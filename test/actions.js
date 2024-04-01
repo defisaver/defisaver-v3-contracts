@@ -626,9 +626,9 @@ const claimMcd = async (proxy, vaultId, joinAddr, to) => {
     return tx;
 };
 
-const mcdGive = async (proxy, vaultId, newOwner, createProxy) => {
+const mcdGive = async (proxy, vaultId, newOwner) => {
     const mcdGiveAction = new dfs.actions.maker.MakerGiveAction(
-        vaultId, newOwner.address, createProxy, MCD_MANAGER_ADDR,
+        vaultId, newOwner.address, MCD_MANAGER_ADDR,
     );
 
     const functionData = mcdGiveAction.encodeForDsProxyCall()[1];
@@ -3154,6 +3154,135 @@ const morphoBlueSetAuthWithSig = async (
     return receipt;
 };
 
+const llamalendCreate = async (
+    proxy,
+    controllerAddress,
+    from,
+    to,
+    collateralAmount,
+    debtAmount,
+    nBands,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendCreateAction(
+        controllerAddress,
+        from,
+        to,
+        collateralAmount,
+        debtAmount,
+        nBands,
+    );
+
+    const [approveObj] = await action.getAssetsToApprove();
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendCreate', functionData, proxy);
+
+    return { receipt, approveObj };
+};
+
+const llamalendSupply = async (
+    proxy,
+    controllerAddress,
+    from,
+    onBehalfOf,
+    collateralAmount,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendSupplyAction(
+        controllerAddress,
+        from,
+        onBehalfOf,
+        collateralAmount,
+    );
+
+    const [approveObj] = await action.getAssetsToApprove();
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendSupply', functionData, proxy);
+
+    return { receipt, approveObj };
+};
+
+const llamalendWithdraw = async (
+    proxy,
+    controllerAddress,
+    to,
+    collateralAmount,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendWithdrawAction(
+        controllerAddress,
+        to,
+        collateralAmount,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendWithdraw', functionData, proxy);
+
+    return receipt;
+};
+
+const llamalendBorrow = async (
+    proxy,
+    controllerAddress,
+    to,
+    debtAmount,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendBorrowAction(
+        controllerAddress,
+        to,
+        debtAmount,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendBorrow', functionData, proxy);
+
+    return receipt;
+};
+
+const llamalendPayback = async (
+    proxy,
+    controllerAddress,
+    from,
+    onBehalfOf,
+    to,
+    debtAmount,
+    maxActiveBand,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendPaybackAction(
+        controllerAddress,
+        from,
+        onBehalfOf,
+        to,
+        debtAmount,
+        maxActiveBand,
+    );
+
+    const [approveObj] = await action.getAssetsToApprove();
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendPayback', functionData, proxy);
+
+    return { receipt, approveObj };
+};
+
+const llamalendSelfLiquidate = async (
+    proxy,
+    controllerAddress,
+    minCrvUsdExpected,
+    from,
+    to,
+) => {
+    const action = new dfs.actions.curveusd.CurveUsdSelfLiquidateAction(
+        controllerAddress,
+        minCrvUsdExpected,
+        from,
+        to,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendSelfLiquidate', functionData, proxy);
+
+    return receipt;
+};
 module.exports = {
     executeAction,
     sell,
@@ -3353,4 +3482,11 @@ module.exports = {
     morphoBluePayback,
     morphoBlueSetAuth,
     morphoBlueSetAuthWithSig,
+
+    llamalendCreate,
+    llamalendBorrow,
+    llamalendPayback,
+    llamalendSelfLiquidate,
+    llamalendSupply,
+    llamalendWithdraw,
 };

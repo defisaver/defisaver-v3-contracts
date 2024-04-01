@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
-import "forge-std/console.sol";
 
 import "ds-test/test.sol";
 import "../../contracts/core/DFSRegistry.sol";
 import "../../contracts/core/strategy/BotAuth.sol";
-import "../../contracts/actions/utils/helpers/ActionsUtilHelper.sol";
+import "../../contracts/core/helpers/CoreHelper.sol";
 import "../CheatCodes.sol";
 
-contract RegistryUtils is ActionsUtilHelper {
+contract RegistryUtils is CoreHelper {
     function redeploy(string memory _actionName, address _newAddr) public {
         DFSRegistry registry = DFSRegistry(REGISTRY_ADDR);
         CheatCodes vm = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);

@@ -20,6 +20,9 @@ import { AaveV3CollateralSwitch } from "../../contracts/actions/aaveV3/AaveV3Col
 import { AaveV3ClaimRewards } from "../../contracts/actions/aaveV3/AaveV3ClaimRewards.sol";
 import { AaveV3Payback } from "../../contracts/actions/aaveV3/AaveV3Payback.sol";
 import { AaveV3ATokenPayback } from "../../contracts/actions/aaveV3/AaveV3ATokenPayback.sol";
+import { SumInputs } from "../../contracts/actions/utils/SumInputs.sol";
+import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
+import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
 
 contract ActionsUtils {
 
@@ -35,7 +38,8 @@ contract ActionsUtils {
         MAKER,
         AAVEV3,
         UNIV3,
-        SPARK
+        SPARK,
+        MORPHO_BLUE
     }
 
     function compV3SupplyEncode(
@@ -150,32 +154,6 @@ contract ActionsUtils {
         return abi.encode(params);
     }
 
-    function flBalancerEncode(
-        address _tokenAddr,
-        uint256 _amount
-    ) public pure returns (bytes memory) {
-        address[] memory tokens = new address[](1);
-        tokens[0] = _tokenAddr;
-
-        uint[] memory amounts = new uint[](1);
-        amounts[0] = _amount;
-
-        uint[] memory modes = new uint[](1);
-        modes[0] = 0;
-
-        IFlashLoanBase.FlashLoanParams memory params = IFlashLoanBase.FlashLoanParams({
-            tokens: tokens,
-            amounts: amounts,
-            modes: modes,
-            onBehalfOf: address(0),
-            flParamGetterAddr: address(0),
-            flParamGetterData: "",
-            recipeData: ""
-        });
-
-        return abi.encode(params);
-    }
-
     function compV3RatioCheckEncode(uint8 _state, uint _targetRatio, address _market) public pure returns (bytes memory) {
         CompV3RatioCheck.Params memory params = CompV3RatioCheck.Params({
             ratioState: CompV3RatioCheck.RatioState(_state),
@@ -195,11 +173,21 @@ contract ActionsUtils {
         address[] memory tokens = new address[](1);
         tokens[0] = _tokenAddr;
 
-        uint[] memory amounts = new uint[](1);
+        uint256[] memory amounts = new uint256[](1);
         amounts[0] = _amount;
 
-        uint[] memory modes = new uint[](1);
-        modes[0] = 0;
+        uint256[] memory modes = new uint256[](0);
+
+        /// @dev modes are used for aave and spark
+        if (_flSource == FLSource.AAVEV2 || _flSource == FLSource.AAVEV3 || _flSource == FLSource.SPARK) {
+            modes = new uint256[](1);
+            modes[0] = 0;
+        }
+
+        /// @dev gho uses hardcoded gho token and maker uses hardcoded dai so we don't need to pass tokens
+        if (_flSource == FLSource.GHO || _flSource == FLSource.MAKER) {
+            tokens = new address[](0);
+        }
 
         IFlashLoanBase.FlashLoanParams memory params = IFlashLoanBase.FlashLoanParams({
             tokens: tokens,
@@ -208,6 +196,35 @@ contract ActionsUtils {
             onBehalfOf: address(0),
             flParamGetterAddr: address(0),
             flParamGetterData: abi.encodePacked(uint8(_flSource)),
+            recipeData: ""
+        });
+
+        return abi.encode(params);
+    }
+
+    function flUniswapEncode(
+        address _token0,
+        address _token1,
+        address _pool,
+        uint256 _amount0,
+        uint256 _amount1
+    ) public pure returns (bytes memory) {
+        address[] memory tokens = new address[](3);
+        tokens[0] = _token0;
+        tokens[1] = _token1;
+        tokens[2] = _pool;
+
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = _amount0;
+        amounts[1] = _amount1;
+
+        IFlashLoanBase.FlashLoanParams memory params = IFlashLoanBase.FlashLoanParams({
+            tokens: tokens,
+            amounts: amounts,
+            modes: new uint256[](0),
+            onBehalfOf: address(0),
+            flParamGetterAddr: address(0),
+            flParamGetterData: abi.encodePacked(uint8(FLSource.UNIV3)),
             recipeData: ""
         });
 
@@ -407,5 +424,44 @@ contract ActionsUtils {
             })
         );
     }
-    
+
+    function sumInputsEncode(
+        uint256 _a,
+        uint256 _b
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SumInputs.Params({
+                a: _a,
+                b: _b
+            })
+        );
+    }
+
+    function pullTokenEncode(
+        address _tokenAddr,
+        address _from,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            PullToken.Params({
+                tokenAddr: _tokenAddr,
+                from: _from,
+                amount: _amount
+            })
+        );
+    }
+
+    function sendTokenEncode(
+        address _tokeAddr,
+        address _to,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SendToken.Params({
+                tokenAddr: _tokeAddr,
+                to: _to,
+                amount: _amount
+            })
+        );
+    }
 }

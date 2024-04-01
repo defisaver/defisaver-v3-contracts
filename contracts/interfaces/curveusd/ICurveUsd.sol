@@ -50,6 +50,7 @@ interface ICrvUsdController {
     function user_prices(address) external view returns (uint256[2] memory);
     function loan_exists(address) external view returns (bool);
     function liquidation_discount() external view returns (uint256);
+    function factory() external view returns (address);
 }
 
 interface ICrvUsdControllerFactory {

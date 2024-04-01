@@ -9,10 +9,12 @@ const {
     setBalance, approve, revertToSnapshot,
     Float2BN, formatExchangeObjCurve, addrs, getAddrFromRegistry, balanceOf,
     setNewExchangeWrapper,
+    openStrategyAndBundleStorage,
+    nullAddress,
 } = require('../../utils');
-const { addBotCaller } = require('../../utils-strategies');
+const { addBotCaller, createStrategy } = require('../../utils-strategies');
 const { curveUsdCreate } = require('../../actions');
-const { subCurveUsdRepayBundle, subCurveUsdBoostBundle } = require('../../strategy-subs');
+const { subCurveUsdRepayBundle, subCurveUsdBoostBundle, subCurveUsdPaybackStrategy } = require('../../strategy-subs');
 const {
     callCurveUsdRepayStrategy,
     callCurveUsdAdvancedRepayStrategy,
@@ -20,8 +22,10 @@ const {
     callCurveUsdBoostStrategy,
     callCurveUsdFLDebtBoostStrategy,
     callCurveUsdFLCollBoostStrategy,
+    callCurveUsdPaybackStrategy,
 } = require('../../strategy-calls');
 const { getActiveBand } = require('../../curveusd/curveusd-tests');
+const { createCurveUsdPaybackStrategy } = require('../../strategies');
 
 const crvUsdAddress = getAssetInfo('crvUSD').address;
 
@@ -433,7 +437,206 @@ const curveUsdRepayStrategyTest = async () => {
     });
 };
 
+const curveUsdPaybackStrategyTest = async () => {
+    describe('CurveUsd-Payback-Strategy', function () {
+        this.timeout(1200000);
+
+        const SUBBED_REPAY_AMOUNT_IN_CRVUSD = '40000';
+
+        let senderAcc;
+        let proxy;
+        let botAcc;
+        let strategyExecutor;
+        let strategyId;
+        let crvusdView;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            botAcc = (await hre.ethers.getSigners())[1];
+
+            strategyExecutor = await redeployCore();
+            crvusdView = await redeploy('CurveUsdView');
+            await redeploy('CurveUsdHealthRatioTrigger');
+            await redeploy('CurveUsdPayback');
+            await redeploy('GasFeeTaker');
+            await redeploy('PullToken');
+            await redeploy('CurveUsdCreate');
+
+            await addBotCaller(botAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+        });
+
+        const subToStrategy = async (
+            controllerAddress,
+            repayAmount,
+        ) => {
+            const minHealthRatio = 40;
+            const addressToPullTokensFrom = senderAcc.address;
+            return subCurveUsdPaybackStrategy(
+                proxy,
+                addressToPullTokensFrom,
+                proxy.address,
+                repayAmount,
+                crvUsdAddress,
+                controllerAddress,
+                minHealthRatio,
+            );
+        };
+
+        Object.entries(curveusdMarkets)
+            // eslint-disable-next-line array-callback-return
+            .map(([assetSymbol, { controllerAddress }]) => {
+                const collateralAsset = getAssetInfo(assetSymbol);
+                if (collateralAsset.symbol !== 'WETH') {
+                    return;
+                }
+                let snapshot;
+                let collateralAmount;
+
+                it(`... should create new curve position with low health ratio in ${assetSymbol} market`, async () => {
+                    collateralAmount = hre.ethers.utils.parseUnits('25', collateralAsset.decimals);
+                    const debtAmount = hre.ethers.utils.parseUnits('65000', 18);
+                    const nBands = 10;
+                    await setBalance(collateralAsset.address, senderAcc.address, collateralAmount);
+                    await approve(collateralAsset.address, proxy.address, senderAcc);
+                    await curveUsdCreate(
+                        proxy,
+                        controllerAddress,
+                        senderAcc.address,
+                        senderAcc.address,
+                        collateralAmount,
+                        debtAmount,
+                        nBands,
+                    );
+                    const loanData = await crvusdView.userData(controllerAddress, proxy.address);
+                    console.log(`Health ratio for ${assetSymbol} market is ${loanData.health / 1e16}%`);
+                    console.log(`Liquidation ratio for ${assetSymbol} market is`, loanData.collRatio / 1e16);
+                });
+                it('... should create a payback strategy', async () => {
+                    const curveUsdPaybackStrategy = createCurveUsdPaybackStrategy();
+                    const isFork = false;
+                    await openStrategyAndBundleStorage(isFork);
+                    strategyId = await createStrategy(proxy, ...curveUsdPaybackStrategy, true);
+                });
+                it(`... should executes a payback strategy for ${assetSymbol} market using payback amount from subData`, async () => {
+                    snapshot = await takeSnapshot();
+
+                    const repayAmount = hre.ethers.utils.parseUnits(
+                        SUBBED_REPAY_AMOUNT_IN_CRVUSD,
+                        18,
+                    );
+                    const { subId, strategySub } = await subToStrategy(
+                        controllerAddress, SUBBED_REPAY_AMOUNT_IN_CRVUSD,
+                    );
+
+                    const userDataBefore = await crvusdView.userData(
+                        controllerAddress, proxy.address,
+                    );
+                    const collRatioBefore = userDataBefore.collRatio;
+                    const healthRatioBefore = userDataBefore.health;
+                    const maxActiveBand = await getActiveBand(controllerAddress);
+
+                    await setBalance(
+                        crvUsdAddress, senderAcc.address, hre.ethers.utils.parseUnits('100000', 18),
+                    );
+                    await approve(crvUsdAddress, proxy.address, senderAcc);
+
+                    const balanceBefore = await balanceOf(crvUsdAddress, senderAcc.address);
+
+                    await callCurveUsdPaybackStrategy(
+                        botAcc,
+                        strategyExecutor,
+                        0,
+                        subId,
+                        strategySub,
+                        repayAmount,
+                        maxActiveBand,
+                        crvUsdAddress,
+                        senderAcc.address,
+                    );
+                    const userDataAfter = await crvusdView.userData(
+                        controllerAddress, proxy.address,
+                    );
+                    const collRatioAfter = userDataAfter.collRatio;
+                    const healthRatioAfter = userDataAfter.health;
+                    const balanceAfter = await balanceOf(crvUsdAddress, senderAcc.address);
+
+                    console.log('coll ratio before', collRatioBefore.toString() / 1e16);
+                    console.log('health ratio before', healthRatioBefore.toString() / 1e16);
+                    console.log('balance before', balanceBefore.toString());
+
+                    console.log('coll ratio after', collRatioAfter.toString() / 1e16);
+                    console.log('health ratio after', healthRatioAfter.toString() / 1e16);
+                    console.log('balance after', balanceAfter.toString());
+
+                    expect(collRatioAfter).to.be.gt(collRatioBefore);
+                    expect(healthRatioAfter).to.be.gt(healthRatioBefore);
+                    expect(balanceAfter).to.be.eq(balanceBefore.sub(repayAmount));
+
+                    await revertToSnapshot(snapshot);
+                });
+                it(`... should executes a payback strategy for ${assetSymbol} market using whole user balance`, async () => {
+                    snapshot = await takeSnapshot();
+
+                    const { subId, strategySub } = await subToStrategy(
+                        controllerAddress, SUBBED_REPAY_AMOUNT_IN_CRVUSD,
+                    );
+
+                    const userDataBefore = await crvusdView.userData(
+                        controllerAddress, proxy.address,
+                    );
+                    const collRatioBefore = userDataBefore.collRatio;
+                    const healthRatioBefore = userDataBefore.health;
+                    const maxActiveBand = await getActiveBand(controllerAddress);
+
+                    // lower than amount from subData, but still enough to payback
+                    const availableAmountToPayback = hre.ethers.utils.parseUnits('20000', 18);
+
+                    // here we set the balance lower than amount from subData,
+                    await setBalance(crvUsdAddress, senderAcc.address, availableAmountToPayback);
+                    await approve(crvUsdAddress, proxy.address, senderAcc);
+
+                    const balanceBefore = await balanceOf(crvUsdAddress, senderAcc.address);
+
+                    await callCurveUsdPaybackStrategy(
+                        botAcc,
+                        strategyExecutor,
+                        0,
+                        subId,
+                        strategySub,
+                        // user whole user balance in PullToken action
+                        hre.ethers.constants.MaxUint256.toString(),
+                        maxActiveBand,
+                        crvUsdAddress,
+                        senderAcc.address,
+                    );
+                    const userDataAfter = await crvusdView.userData(
+                        controllerAddress, proxy.address,
+                    );
+                    const collRatioAfter = userDataAfter.collRatio;
+                    const healthRatioAfter = userDataAfter.health;
+                    const balanceAfter = await balanceOf(crvUsdAddress, senderAcc.address);
+
+                    console.log('coll ratio before', collRatioBefore.toString() / 1e16);
+                    console.log('health ratio before', healthRatioBefore.toString() / 1e16);
+                    console.log('balance before', balanceBefore.toString());
+
+                    console.log('coll ratio after', collRatioAfter.toString() / 1e16);
+                    console.log('health ratio after', healthRatioAfter.toString() / 1e16);
+                    console.log('balance after', balanceAfter.toString());
+
+                    expect(collRatioAfter).to.be.gt(collRatioBefore);
+                    expect(healthRatioAfter).to.be.gt(healthRatioBefore);
+                    expect(balanceAfter).to.be.eq(0);
+
+                    await revertToSnapshot(snapshot);
+                });
+            });
+    });
+};
+
 module.exports = {
     curveUsdRepayStrategyTest,
     curveUsdBoostStrategyTest,
+    curveUsdPaybackStrategyTest,
 };

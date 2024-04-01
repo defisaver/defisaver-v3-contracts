@@ -17,7 +17,6 @@ contract McdGive is ActionBase, McdHelper{
     struct Params {
         uint256 vaultId;
         address newOwner;
-        bool createProxy;
         address mcdManager;
     }
 
@@ -34,7 +33,7 @@ contract McdGive is ActionBase, McdHelper{
         inputData.newOwner = _parseParamAddr(inputData.newOwner, _paramMapping[1], _subData, _returnValues);
         inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[2], _subData, _returnValues);
 
-        (address newOwner, bytes memory logData) = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
+        (address newOwner, bytes memory logData) = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.mcdManager);
         emit ActionEvent("McdGive", logData);
         return bytes32(bytes20(newOwner));
     }
@@ -42,7 +41,7 @@ contract McdGive is ActionBase, McdHelper{
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        (, bytes memory logData) = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.createProxy, inputData.mcdManager);
+        (, bytes memory logData) = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.mcdManager);
         logger.logActionDirectEvent("McdGive", logData);
     }
 
@@ -54,35 +53,23 @@ contract McdGive is ActionBase, McdHelper{
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Gives the vault ownership to a different address
-    /// @dev If _createProxy is true, vault is always sent to a proxy
     /// @param _vaultId The id of the vault
     /// @param _newOwner The address of the new owner
-    /// @param _createProxy If true, it will create a proxy if the _newOwner does not have one
     /// @param _mcdManager Manager address
     function _mcdGive(
         uint256 _vaultId,
         address _newOwner,
-        bool _createProxy,
         address _mcdManager
-    ) internal returns (address newOwner, bytes memory logData) {
-        newOwner = _newOwner;
-
-        if (_createProxy) {
-            address proxy = IProxyRegistry(PROXY_REGISTRY_ADDR).proxies(_newOwner);
-
-            if (proxy == address(0) || IDSProxy(proxy).owner() != _newOwner) {
-                proxy = IProxyRegistry(PROXY_REGISTRY_ADDR).build(_newOwner);
-            }
-
-            newOwner = proxy;
-        }
-
-        if (newOwner == address(0)){
+    ) internal returns (address, bytes memory logData) {
+ 
+        if (_newOwner == address(0)){
             revert NoBurnVaultError();
         }
 
-        IManager(_mcdManager).give(_vaultId, newOwner);
-        logData = abi.encode(_vaultId, newOwner, _createProxy, _mcdManager);
+        IManager(_mcdManager).give(_vaultId, _newOwner);
+        logData = abi.encode(_vaultId, _newOwner, _mcdManager);
+
+        return (_newOwner, logData);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

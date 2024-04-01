@@ -8,7 +8,7 @@ import "../fee/helpers/GasFeeHelperL2.sol";
 import "../ActionBase.sol";
 
 /// @title A special Limit Sell L2 action used as a part of the limit order strategy
-/// @dev Adds differet gas fee calculation on top of regular LimitSell action
+/// @dev Adds different gas fee calculation on top of regular LimitSell action
 contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
     using TokenUtils for address;
 

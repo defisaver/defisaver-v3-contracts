@@ -26,6 +26,7 @@ const {
     IN_REPAY,
     IN_BOOST,
     createMorphoBlueRatioTrigger,
+    createCurveUsdHealthRatioTrigger,
 } = require('./triggers');
 
 const {
@@ -718,6 +719,29 @@ const subCurveUsdRepayBundle = async (
 
     return { subId, strategySub };
 };
+
+const subCurveUsdPaybackStrategy = async (
+    proxy,
+    addressToPullTokensFrom,
+    positionOwner,
+    amountToPayback,
+    curveUsdAddress,
+    controllerAddr,
+    minHealthRatio,
+) => {
+    const strategySub = automationSdk.strategySubService.crvUSDEncode.payback(
+        proxy.address,
+        addressToPullTokensFrom,
+        positionOwner,
+        amountToPayback,
+        curveUsdAddress,
+        controllerAddr,
+        minHealthRatio,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 const subCurveUsdBoostBundle = async (
     proxy, controllerAddr, maxRatio, targetRatio, collTokenAddress, crvUsdAddress,
 ) => {
@@ -823,6 +847,7 @@ module.exports = {
     subAaveV3CloseWithMaximumGasPriceBundle,
     subCurveUsdRepayBundle,
     subCurveUsdBoostBundle,
+    subCurveUsdPaybackStrategy,
     subMorphoBlueBoostBundle,
     subMorphoBlueRepayBundle,
 };

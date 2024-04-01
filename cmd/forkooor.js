@@ -215,7 +215,7 @@ const forkSetup = async (sender) => {
 
     setNetwork(network);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     console.log({ sender: senderAcc.address, proxy: proxy.address });
@@ -232,7 +232,7 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     // very rough estimate takes 1000 eth pre dai price
@@ -287,7 +287,7 @@ const updateMcdCloseStrategySub = async (subId, vaultId, type, price, priceState
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
@@ -360,7 +360,7 @@ const updateMcdCloseToCollStrategySub = async (subId, vaultId, type, price, pric
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
@@ -435,7 +435,7 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio,
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const bundleId = 0;
@@ -456,7 +456,7 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await openStrategyAndBundleStorage(true);
@@ -496,7 +496,7 @@ const cbRebondSub = async (bondId, sender) => {
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const strategyId = '31';
@@ -532,7 +532,7 @@ const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState,
         // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const { subId } = await subLiquityCBPaybackStrategy(
@@ -553,7 +553,7 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
@@ -613,7 +613,7 @@ const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sende
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await openStrategyAndBundleStorage(true);
@@ -656,7 +656,7 @@ const mcdBoostRepaySub = async ({
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
 
     { // deploy if not live
@@ -718,7 +718,7 @@ const aaveAutomationSub = async ({
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
 
     { // deploy if not live
@@ -783,7 +783,7 @@ const compAutomationSub = async ({
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
 
     { // deploy if not live
@@ -844,7 +844,7 @@ const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     // grab latest roundId from chainlink
@@ -874,7 +874,7 @@ const liquityCloseToCollStrategySub = async (price, priceState, sender) => {
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await openStrategyAndBundleStorage(true);
@@ -915,7 +915,7 @@ const updateSmartSavingsStrategySub = async (protocol, subId, vaultId, minRatio,
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
@@ -974,7 +974,7 @@ const activateSub = async (subId, sender) => {
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
@@ -1012,7 +1012,7 @@ const deactivateSub = async (subId, sender) => {
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const subProxyAddr = '0xd18d4756bbf848674cc35f1a0b86afef20787382';
@@ -1067,7 +1067,7 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
     await redeploy('LiquityView', REGISTRY_ADDR, false, true);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const amountColl = hre.ethers.utils.parseUnits(coll, 18);
@@ -1121,7 +1121,7 @@ const createMcdVault = async (type, coll, debt, sender) => {
 
     await topUp(senderAcc.address);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
@@ -1191,7 +1191,7 @@ const createCB = async (lusdAmount, sender) => {
 
     await topUp(senderAcc.address);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     let network = 'mainnet';
@@ -1260,7 +1260,7 @@ const getTrove = async (acc) => {
     if (!acc) {
         const senderAcc = (await hre.ethers.getSigners())[0];
 
-        const proxy = await getProxy(senderAcc.address);
+        const proxy = await getProxy(senderAcc.address,);
         // eslint-disable-next-line no-param-reassign
         acc = proxy.address;
     }
@@ -1287,7 +1287,7 @@ const callSell = async (srcTokenLabel, destTokenLabel, srcAmount, sender) => {
     }
 
     await topUp(senderAcc.address);
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     try {
@@ -1328,7 +1328,7 @@ const supplyCdp = async (type, cdpId, amount, sender) => {
     }
 
     await topUp(senderAcc.address);
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
@@ -1372,7 +1372,7 @@ const withdrawLiquity = async (collAmount, sender) => {
     await topUp(senderAcc.address);
     await redeploy('LiquityView');
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const collAmountWei = hre.ethers.utils.parseUnits(collAmount, 18);
@@ -1409,7 +1409,7 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
 
     await topUp(senderAcc.address);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
@@ -1467,7 +1467,7 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
     const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol, chainIds[network]);
     const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol, chainIds[network]);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
@@ -1642,7 +1642,7 @@ const subAaveAutomation = async (
     setNetwork(network);
     await topUp(getOwnerAddr());
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const subIds = await subAaveV3L2AutomationStrategy(
@@ -1692,7 +1692,7 @@ const subAaveV3MainnetAutomation = async (
     setNetwork(network);
     await topUp(getOwnerAddr());
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     // await openStrategyAndBundleStorage(true);
@@ -1758,7 +1758,7 @@ const subAaveClose = async (
         // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
-    proxy = await getProxy(senderAcc.address);
+    proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await topUp(getOwnerAddr());
@@ -1839,7 +1839,7 @@ const subAaveCloseWithMaximumGasPrice = async (
         // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
-    proxy = await getProxy(senderAcc.address);
+    proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await topUp(getOwnerAddr());
@@ -1927,7 +1927,7 @@ const subSparkAutomation = async (
     setNetwork(network);
     await topUp(getOwnerAddr());
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     if (await getLatestBundleId() < 18) {
@@ -1982,7 +1982,7 @@ const subSparkClose = async (
         // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
-    proxy = await getProxy(senderAcc.address);
+    proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await topUp(getOwnerAddr());
@@ -2061,7 +2061,7 @@ const subCompV3Automation = async (
 
     setNetwork(network);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const bundleId = await getLatestBundleId();
@@ -2137,7 +2137,7 @@ const subLimitOrder = async (
     setNetwork(network);
     set('network', chainIds[network]);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await topUp(addrs[network].OWNER_ACC);
@@ -2498,7 +2498,7 @@ const getAavePos = async (
 
     setNetwork(network);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const aaveView = await hre.ethers.getContractAt('AaveV3View', addrs[network].AAVE_V3_VIEW);
@@ -2567,7 +2567,7 @@ const getCompV3Pos = async (
 
     setNetwork(network);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const compV3View = await hre.ethers.getContractAt('CompV3View', '0x5e07E953dac1d7c19091c3b493579ba7283572a4');
@@ -2622,7 +2622,7 @@ const updateAaveV3AutomationSub = async (
 
     setNetwork(network);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await openStrategyAndBundleStorage(true);
@@ -2730,7 +2730,7 @@ const createCompV3Position = async (
     const collAmountWei = hre.ethers.utils.parseUnits(collAmount, collToken.decimals);
     const debtAmountWei = hre.ethers.utils.parseUnits(debtAmount, 6);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     console.log(proxy.address);
@@ -2824,7 +2824,7 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
     set('network', chainIds[network]);
     setNetwork(network);
 
-    let proxy = await getProxy(senderAcc.address);
+    let proxy = await getProxy(senderAcc.address,);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     // const strategyData = network === 'mainnet' ? createDCAStrategy() : createDCAL2Strategy();
