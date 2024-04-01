@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.10;
 
-
-interface ICrvUsdController {
+interface ILlamaLendController {
     function create_loan(uint256 _collateralAmount, uint256 _debtAmount, uint256 _nBands) external payable;
     function create_loan_extended(uint256 _collateralAmount, uint256 _debtAmount, uint256 _nBands, address _callbacker, uint256[] memory _callbackArgs) external payable;
 
@@ -34,6 +33,7 @@ interface ICrvUsdController {
     function amm() external view returns (address);
     function monetary_policy() external view returns (address);
     function collateral_token() external view returns (address);
+    function borrowed_token() external view returns (address);
     function debt(address) external view returns (uint256);
     function total_debt() external view returns (uint256);
     function health_calculator(address, int256, int256, bool, uint256) external view returns (int256);
@@ -51,50 +51,4 @@ interface ICrvUsdController {
     function loan_exists(address) external view returns (bool);
     function liquidation_discount() external view returns (uint256);
     function factory() external view returns (address);
-}
-
-interface ICrvUsdControllerFactory {
-    function get_controller(address) external view returns (address); 
-    function debt_ceiling(address) external view returns (uint256);
-}
-
-interface ILLAMMA {
-    function active_band_with_skip() external view returns (int256);
-    function get_sum_xy(address) external view returns (uint256[2] memory);
-    function get_xy(address) external view returns (uint256[][2] memory);
-    function get_p() external view returns (uint256);
-    function read_user_tick_numbers(address) external view returns (int256[2] memory);
-    function p_oracle_up(int256) external view returns (uint256);
-    function p_oracle_down(int256) external view returns (uint256);
-    function p_current_up(int256) external view returns (uint256);
-    function p_current_down(int256) external view returns (uint256);
-    function bands_x(int256) external view returns (uint256);
-    function bands_y(int256) external view returns (uint256);
-    function get_base_price() external view returns (uint256);
-    function price_oracle() external view returns (uint256);
-    function active_band() external view returns (int256);
-    function A() external view returns (uint256);
-    function min_band() external view returns (int256);
-    function max_band() external view returns (int256);
-    function rate() external view returns (uint256);
-    function exchange(uint256 i, uint256 j, uint256 in_amount, uint256 min_amount) external returns (uint256[2] memory);
-    function coins(uint256 i) external view returns (address);
-    function user_state(address _user) external view returns (uint256[4] memory);
-}
-
-interface IAGG {
-    function rate() external view returns (uint256);
-    function rate0() external view returns (uint256);
-    function target_debt_fraction() external view returns (uint256);
-    function sigma() external view returns (int256);
-    function peg_keepers(uint256) external view returns (address); 
-}
-
-interface IPegKeeper {
-    function debt() external view returns (uint256);
-}
-
-interface ICurveUsdSwapper {
-    function encodeSwapParams(uint256[5][5] memory swapParams,  uint32 gasUsed, uint24 dfsFeeDivider) external pure returns (uint256 encoded);
-    function setAdditionalRoutes(address[8] memory _additionalRoutes, address[5] memory _swapZapPools) external;
 }

@@ -332,6 +332,7 @@ const coinGeckoHelper = {
     frxETH: 'frax-ether',
     sfrxETH: 'staked-frax-ether',
     tBTC: 'tbtc',
+    crvUSD: 'crvusd',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;
