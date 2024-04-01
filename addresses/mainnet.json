@@ -1160,14 +1160,16 @@
     },
     {
         "name": "ReflexerPayback",
-        "address": "0xcC6838d8a61a4b29Ea565d39C38b830f1491cb29",
+        "address": "0xdAa3963798C2E3F5c16AAcc9114fc727C450d0cb",
         "id": "0xb7460335",
         "path": "contracts/actions/reflexer/ReflexerPayback.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xcC6838d8a61a4b29Ea565d39C38b830f1491cb29"
+        ]
     },
     {
         "name": "ReflexerGenerate",
@@ -1185,6 +1187,17 @@
         "address": "0x4704a7cBd4d913d1233765B70531D601b4384011",
         "id": "0xf26b3b00",
         "path": "contracts/actions/reflexer/ReflexerOpen.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "ReflexerWithdrawStuckFunds",
+        "address": "0x64759d064aaA1f9Ac7A458520Aad06128Da9b7b8",
+        "id": "0x20ee2a2a",
+        "path": "contracts/actions/reflexer/ReflexerWithdrawStuckFunds.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
