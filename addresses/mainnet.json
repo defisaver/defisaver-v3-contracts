@@ -293,14 +293,14 @@
     },
     {
         "name": "KyberInputScalingHelper",
-        "address": "0x05977cA080Ef44a824D935191d0A3d56659295a0",
+        "address": "0x1e038fBC7892304D7435dbb41C0969c734d24A8d",
         "id": "0x559d99f5",
         "path": "contracts/utils/KyberInputScalingHelper",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x05977cA080Ef44a824D935191d0A3d56659295a0"]
     },
     {
         "name": "KyberAggregatorWrapper",
@@ -484,6 +484,17 @@
         "address": "0x809a93fd4a0d7d7906Ef6176f0b5518b418Da08f",
         "id": "0x542e7045",
         "path": "contracts/views/ChickenBondsView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "GeneralView",
+        "address": "0xaa82EC29f0C9A939B29C6135e93E3080ed6669e5",
+        "id": "0xc5831ea6",
+        "path": "contracts/views/GeneralView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -3195,14 +3206,14 @@
     },
     {
         "name": "LSVSell",
-        "address": "0x0c1bb9A39d4A0EF4215Ade19Ce4F954E8419Dfd7",
+        "address": "0xd8F142FFaA386E639ae43c5ab0F52474Bc9432F4",
         "id": "0x9fde5493",
         "path": "contracts/actions/lsv/LSVSupply.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x0c1bb9A39d4A0EF4215Ade19Ce4F954E8419Dfd7"]
     },
     {
         "name": "LSVSupply",
