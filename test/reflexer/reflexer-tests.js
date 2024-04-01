@@ -9,6 +9,7 @@ const {
     reflexerWithdraw,
     reflexerSaviourDeposit,
     reflexerSaviourWithdraw,
+    reflexerWithdrawStuckFunds,
 } = require('../actions');
 const {
     redeploy,
@@ -26,6 +27,9 @@ const {
     RAI_ADDR,
     approve,
     UNIV2_ROUTER_ADDRESS,
+    setBalance,
+    impersonateAccount,
+    sendEther,
 } = require('../utils');
 const {
     safeCount,
@@ -36,8 +40,11 @@ const {
     NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS,
     REFLEXER_SAFE_MANAGER_ADDR,
 } = require('../utils-reflexer');
+const { BigNumber } = require('ethers');
 
 const WETH_SUPPLY_AMOUNT_IN_USD = '100000';
+const SAFE_ENGINE_ADDR = '0xCC88a9d330da1133Df3A7bD823B95e52511A6962';
+const SAFE_MANAGER_ADDR = '0xEfe0B4cA532769a3AE758fD82E1426a03A94F185';
 
 const reflexerOpenTest = async () => {
     describe('Reflexer-Open', () => {
@@ -218,8 +225,16 @@ const reflexerGenerateTest = async () => {
 };
 const reflexerPaybackTest = async () => {
     describe('Reflexer-Payback', function () {
-        let senderAcc; let proxy; let reflexerView; let rai; let weth; let logger;
+        let senderAcc;
+        let proxy;
+        let reflexerView;
+        let rai;
+        let weth;
+        let logger;
         let reflexerViewAddr;
+        let safeEngine;
+        let safeManager;
+
         before(async () => {
             this.timeout(40000);
             reflexerViewAddr = await getAddrFromRegistry('ReflexerView');
@@ -227,6 +242,9 @@ const reflexerPaybackTest = async () => {
             rai = await hre.ethers.getContractAt('IERC20', RAI_ADDR);
             weth = await hre.ethers.getContractAt('IWETH', WETH_ADDRESS);
             logger = await hre.ethers.getContractAt('DefisaverLogger', LOGGER_ADDR);
+
+            safeEngine = await hre.ethers.getContractAt('ISAFEEngine', SAFE_ENGINE_ADDR);
+            safeManager = await hre.ethers.getContractAt('ISAFEManager', SAFE_MANAGER_ADDR);
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
@@ -278,6 +296,46 @@ const reflexerPaybackTest = async () => {
                 .to.changeTokenBalance(rai, senderAcc, amountRai);
 
             await reflexerPayback(proxy, safeID, hre.ethers.constants.MaxUint256, from, RAI_ADDR);
+
+            const safeOwnerAddr = await safeManager.safes(safeID);
+            const safeBalanceAfter = await safeEngine.coinBalance(safeOwnerAddr);
+
+            expect(safeBalanceAfter).to.be.equal(0);
+
+            const info = await getSafeInfo(reflexerView, safeID);
+            expect(info.debt).to.be.equal(0);
+            revertToSnapshot(snapshot);
+        }).timeout(50000);
+
+        it('... should payback amount bigger than debt but lesser than maxUint256', async () => {
+            const snapshot = await takeSnapshot();
+            await reflexerOpen(proxy, ADAPTER_ADDRESS);
+            const safeID = await lastSafeID(proxy.address);
+
+            let amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
+            let amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            amountWETH = amountWETH.mul(5); // 20 eth
+            amountRai = amountRai.mul(10); // 10k rai
+            await depositToWeth(amountWETH.toString());
+
+            const from = senderAcc.address;
+            await expect(() => reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
+                .to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
+
+            const to = senderAcc.address;
+            await expect(() => reflexerGenerate(proxy, safeID, amountRai, to))
+                .to.changeTokenBalance(rai, senderAcc, amountRai);
+
+            const amountToPayback = amountRai.mul(2); // amount is bigger than debt
+
+            await setBalance(RAI_ADDR, senderAcc.address, amountToPayback);
+            await reflexerPayback(proxy, safeID, amountToPayback, from, RAI_ADDR);
+
+            const safeOwnerAddr = await safeManager.safes(safeID);
+            const safeBalanceAfter = await safeEngine.coinBalance(safeOwnerAddr);
+
+            // make sure there is no left over of RAI in safe
+            expect(safeBalanceAfter).to.be.equal(0);
 
             const info = await getSafeInfo(reflexerView, safeID);
             expect(info.debt).to.be.equal(0);
@@ -473,6 +531,63 @@ const reflexerSaviourTest = async () => {
     });
 };
 
+const reflexerWithdrawStuckFundsTest = async () => {
+    describe('Reflexer-Withdraw-Stuck-Funds', () => {
+        it('... should withdraw stuck funds', async () => {
+            await redeploy('ReflexerWithdrawStuckFunds');
+
+            const proxyOwner = '0x4846AEe6d7C9f176F3F329E01A014c2794E21B92';
+
+            await sendEther((await hre.ethers.getSigners())[0], proxyOwner, '1');
+            const proxyAddr = '0xbbda108353b76742ed887056275fe1445ecc1b92';
+            const safeId = 1443;
+            const signer = (await hre.ethers.getSigners())[0];
+
+            impersonateAccount(proxyOwner);
+            const proxyOwnerSigner = await hre.ethers.getSigner(proxyOwner);
+
+            const dsProxy = (await hre.ethers.getContractAt('IDSProxy', proxyAddr)).connect(proxyOwnerSigner);
+            const safeEngine = await hre.ethers.getContractAt('ISAFEEngine', SAFE_ENGINE_ADDR);
+            const safeManager = await hre.ethers.getContractAt('ISAFEManager', SAFE_MANAGER_ADDR);
+            const safeOwnerAddr = await safeManager.safes(safeId);
+
+            const raiStuckAmountInRadPrecision = await safeEngine.coinBalance(safeOwnerAddr);
+            const raiStuckAmountInWadPrecision = raiStuckAmountInRadPrecision
+                .div(BigNumber.from(10).pow(27));
+            const raiSignerBalanceBefore = await balanceOf(RAI_ADDR, signer.address);
+
+            console.log('------------BEFORE--------------');
+            console.log('raiSignerBalanceBefore', raiSignerBalanceBefore.toString());
+            console.log('raiStuckAmountInRadPrecision', raiStuckAmountInRadPrecision.toString());
+            console.log('raiStuckAmountInWadPrecision', raiStuckAmountInWadPrecision.toString());
+
+            await reflexerWithdrawStuckFunds(dsProxy, safeId, signer.address);
+
+            const raiStuckAmountInRadPrecisionAfter = await safeEngine.coinBalance(safeOwnerAddr);
+            const raiSignerBalanceAfter = await balanceOf(RAI_ADDR, signer.address);
+
+            const leftoverRaiOnProxyInRadPrecision = await safeEngine.coinBalance(proxyAddr);
+            const leftoverRaiOnProxyInWadPrecision = leftoverRaiOnProxyInRadPrecision
+                .div(BigNumber.from(10).pow(27));
+
+            console.log('------------AFTER--------------');
+            console.log('raiStuckAmountInRadPrecisionAfter', raiStuckAmountInRadPrecisionAfter.toString());
+            console.log('raiSignerBalanceAfter', raiSignerBalanceAfter.toString());
+            console.log('leftoverRaiOnProxyInRadPrecision', leftoverRaiOnProxyInRadPrecision.toString());
+            console.log('leftoverRaiOnProxyInWadPrecision', leftoverRaiOnProxyInWadPrecision.toString());
+
+            expect(raiStuckAmountInRadPrecisionAfter).to.be.eq(BigNumber.from('0'));
+            expect(raiSignerBalanceAfter).to.be.eq(
+                raiSignerBalanceBefore.add(raiStuckAmountInWadPrecision),
+            );
+            // up to 1 rai can be left on proxy inside reflexer safe balance
+            // due to precision loss while converting from rad to wad
+            expect(leftoverRaiOnProxyInRadPrecision).to.be.gte(BigNumber.from('0'));
+            expect(leftoverRaiOnProxyInWadPrecision).to.be.equal(BigNumber.from('0'));
+        }).timeout(1000000);
+    });
+};
+
 const reflexerDeployContracts = async () => {
     await redeploy('ReflexerOpen');
     await redeploy('ReflexerView');
@@ -483,6 +598,7 @@ const reflexerDeployContracts = async () => {
     await redeploy('ReflexerNativeUniV2SaviourGetReserves');
     await redeploy('ReflexerNativeUniV2SaviourDeposit');
     await redeploy('ReflexerNativeUniV2SaviourWithdraw');
+    await redeploy('ReflexerWithdrawStuckFunds');
 };
 
 const reflexerFullTest = async () => {
@@ -493,6 +609,7 @@ const reflexerFullTest = async () => {
     await reflexerGenerateTest();
     await reflexerPaybackTest();
     await reflexerSaviourTest();
+    await reflexerWithdrawStuckFundsTest();
 };
 
 module.exports = {
@@ -504,4 +621,5 @@ module.exports = {
     reflexerGenerateTest,
     reflexerWithdrawTest,
     reflexerSaviourTest,
+    reflexerWithdrawStuckFundsTest,
 };
