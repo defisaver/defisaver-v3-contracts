@@ -5,7 +5,6 @@ import "../ActionBase.sol";
 import "../../interfaces/IDSProxy.sol";
 import "../../interfaces/IFLParamGetter.sol";
 import "../../interfaces/aaveV3/IPoolV3.sol";
-import "../../core/strategy/StrategyModel.sol";
 import "../../utils/TokenUtils.sol";
 import "../../utils/ReentrancyGuard.sol";
 import "./helpers/FLHelper.sol";
@@ -15,7 +14,7 @@ import "../../interfaces/aaveV3/IDebtToken.sol";
 /// @title Action that gets and receives a FL from Aave V3 and does not return funds but opens debt position on Aave V3
 /// @dev In order to open debt position, FL action must have credit delegation allowance from onBehalfOf address
 /// @dev No credit delegation allowance should be left after FL to prevent someone to borrow funds and generate debt onBehalfOf address 
-contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlashLoanBase {
+contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanBase {
     using TokenUtils for address;
 
     //Caller not aave pool
@@ -26,17 +25,6 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
     error NoInterestRateSetError();
     //Credit delegation allowance must be 0 after FL
     error CreditDelegationAllowanceLeftError(uint256 amountLeft);
-    // Revert if execution fails when using safe wallet
-    error SafeExecutionError();
-
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR =
-        bytes4(
-            keccak256(
-                "_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"
-            )
-        );
-    bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -140,31 +128,9 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
             _assets[i].withdrawTokens(wallet, _amounts[i]);
         }
 
-        address payable recipeExecutor = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
-
-        _executeRecipe(wallet, recipeExecutor, currRecipe, _amounts[0]);
+        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, _amounts[0]);
 
         return true;
-    }
-
-    function _executeRecipe(address _wallet, address _recipeExecutorAddr, Recipe memory _currRecipe, uint256 _paybackAmount) internal {
-        if (isDSProxy(_wallet)) {
-            IDSProxy(_wallet).execute{value: address(this).balance}(
-                _recipeExecutorAddr,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
-            );
-        } else {
-            bool success = ISafe(_wallet).execTransactionFromModule(
-                _recipeExecutorAddr,
-                address(this).balance,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
-                ISafe.Operation.DelegateCall
-            );
-
-            if (!success) {
-                revert SafeExecutionError();
-             }
-        }
     }
 
     function parseInputs(bytes memory _callData) public pure returns (FlashLoanParams memory inputData) {

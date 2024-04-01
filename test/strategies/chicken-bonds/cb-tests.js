@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
+const automationSdk = require('@defisaver/automation-sdk');
 
 const {
     getProxy,
@@ -26,8 +27,6 @@ const { addBotCaller } = require('../../utils-strategies');
 
 const { callCbRebondStrategy } = require('../../strategy-calls');
 const { subCbRebondStrategy } = require('../../strategy-subs');
-
-const { createCbRebondTrigger } = require('../../triggers');
 
 const cbRebondStrategyTest = async () => {
     describe('Chicken-Bond-Rebond-Strategy', function () {
@@ -137,14 +136,14 @@ const cbRebondStrategyTest = async () => {
             } else {
                 const time = await getRebondTime(chickenBondsView, rebondTrigger, newLusdAmount);
 
-                const triggerData = await createCbRebondTrigger(bondIDNew);
+                const triggerData = automationSdk.triggerService.cBondsRebondTrigger.encode(bondIDNew);
 
                 const subIdEncoded = abiCoder.encode(['uint256'], [subId.toString()]);
                 const bondIDNewEncoded = abiCoder.encode(['uint256'], [bondIDNew.toString()]);
                 const bLusdTokenEncoded = abiCoder.encode(['address'], [BLUSD_ADDR]);
                 const lusdTokenEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
                 strategySub = [strategyId, false,
-                    [triggerData], [subIdEncoded, bondIDNewEncoded, bLusdTokenEncoded, lusdTokenEncoded]];
+                    triggerData, [subIdEncoded, bondIDNewEncoded, bLusdTokenEncoded, lusdTokenEncoded]];
 
                 await timeTravel(time);
 

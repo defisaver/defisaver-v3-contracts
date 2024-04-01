@@ -1,6 +1,6 @@
 {
   "name": "defisaver-v3-contracts",
-  "version": "1.0.0",
+  "version": "3.1.1",
   "description": "All the contracts related to the Defi Saver ecosystem",
   "scripts": {
     "compile": "npx hardhat compile",
@@ -26,6 +26,7 @@
   "devDependencies": {
     "@commitlint/cli": "^12.1.1",
     "@commitlint/config-conventional": "^12.1.1",
+    "@defisaver/automation-sdk": "^3.0.2",
     "@defisaver/sdk": "^1.0.14",
     "@defisaver/tokens": "^1.5.4",
     "@nomiclabs/hardhat-ethers": "^2.0.0",
@@ -68,7 +69,7 @@
     }
   },
   "dependencies": {
-    "@curvefi/api": "^2.52.1",
+    "@curvefi/api": "=2.52.1",
     "@uniswap/sdk-core": "^3.1.1",
     "@uniswap/smart-order-router": "^3.5.0",
     "coingecko-api": "^1.0.10",

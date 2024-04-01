@@ -12,7 +12,6 @@ const {
 } = require('@defisaver/tokens');
 
 const {
-    getAddrFromRegistry,
     getProxy,
     redeploy,
     redeployCore,
@@ -267,7 +266,7 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
                     8,
                 );
 
@@ -281,7 +280,7 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                     nullAddress,
                     triggerPrice,
                     RATIO_STATE_OVER,
-                    300000000000,
+                    300,
                     collAddr,
                     collAssetId,
                     debtAddr,
@@ -292,8 +291,6 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
             });
 
             it('... should call AaveV3 Close With Maximum Gas Price strategy', async () => {
-                snapshotId4partial = await takeSnapshot();
-                // eslint-disable-next-line max-len
                 const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
@@ -434,7 +431,7 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
                     8,
                 );
 
@@ -448,7 +445,7 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                     nullAddress,
                     triggerPrice,
                     RATIO_STATE_OVER,
-                    100,
+                    1,
                     collAddr,
                     collAssetId,
                     debtAddr,
@@ -459,8 +456,6 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
             });
 
             it('... should call AaveV3 Close With Maximum Gas Price strategy and fail', async () => {
-                snapshotId4partial = await takeSnapshot();
-                // eslint-disable-next-line max-len
                 const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
@@ -471,10 +466,10 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                     collAssetInfo.decimals,
                 );
 
-                let errMsg = 'Error: Transaction reverted without a reason string';
+                let errMsg = 'Transaction reverted without a reason string';
 
                 if (hre.config.isWalletSafe) {
-                    errMsg = 'Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
+                    errMsg = 'VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
                 }
 
                 await expect(callAaveCloseToCollWithMaximumGasPriceStrategy(
@@ -515,7 +510,6 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
         let flActionAddr;
         let bundleId;
         let snapshotId;
-        let snapshotId4partial;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -615,7 +609,7 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
                     8,
                 );
 
@@ -629,7 +623,7 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     nullAddress,
                     triggerPrice,
                     RATIO_STATE_OVER,
-                    300000000000,
+                    300,
                     collAddr,
                     collAssetId,
                     debtAddr,
@@ -640,8 +634,6 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
             });
 
             it('... should call AaveV3 FL Close With Maximum Gas Price strategy', async () => {
-                snapshotId4partial = await takeSnapshot();
-
                 const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const repayAmount = Float2BN(
                     fetchAmountinUSDPrice(
@@ -779,7 +771,7 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
                     8,
                 );
 
@@ -793,7 +785,7 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     nullAddress,
                     triggerPrice,
                     RATIO_STATE_OVER,
-                    100,
+                    1,
                     collAddr,
                     collAssetId,
                     debtAddr,
@@ -804,8 +796,6 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
             });
 
             it('... should call AaveV3 FL Close With Maximum Gas Price strategy and fail', async () => {
-                snapshotId4partial = await takeSnapshot();
-
                 const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const repayAmount = Float2BN(
                     fetchAmountinUSDPrice(
@@ -825,10 +815,10 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     collAssetInfo.decimals,
                 );
 
-                let errMsg = 'Error: Transaction reverted without a reason string';
+                let errMsg = 'Transaction reverted without a reason string';
 
                 if (hre.config.isWalletSafe) {
-                    errMsg = 'Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
+                    errMsg = 'VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
                 }
 
                 await expect(callAaveFLCloseToCollWithMaximumGasPriceStrategy(
@@ -870,7 +860,6 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
         let debtAssetId;
         let bundleId;
         let snapshotId;
-        let snapshotId4partial;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -984,7 +973,7 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
                     8,
                 );
 
@@ -995,7 +984,7 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                     nullAddress,
                     triggerPrice,
                     RATIO_STATE_OVER,
-                    300000000000,
+                    300,
                     collAddr,
                     collAssetId,
                     debtAddr,
@@ -1006,8 +995,6 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
             });
 
             it('... should call AaveV3 Close with maximum gas price strategy', async () => {
-                snapshotId4partial = await takeSnapshot();
-
                 const collAssetBalanceBefore = await balanceOf(
                     compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
                     senderAcc.address,
@@ -1108,7 +1095,7 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
                     8,
                 );
 
@@ -1119,7 +1106,7 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
                     nullAddress,
                     triggerPrice,
                     RATIO_STATE_OVER,
-                    100,
+                    1,
                     collAddr,
                     collAssetId,
                     debtAddr,
@@ -1130,12 +1117,10 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
             });
 
             it('... should call AaveV3 Close with maximum gas price strategy and fail', async () => {
-                snapshotId4partial = await takeSnapshot();
-
-                let errMsg = 'Error: Transaction reverted without a reason string';
+                let errMsg = 'Transaction reverted without a reason string';
 
                 if (hre.config.isWalletSafe) {
-                    errMsg = 'Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
+                    errMsg = 'VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
                 }
 
                 await expect(callAaveCloseToDebtWithMaximumGasPriceStrategy(
@@ -1174,7 +1159,6 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
         let flActionAddr;
         let bundleId;
         let snapshotId;
-        let snapshotId4partial;
 
         before(async () => {
             console.log(`Network: ${network}`);
@@ -1272,7 +1256,7 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
                     8,
                 );
 
@@ -1286,7 +1270,7 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     nullAddress,
                     triggerPrice,
                     RATIO_STATE_OVER,
-                    300000000000,
+                    300,
                     collAddr,
                     collAssetId,
                     debtAddr,
@@ -1297,8 +1281,6 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
             });
 
             it('... should call AaveV3 FL Close With Maximum Gas Price strategy', async () => {
-                snapshotId4partial = await takeSnapshot();
-
                 const repayAmount = Float2BN(
                     fetchAmountinUSDPrice(
                         debtAssetInfo.symbol,
@@ -1413,7 +1395,7 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
                 const triggerPrice = Float2BN(
-                    `${(getLocalTokenPrice(collAssetInfo.symbol) * 0.8).toFixed(8)}`,
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`,
                     8,
                 );
 
@@ -1427,7 +1409,7 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     nullAddress,
                     triggerPrice,
                     RATIO_STATE_OVER,
-                    100,
+                    1,
                     collAddr,
                     collAssetId,
                     debtAddr,
@@ -1438,8 +1420,6 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
             });
 
             it('... should call AaveV3 FL Close With Maximum Gas Price strategy and fail', async () => {
-                snapshotId4partial = await takeSnapshot();
-
                 const repayAmount = Float2BN(
                     fetchAmountinUSDPrice(
                         debtAssetInfo.symbol,
@@ -1448,10 +1428,10 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     debtAssetInfo.decimals,
                 );
 
-                let errMsg = 'Error: Transaction reverted without a reason string';
+                let errMsg = 'Transaction reverted without a reason string';
 
                 if (hre.config.isWalletSafe) {
-                    errMsg = 'Error: VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
+                    errMsg = 'VM Exception while processing transaction: reverted with an unrecognized custom error (return data: 0xe540c1c8)';
                 }
 
                 await expect(callAaveFLCloseToDebtWithMaximumGasPriceStrategy(

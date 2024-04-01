@@ -43,13 +43,6 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
             _returnValues
         );
 
-        if (params.useDefaultMarket) {
-            params.market = DEFAULT_AAVE_MARKET;
-        }
-        if (!params.useOnBehalf) {
-            params.onBehalf = address(0);
-        }
-
         (uint256 borrowAmount, bytes memory logData) = _borrow(
             params.market,
             params.assetId,
@@ -65,6 +58,14 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
+
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
+        if (!params.useOnBehalf) {
+            params.onBehalf = address(0);
+        }
+
         (, bytes memory logData) = _borrow(
             params.market,
             params.assetId,
@@ -127,6 +128,12 @@ contract AaveV3Borrow is ActionBase, AaveV3Helper {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
+        if (!params.useOnBehalf) {
+            params.onBehalf = address(0);
+        }
     }
 
     function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {

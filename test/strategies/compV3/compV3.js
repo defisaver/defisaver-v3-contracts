@@ -119,10 +119,10 @@ describe('CompV3 L2 automation tests', function () {
     };
 
     const subToCompV3Automation = async (market, debtAddr) => {
-        const minRatio = hre.ethers.utils.parseUnits('180', '16');
-        const maxRatio = hre.ethers.utils.parseUnits('330', '16');
-        const targetRepayRatio = hre.ethers.utils.parseUnits('220', '16');
-        const targetBoostRatio = hre.ethers.utils.parseUnits('280', '16');
+        const minRatio = 180;
+        const maxRatio = 330;
+        const targetRepayRatio = 220;
+        const targetBoostRatio = 280;
         subIds = await subToCompV3L2AutomationStrategy(
             proxy,
             market,

@@ -227,7 +227,7 @@ const subToCompV3ProxyL2 = async (proxy, inputData, regAddr = addrs[network].REG
     const CompV3SubProxyL2 = await hre.ethers.getContractFactory('CompV3SubProxyL2');
     const functionData = CompV3SubProxyL2.interface.encodeFunctionData(
         'subToCompV3Automation',
-        [inputData],
+        inputData,
     );
     const receipt = await proxy['execute(address,bytes)'](compV3SubProxyAddr, functionData, {
         gasLimit: 5000000,
@@ -528,6 +528,7 @@ const subToMcdProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY
     const subProxyAddr = await getAddrFromRegistry('McdSubProxy', regAddr);
     const subProxy = await hre.ethers.getContractAt('McdSubProxy', subProxyAddr);
 
+    // false for _shouldLegacyUnsub, no longer needed, kept to keep the function sig the same
     const functionData = subProxy.interface.encodeFunctionData(
         'subToMcdAutomation',
         [inputData, false],

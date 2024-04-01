@@ -12,5 +12,5 @@ contract MainnetCoreAddresses {
     address internal constant BUNDLE_STORAGE_ADDR = 0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf;
     address internal constant STRATEGY_STORAGE_ADDR = 0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933;
 
-    address internal constant RECIPE_EXECUTOR_ADDR = 0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86;
+    address internal constant RECIPE_EXECUTOR_ADDR = 0x5029336642814bC51a42bA80BF83a6322110035D;
 }

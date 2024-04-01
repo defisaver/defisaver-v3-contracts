@@ -9,6 +9,8 @@ const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const storageSlots = require('./storageSlots.json');
 
+const { getAllFiles } = require('../scripts/hardhat-tasks-functions');
+
 const { deployAsOwner, deployContract } = require('../scripts/utils/deployer');
 
 const { createSafe, executeSafeTx } = require('./utils-safe');
@@ -59,6 +61,8 @@ const addrs = {
         CURVE_WRAPPER_V3: '0xdE73496DD6349829C6649aCaDe31FB1371528AC5',
         COMET_USDC_NATIVE_ADDR: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
         EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0x7b67D9D7993A258C4b2C31CDD9E6cbD5Fb674985',
+        STRATEGY_STORAGE_ADDR: '0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933',
+        BUNDLE_STORAGE_ADDR: '0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -85,6 +89,8 @@ const addrs = {
         DFS_REG_CONTROLLER: '0x493C0dE902E6916128A223F66F37d3b6ee8fA408',
         AAVE_V3_POOL_DATA_PROVIDER: '0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654',
         EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0x79586d55DECB755B9Bb436B2287eFf93025E549D',
+        STRATEGY_STORAGE_ADDR: '0xDdDE69c3Fd246D9D62f9712c814b333728f113A4',
+        BUNDLE_STORAGE_ADDR: '0xc98C5312829006b2D4bBd47162d49B1aa6C275Ab',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -118,6 +124,8 @@ const addrs = {
         AAVE_V3_POOL_DATA_PROVIDER: '0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654',
         EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0xcc0Ae28CC4ae2944B61d3b205F47F5f3aE5Ca204',
         AVG_GAS_PRICE: 0.5,
+        STRATEGY_STORAGE_ADDR: '0x6aeA695fcd0655650323e9dc5f80Ac0b15A91Da2',
+        BUNDLE_STORAGE_ADDR: '0x8332F2a50A9a6C85a476e1ea33031681291cB694',
     },
     base: {
         PROXY_REGISTRY: '0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d',
@@ -144,6 +152,8 @@ const addrs = {
         DFS_REG_CONTROLLER: '0x50bCFC115283dF48Ab6382551B9B93b08E197747',
         AAVE_V3_POOL_DATA_PROVIDER: '0x2d8A3C5677189723C4cB8873CfC9C8976FDF38Ac',
         EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0xB297cB5B1380cDD68A238cA38e8d54C809f3De32',
+        STRATEGY_STORAGE_ADDR: '0x3Ca96CebC7779Ee86685c67c999d0f03158Ee9cA',
+        BUNDLE_STORAGE_ADDR: '0x6AB90ff536f0E2a880DbCdef1bB665C2acC0eDdC',
     },
 };
 
@@ -612,9 +622,12 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);
-
-    const c = await deployAsOwner(name, undefined, ...args);
-
+    let deployer;
+    if (isFork) {
+        // if script is consistenly failing due to tenderly delete this
+        deployer = await hre.ethers.provider.getSigner(getOwnerAddr());
+    }
+    const c = await deployAsOwner(name, deployer, ...args);
     if (name === 'StrategyExecutor' || name === 'StrategyExecutorL2') {
         // eslint-disable-next-line no-param-reassign
         name = 'StrategyExecutorID';
@@ -667,6 +680,28 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     }
 
     return c;
+};
+
+const approveContractInRegistry = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
+    const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
+    const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
+    let registry = await registryInstance.attach(regAddr);
+
+    registry = registry.connect(signer);
+
+    const id = getNameId(name);
+
+    const entryData = await registry.entries(id);
+
+    if (entryData.inContractChange) {
+        if (parseInt(entryData.waitPeriod, 10) > 0) {
+            await timeTravel(parseInt(entryData.waitPeriod, 10) + 10);
+        }
+    
+        await registry.approveContractChange(id, { gasLimit: 2000000 });
+    } else {
+        console.log(`Contract ${name} not in change`);
+    }
 };
 
 const getContractFromRegistry = async (
@@ -1017,8 +1052,8 @@ const getProxyAuth = async (proxyAddr, addrWithAuth) => {
 
 const setNewExchangeWrapper = async (acc, newAddr, isFork = false) => {
     const ownerAddr = addrs[network].OWNER_ACC;
-    await sendEther(acc, ownerAddr, '1');
     if (!isFork) {
+        await sendEther(acc, ownerAddr, '1');
         await impersonateAccount(ownerAddr);
     }
 
@@ -1072,10 +1107,12 @@ const formatExchangeObjForOffchain = (
     [wrapper, exchangeAddr, allowanceTarget, price, protocolFee, callData],
 ];
 
-const addToExchangeAggregatorRegistry = async (acc, newAddr) => {
+const addToExchangeAggregatorRegistry = async (acc, newAddr, isFork = false) => {
     const ownerAddr = addrs[network].OWNER_ACC;
-    await sendEther(acc, ownerAddr, '1');
-    await impersonateAccount(ownerAddr);
+    if (!isFork) {
+        await sendEther(acc, ownerAddr, '1');
+        await impersonateAccount(ownerAddr);
+    }
     const signer = hre.ethers.provider.getSigner(ownerAddr);
 
     const registry = await hre.ethers.getContractAt(
@@ -1083,7 +1120,10 @@ const addToExchangeAggregatorRegistry = async (acc, newAddr) => {
     );
 
     await registry.setExchangeTargetAddr(newAddr, true);
-    await stopImpersonatingAccount(ownerAddr);
+
+    if (!isFork) {
+        await stopImpersonatingAccount(ownerAddr);
+    }
 };
 
 const getGasUsed = async (receipt) => {
@@ -1324,6 +1364,36 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
 const WALLETS = ['DS_PROXY', 'SAFE'];
 const isWalletNameDsProxy = (w) => w === 'DS_PROXY';
 
+const generateIds = () => {
+    const idsMap = {};
+    const files = getAllFiles('./contracts');
+
+    // add extra non-contract name ids
+    files.push('/StrategyExecutorID.sol');
+    files.push('/FLActionL2.sol');
+    files.push('/MStableDeposit.sol');
+    files.push('/MStableWithdraw.sol');
+    files.push('/RariDeposit.sol');
+    files.push('/RariWithdraw.sol');
+    files.push('/FLMorphoBlue.sol');
+    files.push('/FLAaveV3.sol');
+    files.push('/FLAaveV3WithFee.sol');
+    files.push('/FLAaveV2.sol');
+    files.push('/FLMaker.sol');
+    files.push('/FLBalancer.sol');
+
+    files.forEach((filePath) => {
+        const fileName = filePath.split('/').pop().split('.')[0];
+        const id = getNameId(fileName);
+
+        idsMap[id] = { fileName, filePath };
+        // add id if it's contract name + New at the end
+        idsMap[`${id}New`] = { fileName: `${fileName}New`, filePath };
+    });
+
+    return idsMap;
+};
+
 module.exports = {
     addToExchangeAggregatorRegistry,
     getAddrFromRegistry,
@@ -1384,6 +1454,8 @@ module.exports = {
     filterEthersObject,
     curveApiInit,
     executeTxFromProxy,
+    generateIds,
+    approveContractInRegistry,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,

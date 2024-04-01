@@ -6,9 +6,10 @@ import "../../auth/AdminAuth.sol";
 import "../../auth/Permission.sol";
 import "../../core/strategy/SubStorage.sol";
 import "../../utils/CheckWalletType.sol";
+import "./helpers/SparkHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
+contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType, SparkHelper {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID; 
 
@@ -18,8 +19,6 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
     }
 
     enum RatioState { OVER, UNDER }
-
-    address public constant SPARK_MARKET = 0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
 
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
@@ -142,7 +141,7 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(address(this), SPARK_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData = abi.encode(address(this), DEFAULT_SPARK_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -159,7 +158,7 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(address(this), SPARK_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData = abi.encode(address(this), DEFAULT_SPARK_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 

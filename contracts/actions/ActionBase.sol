@@ -104,7 +104,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
                 _param = address(bytes20((_returnValues[getReturnIndex(_mapType)])));
             } else {
                 /// @dev The last two values are specially reserved for proxy addr and owner addr
-                if (_mapType == 254) return address(this); // DSProxy address
+                if (_mapType == 254) return address(this); // wallet address
                 if (_mapType == 255) return fetchOwnersOrWallet(); // owner if 1/1 wallet or the wallet itself
 
                 _param = address(uint160(uint256(_subData[getSubIndex(_mapType)])));

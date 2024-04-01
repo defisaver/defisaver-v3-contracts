@@ -347,29 +347,12 @@ const mcdGiveTest = async () => {
             const vaultId = await openMcd(proxy, join);
 
             const secondProxy = await getProxy(secondAcc.address);
-            const createProxy = false;
 
-            await mcdGive(proxy, vaultId, secondProxy, createProxy);
+            await mcdGive(proxy, vaultId, secondProxy);
 
             const ownerAfter = await mcdManager.owns(vaultId);
 
             expect(ownerAfter).to.be.eq(secondProxy.address);
-        });
-
-        it('... should give a cdp to an address and proxy should be created for it', async () => {
-            const { join } = ilks[0];
-
-            const vaultId = await openMcd(proxy, join);
-
-            const createProxy = true;
-
-            await mcdGive(proxy, vaultId, thirdAcc, createProxy);
-
-            const ownerAfter = await mcdManager.owns(vaultId);
-
-            const thirdProxy = await getProxy(thirdAcc.address);
-
-            expect(ownerAfter).to.be.eq(thirdProxy.address);
         });
     });
 };

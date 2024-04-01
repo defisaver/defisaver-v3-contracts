@@ -616,9 +616,9 @@ const claimMcd = async (proxy, vaultId, joinAddr, to) => {
     return tx;
 };
 
-const mcdGive = async (proxy, vaultId, newOwner, createProxy) => {
+const mcdGive = async (proxy, vaultId, newOwner) => {
     const mcdGiveAction = new dfs.actions.maker.MakerGiveAction(
-        vaultId, newOwner.address, createProxy, MCD_MANAGER_ADDR,
+        vaultId, newOwner.address, MCD_MANAGER_ADDR,
     );
 
     const functionData = mcdGiveAction.encodeForDsProxyCall()[1];
