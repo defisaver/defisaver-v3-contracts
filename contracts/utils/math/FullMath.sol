@@ -3,9 +3,9 @@ pragma solidity =0.8.10;
 
 /// @author Uniswap
 /// @dev This contract is only used as helper in defi saver flashloan tests
+/// @dev We are aware that phantom overflow will revert since we upgraded solidity verision to 0.8.x
 /// @title Contains 512-bit math functions
 /// @notice Facilitates multiplication and division that can have overflow of an intermediate value without any loss of precision
-/// @dev Handles "phantom overflow" i.e., allows multiplication and division where an intermediate value overflows 256 bits
 library FullMath {
     /// @notice Calculates floor(a×b÷denominator) with full precision. Throws if result overflows a uint256 or denominator == 0
     /// @param a The multiplicand
