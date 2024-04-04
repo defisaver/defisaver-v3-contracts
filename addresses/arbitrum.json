@@ -571,6 +571,17 @@
       ]
     },
     {
+      "name": "AaveV3ClaimRewards",
+      "address": "0x3a4d72Ed2a47a409a82ba61f0fca1C749Ea8aB66",
+      "id": "0x3c4556e9",
+      "path": "contracts/actions/aaveV3/AaveV3ClaimRewards.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "FLAaveV3",
       "address": "0x219ac6dA971dE6d943cffD1BD62abde71525d382",
       "id": "0x8d7fb192",
