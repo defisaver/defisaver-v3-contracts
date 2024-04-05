@@ -301,14 +301,17 @@
     },
     {
         "name": "KyberInputScalingHelper",
-        "address": "0x1e038fBC7892304D7435dbb41C0969c734d24A8d",
+        "address": "0x7f0ef73d9c4a16eaee9d445a40145ffce848e40f",
         "id": "0x559d99f5",
         "path": "contracts/utils/KyberInputScalingHelper",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x05977cA080Ef44a824D935191d0A3d56659295a0"]
+        "history": [
+            "0x1e038fBC7892304D7435dbb41C0969c734d24A8d",
+            "0x05977cA080Ef44a824D935191d0A3d56659295a0"
+        ]
     },
     {
         "name": "KyberAggregatorWrapper",
