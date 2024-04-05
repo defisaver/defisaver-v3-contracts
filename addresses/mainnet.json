@@ -304,7 +304,7 @@
         "address": "0x7f0ef73d9c4a16eaee9d445a40145ffce848e40f",
         "id": "0x559d99f5",
         "path": "contracts/utils/KyberInputScalingHelper",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
