@@ -213,14 +213,17 @@
     },
     {
         "name": "UniswapWrapperV3",
-        "address": "0x438991da46971b662769386C3b9c067F6fD79f33",
+        "address": "0x6761A4dB39302d7a33f6f056bd768F9F91274607",
         "id": "0x962c0774",
         "path": "contracts/exchangeV3/onchainWrappersV3/UniswapWrapperV3.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54"]
+        "history": [
+            "0x438991da46971b662769386C3b9c067F6fD79f33",
+            "0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54"
+        ]
     },
     {
         "name": "SushiswapWrapperV3",
