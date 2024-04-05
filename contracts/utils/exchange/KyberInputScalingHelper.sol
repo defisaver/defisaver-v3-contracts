@@ -271,6 +271,34 @@ contract KyberInputScalingHelper {
                 swap.data = newRocketPool(swap.data, oldAmount, newAmount);
             } else if (functionSelector == IExecutorHelper.executeMakersDAI.selector) {
                 swap.data = newMakersDAI(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeRenzo.selector) {
+                swap.data = newRenzo(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeWBETH.selector) {
+                swap.data = newEtherFieETH(swap.data, oldAmount, newAmount); // same etherfi eETH
+            } else if (functionSelector == IExecutorHelper.executeMantleETH.selector) {
+                swap.data = newEtherFieETH(swap.data, oldAmount, newAmount); // same etherfi eETH
+            } else if (functionSelector == IExecutorHelper.executeFrxETH.selector) {
+                swap.data = newFrxETH(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeSfrxETH.selector) {
+                swap.data = newSfrxETH(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeSfrxETHConvertor.selector) {
+                swap.data = newSfrxETHConvertor(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeSwellETH.selector) {
+                swap.data = newEtherFieETH(swap.data, oldAmount, newAmount); // same etherfi eETH
+            } else if (functionSelector == IExecutorHelper.executeRswETH.selector) {
+                swap.data = newEtherFieETH(swap.data, oldAmount, newAmount); // same etherfi eETH
+            } else if (functionSelector == IExecutorHelper.executeStaderETHx.selector) {
+                swap.data = newEthenaSusde(swap.data, oldAmount, newAmount); // same ethena susde
+            } else if (functionSelector == IExecutorHelper.executeOriginETH.selector) {
+                swap.data = newOriginETH(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executePrimeETH.selector) {
+                swap.data = newOriginETH(swap.data, oldAmount, newAmount); // same originETH
+            } else if (functionSelector == IExecutorHelper.executeMantleUsd.selector) {
+                swap.data = newMantleUsd(swap.data, oldAmount, newAmount);
+            } else if (functionSelector == IExecutorHelper.executeBedrockUniETH.selector) {
+                swap.data = newEtherFieETH(swap.data, oldAmount, newAmount); // same etherfi eETH
+            } else if (functionSelector == IExecutorHelper.executeMaiPSM.selector) {
+                swap.data = newFrxETH(swap.data, oldAmount, newAmount); // same frxeth
             } else {
                 revert("AggregationExecutor: Dex type not supported");
             }
@@ -721,10 +749,18 @@ contract KyberInputScalingHelper {
             data,
             (IExecutorHelper.RocketPool)
         );
+
         uint128 _amount = uint128(
             (uint256(uint128(structData.isDepositAndAmount)) * newAmount) / oldAmount
         );
-        structData.isDepositAndAmount |= uint256(_amount);
+
+        bool _isDeposit = (structData.isDepositAndAmount >> 255) == 1;
+
+        // reset and create new variable for isDeposit and amount
+        structData.isDepositAndAmount = 0;
+        structData.isDepositAndAmount |= uint256(uint128(_amount));
+        structData.isDepositAndAmount |= uint256(_isDeposit ? 1 : 0) << 255;
+
         return abi.encode(structData);
     }
 
@@ -737,8 +773,98 @@ contract KyberInputScalingHelper {
         uint128 _amount = uint128(
             (uint256(uint128(structData.isRedeemAndAmount)) * newAmount) / oldAmount
         );
-        structData.isRedeemAndAmount |= uint256(_amount);
+
+        bool _isRedeem = (structData.isRedeemAndAmount >> 255) == 1;
+
+        // reset and create new variable for isRedeem and amount
+        structData.isRedeemAndAmount = 0;
+        structData.isRedeemAndAmount |= uint256(uint128(_amount));
+        structData.isRedeemAndAmount |= uint256(_isRedeem ? 1 : 0) << 255;
+
         return abi.encode(structData);
+    }
+
+    function newRenzo(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.Renzo memory structData = abi.decode(data, (IExecutorHelper.Renzo));
+        structData.amount = uint128((uint256(structData.amount) * newAmount) / oldAmount);
+        return abi.encode(structData);
+    }
+
+    function newFrxETH(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.FrxETH memory structData = abi.decode(data, (IExecutorHelper.FrxETH));
+        structData.amount = uint128((uint256(structData.amount) * newAmount) / oldAmount);
+        return abi.encode(structData);
+    }
+
+    function newSfrxETH(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.SfrxETH memory structData = abi.decode(data, (IExecutorHelper.SfrxETH));
+        structData.amount = uint128((uint256(structData.amount) * newAmount) / oldAmount);
+        return abi.encode(structData);
+    }
+
+    function newSfrxETHConvertor(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.SfrxETHConvertor memory structData = abi.decode(
+            data,
+            (IExecutorHelper.SfrxETHConvertor)
+        );
+
+        uint128 _amount = uint128(
+            (uint256(uint128(structData.isDepositAndAmount)) * newAmount) / oldAmount
+        );
+
+        bool _isDeposit = (structData.isDepositAndAmount >> 255) == 1;
+
+        // reset and create new variable for isDeposit and amount
+        structData.isDepositAndAmount = 0;
+        structData.isDepositAndAmount |= uint256(uint128(_amount));
+        structData.isDepositAndAmount |= uint256(_isDeposit ? 1 : 0) << 255;
+
+        return abi.encode(structData);
+    }
+
+    function newOriginETH(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        IExecutorHelper.OriginETH memory structData = abi.decode(data, (IExecutorHelper.OriginETH));
+        structData.amount = uint128((uint256(structData.amount) * newAmount) / oldAmount);
+        return abi.encode(structData);
+    }
+
+    function newMantleUsd(
+        bytes memory data,
+        uint256 oldAmount,
+        uint256 newAmount
+    ) internal pure returns (bytes memory) {
+        uint256 isWrapAndAmount = abi.decode(data, (uint256));
+
+        uint128 _amount = uint128((uint256(uint128(isWrapAndAmount)) * newAmount) / oldAmount);
+
+        bool _isWrap = (isWrapAndAmount >> 255) == 1;
+
+        // reset and create new variable for isWrap and amount
+        isWrapAndAmount = 0;
+        isWrapAndAmount |= uint256(uint128(_amount));
+        isWrapAndAmount |= uint256(_isWrap ? 1 : 0) << 255;
+
+        return abi.encode(isWrapAndAmount);
     }
 
     function _scaledPositiveSlippageFeeData(

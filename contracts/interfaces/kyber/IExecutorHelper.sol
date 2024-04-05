@@ -317,6 +317,39 @@ interface IExecutorHelper {
     address recipient;
   }
 
+  struct Renzo {
+    address pool;
+    uint256 amount;
+    address tokenIn;
+    address tokenOut;
+  }
+
+  struct FrxETH {
+    address pool;
+    uint256 amount;
+    address tokenOut;
+  }
+
+  struct SfrxETH {
+    address pool;
+    uint256 amount;
+    address tokenOut;
+    address recipient;
+  }
+
+  struct SfrxETHConvertor {
+    address pool;
+    uint256 isDepositAndAmount; // 1 isDeposit + 127 empty + 128 amount token in
+    address tokenIn;
+    address tokenOut;
+    address recipient;
+  }
+
+  struct OriginETH {
+    address pool;
+    uint256 amount;
+  }
+
   function executeUniswap(
     bytes memory data,
     uint256 flagsAndPrevAmountOut
@@ -583,6 +616,76 @@ interface IExecutorHelper {
   ) external payable returns (uint256);
 
   function executeMakersDAI(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeRenzo(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeWBETH(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeMantleETH(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeFrxETH(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeSfrxETH(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeSfrxETHConvertor(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeSwellETH(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeRswETH(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeStaderETHx(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeOriginETH(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executePrimeETH(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeMantleUsd(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeBedrockUniETH(
+    bytes memory data,
+    uint256 flagsAndPrevAmountOut
+  ) external payable returns (uint256);
+
+  function executeMaiPSM(
     bytes memory data,
     uint256 flagsAndPrevAmountOut
   ) external payable returns (uint256);
