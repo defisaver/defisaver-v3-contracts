@@ -15,6 +15,7 @@ interface ILlamaLendController {
 
     /// @dev all functions below: if _debtAmount is 0 will just return
     function borrow_more(uint256 _collateralAmount, uint256 _debtAmount) external payable;
+    function borrow_more_extended(uint256 _collateralAmount, uint256 _debt, address _callbacker, uint256[] memory _callbackArgs) external payable;
 
     /// @dev if _debtAmount > debt will do full repay
     function repay(uint256 _debtAmount) external payable;

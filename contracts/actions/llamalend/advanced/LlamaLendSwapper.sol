@@ -28,13 +28,9 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         uint256,
         uint256[] memory info
     ) external returns (CallbackData memory cb) {
-        address controllerAddr = msg.sender;
-
         uint256 gasUsed = info[0];
 
-        ExchangeData memory exData;
-        // exData = abi.decode(tempStorage.get)
-
+        ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         address collToken = exData.srcAddr;
         address debtToken = exData.destAddr;
 
@@ -45,11 +41,11 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         }
 
         cb.stablecoins = receivedAmount;
-        cb.collateral = IERC20(collToken).balanceOf(address(this));
+        cb.collateral = collToken.getBalance(address(this));
 
         // approve the controller to create new position
-        IERC20(collToken).safeApprove(controllerAddr, cb.collateral);
-        IERC20(debtToken).safeApprove(controllerAddr, cb.stablecoins);
+        IERC20(collToken).safeApprove(msg.sender, cb.collateral);
+        IERC20(debtToken).safeApprove(msg.sender, cb.stablecoins);
     }
 
     function callback_deposit(
@@ -57,8 +53,23 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         uint256,
         uint256,
         uint256,
-        uint256[] memory swapData
+        uint256[] memory info
     ) external returns (CallbackData memory cb) {
+        uint256 gasUsed = info[0];
+        ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
+
+        address collToken = exData.destAddr;
+
+        (, uint256 receivedAmount, bool hasFee) = _sell(exData, _user);
+        // need to take automation fee somehow
+        if (gasUsed > 0){
+            receivedAmount -= takeAutomationFee(receivedAmount, collToken, gasUsed, hasFee);
+        }
+
+        cb.collateral = receivedAmount;
+
+        // approve the controller to create new position
+        IERC20(collToken).safeApprove(msg.sender, cb.collateral);
     }
 
     function callback_liquidate(
@@ -66,8 +77,29 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         uint256,
         uint256,
         uint256,
-        uint256[] memory swapData
+        uint256[] memory info
     ) external returns (CallbackData memory cb) {
+        uint256 gasUsed = info[0];
+        bool sellMax = info[1] > 0;
+
+        ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
+        
+        address collToken = exData.srcAddr;
+        address debtToken = exData.destAddr;
+        if (sellMax) {
+            exData.srcAmount = collToken.getBalance(address(this));
+        }
+        (, uint256 receivedAmount, bool hasFee) = _sell(exData, _user);
+        // need to take automation fee somehow
+        if (gasUsed > 0){
+            receivedAmount -= takeAutomationFee(receivedAmount, debtToken, gasUsed, hasFee);
+        }
+        cb.stablecoins = receivedAmount;
+        cb.collateral = collToken.getBalance(address(this));
+
+        IERC20(collToken).safeApprove(msg.sender, cb.collateral);
+        IERC20(debtToken).safeApprove(msg.sender, cb.stablecoins);
+
     }
 
     /// @dev No funds should be stored on this contract, but if anything is left send back to the user
