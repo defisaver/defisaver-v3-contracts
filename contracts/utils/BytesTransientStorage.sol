@@ -1,21 +1,20 @@
 // SPDX-License-Identifier: MIT
-
+pragma solidity =0.8.10;
+/*
 pragma solidity =0.8.24;
 
 /// @title Used to store exchange data in a transaction
 /// @dev Always set and read data in the same tx, and keep in mind it can be accessed by anyone
 contract BytesTransientStorage {
-    /*
-        Example:
-        0x1cff79cd000004e4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000009d4e4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000002e6dad30c5d95f5ce78a8310f04c23030
-        This data has length of 72
-        Slot 0 will be 0x0000000000000000000000000000000000000000000000000000000000000048 
-        Slot 1 will be 0x1cff79cd000004e4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000009d4 _data[0:32]
-        Slot 2 will be 0xe4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000002e6dad30c5d95f5ce _data[32:64]
-        lastPart will be 0xc5d95f5ce78a8310f04c200000000002e6dad30c5d95f5ce78a8310f04c23030 _data[40:72] will be shifted to the left 24*8 times
-        Slot 3 will be 0x78a8310f04c23030000000000000000000000000000000000000000000000000
-    */
-   /*
+    // Example:
+    // 0x1cff79cd000004e4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000009d4e4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000002e6dad30c5d95f5ce78a8310f04c23030
+    // This data has length of 72
+    // Slot 0 will be 0x0000000000000000000000000000000000000000000000000000000000000048 
+    // Slot 1 will be 0x1cff79cd000004e4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000009d4 _data[0:32]
+    // Slot 2 will be 0xe4b26a5e2e6dad30c5d95f5ce78a8310f04c200000000002e6dad30c5d95f5ce _data[32:64]
+    // lastPart will be 0xc5d95f5ce78a8310f04c200000000002e6dad30c5d95f5ce78a8310f04c23030 _data[40:72] will be shifted to the left 24*8 times
+    // Slot 3 will be 0x78a8310f04c23030000000000000000000000000000000000000000000000000
+    
     function setBytesTransiently(bytes calldata _data) public {
         require(_data.length >= 32);
         // write length of _data to first slot
@@ -75,5 +74,6 @@ contract BytesTransientStorage {
             result = bytes.concat(result, cutChunk);
         }
     }
-    */
+    
 }
+*/
