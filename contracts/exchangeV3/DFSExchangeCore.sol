@@ -25,8 +25,15 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
     /// @notice Internal method that performs a sell on offchain aggregator/on-chain
     /// @dev Useful for other DFS contract to integrate for exchanging
     /// @param exData Exchange data struct
-    /// @return (address, uint) Address of the wrapper used and destAmount
-    function _sell(ExchangeData memory exData) internal returns (address, uint256) {
+    function _sell(ExchangeData memory exData) internal returns (address wrapperAddress, uint256 destAmount) {
+        (wrapperAddress, destAmount, ) = _sell(exData, address(this));
+    }
+
+    /// @notice Internal method that performs a sell on offchain aggregator/on-chain
+    /// @dev Useful for other DFS contract to integrate for exchanging
+    /// @param exData Exchange data struct
+    /// @return (address, uint, bool) Address of the wrapper used and destAmount and if there was fee
+    function _sell(ExchangeData memory exData, address smartWallet) internal returns (address, uint256, bool) {
         uint256 amountWithoutFee = exData.srcAmount;
         address wrapperAddr = exData.offchainData.wrapper;
         bool offChainSwapSuccess;
@@ -37,7 +44,7 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
         if (exData.dfsFeeDivider != 0) {
             exData.srcAmount = sub(exData.srcAmount, getFee(
                 exData.srcAmount,
-                address(this),
+                smartWallet,
                 exData.srcAddr,
                 exData.dfsFeeDivider
             ));
@@ -62,10 +69,11 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
             revert SlippageHitError(amountBought, wmul(exData.minPrice, exData.srcAmount));
         }
 
+        bool hasFee = exData.srcAmount != amountWithoutFee;
         // revert back exData changes to keep it consistent
         exData.srcAmount = amountWithoutFee;
 
-        return (wrapperAddr, amountBought);
+        return (wrapperAddr, amountBought, hasFee);
     }
 
     /// @notice Takes order from exchange aggregator and returns bool indicating if it is successful
