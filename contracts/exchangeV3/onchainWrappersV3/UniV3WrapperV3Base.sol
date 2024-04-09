@@ -23,6 +23,7 @@ contract UniV3WrapperV3Base is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
     /// @param _srcAmount From amount
     /// @param _additionalData Path for swapping
     /// @return uint amount of tokens received from selling
+    /// @dev On-chain wrapper only used for simulations and strategies, in both cases we are ok with setting a dynamic timestamp
     function sell(address _srcAddr, address, uint _srcAmount, bytes calldata _additionalData) external override returns (uint) {
         IERC20(_srcAddr).safeApprove(address(router), _srcAmount);
 
@@ -34,6 +35,14 @@ contract UniV3WrapperV3Base is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
                 amountOutMinimum: 1 /// @dev DFSExchangeCore contains slippage check
             });
         uint amountOut = router.exactInput(params);
+
+        // cleanup tokens if anything left after sell
+        uint256 amountLeft = IERC20(_srcAddr).balanceOf(address(this));
+        
+        if (amountLeft > 0) {
+            IERC20(_srcAddr).safeTransfer(msg.sender, amountLeft);
+        }
+
         return amountOut;
     }
 

@@ -31,6 +31,13 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         /// @dev On-chain wrapper only used for simulations and strategies, in both cases we are ok with setting a dynamic timestamp
         amounts = router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
 
+        // cleanup tokens if anything left after sell
+        uint256 amountLeft = IERC20(_srcAddr).balanceOf(address(this));
+        
+        if (amountLeft > 0) {
+            IERC20(_srcAddr).safeTransfer(msg.sender, amountLeft);
+        }
+
         return amounts[amounts.length - 1];
     }
 

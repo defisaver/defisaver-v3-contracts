@@ -8,8 +8,9 @@ import "../../DS/DSMath.sol";
 import "../../auth/AdminAuth.sol";
 import "./helpers/WrapperHelper.sol";
 import "../../utils/TokenUtils.sol";
+import "../DFSExchangeHelper.sol";
 
-contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
+contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExchangeHelper {
 
     error WrongDestAmountError(uint256, uint256);
     using SafeERC20 for IERC20;
@@ -38,6 +39,8 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
             0, /// @dev DFSExchangeCore contains slippage check instead of writing it here
             WALLET_ID
         );
+
+        sendLeftover(_srcAddr, _destAddr, payable(msg.sender));
 
         return destAmount;
     }

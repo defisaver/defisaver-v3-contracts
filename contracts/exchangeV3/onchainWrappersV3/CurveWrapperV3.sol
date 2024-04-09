@@ -37,6 +37,13 @@ contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
             msg.sender
         );
 
+        // cleanup tokens if anything left after sell
+        uint256 amountLeft = IERC20(_srcAddr).balanceOf(address(this));
+        
+        if (amountLeft > 0) {
+            IERC20(_srcAddr).safeTransfer(msg.sender, amountLeft);
+        }
+
         return amountOut;
     }
 

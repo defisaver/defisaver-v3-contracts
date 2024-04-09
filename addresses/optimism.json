@@ -191,27 +191,29 @@
     },
     {
         "name": "UniV3WrapperV3",
-        "address": "0x836905C8dBE5887060c3E367578B4676901163A0",
+        "address": "0xF723B39fe2Aa9102dE45Bc8ECd3417805aAC79Aa",
         "id": "0x7c1f8079",
         "path": "contracts/exchangeV3/onchainWrappersV3/UniV3WrapperV3.sol",
-        "version": "1.0.1",
-        "inRegistry": false,
-        "changeTime": 0,
-        "registryIds": [],
-        "history": [
-          "0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357"
-        ]
-    },
-    {
-        "name": "CurveWrapperV3",
-        "address": "0x2d262e1c4210B7e6Bc5C7013A338e22aF01BD5A2",
-        "id": "0xb856c9af",
-        "path": "contracts/exchangeV3/onchainWrappersV3/CurveWrapperV3.sol",
         "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x836905C8dBE5887060c3E367578B4676901163A0",
+          "0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357"
+        ]
+    },
+    {
+        "name": "CurveWrapperV3",
+        "address": "0x571A4dbE7BDC118d0B74A9f52E96F288FF8DF85D",
+        "id": "0xb856c9af",
+        "path": "contracts/exchangeV3/onchainWrappersV3/CurveWrapperV3.sol",
+        "version": "1.0.3",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": [
+          "0x2d262e1c4210B7e6Bc5C7013A338e22aF01BD5A2",
           "0xa1a94eF3a366e6Ce53Cb733D93caF66f8124F7bA",
           "0x6c47D2eFa8DCBAb412203C1Fd0A59D8c2ed272AF"
         ]

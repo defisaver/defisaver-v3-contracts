@@ -132,27 +132,29 @@
     },
     {
         "name": "UniV3WrapperV3",
-        "address": "0x6945432Cc46B2956Cd4583836c463284212d96A6",
+        "address": "0x37236458C59F4dCF17b96Aa67FC07Bbf5578d873",
         "id": "0x7c1f8079",
         "path": "contracts/exchangeV3/onchainWrappersV3/UniV3WrapperV3.sol",
-        "version": "1.0.1",
-        "inRegistry": false,
-        "changeTime": 0,
-        "registryIds": [],
-        "history": [
-          "0x48eF488054b5c570cF3A2AC0A0697B0b0D34c431"
-        ]
-    },
-    {
-        "name": "CurveWrapperV3",
-        "address": "0x506bC549432Ae8357385C86a20163960E3C9b33b",
-        "id": "0xb856c9af",
-        "path": "contracts/exchangeV3/onchainWrappersV3/CurveWrapperV3.sol",
         "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x6945432Cc46B2956Cd4583836c463284212d96A6",
+          "0x48eF488054b5c570cF3A2AC0A0697B0b0D34c431"
+        ]
+    },
+    {
+        "name": "CurveWrapperV3",
+        "address": "0x836BCCf8831080AC115559c705c765392AFdCB98",
+        "id": "0xb856c9af",
+        "path": "contracts/exchangeV3/onchainWrappersV3/CurveWrapperV3.sol",
+        "version": "1.0.3",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": [
+          "0x506bC549432Ae8357385C86a20163960E3C9b33b",
           "0x6bfa86D54B75DcFEb58C6A80FadE947E180C3616",
           "0xB82b43c4c0ABF41Dfc342571C330964fF576a9b3"
         ]
@@ -569,6 +571,17 @@
       "history": [
         "0x204ae0d3f7cB0db44A297DC4aD433298ed2042F3"
       ]
+    },
+    {
+      "name": "AaveV3ClaimRewards",
+      "address": "0x3a4d72Ed2a47a409a82ba61f0fca1C749Ea8aB66",
+      "id": "0x3c4556e9",
+      "path": "contracts/actions/aaveV3/AaveV3ClaimRewards.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
     },
     {
       "name": "FLAaveV3",
