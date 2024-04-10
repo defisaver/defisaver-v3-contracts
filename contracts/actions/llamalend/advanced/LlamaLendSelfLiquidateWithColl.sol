@@ -6,18 +6,18 @@ import "../../ActionBase.sol";
 import "../helpers/LlamaLendHelper.sol";
 import "./LlamaLendSwapper.sol";
 
+/// @title LlamaLendSelfLiquidateWithColl
+/// @dev if current debtToken coll > debt, callback address won't be called -> no swap will be done (any coll token and debt token will be send to params.to)
 contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
     using TokenUtils for address;
 
     /// @param controllerAddress Address of the curveusd market controller
     /// @param percentage Fraction to liquidate; 100% = 10**18
     /// @param minCrvUsdExpected Users crvUsd collateral balance must be bigger than this
-    /// @param swapAmount Amount of collateral to swap for crvUsd
-    /// @param minAmount Minimum amount of crvUSD to receive after sell
+    /// @param exData exchange data for swapping (srcAmount will be amount of coll token sold)
     /// @param to Where to send the leftover funds if full close
-    /// @param additionalData Additional data where curve swap path is encoded
+    /// @param sellAllCollateral Since coll token amount is changeable during soft liquidation, this will replace srcAmount in exData with coll amount
     /// @param gasUsed Only used as part of a strategy, estimated gas used for this tx
-    /// @param dfsFeeDivider Fee divider, if a non standard fee is set it will check for custom fee
     struct Params {
         address controllerAddress;
         uint256 percentage; // Fraction to liquidate; 100% = 10**18
@@ -74,14 +74,14 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
         address debtToken = ILlamaLendController(_params.controllerAddress).borrowed_token();
         uint256 collStartingBalance = collToken.getBalance(address(this));
         uint256 debtStartingBalance = debtToken.getBalance(address(this));
+
         ILlamaLendController(_params.controllerAddress)
             .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, false, llamalendSwapper, info);
 
-
-        // cleanup after the callback if any funds are left over
+        // there shouldn't be any funds left on swapper contract but withdrawing it just in case
         LlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
 
-        // send funds to user
+        // there will usually be both coll token and debt token, unless we're selling all collateral
         (, uint256 debtTokenReceived) = _sendLeftoverFunds(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
     
         return (

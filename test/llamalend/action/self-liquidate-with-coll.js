@@ -12,7 +12,7 @@ const {
 } = require('../utils');
 const { llamalendCreate, llamalendSelfLiquidateWithColl } = require('../../actions');
 
-describe('LlamaLend-Create', function () {
+describe('LlamaLend-Self-Liq-With-Coll', function () {
     this.timeout(80000);
 
     const controllers = getControllers();
@@ -36,7 +36,7 @@ describe('LlamaLend-Create', function () {
     afterEach(async () => {
         await revertToSnapshot(snapshot);
     });
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < controllers.length; i++) {
         const controllerAddr = controllers[i];
         it(`should create a Llamalend position in ${controllerAddr} Llamalend market and then self liquidate it with coll when it's in soft liq`, async () => {
             await supplyToMarket(controllerAddr);

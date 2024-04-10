@@ -6,7 +6,7 @@ import "../helpers/LlamaLendHelper.sol";
 import "../../../actions/fee/helpers/GasFeeHelper.sol";
 import "../../../exchangeV3/DFSExchangeCore.sol";
 
-/// @title CurveUsdSwapper Callback contract for CurveUsd extended actions, swaps directly on curve
+/// @title LlamaLendSwapper Callback contract for Llamalend extended actions
 contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, AdminAuth {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
@@ -20,7 +20,9 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
     }
 
 
-    ///@dev Called by curve controller from repay_extended method, sends collateral tokens to this contract
+    ///@dev called by llamalend controller after repay_extended
+    ///@dev sends all collateral the user has to this contract, we swap a part or all of it
+    ///@dev after swapping, llamalend will either recreate the position or close it fully
     function callback_repay(
         address _user,
         uint256,
@@ -33,12 +35,15 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         address collToken = exData.srcAddr;
         address debtToken = exData.destAddr;
+
         (, uint256 receivedAmount, bool hasFee) = _sell(exData, _user);
-        // need to take automation fee somehow
+        
         if (gasUsed > 0){
             receivedAmount -= takeAutomationFee(receivedAmount, debtToken, gasUsed, hasFee);
         }
 
+        // if receivedAmount > current debt, leftover coll will be returned and receivedAmount-currentDebt will be returned
+        // if receivedAmount < current debt, new position will be created with leftover coll and currentDebt-receivedAmount
         cb.stablecoins = receivedAmount;
         cb.collateral = collToken.getBalance(address(this));
 
@@ -47,6 +52,8 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         IERC20(debtToken).safeApprove(msg.sender, cb.stablecoins);
     }
 
+    ///@dev called by llamalend controller after create_loan_extended and borrow_more_extended
+    ///@dev sends exData.srcAmount of debt token to this contract for us to sell, than pulls received coll token
     function callback_deposit(
         address _user,
         uint256,
@@ -60,7 +67,7 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         address collToken = exData.destAddr;
 
         (, uint256 receivedAmount, bool hasFee) = _sell(exData, _user);
-        // need to take automation fee somehow
+
         if (gasUsed > 0){
             receivedAmount -= takeAutomationFee(receivedAmount, collToken, gasUsed, hasFee);
         }
@@ -71,6 +78,9 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         IERC20(collToken).safeApprove(msg.sender, cb.collateral);
     }
 
+    ///@dev called by llamalend controller after liquidate_extended
+    ///@dev if users debtTokenCollateralAmount is higher than debt, this won'te be called at all
+    ///@dev this will send all marketCollateralAmount from users position to this contract, which we can sell all or a part of it
     function callback_liquidate(
         address _user,
         uint256,
@@ -88,7 +98,7 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
             exData.srcAmount = collToken.getBalance(address(this));
         }
         (, uint256 receivedAmount, bool hasFee) = _sell(exData, _user);
-        // need to take automation fee somehow
+
         if (gasUsed > 0){
             receivedAmount -= takeAutomationFee(receivedAmount, debtToken, gasUsed, hasFee);
         }

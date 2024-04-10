@@ -13,6 +13,9 @@ contract LlamaLendRepay is ActionBase, LlamaLendHelper{
     using TokenUtils for address;
 
     /// @param controllerAddress Address of the llamalend market controller
+    /// @param exData exchange data for swapping (srcAmount will be amount of coll token sold)
+    /// @param to address which will receive any leftovers if amount received from selling is greater than debt
+    /// @param gasUsed info for automated strategy gas reimbursement
     struct Params {
         address controllerAddress;
         DFSExchangeData.ExchangeData exData;
@@ -33,9 +36,9 @@ contract LlamaLendRepay is ActionBase, LlamaLendHelper{
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
 
-        (uint256 generatedAmount, bytes memory logData) = _repay(params);
+        (uint256 debtTokenReceived, bytes memory logData) = _repay(params);
         emit ActionEvent("LlamaLendRepay", logData);
-        return bytes32(generatedAmount);
+        return bytes32(debtTokenReceived);
     }
 
     /// @inheritdoc ActionBase
@@ -70,10 +73,11 @@ contract LlamaLendRepay is ActionBase, LlamaLendHelper{
 
         ILlamaLendController(_params.controllerAddress).repay_extended(llamalendSwapper, info);
 
-        // cleanup after the callback if any funds are left over
+        // there shouldn't be any funds left on swapper contract but withdrawing it just in case
         LlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
 
-        // send funds to user
+        // if the amount received from swap is higher than debt there will be leftover debtToken
+        // if we haven't sold 100% of coll from the position there will be leftover collToken
         (, uint256 debtTokenReceived) = _sendLeftoverFunds(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
 
         return (

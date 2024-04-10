@@ -12,6 +12,12 @@ import "../../../exchangeV3/DFSExchangeData.sol";
 contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
     using TokenUtils for address;
 
+    /// @param controllerAddress Address of the llamalend market controller
+    /// @param from address from which collAmount of collToken will be pulled
+    /// @param collAmount amount of collateral that the user is providing at first
+    /// @param nBands number of bands the created position will have
+    /// @param exData exchange data for swapping (srcAmount will be amount of debt token generated and sold)
+    /// @param gasUsed info for automated strategy gas reimbursement
     struct Params {
         address controllerAddress;
         address from;
@@ -35,9 +41,9 @@ contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
         params.collAmount = _parseParamUint(params.collAmount, _paramMapping[2], _subData, _returnValues);
         params.nBands = _parseParamUint(params.nBands, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 generatedAmount, bytes memory logData) = _create(params);
+        (uint256 debtGeneratedAndSold, bytes memory logData) = _create(params);
         emit ActionEvent("LlamaLendLevCreate", logData);
-        return bytes32(generatedAmount);
+        return bytes32(debtGeneratedAndSold);
     }
 
     /// @inheritdoc ActionBase
@@ -59,16 +65,18 @@ contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
         /// @dev see ICrvUsdController natspec
         if (_params.collAmount == 0 || _params.exData.srcAmount == 0) revert();
 
-        // pull coll amount
         address collAddr = ILlamaLendController(_params.controllerAddress).collateral_token();
         _params.collAmount = collAddr.pullTokensIfNeeded(_params.from, _params.collAmount);
-        collAddr.approveToken(_params.controllerAddress, _params.collAmount);
 
         address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
-        // create loan
+
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
+
+
+        collAddr.approveToken(_params.controllerAddress, _params.collAmount);
+        // create loan
         ILlamaLendController(_params.controllerAddress).create_loan_extended(
             _params.collAmount,
             _params.exData.srcAmount,
@@ -78,7 +86,7 @@ contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
         );
 
         return (
-            0,
+            _params.exData.srcAmount,
             abi.encode(_params)
         );
     }

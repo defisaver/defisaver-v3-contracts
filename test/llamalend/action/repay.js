@@ -13,7 +13,7 @@ const {
 } = require('../utils');
 const { llamalendCreate, llamalendRepay } = require('../../actions');
 
-describe('LlamaLend-Create', function () {
+describe('LlamaLend-Repay', function () {
     this.timeout(80000);
 
     const controllers = getControllers();
@@ -36,7 +36,7 @@ describe('LlamaLend-Create', function () {
     afterEach(async () => {
         await revertToSnapshot(snapshot);
     });
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < controllers.length; i++) {
         const controllerAddr = controllers[i];
         it(`should create a Llamalend position and then repay it partially in ${controllerAddr} Llamalend market`, async () => {
             await supplyToMarket(controllerAddr);

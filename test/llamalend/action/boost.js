@@ -12,7 +12,7 @@ const {
 } = require('../utils');
 const { llamalendCreate, llamalendBoost } = require('../../actions');
 
-describe('LlamaLend-Create', function () {
+describe('LlamaLend-Boost', function () {
     this.timeout(80000);
 
     const controllers = getControllers();

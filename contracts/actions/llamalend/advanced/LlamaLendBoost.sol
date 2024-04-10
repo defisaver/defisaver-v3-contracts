@@ -13,6 +13,8 @@ contract LlamaLendBoost is ActionBase, LlamaLendHelper{
     using TokenUtils for address;
 
     /// @param controllerAddress Address of the llamalend market controller
+    /// @param exData exchange data for swapping (srcAmount will be amount of debt generated)
+    /// @param gasUsed info for automated strategy gas reimbursement
     struct Params {
         address controllerAddress;
         DFSExchangeData.ExchangeData exData;
