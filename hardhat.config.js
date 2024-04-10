@@ -1,5 +1,4 @@
 /* eslint-disable import/no-extraneous-dependencies */
-require('hardhat-tracer');
 require('dotenv-safe').config();
 require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-etherscan');
@@ -47,6 +46,7 @@ module.exports = {
             timeout: 1000000,
             gasPrice: 170000000000,
             name: 'mainnet',
+            hardfork: 'cancun',
         },
         localOptimism: {
             url: 'http://127.0.0.1:8545',

@@ -67,8 +67,8 @@ contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
         address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
-
         // create loan
+        transientStorage.setBytesTransiently(abi.encode(_params.exData));
         ILlamaLendController(_params.controllerAddress).create_loan_extended(
             _params.collAmount,
             _params.exData.srcAmount,

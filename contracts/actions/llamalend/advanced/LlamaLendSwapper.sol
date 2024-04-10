@@ -33,7 +33,6 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         address collToken = exData.srcAddr;
         address debtToken = exData.destAddr;
-
         (, uint256 receivedAmount, bool hasFee) = _sell(exData, _user);
         // need to take automation fee somehow
         if (gasUsed > 0){
@@ -81,7 +80,6 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
     ) external returns (CallbackData memory cb) {
         uint256 gasUsed = info[0];
         bool sellMax = info[1] > 0;
-
         ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         
         address collToken = exData.srcAddr;

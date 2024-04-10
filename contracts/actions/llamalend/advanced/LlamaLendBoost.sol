@@ -16,7 +16,6 @@ contract LlamaLendBoost is ActionBase, LlamaLendHelper{
     struct Params {
         address controllerAddress;
         DFSExchangeData.ExchangeData exData;
-        address to;
         uint32 gasUsed;
     }
 
@@ -62,12 +61,6 @@ contract LlamaLendBoost is ActionBase, LlamaLendHelper{
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
         ILlamaLendController(_params.controllerAddress).borrow_more_extended(0, _params.exData.srcAmount, llamalendSwapper, info);
-
-        // cleanup after the callback if any funds are left over
-        LlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
-
-        // send funds to user
-        _sendLeftoverFunds(_params.controllerAddress, _params.to);
 
         return (
             _params.exData.srcAmount,

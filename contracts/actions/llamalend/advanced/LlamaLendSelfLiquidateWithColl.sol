@@ -64,14 +64,16 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
 
     function _liquidate(Params memory _params) internal returns (uint256, bytes memory) {
         address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
-
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
         if (_params.sellAllCollateral) info[1] = 1;
         
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
-        
+        address collToken = ILlamaLendController(_params.controllerAddress).collateral_token();
+        address debtToken = ILlamaLendController(_params.controllerAddress).borrowed_token();
+        uint256 collStartingBalance = collToken.getBalance(address(this));
+        uint256 debtStartingBalance = debtToken.getBalance(address(this));
         ILlamaLendController(_params.controllerAddress)
             .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, false, llamalendSwapper, info);
 
@@ -80,10 +82,10 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
         LlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
 
         // send funds to user
-        _sendLeftoverFunds(_params.controllerAddress, _params.to);
-
+        (, uint256 debtTokenReceived) = _sendLeftoverFunds(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
+    
         return (
-            _params.percentage,
+            debtTokenReceived,
             abi.encode(_params)
         );
     }

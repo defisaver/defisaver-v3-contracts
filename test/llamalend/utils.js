@@ -5,11 +5,17 @@ const { setBalance, fetchAmountinUSDPrice, approve } = require('../utils');
 const loanTokenSupplyAmountInUsd = '500000';
 const collateralSupplyAmountInUsd = '50000';
 const borrowAmountInUsd = '30000';
+const levBorrowAmountInUsd = '60000';
 
 const getControllers = () => [
-    '0x43fc0f246F952ff12B757341A91cF4040711dDE9', // crvusd/crv
-    '0x5E657c5227A596a860621C5551c9735d8f4A8BE3', // wsteth/crvusd
-    '0x7443944962D04720f8c220C0D25f56F869d6EfD4', // crv/crvusd
+    '0xeda215b7666936ded834f76f3fbc6f323295110a', // crv/crvusd
+    '0xc510d73ad34bedeca8978b6914461aa7b50cf3fc', // crvusd/crv
+    '0xaade9230aa9161880e13a38c83400d3d1995267b', // weth/crvusd
+    '0xa5d9137d2a1ee912469d911a8e74b6c77503bac8', // crvusd/weth
+    '0x98fc283d6636f6dcff5a817a00ac69a3add96907', // susde/crvusd
+    '0x413fd2511bad510947a91f5c6c79ebd8138c29fc', // tbtc/crvusd
+    '0xe438658874b0acf4d81c24172e137f0ee00621b8', // crvusd/tbtc
+    '0x1e0165dbd2019441ab7927c018701f3138114d71', // wsteth/crvusd
 ];
 const supplyToMarket = async (controllerAddr) => {
     const [wallet] = await hre.ethers.getSigners();
@@ -43,4 +49,5 @@ module.exports = {
     loanTokenSupplyAmountInUsd,
     collateralSupplyAmountInUsd,
     borrowAmountInUsd,
+    levBorrowAmountInUsd,
 };

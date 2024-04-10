@@ -37,12 +37,17 @@ contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
         collRatio = wdiv(wmul(collAmountWAD, oraclePrice) + debtAssetCollAmount, debt);
     }
 
-        function _sendLeftoverFunds(address _controllerAddress, address _to) internal {
-        address collToken = ILlamaLendController(_controllerAddress).collateral_token();
-        address debtToken = ILlamaLendController(_controllerAddress).borrowed_token();
-
-        debtToken.withdrawTokens(_to, type(uint256).max);
-        collToken.withdrawTokens(_to, type(uint256).max);
+    function _sendLeftoverFunds(
+        address _collToken,
+        address _debtToken,
+        uint256 _collStartingBalance,
+        uint256 _debtStartingBalance,
+        address _to
+    ) internal returns (uint256 collTokenReceived, uint256 debtTokenReceived) {
+        collTokenReceived = _collToken.getBalance(address(this)) - _collStartingBalance;
+        debtTokenReceived = _debtToken.getBalance(address(this)) - _debtStartingBalance;
+        _collToken.withdrawTokens(_to, collTokenReceived);
+        _debtToken.withdrawTokens(_to, debtTokenReceived);
     }
 
     function userMaxWithdraw(

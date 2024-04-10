@@ -30,6 +30,8 @@ contract LlamaLendRepay is ActionBase, LlamaLendHelper{
         Params memory params = parseInputs(_callData);
 
         params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
+
 
         (uint256 generatedAmount, bytes memory logData) = _repay(params);
         emit ActionEvent("LlamaLendRepay", logData);
@@ -61,16 +63,21 @@ contract LlamaLendRepay is ActionBase, LlamaLendHelper{
 
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
+        address collToken = ILlamaLendController(_params.controllerAddress).collateral_token();
+        address debtToken = ILlamaLendController(_params.controllerAddress).borrowed_token();
+        uint256 collStartingBalance = collToken.getBalance(address(this));
+        uint256 debtStartingBalance = debtToken.getBalance(address(this));
+
         ILlamaLendController(_params.controllerAddress).repay_extended(llamalendSwapper, info);
 
         // cleanup after the callback if any funds are left over
         LlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
 
         // send funds to user
-        _sendLeftoverFunds(_params.controllerAddress, _params.to);
+        (, uint256 debtTokenReceived) = _sendLeftoverFunds(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
 
         return (
-            _params.exData.srcAmount,
+            debtTokenReceived,
             abi.encode(_params)
         );
     }
