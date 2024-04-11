@@ -719,6 +719,34 @@ const subCurveUsdRepayBundle = async (
 
     return { subId, strategySub };
 };
+const subLlamaLendRepayStrategy = async (
+    proxy, controllerAddr, minRatio, targetRatio,
+) => {
+    const strategySub = automationSdk.strategySubService.llamaLendEncode.leverageManagement(
+        proxy.address,
+        controllerAddr,
+        automationSdk.enums.RatioState.UNDER,
+        targetRatio,
+        minRatio,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
+const subLlamaLendBoostStrategy = async (
+    proxy, controllerAddr, maxRatio, targetRatio,
+) => {
+    const strategySub = automationSdk.strategySubService.llamaLendEncode.leverageManagement(
+        proxy.address,
+        controllerAddr,
+        automationSdk.enums.RatioState.OVER,
+        targetRatio,
+        maxRatio,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
 
 const subCurveUsdPaybackStrategy = async (
     proxy,
@@ -850,4 +878,6 @@ module.exports = {
     subCurveUsdPaybackStrategy,
     subMorphoBlueBoostBundle,
     subMorphoBlueRepayBundle,
+    subLlamaLendBoostStrategy,
+    subLlamaLendRepayStrategy,
 };

@@ -5,6 +5,7 @@ const {
     nullAddress,
     placeHolderAddr,
 } = require('./utils');
+const { LlamalendRatioCheckAction } = require('@defisaver/sdk/esm/src/actions/checkers');
 
 const createUniV3RangeOrderStrategy = () => {
     const rangeOrderStrategy = new dfs.Strategy('UniV3RangeOrderStrategy');
@@ -3673,6 +3674,7 @@ const createCurveUsdAdvancedRepayStrategy = () => {
     repayStrategy.addAction(curveUsdCollRatioCheckAction);
     return repayStrategy.encodeForDsProxyCall();
 };
+
 const createCurveUsdRepayStrategy = () => {
     const repayStrategy = new dfs.Strategy('CurveUsdRepayStrategy');
 
@@ -4454,6 +4456,55 @@ const createMorphoBlueFLDebtRepayStrategy = () => {
     repayStrategy.addAction(morphoBlueRatioCheckAction);
     return repayStrategy.encodeForDsProxyCall();
 };
+
+const createLlamalendRepayStrategy = () => {
+    const repayStrategy = new dfs.Strategy('LlamaLendRepayStrategy');
+
+    repayStrategy.addSubSlot('&controllerAddress', 'address');
+    repayStrategy.addSubSlot('&ratioState', 'uint8');
+    repayStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const llamalendCollRatioTrigger = new dfs.triggers.LlamaLendCollRatioTrigger(nullAddress, nullAddress, '0', '0');
+    repayStrategy.addTrigger(llamalendCollRatioTrigger);
+    const llamalendRepayAction = new dfs.actions.llamalend.LlamaLendRepayAction(
+        '&controllerAddress',
+        '%exchangeOrder',
+        '&proxy',
+        '%gasUsed',
+    );
+    const llamaLendRatioCheckAction = new dfs.actions.checkers.LlamaLendCollRatioCheck(
+        '&ratioState', // taken from subdata
+        '&targetRatio', // taken from subdata
+        '&controllerAddress', // taken from subdata
+    );
+    repayStrategy.addAction(llamalendRepayAction);
+    repayStrategy.addAction(llamaLendRatioCheckAction);
+    return repayStrategy.encodeForDsProxyCall();
+};
+const createLlamalendBoostStrategy = () => {
+    const boostStrategy = new dfs.Strategy('LlamaLendBoostStrategy');
+
+    boostStrategy.addSubSlot('&controllerAddress', 'address');
+    boostStrategy.addSubSlot('&ratioState', 'uint8');
+    boostStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const llamalendCollRatioTrigger = new dfs.triggers.LlamaLendCollRatioTrigger(nullAddress, nullAddress, '0', '0');
+    boostStrategy.addTrigger(llamalendCollRatioTrigger);
+    const llamalendRepayAction = new dfs.actions.llamalend.LlamaLendBoostAction(
+        '&controllerAddress',
+        '%exchangeOrder',
+        '%gasUsed',
+    );
+    const llamaLendRatioCheckAction = new dfs.actions.checkers.LlamaLendCollRatioCheck(
+        '&ratioState', // taken from subdata
+        '&targetRatio', // taken from subdata
+        '&controllerAddress', // taken from subdata
+    );
+    boostStrategy.addAction(llamalendRepayAction);
+    boostStrategy.addAction(llamaLendRatioCheckAction);
+    return boostStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -4540,4 +4591,6 @@ module.exports = {
     createMorphoBlueRepayStrategy,
     createMorphoBlueFLCollRepayStrategy,
     createMorphoBlueFLDebtRepayStrategy,
+    createLlamalendBoostStrategy,
+    createLlamalendRepayStrategy,
 };
