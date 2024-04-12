@@ -109,11 +109,11 @@ import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
 import { GasFeeHelper } from "../actions/fee/helpers/GasFeeHelper.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
 
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
 import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { IBytesTransientStorage } from "../interfaces/IBytesTransientStorage.sol";
 
 import { console } from "hardhat/console.sol";
 
@@ -128,8 +128,8 @@ contract RecipeExecutor is
 {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    // replace with real transient storage once audited and deployed
-    TransientStorage public constant tempStorage = TransientStorage(0x2F7Ef2ea5E8c97B8687CA703A0e50Aa5a49B7eb2);
+    // remove hardcoded address later
+    IBytesTransientStorage public constant transientStorage = IBytesTransientStorage(0xB3FE6f712c8B8c64CD2780ce714A36e7640DDf0f);
 
     /// @dev Function sig of ActionBase.executeAction()
     bytes4 public constant EXECUTE_ACTION_SELECTOR = 
@@ -155,7 +155,8 @@ contract RecipeExecutor is
         Recipe calldata _currRecipe,
         TxRelayUserSignedData calldata _txRelayData
     ) public payable {
-        uint256 gasStart = uint256(tempStorage.getBytes32("GAS_START"));
+        uint256 gasStart = abi.decode(transientStorage.getBytesTransiently(), (uint256));
+        console.log("Gas start: %d", gasStart);
 
         _executeActions(_currRecipe);
 

@@ -3,13 +3,13 @@
 pragma solidity =0.8.10;
 
 import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { IBytesTransientStorage } from "../interfaces/IBytesTransientStorage.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { SupportedFeeTokensRegistry } from "./SupportedFeeTokensRegistry.sol";
 import { BotAuth } from "../core/strategy/BotAuth.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
 
 import { console } from "hardhat/console.sol";
  
@@ -23,7 +23,7 @@ contract TxRelayExecutor is
     bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
-    TransientStorage public constant tempStorage = TransientStorage(0x2F7Ef2ea5E8c97B8687CA703A0e50Aa5a49B7eb2);
+    IBytesTransientStorage public constant transientStorage = IBytesTransientStorage(0xB3FE6f712c8B8c64CD2780ce714A36e7640DDf0f);
 
     SupportedFeeTokensRegistry public immutable feeTokensRegistry;
 
@@ -51,9 +51,8 @@ contract TxRelayExecutor is
         SafeTxParams calldata _params
     ) external {
         uint256 gasStart = gasleft();
-
-        // replace with real transient storage once audited and deployed
-        tempStorage.setBytes32("GAS_START", bytes32(gasStart));
+        console.log("Gas start: %d", gasStart);
+        transientStorage.setBytesTransiently(abi.encode(gasStart));
 
         (
             Recipe memory recipe,
