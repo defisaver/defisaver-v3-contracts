@@ -7,8 +7,16 @@ import "../../../interfaces/llamalend/ILLAMA.sol";
 import "../../../interfaces/llamalend/IAGG.sol";
 import "../../../interfaces/IERC20.sol";
 import "../../../DS/DSMath.sol";
+import "../../../utils/TokenUtils.sol";
+import "../../../interfaces/IBytesTransientStorage.sol";
 
 contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
+    using TokenUtils for address;
+
+    IBytesTransientStorage constant transientStorage = IBytesTransientStorage(BYTES_TRANSIENT_STORAGE);
+
+    bytes4 constant LLAMALEND_SWAPPER_ID = bytes4(keccak256("LlamaLendSwapper"));
+
     function getCollateralRatio(address _user, address _controllerAddr) public view returns (uint256 collRatio, bool isInSoftLiquidation) {
         // fetch users debt
         uint256 debt = ILlamaLendController(_controllerAddr).debt(_user);
@@ -27,6 +35,19 @@ contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
         uint256 collAmountWAD = assetDec > 18 ? (collAmount / 10 ** (assetDec - 18)) : (collAmount * 10 ** (18 - assetDec));
         
         collRatio = wdiv(wmul(collAmountWAD, oraclePrice) + debtAssetCollAmount, debt);
+    }
+
+    function _sendLeftoverFunds(
+        address _collToken,
+        address _debtToken,
+        uint256 _collStartingBalance,
+        uint256 _debtStartingBalance,
+        address _to
+    ) internal returns (uint256 collTokenReceived, uint256 debtTokenReceived) {
+        collTokenReceived = _collToken.getBalance(address(this)) - _collStartingBalance;
+        debtTokenReceived = _debtToken.getBalance(address(this)) - _debtStartingBalance;
+        _collToken.withdrawTokens(_to, collTokenReceived);
+        _debtToken.withdrawTokens(_to, debtTokenReceived);
     }
 
     function userMaxWithdraw(
