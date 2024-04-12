@@ -3180,6 +3180,89 @@ const llamalendCreate = async (
     return { receipt, approveObj };
 };
 
+const llamalendSelfLiquidateWithColl = async (
+    proxy,
+    controllerAddress,
+    percentage,
+    minCrvUsdExpected,
+    exData,
+    to,
+    sellAllCollateral,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendSelfLiquidateWithCollAction(
+        controllerAddress,
+        percentage,
+        minCrvUsdExpected,
+        exData,
+        to,
+        sellAllCollateral,
+        0,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendSelfLiquidateWithColl', functionData, proxy);
+
+    return { receipt };
+};
+
+const llamalendBoost = async (
+    proxy,
+    controllerAddress,
+    exData,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendBoostAction(
+        controllerAddress,
+        exData,
+        0,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendBoost', functionData, proxy);
+
+    return { receipt };
+};
+
+const llamalendRepay = async (
+    proxy,
+    controllerAddress,
+    exData,
+    to,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendRepayAction(
+        controllerAddress,
+        exData,
+        to,
+        0,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendRepay', functionData, proxy);
+
+    return { receipt };
+};
+
+const llamalendLevCreate = async (
+    proxy,
+    controllerAddress,
+    from,
+    collateralAmount,
+    exData,
+    nBands,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendLevCreateAction(
+        controllerAddress,
+        from,
+        collateralAmount,
+        nBands,
+        exData,
+        0,
+    );
+    const [approveObj] = await action.getAssetsToApprove();
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendLevCreate', functionData, proxy);
+
+    return { receipt, approveObj };
+};
+
 const llamalendSupply = async (
     proxy,
     controllerAddress,
@@ -3489,4 +3572,8 @@ module.exports = {
     llamalendSelfLiquidate,
     llamalendSupply,
     llamalendWithdraw,
+    llamalendLevCreate,
+    llamalendBoost,
+    llamalendRepay,
+    llamalendSelfLiquidateWithColl,
 };

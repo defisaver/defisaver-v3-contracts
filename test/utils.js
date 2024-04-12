@@ -333,6 +333,7 @@ const coinGeckoHelper = {
     sfrxETH: 'staked-frax-ether',
     tBTC: 'tbtc',
     crvUSD: 'crvusd',
+    sUSDe: 'ethena-staked-usde',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;
@@ -541,7 +542,7 @@ const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR)
     const registry = registryInstance.attach(regAddr);
 
     // TODO: Write in registry later
-   // if (name === 'SubProxy') {
+    // if (name === 'SubProxy') {
     //     return addrs[network].SubProxy;
     // }
     const addr = await registry.getAddr(
@@ -697,7 +698,7 @@ const approveContractInRegistry = async (name, regAddr = addrs[getNetwork()].REG
         if (parseInt(entryData.waitPeriod, 10) > 0) {
             await timeTravel(parseInt(entryData.waitPeriod, 10) + 10);
         }
-    
+
         await registry.approveContractChange(id, { gasLimit: 2000000 });
     } else {
         console.log(`Contract ${name} not in change`);
