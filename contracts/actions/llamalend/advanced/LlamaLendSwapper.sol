@@ -53,7 +53,7 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
     }
 
     ///@dev called by llamalend controller after create_loan_extended and borrow_more_extended
-    ///@dev sends exData.srcAmount of debt token to this contract for us to sell, than pulls received coll token
+    ///@dev sends exData.srcAmount of debt token to this contract for us to sell then pulls received coll token
     function callback_deposit(
         address _user,
         uint256,
