@@ -13,10 +13,12 @@ contract LlamaLendBoost is ActionBase, LlamaLendHelper{
     using TokenUtils for address;
 
     /// @param controllerAddress Address of the llamalend market controller
+    /// @param controllerId id that matches controller number in factory
     /// @param exData exchange data for swapping (srcAmount will be amount of debt generated)
     /// @param gasUsed info for automated strategy gas reimbursement
     struct Params {
         address controllerAddress;
+        uint256 controllerId;
         DFSExchangeData.ExchangeData exData;
         uint32 gasUsed;
     }
@@ -54,11 +56,13 @@ contract LlamaLendBoost is ActionBase, LlamaLendHelper{
 
     function _boost(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.exData.srcAmount == 0) revert();
+        if (!isControllerValid(_params.controllerAddress, _params.controllerId)) revert InvalidLlamaLendController();
 
         address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
        
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
+        info[1] = _params.controllerId;
 
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
