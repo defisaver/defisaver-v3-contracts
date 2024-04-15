@@ -8,14 +8,14 @@ const borrowAmountInUsd = '30000';
 const levBorrowAmountInUsd = '60000';
 
 const getControllers = () => [
-    '0xeda215b7666936ded834f76f3fbc6f323295110a', // crv/crvusd
-    '0xc510d73ad34bedeca8978b6914461aa7b50cf3fc', // crvusd/crv
-    '0xaade9230aa9161880e13a38c83400d3d1995267b', // weth/crvusd
-    '0xa5d9137d2a1ee912469d911a8e74b6c77503bac8', // crvusd/weth
-    '0x98fc283d6636f6dcff5a817a00ac69a3add96907', // susde/crvusd
-    '0x413fd2511bad510947a91f5c6c79ebd8138c29fc', // tbtc/crvusd
-    '0xe438658874b0acf4d81c24172e137f0ee00621b8', // crvusd/tbtc
-    '0x1e0165dbd2019441ab7927c018701f3138114d71', // wsteth/crvusd
+    '0x1E0165DbD2019441aB7927C018701f3138114D71',
+    '0xaade9230AA9161880E13a38C83400d3D1995267b',
+    '0x413FD2511BAD510947a91f5c6c79EBD8138C29Fc',
+    '0xEdA215b7666936DEd834f76f3fBC6F323295110A',
+    '0xC510d73Ad34BeDECa8978B6914461aA7b50CF3Fc',
+    '0xa5D9137d2A1Ee912469d911A8E74B6c77503bac8',
+    '0xe438658874b0acf4D81c24172E137F0eE00621b8',
+    '0x98Fc283d6636f6DCFf5a817A00Ac69A3ADd96907',
 ];
 const supplyToMarket = async (controllerAddr) => {
     const [wallet] = await hre.ethers.getSigners();

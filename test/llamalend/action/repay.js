@@ -75,6 +75,7 @@ describe('LlamaLend-Repay', function () {
             await llamalendRepay(
                 proxy,
                 controllerAddr,
+                i,
                 exchangeData,
                 senderAcc.address,
             );
@@ -122,6 +123,7 @@ describe('LlamaLend-Repay', function () {
             await llamalendRepay(
                 proxy,
                 controllerAddr,
+                i,
                 exchangeData,
                 senderAcc.address,
             );

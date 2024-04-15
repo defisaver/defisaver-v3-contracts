@@ -93,6 +93,7 @@ describe('LlamaLend-Self-Liq-With-Coll', function () {
             await llamalendSelfLiquidateWithColl(
                 proxy,
                 controllerAddr,
+                i,
                 hre.ethers.utils.parseUnits('100', 18),
                 1,
                 exchangeData,

@@ -74,6 +74,7 @@ describe('LlamaLend-Boost', function () {
             await llamalendBoost(
                 proxy,
                 controllerAddr,
+                i,
                 exchangeData,
             );
             const infoAfterBoost = await view.callStatic.userData(controllerAddr, proxy.address);

@@ -65,7 +65,7 @@ describe('LlamaLend-Lev-Create', function () {
             await approve(collTokenAddr, proxy.address, senderAcc);
             const debtTokenBalanceBefore = await balanceOf(debtTokenAddr, senderAcc.address);
             await llamalendLevCreate(
-                proxy, controllerAddr, senderAcc.address,
+                proxy, controllerAddr, i, senderAcc.address,
                 supplyAmountInWei, exchangeData, 10,
             );
             const debtTokenBalanceAfter = await balanceOf(debtTokenAddr, senderAcc.address);

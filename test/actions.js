@@ -3183,6 +3183,7 @@ const llamalendCreate = async (
 const llamalendSelfLiquidateWithColl = async (
     proxy,
     controllerAddress,
+    controllerId,
     percentage,
     minCrvUsdExpected,
     exData,
@@ -3191,6 +3192,7 @@ const llamalendSelfLiquidateWithColl = async (
 ) => {
     const action = new dfs.actions.llamalend.LlamaLendSelfLiquidateWithCollAction(
         controllerAddress,
+        controllerId,
         percentage,
         minCrvUsdExpected,
         exData,
@@ -3207,10 +3209,12 @@ const llamalendSelfLiquidateWithColl = async (
 const llamalendBoost = async (
     proxy,
     controllerAddress,
+    controllerId,
     exData,
 ) => {
     const action = new dfs.actions.llamalend.LlamaLendBoostAction(
         controllerAddress,
+        controllerId,
         exData,
         0,
     );
@@ -3224,11 +3228,13 @@ const llamalendBoost = async (
 const llamalendRepay = async (
     proxy,
     controllerAddress,
+    controllerId,
     exData,
     to,
 ) => {
     const action = new dfs.actions.llamalend.LlamaLendRepayAction(
         controllerAddress,
+        controllerId,
         exData,
         to,
         0,
@@ -3242,6 +3248,7 @@ const llamalendRepay = async (
 const llamalendLevCreate = async (
     proxy,
     controllerAddress,
+    controllerId,
     from,
     collateralAmount,
     exData,
@@ -3249,6 +3256,7 @@ const llamalendLevCreate = async (
 ) => {
     const action = new dfs.actions.llamalend.LlamaLendLevCreateAction(
         controllerAddress,
+        controllerId,
         from,
         collateralAmount,
         nBands,
