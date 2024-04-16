@@ -1070,7 +1070,7 @@
     },
     {
       "name": "LlamaLendView",
-      "address": "0xcd11eff1591d6ed9c2f04259d0e697b0f71af3b3",
+      "address": "0x5393BcbfF80ca7638e961820b31Cd3cf785D69A9",
       "id": "0xc7facae6",
       "path": "contracts/views/LlamaLendView.sol",
       "version": "1.0.0",
