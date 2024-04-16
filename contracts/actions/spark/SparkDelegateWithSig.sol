@@ -6,7 +6,7 @@ import "../ActionBase.sol";
 import "../../interfaces/aaveV3/IDebtToken.sol";
 
 /// @title Delegate credit for someone to borrow on user's wallet behalf with his signature
-contract AaveV3DelegateWithSig is ActionBase {
+contract SparkDelegateWithSig is ActionBase {
 
     struct Params {
         address debtToken;
@@ -28,7 +28,7 @@ contract AaveV3DelegateWithSig is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
         (bytes memory logData) = _delegate(params);
-        emit ActionEvent("AaveV3DelegateWithSig", logData);
+        emit ActionEvent("SparkDelegateWithSig", logData);
         return bytes32(params.value);
     }
 
@@ -36,13 +36,13 @@ contract AaveV3DelegateWithSig is ActionBase {
     function executeActionDirect(bytes calldata _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (bytes memory logData) = _delegate(params);
-        logger.logActionDirectEvent("AaveV3DelegateWithSig", logData);
+        logger.logActionDirectEvent("SparkDelegateWithSig", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
         (bytes memory logData) = _delegate(params);
-        logger.logActionDirectEvent("AaveV3DelegateWithSig", logData);
+        logger.logActionDirectEvent("SparkDelegateWithSig", logData);
     }
 
     /// @inheritdoc ActionBase
