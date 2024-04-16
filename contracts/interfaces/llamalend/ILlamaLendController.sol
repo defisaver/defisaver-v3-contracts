@@ -52,4 +52,5 @@ interface ILlamaLendController {
     function loan_exists(address) external view returns (bool);
     function liquidation_discount() external view returns (uint256);
     function factory() external view returns (address);
+    function loan_discount() external view returns (uint256);
 }
