@@ -12,7 +12,7 @@ const {
 } = require('../../utils');
 const { executeAction } = require('../../actions');
 
-describe('Aave-EOA-Boost', function () {
+describe('Aave-EOA-Repay', function () {
     const network = hre.network.config.name;
     this.timeout(150000);
     let senderAcc; let proxy; let pool; let wethAddr; let daiAddr;
@@ -23,8 +23,7 @@ describe('Aave-EOA-Boost', function () {
         proxy = await getProxy(senderAcc.address);
         const mockWrapper = await redeploy('MockExchangeWrapper');
         await setNewExchangeWrapper(senderAcc, mockWrapper.address);
-        await redeploy('AaveV3DelegateWithSig');
-        await redeploy('AaveV3Supply');
+        await redeploy('PermitToken');
 
         wethAddr = getAssetInfo('WETH', chainIds[network]).address;
         daiAddr = getAssetInfo('DAI', chainIds[network]).address;
@@ -35,7 +34,7 @@ describe('Aave-EOA-Boost', function () {
         pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
 
         const collAmountInUSD = fetchAmountinUSDPrice('WETH', '100000');
-        const debtAmountInUSD = fetchAmountinUSDPrice('DAI', '20000');
+        const debtAmountInUSD = fetchAmountinUSDPrice('DAI', '40000');
         const supplyAmountInWei = hre.ethers.utils.parseUnits(
             collAmountInUSD, 18,
         );
@@ -50,73 +49,77 @@ describe('Aave-EOA-Boost', function () {
         await pool.supply(wethAddr, supplyAmountInWei, senderAcc.address, 0);
         await pool.borrow(daiAddr, borrowAmountWei, 2, 0, senderAcc.address);
         console.log('We\'ve supplied 100k$ of WETH');
-        console.log('We\'ve borrowed 20k$ DAI');
+        console.log('We\'ve borrowed 40k$ DAI');
     });
 
-    it('... should boost EOA position', async () => {
-        const daiVariableDebtToken = '0xcF8d0c70c850859266f5C338b38F9D663181C314';
-        const delegator = senderAcc.address;
-        const delegatee = proxy.address;
-        const boostAmount = hre.ethers.utils.parseUnits('20000', 18);
-        const debtTokenContract = await hre.ethers.getContractAt('IDebtToken', daiVariableDebtToken);
-        const nonce = await debtTokenContract.nonces(delegator);
+    it('... should repay EOA position', async () => {
+        const aWETH = '0x4d5F47FA6A74757f35C14fD3a6Ef8E3C9BC514E8';
+        const owner = senderAcc.address;
+        const spender = proxy.address;
+        const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '20000'), 18);
+        const aTokenContract = await hre.ethers.getContractAt('IAToken', aWETH);
+        const nonce = await aTokenContract.nonces(senderAcc.address);
         const deadline = '1812843907';
         const exchangeData = await formatMockExchangeObj(
-            getAssetInfo('DAI'),
             getAssetInfo('WETH'),
-            boostAmount,
+            getAssetInfo('DAI'),
+            repayAmount,
         );
         const signature = hre.ethers.utils.splitSignature(
             // @dev - _signTypedData will be renamed to signTypedData in future ethers versions
             // eslint-disable-next-line no-underscore-dangle
             await senderAcc._signTypedData(
                 {
-                    name: 'Aave Ethereum Variable Debt DAI', // debtToken.name
-                    version: '1', // debtToken.DEBT_TOKEN_REVISION
+                    name: 'Aave Ethereum WETH', // aToken.name
+                    version: '1', // aToken.ATOKEN_REVISION
                     chainId: 1,
-                    verifyingContract: daiVariableDebtToken,
+                    verifyingContract: aWETH,
                 },
                 {
-                    DelegationWithSig: [
-                        { name: 'delegatee', type: 'address' },
+                    Permit: [
+                        { name: 'owner', type: 'address' },
+                        { name: 'spender', type: 'address' },
                         { name: 'value', type: 'uint256' },
                         { name: 'nonce', type: 'uint256' },
                         { name: 'deadline', type: 'uint256' },
                     ],
                 },
                 {
-                    delegatee: proxy.address,
-                    value: boostAmount,
-                    nonce, // debtToken.nonces(owner)
+                    owner,
+                    spender,
+                    value: repayAmount,
+                    nonce, // aToken.nonces(owner)
                     deadline,
                 },
             ),
         );
-
-        const delegateWithSigAction = new dfs.actions.aaveV3.AaveV3DelegateWithSigCredit(
-            daiVariableDebtToken, delegator, delegatee,
-            boostAmount, deadline, signature.v, signature.r, signature.s,
+        const permitAction = new dfs.actions.basic.PermitTokenAction(
+            aWETH, senderAcc.address, proxy.address, repayAmount, deadline,
+            signature.v, signature.r, signature.s,
         );
-        const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-            true, nullAddress, boostAmount, proxy.address, 2, 4, true, senderAcc.address,
+        const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+            aWETH, senderAcc.address, repayAmount,
+        );
+        const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+            true, nullAddress, repayAmount, proxy.address, 0,
         );
         const sellAction = new dfs.actions.basic.SellAction(
             exchangeData, proxy.address, proxy.address,
         );
-        const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-            true, nullAddress, '$3', proxy.address, wethAddr, 0, true, true, senderAcc.address,
+        const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+            true, nullAddress, '$4', proxy.address, 2, daiAddr, 4, true, senderAcc.address,
         );
 
-        const recipe = new dfs.Recipe('AaveV3EOABoost',
-            [delegateWithSigAction, borrowAction, sellAction, supplyAction]);
+        const recipe = new dfs.Recipe('AaveV3EOARepay',
+            [permitAction, pullTokenAction, withdrawAction, sellAction, paybackAction]);
         const functionData = recipe.encodeForDsProxyCall()[1];
         const view = await (await hre.ethers.getContractFactory('AaveV3View')).deploy();
         const loanDataPre = await view.getLoanData(addrs[network].AAVE_MARKET, senderAcc.address);
         await executeAction('RecipeExecutor', functionData, proxy);
 
         const loanData = await view.getLoanData(addrs[network].AAVE_MARKET, senderAcc.address);
-        expect(loanDataPre.collAmounts[0]).to.be.lt(loanData.collAmounts[0]);
-        expect(loanDataPre.borrowVariableAmounts[0]).to.be.lt(loanData.borrowVariableAmounts[0]);
+        expect(loanDataPre.collAmounts[0]).to.be.gt(loanData.collAmounts[0]);
+        expect(loanDataPre.borrowVariableAmounts[0]).to.be.gt(loanData.borrowVariableAmounts[0]);
         console.log(`Our position currently has ${loanData.collAmounts[0] / 1e8}$ of ETH supplied`);
         console.log(`Our position currently has ${loanData.borrowVariableAmounts[0] / 1e8}$ of DAI borrowed`);
     });
