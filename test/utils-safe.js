@@ -22,8 +22,8 @@ const SAFE_MASTER_COPY_VERSIONS = {
 };
 
 const encodeSetupArgs = async (setupArgs) => {
-    const safeInterface = await hre.ethers.getContractAt('ISafe', nullAddress).then((safe) => safe.interface);
-    return safeInterface.encodeFunctionData('setup', setupArgs);
+    const safeInterface = await hre.ethers.getContractAt('ISafe', SAFE_SINGLETON_ADDR);
+    return safeInterface.interface.encodeFunctionData('setup', setupArgs);
 };
 
 const createSafe = async (senderAddress) => {
@@ -206,12 +206,18 @@ const signSafeTx = async (safeInstance, safeTx, signer) => {
         ],
     };
     const domain = {
-        chainId: await hre.ethers.provider.getNetwork().then((e) => e.chainId),
+        chainId: 1,
         verifyingContract: safeInstance.address,
     };
+    console.log('==========Sign Safe Tx Data===========');
+    console.log('SafeTx:', safeTx);
+    console.log('Domain:', domain);
+    console.log('=======================================');
+
     // @dev - _signTypedData will be renamed to signTypedData in future ethers versions
     // eslint-disable-next-line no-underscore-dangle
     const signature = await signer._signTypedData(domain, EIP712_SAFE_TX_TYPE, safeTx);
+    console.log(`Signature: ${signature}`);
     return signature;
 };
 

@@ -150,20 +150,29 @@ contract RecipeExecutor is
         _executeActions(_currRecipe);
     }
 
-    // @notice Called by tx relay, tx relay data is checked before and it is not used here
+    /// @notice Called by tx relay
     function executeRecipeFromTxRelay(
         Recipe calldata _currRecipe,
         TxRelayUserSignedData calldata _txRelayData
     ) public payable {
-        uint256 gasStart = abi.decode(transientStorage.getBytesTransiently(), (uint256));
+        /// @dev include missing gas from safe singleton to recipe executor
+        uint256 totalGasLostBecauseOfEIP150 = gasleft() / 64 + 2500;
+
+        (uint256 gasStart, uint256 gasLost) = abi.decode(
+            transientStorage.getBytesTransiently(), (uint256, uint256)
+        );
         console.log("Gas start: %d", gasStart);
+        console.log("Gas missing: %d", gasLost);
+
+        totalGasLostBecauseOfEIP150 += gasLost;
 
         _executeActions(_currRecipe);
 
         address[] memory owners = ISafe(address(this)).getOwners();
 
-        uint256 gasUsed = gasStart - gasleft();
+        uint256 gasUsed = gasStart - (gasleft() + totalGasLostBecauseOfEIP150);
 
+        uint256 gs = gasleft();
         console.log("**********************Gas used: %s", gasUsed);
         console.log("**********************Total gas estimated: %s", gasUsed + _txRelayData.additionalGasUsed);
         uint256 gasCost = calcGasCost(
@@ -184,6 +193,8 @@ contract RecipeExecutor is
 
         // send tokens from wallet to fee recipient
         _txRelayData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), gasCost);
+        gs = gs - gasleft();
+        console.log("******* Gas cost for fee taking: %d", gs);
     }
 
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers

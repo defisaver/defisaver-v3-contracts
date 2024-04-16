@@ -4,11 +4,10 @@ const hre = require('hardhat');
 const dfs = require('@defisaver/sdk');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
+const { Wallet, BigNumber } = require('ethers');
 
 const {
-    getProxy,
     addrs,
-    network,
     redeploy,
     impersonateAccount,
     getOwnerAddr,
@@ -27,7 +26,12 @@ const {
     LUSD_ADDR,
 } = require('../utils');
 const { addBotCaller } = require('../utils-strategies');
-const { signSafeTx } = require('../utils-safe');
+const {
+    signSafeTx,
+    predictSafeAddress,
+    SAFE_MASTER_COPY_VERSIONS,
+    deploySafe,
+} = require('../utils-safe');
 const { topUp } = require('../../scripts/utils/fork');
 
 describe('Tx Relay - test using funds from EOA', function () {
@@ -41,6 +45,7 @@ describe('Tx Relay - test using funds from EOA', function () {
     let aavePool;
     let isFork;
     let snapshotId;
+    const network = 'mainnet';
 
     const addInitialFeeTokens = async () => {
         if (!isFork) {
@@ -68,15 +73,42 @@ describe('Tx Relay - test using funds from EOA', function () {
         await revertToSnapshot(snapshotId);
     });
 
+    // use real signer account so we can get accurate signature and nonce
+    const setRealSignerAccount = async () => {
+        const provider = hre.ethers.provider;
+        const privKey = process.env.PRIV_KEY_MAINNET;
+        const singerWallet = new Wallet(privKey);
+        senderAcc = await singerWallet.connect(provider);
+    };
+
     before(async () => {
         isFork = hre.network.name === 'fork';
         console.log('isFork', isFork);
-        [senderAcc, botAcc] = await hre.ethers.getSigners();
-        proxy = await getProxy(senderAcc.address, true); // hardcode to safe
-        const owners = await proxy.getOwners();
-        console.log('Owners', owners);
-        console.log(owners[0]);
-        console.log(senderAcc.address);
+
+        await setRealSignerAccount();
+
+        [, botAcc] = await hre.ethers.getSigners();
+
+        // @dev PREDICT SAFE ADDRESS so we can hardcode signature for tenderly fork latter;
+        const setupData = [
+            [senderAcc.address], // owner
+            1, // threshold
+            hre.ethers.constants.AddressZero, // to module address
+            [], // data for module
+            hre.ethers.constants.AddressZero, // fallback handler
+            hre.ethers.constants.AddressZero, // payment token
+            0, // payment
+            hre.ethers.constants.AddressZero, // payment receiver
+        ];
+        const predictedSafeAddr = await predictSafeAddress(SAFE_MASTER_COPY_VERSIONS.V141, setupData, '0');
+        console.log('Predicted Safe address', predictedSafeAddr);
+        await deploySafe(SAFE_MASTER_COPY_VERSIONS.V141, setupData, '0');
+        proxy = await hre.ethers.getContractAt('ISafe', predictedSafeAddr);
+
+        // UNCOMMENT IF WE ARE WORKING WITH EXISTING SAFE
+        // proxy = await hre.ethers.getContractAt('ISafe', '0x633386aC84d9337165f6e7BAdaC05DD93B31878F');
+
+        console.log('Safe address', proxy.address);
 
         if (isFork) {
             await topUp(senderAcc.address);
@@ -94,6 +126,7 @@ describe('Tx Relay - test using funds from EOA', function () {
         await redeploy('AaveV3Supply', addrs[network].REGISTRY_ADDR, false, isFork);
         await redeploy('AaveV3Borrow', addrs[network].REGISTRY_ADDR, false, isFork);
         recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor', addrs[network].REGISTRY_ADDR);
+        console.log('RecipeExecutor', recipeExecutorAddr);
         supportedFeeTokensRegistry = await redeploy('SupportedFeeTokensRegistry', addrs[network].REGISTRY_ADDR, false, isFork);
         console.log('SupportedFeeTokensRegistry', supportedFeeTokensRegistry.address);
 
@@ -105,31 +138,34 @@ describe('Tx Relay - test using funds from EOA', function () {
     });
 
     // include gas used for calculating and sending fee, hardcode it like this for now
+    // adjust values based on fee token and if we are pulling tokens from EOA or smart wallet
+    // this values will be singed from UI as they are packed into safe signature
     const determineAdditionalGasUsed = (feeToken, pullingFromEoa) => {
         if (pullingFromEoa) {
             if (feeToken === addrs[network].USDC_ADDR) {
-                return 83300 - 21000;
+                return 64300;
             }
             if (feeToken === addrs[network].DAI_ADDRESS) {
-                return 72774 - 21000;
+                return 53623;
             }
             if (feeToken === addrs[network].WETH_ADDRESS) {
-                return 28603 - 21000;
+                return 10000;
             }
         } else {
             if (feeToken === addrs[network].USDC_ADDR) {
-                return 82000 - 21000;
+                return 63000;
             }
             if (feeToken === addrs[network].DAI_ADDRESS) {
-                return 72400 - 21000;
+                return 53000;
             }
             if (feeToken === addrs[network].WETH_ADDRESS) {
-                return 28300 - 21000;
+                return 9300;
             }
         }
         return 0;
     };
 
+    // example of function data we want to execute
     const openAavePositionExampleFunctionData = async (txRelayUserSignedData) => {
         const supplyToken = WBTC_ADDR;
         const supplyAmount = hre.ethers.utils.parseUnits('10', 8);
@@ -167,7 +203,7 @@ describe('Tx Relay - test using funds from EOA', function () {
             nullAddress,
         );
 
-        const recipe = new dfs.Recipe('AaveV3 test', [supplyAction, borrowAction]);
+        const recipe = new dfs.Recipe('AaveV3OpenRecipe-Test', [supplyAction, borrowAction]);
 
         return recipe.encodeForTxRelayCall(txRelayUserSignedData)[1];
     };
@@ -185,12 +221,21 @@ describe('Tx Relay - test using funds from EOA', function () {
             refundReceiver: hre.ethers.constants.AddressZero,
             nonce: await proxy.nonce(),
         };
+
+        // if we are using fork we are hardcoding signature for:
+        // user: 0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199
+        // recipe executor: 0x8D9cDA62DC7Bf75f687c6C8729ABB51ac82E20d5
+        // safe wallet: 0x633386aC84d9337165f6e7BAdaC05DD93B31878F
+        if (isFork) {
+            const sig = '0xb3c478bd20ed438321b23d560e06ff6b4e91c4d1f0d0cef975a3b9cae5a85aaa2e03a82c7e2350e9622d62325cda92f25cacbb29043f4f163e0eb0d5f30741d81c';
+            return hre.ethers.utils.arrayify(sig);
+        }
         const signature = await signSafeTx(proxy, safeTxParamsForSign, senderAcc);
         console.log('signature', signature);
         return signature;
     };
 
-    it('Basic test', async () => {
+    it('Test getting FEE from EOA', async () => {
         const feeTokenAsset = getAssetInfo('DAI');
         // eslint-disable-next-line camelcase
         const fee_token = feeTokenAsset.address;
@@ -230,7 +275,9 @@ describe('Tx Relay - test using funds from EOA', function () {
             txParams,
         ]);
 
-        const receipt = await txRelayExecutorByBot.executeTxUsingFeeTokens(txParams);
+        const receipt = await txRelayExecutorByBot.executeTxUsingFeeTokens(txParams, {
+            gasLimit: 8000000,
+        });
 
         const gasUsed = await getGasUsed(receipt);
         const dollarPrice = calcGasToUSD(gasUsed, 0, callData);
@@ -255,8 +302,8 @@ describe('Tx Relay - test using funds from EOA', function () {
         const botSpent = botBalanceBeforeInEth.sub(botBalanceAfterInEth);
         console.log('Bot spent', botSpent.toString());
 
-        expect(feeTaken).to.be.gt(0);
+        expect(feeTaken).to.be.gt(BigNumber.from('0'));
         expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(feeTaken);
-        expect(txRelayFeeTokenBalanceAfter).to.be.equal(0);
+        expect(txRelayFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
     });
 });

@@ -71,6 +71,7 @@ module.exports = {
             timeout: 1000000,
             type: 'tenderly',
             name: 'mainnet',
+            chainId: 1,
         },
         hardhat: {
             forking: {
@@ -80,6 +81,11 @@ module.exports = {
                 // blockNumber: 12068716
             },
             name: 'mainnet',
+            accounts: {
+                balance: '10000000000000000000000000000',
+                privateKey: process.env.PRIV_KEY_MAINNET,
+            },
+            chainId: 1,
         },
         // NETWORKS FOR DEPLOYING
         mainnet: {
