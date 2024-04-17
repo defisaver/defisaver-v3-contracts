@@ -78,16 +78,10 @@ contract LlamaLendSelfLiquidate is ActionBase, LlamaLendHelper {
         
         uint256 collAssetBalancePreLiq = collateralAsset.getBalance(address(this));
         uint256 debtAssetBalancePreLiq = debtAsset.getBalance(address(this));
-        {
-            uint256 chainId;
-            assembly {
-                chainId := chainid()
-            }
-            if (chainId == 1) {
-                ILlamaLendController(_params.controllerAddress).liquidate(address(this), _params.minDebtAssetExpected, false);
-            } else {
-                ILlamaLendController(_params.controllerAddress).liquidate(address(this), _params.minDebtAssetExpected);
-            }
+        if (block.chainid == 1) {
+            ILlamaLendController(_params.controllerAddress).liquidate(address(this), _params.minDebtAssetExpected, false);
+        } else {
+            ILlamaLendController(_params.controllerAddress).liquidate(address(this), _params.minDebtAssetExpected);
         }
         uint256 collAssetBalanceAfterLiq = collateralAsset.getBalance(address(this));
 

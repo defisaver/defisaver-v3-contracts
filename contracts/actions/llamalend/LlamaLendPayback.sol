@@ -94,11 +94,7 @@ contract LlamaLendPayback is ActionBase, LlamaLendHelper {
             startingBaseCollBalance = collateralAsset.getBalance(address(this));
             startingDebtAssetBalanceWithoutDebt = debtAsset.getBalance(address(this)) - debt;
         }
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
-        if (chainId == 1) {
+        if (block.chainid == 1) {
             ILlamaLendController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false);
         } else {
             ILlamaLendController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand);
