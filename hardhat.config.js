@@ -73,6 +73,23 @@ module.exports = {
             name: 'mainnet',
         },
         hardhat: {
+            chains: {
+                42161: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+                10: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+                8453: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+            },
             forking: {
                 url: process.env.ETHEREUM_NODE,
                 timeout: 1000000,

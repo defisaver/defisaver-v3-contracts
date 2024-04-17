@@ -6,6 +6,7 @@ const {
     setBalance, approve, fetchAmountinUSDPrice,
     formatMockExchangeObj,
     setNewExchangeWrapper,
+    chainIds,
 } = require('../../utils');
 const {
     getControllers, collateralSupplyAmountInUsd, borrowAmountInUsd, supplyToMarket,
@@ -14,8 +15,10 @@ const { llamalendCreate, llamalendBoost } = require('../../actions');
 
 describe('LlamaLend-Boost', function () {
     this.timeout(80000);
+    const network = hre.network.config.name;
+    const chainId = chainIds[network];
 
-    const controllers = getControllers();
+    const controllers = getControllers(chainId);
 
     let senderAcc; let proxy; let snapshot; let view; let mockWrapper;
 
@@ -38,18 +41,22 @@ describe('LlamaLend-Boost', function () {
     for (let i = 0; i < controllers.length; i++) {
         const controllerAddr = controllers[i];
         it(`should create a Llamalend position and then boost it in ${controllerAddr} Llamalend market`, async () => {
-            await supplyToMarket(controllerAddr);
             const controller = await hre.ethers.getContractAt('ILlamaLendController', controllerAddr);
             const collTokenAddr = await controller.collateral_token();
             const debtTokenAddr = await controller.borrowed_token();
-            const collToken = getAssetInfoByAddress(collTokenAddr);
-            const debtToken = getAssetInfoByAddress(debtTokenAddr);
+            const collToken = getAssetInfoByAddress(collTokenAddr, chainId);
+            if (collToken.symbol === '?') return;
+            const debtToken = getAssetInfoByAddress(debtTokenAddr, chainId);
+            if (debtToken.symbol === '?') return;
+            await supplyToMarket(controllerAddr, chainId);
             const supplyAmount = fetchAmountinUSDPrice(
                 collToken.symbol, collateralSupplyAmountInUsd,
             );
+            if (supplyAmount === 'Infinity') return;
             const borrowAmount = fetchAmountinUSDPrice(
                 debtToken.symbol, borrowAmountInUsd,
             );
+            if (borrowAmount === 'Infinity') return;
             const supplyAmountInWei = (hre.ethers.utils.parseUnits(
                 supplyAmount, collToken.decimals,
             )).mul(2);

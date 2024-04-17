@@ -1081,7 +1081,7 @@
     },
     {
       "name": "LlamaLendSelfLiquidate",
-      "address": "0xc9fd91f932d903023e887e4e4af0a298e10529a8",
+      "address": "0xe63e836C3ab61481F60A9a56aA72d1D0c55Fc280",
       "id": "0xafcc4eb7",
       "path": "contracts/actions/llamalend/LlamaLendSelfLiquidate.sol",
       "version": "1.0.0",
@@ -1092,7 +1092,7 @@
     },
     {
       "name": "LlamaLendPayback",
-      "address": "0x21e05ffb9cf729630b5a9c2f01ff3b41f38be48c",
+      "address": "0xB2B93495dA2Fee8F92513fBBfA804564110B63ee",
       "id": "0x48ef1f07",
       "path": "contracts/actions/llamalend/LlamaLendPayback.sol",
       "version": "1.0.0",

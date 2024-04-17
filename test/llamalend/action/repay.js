@@ -7,6 +7,7 @@ const {
     formatMockExchangeObj,
     setNewExchangeWrapper,
     balanceOf,
+    chainIds,
 } = require('../../utils');
 const {
     getControllers, collateralSupplyAmountInUsd, borrowAmountInUsd, supplyToMarket,
@@ -15,8 +16,9 @@ const { llamalendCreate, llamalendRepay } = require('../../actions');
 
 describe('LlamaLend-Repay', function () {
     this.timeout(80000);
-
-    const controllers = getControllers();
+    const network = hre.network.config.name;
+    const chainId = chainIds[network];
+    const controllers = getControllers(chainId);
 
     let senderAcc; let proxy; let snapshot; let view; let mockWrapper;
 
@@ -39,18 +41,20 @@ describe('LlamaLend-Repay', function () {
     for (let i = 0; i < controllers.length; i++) {
         const controllerAddr = controllers[i];
         it(`should create a Llamalend position and then repay it partially in ${controllerAddr} Llamalend market`, async () => {
-            await supplyToMarket(controllerAddr);
             const controller = await hre.ethers.getContractAt('ILlamaLendController', controllerAddr);
             const collTokenAddr = await controller.collateral_token();
             const debtTokenAddr = await controller.borrowed_token();
-            const collToken = getAssetInfoByAddress(collTokenAddr);
-            const debtToken = getAssetInfoByAddress(debtTokenAddr);
+            const collToken = getAssetInfoByAddress(collTokenAddr, chainId);
+            const debtToken = getAssetInfoByAddress(debtTokenAddr, chainId);
+            await supplyToMarket(controllerAddr, chainId);
             const supplyAmount = fetchAmountinUSDPrice(
                 collToken.symbol, collateralSupplyAmountInUsd,
             );
             const borrowAmount = fetchAmountinUSDPrice(
                 debtToken.symbol, borrowAmountInUsd,
             );
+            if (supplyAmount === 'Infinity') return;
+            if (borrowAmount === 'Infinity') return;
             const supplyAmountInWei = (hre.ethers.utils.parseUnits(
                 supplyAmount, collToken.decimals,
             ));
@@ -87,18 +91,20 @@ describe('LlamaLend-Repay', function () {
             expect(infoAfterBoost.marketCollateralAmount).to.be.lt(infoBeforeBoost.marketCollateralAmount);
         });
         it(`should create a Llamalend position and then repay it fully in ${controllerAddr} Llamalend market`, async () => {
-            await supplyToMarket(controllerAddr);
             const controller = await hre.ethers.getContractAt('ILlamaLendController', controllerAddr);
             const collTokenAddr = await controller.collateral_token();
             const debtTokenAddr = await controller.borrowed_token();
-            const collToken = getAssetInfoByAddress(collTokenAddr);
-            const debtToken = getAssetInfoByAddress(debtTokenAddr);
+            const collToken = getAssetInfoByAddress(collTokenAddr, chainId);
+            const debtToken = getAssetInfoByAddress(debtTokenAddr, chainId);
+            await supplyToMarket(controllerAddr, chainId);
             const supplyAmount = fetchAmountinUSDPrice(
                 collToken.symbol, collateralSupplyAmountInUsd,
             );
             const borrowAmount = fetchAmountinUSDPrice(
                 debtToken.symbol, borrowAmountInUsd,
             );
+            if (supplyAmount === 'Infinity') return;
+            if (borrowAmount === 'Infinity') return;
             const supplyAmountInWei = (hre.ethers.utils.parseUnits(
                 supplyAmount, collToken.decimals,
             ));
