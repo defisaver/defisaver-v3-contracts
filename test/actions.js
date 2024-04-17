@@ -3180,6 +3180,97 @@ const llamalendCreate = async (
     return { receipt, approveObj };
 };
 
+const llamalendSelfLiquidateWithColl = async (
+    proxy,
+    controllerAddress,
+    controllerId,
+    percentage,
+    minCrvUsdExpected,
+    exData,
+    to,
+    sellAllCollateral,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendSelfLiquidateWithCollAction(
+        controllerAddress,
+        controllerId,
+        percentage,
+        minCrvUsdExpected,
+        exData,
+        to,
+        sellAllCollateral,
+        0,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendSelfLiquidateWithColl', functionData, proxy);
+
+    return { receipt };
+};
+
+const llamalendBoost = async (
+    proxy,
+    controllerAddress,
+    controllerId,
+    exData,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendBoostAction(
+        controllerAddress,
+        controllerId,
+        exData,
+        0,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendBoost', functionData, proxy);
+
+    return { receipt };
+};
+
+const llamalendRepay = async (
+    proxy,
+    controllerAddress,
+    controllerId,
+    exData,
+    to,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendRepayAction(
+        controllerAddress,
+        controllerId,
+        exData,
+        to,
+        0,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendRepay', functionData, proxy);
+
+    return { receipt };
+};
+
+const llamalendLevCreate = async (
+    proxy,
+    controllerAddress,
+    controllerId,
+    from,
+    collateralAmount,
+    exData,
+    nBands,
+) => {
+    const action = new dfs.actions.llamalend.LlamaLendLevCreateAction(
+        controllerAddress,
+        controllerId,
+        from,
+        collateralAmount,
+        nBands,
+        exData,
+        0,
+    );
+    const [approveObj] = await action.getAssetsToApprove();
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('LlamaLendLevCreate', functionData, proxy);
+
+    return { receipt, approveObj };
+};
+
 const llamalendSupply = async (
     proxy,
     controllerAddress,
@@ -3489,4 +3580,8 @@ module.exports = {
     llamalendSelfLiquidate,
     llamalendSupply,
     llamalendWithdraw,
+    llamalendLevCreate,
+    llamalendBoost,
+    llamalendRepay,
+    llamalendSelfLiquidateWithColl,
 };

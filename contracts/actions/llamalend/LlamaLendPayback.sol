@@ -73,7 +73,7 @@ contract LlamaLendPayback is ActionBase, LlamaLendHelper {
         /// @dev this also closes the position
         bool isClose;
         uint256 debt = ILlamaLendController(_params.controllerAddress).debt(_params.onBehalfOf);
-        
+
         if (_params.paybackAmount >= debt) {
             _params.paybackAmount = debt;
             isClose = true;
@@ -82,6 +82,7 @@ contract LlamaLendPayback is ActionBase, LlamaLendHelper {
         address debtAsset = ILlamaLendController(_params.controllerAddress).borrowed_token();
 
         _params.paybackAmount = debtAsset.pullTokensIfNeeded(_params.from, _params.paybackAmount);
+        
         debtAsset.approveToken(_params.controllerAddress, _params.paybackAmount);
 
         address collateralAsset = ILlamaLendController(_params.controllerAddress).collateral_token();
@@ -93,9 +94,11 @@ contract LlamaLendPayback is ActionBase, LlamaLendHelper {
             startingBaseCollBalance = collateralAsset.getBalance(address(this));
             startingDebtAssetBalanceWithoutDebt = debtAsset.getBalance(address(this)) - debt;
         }
-
-        ILlamaLendController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false);
-        
+        if (block.chainid == 1) {
+            ILlamaLendController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false);
+        } else {
+            ILlamaLendController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand);
+        }
         uint256 baseReceivedFromColl;
         uint256 debtAssetReceivedFromColl;
         if (isClose) {
