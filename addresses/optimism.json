@@ -972,7 +972,7 @@
     },
     {
       "name": "CompV3Claim",
-      "address": "0x673e831fffa32fb6c62def03fbfee7e3464ea486",
+      "address": "0xAD36437D50DB3C6c225564A4081acb354b55a5D6",
       "id": "0xf8470345",
       "path": "contracts/actions/compoundV3/CompV3Claim.sol",
       "version": "1.0.1",
@@ -1027,7 +1027,7 @@
     },
     {
     "name": "CompV3View",
-    "address": "0xe5456ec8a4cb1c07ca269d514be50c2b892245ef",
+    "address": "0x969d845618596787DBc64687Ee90b16931BBBCBC",
     "id": "0x16be4292",
     "path": "contracts/views/CompV3View.sol",
     "version": "1.0.0",
