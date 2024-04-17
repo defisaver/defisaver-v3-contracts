@@ -21,7 +21,7 @@ describe('LlamaLend-Lev-Create', function () {
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         await redeploy('LlamaLendLevCreate');
         await redeploy('LlamaLendSwapper');
         mockWrapper = await redeploy('MockExchangeWrapper');

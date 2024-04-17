@@ -21,7 +21,7 @@ describe('LlamaLend-Self-Liq-With-Coll', function () {
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         snapshot = await takeSnapshot();
         await redeploy('LlamaLendCreate');
         await redeploy('LlamaLendSelfLiquidateWithColl');
