@@ -947,5 +947,93 @@
       "changeTime": "0",
       "registryIds": [],
       "history": []
+    },
+    {
+      "name": "CompV3Allow",
+      "address": "0xec4937686022c6b83f0d914dde7a465b1108227e",
+      "id": "0xf2bccef8",
+      "path": "contracts/actions/compoundV3/CompV3Allow.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Borrow",
+      "address": "0x2cc1ec3c2b8734b4e57c0415a7641bbaba1d8c21",
+      "id": "0xbb9f4021",
+      "path": "contracts/actions/compoundV3/CompV3Borrow.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Claim",
+      "address": "0x673e831fffa32fb6c62def03fbfee7e3464ea486",
+      "id": "0xf8470345",
+      "path": "contracts/actions/compoundV3/CompV3Claim.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Payback",
+      "address": "0xdd15d90f92a4973b4c979e58b9e1eebbb4d1cc26",
+      "id": "0xdaa9b106",
+      "path": "contracts/actions/compoundV3/CompV3Payback.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Supply",
+      "address": "0xf4c3D99c43E1DB968CF92770DaE6d377697b0B81",
+      "id": "0x71643f58",
+      "path": "contracts/actions/compoundV3/CompV3Supply.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Transfer",
+      "address": "0x3e5af71709a9e591c5b25422a4419164bb5aba4b",
+      "id": "0xc7443570",
+      "path": "contracts/actions/compoundV3/CompV3Transfer.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Withdraw",
+      "address": "0x744ad24e92d092e0788d429f5178286672288782",
+      "id": "0xc0072381",
+      "path": "contracts/actions/compoundV3/CompV3Withdraw.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+    "name": "CompV3View",
+    "address": "0xe5456ec8a4cb1c07ca269d514be50c2b892245ef",
+    "id": "0x16be4292",
+    "path": "contracts/views/CompV3View.sol",
+    "version": "1.0.0",
+    "inRegistry": false,
+    "changeTime": 0,
+    "registryIds": [],
+    "history": []
     }
 ]
