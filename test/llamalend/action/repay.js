@@ -3,28 +3,33 @@ const { expect } = require('chai');
 const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const {
     takeSnapshot, revertToSnapshot, getProxy, redeploy,
-    setBalance, approve, fetchAmountinUSDPrice, nullAddress, balanceOf,
+    setBalance, approve, fetchAmountinUSDPrice,
+    formatMockExchangeObj,
+    setNewExchangeWrapper,
+    balanceOf,
     chainIds,
 } = require('../../utils');
 const {
-    getControllers, collateralSupplyAmountInUsd, borrowAmountInUsd, supplyToMarket, getActiveBand,
+    getControllers, collateralSupplyAmountInUsd, borrowAmountInUsd, supplyToMarket,
 } = require('../utils');
-const { llamalendCreate, llamalendPayback } = require('../../actions');
+const { llamalendCreate, llamalendRepay } = require('../../actions');
 
-describe('LlamaLend-Payback', function () {
+describe('LlamaLend-Repay', function () {
     this.timeout(80000);
     const network = hre.network.config.name;
     const chainId = chainIds[network];
     const controllers = getControllers(chainId);
 
-    let senderAcc; let proxy; let snapshot; let view;
+    let senderAcc; let proxy; let snapshot; let view; let mockWrapper;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-        snapshot = await takeSnapshot();
         await redeploy('LlamaLendCreate');
-        await redeploy('LlamaLendPayback');
+        await redeploy('LlamaLendRepay');
+        await redeploy('LlamaLendSwapper');
+        mockWrapper = await redeploy('MockExchangeWrapper');
+        await setNewExchangeWrapper(senderAcc, mockWrapper.address);
         view = await (await hre.ethers.getContractFactory('LlamaLendView')).deploy();
     });
     beforeEach(async () => {
@@ -35,7 +40,7 @@ describe('LlamaLend-Payback', function () {
     });
     for (let i = 0; i < controllers.length; i++) {
         const controllerAddr = controllers[i];
-        it(`should create and payback debt partially to a Llamalend position in ${controllerAddr} Llamalend market`, async () => {
+        it(`should create a Llamalend position and then repay it partially in ${controllerAddr} Llamalend market`, async () => {
             const controller = await hre.ethers.getContractAt('ILlamaLendController', controllerAddr);
             const collTokenAddr = await controller.collateral_token();
             const debtTokenAddr = await controller.borrowed_token();
@@ -50,36 +55,42 @@ describe('LlamaLend-Payback', function () {
             );
             if (supplyAmount === 'Infinity') return;
             if (borrowAmount === 'Infinity') return;
-            const supplyAmountInWei = hre.ethers.utils.parseUnits(
+            const supplyAmountInWei = (hre.ethers.utils.parseUnits(
                 supplyAmount, collToken.decimals,
-            );
+            ));
             const borrowAmountWei = hre.ethers.utils.parseUnits(
                 borrowAmount, debtToken.decimals,
             );
+
             await setBalance(collTokenAddr, senderAcc.address, supplyAmountInWei);
             await approve(collTokenAddr, proxy.address, senderAcc);
             await llamalendCreate(
                 proxy, controllerAddr, senderAcc.address, senderAcc.address,
                 supplyAmountInWei, borrowAmountWei, 10,
             );
-            const positionInfoBeforeSupply = await view.callStatic.userData(
-                controllerAddr, proxy.address,
+
+            const exchangeData = await formatMockExchangeObj(
+                collToken,
+                debtToken,
+                supplyAmountInWei.div(2),
             );
-            await setBalance(debtTokenAddr, senderAcc.address, borrowAmountWei.div(10));
-            await approve(debtTokenAddr, proxy.address, senderAcc);
-            console.log(await balanceOf(debtTokenAddr, senderAcc.address));
-            const maxActiveBand = await getActiveBand(controllerAddr);
-            // eslint-disable-next-line max-len
-            await llamalendPayback(proxy, controllerAddr, senderAcc.address, nullAddress, senderAcc.address, borrowAmountWei.div(10), maxActiveBand);
-            const positionInfoAfterSupply = await view.callStatic.userData(
-                controllerAddr, proxy.address,
+            const infoBeforeBoost = await view.callStatic.userData(controllerAddr, proxy.address);
+            console.log(infoBeforeBoost.collRatio / 1e18);
+            await llamalendRepay(
+                proxy,
+                controllerAddr,
+                i,
+                exchangeData,
+                senderAcc.address,
             );
-            console.log(positionInfoAfterSupply.collRatio / 1e18);
-            // here we expect that debt has risen maximally 0.001% from interest
+            const infoAfterBoost = await view.callStatic.userData(controllerAddr, proxy.address);
+            console.log(infoAfterBoost.collRatio / 1e18);
+            expect(infoAfterBoost.collRatio).to.be.gt(infoBeforeBoost.collRatio);
+            expect(infoAfterBoost.debtAmount).to.be.lt(infoBeforeBoost.debtAmount);
             // eslint-disable-next-line max-len
-            expect(positionInfoBeforeSupply.debtAmount.sub(positionInfoAfterSupply.debtAmount)).to.be.closeTo(borrowAmountWei.div(10), borrowAmountWei.div(1e5));
+            expect(infoAfterBoost.marketCollateralAmount).to.be.lt(infoBeforeBoost.marketCollateralAmount);
         });
-        it(`should create and payback debt fully to a Llamalend position in ${controllerAddr} Llamalend market`, async () => {
+        it(`should create a Llamalend position and then repay it fully in ${controllerAddr} Llamalend market`, async () => {
             const controller = await hre.ethers.getContractAt('ILlamaLendController', controllerAddr);
             const collTokenAddr = await controller.collateral_token();
             const debtTokenAddr = await controller.borrowed_token();
@@ -94,43 +105,45 @@ describe('LlamaLend-Payback', function () {
             );
             if (supplyAmount === 'Infinity') return;
             if (borrowAmount === 'Infinity') return;
-            const supplyAmountInWei = hre.ethers.utils.parseUnits(
+            const supplyAmountInWei = (hre.ethers.utils.parseUnits(
                 supplyAmount, collToken.decimals,
-            );
+            ));
             const borrowAmountWei = hre.ethers.utils.parseUnits(
                 borrowAmount, debtToken.decimals,
             );
+
             await setBalance(collTokenAddr, senderAcc.address, supplyAmountInWei);
             await approve(collTokenAddr, proxy.address, senderAcc);
             await llamalendCreate(
                 proxy, controllerAddr, senderAcc.address, senderAcc.address,
                 supplyAmountInWei, borrowAmountWei, 10,
             );
-            const positionInfoBeforeSupply = await view.callStatic.userData(
-                controllerAddr, proxy.address,
+            const exchangeData = await formatMockExchangeObj(
+                collToken,
+                debtToken,
+                supplyAmountInWei.mul('100').div('105'),
             );
-            await setBalance(debtTokenAddr, senderAcc.address, borrowAmountWei.mul(101).div(100));
-            await approve(debtTokenAddr, proxy.address, senderAcc);
-            const maxActiveBand = await getActiveBand(controllerAddr);
+            const infoBeforeBoost = await view.callStatic.userData(controllerAddr, proxy.address);
+            const collTokenBefore = await balanceOf(collToken.address, senderAcc.address);
+            const debtTokenBefore = await balanceOf(debtToken.address, senderAcc.address);
+            await llamalendRepay(
+                proxy,
+                controllerAddr,
+                i,
+                exchangeData,
+                senderAcc.address,
+            );
+            const collTokenAfter = await balanceOf(collToken.address, senderAcc.address);
+            const debtTokenAfter = await balanceOf(debtToken.address, senderAcc.address);
+            expect(collTokenAfter).to.be.gt(collTokenBefore);
+            expect(debtTokenAfter).to.be.gt(debtTokenBefore);
+            const infoAfterBoost = await view.callStatic.userData(controllerAddr, proxy.address);
+            console.log(infoAfterBoost.collRatio / 1e18);
+
+            expect(infoAfterBoost.collRatio).to.be.eq(0);
+            expect(infoAfterBoost.debtAmount).to.be.lt(infoBeforeBoost.debtAmount);
             // eslint-disable-next-line max-len
-            await llamalendPayback(proxy, controllerAddr, senderAcc.address, nullAddress, senderAcc.address, borrowAmountWei.mul(101).div(100), maxActiveBand);
-            const positionInfoAfterSupply = await view.callStatic.userData(
-                controllerAddr, proxy.address,
-            );
-            expect(positionInfoAfterSupply.collRatio).to.be.eq(0);
-            const proxyCollTokenBalanceAfterPayback = await balanceOf(collTokenAddr, proxy.address);
-            const proxyDebtTokenBalanceAfterPayback = await balanceOf(debtTokenAddr, proxy.address);
-            expect(proxyCollTokenBalanceAfterPayback).to.be.eq(0);
-            expect(proxyDebtTokenBalanceAfterPayback).to.be.eq(0);
-            const senderCollateralBalanceAfterMaxPayback = await balanceOf(
-                collTokenAddr, senderAcc.address,
-            );
-            expect(senderCollateralBalanceAfterMaxPayback).to.be.closeTo(supplyAmountInWei, 10);
-            const senderDebtTokenBalanceAfterMaxPayback = await balanceOf(
-                debtTokenAddr, senderAcc.address,
-            );
-            // eslint-disable-next-line max-len
-            expect(borrowAmountWei.mul(101).div(100).sub(positionInfoBeforeSupply.debtAmount)).to.be.closeTo(senderDebtTokenBalanceAfterMaxPayback, borrowAmountWei.div(1e5));
+            expect(infoAfterBoost.marketCollateralAmount).to.be.lt(infoBeforeBoost.marketCollateralAmount);
         });
     }
 });

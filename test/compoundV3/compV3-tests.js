@@ -46,6 +46,12 @@ const compAssets = {
             bAsset: 'USDC',
         },
     },
+    optimism: {
+        USDC_MARKET: {
+            collaterals: ['WETH', 'WBTC', 'OP'], // TODO: add GMX when defisaver/tokens is updated
+            bAsset: 'USDC',
+        },
+    },
 };
 const compMarkets = Object.keys(compAssets[network]);
 
@@ -84,7 +90,6 @@ const compV3SupplyTest = async () => {
                     const token = getAssetInfo(collName, chainId);
                     const fetchedAmountWithUSD = fetchAmountinUSDPrice(token.symbol, '10000');
                     const amount = hre.ethers.utils.parseUnits(fetchedAmountWithUSD, token.decimals);
-
                     const balanceBefore = await comet.collateralBalanceOf(proxy.address, token.address);
 
                     await supplyCompV3(addrs[network].COMET_USDC_ADDR, proxy, token.address, amount, senderAcc.address, proxy.address);

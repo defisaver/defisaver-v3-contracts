@@ -47,6 +47,7 @@ module.exports = {
             gasPrice: 170000000000,
             name: 'mainnet',
             chainId: 1,
+            hardfork: 'cancun',
         },
         localOptimism: {
             url: 'http://127.0.0.1:8545',
@@ -76,6 +77,23 @@ module.exports = {
             name: 'mainnet',
         },
         hardhat: {
+            chains: {
+                42161: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+                10: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+                8453: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+            },
             forking: {
                 url: process.env.ETHEREUM_NODE,
                 timeout: 1000000,
@@ -123,13 +141,27 @@ module.exports = {
         },
     },
     solidity: {
-        version: '0.8.10',
-        settings: {
-            optimizer: {
-                enabled: true,
-                runs: 1000,
+        compilers: [
+            {
+                version: '0.8.10',
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 1000,
+                    },
+                },
             },
-        },
+            {
+                version: '0.8.24',
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 1000,
+                    },
+                },
+            },
+        ],
+
     },
     paths: {
         sources: './contracts',

@@ -70,7 +70,7 @@ const addrs = {
         OWNER_ACC: '0xC9a956923bfb5F141F1cd4467126b3ae91E5CC33',
         WETH_ADDRESS: '0x4200000000000000000000000000000000000006',
         DAI_ADDRESS: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
-        USDC_ADDR: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+        USDC_ADDR: '0x0b2c639c533813f4aa9d7837caf62653d097ff85',
         EXCHANGE_OWNER_ADDR: '0xc9a956923bfb5f141f1cd4467126b3ae91e5cc33',
         WRAPPER_EXCHANGE_REGISTRY: '0x82b039Ca3c16E971132603f960a6E98582d8F021',
         PROXY_AUTH_ADDR: '0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043',
@@ -91,6 +91,8 @@ const addrs = {
         EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0x79586d55DECB755B9Bb436B2287eFf93025E549D',
         STRATEGY_STORAGE_ADDR: '0xDdDE69c3Fd246D9D62f9712c814b333728f113A4',
         BUNDLE_STORAGE_ADDR: '0xc98C5312829006b2D4bBd47162d49B1aa6C275Ab',
+        COMET_USDC_ADDR: '0x2e44e174f7D53F0212823acC11C01A11d58c5bCB',
+        COMET_USDC_REWARDS_ADDR: '0x443EA0340cb75a160F31A440722dec7b5bc3C2E9',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -333,6 +335,8 @@ const coinGeckoHelper = {
     sfrxETH: 'staked-frax-ether',
     tBTC: 'tbtc',
     crvUSD: 'crvusd',
+    sUSDe: 'ethena-staked-usde',
+    OP: 'optimism',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;
@@ -541,7 +545,7 @@ const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR)
     const registry = registryInstance.attach(regAddr);
 
     // TODO: Write in registry later
-   // if (name === 'SubProxy') {
+    // if (name === 'SubProxy') {
     //     return addrs[network].SubProxy;
     // }
     const addr = await registry.getAddr(
@@ -697,7 +701,7 @@ const approveContractInRegistry = async (name, regAddr = addrs[getNetwork()].REG
         if (parseInt(entryData.waitPeriod, 10) > 0) {
             await timeTravel(parseInt(entryData.waitPeriod, 10) + 10);
         }
-    
+
         await registry.approveContractChange(id, { gasLimit: 2000000 });
     } else {
         console.log(`Contract ${name} not in change`);
