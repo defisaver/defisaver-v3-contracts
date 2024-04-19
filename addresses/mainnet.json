@@ -917,6 +917,17 @@
         "history": []
     },
     {
+        "name": "PermitToken",
+        "address": "0x2654056046ed5E3f673FbcBC99A1BDB77F5c460B",
+        "id": "0x25a4d738",
+        "path": "contracts/actions/utils/PermitToken.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "SendToken",
         "address": "0x5c19aF6F5de91209c3bc2Ba447b1f5eb53c50759",
         "id": "0x02abc227",
@@ -1613,23 +1624,45 @@
     },
     {
         "name": "AaveV3Supply",
-        "address": "0x2d10281757ca0a716311A6C5eb456A098cD14Cd7",
+        "address": "0x91b3fCCEA2f2e0622Cc1fb54E12f5ac5aAa55a87",
         "id": "0xfc33bf00",
         "path": "contracts/actions/aaveV3/AaveV3Supply.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x2d10281757ca0a716311A6C5eb456A098cD14Cd7"]
+    },
+    {
+        "name": "SparkSupply",
+        "address": "0xcb4505a5ED92e405BF1F5cD7C791B15c4564AAe9",
+        "id": "0x92e0c47c",
+        "path": "contracts/actions/spark/SparkSupply.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x9e1d7AAA55D83D36d55BF11cAe4d922aF52B6eF0"]
+    },
+    {
+        "name": "AaveV3DelegateWithSig",
+        "address": "0x9253E22Ce4f0AeE541301CF8cC29843f9083a1F4",
+        "id": "0x641f5b73",
+        "path": "contracts/actions/aaveV3/AaveV3DelegateWithSig.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     },
     {
-        "name": "SparkSupply",
-        "address": "0x9e1d7AAA55D83D36d55BF11cAe4d922aF52B6eF0",
-        "id": "0x92e0c47c",
-        "path": "contracts/actions/spark/SparkSupply.sol",
+        "name": "SparkDelegateWithSig",
+        "address": "0xDaDC0a8B6359487257B91347064534c4B3fAc515",
+        "id": "0x58faf27f",
+        "path": "contracts/actions/spark/SparkDelegateWithSig.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "86400",
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     },

@@ -350,12 +350,23 @@
     },
     {
       "name": "AaveV3Supply",
-      "address": "0x741FcFC1D708CEA0d845Fd04de51022b6d00e060",
+      "address": "0x4Df428298a204E4881D95611320b30938CB3facd",
       "id": "0xfc33bf00",
       "path": "contracts/actions/aaveV3/AaveV3Supply.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
+      "registryIds": [],
+      "history": ["0x741FcFC1D708CEA0d845Fd04de51022b6d00e060"]
+    },
+    {
+      "name": "AaveV3DelegateWithSig",
+      "address": "0x9e295AFaC75E7843b88a563D119FD953EDf441c2",
+      "id": "0x641f5b73",
+      "path": "contracts/actions/aaveV3/AaveV3DelegateWithSig.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
       "registryIds": [],
       "history": []
     },
@@ -727,6 +738,17 @@
         "path": "contracts/utils/PriceFeedRegistry.sol",
         "version": "1.0.0",
         "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "PermitToken",
+        "address": "0x57c8ae94a5A11dA33e0518054102488b604628D0",
+        "id": "0x25a4d738",
+        "path": "contracts/actions/utils/PermitToken.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
         "history": []
