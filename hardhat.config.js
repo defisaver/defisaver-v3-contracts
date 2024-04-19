@@ -53,18 +53,21 @@ module.exports = {
             timeout: 1000000,
             gasPrice: 1883022292,
             name: 'optimism',
+            chainId: 10,
         },
         localArbitrum: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
             gasPrice: 1700000000,
             name: 'arbitrum',
+            chainId: 42161,
         },
         localBase: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
             gasPrice: 1700000000,
             name: 'base',
+            chainId: 8453,
         },
         fork: {
             url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
@@ -80,7 +83,7 @@ module.exports = {
                 // blockNumber: 12068716
             },
             name: 'mainnet',
-            chainId: 1,
+            chainId: 10,
         },
         // NETWORKS FOR DEPLOYING
         mainnet: {

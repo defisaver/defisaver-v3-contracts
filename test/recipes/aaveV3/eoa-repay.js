@@ -14,23 +14,25 @@ const { executeAction } = require('../../actions');
 
 describe('Aave-EOA-Repay', function () {
     const network = hre.network.config.name;
+    /// @dev when changing networks, you must change hardhat config file (networks.hardhat.chainId)
     this.timeout(150000);
-    let senderAcc; let proxy; let pool; let wethAddr; let daiAddr;
+    let senderAcc; let proxy; let pool; let wethAddr; let daiAddr; let chainId;
 
     before(async () => {
         console.log('NETWORK:', network);
         senderAcc = (await hre.ethers.getSigners())[0];
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, true);
+        chainId = chainIds[network];
         const mockWrapper = await redeploy('MockExchangeWrapper');
         await setNewExchangeWrapper(senderAcc, mockWrapper.address);
         await redeploy('PermitToken');
 
-        wethAddr = getAssetInfo('WETH', chainIds[network]).address;
-        daiAddr = getAssetInfo('DAI', chainIds[network]).address;
+        wethAddr = getAssetInfo('WETH', chainId).address;
+        daiAddr = getAssetInfo('DAI', chainId).address;
 
         const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
         const poolAddress = await aaveMarketContract.getPool();
-        const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
+        const poolContractName = 'IPoolV3';
         pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
 
         const collAmountInUSD = fetchAmountinUSDPrice('WETH', '100000');
@@ -53,16 +55,19 @@ describe('Aave-EOA-Repay', function () {
     });
 
     it('... should repay EOA position', async () => {
-        const aWETH = '0x4d5F47FA6A74757f35C14fD3a6Ef8E3C9BC514E8';
+        const aWETH = (await pool.getReserveData(wethAddr)).aTokenAddress;
+        const collAssetId = (await pool.getReserveData(wethAddr)).id;
+        const debtAssetId = (await pool.getReserveData(daiAddr)).id;
         const owner = senderAcc.address;
         const spender = proxy.address;
         const repayAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '20000'), 18);
         const aTokenContract = await hre.ethers.getContractAt('IAToken', aWETH);
         const nonce = await aTokenContract.nonces(senderAcc.address);
+        const name = await aTokenContract.name();
         const deadline = '1812843907';
         const exchangeData = await formatMockExchangeObj(
-            getAssetInfo('WETH'),
-            getAssetInfo('DAI'),
+            getAssetInfo('WETH', chainId),
+            getAssetInfo('DAI', chainId),
             repayAmount,
         );
         const signature = hre.ethers.utils.splitSignature(
@@ -70,9 +75,9 @@ describe('Aave-EOA-Repay', function () {
             // eslint-disable-next-line no-underscore-dangle
             await senderAcc._signTypedData(
                 {
-                    name: 'Aave Ethereum WETH', // aToken.name
+                    name, // aToken.name
                     version: '1', // aToken.ATOKEN_REVISION
-                    chainId: 1,
+                    chainId,
                     verifyingContract: aWETH,
                 },
                 {
@@ -101,13 +106,13 @@ describe('Aave-EOA-Repay', function () {
             aWETH, senderAcc.address, repayAmount,
         );
         const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-            true, nullAddress, repayAmount, proxy.address, 0,
+            true, nullAddress, repayAmount, proxy.address, collAssetId,
         );
         const sellAction = new dfs.actions.basic.SellAction(
             exchangeData, proxy.address, proxy.address,
         );
         const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-            true, nullAddress, '$4', proxy.address, 2, daiAddr, 4, true, senderAcc.address,
+            true, nullAddress, '$4', proxy.address, 2, daiAddr, debtAssetId, true, senderAcc.address,
         );
 
         const recipe = new dfs.Recipe('AaveV3EOARepay',

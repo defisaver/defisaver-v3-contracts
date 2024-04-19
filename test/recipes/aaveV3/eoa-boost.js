@@ -14,24 +14,25 @@ const { executeAction } = require('../../actions');
 
 describe('Aave-EOA-Boost', function () {
     const network = hre.network.config.name;
+    /// @dev when changing networks, you must change hardhat config file (networks.hardhat.chainId)
     this.timeout(150000);
-    let senderAcc; let proxy; let pool; let wethAddr; let daiAddr;
-
+    let senderAcc; let proxy; let pool; let wethAddr; let daiAddr; let chainId;
     before(async () => {
         console.log('NETWORK:', network);
         senderAcc = (await hre.ethers.getSigners())[0];
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, true);
         const mockWrapper = await redeploy('MockExchangeWrapper');
+        chainId = chainIds[network];
         await setNewExchangeWrapper(senderAcc, mockWrapper.address);
         await redeploy('AaveV3DelegateWithSig');
         await redeploy('AaveV3Supply');
 
-        wethAddr = getAssetInfo('WETH', chainIds[network]).address;
-        daiAddr = getAssetInfo('DAI', chainIds[network]).address;
+        wethAddr = getAssetInfo('WETH', chainId).address;
+        daiAddr = getAssetInfo('DAI', chainId).address;
 
         const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
         const poolAddress = await aaveMarketContract.getPool();
-        const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
+        const poolContractName = 'IPoolV3';
         pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
 
         const collAmountInUSD = fetchAmountinUSDPrice('WETH', '100000');
@@ -47,6 +48,7 @@ describe('Aave-EOA-Boost', function () {
             wethAddr, senderAcc.address, supplyAmountInWei,
         );
         await approve(wethAddr, poolAddress, senderAcc);
+        console.log(pool.address);
         await pool.supply(wethAddr, supplyAmountInWei, senderAcc.address, 0);
         await pool.borrow(daiAddr, borrowAmountWei, 2, 0, senderAcc.address);
         console.log('We\'ve supplied 100k$ of WETH');
@@ -54,16 +56,19 @@ describe('Aave-EOA-Boost', function () {
     });
 
     it('... should boost EOA position', async () => {
-        const daiVariableDebtToken = '0xcF8d0c70c850859266f5C338b38F9D663181C314';
+        const daiVariableDebtToken = (await pool.getReserveData(daiAddr)).variableDebtTokenAddress;
+        const collAssetId = (await pool.getReserveData(wethAddr)).id;
+        const debtAssetId = (await pool.getReserveData(daiAddr)).id;
         const delegator = senderAcc.address;
         const delegatee = proxy.address;
         const boostAmount = hre.ethers.utils.parseUnits('20000', 18);
         const debtTokenContract = await hre.ethers.getContractAt('IDebtToken', daiVariableDebtToken);
+        const name = await debtTokenContract.name();
         const nonce = await debtTokenContract.nonces(delegator);
         const deadline = '1812843907';
         const exchangeData = await formatMockExchangeObj(
-            getAssetInfo('DAI'),
-            getAssetInfo('WETH'),
+            getAssetInfo('DAI', chainId),
+            getAssetInfo('WETH', chainId),
             boostAmount,
         );
         const signature = hre.ethers.utils.splitSignature(
@@ -71,9 +76,9 @@ describe('Aave-EOA-Boost', function () {
             // eslint-disable-next-line no-underscore-dangle
             await senderAcc._signTypedData(
                 {
-                    name: 'Aave Ethereum Variable Debt DAI', // debtToken.name
+                    name, // debtToken.name
                     version: '1', // debtToken.DEBT_TOKEN_REVISION
-                    chainId: 1,
+                    chainId,
                     verifyingContract: daiVariableDebtToken,
                 },
                 {
@@ -98,13 +103,13 @@ describe('Aave-EOA-Boost', function () {
             boostAmount, deadline, signature.v, signature.r, signature.s,
         );
         const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-            true, nullAddress, boostAmount, proxy.address, 2, 4, true, senderAcc.address,
+            true, nullAddress, boostAmount, proxy.address, 2, debtAssetId, true, senderAcc.address,
         );
         const sellAction = new dfs.actions.basic.SellAction(
             exchangeData, proxy.address, proxy.address,
         );
         const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-            true, nullAddress, '$3', proxy.address, wethAddr, 0, true, true, senderAcc.address,
+            true, nullAddress, '$3', proxy.address, wethAddr, collAssetId, false, true, senderAcc.address,
         );
 
         const recipe = new dfs.Recipe('AaveV3EOABoost',
