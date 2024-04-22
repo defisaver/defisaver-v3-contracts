@@ -66,4 +66,11 @@ contract StrategyModel {
         bytes[] triggerData;
         bytes32[] subData;
     }
+
+    struct TxRelayUserSignedData {
+        uint256 additionalGasUsed;
+        uint256 maxGasPrice;
+        uint256 maxTxCostInFeeToken;
+        address feeToken;
+    }
 }

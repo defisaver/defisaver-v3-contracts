@@ -2,18 +2,6 @@
 
 pragma solidity =0.8.10;
 
-import "../auth/DSProxyPermission.sol";
-import "../actions/ActionBase.sol";
-import "../core/DFSRegistry.sol";
-import "../utils/CheckWalletType.sol";
-import "./strategy/StrategyModel.sol";
-import "./strategy/StrategyStorage.sol";
-import "./strategy/BundleStorage.sol";
-import "./strategy/SubStorage.sol";
-import "../interfaces/flashloan/IFlashLoanBase.sol";
-import "../interfaces/ITrigger.sol";
-import "../auth/SafeModulePermission.sol";
-
 /**
 * @title Entry point into executing recipes/checking triggers directly and as part of a strategy
 * @dev RecipeExecutor can be used in two scenarios:
@@ -105,21 +93,108 @@ import "../auth/SafeModulePermission.sol";
 *
 *
 */
-contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermission, AdminAuth, CoreHelper, CheckWalletType {
+
+import { DSProxyPermission } from "../auth/DSProxyPermission.sol";
+import { SafeModulePermission } from "../auth/SafeModulePermission.sol";
+import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { ActionBase } from "../actions/ActionBase.sol";
+import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { StrategyModel } from "../core/strategy/StrategyModel.sol";
+import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
+import { BundleStorage } from "../core/strategy/BundleStorage.sol";
+import { SubStorage } from "../core/strategy/SubStorage.sol";
+import { FeeRecipient } from "../utils/FeeRecipient.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { CoreHelper } from "../core/helpers/CoreHelper.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { GasFeeHelper } from "../actions/fee/helpers/GasFeeHelper.sol";
+import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
+
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
+import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { IBytesTransientStorage } from "../interfaces/IBytesTransientStorage.sol";
+
+import { console } from "hardhat/console.sol";
+
+contract RecipeExecutor is 
+    StrategyModel,
+    DSProxyPermission,
+    SafeModulePermission,
+    AdminAuth,
+    CoreHelper,
+    GasFeeHelper,
+    CheckWalletType
+{
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+
+    // remove hardcoded address later
+    IBytesTransientStorage public constant transientStorage = IBytesTransientStorage(0xB3FE6f712c8B8c64CD2780ce714A36e7640DDf0f);
 
     /// @dev Function sig of ActionBase.executeAction()
     bytes4 public constant EXECUTE_ACTION_SELECTOR = 
         bytes4(keccak256("executeAction(bytes,bytes32[],uint8[],bytes32[])"));
 
+    using TokenUtils for address;
+
     /// For strategy execution all triggers must be active
     error TriggerNotActiveError(uint256);
+
+    /// For tx relay, total gas cost fee taken from user can't be higher than maxTxCost set by user
+    error TxCostInFeeTokenTooHighError(uint256 maxTxCost, uint256 txCost);
 
     /// @notice Called directly through user wallet to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
     /// @param _currRecipe Recipe to be executed
     function executeRecipe(Recipe calldata _currRecipe) public payable {
         _executeActions(_currRecipe);
+    }
+
+    /// @notice Called by tx relay
+    function executeRecipeFromTxRelay(
+        Recipe calldata _currRecipe,
+        TxRelayUserSignedData calldata _txRelayData
+    ) public payable {
+        /// @dev include missing gas from safe singleton to recipe executor
+        uint256 totalGasLostBecauseOfEIP150 = gasleft() / 64 + 2500;
+
+        (uint256 gasStart, uint256 gasLost) = abi.decode(
+            transientStorage.getBytesTransiently(), (uint256, uint256)
+        );
+        console.log("Gas start: %d", gasStart);
+        console.log("Gas missing: %d", gasLost);
+
+        totalGasLostBecauseOfEIP150 += gasLost;
+
+        _executeActions(_currRecipe);
+
+        address[] memory owners = ISafe(address(this)).getOwners();
+
+        uint256 gasUsed = gasStart - (gasleft() + totalGasLostBecauseOfEIP150);
+
+        uint256 gs = gasleft();
+        console.log("**********************Gas used: %s", gasUsed);
+        console.log("**********************Total gas estimated: %s", gasUsed + _txRelayData.additionalGasUsed);
+        uint256 gasCost = calcGasCost(
+            gasUsed,
+            _txRelayData.feeToken,
+            _txRelayData.additionalGasUsed * tx.gasprice
+        );
+        console.log("**********************Gas cost: %s", gasCost);
+
+        if (gasCost > _txRelayData.maxTxCostInFeeToken) {
+            revert TxCostInFeeTokenTooHighError(_txRelayData.maxTxCostInFeeToken, gasCost);
+        }
+
+        // if 1/1 wallet, pull tokens from eoa to wallet
+        if (owners.length == 1) {
+            _txRelayData.feeToken.pullTokensIfNeeded(owners[0], gasCost);
+        }
+
+        // send tokens from wallet to fee recipient
+        _txRelayData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), gasCost);
+        gs = gs - gasleft();
+        console.log("******* Gas cost for fee taking: %d", gs);
     }
 
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers
