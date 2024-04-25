@@ -228,6 +228,17 @@
       "history": []
     },
     {
+      "name": "ApproveToken",
+      "address": "0x24cb522be664b2a1ab9d37df7a3bded887566e18",
+      "id": "0xbb8027f4",
+      "path": "contracts/actions/utils/ApproveToken.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "FLAaveV3",
       "address": "0x04ce4b2a9F524d976a8eD8a49B9313C5a2C3ccAD",
       "id": "0x8d7fb192",

@@ -155,6 +155,17 @@
       ]
     },
     {
+      "name": "ApproveToken",
+      "address": "0x842a81d2cfe26d401CD63Cc14e9DEf275c197C1a",
+      "id": "0xbb8027f4",
+      "path": "contracts/actions/utils/ApproveToken.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "Discount",
         "address": "0xc526725F694552382e724013d2F8b8DaAAdB5653",
         "id": "0x88f9bc1a",
