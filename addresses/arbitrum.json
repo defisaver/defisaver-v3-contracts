@@ -1203,14 +1203,14 @@
     },
     {
       "name": "LlamaLendSelfLiquidateWithColl",
-      "address": "0x4faef2cd1680ea00f9398a0525c536b2466a887b",
+      "address": "0xebf090e5e83f4cd63d84db013ac8271761a953cf",
       "id": "0x74ba5125",
       "path": "contracts/actions/llamalend/advanced/LlamaLendSelfLiquidateWithColl.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
-      "history": []
+      "history": ["0x4faef2cd1680ea00f9398a0525c536b2466a887b"]
     },
     {
       "name": "LlamaLendSwapper",
