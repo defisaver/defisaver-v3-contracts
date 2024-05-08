@@ -158,11 +158,12 @@ contract RecipeExecutor is
         /// @dev include missing gas from safe singleton to recipe executor
         uint256 totalGasLostBecauseOfEIP150 = gasleft() / 64 + 2500;
 
-        (uint256 gasStart, uint256 gasLost) = abi.decode(
-            transientStorage.getBytesTransiently(), (uint256, uint256)
+        (uint256 gasStart, uint256 gasLost, uint256 additionalGasUsed) = abi.decode(
+            transientStorage.getBytesTransiently(), (uint256, uint256, uint256)
         );
         console.log("Gas start: %d", gasStart);
         console.log("Gas missing: %d", gasLost);
+        console.log("Additional gas used: %d", additionalGasUsed);
 
         totalGasLostBecauseOfEIP150 += gasLost;
 
@@ -174,11 +175,11 @@ contract RecipeExecutor is
 
         uint256 gs = gasleft();
         console.log("**********************Gas used: %s", gasUsed);
-        console.log("**********************Total gas estimated: %s", gasUsed + _txRelayData.additionalGasUsed);
+        console.log("**********************Total gas estimated: %s", gasUsed + additionalGasUsed);
         uint256 gasCost = calcGasCost(
             gasUsed,
             _txRelayData.feeToken,
-            _txRelayData.additionalGasUsed * tx.gasprice
+            additionalGasUsed * tx.gasprice
         );
         console.log("**********************Gas cost: %s", gasCost);
 

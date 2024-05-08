@@ -9,9 +9,7 @@ const { Wallet, BigNumber } = require('ethers');
 const {
     addrs,
     redeploy,
-    impersonateAccount,
     getOwnerAddr,
-    stopImpersonatingAccount,
     setBalance,
     approve,
     nullAddress,
@@ -25,7 +23,6 @@ const {
     WBTC_ADDR,
     LUSD_ADDR,
 } = require('../utils');
-const { addBotCaller } = require('../utils-strategies');
 const {
     signSafeTx,
     predictSafeAddress,
@@ -33,6 +30,7 @@ const {
     deploySafe,
 } = require('../utils-safe');
 const { topUp } = require('../../scripts/utils/fork');
+const { addBotCallerForTxRelay, addInitialFeeTokens, determineAdditionalGasUsedInTxRelay } = require('../utils-tx-relay');
 
 describe('Tx Relay - test using funds from EOA', function () {
     this.timeout(80000);
@@ -46,24 +44,6 @@ describe('Tx Relay - test using funds from EOA', function () {
     let isFork;
     let snapshotId;
     const network = 'mainnet';
-
-    const addInitialFeeTokens = async () => {
-        if (!isFork) {
-            await impersonateAccount(getOwnerAddr());
-        }
-
-        const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-
-        await supportedFeeTokensRegistry.connect(signer).add(addrs[network].DAI_ADDRESS);
-
-        await supportedFeeTokensRegistry.connect(signer).add(addrs[network].USDC_ADDR);
-
-        await supportedFeeTokensRegistry.connect(signer).add(addrs[network].WETH_ADDRESS);
-
-        if (!isFork) {
-            await stopImpersonatingAccount(getOwnerAddr());
-        }
-    };
 
     beforeEach(async () => {
         snapshotId = await takeSnapshot();
@@ -89,7 +69,6 @@ describe('Tx Relay - test using funds from EOA', function () {
 
         [, botAcc] = await hre.ethers.getSigners();
 
-        // @dev PREDICT SAFE ADDRESS so we can hardcode signature for tenderly fork latter;
         const setupData = [
             [senderAcc.address], // owner
             1, // threshold
@@ -121,7 +100,7 @@ describe('Tx Relay - test using funds from EOA', function () {
 
         aavePool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
 
-        await redeploy('BotAuth', addrs[network].REGISTRY_ADDR, false, isFork);
+        await redeploy('BotAuthForTxRelay', addrs[network].REGISTRY_ADDR, false, isFork);
         await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
         await redeploy('AaveV3Supply', addrs[network].REGISTRY_ADDR, false, isFork);
         await redeploy('AaveV3Borrow', addrs[network].REGISTRY_ADDR, false, isFork);
@@ -132,38 +111,9 @@ describe('Tx Relay - test using funds from EOA', function () {
 
         txRelayExecutor = await redeploy('TxRelayExecutor', addrs[network].REGISTRY_ADDR, false, isFork, supportedFeeTokensRegistry.address);
 
-        await addBotCaller(botAcc.address, addrs[network].REGISTRY_ADDR, isFork);
-
+        await addBotCallerForTxRelay(botAcc.address, isFork);
         await addInitialFeeTokens(isFork);
     });
-
-    // include gas used for calculating and sending fee, hardcode it like this for now
-    // adjust values based on fee token and if we are pulling tokens from EOA or smart wallet
-    // this values will be singed from UI as they are packed into safe signature
-    const determineAdditionalGasUsed = (feeToken, pullingFromEoa) => {
-        if (pullingFromEoa) {
-            if (feeToken === addrs[network].USDC_ADDR) {
-                return 64300;
-            }
-            if (feeToken === addrs[network].DAI_ADDRESS) {
-                return 53623;
-            }
-            if (feeToken === addrs[network].WETH_ADDRESS) {
-                return 10000;
-            }
-        } else {
-            if (feeToken === addrs[network].USDC_ADDR) {
-                return 63000;
-            }
-            if (feeToken === addrs[network].DAI_ADDRESS) {
-                return 53000;
-            }
-            if (feeToken === addrs[network].WETH_ADDRESS) {
-                return 9300;
-            }
-        }
-        return 0;
-    };
 
     // example of function data we want to execute
     const openAavePositionExampleFunctionData = async (txRelayUserSignedData) => {
@@ -205,7 +155,10 @@ describe('Tx Relay - test using funds from EOA', function () {
 
         const recipe = new dfs.Recipe('AaveV3OpenRecipe-Test', [supplyAction, borrowAction]);
 
-        return recipe.encodeForTxRelayCall(txRelayUserSignedData)[1];
+        if (txRelayUserSignedData) {
+            return recipe.encodeForTxRelayCall(txRelayUserSignedData)[1];
+        }
+        return recipe.encodeForDsProxyCall()[1];
     };
 
     const signSafeTransaction = async (functionData) => {
@@ -231,7 +184,6 @@ describe('Tx Relay - test using funds from EOA', function () {
             return hre.ethers.utils.arrayify(sig);
         }
         const signature = await signSafeTx(proxy, safeTxParamsForSign, senderAcc);
-        console.log('signature', signature);
         return signature;
     };
 
@@ -242,7 +194,6 @@ describe('Tx Relay - test using funds from EOA', function () {
         await setBalance(fee_token, senderAcc.address, hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals));
         await approve(fee_token, proxy.address, senderAcc);
         const txRelayUserSignedData = {
-            additionalGasUsed: determineAdditionalGasUsed(fee_token, true),
             maxGasPrice: 200 * 10e9, // in wei
             maxTxCostInFeeToken: hre.ethers.utils.parseUnits('50', feeTokenAsset.decimals),
             feeToken: fee_token,
@@ -271,13 +222,20 @@ describe('Tx Relay - test using funds from EOA', function () {
 
         // *************************** EXECUTION **************************************************************
         const txRelayExecutorByBot = txRelayExecutor.connect(botAcc);
-        const callData = txRelayExecutorByBot.interface.encodeFunctionData('executeTxUsingFeeTokens', [
+        const additionalGasUsed = determineAdditionalGasUsedInTxRelay(fee_token, true);
+
+        const callData = txRelayExecutorByBot.interface.encodeFunctionData('executeTxTakingFeeFromEoaOrWallet', [
             txParams,
+            additionalGasUsed
         ]);
 
-        const receipt = await txRelayExecutorByBot.executeTxUsingFeeTokens(txParams, {
-            gasLimit: 8000000,
-        });
+        const receipt = await txRelayExecutorByBot.executeTxTakingFeeFromEoaOrWallet(
+            txParams,
+            additionalGasUsed,
+            {
+                gasLimit: 8000000,
+            },
+        );
 
         const gasUsed = await getGasUsed(receipt);
         const dollarPrice = calcGasToUSD(gasUsed, 0, callData);
@@ -305,5 +263,31 @@ describe('Tx Relay - test using funds from EOA', function () {
         expect(feeTaken).to.be.gt(BigNumber.from('0'));
         expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(feeTaken);
         expect(txRelayFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
+    });
+
+    it('Test executing tx without FEE', async () => {
+        const functionData = await openAavePositionExampleFunctionData();
+        const signature = await signSafeTransaction(functionData);
+        const txParams = {
+            value: 0,
+            safe: proxy.address,
+            data: functionData,
+            signatures: signature,
+        };
+        const txRelayExecutorByBot = txRelayExecutor.connect(botAcc);
+        const callData = txRelayExecutorByBot.interface.encodeFunctionData('executeTxWithoutFee', [
+            txParams,
+        ]);
+
+        const receipt = await txRelayExecutorByBot.executeTxWithoutFee(txParams, {
+            gasLimit: 8000000,
+            gasPrice: 100,
+        });
+
+        const gasUsed = await getGasUsed(receipt);
+        const dollarPrice = calcGasToUSD(gasUsed, 0, callData);
+        console.log(
+            `GasUsed txRelayExecutor: ${gasUsed}, price at mainnet ${addrs.mainnet.AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        );
     });
 });

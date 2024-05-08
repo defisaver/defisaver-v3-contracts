@@ -68,7 +68,6 @@ contract StrategyModel {
     }
 
     struct TxRelayUserSignedData {
-        uint256 additionalGasUsed;
         uint256 maxGasPrice;
         uint256 maxTxCostInFeeToken;
         address feeToken;
