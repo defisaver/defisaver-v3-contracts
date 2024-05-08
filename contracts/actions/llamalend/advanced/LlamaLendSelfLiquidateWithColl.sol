@@ -78,10 +78,14 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
         address debtToken = ILlamaLendController(_params.controllerAddress).borrowed_token();
         uint256 collStartingBalance = collToken.getBalance(address(this));
         uint256 debtStartingBalance = debtToken.getBalance(address(this));
-
-        ILlamaLendController(_params.controllerAddress)
+        if (block.chainid == 1) {
+            ILlamaLendController(_params.controllerAddress)
             .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, false, llamalendSwapper, info);
-
+        } else {
+            ILlamaLendController(_params.controllerAddress)
+            .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, llamalendSwapper, info);
+        }
+        
         // there shouldn't be any funds left on swapper contract but withdrawing it just in case
         LlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
 
