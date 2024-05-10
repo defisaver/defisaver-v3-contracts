@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../auth/AdminAuth.sol";
-import "../../auth/Permission.sol";
-import "../../core/strategy/SubStorage.sol";
-import "../../interfaces/ISubscriptions.sol";
-import "../../utils/helpers/UtilHelper.sol";
-import "../../utils/CheckWalletType.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { Permission } from "../../auth/Permission.sol";
+import { SubStorage } from "../../core/strategy/SubStorage.sol";
+import { ISubscriptions } from "../../interfaces/ISubscriptions.sol";
+import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
+import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
+import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies for Maker
 contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHelper, CheckWalletType {

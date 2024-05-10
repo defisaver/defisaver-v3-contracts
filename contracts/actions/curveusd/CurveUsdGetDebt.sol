@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../interfaces/curveusd/ICurveUsd.sol";
-
+import { ActionBase } from "../ActionBase.sol";
+import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
 
 /// @title Action that returns users crvusd debt on a given market
 contract CurveUsdGetDebt is ActionBase {

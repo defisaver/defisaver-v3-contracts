@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../auth/AdminAuth.sol";
-import "../../auth/Permission.sol";
-import "../../core/strategy/SubStorage.sol";
-import "../../utils/CheckWalletType.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { Permission } from "../../auth/Permission.sol";
+import { SubStorage } from "../../core/strategy/SubStorage.sol";
+import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
+import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Contract that subscribes users to Aave V2 automation bundles
 contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
@@ -161,6 +163,5 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Check
         boostSub.subData[1] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
         boostSub.subData[2] = bytes32(uint256(0)); // ratioState = boost
         boostSub.subData[3] = bytes32(uint256(1)); // enableAsColl = true
-
     }
 }

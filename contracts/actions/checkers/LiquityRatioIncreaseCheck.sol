@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../liquity/helpers/LiquityRatioHelper.sol";
-import "../../utils/TransientStorage.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { LiquityRatioHelper } from "../liquity/helpers/LiquityRatioHelper.sol";
+import { TransientStorage } from "../../utils/TransientStorage.sol";
 
 contract LiquityRatioIncreaseCheck is ActionBase, LiquityRatioHelper {
 

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../ActionBase.sol";
-import "../../../core/strategy/SubStorage.sol";
-import "../../../core/strategy/StrategyModel.sol";
-import "../../../actions/liquity/helpers/CBHelper.sol";
+import { ActionBase } from "../../ActionBase.sol";
+import { SubStorage } from "../../../core/strategy/SubStorage.sol";
+import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
+import { CBHelper } from "../../../actions/liquity/helpers/CBHelper.sol";
 
 /// @title Special action to update rebond strategy data (Only use in that context)
 contract CBUpdateRebondSub is ActionBase, CBHelper {

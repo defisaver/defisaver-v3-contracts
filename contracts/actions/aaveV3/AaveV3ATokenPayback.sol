@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/AaveV3Helper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
+import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
 
 /// @title Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
 contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {

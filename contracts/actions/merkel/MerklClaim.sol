@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./helpers/MerklHelper.sol";
-import "../ActionBase.sol";
-import "../../utils/TokenUtils.sol";
+import { MerklHelper } from "./helpers/MerklHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 /// @title Claims Merkl rewards
 /// @notice You can claim Merkl rewards for anyone, but distinctTokens array should be empty in that case

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/IWETH.sol";
-import "./SafeERC20.sol";
+import { IWETH } from "../interfaces/IWETH.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { SafeERC20 } from "./SafeERC20.sol";
 
 library TokenUtils {
     using SafeERC20 for IERC20;

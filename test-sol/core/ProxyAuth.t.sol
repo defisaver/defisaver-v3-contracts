@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import { ProxyAuth } from "../../contracts/core/strategy/ProxyAuth.sol";
 import { DSProxyPermission } from "../../contracts/auth/DSProxyPermission.sol";

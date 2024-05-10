@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/ITrigger.sol";
-import "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import "../auth/AdminAuth.sol";
-import "../DS/DSMath.sol";
-import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { DSMath } from "../DS/DSMath.sol";
+import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
 contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper {

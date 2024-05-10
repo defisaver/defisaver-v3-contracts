@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract BaseAaveV3Addresses {
     address internal constant AAVE_REWARDS_CONTROLLER_ADDRESS = 0xf9cc4F0D883F1a1eb2c253bdb46c254Ca51E1F44;

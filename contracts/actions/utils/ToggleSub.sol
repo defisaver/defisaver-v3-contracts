@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../core/strategy/SubStorage.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SubStorage } from "../../core/strategy/SubStorage.sol";
 
 /// @title ToggleSub - Sets the state of the sub to active or deactivated
 /// @dev User can only disable/enable his own subscriptions

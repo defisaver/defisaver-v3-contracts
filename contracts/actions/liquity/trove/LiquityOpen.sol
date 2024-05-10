@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../helpers/LiquityHelper.sol";
-import "../../../utils/TokenUtils.sol";
-import "../../ActionBase.sol";
+import { LiquityHelper } from "../helpers/LiquityHelper.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { ActionBase } from "../../ActionBase.sol";
 
 contract LiquityOpen is ActionBase, LiquityHelper {
     using TokenUtils for address;

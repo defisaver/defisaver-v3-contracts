@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
 
 /// @title Contract used to check if a DFS user is exempt from paying a service fee
 contract Discount is AdminAuth{

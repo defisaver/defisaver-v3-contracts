@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../auth/AdminAuth.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
 
 /// @title TokenGroupRegistry - Keeps track of tokens that are in a same group for diff. fee models
 contract TokenGroupRegistry is AdminAuth {

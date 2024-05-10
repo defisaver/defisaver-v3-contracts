@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract MainnetCoreAddresses {
     address internal constant REGISTRY_ADDR = 0x287778F121F134C66212FB16c9b53eC991D32f5b;
@@ -13,4 +13,6 @@ contract MainnetCoreAddresses {
     address internal constant STRATEGY_STORAGE_ADDR = 0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933;
 
     address internal constant RECIPE_EXECUTOR_ADDR = 0x5029336642814bC51a42bA80BF83a6322110035D;
+    address internal constant BYTES_TRANSIENT_STORAGE = 0xB3FE6f712c8B8c64CD2780ce714A36e7640DDf0f;
+    address internal constant TX_RELAY_BYTES_TRANSIENT_STORAGE = 0xB3FE6f712c8B8c64CD2780ce714A36e7640DDf0f;
 }

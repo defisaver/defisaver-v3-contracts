@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "./helpers/SubscriptionsMainnetAddresses.sol";
-import "../../interfaces/ISubscriptions.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SubscriptionsMainnetAddresses } from "./helpers/SubscriptionsMainnetAddresses.sol";
+import { ISubscriptions } from "../../interfaces/ISubscriptions.sol";
 
 contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 library Const {
     address constant OWNER_ACC = 0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00;

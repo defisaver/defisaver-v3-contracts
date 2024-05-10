@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
 
 /// @title Stores all the important DFS addresses and can be changed (timelock)
 contract DFSRegistry is AdminAuth {

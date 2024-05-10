@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/IERC20.sol";
-import "../../interfaces/kyber/IAggregationExecutorOptimistic.sol";
-import "../../interfaces/kyber/IMetaAggregationRouterV2.sol";
+import { IERC20 } from "../../interfaces/IERC20.sol";
+import { IAggregationExecutorOptimistic } from "../../interfaces/kyber/IAggregationExecutorOptimistic.sol";
+import { IMetaAggregationRouterV2 } from "../../interfaces/kyber/IMetaAggregationRouterV2.sol";
 
 library Common {
   using CalldataReader for bytes;

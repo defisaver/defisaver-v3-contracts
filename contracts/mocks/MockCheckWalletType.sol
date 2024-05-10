@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../utils/CheckWalletType.sol";
+import { CheckWalletType } from "../utils/CheckWalletType.sol";
 
 contract MockCheckWalletType {
 

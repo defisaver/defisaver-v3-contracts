@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../actions/mcd/helpers/McdRatioHelper.sol";
-import "../interfaces/ITrigger.sol";
-import "../interfaces/IMCDPriceVerifier.sol";
-import "../core/helpers/CoreHelper.sol";
-import "../core/DFSRegistry.sol";
-import "./helpers/TriggerHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { McdRatioHelper } from "../actions/mcd/helpers/McdRatioHelper.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { IMCDPriceVerifier } from "../interfaces/IMCDPriceVerifier.sol";
+import { CoreHelper } from "../core/helpers/CoreHelper.sol";
+import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 
 /// @title Trigger contract that verifies if current MCD vault ratio is higher or lower than wanted

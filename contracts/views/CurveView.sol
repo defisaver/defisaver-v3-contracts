@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../actions/curve/helpers/CurveHelper.sol";
-import "../interfaces/curve/ICurveFactory.sol";
-import "../interfaces/curve/ILiquidityGauge.sol";
-import "../interfaces/IERC20.sol";
+import { CurveHelper } from "../actions/curve/helpers/CurveHelper.sol";
+import { ICurveFactory, ICurveFactoryLP, ICurveFactoryPool, IGaugeController } from "../interfaces/curve/ICurveFactory.sol";
+import { ILiquidityGauge } from "../interfaces/curve/ILiquidityGauge.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { IRegistry } from "../interfaces/curve/IRegistry.sol";
 
 contract CurveView is CurveHelper {
     struct LpBalance {

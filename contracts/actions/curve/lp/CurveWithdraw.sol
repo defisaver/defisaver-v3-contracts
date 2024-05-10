@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../helpers/CurveHelper.sol";
-import "../../../interfaces/curve/ICurve3PoolZap.sol";
-import "../../../utils/TokenUtils.sol";
-import "../../ActionBase.sol";
+import { CurveHelper } from "../helpers/CurveHelper.sol";
+import { ICurve3PoolZap } from "../../../interfaces/curve/ICurve3PoolZap.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { ActionBase } from "../../ActionBase.sol";
 
 contract CurveWithdraw is ActionBase, CurveHelper {
     using TokenUtils for address;

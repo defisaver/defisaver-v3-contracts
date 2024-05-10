@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./IVat.sol";
-import "./IGem.sol";
+import { IVat } from "./IVat.sol";
+import { IGem } from "./IGem.sol";
 
 abstract contract IDaiJoin {
     function vat() public virtual returns (IVat);

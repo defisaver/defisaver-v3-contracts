@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../mcd/helpers/McdRatioHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { McdRatioHelper } from "../mcd/helpers/McdRatioHelper.sol";
 
 /// @title Checks if ratio is in target range
 contract McdRatioCheck is ActionBase, McdRatioHelper {

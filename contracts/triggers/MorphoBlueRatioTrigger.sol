@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../utils/TransientStorage.sol";
-import "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
-import "../interfaces/ITrigger.sol";
-import "./helpers/TriggerHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { TransientStorage } from "../utils/TransientStorage.sol";
+import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
+import { Id } from "../interfaces/morpho-blue/IMorphoBlue.sol";
 
 /// @title Trigger contract that verifies if the MorphoBlue position went over/under the subbed ratio
 contract MorphoBlueRatioTrigger is ITrigger, AdminAuth, MorphoBlueHelper, TriggerHelper {

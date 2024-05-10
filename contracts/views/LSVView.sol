@@ -1,19 +1,28 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-import "../utils/LSVProxyRegistry.sol";
-import "../utils/TokenUtils.sol";
-import "../utils/DFSProxyRegistry.sol";
+pragma solidity =0.8.24;
+import { LSVProxyRegistry } from "../utils/LSVProxyRegistry.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { DFSProxyRegistry } from "../utils/DFSProxyRegistry.sol";
 
-import "../actions/utils/helpers/ActionsUtilHelper.sol";
-import "../actions/aaveV3/helpers/AaveV3Helper.sol";
-import "../actions/morpho/aaveV3/helpers/MorphoAaveV3Helper.sol";
-import "../actions/compoundV3/helpers/CompV3Helper.sol";
-import "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
-import "../utils/helpers/UtilHelper.sol";
-import "../actions/lsv/helpers/LSVUtilHelper.sol";
-import "../utils/LSVProfitTracker.sol";
-import "../actions/spark/helpers/SparkHelper.sol";
+import { ActionsUtilHelper } from "../actions/utils/helpers/ActionsUtilHelper.sol";
+import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
+import { MorphoAaveV3Helper } from "../actions/morpho/aaveV3/helpers/MorphoAaveV3Helper.sol";
+import { CompV3Helper } from "../actions/compoundV3/helpers/CompV3Helper.sol";
+import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
+import { UtilHelper } from "../utils/helpers/UtilHelper.sol";
+import { LSVUtilHelper } from "../actions/lsv/helpers/LSVUtilHelper.sol";
+import { LSVProfitTracker } from "../utils/LSVProfitTracker.sol";
+import { SparkHelper } from "../actions/spark/helpers/SparkHelper.sol";
+import { IL2PoolV3 } from "../interfaces/aaveV3/IL2PoolV3.sol";
+import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
+import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
+import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
+import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
+import { IMorphoAaveV3 } from "../interfaces/morpho/IMorphoAaveV3.sol";
+import { IComet } from "../interfaces/compoundV3/IComet.sol";
+import { MarketParams, Id } from "../interfaces/morpho-blue/IMorphoBlue.sol";
+import { MarketParamsLib, MorphoLib, MorphoBalancesLib } from "../actions/morpho-blue/helpers/MorphoBlueLib.sol";
 
 struct Position {
     uint8 protocol;
