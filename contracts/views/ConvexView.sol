@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity =0.8.24;
 
-import "../actions/convex/helpers/ConvexHelper.sol";
+import { ConvexHelper } from "../actions/convex/helpers/ConvexHelper.sol";
 
 contract ConvexView is ConvexHelper {
     /// @notice This function gets (base and extra) earned reward amounts

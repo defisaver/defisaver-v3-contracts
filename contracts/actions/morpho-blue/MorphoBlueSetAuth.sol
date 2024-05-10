@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "./helpers/MorphoBlueHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { MorphoBlueHelper } from "./helpers/MorphoBlueHelper.sol";
 
 /// @title Allow or disallow an address to manage MorphoBlue position on user's wallet
 contract MorphoBlueSetAuth is ActionBase, MorphoBlueHelper {

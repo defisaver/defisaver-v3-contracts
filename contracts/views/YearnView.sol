@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../actions/yearn/helpers/YearnHelper.sol";
-import "../interfaces/yearn/IYVault.sol";
-import "../interfaces/yearn/IYearnRegistry.sol";
-import "../interfaces/IERC20.sol";
-import "../DS/DSMath.sol";
+import { YearnHelper } from "../actions/yearn/helpers/YearnHelper.sol";
+import { IYVault } from "../interfaces/yearn/IYVault.sol";
+import { IYearnRegistry } from "../interfaces/yearn/IYearnRegistry.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { DSMath } from "../DS/DSMath.sol";
 
 contract YearnView is YearnHelper, DSMath  {
     function getUnderlyingBalanceInVault(address _user, address _vault) public view returns (uint256) {

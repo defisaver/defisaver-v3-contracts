@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/SparkHelper.sol";
-import "../../interfaces/aaveV3/IRewardsController.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SparkHelper } from "./helpers/SparkHelper.sol";
+import { IRewardsController } from "../../interfaces/aaveV3/IRewardsController.sol";
 
 /// @title Claims single reward type specified by reward for the list of assets. Rewards are received by to address.
 contract SparkClaimRewards is ActionBase, SparkHelper {
@@ -21,7 +21,7 @@ contract SparkClaimRewards is ActionBase, SparkHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes calldata _callData,
+        bytes memory _callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -38,7 +38,7 @@ contract SparkClaimRewards is ActionBase, SparkHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes calldata _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
 
         (, bytes memory logData) = _claimRewards(params);

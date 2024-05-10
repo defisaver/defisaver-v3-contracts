@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./MainnetUtilAddresses.sol";
+import { MainnetUtilAddresses } from "./MainnetUtilAddresses.sol";
 
 contract UtilHelper is MainnetUtilAddresses{
 }

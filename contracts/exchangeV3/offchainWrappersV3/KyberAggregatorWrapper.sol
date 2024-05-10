@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../auth/AdminAuth.sol";
-import "../DFSExchangeHelper.sol";
-import "../../interfaces/exchange/IOffchainWrapper.sol";
-import "../../utils/exchange/KyberInputScalingHelper.sol";
-import "../../core/DFSRegistry.sol";
-import "../../core/helpers/CoreHelper.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
+import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
+import { KyberInputScalingHelper } from "../../utils/exchange/KyberInputScalingHelper.sol";
+import { DFSRegistry } from "../../core/DFSRegistry.sol";
+import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { SafeERC20 } from "../../utils/SafeERC20.sol";
+import { IERC20 } from "../../interfaces/IERC20.sol";
 
 contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, CoreHelper{
 
@@ -20,7 +23,7 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
     /// @notice Takes order from Kyberswap and returns bool indicating if it is successful
     /// @param _exData Exchange data
     function takeOrder(
-        ExchangeData calldata _exData
+        ExchangeData memory _exData
     ) override public payable returns (bool success, uint256) {
         /// @dev safeApprove is modified to always first set approval to 0, then to exact amount
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);

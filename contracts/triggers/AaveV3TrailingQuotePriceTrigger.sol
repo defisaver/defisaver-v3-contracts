@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/ITrigger.sol";
-import "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import "../interfaces/chainlink/IAggregatorV3.sol";
-import "../auth/AdminAuth.sol";
-import "../DS/DSMath.sol";
-import "../utils/TokenUtils.sol";
-import "../utils/TokenPriceHelper.sol";
-import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
+import { IAggregatorV3 } from "../interfaces/chainlink/IAggregatorV3.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { DSMath } from "../DS/DSMath.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
+import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 /// @title Validates trailing stop for quoted asset price
 contract AaveV3TrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper, TokenPriceHelper {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./IERC3156FlashBorrower.sol";
+import { IERC3156FlashBorrower } from "./IERC3156FlashBorrower.sol";
 
 interface IERC3156FlashLender {
     /**

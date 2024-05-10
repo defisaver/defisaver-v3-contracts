@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../auth/AdminAuth.sol";
-import "../../auth/Permission.sol";
-import "../../utils/CheckWalletType.sol";
-import "./SubStorage.sol";
-import "../DFSRegistry.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { Permission } from "../../auth/Permission.sol";
+import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { SubStorage } from "./SubStorage.sol";
+import { DFSRegistry } from "../DFSRegistry.sol";
+import { StrategyModel } from "./StrategyModel.sol";
+import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Called through user wallet, handles auth and calls subscription contract
 contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {

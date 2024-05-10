@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import { SafeModuleAuth } from "../../contracts/core/strategy/SafeModuleAuth.sol";
 import { SafeModulePermission } from "../../contracts/auth/SafeModulePermission.sol";

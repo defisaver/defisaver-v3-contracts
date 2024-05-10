@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./MainnetLiquityAddresses.sol";
-import "../../../interfaces/liquity/IBondNFT.sol";
-import "../../../interfaces/curve/ISwaps.sol";
-import "../../../views/ChickenBondsView.sol";
-import "../../../utils/math/Sqrt.sol";
-import "../../../DS/DSMath.sol";
-import "../../../core/strategy/StrategyModel.sol";
+import { MainnetLiquityAddresses } from "./MainnetLiquityAddresses.sol";
+import { IBondNFT } from "../../../interfaces/liquity/IBondNFT.sol";
+import { ISwaps } from "../../../interfaces/curve/ISwaps.sol";
+import { ChickenBondsView } from "../../../views/ChickenBondsView.sol";
+import { Sqrt } from "../../../utils/math/Sqrt.sol";
+import { DSMath } from "../../../DS/DSMath.sol";
+import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
+import { IChickenBondManager } from "../../../interfaces/liquity/IChickenBondManager.sol";
+import { IERC20 } from "../../../interfaces/IERC20.sol";
 
 /// @title Chicken Bonds helper contract that fetches market price and optimal rebonding calculations
 contract CBHelper is DSMath, MainnetLiquityAddresses {

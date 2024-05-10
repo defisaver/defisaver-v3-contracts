@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../utils/DFSProxyRegistryController.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { DFSProxyRegistryController } from "../../utils/DFSProxyRegistryController.sol";
+import { DSAuth } from "../../DS/DSAuth.sol";
 
 /// @title Changes the owner of the DSProxy and updated the DFSRegistry
 contract ChangeProxyOwner is ActionBase {

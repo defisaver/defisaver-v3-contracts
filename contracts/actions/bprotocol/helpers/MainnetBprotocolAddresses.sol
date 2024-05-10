@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract MainnetBprotocolAddresses {
     address internal constant BAMM_ADDRESS = 0x00FF66AB8699AAfa050EE5EF5041D1503aa0849a;

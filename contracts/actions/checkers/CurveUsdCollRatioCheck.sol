@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../actions/curveusd/helpers/CurveUsdHelper.sol";
-import "../../utils/TransientStorage.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CurveUsdHelper } from "../../actions/curveusd/helpers/CurveUsdHelper.sol";
+import { TransientStorage } from "../../utils/TransientStorage.sol";
 
 contract CurveUsdCollRatioCheck is ActionBase, CurveUsdHelper {
 

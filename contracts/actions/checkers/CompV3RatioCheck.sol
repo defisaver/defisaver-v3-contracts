@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../compoundV3/helpers/CompV3RatioHelper.sol";
-import "../../utils/TransientStorage.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CompV3RatioHelper } from "../compoundV3/helpers/CompV3RatioHelper.sol";
+import { TransientStorage } from "../../utils/TransientStorage.sol";
 
 contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
 

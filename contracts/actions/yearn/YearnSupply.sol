@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../utils/TokenUtils.sol";
-import "../../interfaces/yearn/IYVault.sol";
-import "./helpers/YearnHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { IYVault } from "../../interfaces/yearn/IYVault.sol";
+import { YearnHelper } from "./helpers/YearnHelper.sol";
 
 /// @title Supplies tokens to Yearn vault
 /// @dev tokens need to be approved for user's wallet to pull them (token address)

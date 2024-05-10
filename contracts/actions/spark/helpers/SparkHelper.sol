@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./MainnetSparkAddresses.sol";
+import { MainnetSparkAddresses } from "./MainnetSparkAddresses.sol";
 
-import "../../../interfaces/aaveV3/IL2PoolV3.sol";
-import "../../../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
-import "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
+import { IL2PoolV3 } from "../../../interfaces/aaveV3/IL2PoolV3.sol";
+import { IAaveProtocolDataProvider } from "../../../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
+import { IPoolAddressesProvider } from "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
 
 /// @title Utility functions and data used in Spark actions
 contract SparkHelper is MainnetSparkAddresses {

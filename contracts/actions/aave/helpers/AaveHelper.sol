@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../interfaces/aaveV2/ILendingPoolV2.sol";
-import "../../../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
-import "../../../interfaces/aaveV2/IAaveIncentivesController.sol";
-import "./MainnetAaveAddresses.sol";
-import "../../../interfaces/aaveV2/IStakedToken.sol";
+import { ILendingPoolV2 } from "../../../interfaces/aaveV2/ILendingPoolV2.sol";
+import { ILendingPoolAddressesProviderV2 } from "../../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import { IAaveProtocolDataProviderV2 } from "../../../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
+import { IAaveIncentivesController } from "../../../interfaces/aaveV2/IAaveIncentivesController.sol";
+import { IStakedToken } from "../../../interfaces/aaveV2/IStakedToken.sol";
+import { MainnetAaveAddresses } from "./MainnetAaveAddresses.sol";
 
 /// @title Utility functions and data used in AaveV2 actions
 contract AaveHelper is MainnetAaveAddresses {
@@ -53,7 +54,7 @@ contract AaveHelper is MainnetAaveAddresses {
         return ILendingPoolV2(ILendingPoolAddressesProviderV2(_market).getLendingPool());
     }
 
-    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType, address _debtOwner) internal view returns (uint256 wholeDebt) {
+    function getWholeDebt(address _market, address _tokenAddr, uint256 _borrowType, address _debtOwner) internal view returns (uint256 wholeDebt) {
         uint256 STABLE_ID = 1;
         uint256 VARIABLE_ID = 2;
 

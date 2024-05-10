@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./StrategyModel.sol";
-import "../../auth/AdminAuth.sol";
+import { StrategyModel } from "./StrategyModel.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
 
 /// @title StrategyStorage - Record of all the Strategies created
 contract StrategyStorage is StrategyModel, AdminAuth {

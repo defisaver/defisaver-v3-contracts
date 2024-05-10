@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-import "./MainnetInstAddresses.sol";
+pragma solidity =0.8.24;
+import { MainnetInstAddresses } from "./MainnetInstAddresses.sol";
 
-import "../../../interfaces/insta/IInstaIndex.sol";
-import "../../../interfaces/insta/IInstaMakerDAOMerkleDistributor.sol";
-import "../../../interfaces/mcd/IManager.sol";
+import { IInstaIndex } from "../../../interfaces/insta/IInstaIndex.sol";
+import { IInstaMakerDAOMerkleDistributor } from "../../../interfaces/insta/IInstaMakerDAOMerkleDistributor.sol";
+import { IManager } from "../../../interfaces/mcd/IManager.sol";
 
 /// @title Utility functions and data used in AaveV2 actions
 contract InstHelper is MainnetInstAddresses{

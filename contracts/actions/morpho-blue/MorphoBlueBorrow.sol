@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../utils/TokenUtils.sol";
-import "./helpers/MorphoBlueHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { MorphoBlueHelper } from "./helpers/MorphoBlueHelper.sol";
+import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
 
 /// @title Borrow a token from a Morpho Blue market
 contract MorphoBlueBorrow is ActionBase, MorphoBlueHelper {

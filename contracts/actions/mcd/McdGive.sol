@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/IProxyRegistry.sol";
-import "../../interfaces/IDSProxy.sol";
-import "../../interfaces/mcd/IManager.sol";
-import "./helpers/McdHelper.sol";
-import "../ActionBase.sol";
+import { IProxyRegistry } from "../../interfaces/IProxyRegistry.sol";
+import { IDSProxy } from "../../interfaces/IDSProxy.sol";
+import { IManager } from "../../interfaces/mcd/IManager.sol";
+import { McdHelper } from "./helpers/McdHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
 
 /// @title Give a vault to a different address
 contract McdGive is ActionBase, McdHelper{

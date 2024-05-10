@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/LlamaLendHelper.sol";
-
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { LlamaLendHelper } from "./helpers/LlamaLendHelper.sol";
+import { ILlamaLendController } from "../../interfaces/llamalend/ILlamaLendController.sol";
 
 /// @title Action that supplies collateral to a llamalend position
 /// @dev collateralAmount must be non-zero, can be maxUint

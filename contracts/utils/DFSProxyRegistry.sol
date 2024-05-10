@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../interfaces/IProxyRegistry.sol";
-import "../interfaces/IDSProxy.sol";
-import "./helpers/UtilHelper.sol";
-import "../core/DFSRegistry.sol";
-import "../actions/utils/helpers/ActionsUtilHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { IProxyRegistry } from "../interfaces/IProxyRegistry.sol";
+import { IDSProxy } from "../interfaces/IDSProxy.sol";
+import { UtilHelper } from "./helpers/UtilHelper.sol";
+import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { ActionsUtilHelper } from "../actions/utils/helpers/ActionsUtilHelper.sol";
 
 /// @title Checks Mcd registry and replaces the proxy addr if owner changed
 contract DFSProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {

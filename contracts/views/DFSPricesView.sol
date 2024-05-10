@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../exchangeV3/helpers/ExchangeHelper.sol";
-import "../utils/TokenUtils.sol";
+import { ExchangeHelper } from "../exchangeV3/helpers/ExchangeHelper.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 contract DFSPricesView is ExchangeHelper {
     

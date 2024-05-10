@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
-import "../core/strategy/StrategyModel.sol";
-import "../core/DFSRegistry.sol";
-import "../core/strategy/BundleStorage.sol";
-import "../core/strategy/StrategyStorage.sol";
-import "../interfaces/ITrigger.sol";
-
+pragma solidity =0.8.24;
+import { StrategyModel } from "../core/strategy/StrategyModel.sol";
+import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { BundleStorage } from "../core/strategy/BundleStorage.sol";
+import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 
 contract StrategyTriggerView is StrategyModel, CoreHelper {
 

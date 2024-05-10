@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract OptimismActionsUtilAddresses {
     address internal constant DFS_REG_CONTROLLER_ADDR = 0x493C0dE902E6916128A223F66F37d3b6ee8fA408;

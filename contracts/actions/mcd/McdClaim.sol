@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/mcd/ICropJoin.sol";
-import "../../interfaces/mcd/ICropper.sol";
-import "../../interfaces/mcd/ICdpRegistry.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/McdHelper.sol";
+import { ICropJoin } from "../../interfaces/mcd/ICropJoin.sol";
+import { ICropper } from "../../interfaces/mcd/ICropper.sol";
+import { ICdpRegistry } from "../../interfaces/mcd/ICdpRegistry.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { McdHelper } from "./helpers/McdHelper.sol";
+import { IERC20 } from "../../interfaces/IERC20.sol";
 
 /// @title Claims bonus tokens in CropJoin type vaults
 contract McdClaim is ActionBase, McdHelper {

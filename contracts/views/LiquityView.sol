@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../utils/TokenUtils.sol";
-import "../actions/liquity/helpers/LiquityHelper.sol";
-import "../DS/DSMath.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { LiquityHelper } from "../actions/liquity/helpers/LiquityHelper.sol";
+import { DSMath } from "../DS/DSMath.sol";
 
 contract LiquityView is LiquityHelper, DSMath {
     using TokenUtils for address;

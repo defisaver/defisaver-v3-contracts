@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../interfaces/ITrigger.sol";
-import "../actions/liquity/helpers/LiquityHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { LiquityHelper } from "../actions/liquity/helpers/LiquityHelper.sol";
 
 /// @title Checks if total amount of debt in front of a specified trove is over a limit
 contract LiquityDebtInFrontTrigger is ITrigger, AdminAuth, LiquityHelper {
