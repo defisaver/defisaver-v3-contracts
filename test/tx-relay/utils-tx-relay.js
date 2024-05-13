@@ -6,7 +6,8 @@ const {
     getAddrFromRegistry,
     stopImpersonatingAccount,
     getOwnerAddr,
-} = require('./utils');
+    nullAddress,
+} = require('../utils');
 
 const addBotCallerForTxRelay = async (
     botAddr,
@@ -49,36 +50,35 @@ const addInitialFeeTokens = async (isFork = false) => {
     }
 };
 
-// include gas used for calculating and sending fee, hardcode it like this for now
-// adjust values based on fee token and if we are pulling tokens from EOA or smart wallet
-// this values will be singed from UI as they are packed into safe signature
-const determineAdditionalGasUsedInTxRelay = (feeToken, pullingFromEoa) => {
-    if (pullingFromEoa) {
-        if (feeToken === addrs[getNetwork()].USDC_ADDR) {
-            return 64300;
-        }
-        if (feeToken === addrs[getNetwork()].DAI_ADDRESS) {
-            return 53623;
-        }
-        if (feeToken === addrs[getNetwork()].WETH_ADDRESS) {
-            return 10000;
-        }
-    } else {
-        if (feeToken === addrs[getNetwork()].USDC_ADDR) {
-            return 63000;
-        }
-        if (feeToken === addrs[getNetwork()].DAI_ADDRESS) {
-            return 53000;
-        }
-        if (feeToken === addrs[getNetwork()].WETH_ADDRESS) {
-            return 9300;
-        }
+// TODO[TX-RELAY]: adjust these values based on the actual gas used
+const determineAdditionalGasUsedInTxRelay = (feeToken) => {
+    const feeTokenLower = feeToken.toLowerCase();
+    if (feeTokenLower === addrs[getNetwork()].USDC_ADDR.toLowerCase()) {
+        return 64300;
+    }
+    if (feeTokenLower === addrs[getNetwork()].DAI_ADDRESS.toLowerCase()) {
+        return 90000;
+    }
+    if (feeTokenLower === addrs[getNetwork()].WETH_ADDRESS.toLowerCase()) {
+        return 10000;
     }
     return 0;
+};
+
+const createEmptyOffchainOrder = () => {
+    return {
+        wrapper: nullAddress,
+        exchangeAddr: nullAddress,
+        allowanceTarget: nullAddress,
+        price: 0,
+        protocolFee: 0,
+        callData: hre.ethers.utils.arrayify('0x'), // Empty bytes
+    };
 };
 
 module.exports = {
     addBotCallerForTxRelay,
     addInitialFeeTokens,
     determineAdditionalGasUsedInTxRelay,
+    createEmptyOffchainOrder,
 };

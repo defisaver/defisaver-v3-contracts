@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 
-/// @title Handles authorization of who can call the tx relay
+/// @title Handles authorization of who can call the tx relay executor
 contract BotAuthForTxRelay is AdminAuth {
     mapping(address => bool) public approvedCallers;
 

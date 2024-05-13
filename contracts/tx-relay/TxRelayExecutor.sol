@@ -1,32 +1,33 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import { ISafe } from "../interfaces/safe/ISafe.sol";
-import { IBytesTransientStorage } from "../interfaces/IBytesTransientStorage.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { SupportedFeeTokensRegistry } from "./SupportedFeeTokensRegistry.sol";
 import { BotAuthForTxRelay } from "./BotAuthForTxRelay.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
-import { MainnetTxRelayAddresses } from "./MainnetTxRelayAddresses.sol";
+import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
+import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { TxRelayBytesTransientStorage } from "./TxRelayBytesTransientStorage.sol";
+
+//TODO[TX-RELAY]: remove after testing
 import { console } from "hardhat/console.sol";
- 
+
+/// @title Main entry point for executing tx-relay transactions signed by users through safe wallet 
 contract TxRelayExecutor is 
     StrategyModel,
     AdminAuth,
     CoreHelper,
-    MainnetTxRelayAddresses
+    TxRelayBytesTransientStorage
 {
-    uint256 public constant SANITY_GAS_PRICE = 1000 gwei;
     bytes4 public constant BOT_AUTH_ID_FOR_TX_RELAY = bytes4(keccak256("BotAuthForTxRelay"));
     bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
-    IBytesTransientStorage public constant transientStorage = IBytesTransientStorage(BYTES_TRANSIENT_STORAGE);
 
-    SupportedFeeTokensRegistry public immutable feeTokensRegistry;
+    SupportedFeeTokensRegistry public immutable FEE_TOKENS_REGISTRY;
 
     /// Caller must be authorized bot
     error BotNotApproved(address bot);
@@ -34,94 +35,126 @@ contract TxRelayExecutor is
     error SafeExecutionError();
     /// Gas price can't be higher than maxGasPrice
     error GasPriceTooHigh(uint256 maxGasPrice, uint256 gasPrice);
+    /// Order has to be injected if allowOrderInjection is set to true
+    error OrderInjectionMissing();
+    /// Order injection can't be used if not allowed by user
+    error OrderInjectionNotAllowed();
 
+    /// @notice Data needed to execute a Safe transaction
+    /// @param value Ether value of Safe transaction
+    /// @param safe Address of the Safe wallet
+    /// @param data Data payload of Safe transaction
+    /// @param signatures Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
     struct SafeTxParams {
-        uint256 value; // Ether value of Safe transaction
-        address safe; // Address of the Safe wallet
-        bytes data; // Data payload of Safe transaction
-        bytes signatures; // Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
+        uint256 value;
+        address safe;
+        bytes data;
+        bytes signatures;
     }
 
     constructor(address _supportedFeeTokensRegistry) {
-        feeTokensRegistry = SupportedFeeTokensRegistry(_supportedFeeTokensRegistry);
+        FEE_TOKENS_REGISTRY = SupportedFeeTokensRegistry(_supportedFeeTokensRegistry);
     }
 
-    /// @notice Execute a transaction using fee tokens.
-    /// @notice If wallet is 1/1, fee is taken from eoa
-    /// @notice if wallet is n/n, fee is taken from wallet
+    /// @notice Execute a transaction signed by user and take gas fee from EOA/wallet
+    /// @notice If wallet is 1/1, gas fee is taken from eoa
+    /// @notice If wallet is n/m, gas fee is taken from wallet itself
+    ///
     /// @param _params SafeTxParams data needed to execute safe tx
-    /// @param _additionalGasUsed When estimating gas usage, we need to include gas for taking fee (1 transfer if wallet is 1/1) + sending fee to fee recipient
-    /// @dev _additionalGasUsed is sent from backend, and it's not part of user signature
+    /// @param _additionalGasUsed When estimating gas usage, we need to include gas for taking fee (transfer from EOA if 1/1 wallet) + sending fee to fee recipient
+    /// @param _percentageOfLoweringTxCost Percentage to lower total tx cost
+    ///
+    /// @dev When executing complex transactions, gas refund can go up to 20%. We can't get exact amount of gas refund on-chain, so we estimate it when sending tx  
+    /// @dev For complex transactions, this makes sure we don't take much more gas than tx actually consumes
+    /// @dev _additionalGasUsed & _percentageOfLoweringTxCost are sent from backend, they are not part of user signature
     function executeTxTakingFeeFromEoaOrWallet(
         SafeTxParams calldata _params,
-        uint256 _additionalGasUsed
+        uint256 _additionalGasUsed,
+        uint256 _percentageOfLoweringTxCost
     ) external {
         uint256 gasStartRoot = gasleft();
-        console.log("Gas start root: %d", gasStartRoot);
 
         _botCallerValidation();
 
-        TxRelayUserSignedData memory txRelayData = _parseTxRelayData(_params);        
+        (, TxRelaySignedDataForEoaFee memory txRelayData) = parseTxRelaySignedDataForEoaFee(_params.data);        
 
-        if (tx.gasprice > txRelayData.maxGasPrice) {
-            revert GasPriceTooHigh(txRelayData.maxGasPrice, tx.gasprice);
-        }
+        _gasPriceValidation(txRelayData.maxGasPrice);
 
         uint256 gasFullSafeTx = gasleft();
-        console.log("Before full safe tx: %d", gasStartRoot - gasFullSafeTx);
 
         {   
-            /// @dev We include EIP 150 gas calculation, so we can estimate gas used
-            // we need to cover gas for setting transient storage and call opcode itself
-            // check this value if more accurate estimation is needed
-            uint256 gasAvailableAfterCall = gasleft() - 7000;
+            /// @dev Include EIP-150 gas calculation, so we can estimate gas used
+            // Include gas for transient storage and call opcode
+            uint256 gasAvailable = gasleft() - 7000;
 
             // 63/64 of available gas will be transferred to safe proxy contract
-            uint256 gasLostInSafeProxy = gasAvailableAfterCall / 64;
+            uint256 gasLostInSafeProxy = gasAvailable / 64;
             
             // 63/64 of gas from safe proxy will be transferred to safe singleton
-            uint256 gasLostInSafeSingleton = (gasAvailableAfterCall * 63 / 64) / 64; 
+            uint256 gasLostInSafeSingleton = (gasAvailable * 63 / 64) / 64; 
             
             uint256 totalGasLost = gasLostInSafeProxy + gasLostInSafeSingleton;
             
             console.log("Gas lost because of EIP150: %d", totalGasLost);
 
             // store initial gas and gas lost because of EIP150 so we can calculate gas used
-            // this values are read by the recipe executor
-            transientStorage.setBytesTransiently(abi.encode(gasStartRoot, totalGasLost, _additionalGasUsed));
+            // this values are read inside recipe executor
+            setBytesTransiently(
+                abi.encode(
+                    gasStartRoot,
+                    totalGasLost,
+                    _additionalGasUsed,
+                    _percentageOfLoweringTxCost
+                ),
+                false
+            );
         }
         
         _executeSafeTx(_params);
         
         gasFullSafeTx = gasFullSafeTx - gasleft();
-        console.log("Safe total execution: %d", gasFullSafeTx);
-        
         uint256 gasEndRoot = gasleft();
+
+        console.log("Gas start root: %d", gasStartRoot);
+        console.log("Before full safe tx: %d", gasStartRoot - gasFullSafeTx);
+        console.log("Safe total execution: %d", gasFullSafeTx);
         console.log("Total gas used on contract: %d", gasStartRoot - gasEndRoot);
     }
 
+    /// @notice Execute a transaction signed by user and take gas fee from user position
+    /// @param _params SafeTxParams data needed to execute safe tx
+    /// @param _estimatedGas Estimated gas usage for the transaction
+    /// @param _offchainOrder If user signed allowance for offchain order injection, it's included here, otherwise it's empty
+    /// @dev gas fee is taken inside DFSSell action. Right now, we only support fee taking from position if recipe has sell action
     function executeTxTakingFeeFromPosition(
-        
-    ) external {
-
-    }
-
-    // TODO:: allow to inject order from backend later
-    function executeTxWithoutFee(
-        SafeTxParams calldata _params
+        SafeTxParams calldata _params,
+        uint256 _estimatedGas,
+        DFSExchangeData.OffchainData calldata _offchainOrder
     ) external {
         _botCallerValidation();
 
-        if (tx.gasprice > SANITY_GAS_PRICE) {
-            revert GasPriceTooHigh(SANITY_GAS_PRICE, tx.gasprice);
+        (, TxRelaySignedDataForPositionFee memory txRelayData) = parseTxRelaySignedDataForPositionFee(_params.data);
+
+        _gasPriceValidation(txRelayData.maxGasPrice);
+        
+        bool offchainOrderSent = _offchainOrder.wrapper != address(0);
+
+        if (txRelayData.allowOrderInjection && !offchainOrderSent) {
+            revert OrderInjectionMissing();
         }
+        if (!txRelayData.allowOrderInjection && offchainOrderSent) {
+            revert OrderInjectionNotAllowed();
+        }
+
+        /// @dev read by DFSSell action
+        setBytesTransiently(abi.encode(_estimatedGas, txRelayData, _offchainOrder), true);
 
         _executeSafeTx(_params);
     }
 
     function _executeSafeTx(SafeTxParams memory _params) internal {
         bool success = ISafe(_params.safe).execTransaction(
-            registry.getAddr(RECIPE_EXECUTOR_ID), // TODO: hardcode it later
+            registry.getAddr(RECIPE_EXECUTOR_ID), // TODO[TX-RELAY]: maybe hardcode once deployed
             _params.value,
             _params.data,
             ISafe.Operation.DelegateCall,
@@ -143,8 +176,21 @@ contract TxRelayExecutor is
         }
     }
 
-    function _parseTxRelayData(SafeTxParams calldata _params) internal pure returns (TxRelayUserSignedData memory txRelayData) {
-        Recipe memory recipe;
-        (recipe, txRelayData) = abi.decode(_params.data[4:], (Recipe, TxRelayUserSignedData)); 
+    function _gasPriceValidation(uint256 maxGasPriceSignedByUser) internal view {
+        if (tx.gasprice > maxGasPriceSignedByUser) {
+            revert GasPriceTooHigh(maxGasPriceSignedByUser, tx.gasprice);
+        }
+    }
+
+    function parseTxRelaySignedDataForEoaFee(bytes calldata _data) 
+        public pure returns (Recipe memory recipe, TxRelaySignedDataForEoaFee memory txRelayData)
+    {
+        (recipe, txRelayData) = abi.decode(_data[4:], (Recipe, TxRelaySignedDataForEoaFee)); 
+    }
+
+    function parseTxRelaySignedDataForPositionFee(bytes calldata _data)
+        public pure returns (Recipe memory recipe, TxRelaySignedDataForPositionFee memory txRelayData)
+    {
+        (recipe, txRelayData) = abi.decode(_data[4:], (Recipe, TxRelaySignedDataForPositionFee)); 
     }
 }

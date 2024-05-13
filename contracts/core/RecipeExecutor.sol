@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 /**
 * @title Entry point into executing recipes/checking triggers directly and as part of a strategy
@@ -103,7 +103,6 @@ import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
 import { BundleStorage } from "../core/strategy/BundleStorage.sol";
 import { SubStorage } from "../core/strategy/SubStorage.sol";
-import { FeeRecipient } from "../utils/FeeRecipient.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
@@ -113,8 +112,9 @@ import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
 import { ISafe } from "../interfaces/safe/ISafe.sol";
-import { IBytesTransientStorage } from "../interfaces/IBytesTransientStorage.sol";
+import { ITxRelayBytesTransientStorage } from "../interfaces/ITxRelayBytesTransientStorage.sol";
 
+//TODO[TX-RELAY]: remove after testing
 import { console } from "hardhat/console.sol";
 
 contract RecipeExecutor is 
@@ -126,10 +126,8 @@ contract RecipeExecutor is
     GasFeeHelper,
     CheckWalletType
 {
+    bytes4 public constant TX_RELAY_EXECUTOR_ID = bytes4(keccak256("TxRelayExecutor"));
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
-
-    // remove hardcoded address later
-    IBytesTransientStorage public constant transientStorage = IBytesTransientStorage(0xB3FE6f712c8B8c64CD2780ce714A36e7640DDf0f);
 
     /// @dev Function sig of ActionBase.executeAction()
     bytes4 public constant EXECUTE_ACTION_SELECTOR = 
@@ -143,6 +141,9 @@ contract RecipeExecutor is
     /// For tx relay, total gas cost fee taken from user can't be higher than maxTxCost set by user
     error TxCostInFeeTokenTooHighError(uint256 maxTxCost, uint256 txCost);
 
+    /// When calling tx relay functions, caller has to be tx relay executor
+    error TxRelayAuthorizationError(address caller);
+
     /// @notice Called directly through user wallet to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
     /// @param _currRecipe Recipe to be executed
@@ -150,21 +151,46 @@ contract RecipeExecutor is
         _executeActions(_currRecipe);
     }
 
-    /// @notice Called by tx relay
+    /// @notice Called by tx relay executor through safe wallet when fee for gas cost is taken from user position
+    /// @dev Second param is not used here, but it's needed as it is part of safe signature
+    /// @param _currRecipe Recipe to be executed
+    function executeRecipeFromTxRelayWhileTakingFeeFromPosition(
+        Recipe calldata _currRecipe,
+        TxRelaySignedDataForPositionFee calldata
+    ) public payable {
+        if (msg.sender != registry.getAddr(TX_RELAY_EXECUTOR_ID)) {
+            revert TxRelayAuthorizationError(msg.sender);
+        }
+
+        _executeActions(_currRecipe);
+    }
+
+    /// @notice Called by tx relay executor through safe wallet when fee for gas cost is taken from eoa/wallet
+    /// @param _currRecipe Recipe to be executed
+    /// @param _txRelayData Tx relay data signed by user
+    /// @dev If the wallet is 1/1, take fee for gas cost from eoa, otherwise from wallet itself
     function executeRecipeFromTxRelay(
         Recipe calldata _currRecipe,
-        TxRelayUserSignedData calldata _txRelayData
+        TxRelaySignedDataForEoaFee calldata _txRelayData
     ) public payable {
+        address txRelayExecutorAddr = registry.getAddr(TX_RELAY_EXECUTOR_ID);
+        if (msg.sender != txRelayExecutorAddr) {
+            revert TxRelayAuthorizationError(msg.sender);
+        }
+
         /// @dev include missing gas from safe singleton to recipe executor
         uint256 totalGasLostBecauseOfEIP150 = gasleft() / 64 + 2500;
 
-        (uint256 gasStart, uint256 gasLost, uint256 additionalGasUsed) = abi.decode(
-            transientStorage.getBytesTransiently(), (uint256, uint256, uint256)
+        (
+            uint256 gasStart,
+            uint256 gasLost,
+            uint256 additionalGasUsed,
+            uint256 percentageOfLoweringTxCost
+        ) = abi.decode(
+            ITxRelayBytesTransientStorage(txRelayExecutorAddr).getBytesTransiently(),
+            (uint256, uint256, uint256, uint256)
         );
-        console.log("Gas start: %d", gasStart);
-        console.log("Gas missing: %d", gasLost);
-        console.log("Additional gas used: %d", additionalGasUsed);
-
+        
         totalGasLostBecauseOfEIP150 += gasLost;
 
         _executeActions(_currRecipe);
@@ -174,15 +200,18 @@ contract RecipeExecutor is
         uint256 gasUsed = gasStart - (gasleft() + totalGasLostBecauseOfEIP150);
 
         uint256 gs = gasleft();
-        console.log("**********************Gas used: %s", gasUsed);
-        console.log("**********************Total gas estimated: %s", gasUsed + additionalGasUsed);
         uint256 gasCost = calcGasCost(
             gasUsed,
             _txRelayData.feeToken,
             additionalGasUsed * tx.gasprice
         );
-        console.log("**********************Gas cost: %s", gasCost);
 
+        // lower the gas cost if percentage is set
+        if (percentageOfLoweringTxCost > 0) {
+            gasCost -= gasCost * percentageOfLoweringTxCost / 100;
+        }
+        
+        // revert if gas cost is higher than max cost signed by user
         if (gasCost > _txRelayData.maxTxCostInFeeToken) {
             revert TxCostInFeeTokenTooHighError(_txRelayData.maxTxCostInFeeToken, gasCost);
         }
@@ -195,7 +224,15 @@ contract RecipeExecutor is
         // send tokens from wallet to fee recipient
         _txRelayData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), gasCost);
         gs = gs - gasleft();
-        console.log("******* Gas cost for fee taking: %d", gs);
+
+        console.log("*****************Gas start: %d", gasStart);
+        console.log("*****************Gas missing: %d", gasLost);
+        console.log("*****************Additional gas used: %d", additionalGasUsed);
+        console.log("*****************Percentage of lowering tx cost: %s", percentageOfLoweringTxCost);
+        console.log("*****************Gas used: %s", gasUsed);
+        console.log("*****************Total gas estimated: %s", gasUsed + additionalGasUsed);
+        console.log("*****************Gas cost: %s", gasCost);
+        console.log("*****************Gas cost for fee taking: %d", gs);
     }
 
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers

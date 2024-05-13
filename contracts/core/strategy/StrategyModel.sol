@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 
 /// @title StrategyModel - contract that implements the structs used in the core system
@@ -67,9 +67,26 @@ contract StrategyModel {
         bytes32[] subData;
     }
 
-    struct TxRelayUserSignedData {
+    /// @dev Data needed when signing relay tx and taking fee from EOA/wallet
+    /// @param maxGasPrice Max gas price user is willing to pay
+    /// @param maxTxCostInFeeToken Max tx cost user is willing to pay in fee token
+    /// @param feeToken Address of the token user is willing to pay fee in, has to be whitelisted
+    struct TxRelaySignedDataForEoaFee {
         uint256 maxGasPrice;
         uint256 maxTxCostInFeeToken;
         address feeToken;
     }
+
+    /// @dev Data needed when signing relay tx and taking fee from position
+    /// @param maxGasPrice Max gas price user is willing to pay
+    /// @param maxTxCostInFeeToken Max tx cost user is willing to pay in fee token
+    /// @param allowOrderInjection If true, offchain order can be injected
+    /// @param takeFeeFromSrcToken If true, fee is taken from source token, otherwise from destination token
+    struct TxRelaySignedDataForPositionFee {
+        uint256 maxGasPrice;
+        uint256 maxTxCostInFeeToken;
+        bool allowOrderInjection;
+        bool takeFeeFromSrcToken;
+    }
+
 }

@@ -1,18 +1,23 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../exchangeV3/DFSExchangeCore.sol";
-import "../../exchangeV3/registries/TokenGroupRegistry.sol";
-import "../ActionBase.sol";
+import { DFSExchangeThroughTxRelay } from "../../exchangeV3/DFSExchangeThroughTxRelay.sol";
+import { TokenGroupRegistry } from "../../exchangeV3/registries/TokenGroupRegistry.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { ITxRelayBytesTransientStorage} from "../../interfaces/ITxRelayBytesTransientStorage.sol";
 
+//TODO[TX-RELAY]: Remove after testing
+import { console } from "hardhat/console.sol";
 
 /// @title A exchange sell action through the dfs exchange
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
-contract DFSSell is ActionBase, DFSExchangeCore {
+contract DFSSell is ActionBase, DFSExchangeThroughTxRelay {
 
     using TokenUtils for address;
 
+    bytes4 internal constant TX_RELAY_EXECUTOR_ID = bytes4(keccak256("TxRelayExecutor"));
     uint256 internal constant RECIPE_FEE = 400;
 
     struct Params {
@@ -128,8 +133,20 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             _exchangeData.dfsFeeDivider = 0;
         }
         
+        address wrapper;
+        uint256 exchangedAmount;
 
-        (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
+        {
+            /// @dev Check if TxRelayExecutor initiated transaction by setting right flag in transient storage
+            /// @dev we can't just check for msg.sender, as that wouldn't work for flashloan actions
+            address txRelayAddr = registry.getAddr(TX_RELAY_EXECUTOR_ID);
+            ITxRelayBytesTransientStorage tStorage = ITxRelayBytesTransientStorage(txRelayAddr);
+            if (tStorage.dataHasBeenStoredForTakingFeeFromPosition()) {
+                (wrapper, exchangedAmount) = _sellThroughTxRelay(_exchangeData, tStorage);
+            } else {
+                (wrapper, exchangedAmount) = _sell(_exchangeData);
+            }
+        }
 
         if (isEthDest) {
             TokenUtils.withdrawWeth(exchangedAmount);
