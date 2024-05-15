@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { SupportedFeeTokensRegistry } from "./SupportedFeeTokensRegistry.sol";
 import { BotAuthForTxRelay } from "./BotAuthForTxRelay.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
@@ -27,18 +26,10 @@ contract TxRelayExecutor is
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    SupportedFeeTokensRegistry public immutable FEE_TOKENS_REGISTRY;
-
     /// Caller must be authorized bot
     error BotNotApproved(address bot);
     /// Revert if execution fails when using safe wallet
     error SafeExecutionError();
-    /// Gas price can't be higher than maxGasPrice
-    error GasPriceTooHigh(uint256 maxGasPrice, uint256 gasPrice);
-    /// Order has to be injected if allowOrderInjection is set to true
-    error OrderInjectionMissing();
-    /// Order injection can't be used if not allowed by user
-    error OrderInjectionNotAllowed();
 
     /// @notice Data needed to execute a Safe transaction
     /// @param value Ether value of Safe transaction
@@ -50,10 +41,6 @@ contract TxRelayExecutor is
         address safe;
         bytes data;
         bytes signatures;
-    }
-
-    constructor(address _supportedFeeTokensRegistry) {
-        FEE_TOKENS_REGISTRY = SupportedFeeTokensRegistry(_supportedFeeTokensRegistry);
     }
 
     /// @notice Execute a transaction signed by user and take gas fee from EOA/wallet
@@ -75,10 +62,6 @@ contract TxRelayExecutor is
         uint256 gasStartRoot = gasleft();
 
         _botCallerValidation();
-
-        (, TxRelaySignedDataForEoaFee memory txRelayData) = parseTxRelaySignedDataForEoaFee(_params.data);        
-
-        _gasPriceValidation(txRelayData.maxGasPrice);
 
         uint256 gasFullSafeTx = gasleft();
 
@@ -133,18 +116,7 @@ contract TxRelayExecutor is
     ) external {
         _botCallerValidation();
 
-        (, TxRelaySignedDataForPositionFee memory txRelayData) = parseTxRelaySignedDataForPositionFee(_params.data);
-
-        _gasPriceValidation(txRelayData.maxGasPrice);
-        
-        bool offchainOrderSent = _offchainOrder.wrapper != address(0);
-
-        if (txRelayData.allowOrderInjection && !offchainOrderSent) {
-            revert OrderInjectionMissing();
-        }
-        if (!txRelayData.allowOrderInjection && offchainOrderSent) {
-            revert OrderInjectionNotAllowed();
-        }
+        (, TxRelaySignedData memory txRelayData) = parseTxRelaySignedData(_params.data);
 
         /// @dev read by DFSSell action
         setBytesTransiently(abi.encode(_estimatedGas, txRelayData, _offchainOrder), true);
@@ -176,21 +148,9 @@ contract TxRelayExecutor is
         }
     }
 
-    function _gasPriceValidation(uint256 maxGasPriceSignedByUser) internal view {
-        if (tx.gasprice > maxGasPriceSignedByUser) {
-            revert GasPriceTooHigh(maxGasPriceSignedByUser, tx.gasprice);
-        }
-    }
-
-    function parseTxRelaySignedDataForEoaFee(bytes calldata _data) 
-        public pure returns (Recipe memory recipe, TxRelaySignedDataForEoaFee memory txRelayData)
+    function parseTxRelaySignedData(bytes calldata _data) 
+        public pure returns (Recipe memory recipe, TxRelaySignedData memory txRelayData)
     {
-        (recipe, txRelayData) = abi.decode(_data[4:], (Recipe, TxRelaySignedDataForEoaFee)); 
-    }
-
-    function parseTxRelaySignedDataForPositionFee(bytes calldata _data)
-        public pure returns (Recipe memory recipe, TxRelaySignedDataForPositionFee memory txRelayData)
-    {
-        (recipe, txRelayData) = abi.decode(_data[4:], (Recipe, TxRelaySignedDataForPositionFee)); 
+        (recipe, txRelayData) = abi.decode(_data[4:], (Recipe, TxRelaySignedData)); 
     }
 }

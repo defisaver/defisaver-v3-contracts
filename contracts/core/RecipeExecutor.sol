@@ -156,7 +156,7 @@ contract RecipeExecutor is
     /// @param _currRecipe Recipe to be executed
     function executeRecipeFromTxRelayWhileTakingFeeFromPosition(
         Recipe calldata _currRecipe,
-        TxRelaySignedDataForPositionFee calldata
+        TxRelaySignedData calldata
     ) public payable {
         if (msg.sender != registry.getAddr(TX_RELAY_EXECUTOR_ID)) {
             revert TxRelayAuthorizationError(msg.sender);
@@ -171,7 +171,7 @@ contract RecipeExecutor is
     /// @dev If the wallet is 1/1, take fee for gas cost from eoa, otherwise from wallet itself
     function executeRecipeFromTxRelay(
         Recipe calldata _currRecipe,
-        TxRelaySignedDataForEoaFee calldata _txRelayData
+        TxRelaySignedData calldata _txRelayData
     ) public payable {
         address txRelayExecutorAddr = registry.getAddr(TX_RELAY_EXECUTOR_ID);
         if (msg.sender != txRelayExecutorAddr) {

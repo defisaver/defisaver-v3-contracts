@@ -32,24 +32,6 @@ const addBotCallerForTxRelay = async (
     }
 };
 
-const addInitialFeeTokens = async (isFork = false) => {
-    if (!isFork) {
-        await impersonateAccount(getOwnerAddr());
-    }
-
-    const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    const registryAddr = await getAddrFromRegistry('SupportedFeeTokensRegistry');
-    const registryInstance = await hre.ethers.getContractAt('SupportedFeeTokensRegistry', registryAddr, signer);
-
-    await registryInstance.add(addrs[getNetwork()].DAI_ADDRESS);
-    await registryInstance.add(addrs[getNetwork()].USDC_ADDR);
-    await registryInstance.add(addrs[getNetwork()].WETH_ADDRESS);
-
-    if (!isFork) {
-        await stopImpersonatingAccount(getOwnerAddr());
-    }
-};
-
 // TODO[TX-RELAY]: adjust these values based on the actual gas used
 const determineAdditionalGasUsedInTxRelay = (feeToken) => {
     const feeTokenLower = feeToken.toLowerCase();
@@ -65,20 +47,17 @@ const determineAdditionalGasUsedInTxRelay = (feeToken) => {
     return 0;
 };
 
-const createEmptyOffchainOrder = () => {
-    return {
-        wrapper: nullAddress,
-        exchangeAddr: nullAddress,
-        allowanceTarget: nullAddress,
-        price: 0,
-        protocolFee: 0,
-        callData: hre.ethers.utils.arrayify('0x'), // Empty bytes
-    };
+const emptyOffchainOrder = {
+    wrapper: nullAddress,
+    exchangeAddr: nullAddress,
+    allowanceTarget: nullAddress,
+    price: 0,
+    protocolFee: 0,
+    callData: hre.ethers.utils.arrayify('0x'), // Empty bytes
 };
 
 module.exports = {
     addBotCallerForTxRelay,
-    addInitialFeeTokens,
     determineAdditionalGasUsedInTxRelay,
-    createEmptyOffchainOrder,
+    emptyOffchainOrder,
 };

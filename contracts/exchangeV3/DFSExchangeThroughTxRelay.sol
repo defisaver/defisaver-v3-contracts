@@ -30,14 +30,15 @@ contract DFSExchangeThroughTxRelay is DFSExchangeCore, GasFeeHelper
 
         (
             uint256 estimatedGas,
-            TxRelaySignedDataForPositionFee memory txRelayData,
+            TxRelaySignedData memory txRelayData,
             OffchainData memory offchainData
         ) = abi.decode(
             tStorage.getBytesTransiently(),
-            (uint256, TxRelaySignedDataForPositionFee, OffchainData)
+            (uint256, TxRelaySignedData, OffchainData)
         );
 
-        if (txRelayData.allowOrderInjection) {
+        // if offchain data is present, inject it here
+        if (offchainData.price > 0) {
             exData.offchainData = offchainData;
         }
 
@@ -59,17 +60,14 @@ contract DFSExchangeThroughTxRelay is DFSExchangeCore, GasFeeHelper
         console.log("**************************User %s", exData.user);
         console.log("**************************Wrapper %s", exData.wrapper);
 
-        // if using src token take gas fee before swap
-        if (txRelayData.takeFeeFromSrcToken) {
-            uint256 txCostInSrcToken = calcGasCost(estimatedGas, exData.srcAddr, 0);
-            console.log("**************************Tx cost in src token: %s", txCostInSrcToken);
-            console.log("**************************Max tx cost in fee token: %s", txRelayData.maxTxCostInFeeToken);
-            exData.srcAmount = sub(exData.srcAmount, txCostInSrcToken);
-            if (txCostInSrcToken > txRelayData.maxTxCostInFeeToken) {
-                revert TxCostInFeeTokenTooHighError(txRelayData.maxTxCostInFeeToken, txCostInSrcToken);
-            }
-            exData.srcAddr.withdrawTokens(feeRecipient.getFeeAddr(), txCostInSrcToken);
+        uint256 txCostInSrcToken = calcGasCost(estimatedGas, exData.srcAddr, 0);
+        console.log("**************************Tx cost in src token: %s", txCostInSrcToken);
+        console.log("**************************Max tx cost in fee token: %s", txRelayData.maxTxCostInFeeToken);
+        if (txCostInSrcToken > txRelayData.maxTxCostInFeeToken) {
+            revert TxCostInFeeTokenTooHighError(txRelayData.maxTxCostInFeeToken, txCostInSrcToken);
         }
+        exData.srcAmount = sub(exData.srcAmount, txCostInSrcToken);
+        exData.srcAddr.withdrawTokens(feeRecipient.getFeeAddr(), txCostInSrcToken);
 
         address wrapperAddr = _executeSwap(exData);
 
@@ -77,22 +75,10 @@ contract DFSExchangeThroughTxRelay is DFSExchangeCore, GasFeeHelper
         uint256 amountBought = destBalanceAfter - destBalanceBefore;
 
         console.log("**************************Amount bought: %s", amountBought);
-        console.log("**************************Min price: %s", wmul(exData.minPrice, exData.srcAmount));
 
         // check slippage
         if (amountBought < wmul(exData.minPrice, exData.srcAmount)){
             revert SlippageHitError(amountBought, wmul(exData.minPrice, exData.srcAmount));
-        }
-
-        // if using dest token, take gas fee from swapped amount
-        if (!txRelayData.takeFeeFromSrcToken) {
-            uint256 txCostInDestToken = calcGasCost(estimatedGas, exData.destAddr, 0);
-            console.log("**************************Tx cost in dest token: %s", txCostInDestToken);
-            amountBought = sub(amountBought, txCostInDestToken);
-            if (txCostInDestToken > txRelayData.maxTxCostInFeeToken) {
-                revert TxCostInFeeTokenTooHighError(txRelayData.maxTxCostInFeeToken, txCostInDestToken);
-            }
-            exData.destAddr.withdrawTokens(feeRecipient.getFeeAddr(), txCostInDestToken);
         }
 
         // revert back exData changes to keep it consistent
