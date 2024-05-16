@@ -3496,6 +3496,17 @@
         ]
     },
     {
+        "name": "StarknetClaim",
+        "address": "0x40069889098cd54d6c1021578000f37b197479cf",
+        "id": "0x33e5cbf6",
+        "path": "contracts/actions/utils/StarknetClaim.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"
