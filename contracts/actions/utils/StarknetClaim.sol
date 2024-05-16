@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity =0.8.10;
+
 import "../ActionBase.sol";
 import "../../interfaces/IStarknet.sol";
 
-/// @title Helper action to subtract 2 inputs/return values
+/// @title Action that helps Smart wallets claim Starknet tokens
 contract StarknetClaim is ActionBase {
     struct Params {
         uint256[] payload;
@@ -19,7 +19,7 @@ contract StarknetClaim is ActionBase {
         bytes32[] memory
     ) public virtual override payable returns (bytes32) {}
 
-    
+    /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public override payable {
         Params memory inputData = parseInputs(_callData);
         _starknetClaim(inputData);
