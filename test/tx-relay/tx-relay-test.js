@@ -37,7 +37,6 @@ const { topUp } = require('../../scripts/utils/fork');
 const {
     addBotCallerForTxRelay,
     determineAdditionalGasUsedInTxRelay,
-    createEmptyOffchainOrder,
     emptyOffchainOrder,
 } = require('./utils-tx-relay');
 
@@ -147,7 +146,7 @@ describe('Tx Relay - test using funds from EOA', function () {
 
         const recipe = new dfs.Recipe('AaveV3OpenRecipe-Test', [supplyAction, borrowAction]);
 
-        return recipe.encodeForTxRelayCall(txRelayUserSignedData, false);
+        return recipe.encodeForTxRelayCall(txRelayUserSignedData, false)[1];
     };
 
     const dfsSellFunctionData = async (
@@ -177,7 +176,7 @@ describe('Tx Relay - test using funds from EOA', function () {
             ),
         ]);
 
-        return recipe.encodeForTxRelayCall(txRelaySignedData, true);
+        return recipe.encodeForTxRelayCall(txRelaySignedData, true)[1];
     };
 
     const signSafeTransaction = async (functionData) => {
@@ -325,9 +324,5 @@ describe('Tx Relay - test using funds from EOA', function () {
         console.log(
             `GasUsed txRelayExecutor: ${gasUsed}, price at mainnet ${addrs.mainnet.AVG_GAS_PRICE} gwei $${dollarPrice}`,
         );
-    });
-
-    it('Test getting fee from user position with order injection', async () => {
-        // TODO:
     });
 });

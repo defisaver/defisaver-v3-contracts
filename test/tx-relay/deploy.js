@@ -8,7 +8,7 @@ const {
 } = require('../utils');
 const { createSafe } = require('../utils-safe');
 const { topUp } = require('../../scripts/utils/fork');
-const { addBotCallerForTxRelay, addInitialFeeTokens } = require('./utils-tx-relay');
+const { addBotCallerForTxRelay } = require('./utils-tx-relay');
 
 describe('Deploy tx relay contracts', function () {
     this.timeout(80000);
@@ -25,17 +25,15 @@ describe('Deploy tx relay contracts', function () {
         const bothAuthForTxRelay = await redeploy('BotAuthForTxRelay', addrs[network].REGISTRY_ADDR, false, isFork);
         const recipeExecutor = await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
         const dfsSell = await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, false, isFork);
-        const supportedFeeTokensRegistry = await redeploy('SupportedFeeTokensRegistry', addrs[network].REGISTRY_ADDR, false, isFork);
-        const txRelayExecutor = await redeploy('TxRelayExecutor', addrs[network].REGISTRY_ADDR, false, isFork, supportedFeeTokensRegistry.address);
+        const txRelayExecutor = await redeploy('TxRelayExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
 
         console.log('Sender:', senderAcc.address);
         console.log('Safe wallet:', safeWallet.address);
         console.log('BotAuthForTxRelay:', bothAuthForTxRelay.address);
-        console.log('RecipeExecutor:', recipeExecutor.address)
+        console.log('RecipeExecutor:', recipeExecutor.address);
         console.log('DFSSell:', dfsSell.address);
-        console.log('SupportedFeeTokensRegistry:', supportedFeeTokensRegistry.address);
         console.log('TxRelayExecutor:', txRelayExecutor.address);
-    }
+    };
 
     before(async () => {
         const isFork = hre.network.name === 'fork';
@@ -53,7 +51,6 @@ describe('Deploy tx relay contracts', function () {
         await setUpSafeWallet();
         await redeployContracts(isFork);
         await addBotCallerForTxRelay(botAcc, isFork);
-        await addInitialFeeTokens(isFork);
     });
 
     it('Deploy', async () => {
