@@ -47,17 +47,21 @@ const determineAdditionalGasUsedInTxRelay = (feeToken) => {
     return 0;
 };
 
-const emptyOffchainOrder = {
+const emptyInjectedOffchainOrder = {
     wrapper: nullAddress,
-    exchangeAddr: nullAddress,
-    allowanceTarget: nullAddress,
-    price: 0,
-    protocolFee: 0,
-    callData: hre.ethers.utils.arrayify('0x'), // Empty bytes
+    wrapperData: hre.ethers.utils.arrayify('0x'), // Empty bytes
+    offchainData: {
+        wrapper: nullAddress,
+        exchangeAddr: nullAddress,
+        allowanceTarget: nullAddress,
+        price: 0,
+        protocolFee: 0,
+        callData: hre.ethers.utils.arrayify('0x'), // Empty bytes
+    },
 };
 
 module.exports = {
     addBotCallerForTxRelay,
     determineAdditionalGasUsedInTxRelay,
-    emptyOffchainOrder,
+    emptyInjectedOffchainOrder,
 };

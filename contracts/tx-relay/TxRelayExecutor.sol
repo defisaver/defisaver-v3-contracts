@@ -107,19 +107,19 @@ contract TxRelayExecutor is
     /// @notice Execute a transaction signed by user and take gas fee from user position
     /// @param _params SafeTxParams data needed to execute safe tx
     /// @param _estimatedGas Estimated gas usage for the transaction
-    /// @param _offchainOrder If user signed allowance for offchain order injection, it's included here, otherwise it's empty
+    /// @param _injectedExchangeData Exchange data injected by backend
     /// @dev gas fee is taken inside DFSSell action. Right now, we only support fee taking from position if recipe has sell action
     function executeTxTakingFeeFromPosition(
         SafeTxParams calldata _params,
         uint256 _estimatedGas,
-        DFSExchangeData.OffchainData calldata _offchainOrder
+        DFSExchangeData.InjectedExchangeData calldata _injectedExchangeData
     ) external {
         _botCallerValidation();
 
         (, TxRelaySignedData memory txRelayData) = parseTxRelaySignedData(_params.data);
 
         /// @dev read by DFSSell action
-        setBytesTransiently(abi.encode(_estimatedGas, txRelayData, _offchainOrder), true);
+        setBytesTransiently(abi.encode(_estimatedGas, txRelayData, _injectedExchangeData), true);
 
         _executeSafeTx(_params);
     }

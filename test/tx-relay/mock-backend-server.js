@@ -10,7 +10,7 @@ const { getOwnerAddr, getContractFromRegistry, addrs } = require('../utils');
 const {
     addBotCallerForTxRelay,
     determineAdditionalGasUsedInTxRelay,
-    emptyOffchainOrder,
+    emptyInjectedOffchainOrder,
 } = require('./utils-tx-relay');
 
 const app = express();
@@ -100,10 +100,13 @@ app.post('/tx-relay', async (req, res) => {
             });
         }
         const estimatedGas = 500000; // TODO: do actual gas estimate
+        console.log('BEFORE taking fee from position');
+        console.log(txRelayExecutorByBot.address);
+        console.log(emptyInjectedOffchainOrder);
         receipt = await txRelayExecutorByBot.executeTxTakingFeeFromPosition(
             txParams,
             estimatedGas,
-            emptyOffchainOrder,
+            emptyInjectedOffchainOrder,
             {
                 gasLimit: 8000000,
             },

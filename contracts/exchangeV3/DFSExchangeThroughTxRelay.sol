@@ -31,23 +31,23 @@ contract DFSExchangeThroughTxRelay is DFSExchangeCore, GasFeeHelper
         (
             uint256 estimatedGas,
             TxRelaySignedData memory txRelayData,
-            OffchainData memory offchainData
+            InjectedExchangeData memory injectedExchangeData
         ) = abi.decode(
             tStorage.getBytesTransiently(),
-            (uint256, TxRelaySignedData, OffchainData)
+            (uint256, TxRelaySignedData, InjectedExchangeData)
         );
 
-        // if offchain data is present, inject it here
-        if (offchainData.price > 0) {
-            exData.offchainData = offchainData;
+        // if offchain order data is present, inject it here
+        if (injectedExchangeData.offchainData.price > 0) {
+            exData.offchainData = injectedExchangeData.offchainData;
+        }
+        // if onchain order data is present, inject it here 
+        if (injectedExchangeData.wrapper != address(0)) {
+            exData.wrapper = injectedExchangeData.wrapper;
+            exData.wrapperData = injectedExchangeData.wrapperData;
         }
 
         console.log("****************************OffchainData*********************");
-        console.log("**************************Wrapper %s", offchainData.wrapper);
-        console.log("**************************ExchangeAddr %s", offchainData.exchangeAddr);
-        console.log("**************************AllowanceTarget %s", offchainData.allowanceTarget);
-        console.log("**************************Price %s", offchainData.price);
-        console.log("**************************ProtocolFee %s", offchainData.protocolFee);
         console.log("**************************Estimated gas: %s", estimatedGas);
         console.log("**************************Tx gas price: %s", tx.gasprice);
         console.log("***************************ExchangeData*********************");

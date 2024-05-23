@@ -37,7 +37,7 @@ const { topUp } = require('../../scripts/utils/fork');
 const {
     addBotCallerForTxRelay,
     determineAdditionalGasUsedInTxRelay,
-    emptyOffchainOrder,
+    emptyInjectedOffchainOrder,
 } = require('./utils-tx-relay');
 
 describe('Tx Relay - test using funds from EOA', function () {
@@ -307,13 +307,13 @@ describe('Tx Relay - test using funds from EOA', function () {
         const callData = txRelayExecutorByBot.interface.encodeFunctionData('executeTxTakingFeeFromPosition', [
             txParams,
             estimatedGas,
-            emptyOffchainOrder,
+            emptyInjectedOffchainOrder,
         ]);
 
         const receipt = await txRelayExecutorByBot.executeTxTakingFeeFromPosition(
             txParams,
             estimatedGas,
-            emptyOffchainOrder,
+            emptyInjectedOffchainOrder,
             {
                 gasLimit: 8000000,
             },
