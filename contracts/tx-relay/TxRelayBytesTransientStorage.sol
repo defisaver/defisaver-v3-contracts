@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { console } from "hardhat/console.sol";
+import { ITxRelayBytesTransientStorage } from "../interfaces/ITxRelayBytesTransientStorage.sol";
 
 /// @title Used to store tx relay data in a transaction
 /// @dev Only tx relay can store data, and anyone can read it
-contract TxRelayBytesTransientStorage {
+contract TxRelayBytesTransientStorage is ITxRelayBytesTransientStorage {
     
     function setBytesTransiently(bytes memory _data, bool _useDataForTakingFeeFromPosition) internal {
         uint256 dataLength = _data.length;
