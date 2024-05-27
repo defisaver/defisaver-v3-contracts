@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../interfaces/aaveV3/IDebtToken.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
 
 /// @title Delegate credit for someone to borrow on user's wallet behalf with his signature
 contract SparkDelegateWithSig is ActionBase {
@@ -21,7 +21,7 @@ contract SparkDelegateWithSig is ActionBase {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes calldata _callData,
+        bytes memory _callData,
         bytes32[] memory,
         uint8[] memory,
         bytes32[] memory
@@ -33,7 +33,7 @@ contract SparkDelegateWithSig is ActionBase {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes calldata _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (bytes memory logData) = _delegate(params);
         logger.logActionDirectEvent("SparkDelegateWithSig", logData);
