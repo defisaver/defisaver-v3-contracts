@@ -46,6 +46,7 @@ contract LlamaLendView is LlamaLendHelper {
     uint256 lendApr;
     uint256 debtTokenTotalSupply;
     uint256 debtTokenLeftToBorrow;
+    uint256 loanDiscount;
   }
 
   struct UserData {
@@ -147,7 +148,8 @@ contract LlamaLendView is LlamaLendHelper {
         lendApr: ILlamaLendVault(ctrl.factory()).lend_apr(),
         borrowApr:  ILlamaLendVault(ctrl.factory()).borrow_apr(),
         debtTokenTotalSupply: IERC4626(ctrl.factory()).totalAssets(),
-        debtTokenLeftToBorrow: IERC20(debtTokenAddr).balanceOf(market)
+        debtTokenLeftToBorrow: IERC20(debtTokenAddr).balanceOf(market),
+        loanDiscount: ctrl.loan_discount()
     });
   }
 

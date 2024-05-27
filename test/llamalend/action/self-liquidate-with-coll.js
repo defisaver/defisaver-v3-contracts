@@ -5,6 +5,7 @@ const {
     setBalance, approve, fetchAmountinUSDPrice,
     formatMockExchangeObj,
     setNewExchangeWrapper,
+    chainIds,
 } = require('../../utils');
 const {
     getControllers, collateralSupplyAmountInUsd, supplyToMarket,
@@ -14,14 +15,15 @@ const { llamalendCreate, llamalendSelfLiquidateWithColl } = require('../../actio
 
 describe('LlamaLend-Self-Liq-With-Coll', function () {
     this.timeout(80000);
-
-    const controllers = getControllers();
+    const network = hre.network.config.name;
+    const chainId = chainIds[network];
+    const controllers = getControllers(chainId);
 
     let senderAcc; let proxy; let snapshot; let view; let mockWrapper;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         snapshot = await takeSnapshot();
         await redeploy('LlamaLendCreate');
         await redeploy('LlamaLendSelfLiquidateWithColl');
@@ -39,18 +41,20 @@ describe('LlamaLend-Self-Liq-With-Coll', function () {
     for (let i = 0; i < controllers.length; i++) {
         const controllerAddr = controllers[i];
         it(`should create a Llamalend position in ${controllerAddr} Llamalend market and then self liquidate it with coll when it's in soft liq`, async () => {
-            await supplyToMarket(controllerAddr);
             const controller = await hre.ethers.getContractAt('ILlamaLendController', controllerAddr);
             const collTokenAddr = await controller.collateral_token();
             const debtTokenAddr = await controller.borrowed_token();
-            const collToken = getAssetInfoByAddress(collTokenAddr);
-            const debtToken = getAssetInfoByAddress(debtTokenAddr);
+            const collToken = getAssetInfoByAddress(collTokenAddr, chainId);
+            const debtToken = getAssetInfoByAddress(debtTokenAddr, chainId);
+            await supplyToMarket(controllerAddr, chainId);
             const supplyAmount = fetchAmountinUSDPrice(
                 collToken.symbol, collateralSupplyAmountInUsd,
             );
             const borrowAmount = fetchAmountinUSDPrice(
                 debtToken.symbol, borrowAmountInUsd,
             );
+            if (supplyAmount === 'Infinity') return;
+            if (borrowAmount === 'Infinity') return;
             const supplyAmountInWei = hre.ethers.utils.parseUnits(
                 supplyAmount, collToken.decimals,
             );
@@ -93,6 +97,7 @@ describe('LlamaLend-Self-Liq-With-Coll', function () {
             await llamalendSelfLiquidateWithColl(
                 proxy,
                 controllerAddr,
+                i,
                 hre.ethers.utils.parseUnits('100', 18),
                 1,
                 exchangeData,

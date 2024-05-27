@@ -37,6 +37,7 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         uint256[] memory info
     ) external returns (CallbackData memory cb) {
         uint256 gasUsed = info[0];
+        if (!isControllerValid(msg.sender, info[1])) revert InvalidLlamaLendController();
 
         ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         address collToken = exData.srcAddr;
@@ -45,7 +46,7 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         (, uint256 receivedAmount, bool hasFee) = _sell(exData, _user);
         
         if (gasUsed > 0){
-            receivedAmount -= takeAutomationFee(receivedAmount, debtToken, gasUsed, hasFee);
+            receivedAmount -= _takeAutomationFee(receivedAmount, debtToken, gasUsed, hasFee);
         }
 
         // if receivedAmount > current debt, leftover coll will be returned and receivedAmount-currentDebt will be returned
@@ -59,7 +60,7 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
     }
 
     ///@dev called by llamalend controller after create_loan_extended and borrow_more_extended
-    ///@dev sends exData.srcAmount of debt token to this contract for us to sell, than pulls received coll token
+    ///@dev sends exData.srcAmount of debt token to this contract for us to sell then pulls received coll token
     function callback_deposit(
         address _user,
         uint256,
@@ -68,6 +69,7 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         uint256[] memory info
     ) external returns (CallbackData memory cb) {
         uint256 gasUsed = info[0];
+        if (!isControllerValid(msg.sender, info[1])) revert InvalidLlamaLendController();
         ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
 
         address collToken = exData.destAddr;
@@ -75,7 +77,7 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         (, uint256 receivedAmount, bool hasFee) = _sell(exData, _user);
 
         if (gasUsed > 0){
-            receivedAmount -= takeAutomationFee(receivedAmount, collToken, gasUsed, hasFee);
+            receivedAmount -= _takeAutomationFee(receivedAmount, collToken, gasUsed, hasFee);
         }
 
         cb.collateral = receivedAmount;
@@ -95,7 +97,8 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         uint256[] memory info
     ) external returns (CallbackData memory cb) {
         uint256 gasUsed = info[0];
-        bool sellMax = info[1] > 0;
+        if (!isControllerValid(msg.sender, info[1])) revert InvalidLlamaLendController();
+        bool sellMax = info[2] > 0;
         ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         
         address collToken = exData.srcAddr;
@@ -106,7 +109,7 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         (, uint256 receivedAmount, bool hasFee) = _sell(exData, _user);
 
         if (gasUsed > 0){
-            receivedAmount -= takeAutomationFee(receivedAmount, debtToken, gasUsed, hasFee);
+            receivedAmount -= _takeAutomationFee(receivedAmount, debtToken, gasUsed, hasFee);
         }
         cb.stablecoins = receivedAmount;
         cb.collateral = collToken.getBalance(address(this));
@@ -125,7 +128,7 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         collToken.withdrawTokens(msg.sender, type(uint256).max);
     }
 
-    function takeAutomationFee(
+    function _takeAutomationFee(
         uint256 _destTokenAmount,
         address _token,
         uint256 _gasUsed,

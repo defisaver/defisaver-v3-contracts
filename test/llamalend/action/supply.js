@@ -4,6 +4,7 @@ const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const {
     takeSnapshot, revertToSnapshot, getProxy, redeploy,
     setBalance, approve, fetchAmountinUSDPrice, nullAddress,
+    chainIds,
 } = require('../../utils');
 const {
     getControllers, collateralSupplyAmountInUsd, borrowAmountInUsd, supplyToMarket,
@@ -12,14 +13,15 @@ const { llamalendCreate, llamalendSupply } = require('../../actions');
 
 describe('LlamaLend-Supply', function () {
     this.timeout(80000);
-
-    const controllers = getControllers();
+    const network = hre.network.config.name;
+    const chainId = chainIds[network];
+    const controllers = getControllers(chainId);
 
     let senderAcc; let proxy; let snapshot; let view;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
-        proxy = await getProxy(senderAcc.address);
+        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         snapshot = await takeSnapshot();
         await redeploy('LlamaLendCreate');
         await redeploy('LlamaLendSupply');
@@ -34,18 +36,20 @@ describe('LlamaLend-Supply', function () {
     for (let i = 0; i < controllers.length; i++) {
         const controllerAddr = controllers[i];
         it(`should create and supply to a Llamalend position in ${controllerAddr} Llamalend market`, async () => {
-            await supplyToMarket(controllerAddr);
             const controller = await hre.ethers.getContractAt('ILlamaLendController', controllerAddr);
             const collTokenAddr = await controller.collateral_token();
             const debtTokenAddr = await controller.borrowed_token();
-            const collToken = getAssetInfoByAddress(collTokenAddr);
-            const debtToken = getAssetInfoByAddress(debtTokenAddr);
+            const collToken = getAssetInfoByAddress(collTokenAddr, chainId);
+            const debtToken = getAssetInfoByAddress(debtTokenAddr, chainId);
+            await supplyToMarket(controllerAddr, chainId);
             const supplyAmount = fetchAmountinUSDPrice(
                 collToken.symbol, collateralSupplyAmountInUsd,
             );
             const borrowAmount = fetchAmountinUSDPrice(
                 debtToken.symbol, borrowAmountInUsd,
             );
+            if (supplyAmount === 'Infinity') return;
+            if (borrowAmount === 'Infinity') return;
             const supplyAmountInWei = hre.ethers.utils.parseUnits(
                 supplyAmount, collToken.decimals,
             );

@@ -28,6 +28,7 @@ interface ILlamaLendController {
     function liquidate(address user, uint256 min_x) external;
     function liquidate(address user, uint256 min_x, bool _useEth) external;
     function liquidate_extended(address user, uint256 min_x, uint256 frac, bool use_eth, address callbacker, uint256[] memory _callbackArgs) external;
+    function liquidate_extended(address user, uint256 min_x, uint256 frac, address callbacker, uint256[] memory _callbackArgs) external;
 
 
     /// GETTERS
@@ -52,4 +53,5 @@ interface ILlamaLendController {
     function loan_exists(address) external view returns (bool);
     function liquidation_discount() external view returns (uint256);
     function factory() external view returns (address);
+    function loan_discount() external view returns (uint256);
 }

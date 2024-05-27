@@ -14,6 +14,7 @@ contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
     using TokenUtils for address;
 
     /// @param controllerAddress Address of the llamalend market controller
+    /// @param controllerId id that matches controller number in factory
     /// @param from address from which collAmount of collToken will be pulled
     /// @param collAmount amount of collateral that the user is providing at first
     /// @param nBands number of bands the created position will have
@@ -21,6 +22,7 @@ contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
     /// @param gasUsed info for automated strategy gas reimbursement
     struct Params {
         address controllerAddress;
+        uint256 controllerId;
         address from;
         uint256 collAmount;
         uint256 nBands;
@@ -63,8 +65,8 @@ contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _create(Params memory _params) internal returns (uint256, bytes memory) {
-        /// @dev see ICrvUsdController natspec
         if (_params.collAmount == 0 || _params.exData.srcAmount == 0) revert();
+        if (!isControllerValid(_params.controllerAddress, _params.controllerId)) revert InvalidLlamaLendController();
 
         address collAddr = ILlamaLendController(_params.controllerAddress).collateral_token();
         _params.collAmount = collAddr.pullTokensIfNeeded(_params.from, _params.collAmount);
@@ -72,6 +74,7 @@ contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
         address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
+        info[1] = _params.controllerId;
 
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 

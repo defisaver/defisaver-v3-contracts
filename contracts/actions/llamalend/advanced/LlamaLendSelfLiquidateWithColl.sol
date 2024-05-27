@@ -14,6 +14,7 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
     using TokenUtils for address;
 
     /// @param controllerAddress Address of the curveusd market controller
+    /// @param controllerId id that matches controller number in factory
     /// @param percentage Fraction to liquidate; 100% = 10**18
     /// @param minCrvUsdExpected Users crvUsd collateral balance must be bigger than this
     /// @param exData exchange data for swapping (srcAmount will be amount of coll token sold)
@@ -22,6 +23,7 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
     /// @param gasUsed Only used as part of a strategy, estimated gas used for this tx
     struct Params {
         address controllerAddress;
+        uint256 controllerId;
         uint256 percentage; // Fraction to liquidate; 100% = 10**18
         uint256 minCrvUsdExpected;
         DFSExchangeData.ExchangeData exData;
@@ -65,10 +67,12 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _liquidate(Params memory _params) internal returns (uint256, bytes memory) {
+        if (!isControllerValid(_params.controllerAddress, _params.controllerId)) revert InvalidLlamaLendController();
         address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
-        if (_params.sellAllCollateral) info[1] = 1;
+        info[1] = _params.controllerId;
+        if (_params.sellAllCollateral) info[2] = 1;
         
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
@@ -76,10 +80,14 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
         address debtToken = ILlamaLendController(_params.controllerAddress).borrowed_token();
         uint256 collStartingBalance = collToken.getBalance(address(this));
         uint256 debtStartingBalance = debtToken.getBalance(address(this));
-
-        ILlamaLendController(_params.controllerAddress)
+        if (block.chainid == 1) {
+            ILlamaLendController(_params.controllerAddress)
             .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, false, llamalendSwapper, info);
-
+        } else {
+            ILlamaLendController(_params.controllerAddress)
+            .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, llamalendSwapper, info);
+        }
+        
         // there shouldn't be any funds left on swapper contract but withdrawing it just in case
         LlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
 

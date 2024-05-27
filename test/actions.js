@@ -1876,6 +1876,18 @@ const aaveV3DelegateCredit = async (
 
     return receipt;
 };
+const aaveV3DelegateCreditWithSig = async (
+    proxy, debtToken, delegator, delegatee, value, deadline, v, r, s,
+) => {
+    const aaveDelegateAction = new dfs.actions.aaveV3.AaveV3DelegateWithSigCredit(
+        debtToken, delegator, delegatee, value, deadline, v, r, s,
+    );
+    const functionData = aaveDelegateAction.encodeForDsProxyCall()[1];
+
+    const receipt = await executeAction('AaveV3DelegateWithSig', functionData, proxy);
+
+    return receipt;
+};
 
 const aaveV3Supply = async (
     proxy, market, amount, tokenAddr, assetId, from, signer,
@@ -3183,6 +3195,7 @@ const llamalendCreate = async (
 const llamalendSelfLiquidateWithColl = async (
     proxy,
     controllerAddress,
+    controllerId,
     percentage,
     minCrvUsdExpected,
     exData,
@@ -3191,6 +3204,7 @@ const llamalendSelfLiquidateWithColl = async (
 ) => {
     const action = new dfs.actions.llamalend.LlamaLendSelfLiquidateWithCollAction(
         controllerAddress,
+        controllerId,
         percentage,
         minCrvUsdExpected,
         exData,
@@ -3207,10 +3221,12 @@ const llamalendSelfLiquidateWithColl = async (
 const llamalendBoost = async (
     proxy,
     controllerAddress,
+    controllerId,
     exData,
 ) => {
     const action = new dfs.actions.llamalend.LlamaLendBoostAction(
         controllerAddress,
+        controllerId,
         exData,
         0,
     );
@@ -3224,11 +3240,13 @@ const llamalendBoost = async (
 const llamalendRepay = async (
     proxy,
     controllerAddress,
+    controllerId,
     exData,
     to,
 ) => {
     const action = new dfs.actions.llamalend.LlamaLendRepayAction(
         controllerAddress,
+        controllerId,
         exData,
         to,
         0,
@@ -3242,6 +3260,7 @@ const llamalendRepay = async (
 const llamalendLevCreate = async (
     proxy,
     controllerAddress,
+    controllerId,
     from,
     collateralAmount,
     exData,
@@ -3249,6 +3268,7 @@ const llamalendLevCreate = async (
 ) => {
     const action = new dfs.actions.llamalend.LlamaLendLevCreateAction(
         controllerAddress,
+        controllerId,
         from,
         collateralAmount,
         nBands,
@@ -3484,6 +3504,7 @@ module.exports = {
     aaveV3SwapBorrowRateCalldataOptimised,
     aaveV3ClaimRewards,
     aaveV3DelegateCredit,
+    aaveV3DelegateCreditWithSig,
 
     sparkSupply,
     sparkSupplyCalldataOptimised,

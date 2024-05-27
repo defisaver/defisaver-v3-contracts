@@ -46,6 +46,7 @@ module.exports = {
             timeout: 1000000,
             gasPrice: 170000000000,
             name: 'mainnet',
+            chainId: 1,
             hardfork: 'cancun',
         },
         localOptimism: {
@@ -53,18 +54,21 @@ module.exports = {
             timeout: 1000000,
             gasPrice: 1883022292,
             name: 'optimism',
+            chainId: 10,
         },
         localArbitrum: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
             gasPrice: 1700000000,
             name: 'arbitrum',
+            chainId: 42161,
         },
         localBase: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
             gasPrice: 1700000000,
             name: 'base',
+            chainId: 8453,
         },
         fork: {
             url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
@@ -75,6 +79,23 @@ module.exports = {
             chainId: 1,
         },
         hardhat: {
+            chains: {
+                42161: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+                10: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+                8453: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+            },
             forking: {
                 url: process.env.ETHEREUM_NODE,
                 timeout: 1000000,

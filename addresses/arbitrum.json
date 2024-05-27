@@ -131,6 +131,17 @@
         "history": []
     },
     {
+        "name": "ApproveToken",
+        "address": "0x01058999f5ac434ef48dfb5cd942c57a7661787b",
+        "id": "0xbb8027f4",
+        "path": "contracts/actions/utils/ApproveToken.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "UniV3WrapperV3",
         "address": "0x37236458C59F4dCF17b96Aa67FC07Bbf5578d873",
         "id": "0x7c1f8079",
@@ -476,7 +487,7 @@
     },
     {
       "name": "AaveV3Supply",
-      "address": "0xF159c79077001E2a2C1a178BE68DB7F69a6Da486",
+      "address": "0xA2127f5C7E943c05B6a6A3a541557087F1F1287D",
       "id": "0xfc33bf00",
       "path": "contracts/actions/aaveV3/AaveV3Supply.sol",
       "version": "1.0.1",
@@ -484,10 +495,22 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0xF159c79077001E2a2C1a178BE68DB7F69a6Da486",
         "0x18a1e6775A4fF6F07C4b9aA46f82D13c593c17d2",
         "0x1fFd0E73EB34013951a3da99e10ba5BC4e786Dd3",
         "0xd4AE9d95faca89B235B8A71F410501104fF16E56"
       ]
+    },
+    {
+      "name": "AaveV3DelegateWithSig",
+      "address": "0xFF2CE05250d1880f0f45ea8fB453292CABA42F12",
+      "id": "0x641f5b73",
+      "path": "contracts/actions/aaveV3/AaveV3DelegateWithSig.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
     },
     {
       "name": "AaveV3ATokenPayback",
@@ -1053,6 +1076,160 @@
       "path": "contracts/actions/utils/ChangeProxyOwner.sol",
       "version": "1.0.0",
       "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "LlamaLendCreate",
+      "address": "0xaf14226ad0d782c71d3acf94ad02d6a39c89ec79",
+      "id": "0x570f0528",
+      "path": "contracts/actions/llamalend/LlamaLendCreate.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "LlamaLendView",
+      "address": "0x5393BcbfF80ca7638e961820b31Cd3cf785D69A9",
+      "id": "0xc7facae6",
+      "path": "contracts/views/LlamaLendView.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "LlamaLendSelfLiquidate",
+      "address": "0xe63e836C3ab61481F60A9a56aA72d1D0c55Fc280",
+      "id": "0xafcc4eb7",
+      "path": "contracts/actions/llamalend/LlamaLendSelfLiquidate.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "LlamaLendPayback",
+      "address": "0xB2B93495dA2Fee8F92513fBBfA804564110B63ee",
+      "id": "0x48ef1f07",
+      "path": "contracts/actions/llamalend/LlamaLendPayback.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "LlamaLendWithdraw",
+      "address": "0xd7a80e7a2296d75cd1eebc2f0de0cebd14fbe117",
+      "id": "0xf54e28d9",
+      "path": "contracts/actions/llamalend/LlamaLendWithdraw.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "LlamaLendBorrow",
+      "address": "0x4948135f8b3a8f3b51fbd1050f5d0f755accb8e7",
+      "id": "0x03aadd81",
+      "path": "contracts/actions/llamalend/LlamaLendBorrow.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "LlamaLendSupply",
+      "address": "0x8f0814709d6d8b7c4b3021f7cb80e08476bc6959",
+      "id": "0x37defe88",
+      "path": "contracts/actions/llamalend/LlamaLendSupply.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "LlamaLendBoost",
+      "address": "0xc52a3af27696f8cf999463f3455e23440a376f8d",
+      "id": "0xe339d237",
+      "path": "contracts/actions/llamalend/advanced/LlamaLendBoost.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "LlamaLendRepay",
+      "address": "0x320fdfa922ee33c1cc8a042ada855c9dfe9bed06",
+      "id": "0x731a2ce5",
+      "path": "contracts/actions/llamalend/advanced/LlamaLendRepay.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "LlamaLendGetDebt",
+      "address": "0x81c01f08b8fc4487501c88404ed17ebc17764f9c",
+      "id": "0x389418e6",
+      "path": "contracts/actions/llamalend/LlamaLendGetDebt.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "LlamaLendLevCreate",
+      "address": "0xe5cbdcbe494246c21851eea0642ff0791f95cc86",
+      "id": "0xa7dbc75a",
+      "path": "contracts/actions/llamalend/advanced/LlamaLendLevCreate.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "LlamaLendSelfLiquidateWithColl",
+      "address": "0xebf090e5e83f4cd63d84db013ac8271761a953cf",
+      "id": "0x74ba5125",
+      "path": "contracts/actions/llamalend/advanced/LlamaLendSelfLiquidateWithColl.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": ["0x4faef2cd1680ea00f9398a0525c536b2466a887b"]
+    },
+    {
+      "name": "LlamaLendSwapper",
+      "address": "0x9b4a6d3674b099317d0c5dfe2592ed222057c878",
+      "id": "0x4a94e2c3",
+      "path": "contracts/actions/llamalend/advanced/LlamaLendSwapper.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "PermitToken",
+      "address": "0x2E5E7a691092C158bb8341b936eF24FCcA6c0e00",
+      "id": "0x25a4d738",
+      "path": "contracts/actions/utils/PermitToken.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
       "history": []

@@ -155,6 +155,17 @@
       ]
     },
     {
+      "name": "ApproveToken",
+      "address": "0x842a81d2cfe26d401CD63Cc14e9DEf275c197C1a",
+      "id": "0xbb8027f4",
+      "path": "contracts/actions/utils/ApproveToken.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "Discount",
         "address": "0xc526725F694552382e724013d2F8b8DaAAdB5653",
         "id": "0x88f9bc1a",
@@ -434,7 +445,7 @@
     },
     {
       "name": "AaveV3Supply",
-      "address": "0xD087509490a84C22f3B831Ef09F919061220C876",
+      "address": "0x7e49bdf4690feef64cb341ca46d1e3b45233a683",
       "id": "0xfc33bf00",
       "path": "contracts/actions/aaveV3/AaveV3Supply.sol",
       "version": "1.0.1",
@@ -442,10 +453,22 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0xD087509490a84C22f3B831Ef09F919061220C876",
         "0x85C20f47B8dF7eD41b85cA613d9c4208CE00326B",
         "0x4Ad0cf94e82b58C414266b84ACB061b41bf1bdF7",
         "0xe431c1C673Be123045c8635b0196d51a5bFE55c1"
       ]
+    },
+    {
+      "name": "AaveV3DelegateWithSig",
+      "address": "0x8dd05d32fB05E8c3e8F37294e6f2d13e5823a712",
+      "id": "0x641f5b73",
+      "path": "contracts/actions/aaveV3/AaveV3DelegateWithSig.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
     },
     {
       "name": "AaveV3ATokenPayback",
@@ -944,6 +967,105 @@
       "path": "contracts/actions/utils/ChangeProxyOwner.sol",
       "version": "1.0.0",
       "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Allow",
+      "address": "0xec4937686022c6b83f0d914dde7a465b1108227e",
+      "id": "0xf2bccef8",
+      "path": "contracts/actions/compoundV3/CompV3Allow.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Borrow",
+      "address": "0x2cc1ec3c2b8734b4e57c0415a7641bbaba1d8c21",
+      "id": "0xbb9f4021",
+      "path": "contracts/actions/compoundV3/CompV3Borrow.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Claim",
+      "address": "0xAD36437D50DB3C6c225564A4081acb354b55a5D6",
+      "id": "0xf8470345",
+      "path": "contracts/actions/compoundV3/CompV3Claim.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Payback",
+      "address": "0xdd15d90f92a4973b4c979e58b9e1eebbb4d1cc26",
+      "id": "0xdaa9b106",
+      "path": "contracts/actions/compoundV3/CompV3Payback.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Supply",
+      "address": "0xf4c3D99c43E1DB968CF92770DaE6d377697b0B81",
+      "id": "0x71643f58",
+      "path": "contracts/actions/compoundV3/CompV3Supply.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Transfer",
+      "address": "0x3e5af71709a9e591c5b25422a4419164bb5aba4b",
+      "id": "0xc7443570",
+      "path": "contracts/actions/compoundV3/CompV3Transfer.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3Withdraw",
+      "address": "0x744ad24e92d092e0788d429f5178286672288782",
+      "id": "0xc0072381",
+      "path": "contracts/actions/compoundV3/CompV3Withdraw.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3View",
+      "address": "0x969d845618596787DBc64687Ee90b16931BBBCBC",
+      "id": "0x16be4292",
+      "path": "contracts/views/CompV3View.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "PermitToken",
+      "address": "0xE70c05125E7Cfe929f7ccC1baD348004aCF0f0d6",
+      "id": "0x25a4d738",
+      "path": "contracts/actions/utils/PermitToken.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
       "history": []

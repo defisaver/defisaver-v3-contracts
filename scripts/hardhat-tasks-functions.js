@@ -200,7 +200,7 @@ async function verifyContract(contractAddress, contractName) {
     params.append('codeformat', 'solidity-single-file"');
     let solVersion;
     // https://etherscan.io/solcversions see supported sol versions
-    switch (hardhatSettings.solidity.version) {
+    switch (hardhatSettings.solidity.compilers[0].version) {
     case ('=0.8.10'):
         solVersion = 'v0.8.10+commit.fc410830';
         break;
@@ -208,8 +208,8 @@ async function verifyContract(contractAddress, contractName) {
         solVersion = 'v0.8.10+commit.fc410830';
     }
     params.append('compilerversion', solVersion);
-    params.append('optimizationUsed', hardhatSettings.solidity.settings.optimizer.enabled ? 1 : 0);
-    params.append('runs', hardhatSettings.solidity.settings.optimizer.runs);
+    params.append('optimizationUsed', hardhatSettings.solidity.compilers[0].settings.optimizer.enabled ? 1 : 0);
+    params.append('runs', hardhatSettings.solidity.compilers[0].settings.optimizer.runs);
     params.append('EVMVersion', '');
     /// @notice : MIT license
     params.append('licenseType', 3);
