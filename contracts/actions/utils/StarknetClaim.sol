@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../interfaces/IStarknet.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { IStarknet } from "../../interfaces/IStarknet.sol";
 
 /// @title Action that helps Smart wallets claim Starknet tokens
 contract StarknetClaim is ActionBase {

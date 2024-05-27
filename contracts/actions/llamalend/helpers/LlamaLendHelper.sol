@@ -3,6 +3,7 @@ pragma solidity =0.8.24;
 
 import { MainnetLlamaLendAddresses } from "./MainnetLlamaLendAddresses.sol";
 import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
+import { ILlamaLendFactory } from "../../../interfaces/llamalend/ILlamaLendFactory.sol";
 import { ILLAMMA } from "../../../interfaces/llamalend/ILLAMA.sol";
 import { IAGG } from "../../../interfaces/llamalend/IAGG.sol";
 import { IERC20 } from "../../../interfaces/IERC20.sol";
