@@ -40,17 +40,24 @@ describe('Deploy tx relay contracts', function () {
         console.log('isFork', isFork);
 
         senderAcc = (await hre.ethers.getSigners())[0];
-        const botAcc = '0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4';
+
+        const botAcc1 = '0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4';
+        const botAcc2 = '0xC561281982c3042376eB8242d6A78Ab18062674F';
+        const botAcc3 = '0x660B3515F493200C47Ef3DF195abEAfc57Bd6496';
 
         if (isFork) {
             await topUp(senderAcc.address);
-            await topUp(botAcc);
+            await topUp(botAcc1);
+            await topUp(botAcc2);
+            await topUp(botAcc3);
             await topUp(getOwnerAddr());
         }
 
         await setUpSafeWallet();
         await redeployContracts(isFork);
-        await addBotCallerForTxRelay(botAcc, isFork);
+        await addBotCallerForTxRelay(botAcc1, isFork);
+        await addBotCallerForTxRelay(botAcc2, isFork);
+        await addBotCallerForTxRelay(botAcc3, isFork);
     });
 
     it('Deploy', async () => {
