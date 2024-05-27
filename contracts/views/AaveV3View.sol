@@ -1,12 +1,21 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../actions/aaveV3/helpers/AaveV3Helper.sol";
-import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
-import "../utils/TokenUtils.sol";
-import "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import "../interfaces/aaveV3/IPriceOracleSentinel.sol";
+import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
+import { IPriceOracleSentinel } from "../interfaces/aaveV3/IPriceOracleSentinel.sol";
+import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
+import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
+import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
+import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
+import { IReserveInterestRateStrategy } from "../interfaces/aaveV3/IReserveInterestRateStrategy.sol";
+import { IStableDebtToken } from "../interfaces/aaveV3/IStableDebtToken.sol";
+import { IScaledBalanceToken } from "../interfaces/aaveV3/IScaledBalanceToken.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { WadRayMath } from "../utils/math/WadRayMath.sol";
 
 contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -36,6 +45,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant FLASHLOAN_ENABLED_START_BIT_POSITION = 63;
 
     using TokenUtils for address;
+    using WadRayMath for uint256;
 
     struct LoanData {
         address user;
@@ -511,6 +521,56 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     function isBorrowAllowed(address _market) public view returns (bool) {
         address priceOracleSentinelAddress = IPoolAddressesProvider(_market).getPriceOracleSentinel();
         return (priceOracleSentinelAddress == address(0) || IPriceOracleSentinel(priceOracleSentinelAddress).isBorrowAllowed());
+    }
+
+    struct ReserveLiquidityChange {
+        address reserveAddress;
+        uint256 liquidityAdded;
+        uint256 liquidityTaken;
+    }
+    struct EstimatedApyAfterValues {
+        address reserveAddress;
+        uint256 supplyRate;
+        uint256 variableBorrowRate;
+    }
+
+    function estimateParamsForApyAfterValues(address _market, ReserveLiquidityChange[] memory reserveParams) 
+        public view returns (EstimatedApyAfterValues[] memory) 
+    {
+        IPoolV3 lendingPool = getLendingPool(_market);
+        EstimatedApyAfterValues[] memory apyAfterValues = new EstimatedApyAfterValues[](reserveParams.length);
+        for (uint256 i = 0; i < reserveParams.length; ++i) {
+            DataTypes.ReserveData memory reserve = lendingPool.getReserveData(reserveParams[i].reserveAddress);
+            DataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(reserveParams[i].reserveAddress);
+
+            EstimatedApyAfterValues memory apyAfterValue;
+            apyAfterValue.reserveAddress = reserveParams[i].reserveAddress;
+            
+            (,uint256 currTotalStableDebt,uint256 currAvgStableBorrowRate,) = IStableDebtToken(reserve.stableDebtTokenAddress).getSupplyData();
+            uint256 nextScaledVariableDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply();
+            uint256 totalVarDebt = nextScaledVariableDebt.rayMul(reserve.variableBorrowIndex);
+
+            (
+                apyAfterValue.supplyRate,,
+                apyAfterValue.variableBorrowRate
+            ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
+                DataTypes.CalculateInterestRatesParams({
+                    unbacked: reserve.unbacked,
+                    liquidityAdded: reserveParams[i].liquidityAdded,
+                    liquidityTaken: reserveParams[i].liquidityTaken,
+                    totalStableDebt: currTotalStableDebt,
+                    totalVariableDebt: totalVarDebt,
+                    averageStableBorrowRate: currAvgStableBorrowRate,
+                    reserveFactor: getReserveFactor(config),
+                    reserve: reserveParams[i].reserveAddress,
+                    aToken: reserve.aTokenAddress
+                })
+            );
+
+            apyAfterValues[i] = apyAfterValue;
+        }
+
+        return apyAfterValues;
     }
 
 }
