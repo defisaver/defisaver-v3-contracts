@@ -1126,14 +1126,16 @@
     },
     {
       "name": "LlamaLendWithdraw",
-      "address": "0xd7a80e7a2296d75cd1eebc2f0de0cebd14fbe117",
+      "address": "0x47199A5180d4B16683432f2a1BcBc9FF67CaE421",
       "id": "0xf54e28d9",
       "path": "contracts/actions/llamalend/LlamaLendWithdraw.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
-      "history": []
+      "history": [
+        "0xd7a80e7a2296d75cd1eebc2f0de0cebd14fbe117"
+      ]
     },
     {
       "name": "LlamaLendBorrow",
