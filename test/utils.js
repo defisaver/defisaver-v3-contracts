@@ -330,6 +330,7 @@ const coinGeckoHelper = {
     SUSHI: 'sushi',
     bLUSD: 'boosted-lusd',
     wstETH: 'wrapped-steth',
+    stETH: 'steth',
     GMX: 'gmx',
     ARB: 'arbitrum',
     frxETH: 'frax-ether',

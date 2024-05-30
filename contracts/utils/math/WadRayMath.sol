@@ -1,7 +1,7 @@
 
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.10;
 
 /**
  * @title WadRayMath library
@@ -20,6 +20,13 @@ library WadRayMath {
   uint256 internal constant HALF_RAY = 0.5e27;
 
   uint256 internal constant WAD_RAY_RATIO = 1e9;
+
+  /**
+   * @return One ray, 1e27
+   **/
+  function ray() internal pure returns (uint256) {
+    return RAY;
+  }
 
   /**
    * @dev Multiplies two wad, rounding half up to the nearest wad
