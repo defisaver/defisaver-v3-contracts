@@ -44,6 +44,7 @@ const addrs = {
         FEED_REGISTRY: '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf',
         COMET_USDC_ADDR: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
         COMET_USDC_REWARDS_ADDR: '0x1B0e765F6224C21223AeA2af16c1C46E38885a40',
+        COMET_ETH_ADDR: '0xA17581A9E3356d9A858b789D68B4d866e593aE94',
         COMP_ADDR: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
         CHICKEN_BONDS_VIEW: '0x809a93fd4a0d7d7906Ef6176f0b5518b418Da08f',
         AAVE_MARKET: '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e',
@@ -337,6 +338,7 @@ const coinGeckoHelper = {
     crvUSD: 'crvusd',
     sUSDe: 'ethena-staked-usde',
     OP: 'optimism',
+    cbETH: 'cb-eth',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;

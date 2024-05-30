@@ -7,6 +7,8 @@ import "../utils/math/Exponential.sol";
 import "../interfaces/compound/IComptroller.sol";
 import "../interfaces/compound/ICToken.sol";
 import "../interfaces/compound/ICompoundOracle.sol";
+import { InterestRateModel } from "../interfaces/compound/InterestRateModel.sol";
+import { console } from "hardhat/console.sol";
 
 contract CompView is Exponential, DSMath {
 
@@ -276,6 +278,133 @@ contract CompView is Exponential, DSMath {
             return ETH_ADDRESS;
         } else {
             return ICToken(_cTokenAddress).underlying();
+        }
+    }
+
+    struct ChangeInTokenLiquidity {
+        address cTokenAddr;
+        bool isBorrowAsset;
+        uint256 liquidityAdded;
+        uint256 liquidityTaken;
+    }
+    struct EstimatedRatesAfterValues {
+        address cTokenAddr;
+        uint256 supplyRate;
+        uint256 borrowRate;
+    }
+
+    /// @dev This function should be called with static call
+    function estimateParamsForApyAfterValues(ChangeInTokenLiquidity[] memory _tokens) public returns (EstimatedRatesAfterValues[] memory retVal)
+    {   
+        retVal = new EstimatedRatesAfterValues[](_tokens.length);
+
+        for (uint256 i = 0; i < _tokens.length; ++i) {
+            ICToken cToken = ICToken(_tokens[i].cTokenAddr);
+            InterestRateModel interestRateModel = cToken.interestRateModel();
+    
+            cToken.accrueInterest();
+
+            uint256 totalBorrowsCurrent = cToken.totalBorrowsCurrent();
+            uint256 totalUnderlying = cToken.getCash();
+            uint256 totalReserves = cToken.totalReserves();
+
+            totalUnderlying += _tokens[i].liquidityAdded;
+            if (_tokens[i].liquidityTaken >= totalUnderlying) {
+                totalUnderlying = 0;
+            } else {
+                totalUnderlying -= _tokens[i].liquidityTaken;
+            }
+
+            if (_tokens[i].isBorrowAsset) {
+                totalBorrowsCurrent += _tokens[i].liquidityTaken;
+
+                if (_tokens[i].liquidityAdded >= totalBorrowsCurrent) {
+                    totalBorrowsCurrent = 0;
+                } else {    
+                    totalBorrowsCurrent -= _tokens[i].liquidityAdded;
+                }
+            }
+
+            uint256 estimatedSupplyRate = _getSupplyRate(
+                address(interestRateModel),
+                cToken.supplyRatePerBlock(),
+                totalUnderlying,
+                totalBorrowsCurrent,
+                totalReserves,
+                cToken.reserveFactorMantissa()
+            );
+            
+            uint256 estimatedBorrowRate = _getBorrowRate(
+                address(interestRateModel),
+                cToken.borrowRatePerBlock(),
+                totalUnderlying,
+                totalBorrowsCurrent,
+                totalReserves
+            );
+
+            retVal[i] = EstimatedRatesAfterValues({
+                cTokenAddr: _tokens[i].cTokenAddr,
+                supplyRate: estimatedSupplyRate,
+                borrowRate: estimatedBorrowRate
+            });
+        }
+    }
+    
+    function _getSupplyRate(
+        address _interestRateModel,
+        uint256 _currSupplyRate,
+        uint256 _underlying,
+        uint256 _borrows,
+        uint256 _reserves,
+        uint256 _reserveFactor
+    ) internal view returns (uint256 supplyRate) {
+        supplyRate = _currSupplyRate;
+
+        (bool success, bytes memory data) = _interestRateModel.staticcall(
+            abi.encodeWithSelector(
+                InterestRateModel.getSupplyRate.selector,
+                _underlying,
+                _borrows,
+                _reserves,
+                _reserveFactor
+            )
+        );
+        
+        if (!success || data.length == 0) return supplyRate;
+
+        if (data.length == 32) {
+            supplyRate = abi.decode(data, (uint256));
+        } else if (data.length == 64) {
+            /// @dev In older implementations, two values are returned, with second one being the actual rate
+            (, supplyRate) = abi.decode(data, (uint256, uint256));
+        }
+    }
+
+    function _getBorrowRate(
+        address _interestRateModel,
+        uint256 _currBorrowRate,
+        uint256 _underlying,
+        uint256 _borrows,
+        uint256 _reserves
+    ) internal view returns (uint256 borrowRate) {
+        borrowRate = _currBorrowRate;
+
+        (bool success, bytes memory data) = _interestRateModel.staticcall(
+            abi.encodeWithSelector(
+                InterestRateModel.getBorrowRate.selector,
+                _underlying,
+                _borrows,
+                _reserves
+            )
+        );
+        
+        if (!success || data.length == 0) return borrowRate;
+
+        if (data.length == 32) {
+            borrowRate = abi.decode(data, (uint256));
+        } else if (data.length == 64) {
+            /// @dev In older implementations, two values are returned, with second one being the actual rate
+            (, borrowRate) = abi.decode(data, (uint256, uint256));
         }
     }
 }
