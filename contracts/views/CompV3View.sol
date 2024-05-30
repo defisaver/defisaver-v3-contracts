@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.10;
 
 import "../DS/DSMath.sol";
 import "../utils/math/Exponential.sol";
@@ -201,6 +201,7 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         return ICometRewards(COMET_REWARDS_ADDR).getRewardOwed(_market, _user);
     }
 
+    /// @dev in compV3, only base asset token is used for apy calculations
     function estimateParamsForApyAfterValues(address _market, address _user, uint256 _supplyAmount, uint256 _borrowAmount) 
         public view returns (uint256 utilization, uint256 supplyRate, uint256 borrowRate) 
     {   
@@ -215,9 +216,9 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         IComet.TotalsBasic memory totals = IComet(_market).totalsBasic();
 
         /// @dev estimate updating of baseSupplyIndex and baseBorrowIndex
-        /// @dev estimate time to two blocks after last accrued interest
-        totals.baseSupplyIndex += safe64(mulFactor(totals.baseSupplyIndex, supplyRate * 24 seconds));
-        totals.baseBorrowIndex += safe64(mulFactor(totals.baseBorrowIndex, borrowRate * 24 seconds));
+        /// @dev estimate time to one block after last accrued interest
+        totals.baseSupplyIndex += safe64(mulFactor(totals.baseSupplyIndex, supplyRate * 12 seconds));
+        totals.baseBorrowIndex += safe64(mulFactor(totals.baseBorrowIndex, borrowRate * 12 seconds));
 
         if (_borrowAmount > 0) {
             int256 presentValue = presentValue(user.principal, totals.baseSupplyIndex, totals.baseBorrowIndex);
