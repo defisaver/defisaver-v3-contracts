@@ -347,20 +347,20 @@ contract AaveView is AaveHelper, DSMath{
         uint256 variableBorrowRate;
     }
 
-    function estimateParamsForApyAfterValues(address _market, ReserveLiquidityChange[] memory reserveParams)
+    function estimateParamsForApyAfterValues(address _market, ReserveLiquidityChange[] memory _reserveParams)
         public view returns (EstimatedRatesAfterValues[] memory)
     {
         ILendingPoolV2 lendingPool = ILendingPoolV2(ILendingPoolAddressesProviderV2(_market).getLendingPool());
-        EstimatedRatesAfterValues[] memory estimatedRates = new EstimatedRatesAfterValues[](reserveParams.length);
-        for (uint256 i = 0; i < reserveParams.length; ++i) {
-            DataTypes.ReserveData memory reserve = lendingPool.getReserveData(reserveParams[i].reserveAddress);
+        EstimatedRatesAfterValues[] memory estimatedRates = new EstimatedRatesAfterValues[](_reserveParams.length);
+        for (uint256 i = 0; i < _reserveParams.length; ++i) {
+            DataTypes.ReserveData memory reserve = lendingPool.getReserveData(_reserveParams[i].reserveAddress);
 
             EstimatedRatesAfterValues memory estimatedRate;
-            estimatedRate.reserveAddress = reserveParams[i].reserveAddress;
+            estimatedRate.reserveAddress = _reserveParams[i].reserveAddress;
             estimatedRate.supplyRate = reserve.currentLiquidityRate;
             estimatedRate.variableBorrowRate = reserve.currentVariableBorrowRate;
 
-            if (reserveParams[i].liquidityAdded == 0 && reserveParams[i].liquidityTaken == 0) {
+            if (_reserveParams[i].liquidityAdded == 0 && _reserveParams[i].liquidityTaken == 0) {
                 estimatedRates[i] = estimatedRate;
                 continue;
             }
@@ -374,17 +374,17 @@ contract AaveView is AaveHelper, DSMath{
                 .scaledTotalSupply()
                 .rayMul(nextVariableBorrowIndex);
 
-            uint256 availableLiquidity = IERC20(reserveParams[i].reserveAddress)
+            uint256 availableLiquidity = IERC20(_reserveParams[i].reserveAddress)
                 .balanceOf(reserve.aTokenAddress)
-                + reserveParams[i].liquidityAdded
-                - reserveParams[i].liquidityTaken;
+                + _reserveParams[i].liquidityAdded
+                - _reserveParams[i].liquidityTaken;
             
             (
                estimatedRate.supplyRate,
                ,
                estimatedRate.variableBorrowRate
             ) = IReserveInterestRateStrategyV2(reserve.interestRateStrategyAddress).calculateInterestRates(
-                reserveParams[i].reserveAddress,
+                _reserveParams[i].reserveAddress,
                 availableLiquidity,
                 totalStableDebt,
                 totalVariableDebt,
@@ -398,12 +398,14 @@ contract AaveView is AaveHelper, DSMath{
         return estimatedRates;        
     }
 
-    function _getNextVariableBorrowIndex(DataTypes.ReserveData memory reserve) internal view returns (uint128 variableBorrowIndex) {
-        uint256 scaledVariableDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply();
-        variableBorrowIndex = reserve.variableBorrowIndex;
-        if (reserve.currentLiquidityRate > 0 && scaledVariableDebt != 0) {
-            uint256 cumulatedVariableBorrowInterest =
-                MathUtils.calculateCompoundedInterest(reserve.currentVariableBorrowRate, reserve.lastUpdateTimestamp);
+    function _getNextVariableBorrowIndex(DataTypes.ReserveData memory _reserve) internal view returns (uint128 variableBorrowIndex) {
+        uint256 scaledVariableDebt = IScaledBalanceToken(_reserve.variableDebtTokenAddress).scaledTotalSupply();
+        variableBorrowIndex = _reserve.variableBorrowIndex;
+        if (_reserve.currentLiquidityRate > 0 && scaledVariableDebt != 0) {
+            uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
+                _reserve.currentVariableBorrowRate,
+                _reserve.lastUpdateTimestamp
+            );
             variableBorrowIndex = uint128(cumulatedVariableBorrowInterest.rayMul(variableBorrowIndex));
         }
     }

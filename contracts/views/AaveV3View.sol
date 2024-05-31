@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.10;
 
 import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
@@ -12,10 +12,12 @@ import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
 import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
 import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
 import { IReserveInterestRateStrategy } from "../interfaces/aaveV3/IReserveInterestRateStrategy.sol";
-import { IStableDebtToken } from "../interfaces/aaveV3/IStableDebtToken.sol";
-import { IScaledBalanceToken } from "../interfaces/aaveV3/IScaledBalanceToken.sol";
+import { IStableDebtToken } from "../interfaces/aave/IStableDebtToken.sol";
+import { IScaledBalanceToken } from "../interfaces/aave/IScaledBalanceToken.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 import { WadRayMath } from "../utils/math/WadRayMath.sol";
+import { MathUtils } from "../utils/math/MathUtils.sol";
+import { console } from "hardhat/console.sol";
 
 contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -528,31 +530,36 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint256 liquidityAdded;
         uint256 liquidityTaken;
     }
-    struct EstimatedApyAfterValues {
+    struct EstimatedRatesAfterValues {
         address reserveAddress;
         uint256 supplyRate;
         uint256 variableBorrowRate;
     }
 
     function estimateParamsForApyAfterValues(address _market, ReserveLiquidityChange[] memory reserveParams) 
-        public view returns (EstimatedApyAfterValues[] memory) 
+        public view returns (EstimatedRatesAfterValues[] memory) 
     {
         IPoolV3 lendingPool = getLendingPool(_market);
-        EstimatedApyAfterValues[] memory apyAfterValues = new EstimatedApyAfterValues[](reserveParams.length);
+        EstimatedRatesAfterValues[] memory estimatedRates = new EstimatedRatesAfterValues[](reserveParams.length);
         for (uint256 i = 0; i < reserveParams.length; ++i) {
             DataTypes.ReserveData memory reserve = lendingPool.getReserveData(reserveParams[i].reserveAddress);
-            DataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(reserveParams[i].reserveAddress);
 
-            EstimatedApyAfterValues memory apyAfterValue;
-            apyAfterValue.reserveAddress = reserveParams[i].reserveAddress;
+            EstimatedRatesAfterValues memory estimatedRate;
+            estimatedRate.reserveAddress = reserveParams[i].reserveAddress;
             
-            (,uint256 currTotalStableDebt,uint256 currAvgStableBorrowRate,) = IStableDebtToken(reserve.stableDebtTokenAddress).getSupplyData();
-            uint256 nextScaledVariableDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply();
-            uint256 totalVarDebt = nextScaledVariableDebt.rayMul(reserve.variableBorrowIndex);
+            (uint256 currTotalStableDebt, uint256 currAvgStableBorrowRate) = IStableDebtToken(reserve.stableDebtTokenAddress)
+                .getTotalSupplyAndAvgRate();
+            
+            uint256 nextVariableBorrowIndex = _getNextVariableBorrowIndex(reserve);
+
+            uint256 totalVarDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress)
+                .scaledTotalSupply()
+                .rayMul(nextVariableBorrowIndex);
 
             (
-                apyAfterValue.supplyRate,,
-                apyAfterValue.variableBorrowRate
+                estimatedRate.supplyRate,
+                ,
+                estimatedRate.variableBorrowRate
             ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
                 DataTypes.CalculateInterestRatesParams({
                     unbacked: reserve.unbacked,
@@ -561,16 +568,28 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
                     totalStableDebt: currTotalStableDebt,
                     totalVariableDebt: totalVarDebt,
                     averageStableBorrowRate: currAvgStableBorrowRate,
-                    reserveFactor: getReserveFactor(config),
+                    reserveFactor: getReserveFactor(reserve.configuration),
                     reserve: reserveParams[i].reserveAddress,
                     aToken: reserve.aTokenAddress
                 })
             );
 
-            apyAfterValues[i] = apyAfterValue;
+            estimatedRates[i] = estimatedRate;
         }
 
-        return apyAfterValues;
+        return estimatedRates;
     }
+
+    function _getNextVariableBorrowIndex(DataTypes.ReserveData memory _reserve) internal view returns (uint128 variableBorrowIndex) {
+        uint256 scaledVariableDebt = IScaledBalanceToken(_reserve.variableDebtTokenAddress).scaledTotalSupply();
+        variableBorrowIndex = _reserve.variableBorrowIndex;
+        if (scaledVariableDebt > 0) {
+            uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
+                _reserve.currentVariableBorrowRate,
+                _reserve.lastUpdateTimestamp
+            );
+            variableBorrowIndex = uint128(cumulatedVariableBorrowInterest.rayMul(variableBorrowIndex));
+        }
+    }   
 
 }

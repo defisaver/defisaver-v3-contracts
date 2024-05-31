@@ -340,6 +340,7 @@ const coinGeckoHelper = {
     sUSDe: 'ethena-staked-usde',
     OP: 'optimism',
     cbETH: 'cb-eth',
+    FRAX: 'frax',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;
