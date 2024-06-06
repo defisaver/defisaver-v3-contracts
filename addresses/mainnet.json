@@ -3508,7 +3508,7 @@
     },
     {
         "name": "DFSSafeFactory",
-        "address": "0xb03fe103f54841821C080C124312059c9A3a7B5c",
+        "address": "0x905ade25b1f8f39cf470e39c5a768eaf1f91fd3e",
         "id": "0x001c87d3",
         "path": "contracts/utils/DFSSafeFactory.sol",
         "version": "1.0.0",
