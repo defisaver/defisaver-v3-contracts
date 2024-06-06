@@ -4,7 +4,8 @@ pragma solidity =0.8.10;
 import "../interfaces/safe/ISafeProxyFactory.sol";
 import "../interfaces/safe/ISafe.sol";
 
-
+/// @title Helper contract for deploying a new Safe and executing a Safe tx all at once
+/// @dev We didn't use Safe's initializer for this since we want the Safe address to be easily recreatable on each chain
 contract DFSSafeFactory {
     error UnsupportedChain(uint256);
 
