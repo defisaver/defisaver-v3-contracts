@@ -3508,6 +3508,17 @@
         "history": []
     },
     {
+        "name": "DFSSafeFactory",
+        "address": "0x905ade25b1f8f39cf470e39c5a768eaf1f91fd3e",
+        "id": "0x001c87d3",
+        "path": "contracts/utils/DFSSafeFactory.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"
