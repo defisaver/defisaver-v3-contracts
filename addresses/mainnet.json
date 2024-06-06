@@ -3483,7 +3483,7 @@
     },
     {
         "name": "LSVView",
-        "address": "0xECE15C12d8dCDb88c70fAfF38E8dAE4aC4ee69Ce",
+        "address": "0x2bf0643b4d7e3e63d0a859048af980fb3333b478",
         "id": "0x373e1531",
         "path": "contracts/views/LSVView.sol",
         "version": "1.0.0",
@@ -3491,6 +3491,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xECE15C12d8dCDb88c70fAfF38E8dAE4aC4ee69Ce",
             "0xFAb98E139EBeC1Ed76d226b6bd6E4C5f66B2fE1b",
             "0x328d7a29f1cf211c58a910e498e326e7f419f8d6"
         ]

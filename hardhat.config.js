@@ -101,7 +101,7 @@ module.exports = {
                 // blockNumber: 12068716
             },
             name: 'mainnet',
-            chainId: 10,
+            chainId: 1,
         },
         // NETWORKS FOR DEPLOYING
         mainnet: {

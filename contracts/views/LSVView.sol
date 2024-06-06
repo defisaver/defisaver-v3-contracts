@@ -30,7 +30,9 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
         MORPHO_AAVE_V3,
         COMPOUND_V3,
         SPARK,
-        MORPHO_BLUE_WSTETH
+        MORPHO_BLUE_WSTETH_MARKET_RATE,
+        MORPHO_BLUE_WSTETH_LIDO_RATE_945,
+        MORPHO_BLUE_WSTETH_LIDO_RATE_965
     }
 
     uint256 public constant NUMBER_OF_SUPPORTED_PROTOCOLS = 5;
@@ -160,7 +162,47 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                 Id marketId = MarketParamsLib.id(marketParams);
                 if (MorphoLib.collateral(morphoBlue, marketId, proxies[i]) > 0){
                     tempPositions[positionCounter++] = Position(
-                        uint8(Protocol.MORPHO_BLUE_WSTETH),
+                        uint8(Protocol.MORPHO_BLUE_WSTETH_MARKET_RATE),
+                        proxies[i],
+                        marketParams.collateralToken,
+                        TokenUtils.WETH_ADDR,
+                        MorphoLib.collateral(morphoBlue, marketId, proxies[i]),
+                        MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, proxies[i])
+                    );
+                }
+            }
+            {       
+                MarketParams memory marketParams = MarketParams({
+                    loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                    collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                    oracle: 0xbD60A6770b27E084E8617335ddE769241B0e71D8,
+                    irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                    lltv: 945000000000000000
+                });
+                Id marketId = MarketParamsLib.id(marketParams);
+                if (MorphoLib.collateral(morphoBlue, marketId, proxies[i]) > 0){
+                    tempPositions[positionCounter++] = Position(
+                        uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_945),
+                        proxies[i],
+                        marketParams.collateralToken,
+                        TokenUtils.WETH_ADDR,
+                        MorphoLib.collateral(morphoBlue, marketId, proxies[i]),
+                        MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, proxies[i])
+                    );
+                }
+            }
+            {       
+                MarketParams memory marketParams = MarketParams({
+                    loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                    collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                    oracle: 0xbD60A6770b27E084E8617335ddE769241B0e71D8,
+                    irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                    lltv: 965000000000000000
+                });
+                Id marketId = MarketParamsLib.id(marketParams);
+                if (MorphoLib.collateral(morphoBlue, marketId, proxies[i]) > 0){
+                    tempPositions[positionCounter++] = Position(
+                        uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_965),
                         proxies[i],
                         marketParams.collateralToken,
                         TokenUtils.WETH_ADDR,
@@ -318,7 +360,49 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                 Id marketId = MarketParamsLib.id(marketParams);
                 if (MorphoLib.collateral(morphoBlue, marketId, proxies[i]) > 0){
                     tempPositions[positionCounter++] = Position(
-                        uint8(Protocol.MORPHO_BLUE_WSTETH),
+                        uint8(Protocol.MORPHO_BLUE_WSTETH_MARKET_RATE),
+                        proxies[i],
+                        marketParams.collateralToken,
+                        TokenUtils.WETH_ADDR,
+                        MorphoLib.collateral(morphoBlue, marketId, proxies[i]),
+                        MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, proxies[i])
+                    );
+                }
+            }
+            // MorphoBlue wsteth/eth market
+            {       
+                MarketParams memory marketParams = MarketParams({
+                    loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                    collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                    oracle: 0xbD60A6770b27E084E8617335ddE769241B0e71D8,
+                    irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                    lltv: 945000000000000000
+                });
+                Id marketId = MarketParamsLib.id(marketParams);
+                if (MorphoLib.collateral(morphoBlue, marketId, proxies[i]) > 0){
+                    tempPositions[positionCounter++] = Position(
+                        uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_945),
+                        proxies[i],
+                        marketParams.collateralToken,
+                        TokenUtils.WETH_ADDR,
+                        MorphoLib.collateral(morphoBlue, marketId, proxies[i]),
+                        MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, proxies[i])
+                    );
+                }
+            }
+            // MorphoBlue wsteth/eth market
+            {       
+                MarketParams memory marketParams = MarketParams({
+                    loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                    collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                    oracle: 0xbD60A6770b27E084E8617335ddE769241B0e71D8,
+                    irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                    lltv: 965000000000000000
+                });
+                Id marketId = MarketParamsLib.id(marketParams);
+                if (MorphoLib.collateral(morphoBlue, marketId, proxies[i]) > 0){
+                    tempPositions[positionCounter++] = Position(
+                        uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_965),
                         proxies[i],
                         marketParams.collateralToken,
                         TokenUtils.WETH_ADDR,
@@ -456,7 +540,51 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
             Id marketId = MarketParamsLib.id(marketParams);
             if (MorphoLib.collateral(morphoBlue, marketId, _user) > 0){
                 tempPositions[positionCounter++] = Position(
-                    uint8(Protocol.MORPHO_BLUE_WSTETH),
+                    uint8(Protocol.MORPHO_BLUE_WSTETH_MARKET_RATE),
+                    _user,
+                    marketParams.collateralToken,
+                    TokenUtils.WETH_ADDR,
+                    MorphoLib.collateral(morphoBlue, marketId, _user),
+                    MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, _user)
+                );
+            }
+            
+        }
+        // MorphoBlue wsteth/eth market
+        {       
+            MarketParams memory marketParams = MarketParams({
+                loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                oracle: 0xbD60A6770b27E084E8617335ddE769241B0e71D8,
+                irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                lltv: 945000000000000000
+            });
+            Id marketId = MarketParamsLib.id(marketParams);
+            if (MorphoLib.collateral(morphoBlue, marketId, _user) > 0){
+                tempPositions[positionCounter++] = Position(
+                    uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_945),
+                    _user,
+                    marketParams.collateralToken,
+                    TokenUtils.WETH_ADDR,
+                    MorphoLib.collateral(morphoBlue, marketId, _user),
+                    MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, _user)
+                );
+            }
+            
+        }
+        // MorphoBlue wsteth/eth market
+        {       
+            MarketParams memory marketParams = MarketParams({
+                loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                oracle: 0xbD60A6770b27E084E8617335ddE769241B0e71D8,
+                irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                lltv: 965000000000000000
+            });
+            Id marketId = MarketParamsLib.id(marketParams);
+            if (MorphoLib.collateral(morphoBlue, marketId, _user) > 0){
+                tempPositions[positionCounter++] = Position(
+                    uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_965),
                     _user,
                     marketParams.collateralToken,
                     TokenUtils.WETH_ADDR,
@@ -492,7 +620,9 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
         if (protocol == uint8(Protocol.MORPHO_AAVE_V3)) return findCollAndDebtForMorphoAaveV3Position(_user, _collTokens);
         if (protocol == uint8(Protocol.COMPOUND_V3)) return findCollAndDebtForCompV3Position(_user, _collTokens);
         if (protocol == uint8(Protocol.SPARK)) return findCollAndDebtForSparkPosition(_user, _collTokens);
-        if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH)) return findCollAndDebtForMorphoBlueWstethPosition(_user);
+        if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH_MARKET_RATE)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
+        if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_945)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
+        if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_965)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
         return (0, 0, address(0));
     }
 
@@ -589,14 +719,33 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
         }
     }
     /// @dev we assume it only has one LST token as collateral, and only ETH as debt
-    function findCollAndDebtForMorphoBlueWstethPosition(address _user) public view returns (uint256, uint256, address) {
-        MarketParams memory marketParams = MarketParams({
-            loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
-            collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
-            oracle: 0x2a01EB9496094dA03c4E364Def50f5aD1280AD72,
-            irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
-            lltv: 945000000000000000
-        });
+    function findCollAndDebtForMorphoBlueWstethPosition(address _user, Protocol protocol) public view returns (uint256, uint256, address) {
+        MarketParams memory marketParams;
+        if (protocol == Protocol.MORPHO_BLUE_WSTETH_MARKET_RATE){
+            marketParams = MarketParams({
+                loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                oracle: 0x2a01EB9496094dA03c4E364Def50f5aD1280AD72,
+                irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                lltv: 945000000000000000
+            });
+        } else if (protocol == Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_945){
+            marketParams = MarketParams({
+                loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                oracle: 0xbD60A6770b27E084E8617335ddE769241B0e71D8,
+                irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                lltv: 945000000000000000
+            });
+        } else if (protocol == Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_965){
+            marketParams = MarketParams({
+                loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
+                collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
+                oracle: 0xbD60A6770b27E084E8617335ddE769241B0e71D8,
+                irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
+                lltv: 965000000000000000
+            });
+        }
         Id marketId = MarketParamsLib.id(marketParams);
         uint256 collBalance = MorphoLib.collateral(morphoBlue, marketId, _user);
         uint256 debtBalance = MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, _user);
