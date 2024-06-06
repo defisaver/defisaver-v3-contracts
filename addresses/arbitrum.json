@@ -120,6 +120,17 @@
         "history": []
     },
     {
+        "name": "DFSSafeFactory",
+        "address": "0xeEdfce96C2D257a4c67b711998Bb65E32E288f66",
+        "id": "0x001c87d3",
+        "path": "contracts/utils/DFSSafeFactory.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "DefisaverLogger",
         "address": "0xE6f9A5C850dbcD12bc64f40d692F537250aDEC38",
         "id": "0x35934e1a",
