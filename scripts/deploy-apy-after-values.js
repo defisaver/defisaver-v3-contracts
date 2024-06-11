@@ -31,6 +31,9 @@ async function main() {
     const sparkView = await redeploy('SparkView', addrs[network].REGISTRY_ADDR, false, true);
     console.log('SparkView deployed to:', sparkView.address);
 
+    const morphoView = await redeploy('MorphoBlueView', addrs[network].REGISTRY_ADDR, false, true);
+    console.log('MorphoBlueView deployed to:', morphoView.address);
+
     process.exit(0);
 }
 
