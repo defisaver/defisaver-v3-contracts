@@ -28,6 +28,9 @@ async function main() {
     const aaveV3View = await redeploy('AaveV3View', addrs[network].REGISTRY_ADDR, false, true);
     console.log('AaveV3View deployed to:', aaveV3View.address);
 
+    const sparkView = await redeploy('SparkView', addrs[network].REGISTRY_ADDR, false, true);
+    console.log('SparkView deployed to:', sparkView.address);
+
     process.exit(0);
 }
 
