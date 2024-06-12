@@ -8,7 +8,6 @@ import "../interfaces/compound/IComptroller.sol";
 import "../interfaces/compound/ICToken.sol";
 import "../interfaces/compound/ICompoundOracle.sol";
 import { InterestRateModel } from "../interfaces/compound/InterestRateModel.sol";
-import { console } from "hardhat/console.sol";
 
 contract CompView is Exponential, DSMath {
 
@@ -43,6 +42,24 @@ contract CompView is Exponential, DSMath {
         uint borrowCap;
         bool canMint;
         bool canBorrow;
+    }
+
+    /// @notice Params for supply and borrow rates estimation
+    /// @param cTokenAddr Address of the cToken
+    /// @param isBorrowOperation If the operation is borrow/repay, otherwise supply/withdraw
+    /// @param liquidityAdded Amount of liquidity added (supply/repay)
+    /// @param liquidityTaken Amount of liquidity taken (borrow/withdraw)
+    struct LiquidityChangeParams {
+        address cTokenAddr;
+        bool isBorrowOperation;
+        uint256 liquidityAdded;
+        uint256 liquidityTaken;
+    }
+    
+    struct EstimatedRates {
+        address cTokenAddr;
+        uint256 supplyRate;
+        uint256 borrowRate;
     }
 
     address public constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -281,25 +298,12 @@ contract CompView is Exponential, DSMath {
         }
     }
 
-    struct ChangeInTokenLiquidity {
-        address cTokenAddr;
-        bool isBorrowAsset;
-        uint256 liquidityAdded;
-        uint256 liquidityTaken;
-    }
-    struct EstimatedRatesAfterValues {
-        address cTokenAddr;
-        uint256 supplyRate;
-        uint256 borrowRate;
-    }
-
-    /// @dev This function should be called with static call
-    function estimateParamsForApyAfterValues(ChangeInTokenLiquidity[] memory _tokens) public returns (EstimatedRatesAfterValues[] memory retVal)
+    function getApyAfterValuesEstimation(LiquidityChangeParams[] memory _params) public returns (EstimatedRates[] memory retVal)
     {   
-        retVal = new EstimatedRatesAfterValues[](_tokens.length);
+        retVal = new EstimatedRates[](_params.length);
 
-        for (uint256 i = 0; i < _tokens.length; ++i) {
-            ICToken cToken = ICToken(_tokens[i].cTokenAddr);
+        for (uint256 i = 0; i < _params.length; ++i) {
+            ICToken cToken = ICToken(_params[i].cTokenAddr);
             InterestRateModel interestRateModel = cToken.interestRateModel();
     
             cToken.accrueInterest();
@@ -308,24 +312,24 @@ contract CompView is Exponential, DSMath {
             uint256 totalUnderlying = cToken.getCash();
             uint256 totalReserves = cToken.totalReserves();
 
-            totalUnderlying += _tokens[i].liquidityAdded;
-            if (_tokens[i].liquidityTaken >= totalUnderlying) {
+            totalUnderlying += _params[i].liquidityAdded;
+            if (_params[i].liquidityTaken >= totalUnderlying) {
                 totalUnderlying = 0;
             } else {
-                totalUnderlying -= _tokens[i].liquidityTaken;
+                totalUnderlying -= _params[i].liquidityTaken;
             }
 
-            if (_tokens[i].isBorrowAsset) {
-                totalBorrowsCurrent += _tokens[i].liquidityTaken;
+            if (_params[i].isBorrowOperation) {
+                totalBorrowsCurrent += _params[i].liquidityTaken;
 
-                if (_tokens[i].liquidityAdded >= totalBorrowsCurrent) {
+                if (_params[i].liquidityAdded >= totalBorrowsCurrent) {
                     totalBorrowsCurrent = 0;
                 } else {    
-                    totalBorrowsCurrent -= _tokens[i].liquidityAdded;
+                    totalBorrowsCurrent -= _params[i].liquidityAdded;
                 }
             }
 
-            uint256 estimatedSupplyRate = _getSupplyRate(
+            uint256 estimatedSupplyRate = _getEstimatedSupplyRate(
                 address(interestRateModel),
                 cToken.supplyRatePerBlock(),
                 totalUnderlying,
@@ -334,7 +338,7 @@ contract CompView is Exponential, DSMath {
                 cToken.reserveFactorMantissa()
             );
             
-            uint256 estimatedBorrowRate = _getBorrowRate(
+            uint256 estimatedBorrowRate = _getEstimatedBorrowRate(
                 address(interestRateModel),
                 cToken.borrowRatePerBlock(),
                 totalUnderlying,
@@ -342,15 +346,15 @@ contract CompView is Exponential, DSMath {
                 totalReserves
             );
 
-            retVal[i] = EstimatedRatesAfterValues({
-                cTokenAddr: _tokens[i].cTokenAddr,
+            retVal[i] = EstimatedRates({
+                cTokenAddr: _params[i].cTokenAddr,
                 supplyRate: estimatedSupplyRate,
                 borrowRate: estimatedBorrowRate
             });
         }
     }
     
-    function _getSupplyRate(
+    function _getEstimatedSupplyRate(
         address _interestRateModel,
         uint256 _currSupplyRate,
         uint256 _underlying,
@@ -375,12 +379,12 @@ contract CompView is Exponential, DSMath {
         if (data.length == 32) {
             supplyRate = abi.decode(data, (uint256));
         } else if (data.length == 64) {
-            /// @dev In older implementations, two values are returned, with second one being the actual rate
+            // In older implementations, two values are returned, with second one being the actual rate
             (, supplyRate) = abi.decode(data, (uint256, uint256));
         }
     }
 
-    function _getBorrowRate(
+    function _getEstimatedBorrowRate(
         address _interestRateModel,
         uint256 _currBorrowRate,
         uint256 _underlying,
@@ -403,7 +407,7 @@ contract CompView is Exponential, DSMath {
         if (data.length == 32) {
             borrowRate = abi.decode(data, (uint256));
         } else if (data.length == 64) {
-            /// @dev In older implementations, two values are returned, with second one being the actual rate
+            // In older implementations, two values are returned, with second one being the actual rate
             (, borrowRate) = abi.decode(data, (uint256, uint256));
         }
     }

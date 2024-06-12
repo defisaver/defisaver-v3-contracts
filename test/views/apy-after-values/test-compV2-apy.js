@@ -14,7 +14,6 @@ const {
 } = require('../../actions');
 
 const COMPTROLLER_ADDR = '0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B';
-
 const cTokens = {
     WETH: '0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5',
     WBTC: '0xccF4429DB6322D5C611ee964527D42E5d685DD6a',
@@ -64,7 +63,7 @@ const compV2ApyAfterValuesTest = async () => {
                 const borrowAsset = getAssetInfo(Object.keys(cTokens)[j]);
                 const borrowCToken = cTokens[borrowAsset.symbol];
 
-                it(`... should estimate supply and borrow rates for [coll: ${collAsset.symbol} borrow: ${borrowAsset.symbol}]`, async () => {
+                it(`... should estimate supply and borrow rates when opening position [coll: ${collAsset.symbol} debt: ${borrowAsset.symbol}]`, async () => {
                     const collCTokenContract = await hre.ethers.getContractAt('ICToken', collCToken);
                     const borrowCTokenContract = await hre.ethers.getContractAt('ICToken', borrowCToken);
                     const comptroller = await hre.ethers.getContractAt('IComptroller', COMPTROLLER_ADDR);
@@ -90,19 +89,19 @@ const compV2ApyAfterValuesTest = async () => {
                     const params = [
                         {
                             cTokenAddr: collCToken,
-                            isBorrowAsset: false,
+                            isBorrowOperation: false,
                             liquidityAdded: supplyAmount,
                             liquidityTaken: withdrawAmount,
                         },
                         {
                             cTokenAddr: borrowCToken,
-                            isBorrowAsset: true,
+                            isBorrowOperation: true,
                             liquidityAdded: paybackAmount,
                             liquidityTaken: borrowAmount,
                         },
                     ];
 
-                    const result = await compV2ViewContract.callStatic.estimateParamsForApyAfterValues(params);
+                    const result = await compV2ViewContract.callStatic.getApyAfterValuesEstimation(params);
 
                     const estimatedStateAfter = {
                         collAssetSupplyRate: result[0].supplyRate,

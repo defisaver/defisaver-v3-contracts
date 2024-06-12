@@ -89,7 +89,7 @@ const compV3ApyAfterValuesTest = async () => {
                     const oldSupplyRate = await comet.getSupplyRate(oldUtilization);
                     const oldBorrowRate = await comet.getBorrowRate(oldUtilization);
 
-                    const result = await compV3ViewContract.estimateParamsForApyAfterValues(
+                    const result = await compV3ViewContract.callStatic.getApyAfterValuesEstimation(
                         marketAddr,
                         senderAcc.address,
                         '0',
@@ -149,7 +149,7 @@ const compV3ApyAfterValuesTest = async () => {
                     const oldSupplyRate = await comet.getSupplyRate(oldUtilization);
                     const oldBorrowRate = await comet.getBorrowRate(oldUtilization);
 
-                    const result = await compV3ViewContract.estimateParamsForApyAfterValues(
+                    const result = await compV3ViewContract.callStatic.getApyAfterValuesEstimation(
                         marketAddr,
                         senderAcc.address,
                         supplyAmount,
@@ -206,7 +206,7 @@ const compV3ApyAfterValuesTest = async () => {
                     const oldSupplyRate = await comet.getSupplyRate(oldUtilization);
                     const oldBorrowRate = await comet.getBorrowRate(oldUtilization);
 
-                    const result = await compV3ViewContract.estimateParamsForApyAfterValues(
+                    const result = await compV3ViewContract.callStatic.getApyAfterValuesEstimation(
                         marketAddr,
                         senderAcc.address,
                         supplyAmount,

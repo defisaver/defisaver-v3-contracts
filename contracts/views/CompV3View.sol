@@ -201,9 +201,9 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         return ICometRewards(COMET_REWARDS_ADDR).getRewardOwed(_market, _user);
     }
 
-    /// @dev in compV3, only base asset token is used for apy calculations
-    function estimateParamsForApyAfterValues(address _market, address _user, uint256 _supplyAmount, uint256 _borrowAmount) 
-        public view returns (uint256 utilization, uint256 supplyRate, uint256 borrowRate) 
+    /// @dev In compV3, only base asset token is used for apy calculations
+    function getApyAfterValuesEstimation(address _market, address _user, uint256 _supplyAmount, uint256 _borrowAmount) 
+        public returns (uint256 utilization, uint256 supplyRate, uint256 borrowRate) 
     {   
         utilization = IComet(_market).getUtilization();
         supplyRate = IComet(_market).getSupplyRate(utilization);
@@ -212,13 +212,10 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
             return (utilization, supplyRate, borrowRate);
         }
 
+        IComet(_market).accrueAccount(_user);
+
         IComet.UserBasic memory user = IComet(_market).userBasic(_user);
         IComet.TotalsBasic memory totals = IComet(_market).totalsBasic();
-
-        /// @dev estimate updating of baseSupplyIndex and baseBorrowIndex
-        /// @dev estimate time to one block after last accrued interest
-        totals.baseSupplyIndex += safe64(mulFactor(totals.baseSupplyIndex, supplyRate * 12 seconds));
-        totals.baseBorrowIndex += safe64(mulFactor(totals.baseBorrowIndex, borrowRate * 12 seconds));
 
         if (_borrowAmount > 0) {
             int256 presentValue = presentValue(user.principal, totals.baseSupplyIndex, totals.baseBorrowIndex);
