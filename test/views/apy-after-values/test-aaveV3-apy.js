@@ -103,7 +103,7 @@ const aaveV3ApyAfterValuesTest = async () => {
                             liquidityTaken: borrowAmount,
                         },
                     ];
-                    const result = await aaveV3ViewContract.estimateParamsForApyAfterValues(
+                    const result = await aaveV3ViewContract.getApyAfterValuesEstimation(
                         addrs[network].AAVE_MARKET,
                         params,
                     );

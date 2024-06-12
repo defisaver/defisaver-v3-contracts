@@ -97,7 +97,7 @@ const sparkApyAfterValuesTest = async () => {
                             liquidityTaken: borrowAmount,
                         },
                     ];
-                    const result = await sparkViewContract.estimateParamsForApyAfterValues(
+                    const result = await sparkViewContract.getApyAfterValuesEstimation(
                         addrs[network].SPARK_MARKET,
                         params,
                     );

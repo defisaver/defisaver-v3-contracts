@@ -80,6 +80,22 @@ contract AaveView is AaveHelper, DSMath{
         bool enabledAsCollateral;
     }
 
+    /// @notice Params for supply and borrow rate estimation
+    /// @param reserveAddress Address of the reserve
+    /// @param liquidityAdded Amount of liquidity added (supply/repay)
+    /// @param liquidityTaken Amount of liquidity taken (borrow/withdraw)
+    struct LiquidityChangeParams {
+        address reserveAddress;
+        uint256 liquidityAdded;
+        uint256 liquidityTaken;
+    }
+
+    struct EstimatedRates {
+        address reserveAddress;
+        uint256 supplyRate;
+        uint256 variableBorrowRate;
+    }
+
     function getSafetyRatio(address _market, address _user) public view returns(uint256) {
         ILendingPoolV2 lendingPool = ILendingPoolV2(ILendingPoolAddressesProviderV2(_market).getLendingPool());
         
@@ -336,26 +352,15 @@ contract AaveView is AaveHelper, DSMath{
         return (self.data & ~RESERVE_FACTOR_MASK) >> RESERVE_FACTOR_START_BIT_POSITION;
     }
 
-    struct ReserveLiquidityChange {
-        address reserveAddress;
-        uint256 liquidityAdded;
-        uint256 liquidityTaken;
-    }
-    struct EstimatedRatesAfterValues {
-        address reserveAddress;
-        uint256 supplyRate;
-        uint256 variableBorrowRate;
-    }
-
-    function estimateParamsForApyAfterValues(address _market, ReserveLiquidityChange[] memory _reserveParams)
-        public view returns (EstimatedRatesAfterValues[] memory)
+    function getApyAfterValuesEstimation(address _market, LiquidityChangeParams[] memory _reserveParams)
+        public view returns (EstimatedRates[] memory)
     {
         ILendingPoolV2 lendingPool = ILendingPoolV2(ILendingPoolAddressesProviderV2(_market).getLendingPool());
-        EstimatedRatesAfterValues[] memory estimatedRates = new EstimatedRatesAfterValues[](_reserveParams.length);
+        EstimatedRates[] memory estimatedRates = new EstimatedRates[](_reserveParams.length);
         for (uint256 i = 0; i < _reserveParams.length; ++i) {
             DataTypes.ReserveData memory reserve = lendingPool.getReserveData(_reserveParams[i].reserveAddress);
 
-            EstimatedRatesAfterValues memory estimatedRate;
+            EstimatedRates memory estimatedRate;
             estimatedRate.reserveAddress = _reserveParams[i].reserveAddress;
             estimatedRate.supplyRate = reserve.currentLiquidityRate;
             estimatedRate.variableBorrowRate = reserve.currentVariableBorrowRate;

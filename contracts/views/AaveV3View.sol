@@ -121,6 +121,22 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         bool isFrozen;
     }
 
+    /// @notice Params for supply and borrow rate estimation
+    /// @param reserveAddress Address of the reserve
+    /// @param liquidityAdded Amount of liquidity added (supply/repay)
+    /// @param liquidityTaken Amount of liquidity taken (borrow/withdraw)
+    struct LiquidityChangeParams {
+        address reserveAddress;
+        uint256 liquidityAdded;
+        uint256 liquidityTaken;
+    }
+
+    struct EstimatedRates {
+        address reserveAddress;
+        uint256 supplyRate;
+        uint256 variableBorrowRate;
+    }
+
     function getHealthFactor(address _market, address _user)
         public
         view
@@ -525,27 +541,16 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         return (priceOracleSentinelAddress == address(0) || IPriceOracleSentinel(priceOracleSentinelAddress).isBorrowAllowed());
     }
 
-    struct ReserveLiquidityChange {
-        address reserveAddress;
-        uint256 liquidityAdded;
-        uint256 liquidityTaken;
-    }
-    struct EstimatedRatesAfterValues {
-        address reserveAddress;
-        uint256 supplyRate;
-        uint256 variableBorrowRate;
-    }
-
-    function estimateParamsForApyAfterValues(address _market, ReserveLiquidityChange[] memory reserveParams) 
-        public view returns (EstimatedRatesAfterValues[] memory) 
+    function getApyAfterValuesEstimation(address _market, LiquidityChangeParams[] memory _reserveParams) 
+        public view returns (EstimatedRates[] memory) 
     {
         IPoolV3 lendingPool = getLendingPool(_market);
-        EstimatedRatesAfterValues[] memory estimatedRates = new EstimatedRatesAfterValues[](reserveParams.length);
-        for (uint256 i = 0; i < reserveParams.length; ++i) {
-            DataTypes.ReserveData memory reserve = lendingPool.getReserveData(reserveParams[i].reserveAddress);
+        EstimatedRates[] memory estimatedRates = new EstimatedRates[](_reserveParams.length);
+        for (uint256 i = 0; i < _reserveParams.length; ++i) {
+            DataTypes.ReserveData memory reserve = lendingPool.getReserveData(_reserveParams[i].reserveAddress);
 
-            EstimatedRatesAfterValues memory estimatedRate;
-            estimatedRate.reserveAddress = reserveParams[i].reserveAddress;
+            EstimatedRates memory estimatedRate;
+            estimatedRate.reserveAddress = _reserveParams[i].reserveAddress;
             
             (uint256 currTotalStableDebt, uint256 currAvgStableBorrowRate) = IStableDebtToken(reserve.stableDebtTokenAddress)
                 .getTotalSupplyAndAvgRate();
@@ -563,13 +568,13 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
                 DataTypes.CalculateInterestRatesParams({
                     unbacked: reserve.unbacked,
-                    liquidityAdded: reserveParams[i].liquidityAdded,
-                    liquidityTaken: reserveParams[i].liquidityTaken,
+                    liquidityAdded: _reserveParams[i].liquidityAdded,
+                    liquidityTaken: _reserveParams[i].liquidityTaken,
                     totalStableDebt: currTotalStableDebt,
                     totalVariableDebt: totalVarDebt,
                     averageStableBorrowRate: currAvgStableBorrowRate,
                     reserveFactor: getReserveFactor(reserve.configuration),
-                    reserve: reserveParams[i].reserveAddress,
+                    reserve: _reserveParams[i].reserveAddress,
                     aToken: reserve.aTokenAddress
                 })
             );
