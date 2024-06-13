@@ -1049,5 +1049,16 @@
         "changeTime": "0",
         "registryIds": [],
         "history": []
+      },
+      {
+        "name": "CompV3View",
+        "address": "0x7219E16B532a7B3Fb010e7806F22e077f4080c3b",
+        "id": "0x16be4292",
+        "path": "contracts/views/CompV3View.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
       }
   ]
