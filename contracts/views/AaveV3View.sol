@@ -17,7 +17,6 @@ import { IScaledBalanceToken } from "../interfaces/aave/IScaledBalanceToken.sol"
 import { IERC20 } from "../interfaces/IERC20.sol";
 import { WadRayMath } from "../utils/math/WadRayMath.sol";
 import { MathUtils } from "../utils/math/MathUtils.sol";
-import { console } from "hardhat/console.sol";
 
 contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
