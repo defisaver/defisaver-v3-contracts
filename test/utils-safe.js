@@ -22,7 +22,7 @@ const SAFE_MASTER_COPY_VERSIONS = {
 };
 
 const encodeSetupArgs = async (setupArgs) => {
-    const safeInterface = await hre.ethers.getContractAt('ISafe', nullAddress).then((safe) => safe.interface);
+    const safeInterface = await hre.ethers.getContractAt('ISafe', '0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552').then((safe) => safe.interface);
     return safeInterface.encodeFunctionData('setup', setupArgs);
 };
 
@@ -154,15 +154,20 @@ const predictSafeAddress = async (
     masterCopyAddress,
     setupArgs,
     saltNonce,
+    safeFactory,
 ) => {
     const setupArgsEncoded = await encodeSetupArgs(setupArgs);
-
-    const safeProxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', SAFE_PROXY_FACTORY_ADDR);
+    let safeProxyFactory;
+    if (!safeFactory) {
+        safeProxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', SAFE_PROXY_FACTORY_ADDR);
+    } else {
+        safeProxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', safeFactory);
+    }
     const proxyCreationCode = await safeProxyFactory.proxyCreationCode(); // can cache
     const salt = hre.ethers.utils.keccak256(hre.ethers.utils.solidityPack(['bytes', 'uint256'], [hre.ethers.utils.keccak256(setupArgsEncoded), saltNonce]));
 
     return hre.ethers.utils.getCreate2Address(
-        SAFE_PROXY_FACTORY_ADDR,
+        safeProxyFactory.address,
         salt,
         hre.ethers.utils.keccak256(
             proxyCreationCode.concat(masterCopyAddress.slice(2).padStart(64, '0')),
@@ -224,4 +229,5 @@ module.exports = {
     deploySafe,
     SAFE_MASTER_COPY_VERSIONS,
     signSafeTx,
+    encodeSetupArgs,
 };

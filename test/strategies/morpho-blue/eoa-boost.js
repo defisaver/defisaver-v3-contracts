@@ -6,6 +6,6 @@ describe('MorphoBlue Repay Strategy test', function () {
 
     it('... test MorphoBlue repay strategy', async () => {
         await resetForkToBlock();
-        await morphoBlueRepayStrategyTest(false);
+        await morphoBlueRepayStrategyTest(true);
     }).timeout(50000);
 });
