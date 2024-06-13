@@ -32,13 +32,13 @@ contract TxRelayExecutor is
     error SafeExecutionError();
 
     /// @notice Data needed to execute a Safe transaction
-    /// @param value Ether value of Safe transaction
     /// @param safe Address of the Safe wallet
+    /// @param refundReceiver Injected address to track safe points
     /// @param data Data payload of Safe transaction
     /// @param signatures Packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
     struct SafeTxParams {
-        uint256 value;
         address safe;
+        address refundReceiver;
         bytes data;
         bytes signatures;
     }
@@ -127,14 +127,14 @@ contract TxRelayExecutor is
     function _executeSafeTx(SafeTxParams memory _params) internal {
         bool success = ISafe(_params.safe).execTransaction(
             registry.getAddr(RECIPE_EXECUTOR_ID), // TODO[TX-RELAY]: maybe hardcode once deployed
-            _params.value,
+            0, // value
             _params.data,
             ISafe.Operation.DelegateCall,
             0, // safeTxGas, 
             0, // baseGas
             0, // gasPrice
             address(0), // gasToken
-            payable(address(0)), // refundReceiver
+            payable(_params.refundReceiver),
             _params.signatures 
         );
         if (!success) {

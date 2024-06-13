@@ -211,8 +211,8 @@ describe('Tx Relay - test using funds from EOA', function () {
         const signature = await signSafeTransaction(functionData);
 
         const txParams = {
-            value: 0,
             safe: safeWallet.address,
+            refundReceiver: nullAddress,
             data: functionData,
             signatures: signature,
         };
@@ -295,8 +295,8 @@ describe('Tx Relay - test using funds from EOA', function () {
         const signature = await signSafeTransaction(functionData);
 
         const txParams = {
-            value: 0,
             safe: safeWallet.address,
+            refundReceiver: nullAddress,
             data: functionData,
             signatures: signature,
         };
