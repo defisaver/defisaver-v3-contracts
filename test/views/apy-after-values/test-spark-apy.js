@@ -159,3 +159,7 @@ describe('Spark-apy-after-values', () => {
         await sparkApyAfterValuesTest();
     });
 });
+
+module.exports = {
+    sparkApyAfterValuesTest,
+};

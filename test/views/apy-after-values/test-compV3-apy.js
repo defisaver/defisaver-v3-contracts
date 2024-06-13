@@ -263,3 +263,7 @@ describe('CompV3-apy-after-values', () => {
         await compV3ApyAfterValuesTest();
     });
 });
+
+module.exports = {
+    compV3ApyAfterValuesTest,
+};

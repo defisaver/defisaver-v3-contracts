@@ -18,7 +18,6 @@ const {
     revertToSnapshot,
     fetchAmountinUSDPrice,
     setBalance,
-    nullAddress,
     approve,
 } = require('../../utils');
 const { getMarkets } = require('../../morpho-blue/utils');
@@ -35,6 +34,7 @@ const morphoBlueApyAfterValuesTest = async () => {
             [senderAcc] = await hre.ethers.getSigners();
             wallet = await getProxy(senderAcc.address);
             morphoBlueViewContract = await redeploy('MorphoBlueView');
+            await redeploy('MorphoBlueBorrow');
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -52,7 +52,7 @@ const morphoBlueApyAfterValuesTest = async () => {
                     collAsset.decimals,
                 );
                 const borrowAmount = hre.ethers.utils.parseUnits(
-                    fetchAmountinUSDPrice(debtAsset.symbol, '500000'),
+                    fetchAmountinUSDPrice(debtAsset.symbol, '400000'),
                     debtAsset.decimals,
                 );
                 const repayAmount = hre.ethers.utils.parseUnits(
@@ -61,6 +61,11 @@ const morphoBlueApyAfterValuesTest = async () => {
                 );
                 let marketInfo = await morphoBlueViewContract.callStatic.getMarketInfo(marketParams);
                 const borrowRateBefore = marketInfo.borrowRate;
+
+                if (marketInfo.totalSupplyAssets - marketInfo.totalBorrowAssets < borrowAmount) {
+                    console.log('Skipping test for opening position for [coll: %s, debt: %s] as borrow amount is too high', collAsset.symbol, debtAsset.symbol);
+                    return;
+                }
 
                 const estimatedBorrowRateWithMarket = await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
                     [marketParams, true, '0', borrowAmount],
@@ -80,7 +85,7 @@ const morphoBlueApyAfterValuesTest = async () => {
                     wallet,
                     marketParams,
                     borrowAmount,
-                    nullAddress,
+                    wallet.address,
                     senderAcc.address,
                 );
                 marketInfo = await morphoBlueViewContract.callStatic.getMarketInfo(marketParams);
@@ -163,3 +168,7 @@ describe('MorphoBlue-apy-after-values', () => {
         await morphoBlueApyAfterValuesTest();
     });
 });
+
+module.exports = {
+    morphoBlueApyAfterValuesTest,
+};

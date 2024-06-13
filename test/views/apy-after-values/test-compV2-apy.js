@@ -160,3 +160,7 @@ describe('CompV2-apy-after-values', () => {
         await compV2ApyAfterValuesTest();
     });
 });
+
+module.exports = {
+    compV2ApyAfterValuesTest,
+};

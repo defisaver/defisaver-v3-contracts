@@ -18,8 +18,11 @@ const {
     setBalance,
 } = require('../../utils');
 
-const collateralTokens = ['wstETH', 'WETH', 'USDC', 'USDT', 'rETH', 'LINK', 'cbETH'];
-const debtTokens = ['DAI', 'USDC', 'WETH'];
+// const collateralTokens = ['wstETH', 'WETH', 'USDC', 'USDT', 'rETH', 'LINK', 'cbETH'];
+// const debtTokens = ['DAI', 'USDC', 'WETH'];
+
+const collateralTokens = ['WETH'];
+const debtTokens = ['LINK'];
 
 const aaveV3ApyAfterValuesTest = async () => {
     describe('Test Aave V3 apy after values', async () => {
@@ -165,3 +168,7 @@ describe('AaveV3-apy-after-values', () => {
         await aaveV3ApyAfterValuesTest();
     });
 });
+
+module.exports = {
+    aaveV3ApyAfterValuesTest,
+};

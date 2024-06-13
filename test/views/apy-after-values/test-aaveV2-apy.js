@@ -168,3 +168,7 @@ describe('AaveV2-apy-after-values', () => {
         await aaveV2ApyAfterValuesTest();
     });
 });
+
+module.exports = {
+    aaveV2ApyAfterValuesTest,
+};
