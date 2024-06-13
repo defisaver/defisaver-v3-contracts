@@ -333,7 +333,13 @@ const reflexerWithdrawStuckFunds = async (proxy, safeId, to) => {
 |  `----.|  `--'  | |  |  |  | |  |      |  `--'  | |  `--'  | |  |\   | |  '--'  |
  \______| \______/  |__|  |__| | _|       \______/   \______/  |__| \__| |_______/
 */
-const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
+const supplyComp = async (proxy, cTokenAddr, tokenAddr, amount, from, isFork = false) => {
+    if (!isFork) {
+        await setBalance(tokenAddr, from, amount);
+    }
+    const signer = await hre.ethers.getSigner(from);
+    await approve(tokenAddr, proxy.address, signer);
+
     const compSupplyAction = new dfs.actions.compound.CompoundSupplyAction(
         cTokenAddr,
         amount,
@@ -366,15 +372,15 @@ const borrowComp = async (proxy, cTokenAddr, amount, to) => {
     return tx;
 };
 
-const paybackComp = async (proxy, cTokenAddr, amount, from) => {
+const paybackComp = async (proxy, cTokenAddr, tokenAddr, amount, from) => {
     if (cTokenAddr.toLowerCase() === getAssetInfo('cETH').address.toLowerCase()) {
         const wethBalance = await balanceOf(WETH_ADDRESS, from);
         if (wethBalance.lt(amount)) {
             await depositToWeth(amount.toString());
         }
     }
-
-    await approve(cTokenAddr, proxy.address);
+    const signer = await hre.ethers.getSigner(from);
+    await approve(tokenAddr, proxy.address, signer);
 
     const compPaybackAction = new dfs.actions.compound.CompoundPaybackAction(
         cTokenAddr,

@@ -29,6 +29,11 @@ const getAaveLendingPoolV2 = async () => {
     return lendingPool;
 };
 
+const getPriceOracle = async () => {
+    const lendingPoolAddressProvider = await hre.ethers.getContractAt('ILendingPoolAddressesProviderV2', LENDING_POOL_ADDRESS_PROVIDER_V2);
+    return lendingPoolAddressProvider.getPriceOracle();
+};
+
 const getAaveTokenInfo = async (dataProvider, tokenAddr) => {
     const tokens = await dataProvider.getReserveTokensAddresses(tokenAddr);
     return tokens;
@@ -76,6 +81,7 @@ module.exports = {
     getAaveReserveData,
     isAssetBorrowableV3,
     getEstimatedTotalLiquidityForToken,
+    getPriceOracle,
     aaveV2assetsDefaultMarket,
     AAVE_NO_DEBT_MODE,
     STABLE_RATE,

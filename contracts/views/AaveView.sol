@@ -8,10 +8,20 @@ import "../interfaces/aaveV2/IPriceOracleGetterAave.sol";
 import "../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
 import "../interfaces/aaveV2/ILendingPoolV2.sol";
 import "../utils/TokenUtils.sol";
+import { WadRayMath } from "../utils/math/WadRayMath.sol";
+import { MathUtils } from "../utils/math/MathUtils.sol";
+import { IStableDebtToken } from "../interfaces/aave/IStableDebtToken.sol";
+import { IScaledBalanceToken } from "../interfaces/aave/IScaledBalanceToken.sol";
+import { IReserveInterestRateStrategyV2 } from "../interfaces/aaveV2/IReserveInterestRateStrategyV2.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 contract AaveView is AaveHelper, DSMath{
 
+    uint256 constant RESERVE_FACTOR_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
+    uint256 constant RESERVE_FACTOR_START_BIT_POSITION = 64;
+
     using TokenUtils for address;
+    using WadRayMath for uint256;
 
     struct LoanData {
         address user;
@@ -68,6 +78,22 @@ contract AaveView is AaveHelper, DSMath{
         uint256 borrowsVariable;
         uint256 stableBorrowRate;
         bool enabledAsCollateral;
+    }
+
+    /// @notice Params for supply and borrow rate estimation
+    /// @param reserveAddress Address of the reserve
+    /// @param liquidityAdded Amount of liquidity added (supply/repay)
+    /// @param liquidityTaken Amount of liquidity taken (borrow/withdraw)
+    struct LiquidityChangeParams {
+        address reserveAddress;
+        uint256 liquidityAdded;
+        uint256 liquidityTaken;
+    }
+
+    struct EstimatedRates {
+        address reserveAddress;
+        uint256 supplyRate;
+        uint256 variableBorrowRate;
     }
 
     function getSafetyRatio(address _market, address _user) public view returns(uint256) {
@@ -316,5 +342,76 @@ contract AaveView is AaveHelper, DSMath{
 
     function getStakingRewardsBalance(address _staker) external view returns (uint256) {
         return StakedToken.getTotalRewardsBalance(_staker);
+    }
+
+    function getReserveFactor(DataTypes.ReserveConfigurationMap memory self)
+        internal
+        pure
+        returns (uint256)
+    {
+        return (self.data & ~RESERVE_FACTOR_MASK) >> RESERVE_FACTOR_START_BIT_POSITION;
+    }
+
+    function getApyAfterValuesEstimation(address _market, LiquidityChangeParams[] memory _reserveParams)
+        public view returns (EstimatedRates[] memory)
+    {
+        ILendingPoolV2 lendingPool = ILendingPoolV2(ILendingPoolAddressesProviderV2(_market).getLendingPool());
+        EstimatedRates[] memory estimatedRates = new EstimatedRates[](_reserveParams.length);
+        for (uint256 i = 0; i < _reserveParams.length; ++i) {
+            DataTypes.ReserveData memory reserve = lendingPool.getReserveData(_reserveParams[i].reserveAddress);
+
+            EstimatedRates memory estimatedRate;
+            estimatedRate.reserveAddress = _reserveParams[i].reserveAddress;
+            estimatedRate.supplyRate = reserve.currentLiquidityRate;
+            estimatedRate.variableBorrowRate = reserve.currentVariableBorrowRate;
+
+            if (_reserveParams[i].liquidityAdded == 0 && _reserveParams[i].liquidityTaken == 0) {
+                estimatedRates[i] = estimatedRate;
+                continue;
+            }
+
+            (uint256 totalStableDebt, uint256 avgStableRate) = IStableDebtToken(reserve.stableDebtTokenAddress)
+                .getTotalSupplyAndAvgRate();
+
+            uint256 nextVariableBorrowIndex = _getNextVariableBorrowIndex(reserve);
+            
+            uint256 totalVariableDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress)
+                .scaledTotalSupply()
+                .rayMul(nextVariableBorrowIndex);
+
+            uint256 availableLiquidity = IERC20(_reserveParams[i].reserveAddress)
+                .balanceOf(reserve.aTokenAddress)
+                + _reserveParams[i].liquidityAdded
+                - _reserveParams[i].liquidityTaken;
+            
+            (
+               estimatedRate.supplyRate,
+               ,
+               estimatedRate.variableBorrowRate
+            ) = IReserveInterestRateStrategyV2(reserve.interestRateStrategyAddress).calculateInterestRates(
+                _reserveParams[i].reserveAddress,
+                availableLiquidity,
+                totalStableDebt,
+                totalVariableDebt,
+                avgStableRate,
+                getReserveFactor(reserve.configuration)
+            );
+
+            estimatedRates[i] = estimatedRate;
+        }
+
+        return estimatedRates;        
+    }
+
+    function _getNextVariableBorrowIndex(DataTypes.ReserveData memory _reserve) internal view returns (uint128 variableBorrowIndex) {
+        uint256 scaledVariableDebt = IScaledBalanceToken(_reserve.variableDebtTokenAddress).scaledTotalSupply();
+        variableBorrowIndex = _reserve.variableBorrowIndex;
+        if (_reserve.currentLiquidityRate > 0 && scaledVariableDebt != 0) {
+            uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
+                _reserve.currentVariableBorrowRate,
+                _reserve.lastUpdateTimestamp
+            );
+            variableBorrowIndex = uint128(cumulatedVariableBorrowInterest.rayMul(variableBorrowIndex));
+        }
     }
 }

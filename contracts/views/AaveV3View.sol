@@ -2,11 +2,21 @@
 
 pragma solidity =0.8.10;
 
-import "../actions/aaveV3/helpers/AaveV3Helper.sol";
-import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
-import "../utils/TokenUtils.sol";
-import "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import "../interfaces/aaveV3/IPriceOracleSentinel.sol";
+import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
+import { IPriceOracleSentinel } from "../interfaces/aaveV3/IPriceOracleSentinel.sol";
+import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
+import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
+import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
+import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
+import { IReserveInterestRateStrategy } from "../interfaces/aaveV3/IReserveInterestRateStrategy.sol";
+import { IStableDebtToken } from "../interfaces/aave/IStableDebtToken.sol";
+import { IScaledBalanceToken } from "../interfaces/aave/IScaledBalanceToken.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { WadRayMath } from "../utils/math/WadRayMath.sol";
+import { MathUtils } from "../utils/math/MathUtils.sol";
 
 contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -36,6 +46,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant FLASHLOAN_ENABLED_START_BIT_POSITION = 63;
 
     using TokenUtils for address;
+    using WadRayMath for uint256;
 
     struct LoanData {
         address user;
@@ -107,6 +118,22 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         bool isActive;
         bool isPaused;
         bool isFrozen;
+    }
+
+    /// @notice Params for supply and borrow rate estimation
+    /// @param reserveAddress Address of the reserve
+    /// @param liquidityAdded Amount of liquidity added (supply/repay)
+    /// @param liquidityTaken Amount of liquidity taken (borrow/withdraw)
+    struct LiquidityChangeParams {
+        address reserveAddress;
+        uint256 liquidityAdded;
+        uint256 liquidityTaken;
+    }
+
+    struct EstimatedRates {
+        address reserveAddress;
+        uint256 supplyRate;
+        uint256 variableBorrowRate;
     }
 
     function getHealthFactor(address _market, address _user)
@@ -512,5 +539,61 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         address priceOracleSentinelAddress = IPoolAddressesProvider(_market).getPriceOracleSentinel();
         return (priceOracleSentinelAddress == address(0) || IPriceOracleSentinel(priceOracleSentinelAddress).isBorrowAllowed());
     }
+
+    function getApyAfterValuesEstimation(address _market, LiquidityChangeParams[] memory _reserveParams) 
+        public view returns (EstimatedRates[] memory) 
+    {
+        IPoolV3 lendingPool = getLendingPool(_market);
+        EstimatedRates[] memory estimatedRates = new EstimatedRates[](_reserveParams.length);
+        for (uint256 i = 0; i < _reserveParams.length; ++i) {
+            DataTypes.ReserveData memory reserve = lendingPool.getReserveData(_reserveParams[i].reserveAddress);
+
+            EstimatedRates memory estimatedRate;
+            estimatedRate.reserveAddress = _reserveParams[i].reserveAddress;
+            
+            (uint256 currTotalStableDebt, uint256 currAvgStableBorrowRate) = IStableDebtToken(reserve.stableDebtTokenAddress)
+                .getTotalSupplyAndAvgRate();
+            
+            uint256 nextVariableBorrowIndex = _getNextVariableBorrowIndex(reserve);
+
+            uint256 totalVarDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress)
+                .scaledTotalSupply()
+                .rayMul(nextVariableBorrowIndex);
+
+            (
+                estimatedRate.supplyRate,
+                ,
+                estimatedRate.variableBorrowRate
+            ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
+                DataTypes.CalculateInterestRatesParams({
+                    unbacked: reserve.unbacked,
+                    liquidityAdded: _reserveParams[i].liquidityAdded,
+                    liquidityTaken: _reserveParams[i].liquidityTaken,
+                    totalStableDebt: currTotalStableDebt,
+                    totalVariableDebt: totalVarDebt,
+                    averageStableBorrowRate: currAvgStableBorrowRate,
+                    reserveFactor: getReserveFactor(reserve.configuration),
+                    reserve: _reserveParams[i].reserveAddress,
+                    aToken: reserve.aTokenAddress
+                })
+            );
+
+            estimatedRates[i] = estimatedRate;
+        }
+
+        return estimatedRates;
+    }
+
+    function _getNextVariableBorrowIndex(DataTypes.ReserveData memory _reserve) internal view returns (uint128 variableBorrowIndex) {
+        uint256 scaledVariableDebt = IScaledBalanceToken(_reserve.variableDebtTokenAddress).scaledTotalSupply();
+        variableBorrowIndex = _reserve.variableBorrowIndex;
+        if (scaledVariableDebt > 0) {
+            uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
+                _reserve.currentVariableBorrowRate,
+                _reserve.lastUpdateTimestamp
+            );
+            variableBorrowIndex = uint128(cumulatedVariableBorrowInterest.rayMul(variableBorrowIndex));
+        }
+    }   
 
 }
