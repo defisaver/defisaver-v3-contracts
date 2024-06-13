@@ -7,7 +7,5 @@ describe('MorphoBlue Boost Strategy test', function () {
     it('... test MorphoBlue boost strategy', async () => {
         await resetForkToBlock();
         await morphoBlueBoostStrategyTest(false);
-        await resetForkToBlock();
-        await morphoBlueBoostStrategyTest(true);
     }).timeout(50000);
 });

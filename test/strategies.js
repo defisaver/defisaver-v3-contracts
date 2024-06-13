@@ -4350,7 +4350,7 @@ const createMorphoBlueFLCollRepayStrategy = () => {
         '&irm',
         '&lltv',
         '$1', // withdraw enough to payback flashloan
-        '&proxy',
+        '&user',
         '%flAddress', // sent by backend
     );
     const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
