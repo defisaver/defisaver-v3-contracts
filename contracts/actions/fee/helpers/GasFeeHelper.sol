@@ -10,6 +10,12 @@ import { TokenPriceHelper } from "../../../utils/TokenPriceHelper.sol";
 contract GasFeeHelper is DSMath, TokenPriceHelper {
     using TokenUtils for address;
 
+    // only support token with decimals <= 18
+    error TokenDecimalsUnsupportedError(uint256 decimals);
+
+    // when injecting price, price must be greater than 0
+    error ZeroTokenPriceInEthError();
+
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
 
     uint256 public constant SANITY_GAS_PRICE = 1000 gwei;
@@ -38,13 +44,38 @@ contract GasFeeHelper is DSMath, TokenPriceHelper {
             uint256 price = getPriceInETH(_feeToken);
             uint256 tokenDecimals = _feeToken.getTokenDecimals();
 
-            require(tokenDecimals <= 18, "Token decimal too big");
+            if (tokenDecimals > 18) revert TokenDecimalsUnsupportedError(tokenDecimals);
 
             if (price > 0) {
                 txCost = wdiv(txCost, uint256(price)) / (10**(18 - tokenDecimals));
             } else {
                 txCost = 0;
             }
+        }
+    }
+
+    function calcGasCostUsingInjectedPrice(
+        uint256 _gasUsed,
+        address _feeToken,
+        uint256 _tokenPriceInEth
+    ) internal view returns (uint256 txCost) {
+        // can't use more gas than the block gas limit
+        if (_gasUsed > block.gaslimit) {
+            _gasUsed = block.gaslimit;
+        }
+
+        // calc gas used
+        txCost = _gasUsed * tx.gasprice;    
+
+        // convert to token amount
+        if (_feeToken != TokenUtils.WETH_ADDR) {
+            uint256 tokenDecimals = _feeToken.getTokenDecimals();
+
+            if (tokenDecimals > 18) revert TokenDecimalsUnsupportedError(tokenDecimals);
+
+            if (_tokenPriceInEth == 0) revert ZeroTokenPriceInEthError();
+
+            txCost = wdiv(txCost, _tokenPriceInEth) / (10**(18 - tokenDecimals));
         }
     }
 }

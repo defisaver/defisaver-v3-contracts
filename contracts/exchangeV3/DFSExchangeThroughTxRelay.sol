@@ -60,7 +60,12 @@ contract DFSExchangeThroughTxRelay is DFSExchangeCore, GasFeeHelper
         console.log("**************************User %s", exData.user);
         console.log("**************************Wrapper %s", exData.wrapper);
 
-        uint256 txCostInSrcToken = calcGasCost(estimatedGas, exData.srcAddr, 0);
+        uint256 txCostInSrcToken = calcGasCostUsingInjectedPrice(
+            estimatedGas,
+            exData.srcAddr,
+            txRelayData.tokenPriceInEth
+        );
+
         console.log("**************************Tx cost in src token: %s", txCostInSrcToken);
         console.log("**************************Max tx cost in fee token: %s", txRelayData.maxTxCostInFeeToken);
         if (txCostInSrcToken > txRelayData.maxTxCostInFeeToken) {

@@ -200,10 +200,12 @@ contract RecipeExecutor is
         uint256 gasUsed = gasStart - (gasleft() + totalGasLostBecauseOfEIP150);
 
         uint256 gs = gasleft();
-        uint256 gasCost = calcGasCost(
-            gasUsed,
+
+        uint256 totalGasUsed = gasUsed + additionalGasUsed;
+        uint256 gasCost = calcGasCostUsingInjectedPrice(
+            totalGasUsed,
             _txRelayData.feeToken,
-            additionalGasUsed * tx.gasprice
+            _txRelayData.tokenPriceInEth
         );
 
         // lower the gas cost if percentage is set

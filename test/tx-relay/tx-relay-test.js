@@ -26,6 +26,7 @@ const {
     formatExchangeObj,
     WETH_ADDRESS,
     DAI_ADDR,
+    getChainLinkPrice,
 } = require('../utils');
 const {
     signSafeTx,
@@ -48,6 +49,7 @@ describe('Tx Relay - test using funds from EOA', function () {
     let txRelayExecutor;
     let recipeExecutorAddr;
     let snapshotId;
+    let tokenPriceHelper;
     const network = 'mainnet';
 
     beforeEach(async () => {
@@ -101,6 +103,10 @@ describe('Tx Relay - test using funds from EOA', function () {
 
         await redeployContracts(isFork);
         await addBotCallerForTxRelay(botAcc.address, isFork);
+
+        const tokenPriceHelperFactory = await hre.ethers.getContractFactory('TokenPriceHelper');
+        tokenPriceHelper = await tokenPriceHelperFactory.deploy();
+        await tokenPriceHelper.deployed();
     });
 
     const openAavePositionFunctionData = async (txRelayUserSignedData) => {
@@ -201,11 +207,13 @@ describe('Tx Relay - test using funds from EOA', function () {
 
         const feeTokenAsset = getAssetInfo('DAI');
         const feeTokenAddress = feeTokenAsset.address;
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
         await setBalance(feeTokenAddress, senderAcc.address, hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals));
         await approve(feeTokenAddress, safeWallet.address, senderAcc);
         const txRelaySignedData = {
             maxTxCostInFeeToken: hre.ethers.utils.parseUnits('50', feeTokenAsset.decimals),
             feeToken: feeTokenAddress,
+            tokenPriceInEth: feeTokenPriceInEth,
         };
         const functionData = await openAavePositionFunctionData(txRelaySignedData);
         const signature = await signSafeTransaction(functionData);
@@ -217,6 +225,7 @@ describe('Tx Relay - test using funds from EOA', function () {
             signatures: signature,
         };
 
+        console.log('Fee token price in eth:', feeTokenPriceInEth.toString());
         // ************************** BEFORE ************************************************************************
         const botEthBalanceBefore = await balanceOf(ETH_ADDR, botAcc.address);
         const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
@@ -281,9 +290,13 @@ describe('Tx Relay - test using funds from EOA', function () {
         const destToken = DAI_ADDR;
         const sellAmount = hre.ethers.utils.parseUnits('10', 18);
 
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(srcToken);
+        console.log('Fee token price in eth:', feeTokenPriceInEth.toString());
+
         const txRelaySignedData = {
             maxTxCostInFeeToken: hre.ethers.utils.parseUnits('1', srcToken.decimals),
             feeToken: srcToken,
+            tokenPriceInEth: feeTokenPriceInEth,
         };
 
         const functionData = await dfsSellFunctionData(

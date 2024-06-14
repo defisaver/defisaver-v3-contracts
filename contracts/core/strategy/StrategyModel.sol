@@ -70,8 +70,10 @@ contract StrategyModel {
     /// @dev Data needed when signing relay transaction
     /// @param maxTxCostInFeeToken Max tx cost user is willing to pay in fee token
     /// @param feeToken Address of the token user is willing to pay fee in
+    /// @param tokenPriceInEth Price of the token in ETH
     struct TxRelaySignedData {
         uint256 maxTxCostInFeeToken;
         address feeToken;
+        uint256 tokenPriceInEth;
     }
 }
