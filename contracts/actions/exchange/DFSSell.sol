@@ -14,7 +14,6 @@ contract DFSSell is ActionBase, DFSExchangeThroughTxSaver {
 
     using TokenUtils for address;
 
-    bytes4 internal constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
     uint256 internal constant RECIPE_FEE = 400;
 
     struct Params {
@@ -133,17 +132,7 @@ contract DFSSell is ActionBase, DFSExchangeThroughTxSaver {
         address wrapper;
         uint256 exchangedAmount;
 
-        {
-            /// @dev Check if TxSaverExecutor initiated transaction by setting right flag in transient storage
-            /// @dev we can't just check for msg.sender, as that wouldn't work for flashloan actions
-            address txSaverAddr = registry.getAddr(TX_SAVER_EXECUTOR_ID);
-            ITxSaverBytesTransientStorage tStorage = ITxSaverBytesTransientStorage(txSaverAddr);
-            if (tStorage.isPositionFeeDataStored()) {
-                (wrapper, exchangedAmount) = _sellThroughTxSaver(_exchangeData, tStorage);
-            } else {
-                (wrapper, exchangedAmount) = _sell(_exchangeData);
-            }
-        }
+        (wrapper, exchangedAmount) = _sellThroughTxSaver(_exchangeData, registry);
 
         if (isEthDest) {
             TokenUtils.withdrawWeth(exchangedAmount);

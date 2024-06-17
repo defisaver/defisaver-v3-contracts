@@ -178,6 +178,9 @@ contract RecipeExecutor is
         // execute the recipe
         _executeActions(_currRecipe);
 
+        // when sending sponsored tx, no tx cost is taken
+        if (estimatedGasUsed == 0) return;
+
         // calculate gas cost using gas estimation and signed token price
         uint256 gasCost = calcGasCostUsingInjectedPrice(
             estimatedGasUsed,
