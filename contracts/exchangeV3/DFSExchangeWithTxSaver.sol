@@ -9,7 +9,7 @@ import { GasFeeHelper } from "../../contracts/actions/fee/helpers/GasFeeHelper.s
 import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
 
-contract DFSExchangeThroughTxSaver is DFSExchangeCore, GasFeeHelper
+contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
 {   
     using SafeERC20 for IERC20;
     using TokenUtils for address;

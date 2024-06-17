@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../../../auth/AdminAuth.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
-import { DFSExchangeThroughTxSaver } from "../../../exchangeV3/DFSExchangeThroughTxSaver.sol";
+import { DFSExchangeWithTxSaver } from "../../../exchangeV3/DFSExchangeWithTxSaver.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
 import { FeeRecipient } from "../../../utils/FeeRecipient.sol";
 import { SafeERC20 } from "../../../utils/SafeERC20.sol";
@@ -16,7 +16,7 @@ import { DFSRegistry } from "../../../core/DFSRegistry.sol";
 /// @title LlamaLendSwapper Callback contract for Llamalend extended actions
 contract LlamaLendSwapper is 
     LlamaLendHelper,
-    DFSExchangeThroughTxSaver,
+    DFSExchangeWithTxSaver,
     AdminAuth,
     ActionsUtilHelper
 {
