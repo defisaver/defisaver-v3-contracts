@@ -132,7 +132,7 @@ contract DFSSell is ActionBase, DFSExchangeThroughTxSaver {
         address wrapper;
         uint256 exchangedAmount;
 
-        (wrapper, exchangedAmount) = _sellThroughTxSaver(_exchangeData, registry);
+        (wrapper, exchangedAmount,,) = _sellWithTxSaverChoice(_exchangeData, address(this), registry);
 
         if (isEthDest) {
             TokenUtils.withdrawWeth(exchangedAmount);

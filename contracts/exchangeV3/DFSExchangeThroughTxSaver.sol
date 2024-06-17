@@ -19,14 +19,7 @@ contract DFSExchangeThroughTxSaver is DFSExchangeCore, GasFeeHelper
     /// For TxSaver, total gas cost fee taken from user can't be higher than maxTxCost set by user
     error TxCostInFeeTokenTooHighError(uint256 maxTxCost, uint256 txCost);
 
-
-    function _sellThroughTxSaver(ExchangeData memory _exData, DFSRegistry _registry) 
-        internal returns (address wrapperAddress, uint256 destAmount) 
-    {
-        (wrapperAddress, destAmount,,) = _sellThroughTxSaver(_exData, address(this), _registry);
-    } 
-
-    function _sellThroughTxSaver(ExchangeData memory _exData, address _user, DFSRegistry _registry) 
+    function _sellWithTxSaverChoice(ExchangeData memory _exData, address _user, DFSRegistry _registry) 
         internal returns (
             address wrapperAddress,
             uint256 destAmount,

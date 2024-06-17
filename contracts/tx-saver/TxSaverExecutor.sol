@@ -52,7 +52,7 @@ contract TxSaverExecutor is
     ///
     /// @param _params SafeTxParams data needed to execute safe tx
     /// @param _estimatedGas Estimated gas usage for the transaction
-    /// @param _injectedExchangeData Exchange data injected by backend, used only when taking fee from position
+    /// @param _injectedExchangeData Exchange data injected by backend
     function executeTx(
         SafeTxParams calldata _params,
         uint256 _estimatedGas,

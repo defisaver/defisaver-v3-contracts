@@ -48,7 +48,7 @@ contract LlamaLendSwapper is
         address collToken = exData.srcAddr;
         address debtToken = exData.destAddr;
 
-        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) = _sellThroughTxSaver(
+        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) = _sellWithTxSaverChoice(
             exData,
             _user,
             DFSRegistry(REGISTRY_ADDR)
@@ -84,7 +84,7 @@ contract LlamaLendSwapper is
 
         address collToken = exData.destAddr;
 
-        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) = _sellThroughTxSaver(
+        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) = _sellWithTxSaverChoice(
             exData,
             _user,
             DFSRegistry(REGISTRY_ADDR)
@@ -122,7 +122,7 @@ contract LlamaLendSwapper is
             exData.srcAmount = collToken.getBalance(address(this));
         }
 
-        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) = _sellThroughTxSaver(
+        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) = _sellWithTxSaverChoice(
             exData,
             _user,
             DFSRegistry(REGISTRY_ADDR)
