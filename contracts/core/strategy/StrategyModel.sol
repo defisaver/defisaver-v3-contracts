@@ -71,9 +71,13 @@ contract StrategyModel {
     /// @param maxTxCostInFeeToken Max tx cost user is willing to pay in fee token
     /// @param feeToken Address of the token user is willing to pay fee in
     /// @param tokenPriceInEth Price of the token in ETH
-    struct TxRelaySignedData {
+    /// @param deadline Deadline for the relay transaction to be executed
+    /// @param shouldTakeFeeFromPosition Flag to indicate if fee should be taken from position, otherwise from EOA/wallet
+    struct TxSaverSignedData {
         uint256 maxTxCostInFeeToken;
         address feeToken;
         uint256 tokenPriceInEth;
+        uint256 deadline;
+        bool shouldTakeFeeFromPosition;
     }
 }

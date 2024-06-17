@@ -2,20 +2,20 @@
 
 pragma solidity =0.8.24;
 
-import { ITxRelayBytesTransientStorage } from "../interfaces/ITxRelayBytesTransientStorage.sol";
+import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
 
-/// @title Used to store tx relay data in a transaction
-/// @dev Only tx relay can store data, and anyone can read it
-contract TxRelayBytesTransientStorage is ITxRelayBytesTransientStorage {
+/// @title Used to store TxSaver data in a transaction
+/// @dev Only TxSaverExecutor can store data, and anyone can read it
+contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
     
-    function setBytesTransiently(bytes memory _data, bool _useDataForTakingFeeFromPosition) internal {
+    function setBytesTransiently(bytes memory _data, bool _takeFeeFromPosition) internal {
         uint256 dataLength = _data.length;
 
         /// @dev ensure data follows abi specification, so length will be multiple of 32 when using abi.encode    
         require(dataLength >= 32 && dataLength % 32 == 0);
 
-        // write 1 to first slot as indicator that tx relay stored data for taking fee from position or 0 otherwise
-        uint256 flag = _useDataForTakingFeeFromPosition ? 1 : 0;
+        // write 1 to first slot as indicator that TxSaver stored data for taking fee from position or 0 otherwise
+        uint256 flag = _takeFeeFromPosition ? 1 : 0;
         assembly {
             tstore(0, flag)
         }
@@ -40,7 +40,7 @@ contract TxRelayBytesTransientStorage is ITxRelayBytesTransientStorage {
     }
 
     /// @dev Used to differentiate between taking fee from position and taking from EOA/wallet
-    function dataHasBeenStoredForTakingFeeFromPosition() public view returns (bool) {
+    function isPositionFeeDataStored() public view returns (bool) {
         uint256 isDataStored;
         assembly{
             isDataStored := tload(0)

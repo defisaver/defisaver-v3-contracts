@@ -9,9 +9,8 @@ const { topUp } = require('../../scripts/utils/fork');
 const { getOwnerAddr, getContractFromRegistry, addrs } = require('../utils');
 const {
     addBotCallerForTxRelay,
-    determineAdditionalGasUsedInTxRelay,
     emptyInjectedOffchainOrder,
-} = require('./utils-tx-relay');
+} = require('./utils-tx-saver');
 
 const app = express();
 const port = 7777;
@@ -92,6 +91,8 @@ app.post('/tx-relay', async (req, res) => {
 
     let receipt;
 
+    const estimatedGas = 500000; // TODO: do actual gas estimate
+
     if (shouldTakeGasFeeFromPosition) {
         if (!recipeHasDFSSellAction) {
             console.error('Recipe does not have DFSSell action');
@@ -99,7 +100,6 @@ app.post('/tx-relay', async (req, res) => {
                 status: 'Error',
             });
         }
-        const estimatedGas = 500000; // TODO: do actual gas estimate
         console.log('BEFORE taking fee from position');
         console.log(txRelayExecutorByBot.address);
         console.log(emptyInjectedOffchainOrder);
@@ -112,15 +112,9 @@ app.post('/tx-relay', async (req, res) => {
             },
         );
     } else {
-        const additionalGasUsed = determineAdditionalGasUsedInTxRelay(txRelaySignedData.feeToken);
-        let percentageOfLoweringTxCost = 0;
-        if (recipeHasDFSSellAction) {
-            percentageOfLoweringTxCost = 12;
-        }
         receipt = await txRelayExecutorByBot.executeTxTakingFeeFromEoaOrWallet(
             txParams,
-            additionalGasUsed,
-            percentageOfLoweringTxCost,
+            estimatedGas,
             {
                 gasLimit: 8000000,
             },

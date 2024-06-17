@@ -112,10 +112,7 @@ import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
 import { ISafe } from "../interfaces/safe/ISafe.sol";
-import { ITxRelayBytesTransientStorage } from "../interfaces/ITxRelayBytesTransientStorage.sol";
-
-//TODO[TX-RELAY]: remove after testing
-import { console } from "hardhat/console.sol";
+import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
 
 contract RecipeExecutor is 
     StrategyModel,
@@ -126,7 +123,7 @@ contract RecipeExecutor is
     GasFeeHelper,
     CheckWalletType
 {
-    bytes4 public constant TX_RELAY_EXECUTOR_ID = bytes4(keccak256("TxRelayExecutor"));
+    bytes4 public constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     /// @dev Function sig of ActionBase.executeAction()
@@ -138,11 +135,11 @@ contract RecipeExecutor is
     /// For strategy execution all triggers must be active
     error TriggerNotActiveError(uint256);
 
-    /// For tx relay, total gas cost fee taken from user can't be higher than maxTxCost set by user
+    /// For TxSaver, total gas cost fee taken from user can't be higher than maxTxCost set by user
     error TxCostInFeeTokenTooHighError(uint256 maxTxCost, uint256 txCost);
 
-    /// When calling tx relay functions, caller has to be tx relay executor
-    error TxRelayAuthorizationError(address caller);
+    /// When calling TxSaver functions, caller has to be TxSaverExecutor
+    error TxSaverAuthorizationError(address caller);
 
     /// @notice Called directly through user wallet to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
@@ -151,90 +148,57 @@ contract RecipeExecutor is
         _executeActions(_currRecipe);
     }
 
-    /// @notice Called by tx relay executor through safe wallet when fee for gas cost is taken from user position
-    /// @dev Second param is not used here, but it's needed as it is part of safe signature
+    /// @notice Called by TxSaverExecutor through safe wallet
     /// @param _currRecipe Recipe to be executed
-    function executeRecipeFromTxRelayWhileTakingFeeFromPosition(
+    /// @param _txSaverData TxSaver data signed by user
+    function executeRecipeFromTxSaver(
         Recipe calldata _currRecipe,
-        TxRelaySignedData calldata
+        TxSaverSignedData calldata _txSaverData
     ) public payable {
-        if (msg.sender != registry.getAddr(TX_RELAY_EXECUTOR_ID)) {
-            revert TxRelayAuthorizationError(msg.sender);
+        address txSaverExecutorAddr = registry.getAddr(TX_SAVER_EXECUTOR_ID);
+
+        // only TxSaverExecutor can call this function
+        if (msg.sender != txSaverExecutorAddr) {
+            revert TxSaverAuthorizationError(msg.sender);
         }
 
-        _executeActions(_currRecipe);
-    }
-
-    /// @notice Called by tx relay executor through safe wallet when fee for gas cost is taken from eoa/wallet
-    /// @param _currRecipe Recipe to be executed
-    /// @param _txRelayData Tx relay data signed by user
-    /// @dev If the wallet is 1/1, take fee for gas cost from eoa, otherwise from wallet itself
-    function executeRecipeFromTxRelay(
-        Recipe calldata _currRecipe,
-        TxRelaySignedData calldata _txRelayData
-    ) public payable {
-        address txRelayExecutorAddr = registry.getAddr(TX_RELAY_EXECUTOR_ID);
-        if (msg.sender != txRelayExecutorAddr) {
-            revert TxRelayAuthorizationError(msg.sender);
+        // if fee is taken from position, its taken inside sell action, so here we just execute the recipe
+        if (_txSaverData.shouldTakeFeeFromPosition) {
+            _executeActions(_currRecipe);
+            return;
         }
-
-        /// @dev include missing gas from safe singleton to recipe executor
-        uint256 totalGasLostBecauseOfEIP150 = gasleft() / 64 + 2500;
-
-        (
-            uint256 gasStart,
-            uint256 gasLost,
-            uint256 additionalGasUsed,
-            uint256 percentageOfLoweringTxCost
-        ) = abi.decode(
-            ITxRelayBytesTransientStorage(txRelayExecutorAddr).getBytesTransiently(),
-            (uint256, uint256, uint256, uint256)
-        );
         
-        totalGasLostBecauseOfEIP150 += gasLost;
+        // when taking fee from EOA/wallet
+        // first read gas estimation set by TxSaverExecutor
+        (uint256 estimatedGasUsed) = abi.decode(
+            ITxSaverBytesTransientStorage(txSaverExecutorAddr).getBytesTransiently(),
+            (uint256)
+        );
 
+        // execute the recipe
         _executeActions(_currRecipe);
+
+        // calculate gas cost using gas estimation and signed token price
+        uint256 gasCost = calcGasCostUsingInjectedPrice(
+            estimatedGasUsed,
+            _txSaverData.feeToken,
+            _txSaverData.tokenPriceInEth
+        );
+
+        // revert if gas cost is higher than max cost signed by user
+        if (gasCost > _txSaverData.maxTxCostInFeeToken) {
+            revert TxCostInFeeTokenTooHighError(_txSaverData.maxTxCostInFeeToken, gasCost);
+        }
 
         address[] memory owners = ISafe(address(this)).getOwners();
 
-        uint256 gasUsed = gasStart - (gasleft() + totalGasLostBecauseOfEIP150);
-
-        uint256 gs = gasleft();
-
-        uint256 totalGasUsed = gasUsed + additionalGasUsed;
-        uint256 gasCost = calcGasCostUsingInjectedPrice(
-            totalGasUsed,
-            _txRelayData.feeToken,
-            _txRelayData.tokenPriceInEth
-        );
-
-        // lower the gas cost if percentage is set
-        if (percentageOfLoweringTxCost > 0) {
-            gasCost -= gasCost * percentageOfLoweringTxCost / 100;
-        }
-        
-        // revert if gas cost is higher than max cost signed by user
-        if (gasCost > _txRelayData.maxTxCostInFeeToken) {
-            revert TxCostInFeeTokenTooHighError(_txRelayData.maxTxCostInFeeToken, gasCost);
-        }
-
         // if 1/1 wallet, pull tokens from eoa to wallet
         if (owners.length == 1) {
-            _txRelayData.feeToken.pullTokensIfNeeded(owners[0], gasCost);
+            _txSaverData.feeToken.pullTokensIfNeeded(owners[0], gasCost);
         }
 
         // send tokens from wallet to fee recipient
-        _txRelayData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), gasCost);
-        gs = gs - gasleft();
-
-        console.log("*****************Gas start: %d", gasStart);
-        console.log("*****************Gas missing: %d", gasLost);
-        console.log("*****************Additional gas used: %d", additionalGasUsed);
-        console.log("*****************Percentage of lowering tx cost: %s", percentageOfLoweringTxCost);
-        console.log("*****************Gas used: %s", gasUsed);
-        console.log("*****************Total gas estimated: %s", gasUsed + additionalGasUsed);
-        console.log("*****************Gas cost: %s", gasCost);
-        console.log("*****************Gas cost for fee taking: %d", gs);
+        _txSaverData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), gasCost);
     }
 
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers

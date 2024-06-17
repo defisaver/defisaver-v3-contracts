@@ -26,7 +26,6 @@ const {
     formatExchangeObj,
     WETH_ADDRESS,
     DAI_ADDR,
-    getChainLinkPrice,
 } = require('../utils');
 const {
     signSafeTx,
@@ -36,17 +35,16 @@ const {
 } = require('../utils-safe');
 const { topUp } = require('../../scripts/utils/fork');
 const {
-    addBotCallerForTxRelay,
-    determineAdditionalGasUsedInTxRelay,
+    addBotCallerForTxSaver,
     emptyInjectedOffchainOrder,
-} = require('./utils-tx-relay');
+} = require('./utils-tx-saver');
 
-describe('Tx Relay - test using funds from EOA', function () {
+describe('TxSaver tests', function () {
     this.timeout(80000);
     let senderAcc;
     let safeWallet;
     let botAcc;
-    let txRelayExecutor;
+    let txSaverExecutor;
     let recipeExecutorAddr;
     let snapshotId;
     let tokenPriceHelper;
@@ -78,19 +76,23 @@ describe('Tx Relay - test using funds from EOA', function () {
     };
 
     const redeployContracts = async (isFork) => {
-        await redeploy('BotAuthForTxRelay', addrs[network].REGISTRY_ADDR, false, isFork);
+        await redeploy('BotAuthForTxSaver', addrs[network].REGISTRY_ADDR, false, isFork);
         await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
         await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, false, isFork);
 
         recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor', addrs[network].REGISTRY_ADDR);
         console.log('RecipeExecutor', recipeExecutorAddr);
-        txRelayExecutor = await redeploy('TxRelayExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
-        console.log('TxRelayExecutor', txRelayExecutor.address);
+        txSaverExecutor = await redeploy('TxSaverExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
+        console.log('txSaverExecutor', txSaverExecutor.address);
+
+        const tokenPriceHelperFactory = await hre.ethers.getContractFactory('TokenPriceHelper');
+        tokenPriceHelper = await tokenPriceHelperFactory.deploy();
+        await tokenPriceHelper.deployed();
     };
 
     before(async () => {
         const isFork = hre.network.name === 'fork';
-        console.log('isFork', isFork);
+        console.log('[INFO] Testing on fork:', isFork);
 
         [senderAcc, botAcc] = await hre.ethers.getSigners();
         await setUpSafeWallet(senderAcc.address);
@@ -102,14 +104,10 @@ describe('Tx Relay - test using funds from EOA', function () {
         }
 
         await redeployContracts(isFork);
-        await addBotCallerForTxRelay(botAcc.address, isFork);
-
-        const tokenPriceHelperFactory = await hre.ethers.getContractFactory('TokenPriceHelper');
-        tokenPriceHelper = await tokenPriceHelperFactory.deploy();
-        await tokenPriceHelper.deployed();
+        await addBotCallerForTxSaver(botAcc.address, isFork);
     });
 
-    const openAavePositionFunctionData = async (txRelayUserSignedData) => {
+    const openAavePositionFunctionData = async (txSaverUserSignedData) => {
         const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
         const poolAddress = await aaveMarketContract.getPool();
         const aavePool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
@@ -152,11 +150,11 @@ describe('Tx Relay - test using funds from EOA', function () {
 
         const recipe = new dfs.Recipe('AaveV3OpenRecipe-Test', [supplyAction, borrowAction]);
 
-        return recipe.encodeForTxRelayCall(txRelayUserSignedData, false)[1];
+        return recipe.encodeForTxSaverCall(txSaverUserSignedData)[1];
     };
 
     const dfsSellFunctionData = async (
-        txRelaySignedData,
+        txSaverSignedData,
         srcToken,
         destToken,
         sellAmount,
@@ -182,7 +180,7 @@ describe('Tx Relay - test using funds from EOA', function () {
             ),
         ]);
 
-        return recipe.encodeForTxRelayCall(txRelaySignedData, true)[1];
+        return recipe.encodeForTxSaverCall(txSaverSignedData)[1];
     };
 
     const signSafeTransaction = async (functionData) => {
@@ -202,20 +200,20 @@ describe('Tx Relay - test using funds from EOA', function () {
         return signature;
     };
 
-    it('Should take fee from eoa', async () => {
-        // TODO[TX-RELAY]: Should we use only permit tokens? If yes, should we also support DAI or only full EIP-2612 standard?
-
+    it('... should take fee from eoa', async () => {
         const feeTokenAsset = getAssetInfo('DAI');
         const feeTokenAddress = feeTokenAsset.address;
         const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
         await setBalance(feeTokenAddress, senderAcc.address, hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals));
         await approve(feeTokenAddress, safeWallet.address, senderAcc);
-        const txRelaySignedData = {
+        const txSaverSignedData = {
             maxTxCostInFeeToken: hre.ethers.utils.parseUnits('50', feeTokenAsset.decimals),
             feeToken: feeTokenAddress,
             tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: false,
         };
-        const functionData = await openAavePositionFunctionData(txRelaySignedData);
+        const functionData = await openAavePositionFunctionData(txSaverSignedData);
         const signature = await signSafeTransaction(functionData);
 
         const txParams = {
@@ -230,28 +228,27 @@ describe('Tx Relay - test using funds from EOA', function () {
         const botEthBalanceBefore = await balanceOf(ETH_ADDR, botAcc.address);
         const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
         const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].FEE_RECEIVER);
-        const txRelayFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, txRelayExecutor.address);
+        const txSaverFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, txSaverExecutor.address);
 
         console.log('[BOT] eth balance before:', botEthBalanceBefore.toString());
         console.log('[EOA] fee token balance before:', eoaFeeTokenBalanceBefore.toString());
         console.log('[FEE RECIPIENT] fee token balance before:', feeRecipientFeeTokenBalanceBefore.toString());
-        console.log('[RELAY EXECUTOR] fee token balance before:', txRelayFeeTokenBalanceBefore.toString());
+        console.log('[TX SAVER EXECUTOR] fee token balance before:', txSaverFeeTokenBalanceBefore.toString());
 
         // ************************* EXECUTION *********************************************************************
-        const txRelayExecutorByBot = txRelayExecutor.connect(botAcc);
-        const additionalGasUsed = determineAdditionalGasUsedInTxRelay(feeTokenAddress);
-        const percentageOfLoweringTxCost = 0;
+        const txSaverExecutorByBot = txSaverExecutor.connect(botAcc);
+        const estimatedGas = 500000;
 
-        const callData = txRelayExecutorByBot.interface.encodeFunctionData('executeTxTakingFeeFromEoaOrWallet', [
+        const callData = txSaverExecutorByBot.interface.encodeFunctionData('executeTx', [
             txParams,
-            additionalGasUsed,
-            percentageOfLoweringTxCost,
+            estimatedGas,
+            emptyInjectedOffchainOrder,
         ]);
 
-        const receipt = await txRelayExecutorByBot.executeTxTakingFeeFromEoaOrWallet(
+        const receipt = await txSaverExecutorByBot.executeTx(
             txParams,
-            additionalGasUsed,
-            percentageOfLoweringTxCost,
+            estimatedGas,
+            emptyInjectedOffchainOrder,
             {
                 gasLimit: 8000000,
             },
@@ -260,19 +257,19 @@ describe('Tx Relay - test using funds from EOA', function () {
         const gasUsed = await getGasUsed(receipt);
         const dollarPrice = calcGasToUSD(gasUsed, 0, callData);
         console.log(
-            `GasUsed txRelayExecutor: ${gasUsed}, price at mainnet ${addrs.mainnet.AVG_GAS_PRICE} gwei $${dollarPrice}`,
+            `GasUsed txSaverExecutor: ${gasUsed}, price at mainnet ${addrs.mainnet.AVG_GAS_PRICE} gwei $${dollarPrice}`,
         );
         // ****************************** AFTER *******************************************************
 
         const botEthBalanceAfter = await balanceOf(ETH_ADDR, botAcc.address);
         const eoaFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, senderAcc.address);
         const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].FEE_RECEIVER);
-        const txRelayFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txRelayExecutor.address);
+        const txSaverFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txSaverExecutor.address);
 
         console.log('[BOT] eth balance after:', botEthBalanceAfter.toString());
         console.log('[EOA] fee token balance after:', eoaFeeTokenBalanceAfter.toString());
         console.log('[FEE RECIPIENT] fee token balance after:', feeRecipientFeeTokenBalanceAfter.toString());
-        console.log('[RELAY EXECUTOR] fee token balance after:', txRelayFeeTokenBalanceAfter.toString());
+        console.log('[TX SAVER EXECUTOR] fee token balance after:', txSaverFeeTokenBalanceAfter.toString());
 
         const feeTaken = eoaFeeTokenBalanceBefore.sub(eoaFeeTokenBalanceAfter);
         console.log('Fee taken:', feeTaken.toString());
@@ -282,10 +279,10 @@ describe('Tx Relay - test using funds from EOA', function () {
 
         expect(feeTaken).to.be.gt(BigNumber.from('0'));
         expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(feeTaken);
-        expect(txRelayFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
+        expect(txSaverFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
     });
 
-    it('Test getting fee from user position without order injection', async () => {
+    it('... should take fee from user position without order injection', async () => {
         const srcToken = WETH_ADDRESS;
         const destToken = DAI_ADDR;
         const sellAmount = hre.ethers.utils.parseUnits('10', 18);
@@ -293,14 +290,16 @@ describe('Tx Relay - test using funds from EOA', function () {
         const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(srcToken);
         console.log('Fee token price in eth:', feeTokenPriceInEth.toString());
 
-        const txRelaySignedData = {
+        const txSaverSignedData = {
             maxTxCostInFeeToken: hre.ethers.utils.parseUnits('1', srcToken.decimals),
             feeToken: srcToken,
             tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: true,
         };
 
         const functionData = await dfsSellFunctionData(
-            txRelaySignedData,
+            txSaverSignedData,
             srcToken,
             destToken,
             sellAmount,
@@ -314,16 +313,16 @@ describe('Tx Relay - test using funds from EOA', function () {
             signatures: signature,
         };
 
-        const txRelayExecutorByBot = txRelayExecutor.connect(botAcc);
+        const txSaverExecutorByBot = txSaverExecutor.connect(botAcc);
         const estimatedGas = 500000;
 
-        const callData = txRelayExecutorByBot.interface.encodeFunctionData('executeTxTakingFeeFromPosition', [
+        const callData = txSaverExecutorByBot.interface.encodeFunctionData('executeTx', [
             txParams,
             estimatedGas,
             emptyInjectedOffchainOrder,
         ]);
 
-        const receipt = await txRelayExecutorByBot.executeTxTakingFeeFromPosition(
+        const receipt = await txSaverExecutorByBot.executeTx(
             txParams,
             estimatedGas,
             emptyInjectedOffchainOrder,
@@ -335,7 +334,51 @@ describe('Tx Relay - test using funds from EOA', function () {
         const gasUsed = await getGasUsed(receipt);
         const dollarPrice = calcGasToUSD(gasUsed, 0, callData);
         console.log(
-            `GasUsed txRelayExecutor: ${gasUsed}, price at mainnet ${addrs.mainnet.AVG_GAS_PRICE} gwei $${dollarPrice}`,
+            `GasUsed TxSaverExecutor: ${gasUsed}, price at mainnet ${addrs.mainnet.AVG_GAS_PRICE} gwei $${dollarPrice}`,
         );
+    });
+
+    it('... should fail taking fee from position when deadline passed', async () => {
+        const srcToken = WETH_ADDRESS;
+        const destToken = DAI_ADDR;
+        const sellAmount = hre.ethers.utils.parseUnits('10', 18);
+
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(srcToken);
+        console.log('Fee token price in eth:', feeTokenPriceInEth.toString());
+
+        const txSaverSignedData = {
+            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('1', srcToken.decimals),
+            feeToken: srcToken,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: Math.floor(Date.now() / 1000),
+            shouldTakeFeeFromPosition: true,
+        };
+
+        const functionData = await dfsSellFunctionData(
+            txSaverSignedData,
+            srcToken,
+            destToken,
+            sellAmount,
+        );
+        const signature = await signSafeTransaction(functionData);
+
+        const txParams = {
+            safe: safeWallet.address,
+            refundReceiver: nullAddress,
+            data: functionData,
+            signatures: signature,
+        };
+
+        const txSaverExecutorByBot = txSaverExecutor.connect(botAcc);
+        const estimatedGas = 500000;
+
+        await expect(txSaverExecutorByBot.executeTx(
+            txParams,
+            estimatedGas,
+            emptyInjectedOffchainOrder,
+            {
+                gasLimit: 8000000,
+            },
+        )).to.be.reverted;
     });
 });

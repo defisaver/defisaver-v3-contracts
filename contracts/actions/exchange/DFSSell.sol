@@ -2,22 +2,19 @@
 
 pragma solidity =0.8.24;
 
-import { DFSExchangeThroughTxRelay } from "../../exchangeV3/DFSExchangeThroughTxRelay.sol";
+import { DFSExchangeThroughTxSaver } from "../../exchangeV3/DFSExchangeThroughTxSaver.sol";
 import { TokenGroupRegistry } from "../../exchangeV3/registries/TokenGroupRegistry.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { ITxRelayBytesTransientStorage} from "../../interfaces/ITxRelayBytesTransientStorage.sol";
-
-//TODO[TX-RELAY]: Remove after testing
-import { console } from "hardhat/console.sol";
+import { ITxSaverBytesTransientStorage} from "../../interfaces/ITxSaverBytesTransientStorage.sol";
 
 /// @title A exchange sell action through the dfs exchange
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
-contract DFSSell is ActionBase, DFSExchangeThroughTxRelay {
+contract DFSSell is ActionBase, DFSExchangeThroughTxSaver {
 
     using TokenUtils for address;
 
-    bytes4 internal constant TX_RELAY_EXECUTOR_ID = bytes4(keccak256("TxRelayExecutor"));
+    bytes4 internal constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
     uint256 internal constant RECIPE_FEE = 400;
 
     struct Params {
@@ -137,12 +134,12 @@ contract DFSSell is ActionBase, DFSExchangeThroughTxRelay {
         uint256 exchangedAmount;
 
         {
-            /// @dev Check if TxRelayExecutor initiated transaction by setting right flag in transient storage
+            /// @dev Check if TxSaverExecutor initiated transaction by setting right flag in transient storage
             /// @dev we can't just check for msg.sender, as that wouldn't work for flashloan actions
-            address txRelayAddr = registry.getAddr(TX_RELAY_EXECUTOR_ID);
-            ITxRelayBytesTransientStorage tStorage = ITxRelayBytesTransientStorage(txRelayAddr);
-            if (tStorage.dataHasBeenStoredForTakingFeeFromPosition()) {
-                (wrapper, exchangedAmount) = _sellThroughTxRelay(_exchangeData, tStorage);
+            address txSaverAddr = registry.getAddr(TX_SAVER_EXECUTOR_ID);
+            ITxSaverBytesTransientStorage tStorage = ITxSaverBytesTransientStorage(txSaverAddr);
+            if (tStorage.isPositionFeeDataStored()) {
+                (wrapper, exchangedAmount) = _sellThroughTxSaver(_exchangeData, tStorage);
             } else {
                 (wrapper, exchangedAmount) = _sell(_exchangeData);
             }

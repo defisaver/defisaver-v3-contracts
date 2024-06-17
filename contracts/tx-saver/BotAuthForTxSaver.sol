@@ -3,8 +3,8 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 
-/// @title Handles authorization of who can call the tx relay executor
-contract BotAuthForTxRelay is AdminAuth {
+/// @title Handles authorization of who can call the TxSaverExecutor
+contract BotAuthForTxSaver is AdminAuth {
     mapping(address => bool) public approvedCallers;
 
     /// @notice Checks if the caller is approved
@@ -13,13 +13,13 @@ contract BotAuthForTxRelay is AdminAuth {
         return approvedCallers[_caller];
     }
 
-    /// @notice Adds a new bot address which will be able to call tx relay executor
+    /// @notice Adds a new bot address which will be able to call TxSaverExecutor
     /// @param _caller Bot address
     function addCaller(address _caller) public onlyOwner {
         approvedCallers[_caller] = true;
     }
 
-    /// @notice Removes a bot address so it can't call tx relay executor
+    /// @notice Removes a bot address so it can't call TxSaverExecutor
     /// @param _caller Bot address
     function removeCaller(address _caller) public onlyOwner {
         approvedCallers[_caller] = false;

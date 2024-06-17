@@ -8,7 +8,7 @@ const {
 } = require('../utils');
 const { createSafe } = require('../utils-safe');
 const { topUp } = require('../../scripts/utils/fork');
-const { addBotCallerForTxRelay } = require('./utils-tx-relay');
+const { addBotCallerForTxRelay } = require('./utils-tx-saver');
 
 describe('Deploy tx relay contracts', function () {
     this.timeout(80000);

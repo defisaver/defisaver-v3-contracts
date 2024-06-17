@@ -1,7 +1,5 @@
 const hre = require('hardhat');
 const {
-    getNetwork,
-    addrs,
     impersonateAccount,
     getAddrFromRegistry,
     stopImpersonatingAccount,
@@ -9,7 +7,7 @@ const {
     nullAddress,
 } = require('../utils');
 
-const addBotCallerForTxRelay = async (
+const addBotCallerForTxSaver = async (
     botAddr,
     isFork = false,
 ) => {
@@ -18,9 +16,9 @@ const addBotCallerForTxRelay = async (
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    const botAuthAddr = await getAddrFromRegistry('BotAuthForTxRelay');
+    const botAuthAddr = await getAddrFromRegistry('BotAuthForTxSaver');
 
-    const botAuthInstance = await hre.ethers.getContractFactory('BotAuthForTxRelay', signer);
+    const botAuthInstance = await hre.ethers.getContractFactory('BotAuthForTxSaver', signer);
     let botAuth = await botAuthInstance.attach(botAuthAddr);
 
     botAuth = botAuth.connect(signer);
@@ -30,21 +28,6 @@ const addBotCallerForTxRelay = async (
     if (!isFork) {
         await stopImpersonatingAccount(getOwnerAddr());
     }
-};
-
-// TODO[TX-RELAY]: adjust these values based on the actual gas used
-const determineAdditionalGasUsedInTxRelay = (feeToken) => {
-    const feeTokenLower = feeToken.toLowerCase();
-    if (feeTokenLower === addrs[getNetwork()].USDC_ADDR.toLowerCase()) {
-        return 64300;
-    }
-    if (feeTokenLower === addrs[getNetwork()].DAI_ADDRESS.toLowerCase()) {
-        return 90000;
-    }
-    if (feeTokenLower === addrs[getNetwork()].WETH_ADDRESS.toLowerCase()) {
-        return 10000;
-    }
-    return 0;
 };
 
 const emptyInjectedOffchainOrder = {
@@ -61,7 +44,6 @@ const emptyInjectedOffchainOrder = {
 };
 
 module.exports = {
-    addBotCallerForTxRelay,
-    determineAdditionalGasUsedInTxRelay,
+    addBotCallerForTxSaver,
     emptyInjectedOffchainOrder,
 };
