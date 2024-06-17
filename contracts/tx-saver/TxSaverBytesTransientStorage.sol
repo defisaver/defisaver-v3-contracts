@@ -8,14 +8,17 @@ import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransi
 /// @dev Only TxSaverExecutor can store data, and anyone can read it
 contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
     
+    uint256 constant POSITION_FEE_FLAG = 1;
+    uint256 constant EOA_OR_WALLET_FEE_FLAG = 2;
+
     function setBytesTransiently(bytes memory _data, bool _takeFeeFromPosition) internal {
         uint256 dataLength = _data.length;
 
-        /// @dev ensure data follows abi specification, so length will be multiple of 32 when using abi.encode    
+        // ensure data follows abi specification, so length will be multiple of 32 when using abi.encode    
         require(dataLength >= 32 && dataLength % 32 == 0);
 
-        // write 1 to first slot as indicator that TxSaver stored data for taking fee from position or 0 otherwise
-        uint256 flag = _takeFeeFromPosition ? 1 : 0;
+        // write flag to first slot to indicate if fee is taken from position or EOA/wallet
+        uint256 flag = _takeFeeFromPosition ? POSITION_FEE_FLAG : EOA_OR_WALLET_FEE_FLAG;
         assembly {
             tstore(0, flag)
         }
@@ -39,13 +42,12 @@ contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
         }
     }
 
-    /// @dev Used to differentiate between taking fee from position and taking from EOA/wallet
-    function isPositionFeeDataStored() public view returns (bool) {
-        uint256 isDataStored;
+    function getFeeType() public view returns (uint256) {
+        uint256 feeType;
         assembly{
-            isDataStored := tload(0)
+            feeType := tload(0)
         }
-        return isDataStored == 1;
+        return feeType;
     }
 
     function getBytesTransiently() public view returns (bytes memory result){

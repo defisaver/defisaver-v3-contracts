@@ -3,6 +3,6 @@
 pragma solidity =0.8.24;
 
 interface ITxSaverBytesTransientStorage {
-    function isPositionFeeDataStored() external view returns (bool);
+    function getFeeType() external view returns (uint256);
     function getBytesTransiently() external view returns (bytes memory result);
 }

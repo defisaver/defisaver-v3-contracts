@@ -15,6 +15,7 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
     using TokenUtils for address;
 
     bytes4 internal constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
+    uint256 constant EOA_OR_WALLET_FEE_FLAG = 2; // see TxSaverBytesTransientStorage
 
     /// For TxSaver, total gas cost fee taken from user can't be higher than maxTxCost set by user
     error TxCostInFeeTokenTooHighError(uint256 maxTxCost, uint256 txCost);
@@ -29,61 +30,98 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
     {   
         address txSaverAddr = _registry.getAddr(TX_SAVER_EXECUTOR_ID);
         ITxSaverBytesTransientStorage tStorage = ITxSaverBytesTransientStorage(txSaverAddr);
+
+        // Check if TxSaverExecutor initiated transaction by setting right flag in transient storage
+        // we can't just check for msg.sender, as that wouldn't work for flashloan actions
+        uint256 feeType = tStorage.getFeeType();
         
-        /// @dev Check if TxSaverExecutor initiated transaction by setting right flag in transient storage
-        /// @dev we can't just check for msg.sender, as that wouldn't work for flashloan actions
-        if (tStorage.isPositionFeeDataStored()) {
-            uint256 amountWithoutFee = _exData.srcAmount;
-
-            _takeTxSaverFee(_exData, tStorage);
-            txSaverFeeTaken = true;
-            
-            // perform regular sell
-            (wrapperAddress, destAmount, hasFee) = _sell(_exData, _user);
-            
-            // revert back exData changes to keep it consistent
-            _exData.srcAmount = amountWithoutFee;
-
-        } else {
+        // if not initiated by TxSaverExecutor, perform regular sell
+        if (feeType == 0) {
             txSaverFeeTaken = false;
             (wrapperAddress, destAmount, hasFee) = _sell(_exData, _user);
+            return (wrapperAddress, destAmount, hasFee, txSaverFeeTaken);
         }
-    }
 
-    function _takeTxSaverFee(ExchangeData memory _exData, ITxSaverBytesTransientStorage _tStorage) internal {
         (
             uint256 estimatedGas,
             TxSaverSignedData memory txSaverData,
             InjectedExchangeData memory injectedExchangeData
-        ) = abi.decode(
-            _tStorage.getBytesTransiently(),
-            (uint256, TxSaverSignedData, InjectedExchangeData)
-        );
+        ) = _readDataFromTransientStorage(feeType, tStorage);
 
+        uint256 amountWithoutFee = _exData.srcAmount;
+
+        _injectExchangeData(_exData, injectedExchangeData);
+
+        // when taking fee from EOA/wallet perform regular sell
+        // fee is taken inside the RecipeExecutor
+        if (feeType == EOA_OR_WALLET_FEE_FLAG) {
+            txSaverFeeTaken = false;
+            (wrapperAddress, destAmount, hasFee) = _sell(_exData, _user);
+            return (wrapperAddress, destAmount, hasFee, txSaverFeeTaken);
+        }
+        
+        // when taking fee from position, take tx cost before regular sell
+        _takeTxSaverFee(_exData, txSaverData, estimatedGas);
+        txSaverFeeTaken = true;
+    
+        // perform regular sell
+        (wrapperAddress, destAmount, hasFee) = _sell(_exData, _user);
+    
+        // revert back exData changes to keep it consistent
+        _exData.srcAmount = amountWithoutFee;
+    }
+
+    function _injectExchangeData(ExchangeData memory _exData, InjectedExchangeData memory _injectedExchangeData) internal pure {
         // if offchain order data is present, inject it here
-        if (injectedExchangeData.offchainData.price > 0) {
-            _exData.offchainData = injectedExchangeData.offchainData;
+        if (_injectedExchangeData.offchainData.price > 0) {
+            _exData.offchainData = _injectedExchangeData.offchainData;
         }
 
         // if onchain order data is present, inject it here 
-        if (injectedExchangeData.wrapper != address(0)) {
-            _exData.wrapper = injectedExchangeData.wrapper;
-            _exData.wrapperData = injectedExchangeData.wrapperData;
+        if (_injectedExchangeData.wrapper != address(0)) {
+            _exData.wrapper = _injectedExchangeData.wrapper;
+            _exData.wrapperData = _injectedExchangeData.wrapperData;
         }
+    }
 
+    function _readDataFromTransientStorage(uint256 _feeType, ITxSaverBytesTransientStorage _tStorage) 
+        internal view returns (
+            uint256 estimatedGas,
+            TxSaverSignedData memory txSaverData,
+            InjectedExchangeData memory injectedExchangeData
+        ) 
+    {
+        if (_feeType == EOA_OR_WALLET_FEE_FLAG) {
+            (estimatedGas, injectedExchangeData) = abi.decode(
+                _tStorage.getBytesTransiently(),
+                (uint256, InjectedExchangeData)
+            );
+        } else {
+            (estimatedGas, txSaverData, injectedExchangeData) = abi.decode(
+                _tStorage.getBytesTransiently(),
+                (uint256, TxSaverSignedData, InjectedExchangeData)
+            );
+        }
+    }
+
+    function _takeTxSaverFee(
+        ExchangeData memory _exData,
+        TxSaverSignedData memory _txSaverData,
+        uint256 _estimatedGas
+    ) internal {
         // when sending sponsored tx, no tx cost is taken
-        if (estimatedGas == 0) return;
+        if (_estimatedGas == 0) return;
 
         // calculate gas cost in src token
         uint256 txCostInSrcToken = calcGasCostUsingInjectedPrice(
-            estimatedGas,
+            _estimatedGas,
             _exData.srcAddr,
-            txSaverData.tokenPriceInEth
+            _txSaverData.tokenPriceInEth
         );
 
         // revert if tx cost is higher than max value set by user
-        if (txCostInSrcToken > txSaverData.maxTxCostInFeeToken) {
-            revert TxCostInFeeTokenTooHighError(txSaverData.maxTxCostInFeeToken, txCostInSrcToken);
+        if (txCostInSrcToken > _txSaverData.maxTxCostInFeeToken) {
+            revert TxCostInFeeTokenTooHighError(_txSaverData.maxTxCostInFeeToken, txCostInSrcToken);
         }
 
         // subtract tx cost from src amount and send it to fee recipient

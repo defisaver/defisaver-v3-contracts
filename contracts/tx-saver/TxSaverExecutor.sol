@@ -71,15 +71,13 @@ contract TxSaverExecutor is
         }
 
         if (txSaverData.shouldTakeFeeFromPosition) {
-            /// @dev read inside sell action
             setBytesTransiently(
                 abi.encode(_estimatedGas, txSaverData, _injectedExchangeData),
                 txSaverData.shouldTakeFeeFromPosition
             );
         } else {
-            /// @dev read inside recipe executor
             setBytesTransiently(
-                abi.encode(_estimatedGas),
+                abi.encode(_estimatedGas, _injectedExchangeData),
                 txSaverData.shouldTakeFeeFromPosition
             );
         }

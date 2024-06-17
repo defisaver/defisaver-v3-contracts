@@ -108,6 +108,7 @@ import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
 import { GasFeeHelper } from "../actions/fee/helpers/GasFeeHelper.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
+import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
@@ -170,9 +171,9 @@ contract RecipeExecutor is
         
         // when taking fee from EOA/wallet
         // first read gas estimation set by TxSaverExecutor
-        (uint256 estimatedGasUsed) = abi.decode(
+        (uint256 estimatedGasUsed,) = abi.decode(
             ITxSaverBytesTransientStorage(txSaverExecutorAddr).getBytesTransiently(),
-            (uint256)
+            (uint256, DFSExchangeData.InjectedExchangeData)
         );
 
         // execute the recipe
