@@ -127,7 +127,6 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
         console.log("Src token: %s", _exData.srcAddr);
         console.log("Token price in eth: %s", _txSaverData.tokenPriceInEth);
         console.log("Max tx cost in fee token: %s", _txSaverData.maxTxCostInFeeToken);
-        console.log("Fee recipient: %s", feeRecipient.getFeeAddr());
 
         // calculate gas cost in src token
         uint256 txCostInSrcToken = calcGasCostUsingInjectedPrice(
@@ -145,6 +144,6 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
 
         // subtract tx cost from src amount and send it to fee recipient
         _exData.srcAmount = sub(_exData.srcAmount, txCostInSrcToken);
-        _exData.srcAddr.withdrawTokens(feeRecipient.getFeeAddr(), txCostInSrcToken);
+        _exData.srcAddr.withdrawTokens(TX_SAVER_FEE_RECIPIENT, txCostInSrcToken);
     }
 }

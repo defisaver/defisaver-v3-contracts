@@ -201,7 +201,6 @@ contract RecipeExecutor is
         console.log("Gas cost when taking from EOA/wallet: %s", gasCost);
         console.log("Max tx cost in fee token: %s", _txSaverData.maxTxCostInFeeToken);
         console.log("Fee token: %s", _txSaverData.feeToken);
-        console.log("Fee recipient: %s", feeRecipient.getFeeAddr());
         console.log("Token price in eth: %s", _txSaverData.tokenPriceInEth);
 
         // revert if gas cost is higher than max cost signed by user
@@ -217,7 +216,7 @@ contract RecipeExecutor is
         }
 
         // send tokens from wallet to fee recipient
-        _txSaverData.feeToken.withdrawTokens(feeRecipient.getFeeAddr(), gasCost);
+        _txSaverData.feeToken.withdrawTokens(TX_SAVER_FEE_RECIPIENT, gasCost);
     }
 
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers

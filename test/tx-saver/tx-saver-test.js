@@ -338,7 +338,7 @@ describe('TxSaver tests', function () {
         // ************************** BEFORE ************************************************************************
         const botEthBalanceBefore = await balanceOf(ETH_ADDR, botAcc.address);
         const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
-        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
         const txSaverFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, txSaverExecutor.address);
 
         console.log('[BOT] eth balance before:', botEthBalanceBefore.toString());
@@ -374,7 +374,7 @@ describe('TxSaver tests', function () {
 
         const botEthBalanceAfter = await balanceOf(ETH_ADDR, botAcc.address);
         const eoaFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, senderAcc.address);
-        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
         const txSaverFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txSaverExecutor.address);
 
         console.log('[BOT] eth balance after:', botEthBalanceAfter.toString());
