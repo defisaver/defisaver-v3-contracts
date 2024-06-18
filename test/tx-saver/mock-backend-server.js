@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable import/no-extraneous-dependencies */
 require('dotenv-safe').config();
 const { Wallet } = require('ethers');
@@ -8,13 +9,17 @@ const cors = require('cors');
 const { topUp } = require('../../scripts/utils/fork');
 const { getOwnerAddr, getContractFromRegistry, addrs } = require('../utils');
 const {
-    addBotCallerForTxRelay,
+    addBotCallerForTxSaver,
     emptyInjectedOffchainOrder,
 } = require('./utils-tx-saver');
 
 const app = express();
 const port = 7777;
 const DFS_SELL_SELECTOR = '0x7f2a0f35';
+const LLAMA_LEND_BOOST_SELECTOR = '0xe339d237';
+const LLAMA_LEND_LEV_CREATE_SELECTOR = '0xa7dbc75a';
+const LLAMA_LEND_REPAY_SELECTOR = '0x731a2ce5';
+const LLAMA_LEND_SELF_LIQUIDATE_WITH_COLL_SELECTOR = '0x74ba5125';
 
 const adaptSignatureForSafeCall = (signature) => {
     // @dev only personal_sign is supported on frontend for now
@@ -34,25 +39,23 @@ const adaptSignatureForSafeCall = (signature) => {
 
 app.use(bodyParser.json());
 app.use(cors());
-app.post('/tx-relay', async (req, res) => {
+app.post('/tx-saver', async (req, res) => {
     const {
-        value,
         safe,
         data,
         eoa,
+        refundReceiver,
         messageHash,
         signatures,
-        shouldTakeGasFeeFromPosition,
     } = req.body;
 
     console.log('Received data:');
-    console.log('Value:', value);
     console.log('Safe:', safe);
     console.log('Data:', data);
     console.log('EOA:', eoa);
+    console.log('Refund Receiver:', refundReceiver);
     console.log('Message Hash:', messageHash);
     console.log('Signatures:', signatures);
-    console.log('Should take gas fee from position:', shouldTakeGasFeeFromPosition);
 
     res.status(200).send({
         status: 'Success',
@@ -66,60 +69,58 @@ app.post('/tx-relay', async (req, res) => {
 
     await topUp(botAcc.address);
     await topUp(getOwnerAddr());
-    await addBotCallerForTxRelay(botAcc.address, true);
+    await addBotCallerForTxSaver(botAcc.address, true);
 
-    const txRelayExecutor = await getContractFromRegistry('TxRelayExecutor', addrs.mainnet.REGISTRY_ADDR, false, true);
-    const txRelayExecutorByBot = txRelayExecutor.connect(botAcc);
+    const txSaverExecutor = await getContractFromRegistry('TxSaverExecutor', addrs.mainnet.REGISTRY_ADDR, false, true);
+    const txSaverExecutorByBot = txSaverExecutor.connect(botAcc);
 
     const txParams = {
-        value,
         safe,
+        refundReceiver,
         data: hre.ethers.utils.arrayify(data),
         signatures: hre.ethers.utils.arrayify(signatures),
     };
 
-    const parsedTxRelayData = await txRelayExecutorByBot.parseTxRelaySignedData(txParams.data);
-    const recipe = parsedTxRelayData.recipe;
-    const txRelaySignedData = parsedTxRelayData.txRelayData;
+    const parsedTxSaverData = await txSaverExecutorByBot.parseTxSaverSignedData(txParams.data);
+    const recipe = parsedTxSaverData.recipe;
+    const txSaverSignedData = parsedTxSaverData.txSaverData;
 
     console.log(recipe);
-    console.log(txRelaySignedData);
+    console.log(txSaverSignedData);
 
     txParams.signatures = adaptSignatureForSafeCall(txParams.signatures);
 
-    const recipeHasDFSSellAction = recipe.actionIds.some((id) => id === DFS_SELL_SELECTOR);
+    const allowedDFSSellSelectors = [
+        DFS_SELL_SELECTOR,
+        LLAMA_LEND_BOOST_SELECTOR,
+        LLAMA_LEND_LEV_CREATE_SELECTOR,
+        LLAMA_LEND_REPAY_SELECTOR,
+        LLAMA_LEND_SELF_LIQUIDATE_WITH_COLL_SELECTOR,
+    ];
 
-    let receipt;
+    const recipeHasSellAction = recipe.actionIds.some((id) => allowedDFSSellSelectors.includes(id));
 
     const estimatedGas = 500000; // TODO: do actual gas estimate
 
-    if (shouldTakeGasFeeFromPosition) {
-        if (!recipeHasDFSSellAction) {
-            console.error('Recipe does not have DFSSell action');
+    if (txSaverSignedData.shouldTakeFeeFromPosition) {
+        if (!recipeHasSellAction) {
+            console.error('Recipe does not have sell action');
             res.status(400).send({
                 status: 'Error',
             });
         }
-        console.log('BEFORE taking fee from position');
-        console.log(txRelayExecutorByBot.address);
-        console.log(emptyInjectedOffchainOrder);
-        receipt = await txRelayExecutorByBot.executeTxTakingFeeFromPosition(
-            txParams,
-            estimatedGas,
-            emptyInjectedOffchainOrder,
-            {
-                gasLimit: 8000000,
-            },
-        );
-    } else {
-        receipt = await txRelayExecutorByBot.executeTxTakingFeeFromEoaOrWallet(
-            txParams,
-            estimatedGas,
-            {
-                gasLimit: 8000000,
-            },
-        );
     }
+
+    console.log(txSaverExecutorByBot.address);
+    console.log(emptyInjectedOffchainOrder);
+    const receipt = await txSaverExecutorByBot.executeTx(
+        txParams,
+        estimatedGas,
+        emptyInjectedOffchainOrder,
+        {
+            gasLimit: 8000000,
+        },
+    );
 
     const result = await hre.ethers.provider.getTransactionReceipt(receipt.hash);
 

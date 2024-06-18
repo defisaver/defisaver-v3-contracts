@@ -8,6 +8,7 @@ import { IERC20 } from "../interfaces/IERC20.sol";
 import { GasFeeHelper } from "../../contracts/actions/fee/helpers/GasFeeHelper.sol";
 import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { console } from "hardhat/console.sol";
 
 contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
 {   
@@ -35,6 +36,8 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
         // we can't just check for msg.sender, as that wouldn't work for flashloan actions
         uint256 feeType = tStorage.getFeeType();
         
+        console.log("Fee type: %s", feeType);
+
         // if not initiated by TxSaverExecutor, perform regular sell
         if (feeType == 0) {
             txSaverFeeTaken = false;
@@ -49,6 +52,7 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
         ) = _readDataFromTransientStorage(feeType, tStorage);
 
         uint256 amountWithoutFee = _exData.srcAmount;
+        console.log("Amount without fee: %s", amountWithoutFee);
 
         _injectExchangeData(_exData, injectedExchangeData);
 
@@ -66,6 +70,8 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
     
         // perform regular sell
         (wrapperAddress, destAmount, hasFee) = _sell(_exData, _user);
+
+        console.log("Dest amount after regular sell", destAmount);
     
         // revert back exData changes to keep it consistent
         _exData.srcAmount = amountWithoutFee;
@@ -74,11 +80,15 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
     function _injectExchangeData(ExchangeData memory _exData, InjectedExchangeData memory _injectedExchangeData) internal pure {
         // if offchain order data is present, inject it here
         if (_injectedExchangeData.offchainData.price > 0) {
+            console.log("injecting offchain data");
+            console.log("price: %s", _injectedExchangeData.offchainData.price);
             _exData.offchainData = _injectedExchangeData.offchainData;
         }
 
         // if onchain order data is present, inject it here 
         if (_injectedExchangeData.wrapper != address(0)) {
+            console.log("injecting wrapper data");
+            console.log("wrapper: %s", _injectedExchangeData.wrapper);
             _exData.wrapper = _injectedExchangeData.wrapper;
             _exData.wrapperData = _injectedExchangeData.wrapperData;
         }
@@ -112,12 +122,21 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
         // when sending sponsored tx, no tx cost is taken
         if (_estimatedGas == 0) return;
 
+        console.log("Taking tx saver fee");
+        console.log("Estimated gas: %s", _estimatedGas);
+        console.log("Src token: %s", _exData.srcAddr);
+        console.log("Token price in eth: %s", _txSaverData.tokenPriceInEth);
+        console.log("Max tx cost in fee token: %s", _txSaverData.maxTxCostInFeeToken);
+        console.log("Fee recipient: %s", feeRecipient.getFeeAddr());
+
         // calculate gas cost in src token
         uint256 txCostInSrcToken = calcGasCostUsingInjectedPrice(
             _estimatedGas,
             _exData.srcAddr,
             _txSaverData.tokenPriceInEth
         );
+
+        console.log("Tx cost in src token: %s", txCostInSrcToken);
 
         // revert if tx cost is higher than max value set by user
         if (txCostInSrcToken > _txSaverData.maxTxCostInFeeToken) {

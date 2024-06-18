@@ -8,9 +8,9 @@ const {
 } = require('../utils');
 const { createSafe } = require('../utils-safe');
 const { topUp } = require('../../scripts/utils/fork');
-const { addBotCallerForTxRelay } = require('./utils-tx-saver');
+const { addBotCallerForTxSaver } = require('./utils-tx-saver');
 
-describe('Deploy tx relay contracts', function () {
+describe('Deploy tx saver contracts', function () {
     this.timeout(80000);
     let senderAcc;
     let safeWallet;
@@ -22,17 +22,27 @@ describe('Deploy tx relay contracts', function () {
     };
 
     const redeployContracts = async (isFork) => {
-        const bothAuthForTxRelay = await redeploy('BotAuthForTxRelay', addrs[network].REGISTRY_ADDR, false, isFork);
+        const bothAuthForTxSaver = await redeploy('BotAuthForTxSaver', addrs[network].REGISTRY_ADDR, false, isFork);
         const recipeExecutor = await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
         const dfsSell = await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, false, isFork);
-        const txRelayExecutor = await redeploy('TxRelayExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
+
+        const llamaLendBoost = await redeploy('LlamaLendBoost', addrs[network].REGISTRY_ADDR, false, isFork);
+        const llamaLendRepay = await redeploy('LlamaLendRepay', addrs[network].REGISTRY_ADDR, false, isFork);
+        const llamaLendLevCreate = await redeploy('LlamaLendLevCreate', addrs[network].REGISTRY_ADDR, false, isFork);
+        const llamaLendSelfLiquidateWithColl = await redeploy('LlamaLendSelfLiquidateWithColl', addrs[network].REGISTRY_ADDR, false, isFork);
+
+        const txSaverExecutor = await redeploy('TxSaverExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
 
         console.log('Sender:', senderAcc.address);
         console.log('Safe wallet:', safeWallet.address);
-        console.log('BotAuthForTxRelay:', bothAuthForTxRelay.address);
+        console.log('BotAuthForTxSaver:', bothAuthForTxSaver.address);
         console.log('RecipeExecutor:', recipeExecutor.address);
         console.log('DFSSell:', dfsSell.address);
-        console.log('TxRelayExecutor:', txRelayExecutor.address);
+        console.log('LlamaLendBoost:', llamaLendBoost.address);
+        console.log('LlamaLendRepay:', llamaLendRepay.address);
+        console.log('LlamaLendLevCreate:', llamaLendLevCreate.address);
+        console.log('LlamaLendSelfLiquidateWithColl:', llamaLendSelfLiquidateWithColl.address);
+        console.log('TxSaverExecutor:', txSaverExecutor.address);
     };
 
     before(async () => {
@@ -55,9 +65,9 @@ describe('Deploy tx relay contracts', function () {
 
         await setUpSafeWallet();
         await redeployContracts(isFork);
-        await addBotCallerForTxRelay(botAcc1, isFork);
-        await addBotCallerForTxRelay(botAcc2, isFork);
-        await addBotCallerForTxRelay(botAcc3, isFork);
+        await addBotCallerForTxSaver(botAcc1, isFork);
+        await addBotCallerForTxSaver(botAcc2, isFork);
+        await addBotCallerForTxSaver(botAcc3, isFork);
     });
 
     it('Deploy', async () => {
