@@ -14,25 +14,18 @@ const {
     setBalance,
     approve,
     nullAddress,
-    getGasUsed,
-    calcGasToUSD,
     getAddrFromRegistry,
     takeSnapshot,
     revertToSnapshot,
     balanceOf,
-    ETH_ADDR,
-    WBTC_ADDR,
-    LUSD_ADDR,
-    formatExchangeObj,
     WETH_ADDRESS,
     DAI_ADDR,
-    chainIds,
-    fetchAmountinUSDPrice,
-    formatMockExchangeObj,
     setNewExchangeWrapper,
+    USDC_ADDR,
+    formatExchangeObj,
+    chainIds,
 } = require('../utils');
 const {
-    signSafeTx,
     predictSafeAddress,
     SAFE_MASTER_COPY_VERSIONS,
     deploySafe,
@@ -40,25 +33,39 @@ const {
 const { topUp } = require('../../scripts/utils/fork');
 const {
     addBotCallerForTxSaver,
-    emptyInjectedOffchainOrder,
+    emptyInjectedOrder,
+    dfsSellEncodedData,
+    signSafeTransaction,
+    openAavePositionEncodedData,
+    calculateExpectedFeeTaken,
+    llamaLendLevCreateEncodedData,
 } = require('./utils-tx-saver');
-const { getControllers, supplyToMarket } = require('../llamalend/utils');
+const { executeAction } = require('../actions');
+const { getControllers } = require('../llamalend/utils');
 
 describe('TxSaver tests', function () {
     this.timeout(80000);
+    let isFork;
     let senderAcc;
     let safeWallet;
     let botAcc;
     let txSaverExecutor;
+    let txSaverExecutorByBot;
     let recipeExecutorAddr;
     let snapshotId;
     let tokenPriceHelper;
+
     const network = 'mainnet';
+    const refundReceiver = nullAddress;
+    const estimatedGas = 500000;
+    const gasParams = {
+        gasPrice: 20 * 1e9,
+        gasLimit: 10000000,
+    };
 
     beforeEach(async () => {
         snapshotId = await takeSnapshot();
     });
-
     afterEach(async () => {
         await revertToSnapshot(snapshotId);
     });
@@ -77,33 +84,64 @@ describe('TxSaver tests', function () {
         const predictedSafeAddr = await predictSafeAddress(SAFE_MASTER_COPY_VERSIONS.V141, setupData, '0');
         await deploySafe(SAFE_MASTER_COPY_VERSIONS.V141, setupData, '0');
         safeWallet = await hre.ethers.getContractAt('ISafe', predictedSafeAddr);
-        console.log('Safe address', safeWallet.address);
     };
 
-    const redeployContracts = async (isFork) => {
+    const setUpMultisigSafeWallet = async (owners, threshold) => {
+        const setupData = [
+            owners,
+            threshold,
+            hre.ethers.constants.AddressZero, // to module address
+            [], // data for module
+            hre.ethers.constants.AddressZero, // fallback handler
+            hre.ethers.constants.AddressZero, // payment token
+            0, // payment
+            hre.ethers.constants.AddressZero, // payment receiver
+        ];
+        const predictedSafeAddr = await predictSafeAddress(SAFE_MASTER_COPY_VERSIONS.V141, setupData, '0');
+        await deploySafe(SAFE_MASTER_COPY_VERSIONS.V141, setupData, '0');
+        const multisigWallet = await hre.ethers.getContractAt('ISafe', predictedSafeAddr);
+        return multisigWallet;
+    };
+
+    const redeployContracts = async () => {
         await redeploy('BotAuthForTxSaver', addrs[network].REGISTRY_ADDR, false, isFork);
         await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
         await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, false, isFork);
 
         recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor', addrs[network].REGISTRY_ADDR);
-        console.log('RecipeExecutor', recipeExecutorAddr);
         txSaverExecutor = await redeploy('TxSaverExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
-        console.log('txSaverExecutor', txSaverExecutor.address);
 
         const tokenPriceHelperFactory = await hre.ethers.getContractFactory('TokenPriceHelper');
         tokenPriceHelper = await tokenPriceHelperFactory.deploy();
         await tokenPriceHelper.deployed();
+    };
 
+    const redeployForLlamaLend = async () => {
         // for testing LlamaLendSwapper with TxSaver
-        await redeploy('LlamaLendLevCreate');
-        await redeploy('LlamaLendSwapper');
-        const mockWrapper = await redeploy('MockExchangeWrapper');
-        await setNewExchangeWrapper(senderAcc, mockWrapper.address);
+        await redeploy('LlamaLendLevCreate', addrs[network].REGISTRY_ADDR, false, isFork);
+        await redeploy('LlamaLendSwapper', addrs[network].REGISTRY_ADDR, false, isFork);
+        const mockWrapper = await redeploy('MockExchangeWrapper', addrs[network].REGISTRY_ADDR, false, isFork);
+        await setNewExchangeWrapper(senderAcc, mockWrapper.address, isFork);
+    };
+
+    const getTxParams = async (functionData) => {
+        const signature = await signSafeTransaction(
+            senderAcc,
+            safeWallet,
+            recipeExecutorAddr,
+            functionData,
+            refundReceiver,
+        );
+        return {
+            safe: safeWallet.address,
+            refundReceiver: nullAddress,
+            data: functionData,
+            signatures: signature,
+        };
     };
 
     before(async () => {
-        const isFork = hre.network.name === 'fork';
-        console.log('[INFO] Testing on fork:', isFork);
+        isFork = hre.network.name === 'fork';
 
         [senderAcc, botAcc] = await hre.ethers.getSigners();
         await setUpSafeWallet(senderAcc.address);
@@ -116,64 +154,95 @@ describe('TxSaver tests', function () {
 
         await redeployContracts(isFork);
         await addBotCallerForTxSaver(botAcc.address, isFork);
+
+        txSaverExecutorByBot = txSaverExecutor.connect(botAcc);
     });
 
-    const openAavePositionFunctionData = async (txSaverUserSignedData) => {
-        const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
-        const poolAddress = await aaveMarketContract.getPool();
-        const aavePool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
+    it('... should fail to call executeTx without caller permission', async () => {
+        await expect(txSaverExecutor.connect(senderAcc).executeTx(
+            {
+                safe: safeWallet.address,
+                refundReceiver: nullAddress,
+                data: '0x',
+                signatures: '0x',
+            },
+            estimatedGas,
+            emptyInjectedOrder,
+            gasParams,
+        )).to.be.revertedWith('BotNotApproved');
+    });
 
-        const supplyToken = WBTC_ADDR;
-        const supplyAmount = hre.ethers.utils.parseUnits('10', 8);
-        const supplyAssetReserveData = await aavePool.getReserveData(supplyToken);
-        const supplyAssetId = supplyAssetReserveData.id;
+    it('... should fail to execute TxSaver tx as deadline passed', async () => {
+        const srcToken = WETH_ADDRESS;
+        const destToken = DAI_ADDR;
+        const sellAmount = hre.ethers.utils.parseUnits('10', 18);
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(srcToken);
 
-        const borrowToken = LUSD_ADDR;
-        const borrowAmount = hre.ethers.utils.parseUnits('10000', 18);
-        const borrowAssetReserveData = await aavePool.getReserveData(borrowToken);
-        const borrowAssetReserveDataId = borrowAssetReserveData.id;
-
-        await setBalance(supplyToken, senderAcc.address, supplyAmount);
-        await approve(supplyToken, safeWallet.address, senderAcc);
-
-        const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-            true,
-            addrs[network].AAVE_MARKET,
-            supplyAmount.toString(),
-            senderAcc.address,
-            supplyToken,
-            supplyAssetId,
-            true,
-            false,
-            nullAddress,
+        const txSaverSignedData = {
+            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('1', srcToken.decimals),
+            feeToken: srcToken,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: Math.floor(Date.now() / 1000),
+            shouldTakeFeeFromPosition: true,
+        };
+        const functionData = await dfsSellEncodedData(
+            safeWallet,
+            senderAcc,
+            txSaverSignedData,
+            srcToken,
+            destToken,
+            sellAmount,
         );
+        const txParamsForExecution = await getTxParams(functionData);
+        await expect(txSaverExecutorByBot.executeTx(
+            txParamsForExecution,
+            estimatedGas,
+            emptyInjectedOrder,
+            gasParams,
+        )).to.be.revertedWith('TxSaverSignatureExpired');
+    });
 
-        const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-            true,
-            addrs[network].AAVE_MARKET,
-            borrowAmount.toString(),
-            senderAcc.address,
-            2,
-            borrowAssetReserveDataId,
-            false,
-            nullAddress,
+    it('... should fail to call RecipeExecutor from TxSaverExecutor if caller is not TxSaverExecutor', async () => {
+        const srcToken = WETH_ADDRESS;
+        const destToken = DAI_ADDR;
+        const sellAmount = hre.ethers.utils.parseUnits('10', 18);
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(srcToken);
+
+        const txSaverSignedData = {
+            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('1', srcToken.decimals),
+            feeToken: srcToken,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: true,
+        };
+        const functionData = await dfsSellEncodedData(
+            safeWallet,
+            senderAcc,
+            txSaverSignedData,
+            srcToken,
+            destToken,
+            sellAmount,
         );
+        const decodedData = await txSaverExecutor.parseTxSaverSignedData(functionData);
+        const decodedRecipe = decodedData[0];
+        const decodedTxSaverData = decodedData[1];
 
-        const recipe = new dfs.Recipe('AaveV3OpenRecipe-Test', [supplyAction, borrowAction]);
+        const recipeExecutor = await hre.ethers.getContractAt('RecipeExecutor', recipeExecutorAddr);
+        await expect(recipeExecutor.connect(senderAcc).executeRecipeFromTxSaver(
+            decodedRecipe,
+            decodedTxSaverData,
+        )).to.be.revertedWith('TxSaverAuthorizationError');
+    });
 
-        return recipe.encodeForTxSaverCall(txSaverUserSignedData)[1];
-    };
+    it('... should not take fee for TxSaver on regular sell', async () => {
+        const srcToken = WETH_ADDRESS;
+        const feeTokenAddress = srcToken;
+        const destToken = DAI_ADDR;
+        const sellAmount = hre.ethers.utils.parseUnits('10', 18);
 
-    const dfsSellFunctionData = async (
-        txSaverSignedData,
-        srcToken,
-        destToken,
-        sellAmount,
-    ) => {
         await setBalance(srcToken, senderAcc.address, sellAmount);
         await approve(srcToken, safeWallet.address, senderAcc);
-
-        const recipe = new dfs.Recipe('SellRecipe', [
+        const recipe = new dfs.Recipe('RegularSell', [
             new dfs.actions.basic.PullTokenAction(
                 srcToken,
                 senderAcc.address,
@@ -190,259 +259,25 @@ describe('TxSaver tests', function () {
                 senderAcc.address,
             ),
         ]);
+        const functionData = recipe.encodeForDsProxyCall()[1];
 
-        return recipe.encodeForTxSaverCall(txSaverSignedData)[1];
-    };
-
-    const llamaLendLevCreateFunctionData = async (
-        txSaverSignedData,
-        controllerAddr,
-        controllerId,
-        collToken,
-        debToken,
-    ) => {
-        await supplyToMarket(controllerAddr, chainIds[network]);
-        const supplyAmount = fetchAmountinUSDPrice(
-            collToken.symbol, '50000',
-        );
-        const borrowAmount = fetchAmountinUSDPrice(
-            debToken.symbol, '60000',
-        );
-        if (supplyAmount === 'Infinity') return;
-        if (borrowAmount === 'Infinity') return;
-        const supplyAmountInWei = hre.ethers.utils.parseUnits(
-            supplyAmount, collToken.decimals,
-        );
-        const borrowAmountWei = hre.ethers.utils.parseUnits(
-            borrowAmount, debToken.decimals,
-        );
-        const exchangeData = await formatMockExchangeObj(
-            debToken,
-            collToken,
-            borrowAmountWei,
-        );
-        await setBalance(collToken.address, senderAcc.address, supplyAmountInWei);
-        await approve(collToken.address, safeWallet.address, senderAcc);
-
-        const recipe = new dfs.Recipe('LlamaLendLevCreateRecipe', [
-            new dfs.actions.llamalend.LlamaLendLevCreateAction(
-                controllerAddr,
-                controllerId,
-                senderAcc.address,
-                supplyAmountInWei,
-                10, // bands
-                exchangeData,
-                0, // gas used
-            ),
-        ]);
-        // eslint-disable-next-line consistent-return
-        return recipe.encodeForTxSaverCall(txSaverSignedData)[1];
-    };
-
-    const signSafeTransaction = async (functionData) => {
-        const safeTxParamsForSign = {
-            to: recipeExecutorAddr,
-            value: 0,
-            data: functionData,
-            operation: 1,
-            safeTxGas: 0,
-            baseGas: 0,
-            gasPrice: 0,
-            gasToken: hre.ethers.constants.AddressZero,
-            refundReceiver: hre.ethers.constants.AddressZero,
-            nonce: await safeWallet.nonce(),
-        };
-        const signature = await signSafeTx(safeWallet, safeTxParamsForSign, senderAcc);
-        return signature;
-    };
-
-    const takeFeeFromUserPositionWithoutOrderInjection = async (estimatedGas) => {
-        const srcToken = WETH_ADDRESS;
-        const destToken = DAI_ADDR;
-        const sellAmount = hre.ethers.utils.parseUnits('10', 18);
-
-        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(srcToken);
-        console.log('Fee token price in eth:', feeTokenPriceInEth.toString());
-
-        const txSaverSignedData = {
-            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('1', srcToken.decimals),
-            feeToken: srcToken,
-            tokenPriceInEth: feeTokenPriceInEth,
-            deadline: 0,
-            shouldTakeFeeFromPosition: true,
-        };
-
-        const functionData = await dfsSellFunctionData(
-            txSaverSignedData,
-            srcToken,
-            destToken,
-            sellAmount,
-        );
-        const signature = await signSafeTransaction(functionData);
-
-        const txParams = {
-            safe: safeWallet.address,
-            refundReceiver: nullAddress,
-            data: functionData,
-            signatures: signature,
-        };
-
-        const txSaverExecutorByBot = txSaverExecutor.connect(botAcc);
-
-        const callData = txSaverExecutorByBot.interface.encodeFunctionData('executeTx', [
-            txParams,
-            estimatedGas,
-            emptyInjectedOffchainOrder,
-        ]);
-
-        const receipt = await txSaverExecutorByBot.executeTx(
-            txParams,
-            estimatedGas,
-            emptyInjectedOffchainOrder,
-            {
-                gasLimit: 8000000,
-            },
-        );
-
-        const gasUsed = await getGasUsed(receipt);
-        const dollarPrice = calcGasToUSD(gasUsed, 0, callData);
-        console.log(
-            `GasUsed TxSaverExecutor: ${gasUsed}, price at mainnet ${addrs.mainnet.AVG_GAS_PRICE} gwei $${dollarPrice}`,
-        );
-    };
-
-    it('... should take fee from eoa', async () => {
-        const feeTokenAsset = getAssetInfo('DAI');
-        const feeTokenAddress = feeTokenAsset.address;
-        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
-        await setBalance(feeTokenAddress, senderAcc.address, hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals));
-        await approve(feeTokenAddress, safeWallet.address, senderAcc);
-        const txSaverSignedData = {
-            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('50', feeTokenAsset.decimals),
-            feeToken: feeTokenAddress,
-            tokenPriceInEth: feeTokenPriceInEth,
-            deadline: 0,
-            shouldTakeFeeFromPosition: false,
-        };
-        const functionData = await openAavePositionFunctionData(txSaverSignedData);
-        const signature = await signSafeTransaction(functionData);
-
-        const txParams = {
-            safe: safeWallet.address,
-            refundReceiver: nullAddress,
-            data: functionData,
-            signatures: signature,
-        };
-
-        console.log('Fee token price in eth:', feeTokenPriceInEth.toString());
-        // ************************** BEFORE ************************************************************************
-        const botEthBalanceBefore = await balanceOf(ETH_ADDR, botAcc.address);
         const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
         const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
-        const txSaverFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, txSaverExecutor.address);
 
-        console.log('[BOT] eth balance before:', botEthBalanceBefore.toString());
-        console.log('[EOA] fee token balance before:', eoaFeeTokenBalanceBefore.toString());
-        console.log('[FEE RECIPIENT] fee token balance before:', feeRecipientFeeTokenBalanceBefore.toString());
-        console.log('[TX SAVER EXECUTOR] fee token balance before:', txSaverFeeTokenBalanceBefore.toString());
+        await executeAction('RecipeExecutor', functionData, safeWallet);
 
-        // ************************* EXECUTION *********************************************************************
-        const txSaverExecutorByBot = txSaverExecutor.connect(botAcc);
-        const estimatedGas = 500000;
-
-        const callData = txSaverExecutorByBot.interface.encodeFunctionData('executeTx', [
-            txParams,
-            estimatedGas,
-            emptyInjectedOffchainOrder,
-        ]);
-
-        const receipt = await txSaverExecutorByBot.executeTx(
-            txParams,
-            estimatedGas,
-            emptyInjectedOffchainOrder,
-            {
-                gasLimit: 8000000,
-            },
-        );
-
-        const gasUsed = await getGasUsed(receipt);
-        const dollarPrice = calcGasToUSD(gasUsed, 0, callData);
-        console.log(
-            `GasUsed txSaverExecutor: ${gasUsed}, price at mainnet ${addrs.mainnet.AVG_GAS_PRICE} gwei $${dollarPrice}`,
-        );
-        // ****************************** AFTER *******************************************************
-
-        const botEthBalanceAfter = await balanceOf(ETH_ADDR, botAcc.address);
         const eoaFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, senderAcc.address);
         const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
         const txSaverFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txSaverExecutor.address);
 
-        console.log('[BOT] eth balance after:', botEthBalanceAfter.toString());
-        console.log('[EOA] fee token balance after:', eoaFeeTokenBalanceAfter.toString());
-        console.log('[FEE RECIPIENT] fee token balance after:', feeRecipientFeeTokenBalanceAfter.toString());
-        console.log('[TX SAVER EXECUTOR] fee token balance after:', txSaverFeeTokenBalanceAfter.toString());
-
-        const feeTaken = eoaFeeTokenBalanceBefore.sub(eoaFeeTokenBalanceAfter);
-        console.log('Fee taken:', feeTaken.toString());
-
-        const botSpent = botEthBalanceBefore.sub(botEthBalanceAfter);
-        console.log('Bot spent in eth:', botSpent.toString());
-
-        expect(feeTaken).to.be.gt(BigNumber.from('0'));
-        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(feeTaken);
+        expect(eoaFeeTokenBalanceBefore.sub(eoaFeeTokenBalanceAfter)).to.be.equal(sellAmount);
+        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(0);
         expect(txSaverFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
     });
 
-    it('... should take fee from user position without order injection', async () => {
-        const estimatedGas = 500000;
-        await takeFeeFromUserPositionWithoutOrderInjection(estimatedGas);
-    });
-
-    it('... should fail taking fee from position when deadline passed', async () => {
-        const srcToken = WETH_ADDRESS;
-        const destToken = DAI_ADDR;
-        const sellAmount = hre.ethers.utils.parseUnits('10', 18);
-
-        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(srcToken);
-        console.log('Fee token price in eth:', feeTokenPriceInEth.toString());
-
-        const txSaverSignedData = {
-            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('1', srcToken.decimals),
-            feeToken: srcToken,
-            tokenPriceInEth: feeTokenPriceInEth,
-            deadline: Math.floor(Date.now() / 1000),
-            shouldTakeFeeFromPosition: true,
-        };
-
-        const functionData = await dfsSellFunctionData(
-            txSaverSignedData,
-            srcToken,
-            destToken,
-            sellAmount,
-        );
-        const signature = await signSafeTransaction(functionData);
-
-        const txParams = {
-            safe: safeWallet.address,
-            refundReceiver: nullAddress,
-            data: functionData,
-            signatures: signature,
-        };
-
-        const txSaverExecutorByBot = txSaverExecutor.connect(botAcc);
-        const estimatedGas = 500000;
-
-        await expect(txSaverExecutorByBot.executeTx(
-            txParams,
-            estimatedGas,
-            emptyInjectedOffchainOrder,
-            {
-                gasLimit: 8000000,
-            },
-        )).to.be.reverted;
-    });
-
     it('... should take fee from position when using LlamaLendSwapper', async () => {
+        await redeployForLlamaLend();
+
         const chainId = chainIds[network];
         const controllerId = 0;
         const llamaControllerAddr = getControllers(chainId)[controllerId];
@@ -456,60 +291,482 @@ describe('TxSaver tests', function () {
         const debtToken = getAssetInfoByAddress(debtTokenAddr, chainId);
         if (debtToken.symbol === '?') return;
 
-        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(collTokenAddr);
-        console.log('Fee token price in eth:', feeTokenPriceInEth.toString());
+        // as this is leverage create, we are selling debt for collateral, debt token will be src token when taking fee
+        const feeTokenAsset = debtToken;
+        const feeTokenAddress = feeTokenAsset.address;
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
 
         const txSaverSignedData = {
-            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('1', collTokenAddr.decimals),
-            feeToken: collTokenAddr,
+            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('50', feeTokenAsset.decimals),
+            feeToken: feeTokenAddress,
             tokenPriceInEth: feeTokenPriceInEth,
             deadline: 0,
             shouldTakeFeeFromPosition: true,
         };
-
-        const functionData = await llamaLendLevCreateFunctionData(
+        const functionData = await llamaLendLevCreateEncodedData(
+            senderAcc,
+            safeWallet,
             txSaverSignedData,
             llamaControllerAddr,
             controllerId,
             collToken,
             debtToken,
         );
-        const signature = await signSafeTransaction(functionData);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
 
-        const txParams = {
-            safe: safeWallet.address,
-            refundReceiver: nullAddress,
-            data: functionData,
-            signatures: signature,
-        };
-
-        const txSaverExecutorByBot = txSaverExecutor.connect(botAcc);
-        const estimatedGas = 500000;
-
-        const callData = txSaverExecutorByBot.interface.encodeFunctionData('executeTx', [
-            txParams,
+        const txParamsForExecution = await getTxParams(functionData);
+        await txSaverExecutorByBot.executeTx(
+            txParamsForExecution,
             estimatedGas,
-            emptyInjectedOffchainOrder,
-        ]);
-
-        const receipt = await txSaverExecutorByBot.executeTx(
-            txParams,
-            estimatedGas,
-            emptyInjectedOffchainOrder,
-            {
-                gasLimit: 8000000,
-            },
+            emptyInjectedOrder,
+            gasParams,
         );
 
-        const gasUsed = await getGasUsed(receipt);
-        const dollarPrice = calcGasToUSD(gasUsed, 0, callData);
-        console.log(
-            `GasUsed TxSaverExecutor: ${gasUsed}, price at mainnet ${addrs.mainnet.AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+
+        const expectedFeeTaken = await calculateExpectedFeeTaken(
+            estimatedGas,
+            feeTokenAsset,
+            feeTokenPriceInEth,
+            gasParams.gasPrice,
         );
+        const feeTaken = feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore);
+        expect(feeTaken).to.be.equal(expectedFeeTaken);
     });
 
-    it('... should send sponsored transaction without taking fee', async () => {
-        const estimatedGas = 0;
-        await takeFeeFromUserPositionWithoutOrderInjection(estimatedGas);
+    it('... should take fee from EOA when executing TxSaver tx', async () => {
+        const feeTokenAsset = getAssetInfo('DAI');
+        const feeTokenAddress = feeTokenAsset.address;
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
+
+        await setBalance(feeTokenAddress, senderAcc.address, hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals));
+        await approve(feeTokenAddress, safeWallet.address, senderAcc);
+
+        const txSaverSignedData = {
+            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('50', feeTokenAsset.decimals),
+            feeToken: feeTokenAddress,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: false,
+        };
+
+        const functionData = await openAavePositionEncodedData(senderAcc, safeWallet, txSaverSignedData);
+
+        const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+
+        const txParamsForExecution = await getTxParams(functionData);
+        await txSaverExecutorByBot.executeTx(
+            txParamsForExecution,
+            estimatedGas,
+            emptyInjectedOrder,
+            gasParams,
+        );
+
+        const eoaFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, senderAcc.address);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const txSaverFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txSaverExecutor.address);
+
+        const expectedFeeTaken = await calculateExpectedFeeTaken(
+            estimatedGas,
+            feeTokenAsset,
+            feeTokenPriceInEth,
+            gasParams.gasPrice,
+        );
+
+        const feeTaken = eoaFeeTokenBalanceBefore.sub(eoaFeeTokenBalanceAfter);
+        expect(feeTaken).to.be.equal(expectedFeeTaken);
+        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(feeTaken);
+        expect(txSaverFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
+    });
+
+    it('... should not take fee from EOA when executing TxSaver sponsored tx', async () => {
+        const feeTokenAsset = getAssetInfo('DAI');
+        const feeTokenAddress = feeTokenAsset.address;
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
+
+        const txSaverSignedData = {
+            maxTxCostInFeeToken: 0,
+            feeToken: feeTokenAddress,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: false,
+        };
+
+        const functionData = await openAavePositionEncodedData(senderAcc, safeWallet, txSaverSignedData);
+
+        const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+
+        const txParamsForExecution = await getTxParams(functionData);
+        await txSaverExecutorByBot.executeTx(
+            txParamsForExecution,
+            0, // when sending sponsored transaction send estimatedGas as zero
+            emptyInjectedOrder,
+            gasParams,
+        );
+
+        const eoaFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, senderAcc.address);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const txSaverFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txSaverExecutor.address);
+        const feeTaken = eoaFeeTokenBalanceBefore.sub(eoaFeeTokenBalanceAfter);
+
+        expect(feeTaken).to.be.equal(0);
+        expect(feeRecipientFeeTokenBalanceAfter).to.be.equal(feeRecipientFeeTokenBalanceBefore);
+        expect(txSaverFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
+    });
+
+    it('... should take fee from EOA when executing TxSaver tx with order injection', async () => {
+        const feeTokenAsset = getAssetInfo('DAI');
+        const feeTokenAddress = feeTokenAsset.address;
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
+        const srcToken = feeTokenAddress;
+        const destToken = USDC_ADDR;
+        const sellAmount = hre.ethers.utils.parseUnits('1000', 18);
+
+        const maxTxCostInFeeToken = hre.ethers.utils.parseUnits('50', feeTokenAsset.decimals);
+        await setBalance(feeTokenAddress, senderAcc.address, hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals));
+        await approve(feeTokenAddress, safeWallet.address, senderAcc);
+
+        const txSaverSignedData = {
+            maxTxCostInFeeToken,
+            feeToken: srcToken,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: false,
+        };
+        const functionData = await dfsSellEncodedData(
+            safeWallet,
+            senderAcc,
+            txSaverSignedData,
+            srcToken,
+            destToken,
+            sellAmount,
+        );
+        const wrapperAddr = addrs[network].UNISWAP_WRAPPER;
+        const exchangeObj = formatExchangeObj(
+            srcToken,
+            destToken,
+            sellAmount,
+            wrapperAddr,
+        );
+        const exchangeData = exchangeObj[exchangeObj.length - 2];
+        const injectedOrder = emptyInjectedOrder;
+        injectedOrder.wrapper = wrapperAddr;
+        injectedOrder.wrapperData = hre.ethers.utils.arrayify(exchangeData);
+
+        const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+
+        const txParamsForExecution = await getTxParams(functionData);
+        await txSaverExecutorByBot.executeTx(
+            txParamsForExecution,
+            estimatedGas,
+            injectedOrder,
+            gasParams,
+        );
+
+        const eoaFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, senderAcc.address);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const txSaverFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txSaverExecutor.address);
+
+        const expectedFeeTaken = await calculateExpectedFeeTaken(
+            estimatedGas,
+            feeTokenAsset,
+            feeTokenPriceInEth,
+            gasParams.gasPrice,
+        );
+
+        const feeTaken = eoaFeeTokenBalanceBefore.sub(eoaFeeTokenBalanceAfter).sub(sellAmount);
+        expect(feeTaken).to.be.equal(expectedFeeTaken);
+        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(feeTaken);
+        expect(txSaverFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
+    });
+
+    it('... should fail to take fee from EOA because of higher gas cost than max cost set by user', async () => {
+        const feeTokenAsset = getAssetInfo('DAI');
+        const feeTokenAddress = feeTokenAsset.address;
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
+
+        await setBalance(feeTokenAddress, senderAcc.address, hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals));
+        await approve(feeTokenAddress, safeWallet.address, senderAcc);
+
+        const txSaverSignedData = {
+            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('0.000001', feeTokenAsset.decimals),
+            feeToken: feeTokenAddress,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: false,
+        };
+        const functionData = await openAavePositionEncodedData(senderAcc, safeWallet, txSaverSignedData);
+
+        const txParamsForExecution = await getTxParams(functionData);
+        await expect(txSaverExecutorByBot.executeTx(
+            txParamsForExecution,
+            estimatedGas,
+            emptyInjectedOrder,
+            gasParams,
+        )).to.be.reverted;
+    });
+
+    it('... should fail to take fee from EOA because of missing fee tokens on user account', async () => {
+        const feeTokenAsset = getAssetInfo('DAI');
+        const feeTokenAddress = feeTokenAsset.address;
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
+
+        const txSaverSignedData = {
+            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('100', feeTokenAsset.decimals),
+            feeToken: feeTokenAddress,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: false,
+        };
+        const functionData = await openAavePositionEncodedData(senderAcc, safeWallet, txSaverSignedData);
+
+        const txParamsForExecution = await getTxParams(functionData);
+        await expect(txSaverExecutorByBot.executeTx(
+            txParamsForExecution,
+            estimatedGas,
+            emptyInjectedOrder,
+            gasParams,
+        )).to.be.reverted;
+    });
+
+    it('... should take fee from multisig wallet when executing TxSaver tx', async () => {
+        const [owner1, owner2] = await hre.ethers.getSigners();
+        const multisigWallet = await setUpMultisigSafeWallet([owner1.address, owner2.address], 2);
+
+        const feeTokenAsset = getAssetInfo('DAI');
+        const feeTokenAddress = feeTokenAsset.address;
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
+        await setBalance(feeTokenAddress, multisigWallet.address, hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals));
+
+        const txSaverSignedData = {
+            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('50', feeTokenAsset.decimals),
+            feeToken: feeTokenAddress,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: false,
+        };
+        const functionData = await openAavePositionEncodedData(senderAcc, multisigWallet, txSaverSignedData);
+
+        const firstSignature = await signSafeTransaction(
+            owner1,
+            multisigWallet,
+            recipeExecutorAddr,
+            functionData,
+            refundReceiver,
+        );
+        const secondSignature = await signSafeTransaction(
+            owner2,
+            multisigWallet,
+            recipeExecutorAddr,
+            functionData,
+            refundReceiver,
+        );
+        const txParams = {
+            safe: multisigWallet.address,
+            refundReceiver: nullAddress,
+            data: functionData,
+            signatures: hre.ethers.utils.arrayify(secondSignature + firstSignature.slice(2)),
+        };
+
+        const walletFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, multisigWallet.address);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+
+        await txSaverExecutorByBot.executeTx(
+            txParams,
+            estimatedGas,
+            emptyInjectedOrder,
+            gasParams,
+        );
+
+        const walletFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, multisigWallet.address);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const txSaverFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txSaverExecutor.address);
+
+        const expectedFeeTaken = await calculateExpectedFeeTaken(
+            estimatedGas,
+            feeTokenAsset,
+            feeTokenPriceInEth,
+            gasParams.gasPrice,
+        );
+        const feeTaken = walletFeeTokenBalanceBefore.sub(walletFeeTokenBalanceAfter);
+
+        expect(feeTaken).to.be.equal(expectedFeeTaken);
+        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(feeTaken);
+        expect(txSaverFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
+    });
+
+    it('... should take fee from user position without order injection', async () => {
+        const feeTokenAsset = getAssetInfo('DAI');
+        const feeTokenAddress = feeTokenAsset.address;
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
+        const srcToken = feeTokenAddress;
+        const destToken = USDC_ADDR;
+        const sellAmount = hre.ethers.utils.parseUnits('1000', 18);
+
+        const txSaverSignedData = {
+            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('50', srcToken.decimals),
+            feeToken: feeTokenAddress,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: true,
+        };
+        const functionData = await dfsSellEncodedData(
+            safeWallet,
+            senderAcc,
+            txSaverSignedData,
+            srcToken,
+            destToken,
+            sellAmount,
+        );
+
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+
+        const txParamsForExecution = await getTxParams(functionData);
+        await txSaverExecutorByBot.executeTx(
+            txParamsForExecution,
+            estimatedGas,
+            emptyInjectedOrder,
+            gasParams,
+        );
+
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+
+        const expectedFeeTaken = await calculateExpectedFeeTaken(
+            estimatedGas,
+            feeTokenAsset,
+            feeTokenPriceInEth,
+            gasParams.gasPrice,
+        );
+        const feeTaken = feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore);
+        expect(feeTaken).to.be.equal(expectedFeeTaken);
+    });
+
+    it('... should not take fee from user position when executing TxSaver sponsored tx', async () => {
+        const feeTokenAsset = getAssetInfo('DAI');
+        const feeTokenAddress = feeTokenAsset.address;
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
+        const srcToken = feeTokenAddress;
+        const destToken = USDC_ADDR;
+        const sellAmount = hre.ethers.utils.parseUnits('1000', 18);
+
+        const txSaverSignedData = {
+            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('50', srcToken.decimals),
+            feeToken: feeTokenAddress,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: true,
+        };
+        const functionData = await dfsSellEncodedData(
+            safeWallet,
+            senderAcc,
+            txSaverSignedData,
+            srcToken,
+            destToken,
+            sellAmount,
+        );
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+
+        const txParamsForExecution = await getTxParams(functionData);
+        await txSaverExecutorByBot.executeTx(
+            txParamsForExecution,
+            0,
+            emptyInjectedOrder,
+            gasParams,
+        );
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        expect(feeRecipientFeeTokenBalanceBefore).to.be.equal(feeRecipientFeeTokenBalanceAfter);
+    });
+
+    it('... should take fee from user position with order injection', async () => {
+        const feeTokenAsset = getAssetInfo('DAI');
+        const feeTokenAddress = feeTokenAsset.address;
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
+        const srcToken = feeTokenAddress;
+        const destToken = USDC_ADDR;
+        const sellAmount = hre.ethers.utils.parseUnits('1000', 18);
+
+        const txSaverSignedData = {
+            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('50', srcToken.decimals),
+            feeToken: feeTokenAddress,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: true,
+        };
+        const functionData = await dfsSellEncodedData(
+            safeWallet,
+            senderAcc,
+            txSaverSignedData,
+            srcToken,
+            destToken,
+            sellAmount,
+        );
+        const wrapperAddr = addrs[network].UNISWAP_WRAPPER;
+        const exchangeObj = formatExchangeObj(
+            srcToken,
+            destToken,
+            sellAmount,
+            wrapperAddr,
+        );
+        const exchangeData = exchangeObj[exchangeObj.length - 2];
+        const injectedOrder = emptyInjectedOrder;
+        injectedOrder.wrapper = wrapperAddr;
+        injectedOrder.wrapperData = hre.ethers.utils.arrayify(exchangeData);
+
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+
+        const txParamsForExecution = await getTxParams(functionData);
+        await txSaverExecutorByBot.executeTx(
+            txParamsForExecution,
+            estimatedGas,
+            injectedOrder,
+            gasParams,
+        );
+
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+
+        const expectedFeeTaken = await calculateExpectedFeeTaken(
+            estimatedGas,
+            feeTokenAsset,
+            feeTokenPriceInEth,
+            gasParams.gasPrice,
+        );
+        const feeTaken = feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore);
+        expect(feeTaken).to.be.equal(expectedFeeTaken);
+    });
+
+    it('... should fail to take fee from user position because of higher gas cost than max cost set by user', async () => {
+        const feeTokenAsset = getAssetInfo('DAI');
+        const feeTokenAddress = feeTokenAsset.address;
+        const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
+        const srcToken = feeTokenAddress;
+        const destToken = USDC_ADDR;
+        const sellAmount = hre.ethers.utils.parseUnits('1000', 18);
+
+        // set low maxTxCostInFeeToken
+        const txSaverSignedData = {
+            maxTxCostInFeeToken: hre.ethers.utils.parseUnits('0.00001', srcToken.decimals),
+            feeToken: feeTokenAddress,
+            tokenPriceInEth: feeTokenPriceInEth,
+            deadline: 0,
+            shouldTakeFeeFromPosition: true,
+        };
+        const functionData = await dfsSellEncodedData(
+            safeWallet,
+            senderAcc,
+            txSaverSignedData,
+            srcToken,
+            destToken,
+            sellAmount,
+        );
+        const txParamsForExecution = await getTxParams(functionData);
+        await expect(txSaverExecutorByBot.executeTx(
+            txParamsForExecution,
+            estimatedGas,
+            emptyInjectedOrder,
+            gasParams,
+        )).to.be.reverted;
     });
 });

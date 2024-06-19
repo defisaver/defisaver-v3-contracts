@@ -30,6 +30,7 @@ describe('Deploy tx saver contracts', function () {
         const llamaLendRepay = await redeploy('LlamaLendRepay', addrs[network].REGISTRY_ADDR, false, isFork);
         const llamaLendLevCreate = await redeploy('LlamaLendLevCreate', addrs[network].REGISTRY_ADDR, false, isFork);
         const llamaLendSelfLiquidateWithColl = await redeploy('LlamaLendSelfLiquidateWithColl', addrs[network].REGISTRY_ADDR, false, isFork);
+        const llamaLendSwapper = await redeploy('LlamaLendSwapper', addrs[network].REGISTRY_ADDR, false, isFork);
 
         const txSaverExecutor = await redeploy('TxSaverExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
 
@@ -38,6 +39,7 @@ describe('Deploy tx saver contracts', function () {
         console.log('BotAuthForTxSaver:', bothAuthForTxSaver.address);
         console.log('RecipeExecutor:', recipeExecutor.address);
         console.log('DFSSell:', dfsSell.address);
+        console.log('LlamaLendSwapper:', llamaLendSwapper.address);
         console.log('LlamaLendBoost:', llamaLendBoost.address);
         console.log('LlamaLendRepay:', llamaLendRepay.address);
         console.log('LlamaLendLevCreate:', llamaLendLevCreate.address);

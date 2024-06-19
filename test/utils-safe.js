@@ -209,15 +209,15 @@ const signSafeTx = async (safeInstance, safeTx, signer) => {
         chainId: 1,
         verifyingContract: safeInstance.address,
     };
-    console.log('==========Sign Safe Tx Data===========');
-    console.log('SafeTx:', safeTx);
-    console.log('Domain:', domain);
-    console.log('=======================================');
+
+    // console.log('==========Sign Safe Tx Data===========');
+    // console.log('SafeTx:', safeTx);
+    // console.log('Domain:', domain);
+    // console.log('=======================================');
 
     // @dev - _signTypedData will be renamed to signTypedData in future ethers versions
     // eslint-disable-next-line no-underscore-dangle
     const signature = await signer._signTypedData(domain, EIP712_SAFE_TX_TYPE, safeTx);
-    console.log(`Signature: ${signature}`);
     return signature;
 };
 
