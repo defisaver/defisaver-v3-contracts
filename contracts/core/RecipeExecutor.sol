@@ -183,7 +183,6 @@ contract RecipeExecutor is
         // execute the recipe
         _executeActions(_currRecipe);
 
-
         // when sending sponsored tx, no tx cost is taken
         if (estimatedGasUsed == 0) {
             console.log("Sending sponsored tx, no gas cost taken");

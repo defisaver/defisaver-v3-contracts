@@ -34,5 +34,5 @@ contract BaseUtilAddresses {
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0x7dFF34190d0307fC234fc7E8C152C9715083eB02;
 
-    address public constant TX_SAVER_FEE_RECIPIENT = 0xA0Fb34B9702B7DF5c5B6dEecF07442F39C1ca83d; // TODO[TX-SAVER] replace this placeholder address
+    address public constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
 }
