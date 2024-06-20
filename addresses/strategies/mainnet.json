@@ -4098,7 +4098,7 @@
         "&7"
       ]
     ],
-    "bundleId": 32
+    "bundleId": 34
   },
   {
     "name": "MorphoBlueFLCollRepayStrategy",
@@ -4231,7 +4231,7 @@
         "&7"
       ]
     ],
-    "bundleId": 32
+    "bundleId": 34
   },
   {
     "name": "MorphoBlueBoostStrategy",
@@ -4458,5 +4458,67 @@
         0
       ]
     ]
+  },
+  {
+    "name": "MorphoBlueFLCollRepayStrategy",
+    "id": 93,
+    "isContinuous": true,
+    "triggerIds": [
+      "MorphoBlueRatioTrigger"
+    ],
+    "actionIds": [
+      "FLAction",
+      "DFSSell",
+      "GasFeeTaker",
+      "MorphoBluePayback",
+      "MorphoBlueWithdrawCollateral",
+      "MorphoBlueRatioCheck"
+    ],
+    "paramMapping": [
+      [],
+      [
+        "&2",
+        "&1",
+        0,
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&1",
+        "$2",
+        0
+      ],
+      [
+        "&1",
+        "&2",
+        "&3",
+        "&4",
+        "&5",
+        "$3",
+        "&proxy",
+        "&8"
+      ],
+      [
+        "&1",
+        "&2",
+        "&3",
+        "&4",
+        "&5",
+        "$1",
+        "&8",
+        0
+      ],
+      [
+        "&1",
+        "&2",
+        "&3",
+        "&4",
+        "&5",
+        "&8",
+        "&6",
+        "&7"
+      ]
+    ],
+    "bundleId": 34
   }
 ]

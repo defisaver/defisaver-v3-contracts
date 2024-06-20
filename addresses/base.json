@@ -105,6 +105,17 @@
       "history": []
     },
     {
+      "name": "DFSSafeFactory",
+      "address": "0x3590d2be7f7a604a0496b00ded525eb8ae27ab5d",
+      "id": "0x001c87d3",
+      "path": "contracts/utils/DFSSafeFactory.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "ProxyAuth",
       "address": "0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc",
       "id": "0x5079c3ea",
