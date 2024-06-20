@@ -120,6 +120,17 @@
         "history": []
     },
     {
+        "name": "DFSSafeFactory",
+        "address": "0xeEdfce96C2D257a4c67b711998Bb65E32E288f66",
+        "id": "0x001c87d3",
+        "path": "contracts/utils/DFSSafeFactory.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "DefisaverLogger",
         "address": "0xE6f9A5C850dbcD12bc64f40d692F537250aDEC38",
         "id": "0x35934e1a",
@@ -1126,14 +1137,16 @@
     },
     {
       "name": "LlamaLendWithdraw",
-      "address": "0xd7a80e7a2296d75cd1eebc2f0de0cebd14fbe117",
+      "address": "0x47199A5180d4B16683432f2a1BcBc9FF67CaE421",
       "id": "0xf54e28d9",
       "path": "contracts/actions/llamalend/LlamaLendWithdraw.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
-      "history": []
+      "history": [
+        "0xd7a80e7a2296d75cd1eebc2f0de0cebd14fbe117"
+      ]
     },
     {
       "name": "LlamaLendBorrow",

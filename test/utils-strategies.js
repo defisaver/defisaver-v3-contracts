@@ -54,7 +54,6 @@ const getLatestSubId = async (regAddr = addrs[network].REGISTRY_ADDR) => {
 const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramMapping, continuous) => {
     const storageAddr = await getAddrFromRegistry('StrategyStorage');
     const storage = await hre.ethers.getContractAt('StrategyStorage', storageAddr);
-
     const receipt = await storage.createStrategy(
         strategyName, triggerIds, actionIds, paramMapping, continuous,
         {
@@ -93,8 +92,7 @@ const createBundle = async (proxy, strategyIds) => {
 };
 
 const subToStrategy = async (proxy, strategySub, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
-    const SubProxyAddr = await getAddrFromRegistry('SubProxy', regAddr);
-
+    const SubProxyAddr = addrs[getNetwork()].SubProxy;
     const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
     const functionData = SubProxyProxy.interface.encodeFunctionData(
         'subscribeToStrategy',

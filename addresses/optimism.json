@@ -444,6 +444,17 @@
       "history": []
     },
     {
+      "name": "DFSSafeFactory",
+      "address": "0x28b6947c7f3cadcad6c5eaa07bb8b16896e44464",
+      "id": "0x001c87d3",
+      "path": "contracts/utils/DFSSafeFactory.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "AaveV3Supply",
       "address": "0x7e49bdf4690feef64cb341ca46d1e3b45233a683",
       "id": "0xfc33bf00",

@@ -68,7 +68,11 @@ contract LlamaLendWithdraw is ActionBase, LlamaLendHelper {
         if (collateralAsset != TokenUtils.WETH_ADDR){
             ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount);
         } else {
-            ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount, false);
+            if (block.chainid == 1){
+                ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount, false);
+            } else {
+                ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount);
+            }
         }
 
         collateralAsset.withdrawTokens(_params.to, _params.collateralAmount);
