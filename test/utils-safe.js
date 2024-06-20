@@ -189,8 +189,9 @@ const deploySafe = async (
  * @param safeInstance instance of the safe wallet
  * @param safeTx safe tx params {to,value,data,operation,safeTxGas,baseGas,gasPrice,gasToken,refundReceiver,nonce}
  * @param signer signer  of the safe tx
+ * @param chainId chain id of the network, default is 1
  */
-const signSafeTx = async (safeInstance, safeTx, signer) => {
+const signSafeTx = async (safeInstance, safeTx, signer, chainId = 1) => {
     const EIP712_SAFE_TX_TYPE = {
         SafeTx: [
             { type: 'address', name: 'to' },
@@ -206,7 +207,7 @@ const signSafeTx = async (safeInstance, safeTx, signer) => {
         ],
     };
     const domain = {
-        chainId: 1,
+        chainId,
         verifyingContract: safeInstance.address,
     };
 

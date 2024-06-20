@@ -12,7 +12,6 @@ contract GasFeeHelper is DSMath, TokenPriceHelper {
 
     // only support token with decimals <= 18
     error TokenDecimalsUnsupportedError(uint256 decimals);
-
     // when injecting price, price must be greater than 0
     error ZeroTokenPriceInEthError();
 

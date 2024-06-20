@@ -32,4 +32,6 @@ contract OptimismUtilAddresses {
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0x7E3D9e4E620842d61aB111a6DbF1be5a8cc91774;
+
+    address public constant TX_SAVER_FEE_RECIPIENT = 0xA0Fb34B9702B7DF5c5B6dEecF07442F39C1ca83d; // TODO[TX-SAVER] replace this placeholder address
 }

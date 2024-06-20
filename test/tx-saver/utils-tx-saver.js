@@ -2,6 +2,7 @@
 const hre = require('hardhat');
 const dfs = require('@defisaver/sdk');
 const { BigNumber } = require('ethers');
+const { getAssetInfo } = require('@defisaver/tokens');
 
 const {
     impersonateAccount,
@@ -11,8 +12,6 @@ const {
     nullAddress,
     addrs,
     network,
-    WBTC_ADDR,
-    LUSD_ADDR,
     setBalance,
     approve,
     formatExchangeObj,
@@ -64,23 +63,33 @@ const openAavePositionEncodedData = async (senderAcc, wallet, txSaverUserSignedD
     const poolAddress = await aaveMarketContract.getPool();
     const aavePool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
 
-    const supplyToken = WBTC_ADDR;
-    const supplyAmount = hre.ethers.utils.parseUnits('10', 8);
+    const supplyAsset = getAssetInfo('WETH', chainIds[network]);
+    const supplyToken = supplyAsset.address;
+    const supplyAmount = fetchAmountinUSDPrice(
+        supplyAsset.symbol,
+        '50000',
+    );
+    const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, supplyAsset.decimals);
     const supplyAssetReserveData = await aavePool.getReserveData(supplyToken);
     const supplyAssetId = supplyAssetReserveData.id;
 
-    const borrowToken = LUSD_ADDR;
-    const borrowAmount = hre.ethers.utils.parseUnits('10000', 18);
+    const borrowAsset = getAssetInfo('USDC', chainIds[network]);
+    const borrowToken = borrowAsset.address;
+    const borrowAmount = fetchAmountinUSDPrice(
+        borrowAsset.symbol,
+        '20000',
+    );
+    const borrowAmountInWei = hre.ethers.utils.parseUnits(borrowAmount, borrowAsset.decimals);
     const borrowAssetReserveData = await aavePool.getReserveData(borrowToken);
     const borrowAssetReserveDataId = borrowAssetReserveData.id;
 
-    await setBalance(supplyToken, senderAcc.address, supplyAmount);
+    await setBalance(supplyToken, senderAcc.address, supplyAmountInWei);
     await approve(supplyToken, wallet.address, senderAcc);
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         true,
         addrs[network].AAVE_MARKET,
-        supplyAmount.toString(),
+        supplyAmountInWei.toString(),
         senderAcc.address,
         supplyToken,
         supplyAssetId,
@@ -92,7 +101,7 @@ const openAavePositionEncodedData = async (senderAcc, wallet, txSaverUserSignedD
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
         true,
         addrs[network].AAVE_MARKET,
-        borrowAmount.toString(),
+        borrowAmountInWei.toString(),
         senderAcc.address,
         2,
         borrowAssetReserveDataId,
@@ -112,6 +121,7 @@ const dfsSellEncodedData = async (
     srcToken,
     destToken,
     sellAmount,
+    fee = 3000,
 ) => {
     await setBalance(srcToken, senderAcc.address, BigNumber.from(sellAmount).mul(2));
     await approve(srcToken, wallet.address, senderAcc);
@@ -127,7 +137,9 @@ const dfsSellEncodedData = async (
                 srcToken,
                 destToken,
                 sellAmount,
-                addrs[network].UNISWAP_WRAPPER,
+                addrs[network].UNISWAP_V3_WRAPPER,
+                0,
+                fee,
             ),
             wallet.address,
             senderAcc.address,
@@ -202,7 +214,7 @@ const signSafeTransaction = async (
         refundReceiver,
         nonce: await wallet.nonce(),
     };
-    const signature = await signSafeTx(wallet, safeTxParamsForSign, senderAcc);
+    const signature = await signSafeTx(wallet, safeTxParamsForSign, senderAcc, chainIds[network]);
     return signature;
 };
 
