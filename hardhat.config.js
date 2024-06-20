@@ -101,7 +101,7 @@ module.exports = {
                 // blockNumber: 12068716
             },
             name: 'mainnet',
-            hardfork: "cancun",
+            hardfork: 'cancun',
             accounts: {
                 balance: '10000000000000000000000000000',
                 privateKey: process.env.PRIV_KEY_MAINNET,
@@ -154,7 +154,7 @@ module.exports = {
                         enabled: true,
                         runs: 1000,
                     },
-                    evmVersion: 'cancun'
+                    evmVersion: 'cancun',
                 },
             },
             {
