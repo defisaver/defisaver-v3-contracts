@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import { ISafeProxyFactory } from "../interfaces/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../interfaces/safe/ISafe.sol";
