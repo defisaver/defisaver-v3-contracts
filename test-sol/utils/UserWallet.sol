@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import "../../contracts/DS/DSProxyFactoryInterface.sol";
-import "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
-import "../../contracts/interfaces/safe/ISafe.sol";
-import "../Const.sol";
-
+import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterface.sol";
+import { DSProxy } from "../../contracts/DS/DSProxy.sol";
+import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
+import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { Const } from "../Const.sol";
 
 abstract contract UserWallet {
     DSProxy public proxy;

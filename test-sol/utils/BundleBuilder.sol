@@ -2,8 +2,10 @@
 pragma solidity =0.8.24;
 
 import "ds-test/test.sol";
-import "../../contracts/core/strategy/BundleStorage.sol";
-import "../CheatCodes.sol";
+
+import { BundleStorage } from "../../contracts/core/strategy/BundleStorage.sol";
+import { AdminVault } from "../../contracts/auth/AdminAuth.sol";
+import { CheatCodes } from "../CheatCodes.sol";
 
 contract BundleBuilder {
     address internal BUNDLE_ADDR = 0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf;
