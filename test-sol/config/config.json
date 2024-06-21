@@ -1,6 +1,6 @@
 {
     "isSmartWalletSafe" : true,
-    "blockNumber" : 19268905,
+    "blockNumber" : 20138870,
     "TestNameExampleIfThisTestNeedsSpecificBlockToRun": { "blockNumber": 19268904},
     "AaveV3": {
         "lightTesting": false,

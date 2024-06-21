@@ -299,7 +299,7 @@ contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermissio
             _returnValues
         );
 
-        isDSProxy ? removeProxyPermission(_flActionAddr) : disableLastModule(_flActionAddr);
+        isDSProxy ? removeProxyPermission(_flActionAddr) : disableModule(_flActionAddr);
     }
 
     /// @notice Checks if the specified address is of FL type action

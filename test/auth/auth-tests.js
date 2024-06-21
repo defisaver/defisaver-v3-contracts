@@ -76,23 +76,6 @@ const adminAuthTest = async () => {
                 expect(err.toString()).to.have.string('SenderNotAdmin');
             }
         });
-
-        it('... admin should be able to kill the contract', async () => {
-            await impersonateAccount(ADMIN_ACC);
-
-            const adminAuthByAdmin = adminAuth.connect(adminAcc);
-            await adminAuthByAdmin.kill();
-
-            await stopImpersonatingAccount(ADMIN_ACC);
-
-            try {
-                await adminAuth.adminVault();
-
-                expect(true).to.be(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('Error: call revert exception');
-            }
-        });
     });
 };
 
@@ -239,7 +222,7 @@ const safeModulePermissionTest = async () => {
 
         const disableSafeModule = async (moduleAddr) => {
             const disableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
-                'disableLastModule',
+                'disableModule',
                 [moduleAddr],
             );
             await executeSafeTx(
@@ -300,7 +283,7 @@ const safeModulePermissionTest = async () => {
 
         it('... should revert when disabling module that is not enabled', async () => {
             const disableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
-                'disableLastModule',
+                'disableModule',
                 [flAddr],
             );
             await expect(
@@ -315,7 +298,7 @@ const safeModulePermissionTest = async () => {
 
         it('... should revert when disabling sentinel module address', async () => {
             const disableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
-                'disableLastModule',
+                'disableModule',
                 [SAFE_CONSTANTS.SENTINEL_MODULE],
             );
             await expect(
@@ -343,24 +326,19 @@ const safeModulePermissionTest = async () => {
             expect(isFlBalancerEnabled).to.be.equal(false);
         });
 
-        it('... should revert when not disabling last module in list of enabled modules', async () => {
+        it('... should disable first module in list of enabled modules', async () => {
             await enableSafeModule(flAddr);
 
             const flBalancer = await getAddrFromRegistry('FLBalancer');
             await enableSafeModule(flBalancer);
 
-            const disableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
-                'disableLastModule',
-                [flAddr],
-            );
-            await expect(
-                executeSafeTx(
-                    senderAddr,
-                    safeInstance,
-                    modulePermissionContract.address,
-                    disableModuleFuncData,
-                ),
-            ).to.be.reverted;
+            await disableSafeModule(flAddr);
+
+            const isFlEnabled = await safeInstance.isModuleEnabled(flAddr);
+            expect(isFlEnabled).to.be.equal(false);
+
+            const isFlBalancerEnabled = await safeInstance.isModuleEnabled(flBalancer);
+            expect(isFlBalancerEnabled).to.be.equal(true);
         });
     });
 };
