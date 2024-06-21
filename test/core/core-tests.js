@@ -979,7 +979,6 @@ const strategyExecutorTest = async () => {
         let strategyExecutorByBot;
         let strategyId;
         let subId;
-        let strategyExecutorByOwner;
 
         before(async () => {
             subProxy = await redeploy('SubProxy');

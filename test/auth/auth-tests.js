@@ -25,12 +25,11 @@ const { createSafe, executeSafeTx, SAFE_CONSTANTS } = require('../utils-safe');
 
 const adminAuthTest = async () => {
     describe('Admin-Auth', () => {
-        let sender; let ownerAcc; let adminAcc; let adminAuth;
+        let sender; let ownerAcc; let adminAuth;
         before(async () => {
             const adminAuthAddr = await getAddrFromRegistry('AdminAuth');
             adminAuth = await hre.ethers.getContractAt('AdminAuth', adminAuthAddr);
 
-            adminAcc = await hre.ethers.provider.getSigner(ADMIN_ACC);
             ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
 
             sender = (await hre.ethers.getSigners())[0];
