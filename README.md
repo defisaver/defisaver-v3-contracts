@@ -10,7 +10,7 @@ For a quick start, you can copy `.env.example` with default values and rename it
 
 #### Link @defisaver/sdk package
 1. Clone sdk repo (https://github.com/defisaver/defisaver-sdk)
-2. Checkout to `refactor/v3.1` branch
+2. Checkout to `feat/tx-relay` branch
 3. Run `yarn`
 4. Run `yarn build`
 5. Run `yarn link`
