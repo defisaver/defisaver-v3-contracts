@@ -151,7 +151,7 @@ contract TestCore_SafeModulePermission is SafeModulePermission, BaseTest {
 
         // try to disable first module added
         vm.expectRevert();
-        _disable_module(address(0xfff));
+        _disable_module(address(0xff));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
