@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/SafeERC20.sol";
-import "../ActionBase.sol";
+import { SafeERC20 } from "../../utils/SafeERC20.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { IERC20 } from "../../interfaces/IERC20.sol";
 
 /// @title Helper action to remove token approval given to a spender
 contract RemoveTokenApproval is ActionBase {

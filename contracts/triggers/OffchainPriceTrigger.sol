@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../interfaces/ITrigger.sol";
-import "../utils/TransientStorage.sol";
-import "./helpers/TriggerHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { TransientStorage } from "../utils/TransientStorage.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 contract OffchainPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
 

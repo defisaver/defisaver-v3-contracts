@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../DS/DSMath.sol";
-import "../../../utils/TokenUtils.sol";
-import "../../../utils/FeeRecipient.sol";
-import "../../../utils/TokenPriceHelper.sol";
+import { DSMath } from "../../../DS/DSMath.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { FeeRecipient } from "../../../utils/FeeRecipient.sol";
+import { TokenPriceHelper } from "../../../utils/TokenPriceHelper.sol";
 
 contract GasFeeHelper is DSMath, TokenPriceHelper {
     using TokenUtils for address;

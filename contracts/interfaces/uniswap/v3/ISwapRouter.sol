@@ -2,7 +2,7 @@
 pragma solidity >=0.8.4;
 pragma abicoder v2;
 
-import './IUniswapV3SwapCallback.sol';
+import { IUniswapV3SwapCallback } from "./IUniswapV3SwapCallback.sol";
 
 /// @title Router token swapping functionality
 /// @notice Functions for swapping tokens via Uniswap V3

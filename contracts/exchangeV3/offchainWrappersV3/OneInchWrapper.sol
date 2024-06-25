@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../auth/AdminAuth.sol";
-import "../DFSExchangeHelper.sol";
-import "../../interfaces/exchange/IOffchainWrapper.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
+import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { SafeERC20 } from "../../utils/SafeERC20.sol";
+import { IERC20 } from "../../interfaces/IERC20.sol";
 
 /// @title Wrapper contract which will be used if offchain exchange used is 1Inch
 contract OneInchWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {

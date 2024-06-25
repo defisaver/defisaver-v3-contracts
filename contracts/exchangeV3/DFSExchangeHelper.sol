@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../utils/TokenUtils.sol";
-import "../utils/Discount.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { SafeERC20 } from "../utils/SafeERC20.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 contract DFSExchangeHelper {
     

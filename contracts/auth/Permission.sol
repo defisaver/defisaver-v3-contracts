@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./SafeModulePermission.sol";
-import "./DSProxyPermission.sol";
+import { SafeModulePermission } from "./SafeModulePermission.sol";
+import { DSProxyPermission } from "./DSProxyPermission.sol";
 
 /// @title Permission contract which works with Safe modules and DSProxy to give execute permission
 contract Permission is DSProxyPermission, SafeModulePermission {   

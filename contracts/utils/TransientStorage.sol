@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 /// @title Used as a temp/tx only storage, should not trust value if not set in same tx
 contract TransientStorage {

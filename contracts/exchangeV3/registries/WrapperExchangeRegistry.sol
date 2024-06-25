@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../auth/AdminAuth.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
 
 contract WrapperExchangeRegistry is AdminAuth {
 	mapping(address => bool) private wrappers;

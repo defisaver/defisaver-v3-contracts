@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import "./CompUserUtils.sol";
 import "../../../contracts/interfaces/compoundV3/IComet.sol";

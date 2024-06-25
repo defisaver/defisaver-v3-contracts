@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract BaseActionsUtilAddresses {
     address internal constant DFS_REG_CONTROLLER_ADDR = 0x50bCFC115283dF48Ab6382551B9B93b08E197747;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 /// @dev We are aware that anyone can change their unrealisedProfit, the worst thing someone can do is remove LSV fee
 /// @dev It's tradeoff for much higher gas usage that would happen if we'd have much more strict requirements and checks

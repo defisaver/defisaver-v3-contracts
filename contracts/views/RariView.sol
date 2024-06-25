@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/IERC20.sol";
-import "../interfaces/rari/IFundProxy.sol";
-import "../interfaces/rari/IFundController.sol";
-import "../interfaces/rari/IFuseAsset.sol";
-import "../DS/DSMath.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { IFundProxy } from "../interfaces/rari/IFundProxy.sol";
+import { IFundController } from "../interfaces/rari/IFundController.sol";
+import { IFuseAsset } from "../interfaces/rari/IFuseAsset.sol";
+import { DSMath } from "../DS/DSMath.sol";
 
 contract RariView is DSMath {
 

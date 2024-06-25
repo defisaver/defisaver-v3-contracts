@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/exchange/IExchangeV3.sol";
-import "../../interfaces/curve/ISwapRouterNG.sol";
-import "../../DS/DSMath.sol";
-import "../../auth/AdminAuth.sol";
-import "../../utils/TokenUtils.sol";
-import "./helpers/WrapperHelper.sol";
+import { IExchangeV3 } from "../../interfaces/exchange/IExchangeV3.sol";
+import { ISwapRouterNG } from "../../interfaces/curve/ISwapRouterNG.sol";
+import { DSMath } from "../../DS/DSMath.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { WrapperHelper } from "./helpers/WrapperHelper.sol";
+import { SafeERC20 } from "../../utils/SafeERC20.sol";
+import { IERC20 } from "../../interfaces/IERC20.sol";
 
 /// @title DFS exchange wrapper for Curve
 contract CurveWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {

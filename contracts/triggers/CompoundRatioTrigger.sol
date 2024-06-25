@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../actions/compound/helpers/CompRatioHelper.sol";
-import "../interfaces/ITrigger.sol";
-import "../utils/TransientStorage.sol";
-import "./helpers/TriggerHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { CompRatioHelper } from "../actions/compound/helpers/CompRatioHelper.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { TransientStorage } from "../utils/TransientStorage.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if the Compound position went over/under the subbed ratio
 contract CompoundRatioTrigger is ITrigger, AdminAuth, CompRatioHelper, TriggerHelper {

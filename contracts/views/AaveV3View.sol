@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../actions/aaveV3/helpers/AaveV3Helper.sol";
-import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
-import "../utils/TokenUtils.sol";
-import "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import "../interfaces/aaveV3/IPriceOracleSentinel.sol";
+import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
+import { IPriceOracleSentinel } from "../interfaces/aaveV3/IPriceOracleSentinel.sol";
+import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
+import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
+import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
+import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract MainnetMcdAddresses {
     address internal constant POT_ADDR = 0x197E90f9FAD81970bA7976f33CbD77088E5D7cf7;

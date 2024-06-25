@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../DS/DSGuard.sol";
-import "../DS/DSAuth.sol";
+import { DSGuard, DSGuardFactory } from "../DS/DSGuard.sol";
+import { DSAuth } from "../DS/DSAuth.sol";
+import { DSAuthority } from "../DS/DSAuthority.sol";
 
-import "./helpers/AuthHelper.sol";
+import { AuthHelper } from "./helpers/AuthHelper.sol";
 
 /// @title DSProxyPermission Proxy contract which works with DSProxy to give execute permission
 contract DSProxyPermission is AuthHelper {

@@ -1,19 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./MainnetAaveV3Addresses.sol";
-
-import "../../../interfaces/aaveV3/IL2PoolV3.sol";
-import "../../../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
-import "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
+import { IL2PoolV3 } from "../../../interfaces/aaveV3/IL2PoolV3.sol";
+import { IAaveProtocolDataProvider } from "../../../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
+import { IPoolAddressesProvider } from "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
+import { MainnetAaveV3Addresses } from "./MainnetAaveV3Addresses.sol";
 
 /// @title Utility functions and data used in AaveV3 actions
 contract AaveV3Helper is MainnetAaveV3Addresses {
     
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
-    
-    
     /// @notice Returns the lending pool contract of the specified market
     function getLendingPool(address _market) internal virtual view returns (IL2PoolV3) {
         return IL2PoolV3(IPoolAddressesProvider(_market).getPool());

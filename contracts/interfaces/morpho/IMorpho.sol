@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU AGPLv3
 pragma solidity ^0.8.0;
 
-import "./MorphoTypes.sol";
+import { MorphoTypes } from "./MorphoTypes.sol";
 
 interface IMorpho {
 
@@ -17,15 +17,15 @@ interface IMorpho {
     function ONE() external view returns(bytes32);
 
     function isClaimRewardsPaused() external view returns (bool);
-    function defaultMaxGasForMatching() external view returns (Types.MaxGasForMatching memory);
+    function defaultMaxGasForMatching() external view returns (MorphoTypes.MaxGasForMatching memory);
     function maxSortedUsers() external view returns (uint256);
-    function supplyBalanceInOf(address, address) external view returns (Types.SupplyBalance memory);
-    function borrowBalanceInOf(address, address) external view returns (Types.BorrowBalance memory);
-    function deltas(address) external view returns (Types.Delta memory);
-    function market(address) external view returns (Types.Market memory);
+    function supplyBalanceInOf(address, address) external view returns (MorphoTypes.SupplyBalance memory);
+    function borrowBalanceInOf(address, address) external view returns (MorphoTypes.BorrowBalance memory);
+    function deltas(address) external view returns (MorphoTypes.Delta memory);
+    function market(address) external view returns (MorphoTypes.Market memory);
     function p2pSupplyIndex(address) external view returns (uint256);
     function p2pBorrowIndex(address) external view returns (uint256);
-    function poolIndexes(address) external view returns (Types.PoolIndexes memory);
+    function poolIndexes(address) external view returns (MorphoTypes.PoolIndexes memory);
     function interestRatesManager() external view returns (address);
     function rewardsManager() external view returns (address);
     function entryPositionsManager() external view returns (address);
@@ -45,13 +45,13 @@ interface IMorpho {
     /// GETTERS ///
 
     function getMarketsCreated() external view returns (address[] memory marketsCreated_);
-    function getHead(address _poolToken, Types.PositionType _positionType) external view returns (address head);
-    function getNext(address _poolToken, Types.PositionType _positionType, address _user) external view returns (address next);
+    function getHead(address _poolToken, MorphoTypes.PositionType _positionType) external view returns (address head);
+    function getNext(address _poolToken, MorphoTypes.PositionType _positionType, address _user) external view returns (address next);
 
     /// GOVERNANCE ///
 
     function setMaxSortedUsers(uint256 _newMaxSortedUsers) external;
-    function setDefaultMaxGasForMatching(Types.MaxGasForMatching memory _maxGasForMatching) external;
+    function setDefaultMaxGasForMatching(MorphoTypes.MaxGasForMatching memory _maxGasForMatching) external;
     function setTreasuryVault(address _newTreasuryVaultAddress) external;
     function setIncentivesVault(address _newIncentivesVault) external;
     function setRewardsManager(address _rewardsManagerAddress) external;

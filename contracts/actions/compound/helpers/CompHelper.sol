@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../interfaces/compound/IComptroller.sol";
-import "../../../interfaces/compound/ICToken.sol";
-import "../../../utils/TokenUtils.sol";
-import "./MainnetCompAddresses.sol";
+import { IComptroller } from "../../../interfaces/compound/IComptroller.sol";
+import { ICToken } from "../../../interfaces/compound/ICToken.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { MainnetCompAddresses } from "./MainnetCompAddresses.sol";
 
 /// @title Utility functions and data used in Compound actions
 contract CompHelper is MainnetCompAddresses{

@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces//exchange/IKyberNetworkProxy.sol";
-import "../../interfaces/exchange/IExchangeV3.sol";
-import "../../DS/DSMath.sol";
-import "../../auth/AdminAuth.sol";
-import "./helpers/WrapperHelper.sol";
-import "../../utils/TokenUtils.sol";
-import "../DFSExchangeHelper.sol";
+import { KyberNetworkProxyInterface } from "../../interfaces//exchange/IKyberNetworkProxy.sol";
+import { IExchangeV3 } from "../../interfaces/exchange/IExchangeV3.sol";
+import { DSMath } from "../../DS/DSMath.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { WrapperHelper } from "./helpers/WrapperHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
+import { SafeERC20 } from "../../utils/SafeERC20.sol";
+import { IERC20 } from "../../interfaces/IERC20.sol";
 
 contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExchangeHelper {
 

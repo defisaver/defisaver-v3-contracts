@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 /// @title Utility functions and data used in GUni actions
 contract MainnetGUniAddresses {

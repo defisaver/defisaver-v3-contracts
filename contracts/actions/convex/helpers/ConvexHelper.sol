@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../interfaces/convex/IConvexToken.sol";
-import "../../../interfaces/convex/IConvexToken.sol";
-import "../../../interfaces/convex/IBRewardPool.sol";
-import "../../../interfaces/convex/IRewardPool.sol";
-import "../../../utils/TokenUtils.sol";
+import { IConvexToken } from "../../../interfaces/convex/IConvexToken.sol";
+import { IConvexToken } from "../../../interfaces/convex/IConvexToken.sol";
+import { IBRewardPool } from "../../../interfaces/convex/IBRewardPool.sol";
+import { IRewardPool } from "../../../interfaces/convex/IRewardPool.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
-import "./MainnetConvexAddresses.sol";
+import { IERC20 } from "../../../interfaces/IERC20.sol";
+import { MainnetConvexAddresses } from "./MainnetConvexAddresses.sol";
 
 contract ConvexHelper is MainnetConvexAddresses {
     using TokenUtils for address;

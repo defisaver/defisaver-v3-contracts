@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../IERC20.sol";
+import { IERC20 } from "../IERC20.sol";
 
 abstract contract ICToken is IERC20 {
     function mint(uint256 mintAmount) external virtual returns (uint256);

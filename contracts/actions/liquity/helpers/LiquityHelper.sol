@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../utils/TokenUtils.sol";
-import "../../../interfaces/liquity/ITroveManager.sol";
-import "../../../interfaces/liquity/IBorrowerOperations.sol";
-import "../../../interfaces/liquity/IPriceFeed.sol";
-import "../../../interfaces/liquity/IHintHelpers.sol";
-import "../../../interfaces/liquity/ISortedTroves.sol";
-import "../../../interfaces/liquity/ICollSurplusPool.sol";
-import "../../../interfaces/liquity/IStabilityPool.sol";
-import "../../../interfaces/liquity/ILQTYStaking.sol";
-import "../../../interfaces/liquity/IChickenBondManager.sol";
-import "./MainnetLiquityAddresses.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { ITroveManager } from "../../../interfaces/liquity/ITroveManager.sol";
+import { IBorrowerOperations } from "../../../interfaces/liquity/IBorrowerOperations.sol";
+import { IPriceFeed } from "../../../interfaces/liquity/IPriceFeed.sol";
+import { IHintHelpers } from "../../../interfaces/liquity/IHintHelpers.sol";
+import { ISortedTroves } from "../../../interfaces/liquity/ISortedTroves.sol";
+import { ICollSurplusPool } from "../../../interfaces/liquity/ICollSurplusPool.sol";
+import { IStabilityPool } from "../../../interfaces/liquity/IStabilityPool.sol";
+import { ILQTYStaking } from "../../../interfaces/liquity/ILQTYStaking.sol";
+import { IChickenBondManager } from "../../../interfaces/liquity/IChickenBondManager.sol";
+import { MainnetLiquityAddresses } from "./MainnetLiquityAddresses.sol";
 
 contract LiquityHelper is MainnetLiquityAddresses {
     using TokenUtils for address;

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "./helpers/CompV3Helper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CompV3Helper } from "./helpers/CompV3Helper.sol";
+import { IComet } from "../../interfaces/compoundV3/IComet.sol";
 
 /// @title Allow or disallow manager
 contract CompV3Allow is ActionBase, CompV3Helper {

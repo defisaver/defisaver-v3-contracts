@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-import "../../auth/AdminAuth.sol";
+pragma solidity =0.8.24;
+import { AdminAuth } from "../../auth/AdminAuth.sol";
 
 /// @title Handles authorization of who can call the execution of strategies
 contract BotAuth is AdminAuth {
