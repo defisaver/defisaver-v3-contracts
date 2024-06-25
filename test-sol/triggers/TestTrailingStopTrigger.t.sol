@@ -3,11 +3,15 @@ pragma solidity =0.8.24;
 
 import "ds-test/test.sol";
 import "forge-std/console.sol";
-import "../CheatCodes.sol";
 
-import "../../contracts/mocks/MockChainlinkFeedRegistry.sol";
-import "../../contracts/mocks/MockChainlinkAggregator.sol";
-import "../../contracts/triggers/TrailingStopTrigger.sol";
+import { CheatCodes } from "../CheatCodes.sol";
+import { MainnetTriggerAddresses } from "../../contracts/triggers/helpers/MainnetTriggerAddresses.sol";
+import { MainnetUtilAddresses } from "../../contracts/utils/helpers/MainnetUtilAddresses.sol";
+import { MockChainlinkFeedRegistry } from "../../contracts/mocks/MockChainlinkFeedRegistry.sol";
+import { MockChainlinkAggregator } from "../../contracts/mocks/MockChainlinkAggregator.sol";
+import { TrailingStopTrigger } from "../../contracts/triggers/TrailingStopTrigger.sol";
+import { DSMath } from "../../contracts/DS/DSMath.sol";
+import { IWStEth } from "../../contracts/interfaces/lido/IWStEth.sol";
 
 contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses, MainnetUtilAddresses {
     CheatCodes vm = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);

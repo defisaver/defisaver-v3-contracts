@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import "ds-test/test.sol";
-import "../../contracts/triggers/CurveUsdBorrowRateTrigger.sol";
+import { CurveUsdBorrowRateTrigger } from "../../contracts/triggers/CurveUsdBorrowRateTrigger.sol";
 
 
 contract TestCurveUsdBorrowRateTrigger is DSTest {

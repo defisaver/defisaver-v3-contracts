@@ -2,10 +2,12 @@
 pragma solidity =0.8.24;
 
 import "ds-test/test.sol";
-import "../../contracts/core/DFSRegistry.sol";
-import "../../contracts/core/strategy/BotAuth.sol";
-import "../../contracts/core/helpers/CoreHelper.sol";
-import "../CheatCodes.sol";
+
+import { DFSRegistry } from "../../contracts/core/DFSRegistry.sol";
+import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
+import { CoreHelper } from "../../contracts/core/helpers/CoreHelper.sol";
+import { AdminVault } from "../../contracts/auth/AdminAuth.sol";
+import { CheatCodes } from "../CheatCodes.sol";
 
 contract RegistryUtils is CoreHelper {
     function redeploy(string memory _actionName, address _newAddr) public {

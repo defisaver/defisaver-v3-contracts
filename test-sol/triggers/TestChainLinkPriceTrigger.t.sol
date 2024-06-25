@@ -3,7 +3,12 @@ pragma solidity =0.8.24;
 
 import "ds-test/test.sol";
 import "forge-std/console.sol";
-import "../../contracts/triggers/ChainLinkPriceTrigger.sol";
+
+import { MainnetTriggerAddresses } from "../../contracts/triggers/helpers/MainnetTriggerAddresses.sol";
+import { ChainLinkPriceTrigger } from "../../contracts/triggers/ChainLinkPriceTrigger.sol";
+import { MainnetUtilAddresses } from "../../contracts/utils/helpers/MainnetUtilAddresses.sol";
+import { TokenPriceHelper } from "../../contracts/utils/TokenPriceHelper.sol";
+import { TokenUtils } from "../../contracts/utils/TokenUtils.sol";
 
 contract TestChainLinkPriceTrigger is DSTest, MainnetTriggerAddresses, MainnetUtilAddresses, TokenPriceHelper{
 
@@ -31,5 +36,4 @@ contract TestChainLinkPriceTrigger is DSTest, MainnetTriggerAddresses, MainnetUt
 
        assertGt(priceWsteth, 0);
     }
-
 }

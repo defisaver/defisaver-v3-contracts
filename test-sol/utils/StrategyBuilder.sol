@@ -2,8 +2,9 @@
 pragma solidity =0.8.24;
 
 import "ds-test/test.sol";
-import "../../contracts/core/strategy/StrategyStorage.sol";
-import "../CheatCodes.sol";
+
+import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
+import { CheatCodes } from "../CheatCodes.sol";
 
 contract StrategyBuilder {
     string name;

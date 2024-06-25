@@ -3,7 +3,9 @@ pragma solidity =0.8.24;
 
 import "ds-test/test.sol";
 import "forge-std/console.sol";
-import "../../contracts/triggers/LiquityDebtInFrontTrigger.sol";
+
+import { LiquityDebtInFrontTrigger } from "../../contracts/triggers/LiquityDebtInFrontTrigger.sol";
+import { LiquityHelper } from "../../contracts/actions/liquity/helpers/LiquityHelper.sol";
 
 /// @dev Fetching lastTrove is really slow, so we ignore these tests by adding '_' as prefix to remove delay when running all tests
 /// @dev For running these two tests, just remove '_' from the function name

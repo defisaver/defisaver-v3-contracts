@@ -4,11 +4,10 @@ pragma solidity =0.8.24;
 import "ds-test/test.sol";
 import "forge-std/console.sol";
 
-import "../../contracts/exchangeV3/registries/TokenGroupRegistry.sol";
-import "../../contracts/auth/AdminAuth.sol";
-
-import "../CheatCodes.sol";
-import "../TokenAddresses.sol";
+import { TokenGroupRegistry } from "../../contracts/exchangeV3/registries/TokenGroupRegistry.sol";
+import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
+import { CheatCodes } from "../CheatCodes.sol";
+import { TokenAddresses } from "../TokenAddresses.sol";
 
 contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
 
