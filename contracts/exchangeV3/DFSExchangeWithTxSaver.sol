@@ -21,6 +21,8 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
     /// For TxSaver, total gas cost fee taken from user can't be higher than maxTxCost set by user
     error TxCostInFeeTokenTooHighError(uint256 maxTxCost, uint256 txCost);
 
+    error FeeTokenNotSameAsSrcToken(address srcToken, address feeToken);
+
     function _sellWithTxSaverChoice(ExchangeData memory _exData, address _user, DFSRegistry _registry) 
         internal returns (
             address wrapperAddress,
@@ -140,6 +142,9 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
         // revert if tx cost is higher than max value set by user
         if (txCostInSrcToken > _txSaverData.maxTxCostInFeeToken) {
             revert TxCostInFeeTokenTooHighError(_txSaverData.maxTxCostInFeeToken, txCostInSrcToken);
+        }
+        if (_exData.srcAddr != _txSaverData.feeToken){
+            revert FeeTokenNotSameAsSrcToken(_exData.srcAddr, _txSaverData.feeToken);
         }
 
         // subtract tx cost from src amount and send it to fee recipient
