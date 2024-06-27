@@ -29,7 +29,8 @@ contract GasFeeHelperL2 is DSMath, TokenPriceHelperL2 {
         if (tx.gasprice > SANITY_GAS_PRICE) {
             gasPrice = SANITY_GAS_PRICE;
         }
-        // TODO: think about L2 (arbitrum) moving gas limit
+
+        /// @dev we acknowledge that Arbitrum block gas limit can be higher than others
         // can't use more gas than the block gas limit
         if (_gasUsed > block.gaslimit) {
             _gasUsed = block.gaslimit;
