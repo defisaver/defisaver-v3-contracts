@@ -114,7 +114,6 @@ import { ITrigger } from "../interfaces/ITrigger.sol";
 import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
 import { ISafe } from "../interfaces/safe/ISafe.sol";
 import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
-import { console } from "hardhat/console.sol";
 
 contract RecipeExecutor is 
     StrategyModel,
@@ -164,9 +163,6 @@ contract RecipeExecutor is
             revert TxSaverAuthorizationError(msg.sender);
         }
 
-        console.log("Executing recipe from TxSaver");
-        console.log("Should take fee from position: %s", _txSaverData.shouldTakeFeeFromPosition);
-
         // if fee is taken from position, its taken inside sell action, so here we just execute the recipe
         if (_txSaverData.shouldTakeFeeFromPosition) {
             _executeActions(_currRecipe);
@@ -185,7 +181,6 @@ contract RecipeExecutor is
 
         // when sending sponsored tx, no tx cost is taken
         if (estimatedGasUsed == 0) {
-            console.log("Sending sponsored tx, no gas cost taken");
             return;
         }
 
@@ -196,12 +191,6 @@ contract RecipeExecutor is
             _txSaverData.tokenPriceInEth,
             l1GasCostInEth
         );
-
-        console.log("Estimated gas used: %s", estimatedGasUsed);
-        console.log("Gas cost when taking from EOA/wallet: %s", gasCost);
-        console.log("Max tx cost in fee token: %s", _txSaverData.maxTxCostInFeeToken);
-        console.log("Fee token: %s", _txSaverData.feeToken);
-        console.log("Token price in eth: %s", _txSaverData.tokenPriceInEth);
 
         // revert if gas cost is higher than max cost signed by user
         if (gasCost > _txSaverData.maxTxCostInFeeToken) {

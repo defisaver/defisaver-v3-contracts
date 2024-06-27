@@ -10,7 +10,6 @@ import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 import { ISafe } from "../interfaces/safe/ISafe.sol";
 import { TxSaverBytesTransientStorage } from "./TxSaverBytesTransientStorage.sol";
-import { console } from "hardhat/console.sol";
 
 /// @title Main entry point for executing TxSaver transactions signed by users through safe wallet 
 contract TxSaverExecutor is 
@@ -67,9 +66,6 @@ contract TxSaverExecutor is
         }
 
         (, TxSaverSignedData memory txSaverData) = parseTxSaverSignedData(_params.data);
-
-        console.log("Refund Receiver: %s", _params.refundReceiver);
-        console.log("Deadline: %s, Current Time: %s", txSaverData.deadline, block.timestamp);
 
         // check if signature is expired
         if (txSaverData.deadline > 0 && block.timestamp > txSaverData.deadline) {
