@@ -172,6 +172,7 @@ describe('TxSaver tests', function () {
                 signatures: '0x',
             },
             estimatedGas,
+            0,
             emptyInjectedOrder,
             gasParams,
         )).to.be.revertedWith('BotNotApproved');
@@ -202,6 +203,7 @@ describe('TxSaver tests', function () {
         await expect(txSaverExecutorByBot.executeTx(
             txParamsForExecution,
             estimatedGas,
+            0,
             emptyInjectedOrder,
             gasParams,
         )).to.be.revertedWith('TxSaverSignatureExpired');
@@ -333,6 +335,7 @@ describe('TxSaver tests', function () {
         await txSaverExecutorByBot.executeTx(
             txParamsForExecution,
             estimatedGas,
+            0,
             emptyInjectedOrder,
             gasParams,
         );
@@ -374,6 +377,7 @@ describe('TxSaver tests', function () {
         await txSaverExecutorByBot.executeTx(
             txParamsForExecution,
             estimatedGas,
+            0,
             emptyInjectedOrder,
             gasParams,
         );
@@ -416,6 +420,7 @@ describe('TxSaver tests', function () {
         const txParamsForExecution = await getTxParams(functionData);
         await txSaverExecutorByBot.executeTx(
             txParamsForExecution,
+            0,
             0, // when sending sponsored transaction send estimatedGas as zero
             emptyInjectedOrder,
             gasParams,
@@ -485,6 +490,7 @@ describe('TxSaver tests', function () {
         await txSaverExecutorByBot.executeTx(
             txParamsForExecution,
             estimatedGas,
+            0,
             injectedOrder,
             gasParams,
         );
@@ -527,6 +533,7 @@ describe('TxSaver tests', function () {
         await expect(txSaverExecutorByBot.executeTx(
             txParamsForExecution,
             estimatedGas,
+            0,
             emptyInjectedOrder,
             gasParams,
         )).to.be.reverted;
@@ -550,6 +557,7 @@ describe('TxSaver tests', function () {
         await expect(txSaverExecutorByBot.executeTx(
             txParamsForExecution,
             estimatedGas,
+            0,
             emptyInjectedOrder,
             gasParams,
         )).to.be.reverted;
@@ -600,6 +608,7 @@ describe('TxSaver tests', function () {
         await txSaverExecutorByBot.executeTx(
             txParams,
             estimatedGas,
+            0,
             emptyInjectedOrder,
             gasParams,
         );
@@ -657,6 +666,7 @@ describe('TxSaver tests', function () {
         await txSaverExecutorByBot.executeTx(
             txParamsForExecution,
             estimatedGas,
+            0,
             emptyInjectedOrder,
             gasParams,
         );
@@ -707,6 +717,7 @@ describe('TxSaver tests', function () {
         const txParamsForExecution = await getTxParams(functionData);
         await txSaverExecutorByBot.executeTx(
             txParamsForExecution,
+            0,
             0,
             emptyInjectedOrder,
             gasParams,
@@ -765,6 +776,7 @@ describe('TxSaver tests', function () {
         await txSaverExecutorByBot.executeTx(
             txParamsForExecution,
             estimatedGas,
+            0,
             injectedOrder,
             gasParams,
         );
@@ -817,6 +829,7 @@ describe('TxSaver tests', function () {
         await expect(txSaverExecutorByBot.executeTx(
             txParamsForExecution,
             estimatedGas,
+            0,
             emptyInjectedOrder,
             gasParams,
         )).to.be.reverted;

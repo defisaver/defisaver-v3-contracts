@@ -49,6 +49,7 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc
 
         (
             uint256 estimatedGas,
+            uint256 l1GasCostInEth,
             TxSaverSignedData memory txSaverData,
             InjectedExchangeData memory injectedExchangeData
         ) = _readDataFromTransientStorage(feeType, tStorage);
@@ -67,7 +68,7 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc
         }
         
         // when taking fee from position, take tx cost before regular sell
-        _takeTxSaverFee(_exData, txSaverData, estimatedGas);
+        _takeTxSaverFee(_exData, txSaverData, estimatedGas, l1GasCostInEth);
         txSaverFeeTaken = true;
     
         // perform regular sell
@@ -99,19 +100,20 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc
     function _readDataFromTransientStorage(uint256 _feeType, ITxSaverBytesTransientStorage _tStorage) 
         internal view returns (
             uint256 estimatedGas,
+            uint256 l1GasCostInEth,
             TxSaverSignedData memory txSaverData,
             InjectedExchangeData memory injectedExchangeData
         ) 
     {
         if (_feeType == EOA_OR_WALLET_FEE_FLAG) {
-            (estimatedGas, injectedExchangeData) = abi.decode(
+            (estimatedGas, l1GasCostInEth, injectedExchangeData) = abi.decode(
                 _tStorage.getBytesTransiently(),
-                (uint256, InjectedExchangeData)
+                (uint256, uint256, InjectedExchangeData)
             );
         } else {
-            (estimatedGas, txSaverData, injectedExchangeData) = abi.decode(
+            (estimatedGas, l1GasCostInEth, txSaverData, injectedExchangeData) = abi.decode(
                 _tStorage.getBytesTransiently(),
-                (uint256, TxSaverSignedData, InjectedExchangeData)
+                (uint256, uint256, TxSaverSignedData, InjectedExchangeData)
             );
         }
     }
@@ -119,7 +121,8 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc
     function _takeTxSaverFee(
         ExchangeData memory _exData,
         TxSaverSignedData memory _txSaverData,
-        uint256 _estimatedGas
+        uint256 _estimatedGas,
+        uint256 _l1GasCostInEth
     ) internal {
         // when sending sponsored tx, no tx cost is taken
         if (_estimatedGas == 0) return;
@@ -134,7 +137,8 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc
         uint256 txCostInSrcToken = calcGasCostUsingInjectedPrice(
             _estimatedGas,
             _exData.srcAddr,
-            _txSaverData.tokenPriceInEth
+            _txSaverData.tokenPriceInEth,
+            _l1GasCostInEth
         );
 
         console.log("Tx cost in src token: %s", txCostInSrcToken);

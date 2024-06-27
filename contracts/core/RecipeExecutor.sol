@@ -175,9 +175,9 @@ contract RecipeExecutor is
         
         // when taking fee from EOA/wallet
         // first read gas estimation set by TxSaverExecutor
-        (uint256 estimatedGasUsed,) = abi.decode(
+        (uint256 estimatedGasUsed, uint256 l1GasCostInEth, ) = abi.decode(
             ITxSaverBytesTransientStorage(txSaverExecutorAddr).getBytesTransiently(),
-            (uint256, DFSExchangeData.InjectedExchangeData)
+            (uint256, uint256, DFSExchangeData.InjectedExchangeData)
         );
 
         // execute the recipe
@@ -193,7 +193,8 @@ contract RecipeExecutor is
         uint256 gasCost = calcGasCostUsingInjectedPrice(
             estimatedGasUsed,
             _txSaverData.feeToken,
-            _txSaverData.tokenPriceInEth
+            _txSaverData.tokenPriceInEth,
+            l1GasCostInEth
         );
 
         console.log("Estimated gas used: %s", estimatedGasUsed);

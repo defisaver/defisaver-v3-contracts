@@ -53,10 +53,12 @@ contract TxSaverExecutor is
     ///
     /// @param _params SafeTxParams data needed to execute safe tx
     /// @param _estimatedGas Estimated gas usage for the transaction
+    /// @param _l1GasCostInEth Additional gas cost added for Optimism based L2s
     /// @param _injectedExchangeData Exchange data injected by backend
     function executeTx(
         SafeTxParams calldata _params,
         uint256 _estimatedGas,
+        uint256 _l1GasCostInEth,
         DFSExchangeData.InjectedExchangeData calldata _injectedExchangeData
     ) external {
         // only authorized bot can call this function
@@ -76,12 +78,12 @@ contract TxSaverExecutor is
 
         if (txSaverData.shouldTakeFeeFromPosition) {
             setBytesTransiently(
-                abi.encode(_estimatedGas, txSaverData, _injectedExchangeData),
+                abi.encode(_estimatedGas, _l1GasCostInEth, txSaverData, _injectedExchangeData),
                 txSaverData.shouldTakeFeeFromPosition
             );
         } else {
             setBytesTransiently(
-                abi.encode(_estimatedGas, _injectedExchangeData),
+                abi.encode(_estimatedGas, _l1GasCostInEth, _injectedExchangeData),
                 txSaverData.shouldTakeFeeFromPosition
             );
         }

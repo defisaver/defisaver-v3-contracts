@@ -17,7 +17,8 @@ contract TxSaverGasCostCalc is DSMath, UtilHelper {
     function calcGasCostUsingInjectedPrice(
         uint256 _gasUsed,
         address _feeToken,
-        uint256 _tokenPriceInEth
+        uint256 _tokenPriceInEth,
+        uint256 _l1GasCostInEth
     ) internal view returns (uint256 txCost) {
         // can't use more gas than the block gas limit
         if (_gasUsed > block.gaslimit) {
@@ -25,7 +26,7 @@ contract TxSaverGasCostCalc is DSMath, UtilHelper {
         }
 
         // calc gas used
-        txCost = _gasUsed * tx.gasprice;    
+        txCost = (_gasUsed * tx.gasprice) + _l1GasCostInEth;    
 
         // convert to token amount
         if (_feeToken != TokenUtils.WETH_ADDR) {
