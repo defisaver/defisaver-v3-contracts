@@ -5,12 +5,12 @@ import { DFSExchangeCore } from "./DFSExchangeCore.sol";
 import { SafeERC20 } from "../utils/SafeERC20.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
-import { GasFeeHelper } from "../../contracts/actions/fee/helpers/GasFeeHelper.sol";
+import { TxSaverGasCostCalc } from "../utils/TxSaverGasCostCalc.sol";
 import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { console } from "hardhat/console.sol";
 
-contract DFSExchangeWithTxSaver is DFSExchangeCore, GasFeeHelper
+contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc
 {   
     using SafeERC20 for IERC20;
     using TokenUtils for address;

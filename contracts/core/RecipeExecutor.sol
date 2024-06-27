@@ -106,7 +106,7 @@ import { SubStorage } from "../core/strategy/SubStorage.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
-import { GasFeeHelper } from "../actions/fee/helpers/GasFeeHelper.sol";
+import { TxSaverGasCostCalc } from "../utils/TxSaverGasCostCalc.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 
@@ -122,7 +122,7 @@ contract RecipeExecutor is
     SafeModulePermission,
     AdminAuth,
     CoreHelper,
-    GasFeeHelper,
+    TxSaverGasCostCalc,
     CheckWalletType
 {
     bytes4 public constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));

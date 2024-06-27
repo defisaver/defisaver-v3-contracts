@@ -12,13 +12,15 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
 import { ActionsUtilHelper } from "../../utils/helpers/ActionsUtilHelper.sol";
 import { DFSRegistry } from "../../../core/DFSRegistry.sol";
+import { GasFeeHelper } from "../../fee/helpers/GasFeeHelper.sol";
 
 /// @title LlamaLendSwapper Callback contract for Llamalend extended actions
 contract LlamaLendSwapper is 
     LlamaLendHelper,
     DFSExchangeWithTxSaver,
     AdminAuth,
-    ActionsUtilHelper
+    ActionsUtilHelper,
+    GasFeeHelper
 {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
