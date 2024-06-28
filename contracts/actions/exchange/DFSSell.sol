@@ -2,14 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import "../../exchangeV3/DFSExchangeCore.sol";
-import "../../exchangeV3/registries/TokenGroupRegistry.sol";
-import "../ActionBase.sol";
-
+import { DFSExchangeWithTxSaver } from "../../exchangeV3/DFSExchangeWithTxSaver.sol";
+import { TokenGroupRegistry } from "../../exchangeV3/registries/TokenGroupRegistry.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { ITxSaverBytesTransientStorage} from "../../interfaces/ITxSaverBytesTransientStorage.sol";
 
 /// @title A exchange sell action through the dfs exchange
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
-contract DFSSell is ActionBase, DFSExchangeCore {
+contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
 
     using TokenUtils for address;
 
@@ -128,8 +129,10 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             _exchangeData.dfsFeeDivider = 0;
         }
         
+        address wrapper;
+        uint256 exchangedAmount;
 
-        (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
+        (wrapper, exchangedAmount,,) = _sellWithTxSaverChoice(_exchangeData, address(this), registry);
 
         if (isEthDest) {
             TokenUtils.withdrawWeth(exchangedAmount);

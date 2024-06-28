@@ -204,6 +204,9 @@ async function verifyContract(contractAddress, contractName) {
     case ('=0.8.10'):
         solVersion = 'v0.8.10+commit.fc410830';
         break;
+    case ('=0.8.24'):
+        solVersion = 'v0.8.24+commit.e11b9ed9';
+        break;
     default:
         solVersion = 'v0.8.10+commit.fc410830';
     }

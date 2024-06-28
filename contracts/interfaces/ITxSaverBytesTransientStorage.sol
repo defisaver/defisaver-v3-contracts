@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-interface ITxRelayBytesTransientStorage {
-    function dataHasBeenStored() external view returns (bool);
+interface ITxSaverBytesTransientStorage {
+    function getFeeType() external view returns (uint256);
     function getBytesTransiently() external view returns (bytes memory result);
 }

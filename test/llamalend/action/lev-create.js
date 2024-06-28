@@ -27,6 +27,7 @@ describe('LlamaLend-Lev-Create', function () {
         proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         await redeploy('LlamaLendLevCreate');
         await redeploy('LlamaLendSwapper');
+        await redeploy('TxSaverExecutor');
         mockWrapper = await redeploy('MockExchangeWrapper');
         await setNewExchangeWrapper(senderAcc, mockWrapper.address);
         view = await (await hre.ethers.getContractFactory('LlamaLendView')).deploy();

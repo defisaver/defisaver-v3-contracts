@@ -14,5 +14,4 @@ contract MainnetCoreAddresses {
 
     address internal constant RECIPE_EXECUTOR_ADDR = 0x5029336642814bC51a42bA80BF83a6322110035D;
     address internal constant BYTES_TRANSIENT_STORAGE = 0xB3FE6f712c8B8c64CD2780ce714A36e7640DDf0f;
-    address internal constant TX_RELAY_BYTES_TRANSIENT_STORAGE = 0xB3FE6f712c8B8c64CD2780ce714A36e7640DDf0f;
 }

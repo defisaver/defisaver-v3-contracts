@@ -15,7 +15,7 @@ import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 
 import { SmartWallet } from "../SmartWallet.sol";
 
-/// @notice Contract for creating CDP on AaveV3 with default values for some common parameters
+/// @notice Contract for creating position on AaveV3 with default values for some common parameters
 /// @dev If more complex setup is needed, use AaveV3ExecuteActions directly
 contract AaveV3PositionCreator is AaveV3ExecuteActions, AaveV3Helper, CommonPositionCreator {
 

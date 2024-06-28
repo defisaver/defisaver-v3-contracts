@@ -24,4 +24,10 @@ contract DFSExchangeData {
         bytes wrapperData; // on-chain additional data for on-chain (uniswap route for example)
         OffchainData offchainData; // offchain aggregator order
     }
+
+    struct InjectedExchangeData {
+        address wrapper; // on-chain wrapper address (must be in WrapperExchangeRegistry)
+        bytes wrapperData; // on-chain additional data for on-chain (uniswap route for example)
+        OffchainData offchainData; // offchain aggregator order
+    }
 }
