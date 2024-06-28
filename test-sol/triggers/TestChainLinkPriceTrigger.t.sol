@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
 import { MainnetTriggerAddresses } from "../../contracts/triggers/helpers/MainnetTriggerAddresses.sol";
@@ -10,7 +10,7 @@ import { MainnetUtilAddresses } from "../../contracts/utils/helpers/MainnetUtilA
 import { TokenPriceHelper } from "../../contracts/utils/TokenPriceHelper.sol";
 import { TokenUtils } from "../../contracts/utils/TokenUtils.sol";
 
-contract TestChainLinkPriceTrigger is DSTest, MainnetTriggerAddresses, MainnetUtilAddresses, TokenPriceHelper{
+contract TestChainLinkPriceTrigger is Test, MainnetTriggerAddresses, MainnetUtilAddresses, TokenPriceHelper{
 
     ChainLinkPriceTrigger trigger;
 

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import { CurveUsdBorrowRateTrigger } from "../../contracts/triggers/CurveUsdBorrowRateTrigger.sol";
 
 
-contract TestCurveUsdBorrowRateTrigger is DSTest {
+contract TestCurveUsdBorrowRateTrigger is Test {
     CurveUsdBorrowRateTrigger trigger;
 
     address WSTETH_MARKET = 0x100dAa78fC509Db39Ef7D04DE0c1ABD299f4C6CE;

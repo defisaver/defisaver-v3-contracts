@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
 import { CheatCodes } from "../CheatCodes.sol";
@@ -13,8 +13,8 @@ import { TrailingStopTrigger } from "../../contracts/triggers/TrailingStopTrigge
 import { DSMath } from "../../contracts/DS/DSMath.sol";
 import { IWStEth } from "../../contracts/interfaces/lido/IWStEth.sol";
 
-contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses, MainnetUtilAddresses {
-    CheatCodes vm = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+contract TestTrailingStopTrigger is Test, DSMath, MainnetTriggerAddresses, MainnetUtilAddresses {
+    CheatCodes constant cheats = CheatCodes(VM_ADDRESS);
 
     TrailingStopTrigger trigger;
     MockChainlinkAggregator mockAggregator;
@@ -24,11 +24,11 @@ contract TestTrailingStopTrigger is DSTest, DSMath, MainnetTriggerAddresses, Mai
         MockChainlinkFeedRegistry mockPriceFeed = new MockChainlinkFeedRegistry();
         mockAggregator = new MockChainlinkAggregator();
 
-        vm.etch(CHAINLINK_FEED_REGISTRY, address(mockPriceFeed).code);
+        cheats.etch(CHAINLINK_FEED_REGISTRY, address(mockPriceFeed).code);
         mockPriceFeed = MockChainlinkFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
         address realAggregatorAddress = mockPriceFeed.getFeed(address(0), address(0));
-        vm.etch(realAggregatorAddress, address(mockAggregator).code);
+        cheats.etch(realAggregatorAddress, address(mockAggregator).code);
         mockAggregator = MockChainlinkAggregator(realAggregatorAddress);
     }
 
