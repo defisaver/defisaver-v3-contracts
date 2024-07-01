@@ -130,7 +130,7 @@ const morphoBlueApyAfterValuesTest = async () => {
                 const borrowRateBefore = marketInfo.borrowRate;
 
                 const estimatedBorrowRateWithMarket = await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
-                    [marketParams, true, supplyAmount, withdrawAmount],
+                    [marketParams, false, supplyAmount, withdrawAmount],
                 );
 
                 const estimatedBorrowRate = estimatedBorrowRateWithMarket.borrowRate;
