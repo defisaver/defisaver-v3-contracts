@@ -267,7 +267,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
             supplyRate: reserveData.currentLiquidityRate,
             borrowRateVariable: reserveData.currentVariableBorrowRate,
             borrowRateStable: reserveData.currentStableBorrowRate,
-            totalSupply: IERC20(reserveData.aTokenAddress).totalSupply(),
+            totalSupply: IERC20(reserveData.aTokenAddress).totalSupply()  + reserveData.accruedToTreasury,
             availableLiquidity: _tokenAddr.getBalance(reserveData.aTokenAddress),
             totalBorrow: totalVariableBorrow + totalStableBorrow,
             totalBorrowVar: totalVariableBorrow,
