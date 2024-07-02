@@ -865,13 +865,13 @@
       },
       {
         "name": "MorphoBlueView",
-        "address": "0xdbcacf59c5063da8b15481f88e7d70e13c92f2a1",
+        "address": "0x53c0E962bd0AC53928ca04703238b2ec2894195B",
         "id": "0x942aef0a",
         "path": "contracts/views/MorphoBlueView",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xdbcacf59c5063da8b15481f88e7d70e13c92f2a1"]
       }
   ]
