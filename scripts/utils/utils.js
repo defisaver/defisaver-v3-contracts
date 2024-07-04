@@ -18,6 +18,17 @@ async function getFile(dir, filename) {
     return arr.filter((s) => s.includes(filename));
 }
 
+async function getAllFiles(dir) {
+    const dirents = await fsPromises.readdir(dir, { withFileTypes: true });
+    const files = await Promise.all(dirents.map((dirent) => {
+        const res = resolve(dir, dirent.name);
+        return dirent.isDirectory() ? getAllFiles(res) : res;
+    }));
+    const arr = Array.prototype.concat(...files);
+
+    return arr;
+}
+
 async function changeConstantInFile(dir, filename, variable, value) {
     const filepath = (await getFile(dir, filename))[0];
 
@@ -49,4 +60,5 @@ module.exports = {
     changeConstantInFile,
     changeConstantInFiles,
     getCurrentDir,
+    getAllFiles,
 };
