@@ -13,6 +13,7 @@ import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendCo
 import { ActionsUtilHelper } from "../../utils/helpers/ActionsUtilHelper.sol";
 import { DFSRegistry } from "../../../core/DFSRegistry.sol";
 import { GasFeeHelper } from "../../fee/helpers/GasFeeHelper.sol";
+import { ReentrancyGuardTransient } from "../../../utils/ReentrancyGuardTransient.sol";
 
 /// @title LlamaLendSwapper Callback contract for Llamalend extended actions
 contract LlamaLendSwapper is 
@@ -20,7 +21,8 @@ contract LlamaLendSwapper is
     DFSExchangeWithTxSaver,
     AdminAuth,
     ActionsUtilHelper,
-    GasFeeHelper
+    GasFeeHelper,
+    ReentrancyGuardTransient
 {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
@@ -42,7 +44,7 @@ contract LlamaLendSwapper is
         uint256,
         uint256,
         uint256[] memory info
-    ) external returns (CallbackData memory cb) {
+    ) external nonReentrant returns (CallbackData memory cb) {
         uint256 gasUsed = info[0];
         if (!isControllerValid(msg.sender, info[1])) revert InvalidLlamaLendController();
 
@@ -79,7 +81,7 @@ contract LlamaLendSwapper is
         uint256,
         uint256,
         uint256[] memory info
-    ) external returns (CallbackData memory cb) {
+    ) external nonReentrant returns (CallbackData memory cb) {
         uint256 gasUsed = info[0];
         if (!isControllerValid(msg.sender, info[1])) revert InvalidLlamaLendController();
         ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
@@ -112,7 +114,7 @@ contract LlamaLendSwapper is
         uint256,
         uint256,
         uint256[] memory info
-    ) external returns (CallbackData memory cb) {
+    ) external nonReentrant returns (CallbackData memory cb) {
         uint256 gasUsed = info[0];
         if (!isControllerValid(msg.sender, info[1])) revert InvalidLlamaLendController();
         bool sellMax = info[2] > 0;
@@ -143,7 +145,7 @@ contract LlamaLendSwapper is
     }
 
     /// @dev No funds should be stored on this contract, but if anything is left send back to the user
-    function withdrawAll(address _controllerAddress) external {
+    function withdrawAll(address _controllerAddress) external nonReentrant {
         address collToken = ILlamaLendController(_controllerAddress).collateral_token();
         address debtToken = ILlamaLendController(_controllerAddress).borrowed_token();
 
