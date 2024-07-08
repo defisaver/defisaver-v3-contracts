@@ -89,6 +89,18 @@ contract TestCore_SafeModulePermission is SafeModulePermission, BaseTest {
         assertTrue(ISafe(walletAddr).isModuleEnabled(firstModule));
     }
 
+    function test_enabling_two_modules_than_disabling_first_one() public {
+        address firstModule = address(0x111);
+        address secondModule = address(0x222);
+
+        _enable_safe_module(firstModule);
+        _enable_safe_module(secondModule);
+        _disable_module(firstModule);
+
+        assertTrue(ISafe(walletAddr).isModuleEnabled(secondModule));
+        assertFalse(ISafe(walletAddr).isModuleEnabled(firstModule));
+    }
+
     function test_enabling_three_modules_than_disabling_second_one() public {
         address firstModule = address(0x111);
         address secondModule = address(0x222);
