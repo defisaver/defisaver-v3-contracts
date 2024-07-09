@@ -604,7 +604,7 @@ const odosTest = async () => {
                     },
                 ],
                 referralCode: 0,
-                slippageLimitPercent: 0.3,
+                slippageLimitPercent: 1,
                 userAddr: odosWrapper.address,
             };
             const quote = {
@@ -667,7 +667,7 @@ const odosTest = async () => {
             await revertToSnapshot(snapshot);
         });
 
-        it('... should try to sell WETH for DAI with offchain calldata (1inch)', async () => {
+        it('... should try to sell WETH for DAI with offchain calldata (Odos)', async () => {
             const sellAction = new dfs.actions.basic.SellAction(
                 exchangeObject, senderAcc.address, senderAcc.address,
             );
@@ -679,7 +679,7 @@ const odosTest = async () => {
 
             expect(buyBalanceBefore).is.lt(buyBalanceAfter);
         });
-        it('... should try to sell WETH for DAI with offchain calldata (1inch) in a recipe', async () => {
+        it('... should try to sell WETH for DAI with offchain calldata (Odos) in a recipe', async () => {
             // test recipe
             const sellRecipe = new dfs.Recipe('SellRecipe', [
                 new dfs.actions.basic.PullTokenAction(sellAssetInfo.address, senderAcc.address, amount.toString()),
