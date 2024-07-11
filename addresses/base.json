@@ -622,6 +622,17 @@
         ]
       },
       {
+        "name": "OdosWrapper",
+        "address": "0x3a36da98f2cbcfcddbd983cb7839e9588133ac77",
+        "id": "0x79d17c0f",
+        "path": "contracts/exchangeV3/offchainWrappersV3/OdosWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
         "name": "KyberAggregatorWrapper",
         "address": "0xAB72cBe0472378190a2aB3071235aE5C1eE76aA3",
         "id": "0x1abf4ed0",

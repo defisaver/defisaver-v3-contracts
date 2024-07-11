@@ -208,6 +208,17 @@
       ]
     },
     {
+      "name": "OdosWrapper",
+      "address": "0x5Ff9cf41E82C84e4D25508fFf794dDF1dd6B434B",
+      "id": "0x79d17c0f",
+      "path": "contracts/exchangeV3/offchainWrappersV3/OdosWrapper.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "ParaswapWrapper",
       "address": "0x6a1Ebcb09D419Affe500B4feA13A89511aD23c1b",
       "id": "0x115fa27e",
