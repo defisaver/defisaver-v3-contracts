@@ -262,14 +262,14 @@
     },
     {
       "name": "FLAction",
-      "address": "0xAAbd4B0372240E319F9722c4Fd1e2FE0C8d422D2",
+      "address": "0x5523E61fBEF59825831Ffbb1306aBc3Bb03BB3A4",
       "id": "0xbcab5e2a",
       "path": "contracts/actions/flashloan/FLAction.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xAAbd4B0372240E319F9722c4Fd1e2FE0C8d422D2"]
     },
     {
       "name": "FLAaveV3WithFee",
