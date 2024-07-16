@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/curveusd/ICurveUsd.sol";
-import "../actions/curveusd/helpers/CurveUsdHelper.sol";
-import "../interfaces/IERC20.sol";
+import { ICrvUsdController, ILLAMMA, IAGG } from "../interfaces/curveusd/ICurveUsd.sol";
+import { CurveUsdHelper } from "../actions/curveusd/helpers/CurveUsdHelper.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 contract CurveUsdView is CurveUsdHelper {
   struct Band {

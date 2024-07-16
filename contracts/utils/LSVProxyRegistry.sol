@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../utils/helpers/UtilHelper.sol";
-import "../actions/utils/helpers/ActionsUtilHelper.sol";
-import "../DS/DSProxyFactoryInterface.sol";
-import "../utils/ds-proxy-factory/DSProxyFactoryHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { UtilHelper } from "../utils/helpers/UtilHelper.sol";
+import { ActionsUtilHelper } from "../actions/utils/helpers/ActionsUtilHelper.sol";
+import { DSProxyFactoryInterface } from "../DS/DSProxyFactoryInterface.sol";
+import { DSProxyFactoryHelper } from "../utils/ds-proxy-factory/DSProxyFactoryHelper.sol";
+import { DSProxy } from "../DS/DSProxy.sol";
+import { DSAuth } from "../DS/DSAuth.sol";
 
 /// @title Registry of proxies related to LSV
 contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper, DSProxyFactoryHelper {

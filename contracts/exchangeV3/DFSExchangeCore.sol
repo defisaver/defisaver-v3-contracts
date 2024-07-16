@@ -1,18 +1,28 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../DS/DSMath.sol";
-import "../interfaces/exchange/IExchangeV3.sol";
-import "./DFSExchangeData.sol";
-import "../utils/Discount.sol";
-import "../utils/FeeRecipient.sol";
-import "./DFSExchangeHelper.sol";
-import "./registries/ExchangeAggregatorRegistry.sol";
-import "./registries/WrapperExchangeRegistry.sol";
-import "../interfaces/exchange/IOffchainWrapper.sol";
-import "./helpers/ExchangeHelper.sol";
+import { IExchangeV3 } from "../interfaces/exchange/IExchangeV3.sol";
+import { DFSExchangeData } from "./DFSExchangeData.sol";
+import { Discount } from "../utils/Discount.sol";
+import { FeeRecipient } from "../utils/FeeRecipient.sol";
+import { DFSExchangeHelper } from "./DFSExchangeHelper.sol";
+import { ExchangeAggregatorRegistry } from "./registries/ExchangeAggregatorRegistry.sol";
+import { WrapperExchangeRegistry } from "./registries/WrapperExchangeRegistry.sol";
+import { IOffchainWrapper } from "../interfaces/exchange/IOffchainWrapper.sol";
+import { ExchangeHelper } from "./helpers/ExchangeHelper.sol";
+import { StrategyModel } from "../core/strategy/StrategyModel.sol";
+import { SafeERC20 } from "../utils/SafeERC20.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { DSMath } from "../DS/DSMath.sol";
 
-contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, ExchangeHelper {
+contract DFSExchangeCore is
+    DSMath,
+    DFSExchangeHelper,
+    DFSExchangeData,
+    ExchangeHelper,
+    StrategyModel
+{   
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -35,31 +45,11 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
     /// @return (address, uint, bool) Address of the wrapper used and destAmount and if there was fee
     function _sell(ExchangeData memory exData, address smartWallet) internal returns (address, uint256, bool) {
         uint256 amountWithoutFee = exData.srcAmount;
-        address wrapperAddr = exData.offchainData.wrapper;
-        bool offChainSwapSuccess;
-
         uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
 
-        // Takes DFS exchange fee
-        if (exData.dfsFeeDivider != 0) {
-            exData.srcAmount = sub(exData.srcAmount, getFee(
-                exData.srcAmount,
-                smartWallet,
-                exData.srcAddr,
-                exData.dfsFeeDivider
-            ));
-        }
+        _takeDfsExchangeFee(exData, smartWallet);
 
-        // Try offchain aggregator first and then fallback on specific wrapper
-        if (exData.offchainData.price > 0) {
-            (offChainSwapSuccess, ) = offChainSwap(exData);
-        }
-
-        // fallback to desired wrapper if offchain aggregator failed
-        if (!offChainSwapSuccess) {
-            onChainSwap(exData);
-            wrapperAddr = exData.wrapper;
-        }
+        address wrapperAddr = _executeSwap(exData);
 
         uint256 destBalanceAfter = exData.destAddr.getBalance(address(this));
         uint256 amountBought = destBalanceAfter - destBalanceBefore;
@@ -117,6 +107,33 @@ contract DFSExchangeCore is DFSExchangeHelper, DSMath, DFSExchangeData, Exchange
             _exData.srcAmount,
             _exData.wrapperData
         );
+    }
+
+    function _takeDfsExchangeFee(ExchangeData memory exData, address smartWallet) internal {
+        if (exData.dfsFeeDivider != 0) {
+            exData.srcAmount = sub(exData.srcAmount, getFee(
+                exData.srcAmount,
+                smartWallet,
+                exData.srcAddr,
+                exData.dfsFeeDivider
+            ));
+        }
+    }
+
+    function _executeSwap(ExchangeData memory exData) internal returns (address wrapperAddr) {
+        wrapperAddr = exData.offchainData.wrapper;
+        bool offChainSwapSuccess;
+
+         // Try offchain aggregator first and then fallback on specific wrapper
+        if (exData.offchainData.price > 0) {
+            (offChainSwapSuccess, ) = offChainSwap(exData);
+        }
+
+        // fallback to desired wrapper if offchain aggregator failed
+        if (!offChainSwapSuccess) {
+            onChainSwap(exData);
+            wrapperAddr = exData.wrapper;
+        }
     }
 
     /// @notice Takes a feePercentage and sends it to wallet

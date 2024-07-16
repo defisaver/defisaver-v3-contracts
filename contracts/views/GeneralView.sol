@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity =0.8.24;
 
-import "../utils/CheckWalletType.sol";
-import "../interfaces/IDSProxy.sol";
-import "../interfaces/safe/ISafe.sol";
+import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { IDSProxy } from "../interfaces/IDSProxy.sol";
+import { ISafe } from "../interfaces/safe/ISafe.sol";
 
 contract GeneralView is CheckWalletType{
 

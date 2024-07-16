@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../interfaces/safe/ISafe.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { ISafe } from "../../interfaces/safe/ISafe.sol";
 
 /// @title Helper action to execute a Safe transaction
 contract ExecuteSafeTx is ActionBase {

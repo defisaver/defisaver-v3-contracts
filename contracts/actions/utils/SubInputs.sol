@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-import "../ActionBase.sol";
+pragma solidity =0.8.24;
+import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to subtract 2 inputs/return values
 contract SubInputs is ActionBase {

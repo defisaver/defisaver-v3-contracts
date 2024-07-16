@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 /// @author Morpho Labs.
 /// @custom:contact security@morpho.xyz
 /// @dev Common types and structs used in Morpho contracts.
-library Types {
+library MorphoTypes {
     /// ENUMS ///
 
     enum PositionType {

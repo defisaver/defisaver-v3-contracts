@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import { AaveV3ClaimRewards } from "../../../contracts/actions/aaveV3/AaveV3ClaimRewards.sol";
 import { MockRewardsController } from "./mocks/MockRewardsController.sol";

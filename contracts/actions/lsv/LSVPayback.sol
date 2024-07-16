@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "./helpers/LSVUtilHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { LSVUtilHelper } from "./helpers/LSVUtilHelper.sol";
+import { LSVProfitTracker } from "../../utils/LSVProfitTracker.sol";
 
 /// @title action for tracking users paybacks within the LSV ecosystem
 contract LSVPayback is ActionBase, LSVUtilHelper {

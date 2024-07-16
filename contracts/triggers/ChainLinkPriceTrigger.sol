@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../DS/DSMath.sol";
-import "../interfaces/ITrigger.sol";
-import "../utils/TokenUtils.sol";
-import "./helpers/TriggerHelper.sol";
-import "../utils/TokenPriceHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { DSMath } from "../DS/DSMath.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
+import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
 
 /// @title Trigger contract that verifies if current token price is over/under the price specified during subscription
 /// @notice If there's no chainlink oracle available for the token, price will be fetched from AaveV2, Spark and AaveV3 (in that order)

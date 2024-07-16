@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/AaveV3Helper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
+import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 
 /// @title Set positions eMode on Aave v3
 contract AaveV3SetEMode is ActionBase, AaveV3Helper {
@@ -18,7 +19,7 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes calldata _callData,
+        bytes memory _callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -33,7 +34,7 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes calldata _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _setEmode(params.market, params.categoryId);
         logger.logActionDirectEvent("AaveV3SetEMode", logData);

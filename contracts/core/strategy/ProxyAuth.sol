@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/IDFSRegistry.sol";
-import "../../interfaces/IDSProxy.sol";
-import "../../auth/AdminAuth.sol";
-import "./../helpers/CoreHelper.sol";
+import { IDFSRegistry } from "../../interfaces/IDFSRegistry.sol";
+import { IDSProxy } from "../../interfaces/IDSProxy.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { CoreHelper } from "./../helpers/CoreHelper.sol";
 
 /// @title ProxyAuth Gets DSProxy auth from users and is callable by the Executor
 contract ProxyAuth is AdminAuth, CoreHelper {

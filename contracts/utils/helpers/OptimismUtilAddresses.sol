@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract OptimismUtilAddresses {
     address internal refillCaller = 0xaFdFC3814921d49AA412d6a22e3F44Cc555dDcC8;

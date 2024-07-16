@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/IERC721.sol";
-import "../ActionBase.sol";
+import { IERC721 } from "../../interfaces/IERC721.sol";
+import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to transfer a NFT token to the specified address
 contract TransferNFT is ActionBase {

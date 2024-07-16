@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 interface ICurve3PoolZap {
     function add_liquidity(address, uint256[4] memory, uint256) external;

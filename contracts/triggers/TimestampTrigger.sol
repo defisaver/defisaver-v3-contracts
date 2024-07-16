@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../interfaces/ITrigger.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
 
 /// @title Trigger contract that verifies if current timestamp is higher than the one in sub data,
 /// and also helps change the timestamp for next execution

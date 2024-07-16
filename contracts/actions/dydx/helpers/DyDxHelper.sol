@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../interfaces/dydx/ISoloMargin.sol";
-import "./MainnetDyDxAddresses.sol";
+import { ISoloMargin, Types, Account } from "../../../interfaces/dydx/ISoloMargin.sol";
+import { MainnetDyDxAddresses } from "./MainnetDyDxAddresses.sol";
 
 contract DyDxHelper is MainnetDyDxAddresses{
     ISoloMargin public constant soloMargin =

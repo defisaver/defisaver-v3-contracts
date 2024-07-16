@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import { Pausable } from "../../contracts/auth/Pausable.sol";
 import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";

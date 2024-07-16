@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-import "./helpers/AuthHelper.sol";
+pragma solidity =0.8.24;
+import { AuthHelper } from "./helpers/AuthHelper.sol";
 
 /// @title A stateful contract that holds and can change owner/admin
 contract AdminVault is AuthHelper {

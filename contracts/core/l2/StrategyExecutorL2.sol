@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/IAuth.sol";
-import "../../auth/AdminAuth.sol";
-import "../../utils/CheckWalletType.sol";
-import "../strategy/StrategyModel.sol";
-import "../strategy/BotAuth.sol";
-import "../DFSRegistry.sol";
-import "./SubStorageL2.sol";
+import { IAuth } from "../../interfaces/IAuth.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { StrategyModel } from "../strategy/StrategyModel.sol";
+import { BotAuth } from "../strategy/BotAuth.sol";
+import { DFSRegistry } from "../DFSRegistry.sol";
+import { SubStorageL2 } from "./SubStorageL2.sol";
+import { CoreHelper } from "../helpers/CoreHelper.sol";
 
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWalletType {

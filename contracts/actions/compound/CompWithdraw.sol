@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/compound/ICToken.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/CompHelper.sol";
+import { ICToken } from "../../interfaces/compound/ICToken.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CompHelper } from "./helpers/CompHelper.sol";
 
 /// @title Withdraw a token from Compound
 contract CompWithdraw is ActionBase, CompHelper {

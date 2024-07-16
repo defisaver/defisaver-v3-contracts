@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../ActionBase.sol";
-import "../helpers/CurveHelper.sol";
-import "../../../utils/TokenUtils.sol";
+import { ActionBase } from "../../ActionBase.sol";
+import { CurveHelper } from "../helpers/CurveHelper.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
-import "../../../interfaces/curve/ILiquidityGauge.sol";
+import { ILiquidityGauge } from "../../../interfaces/curve/ILiquidityGauge.sol";
 
 contract CurveGaugeDeposit is ActionBase, CurveHelper {
     using TokenUtils for address;

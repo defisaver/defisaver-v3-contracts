@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../actions/liquity/helpers/LiquityRatioHelper.sol";
-import "../interfaces/ITrigger.sol";
-import "../utils/TransientStorage.sol";
-import "./helpers/TriggerHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { LiquityRatioHelper } from "../actions/liquity/helpers/LiquityRatioHelper.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { TransientStorage } from "../utils/TransientStorage.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if current Liquity position ratio went over/under the subbed ratio
 contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper, TriggerHelper {

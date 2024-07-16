@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../ActionBase.sol";
-import "../../../utils/TokenUtils.sol";
-import "./helpers/MorphoAaveV3Helper.sol";
+import { ActionBase } from "../../ActionBase.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { MorphoAaveV3Helper } from "./helpers/MorphoAaveV3Helper.sol";
+import { IMorphoAaveV3 } from "../../../interfaces/morpho/IMorphoAaveV3.sol";
 
 /// @title Withdraw a token from Morpho AaveV3
 contract MorphoAaveV3Withdraw is ActionBase, MorphoAaveV3Helper {

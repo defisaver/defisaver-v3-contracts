@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/uniswap/IUniswapV2Pair.sol";
-import "../interfaces/uniswap/IUniswapV2Factory.sol";
+import { IUniswapV2Pair } from "../interfaces/uniswap/IUniswapV2Pair.sol";
+import { IUniswapV2Factory } from "../interfaces/uniswap/IUniswapV2Factory.sol";
 
 contract SushiView {
     address constant public UNISWAP_V2_FACTORY_ADDR = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac;

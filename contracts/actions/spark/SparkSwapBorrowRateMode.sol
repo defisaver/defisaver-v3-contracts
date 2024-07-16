@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/SparkHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SparkHelper } from "./helpers/SparkHelper.sol";
+import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 
 /// @title Swaps user's wallet positions borrow rate mode between stable and variable.
 contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/safe/ISafe.sol";
+import { ISafe } from "../interfaces/safe/ISafe.sol";
 
 /// @title SafeModulePermission contract which works with Safe modules to give execute permission
 contract SafeModulePermission {

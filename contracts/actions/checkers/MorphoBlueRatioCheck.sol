@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
-import "../../utils/TransientStorage.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { MorphoBlueHelper } from "../../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
+import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
 
 contract MorphoBlueRatioCheck is ActionBase, MorphoBlueHelper {
 

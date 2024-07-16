@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../helpers/LiquityHelper.sol";
-import "../../../utils/TokenUtils.sol";
-import "../../ActionBase.sol";
+import { LiquityHelper } from "../helpers/LiquityHelper.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { ActionBase } from "../../ActionBase.sol";
+import { IChickenBondManager } from "../../../interfaces/liquity/IChickenBondManager.sol";
 
 /// @title Withdraws backing lusd from a pending bond
 contract CBChickenOut is ActionBase, LiquityHelper {

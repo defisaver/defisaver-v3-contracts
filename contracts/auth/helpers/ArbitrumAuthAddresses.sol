@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract ArbitrumAuthAddresses {
     address internal constant ADMIN_VAULT_ADDR = 0xd47D8D97cAd12A866900eEc6Cde1962529F25351;

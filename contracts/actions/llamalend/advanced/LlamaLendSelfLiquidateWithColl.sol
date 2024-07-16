@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../utils/TokenUtils.sol";
-import "../../ActionBase.sol";
-import "../helpers/LlamaLendHelper.sol";
-import "./LlamaLendSwapper.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { ActionBase } from "../../ActionBase.sol";
+import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
+import { LlamaLendSwapper } from "./LlamaLendSwapper.sol";
+import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
+import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
 
 /// @title LlamaLendSelfLiquidateWithColl
 /// @dev if current debtToken coll > debt, callback address won't be called -> no swap will be done (any coll token and debt token will be send to params.to)
@@ -78,7 +80,7 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
         address debtToken = ILlamaLendController(_params.controllerAddress).borrowed_token();
         uint256 collStartingBalance = collToken.getBalance(address(this));
         uint256 debtStartingBalance = debtToken.getBalance(address(this));
-        if (block.chainid == 1) {
+        if (_params.controllerAddress == OLD_WETH_CONTROLLER && block.chainid == 1) {
             ILlamaLendController(_params.controllerAddress)
             .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, false, llamalendSwapper, info);
         } else {

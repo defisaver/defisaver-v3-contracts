@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../ActionBase.sol";
-import "./helpers/MorphoAaveV3Helper.sol";
+import { ActionBase } from "../../ActionBase.sol";
+import { MorphoAaveV3Helper } from "./helpers/MorphoAaveV3Helper.sol";
+import { IMorphoAaveV3 } from "../../../interfaces/morpho/IMorphoAaveV3.sol";
 
 /// @title Allow or disallow an address to manage your Morpho-AaveV3 position on your wallet
 contract MorphoAaveV3SetManager is ActionBase, MorphoAaveV3Helper {

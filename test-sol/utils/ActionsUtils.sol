@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import { CompV3Supply } from "../../contracts/actions/compoundV3/CompV3Supply.sol";
 import { CompV3Withdraw } from "../../contracts/actions/compoundV3/CompV3Withdraw.sol";

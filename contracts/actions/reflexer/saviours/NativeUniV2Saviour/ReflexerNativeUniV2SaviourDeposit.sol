@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../ActionBase.sol";
-import "./../../helpers/ReflexerHelper.sol";
-import "../../../../utils/TokenUtils.sol";
+import { ActionBase } from "../../../ActionBase.sol";
+import { ReflexerHelper } from "./../../helpers/ReflexerHelper.sol";
+import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { ISAFESaviour } from "../../../../interfaces/reflexer/ISAFESaviour.sol";
 
 /// @title Deposit lpToken in the contract in order to provide cover for a specific SAFE managed by the SAFE Manager
 contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {

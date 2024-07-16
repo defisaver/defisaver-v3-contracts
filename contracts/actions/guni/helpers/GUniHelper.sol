@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./MainnetGUniAddresses.sol";
-import "../../../interfaces/guni/IGUniRouter02.sol";
+import { MainnetGUniAddresses } from "./MainnetGUniAddresses.sol";
+import { IGUniRouter02 } from "../../../interfaces/guni/IGUniRouter02.sol";
 
 
 /// @title Utility functions and data used in GUni actions
