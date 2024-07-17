@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract BaseUtilAddresses {
     address internal refillCaller = 0xBefc466abe547B1785f382883833330a47C573f7;
@@ -19,7 +19,6 @@ contract BaseUtilAddresses {
     address internal constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address internal constant MKR_PROXY_REGISTRY = 0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d;
-    address internal constant PROXY_FACTORY_ADDR = 0x291EAc3cA14b7FcA8a93af4f6198E76FcFc6B0cD;
     address internal constant DFS_PROXY_REGISTRY_ADDR = 0x2D8BFD9FF88E3106ce7214621b0770c1578749A1;
 
     // TODO: not needed now
@@ -34,4 +33,6 @@ contract BaseUtilAddresses {
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0x7dFF34190d0307fC234fc7E8C152C9715083eB02;
+
+    address public constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
 }

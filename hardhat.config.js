@@ -1,5 +1,4 @@
 /* eslint-disable import/no-extraneous-dependencies */
-require('hardhat-tracer');
 require('dotenv-safe').config();
 require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-etherscan');
@@ -39,6 +38,7 @@ module.exports = {
     saveOnTenderly: false,
     defaultNetwork: 'fork',
     lightTesting: true,
+    isWalletSafe: true,
     networks: {
         ...testNetworks,
         local: {
@@ -46,32 +46,56 @@ module.exports = {
             timeout: 1000000,
             gasPrice: 170000000000,
             name: 'mainnet',
+            chainId: 1,
+            hardfork: 'cancun',
         },
         localOptimism: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
             gasPrice: 1883022292,
             name: 'optimism',
+            chainId: 10,
         },
         localArbitrum: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
             gasPrice: 1700000000,
             name: 'arbitrum',
+            chainId: 42161,
         },
         localBase: {
             url: 'http://127.0.0.1:8545',
             timeout: 1000000,
             gasPrice: 1700000000,
             name: 'base',
+            chainId: 8453,
         },
         fork: {
             url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
             timeout: 1000000,
             type: 'tenderly',
             name: 'mainnet',
+            hardfork: "cancun",
+            chainId: 1,
         },
         hardhat: {
+            chains: {
+                42161: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+                10: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+                8453: {
+                    hardforkHistory: {
+                        london: 1,
+                    },
+                },
+            },
             forking: {
                 url: process.env.ETHEREUM_NODE,
                 timeout: 1000000,
@@ -79,6 +103,12 @@ module.exports = {
                 // blockNumber: 12068716
             },
             name: 'mainnet',
+            hardfork: 'cancun',
+            accounts: {
+                balance: '10000000000000000000000000000',
+                privateKey: process.env.PRIV_KEY_MAINNET,
+            },
+            chainId: 1,
         },
         // NETWORKS FOR DEPLOYING
         mainnet: {
@@ -118,13 +148,28 @@ module.exports = {
         },
     },
     solidity: {
-        version: '0.8.10',
-        settings: {
-            optimizer: {
-                enabled: true,
-                runs: 10000,
+        compilers: [
+            {
+                version: '0.8.24',
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 1000,
+                    },
+                    evmVersion: 'cancun',
+                },
             },
-        },
+            {
+                version: '0.8.10',
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 1000,
+                    },
+                },
+            },
+        ],
+
     },
     paths: {
         sources: './contracts',
@@ -151,4 +196,4 @@ module.exports = {
     },
 };
 
-require('./scripts/hardhat-tasks.js');
+require('./scripts/hardhat-tasks');

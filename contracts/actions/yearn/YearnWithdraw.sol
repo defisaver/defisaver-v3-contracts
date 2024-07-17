@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../utils/TokenUtils.sol";
-import "../../interfaces/yearn/IYVault.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { IYVault } from "../../interfaces/yearn/IYVault.sol";
 
 /// @title Burns yTokens and receive underlying tokens in return
-/// @dev yTokens need to be approved for DSProxy to pull them (yToken address)
+/// @dev yTokens need to be approved for user's wallet to pull them (yToken address)
 contract YearnWithdraw is ActionBase {
     using TokenUtils for address;
 

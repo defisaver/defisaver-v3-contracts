@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../exchangeV3/DFSExchangeData.sol";
+import { DFSExchangeData } from "../../exchangeV3/DFSExchangeData.sol";
 
 abstract contract IOffchainWrapper is DFSExchangeData {
     function takeOrder(
-        ExchangeData memory _exData,
-        ExchangeActionType _type
+        ExchangeData memory _exData
     ) virtual public payable returns (bool success, uint256);
 }

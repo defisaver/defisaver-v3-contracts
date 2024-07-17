@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.24;
 
-import "./../ActionBase.sol";
-import "../../utils/TokenUtils.sol";
-import "../../DS/DSMath.sol";
-import "./helpers/GUniHelper.sol";
+import { ActionBase } from "./../ActionBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { DSMath } from "../../DS/DSMath.sol";
+import { GUniHelper } from "./helpers/GUniHelper.sol";
 
 /// @title Action that removes liquidity from a G-UNI pool and burns G-UNI LP tokens
 contract GUniWithdraw is ActionBase, DSMath, GUniHelper {

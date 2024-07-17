@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../utils/TokenUtils.sol";
-import "../utils/SafeERC20.sol";
-import "../utils/Discount.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { SafeERC20 } from "../utils/SafeERC20.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 contract DFSExchangeHelper {
     
@@ -12,6 +12,8 @@ contract DFSExchangeHelper {
     
     error InvalidOffchainData();
     error OutOfRangeSlicingError();
+    //Order success but amount 0
+    error ZeroTokensSwapped();
 
     using SafeERC20 for IERC20;
 
@@ -31,7 +33,6 @@ contract DFSExchangeHelper {
         if (bs.length < start + 32){
             revert OutOfRangeSlicingError();
         }
-
 
         uint256 x;
         assembly {

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
 
-/// @title Helper action to approve spender to pull an amount of tokens from DSProxy
+/// @title Helper action to approve spender to pull an amount of tokens from user's wallet
 contract ApproveToken is ActionBase {
 
     using TokenUtils for address;
@@ -51,7 +51,7 @@ contract ApproveToken is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
 
-    /// @notice Approves an amount of tokens for spender to pull from DSProxy
+    /// @notice Approves an amount of tokens for spender to pull from user's wallet
     /// @param _tokenAddr Address of token
     /// @param _spender Address of the spender
     /// @param _amount Amount of tokens, can be type(uint).max

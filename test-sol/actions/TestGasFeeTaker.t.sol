@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "ds-test/test.sol";
-import "forge-std/console.sol";
-import "../../contracts/actions/fee/GasFeeTaker.sol";
-import "../CheatCodes.sol";
 import "forge-std/Test.sol";
+import "forge-std/console.sol";
 
-contract TestGasFeeTaker is DSTest, GasFeeTaker {
+import { GasFeeTaker } from "../../contracts/actions/fee/GasFeeTaker.sol";
+import { CheatCodes } from "../CheatCodes.sol";
+import { ILendingPoolAddressesProviderV2 } from "../../contracts/interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import { IPriceOracleGetterAave } from "../../contracts/interfaces/aaveV2/IPriceOracleGetterAave.sol";
+
+contract TestGasFeeTaker is Test, GasFeeTaker {
     GasFeeTaker feeTaker;
 
     address internal matic = 0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0;
@@ -15,7 +17,7 @@ contract TestGasFeeTaker is DSTest, GasFeeTaker {
     address internal wbtc = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
     address internal AAVE_V2_MARKET = 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5;
 
-    CheatCodes constant cheats = CheatCodes(HEVM_ADDRESS);
+    CheatCodes constant cheats = CheatCodes(VM_ADDRESS);
 
     function setUp() public {
         feeTaker = new GasFeeTaker();
@@ -33,7 +35,7 @@ contract TestGasFeeTaker is DSTest, GasFeeTaker {
        console.log(price);
    }
 
-   function testWBTCPrice() public {
+   function testWBTCPrice() public view {
         uint256 price = feeTaker.getPriceInETH(wbtc);
 
         address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
@@ -42,7 +44,8 @@ contract TestGasFeeTaker is DSTest, GasFeeTaker {
         console.log(price);
         console.log(aavePrice);
    }
-   function testDaiPrice() public {
+   
+   function testDaiPrice() public view {
         uint256 price = feeTaker.getPriceInETH(DAI_ADDR);
 
         address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
@@ -54,11 +57,6 @@ contract TestGasFeeTaker is DSTest, GasFeeTaker {
 
     function testPriceForNonTokenAddr() public {
         uint256 price = feeTaker.getPriceInUSD(aDAI);
-
-        //  address priceOracleAddress =
-        //         ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
-
-        // uint price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(TokenUtils.WETH_ADDR);
 
         console.log(price);
         assertEq(price, 0);
@@ -78,6 +76,4 @@ contract TestGasFeeTaker is DSTest, GasFeeTaker {
         console.log("Gas cost:", gasCost);
         assertEq(gasCost, 1_000_000 * tx.gasprice);
     }
-  
-
 }

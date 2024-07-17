@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/AaveV3Helper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
+import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 
 /// @title Set positions eMode on Aave v3
 contract AaveV3SetEMode is ActionBase, AaveV3Helper {
@@ -18,7 +19,7 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes calldata _callData,
+        bytes memory _callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -33,7 +34,7 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes calldata _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _setEmode(params.market, params.categoryId);
         logger.logActionDirectEvent("AaveV3SetEMode", logData);
@@ -52,7 +53,7 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User sets EMode for Aave position on Proxy
+    /// @notice User sets EMode for Aave position on its wallet
     /// @param _market Address provider for specific market
     /// @param _categoryId eMode category id (0 - 255)
     function _setEmode(address _market, uint8 _categoryId)
@@ -73,22 +74,22 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
         }
     }
 
-    function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+    function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        encodedInput = bytes.concat(encodedInput, bytes1(params.categoryId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
-        if (!params.useDefaultMarket) {
-            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        encodedInput = bytes.concat(encodedInput, bytes1(_params.categoryId));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        if (!_params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
     }
 
-    function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.categoryId = uint8(bytes1(encodedInput[0:1]));
-        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[1:2]));
+    function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
+        params.categoryId = uint8(bytes1(_encodedInput[0:1]));
+        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[1:2]));
         if (params.useDefaultMarket) {
             params.market = DEFAULT_AAVE_MARKET;
         } else {
-            params.market = address(bytes20(encodedInput[2:22]));
+            params.market = address(bytes20(_encodedInput[2:22]));
         }
     }
 }

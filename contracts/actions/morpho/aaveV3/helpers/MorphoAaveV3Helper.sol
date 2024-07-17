@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../../DS/DSMath.sol";
-import "./MainnetMorphoAaveV3Addresses.sol";
-import "../../../../utils/MorphoMarketStorage.sol";
-import "../../../../interfaces/morpho/IMorphoAaveV3.sol";
+import { DSMath } from "../../../../DS/DSMath.sol";
+import { MainnetMorphoAaveV3Addresses } from "./MainnetMorphoAaveV3Addresses.sol";
+import { MorphoMarketStorage } from "../../../../utils/MorphoMarketStorage.sol";
+import { IMorphoAaveV3 } from "../../../../interfaces/morpho/IMorphoAaveV3.sol";
+import { Types } from "../../../../interfaces/morpho/MorphoTypesAaveV3.sol";
 
 contract MorphoAaveV3Helper is MainnetMorphoAaveV3Addresses, DSMath {
 
@@ -25,5 +26,4 @@ contract MorphoAaveV3Helper is MainnetMorphoAaveV3Addresses, DSMath {
         if (liqData.debt == 0) return 0;
         return wdiv(liqData.borrowable, liqData.debt);
     }
-
 }

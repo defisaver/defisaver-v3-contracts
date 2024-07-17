@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract MainnetCurveAddresses {
     address internal constant CRV_TOKEN_ADDR = 0xD533a949740bb3306d119CC777fa900bA034cd52;
@@ -14,7 +14,7 @@ contract MainnetCurveAddresses {
 
     address internal constant CURVE_3POOL_ZAP_ADDR = 0xA79828DF1850E8a3A3064576f380D90aECDD3359;
 
-    address constant internal CURVE_STETH_POOL_ADDR = 0xDC24316b9AE028F1497c275EB9192a3Ea0f67022;
-    address constant internal STE_CRV_ADDR = 0x06325440D014e39736583c165C2963BA99fAf14E;
-    address constant internal STETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
+    address internal constant CURVE_STETH_POOL_ADDR = 0xDC24316b9AE028F1497c275EB9192a3Ea0f67022;
+    address internal constant STE_CRV_ADDR = 0x06325440D014e39736583c165C2963BA99fAf14E;
+    address internal constant STETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
 }

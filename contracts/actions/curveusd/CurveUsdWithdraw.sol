@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/CurveUsdHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CurveUsdHelper } from "./helpers/CurveUsdHelper.sol";
+import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
 
-
-/// @title Action that withdraws collateral from proxy curveusd position
+/// @title Action that withdraws collateral from user's wallet curveusd position
 /// @dev collateralAmount must be non-zero
 /// @dev if collateralAmount == uintMax will withdraw as much as the debt will allow
 contract CurveUsdWithdraw is ActionBase, CurveUsdHelper {
@@ -15,7 +15,7 @@ contract CurveUsdWithdraw is ActionBase, CurveUsdHelper {
     error ZeroAmountWithdraw();
 
     /// @param controllerAddress Address of the curveusd market controller
-    /// @param to Address that will receive the withdrawn collateral, will default to proxy
+    /// @param to Address that will receive the withdrawn collateral, will default to user's wallet
     /// @param collateralAmount Amount of collateral to withdraw
     struct Params {
         address controllerAddress;

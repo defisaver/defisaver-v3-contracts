@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/DyDxHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { DyDxHelper } from "./helpers/DyDxHelper.sol";
+import { Account, Actions, Types } from "../../interfaces/dydx/ISoloMargin.sol";
 
 /// @title Withdraw tokens from DyDx
 contract DyDxWithdraw is ActionBase, DyDxHelper {

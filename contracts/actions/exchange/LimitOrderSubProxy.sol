@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
-import "../../core/strategy/SubStorage.sol";
-import "../../utils/helpers/UtilHelper.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { Permission } from "../../auth/Permission.sol";
+import { SubStorage } from "../../core/strategy/SubStorage.sol";
+import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
+import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
+import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
-contract LimitOrderSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper, UtilHelper {
+contract LimitOrderSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHelper, CheckWalletType {
 
     error InvalidTokenAddresses(address tokenSellAddr, address tokenBuyAddr);
     error InvalidAmount();
@@ -30,7 +33,8 @@ contract LimitOrderSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHe
     }
 
     function subToLimitOrder(LimitOrderSub memory _subData) external {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
 
         _validateData(_subData);
 

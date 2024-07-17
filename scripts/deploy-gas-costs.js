@@ -25,7 +25,6 @@ async function main() {
     totalGasUsed += await deployContractAndReturnGasUsed('BotAuth');
     totalGasUsed += await deployContractAndReturnGasUsed('BundleStorage');
     totalGasUsed += await deployContractAndReturnGasUsed('SubProxy');
-    totalGasUsed += await deployContractAndReturnGasUsed('StrategyProxy');
     totalGasUsed += await deployContractAndReturnGasUsed('StrategyExecutor');
 
     let lastSnapShot = totalGasUsed;

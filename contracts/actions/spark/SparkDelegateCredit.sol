@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/SparkHelper.sol";
-import "../../interfaces/aaveV3/IDebtToken.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SparkHelper } from "./helpers/SparkHelper.sol";
+import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
+import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
 
-/// @title Delegate credit for someone to borrow on DSProxys behalf
+/// @title Delegate credit for someone to borrow on user's wallet behalf
 contract SparkDelegateCredit is ActionBase, SparkHelper {
     using TokenUtils for address;
 
@@ -27,7 +29,7 @@ contract SparkDelegateCredit is ActionBase, SparkHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes calldata _callData,
+        bytes memory _callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -41,17 +43,13 @@ contract SparkDelegateCredit is ActionBase, SparkHelper {
         params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
         params.market = _parseParamAddr(params.market, _paramMapping[5], _subData, _returnValues);
 
-        if (params.useDefaultMarket) {
-            params.market = DEFAULT_SPARK_MARKET;
-        }
-
         (bytes memory logData) = _delegate(params);
         emit ActionEvent("SparkDelegateCredit", logData);
         return bytes32(params.amount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes calldata _callData) public payable override {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (bytes memory logData) = _delegate(params);
         logger.logActionDirectEvent("SparkDelegateCredit", logData);
@@ -95,29 +93,28 @@ contract SparkDelegateCredit is ActionBase, SparkHelper {
         }
     }
 
-
-    function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
+    function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
-        encodedInput = bytes.concat(encodedInput, bytes20(params.delegatee));
-        encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
-        encodedInput = bytes.concat(encodedInput, bytes1(params.rateMode));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
-        if (!params.useDefaultMarket) {
-            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        encodedInput = bytes.concat(encodedInput, bytes32(_params.amount));
+        encodedInput = bytes.concat(encodedInput, bytes20(_params.delegatee));
+        encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
+        encodedInput = bytes.concat(encodedInput, bytes1(_params.rateMode));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        if (!_params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
     }
 
-    function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.amount = uint256(bytes32(encodedInput[0:32]));
-        params.delegatee = address(bytes20(encodedInput[32:52]));
-        params.assetId = uint16(bytes2(encodedInput[52:54]));
-        params.rateMode = uint8(bytes1(encodedInput[54:55]));
-        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[55:56]));
+    function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
+        params.amount = uint256(bytes32(_encodedInput[0:32]));
+        params.delegatee = address(bytes20(_encodedInput[32:52]));
+        params.assetId = uint16(bytes2(_encodedInput[52:54]));
+        params.rateMode = uint8(bytes1(_encodedInput[54:55]));
+        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[55:56]));
         if (params.useDefaultMarket) {
             params.market = DEFAULT_SPARK_MARKET;
         } else {
-            params.market = address(bytes20(encodedInput[56:76]));
+            params.market = address(bytes20(_encodedInput[56:76]));
         }
     }
     

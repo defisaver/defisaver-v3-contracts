@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/CurveUsdHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CurveUsdHelper } from "./helpers/CurveUsdHelper.sol";
+import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
 
 /// @title Action that supplies collateral to a curveusd position and borrows more crvUSD
-/// @dev will always adjust only proxy position, can't adjust on behalf of someone else
+/// @dev will always adjust only user's wallet position, can't adjust on behalf of someone else
 contract CurveUsdAdjust is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 
     error ZeroAmountBorrowed();
 
     /// @param controllerAddress Address of the curveusd market controller
-    /// @param from Address from which to pull collateral asset, will default to proxy
+    /// @param from Address from which to pull collateral asset, will default to user's wallet
     /// @param to Address which will receive borrowed crvUSD
     /// @param supplyAmount Amount of collateral asset to supply (uint.max supported)
     /// @param borrowAmount Amount of debt asset to borrow (uint.max not supported)

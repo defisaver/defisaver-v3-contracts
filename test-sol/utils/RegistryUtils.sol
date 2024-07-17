@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
-import "forge-std/console.sol";
+pragma solidity =0.8.24;
 
-import "ds-test/test.sol";
-import "../../contracts/core/DFSRegistry.sol";
-import "../../contracts/core/strategy/BotAuth.sol";
-import "../../contracts/actions/utils/helpers/ActionsUtilHelper.sol";
-import "../CheatCodes.sol";
+import "forge-std/Test.sol";
 
-contract RegistryUtils is ActionsUtilHelper {
+import { DFSRegistry } from "../../contracts/core/DFSRegistry.sol";
+import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
+import { CoreHelper } from "../../contracts/core/helpers/CoreHelper.sol";
+import { AdminVault } from "../../contracts/auth/AdminAuth.sol";
+import { CheatCodes } from "../CheatCodes.sol";
+
+contract RegistryUtils is CoreHelper {
     function redeploy(string memory _actionName, address _newAddr) public {
         DFSRegistry registry = DFSRegistry(REGISTRY_ADDR);
-        CheatCodes vm = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+        CheatCodes cheats = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
         bytes4 actionId = bytes4(keccak256(abi.encodePacked(_actionName)));
 
@@ -19,18 +20,18 @@ contract RegistryUtils is ActionsUtilHelper {
 
         address owner = AdminVault(registry.adminVault()).owner();
 
-        vm.startPrank(owner);
+        cheats.startPrank(owner);
 
         if (exists) {
             registry.startContractChange(actionId, _newAddr);
             // time travel
-            vm.warp(block.timestamp + waitPeriod);
+            cheats.warp(block.timestamp + waitPeriod);
             registry.approveContractChange(actionId);
         } else {
             registry.addNewContract(actionId, _newAddr, 0);
         }
 
-        vm.stopPrank();
+        cheats.stopPrank();
     }
 
     function getAddr(string memory _name) public view returns (address) {
@@ -42,14 +43,14 @@ contract RegistryUtils is ActionsUtilHelper {
     }
 
     function addBotCaller(address _newBot) public {
-        CheatCodes vm = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+        CheatCodes cheats = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
         BotAuth botAuth = BotAuth(getAddr("BotAuth"));
 
         address owner = AdminVault(botAuth.adminVault()).owner();
 
-        vm.startPrank(owner);
+        cheats.startPrank(owner);
         botAuth.addCaller(_newBot);
-        vm.stopPrank();
+        cheats.stopPrank();
     }
 
 }

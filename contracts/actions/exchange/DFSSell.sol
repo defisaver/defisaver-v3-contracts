@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/IDSProxy.sol";
-import "../../exchangeV3/DFSExchangeCore.sol";
-import "../../exchangeV3/TokenGroupRegistry.sol";
-import "../ActionBase.sol";
+import { DFSExchangeWithTxSaver } from "../../exchangeV3/DFSExchangeWithTxSaver.sol";
+import { TokenGroupRegistry } from "../../exchangeV3/registries/TokenGroupRegistry.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { ITxSaverBytesTransientStorage} from "../../interfaces/ITxSaverBytesTransientStorage.sol";
 
 /// @title A exchange sell action through the dfs exchange
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
-contract DFSSell is ActionBase, DFSExchangeCore {
+contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
 
     using TokenUtils for address;
 
@@ -83,7 +84,7 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         address _to,
         bool _isDirect
     ) internal returns (uint256, bytes memory) {
-        // if we set srcAmount to max, take the whole proxy balance
+        // if we set srcAmount to max, take the whole user's wallet balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
         }
@@ -116,8 +117,6 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             isEthDest = true;
         } 
 
-        _exchangeData.user = getUserAddress();
-
         /// @dev only check for custom fee if a non standard fee is sent
         if (!_isDirect) {
             if (_exchangeData.dfsFeeDivider != RECIPE_FEE) {
@@ -130,8 +129,10 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             _exchangeData.dfsFeeDivider = 0;
         }
         
+        address wrapper;
+        uint256 exchangedAmount;
 
-        (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
+        (wrapper, exchangedAmount,,) = _sellWithTxSaverChoice(_exchangeData, address(this), registry);
 
         if (isEthDest) {
             TokenUtils.withdrawWeth(exchangedAmount);
@@ -155,12 +156,5 @@ contract DFSSell is ActionBase, DFSExchangeCore {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
-    }
-
-    /// @notice Returns the owner of the DSProxy that called the contract
-    function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
     }
 }

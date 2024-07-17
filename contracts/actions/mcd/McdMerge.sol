@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/mcd/IManager.sol";
-import "../ActionBase.sol";
-import "./helpers/McdHelper.sol";
+import { IManager } from "../../interfaces/mcd/IManager.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { McdHelper } from "./helpers/McdHelper.sol";
 
 /// @title Merge two vaults that are of the same type
 contract McdMerge is ActionBase, McdHelper {

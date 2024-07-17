@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
-import "../ActionBase.sol";
-import "../../utils/TokenUtils.sol";
+pragma solidity =0.8.24;
+
+import { ActionBase } from "../ActionBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 contract TokenBalance is ActionBase {
     using TokenUtils for address;

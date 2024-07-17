@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../interfaces/ITrigger.sol";
-import "../actions/liquity/helpers/LiquityHelper.sol";
-import "../actions/liquity/helpers/LiquityRatioHelper.sol";
-import "./helpers/TriggerHelper.sol";
-import "../utils/TransientStorage.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { LiquityHelper } from "../actions/liquity/helpers/LiquityHelper.sol";
+import { LiquityRatioHelper } from "../actions/liquity/helpers/LiquityRatioHelper.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
+import { TransientStorage } from "../utils/TransientStorage.sol";
 
 
 /// @title Checks if total amount of debt in front of a specified trove is over a limit
 contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatioHelper, TriggerHelper, LiquityHelper {
 
     /// @dev Max number of troves to check
-    uint256 constant internal MAX_ITERATIONS = 250;
+    uint256 internal constant MAX_ITERATIONS = 250;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 

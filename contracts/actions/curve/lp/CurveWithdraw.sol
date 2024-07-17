@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../helpers/CurveHelper.sol";
-import "../../../interfaces/curve/ICurve3PoolZap.sol";
-import "../../../utils/TokenUtils.sol";
-import "../../ActionBase.sol";
+import { CurveHelper } from "../helpers/CurveHelper.sol";
+import { ICurve3PoolZap } from "../../../interfaces/curve/ICurve3PoolZap.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { ActionBase } from "../../ActionBase.sol";
 
 contract CurveWithdraw is ActionBase, CurveHelper {
     using TokenUtils for address;
@@ -75,6 +75,11 @@ contract CurveWithdraw is ActionBase, CurveHelper {
 
         _params.burnAmount = cache.lpToken.pullTokensIfNeeded(_params.from, _params.burnAmount);
         burned = cache.lpToken.getBalance(address(this));
+        
+        /// @dev pool has mint ownership over lpToken, so if we're withdrawing directly from pool we don't need to approve
+        if (cache.pool != cache.depositTarget) {
+            cache.lpToken.approveToken(cache.depositTarget, _params.burnAmount);
+        }
 
         /// @dev if removeOneCoin or explicitUnderlying we dont have to worry about other token balances as they are not updated
         /// @dev otherwise zero amounts specified in _params.amounts doesnt mean that we wont get some of those tokens from withdrawal

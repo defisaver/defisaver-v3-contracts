@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.24;
 
-
-import "../../utils/FeeRecipient.sol";
-import "../ActionBase.sol";
-import "./helpers/GasFeeHelperL2.sol";
+import { FeeRecipient } from "../../utils/FeeRecipient.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { GasFeeHelperL2 } from "./helpers/GasFeeHelperL2.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 /// @title Helper action to send a token to the specified address
 contract GasFeeTakerL2 is ActionBase, GasFeeHelperL2 {
@@ -36,7 +35,7 @@ contract GasFeeTakerL2 is ActionBase, GasFeeHelperL2 {
         uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken, inputData.l1GasCostInEth);
 
         /// @dev This means inputData.availableAmount is not being piped into
-        /// @dev To stop sender from sending any value here, if not piped take proxy balance
+        /// @dev To stop sender from sending any value here, if not piped take user's wallet balance
         if (_paramMapping[1] == 0) {
             inputData.availableAmount = inputData.feeToken.getBalance(address(this));
         }

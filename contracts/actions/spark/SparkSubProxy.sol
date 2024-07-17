@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../auth/AdminAuth.sol";
-import "../../auth/ProxyPermission.sol";
-import "../../core/strategy/SubStorage.sol";
-
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { Permission } from "../../auth/Permission.sol";
+import { SubStorage } from "../../core/strategy/SubStorage.sol";
+import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { SparkHelper } from "./helpers/SparkHelper.sol";
+import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
+import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract SparkSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper {
+contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType, SparkHelper {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID; 
 
@@ -18,8 +21,6 @@ contract SparkSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper 
     }
 
     enum RatioState { OVER, UNDER }
-
-    address public constant SPARK_MARKET = 0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
 
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
@@ -37,15 +38,16 @@ contract SparkSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper 
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
-    /// @dev Gives DSProxy permission if needed and registers a new sub
+    /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToSparkAutomation(
-        bytes calldata encodedInput
+        bytes calldata _encodedInput
     ) public {
-        givePermission(PROXY_AUTH_ADDR);
+         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
 
-        SparkSubData memory subData = parseSubData(encodedInput);
+        SparkSubData memory subData = parseSubData(_encodedInput);
 
         StrategySub memory repaySub = formatRepaySub(subData);
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
@@ -62,11 +64,11 @@ contract SparkSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper 
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId send as 0
     function updateSubData(
-        bytes calldata encodedInput
+        bytes calldata _encodedInput
     ) public {
-        (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
+        (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
-        SparkSubData memory subData = parseSubData(encodedInput[8:]);
+        SparkSubData memory subData = parseSubData(_encodedInput[8:]);
 
         // update repay as we must have a subId, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(subData);
@@ -94,9 +96,9 @@ contract SparkSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper 
 
     /// @notice Activates Repay sub and if exists a Boost sub
     function activateSub(
-        bytes calldata encodedInput
+        bytes calldata _encodedInput
     ) public {
-        (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
+        (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);
 
@@ -107,9 +109,9 @@ contract SparkSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper 
 
     /// @notice Deactivates Repay sub and if exists a Boost sub
     function deactivateSub(
-        bytes calldata encodedInput
+        bytes calldata _encodedInput
     ) public {
-        (uint32 subId1, uint32 subId2) = parseSubIds(encodedInput[0:8]);
+        (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).deactivateSub(subId1);
 
@@ -141,7 +143,7 @@ contract SparkSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper 
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(address(this), SPARK_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData = abi.encode(address(this), DEFAULT_SPARK_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData =  new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -158,7 +160,7 @@ contract SparkSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper 
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(address(this), SPARK_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData = abi.encode(address(this), DEFAULT_SPARK_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
@@ -170,16 +172,16 @@ contract SparkSubProxy is StrategyModel, AdminAuth, ProxyPermission, CoreHelper 
         boostSub.subData[4] = bytes32(uint256(1)); // enableAsColl = true
     }
 
-    function parseSubData(bytes calldata encodedInput) public pure returns (SparkSubData memory user) {
-        user.minRatio = uint128(bytes16(encodedInput[0:16]));
-        user.maxRatio = uint128(bytes16(encodedInput[16:32]));
-        user.targetRatioBoost = uint128(bytes16(encodedInput[32:48]));
-        user.targetRatioRepay = uint128(bytes16(encodedInput[48:64]));
-        user.boostEnabled = (bytes1(encodedInput[64:65])) != bytes1(0x00); // compare to get bool
+    function parseSubData(bytes calldata _encodedInput) public pure returns (SparkSubData memory user) {
+        user.minRatio = uint128(bytes16(_encodedInput[0:16]));
+        user.maxRatio = uint128(bytes16(_encodedInput[16:32]));
+        user.targetRatioBoost = uint128(bytes16(_encodedInput[32:48]));
+        user.targetRatioRepay = uint128(bytes16(_encodedInput[48:64]));
+        user.boostEnabled = (bytes1(_encodedInput[64:65])) != bytes1(0x00); // compare to get bool
     }
 
-    function parseSubIds(bytes calldata encodedInput) public pure returns (uint32 subId1, uint32 subId2) {
-        subId1 = uint32(bytes4(encodedInput[0:4]));
-        subId2 = uint32(bytes4(encodedInput[4:8]));
+    function parseSubIds(bytes calldata _encodedInput) public pure returns (uint32 subId1, uint32 subId2) {
+        subId1 = uint32(bytes4(_encodedInput[0:4]));
+        subId2 = uint32(bytes4(_encodedInput[4:8]));
     }
 }

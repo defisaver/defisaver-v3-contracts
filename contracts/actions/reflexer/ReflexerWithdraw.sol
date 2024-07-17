@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/ReflexerHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { ReflexerHelper } from "./helpers/ReflexerHelper.sol";
+import { IBasicTokenAdapters } from "../../interfaces/reflexer/IBasicTokenAdapters.sol";
 
 /// @title Withdraws collateral from a Reflexer safe
 contract ReflexerWithdraw is ActionBase, ReflexerHelper {

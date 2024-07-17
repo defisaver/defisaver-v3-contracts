@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/compound/ICToken.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/CompHelper.sol";
+import { ICToken } from "../../interfaces/compound/ICToken.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CompHelper } from "./helpers/CompHelper.sol";
+
 /// @title Payback a token a user borrowed from Compound
 contract CompPayback is ActionBase, CompHelper {
     using TokenUtils for address;
@@ -55,7 +56,7 @@ contract CompPayback is ActionBase, CompHelper {
     /// @param _cTokenAddr Address of the cToken we are paying back
     /// @param _amount Amount of the underlying token
     /// @param _from Address where we are pulling the underlying tokens from
-    /// @param _onBehalf Repay on behalf of which address (if 0x0 defaults to proxy)
+    /// @param _onBehalf Repay on behalf of which address (if 0x0 defaults to user's wallet)
     function _payback(
         address _cTokenAddr,
         uint256 _amount,
@@ -64,7 +65,7 @@ contract CompPayback is ActionBase, CompHelper {
     ) internal returns (uint256, bytes memory) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
-        // default to onBehalf of proxy
+        // default to onBehalf of user's wallet
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }

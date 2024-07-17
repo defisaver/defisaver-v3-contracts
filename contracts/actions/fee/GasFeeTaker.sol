@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.24;
 
-
-import "../../utils/FeeRecipient.sol";
-import "../ActionBase.sol";
-import "./helpers/GasFeeHelper.sol";
+import { FeeRecipient } from "../../utils/FeeRecipient.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { GasFeeHelper } from "./helpers/GasFeeHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 /// @title Helper action to send a token to the specified address
 contract GasFeeTaker is ActionBase, GasFeeHelper {
@@ -33,7 +32,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         inputData.dfsFeeDivider = _parseParamUint(inputData.dfsFeeDivider, _paramMapping[2], _subData, _returnValues);
 
         /// @dev This means inputData.availableAmount is not being piped into
-        /// @dev To stop sender from sending any value here, if not piped take proxy balance
+        /// @dev To stop sender from sending any value here, if not piped take user's wallet balance
         if (_paramMapping[1] == 0) {
             inputData.availableAmount = inputData.feeToken.getBalance(address(this));
         }

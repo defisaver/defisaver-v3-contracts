@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/CurveUsdHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CurveUsdHelper } from "./helpers/CurveUsdHelper.sol";
+import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
 
-
-/// @title Action that borrows crvUSD from proxy curveusd position
+/// @title Action that borrows crvUSD from user's wallet curveusd position
 /// @dev debtAmount must be non-zero
 contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
@@ -14,7 +14,7 @@ contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
     error ZeroAmountBorrowed();
 
     /// @param controllerAddress Address of the curveusd market controller
-    /// @param to Address that will receive the borrowed crvUSD, will default to proxy
+    /// @param to Address that will receive the borrowed crvUSD, will default to user's wallet
     /// @param debtAmount Amount of crvUSD to borrow (does not support uint.max)
     struct Params {
         address controllerAddress;

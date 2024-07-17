@@ -54,13 +54,18 @@ const sendContractsToTenderly = async (formattedContractsToSend) => {
         'Content-Type': 'application/json',
         'X-Access-Key': process.env.TENDERLY_ACCESS_KEY,
     };
-    const body = { contracts: formattedContractsToSend };
-    try {
-        await axios.post(url, body, { headers: headersParams });
-        console.log('Contract(s) successfully sent to Tenderly');
-    } catch (error) {
-        console.error('Error sending contracts to Tenderly', error.response.data);
+    
+    for (let i = 0; i < formattedContractsToSend.length; i += 1) {
+        const body = { contracts: [formattedContractsToSend[i]] };
+        try {
+            await axios.post(url, body, { headers: headersParams });
+            console.log('Contract successfully sent to Tenderly');
+        } catch (error) {
+            console.error('Error sending contracts to Tenderly', error.response.data);
+        }
     }
+        
+   
 };
 
 const getFormattedContractsWithHistoryIncluded = (contract, networkId) => {

@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.24;
 
-import "../../../interfaces/curve/ICurveFactory.sol";
-import "../../../interfaces/curve/IDepositZap.sol";
-import "../../../interfaces/curve/IAddressProvider.sol";
-import "../../../interfaces/curve/ISwaps.sol";
-import "../../../interfaces/curve/IRegistry.sol";
-import "../../../interfaces/curve/IMinter.sol";
-import "../../../interfaces/curve/IVotingEscrow.sol";
-import "../../../interfaces/curve/IFeeDistributor.sol";
-import "./MainnetCurveAddresses.sol";
+import { ICurveFactory } from "../../../interfaces/curve/ICurveFactory.sol";
+import { IDepositZap } from "../../../interfaces/curve/IDepositZap.sol";
+import { IAddressProvider } from "../../../interfaces/curve/IAddressProvider.sol";
+import { ISwaps } from "../../../interfaces/curve/ISwaps.sol";
+import { IRegistry } from "../../../interfaces/curve/IRegistry.sol";
+import { IMinter } from "../../../interfaces/curve/IMinter.sol";
+import { IVotingEscrow } from "../../../interfaces/curve/IVotingEscrow.sol";
+import { IFeeDistributor } from "../../../interfaces/curve/IFeeDistributor.sol";
+import { MainnetCurveAddresses } from "./MainnetCurveAddresses.sol";
+import { ICurveFactoryPool } from "../../../interfaces/curve/ICurveFactory.sol";
 
 contract CurveHelper is MainnetCurveAddresses {
     IAddressProvider public constant AddressProvider = IAddressProvider(ADDRESS_PROVIDER_ADDR);

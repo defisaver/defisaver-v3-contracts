@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-import "../DS/DSMath.sol";
+pragma solidity =0.8.24;
+import { DSMath } from "../DS/DSMath.sol";
 
-import "../actions/mcd/helpers/McdHelper.sol";
-import "../interfaces/mcd/IManager.sol";
-import "../interfaces/mcd/ICropper.sol";
-import "../interfaces/mcd/ISpotter.sol";
-import "../interfaces/mcd/IPot.sol";
-import "../interfaces/IDSProxy.sol";
+import { McdHelper } from "../actions/mcd/helpers/McdHelper.sol";
+import { IManager } from "../interfaces/mcd/IManager.sol";
+import { ICropper } from "../interfaces/mcd/ICropper.sol";
+import { ISpotter } from "../interfaces/mcd/ISpotter.sol";
+import { IPot } from "../interfaces/mcd/IPot.sol";
+import { IDSProxy } from "../interfaces/IDSProxy.sol";
+import { ICdpRegistry } from "../interfaces/mcd/ICdpRegistry.sol";
 
 /// @title Getter contract for Vault info from Maker protocol
 contract McdView is DSMath, McdHelper {
@@ -64,9 +65,25 @@ contract McdView is DSMath, McdHelper {
         (collateral, debt) = vat.urns(ilk, urn);
     }
 
+    /// @dev Returns the owner of the proxy if the proxy is DSProxy
     function _getProxyOwner(address owner) external view returns (address userAddr) {
         IDSProxy proxy = IDSProxy(owner);
         userAddr = proxy.owner();
+    }
+
+    /// @notice Address that owns the CDP, might be DSProxy, Safe or EOA
+    /// @param _manager Manager contract
+    /// @param _cdpId Id of the CDP
+    function getOwner(IManager _manager, uint _cdpId) public view returns (address) {
+        address owner;
+        
+        if (address(_manager) == CROPPER) {
+            owner = ICdpRegistry(CDP_REGISTRY).owns(_cdpId);
+        } else {
+            owner = _manager.owns(_cdpId);
+        }
+
+        return address(owner);
     }
 
     /// @notice Gets a price of the asset

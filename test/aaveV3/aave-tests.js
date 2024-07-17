@@ -17,6 +17,7 @@ const {
     aaveV3ATokenPaybackCalldataOptimised, aaveV3ATokenPayback, aaveV3BorrowCalldataOptimised,
     aaveV3ClaimRewards,
     aaveV3DelegateCredit,
+    aaveV3DelegateCreditWithSig,
 } = require('../actions');
 
 const aaveV3SupplyTest = async () => {
@@ -1155,6 +1156,74 @@ const aaveV3DelegateCreditTest = async () => {
         }).timeout(50000);
     });
 };
+const aaveV3DelegateCreditWithSigTest = async () => {
+    describe('AaveV3-DelegateCreditWithSigTest', function () {
+        this.timeout(150000);
+        let snapshotId;
+
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
+
+        let senderAcc; let proxy;
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+        });
+
+        it('... delegate credit on AaveV3', async () => {
+            const debtToken = '0xeA51d7853EEFb32b6ee06b1C12E6dcCA88Be0fFE';
+            const delegator = senderAcc.address;
+            const delegatee = proxy.address;
+            const value = hre.ethers.utils.parseUnits('100', 18);
+            const debtTokenContract = await hre.ethers.getContractAt('IDebtToken', debtToken);
+            const nonce = await debtTokenContract.nonces(delegator);
+            const deadline = '1812843907';
+            console.log(value);
+            console.log(nonce);
+            console.log(deadline);
+
+            const signature = hre.ethers.utils.splitSignature(
+                // @dev - _signTypedData will be renamed to signTypedData in future ethers versions
+                // eslint-disable-next-line no-underscore-dangle
+                await senderAcc._signTypedData(
+                    {
+                        name: 'Aave Ethereum Variable Debt WETH', // debtToken.name
+                        version: '1', // debtToken.DEBT_TOKEN_REVISION
+                        chainId: 1,
+                        verifyingContract: debtToken,
+                    },
+                    {
+                        DelegationWithSig: [
+                            { name: 'delegatee', type: 'address' },
+                            { name: 'value', type: 'uint256' },
+                            { name: 'nonce', type: 'uint256' },
+                            { name: 'deadline', type: 'uint256' },
+                        ],
+                    },
+                    {
+                        delegatee: proxy.address,
+                        value,
+                        nonce, // debtToken.nonces(owner)
+                        deadline,
+                    },
+                ),
+            );
+            await aaveV3DelegateCreditWithSig(
+                proxy, debtToken, senderAcc.address, proxy.address,
+                value, deadline, signature.v, signature.r, signature.s,
+            );
+            const delegatedAmount = await debtTokenContract.borrowAllowance(delegator, delegatee);
+            console.log(delegatedAmount.toString());
+            expect(delegatedAmount).to.be.eq(value);
+        }).timeout(50000);
+    });
+};
 
 const aaveV3DeployContracts = async () => {
     await redeploy('AaveV3Supply');
@@ -1193,4 +1262,5 @@ module.exports = {
     aaveV3ATokenPaybackTest,
     aaveV3ClaimRewardsTest,
     aaveV3DelegateCreditTest,
+    aaveV3DelegateCreditWithSigTest,
 };

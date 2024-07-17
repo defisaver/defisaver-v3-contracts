@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../core/strategy/SubStorage.sol";
-import "../../core/strategy/StrategyModel.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SubStorage } from "../../core/strategy/SubStorage.sol";
+import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 
 /// @title Updates users sub information on SubStorage contract
 /// @dev user can only change his own subscriptions

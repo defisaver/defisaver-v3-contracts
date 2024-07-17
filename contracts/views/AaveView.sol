@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../DS/DSMath.sol";
-import "../actions/aave/helpers/AaveHelper.sol";
-import "../interfaces/aaveV2/IPriceOracleGetterAave.sol";
-import "../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
-import "../interfaces/aaveV2/ILendingPoolV2.sol";
-import "../utils/TokenUtils.sol";
+import { DSMath } from "../DS/DSMath.sol";
+import { AaveHelper } from "../actions/aave/helpers/AaveHelper.sol";
+import { IPriceOracleGetterAave } from "../interfaces/aaveV2/IPriceOracleGetterAave.sol";
+import { IAaveProtocolDataProviderV2 } from "../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
+import { ILendingPoolV2 } from "../interfaces/aaveV2/ILendingPoolV2.sol";
+import { ILendingPoolAddressesProviderV2 } from "../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 contract AaveView is AaveHelper, DSMath{
 

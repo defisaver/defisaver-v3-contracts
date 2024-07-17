@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.24;
 
-import "../../../interfaces/curve/stethPool/ICurveStethPool.sol";
-import "../helpers/CurveHelper.sol";
-import "../../../utils/TokenUtils.sol";
-import "../../ActionBase.sol";
+import { ICurveStethPool } from "../../../interfaces/curve/stethPool/ICurveStethPool.sol";
+import { CurveHelper } from "../helpers/CurveHelper.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { ActionBase } from "../../ActionBase.sol";
 
 contract CurveStethPoolDeposit is ActionBase, CurveHelper {
     using TokenUtils for address;

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/mcd/IJoin.sol";
-import "../../interfaces/mcd/IManager.sol";
-import "../../interfaces/mcd/ICdpRegistry.sol";
-import "./helpers/McdHelper.sol";
-import "../ActionBase.sol";
+import { IJoin } from "../../interfaces/mcd/IJoin.sol";
+import { IManager } from "../../interfaces/mcd/IManager.sol";
+import { ICdpRegistry } from "../../interfaces/mcd/ICdpRegistry.sol";
+import { McdHelper } from "./helpers/McdHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
 
 /// @title Open a new Maker vault
 contract McdOpen is ActionBase, McdHelper {

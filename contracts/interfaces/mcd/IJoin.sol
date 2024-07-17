@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./IGem.sol";
+import { IGem } from "./IGem.sol";
 
 abstract contract IJoin {
     bytes32 public ilk;

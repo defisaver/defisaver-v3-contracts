@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../DS/DSMath.sol";
-import "../interfaces/reflexer/IGetSafes.sol";
-import "../interfaces/reflexer/ISAFEEngine.sol";
-import "../interfaces/reflexer/ISAFEManager.sol";
-import "../interfaces/reflexer/IOracleRelayer.sol";
-import "../interfaces/reflexer/IMedianOracle.sol";
-import "../interfaces/reflexer/ITaxCollector.sol";
+import { DSMath } from "../DS/DSMath.sol";
+import { IGetSafes } from "../interfaces/reflexer/IGetSafes.sol";
+import { ISAFEEngine } from "../interfaces/reflexer/ISAFEEngine.sol";
+import { ISAFEManager } from "../interfaces/reflexer/ISAFEManager.sol";
+import { IOracleRelayer } from "../interfaces/reflexer/IOracleRelayer.sol";
+import { IMedianOracle } from "../interfaces/reflexer/IMedianOracle.sol";
+import { ITaxCollector } from "../interfaces/reflexer/ITaxCollector.sol";
 
 contract ReflexerView is DSMath {
     // mainnet
@@ -15,7 +15,7 @@ contract ReflexerView is DSMath {
     address public constant MANAGER_ADDR = 0xEfe0B4cA532769a3AE758fD82E1426a03A94F185;
     address public constant SAFE_ENGINE_ADDRESS = 0xCC88a9d330da1133Df3A7bD823B95e52511A6962;
     address public constant ORACLE_RELAYER_ADDRESS = 0x4ed9C0dCa0479bC64d8f4EB3007126D5791f7851;
-    address public constant MEDIAN_ORACLE_ADDRESS = 0x92dC9b16be52De059279916c1eF810877f85F960;
+    address public constant MEDIAN_ORACLE_ADDRESS = 0xcbE170458B8e69147100504D26FFc8f02c1B862F;
     address public constant TAX_COLLECTOR_ADDRESS = 0xcDB05aEda142a1B0D6044C09C64e4226c1a281EB;
 
     struct SafeInfo {

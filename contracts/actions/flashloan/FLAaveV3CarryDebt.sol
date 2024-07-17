@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../interfaces/IDSProxy.sol";
-import "../../interfaces/IFLParamGetter.sol";
-import "../../interfaces/aaveV3/IPoolV3.sol";
-import "../../core/strategy/StrategyModel.sol";
-import "../../utils/TokenUtils.sol";
-import "../../utils/ReentrancyGuard.sol";
-import "./helpers/FLHelper.sol";
-import "../../interfaces/flashloan/IFlashLoanBase.sol";
-import "../../interfaces/aaveV3/IDebtToken.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { IDSProxy } from "../../interfaces/IDSProxy.sol";
+import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
+import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
+import { FLHelper } from "./helpers/FLHelper.sol";
+import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
+import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
+import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
 
 /// @title Action that gets and receives a FL from Aave V3 and does not return funds but opens debt position on Aave V3
 /// @dev In order to open debt position, FL action must have credit delegation allowance from onBehalfOf address
 /// @dev No credit delegation allowance should be left after FL to prevent someone to borrow funds and generate debt onBehalfOf address 
-contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelper, IFlashLoanBase {
+contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanBase {
     using TokenUtils for address;
 
     //Caller not aave pool
@@ -26,8 +26,6 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
     error NoInterestRateSetError();
     //Credit delegation allowance must be 0 after FL
     error CreditDelegationAllowanceLeftError(uint256 amountLeft);
-
-    bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -124,20 +122,14 @@ contract FLAaveV3CarryDebt is ActionBase, StrategyModel, ReentrancyGuard, FLHelp
             revert SameCallerError();
         }
 
-        (Recipe memory currRecipe, address proxy) = abi.decode(_params, (Recipe, address));
+        (Recipe memory currRecipe, address wallet) = abi.decode(_params, (Recipe, address));
 
-        // Send FL amounts to user proxy
+        // Send FL amounts to user wallet
         for (uint256 i = 0; i < _assets.length; ++i) {
-            _assets[i].withdrawTokens(proxy, _amounts[i]);
+            _assets[i].withdrawTokens(wallet, _amounts[i]);
         }
 
-        address payable recipeExecutor = payable(registry.getAddr(RECIPE_EXECUTOR_ID));
-
-        // call Action execution
-        IDSProxy(proxy).execute{value: address(this).balance}(
-            recipeExecutor,
-            abi.encodeWithSignature("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)", currRecipe, bytes32(_amounts[0]))
-        );
+        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, _amounts[0]);
 
         return true;
     }

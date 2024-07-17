@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../interfaces/morpho/IMorphoAaveV3.sol";
-import "../../ActionBase.sol";
-import "../../../utils/TokenUtils.sol";
-import "./helpers/MorphoAaveV3Helper.sol";
+import { IMorphoAaveV3 } from "../../../interfaces/morpho/IMorphoAaveV3.sol";
+import { ActionBase } from "../../ActionBase.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { MorphoAaveV3Helper } from "./helpers/MorphoAaveV3Helper.sol";
+import { IMorphoAaveV3 } from "../../../interfaces/morpho/IMorphoAaveV3.sol";
 
 /// @title Supply a token to Morpho AaveV3
 contract MorphoAaveV3Supply is ActionBase, MorphoAaveV3Helper {
@@ -14,7 +15,7 @@ contract MorphoAaveV3Supply is ActionBase, MorphoAaveV3Helper {
     /// @param tokenAddr The address of the token to be deposited
     /// @param amount Amount of tokens to be deposited
     /// @param from Where are we pulling the supply tokens amount from
-    /// @param onBehalf For what user we are supplying the tokens, defaults to proxy
+    /// @param onBehalf For what user we are supplying the tokens, defaults to user's wallet
     /// @param supplyAsColl Whether to supplyAsCollateral or regular supply
     /// @param maxIterations Max number of iterations for p2p matching, 0 will use default num of iterations
     struct Params {
@@ -80,7 +81,7 @@ contract MorphoAaveV3Supply is ActionBase, MorphoAaveV3Helper {
         _params.amount = _params.tokenAddr.pullTokensIfNeeded(_params.from, _params.amount);
         _params.tokenAddr.approveToken(morphoAddress, _params.amount);
 
-        // default to onBehalf of proxy
+        // default to onBehalf of user's wallet
         if (_params.onBehalf == address(0)) {
             _params.onBehalf = address(this);
         }

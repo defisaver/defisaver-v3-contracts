@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/chainlink/IAggregatorV3.sol";
+import { IAggregatorV3 } from "../interfaces/chainlink/IAggregatorV3.sol";
 
 contract MockAaveV3Oracle {
     mapping(address => address) tokenFeeds;

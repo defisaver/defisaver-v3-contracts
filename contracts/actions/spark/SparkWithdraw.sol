@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/IWETH.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/SparkHelper.sol";
-
+import { IWETH } from "../../interfaces/IWETH.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SparkHelper } from "./helpers/SparkHelper.sol";
+import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 
 /// @title Withdraw a token from an Spark market
 contract SparkWithdraw is ActionBase, SparkHelper {
@@ -22,7 +22,7 @@ contract SparkWithdraw is ActionBase, SparkHelper {
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes calldata callData,
+        bytes memory callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -34,10 +34,6 @@ contract SparkWithdraw is ActionBase, SparkHelper {
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
         params.market = _parseParamAddr(params.market, _paramMapping[4], _subData, _returnValues);
-
-        if (params.useDefaultMarket) {
-            params.market = DEFAULT_SPARK_MARKET;
-        }
 
         (uint256 withdrawnAmount, bytes memory logData) = _withdraw(
             params.market,
@@ -114,28 +110,31 @@ contract SparkWithdraw is ActionBase, SparkHelper {
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
-    }
-
-    function encodeInputs(Params memory params) public pure returns (bytes memory encodedInput) {
-        encodedInput = bytes.concat(this.executeActionDirectL2.selector);
-        encodedInput = bytes.concat(encodedInput, bytes2(params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(params.useDefaultMarket));
-        encodedInput = bytes.concat(encodedInput, bytes32(params.amount));
-        encodedInput = bytes.concat(encodedInput, bytes20(params.to));
-        if (!params.useDefaultMarket) {
-            encodedInput = bytes.concat(encodedInput, bytes20(params.market));
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_SPARK_MARKET;
         }
     }
 
-    function decodeInputs(bytes calldata encodedInput) public pure returns (Params memory params) {
-        params.assetId = uint16(bytes2(encodedInput[0:2]));
-        params.useDefaultMarket = bytesToBool(bytes1(encodedInput[2:3]));
-        params.amount = uint256(bytes32(encodedInput[3:35]));
-        params.to = address(bytes20(encodedInput[35:55]));
+    function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
+        encodedInput = bytes.concat(this.executeActionDirectL2.selector);
+        encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
+        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, bytes32(_params.amount));
+        encodedInput = bytes.concat(encodedInput, bytes20(_params.to));
+        if (!_params.useDefaultMarket) {
+            encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
+        }
+    }
+
+    function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
+        params.assetId = uint16(bytes2(_encodedInput[0:2]));
+        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[2:3]));
+        params.amount = uint256(bytes32(_encodedInput[3:35]));
+        params.to = address(bytes20(_encodedInput[35:55]));
         if (params.useDefaultMarket) {
             params.market = DEFAULT_SPARK_MARKET;
         } else {
-            params.market = address(bytes20(encodedInput[55:75]));
+            params.market = address(bytes20(_encodedInput[55:75]));
         }
     }
 }

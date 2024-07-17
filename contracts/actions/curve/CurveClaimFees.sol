@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "./helpers/CurveHelper.sol";
-import "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CurveHelper } from "./helpers/CurveHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 contract CurveClaimFees is ActionBase, CurveHelper {
     using TokenUtils for address;
@@ -42,7 +41,7 @@ contract CurveClaimFees is ActionBase, CurveHelper {
     }
 
     /// @notice Claims 3Crv rewards from Fee Distributor
-    /// @dev if _claimFor != _receiver the _claimFor address needs to approve the DSProxy to pull 3Crv token
+    /// @dev if _claimFor != _receiver the _claimFor address needs to approve the user's wallet to pull 3Crv token
     function _curveClaimFees(Params memory _params) internal returns (uint256 claimed, bytes memory logData) {
         claimed = FeeDistributor.claim(_params.claimFor);
 

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/IERC721.sol";
-import "../ActionBase.sol";
+import { IERC721 } from "../../interfaces/IERC721.sol";
+import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to transfer a NFT token to the specified address
 contract TransferNFT is ActionBase {
@@ -48,9 +48,9 @@ contract TransferNFT is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
-    /// @dev Proxy must have approve if _from != proxy
+    /// @dev The user's wallet must have approve if _from != user's wallet
     /// @param _nftAddr Address of the ERC721 contract
-    /// @param _from Where from we are pulling the nft (defaults to proxy)
+    /// @param _from Where from we are pulling the nft (defaults to user's wallet)
     /// @param _to Address where we are transferring the nft
     /// @param _nftId TokenId we are transferring
     function _transferNFT(address _nftAddr, address _from, address _to, uint _nftId) internal {

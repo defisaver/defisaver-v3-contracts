@@ -200,16 +200,19 @@ async function verifyContract(contractAddress, contractName) {
     params.append('codeformat', 'solidity-single-file"');
     let solVersion;
     // https://etherscan.io/solcversions see supported sol versions
-    switch (hardhatSettings.solidity.version) {
+    switch (hardhatSettings.solidity.compilers[0].version) {
     case ('=0.8.10'):
         solVersion = 'v0.8.10+commit.fc410830';
+        break;
+    case ('=0.8.24'):
+        solVersion = 'v0.8.24+commit.e11b9ed9';
         break;
     default:
         solVersion = 'v0.8.10+commit.fc410830';
     }
     params.append('compilerversion', solVersion);
-    params.append('optimizationUsed', hardhatSettings.solidity.settings.optimizer.enabled ? 1 : 0);
-    params.append('runs', hardhatSettings.solidity.settings.optimizer.runs);
+    params.append('optimizationUsed', hardhatSettings.solidity.compilers[0].settings.optimizer.enabled ? 1 : 0);
+    params.append('runs', hardhatSettings.solidity.compilers[0].settings.optimizer.runs);
     params.append('EVMVersion', '');
     /// @notice : MIT license
     params.append('licenseType', 3);
@@ -238,13 +241,13 @@ async function flatten(filePath) {
     }
     const fileName = path.basename(filePath);
     const pragmaRegex = /^pragma.*$\n?/gm; // anything starting with pragma
-    const licenseRegex = /^[//SPDX].*$\n?/gm; // anything starting with //SPDX
+    const topLvlCommentsRegex = /^(?<!\/\*\*)(?<=^|\n)[^\s]*\/\/.*$/gm; // matches anything with // that is without spaces or indents
     let globalLicense;
     let pragma;
     // Find license and any pragmas (sol version, and possible abi encoder)
     try {
         const data = fs.readFileSync(filePath, 'utf8');
-        globalLicense = data.match(licenseRegex);
+        globalLicense = data.match(topLvlCommentsRegex);
         pragma = data.match(pragmaRegex);
     } catch (err) {
         console.error(err);
@@ -255,7 +258,7 @@ async function flatten(filePath) {
         await fs.readFileSync(`contracts/flattened/${fileName}`)
     ).toString();
     data = data.replace(pragmaRegex, '');
-    data = data.replace(licenseRegex, '');
+    data = data.replace(topLvlCommentsRegex, '');
     const flags = { flag: 'a+' };
 
     fs.writeFileSync(`contracts/flattened/${fileName}`, globalLicense[0]);

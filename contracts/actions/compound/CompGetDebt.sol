@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
-import "../ActionBase.sol";
-import "../../utils/TokenUtils.sol";
-import "../../interfaces/compound/ICToken.sol";
+pragma solidity =0.8.24;
+
+import { ActionBase } from "../ActionBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ICToken } from "../../interfaces/compound/ICToken.sol";
 
 /// @title Action that gets debt amount for a single asset on Compound for debtor
 contract CompGetDebt is ActionBase {

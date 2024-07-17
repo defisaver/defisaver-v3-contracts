@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../interfaces/morpho/IMorpho.sol";
-import "../../../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
-import "../../ActionBase.sol";
-import "../../../utils/TokenUtils.sol";
-import "./helpers/MorphoAaveV2Helper.sol";
+import { IMorpho } from "../../../interfaces/morpho/IMorpho.sol";
+import { IAaveProtocolDataProviderV2 } from "../../../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
+import { ActionBase } from "../../ActionBase.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { MorphoAaveV2Helper } from "./helpers/MorphoAaveV2Helper.sol";
 
 /// @title Supply a token to Morpho
 contract MorphoAaveV2Supply is ActionBase, MorphoAaveV2Helper {
@@ -14,7 +14,7 @@ contract MorphoAaveV2Supply is ActionBase, MorphoAaveV2Helper {
     /// @param tokenAddr The address of the token to be deposited
     /// @param amount Amount of tokens to be deposited
     /// @param from Where are we pulling the supply tokens amount from
-    /// @param onBehalf For what user we are supplying the tokens, defaults to proxy
+    /// @param onBehalf For what user we are supplying the tokens, defaults to user's wallet
     /// @param maxGasForMatching Max gas to spend on p2p matching
     struct Params {
         address tokenAddr;
@@ -55,7 +55,7 @@ contract MorphoAaveV2Supply is ActionBase, MorphoAaveV2Helper {
         _params.amount = _params.tokenAddr.pullTokensIfNeeded(_params.from, _params.amount);
         _params.tokenAddr.approveToken(MORPHO_AAVEV2_ADDR, _params.amount);
 
-        // default to onBehalf of proxy
+        // default to onBehalf of user's wallet
         if (_params.onBehalf == address(0)) {
             _params.onBehalf = address(this);
         }

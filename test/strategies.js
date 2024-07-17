@@ -227,190 +227,6 @@ const createMcdFLRepayCompositeStrategy = () => {
     return repayStrategy.encodeForDsProxyCall();
 };
 
-const createRariRepayStrategy = () => {
-    const repayStrategy = new dfs.Strategy('McdRariRepayStrategy');
-
-    repayStrategy.addSubSlot('&vaultId', 'uint256');
-    repayStrategy.addSubSlot('&targetRatio', 'uint256');
-    repayStrategy.addSubSlot('&daiAddr', 'address');
-    repayStrategy.addSubSlot('&mcdManager', 'address');
-
-    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
-    repayStrategy.addTrigger(mcdRatioTrigger);
-
-    const rariWithdrawAction = new dfs.actions.rari.RariWithdrawAction(
-        '%fundManager',
-        '%poolTokenAddress',
-        '%poolTokensAmountToPull',
-        '&proxy',
-        '%stablecoinAddress',
-        '%stablecoinAmountToWithdraw',
-        '&proxy',
-    );
-
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '&daiAddr', '$1',
-    );
-
-    const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
-        '&vaultId',
-        '$2',
-        '&proxy',
-        '&mcdManager',
-    );
-
-    repayStrategy.addAction(rariWithdrawAction);
-    repayStrategy.addAction(feeTakingAction);
-    repayStrategy.addAction(mcdPaybackAction);
-
-    return repayStrategy.encodeForDsProxyCall();
-};
-
-const createRariRepayStrategyWithExchange = () => {
-    const repayStrategy = new dfs.Strategy('McdRariRepayWithExchangeStrategy');
-
-    repayStrategy.addSubSlot('&vaultId', 'uint256');
-    repayStrategy.addSubSlot('&targetRatio', 'uint256');
-    repayStrategy.addSubSlot('&daiAddr', 'address');
-    repayStrategy.addSubSlot('&mcdManager', 'address');
-
-    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
-    repayStrategy.addTrigger(mcdRatioTrigger);
-
-    const rariWithdrawAction = new dfs.actions.rari.RariWithdrawAction(
-        '%fundManager',
-        '%poolTokenAddress',
-        '%poolTokensAmountToPull',
-        '&proxy',
-        '%stablecoinAddress',
-        '%stablecoinAmountToWithdraw',
-        '&proxy',
-    );
-
-    const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            '%usdcAddr',
-            '&daiAddr',
-            '$1',
-            '%wrapper',
-        ),
-        '&proxy',
-        '&proxy',
-    );
-
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '&daiAddr', '$2',
-    );
-
-    const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
-        '&vaultId',
-        '$3',
-        '&proxy',
-        '&mcdManager',
-    );
-
-    repayStrategy.addAction(rariWithdrawAction);
-    repayStrategy.addAction(sellAction);
-    repayStrategy.addAction(feeTakingAction);
-    repayStrategy.addAction(mcdPaybackAction);
-
-    return repayStrategy.encodeForDsProxyCall();
-};
-
-const createMstableRepayStrategy = () => {
-    const repayStrategy = new dfs.Strategy('McdMstableRepayStrategy');
-
-    repayStrategy.addSubSlot('&vaultId', 'uint256');
-    repayStrategy.addSubSlot('&targetRatio', 'uint256');
-    repayStrategy.addSubSlot('&daiAddr', 'address');
-    repayStrategy.addSubSlot('&mcdManager', 'address');
-
-    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
-    repayStrategy.addTrigger(mcdRatioTrigger);
-
-    const mstableWithdrawAction = new dfs.actions.mstable.MStableWithdrawAction(
-        '%bAsset',
-        '%mAsset',
-        '%saveAddress',
-        '%vaultAddress',
-        '&proxy',
-        '&proxy',
-        '%amount',
-        '%minOut',
-        '%assetPair',
-    );
-
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '&daiAddr', '$1',
-    );
-
-    const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
-        '&vaultId',
-        '$2',
-        '&proxy',
-        '&mcdManager',
-    );
-
-    repayStrategy.addAction(mstableWithdrawAction);
-    repayStrategy.addAction(feeTakingAction);
-    repayStrategy.addAction(mcdPaybackAction);
-
-    return repayStrategy.encodeForDsProxyCall();
-};
-
-const createMstableRepayStrategyWithExchange = () => {
-    const repayStrategy = new dfs.Strategy('McdMstableRepayWithExchangeStrategy');
-
-    repayStrategy.addSubSlot('&vaultId', 'uint256');
-    repayStrategy.addSubSlot('&targetRatio', 'uint256');
-    repayStrategy.addSubSlot('&daiAddr', 'address');
-    repayStrategy.addSubSlot('&mcdManager', 'address');
-
-    const mcdRatioTrigger = new dfs.triggers.MakerRatioTrigger('0', '0', '0');
-    repayStrategy.addTrigger(mcdRatioTrigger);
-
-    const mstableWithdrawAction = new dfs.actions.mstable.MStableWithdrawAction(
-        '%bAsset',
-        '%mAsset',
-        '%saveAddress',
-        '%vaultAddress',
-        '&proxy',
-        '&proxy',
-        '%amount',
-        '%minOut',
-        '%assetPair',
-    );
-
-    const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            '%wethAddr',
-            '&daiAddr',
-            '$1',
-            '%wrapper',
-        ),
-        '&proxy',
-        '&proxy',
-    );
-
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', '&daiAddr', '$2',
-    );
-
-    const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
-        '&vaultId',
-        '$3',
-        '&proxy',
-        '&mcdManager',
-    );
-
-    repayStrategy.addAction(mstableWithdrawAction);
-    repayStrategy.addAction(sellAction);
-    repayStrategy.addAction(feeTakingAction);
-    repayStrategy.addAction(mcdPaybackAction);
-
-    return repayStrategy.encodeForDsProxyCall();
-};
-
 const createYearnRepayStrategy = () => {
     const repayStrategy = new dfs.Strategy('McdYearnRepayStrategy');
 
@@ -694,10 +510,12 @@ const createMcdCloseToDaiStrategy = (isTrailing = false) => {
 
     mcdCloseStrategy.addTrigger(trigger);
     mcdCloseStrategy.addAction(
-        new dfs.actions.flashloan.MakerFlashLoanAction(
-            '%loanAmount', // cdp.debt + a bit extra to handle debt increasing
-            nullAddress,
-            [],
+        new dfs.actions.flashloan.FLAction(
+            new dfs.actions.flashloan.MakerFlashLoanAction(
+                '%loanAmount', // cdp.debt + a bit extra to handle debt increasing
+                nullAddress,
+                [],
+            ),
         ),
     );
     mcdCloseStrategy.addAction(
@@ -769,10 +587,12 @@ const createMcdCloseToCollStrategy = (isTrailing = false) => {
 
     mcdCloseStrategy.addTrigger(trigger);
     mcdCloseStrategy.addAction(
-        new dfs.actions.flashloan.MakerFlashLoanAction(
-            '%loanAmount', // cdp.debt + a bit extra to handle debt increasing
-            nullAddress,
-            [],
+        new dfs.actions.flashloan.FLAction(
+            new dfs.actions.flashloan.MakerFlashLoanAction(
+                '%loanAmount', // cdp.debt + a bit extra to handle debt increasing
+                nullAddress,
+                [],
+            ),
         ),
     );
     mcdCloseStrategy.addAction(
@@ -932,10 +752,9 @@ const createLiquityDebtInFrontRepayStrategy = () => {
         '%lowerHint',
     );
 
-    const liquityRatioIncreaseCheckAction =
-        new dfs.actions.checkers.LiquityRatioIncreaseCheckAction(
-            '&ratioIncrease',
-        );
+    const liquityRatioIncreaseCheckAction = new dfs.actions.checkers.LiquityRatioIncreaseCheckAction(
+        '&ratioIncrease',
+    );
 
     liquityFLRepayStrategy.addAction(flAction);
     liquityFLRepayStrategy.addAction(sellAction);
@@ -1249,8 +1068,6 @@ const createLiquityCloseToCollStrategy = (isTrailing = false) => {
     liquityCloseToCollStrategy.addAction(sendFL);
     liquityCloseToCollStrategy.addAction(sendWethToEoa);
     liquityCloseToCollStrategy.addAction(sendLUSDToEoa);
-
-    console.log(liquityCloseToCollStrategy.encodeForDsProxyCall());
 
     return liquityCloseToCollStrategy.encodeForDsProxyCall();
 };
@@ -1654,7 +1471,8 @@ const createFlCompV3RepayStrategy = () => {
     const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
     compV3RepayStrategy.addTrigger(compV3Trigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%collAddr'], ['%repayAmount']);
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction(['%collAddr'], ['%repayAmount']);
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -1711,7 +1529,8 @@ const createFlCompV3EOARepayStrategy = () => {
     const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
     compV3RepayStrategy.addTrigger(compV3Trigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%collAddr'], ['%repayAmount']);
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction(['%collAddr'], ['%repayAmount']);
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -1875,7 +1694,8 @@ const createCompV3FlBoostStrategy = () => {
     const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
     compV3BoostStrategy.addTrigger(compV3Trigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%baseToken'], ['%boostAmount']);
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction(['%baseToken'], ['%boostAmount']);
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -1979,7 +1799,8 @@ const createCompV3EOAFlBoostStrategy = () => {
     const compV3Trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
     compV3BoostStrategy.addTrigger(compV3Trigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(['%baseToken'], ['%boostAmount']);
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction(['%baseToken'], ['%boostAmount']);
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -2120,8 +1941,11 @@ const createMorphoAaveV2FLBoostStrategy = () => {
         '%nullAddr', '%0', '%0',
     ));
     strategy.addAction(new dfs.actions.flashloan.FLAction(
-        new dfs.actions.flashloan.EulerFlashLoanAction(
-            '%dAsset', '%flAmount',
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collAddr'],
+            ['%loanAmount'],
+            nullAddress,
+            [],
         ),
     ));
     strategy.addAction(new dfs.actions.basic.SellAction(
@@ -2195,8 +2019,11 @@ const createMorphoAaveV2FLRepayStrategy = () => {
         '%nullAddr', '%0', '%0',
     ));
     strategy.addAction(new dfs.actions.flashloan.FLAction(
-        new dfs.actions.flashloan.EulerFlashLoanAction(
-            '%cAsset', '%flAmount',
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collAddr'],
+            ['%loanAmount'],
+            nullAddress,
+            [],
         ),
     ));
     strategy.addAction(new dfs.actions.basic.SellAction(
@@ -3551,7 +3378,7 @@ const sparkCloseActions = {
 
     // eslint-disable-next-line max-len
     flAction: () => new dfs.actions.flashloan.FLAction(
-        new dfs.actions.flashloan.SparkFlashLoanAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
             ['%debtAsset'],
             ['%repayAmount'], // cant pipe in FL actions :(
             ['%AAVE_NO_DEBT_MODE'],
@@ -4130,16 +3957,509 @@ const createCurveUsdFLDebtBoostStrategy = () => {
     return boostStrategy.encodeForDsProxyCall();
 };
 
+const createCurveUsdPaybackStrategy = () => {
+    const paybackStrategy = new dfs.Strategy('CurveUsdPaybackStrategy');
+
+    paybackStrategy.addSubSlot('&controllerAddr', 'address');
+    paybackStrategy.addSubSlot('&addressToPullTokensFrom', 'address');
+    paybackStrategy.addSubSlot('&positionOwner', 'address');
+    paybackStrategy.addSubSlot('&amountToPayback', 'uint256');
+    paybackStrategy.addSubSlot('&crvUsdAddress', 'address');
+
+    const curveUsdHealthRatioTrigger = new dfs.triggers.CurveUsdHealthRatioTrigger(nullAddress, nullAddress, '0');
+    paybackStrategy.addTrigger(curveUsdHealthRatioTrigger);
+
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '&crvUsdAddress', // taken from subdata
+        '&addressToPullTokensFrom', // taken from subdata
+        '%amountToPayback', // sent by backend, either amount from sub data or maxUint for whole balance
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&crvUsdAddress', // taken from subdata
+        '$1', // output of pull token action
+    );
+    const curveUsdPaybackAction = new dfs.actions.curveusd.CurveUsdPaybackAction(
+        '&controllerAddr', // taken from subdata,
+        '&proxy', // piped
+        '&positionOwner', // taken from subdata
+        '&eoa', // piped
+        '$2', // output of gas fee taker action
+        '%maxActiveBand', // sent by backend
+    );
+    paybackStrategy.addAction(pullTokenAction);
+    paybackStrategy.addAction(feeTakingAction);
+    paybackStrategy.addAction(curveUsdPaybackAction);
+    return paybackStrategy.encodeForDsProxyCall();
+};
+
+const createMorphoBlueBoostStrategy = () => {
+    const boostStrategy = new dfs.Strategy('MorphoBlueBoostStrategy');
+
+    boostStrategy.addSubSlot('&loanToken', 'address');
+    boostStrategy.addSubSlot('&collateralToken', 'address');
+    boostStrategy.addSubSlot('&oracle', 'address');
+    boostStrategy.addSubSlot('&irm', 'address');
+    boostStrategy.addSubSlot('&lltv', 'uint256');
+    boostStrategy.addSubSlot('&ratioState', 'uint8');
+    boostStrategy.addSubSlot('&targetRatio', 'uint256');
+    boostStrategy.addSubSlot('&user', 'address');
+
+    const morphoBlueRatioTrigger = new dfs.triggers.MorphoBlueRatioTrigger(
+        0, nullAddress, 0, 0,
+    );
+    boostStrategy.addTrigger(morphoBlueRatioTrigger);
+
+    const morphoBlueBorrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%boostAmount', // sent by backend
+        '&user',
+        '&proxy',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&loanToken',
+            '&collateralToken',
+            '$1', // output of borrow action
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&collateralToken',
+        '$2', // output of sell action
+    );
+    const supplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$3', // output of fee taking action
+        '&proxy',
+        '&user',
+    );
+    const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&ratioState',
+        '&targetRatio',
+    );
+
+    boostStrategy.addAction(morphoBlueBorrowAction);
+    boostStrategy.addAction(sellAction);
+    boostStrategy.addAction(feeTakingAction);
+    boostStrategy.addAction(supplyAction);
+    boostStrategy.addAction(morphoBlueRatioCheckAction);
+    return boostStrategy.encodeForDsProxyCall();
+};
+
+const createMorphoBlueFLDebtBoostStrategy = () => {
+    const boostStrategy = new dfs.Strategy('MorphoBlueFLDebtBoostStrategy');
+
+    boostStrategy.addSubSlot('&loanToken', 'address');
+    boostStrategy.addSubSlot('&collateralToken', 'address');
+    boostStrategy.addSubSlot('&oracle', 'address');
+    boostStrategy.addSubSlot('&irm', 'address');
+    boostStrategy.addSubSlot('&lltv', 'uint256');
+    boostStrategy.addSubSlot('&ratioState', 'uint8');
+    boostStrategy.addSubSlot('&targetRatio', 'uint256');
+    boostStrategy.addSubSlot('&user', 'address');
+
+    const morphoBlueRatioTrigger = new dfs.triggers.MorphoBlueRatioTrigger(
+        0, nullAddress, 0, 0,
+    );
+    boostStrategy.addTrigger(morphoBlueRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%loanToken'], // sent by backend (no piping available in fl actions)
+        ['%flAmount'], // sent by backend
+        '%nullAddress',
+        [],
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&loanToken',
+            '&collateralToken',
+            '%flAmount', // same number as fl amount, cant pipe fl output due to fee
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&collateralToken',
+        '$2', // output of sell action
+    );
+    const morphoBlueSupplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$3', // output of fee taking action
+        '&proxy',
+        '&user',
+    );
+    const morphoBlueBorrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$1', // we borrow enough to payback flashloan
+        '&user',
+        '%flAddress', // sent by backend
+    );
+    const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&ratioState',
+        '&targetRatio',
+    );
+    boostStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+    boostStrategy.addAction(sellAction);
+    boostStrategy.addAction(feeTakingAction);
+    boostStrategy.addAction(morphoBlueSupplyAction);
+    boostStrategy.addAction(morphoBlueBorrowAction);
+    boostStrategy.addAction(morphoBlueRatioCheckAction);
+    return boostStrategy.encodeForDsProxyCall();
+};
+const createMorphoBlueFLCollBoostStrategy = () => {
+    const boostStrategy = new dfs.Strategy('MorphoBlueFLCollBoostStrategy');
+
+    boostStrategy.addSubSlot('&loanToken', 'address');
+    boostStrategy.addSubSlot('&collateralToken', 'address');
+    boostStrategy.addSubSlot('&oracle', 'address');
+    boostStrategy.addSubSlot('&irm', 'address');
+    boostStrategy.addSubSlot('&lltv', 'uint256');
+    boostStrategy.addSubSlot('&ratioState', 'uint8');
+    boostStrategy.addSubSlot('&targetRatio', 'uint256');
+    boostStrategy.addSubSlot('&user', 'address');
+
+    const morphoBlueRatioTrigger = new dfs.triggers.MorphoBlueRatioTrigger(
+        0, nullAddress, 0, 0,
+    );
+    boostStrategy.addTrigger(morphoBlueRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collateralToken'], // sent by backend (no piping available in fl actions)
+        ['%flAmount'], // sent by backend
+        '%nullAddress',
+        [],
+    );
+    const morphoBlueSupplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%flAmount', // sent by backend, should be the same as flashloan amount
+        '&proxy',
+        '&user',
+    );
+    const morphoBlueBorrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%boostAmount', // sent by backend
+        '&user',
+        '&proxy',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&loanToken',
+            '&collateralToken',
+            '$3', // output of borrow action
+            '%exchangeWrapper',
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&collateralToken',
+        '$4', // output of sell action
+    );
+    const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+        ['&collateralToken', '&collateralToken'],
+        ['%flAddress', '&eoa'], // first one sent by backend, second piped
+        ['$1', '%maxUint'], // first one piped to return fl, second one sent by backend
+    );
+    const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&ratioState',
+        '&targetRatio',
+    );
+    boostStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+    boostStrategy.addAction(morphoBlueSupplyAction);
+    boostStrategy.addAction(morphoBlueBorrowAction);
+    boostStrategy.addAction(sellAction);
+    boostStrategy.addAction(feeTakingAction);
+    boostStrategy.addAction(sendTokensAction);
+    boostStrategy.addAction(morphoBlueRatioCheckAction);
+    return boostStrategy.encodeForDsProxyCall();
+};
+const createMorphoBlueRepayStrategy = () => {
+    const repayStrategy = new dfs.Strategy('MorphoBlueRepayStrategy');
+
+    repayStrategy.addSubSlot('&loanToken', 'address');
+    repayStrategy.addSubSlot('&collateralToken', 'address');
+    repayStrategy.addSubSlot('&oracle', 'address');
+    repayStrategy.addSubSlot('&irm', 'address');
+    repayStrategy.addSubSlot('&lltv', 'uint256');
+    repayStrategy.addSubSlot('&ratioState', 'uint8');
+    repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&user', 'address');
+
+    const morphoBlueRatioTrigger = new dfs.triggers.MorphoBlueRatioTrigger(
+        0, nullAddress, 0, 0,
+    );
+    repayStrategy.addTrigger(morphoBlueRatioTrigger);
+
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%repayAmount', // sent by backend
+        '&user',
+        '&proxy',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collateralToken',
+            '&loanToken',
+            '$1', // output of withdraw action
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&loanToken',
+        '$2', // output of sell action
+    );
+    const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$3', // output of fee taking action
+        '&proxy',
+        '&user',
+    );
+    const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&ratioState',
+        '&targetRatio',
+    );
+
+    repayStrategy.addAction(withdrawAction);
+    repayStrategy.addAction(sellAction);
+    repayStrategy.addAction(feeTakingAction);
+    repayStrategy.addAction(paybackAction);
+    repayStrategy.addAction(morphoBlueRatioCheckAction);
+    return repayStrategy.encodeForDsProxyCall();
+};
+const createMorphoBlueFLCollRepayStrategy = () => {
+    const repayStrategy = new dfs.Strategy('MorphoBlueFLCollRepayStrategy');
+
+    repayStrategy.addSubSlot('&loanToken', 'address');
+    repayStrategy.addSubSlot('&collateralToken', 'address');
+    repayStrategy.addSubSlot('&oracle', 'address');
+    repayStrategy.addSubSlot('&irm', 'address');
+    repayStrategy.addSubSlot('&lltv', 'uint256');
+    repayStrategy.addSubSlot('&ratioState', 'uint8');
+    repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&user', 'address');
+
+    const morphoBlueRatioTrigger = new dfs.triggers.MorphoBlueRatioTrigger(
+        0, nullAddress, 0, 0,
+    );
+    repayStrategy.addTrigger(morphoBlueRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%collateralToken'], // sent by backend (no piping available in fl actions)
+        ['%flAmount'], // sent by backend
+        '%nullAddress',
+        [],
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collateralToken',
+            '&loanToken',
+            '%repayAmount', // same as flamount, sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&loanToken',
+        '$2', // output of sell action
+    );
+    const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$3', // output of fee taking action
+        '&proxy',
+        '&user',
+    );
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$1', // withdraw enough to payback flashloan
+        '&user',
+        '%flAddress', // sent by backend
+    );
+    const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&ratioState',
+        '&targetRatio',
+    );
+
+    repayStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+    repayStrategy.addAction(sellAction);
+    repayStrategy.addAction(feeTakingAction);
+    repayStrategy.addAction(paybackAction);
+    repayStrategy.addAction(withdrawAction);
+    repayStrategy.addAction(morphoBlueRatioCheckAction);
+    return repayStrategy.encodeForDsProxyCall();
+};
+const createMorphoBlueFLDebtRepayStrategy = () => {
+    const repayStrategy = new dfs.Strategy('MorphoBlueFLDebtRepayStrategy');
+
+    repayStrategy.addSubSlot('&loanToken', 'address');
+    repayStrategy.addSubSlot('&collateralToken', 'address');
+    repayStrategy.addSubSlot('&oracle', 'address');
+    repayStrategy.addSubSlot('&irm', 'address');
+    repayStrategy.addSubSlot('&lltv', 'uint256');
+    repayStrategy.addSubSlot('&ratioState', 'uint8');
+    repayStrategy.addSubSlot('&targetRatio', 'uint256');
+    repayStrategy.addSubSlot('&user', 'address');
+
+    const morphoBlueRatioTrigger = new dfs.triggers.MorphoBlueRatioTrigger(
+        0, nullAddress, 0, 0,
+    );
+    repayStrategy.addTrigger(morphoBlueRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['%debtToken'], // sent by backend (no piping available in fl actions)
+        ['%flAmount'], // sent by backend
+        '%nullAddress',
+        [],
+    );
+    const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%repayAmount', // <- same as flAmount
+        '&proxy',
+        '&user',
+    );
+    const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%withdrawAmount', // sent by backend
+        '&user',
+        '&proxy',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collateralToken',
+            '&loanToken',
+            '$3', // output of withdraw action
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '0', // sent by backend
+        '&loanToken',
+        '$4', // output of sell action
+    );
+    const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+        ['&loanToken', '&loanToken'],
+        ['%flAddress', '&eoa'], // first one sent by backend, second piped
+        ['$1', '%maxUint'], // first one piped to return fl, second one sent by backend
+    );
+    const morphoBlueRatioCheckAction = new dfs.actions.checkers.MorphoBlueRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&ratioState',
+        '&targetRatio',
+    );
+    repayStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+    repayStrategy.addAction(paybackAction);
+    repayStrategy.addAction(withdrawAction);
+    repayStrategy.addAction(sellAction);
+    repayStrategy.addAction(feeTakingAction);
+    repayStrategy.addAction(sendTokensAction);
+    repayStrategy.addAction(morphoBlueRatioCheckAction);
+    return repayStrategy.encodeForDsProxyCall();
+};
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
     createFLRepayStrategy,
     createYearnRepayStrategy,
     createYearnRepayStrategyWithExchange,
-    createRariRepayStrategy,
-    createRariRepayStrategyWithExchange,
-    createMstableRepayStrategy,
-    createMstableRepayStrategyWithExchange,
     createReflexerRepayStrategy,
     createReflexerFLRepayStrategy,
     createReflexerFLBoostStrategy,
@@ -4213,4 +4533,11 @@ module.exports = {
     createCurveUsdBoostStrategy,
     createCurveUsdFLCollBoostStrategy,
     createCurveUsdFLDebtBoostStrategy,
+    createCurveUsdPaybackStrategy,
+    createMorphoBlueBoostStrategy,
+    createMorphoBlueFLDebtBoostStrategy,
+    createMorphoBlueFLCollBoostStrategy,
+    createMorphoBlueRepayStrategy,
+    createMorphoBlueFLCollRepayStrategy,
+    createMorphoBlueFLDebtRepayStrategy,
 };

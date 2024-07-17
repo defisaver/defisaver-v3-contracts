@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../interfaces/convex/IConvexToken.sol";
-import "../../../interfaces/convex/IConvexToken.sol";
-import "../../../interfaces/convex/IBRewardPool.sol";
-import "../../../interfaces/convex/IRewardPool.sol";
-import "../../../utils/SafeMath.sol";
-import "../../../utils/TokenUtils.sol";
+import { IConvexToken } from "../../../interfaces/convex/IConvexToken.sol";
+import { IConvexToken } from "../../../interfaces/convex/IConvexToken.sol";
+import { IBRewardPool } from "../../../interfaces/convex/IBRewardPool.sol";
+import { IRewardPool } from "../../../interfaces/convex/IRewardPool.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
-import "./MainnetConvexAddresses.sol";
+import { IERC20 } from "../../../interfaces/IERC20.sol";
+import { MainnetConvexAddresses } from "./MainnetConvexAddresses.sol";
 
 contract ConvexHelper is MainnetConvexAddresses {
-    using SafeMath for uint256;
     using TokenUtils for address;
 
     uint256 internal constant CVX_TOTAL_CLIFFS = 1000;
@@ -43,17 +42,17 @@ contract ConvexHelper is MainnetConvexAddresses {
         //this will cause a bit of overflow into the next cliff range
         //but should be within reasonable levels.
         //requires a max supply check though
-        uint256 cliff = supply.div(CVX_REDUCTION_PER_CLIFF);
+        uint256 cliff = supply / CVX_REDUCTION_PER_CLIFF;
         //mint if below total cliffs
         uint256 totalCliffs = CVX_TOTAL_CLIFFS;
         if(cliff < totalCliffs){
             //for reduction% take inverse of current cliff
-            uint256 reduction = totalCliffs.sub(cliff);
+            uint256 reduction = totalCliffs - cliff;
             //reduce
-            _amount = _amount.mul(reduction).div(totalCliffs);
+            _amount = _amount * (reduction) / (totalCliffs);
 
             //supply cap check
-            uint256 amtTillMax = CVX_MAX_SUPPLY.sub(supply);
+            uint256 amtTillMax = CVX_MAX_SUPPLY - (supply);
             if(_amount > amtTillMax){
                 _amount = amtTillMax;
             }

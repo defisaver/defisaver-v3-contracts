@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract LSVUtilMainnetAddresses {
     address internal constant RETH_ADDRESS = 0xae78736Cd615f374D3085123A210448E74Fc6393;

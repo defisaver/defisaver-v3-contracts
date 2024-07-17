@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 
 /// @title StrategyModel - contract that implements the structs used in the core system
@@ -46,11 +46,11 @@ contract StrategyModel {
 
     /// @dev Actual data of the sub we store on-chain
     /// @dev In order to save on gas we store a keccak256(StrategySub) and verify later on
-    /// @param userProxy Address of the users smart wallet/proxy
+    /// @param walletAddr Address of the users smart wallet/proxy
     /// @param isEnabled Toggle if the subscription is active
     /// @param strategySubHash Hash of the StrategySub data the user inputted
     struct StoredSubData {
-        bytes20 userProxy; // address but put in bytes20 for gas savings
+        bytes20 walletAddr; // address but put in bytes20 for gas savings
         bool isEnabled;
         bytes32 strategySubHash;
     }
@@ -65,5 +65,19 @@ contract StrategyModel {
         bool isBundle;
         bytes[] triggerData;
         bytes32[] subData;
+    }
+
+    /// @dev Data needed when signing relay transaction
+    /// @param maxTxCostInFeeToken Max tx cost user is willing to pay in fee token
+    /// @param feeToken Address of the token user is willing to pay fee in
+    /// @param tokenPriceInEth Price of the token in ETH
+    /// @param deadline Deadline for the relay transaction to be executed
+    /// @param shouldTakeFeeFromPosition Flag to indicate if fee should be taken from position, otherwise from EOA/wallet
+    struct TxSaverSignedData {
+        uint256 maxTxCostInFeeToken;
+        address feeToken;
+        uint256 tokenPriceInEth;
+        uint256 deadline;
+        bool shouldTakeFeeFromPosition;
     }
 }

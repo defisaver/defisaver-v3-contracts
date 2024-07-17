@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../utils/TransientStorage.sol";
-import "../interfaces/ITrigger.sol";
-import "./helpers/TriggerHelper.sol";
-import "../actions/curveusd/helpers/CurveUsdHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { TransientStorage } from "../utils/TransientStorage.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
+import { CurveUsdHelper } from "../actions/curveusd/helpers/CurveUsdHelper.sol";
 
 /// @title Trigger contract that verifies if the CurveUSD position went over/under the subbed ratio
 contract CurveUsdCollRatioTrigger is ITrigger, AdminAuth, CurveUsdHelper, TriggerHelper {

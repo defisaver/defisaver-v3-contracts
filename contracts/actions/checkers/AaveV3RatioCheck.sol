@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../aaveV3/helpers/AaveV3RatioHelper.sol";
-import "../../utils/TransientStorage.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveV3RatioHelper } from "../aaveV3/helpers/AaveV3RatioHelper.sol";
+import { TransientStorage } from "../../utils/TransientStorage.sol";
 
 contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
 

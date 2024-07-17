@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import "../interfaces/chainlink/IAggregatorV3.sol";
-import "../interfaces/chainlink/IPhaseAggregator.sol";
-import "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
+import { IAggregatorV3 } from "../interfaces/chainlink/IAggregatorV3.sol";
+import { IPhaseAggregator } from "../interfaces/chainlink/IPhaseAggregator.sol";
+import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 contract AaveV3OracleView is AaveV3RatioHelper {
     IAaveV3Oracle public constant aaveOracleV3 = IAaveV3Oracle(AAVE_ORACLE_V3);
@@ -61,6 +61,7 @@ contract AaveV3OracleView is AaveV3RatioHelper {
         // check if _roundId is a legit round
         if (timestamp == 0) return 1;
 
+        /// @dev Price staleness not checked, the risk has been deemed acceptable
         (uint80 latestRoundId, , , ,) = aggregatorProxy.latestRoundData();
         if (_roundId == latestRoundId) return 0;
 
@@ -68,6 +69,8 @@ contract AaveV3OracleView is AaveV3RatioHelper {
         if (currentPhase == phaseId) return _roundId + 1;
         
         IPhaseAggregator phaseAggregator = IPhaseAggregator(aggregatorProxy.phaseAggregators(phaseId));
+
+        /// @dev Price staleness not checked, the risk has been deemed acceptable
         (uint80 phaseLastRoundId, , , ,) = phaseAggregator.latestRoundData();
         if (phaseLastRoundId == aggregatorRoundId) return (phaseId + 1) << 64 + 1;
         

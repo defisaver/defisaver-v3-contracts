@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../core/DFSRegistry.sol";
-import "../core/helpers/CoreHelper.sol";
+import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 
 /// @title MultiDFSRegistrySetter Adds multiple entries in DFS Registry
 /// @dev Contract must have auth in DFSRegistry in order for this to work

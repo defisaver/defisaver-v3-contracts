@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/compound/ICToken.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/CompHelper.sol";
+import { ICToken } from "../../interfaces/compound/ICToken.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CompHelper } from "./helpers/CompHelper.sol";
 
 /// @title Withdraw a token from Compound
 contract CompWithdraw is ActionBase, CompHelper {
@@ -55,7 +55,7 @@ contract CompWithdraw is ActionBase, CompHelper {
     /// @dev Send type(uint).max to withdraw whole balance
     /// @param _cTokenAddr cToken address
     /// @param _amount Amount of underlying tokens to withdraw
-    /// @param _to Address where to send the tokens to (can be left on proxy)
+    /// @param _to Address where to send the tokens to (can be left on user's wallet)
     function _withdraw(
         address _cTokenAddr,
         uint256 _amount,
@@ -70,7 +70,7 @@ contract CompWithdraw is ActionBase, CompHelper {
 
         uint256 tokenBalanceBefore = tokenAddr.getBalance(address(this));
 
-        // if _amount type(uint).max that means take out proxy whole balance
+        // if _amount type(uint).max that means take out user's wallet whole balance
         if (_amount == type(uint256).max) {
             _amount = _cTokenAddr.getBalance(address(this));
             if (ICToken(_cTokenAddr).redeem(_amount) != NO_ERROR){

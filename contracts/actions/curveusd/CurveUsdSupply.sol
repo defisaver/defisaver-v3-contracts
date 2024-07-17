@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/CurveUsdHelper.sol";
-
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CurveUsdHelper } from "./helpers/CurveUsdHelper.sol";
+import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
 
 /// @title Action that supplies collateral to a curveusd position
 /// @dev collateralAmount must be non-zero, can be maxUint
@@ -14,8 +14,8 @@ contract CurveUsdSupply is ActionBase, CurveUsdHelper {
     error ZeroAmountSupplied();
 
     /// @param controllerAddress Address of the curveusd market controller
-    /// @param from Address from which to pull collateral asset, will default to proxy
-    /// @param onBehalfOf Address for which we are supplying, will default to proxy
+    /// @param from Address from which to pull collateral asset, will default to user's wallet
+    /// @param onBehalfOf Address for which we are supplying, will default to user's wallet
     /// @param collateralAmount Amount of collateral asset to supply
     struct Params {
         address controllerAddress;

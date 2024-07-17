@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to un-wrap WETH9 to Eth
 contract UnwrapEth is ActionBase {
@@ -53,7 +53,7 @@ contract UnwrapEth is ActionBase {
 
         TokenUtils.withdrawWeth(_amount);
 
-        // if _to == proxy, it will stay on proxy
+        // if _to == user's wallet, it will stay on user's wallet
         TokenUtils.ETH_ADDR.withdrawTokens(_to, _amount);
 
         return _amount;

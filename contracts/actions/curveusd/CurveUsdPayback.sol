@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/CurveUsdHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CurveUsdHelper } from "./helpers/CurveUsdHelper.sol";
+import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
 
 /// @title Action that pays back crvUSD to a curveusd position
 /// @dev paybackAmount must be non-zero
@@ -14,9 +15,9 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
     error ZeroAmountPayback();
 
     /// @param controllerAddress Address of the curveusd market controller
-    /// @param from Address from which to pull crvUSD, will default to proxy
-    /// @param onBehalfOf Address for which we are paying back debt, will default to proxy
-    /// @param to Address that will receive the crvUSD and collateral asset if close, will default to proxy
+    /// @param from Address from which to pull crvUSD, will default to user's wallet
+    /// @param onBehalfOf Address for which we are paying back debt, will default to user's wallet
+    /// @param to Address that will receive the crvUSD and collateral asset if close, will default to user's wallet
     /// @param paybackAmount Amount of crvUSD to payback
     /// @param maxActiveBand Don't allow active band to be higher than this (to prevent front-running the repay)
     struct Params {

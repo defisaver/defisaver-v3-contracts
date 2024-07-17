@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract ArbitrumUtilAddresses {
     address internal refillCaller = 0xcbA094ae1B2B363886CC7f428206dB1b116834A2;
@@ -21,7 +21,6 @@ contract ArbitrumUtilAddresses {
     address internal constant WBTC_ADDR = 0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f;
 
     address internal constant MKR_PROXY_REGISTRY = 0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895;
-    address internal constant PROXY_FACTORY_ADDR = 0x5a15566417e6C1c9546523066500bDDBc53F88C7;
     address internal constant DFS_PROXY_REGISTRY_ADDR = 0xeCF15D0aE171F757175c6aBDD2C70e9a8806984C;
 
     // TODO: not needed now
@@ -35,4 +34,5 @@ contract ArbitrumUtilAddresses {
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0x158E27De8B5E5bC3FA1C6D5b365a291c54f6b0Fd;
 
+    address public constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
 }

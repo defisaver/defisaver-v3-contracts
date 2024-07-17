@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/ITrigger.sol";
-import "../actions/morpho/aaveV2/helpers/MorphoAaveV2Helper.sol";
-import "../utils/TransientStorage.sol";
-import "./helpers/TriggerHelper.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { MorphoAaveV2Helper } from "../actions/morpho/aaveV2/helpers/MorphoAaveV2Helper.sol";
+import { TransientStorage } from "../utils/TransientStorage.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 contract MorphoAaveV2RatioTrigger is ITrigger, MorphoAaveV2Helper, TriggerHelper {
 

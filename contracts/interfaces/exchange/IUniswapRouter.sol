@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 abstract contract IUniswapRouter {
     function swapExactTokensForETH(
@@ -18,6 +18,13 @@ abstract contract IUniswapRouter {
         address to,
         uint256 deadline
     ) external virtual returns (uint256[] memory amounts);
+
+    function swapETHForExactTokens(
+        uint amountOut,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external virtual payable returns (uint256[] memory amounts);
 
     function swapTokensForExactETH(
         uint256 amountOut,

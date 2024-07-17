@@ -2,6 +2,7 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 
 const { getAssetInfo, set } = require('@defisaver/tokens');
+const automationSdk = require('@defisaver/automation-sdk');
 
 const {
     getProxy,
@@ -16,15 +17,14 @@ const {
     sendEther,
     getOwnerAddr,
     setBalance,
-    resetForkToBlock,
     addrs,
     chainIds,
+    setNewExchangeWrapper,
 } = require('../../utils');
 
 const { callDcaStrategy } = require('../../strategy-calls');
 const { subDcaStrategy } = require('../../strategy-subs');
-const { createDCAStrategy } = require('../../strategies');
-const { createDCAL2Strategy, createLimitOrderL2Strategy } = require('../../l2-strategies');
+const { createLimitOrderL2Strategy } = require('../../l2-strategies');
 
 const { createStrategy, addBotCaller, getUpdatedStrategySub } = require('../../utils-strategies');
 
@@ -34,11 +34,6 @@ const { createLimitOrderStrategy } = require('../../strategies');
 
 const DAY = 1 * 24 * 60 * 60;
 const TWO_DAYS = 2 * 24 * 60 * 60;
-
-const OrderType = {
-    TAKE_PROFIT: 0,
-    STOP_LOSS: 1,
-};
 
 const limitOrderStrategyTest = async () => {
     const tokenPairs = [
@@ -79,7 +74,7 @@ const limitOrderStrategyTest = async () => {
         const goodUntilDuration = 24 * 60 * 60;
 
         before(async () => {
-            await resetForkToBlock(16728856);
+            // await resetForkToBlock(19000000);
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
@@ -99,8 +94,10 @@ const limitOrderStrategyTest = async () => {
 
             uniV3Wrapper = await hre.ethers.getContractAt('UniswapWrapperV3', addrs[network].UNISWAP_V3_WRAPPER);
 
+            await setNewExchangeWrapper(senderAcc, addrs[network].UNISWAP_V3_WRAPPER);
+
             await addBotCaller(botAcc.address);
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
             const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
             await openStrategyAndBundleStorage();
@@ -143,7 +140,7 @@ const limitOrderStrategyTest = async () => {
                     sellAmountWei,
                     targetPrice,
                     goodUntilDuration,
-                    OrderType.TAKE_PROFIT,
+                    automationSdk.enums.OrderType.TAKE_PROFIT,
                     addrs[getNetwork()].REGISTRY_ADDR,
                 ));
             });
@@ -226,7 +223,7 @@ const limitOrderStrategyTest = async () => {
                     sellAmountWei,
                     targetPrice,
                     goodUntilDuration,
-                    OrderType.STOP_LOSS,
+                    automationSdk.enums.OrderType.STOP_LOSS,
                     addrs[getNetwork()].REGISTRY_ADDR,
                 ));
             });
@@ -300,7 +297,6 @@ const dcaStrategyTest = async () => {
         let tokenAddrSell;
         let tokenAddrBuy;
         let sellAmountWei;
-        let strategyId;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -318,18 +314,16 @@ const dcaStrategyTest = async () => {
             await redeploy('GasFeeTaker');
             await redeploy('DFSSell');
             await redeploy('TimestampTrigger');
+            await redeploy('SendTokenAndUnwrap');
 
             subStorageAddr = getAddrFromRegistry('SubStorage');
             subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
             await addBotCaller(botAcc.address);
 
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
-            const strategyData = network === 'mainnet' ? createDCAStrategy() : createDCAL2Strategy();
-            await openStrategyAndBundleStorage();
-
-            strategyId = await createStrategy(proxy, ...strategyData, true);
+            await setNewExchangeWrapper(senderAcc, addrs[network].UNISWAP_V3_WRAPPER);
         });
 
         for (let i = 0; i < tokenPairs.length; i++) {
@@ -360,7 +354,6 @@ const dcaStrategyTest = async () => {
                     sellAmountWei,
                     interval,
                     lastTimestamp,
-                    strategyId,
                 ));
             });
 

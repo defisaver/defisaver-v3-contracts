@@ -1,14 +1,19 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./DFSProxyRegistry.sol";
-import "../DS/DSProxyFactoryInterface.sol";
-import "./helpers/UtilHelper.sol";
+import { DSProxyFactoryInterface } from "../DS/DSProxyFactoryInterface.sol";
+import { DSProxyFactoryHelper } from "./../utils/ds-proxy-factory/DSProxyFactoryHelper.sol";
+import { DSProxy } from "../DS/DSProxy.sol";
+import { DSAuth } from "../DS/DSAuth.sol";
+
+import { DFSProxyRegistry } from "./DFSProxyRegistry.sol";
+import { AdminAuth } from "./../auth/AdminAuth.sol";
+import { UtilHelper } from "./helpers/UtilHelper.sol";
 
 
 /// @title User facing contract to manage new proxies (is owner of DFSProxyRegistry)
-contract DFSProxyRegistryController is AdminAuth, UtilHelper {
+contract DFSProxyRegistryController is AdminAuth, UtilHelper, DSProxyFactoryHelper {
 
     /// @dev List of prebuilt proxies the users can claim to save gas
     address[] public proxyPool;

@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/reflexer/ICoinJoin.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/ReflexerHelper.sol";
+import { ICoinJoin } from "../../interfaces/reflexer/ICoinJoin.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { ReflexerHelper } from "./helpers/ReflexerHelper.sol";
+import { ISAFEEngine } from "../../interfaces/reflexer/ISAFEEngine.sol";
 
 /// @title Payback rai debt for a reflexer safe
 contract ReflexerPayback is ActionBase, ReflexerHelper {
@@ -62,10 +63,9 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         address safe = safeManager.safes(_safeId);
         bytes32 collType = safeManager.collateralTypes(_safeId);
 
-        // if amount type(uint256).max payback the whole safe debt
-        if (_amount == type(uint256).max) {
-            _amount = getAllDebt(safe, safe, collType);
-        }
+        // if _amount is higher than current debt, repay all debt
+        uint256 debt = getAllDebt(safe, safe, collType);
+        _amount = _amount > debt ? debt : _amount;
 
         // pull rai from user and join the reflexer pool
         RAI_ADDRESS.pullTokensIfNeeded(_from, _amount);

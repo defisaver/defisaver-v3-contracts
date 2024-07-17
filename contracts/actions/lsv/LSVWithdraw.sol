@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "./helpers/LSVUtilHelper.sol";
-import "../../utils/TokenUtils.sol";
-import "../../utils/FeeRecipient.sol";
-import "../../utils/Discount.sol";
-import "../../exchangeV3/helpers/ExchangeHelper.sol";
-import "../../interfaces/IDSProxy.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { LSVUtilHelper } from "./helpers/LSVUtilHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { FeeRecipient } from "../../utils/FeeRecipient.sol";
+import { Discount } from "../../utils/Discount.sol";
+import { ExchangeHelper } from "../../exchangeV3/helpers/ExchangeHelper.sol";
+import { LSVProfitTracker } from "../../utils/LSVProfitTracker.sol";
 
 /// @title action for tracking users withdrawals within the LSV ecosystem
 contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
@@ -69,7 +69,7 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @dev LSV Withdraw expects users to have withdrawn tokens to the proxy, from which we'll pull the performance fee
+    /// @dev LSV Withdraw expects users to have withdrawn tokens to the user's wallet, from which we'll pull the performance fee
     /// @dev ProfitTracker will return realisedProfit amount, from which we will calculate fee
     function _lsvWithdraw(Params memory _inputData) internal returns (uint256 remainingAmount, bytes memory logData) {
         uint256 amountWithdrawnInETH = getAmountInETHFromLST(_inputData.token, _inputData.amount);
@@ -97,20 +97,11 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
     function calculateFee(
         uint256 _amount
     ) internal view returns (uint256 feeAmount) {
-        address user = getUserAddress();
-
-        if (Discount(DISCOUNT_ADDRESS).isCustomFeeSet(user)) {
+        if (Discount(DISCOUNT_ADDRESS).serviceFeesDisabled(address(this))) {
             feeAmount = 0;
         } else {
             feeAmount = _amount / FEE_DIVIDER;
         }
-    }
-
-    /// @notice Returns the owner of the DSProxy that called the contract
-    function getUserAddress() internal view returns (address) {
-        IDSProxy proxy = IDSProxy(payable(address(this)));
-
-        return proxy.owner();
     }
 
     function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/chainlink/IAggregatorV3.sol";
-import "../auth/AdminAuth.sol";
+import { IAggregatorV3 } from "../interfaces/chainlink/IAggregatorV3.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
 
 contract PriceFeedRegistry is AdminAuth{
 
@@ -38,6 +38,8 @@ contract PriceFeedRegistry is AdminAuth{
     )
   {
     address aggregator = getFeed(base, quote);
+    
+    /// @dev Price staleness not checked, the risk has been deemed acceptable
     return IAggregatorV3(aggregator).latestRoundData();
   }
 

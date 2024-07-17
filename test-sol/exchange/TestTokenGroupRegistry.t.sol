@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
-import "../../contracts/exchangeV3/TokenGroupRegistry.sol";
-import "../../contracts/auth/AdminAuth.sol";
+import { TokenGroupRegistry } from "../../contracts/exchangeV3/registries/TokenGroupRegistry.sol";
+import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
+import { CheatCodes } from "../CheatCodes.sol";
+import { TokenAddresses } from "../TokenAddresses.sol";
 
-import "../CheatCodes.sol";
-import "../TokenAddresses.sol";
+contract TestTokenGroupRegistry is Test, TokenGroupRegistry {
 
-contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
-
-    CheatCodes vm = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+    CheatCodes constant cheats = CheatCodes(VM_ADDRESS);
 
     TokenGroupRegistry tokenGroupRegistry;
 
@@ -43,7 +42,6 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
         );
         assertEq(tokenGroupRegistry.groupIds(TokenAddresses.WBTC_ADDR), uint256(Groups.BTC_BASED));
         assertEq(tokenGroupRegistry.groupIds(TokenAddresses.RENBTC_ADDR), uint256(Groups.BTC_BASED));
-
     }
 
     function testFeeForBannedToken() public {
@@ -73,11 +71,10 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
         );
         assertEq(tokenGroupRegistry.groupIds(TokenAddresses.YFI_ADDR), uint256(Groups.NOT_LISTED));
         assertEq(tokenGroupRegistry.groupIds(TokenAddresses.MKR_ADDR), uint256(Groups.NOT_LISTED));
-    
     }
 
     function testAddNewTokenGroup() public {
-        vm.startPrank(TokenAddresses.OWNER_ADDR);
+        cheats.startPrank(TokenAddresses.OWNER_ADDR);
 
         address[] memory tokens = new address[](2);
         tokens[0] = TokenAddresses.YFI_ADDR;
@@ -93,11 +90,11 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
             666
         );
 
-        vm.stopPrank();
+        cheats.stopPrank();
     }
 
     function testChangeFeeForTokenGroup() public {
-        vm.startPrank(TokenAddresses.OWNER_ADDR);
+        cheats.startPrank(TokenAddresses.OWNER_ADDR);
 
         tokenGroupRegistry.changeGroupFee(uint256(Groups.ETH_BASED), 5000);
 
@@ -107,22 +104,13 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
         );
     }
 
-    function testFailToAddTokenIfNotOwner() public {
-        vm.expectRevert();
+    function testRevertToAddTokenIfNotOwner() public {
+        cheats.expectRevert();
         tokenGroupRegistry.addTokenInGroup(TokenAddresses.ETH_ADDR, uint256(Groups.ETH_BASED));
     }
 
-    function testFailToAddTokenToNonExistentGroup() public {
-        vm.startPrank(TokenAddresses.OWNER_ADDR);
-
-        vm.expectRevert(abi.encodeWithSelector(TokenGroupRegistry.FeeTooHigh.selector, 1));
-        tokenGroupRegistry.addTokenInGroup(TokenAddresses.ETH_ADDR, 17);
-
-        vm.stopPrank();
-    }
-
-    function testFailToAddTokensIfNotOwner() public {
-        vm.expectRevert();
+    function testRevertToAddTokensIfNotOwner() public {
+        cheats.expectRevert();
         address[] memory tokens = new address[](2);
         tokens[0] = TokenAddresses.ETH_ADDR;
         tokens[1] = TokenAddresses.WETH_ADDR;
@@ -130,8 +118,8 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
         tokenGroupRegistry.addTokensInGroup(tokens, uint256(Groups.ETH_BASED));
     }
 
-    function testFailToAddNewGroupIfNotOwner() public {
-        vm.expectRevert();
+    function testRevertToAddNewGroupIfNotOwner() public {
+        cheats.expectRevert();
 
         address[] memory tokens = new address[](2);
         tokens[0] = TokenAddresses.YFI_ADDR;
@@ -140,38 +128,49 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
         tokenGroupRegistry.addNewGroup(tokens, 666);
     }
 
-    function testFailToChangeGroupFeeIfNotOwner() public {
-        vm.expectRevert();
+    function testRevertToChangeGroupFeeIfNotOwner() public {
+        cheats.expectRevert();
 
         tokenGroupRegistry.changeGroupFee(uint256(Groups.ETH_BASED), 5000);
     }
 
-    function testFailToChangeFeeTooHigh() public {
-        vm.startPrank(TokenAddresses.OWNER_ADDR);
+    function testRevertToChangeFeeTooHigh() public {
+        cheats.startPrank(TokenAddresses.OWNER_ADDR);
 
-        vm.expectRevert();
+        cheats.expectRevert();
         tokenGroupRegistry.changeGroupFee(uint256(Groups.ETH_BASED), 10);
 
-        vm.stopPrank();
+        cheats.stopPrank();
     }
 
-    function testFailToCreateGroupFeeTooHigh() public {
-        vm.startPrank(TokenAddresses.OWNER_ADDR);
+    function testRevertToCreateGroupFeeTooHigh() public {
+        cheats.startPrank(TokenAddresses.OWNER_ADDR);
 
         address[] memory tokens = new address[](2);
         tokens[0] = TokenAddresses.YFI_ADDR;
         tokens[1] = TokenAddresses.MKR_ADDR;
 
-        vm.expectRevert();
-        tokenGroupRegistry.addNewGroup(tokens, 1);
+        uint256 feeDivider = 1;
+        cheats.expectRevert(abi.encodeWithSelector(TokenGroupRegistry.FeeTooHigh.selector, feeDivider));
+        tokenGroupRegistry.addNewGroup(tokens, feeDivider);
 
-        vm.stopPrank();
+        cheats.stopPrank();
+    }
+
+    function testRevertToAddTokenToNonExistentGroup() public {
+        cheats.startPrank(TokenAddresses.OWNER_ADDR);
+        
+        uint256 groupId = 17;
+        cheats.expectRevert(abi.encodeWithSelector(TokenGroupRegistry.GroupNonExistent.selector, groupId));
+        tokenGroupRegistry.addTokenInGroup(TokenAddresses.ETH_ADDR, groupId);
+
+        cheats.stopPrank();
     }
 
     //////////////////////// INTERNAL ////////////////////////
 
     function populateRegistry() internal {
-        vm.startPrank(TokenAddresses.OWNER_ADDR);
+        cheats.startPrank(TokenAddresses.OWNER_ADDR);
 
         // blocked
         tokenGroupRegistry.addTokenInGroup(TokenAddresses.BANNED_TOKEN_ADDR, uint256(Groups.BANNED));
@@ -191,6 +190,6 @@ contract TestTokenGroupRegistry is DSTest, TokenGroupRegistry {
         tokenGroupRegistry.addTokenInGroup(TokenAddresses.WBTC_ADDR, uint256(Groups.BTC_BASED));
         tokenGroupRegistry.addTokenInGroup(TokenAddresses.RENBTC_ADDR, uint256(Groups.BTC_BASED));
 
-        vm.stopPrank();
+        cheats.stopPrank();
     }
 }

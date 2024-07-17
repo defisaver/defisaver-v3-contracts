@@ -1,28 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
-pragma experimental ABIEncoderV2;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
+import { ActionBase } from "../ActionBase.sol";
 
-import "../../interfaces/balancer/IFlashLoanRecipient.sol";
-import "../../interfaces/balancer/IFlashLoans.sol";
-import "../../interfaces/IDSProxy.sol";
-import "../../interfaces/IFLParamGetter.sol";
-import "../../interfaces/flashloan/IFlashLoanBase.sol";
-import "../../core/strategy/StrategyModel.sol";
-import "../../utils/TokenUtils.sol";
-import "../../utils/SafeMath.sol";
-import "../../utils/ReentrancyGuard.sol";
+import { IFlashLoanRecipient } from "../../interfaces/balancer/IFlashLoanRecipient.sol";
+import { IFlashLoans } from "../../interfaces/balancer/IFlashLoans.sol";
+import { IDSProxy } from "../../interfaces/IDSProxy.sol";
+import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
+import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
 
-import "./helpers/FLHelper.sol";
+import { FLHelper } from "./helpers/FLHelper.sol";
 
-contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashLoanBase, StrategyModel, FLHelper {
+contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashLoanBase, FLHelper {
     using TokenUtils for address;
-    using SafeMath for uint256;
-
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR = bytes4(keccak256("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
-    bytes32 constant RECIPE_EXECUTOR_ID = keccak256("RecipeExecutor");
 
     bytes32 public constant CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
@@ -74,23 +66,18 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashL
         bytes memory _userData
     ) external override nonReentrant {
         require(msg.sender == VAULT_ADDR, "Untrusted lender");
-        (Recipe memory currRecipe, address proxy) = abi.decode(_userData, (Recipe, address));
+        (Recipe memory currRecipe, address wallet) = abi.decode(_userData, (Recipe, address));
 
         uint256[] memory balancesBefore = new uint256[](_tokens.length);
         for (uint256 i = 0; i < _tokens.length; i++) {
-            _tokens[i].withdrawTokens(proxy, _amounts[i]);
+            _tokens[i].withdrawTokens(wallet, _amounts[i]);
             balancesBefore[i] = _tokens[i].getBalance(address(this));
         }
-        address payable recipeExecutorAddr = payable(registry.getAddr(bytes4(RECIPE_EXECUTOR_ID)));
 
-        // call Action execution
-        IDSProxy(proxy).execute{value: address(this).balance}(
-            recipeExecutorAddr,
-            abi.encodeWithSelector(CALLBACK_SELECTOR, currRecipe, _amounts[0].add(_feeAmounts[0]))
-        );
+        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, (_amounts[0] + _feeAmounts[0]));
 
         for (uint256 i = 0; i < _tokens.length; i++) {
-            uint256 paybackAmount = _amounts[i].add(_feeAmounts[i]);
+            uint256 paybackAmount = _amounts[i] + _feeAmounts[i];
             
             require(_tokens[i].getBalance(address(this)) == paybackAmount + balancesBefore[i], "Wrong payback amount");
 

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./StrategyModel.sol";
-import "../../auth/AdminAuth.sol";
-import "../DFSRegistry.sol";
-import "./StrategyStorage.sol";
-import "../helpers/CoreHelper.sol";
+import { StrategyModel } from "./StrategyModel.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { DFSRegistry } from "../DFSRegistry.sol";
+import { StrategyStorage } from "./StrategyStorage.sol";
+import { CoreHelper } from "../helpers/CoreHelper.sol";
 
 /// @title BundleStorage - Record of all the Bundles created
 contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {

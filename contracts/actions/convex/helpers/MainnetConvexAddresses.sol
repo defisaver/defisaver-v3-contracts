@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 contract MainnetConvexAddresses {
     address internal constant CRV_ADDR = 0xD533a949740bb3306d119CC777fa900bA034cd52;

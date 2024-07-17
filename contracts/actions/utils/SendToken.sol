@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to send a token to the specified address
 contract SendToken is ActionBase {
@@ -50,7 +50,7 @@ contract SendToken is ActionBase {
     
 
     /// @notice Sends a token to the specified addr, works with Eth also
-    /// @dev If amount is type(uint).max it will send proxy balance
+    /// @dev If amount is type(uint).max it will send whole user's wallet balance
     /// @param _tokenAddr Address of token, use 0xEeee... for eth
     /// @param _to Where the tokens are sent
     /// @param _amount Amount of tokens, can be type(uint).max

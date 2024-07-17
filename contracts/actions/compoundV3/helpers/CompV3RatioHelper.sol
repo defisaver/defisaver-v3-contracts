@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../DS/DSMath.sol";
-import "../../../interfaces/compoundV3/IComet.sol";
-import "./MainnetCompV3Addresses.sol";
+import { DSMath } from "../../../DS/DSMath.sol";
+import { IComet } from "../../../interfaces/compoundV3/IComet.sol";
+import { MainnetCompV3Addresses } from "./MainnetCompV3Addresses.sol";
 
 contract CompV3RatioHelper is DSMath, MainnetCompV3Addresses {
 

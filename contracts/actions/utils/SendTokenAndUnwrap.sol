@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to send a token to the specified address and unwrap if weth address
 contract SendTokenAndUnwrap is ActionBase {
@@ -50,7 +50,7 @@ contract SendTokenAndUnwrap is ActionBase {
     
 
     /// @notice Sends a token to the specified addr, works with Eth also
-    /// @dev If amount is type(uint).max it will send proxy balance
+    /// @dev If amount is type(uint).max it will send whole users' wallet balance
     /// @dev If weth address is set it will unwrap by default
     /// @param _tokenAddr Address of token, use 0xEeee... for eth
     /// @param _to Where the tokens are sent

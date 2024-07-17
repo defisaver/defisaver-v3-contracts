@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/CompHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CompHelper } from "./helpers/CompHelper.sol";
+import { ICToken } from "../../interfaces/compound/ICToken.sol"; 
 
 /// @title Supply a token to Compound
 contract CompSupply is ActionBase, CompHelper {
@@ -51,7 +52,7 @@ contract CompSupply is ActionBase, CompHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Supplies a token to the Compound protocol
-    /// @dev If amount == type(uint256).max we are getting the whole balance of the proxy
+    /// @dev If amount == type(uint256).max we are getting the whole balance of the user's wallet
     /// @param _cTokenAddr Address of the cToken we'll get when supplying
     /// @param _amount Amount of the underlying token we are supplying
     /// @param _from Address where we are pulling the underlying tokens from
@@ -68,7 +69,7 @@ contract CompSupply is ActionBase, CompHelper {
         if (_amount == type(uint256).max) {
             _amount = tokenAddr.getBalance(_from);
         }
-        // pull the tokens _from to the proxy
+        // pull the tokens _from to the user's wallet
         tokenAddr.pullTokensIfNeeded(_from, _amount);
 
         // enter the market if needed

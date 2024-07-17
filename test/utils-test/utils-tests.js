@@ -1,4 +1,5 @@
 /* eslint-disable no-await-in-loop */
+const sdk = require('@defisaver/sdk');
 const { expect } = require('chai');
 const hre = require('hardhat');
 const { getAssetInfo, assets } = require('@defisaver/tokens');
@@ -24,105 +25,17 @@ const {
     getProxy,
     DFS_REG_CONTROLLER,
     getAddrFromRegistry,
+    chainIds,
     setBalance,
     addrs,
-    chainIds,
+    takeSnapshot,
+    revertToSnapshot,
 } = require('../utils');
-
-const botRefillL2Test = async () => {
-    describe('Bot-Refills-L2', function () {
-        this.timeout(80000);
-
-        let botRefills;
-        let refillCaller; let refillAddr; let feeAddr;
-        let owner;
-        // TEST FOR OPTIMISM NETWORK
-        const network = hre.network.config.name;
-        before(async () => {
-            const botRefillsAddr = await getAddrFromRegistry('BotRefillsL2');
-            botRefills = await hre.ethers.getContractAt('BotRefillsL2', botRefillsAddr);
-
-            refillAddr = '0x5aa40C7C8158D8E29CA480d7E05E5a32dD819332';
-            feeAddr = '0x76720ac2574631530ec8163e4085d6f98513fb27';
-            refillCaller = '0xaFdFC3814921d49AA412d6a22e3F44Cc555dDcC8';
-            owner = '0x322d58b9E75a6918f7e7849AEe0fF09369977e08';
-
-            await sendEther((await hre.ethers.getSigners())[1], refillCaller, '5');
-
-            // give approval to contract from feeAddr
-            // set refillAddr to be allowed
-            await impersonateAccount(owner);
-            const ownerSigner = await hre.ethers.provider.getSigner(owner);
-            const botRefillsOwner = botRefills.connect(ownerSigner);
-            await botRefillsOwner.setAdditionalBot(refillAddr, true);
-            await botRefillsOwner.setRefillCaller(refillCaller);
-            await stopImpersonatingAccount(owner);
-            await impersonateAccount(feeAddr);
-
-            let daiContract = await hre.ethers.getContractAt('IERC20', addrs[network].DAI_ADDRESS);
-            let wethContract = await hre.ethers.getContractAt('IERC20', addrs[network].WETH_ADDRESS);
-
-            const signer = await hre.ethers.provider.getSigner(feeAddr);
-            wethContract = wethContract.connect(signer);
-            daiContract = daiContract.connect(signer);
-
-            await wethContract.approve(botRefills.address, MAX_UINT);
-            await daiContract.approve(botRefills.address, MAX_UINT);
-
-            // clean out all weth on fee addr for test to work
-            const wethFeeAddrBalance = await balanceOf(addrs[network].WETH_ADDRESS, feeAddr);
-            await wethContract.transfer(nullAddress, wethFeeAddrBalance);
-
-            await stopImpersonatingAccount(feeAddr);
-        });
-
-        it('... should call refill with WETH', async () => {
-            await impersonateAccount(refillCaller);
-
-            const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, refillAddr);
-
-            const signer = await hre.ethers.provider.getSigner(refillCaller);
-            botRefills = botRefills.connect(signer);
-
-            const ethRefillAmount = hre.ethers.utils.parseUnits('4', 18);
-
-            const wethFeeAddrBalance = await balanceOf(addrs[network].WETH_ADDRESS, feeAddr);
-
-            if (wethFeeAddrBalance.lt(ethRefillAmount)) {
-                await depositToWeth(ethRefillAmount);
-                await send(addrs[network].WETH_ADDRESS, feeAddr, ethRefillAmount);
-            }
-
-            await botRefills.refill(ethRefillAmount, refillAddr);
-
-            const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, refillAddr);
-
-            expect(ethBotAddrBalanceAfter).to.be.eq(ethBotAddrBalanceBefore.add(ethRefillAmount));
-
-            await stopImpersonatingAccount(refillCaller);
-        });
-
-        it('... should call refill with DAI', async () => {
-            await impersonateAccount(refillCaller);
-
-            const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, refillAddr);
-            const signer = await hre.ethers.provider.getSigner(refillCaller);
-            botRefills = botRefills.connect(signer);
-
-            const ethRefillAmount = hre.ethers.utils.parseUnits('4', 18);
-
-            const daiAmount = hre.ethers.utils.parseUnits('50000', 18);
-            await setBalance(addrs[network].DAI_ADDRESS, feeAddr, daiAmount);
-
-            await botRefills.refill(ethRefillAmount, refillAddr);
-
-            const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, refillAddr);
-
-            expect(ethBotAddrBalanceAfter).to.be.eq(ethBotAddrBalanceBefore.add(ethRefillAmount));
-            await stopImpersonatingAccount(refillCaller);
-        });
-    });
-};
+const {
+    predictSafeAddress, SAFE_MASTER_COPY_VERSIONS, deploySafe, SAFE_CONSTANTS,
+    signSafeTx,
+    encodeSetupArgs,
+} = require('../utils-safe');
 
 const botRefillTest = async () => {
     describe('Bot-Refills', function () {
@@ -184,29 +97,9 @@ const botRefillTest = async () => {
 
             await stopImpersonatingAccount(refillCaller);
         });
-
-        it('... should call refill with DAI', async () => {
-            await impersonateAccount(refillCaller);
-
-            const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, refillAddr);
-
-            const signer = await hre.ethers.provider.getSigner(refillCaller);
-            botRefills = botRefills.connect(signer);
-
-            const ethRefillAmount = hre.ethers.utils.parseUnits('4', 18);
-            const daiAmount = hre.ethers.utils.parseUnits('50000', 18);
-            await setBalance(DAI_ADDR, feeAddr, daiAmount);
-            await botRefills.refill(ethRefillAmount, refillAddr);
-
-            const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, refillAddr);
-
-            console.log(ethBotAddrBalanceBefore.toString(), ethBotAddrBalanceAfter.toString());
-
-            expect(ethBotAddrBalanceAfter).to.be.gt(ethBotAddrBalanceBefore);
-            await stopImpersonatingAccount(refillCaller);
-        });
     });
 };
+
 const feeReceiverTest = async () => {
     describe('Fee-Receiver', function () {
         this.timeout(80000);
@@ -596,6 +489,86 @@ const priceFeedTest = async () => {
         });
     });
 };
+const dfsSafeFactoryTest = async () => {
+    describe('DFS-Safe-Factory', function () {
+        this.timeout(80000);
+        let dfsSafeFactory;
+        let snapshotId;
+        before(async () => {
+            dfsSafeFactory = await redeploy('DFSSafeFactory');
+        });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
+
+        it('... should create a Safe and execute a transaction on it via signature', async () => {
+            const [signer] = await hre.ethers.getSigners();
+            const setupArgs = [
+                [signer.address], // _owners - List of Safe owners.
+                1, // _threshold - Number of required confirmations for a Safe transaction.
+                nullAddress, // to - Contract address for optional delegate call.
+                '0x', // data - Data payload for optional delegate call.
+                nullAddress, // fallbackHandler - Handler for fallback calls to this contract.
+                nullAddress, // paymentToken - Token that should be used for the payment (0 is ETH)
+                0, // payment - Value that should be paid.
+                nullAddress, // paymentReceiver - Address that should receive the payment
+            ];
+
+            const saltNonce = '0';
+            const safeFactory = await dfsSafeFactory.safeFactory();
+            const singletonAddr = '0xd9db270c1b5e3bd161e8c8503c55ceabee709552';
+            const predictedAddress = await predictSafeAddress(
+                singletonAddr,
+                setupArgs,
+                saltNonce,
+                safeFactory,
+            );
+
+            const network = hre.network.config.name;
+            await setBalance(addrs[network].WETH_ADDRESS, predictedAddress, hre.ethers.utils.parseUnits('10', 18));
+            const tokenBalanceAction = new sdk.actions.basic.TokenBalanceAction(
+                addrs[network].WETH_ADDRESS,
+                predictedAddress,
+            );
+            const recipe = new sdk.Recipe('Test Recipe',
+                [tokenBalanceAction,
+                    new sdk.actions.basic.SendTokenAction(
+                        addrs[network].WETH_ADDRESS, signer.address, '$1',
+                    )]);
+            const recipeExecutor = await getAddrFromRegistry('RecipeExecutor');
+            const safeTxParams = {
+                to: recipeExecutor,
+                value: 0,
+                data: recipe.encodeForDsProxyCall()[1],
+                operation: 1,
+                safeTxGas: 0,
+                baseGas: 0,
+                gasPrice: 0,
+                gasToken: hre.ethers.constants.AddressZero,
+                refundReceiver: hre.ethers.constants.AddressZero,
+                nonce: 0,
+            };
+            const signature = await signSafeTx({ address: predictedAddress }, safeTxParams, signer);
+            const setupArgsEncoded = await encodeSetupArgs(setupArgs);
+            await dfsSafeFactory.createSafeAndExecute(
+                [singletonAddr, setupArgsEncoded, saltNonce],
+                [safeTxParams.to, safeTxParams.value, safeTxParams.data, safeTxParams.operation,
+                    safeTxParams.safeTxGas, safeTxParams.baseGas, safeTxParams.gasPrice,
+                    safeTxParams.gasToken, safeTxParams.refundReceiver,
+                    signature,
+                ],
+            );
+            const eoaBalance = await balanceOf(addrs[network].WETH_ADDRESS, signer.address);
+            const safeBalance = await balanceOf(addrs[network].WETH_ADDRESS, predictedAddress);
+            expect(safeBalance).to.be.eq(0);
+            expect(eoaBalance).to.be.eq(hre.ethers.utils.parseUnits('10', 18));
+        });
+    });
+};
 
 const deployUtilsTestsContracts = async () => {
     await redeploy('BotRefills');
@@ -609,10 +582,10 @@ const utilsTestsFullTest = async () => {
 module.exports = {
     utilsTestsFullTest,
     botRefillTest,
-    botRefillL2Test,
     feeReceiverTest,
     dfsRegistryControllerTest,
     tokenPriceHelperTest,
     tokenPriceHelperL2Test,
     priceFeedTest,
+    dfsSafeFactoryTest,
 };

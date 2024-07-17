@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/mcd/IDaiJoin.sol";
+import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
 
-import "../ActionBase.sol";
-import "../exchange/DFSSell.sol";
-import "../fee/GasFeeTaker.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { DFSSell } from "../exchange/DFSSell.sol";
+import { GasFeeTaker } from "../fee/GasFeeTaker.sol";
 
-import "./helpers/McdHelper.sol";
-import "./helpers/McdRatioHelper.sol";
+import { McdHelper } from "./helpers/McdHelper.sol";
+import { McdRatioHelper } from "./helpers/McdRatioHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { IManager } from "../../interfaces/mcd/IManager.sol";
+import { IJoin } from "../../interfaces/mcd/IJoin.sol";
 
 /// @title Single mcd repay action can use flashloan or not
 contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRatioHelper {
@@ -42,7 +45,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
 
     /// @inheritdoc ActionBase
     function executeAction(
-        bytes calldata _callData,
+        bytes memory _callData,
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
@@ -150,7 +153,8 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
             (address urn, bytes32 ilk) = getUrnAndIlk(MCD_MANAGER_ADDR, _repayParams.vaultId);
             uint256 debt = getAllDebt(address(vat), urn, urn, ilk);
             if (paybackAmount > debt) {
-                DAI_ADDR.withdrawTokens(IDSProxy(address(this)).owner(), paybackAmount - debt);
+                address owner = fetchOwnersOrWallet();
+                DAI_ADDR.withdrawTokens(owner, paybackAmount - debt);
                 paybackAmount = debt;
             }
 

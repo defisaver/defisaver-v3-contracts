@@ -1,35 +1,59 @@
 # defisaver-v3-contracts
 All the contracts related to the Defi Saver ecosystem.
 
-Detailed overview about that code can be found https://docs.defisaver.com
+Detailed overview about the code can be found at https://docs.defisaver.com
 
 ## To install
 Run `yarn` in the repo folder.
-You will also need to create a .env file as in the .env.example and fill it in with appropriate api keys.
-For a quick start, you can use the default values from .env.example and adapt them later.
+You will also need to create a `.env` file as in the `.env.example` and fill it in with appropriate api keys.
+For a quick start, you can copy `.env.example` with default values and rename it to `.env`.
+
+#### Link @defisaver/sdk package
+1. Clone sdk repo (https://github.com/defisaver/defisaver-sdk)
+2. Checkout to `feat/tx-relay` branch
+3. Run `yarn`
+4. Run `yarn build`
+5. Run `yarn link`
+6. Go back to defisaver-v3-contracts repo and run `yarn link @defisaver/sdk`
 
 ## How to run tests
 
 All of the tests are ran from the forked state of the mainnet. In the hardhat config you can change the 
 block number the fork starts from. If it starts from an old state some tests might not work.
-1. Compile all contracts at start:
 
-`npx hardhat compile`
+Before running tests compile all contracts at start: `npx hardhat compile`
 
-2. You need to start a hardhat node from the forked mainnet with the following command:
+#### Run tests with default hardhat network
+
+In `hardhat.config.js` hardhat network will fork mainnet by default. For example, you can run tests as:
+
+`npx hardhat test ./test/aaveV3/full-test.js --network hardhat`
+
+#### Run tests with separate hardhat node running
+First You need to start a hardhat node from the forked mainnet with the following command:
 
 `npx hardhat node --max-memory 8192  --fork ETHEREUM_NODE_URL`
 
-3. After that you can run the tests, for example:
+After that you can run the tests, for example:
 
-`npm run test local ./mcd/mcd-supply.js`
+`npm run test local ./aaveV3/full-test.js`
 
 ### Running strategy core tests
-`npm run test local ./run-core-tests.js`
+`npx hardhat test ./test/run-core-tests.js --network hardhat`
 
-Before running tests from the latest fork block it's necessary to update the prices used in integrations tests.
+### Running foundry tests
 
-`node scripts/utils/price-tracker.js`
+In `test-sol` folder you can find foundry setup.
+
+Before running tests make sure you have foundry installed (check it with `forge --version`)
+
+To run tests execute:
+
+`forge test --fork-url <INSERT_MAINNET_FORK>`
+
+<b>Notice:</b> 
+Currently, foundry tests are used just as an example. Although, we plan to add them more in the future, all protocols and core tests
+should be run in hardhat environment
 
 ## How to deploy on a tenderly fork
 

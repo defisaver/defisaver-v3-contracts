@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../DS/DSMath.sol";
-import "./helpers/UtilHelper.sol";
-import "../interfaces/chainlink/IFeedRegistry.sol";
-import "./Denominations.sol";
-import "../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
-import "../interfaces/aaveV2/IPriceOracleGetterAave.sol";
-import "../interfaces/chainlink/IAggregatorV3.sol";
+import { DSMath } from "../DS/DSMath.sol";
+import { UtilHelper } from "./helpers/UtilHelper.sol";
+import { IFeedRegistry } from "../interfaces/chainlink/IFeedRegistry.sol";
+import { Denominations } from "./Denominations.sol";
+import { ILendingPoolAddressesProviderV2 } from "../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import { IPriceOracleGetterAave } from "../interfaces/aaveV2/IPriceOracleGetterAave.sol";
+import { IAggregatorV3 } from "../interfaces/chainlink/IAggregatorV3.sol";
 
 /// @title TokenPriceHelperL2 Fetches prices from chainlink/aave and formats tokens properly on L2
 contract TokenPriceHelperL2 is DSMath, UtilHelper {
@@ -23,6 +23,7 @@ contract TokenPriceHelperL2 is DSMath, UtilHelper {
     {
         int256 price;
 
+        /// @dev Price staleness not checked, the risk has been deemed acceptable
         if (_roundId == 0) {
             (, price, , updateTimestamp, ) = aggregator.latestRoundData();
         } else {
