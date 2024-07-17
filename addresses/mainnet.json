@@ -263,6 +263,17 @@
         "history": ["0x02DCC3438Bb7e46F6BF671C72e98D503c0bCE520"]
     },
     {
+        "name": "OdosWrapper",
+        "address": "0x0cbc13b84286007ec4f17cd0f9dc7d7ca6ee4fff",
+        "id": "0x79d17c0f",
+        "path": "contracts/exchangeV3/offchainWrappersV3/OdosWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveWrapperV3",
         "address": "0xF5E8C498b6697F0704F0C50448714C5E328b33E2",
         "id": "0xb856c9af",
