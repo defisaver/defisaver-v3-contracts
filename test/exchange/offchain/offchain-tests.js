@@ -555,6 +555,149 @@ const zeroxTest = async () => {
     });
 };
 
+const odosTest = async () => {
+    describe('Dfs-Sell-via-Odos-Aggregator', function () {
+        this.timeout(400000);
+
+        let senderAcc;
+        let odosWrapper;
+        let proxy;
+        let snapshot;
+        let exchangeObject;
+        let amount;
+        let buyBalanceBefore;
+        let buyAssetInfo;
+        let sellAssetInfo;
+
+        before(async () => {
+            const chainId = chainIds[getNetwork()];
+
+            await redeploy('DFSSell');
+            await redeploy('PullToken');
+            await redeploy('RecipeExecutor');
+            odosWrapper = await redeploy('OdosWrapper');
+
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+            await setNewExchangeWrapper(senderAcc, odosWrapper.address);
+
+            sellAssetInfo = getAssetInfo('WETH', chainId);
+            buyAssetInfo = getAssetInfo('USDC', chainId);
+
+            buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
+            amount = hre.ethers.utils.parseUnits('1', 18);
+            await setBalance(sellAssetInfo.address, senderAcc.address, amount);
+            await approve(sellAssetInfo.address, proxy.address);
+            const odosQuoteBody = {
+                chainId: 1,
+                compact: false,
+                inputTokens: [
+                    {
+                        amount: amount.toString(),
+                        tokenAddress: sellAssetInfo.address,
+                    },
+                ],
+                outputTokens: [
+                    {
+                        proportion: 1,
+                        tokenAddress: buyAssetInfo.address,
+                    },
+                ],
+                referralCode: 0,
+                slippageLimitPercent: 1,
+                userAddr: odosWrapper.address,
+            };
+            const quote = {
+                method: 'POST',
+                baseURL: 'https://api.odos.xyz/sor/quote/v2',
+                data: odosQuoteBody,
+            };
+            // set slippage to user slippage + fee%
+            // add all protocols and remove one by one
+
+            const quoteObject = await axios(quote).then((response) => response.data);
+            const assembleTx = {
+                method: 'POST',
+                baseURL: 'https://api.odos.xyz/sor/assemble',
+                data: {
+                    userAddr: odosWrapper.address,
+                    pathId: quoteObject.pathId,
+                },
+            };
+            // set slippage to user slippage + fee%
+            // add all protocols and remove one by one
+
+            const transactionObject = await axios(assembleTx).then((response) => response.data);
+            console.log(transactionObject);
+
+            // THIS IS CHANGEABLE WITH API INFORMATION
+            const allowanceTarget = transactionObject.transaction.to;
+            const price = 1; // just for testing, anything bigger than 0 triggers offchain if
+            const protocolFee = 0;
+            const callData = transactionObject.transaction.data;
+
+            let amountInHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [amount]);
+            amountInHex = amountInHex.slice(2);
+
+            let offset = callData.toString().indexOf(amountInHex.toLowerCase());
+            offset = offset / 2 - 1;
+
+            const specialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes,uint256)'], [[callData, offset]]);
+
+            exchangeObject = formatExchangeObjForOffchain(
+                sellAssetInfo.address,
+                buyAssetInfo.address,
+                amount,
+                odosWrapper.address,
+                allowanceTarget,
+                allowanceTarget,
+                price,
+                protocolFee,
+                specialCalldata,
+            );
+
+            await addToExchangeAggregatorRegistry(senderAcc, allowanceTarget);
+        });
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        it('... should try to sell WETH for DAI with offchain calldata (Odos)', async () => {
+            const sellAction = new dfs.actions.basic.SellAction(
+                exchangeObject, senderAcc.address, senderAcc.address,
+            );
+            const functionData = sellAction.encodeForDsProxyCall()[1];
+
+            await executeAction('DFSSell', functionData, proxy);
+
+            const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
+
+            expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+        });
+        it('... should try to sell WETH for DAI with offchain calldata (Odos) in a recipe', async () => {
+            // test recipe
+            const sellRecipe = new dfs.Recipe('SellRecipe', [
+                new dfs.actions.basic.PullTokenAction(sellAssetInfo.address, senderAcc.address, amount.toString()),
+                new dfs.actions.basic.SellAction(
+                    exchangeObject, proxy.address, senderAcc.address,
+                ),
+            ]);
+            const functionData = sellRecipe.encodeForDsProxyCall()[1];
+
+            await executeAction('RecipeExecutor', functionData, proxy, addrs[getNetwork()].REGISTRY_ADDR, amount);
+
+            const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
+
+            expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+        });
+    });
+};
+
 const offchainExchangeFullTest = async () => {
     await paraswapTest();
     await oneInchTest();
@@ -568,4 +711,5 @@ module.exports = {
     paraswapTest,
     oneInchTest,
     zeroxTest,
+    odosTest,
 };
