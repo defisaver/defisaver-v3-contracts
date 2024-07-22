@@ -263,6 +263,17 @@
         "history": ["0x02DCC3438Bb7e46F6BF671C72e98D503c0bCE520"]
     },
     {
+        "name": "OdosWrapper",
+        "address": "0x0cbc13b84286007ec4f17cd0f9dc7d7ca6ee4fff",
+        "id": "0x79d17c0f",
+        "path": "contracts/exchangeV3/offchainWrappersV3/OdosWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveWrapperV3",
         "address": "0xF5E8C498b6697F0704F0C50448714C5E328b33E2",
         "id": "0xb856c9af",
@@ -2972,36 +2983,36 @@
     },
     {
         "name": "LlamaLendSelfLiquidate",
-        "address": "0xE4944E0e46177300fa4c351EF72b95b9655E8394",
+        "address": "0x46173C379Fbf998E6db0B47F45b73f77C64d3897",
         "id": "0xafcc4eb7",
         "path": "contracts/actions/llamalend/LlamaLendSelfLiquidate.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xE4944E0e46177300fa4c351EF72b95b9655E8394"]
     },
     {
         "name": "LlamaLendPayback",
-        "address": "0x5B506B7a0117dbcd086632575dA599BB603Eb602",
+        "address": "0x07e31d56E47EE6926892dCd928dF26899F58Ac8E",
         "id": "0x48ef1f07",
         "path": "contracts/actions/llamalend/LlamaLendPayback.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x5B506B7a0117dbcd086632575dA599BB603Eb602"]
     },
     {
         "name": "LlamaLendWithdraw",
-        "address": "0x2593Da3c4110C531541424e9e847cd7905894C52",
+        "address": "0x5aEb07Ce4A49b7EaE2A1e5281768cFc0C3e1d8F3",
         "id": "0xf54e28d9",
         "path": "contracts/actions/llamalend/LlamaLendWithdraw.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x2593Da3c4110C531541424e9e847cd7905894C52"]
     },
     {
         "name": "LlamaLendBorrow",
@@ -3071,14 +3082,14 @@
     },
     {
         "name": "LlamaLendSelfLiquidateWithColl",
-        "address": "0xc20460aabdb89e55c2d29067e031d170f2fb10e5",
+        "address": "0xA99DD1D91141cA63C423DB763dE75078336803B2",
         "id": "0x74ba5125",
         "path": "contracts/actions/llamalend/advanced/LlamaLendSelfLiquidateWithColl.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xc20460aabdb89e55c2d29067e031d170f2fb10e5"]
     },
     {
         "name": "LlamaLendSwapper",
