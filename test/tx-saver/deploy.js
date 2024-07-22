@@ -25,13 +25,7 @@ describe('Deploy tx saver contracts', function () {
         const bothAuthForTxSaver = await redeploy('BotAuthForTxSaver', addrs[network].REGISTRY_ADDR, false, isFork);
         const recipeExecutor = await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
         const dfsSell = await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, false, isFork);
-
-        const llamaLendBoost = await redeploy('LlamaLendBoost', addrs[network].REGISTRY_ADDR, false, isFork);
-        const llamaLendRepay = await redeploy('LlamaLendRepay', addrs[network].REGISTRY_ADDR, false, isFork);
-        const llamaLendLevCreate = await redeploy('LlamaLendLevCreate', addrs[network].REGISTRY_ADDR, false, isFork);
-        const llamaLendSelfLiquidateWithColl = await redeploy('LlamaLendSelfLiquidateWithColl', addrs[network].REGISTRY_ADDR, false, isFork);
         const llamaLendSwapper = await redeploy('LlamaLendSwapper', addrs[network].REGISTRY_ADDR, false, isFork);
-
         const txSaverExecutor = await redeploy('TxSaverExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
 
         console.log('Sender:', senderAcc.address);
@@ -40,10 +34,6 @@ describe('Deploy tx saver contracts', function () {
         console.log('RecipeExecutor:', recipeExecutor.address);
         console.log('DFSSell:', dfsSell.address);
         console.log('LlamaLendSwapper:', llamaLendSwapper.address);
-        console.log('LlamaLendBoost:', llamaLendBoost.address);
-        console.log('LlamaLendRepay:', llamaLendRepay.address);
-        console.log('LlamaLendLevCreate:', llamaLendLevCreate.address);
-        console.log('LlamaLendSelfLiquidateWithColl:', llamaLendSelfLiquidateWithColl.address);
         console.log('TxSaverExecutor:', txSaverExecutor.address);
     };
 
@@ -56,12 +46,14 @@ describe('Deploy tx saver contracts', function () {
         const botAcc1 = '0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4';
         const botAcc2 = '0xC561281982c3042376eB8242d6A78Ab18062674F';
         const botAcc3 = '0x660B3515F493200C47Ef3DF195abEAfc57Bd6496';
+        const botAcc4 = '0xF14e7451A6836725481d8E9042C22117b2039539';
 
         if (isFork) {
             await topUp(senderAcc.address);
             await topUp(botAcc1);
             await topUp(botAcc2);
             await topUp(botAcc3);
+            await topUp(botAcc4);
             await topUp(getOwnerAddr());
         }
 
@@ -70,6 +62,7 @@ describe('Deploy tx saver contracts', function () {
         await addBotCallerForTxSaver(botAcc1, isFork);
         await addBotCallerForTxSaver(botAcc2, isFork);
         await addBotCallerForTxSaver(botAcc3, isFork);
+        await addBotCallerForTxSaver(botAcc4, isFork);
     });
 
     it('Deploy', async () => {

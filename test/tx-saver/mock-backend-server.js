@@ -10,7 +10,7 @@ const { topUp } = require('../../scripts/utils/fork');
 const { getOwnerAddr, getContractFromRegistry, addrs } = require('../utils');
 const {
     addBotCallerForTxSaver,
-    emptyInjectedOffchainOrder,
+    emptyInjectedOrder,
 } = require('./utils-tx-saver');
 
 const app = express();
@@ -110,13 +110,14 @@ app.post('/tx-saver', async (req, res) => {
             });
         }
     }
-
+    const l1GasCostInEth = 0;
     console.log(txSaverExecutorByBot.address);
-    console.log(emptyInjectedOffchainOrder);
+    console.log(emptyInjectedOrder);
     const receipt = await txSaverExecutorByBot.executeTx(
         txParams,
         estimatedGas,
-        emptyInjectedOffchainOrder,
+        l1GasCostInEth,
+        emptyInjectedOrder,
         {
             gasLimit: 8000000,
         },
