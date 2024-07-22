@@ -412,14 +412,15 @@
       },
     {
       "name": "DFSSell",
-      "address": "0xF940aE73cb01c81e657916D14e5699c73a22566c",
+      "address": "0xdC2C741b8A60B40BCc170F67C4aF02038b5086a7",
       "id": "0x7f2a0f35",
       "path": "contracts/actions/exchange/DFSSell.sol",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0xF940aE73cb01c81e657916D14e5699c73a22566c",
         "0x9109F34AB28D369cF894aF45C50E976B8E312a82",
         "0x49E1574Ba6b8134c29B1EbC010784A01D91b794F"
       ]
@@ -652,14 +653,15 @@
     },
     {
       "name": "RecipeExecutor",
-      "address": "0x4417bffFD5e3131069f62Fac07e40704EE234404",
+      "address": "0x7a25174229ea402d8ccd35fc6d55af079c399884",
       "id": "0x4c69ee1e",
       "path": "contracts/core/RecipeExecutor.sol",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0x4417bffFD5e3131069f62Fac07e40704EE234404",
         "0xe775c59e5662597bcE8aB4432C06380709554883",
         "0xc1cB462033D8319016dF4e8A1810f1afB06b50bB"
       ]
@@ -1238,14 +1240,14 @@
     },
     {
       "name": "LlamaLendSwapper",
-      "address": "0x9b4a6d3674b099317d0c5dfe2592ed222057c878",
+      "address": "0xee41a84da283a82cbeadab051aa07dbb442eb0b4",
       "id": "0x4a94e2c3",
       "path": "contracts/actions/llamalend/advanced/LlamaLendSwapper.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
-      "history": []
+      "history": ["0x9b4a6d3674b099317d0c5dfe2592ed222057c878"]
     },
     {
       "name": "PermitToken",
@@ -1255,6 +1257,28 @@
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "TxSaverExecutor",
+      "address": "0x2d7993e134b820359c55ca0b12b997f29a74556a",
+      "id": "0x91bfbd87",
+      "path": "contracts/tx-saver/TxSaverExecutor.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "BotAuthForTxSaver",
+      "address": "0xf9b14d41090429436f8da2b01c1d980cbe4f8e43",
+      "id": "0x5efaa232",
+      "path": "contracts/tx-saver/BotAuthForTxSaver.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": 0,
       "registryIds": [],
       "history": []
     }

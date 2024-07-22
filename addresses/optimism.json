@@ -359,14 +359,15 @@
     },
     {
       "name": "RecipeExecutor",
-      "address": "0xA532771BD90dAf94b456A4acC9E9cbBdF1367572",
+      "address": "0x993a8c81142044e1cb0cf0c3d84bea235d842fb0",
       "id": "0x4c69ee1e",
       "path": "contracts/core/RecipeExecutor.sol",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0xA532771BD90dAf94b456A4acC9E9cbBdF1367572",
         "0x44FDe16DDCd7c02bE28de52CEc08997336051735",
         "0xe91ff198bA6DFA97A7B4Fa43e5a606c915B0471f",
         "0x93B018328aB415cDc1b001B3a9fdFA9BEaB971A2"
@@ -725,14 +726,15 @@
     },
     {
       "name": "DFSSell",
-      "address": "0x01f7DB086076a16Cebd940A95919Af088C0662FD",
+      "address": "0x47c402981f3d06e467befc9bbae8da4135ff5e28",
       "id": "0x7f2a0f35",
       "path": "contracts/actions/exchange/DFSSell.sol",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0x01f7DB086076a16Cebd940A95919Af088C0662FD",
         "0xC6c601fcAa870efd26C624F8c65fbc54cBe533b1",
         "0xfA015aD97E25247c2144F1C89AeD449cc3Fd1FCB"
       ]
@@ -1089,6 +1091,28 @@
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "TxSaverExecutor",
+      "address": "0xCD6051D332ec92Dcb25d5AE52D02e02f04ed0614",
+      "id": "0x91bfbd87",
+      "path": "contracts/tx-saver/TxSaverExecutor.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "BotAuthForTxSaver",
+      "address": "0x8860336e0a5e5b9da593a63a4f782e0237ad2d90",
+      "id": "0x5efaa232",
+      "path": "contracts/tx-saver/BotAuthForTxSaver.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": 0,
       "registryIds": [],
       "history": []
     }
