@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./IPipInterface.sol";
+import { IPipInterface } from "./IPipInterface.sol";
 
 abstract contract ISpotter {
     struct Ilk {

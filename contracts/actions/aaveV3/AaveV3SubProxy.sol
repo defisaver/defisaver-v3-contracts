@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../auth/AdminAuth.sol";
-import "../../auth/Permission.sol";
-import "../../core/strategy/SubStorage.sol";
-import "../../utils/CheckWalletType.sol";
-import "./helpers/AaveV3Helper.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { Permission } from "../../auth/Permission.sol";
+import { SubStorage } from "../../core/strategy/SubStorage.sol";
+import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
+import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
+import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
 contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType, AaveV3Helper {

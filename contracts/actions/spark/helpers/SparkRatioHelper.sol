@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../DS/DSMath.sol";
-import "./MainnetSparkAddresses.sol";
-import "../../../interfaces/aaveV3/IPoolV3.sol";
+import { DSMath } from "../../../DS/DSMath.sol";
+import { MainnetSparkAddresses } from "./MainnetSparkAddresses.sol";
+import { IPoolV3 } from "../../../interfaces/aaveV3/IPoolV3.sol";
+import { IPoolAddressesProvider } from "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
 
 contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
    function getSafetyRatio(address _market, address _user) public view returns (uint256) {

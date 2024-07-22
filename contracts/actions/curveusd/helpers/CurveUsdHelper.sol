@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import {ICrvUsdController, ILLAMMA, ICrvUsdControllerFactory, ICurveUsdSwapper} from "../../../interfaces/curveusd/ICurveUsd.sol";
-import "../../../interfaces/curve/IAddressProvider.sol";
+import { IAddressProvider } from "../../../interfaces/curve/IAddressProvider.sol";
 
-import "../../../interfaces/IERC20.sol";
-import "../../../DS/DSMath.sol";
-import "./MainnetCurveUsdAddresses.sol";
-import "../../../utils/TokenUtils.sol";
+import { IERC20 } from "../../../interfaces/IERC20.sol";
+import { DSMath } from "../../../DS/DSMath.sol";
+import { MainnetCurveUsdAddresses } from "./MainnetCurveUsdAddresses.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
 contract CurveUsdHelper is MainnetCurveUsdAddresses, DSMath {
     using TokenUtils for address;

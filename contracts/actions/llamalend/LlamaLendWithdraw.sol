@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/LlamaLendHelper.sol";
-
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { LlamaLendHelper } from "./helpers/LlamaLendHelper.sol";
+import { ILlamaLendController } from "../../interfaces/llamalend/ILlamaLendController.sol";
 
 /// @title Action that withdraws collateral from user's wallet llamalend position
 /// @dev collateralAmount must be non-zero
@@ -65,14 +65,11 @@ contract LlamaLendWithdraw is ActionBase, LlamaLendHelper {
         }
         
         address collateralAsset = ILlamaLendController(_params.controllerAddress).collateral_token();
-        if (collateralAsset != TokenUtils.WETH_ADDR){
-            ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount);
+
+        if (_params.controllerAddress == OLD_WETH_CONTROLLER && block.chainid == 1){
+            ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount, false);
         } else {
-            if (block.chainid == 1){
-                ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount, false);
-            } else {
-                ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount);
-            }
+            ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount);
         }
 
         collateralAsset.withdrawTokens(_params.to, _params.collateralAmount);

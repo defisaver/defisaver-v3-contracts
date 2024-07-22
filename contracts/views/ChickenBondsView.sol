@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../actions/liquity/helpers/LiquityHelper.sol";
-import "../interfaces/liquity/IChickenBondManager.sol";
-import "../interfaces/liquity/IBondNFT.sol";
+import { LiquityHelper } from "../actions/liquity/helpers/LiquityHelper.sol";
+import { IChickenBondManager } from "../interfaces/liquity/IChickenBondManager.sol";
+import { IBondNFT } from "../interfaces/liquity/IBondNFT.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 contract ChickenBondsView is LiquityHelper {
 

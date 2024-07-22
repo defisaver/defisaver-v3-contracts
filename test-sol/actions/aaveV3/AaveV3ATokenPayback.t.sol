@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import { AaveV3ATokenPayback } from "../../../contracts/actions/aaveV3/AaveV3ATokenPayback.sol";   
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";   

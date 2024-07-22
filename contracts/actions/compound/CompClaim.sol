@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/CompHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { CompHelper } from "./helpers/CompHelper.sol";
+import { IComptroller } from "../../interfaces/compound/IComptroller.sol";
 
 /// @title Claims Comp reward for the specified user
 contract CompClaim is ActionBase, CompHelper {

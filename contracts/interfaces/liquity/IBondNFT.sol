@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../IERC721Enumerable.sol";
+import { IERC721Enumerable } from "../IERC721Enumerable.sol";
 
 interface IBondNFT is IERC721Enumerable {
     

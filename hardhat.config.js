@@ -101,6 +101,11 @@ module.exports = {
                 // blockNumber: 12068716
             },
             name: 'mainnet',
+            hardfork: 'cancun',
+            accounts: {
+                balance: '10000000000000000000000000000',
+                privateKey: process.env.PRIV_KEY_MAINNET,
+            },
             chainId: 1,
         },
         // NETWORKS FOR DEPLOYING
@@ -143,16 +148,17 @@ module.exports = {
     solidity: {
         compilers: [
             {
-                version: '0.8.10',
+                version: '0.8.24',
                 settings: {
                     optimizer: {
                         enabled: true,
                         runs: 1000,
                     },
+                    evmVersion: 'cancun',
                 },
             },
             {
-                version: '0.8.24',
+                version: '0.8.10',
                 settings: {
                     optimizer: {
                         enabled: true,

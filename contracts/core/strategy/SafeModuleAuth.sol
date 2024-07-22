@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/IDFSRegistry.sol";
-import "../../interfaces/IAuth.sol";
-import "../../auth/Pausable.sol";
-import "./../helpers/CoreHelper.sol";
-import "../../interfaces/safe/ISafe.sol";
+import { IDFSRegistry } from "../../interfaces/IDFSRegistry.sol";
+import { IAuth } from "../../interfaces/IAuth.sol";
+import { Pausable } from "../../auth/Pausable.sol";
+import { CoreHelper } from "./../helpers/CoreHelper.sol";
+import { ISafe } from "../../interfaces/safe/ISafe.sol";
 
 /// @title SafeModuleAuth Gets safe module auth from users and is callable by the Executor
 contract SafeModuleAuth is Pausable, CoreHelper, IAuth {

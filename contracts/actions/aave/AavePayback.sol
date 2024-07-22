@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/AaveHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveHelper } from "./helpers/AaveHelper.sol";
+import { ILendingPoolV2 } from "../../interfaces/aaveV2/ILendingPoolV2.sol";
 
 /// @title Payback a token a user borrowed from an Aave market
 contract AavePayback is ActionBase, AaveHelper {

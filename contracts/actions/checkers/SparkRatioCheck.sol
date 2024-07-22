@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../spark/helpers/SparkRatioHelper.sol";
-import "../../core/helpers/CoreHelper.sol";
-import "../../utils/TransientStorage.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SparkRatioHelper } from "../spark/helpers/SparkRatioHelper.sol";
+import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
+import { TransientStorage } from "../../utils/TransientStorage.sol";
 
 contract SparkRatioCheck is ActionBase, SparkRatioHelper {
 

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../DS/DSMath.sol";
-import "../../../interfaces/liquity/ITroveManager.sol";
-import "../../../interfaces/liquity/IPriceFeed.sol";
-import "./MainnetLiquityAddresses.sol";
+import { DSMath } from "../../../DS/DSMath.sol";
+import { ITroveManager } from "../../../interfaces/liquity/ITroveManager.sol";
+import { IPriceFeed } from "../../../interfaces/liquity/IPriceFeed.sol";
+import { MainnetLiquityAddresses } from "./MainnetLiquityAddresses.sol";
 
 /// @title Helper methods for Liquity ratio calc.
 contract LiquityRatioHelper is DSMath, MainnetLiquityAddresses {

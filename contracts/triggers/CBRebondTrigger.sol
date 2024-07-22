@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../interfaces/ITrigger.sol";
-import "../actions/liquity/helpers/CBHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { CBHelper } from "../actions/liquity/helpers/CBHelper.sol";
+import { IChickenBondManager } from "../interfaces/liquity/IChickenBondManager.sol";
 
 /// @title Chicken Bonds trigger when the optimal amount of bLUSD has accrued
 contract CBRebondTrigger is ITrigger, AdminAuth, CBHelper {

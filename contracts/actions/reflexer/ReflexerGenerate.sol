@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/reflexer/ITaxCollector.sol";
-import "../../interfaces/reflexer/ICoinJoin.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/ReflexerHelper.sol";
+import { ITaxCollector } from "../../interfaces/reflexer/ITaxCollector.sol";
+import { ICoinJoin } from "../../interfaces/reflexer/ICoinJoin.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { ReflexerHelper } from "./helpers/ReflexerHelper.sol";
 
 /// @title Generate rai from a Reflexer Safe
 contract ReflexerGenerate is ActionBase, ReflexerHelper {

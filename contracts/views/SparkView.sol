@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../actions/spark/helpers/SparkHelper.sol";
-import "../actions/spark/helpers/SparkRatioHelper.sol";
-import "../utils/TokenUtils.sol";
-import "../interfaces/aaveV3/IAaveV3Oracle.sol";
+import { SparkHelper } from "../actions/spark/helpers/SparkHelper.sol";
+import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
+import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
+import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
+import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
 
 import { WadRayMath } from "../utils/math/WadRayMath.sol";
 import { MathUtils } from "../utils/math/MathUtils.sol";

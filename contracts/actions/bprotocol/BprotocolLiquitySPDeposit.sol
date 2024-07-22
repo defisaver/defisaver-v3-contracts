@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/bprotocol/IBAMM.sol";
-import "../ActionBase.sol";
-import "./helpers/BprotocolLiquitySPHelper.sol";
-import "../../utils/TokenUtils.sol";
+import { IBAMM } from "../../interfaces/bprotocol/IBAMM.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { BprotocolLiquitySPHelper } from "./helpers/BprotocolLiquitySPHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 
 /// @title BprotocolLiquitySPDeposit - Action that deposits LUSD into Bprotocol

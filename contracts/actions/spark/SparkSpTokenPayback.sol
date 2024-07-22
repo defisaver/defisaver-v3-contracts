@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/IWETH.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/SparkHelper.sol";
-import "../../interfaces/aave/IAToken.sol";
+import { IWETH } from "../../interfaces/IWETH.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SparkHelper } from "./helpers/SparkHelper.sol";
+import { IAToken } from "../../interfaces/aave/IAToken.sol";
+import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
 
 /// @title Allows user to repay with spTokens of the underlying debt asset eg. Pay DAI debt using spDAI tokens.
 contract SparkSpTokenPayback is ActionBase, SparkHelper {

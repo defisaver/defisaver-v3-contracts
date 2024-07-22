@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
-import "../../auth/Permission.sol";
-import "../../core/strategy/SubStorage.sol";
-import "../../core/strategy/StrategyModel.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { Permission } from "../../auth/Permission.sol";
+import { SubStorage } from "../../core/strategy/SubStorage.sol";
+import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 
 /// @title Action to create a new subscription
 contract CreateSub is ActionBase, Permission {

@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../interfaces/IBotRegistry.sol";
-import "./TokenUtils.sol";
-import "./helpers/UtilHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { IBotRegistry } from "../interfaces/IBotRegistry.sol";
+import { TokenUtils } from "./TokenUtils.sol";
+import { UtilHelper } from "./helpers/UtilHelper.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 /// @title Contract used to refill tx sending bots when they are low on eth
 contract BotRefills is AdminAuth, UtilHelper {

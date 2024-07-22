@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
-import "../interfaces/morpho-blue/IIrm.sol";
-import "../interfaces/morpho-blue/IOracle.sol";
+import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
+import { IIrm } from "../interfaces/morpho-blue/IIrm.sol";
+import { IOracle } from "../interfaces/morpho-blue/IOracle.sol";
+import { Id, MarketParams, Market, MorphoBluePosition } from "../interfaces/morpho-blue/IMorphoBlue.sol";
+import { MarketParamsLib, MorphoLib, SharesMathLib } from "../actions/morpho-blue/helpers/MorphoBlueLib.sol";
 
 contract MorphoBlueView is MorphoBlueHelper {
 

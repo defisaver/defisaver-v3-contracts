@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/balancer/IPool.sol";
-import "../interfaces/balancer/IVault.sol";
+import { IPool } from "../interfaces/balancer/IPool.sol";
+import { IVault } from "../interfaces/balancer/IVault.sol";
 
 contract BalancerView {
     

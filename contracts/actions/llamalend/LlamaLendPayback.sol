@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/LlamaLendHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { LlamaLendHelper } from "./helpers/LlamaLendHelper.sol";
+import { ILlamaLendController } from "../../interfaces/llamalend/ILlamaLendController.sol";
 
 /// @title Action that pays back debt asset to a llamalend position
 /// @dev paybackAmount must be non-zero
@@ -94,7 +95,7 @@ contract LlamaLendPayback is ActionBase, LlamaLendHelper {
             startingBaseCollBalance = collateralAsset.getBalance(address(this));
             startingDebtAssetBalanceWithoutDebt = debtAsset.getBalance(address(this)) - debt;
         }
-        if (block.chainid == 1) {
+        if (_params.controllerAddress == OLD_WETH_CONTROLLER && block.chainid == 1) {
             ILlamaLendController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false);
         } else {
             ILlamaLendController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand);

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../DS/DSMath.sol";
-import "../utils/math/Exponential.sol";
-import "../interfaces/compound/IComptroller.sol";
-import "../interfaces/compound/ICToken.sol";
-import "../interfaces/compound/ICompoundOracle.sol";
 import { InterestRateModel } from "../interfaces/compound/InterestRateModel.sol";
+import { DSMath } from "../DS/DSMath.sol";
+import { Exponential } from "../utils/math/Exponential.sol";
+import { IComptroller } from "../interfaces/compound/IComptroller.sol";
+import { ICToken } from "../interfaces/compound/ICToken.sol";
+import { ICompoundOracle } from "../interfaces/compound/ICompoundOracle.sol";
 
 contract CompView is Exponential, DSMath {
 

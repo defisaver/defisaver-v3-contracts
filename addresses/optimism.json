@@ -123,6 +123,17 @@
       ]
     },
     {
+      "name": "OdosWrapper",
+      "address": "0x02451c3a514c2e3b9d26eddb75449bb82ee018bf",
+      "id": "0x79d17c0f",
+      "path": "contracts/exchangeV3/offchainWrappersV3/OdosWrapper.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "KyberInputScalingHelper",
       "address": "0x1E3b2371b3790bDc7C667d50aB077Dce7121391A",
       "id": "0x559d99f5",

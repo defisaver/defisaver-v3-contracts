@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
+import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to sum up 2 inputs/return values
 contract SumInputs is ActionBase {

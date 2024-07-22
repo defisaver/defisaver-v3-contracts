@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../../DS/DSMath.sol";
-import "./MainnetAaveV3Addresses.sol";
-import "../../../interfaces/aaveV3/IPoolV3.sol";
+import { DSMath } from "../../../DS/DSMath.sol";
+import { MainnetAaveV3Addresses } from "./MainnetAaveV3Addresses.sol";
+import { IPoolV3 } from "../../../interfaces/aaveV3/IPoolV3.sol";
+import { IPoolAddressesProvider } from "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
 
 contract AaveV3RatioHelper is DSMath, MainnetAaveV3Addresses {
    function getSafetyRatio(address _market, address _user) public view returns (uint256) {

@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/mcd/IManager.sol";
-import "../../interfaces/mcd/ISpotter.sol";
-import "../../interfaces/mcd/IDaiJoin.sol";
-import "../../interfaces/mcd/IJug.sol";
-import "../../interfaces/mcd/ICropper.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/McdHelper.sol";
+import { IManager } from "../../interfaces/mcd/IManager.sol";
+import { ISpotter } from "../../interfaces/mcd/ISpotter.sol";
+import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
+import { IJug } from "../../interfaces/mcd/IJug.sol";
+import { ICropper } from "../../interfaces/mcd/ICropper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { McdHelper } from "./helpers/McdHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ICdpRegistry } from "../../interfaces/mcd/ICdpRegistry.sol";
 
 /// @title Generate dai from a Maker Vault
 contract McdGenerate is ActionBase, McdHelper {

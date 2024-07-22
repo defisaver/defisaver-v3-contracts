@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../interfaces/mcd/IManager.sol";
-import "../../interfaces/mcd/IDaiJoin.sol";
-import "../../utils/TokenUtils.sol";
-import "../ActionBase.sol";
-import "./helpers/McdHelper.sol";
-import "../../interfaces/mcd/ICropper.sol";
-import "../../interfaces/mcd/ICdpRegistry.sol";
+import { IManager } from "../../interfaces/mcd/IManager.sol";
+import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { McdHelper } from "./helpers/McdHelper.sol";
+import { ICropper } from "../../interfaces/mcd/ICropper.sol";
+import { ICdpRegistry } from "../../interfaces/mcd/ICdpRegistry.sol";
 
 /// @title Payback dai debt for a Maker vault
 contract McdPayback is ActionBase, McdHelper {

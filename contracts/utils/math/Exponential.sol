@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./CarefulMath.sol";
+import { CarefulMath } from "./CarefulMath.sol";
 
 /// @title Exponential module for storing fixed-precision decimals
 /// @author Compound

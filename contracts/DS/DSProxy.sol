@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "./DSAuth.sol";
-import "./DSNote.sol";
+import { DSAuth } from "./DSAuth.sol";
+import { DSNote } from "./DSNote.sol";
 
 abstract contract DSProxy is DSAuth, DSNote {
     DSProxyCache public cache; // global cache for contracts

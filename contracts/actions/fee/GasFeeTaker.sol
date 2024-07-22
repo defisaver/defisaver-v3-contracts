@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../utils/FeeRecipient.sol";
-import "../ActionBase.sol";
-import "./helpers/GasFeeHelper.sol";
+import { FeeRecipient } from "../../utils/FeeRecipient.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { GasFeeHelper } from "./helpers/GasFeeHelper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 /// @title Helper action to send a token to the specified address
 contract GasFeeTaker is ActionBase, GasFeeHelper {

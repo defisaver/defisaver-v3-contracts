@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../auth/AdminAuth.sol";
-import "../interfaces/ITrigger.sol";
-import "../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
-import "../interfaces/uniswap/v3/IUniswapV3Factory.sol";
-import "../interfaces/uniswap/v3/IUniswapV3Pool.sol";
-import "./helpers/TriggerHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { IUniswapV3NonfungiblePositionManager } from "../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+import { IUniswapV3Factory } from "../interfaces/uniswap/v3/IUniswapV3Factory.sol";
+import { IUniswapV3Pool } from "../interfaces/uniswap/v3/IUniswapV3Pool.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that triggers if the current tick is outside of the positions range on the side that we want it to be
 contract UniV3CurrentTickTrigger is ITrigger, AdminAuth, TriggerHelper {

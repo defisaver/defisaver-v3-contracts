@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../ActionBase.sol";
+import { ActionBase } from "../ActionBase.sol";
 
-import "../../interfaces/balancer/IFlashLoanRecipient.sol";
-import "../../interfaces/balancer/IFlashLoans.sol";
-import "../../interfaces/IDSProxy.sol";
-import "../../interfaces/IFLParamGetter.sol";
-import "../../interfaces/flashloan/IFlashLoanBase.sol";
-import "../../utils/TokenUtils.sol";
-import "../../utils/ReentrancyGuard.sol";
+import { IFlashLoanRecipient } from "../../interfaces/balancer/IFlashLoanRecipient.sol";
+import { IFlashLoans } from "../../interfaces/balancer/IFlashLoans.sol";
+import { IDSProxy } from "../../interfaces/IDSProxy.sol";
+import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
+import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
 
-import "./helpers/FLHelper.sol";
+import { FLHelper } from "./helpers/FLHelper.sol";
 
 contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashLoanBase, FLHelper {
     using TokenUtils for address;

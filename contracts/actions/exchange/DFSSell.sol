@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import "../../exchangeV3/DFSExchangeCore.sol";
 import "../../exchangeV3/registries/TokenGroupRegistry.sol";

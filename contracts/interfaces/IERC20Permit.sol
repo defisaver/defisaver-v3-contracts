@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.9.0) (token/ERC20/extensions/IERC20Permit.sol)
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 /**
  * @dev Interface of the ERC20 Permit extension allowing approvals to be made via signatures, as defined in

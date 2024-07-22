@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU AGPLv3
 pragma solidity >=0.5.0;
 
-import "./MorphoTypes.sol";
+import { MorphoTypes } from "./MorphoTypes.sol";
 
 interface IMorphoAaveV2Lens {
     /// STORAGE ///
@@ -71,7 +71,7 @@ interface IMorphoAaveV2Lens {
         external
         view
         returns (
-            Types.Indexes memory indexes,
+            MorphoTypes.Indexes memory indexes,
             uint32 lastUpdateTimestamp,
             uint256 p2pSupplyDelta,
             uint256 p2pBorrowDelta
@@ -97,7 +97,7 @@ interface IMorphoAaveV2Lens {
     function getMarketPauseStatus(address _poolToken)
         external
         view
-        returns (Types.MarketPauseStatus memory);
+        returns (MorphoTypes.MarketPauseStatus memory);
 
     function getTotalMarketSupply(address _poolToken)
         external
@@ -115,7 +115,7 @@ interface IMorphoAaveV2Lens {
 
     function getCurrentP2PBorrowIndex(address _poolToken) external view returns (uint256);
 
-    function getIndexes(address _poolToken) external view returns (Types.Indexes memory indexes);
+    function getIndexes(address _poolToken) external view returns (MorphoTypes.Indexes memory indexes);
 
     /// USERS ///
 
@@ -129,7 +129,7 @@ interface IMorphoAaveV2Lens {
     function getUserBalanceStates(address _user)
         external
         view
-        returns (Types.LiquidityData memory assetData);
+        returns (MorphoTypes.LiquidityData memory assetData);
 
     function getCurrentSupplyBalanceInOf(address _poolToken, address _user)
         external
@@ -159,7 +159,7 @@ interface IMorphoAaveV2Lens {
         address _poolToken,
         uint256 _withdrawnAmount,
         uint256 _borrowedAmount
-    ) external view returns (Types.LiquidityData memory assetData);
+    ) external view returns (MorphoTypes.LiquidityData memory assetData);
 
     function getUserHypotheticalHealthFactor(
         address _user,
@@ -172,7 +172,7 @@ interface IMorphoAaveV2Lens {
         address _user,
         address _poolToken,
         address _oracle
-    ) external view returns (Types.AssetLiquidityData memory assetData);
+    ) external view returns (MorphoTypes.AssetLiquidityData memory assetData);
 
     function isLiquidatable(address _user) external view returns (bool);
 

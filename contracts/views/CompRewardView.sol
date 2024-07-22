@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../interfaces/compound/IComptroller.sol";
-import "../interfaces/IERC20.sol";
-import "../utils/math/Exponential.sol";
+import { IComptroller } from "../interfaces/compound/IComptroller.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { Exponential } from "../utils/math/Exponential.sol";
 
 contract CompRewardView is Exponential {
     IComptroller public constant comp = IComptroller(

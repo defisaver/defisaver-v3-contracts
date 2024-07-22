@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
-import "../../ActionBase.sol";
-import "../../../utils/TokenUtils.sol";
-import "./helpers/UniV3Helper.sol";
+import { ActionBase } from "../../ActionBase.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { UniV3Helper } from "./helpers/UniV3Helper.sol";
+import { IUniswapV3NonfungiblePositionManager } from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Collects tokensOwed from a position represented by tokenId
 contract UniCollectV3 is ActionBase, UniV3Helper {
