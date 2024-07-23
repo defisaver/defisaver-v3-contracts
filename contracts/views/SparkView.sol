@@ -554,13 +554,14 @@ contract SparkView is SparkHelper, SparkRatioHelper {
             uint256 nextVariableBorrowIndex = _getNextVariableBorrowIndex(reserve);
             uint256 variableDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply();
             
-            if (_reserveParams[i].isDebtAsset) {
-                variableDebt += _reserveParams[i].liquidityTaken;
-                variableDebt = _reserveParams[i].liquidityAdded >= variableDebt ? 0
-                    : variableDebt - _reserveParams[i].liquidityAdded;
-            }
 
             uint256 totalVarDebt = variableDebt.rayMul(nextVariableBorrowIndex);
+
+            if (_reserveParams[i].isDebtAsset) {
+                totalVarDebt += _reserveParams[i].liquidityTaken;
+                totalVarDebt = _reserveParams[i].liquidityAdded >= totalVarDebt ? 0
+                    : totalVarDebt - _reserveParams[i].liquidityAdded;
+            }
 
             (
                 estimatedRate.supplyRate,

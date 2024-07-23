@@ -378,14 +378,14 @@ contract AaveView is AaveHelper, DSMath{
 
             uint256 nextVariableBorrowIndex = _getNextVariableBorrowIndex(reserve);
             uint256 variableDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply();
-
-            if (_reserveParams[i].isDebtAsset) {
-                variableDebt += _reserveParams[i].liquidityTaken;
-                variableDebt = _reserveParams[i].liquidityAdded >= variableDebt ? 0
-                    : variableDebt - _reserveParams[i].liquidityAdded;
-            }
             
             uint256 totalVariableDebt = variableDebt.rayMul(nextVariableBorrowIndex);
+            
+            if (_reserveParams[i].isDebtAsset) {
+                totalVariableDebt += _reserveParams[i].liquidityTaken;
+                totalVariableDebt = _reserveParams[i].liquidityAdded >= totalVariableDebt ? 0
+                    : totalVariableDebt - _reserveParams[i].liquidityAdded;
+            }
 
             uint256 availableLiquidity = IERC20(_reserveParams[i].reserveAddress)
                 .balanceOf(reserve.aTokenAddress)
