@@ -7,6 +7,7 @@ const { getAssetInfo } = require('@defisaver/tokens');
 const {
     aaveV3Supply,
     aaveV3Borrow,
+    aaveV3Payback,
 } = require('../../actions');
 
 const { isAssetBorrowableV3, VARIABLE_RATE } = require('../../utils-aave');
@@ -16,13 +17,12 @@ const {
     network,
     fetchAmountinUSDPrice,
     setBalance,
+    approve,
 } = require('../../utils');
 
-// const collateralTokens = ['wstETH', 'WETH', 'USDC', 'USDT', 'rETH', 'LINK', 'cbETH'];
-// const debtTokens = ['DAI', 'USDC', 'WETH'];
-
+// const collateralTokens = ['wstETH', 'WETH', 'USDC', 'USDT', 'rETH', 'LINK', 'cbETH', 'MKR', 'UNI'];
 const collateralTokens = ['WETH'];
-const debtTokens = ['LINK'];
+const debtTokens = ['DAI', 'USDC', 'WETH', 'LINK', 'UNI'];
 
 const aaveV3ApyAfterValuesTest = async () => {
     describe('Test Aave V3 apy after values', async () => {
@@ -87,6 +87,7 @@ const aaveV3ApyAfterValuesTest = async () => {
                     if (borrowTokenInfoFull.availableLiquidity.lt(borrowAmount)) {
                         borrowAmount = borrowTokenInfoFull.availableLiquidity.div(2);
                     }
+                    const paybackAmount = borrowAmount.div(4);
 
                     const stateBefore = {
                         collAssetSupplyRate: collTokenInfoFull.supplyRate,
@@ -99,11 +100,13 @@ const aaveV3ApyAfterValuesTest = async () => {
                             reserveAddress: collAsset.address,
                             liquidityAdded: supplyAmount,
                             liquidityTaken: '0',
+                            isDebtAsset: false,
                         },
                         {
                             reserveAddress: debtAsset.address,
-                            liquidityAdded: '0',
+                            liquidityAdded: paybackAmount,
                             liquidityTaken: borrowAmount,
+                            isDebtAsset: true,
                         },
                     ];
                     const result = await aaveV3ViewContract.getApyAfterValuesEstimation(
@@ -135,6 +138,17 @@ const aaveV3ApyAfterValuesTest = async () => {
                         senderAcc.address,
                         VARIABLE_RATE,
                         borrowTokenInfoFull.assetId,
+                    );
+                    await setBalance(debtAsset.address, senderAcc.address, paybackAmount);
+                    await approve(debtAsset.address, wallet.address, senderAcc);
+                    await aaveV3Payback(
+                        wallet,
+                        addrs[network].AAVE_MARKET,
+                        paybackAmount,
+                        senderAcc.address,
+                        VARIABLE_RATE,
+                        borrowTokenInfoFull.assetId,
+                        debtAsset.address,
                     );
 
                     const collTokenInfoFullAfter = await aaveV3ViewContract.getTokenInfoFull(
