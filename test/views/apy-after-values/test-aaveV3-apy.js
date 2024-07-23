@@ -20,7 +20,7 @@ const {
     approve,
 } = require('../../utils');
 
-// const collateralTokens = ['wstETH', 'WETH', 'USDC', 'USDT', 'rETH', 'LINK', 'cbETH', 'MKR', 'UNI'];
+// const collateralTokens = ['wstETH', 'WETH', 'USDC', 'USDT', 'rETH', 'LINK', 'MKR', 'UNI'];
 const collateralTokens = ['WETH'];
 const debtTokens = ['DAI', 'USDC', 'WETH', 'LINK', 'UNI'];
 

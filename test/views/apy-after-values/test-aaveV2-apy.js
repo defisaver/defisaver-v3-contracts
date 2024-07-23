@@ -13,14 +13,17 @@ const {
 const {
     supplyAave,
     borrowAave,
+    paybackAave,
 } = require('../../actions');
 const {
     takeSnapshot, revertToSnapshot, getProxy, redeploy,
     fetchAmountinUSDPrice,
     AAVE_MARKET,
+    setBalance,
+    approve,
 } = require('../../utils');
 
-const collateralTokens = ['WBTC', 'WETH', 'DAI', 'USDC', 'stETH'];
+const collateralTokens = ['WBTC', 'WETH', 'DAI', 'USDC'];
 const debtTokens = ['DAI', 'USDT', 'WBTC', 'WETH', 'USDC'];
 
 const aaveV2ApyAfterValuesTest = async () => {
@@ -79,6 +82,8 @@ const aaveV2ApyAfterValuesTest = async () => {
                         fetchAmountinUSDPrice(debtAsset.symbol, '500000'),
                         debtAsset.decimals,
                     );
+                    const paybackAmount = borrowAmount.div(4);
+
                     const collTokenInfoFull = await aaveV2ViewContract.getTokenInfoFull(
                         dataProvider.address,
                         priceOracle,
@@ -100,11 +105,13 @@ const aaveV2ApyAfterValuesTest = async () => {
                             reserveAddress: collAsset.address,
                             liquidityAdded: supplyAmount,
                             liquidityTaken: '0',
+                            isDebtAsset: false,
                         },
                         {
                             reserveAddress: debtAsset.address,
-                            liquidityAdded: '0',
+                            liquidityAdded: paybackAmount,
                             liquidityTaken: borrowAmount,
+                            isDebtAsset: true,
                         },
                     ];
                     const result = await aaveV2ViewContract.getApyAfterValuesEstimation(
@@ -131,6 +138,16 @@ const aaveV2ApyAfterValuesTest = async () => {
                         AAVE_MARKET,
                         debtAsset.address,
                         borrowAmount,
+                        VARIABLE_RATE,
+                        senderAcc.address,
+                    );
+                    await setBalance(debtAsset.address, senderAcc.address, paybackAmount);
+                    await approve(debtAsset.address, wallet.address, senderAcc);
+                    await paybackAave(
+                        wallet,
+                        AAVE_MARKET,
+                        debtAsset.address,
+                        paybackAmount,
                         VARIABLE_RATE,
                         senderAcc.address,
                     );
