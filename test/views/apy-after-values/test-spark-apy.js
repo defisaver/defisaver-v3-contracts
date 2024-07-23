@@ -7,6 +7,7 @@ const { getAssetInfo } = require('@defisaver/tokens');
 const {
     sparkSupply,
     sparkBorrow,
+    sparkPayback,
 } = require('../../actions');
 const { VARIABLE_RATE } = require('../../utils-aave');
 
@@ -19,6 +20,7 @@ const {
     network,
     fetchAmountinUSDPrice,
     setBalance,
+    approve,
 } = require('../../utils');
 
 const collateralTokens = ['wbtc', 'wstETH', 'rETH'];
@@ -78,6 +80,7 @@ const sparkApyAfterValuesTest = async () => {
                     if (borrowTokenInfoFull.availableLiquidity.lt(borrowAmount)) {
                         borrowAmount = borrowTokenInfoFull.availableLiquidity.div(2);
                     }
+                    const paybackAmount = borrowAmount.div(4);
 
                     const stateBefore = {
                         collAssetSupplyRate: collTokenInfoFull.supplyRate,
@@ -90,11 +93,13 @@ const sparkApyAfterValuesTest = async () => {
                             reserveAddress: collAsset.address,
                             liquidityAdded: supplyAmount,
                             liquidityTaken: '0',
+                            isDebtAsset: false,
                         },
                         {
                             reserveAddress: debtAsset.address,
-                            liquidityAdded: '0',
+                            liquidityAdded: paybackAmount,
                             liquidityTaken: borrowAmount,
+                            isDebtAsset: true,
                         },
                     ];
                     const result = await sparkViewContract.getApyAfterValuesEstimation(
@@ -126,6 +131,17 @@ const sparkApyAfterValuesTest = async () => {
                         senderAcc.address,
                         VARIABLE_RATE,
                         borrowTokenInfoFull.assetId,
+                    );
+                    await setBalance(debtAsset.address, senderAcc.address, paybackAmount);
+                    await approve(debtAsset.address, wallet.address, senderAcc);
+                    await sparkPayback(
+                        wallet,
+                        addrs[network].SPARK_MARKET,
+                        paybackAmount,
+                        senderAcc.address,
+                        VARIABLE_RATE,
+                        borrowTokenInfoFull.assetId,
+                        debtAsset.address,
                     );
 
                     const collTokenInfoFullAfter = await sparkViewContract.getTokenInfoFull(

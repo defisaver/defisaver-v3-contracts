@@ -125,10 +125,12 @@ contract SparkView is SparkHelper, SparkRatioHelper {
     /// @param reserveAddress Address of the reserve
     /// @param liquidityAdded Amount of liquidity added (supply/repay)
     /// @param liquidityTaken Amount of liquidity taken (borrow/withdraw)
+    /// @param isDebtAsset isDebtAsset if operation is borrow/payback
     struct LiquidityChangeParams {
         address reserveAddress;
         uint256 liquidityAdded;
         uint256 liquidityTaken;
+        bool isDebtAsset;
     }
 
     struct EstimatedRates {
@@ -550,10 +552,15 @@ contract SparkView is SparkHelper, SparkRatioHelper {
                 .getTotalSupplyAndAvgRate();
             
             uint256 nextVariableBorrowIndex = _getNextVariableBorrowIndex(reserve);
+            uint256 variableDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply();
+            
+            if (_reserveParams[i].isDebtAsset) {
+                variableDebt += _reserveParams[i].liquidityTaken;
+                variableDebt = _reserveParams[i].liquidityAdded >= variableDebt ? 0
+                    : variableDebt - _reserveParams[i].liquidityAdded;
+            }
 
-            uint256 totalVarDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress)
-                .scaledTotalSupply()
-                .rayMul(nextVariableBorrowIndex);
+            uint256 totalVarDebt = variableDebt.rayMul(nextVariableBorrowIndex);
 
             (
                 estimatedRate.supplyRate,
