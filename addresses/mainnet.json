@@ -685,28 +685,31 @@
     },
     {
         "name": "CompView",
-        "address": "0xb25b98d3cA2Dde635829870f852472Bdd0b01B7e",
+        "address": "0xc6a75c86dEB83e6BeE568C095A3549BC91415753",
         "id": "0x316f2b89",
         "path": "contracts/views/CompView.sol",
-        "version": "1.0.0",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xb25b98d3cA2Dde635829870f852472Bdd0b01B7e",
             "0x19c76C1EdECd4551Fa8e49D1f96598dCDFF7A65F",
             "0x4D81E17ce35A81b70b2E5eD4a0592e1C2C01219d"
         ]
     },
     {
         "name": "CompV3View",
-        "address": "0xf522b1588688b9887623b9C666175684d284D363",
+        "address": "0x566b1Bd61E4C164DC22f51883942655DaA7Ea297",
         "id": "0x16be4292",
         "path": "contracts/views/CompV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xf522b1588688b9887623b9C666175684d284D363"
+        ]
     },
     {
         "name": "BalancerView",
@@ -721,14 +724,17 @@
     },
     {
         "name": "AaveView",
-        "address": "0xf585d53f568d226449a94d48c4ea122cdeffe52d",
+        "address": "0xD0bA40A400f9e045D54978E3B78Cd9aD9FA92144",
         "id": "0x0a55b48c",
         "path": "contracts/views/AaveView.sol",
-        "version": "1.0.0",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xEDf1087544a01596b70Da746F861B878F245B08f"]
+        "history": [
+            "0xf585d53f568d226449a94d48c4ea122cdeffe52d",
+            "0xEDf1087544a01596b70Da746F861B878F245B08f"
+        ]
     },
     {
         "name": "MockChainlinkFeedRegistry",
@@ -1965,14 +1971,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xb49b5f783381408eBda3C3b4C5f34142B4B289EC",
+        "address": "0x8a1b0FCd8f49D3b67e2CEE0a1583a244dafc8359",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xb49b5f783381408eBda3C3b4C5f34142B4B289EC",
             "0x8095fFFC3cDdE58C4F537D39f9795A40a103e633",
             "0xf4B715BB788cC4071061bd67dC8B56681460A2fF",
             "0x485416D87B6B6B98259c32E789D4f7Ce4CD2959c"
@@ -1980,14 +1987,15 @@
     },
     {
         "name": "SparkView",
-        "address": "0xD3780b6A694C3573C669A10bc10f61e3401412B8",
+        "address": "0x080f99a5E039e863EC61bbEBBc48a409E75C58F5",
         "id": "0xd6f690a9",
         "path": "contracts/views/SparkView.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xD3780b6A694C3573C669A10bc10f61e3401412B8",
             "0xB3B13838F6F57CE76b94f0744Ab0B045B780836e",
             "0x29d01EF37514912ab874D51fEc76c8f5d4d6712e",
             "0xd34306ae3FAE4e347290E4691059e240Aee22eb3"

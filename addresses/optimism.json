@@ -321,14 +321,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x5075c6a7251485CC3FcbB4Ba59d6E6EF26a69d45",
+        "address": "0xDBB56C734f8e411bB0dEEee942339EDDc67c1Cd7",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x5075c6a7251485CC3FcbB4Ba59d6E6EF26a69d45",
           "0xB6aF2C91E3eBB250615aaa33Bb955f7a7f21AD17",
           "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
           "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
@@ -1073,14 +1074,14 @@
     },
     {
       "name": "CompV3View",
-      "address": "0x969d845618596787DBc64687Ee90b16931BBBCBC",
+      "address": "0x2c88d93Ec06F404C67CD3d2df29084FAfe2C8605",
       "id": "0x16be4292",
       "path": "contracts/views/CompV3View.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
-      "history": []
+      "history": ["0x969d845618596787DBc64687Ee90b16931BBBCBC"]
     },
     {
       "name": "PermitToken",
