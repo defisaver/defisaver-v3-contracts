@@ -9,22 +9,22 @@ import {IOperationsRegistry} from "../../interfaces/summerfi/IOperationsRegistry
 import {IOperationExecutor, Call} from "../../interfaces/summerfi/IOperationExecutor.sol";
 
 
-/// @title Approve tokens through Summerfi proxy
-/// @dev DSProxy that calls this action needs to be permited by Summerfi proxy through AccountGuard
+/// @title Approve tokens through Summer.fi proxy
+/// @dev User wallet that calls this action needs to be permitted by Summer.fi proxy through AccountGuard
 contract SFApproveTokens is ActionBase {
     address constant SF_OPERATION_EXECUTOR = 0xcA71C36D26f515AD0cce1D806B231CBC1185CdfC;
     address constant SF_OPERATIONS_REGISTRY = 0x563d2689fE89c78259dD7F694146BB93f6388A55;
     string constant SF_OPERATION_NAME = "AAVEV3PaybackWithdraw";
     bytes32 constant SF_OPERATION_HASH = keccak256(bytes(SF_OPERATION_NAME));
     bytes32 constant SF_SET_APPROVAL_HASH = keccak256("SetApproval_3");
-    uint256 constant SF_OPERATION_ACTIONS = 9;
+    uint256 constant SF_NUM_OF_OPERATION_ACTIONS = 9;
     uint256 constant OPERATION_SET_APPROVAL_INDEX = 1;
 
     error SFApproveFailed(address proxy, address sfProxy);
     error InvalidArrayLength();
 
-    /// @param sfProxy  Summerfi proxy address
-    /// @param spender  DSProxy address
+    /// @param sfProxy  Summer.fi proxy address
+    /// @param spender  User's wallet  address
     /// @param tokens  List of assets to approve
     /// @param allowances  Approve amounts
     struct Params {
@@ -64,10 +64,11 @@ contract SFApproveTokens is ActionBase {
     }
 
     function _sfApprove(Params memory params) internal returns (bytes memory logData) {
-        uint256 len = params.tokens.length;
-        if (len != params.allowances.length) {
+        uint256 paramsLength = params.tokens.length;
+        if (paramsLength != params.allowances.length) {
             revert InvalidArrayLength();
         }
+        // defaults to user's wallet
         if (params.spender == address(0)) {
             params.spender = address(this);
         }
@@ -75,8 +76,9 @@ contract SFApproveTokens is ActionBase {
         (bytes32[] memory targets, ) = IOperationsRegistry(SF_OPERATIONS_REGISTRY).getOperation(
             SF_OPERATION_NAME
         );
-        Call[] memory calls = new Call[](SF_OPERATION_ACTIONS);
-        for (uint256 i; i < SF_OPERATION_ACTIONS; ++i) {
+
+        Call[] memory calls = new Call[](SF_NUM_OF_OPERATION_ACTIONS);
+        for (uint256 i; i < SF_NUM_OF_OPERATION_ACTIONS; ++i) {
             calls[i] = Call({target: targets[i], data: new bytes(0), skip: true});
         }
         calls[OPERATION_SET_APPROVAL_INDEX].target = SF_SET_APPROVAL_HASH;
@@ -84,7 +86,7 @@ contract SFApproveTokens is ActionBase {
 
         uint8[] memory emptyParamMap = new uint8[](3);
 
-        for (uint256 i; i < len; ++i) {
+        for (uint256 i; i < paramsLength; ++i) {
             address tokenAddr = params.tokens[i];
             uint256 allowance = params.allowances[i];
             calls[OPERATION_SET_APPROVAL_INDEX].data = abi.encodeWithSelector(
