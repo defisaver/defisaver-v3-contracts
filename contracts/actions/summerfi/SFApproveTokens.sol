@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.10;
+pragma solidity =0.8.24;
 
 import {ActionBase} from "../ActionBase.sol";
 import {IERC20} from "../../interfaces/IERC20.sol";
