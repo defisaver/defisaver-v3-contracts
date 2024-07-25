@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import {ActionBase} from "../ActionBase.sol";
-import {IERC20} from "../../interfaces/IERC20.sol";
-import {IDSProxy} from "../../interfaces/IDSProxy.sol";
-import {IExecutable} from "../../interfaces/summerfi/IExecutable.sol";
-import {IOperationsRegistry} from "../../interfaces/summerfi/IOperationsRegistry.sol";
-import {IOperationExecutor, Call} from "../../interfaces/summerfi/IOperationExecutor.sol";
-
+import { ActionBase } from "../ActionBase.sol";
+import { IERC20 } from "../../interfaces/IERC20.sol";
+import { IDSProxy } from "../../interfaces/IDSProxy.sol";
+import { IExecutable } from "../../interfaces/summerfi/IExecutable.sol";
+import { IOperationsRegistry } from "../../interfaces/summerfi/IOperationsRegistry.sol";
+import { IOperationExecutor, Call } from "../../interfaces/summerfi/IOperationExecutor.sol";
 
 /// @title Approve tokens through Summer.fi proxy
 /// @dev User wallet that calls this action needs to be permitted by Summer.fi proxy through AccountGuard
@@ -20,7 +19,10 @@ contract SFApproveTokens is ActionBase {
     uint256 constant SF_NUM_OF_OPERATION_ACTIONS = 9;
     uint256 constant OPERATION_SET_APPROVAL_INDEX = 1;
 
+    /// @notice Error thrown if approvals are not set
     error SFApproveFailed(address proxy, address sfProxy);
+
+    /// @notice Tokens and allowances arrays should match in length
     error InvalidArrayLength();
 
     /// @param sfProxy  Summer.fi proxy address
@@ -34,6 +36,11 @@ contract SFApproveTokens is ActionBase {
         uint256[] allowances;
     }
 
+    /// @notice Data needed for SetApproval action
+    /// @param asset Asset for approval
+    /// @param delegate Spender address
+    /// @param amount Approval amount
+    /// @param sumAmounts SumAmounts (use it as false here)
     struct SFSetApprovalData {
         address asset;
         address delegate;
@@ -68,6 +75,7 @@ contract SFApproveTokens is ActionBase {
         if (paramsLength != params.allowances.length) {
             revert InvalidArrayLength();
         }
+
         // defaults to user's wallet
         if (params.spender == address(0)) {
             params.spender = address(this);
