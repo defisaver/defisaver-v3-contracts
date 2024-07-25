@@ -470,6 +470,17 @@
       "history": []
     },
     {
+      "name": "CompV3View",
+      "address": "0xa91a1E214049d97f5c0a2504f5e18744ebBad1Ea",
+      "id": "0x16be4292",
+      "path": "contracts/views/CompV3View.sol",
+      "version": "1.0.1",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": ["0x22591183c0eb7B2Fe07F6F44fd360d1117D07b4f"]
+    },
+    {
       "name": "CompV3Transfer",
       "address": "0xdCAF9C6Bccc062Bc1b8704AA37005897FeA257a0",
       "id": "0xc7443570",
@@ -722,14 +733,17 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b",
+        "address": "0xD6A370B4721067fEA88dbEcbA1085e76A3691d0f",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": [
+          "0xa679fED396bfA42ca2E67FfDbe7E78D335548fA4",
+          "0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b"
+        ]
     },
     {
         "name": "ERC20View",
@@ -876,13 +890,13 @@
       },
       {
         "name": "MorphoBlueView",
-        "address": "0xdbcacf59c5063da8b15481f88e7d70e13c92f2a1",
+        "address": "0x53c0E962bd0AC53928ca04703238b2ec2894195B",
         "id": "0x942aef0a",
         "path": "contracts/views/MorphoBlueView",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xdbcacf59c5063da8b15481f88e7d70e13c92f2a1"]
       }
   ]

@@ -2,6 +2,7 @@
 
 pragma solidity =0.8.24;
 
+import { InterestRateModel } from "./InterestRateModel.sol";
 import { IERC20 } from "../IERC20.sol";
 
 abstract contract ICToken is IERC20 {
@@ -53,4 +54,6 @@ abstract contract ICToken is IERC20 {
     function underlying() external virtual returns (address);
 
     function getAccountSnapshot(address account) external virtual view returns (uint, uint, uint, uint);
+
+    function interestRateModel() external virtual returns (InterestRateModel);
 }

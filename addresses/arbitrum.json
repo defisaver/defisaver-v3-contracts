@@ -330,18 +330,20 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x35a329dda803ecced333647d7e6c14bafb14fe8a",
+        "address": "0xc747eA1ea1499a623B0aBfbAF22A5703430E461a",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.3",
+        "version": "1.0.6",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x0f2320895940b81Af0cC53624570AB372d9D73F9",
           "0x2596e41933136E87C04b56f632CEcA2cdCCC2Cc6",
           "0x401E66549DF354a21B3CC95e3F548Df6854d6DEE",
           "0x8EF42fF40e9a9dD3E1ae81e7947D4E89e6d9f968",
-          "0xA74a85407D5A940542915458616aC3cf3f404E3b"
+          "0xA74a85407D5A940542915458616aC3cf3f404E3b",
+          "0x35a329dda803ecced333647d7e6c14bafb14fe8a"
       ]
     },
     {
@@ -1049,14 +1051,14 @@
     },
     {
     "name": "CompV3View",
-    "address": "0x3A07Bb9eb0d71bf03295a84655d82b00A1450CD6",
+    "address": "0xdaAFACe18f75D941041Eef575255A41fdBC50a17",
     "id": "0x16be4292",
     "path": "contracts/views/CompV3View.sol",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "inRegistry": false,
     "changeTime": 0,
     "registryIds": [],
-    "history": []
+    "history": ["0x3A07Bb9eb0d71bf03295a84655d82b00A1450CD6"]
     },
     {
       "name": "BotRefillsL2",
