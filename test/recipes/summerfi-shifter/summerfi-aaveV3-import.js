@@ -169,7 +169,6 @@ const validatePositionShift = (oldPosition, newPosition) => {
         expect(newPosition.debtAmounts[i]).to.be.gte(e);
         expect(newPosition.debtAmounts[i].sub(e)).to.be.lte(e.div(100_00));
     });
-    console.log(oldPosition.collAssetIds.length);
 };
 
 describe('Summerfi-AaveV3-Import', function () {
@@ -204,7 +203,7 @@ describe('Summerfi-AaveV3-Import', function () {
         flAddress = flContract.address;
 
         await redeploy('SFApproveTokens', addrs[network].REGISTRY_ADDR, false, isFork);
-        wallet = await getProxy(userAddress, true);
+        wallet = await getProxy(userAddress, hre.config.isWalletSafe);
         wallet = wallet.connect(userAcc);
 
         sfPositionInfo = await getPositionInfo(sfProxyAddress, aaveV3View);

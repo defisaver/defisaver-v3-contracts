@@ -20,7 +20,7 @@ contract SFApproveTokens is ActionBase {
     uint256 constant OPERATION_SET_APPROVAL_INDEX = 1;
 
     /// @notice Error thrown if approvals are not set
-    error SFApproveFailed(address proxy, address sfProxy);
+    error SFApproveFailed(address spender, address sfProxy);
 
     /// @notice Tokens and allowances arrays should match in length
     error InvalidArrayLength();
@@ -114,7 +114,7 @@ contract SFApproveTokens is ActionBase {
 
             uint256 actual = IERC20(tokenAddr).allowance(params.sfProxy, params.spender);
             if (actual < allowance && allowance != type(uint256).max) {
-                revert SFApproveFailed(address(this), params.sfProxy);
+                revert SFApproveFailed(params.spender, params.sfProxy);
             }
         }
 
