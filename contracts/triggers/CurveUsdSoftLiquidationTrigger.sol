@@ -19,7 +19,7 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
     /// @dev checks if user is in, or %percentage away from soft liquidation
     /// @dev if the user is fully soft liquidated "percentage" is ignored and returns false
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
-        SubParams memory triggerSubData = parseInputs(_subData);
+        SubParams memory triggerSubData = parseSubInputs(_subData);
         uint256 percentage = calcPercentage(triggerSubData.market, triggerSubData.user);
 
         return percentage <= triggerSubData.percentage;
@@ -46,7 +46,7 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
         return percentage = oraclePrice * 1e18 / highBandPrice - 1e18;
     }
 
-    function parseInputs(bytes memory _subData) internal pure returns (SubParams memory params) {
+    function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
 

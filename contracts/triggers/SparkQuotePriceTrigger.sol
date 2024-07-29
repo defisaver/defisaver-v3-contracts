@@ -69,11 +69,7 @@ contract SparkQuotePriceTrigger is ITrigger, AdminAuth, DSMath, SparkRatioHelper
         return false;
     }
 
-    function parseSubInputs(bytes memory _callData)
-        internal
-        pure
-        returns (SubParams memory params)
-    {
+    function parseSubInputs(bytes memory _callData) public pure returns (SubParams memory params) {
         params = abi.decode(_callData, (SubParams));
     }
 }
