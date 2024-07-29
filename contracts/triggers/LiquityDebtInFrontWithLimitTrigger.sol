@@ -26,7 +26,7 @@ contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatio
     }
 
     function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
-        SubParams memory triggerSubData = parseInputs(_subData);
+        SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 debtInFront;
         address next = triggerSubData.troveOwner;
@@ -72,7 +72,7 @@ contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatio
         return false;
     }
 
-    function parseInputs(bytes memory _subData) public pure returns (SubParams memory params) {
+    function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
 }

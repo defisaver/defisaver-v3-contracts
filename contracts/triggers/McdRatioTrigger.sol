@@ -118,7 +118,7 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
         params = abi.decode(_callData, (CallParams));
     }
 
-    function parseSubInputs(bytes memory _subData) internal pure returns (SubParams memory params) {
+    function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
 }
