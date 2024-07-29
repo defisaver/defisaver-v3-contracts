@@ -1971,7 +1971,7 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x8a1b0FCd8f49D3b67e2CEE0a1583a244dafc8359",
+        "address": "0x3789ae0ea3bc9a4641ed0c5fd90b51e5ed4a3551",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.4",
