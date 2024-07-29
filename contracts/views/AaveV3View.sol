@@ -33,6 +33,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant ACTIVE_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant FROZEN_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant PAUSED_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFF; // prettier-ignore
+    uint256 internal constant VIRTUAL_ACC_ACTIVE =             0xEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
 
     
     uint256 internal constant LIQUIDATION_THRESHOLD_START_BIT_POSITION = 16;
@@ -537,6 +538,13 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         );
     }
 
+    function isReserveUsingVirtualAccounting(
+        DataTypes.ReserveConfigurationMap memory self
+    ) internal pure returns (bool) {
+        uint256 dataLocal = self.data;
+        return (dataLocal & ~VIRTUAL_ACC_ACTIVE) != 0;
+    }
+
     function isBorrowAllowed(address _market) public view returns (bool) {
         address priceOracleSentinelAddress = IPoolAddressesProvider(_market).getPriceOracleSentinel();
         return (priceOracleSentinelAddress == address(0) || IPriceOracleSentinel(priceOracleSentinelAddress).isBorrowAllowed());
@@ -548,18 +556,18 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         IPoolV3 lendingPool = getLendingPool(_market);
         EstimatedRates[] memory estimatedRates = new EstimatedRates[](_reserveParams.length);
         for (uint256 i = 0; i < _reserveParams.length; ++i) {
-            DataTypes.ReserveData memory reserve = lendingPool.getReserveData(_reserveParams[i].reserveAddress);
+            DataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(
+                _reserveParams[i].reserveAddress
+            );
+            DataTypes.ReserveDataExtended memory reserve = lendingPool.getReserveDataExtended(_reserveParams[i].reserveAddress);
 
             EstimatedRates memory estimatedRate;
             estimatedRate.reserveAddress = _reserveParams[i].reserveAddress;
             
             (uint256 currTotalStableDebt, uint256 currAvgStableBorrowRate) = IStableDebtToken(reserve.stableDebtTokenAddress)
                 .getTotalSupplyAndAvgRate();
-            
-            uint256 nextVariableBorrowIndex = _getNextVariableBorrowIndex(reserve);
-            uint256 variableDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply();
 
-            uint256 totalVarDebt = variableDebt.rayMul(nextVariableBorrowIndex);
+            uint256 totalVarDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply().rayMul(_getNextVariableBorrowIndex(reserve));
 
             if (_reserveParams[i].isDebtAsset) {
                 totalVarDebt += _reserveParams[i].liquidityTaken;
@@ -581,7 +589,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
                     averageStableBorrowRate: currAvgStableBorrowRate,
                     reserveFactor: getReserveFactor(reserve.configuration),
                     reserve: _reserveParams[i].reserveAddress,
-                    aToken: reserve.aTokenAddress
+                    usingVirtualBalance: isReserveUsingVirtualAccounting(config),
+                    virtualUnderlyingBalance: reserve.virtualUnderlyingBalance
                 })
             );
 
@@ -591,7 +600,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         return estimatedRates;
     }
 
-    function _getNextVariableBorrowIndex(DataTypes.ReserveData memory _reserve) internal view returns (uint128 variableBorrowIndex) {
+    function _getNextVariableBorrowIndex(DataTypes.ReserveDataExtended memory _reserve) internal view returns (uint128 variableBorrowIndex) {
         uint256 scaledVariableDebt = IScaledBalanceToken(_reserve.variableDebtTokenAddress).scaledTotalSupply();
         variableBorrowIndex = _reserve.variableBorrowIndex;
         if (scaledVariableDebt > 0) {
