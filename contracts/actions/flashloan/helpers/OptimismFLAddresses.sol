@@ -31,6 +31,4 @@ contract OptimismFLAddresses {
     address internal constant UNI_V3_FACTORY = 0x1F98431c8aD98523631AE4a59f267346ea31F984;
 
     address internal constant MORPHO_BLUE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-
-    address internal constant RECIPE_EXECUTOR_ADDR = 0xA532771BD90dAf94b456A4acC9E9cbBdF1367572;
 }

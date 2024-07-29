@@ -32,6 +32,4 @@ contract BaseFLAddresses {
     address internal constant GHO_FLASH_MINTER_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     
     address internal constant MORPHO_BLUE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-
-    address internal constant RECIPE_EXECUTOR_ADDR = 0xd0Ae279e330f98C399375f80968C8bf860202766;
 }

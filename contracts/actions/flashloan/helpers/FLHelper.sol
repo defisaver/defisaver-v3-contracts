@@ -13,6 +13,8 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
     uint16 internal constant AAVE_REFERRAL_CODE = 64;
     uint16 internal constant SPARK_REFERRAL_CODE = 0;
 
+    bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
+
     FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
 
     /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
@@ -26,15 +28,15 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
     // Revert if execution fails when using safe wallet
     error SafeExecutionError();
 
-    function _executeRecipe(address _wallet, bool _isDSProxy, Recipe memory _currRecipe, uint256 _paybackAmount) internal {
+    function _executeRecipe(address _wallet, bool _isDSProxy, Recipe memory _currRecipe, uint256 _paybackAmount, address _recipeExecutor) internal {
         if (_isDSProxy) {
             IDSProxy(_wallet).execute{value: address(this).balance}(
-                RECIPE_EXECUTOR_ADDR,
+                _recipeExecutor,
                 abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
             );
         } else {
             bool success = ISafe(_wallet).execTransactionFromModule(
-                RECIPE_EXECUTOR_ADDR,
+                _recipeExecutor,
                 address(this).balance,
                 abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
                 ISafe.Operation.DelegateCall
