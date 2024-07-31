@@ -1021,14 +1021,15 @@
     },
     {
         "name": "DFSSell",
-        "address": "0xba7f206610e2aab9f027c92debee4ff6f1682657",
+        "address": "0x901d383c37b30cefad9b6e2bbb0539a40e02c5f4",
         "id": "0x7f2a0f35",
         "path": "contracts/actions/exchange/DFSSell.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xba7f206610e2aab9f027c92debee4ff6f1682657",
             "0x8bfc99652358884AF965324e6A233014510F0CFc",
             "0x951D7B421f45FF0e4A8ddE0288aE3f9C2C69b784",
             "0x1abDDCae131ce200e66140d9fBd0C37F7a40e642",
