@@ -7,6 +7,7 @@ import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol"
 import { TokenUtils } from "../utils/TokenUtils.sol";
 import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
 import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
+import { SparkDataTypes } from "../interfaces/spark/SparkDataTypes.sol";
 import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
 import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
@@ -16,7 +17,7 @@ import { WadRayMath } from "../utils/math/WadRayMath.sol";
 import { MathUtils } from "../utils/math/MathUtils.sol";
 import { IScaledBalanceToken } from "../interfaces/aave/IScaledBalanceToken.sol";
 import { IStableDebtToken } from "../interfaces/aave/IStableDebtToken.sol";
-import { IReserveInterestRateStrategy } from "../interfaces/aaveV3/IReserveInterestRateStrategy.sol";
+import { ISparkReserveInterestRateStrategy } from "../interfaces/spark/ISparkReserveInterestRateStrategy.sol";
 
 
 contract SparkView is SparkHelper, SparkRatioHelper {
@@ -567,8 +568,8 @@ contract SparkView is SparkHelper, SparkRatioHelper {
                 estimatedRate.supplyRate,
                 ,
                 estimatedRate.variableBorrowRate
-            ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
-                DataTypes.CalculateInterestRatesParams({
+            ) = ISparkReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
+                SparkDataTypes.CalculateInterestRatesParams({
                     unbacked: reserve.unbacked,
                     liquidityAdded: _reserveParams[i].liquidityAdded,
                     liquidityTaken: _reserveParams[i].liquidityTaken,
