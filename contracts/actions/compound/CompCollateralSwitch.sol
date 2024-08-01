@@ -51,7 +51,7 @@ contract CompCollateralSwitch is ActionBase, CompHelper {
         }
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 }
