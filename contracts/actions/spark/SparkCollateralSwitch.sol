@@ -68,7 +68,7 @@ contract SparkCollateralSwitch is ActionBase, SparkHelper {
         return (0, logData);
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
         if (params.useDefaultMarket) {
             params.market = DEFAULT_SPARK_MARKET;
