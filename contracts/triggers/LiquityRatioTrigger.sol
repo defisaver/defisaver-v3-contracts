@@ -29,7 +29,7 @@ contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper, Trigger
         override
         returns (bool)
     {   
-        SubParams memory triggerSubData = parseInputs(_subData);
+        SubParams memory triggerSubData = parseSubInputs(_subData);
 
         (uint256 currRatio, bool isActive) = getRatio(triggerSubData.troveOwner);
         
@@ -48,14 +48,14 @@ contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper, Trigger
         return false;
     }
 
-    function parseInputs(bytes memory _subData) internal pure returns (SubParams memory params) {
+    function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
+
     function changedSubData(bytes memory _subData) public pure override  returns (bytes memory) {
     }
     
     function isChangeable() public pure override returns (bool){
         return false;
     }
-
 }

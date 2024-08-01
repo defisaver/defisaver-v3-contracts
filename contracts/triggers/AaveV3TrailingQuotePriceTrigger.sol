@@ -208,19 +208,11 @@ contract AaveV3TrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3R
         return false;
     }
 
-    function parseSubInputs(bytes memory _callData)
-        internal
-        pure
-        returns (SubParams memory params)
-    {
+    function parseSubInputs(bytes memory _callData) public pure returns (SubParams memory params) {
         params = abi.decode(_callData, (SubParams));
     }
 
-    function parseCallInputs(bytes memory _callData)
-        internal
-        pure
-        returns (CallParams memory params)
-    {
+    function parseCallInputs(bytes memory _callData) internal pure returns (CallParams memory params) {
         params = abi.decode(_callData, (CallParams));
     }
 }

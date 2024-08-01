@@ -12,7 +12,7 @@ contract GasPriceTrigger is ITrigger, AdminAuth {
     }
 
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
-        SubParams memory triggerSubData = parseInputs(_subData);
+        SubParams memory triggerSubData = parseSubInputs(_subData);
 
         if (triggerSubData.maxGasPrice >= tx.gasprice) return true;
 
@@ -26,7 +26,7 @@ contract GasPriceTrigger is ITrigger, AdminAuth {
         return false;
     }
 
-    function parseInputs(bytes memory _subData) public pure returns (SubParams memory params) {
+    function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
 }

@@ -7,10 +7,18 @@ import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol"
 import { TokenUtils } from "../utils/TokenUtils.sol";
 import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
 import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
+import { SparkDataTypes } from "../interfaces/spark/SparkDataTypes.sol";
 import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
 import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
+
+import { WadRayMath } from "../utils/math/WadRayMath.sol";
+import { MathUtils } from "../utils/math/MathUtils.sol";
+import { IScaledBalanceToken } from "../interfaces/aave/IScaledBalanceToken.sol";
+import { IStableDebtToken } from "../interfaces/aave/IStableDebtToken.sol";
+import { ISparkReserveInterestRateStrategy } from "../interfaces/spark/ISparkReserveInterestRateStrategy.sol";
+
 
 contract SparkView is SparkHelper, SparkRatioHelper {
     uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -39,6 +47,8 @@ contract SparkView is SparkHelper, SparkRatioHelper {
     uint256 internal constant FLASHLOAN_ENABLED_START_BIT_POSITION = 63;
 
     using TokenUtils for address;
+    using WadRayMath for uint256;
+
 
     struct LoanData {
         address user;
@@ -110,6 +120,24 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         bool isActive;
         bool isPaused;
         bool isFrozen;
+    }
+
+    /// @notice Params for supply and borrow rate estimation
+    /// @param reserveAddress Address of the reserve
+    /// @param liquidityAdded Amount of liquidity added (supply/repay)
+    /// @param liquidityTaken Amount of liquidity taken (borrow/withdraw)
+    /// @param isDebtAsset isDebtAsset if operation is borrow/payback
+    struct LiquidityChangeParams {
+        address reserveAddress;
+        uint256 liquidityAdded;
+        uint256 liquidityTaken;
+        bool isDebtAsset;
+    }
+
+    struct EstimatedRates {
+        address reserveAddress;
+        uint256 supplyRate;
+        uint256 variableBorrowRate;
     }
 
     function getHealthFactor(address _market, address _user)
@@ -247,7 +275,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
             supplyRate: reserveData.currentLiquidityRate,
             borrowRateVariable: reserveData.currentVariableBorrowRate,
             borrowRateStable: reserveData.currentStableBorrowRate,
-            totalSupply: IERC20(reserveData.aTokenAddress).totalSupply(),
+            totalSupply: IERC20(reserveData.aTokenAddress).totalSupply()  + reserveData.accruedToTreasury,
             availableLiquidity: _tokenAddr.getBalance(reserveData.aTokenAddress),
             totalBorrow: totalVariableBorrow + totalStableBorrow,
             totalBorrowVar: totalVariableBorrow,
@@ -509,5 +537,67 @@ contract SparkView is SparkHelper, SparkRatioHelper {
     function getFlashLoanEnabled(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
         return (self.data & ~FLASHLOAN_ENABLED_MASK) != 0;
     }
+
+    function getApyAfterValuesEstimation(address _market, LiquidityChangeParams[] memory _reserveParams) 
+        public view returns (EstimatedRates[] memory) 
+    {
+        IPoolV3 lendingPool = getLendingPool(_market);
+        EstimatedRates[] memory estimatedRates = new EstimatedRates[](_reserveParams.length);
+        for (uint256 i = 0; i < _reserveParams.length; ++i) {
+            DataTypes.ReserveData memory reserve = lendingPool.getReserveData(_reserveParams[i].reserveAddress);
+
+            EstimatedRates memory estimatedRate;
+            estimatedRate.reserveAddress = _reserveParams[i].reserveAddress;
+            
+            (uint256 currTotalStableDebt, uint256 currAvgStableBorrowRate) = IStableDebtToken(reserve.stableDebtTokenAddress)
+                .getTotalSupplyAndAvgRate();
+            
+            uint256 nextVariableBorrowIndex = _getNextVariableBorrowIndex(reserve);
+            uint256 variableDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply();
+            
+
+            uint256 totalVarDebt = variableDebt.rayMul(nextVariableBorrowIndex);
+
+            if (_reserveParams[i].isDebtAsset) {
+                totalVarDebt += _reserveParams[i].liquidityTaken;
+                totalVarDebt = _reserveParams[i].liquidityAdded >= totalVarDebt ? 0
+                    : totalVarDebt - _reserveParams[i].liquidityAdded;
+            }
+
+            (
+                estimatedRate.supplyRate,
+                ,
+                estimatedRate.variableBorrowRate
+            ) = ISparkReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
+                SparkDataTypes.CalculateInterestRatesParams({
+                    unbacked: reserve.unbacked,
+                    liquidityAdded: _reserveParams[i].liquidityAdded,
+                    liquidityTaken: _reserveParams[i].liquidityTaken,
+                    totalStableDebt: currTotalStableDebt,
+                    totalVariableDebt: totalVarDebt,
+                    averageStableBorrowRate: currAvgStableBorrowRate,
+                    reserveFactor: getReserveFactor(reserve.configuration),
+                    reserve: _reserveParams[i].reserveAddress,
+                    aToken: reserve.aTokenAddress
+                })
+            );
+
+            estimatedRates[i] = estimatedRate;
+        }
+
+        return estimatedRates;
+    }
+
+    function _getNextVariableBorrowIndex(DataTypes.ReserveData memory _reserve) internal view returns (uint128 variableBorrowIndex) {
+        uint256 scaledVariableDebt = IScaledBalanceToken(_reserve.variableDebtTokenAddress).scaledTotalSupply();
+        variableBorrowIndex = _reserve.variableBorrowIndex;
+        if (scaledVariableDebt > 0) {
+            uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
+                _reserve.currentVariableBorrowRate,
+                _reserve.lastUpdateTimestamp
+            );
+            variableBorrowIndex = uint128(cumulatedVariableBorrowInterest.rayMul(variableBorrowIndex));
+        }
+    }   
 
 }

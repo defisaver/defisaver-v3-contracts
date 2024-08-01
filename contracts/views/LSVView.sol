@@ -41,10 +41,11 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
         SPARK,
         MORPHO_BLUE_WSTETH_MARKET_RATE,
         MORPHO_BLUE_WSTETH_LIDO_RATE_945,
-        MORPHO_BLUE_WSTETH_LIDO_RATE_965
+        MORPHO_BLUE_WSTETH_LIDO_RATE_965,
+        AAVE_V3_LIDO_INSTANCE
     }
 
-    uint256 public constant NUMBER_OF_SUPPORTED_PROTOCOLS = 5;
+    uint256 public constant NUMBER_OF_SUPPORTED_PROTOCOLS = 8;
     
     using TokenUtils for address;
 
@@ -218,6 +219,35 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                         MorphoLib.collateral(morphoBlue, marketId, proxies[i]),
                         MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, proxies[i])
                     );
+                }
+            }
+            // Aave V3 Lido position
+            {
+                IPoolV3 lendingPool = getLendingPool(0xcfBf336fe147D643B9Cb705648500e101504B16d);
+                DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
+                    TokenUtils.WETH_ADDR
+                );
+                for (uint j = 0; j < _collTokens.length; j++) {
+                    DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
+                        _collTokens[j]
+                    );
+                    if (reserveData.aTokenAddress != address(0)) {
+                        uint256 collBalance = reserveData.aTokenAddress.getBalance(proxies[i]);
+                        if (collBalance > 0) {
+                            uint256 debtBalance = wethReserveData
+                                .variableDebtTokenAddress
+                                .getBalance(proxies[i]);
+                            tempPositions[positionCounter++] = Position(
+                                uint8(Protocol.AAVE_V3_LIDO_INSTANCE),
+                                proxies[i],
+                                _collTokens[j],
+                                TokenUtils.WETH_ADDR,
+                                collBalance,
+                                debtBalance
+                            );
+                            j = _collTokens.length;
+                        }
+                    }
                 }
             }
         }
@@ -420,7 +450,37 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                     );
                 }
             }
+            // Aave Lido position
+            {
+                IPoolV3 lendingPool = getLendingPool(0xcfBf336fe147D643B9Cb705648500e101504B16d);
+                DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
+                    TokenUtils.WETH_ADDR
+                );
+                for (uint j = 0; j < _collTokens.length; j++) {
+                    DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
+                        _collTokens[j]
+                    );
+                    if (reserveData.aTokenAddress != address(0)) {
+                        uint256 collBalance = reserveData.aTokenAddress.getBalance(proxies[i]);
+                        if (collBalance > 0) {
+                            uint256 debtBalance = wethReserveData
+                                .variableDebtTokenAddress
+                                .getBalance(proxies[i]);
+                            tempPositions[positionCounter++] = Position(
+                                uint8(Protocol.AAVE_V3_LIDO_INSTANCE),
+                                proxies[i],
+                                _collTokens[j],
+                                TokenUtils.WETH_ADDR,
+                                collBalance,
+                                debtBalance
+                            );
+                            j = _collTokens.length;
+                        }
+                    }
+                }
+            }
         }
+        
         positions = new Position[](positionCounter);
         for (uint i = 0; i < positionCounter; i++) {
             positions[i] = tempPositions[i];
@@ -601,6 +661,36 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
                     MorphoBalancesLib.expectedBorrowAssets(morphoBlue, marketParams, _user)
                 );
             }
+
+        // Aave Lido position
+        {
+            IPoolV3 lendingPool = getLendingPool(0xcfBf336fe147D643B9Cb705648500e101504B16d);
+            DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
+                TokenUtils.WETH_ADDR
+            );
+            for (uint j = 0; j < _collTokens.length; j++) {
+                DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
+                    _collTokens[j]
+                );
+                if (reserveData.aTokenAddress != address(0)) {
+                    uint256 collBalance = reserveData.aTokenAddress.getBalance(_user);
+                    if (collBalance > 0) {
+                        uint256 debtBalance = wethReserveData.variableDebtTokenAddress.getBalance(
+                            _user
+                        );
+                        tempPositions[positionCounter++] = Position(
+                            uint8(Protocol.AAVE_V3_LIDO_INSTANCE),
+                            _user,
+                            _collTokens[j],
+                            TokenUtils.WETH_ADDR,
+                            collBalance,
+                            debtBalance
+                        );
+                        j = _collTokens.length;
+                    }
+                }
+            }
+        }
             
         }
         positions = new Position[](positionCounter);
@@ -632,6 +722,7 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
         if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH_MARKET_RATE)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
         if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_945)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
         if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_965)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
+        if (protocol == uint8(Protocol.AAVE_V3_LIDO_INSTANCE)) return findCollAndDebtForAaveV3LidoPosition(_user, _collTokens);
         return (0, 0, address(0));
     }
 
@@ -642,6 +733,32 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
     ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) 
         {
         IPoolV3 lendingPool = getLendingPool(DEFAULT_AAVE_MARKET);
+        DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
+            TokenUtils.WETH_ADDR
+        );
+        uint256 ethDebtAmount = wethReserveData.variableDebtTokenAddress.getBalance(_user);
+        for (uint j = 0; j < _collTokens.length; j++) {
+            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
+                _collTokens[j]
+            );
+            if (reserveData.aTokenAddress != address(0)) {
+                uint256 lstCollAmount = reserveData.aTokenAddress.getBalance(_user);
+                if (lstCollAmount > 0) {
+                    collAmount = lstCollAmount;
+                    debtAmount = ethDebtAmount;
+                    collToken = _collTokens[j];
+                }
+            }
+        }
+    }
+
+    /// @dev we assume it only has one LST token as collateral, and only ETH as debt
+    function findCollAndDebtForAaveV3LidoPosition(
+        address _user,
+        address[] memory _collTokens
+    ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) 
+        {
+        IPoolV3 lendingPool = getLendingPool(0xcfBf336fe147D643B9Cb705648500e101504B16d);
         DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
             TokenUtils.WETH_ADDR
         );

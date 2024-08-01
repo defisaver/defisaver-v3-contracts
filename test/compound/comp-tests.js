@@ -239,7 +239,9 @@ const compPaybackTest = async (compTestLength) => {
                 const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
                 const borrowBalanceBefore = await getBorrowBalance(compView, proxy.address, cToken);
 
-                await paybackComp(proxy, cToken, borrowingAmount, senderAcc.address);
+                await paybackComp(
+                    proxy, cToken, assetInfo.address, borrowingAmount, senderAcc.address,
+                );
 
                 const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
                 const borrowBalanceAfter = await getBorrowBalance(compView, proxy.address, cToken);
