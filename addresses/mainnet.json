@@ -3548,11 +3548,11 @@
         "address": "0xac7745d524b780751cc8410224d73ebe7e7acca2",
         "id": "0x91bfbd87",
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x475f433407205557E8A7aeE7Be53155EB9681c92"]
     },
     {
         "name": "BotAuthForTxSaver",

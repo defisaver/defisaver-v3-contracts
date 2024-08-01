@@ -907,11 +907,11 @@
         "address": "0xa1c1e3de24f0efbb2f619b55dd31b16a224344d5",
         "id": "0x91bfbd87",
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xe41DB81Eaa636E71A2f4E67D34236f341D5a1B7d"]
       },
       {
         "name": "BotAuthForTxSaver",
