@@ -90,7 +90,7 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
         return (mintAmount, logData);
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 }

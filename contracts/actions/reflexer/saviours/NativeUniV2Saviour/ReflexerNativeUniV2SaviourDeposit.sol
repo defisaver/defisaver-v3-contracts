@@ -82,7 +82,7 @@ contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
         logData = abi.encode(_inputData, amountPulled);
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 }

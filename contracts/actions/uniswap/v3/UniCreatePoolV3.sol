@@ -153,7 +153,7 @@ contract UniCreatePoolV3 is ActionBase, UniV3Helper {
         (tokenId, liquidity, amount0, amount1) = positionManager.mint(mintParams);
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 }

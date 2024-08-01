@@ -73,7 +73,7 @@ contract CurveStethPoolDeposit is ActionBase, CurveHelper {
         logData = abi.encode(_params.amounts[0], _params.amounts[1], receivedLp);
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
 }
