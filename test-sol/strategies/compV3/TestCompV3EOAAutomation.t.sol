@@ -1,32 +1,41 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 
-import "../../TokenAddresses.sol";
-import "../../Const.sol";
-import "../../CheatCodes.sol";
+import { TokenAddresses } from "../../TokenAddresses.sol";
+import { Const } from "../../Const.sol";
+import { CheatCodes } from "../../CheatCodes.sol";
 
-import "../../utils/Tokens.sol";
-import "../../utils/compV3/CompUserEOA.sol";
-import "../../utils/BundleBuilder.sol";
-import "../../utils/RegistryUtils.sol";
-import "../../utils/ActionsUtils.sol";
-import "../../utils/Strategies.sol";
+import { Tokens } from "../../utils/Tokens.sol";
+import { CompUserEOA }from "../../utils/compV3/CompUserEOA.sol";
+import { BundleBuilder } from "../../utils/BundleBuilder.sol";
+import { RegistryUtils  } from "../../utils/RegistryUtils.sol";
+import { ActionsUtils  } from "../../utils/ActionsUtils.sol";
+import { Strategies  } from "../../utils/Strategies.sol";
 
-import "../../../contracts/core/strategy/StrategyModel.sol";
-import "../../../contracts/core/strategy/StrategyExecutor.sol";
-import "../../../contracts/core/RecipeExecutor.sol";
-import "../../../contracts/core/strategy/SafeModuleAuth.sol";
-import "../../../contracts/triggers/CompV3RatioTrigger.sol";
-import "../../../contracts/actions/fee/GasFeeTaker.sol";
-import "../../../contracts/actions/exchange/DFSSell.sol";
-import "../../../contracts/actions/compoundV3/CompV3SubProxy.sol";
-import "../../../contracts/actions/checkers/CompV3RatioCheck.sol";
-import "../../../contracts/actions/flashloan/FLAction.sol";
+import { StrategyModel  } from "../../../contracts/core/strategy/StrategyModel.sol";
+import { StrategyExecutor  } from "../../../contracts/core/strategy/StrategyExecutor.sol";
+import { RecipeExecutor  } from "../../../contracts/core/RecipeExecutor.sol";
+import { SafeModuleAuth  } from "../../../contracts/core/strategy/SafeModuleAuth.sol";
+import { CompV3RatioTrigger  } from "../../../contracts/triggers/CompV3RatioTrigger.sol";
+import { GasFeeTaker  } from "../../../contracts/actions/fee/GasFeeTaker.sol";
+import { DFSSell  } from "../../../contracts/actions/exchange/DFSSell.sol";
+import { CompV3SubProxy  } from "../../../contracts/actions/compoundV3/CompV3SubProxy.sol";
+import { CompV3RatioCheck  } from "../../../contracts/actions/checkers/CompV3RatioCheck.sol";
+import { FLAction  } from "../../../contracts/actions/flashloan/FLAction.sol";
+import { DSMath } from "../../../contracts/DS/DSMath.sol";
+import { SubStorage } from "../../../contracts/core/strategy/SubStorage.sol";
+import { CompV3Supply } from "../../../contracts/actions/compoundV3/CompV3Supply.sol";
+import { CompV3Withdraw } from "../../../contracts/actions/compoundV3/CompV3Withdraw.sol";
+import { CompV3Borrow } from "../../../contracts/actions/compoundV3/CompV3Borrow.sol";
+import { CompV3Payback } from "../../../contracts/actions/compoundV3/CompV3Payback.sol";
+import { WrapperExchangeRegistry } from "../../../contracts/exchangeV3/registries/WrapperExchangeRegistry.sol";
+import { IComet } from "../../../contracts/interfaces/compoundV3/IComet.sol";
+import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
 
 contract TestCompV3EOAAutomation is
-    DSTest,
+    Test,
     DSMath,
     Tokens,
     RegistryUtils,

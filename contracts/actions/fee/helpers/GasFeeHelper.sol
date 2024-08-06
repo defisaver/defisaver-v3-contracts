@@ -10,6 +10,9 @@ import { TokenPriceHelper } from "../../../utils/TokenPriceHelper.sol";
 contract GasFeeHelper is DSMath, TokenPriceHelper {
     using TokenUtils for address;
 
+    // only support token with decimals <= 18
+    error TokenDecimalsUnsupportedError(uint256 decimals);
+
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
 
     uint256 public constant SANITY_GAS_PRICE = 1000 gwei;
@@ -38,7 +41,7 @@ contract GasFeeHelper is DSMath, TokenPriceHelper {
             uint256 price = getPriceInETH(_feeToken);
             uint256 tokenDecimals = _feeToken.getTokenDecimals();
 
-            require(tokenDecimals <= 18, "Token decimal too big");
+            if (tokenDecimals > 18) revert TokenDecimalsUnsupportedError(tokenDecimals);
 
             if (price > 0) {
                 txCost = wdiv(txCost, uint256(price)) / (10**(18 - tokenDecimals));
@@ -47,4 +50,6 @@ contract GasFeeHelper is DSMath, TokenPriceHelper {
             }
         }
     }
+
+    
 }

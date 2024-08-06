@@ -25,12 +25,11 @@ const { createSafe, executeSafeTx, SAFE_CONSTANTS } = require('../utils-safe');
 
 const adminAuthTest = async () => {
     describe('Admin-Auth', () => {
-        let sender; let ownerAcc; let adminAcc; let adminAuth;
+        let sender; let ownerAcc; let adminAuth;
         before(async () => {
             const adminAuthAddr = await getAddrFromRegistry('AdminAuth');
             adminAuth = await hre.ethers.getContractAt('AdminAuth', adminAuthAddr);
 
-            adminAcc = await hre.ethers.provider.getSigner(ADMIN_ACC);
             ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
 
             sender = (await hre.ethers.getSigners())[0];
@@ -74,23 +73,6 @@ const adminAuthTest = async () => {
                 expect(true).to.be(false);
             } catch (err) {
                 expect(err.toString()).to.have.string('SenderNotAdmin');
-            }
-        });
-
-        it('... admin should be able to kill the contract', async () => {
-            await impersonateAccount(ADMIN_ACC);
-
-            const adminAuthByAdmin = adminAuth.connect(adminAcc);
-            await adminAuthByAdmin.kill();
-
-            await stopImpersonatingAccount(ADMIN_ACC);
-
-            try {
-                await adminAuth.adminVault();
-
-                expect(true).to.be(false);
-            } catch (err) {
-                expect(err.toString()).to.have.string('Error: call revert exception');
             }
         });
     });
@@ -239,7 +221,7 @@ const safeModulePermissionTest = async () => {
 
         const disableSafeModule = async (moduleAddr) => {
             const disableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
-                'disableLastModule',
+                'disableModule',
                 [moduleAddr],
             );
             await executeSafeTx(
@@ -300,7 +282,7 @@ const safeModulePermissionTest = async () => {
 
         it('... should revert when disabling module that is not enabled', async () => {
             const disableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
-                'disableLastModule',
+                'disableModule',
                 [flAddr],
             );
             await expect(
@@ -315,7 +297,7 @@ const safeModulePermissionTest = async () => {
 
         it('... should revert when disabling sentinel module address', async () => {
             const disableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
-                'disableLastModule',
+                'disableModule',
                 [SAFE_CONSTANTS.SENTINEL_MODULE],
             );
             await expect(
@@ -343,24 +325,19 @@ const safeModulePermissionTest = async () => {
             expect(isFlBalancerEnabled).to.be.equal(false);
         });
 
-        it('... should revert when not disabling last module in list of enabled modules', async () => {
+        it('... should disable first module in list of enabled modules', async () => {
             await enableSafeModule(flAddr);
 
             const flBalancer = await getAddrFromRegistry('FLBalancer');
             await enableSafeModule(flBalancer);
 
-            const disableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(
-                'disableLastModule',
-                [flAddr],
-            );
-            await expect(
-                executeSafeTx(
-                    senderAddr,
-                    safeInstance,
-                    modulePermissionContract.address,
-                    disableModuleFuncData,
-                ),
-            ).to.be.reverted;
+            await disableSafeModule(flAddr);
+
+            const isFlEnabled = await safeInstance.isModuleEnabled(flAddr);
+            expect(isFlEnabled).to.be.equal(false);
+
+            const isFlBalancerEnabled = await safeInstance.isModuleEnabled(flBalancer);
+            expect(isFlBalancerEnabled).to.be.equal(true);
         });
     });
 };

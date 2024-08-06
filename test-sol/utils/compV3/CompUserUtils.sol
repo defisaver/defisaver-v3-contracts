@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import "../UserWallet.sol";
-
-import "../../Const.sol";
-import "../../../contracts/interfaces/compoundV3/IComet.sol";
-import "../../../contracts/actions/compoundV3/CompV3SubProxy.sol";
+import { UserWallet } from "../UserWallet.sol";
+import { Const } from "../../Const.sol";
+import { IComet } from "../../../contracts/interfaces/compoundV3/IComet.sol";
+import { CompV3SubProxy } from "../../../contracts/actions/compoundV3/CompV3SubProxy.sol";
 
 contract CompUserUtils is UserWallet {
 

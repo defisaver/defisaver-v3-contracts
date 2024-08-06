@@ -28,6 +28,7 @@ describe('LlamaLend-Self-Liq-With-Coll', function () {
         await redeploy('LlamaLendCreate');
         await redeploy('LlamaLendSelfLiquidateWithColl');
         await redeploy('LlamaLendSwapper');
+        await redeploy('TxSaverExecutor');
         mockWrapper = await redeploy('MockExchangeWrapper');
         await setNewExchangeWrapper(senderAcc, mockWrapper.address);
         view = await (await hre.ethers.getContractFactory('LlamaLendView')).deploy();

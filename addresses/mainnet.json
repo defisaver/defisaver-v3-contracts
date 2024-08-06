@@ -840,14 +840,15 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0x5029336642814bC51a42bA80BF83a6322110035D",
+        "address": "0x2ee96cf53ae5fbd5309284704f978d0ca66cb963",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
+            "0x5029336642814bC51a42bA80BF83a6322110035D",
             "0x5029336642814bC51a42bA80BF83a6322110035D",
             "0xe822d76c2632FC52f3eaa686bDA9Cea3212579D8",
             "0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86"
@@ -1026,14 +1027,16 @@
     },
     {
         "name": "DFSSell",
-        "address": "0x8bfc99652358884AF965324e6A233014510F0CFc",
+        "address": "0x901d383c37b30cefad9b6e2bbb0539a40e02c5f4",
         "id": "0x7f2a0f35",
         "path": "contracts/actions/exchange/DFSSell.sol",
-        "version": "1.0.3",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xba7f206610e2aab9f027c92debee4ff6f1682657",
+            "0x8bfc99652358884AF965324e6A233014510F0CFc",
             "0x951D7B421f45FF0e4A8ddE0288aE3f9C2C69b784",
             "0x1abDDCae131ce200e66140d9fBd0C37F7a40e642",
             "0xB744474Bdd7226736ACa4Ba87593e32d8315e5c9"
@@ -3103,14 +3106,14 @@
     },
     {
         "name": "LlamaLendSwapper",
-        "address": "0xacd1179c667e27f485798dca11d417d8603ddbaf",
+        "address": "0x5E342d7b1561Fb30a0AaD7eCE025Fa76582B5807",
         "id": "0x4a94e2c3",
         "path": "contracts/actions/llamalend/advanced/LlamaLendSwapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xacd1179c667e27f485798dca11d417d8603ddbaf"]
     },
     {
         "name": "CurveUsdView",
@@ -3536,6 +3539,28 @@
         "path": "contracts/utils/DFSSafeFactory.sol",
         "version": "1.0.0",
         "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TxSaverExecutor",
+        "address": "0xac7745d524b780751cc8410224d73ebe7e7acca2",
+        "id": "0x91bfbd87",
+        "path": "contracts/tx-saver/TxSaverExecutor.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0x475f433407205557E8A7aeE7Be53155EB9681c92"]
+    },
+    {
+        "name": "BotAuthForTxSaver",
+        "address": "0xc7d2e4eeead6b6fc2d2c23e23198c2301efd1903",
+        "id": "0x5efaa232",
+        "path": "contracts/tx-saver/BotAuthForTxSaver.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
         "history": []

@@ -22,8 +22,8 @@ const SAFE_MASTER_COPY_VERSIONS = {
 };
 
 const encodeSetupArgs = async (setupArgs) => {
-    const safeInterface = await hre.ethers.getContractAt('ISafe', '0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552').then((safe) => safe.interface);
-    return safeInterface.encodeFunctionData('setup', setupArgs);
+    const safeInterface = await hre.ethers.getContractAt('ISafe', SAFE_SINGLETON_ADDR);
+    return safeInterface.interface.encodeFunctionData('setup', setupArgs);
 };
 
 const createSafe = async (senderAddress) => {
@@ -194,8 +194,9 @@ const deploySafe = async (
  * @param safeInstance instance of the safe wallet
  * @param safeTx safe tx params {to,value,data,operation,safeTxGas,baseGas,gasPrice,gasToken,refundReceiver,nonce}
  * @param signer signer  of the safe tx
+ * @param chainId chain id of the network, default is 1
  */
-const signSafeTx = async (safeInstance, safeTx, signer) => {
+const signSafeTx = async (safeInstance, safeTx, signer, chainId = 1) => {
     const EIP712_SAFE_TX_TYPE = {
         SafeTx: [
             { type: 'address', name: 'to' },
@@ -211,9 +212,15 @@ const signSafeTx = async (safeInstance, safeTx, signer) => {
         ],
     };
     const domain = {
-        chainId: await hre.ethers.provider.getNetwork().then((e) => e.chainId),
+        chainId,
         verifyingContract: safeInstance.address,
     };
+
+    // console.log('==========Sign Safe Tx Data===========');
+    // console.log('SafeTx:', safeTx);
+    // console.log('Domain:', domain);
+    // console.log('=======================================');
+
     // @dev - _signTypedData will be renamed to signTypedData in future ethers versions
     // eslint-disable-next-line no-underscore-dangle
     const signature = await signer._signTypedData(domain, EIP712_SAFE_TX_TYPE, safeTx);

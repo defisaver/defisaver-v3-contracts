@@ -34,12 +34,12 @@ const addrs = {
         ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         TOKEN_GROUP_REGISTRY: '0xcA49e64FE1FE8be40ED30F682edA1b27a6c8611c',
         FEE_RECEIVER: '0x6467e807dB1E71B9Ef04E0E3aFb962E4B0900B2B',
-        USDC_ADDR: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        TX_SAVER_FEE_RECEIVER: '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479',
         EXCHANGE_OWNER_ADDR: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
         WRAPPER_EXCHANGE_REGISTRY: '0x653893375dD1D942D2C429caB51641F2bf14d426',
         SubProxy: '0x88B8cEb76b88Ee0Fb7160E6e2Ad86055a32D72d4',
         UNISWAP_WRAPPER: '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54',
-        UNISWAP_V3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
+        UNISWAP_V3_WRAPPER: '0xfd077F7990AeE7A0F59b1aD98c6dBeB9aBFf0D7a',
         UNIV3_WRAPPER: '0xA250D449e8246B0be1ecF66E21bB98678448DEF5',
         FEED_REGISTRY: '0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf',
         COMET_USDC_ADDR: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
@@ -77,7 +77,7 @@ const addrs = {
         PROXY_AUTH_ADDR: '0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         SubProxy: '0x163c08d3F6d916AD6Af55b37728D547e968103F8',
-        UNISWAP_V3_WRAPPER: '0xc6F57b45c20aE92174b8B7F86Bb51A1c8e4AD357',
+        UNISWAP_V3_WRAPPER: '0xF723B39fe2Aa9102dE45Bc8ECd3417805aAC79Aa',
         AAVE_V3_VIEW: '0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc',
         AAVE_SUB_PROXY: '0x9E8aE909Af8A391b58f45819f0d36e4256991D19',
         AVG_GAS_PRICE: 0.001,
@@ -94,6 +94,7 @@ const addrs = {
         BUNDLE_STORAGE_ADDR: '0xc98C5312829006b2D4bBd47162d49B1aa6C275Ab',
         COMET_USDC_ADDR: '0x2e44e174f7D53F0212823acC11C01A11d58c5bCB',
         COMET_USDC_REWARDS_ADDR: '0x443EA0340cb75a160F31A440722dec7b5bc3C2E9',
+        TX_SAVER_FEE_RECEIVER: '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -106,12 +107,13 @@ const addrs = {
         EXCHANGE_OWNER_ADDR: '0x926516e60521556f4ab5e7bf16a4d41a8539c7d1',
         WRAPPER_EXCHANGE_REGISTRY: '0x4a0c7BDF7F58AA04852Da07CDb3d367521f81446',
         FEE_RECEIVER: '0xe000e3c9428D539566259cCd89ed5fb85e655A01',
+        TX_SAVER_FEE_RECEIVER: '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479',
         TOKEN_GROUP_REGISTRY: '0xb03fe103f54841821C080C124312059c9A3a7B5c',
         PROXY_AUTH_ADDR: '0xF3A8479538319756e100C386b3E60BF783680d8f',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
         SubProxy: '0x275A8f98dBA07Ad6380D3ea3F36B665DD6E02F25',
         AAVE_V3_VIEW: '0xA74a85407D5A940542915458616aC3cf3f404E3b',
-        UNISWAP_V3_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
+        UNISWAP_V3_WRAPPER: '0x37236458C59F4dCF17b96Aa67FC07Bbf5578d873',
         ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         AAVE_SUB_PROXY: '0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4',
         UNISWAP_WRAPPER: '0x48ef488054b5c570cf3a2ac0a0697b0b0d34c431',
@@ -139,10 +141,10 @@ const addrs = {
         USDC_ADDR: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
         EXCHANGE_OWNER_ADDR: '0xC4D4b4F2Df76f9952E6e0Dc79861582A5b7269c3',
         WRAPPER_EXCHANGE_REGISTRY: '0x586328A3F24E2c1A41D9A3a5B2Ed123A156dB82e',
-        PROXY_AUTH_ADDR: '0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc',
+        PROXY_AUTH_ADDR: '0xD34BBE7398F7F08952b033bbaF2D2xC84231dCEdc',
         AAVE_MARKET: '0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D',
         SubProxy: '',
-        UNISWAP_V3_WRAPPER: '0xBd2d2d4718C24B8D35168480553b1F5a11f9884b',
+        UNISWAP_V3_WRAPPER: '0x914A50910fF1404Fe62D04846a559c49C55219c3',
         AAVE_V3_VIEW: '0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b',
         AAVE_SUB_PROXY: '',
         AVG_GAS_PRICE: 0.001,
@@ -157,6 +159,7 @@ const addrs = {
         EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0xB297cB5B1380cDD68A238cA38e8d54C809f3De32',
         STRATEGY_STORAGE_ADDR: '0x3Ca96CebC7779Ee86685c67c999d0f03158Ee9cA',
         BUNDLE_STORAGE_ADDR: '0x6AB90ff536f0E2a880DbCdef1bB665C2acC0eDdC',
+        TX_SAVER_FEE_RECEIVER: '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479',
     },
 };
 
@@ -238,6 +241,7 @@ const chainIds = {
     mainnet: 1,
     optimism: 10,
     arbitrum: 42161,
+    base: 8453,
 };
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
@@ -630,12 +634,12 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);
-    let deployer;
-    if (isFork) {
-        // if script is consistenly failing due to tenderly delete this
-        deployer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    }
-    const c = await deployAsOwner(name, deployer, ...args);
+    // let deployer;
+    // if (isFork) {
+    //     // if script is consistenly failing due to tenderly delete this
+    //     // deployer = await hre.ethers.provider.getSigner(getOwnerAddr());
+    // }
+    const c = await deployAsOwner(name, signer, ...args);
     if (name === 'StrategyExecutor' || name === 'StrategyExecutorL2') {
         // eslint-disable-next-line no-param-reassign
         name = 'StrategyExecutorID';
@@ -835,7 +839,7 @@ const formatMockExchangeObj = async (
 ) => {
     if (!wrapper) {
         // eslint-disable-next-line no-param-reassign
-        wrapper = await getContractFromRegistry('MockExchangeWrapper');
+        wrapper = await getContractFromRegistry('MockExchangeWrapper', addrs[network].REGISTRY_ADDR);
     }
 
     const rateDecimals = 18 + destTokenInfo.decimals - srcTokenInfo.decimals;

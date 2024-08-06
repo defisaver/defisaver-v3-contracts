@@ -2,18 +2,6 @@
 
 pragma solidity =0.8.24;
 
-import "../auth/DSProxyPermission.sol";
-import "../actions/ActionBase.sol";
-import "../core/DFSRegistry.sol";
-import "../utils/CheckWalletType.sol";
-import "./strategy/StrategyModel.sol";
-import "./strategy/StrategyStorage.sol";
-import "./strategy/BundleStorage.sol";
-import "./strategy/SubStorage.sol";
-import "../interfaces/flashloan/IFlashLoanBase.sol";
-import "../interfaces/ITrigger.sol";
-import "../auth/SafeModulePermission.sol";
-
 /**
 * @title Entry point into executing recipes/checking triggers directly and as part of a strategy
 * @dev RecipeExecutor can be used in two scenarios:
@@ -105,21 +93,119 @@ import "../auth/SafeModulePermission.sol";
 *
 *
 */
-contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermission, AdminAuth, CoreHelper, CheckWalletType {
+
+import { DSProxyPermission } from "../auth/DSProxyPermission.sol";
+import { SafeModulePermission } from "../auth/SafeModulePermission.sol";
+import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { ActionBase } from "../actions/ActionBase.sol";
+import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { StrategyModel } from "../core/strategy/StrategyModel.sol";
+import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
+import { BundleStorage } from "../core/strategy/BundleStorage.sol";
+import { SubStorage } from "../core/strategy/SubStorage.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { CoreHelper } from "../core/helpers/CoreHelper.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { TxSaverGasCostCalc } from "../utils/TxSaverGasCostCalc.sol";
+import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
+import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
+
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
+import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
+
+contract RecipeExecutor is 
+    StrategyModel,
+    DSProxyPermission,
+    SafeModulePermission,
+    AdminAuth,
+    CoreHelper,
+    TxSaverGasCostCalc,
+    CheckWalletType
+{
+    bytes4 public constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     /// @dev Function sig of ActionBase.executeAction()
     bytes4 public constant EXECUTE_ACTION_SELECTOR = 
         bytes4(keccak256("executeAction(bytes,bytes32[],uint8[],bytes32[])"));
 
+    using TokenUtils for address;
+
     /// For strategy execution all triggers must be active
     error TriggerNotActiveError(uint256);
+
+    /// For TxSaver, total gas cost fee taken from user can't be higher than maxTxCost set by user
+    error TxCostInFeeTokenTooHighError(uint256 maxTxCost, uint256 txCost);
+
+    /// When calling TxSaver functions, caller has to be TxSaverExecutor
+    error TxSaverAuthorizationError(address caller);
 
     /// @notice Called directly through user wallet to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
     /// @param _currRecipe Recipe to be executed
     function executeRecipe(Recipe calldata _currRecipe) public payable {
         _executeActions(_currRecipe);
+    }
+
+    /// @notice Called by TxSaverExecutor through safe wallet
+    /// @param _currRecipe Recipe to be executed
+    /// @param _txSaverData TxSaver data signed by user
+    function executeRecipeFromTxSaver(
+        Recipe calldata _currRecipe,
+        TxSaverSignedData calldata _txSaverData
+    ) public payable {
+        address txSaverExecutorAddr = registry.getAddr(TX_SAVER_EXECUTOR_ID);
+
+        // only TxSaverExecutor can call this function
+        if (msg.sender != txSaverExecutorAddr) {
+            revert TxSaverAuthorizationError(msg.sender);
+        }
+
+        // if fee is taken from position, its taken inside sell action, so here we just execute the recipe
+        if (_txSaverData.shouldTakeFeeFromPosition) {
+            _executeActions(_currRecipe);
+            return;
+        }
+        
+        // when taking fee from EOA/wallet
+        // first read gas estimation set by TxSaverExecutor
+        (uint256 estimatedGasUsed, uint256 l1GasCostInEth, ) = abi.decode(
+            ITxSaverBytesTransientStorage(txSaverExecutorAddr).getBytesTransiently(),
+            (uint256, uint256, DFSExchangeData.InjectedExchangeData)
+        );
+
+        // execute the recipe
+        _executeActions(_currRecipe);
+
+        // when sending sponsored tx, no tx cost is taken
+        if (estimatedGasUsed == 0) {
+            return;
+        }
+
+        // calculate gas cost using gas estimation and signed token price
+        uint256 gasCost = calcGasCostUsingInjectedPrice(
+            estimatedGasUsed,
+            _txSaverData.feeToken,
+            _txSaverData.tokenPriceInEth,
+            l1GasCostInEth
+        );
+
+        // revert if gas cost is higher than max cost signed by user
+        if (gasCost > _txSaverData.maxTxCostInFeeToken) {
+            revert TxCostInFeeTokenTooHighError(_txSaverData.maxTxCostInFeeToken, gasCost);
+        }
+
+        address[] memory owners = ISafe(address(this)).getOwners();
+
+        // if 1/1 wallet, pull tokens from eoa to wallet
+        if (owners.length == 1) {
+            _txSaverData.feeToken.pullTokensIfNeeded(owners[0], gasCost);
+        }
+
+        // send tokens from wallet to fee recipient
+        _txSaverData.feeToken.withdrawTokens(TX_SAVER_FEE_RECIPIENT, gasCost);
     }
 
     /// @notice Called by user wallet through the auth contract to execute a recipe & check triggers
@@ -299,7 +385,7 @@ contract RecipeExecutor is StrategyModel, DSProxyPermission, SafeModulePermissio
             _returnValues
         );
 
-        isDSProxy ? removeProxyPermission(_flActionAddr) : disableLastModule(_flActionAddr);
+        isDSProxy ? removeProxyPermission(_flActionAddr) : disableModule(_flActionAddr);
     }
 
     /// @notice Checks if the specified address is of FL type action
