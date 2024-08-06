@@ -4291,7 +4291,7 @@
         "&7"
       ]
     ],
-    "bundleId": 33
+    "bundleId": 35
   },
   {
     "name": "MorphoBlueFLDebtBoostStrategy",
@@ -4353,7 +4353,7 @@
         "&7"
       ]
     ],
-    "bundleId": 33
+    "bundleId": 35
   },
   {
     "name": "MorphoBlueFLCollBoostStrategy",
@@ -4424,7 +4424,7 @@
         "&7"
       ]
     ],
-    "bundleId": 33
+    "bundleId": 35
   },
   {
     "name": "CurveUsdPaybackStrategy",
