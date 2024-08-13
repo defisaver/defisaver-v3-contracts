@@ -33,4 +33,6 @@ contract BaseUtilAddresses {
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0x7dFF34190d0307fC234fc7E8C152C9715083eB02;
+
+    address public constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
 }

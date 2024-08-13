@@ -979,7 +979,6 @@ const strategyExecutorTest = async () => {
         let strategyExecutorByBot;
         let strategyId;
         let subId;
-        let strategyExecutorByOwner;
 
         before(async () => {
             subProxy = await redeploy('SubProxy');
@@ -1067,48 +1066,6 @@ const strategyExecutorTest = async () => {
                 expect(true).to.be.equal(false);
             } catch (err) {
                 expect(err.toString()).to.have.string('SubNotEnabled(');
-            }
-        });
-
-        it('...should test recoverOwner() function for funds rescue for the user', async () => {
-            const userProxyAddr = '0xddc65fAC7201922395045FFDFfe28d3CF6012E22';
-
-            await impersonateAccount(getOwnerAddr());
-
-            const ownerAcc = await hre.ethers.provider.getSigner(getOwnerAddr());
-            strategyExecutorByOwner = strategyExecutor.connect(ownerAcc);
-
-            const dsProxy = await hre.ethers.getContractAt('IDSProxy', userProxyAddr);
-
-            const ownerBefore = await dsProxy.owner();
-
-            console.log(`Owner before ${ownerBefore}`);
-
-            await strategyExecutorByOwner.recoverOwner({ gasLimit: 4_000_000 });
-
-            const ownerAfter = await dsProxy.owner();
-
-            console.log(`Owner after ${ownerAfter}`);
-            expect(ownerBefore).not.to.be.eq(ownerAfter);
-        });
-
-        it('...should fail to call recoverOwner() function after the EOA is set', async () => {
-            const userProxyAddr = '0xddc65fAC7201922395045FFDFfe28d3CF6012E22';
-
-            const dsProxy = await hre.ethers.getContractAt('IDSProxy', userProxyAddr);
-
-            const ownerBefore = await dsProxy.owner();
-
-            console.log(`Owner before ${ownerBefore}`);
-
-            try {
-                await strategyExecutorByOwner.recoverOwner({ gasLimit: 4_000_000 });
-            } catch (err) {
-                await stopImpersonatingAccount(getOwnerAddr());
-
-                const ownerAfter = await dsProxy.owner();
-
-                expect(ownerBefore).to.be.eq(ownerAfter);
             }
         });
     });

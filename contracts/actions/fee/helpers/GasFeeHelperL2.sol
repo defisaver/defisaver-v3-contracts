@@ -10,6 +10,9 @@ import { TokenPriceHelperL2 } from "../../../utils/TokenPriceHelperL2.sol";
 contract GasFeeHelperL2 is DSMath, TokenPriceHelperL2 {
     using TokenUtils for address;
 
+     // only support token with decimals <= 18
+    error TokenDecimalsUnsupportedError(uint256 decimals);
+
     FeeRecipient public constant feeRecipient = FeeRecipient(FEE_RECIPIENT);
 
     uint256 public constant SANITY_GAS_PRICE = 1000 gwei;
@@ -25,6 +28,7 @@ contract GasFeeHelperL2 is DSMath, TokenPriceHelperL2 {
             gasPrice = SANITY_GAS_PRICE;
         }
 
+        /// @dev we acknowledge that Arbitrum block gas limit can be higher than others
         // can't use more gas than the block gas limit
         if (_gasUsed > block.gaslimit) {
             _gasUsed = block.gaslimit;
@@ -38,7 +42,7 @@ contract GasFeeHelperL2 is DSMath, TokenPriceHelperL2 {
             uint256 price = getPriceInETH(_feeToken);
             uint256 tokenDecimals = _feeToken.getTokenDecimals();
 
-            require(tokenDecimals <= 18, "Token decimal too big");
+            if (tokenDecimals > 18) revert TokenDecimalsUnsupportedError(tokenDecimals);
 
             if (price > 0) {
                 txCost = wdiv(txCost, uint256(price)) / (10**(18 - tokenDecimals));

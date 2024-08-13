@@ -75,6 +75,8 @@ module.exports = {
             timeout: 1000000,
             type: 'tenderly',
             name: 'mainnet',
+            hardfork: "cancun",
+            chainId: 1,
         },
         hardhat: {
             chains: {

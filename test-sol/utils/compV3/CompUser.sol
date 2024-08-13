@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import "./CompUserUtils.sol";
-import "../../../contracts/actions/compoundV3/CompV3Supply.sol";
-import "../../../contracts/actions/compoundV3/CompV3Borrow.sol";
+import { CompUserUtils } from "./CompUserUtils.sol";
+import { CompV3Supply } from "../../../contracts/actions/compoundV3/CompV3Supply.sol";
+import { CompV3Borrow } from "../../../contracts/actions/compoundV3/CompV3Borrow.sol";
 
 contract CompUser is CompUserUtils {
 

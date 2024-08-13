@@ -71,14 +71,16 @@
     },
     {
       "name": "DFSSell",
-      "address": "0x76e5c4e10E36B2f7E8B7F8a570e8A485B86d0ac7",
+      "address": "0xcd151d2bd3e129a4678f2116a9944b5aea0c860d",
       "id": "0x7f2a0f35",
       "path": "contracts/actions/exchange/DFSSell.sol",
-      "version": "1.0.1",
+      "version": "1.0.3",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0x31f218638dab2fc6d459319ae49271c3b98d2a3a",
+        "0x76e5c4e10E36B2f7E8B7F8a570e8A485B86d0ac7",
         "0xCc0f04e8c34B670a1D06f4978C843952F690d3f4"
       ]
     },
@@ -150,14 +152,15 @@
     },
     {
       "name": "RecipeExecutor",
-      "address": "0xd0Ae279e330f98C399375f80968C8bf860202766",
+      "address": "0x7a87565b77dd65bbc153fe20e97743842f1a6e0c",
       "id": "0x4c69ee1e",
       "path": "contracts/core/RecipeExecutor.sol",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0xd0Ae279e330f98C399375f80968C8bf860202766",
         "0xdDFFd19564F9703800Da8a2FB9c2b4a7242bf01F"
       ]
     },
@@ -898,5 +901,27 @@
         "changeTime": "0",
         "registryIds": [],
         "history": ["0xdbcacf59c5063da8b15481f88e7d70e13c92f2a1"]
+      },
+      {
+        "name": "TxSaverExecutor",
+        "address": "0xa1c1e3de24f0efbb2f619b55dd31b16a224344d5",
+        "id": "0x91bfbd87",
+        "path": "contracts/tx-saver/TxSaverExecutor.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0xe41DB81Eaa636E71A2f4E67D34236f341D5a1B7d"]
+      },
+      {
+        "name": "BotAuthForTxSaver",
+        "address": "0x768ff5196ce56F3249C9a399568D70A3e186770E",
+        "id": "0x5efaa232",
+        "path": "contracts/tx-saver/BotAuthForTxSaver.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
       }
   ]

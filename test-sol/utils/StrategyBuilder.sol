@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import "ds-test/test.sol";
-import "../../contracts/core/strategy/StrategyStorage.sol";
-import "../CheatCodes.sol";
+import "forge-std/Test.sol";
+
+import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
+import { CheatCodes } from "../CheatCodes.sol";
 
 contract StrategyBuilder {
     string name;
@@ -16,7 +17,7 @@ contract StrategyBuilder {
     address internal OWNER_ADDR = 0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00;
     address internal STORAGE_ADDR = 0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933;
 
-    CheatCodes vm = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+    CheatCodes constant cheats = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
     uint8 startSubIndex = 128;
 
@@ -56,7 +57,7 @@ contract StrategyBuilder {
             }
         }
 
-        vm.startPrank(OWNER_ADDR);
+        cheats.startPrank(OWNER_ADDR);
 
         bytes memory subCallData = abi.encodeWithSignature(
             "createStrategy(string,bytes4[],bytes4[],uint8[][],bool)",
@@ -70,7 +71,7 @@ contract StrategyBuilder {
         (bool success, ) = address(strategyStorage).call(subCallData);
         require(success);
 
-        vm.stopPrank();
+        cheats.stopPrank();
 
         return strategyStorage.getStrategyCount() - 1;
     }
