@@ -80,7 +80,7 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
         address debtToken = ILlamaLendController(_params.controllerAddress).borrowed_token();
         uint256 collStartingBalance = collToken.getBalance(address(this));
         uint256 debtStartingBalance = debtToken.getBalance(address(this));
-        if (block.chainid == 1) {
+        if (_params.controllerAddress == OLD_WETH_CONTROLLER && block.chainid == 1) {
             ILlamaLendController(_params.controllerAddress)
             .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, false, llamalendSwapper, info);
         } else {

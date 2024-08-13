@@ -51,7 +51,7 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
     ) public payable virtual override(ActionBase, DFSSell, GasFeeTaker) returns (bytes32) {
-        BoostParams memory boostParams = _parseCompositeParams(_callData);
+        BoostParams memory boostParams = parseCompositeParams(_callData);
 
         boostParams.vaultId = _parseParamUint(
             boostParams.vaultId,
@@ -107,7 +107,7 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         virtual
         override(ActionBase, DFSSell, GasFeeTaker)
     {
-        BoostParams memory boostParams = _parseCompositeParams(_callData);
+        BoostParams memory boostParams = parseCompositeParams(_callData);
         (bytes memory logData, ) = _boost(boostParams);
         logger.logActionDirectEvent("McdBoostComposite", logData);
     }
@@ -222,8 +222,8 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         return uint8(ActionType.CUSTOM_ACTION);
     }
 
-    function _parseCompositeParams(bytes memory _calldata)
-        internal
+    function parseCompositeParams(bytes memory _calldata)
+        public
         pure
         returns (BoostParams memory params)
     {

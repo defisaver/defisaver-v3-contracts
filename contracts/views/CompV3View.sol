@@ -2,15 +2,15 @@
 
 pragma solidity =0.8.24;
 
+import { CompV3Helper } from "../actions/compoundV3/helpers/CompV3Helper.sol";
+import { CompV3PortedFunctions } from "../utils/CompV3PortedFunctions.sol";
 import { DSMath } from "../DS/DSMath.sol";
 import { Exponential } from "../utils/math/Exponential.sol";
 import { IComet } from "../interfaces/compoundV3/IComet.sol";
 import { ICometExt } from "../interfaces/compoundV3/ICometExt.sol";
 import { ICometRewards } from "../interfaces/compoundV3/ICometRewards.sol";
 
-import { CompV3Helper } from "../actions/compoundV3/helpers/CompV3Helper.sol";
-
-contract CompV3View is Exponential, DSMath, CompV3Helper {
+contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions {
 
     struct LoanData {
         address user;
@@ -199,5 +199,47 @@ contract CompV3View is Exponential, DSMath, CompV3Helper {
 
     function getRewardsOwed(address _market, address _user) public returns (ICometRewards.RewardOwed memory rewardsOwed){
         return ICometRewards(COMET_REWARDS_ADDR).getRewardOwed(_market, _user);
+    }
+
+    /// @dev In compV3, only base asset token is used for apy calculations
+    function getApyAfterValuesEstimation(address _market, address _user, uint256 _supplyAmount, uint256 _borrowAmount) 
+        public returns (uint256 utilization, uint256 supplyRate, uint256 borrowRate) 
+    {   
+        utilization = IComet(_market).getUtilization();
+        supplyRate = IComet(_market).getSupplyRate(utilization);
+        borrowRate = IComet(_market).getBorrowRate(utilization);
+        if (_supplyAmount == 0 && _borrowAmount == 0) {
+            return (utilization, supplyRate, borrowRate);
+        }
+
+        IComet(_market).accrueAccount(_user);
+
+        IComet.UserBasic memory user = IComet(_market).userBasic(_user);
+        IComet.TotalsBasic memory totals = IComet(_market).totalsBasic();
+
+        if (_borrowAmount > 0) {
+            int256 presentValue = presentValue(user.principal, totals.baseSupplyIndex, totals.baseBorrowIndex);
+            int256 balance = presentValue - signed256(_borrowAmount);
+            int104 principalNew = principalValue(balance, totals.baseSupplyIndex, totals.baseBorrowIndex);
+            (uint104 withdrawAmount, uint104 borrowAmount) = withdrawAndBorrowAmount(user.principal, principalNew);
+
+            totals.totalSupplyBase -= withdrawAmount;
+            totals.totalBorrowBase += borrowAmount;
+
+            user.principal = principalNew;
+        }
+        if (_supplyAmount > 0) {
+            int256 presentValue = presentValue(user.principal, totals.baseSupplyIndex, totals.baseBorrowIndex);
+            int256 balance = presentValue + signed256(_supplyAmount);
+            int104 principalNew = principalValue(balance, totals.baseSupplyIndex, totals.baseBorrowIndex);
+            (uint104 repayAmount, uint104 supplyAmount) = repayAndSupplyAmount(user.principal, principalNew);
+
+            totals.totalSupplyBase += supplyAmount;
+            totals.totalBorrowBase -= repayAmount;
+        }
+
+        utilization = getUtilization(totals);
+        supplyRate = IComet(_market).getSupplyRate(utilization);
+        borrowRate = IComet(_market).getBorrowRate(utilization);
     }
 }

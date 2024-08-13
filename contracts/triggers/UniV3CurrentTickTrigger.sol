@@ -27,7 +27,7 @@ contract UniV3CurrentTickTrigger is ITrigger, AdminAuth, TriggerHelper {
     }
     /// @dev function that checks positions upper and lower tick, and current tick of the pool and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
-        SubParams memory triggerSubData = parseInputs(_subData);
+        SubParams memory triggerSubData = parseSubInputs(_subData);
 
         (,, address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper,,,,,) = positionManager.positions(triggerSubData.tokenId);
 
@@ -51,7 +51,7 @@ contract UniV3CurrentTickTrigger is ITrigger, AdminAuth, TriggerHelper {
         return false;
     }
 
-    function parseInputs(bytes memory _subData) public pure returns (SubParams memory params) {
+    function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
 }

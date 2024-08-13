@@ -263,6 +263,17 @@
         "history": ["0x02DCC3438Bb7e46F6BF671C72e98D503c0bCE520"]
     },
     {
+        "name": "OdosWrapper",
+        "address": "0x0cbc13b84286007ec4f17cd0f9dc7d7ca6ee4fff",
+        "id": "0x79d17c0f",
+        "path": "contracts/exchangeV3/offchainWrappersV3/OdosWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveWrapperV3",
         "address": "0xF5E8C498b6697F0704F0C50448714C5E328b33E2",
         "id": "0xb856c9af",
@@ -674,28 +685,31 @@
     },
     {
         "name": "CompView",
-        "address": "0xb25b98d3cA2Dde635829870f852472Bdd0b01B7e",
+        "address": "0xc6a75c86dEB83e6BeE568C095A3549BC91415753",
         "id": "0x316f2b89",
         "path": "contracts/views/CompView.sol",
-        "version": "1.0.0",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xb25b98d3cA2Dde635829870f852472Bdd0b01B7e",
             "0x19c76C1EdECd4551Fa8e49D1f96598dCDFF7A65F",
             "0x4D81E17ce35A81b70b2E5eD4a0592e1C2C01219d"
         ]
     },
     {
         "name": "CompV3View",
-        "address": "0xf522b1588688b9887623b9C666175684d284D363",
+        "address": "0x566b1Bd61E4C164DC22f51883942655DaA7Ea297",
         "id": "0x16be4292",
         "path": "contracts/views/CompV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xf522b1588688b9887623b9C666175684d284D363"
+        ]
     },
     {
         "name": "BalancerView",
@@ -710,14 +724,17 @@
     },
     {
         "name": "AaveView",
-        "address": "0xf585d53f568d226449a94d48c4ea122cdeffe52d",
+        "address": "0xD0bA40A400f9e045D54978E3B78Cd9aD9FA92144",
         "id": "0x0a55b48c",
         "path": "contracts/views/AaveView.sol",
-        "version": "1.0.0",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xEDf1087544a01596b70Da746F861B878F245B08f"]
+        "history": [
+            "0xf585d53f568d226449a94d48c4ea122cdeffe52d",
+            "0xEDf1087544a01596b70Da746F861B878F245B08f"
+        ]
     },
     {
         "name": "MockChainlinkFeedRegistry",
@@ -823,14 +840,15 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0x5029336642814bC51a42bA80BF83a6322110035D",
+        "address": "0x2ee96cf53ae5fbd5309284704f978d0ca66cb963",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
+            "0x5029336642814bC51a42bA80BF83a6322110035D",
             "0x5029336642814bC51a42bA80BF83a6322110035D",
             "0xe822d76c2632FC52f3eaa686bDA9Cea3212579D8",
             "0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86"
@@ -1009,14 +1027,16 @@
     },
     {
         "name": "DFSSell",
-        "address": "0x8bfc99652358884AF965324e6A233014510F0CFc",
+        "address": "0x901d383c37b30cefad9b6e2bbb0539a40e02c5f4",
         "id": "0x7f2a0f35",
         "path": "contracts/actions/exchange/DFSSell.sol",
-        "version": "1.0.3",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xba7f206610e2aab9f027c92debee4ff6f1682657",
+            "0x8bfc99652358884AF965324e6A233014510F0CFc",
             "0x951D7B421f45FF0e4A8ddE0288aE3f9C2C69b784",
             "0x1abDDCae131ce200e66140d9fBd0C37F7a40e642",
             "0xB744474Bdd7226736ACa4Ba87593e32d8315e5c9"
@@ -1602,14 +1622,14 @@
     },
     {
         "name": "MorphoBlueView",
-        "address": "0xE29175a86B60138403a9534A391acaDb19f1E9a6",
+        "address": "0x10B621823D4f3E85fBDF759e252598e4e097C1fd",
         "id": "0x942aef0a",
         "path": "contracts/views/MorphoBlueView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xE29175a86B60138403a9534A391acaDb19f1E9a6"]
     },
     {
         "name": "MorphoAaveV2View",
@@ -1954,30 +1974,34 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x485416D87B6B6B98259c32E789D4f7Ce4CD2959c",
+        "address": "0x3789ae0ea3bc9a4641ed0c5fd90b51e5ed4a3551",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xb49b5f783381408eBda3C3b4C5f34142B4B289EC",
             "0x8095fFFC3cDdE58C4F537D39f9795A40a103e633",
-            "0xf4B715BB788cC4071061bd67dC8B56681460A2fF"
+            "0xf4B715BB788cC4071061bd67dC8B56681460A2fF",
+            "0x485416D87B6B6B98259c32E789D4f7Ce4CD2959c"
         ]
     },
     {
         "name": "SparkView",
-        "address": "0xd34306ae3FAE4e347290E4691059e240Aee22eb3",
+        "address": "0x080f99a5E039e863EC61bbEBBc48a409E75C58F5",
         "id": "0xd6f690a9",
         "path": "contracts/views/SparkView.sol",
-        "version": "1.0.1",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xD3780b6A694C3573C669A10bc10f61e3401412B8",
             "0xB3B13838F6F57CE76b94f0744Ab0B045B780836e",
-            "0x29d01EF37514912ab874D51fEc76c8f5d4d6712e"
+            "0x29d01EF37514912ab874D51fEc76c8f5d4d6712e",
+            "0xd34306ae3FAE4e347290E4691059e240Aee22eb3"
         ]
     },
     {
@@ -2972,36 +2996,36 @@
     },
     {
         "name": "LlamaLendSelfLiquidate",
-        "address": "0xE4944E0e46177300fa4c351EF72b95b9655E8394",
+        "address": "0x46173C379Fbf998E6db0B47F45b73f77C64d3897",
         "id": "0xafcc4eb7",
         "path": "contracts/actions/llamalend/LlamaLendSelfLiquidate.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xE4944E0e46177300fa4c351EF72b95b9655E8394"]
     },
     {
         "name": "LlamaLendPayback",
-        "address": "0x5B506B7a0117dbcd086632575dA599BB603Eb602",
+        "address": "0x07e31d56E47EE6926892dCd928dF26899F58Ac8E",
         "id": "0x48ef1f07",
         "path": "contracts/actions/llamalend/LlamaLendPayback.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x5B506B7a0117dbcd086632575dA599BB603Eb602"]
     },
     {
         "name": "LlamaLendWithdraw",
-        "address": "0x2593Da3c4110C531541424e9e847cd7905894C52",
+        "address": "0x5aEb07Ce4A49b7EaE2A1e5281768cFc0C3e1d8F3",
         "id": "0xf54e28d9",
         "path": "contracts/actions/llamalend/LlamaLendWithdraw.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0x2593Da3c4110C531541424e9e847cd7905894C52"]
     },
     {
         "name": "LlamaLendBorrow",
@@ -3071,25 +3095,25 @@
     },
     {
         "name": "LlamaLendSelfLiquidateWithColl",
-        "address": "0xc20460aabdb89e55c2d29067e031d170f2fb10e5",
+        "address": "0xA99DD1D91141cA63C423DB763dE75078336803B2",
         "id": "0x74ba5125",
         "path": "contracts/actions/llamalend/advanced/LlamaLendSelfLiquidateWithColl.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xc20460aabdb89e55c2d29067e031d170f2fb10e5"]
     },
     {
         "name": "LlamaLendSwapper",
-        "address": "0xacd1179c667e27f485798dca11d417d8603ddbaf",
+        "address": "0x5E342d7b1561Fb30a0AaD7eCE025Fa76582B5807",
         "id": "0x4a94e2c3",
         "path": "contracts/actions/llamalend/advanced/LlamaLendSwapper.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": ["0xacd1179c667e27f485798dca11d417d8603ddbaf"]
     },
     {
         "name": "CurveUsdView",
@@ -3483,7 +3507,7 @@
     },
     {
         "name": "LSVView",
-        "address": "0x2bf0643b4d7e3e63d0a859048af980fb3333b478",
+        "address": "0x096fd98653681dcf07687d2c21beb67807e0c8e6",
         "id": "0x373e1531",
         "path": "contracts/views/LSVView.sol",
         "version": "1.0.0",
@@ -3491,6 +3515,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x2bf0643b4d7e3e63d0a859048af980fb3333b478",
             "0xECE15C12d8dCDb88c70fAfF38E8dAE4aC4ee69Ce",
             "0xFAb98E139EBeC1Ed76d226b6bd6E4C5f66B2fE1b",
             "0x328d7a29f1cf211c58a910e498e326e7f419f8d6"
@@ -3514,6 +3539,28 @@
         "path": "contracts/utils/DFSSafeFactory.sol",
         "version": "1.0.0",
         "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TxSaverExecutor",
+        "address": "0xac7745d524b780751cc8410224d73ebe7e7acca2",
+        "id": "0x91bfbd87",
+        "path": "contracts/tx-saver/TxSaverExecutor.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0x475f433407205557E8A7aeE7Be53155EB9681c92"]
+    },
+    {
+        "name": "BotAuthForTxSaver",
+        "address": "0xc7d2e4eeead6b6fc2d2c23e23198c2301efd1903",
+        "id": "0x5efaa232",
+        "path": "contracts/tx-saver/BotAuthForTxSaver.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
         "history": []

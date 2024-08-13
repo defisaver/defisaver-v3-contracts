@@ -52,8 +52,11 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
         );
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
+        
+        bool isDirect = _returnValues.length == 1 ? true : false;
 
-        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, false);
+        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, isDirect);
+
         emit ActionEvent("DFSSell", logData);
         return bytes32(exchangedAmount);
     }

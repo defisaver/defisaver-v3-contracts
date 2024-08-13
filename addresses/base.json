@@ -71,14 +71,16 @@
     },
     {
       "name": "DFSSell",
-      "address": "0x76e5c4e10E36B2f7E8B7F8a570e8A485B86d0ac7",
+      "address": "0xcd151d2bd3e129a4678f2116a9944b5aea0c860d",
       "id": "0x7f2a0f35",
       "path": "contracts/actions/exchange/DFSSell.sol",
-      "version": "1.0.1",
+      "version": "1.0.3",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0x31f218638dab2fc6d459319ae49271c3b98d2a3a",
+        "0x76e5c4e10E36B2f7E8B7F8a570e8A485B86d0ac7",
         "0xCc0f04e8c34B670a1D06f4978C843952F690d3f4"
       ]
     },
@@ -150,14 +152,15 @@
     },
     {
       "name": "RecipeExecutor",
-      "address": "0xd0Ae279e330f98C399375f80968C8bf860202766",
+      "address": "0x7a87565b77dd65bbc153fe20e97743842f1a6e0c",
       "id": "0x4c69ee1e",
       "path": "contracts/core/RecipeExecutor.sol",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0xd0Ae279e330f98C399375f80968C8bf860202766",
         "0xdDFFd19564F9703800Da8a2FB9c2b4a7242bf01F"
       ]
     },
@@ -470,6 +473,17 @@
       "history": []
     },
     {
+      "name": "CompV3View",
+      "address": "0xa91a1E214049d97f5c0a2504f5e18744ebBad1Ea",
+      "id": "0x16be4292",
+      "path": "contracts/views/CompV3View.sol",
+      "version": "1.0.1",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": ["0x22591183c0eb7B2Fe07F6F44fd360d1117D07b4f"]
+    },
+    {
       "name": "CompV3Transfer",
       "address": "0xdCAF9C6Bccc062Bc1b8704AA37005897FeA257a0",
       "id": "0xc7443570",
@@ -622,6 +636,17 @@
         ]
       },
       {
+        "name": "OdosWrapper",
+        "address": "0x3a36da98f2cbcfcddbd983cb7839e9588133ac77",
+        "id": "0x79d17c0f",
+        "path": "contracts/exchangeV3/offchainWrappersV3/OdosWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
         "name": "KyberAggregatorWrapper",
         "address": "0xAB72cBe0472378190a2aB3071235aE5C1eE76aA3",
         "id": "0x1abf4ed0",
@@ -711,14 +736,17 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b",
+        "address": "0x1882BBB847425335CCe0b81eC10295674A982395",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": [
+          "0xa679fED396bfA42ca2E67FfDbe7E78D335548fA4",
+          "0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b"
+        ]
     },
     {
         "name": "ERC20View",
@@ -865,12 +893,34 @@
       },
       {
         "name": "MorphoBlueView",
-        "address": "0xdbcacf59c5063da8b15481f88e7d70e13c92f2a1",
+        "address": "0x53c0E962bd0AC53928ca04703238b2ec2894195B",
         "id": "0x942aef0a",
         "path": "contracts/views/MorphoBlueView",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
+        "registryIds": [],
+        "history": ["0xdbcacf59c5063da8b15481f88e7d70e13c92f2a1"]
+      },
+      {
+        "name": "TxSaverExecutor",
+        "address": "0xa1c1e3de24f0efbb2f619b55dd31b16a224344d5",
+        "id": "0x91bfbd87",
+        "path": "contracts/tx-saver/TxSaverExecutor.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0xe41DB81Eaa636E71A2f4E67D34236f341D5a1B7d"]
+      },
+      {
+        "name": "BotAuthForTxSaver",
+        "address": "0x768ff5196ce56F3249C9a399568D70A3e186770E",
+        "id": "0x5efaa232",
+        "path": "contracts/tx-saver/BotAuthForTxSaver.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
       }
