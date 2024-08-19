@@ -7,11 +7,14 @@ import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { LSVUtilHelper } from "../lsv/helpers/LSVUtilHelper.sol";
+import { IRethToken } from "../../interfaces/rocketPool/IRethToken.sol";
+import { IRocketDepositPool } from "../../interfaces/rocketPool/IRocketDepositPool.sol";
 
 /// @title A exchange sell action through the LSV exchange with no fee (used only for ETH Saver)
 /// @dev weth and steth will be transformed into wsteth directly if the rate is better than minPrice
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
-contract LSVSell is ActionBase, UtilHelper, DFSExchangeCore {
+contract LSVSell is ActionBase, DFSExchangeCore, LSVUtilHelper {
 
     using TokenUtils for address;
 
@@ -120,17 +123,19 @@ contract LSVSell is ActionBase, UtilHelper, DFSExchangeCore {
         address wrapper;
         uint256 exchangedAmount;
 
-        if (_exchangeData.destAddr == WSTETH_ADDR){
-            if (_exchangeData.srcAddr == TokenUtils.WETH_ADDR || _exchangeData.srcAddr == STETH_ADDR){
-                shouldSell = _exchangeData.minPrice > IWStEth(WSTETH_ADDR).tokensPerStEth();
-            }
-            if (!shouldSell){
-                if (_exchangeData.srcAddr == TokenUtils.WETH_ADDR){
-                    exchangedAmount = _lidoStakeAndWrapWETH(_exchangeData.srcAmount);
-                } else if (_exchangeData.srcAddr == STETH_ADDR){
-                    exchangedAmount = _lidoWrapStEth(_exchangeData.srcAmount);
-                }
-            }
+        if (_exchangeData.destAddr == WSTETH_ADDRESS) {
+            (shouldSell, exchangedAmount) = _stakeWithLidoIfBetterRate(
+                _exchangeData.srcAddr,
+                _exchangeData.srcAmount,
+                _exchangeData.minPrice
+            );
+        }
+        if (_exchangeData.destAddr == RETH_ADDRESS) {
+            (shouldSell, exchangedAmount) = _stakeWithRockerPoolIfBetterRate(
+                _exchangeData.srcAddr,
+                _exchangeData.srcAmount,
+                _exchangeData.minPrice
+            );
         }
 
         if (shouldSell){
@@ -158,21 +163,71 @@ contract LSVSell is ActionBase, UtilHelper, DFSExchangeCore {
         return (exchangedAmount, logData);
     }
 
+    function _stakeWithLidoIfBetterRate(address _srcAddr, uint256 _srcAmount, uint256 _minPrice) internal returns (bool shouldSell, uint256 exchangedAmount) {
+        if (_srcAddr != TokenUtils.WETH_ADDR && _srcAddr != STETH_ADDRESS){
+            return (true, 0);
+        }
+
+        if (_minPrice > IWStEth(WSTETH_ADDRESS).tokensPerStEth()) {
+            return (true, 0);
+        }
+
+        if (_srcAddr == TokenUtils.WETH_ADDR){
+            exchangedAmount = _lidoStakeAndWrapWETH(_srcAmount);
+        } else if (_srcAddr == STETH_ADDRESS){
+            exchangedAmount = _lidoWrapStEth(_srcAmount);
+        }
+        
+        return (false, exchangedAmount);
+    }
+    
+    function _stakeWithRockerPoolIfBetterRate(address _srcAddr, uint256 _srcAmount, uint256 _minPrice) internal returns (bool shouldSell, uint256 exchangedAmount) {
+        if (_srcAddr != TokenUtils.WETH_ADDR) {
+            return (true, 0);
+        }
+
+        uint256 maximumDepositAmount = 
+            IRocketDepositPool(ROCKET_DEPOSIT_POOL_ADDRESS).getMaximumDepositAmount();
+
+        if (_srcAmount > maximumDepositAmount) {
+            return (true, 0);
+        }
+
+        // We don't check for current rocket pool fee on deposit as that would increase the gas cost
+        if (_minPrice > IRethToken(RETH_ADDRESS).getRethValue(1 ether)) {
+            return (true, 0);
+        }
+
+        exchangedAmount = _rocketPoolStake(_srcAmount);
+        
+        return (false, exchangedAmount);
+    }
+
     function _lidoStakeAndWrapWETH(uint256 wethAmount) internal returns (uint256 wStEthReceivedAmount){
         TokenUtils.withdrawWeth(wethAmount);
 
-        uint256 wStEthBalanceBefore = WSTETH_ADDR.getBalance(address(this));
-        (bool sent, ) = payable(WSTETH_ADDR).call{value: wethAmount}("");
+        uint256 wStEthBalanceBefore = WSTETH_ADDRESS.getBalance(address(this));
+        (bool sent, ) = payable(WSTETH_ADDRESS).call{value: wethAmount}("");
         require(sent, "Failed to send Ether");
-        uint256 wStEthBalanceAfter = WSTETH_ADDR.getBalance(address(this));
+        uint256 wStEthBalanceAfter = WSTETH_ADDRESS.getBalance(address(this));
 
         wStEthReceivedAmount = wStEthBalanceAfter - wStEthBalanceBefore;
     }
 
-    function _lidoWrapStEth(uint256 _stethAmount) internal returns (uint256 wStEthReceivedAmount){
-        STETH_ADDR.approveToken(WSTETH_ADDR, _stethAmount);
+    function _rocketPoolStake(uint256 _wethAmount) internal returns (uint256 rEthReceivedAmount){
+        TokenUtils.withdrawWeth(_wethAmount);
 
-        wStEthReceivedAmount = IWStEth(WSTETH_ADDR).wrap(_stethAmount);
+        uint256 rEthBalanceBefore = RETH_ADDRESS.getBalance(address(this));
+        IRocketDepositPool(ROCKET_DEPOSIT_POOL_ADDRESS).deposit{value: _wethAmount}();
+        uint256 rEthBalanceAfter = RETH_ADDRESS.getBalance(address(this));
+
+        rEthReceivedAmount = rEthBalanceAfter - rEthBalanceBefore;
+    }
+
+    function _lidoWrapStEth(uint256 _stethAmount) internal returns (uint256 wStEthReceivedAmount){
+        STETH_ADDRESS.approveToken(WSTETH_ADDRESS, _stethAmount);
+
+        wStEthReceivedAmount = IWStEth(WSTETH_ADDRESS).wrap(_stethAmount);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

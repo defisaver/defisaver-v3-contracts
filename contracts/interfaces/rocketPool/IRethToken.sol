@@ -9,4 +9,7 @@ interface IRethToken {
 
     // Returns the rETH balance of an account
     function balanceOf(address account) external view returns (uint256);
+
+    // Calculate the amount of rETH backed by an amount of ETH
+    function getRethValue(uint256 _ethAmount) external view returns (uint256);
 }
