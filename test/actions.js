@@ -3399,6 +3399,12 @@ const rocketPoolStake = async (amount, from, to, proxy) => {
     const tx = await executeAction('RocketPoolStake', functionData, proxy);
     return tx;
 };
+const rocketPoolUnstake = async (amount, to, proxy) => {
+    const rocketPoolUnstakeAction = new dfs.actions.rocketPool.RocketPoolUnstakeAction(amount, to);
+    const functionData = rocketPoolUnstakeAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('RocketPoolUnstake', functionData, proxy);
+    return tx;
+};
 
 module.exports = {
     executeAction,
@@ -3613,4 +3619,5 @@ module.exports = {
     llamalendSelfLiquidateWithColl,
 
     rocketPoolStake,
+    rocketPoolUnstake,
 };
