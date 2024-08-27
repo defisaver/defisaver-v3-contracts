@@ -236,6 +236,7 @@ const setNetwork = (networkName) => {
 };
 
 const getNetwork = () => network;
+const isNetworkFork = () => hre.network.name === 'fork';
 
 const chainIds = {
     mainnet: 1,
@@ -519,20 +520,12 @@ const getLocalTokenPrice = (tokenSymbol) => {
     }
     return 0;
 };
-
-let cachedTokenHelperContract;
 const getTokenHelperContract = async () => {
-    let tokenHelper;
-    if (cachedTokenHelperContract) {
-        tokenHelper = cachedTokenHelperContract;
-    } else {
-        const contractName = chainIds[getNetwork()] === 1 ? 'TokenPriceHelper' : 'TokenPriceHelperL2';
-        console.log(`Deploying ${contractName}`);
-        const tokenPriceHelperFactory = await hre.ethers.getContractFactory(contractName);
-        tokenHelper = await tokenPriceHelperFactory.deploy();
-        await tokenHelper.deployed();
-        cachedTokenHelperContract = tokenHelper;
-    }
+    const contractName = chainIds[getNetwork()] === 1 ? 'TokenPriceHelper' : 'TokenPriceHelperL2';
+    console.log(`Deploying ${contractName}`);
+    const tokenPriceHelperFactory = await hre.ethers.getContractFactory(contractName);
+    const tokenHelper = await tokenPriceHelperFactory.deploy();
+    await tokenHelper.deployed();
     return tokenHelper;
 };
 const fetchAmountInUSDPrice = async (tokenSymbol, amountUSD) => {
@@ -1506,6 +1499,7 @@ module.exports = {
     isWalletNameDsProxy,
     fetchAmountInUSDPrice,
     fetchTokenPriceInUSD,
+    isNetworkFork,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,

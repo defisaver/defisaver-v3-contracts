@@ -9,16 +9,41 @@ const {
     chainIds,
     fetchTokenPriceInUSD,
     setBalance,
+    openStrategyAndBundleStorage,
 } = require('../../utils');
 
 const {
     addBotCaller,
+    createBundle,
+    createStrategy,
 } = require('../../utils-strategies');
 
 const { topUp } = require('../../../scripts/utils/fork');
-const { deployOpenOrderFromCollBundle } = require('./utils/aaveV3-strategy-utils');
 const { subAaveV3OpenOrderFromCollBundle } = require('../../strategy-subs');
 const { aaveV3Supply } = require('../../actions');
+const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy } = require('../../strategies');
+
+const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
+
+    const openStrategy = createAaveV3OpenOrderFromCollStrategy();
+    const flOpenStrategy = createAaveV3FLOpenOrderFromCollStrategy();
+    const aaveV3OpenOrderFromCollStrategyId = await createStrategy(
+        proxy,
+        ...openStrategy,
+        false,
+    );
+    const aaveV3FLOpenOrderFromCollStrategyId = await createStrategy(
+        proxy,
+        ...flOpenStrategy,
+        false,
+    );
+    const aaveV3OpenOrderFromCollBundleId = await createBundle(
+        proxy,
+        [aaveV3OpenOrderFromCollStrategyId, aaveV3FLOpenOrderFromCollStrategyId],
+    );
+    return aaveV3OpenOrderFromCollBundleId;
+};
 
 describe('AaveV3-Open-Order-From-Coll-Strategy-Test', function () {
     this.timeout(1200000);
@@ -74,7 +99,7 @@ describe('AaveV3-Open-Order-From-Coll-Strategy-Test', function () {
 
         const currCollPrice = await fetchTokenPriceInUSD('ETH');
         console.log('Current WETH price:', currCollPrice.toString());
-        const triggerPrice = currCollPrice.div(2);
+        const triggerPrice = currCollPrice.mul(2);
         console.log('Trigger price:', triggerPrice.toString());
 
         // 2. sub to bundle

@@ -4490,10 +4490,15 @@ const createAaveV3OpenOrderFromCollStrategy = () => {
         '&proxy',
         '&proxy',
     );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // sent by backend
+        '&collAsset',
+        '$2', // output of sell action
+    );
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         '%useDefaultMarket', // hardcode to false
         '&marketAddr',
-        '$2', // output of sell action
+        '$3', // output of gas fee taker action
         '&proxy',
         '&collAsset',
         '&collAssetId',
@@ -4507,6 +4512,7 @@ const createAaveV3OpenOrderFromCollStrategy = () => {
     );
     aaveV3OpenOrderFromCollStrategy.addAction(borrowAction);
     aaveV3OpenOrderFromCollStrategy.addAction(sellAction);
+    aaveV3OpenOrderFromCollStrategy.addAction(feeTakingAction);
     aaveV3OpenOrderFromCollStrategy.addAction(supplyAction);
     aaveV3OpenOrderFromCollStrategy.addAction(openRatioCheckAction);
     return aaveV3OpenOrderFromCollStrategy.encodeForDsProxyCall();
@@ -4544,10 +4550,15 @@ const createAaveV3FLOpenOrderFromCollStrategy = () => {
         '&proxy',
         '&proxy',
     );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // sent by backend
+        '&collAsset',
+        '$2', // output of sell action
+    );
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         '%useDefaultMarket', // hardcode to false
         '&marketAddr',
-        '$2', // output of sell action
+        '$3', // output of gas fee taker action
         '&proxy',
         '&collAsset',
         '&collAssetId',
@@ -4571,6 +4582,7 @@ const createAaveV3FLOpenOrderFromCollStrategy = () => {
     );
     aaveV3OpenOrderFromCollStrategy.addAction(flAction);
     aaveV3OpenOrderFromCollStrategy.addAction(sellAction);
+    aaveV3OpenOrderFromCollStrategy.addAction(feeTakingAction);
     aaveV3OpenOrderFromCollStrategy.addAction(supplyAction);
     aaveV3OpenOrderFromCollStrategy.addAction(borrowAction);
     aaveV3OpenOrderFromCollStrategy.addAction(openRatioCheckAction);
