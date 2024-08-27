@@ -10,6 +10,7 @@ const {
     fetchTokenPriceInUSD,
     setBalance,
     openStrategyAndBundleStorage,
+    getNetwork,
 } = require('../../utils');
 
 const {
@@ -22,12 +23,13 @@ const { topUp } = require('../../../scripts/utils/fork');
 const { subAaveV3OpenOrderFromCollBundle } = require('../../strategy-subs');
 const { aaveV3Supply } = require('../../actions');
 const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy } = require('../../strategies');
+const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromCollL2Strategy } = require('../../l2-strategies');
 
 const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const openStrategy = createAaveV3OpenOrderFromCollStrategy();
-    const flOpenStrategy = createAaveV3FLOpenOrderFromCollStrategy();
+    const openStrategy = getNetwork() === 'mainnet' ? createAaveV3OpenOrderFromCollStrategy() : createAaveV3OpenOrderFromCollL2Strategy();
+    const flOpenStrategy = getNetwork() === 'mainnet' ? createAaveV3FLOpenOrderFromCollStrategy() : createAaveV3FLOpenOrderFromCollL2Strategy();
     const aaveV3OpenOrderFromCollStrategyId = await createStrategy(
         proxy,
         ...openStrategy,
@@ -151,6 +153,9 @@ describe('AaveV3-Open-Order-From-Coll-Strategy-Test', function () {
             await topUp(botAcc4);
         }
         const openRatioCheckAction = await redeploy('AaveV3OpenRatioCheck', REGISTRY_ADDR, false, isFork);
+        if (getNetwork() !== 'mainnet') {
+            await redeploy('ChainLinkPriceTriggerL2', REGISTRY_ADDR, false, isFork);
+        }
         await addBotCaller(botAcc1, REGISTRY_ADDR, isFork);
         await addBotCaller(botAcc2, REGISTRY_ADDR, isFork);
         await addBotCaller(botAcc3, REGISTRY_ADDR, isFork);

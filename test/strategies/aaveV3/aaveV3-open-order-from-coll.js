@@ -18,6 +18,7 @@ const {
     getContractFromRegistry,
     formatExchangeObj,
     openStrategyAndBundleStorage,
+    getNetwork,
 } = require('../../utils');
 
 const {
@@ -34,13 +35,13 @@ const { topUp } = require('../../../scripts/utils/fork');
 const { subAaveV3OpenOrderFromCollBundle } = require('../../strategy-subs');
 const { callAaveV3OpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromCollStrategy } = require('../../strategy-calls');
 const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy } = require('../../strategies');
-const { BigNumber } = require('ethers');
+const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromCollL2Strategy } = require('../../l2-strategies');
 
 const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const openStrategy = createAaveV3OpenOrderFromCollStrategy();
-    const flOpenStrategy = createAaveV3FLOpenOrderFromCollStrategy();
+    const openStrategy = getNetwork() === 'mainnet' ? createAaveV3OpenOrderFromCollStrategy() : createAaveV3OpenOrderFromCollL2Strategy();
+    const flOpenStrategy = getNetwork() === 'mainnet' ? createAaveV3FLOpenOrderFromCollStrategy() : createAaveV3FLOpenOrderFromCollL2Strategy();
     const aaveV3OpenOrderFromCollStrategyId = await createStrategy(
         proxy,
         ...openStrategy,
@@ -71,7 +72,7 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
         let strategyExecutor;
         let flAction;
 
-        let bundleId = 36;
+        let bundleId;
 
         before(async () => {
             console.log('isFork', isFork);
@@ -86,10 +87,16 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
             }
             await redeploy('AaveV3OpenRatioCheck', REGISTRY_ADDR, false, isFork);
 
-            strategyExecutor = await getContractFromRegistry('StrategyExecutor', REGISTRY_ADDR, false, isFork);
+            if (network === 'mainnet') {
+                strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
+            } else {
+                await redeploy('ChainLinkPriceTriggerL2', REGISTRY_ADDR, false, isFork);
+                strategyExecutor = await hre.ethers.getContractAt('StrategyExecutorL2', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
+            }
             strategyExecutor = strategyExecutor.connect(botAcc);
             flAction = await getContractFromRegistry('FLAction', REGISTRY_ADDR, false, isFork);
             bundleId = await deployOpenOrderFromCollBundle(proxy, isFork);
+            console.log('BundleId:', bundleId);
             await addBotCaller(botAcc.address, REGISTRY_ADDR, isFork);
         });
 
@@ -149,7 +156,7 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
             const debtAsset = getAssetInfo('DAI', chainIds[network]);
 
             const collAmountInUsd = '50000';
-            const borrowAmount = await fetchAmountInUSDPrice(debtAsset.symbol, '32500');
+            const borrowAmount = await fetchAmountInUSDPrice(debtAsset.symbol, '34000');
             const ratio = 200;
             const { subId, strategySub } = await subToBundle(
                 collAmountInUsd,
