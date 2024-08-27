@@ -26,7 +26,7 @@ const {
     IN_REPAY,
     IN_BOOST,
     createMorphoBlueRatioTrigger,
-    createCurveUsdHealthRatioTrigger,
+    createChainLinkPriceTrigger,
 } = require('./triggers');
 
 const {
@@ -815,6 +815,34 @@ const subMorphoBlueBoostBundle = async (
 
     return { subId, strategySub };
 };
+const subAaveV3OpenOrderFromCollBundle = async (
+    proxy, bundleId, collAsset, collAssetId, debtAsset, debtAssetId, marketAddr, targetRatio, triggerPrice, rateMode,
+) => {
+    const triggerData = await createChainLinkPriceTrigger(collAsset, triggerPrice, RATIO_STATE_UNDER);
+    const collAssetEncoded = abiCoder.encode(['address'], [collAsset]);
+    const collAssetIdEncoded = abiCoder.encode(['uint256'], [collAssetId]);
+    const debtAssetEncoded = abiCoder.encode(['address'], [debtAsset]);
+    const debtAssetIdEncoded = abiCoder.encode(['uint256'], [debtAssetId]);
+    const marketAddrEncoded = abiCoder.encode(['address'], [marketAddr]);
+    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
+    const useOnBehalfEncoded = abiCoder.encode(['bool'], [false]);
+    const rateModeEncoded = abiCoder.encode(['uint256'], [rateMode]);
+    const strategySub = [bundleId, true, [triggerData],
+        [
+            collAssetEncoded,
+            collAssetIdEncoded,
+            debtAssetEncoded,
+            debtAssetIdEncoded,
+            marketAddrEncoded,
+            targetRatioEncoded,
+            useOnBehalfEncoded,
+            rateModeEncoded,
+        ],
+    ];
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
 
 module.exports = {
     subDcaStrategy,
@@ -850,4 +878,5 @@ module.exports = {
     subCurveUsdPaybackStrategy,
     subMorphoBlueBoostBundle,
     subMorphoBlueRepayBundle,
+    subAaveV3OpenOrderFromCollBundle,
 };

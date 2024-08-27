@@ -5091,6 +5091,10 @@ const callMorphoBlueFLDebtRepayStrategy = async (botAcc, strategyExecutor, strat
 
     console.log(`GasUsed callMorphoBlueFLDebtRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
+const callAaveV3OpenOrderFromCollStrategy = async () => {
+};
+const callAaveV3FLOpenOrderFromCollStrategy = async () => {
+};
 
 module.exports = {
     callDcaStrategy,
@@ -5169,4 +5173,6 @@ module.exports = {
     callMorphoBlueRepayStrategy,
     callMorphoBlueFLCollRepayStrategy,
     callMorphoBlueFLDebtRepayStrategy,
+    callAaveV3OpenOrderFromCollStrategy,
+    callAaveV3FLOpenOrderFromCollStrategy,
 };

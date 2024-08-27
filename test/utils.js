@@ -520,6 +520,41 @@ const getLocalTokenPrice = (tokenSymbol) => {
     return 0;
 };
 
+let cachedTokenHelperContract;
+const getTokenHelperContract = async () => {
+    let tokenHelper;
+    if (cachedTokenHelperContract) {
+        tokenHelper = cachedTokenHelperContract;
+    } else {
+        const contractName = chainIds[getNetwork()] === 1 ? 'TokenPriceHelper' : 'TokenPriceHelperL2';
+        console.log(`Deploying ${contractName}`);
+        const tokenPriceHelperFactory = await hre.ethers.getContractFactory(contractName);
+        tokenHelper = await tokenPriceHelperFactory.deploy();
+        await tokenHelper.deployed();
+        cachedTokenHelperContract = tokenHelper;
+    }
+    return tokenHelper;
+};
+const fetchAmountInUSDPrice = async (tokenSymbol, amountUSD) => {
+    const { decimals, address } = getAssetInfo(tokenSymbol, chainIds[getNetwork()]);
+    const tokenHelper = await getTokenHelperContract();
+
+    const tokenPriceInUSD = await tokenHelper.getPriceInUSD(address);
+    const tokenPriceInUSDFormatted = tokenPriceInUSD / 10 ** 8;
+
+    const numOfTokens = (amountUSD / tokenPriceInUSDFormatted).toFixed(decimals);
+
+    return hre.ethers.utils.parseUnits(numOfTokens, decimals);
+};
+
+const fetchTokenPriceInUSD = async (tokenSymbol) => {
+    const { address } = getAssetInfo(tokenSymbol, chainIds[getNetwork()]);
+    const tokenHelper = await getTokenHelperContract();
+    const tokenPriceInUSD = await tokenHelper.getPriceInUSD(address);
+    return tokenPriceInUSD;
+};
+
+// TODO: remove once we replace it with fetchAmountInUSDPrice
 const fetchAmountinUSDPrice = (tokenSymbol, amountUSD) => {
     const { decimals } = getAssetInfo(tokenSymbol);
     const tokenPrice = getLocalTokenPrice(tokenSymbol);
@@ -1468,6 +1503,9 @@ module.exports = {
     executeTxFromProxy,
     generateIds,
     approveContractInRegistry,
+    isWalletNameDsProxy,
+    fetchAmountInUSDPrice,
+    fetchTokenPriceInUSD,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
@@ -1524,5 +1562,4 @@ module.exports = {
     BOND_NFT_ADDR,
     AAVE_V2_MARKET_ADDR,
     WALLETS,
-    isWalletNameDsProxy,
 };
