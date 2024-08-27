@@ -4,9 +4,10 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { Permission } from "../../auth/Permission.sol";
+import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 
-/// @title Action to enable/disable DSProxy authorization given
-contract DSProxyHandleAuth is ActionBase, Permission {
+/// @title Action to enable/disable smart wallet authorization
+contract HandleAuth is ActionBase, Permission {
 
     struct Params {
         bool enableAuth; // if true it'll enable authorization, if false it'll disable authorization
@@ -37,10 +38,13 @@ contract DSProxyHandleAuth is ActionBase, Permission {
     //////////////////////////// ACTION LOGIC ////////////////////////////
    
     function handleAuth(Params memory _inputData) internal {
+        bool isDSProxy = isDSProxy(address(this));
+        address authContract = isDSProxy ? PROXY_AUTH_ADDRESS : MODULE_AUTH_ADDRESS;
+        
         if (_inputData.enableAuth){
-            giveProxyPermission(PROXY_AUTH_ADDRESS);
+            isDSProxy ? giveProxyPermission(authContract) : enableModule(authContract);
         } else {
-            removeProxyPermission(PROXY_AUTH_ADDRESS);
+            isDSProxy ? removeProxyPermission(authContract): disableModule(authContract);
         }
     }
 
