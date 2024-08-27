@@ -42,6 +42,7 @@ const {
     getContractFromRegistry,
     chainIds,
 } = require('./utils');
+const { BigNumber } = require('ethers');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -818,27 +819,25 @@ const subMorphoBlueBoostBundle = async (
 const subAaveV3OpenOrderFromCollBundle = async (
     proxy, bundleId, collAsset, collAssetId, debtAsset, debtAssetId, marketAddr, targetRatio, triggerPrice, rateMode,
 ) => {
-    const triggerData = await createChainLinkPriceTrigger(collAsset, triggerPrice, RATIO_STATE_UNDER);
-    const collAssetEncoded = abiCoder.encode(['address'], [collAsset]);
-    const collAssetIdEncoded = abiCoder.encode(['uint256'], [collAssetId]);
-    const debtAssetEncoded = abiCoder.encode(['address'], [debtAsset]);
-    const debtAssetIdEncoded = abiCoder.encode(['uint256'], [debtAssetId]);
-    const marketAddrEncoded = abiCoder.encode(['address'], [marketAddr]);
-    const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
-    const useOnBehalfEncoded = abiCoder.encode(['bool'], [false]);
-    const rateModeEncoded = abiCoder.encode(['uint256'], [rateMode]);
-    const strategySub = [bundleId, true, [triggerData],
-        [
-            collAssetEncoded,
-            collAssetIdEncoded,
-            debtAssetEncoded,
-            debtAssetIdEncoded,
-            marketAddrEncoded,
-            targetRatioEncoded,
-            useOnBehalfEncoded,
-            rateModeEncoded,
-        ],
-    ];
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.openOrder(
+        bundleId,
+        true,
+        {
+            tokenAddress: collAsset,
+            price: triggerPrice.div(BigNumber.from(10).pow(8)).toString(),
+            state: RATIO_STATE_UNDER,
+        },
+        {
+            collAsset,
+            collAssetId,
+            debtAsset,
+            debtAssetId,
+            marketAddr,
+            targetRatio,
+            useOnBehalf: false,
+            rateMode,
+        },
+    );
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };

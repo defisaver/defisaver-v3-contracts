@@ -34,6 +34,7 @@ const { topUp } = require('../../../scripts/utils/fork');
 const { subAaveV3OpenOrderFromCollBundle } = require('../../strategy-subs');
 const { callAaveV3OpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromCollStrategy } = require('../../strategy-calls');
 const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy } = require('../../strategies');
+const { BigNumber } = require('ethers');
 
 const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
@@ -120,7 +121,6 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
                 senderAcc,
             );
 
-            const targetRatio = hre.ethers.utils.parseUnits(ratio, 16);
             const rateMode = 2;
             const currCollPrice = await fetchTokenPriceInUSD('ETH');
             console.log('Current WETH price:', currCollPrice.toString());
@@ -136,7 +136,7 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
                 debtAsset.address,
                 debtReserveData.id,
                 market,
-                targetRatio,
+                ratio,
                 triggerPrice,
                 rateMode,
             );
@@ -150,7 +150,7 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
 
             const collAmountInUsd = '50000';
             const borrowAmount = await fetchAmountInUSDPrice(debtAsset.symbol, '32500');
-            const ratio = '200';
+            const ratio = 200;
             const { subId, strategySub } = await subToBundle(
                 collAmountInUsd,
                 ratio,
@@ -181,7 +181,7 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
 
             const collAmountInUsd = '50000';
             const flAmount = await fetchAmountInUSDPrice(debtAsset.symbol, '50000');
-            const ratio = '160';
+            const ratio = 160;
             const { subId, strategySub } = await subToBundle(
                 collAmountInUsd,
                 ratio,
