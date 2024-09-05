@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const {
@@ -8,9 +9,9 @@ const {
     getOwnerAddr,
     chainIds,
     fetchTokenPriceInUSD,
-    setBalance,
     openStrategyAndBundleStorage,
     getNetwork,
+    getContractFromRegistry,
 } = require('../../utils');
 
 const {
@@ -20,7 +21,7 @@ const {
 } = require('../../utils-strategies');
 
 const { topUp } = require('../../../scripts/utils/fork');
-const { subAaveV3OpenOrderFromCollBundle } = require('../../strategy-subs');
+const { subAaveV3OpenOrder } = require('../../strategy-subs');
 const { aaveV3Supply } = require('../../actions');
 const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy } = require('../../strategies');
 const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromCollL2Strategy } = require('../../l2-strategies');
@@ -81,8 +82,11 @@ describe('AaveV3-Open-Order-From-Coll-Strategy-Test', function () {
         const daiReserveData = await pool.getReserveData(daiAsset.addresses[chainIds[network]]);
 
         // 1. Supply collateral to AaveV3 before subbing
-        const supplyAmount = hre.ethers.utils.parseEther('50', 18);
-        await setBalance(wethAsset.address, senderAcc.address, supplyAmount);
+        const supplyAmount = hre.ethers.utils.parseUnits('50', 18);
+        console.log('WETH address:', wethAsset.address);
+        console.log(supplyAmount);
+        const wethContract = await hre.ethers.getContractAt('IWETH', wethAsset.address);
+        await wethContract.connect(senderAcc).deposit({ value: supplyAmount });
         await aaveV3Supply(
             proxy,
             market,
@@ -96,7 +100,7 @@ describe('AaveV3-Open-Order-From-Coll-Strategy-Test', function () {
         const collAssetId = wethReserveData.id;
         const debtAsset = daiAsset.address;
         const debtAssetId = daiReserveData.id;
-        const targetRatio = hre.ethers.utils.parseUnits('200', 16);
+        const targetRatio = 130;
         const rateMode = 2;
 
         const currCollPrice = await fetchTokenPriceInUSD('ETH');
@@ -105,7 +109,7 @@ describe('AaveV3-Open-Order-From-Coll-Strategy-Test', function () {
         console.log('Trigger price:', triggerPrice.toString());
 
         // 2. sub to bundle
-        const { subId, strategySub } = await subAaveV3OpenOrderFromCollBundle(
+        const { subId, strategySub } = await subAaveV3OpenOrder(
             proxy,
             bundleId,
             collAsset,
@@ -134,11 +138,19 @@ describe('AaveV3-Open-Order-From-Coll-Strategy-Test', function () {
             senderAcc6,
         ] = await hre.ethers.getSigners();
 
+        const mainnetBocAccounts = [
+            '0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4',
+            '0xC561281982c3042376eB8242d6A78Ab18062674F',
+            '0x660B3515F493200C47Ef3DF195abEAfc57Bd6496',
+            '0xF14e7451A6836725481d8E9042C22117b2039539',
+        ];
+        const l2BotAccounts = [
+            '0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4',
+            '0xC561281982c3042376eB8242d6A78Ab18062674F',
+        ];
+        const botAccounts = getNetwork() === 'mainnet' ? mainnetBocAccounts : l2BotAccounts;
+
         // ---- Fork setup ----
-        const botAcc1 = '0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4';
-        const botAcc2 = '0xC561281982c3042376eB8242d6A78Ab18062674F';
-        const botAcc3 = '0x660B3515F493200C47Ef3DF195abEAfc57Bd6496';
-        const botAcc4 = '0xF14e7451A6836725481d8E9042C22117b2039539';
         if (isFork) {
             await topUp(senderAcc1.address);
             await topUp(senderAcc2.address);
@@ -147,19 +159,17 @@ describe('AaveV3-Open-Order-From-Coll-Strategy-Test', function () {
             await topUp(senderAcc5.address);
             await topUp(senderAcc6.address);
             await topUp(getOwnerAddr());
-            await topUp(botAcc1);
-            await topUp(botAcc2);
-            await topUp(botAcc3);
-            await topUp(botAcc4);
+            for (let i = 0; i < botAccounts.length; i++) {
+                await topUp(botAccounts[i]);
+            }
         }
         const openRatioCheckAction = await redeploy('AaveV3OpenRatioCheck', REGISTRY_ADDR, false, isFork);
         if (getNetwork() !== 'mainnet') {
             await redeploy('ChainLinkPriceTriggerL2', REGISTRY_ADDR, false, isFork);
         }
-        await addBotCaller(botAcc1, REGISTRY_ADDR, isFork);
-        await addBotCaller(botAcc2, REGISTRY_ADDR, isFork);
-        await addBotCaller(botAcc3, REGISTRY_ADDR, isFork);
-        await addBotCaller(botAcc4, REGISTRY_ADDR, isFork);
+        for (let i = 0; i < botAccounts.length; i++) {
+            await addBotCaller(botAccounts[i], REGISTRY_ADDR, isFork);
+        }
         bundleId = await deployOpenOrderFromCollBundle(proxy, isFork);
         console.log('AaveV3OpenRatioCheck address:', openRatioCheckAction.address);
         console.log('BundleId:', bundleId);
@@ -172,6 +182,11 @@ describe('AaveV3-Open-Order-From-Coll-Strategy-Test', function () {
         console.log('Proxy:', proxyAddr);
 
         await subToBundle();
+
+        const aaveV3View = await getContractFromRegistry('AaveV3View', REGISTRY_ADDR, false, isFork);
+        const res = await aaveV3View.getLoanData(addrs[network].AAVE_MARKET, proxyAddr);
+        console.log('----PROXY POSITION----');
+        console.log(res);
     });
 
     it('Deploy on fork', async () => {

@@ -5235,7 +5235,7 @@ const callAaveV3FLOpenOrderFromCollStrategy = async (strategyExecutor, strategyI
         placeHolderAddr,
     );
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-        false, // hardcode to false
+        false,
         placeHolderAddr,
         flAmount,
         flAddress,
@@ -5267,6 +5267,94 @@ const callAaveV3FLOpenOrderFromCollStrategy = async (strategyExecutor, strategyI
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(`GasUsed callAaveV3FLOpenOrderFromCollStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+const callAaveV3FLOpenOrderFromDebtStrategy = async (strategyExecutor, strategyIndex, subId, strategySub, flAmount, withdrawAmount, exchangeObject, debtAsset, flAddress) => {
+    const isL2 = network !== 'mainnet';
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+    const flAction = new dfs.actions.flashloan.FLAction(new dfs.actions.flashloan.BalancerFlashLoanAction([debtAsset], [flAmount]));
+
+    const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        false,
+        placeHolderAddr,
+        withdrawAmount,
+        placeHolderAddr,
+        0,
+    );
+    const sumInputsAction = new dfs.actions.basic.SumInputsAction(
+        flAmount,
+        0,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    let feeTakingAction;
+    if (isL2) {
+        feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+            gasCost,
+            placeHolderAddr,
+            '0',
+            '0',
+            '10000000',
+        );
+    } else {
+        feeTakingAction = new dfs.actions.basic.GasFeeAction(
+            gasCost,
+            placeHolderAddr,
+            '0',
+        );
+    }
+
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        false,
+        placeHolderAddr,
+        0,
+        placeHolderAddr,
+        placeHolderAddr,
+        0,
+        true,
+        false,
+        placeHolderAddr,
+    );
+    const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        false,
+        placeHolderAddr,
+        flAmount,
+        flAddress,
+        0,
+        0,
+        false,
+        placeHolderAddr,
+    );
+    const openRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
+        0,
+        placeHolderAddr,
+    );
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sumInputsAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(borrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(openRatioCheckAction.encodeForRecipe()[0]);
+    triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint8'], [placeHolderAddr, 0, 1]));
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(`GasUsed callAaveV3FLOpenOrderFromDebtStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
 module.exports = {
@@ -5348,4 +5436,5 @@ module.exports = {
     callMorphoBlueFLDebtRepayStrategy,
     callAaveV3OpenOrderFromCollStrategy,
     callAaveV3FLOpenOrderFromCollStrategy,
+    callAaveV3FLOpenOrderFromDebtStrategy,
 };

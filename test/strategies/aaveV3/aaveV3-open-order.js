@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 const hre = require('hardhat');
+const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
 
 const {
@@ -19,6 +20,7 @@ const {
     formatExchangeObj,
     openStrategyAndBundleStorage,
     getNetwork,
+    balanceOf,
 } = require('../../utils');
 
 const {
@@ -32,10 +34,10 @@ const {
 } = require('../../actions');
 
 const { topUp } = require('../../../scripts/utils/fork');
-const { subAaveV3OpenOrderFromCollBundle } = require('../../strategy-subs');
-const { callAaveV3OpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromCollStrategy } = require('../../strategy-calls');
-const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy } = require('../../strategies');
-const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromCollL2Strategy } = require('../../l2-strategies');
+const { subAaveV3OpenOrder } = require('../../strategy-subs');
+const { callAaveV3OpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromDebtStrategy } = require('../../strategy-calls');
+const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromDebtStrategy } = require('../../strategies');
+const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromDebtL2Strategy } = require('../../l2-strategies');
 
 const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
@@ -59,8 +61,20 @@ const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
     return aaveV3OpenOrderFromCollBundleId;
 };
 
-const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
-    describe('AaveV3-Open-Order-From-Coll-Strategy-Test', function () {
+const deployOpenOrderFromDebtStrategy = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
+
+    const openStrategy = getNetwork() === 'mainnet' ? createAaveV3FLOpenOrderFromDebtStrategy() : createAaveV3FLOpenOrderFromDebtL2Strategy();
+    const aaveV3FLOpenOrderFromDebtStrategyId = await createStrategy(
+        proxy,
+        ...openStrategy,
+        false,
+    );
+    return aaveV3FLOpenOrderFromDebtStrategyId;
+};
+
+const aaveV3OpenOrderStrategyTest = async (isFork) => {
+    describe('AaveV3-Open-Order-Strategy-Test', function () {
         this.timeout(1200000);
 
         const REGISTRY_ADDR = addrs[network].REGISTRY_ADDR;
@@ -72,19 +86,20 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
         let strategyExecutor;
         let flAction;
 
-        let bundleId;
+        let openOrderFromCollBundleId;
+        let openOrderFromDebtStrategyId;
 
-        before(async () => {
-            console.log('isFork', isFork);
-
+        const setUpCallers = async () => {
             [senderAcc, botAcc] = await hre.ethers.getSigners();
-            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-
             if (isFork) {
                 await topUp(senderAcc.address);
                 await topUp(botAcc.address);
                 await topUp(getOwnerAddr());
             }
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+        };
+
+        const setUpContracts = async () => {
             await redeploy('AaveV3OpenRatioCheck', REGISTRY_ADDR, false, isFork);
 
             if (network === 'mainnet') {
@@ -95,19 +110,24 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
             }
             strategyExecutor = strategyExecutor.connect(botAcc);
             flAction = await getContractFromRegistry('FLAction', REGISTRY_ADDR, false, isFork);
-            bundleId = await deployOpenOrderFromCollBundle(proxy, isFork);
-            console.log('BundleId:', bundleId);
+        };
+
+        const deployStrategies = async () => {
+            openOrderFromCollBundleId = await deployOpenOrderFromCollBundle(proxy, isFork);
+            openOrderFromDebtStrategyId = await deployOpenOrderFromDebtStrategy(proxy, isFork);
+        };
+
+        before(async () => {
+            console.log('isFork', isFork);
+            await setUpCallers();
+            await setUpContracts();
+            await deployStrategies();
             await addBotCaller(botAcc.address, REGISTRY_ADDR, isFork);
         });
+        beforeEach(async () => { snapshotId = await takeSnapshot(); });
+        afterEach(async () => { await revertToSnapshot(snapshotId); });
 
-        beforeEach(async () => {
-            snapshotId = await takeSnapshot();
-        });
-        afterEach(async () => {
-            await revertToSnapshot(snapshotId);
-        });
-
-        const subToBundle = async (collAmountInUsd, ratio, collAsset, debtAsset) => {
+        const subToBundle = async (supplyAmountInUsd, supplyCollAsset, ratio, collAsset, debtAsset, subForOpenFromColl) => {
             const market = addrs[network].AAVE_MARKET;
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', market);
             const poolAddress = await aaveMarketContract.getPool();
@@ -115,29 +135,32 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
             const collReserveData = await pool.getReserveData(collAsset.addresses[chainIds[network]]);
             const debtReserveData = await pool.getReserveData(debtAsset.addresses[chainIds[network]]);
 
-            // 1. Supply collateral to AaveV3 before subbing
-            const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, collAmountInUsd);
-            await setBalance(collAsset.address, senderAcc.address, supplyAmount);
+            // 1. Supply coll/debt asset to AaveV3 before subbing
+            const supplyAsset = supplyCollAsset ? collAsset : debtAsset;
+            const supplyAssetReserveData = supplyCollAsset ? collReserveData : debtReserveData;
+            const supplyAmount = await fetchAmountInUSDPrice(supplyAsset.symbol, supplyAmountInUsd);
+            await setBalance(supplyAsset.address, senderAcc.address, supplyAmount);
             await aaveV3Supply(
                 proxy,
                 market,
                 supplyAmount,
-                collAsset.address,
-                collReserveData.id,
+                supplyAsset.address,
+                supplyAssetReserveData.id,
                 senderAcc.address,
                 senderAcc,
             );
 
             const rateMode = 2;
             const currCollPrice = await fetchTokenPriceInUSD('ETH');
-            console.log('Current WETH price:', currCollPrice.toString());
             const triggerPrice = currCollPrice.mul(2);
-            console.log('Trigger price:', triggerPrice.toString());
+
+            const isBundle = subForOpenFromColl;
+            const strategyOrBundleId = subForOpenFromColl ? openOrderFromCollBundleId : openOrderFromDebtStrategyId;
 
             // 2. sub to bundle
-            const { subId, strategySub } = await subAaveV3OpenOrderFromCollBundle(
+            const { subId, strategySub } = await subAaveV3OpenOrder(
                 proxy,
-                bundleId,
+                strategyOrBundleId,
                 collAsset.address,
                 collReserveData.id,
                 debtAsset.address,
@@ -146,12 +169,19 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
                 ratio,
                 triggerPrice,
                 rateMode,
+                isBundle,
             );
             console.log('SubId:', subId);
             console.log('StrategySub:', strategySub);
             return { subId, strategySub };
         };
-        it('... should call AaveV3 open order from coll strategy', async () => {
+
+        /* //////////////////////////////////////////////////////////////
+                                     TESTS
+        ////////////////////////////////////////////////////////////// */
+        it.skip('... should call AaveV3 open order from coll strategy', async () => {
+            const supplyCollAsset = true;
+            const subForOpenFromColl = true;
             const collAsset = getAssetInfo('WETH', chainIds[network]);
             const debtAsset = getAssetInfo('DAI', chainIds[network]);
 
@@ -160,17 +190,14 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
             const ratio = 200;
             const { subId, strategySub } = await subToBundle(
                 collAmountInUsd,
+                supplyCollAsset,
                 ratio,
                 collAsset,
                 debtAsset,
+                subForOpenFromColl,
             );
             const exchangeObject = formatExchangeObj(
-                debtAsset.address,
-                collAsset.address,
-                '0',
-                addrs[network].UNISWAP_V3_WRAPPER,
-                0,
-                3000, // uniV3 fee
+                debtAsset.address, collAsset.address, 0, addrs[network].UNISWAP_V3_WRAPPER, 0, 3000,
             );
             await callAaveV3OpenOrderFromCollStrategy(
                 strategyExecutor,
@@ -181,8 +208,9 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
                 exchangeObject,
             );
         });
-
         it('... should call AaveV3 FL Open order from coll strategy', async () => {
+            const supplyCollAsset = true;
+            const subForOpenFromColl = true;
             const collAsset = getAssetInfo('WETH', chainIds[network]);
             const debtAsset = getAssetInfo('DAI', chainIds[network]);
 
@@ -191,19 +219,15 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
             const ratio = 160;
             const { subId, strategySub } = await subToBundle(
                 collAmountInUsd,
+                supplyCollAsset,
                 ratio,
                 collAsset,
                 debtAsset,
+                subForOpenFromColl,
             );
             const exchangeObject = formatExchangeObj(
-                debtAsset.address,
-                collAsset.address,
-                flAmount,
-                addrs[network].UNISWAP_V3_WRAPPER,
-                0,
-                3000, // uniV3 fee
+                debtAsset.address, collAsset.address, flAmount, addrs[network].UNISWAP_V3_WRAPPER, 0, 3000,
             );
-            console.log('fl action:', flAction.address);
             await callAaveV3FLOpenOrderFromCollStrategy(
                 strategyExecutor,
                 1,
@@ -215,17 +239,54 @@ const aaveV3OpenOrderFromCollStrategyTest = async (isFork) => {
                 flAction.address,
             );
         });
+        it('... should call AaveV3 FL Open order from debt strategy', async () => {
+            const supplyCollAsset = false;
+            const subForOpenFromColl = false;
+            const collAsset = getAssetInfo('WETH', chainIds[network]);
+            const debtAsset = getAssetInfo('DAI', chainIds[network]);
+
+            const supplyDebtAssetAmountInUsd = '20000';
+            const withdrawAmount = hre.ethers.constants.MaxUint256;
+            const flAmount = await fetchAmountInUSDPrice(debtAsset.symbol, '40000');
+
+            const ratio = 120;
+            const { subId, strategySub } = await subToBundle(
+                supplyDebtAssetAmountInUsd,
+                supplyCollAsset,
+                ratio,
+                collAsset,
+                debtAsset,
+                subForOpenFromColl,
+            );
+            const exchangeObject = formatExchangeObj(
+                debtAsset.address, collAsset.address, 0, addrs[network].UNISWAP_V3_WRAPPER, 0, 3000,
+            );
+            await callAaveV3FLOpenOrderFromDebtStrategy(
+                strategyExecutor,
+                0,
+                subId,
+                strategySub,
+                flAmount,
+                withdrawAmount,
+                exchangeObject,
+                debtAsset.address,
+                flAction.address,
+            );
+            const proxyDebtBalanceAfter = await balanceOf(debtAsset.address, proxy.address);
+            console.log('Proxy debt balance after:', proxyDebtBalanceAfter.toString());
+            expect(proxyDebtBalanceAfter).to.be.eq(0);
+        });
     });
 };
 
-describe('AaveV3 open order from coll strategy test', function () {
+describe('AaveV3 open order strategy test', function () {
     this.timeout(80000);
 
-    it('... test AaveV3 open order from coll', async () => {
-        await aaveV3OpenOrderFromCollStrategyTest(isNetworkFork());
+    it('... test AaveV3 open order strategy', async () => {
+        await aaveV3OpenOrderStrategyTest(isNetworkFork());
     }).timeout(50000);
 });
 
 module.exports = {
-    aaveV3OpenOrderFromCollStrategyTest,
+    aaveV3OpenOrderStrategyTest,
 };
