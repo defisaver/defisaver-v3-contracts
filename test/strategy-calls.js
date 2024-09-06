@@ -5179,7 +5179,7 @@ const callAaveV3OpenOrderFromCollStrategy = async (strategyExecutor, strategyInd
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(supplyAction.encodeForRecipe()[0]);
     actionsCallData.push(openRatioCheckAction.encodeForRecipe()[0]);
-    triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint8'], [placeHolderAddr, 0, 1]));
+    triggerCallData.push(abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [placeHolderAddr, placeHolderAddr, 0, 1]));
     const { callData, receipt } = await executeStrategy(
         isL2,
         strategyExecutor,
@@ -5254,7 +5254,7 @@ const callAaveV3FLOpenOrderFromCollStrategy = async (strategyExecutor, strategyI
     actionsCallData.push(supplyAction.encodeForRecipe()[0]);
     actionsCallData.push(borrowAction.encodeForRecipe()[0]);
     actionsCallData.push(openRatioCheckAction.encodeForRecipe()[0]);
-    triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint8'], [placeHolderAddr, 0, 1]));
+    triggerCallData.push(abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [placeHolderAddr, placeHolderAddr, 0, 1]));
     const { callData, receipt } = await executeStrategy(
         isL2,
         strategyExecutor,
@@ -5342,7 +5342,7 @@ const callAaveV3FLOpenOrderFromDebtStrategy = async (strategyExecutor, strategyI
     actionsCallData.push(supplyAction.encodeForRecipe()[0]);
     actionsCallData.push(borrowAction.encodeForRecipe()[0]);
     actionsCallData.push(openRatioCheckAction.encodeForRecipe()[0]);
-    triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint8'], [placeHolderAddr, 0, 1]));
+    triggerCallData.push(abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [placeHolderAddr, placeHolderAddr, 0, 1]));
     const { callData, receipt } = await executeStrategy(
         isL2,
         strategyExecutor,

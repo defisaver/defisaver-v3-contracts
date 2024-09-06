@@ -823,8 +823,9 @@ const subAaveV3OpenOrder = async (
         strategyOrBundleId,
         isBundle,
         {
-            tokenAddress: collAsset,
-            price: triggerPrice.div(BigNumber.from(10).pow(8)).toString(),
+            baseTokenAddress: collAsset,
+            quoteTokenAddress: debtAsset,
+            price: triggerPrice.div(BigNumber.from(10).pow(8)),
             state: RATIO_STATE_UNDER,
         },
         {

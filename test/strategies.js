@@ -4467,7 +4467,7 @@ const createAaveV3OpenOrderFromCollStrategy = () => {
     aaveV3OpenOrderFromCollStrategy.addSubSlot('&useOnBehalf', 'bool');
     aaveV3OpenOrderFromCollStrategy.addSubSlot('&rateMode', 'uint8');
 
-    const trigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3OpenOrderFromCollStrategy.addTrigger(trigger);
 
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
@@ -4529,7 +4529,7 @@ const createAaveV3FLOpenOrderFromCollStrategy = () => {
     aaveV3OpenOrderFromCollStrategy.addSubSlot('&useOnBehalf', 'bool');
     aaveV3OpenOrderFromCollStrategy.addSubSlot('&rateMode', 'uint8');
 
-    const trigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3OpenOrderFromCollStrategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
@@ -4600,7 +4600,7 @@ const createAaveV3FLOpenOrderFromDebtStrategy = () => {
     aaveV3OpenOrderFromDebtStrategy.addSubSlot('&useOnBehalf', 'bool');
     aaveV3OpenOrderFromDebtStrategy.addSubSlot('&rateMode', 'uint8');
 
-    const trigger = new dfs.triggers.ChainLinkPriceTrigger(nullAddress, '0', '0');
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3OpenOrderFromDebtStrategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
