@@ -179,7 +179,7 @@ const aaveV3OpenOrderStrategyTest = async (isFork) => {
         /* //////////////////////////////////////////////////////////////
                                      TESTS
         ////////////////////////////////////////////////////////////// */
-        it.skip('... should call AaveV3 open order from coll strategy', async () => {
+        it('... should call AaveV3 open order from coll strategy', async () => {
             const supplyCollAsset = true;
             const subForOpenFromColl = true;
             const collAsset = getAssetInfo('WETH', chainIds[network]);
