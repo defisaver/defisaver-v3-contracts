@@ -105,7 +105,6 @@ const aaveV3OpenOrderStrategyTest = async (isFork) => {
             if (network === 'mainnet') {
                 strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
             } else {
-                await redeploy('ChainLinkPriceTriggerL2', REGISTRY_ADDR, false, isFork);
                 strategyExecutor = await hre.ethers.getContractAt('StrategyExecutorL2', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
             }
             strategyExecutor = strategyExecutor.connect(botAcc);
