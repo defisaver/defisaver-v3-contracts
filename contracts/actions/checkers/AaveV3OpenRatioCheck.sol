@@ -26,7 +26,7 @@ contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 targetRatio = _parseParamUint(uint256(inputData.targetRatio), _paramMapping[0], _subData, _returnValues);
+        uint256 targetRatio = _parseParamUint(inputData.targetRatio, _paramMapping[0], _subData, _returnValues);
         address market = _parseParamAddr(inputData.market, _paramMapping[1], _subData, _returnValues);
 
         uint256 currRatio = getRatio(market, address(this));
