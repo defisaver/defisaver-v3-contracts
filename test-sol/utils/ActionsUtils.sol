@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import { ActionBase } from "../../contracts/actions/ActionBase.sol";
 import { CompV3Supply } from "../../contracts/actions/compoundV3/CompV3Supply.sol";
 import { CompV3Withdraw } from "../../contracts/actions/compoundV3/CompV3Withdraw.sol";
 import { CompV3Payback } from "../../contracts/actions/compoundV3/CompV3Payback.sol";
@@ -23,6 +24,10 @@ import { AaveV3ATokenPayback } from "../../contracts/actions/aaveV3/AaveV3AToken
 import { SumInputs } from "../../contracts/actions/utils/SumInputs.sol";
 import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
 import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
+import { EulerV2Supply } from "../../contracts/actions/eulerV2/EulerV2Supply.sol";
+import { EulerV2Withdraw } from "../../contracts/actions/eulerV2/EulerV2Withdraw.sol";
+import { EulerV2Borrow } from "../../contracts/actions/eulerV2/EulerV2Borrow.sol";
+import { EulerV2Payback } from "../../contracts/actions/eulerV2/EulerV2Payback.sol";
 
 contract ActionsUtils {
 
@@ -40,6 +45,23 @@ contract ActionsUtils {
         UNIV3,
         SPARK,
         MORPHO_BLUE
+    }
+
+    function executeActionCalldata(bytes memory _paramsCalldata, bool _isDirect) public view returns (bytes memory callData) {
+        if (_isDirect) {
+            callData = abi.encodeWithSelector(
+                ActionBase.executeActionDirect.selector,
+                _paramsCalldata
+            );
+        } else {
+            callData = abi.encodeWithSelector(
+                ActionBase.executeAction.selector,
+                _paramsCalldata,
+                subData,
+                paramMapping,
+                returnValues
+            );
+        }
     }
 
     function compV3SupplyEncode(
@@ -461,6 +483,76 @@ contract ActionsUtils {
                 tokenAddr: _tokeAddr,
                 to: _to,
                 amount: _amount
+            })
+        );
+    }
+
+    function eulerV2SupplyEncode(
+        address _vault,
+        address _account,
+        address _from,
+        uint256 _amount,
+        bool _enableAsColl
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            EulerV2Supply.Params({
+                vault: _vault,
+                account: _account,
+                from: _from,
+                amount: _amount,
+                enableAsColl: _enableAsColl
+            })
+        );
+    }
+
+    function eulerV2WithdrawEncode(
+        address _vault,
+        address _account,
+        address _receiver,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            EulerV2Withdraw.Params({
+                vault: _vault,
+                account: _account,
+                receiver: _receiver,
+                amount: _amount
+            })
+        );
+    }
+
+    function eulerV2BorrowEncode(
+        address _vault,
+        address _account,
+        address _receiver,
+        uint256 _amount,
+        bool _enableAsController
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            EulerV2Borrow.Params({
+                vault: _vault,
+                account: _account,
+                receiver: _receiver,
+                amount: _amount,
+                enableAsController: _enableAsController
+            })
+        );
+    }
+
+    function eulerV2PaybackEncode(
+        address _vault,
+        address _account,
+        address _from,
+        uint256 _amount,
+        bool _disableController
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            EulerV2Payback.Params({
+                vault: _vault,
+                account: _account,
+                from: _from,
+                amount: _amount,
+                disableController: _disableController
             })
         );
     }
