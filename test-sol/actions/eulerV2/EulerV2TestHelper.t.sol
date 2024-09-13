@@ -8,8 +8,6 @@ import {EulerV2PositionCreator} from "../../utils/positions/EulerV2PositionCreat
 
 contract EulerV2TestHelper is EulerV2Helper, EulerV2PositionCreator {
 
-    uint160 constant ACCOUNT_ID_OFFSET = 8;
-
     address constant ESCROWED_COLLATERAL_PERSPECTIVE = 0xc68CB3658ACf1d49547Fa8605dc158D876cD5828;
     address constant GOVERNED_PERSPECTIVE = 0xC0121817FF224a018840e4D15a864747d36e6Eb2;
     address constant UNGOVERNED_0X_PERSPECTIVE = 0x5345562eD3Ce537582A1A568d3B06c8382Cd60BD;
@@ -28,15 +26,6 @@ contract EulerV2TestHelper is EulerV2Helper, EulerV2PositionCreator {
 
     function getGovernedVaults() internal view returns (address[] memory) {
         return IPerspective(GOVERNED_PERSPECTIVE).verifiedArray();
-    }
-
-    /// @notice Computes the address prefix for a given account address.
-    /// @dev The address prefix is derived by right-shifting the account address by 8 bits which effectively reduces the
-    /// address size to 19 bytes.
-    /// @param _account The account address to compute the prefix for.
-    /// @return The computed address prefix as a bytes19 value.
-    function getAddressPrefixInternal(address _account) internal pure returns (bytes19) {
-        return bytes19(uint152(uint160(_account) >> ACCOUNT_ID_OFFSET));
     }
 
     function getVirtualAccount(

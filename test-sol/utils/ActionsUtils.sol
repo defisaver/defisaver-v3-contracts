@@ -31,6 +31,9 @@ import { EulerV2Payback } from "../../contracts/actions/eulerV2/EulerV2Payback.s
 import { EulerV2CollateralSwitch } from "../../contracts/actions/eulerV2/EulerV2CollateralSwitch.sol";
 import { EulerV2ControllerSwitch } from "../../contracts/actions/eulerV2/EulerV2ControllerSwitch.sol";
 import { EulerV2ReorderCollaterals } from "../../contracts/actions/eulerV2/EulerV2ReorderCollaterals.sol";
+import { EulerV2LockDownModeSwitch } from "../../contracts/actions/eulerV2/EulerV2LockDownModeSwitch.sol";
+import { EulerV2PermitDisabledModeSwitch } from "../../contracts/actions/eulerV2/EulerV2PermitDisabledModeSwitch.sol";
+
 
 contract ActionsUtils {
 
@@ -598,5 +601,25 @@ contract ActionsUtils {
                 indexes: _indexes
             })
         );
+    }
+
+    function eulerV2LockDownModeSwitchEncode(
+        bool _enabled
+    ) public pure returns (bytes memory params) {
+        EulerV2LockDownModeSwitch.Params memory _params = EulerV2LockDownModeSwitch.Params({
+            enabled: _enabled
+        });
+
+        return abi.encode(_params);
+    }
+
+    function eulerV2PermitDisabledModeSwitch(
+        bool _enabled
+    ) public pure returns (bytes memory params) {
+        EulerV2PermitDisabledModeSwitch.Params memory _params = EulerV2PermitDisabledModeSwitch.Params({
+            enabled: _enabled
+        });
+
+        return abi.encode(_params);
     }
 }
