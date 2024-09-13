@@ -166,6 +166,17 @@
       ]
     },
     {
+      "name": "HandleAuth",
+      "address": "0x7f143607250ee51e4dce31254c8ad33ec4c2dad5",
+      "id": "0xd951fa77",
+      "path": "contracts/actions/utils/HandleAuth.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+   },
+    {
       "name": "ApproveToken",
       "address": "0x842a81d2cfe26d401CD63Cc14e9DEf275c197C1a",
       "id": "0xbb8027f4",
