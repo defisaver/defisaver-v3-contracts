@@ -825,7 +825,9 @@ const subAaveV3OpenOrder = async (
         {
             baseTokenAddress: collAsset,
             quoteTokenAddress: debtAsset,
-            price: triggerPrice.div(BigNumber.from(10).pow(8)),
+            // price: triggerPrice.div(BigNumber.from(10).pow(8)),
+            // TODO: temporary pass price as is
+            price: triggerPrice,
             state: RATIO_STATE_UNDER,
         },
         {
