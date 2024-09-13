@@ -3,18 +3,16 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
 
-import { IERC4626 } from "../../interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
+import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IRiskManager } from "../../interfaces/eulerV2/IEVault.sol";
 
-contract EulerV2Withdraw is ActionBase, EulerV2Helper {
+contract EulerV2ControllerSwitch is ActionBase, EulerV2Helper {
     struct Params {
         address vault;
         address account;
-        address receiver;
-        uint256 amount;
+        bool enableAsController;
     }
 
     /// @inheritdoc ActionBase
@@ -28,19 +26,23 @@ contract EulerV2Withdraw is ActionBase, EulerV2Helper {
 
         params.vault = _parseParamAddr(params.vault, _paramMapping[0], _subData, _returnValues);
         params.account = _parseParamAddr(params.account, _paramMapping[1], _subData, _returnValues);
-        params.receiver = _parseParamAddr(params.receiver, _paramMapping[2], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-   
-        (uint256 withdrawAmount, bytes memory logData) = _withdraw(params);
-        emit ActionEvent("EulerV2Withdraw", logData);
-        return bytes32(withdrawAmount);
+        params.enableAsController = _parseParamUint(
+            params.enableAsController ? 1 : 0,
+            _paramMapping[2],
+            _subData,
+            _returnValues
+        ) == 1;
+
+        bytes memory logData = _controllerSwitch(params);
+        emit ActionEvent("EulerV2ControllerSwitch", logData);
+        return bytes32(uint256(params.enableAsController ? 1 : 0));
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _withdraw(params);
-        logger.logActionDirectEvent("EulerV2Withdraw", logData);
+        bytes memory logData = _controllerSwitch(params);
+        logger.logActionDirectEvent("EulerV2ControllerSwitch", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -51,33 +53,23 @@ contract EulerV2Withdraw is ActionBase, EulerV2Helper {
     /*//////////////////////////////////////////////////////////////
                             ACTION LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _withdraw(Params memory _params) internal returns (uint256, bytes memory) {
+    function _controllerSwitch(Params memory _params) internal returns (bytes memory) {
         if (_params.account == address(0)) {
             _params.account = address(this);
         }
 
-        bytes4 vaultActionSelector = _params.amount == type(uint256).max ?
-            IERC4626.redeem.selector : IERC4626.withdraw.selector;
-
-        bytes memory vaultCallData = abi.encodeWithSelector(
-            vaultActionSelector,
-            _params.amount,
-            _params.receiver,
-            _params.account
-        );
-
-        bytes memory result = IEVC(EVC_ADDR).call(
-            _params.vault,
-            _params.account,
-            0,
-            vaultCallData
-        );
-
-        if (_params.amount == type(uint256).max) {
-            _params.amount = abi.decode(result, (uint256));
+        if (_params.enableAsController) {
+            IEVC(EVC_ADDR).enableController(_params.account, _params.vault);
+        } else {
+            IEVC(EVC_ADDR).call(
+                _params.vault,
+                _params.account,
+                0,
+                abi.encodeCall(IRiskManager.disableController, ())
+            );
         }
 
-        return (_params.amount,  abi.encode(_params));
+        return abi.encode(_params);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

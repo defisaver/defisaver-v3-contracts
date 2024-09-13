@@ -3,15 +3,12 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IEVault, IBorrowing } from "../../interfaces/eulerV2/IEVault.sol";
+import { IBorrowing } from "../../interfaces/eulerV2/IEVault.sol";
 import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 
 contract EulerV2Borrow is ActionBase, EulerV2Helper {
-    using TokenUtils for address;
-
     struct Params {
         address vault;
         address account;

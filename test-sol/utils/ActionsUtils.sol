@@ -28,6 +28,9 @@ import { EulerV2Supply } from "../../contracts/actions/eulerV2/EulerV2Supply.sol
 import { EulerV2Withdraw } from "../../contracts/actions/eulerV2/EulerV2Withdraw.sol";
 import { EulerV2Borrow } from "../../contracts/actions/eulerV2/EulerV2Borrow.sol";
 import { EulerV2Payback } from "../../contracts/actions/eulerV2/EulerV2Payback.sol";
+import { EulerV2CollateralSwitch } from "../../contracts/actions/eulerV2/EulerV2CollateralSwitch.sol";
+import { EulerV2ControllerSwitch } from "../../contracts/actions/eulerV2/EulerV2ControllerSwitch.sol";
+import { EulerV2ReorderCollaterals } from "../../contracts/actions/eulerV2/EulerV2ReorderCollaterals.sol";
 
 contract ActionsUtils {
 
@@ -553,6 +556,46 @@ contract ActionsUtils {
                 from: _from,
                 amount: _amount,
                 disableController: _disableController
+            })
+        );
+    }
+
+    function eulerV2CollateralSwitchEncode(
+        address _vault,
+        address _account,
+        bool _enableAsColl
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            EulerV2CollateralSwitch.Params({
+                vault: _vault,
+                account: _account,
+                enableAsColl: _enableAsColl
+            })
+        );
+    }
+
+    function eulerV2ControllerSwitchEncode(
+        address _vault,
+        address _account,
+        bool _enableAsController
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            EulerV2ControllerSwitch.Params({
+                vault: _vault,
+                account: _account,
+                enableAsController: _enableAsController
+            })
+        );
+    }
+
+    function eulerV2ReorderCollaterals(
+        address _account,
+        uint8[][] memory _indexes
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            EulerV2ReorderCollaterals.Params({
+                account: _account,
+                indexes: _indexes
             })
         );
     }
