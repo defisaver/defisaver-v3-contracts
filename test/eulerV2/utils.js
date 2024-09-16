@@ -6,6 +6,8 @@ const E_WETH_2_GOVERNED = '0xD8b27CF359b7D15710a5BE299AF6e7Bf904984C2';
 const E_WSTETH_2_GOVERNED = '0xbC4B4AC47582c3E38Ce5940B80Da65401F4628f1';
 const E_USDC_2_GOVERNED = '0x797DD80692c3b2dAdabCe8e30C07fDE5307D48a9';
 
+const EVC_ADDR = '0x0C9a3dd6b8F28529d72d7f9cE918D493519EE383';
+
 const getEulerV2TestPairs = async (collAmountInUsd, debtAmountInUsd) => {
     return [
         {
@@ -75,4 +77,5 @@ module.exports = {
     E_WETH_2_GOVERNED,
     E_WSTETH_2_GOVERNED,
     E_USDC_2_GOVERNED,
+    EVC_ADDR,
 };
