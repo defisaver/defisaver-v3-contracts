@@ -81,8 +81,8 @@ contract TestEulerV2CollateralSwitch is EulerV2TestHelper {
         assertEq(accountCollaterals[0], firstCollateralVault);
     }
 
-    function test_should_enable_collateral_on_virtual_account() public revertToSnapshot {
-        address account = getVirtualAccount(walletAddr, 0x01);
+    function test_should_enable_collateral_on_sub_account() public revertToSnapshot {
+        address account = getSubAccount(walletAddr, 0x01);
         address collateralVault = E_USDC_2_GOVERNED;
         bool enableAsColl = true;
         bool isDirect = true;

@@ -50,7 +50,7 @@ contract TestEulerV2PermitDisabledModeSwitch is EulerV2TestHelper {
 
     function _permitDisabledModeSwitch(bool _enabled, bool _isDirect) internal {
         bytes memory executeActionCallData = executeActionCalldata(
-            eulerV2PermitDisabledModeSwitch(_enabled),
+            eulerV2PermitDisabledModeSwitchEncode(_enabled),
             _isDirect
         );
         wallet.execute(address(cut), executeActionCallData, 0);

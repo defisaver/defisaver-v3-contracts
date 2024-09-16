@@ -8,7 +8,13 @@ import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
 import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 import { IRiskManager } from "../../interfaces/eulerV2/IEVault.sol";
 
+/// @title Switch if vault will be used as controller or not
+/// @notice Disabling controller is only possible if the account has no debt
 contract EulerV2ControllerSwitch is ActionBase, EulerV2Helper {
+
+    /// @param vault The address of the vault
+    /// @param account The address of the Euler account, defaults to user's wallet
+    /// @param enableAsController Whether to enable or disable the vault as controller
     struct Params {
         address vault;
         address account;

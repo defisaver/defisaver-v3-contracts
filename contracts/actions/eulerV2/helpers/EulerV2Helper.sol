@@ -7,7 +7,7 @@ import { MainnetEulerV2Addresses } from "./MainnetEulerV2Addresses.sol";
 // solhint-disable-next-line no-empty-blocks
 contract EulerV2Helper is MainnetEulerV2Addresses {
 
-    uint160 constant ACCOUNT_ID_OFFSET = 8;
+    uint160 constant internal ACCOUNT_ID_OFFSET = 8;
 
     /// @notice Computes the address prefix for a given account address.
     /// @dev The address prefix is derived by right-shifting the account address by 8 bits which effectively reduces the

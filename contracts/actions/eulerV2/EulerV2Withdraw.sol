@@ -3,13 +3,18 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 import { IERC4626 } from "../../interfaces/eulerV2/IEVault.sol";
 import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
 
+/// @title Withdraws assets from Euler vault
 contract EulerV2Withdraw is ActionBase, EulerV2Helper {
+
+    /// @param vault The address of the Euler vault
+    /// @param account The address of the Euler account, defaults to user's wallet
+    /// @param receiver The address to receive the withdrawn assets
+    /// @param amount The amount of assets to withdraw (uint256.max for max withdrawal)
     struct Params {
         address vault;
         address account;

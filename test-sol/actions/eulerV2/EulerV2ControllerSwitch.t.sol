@@ -65,8 +65,8 @@ contract TestEulerV2ControllerSwitch is EulerV2TestHelper {
         _baseTest(account, controllerVault, enableAsController, isDirect);
     }
 
-    function test_should_enable_controller_on_virtual_account() public revertToSnapshot {
-        address account = getVirtualAccount(walletAddr, 0x01);
+    function test_should_enable_controller_on_sub_account() public revertToSnapshot {
+        address account = getSubAccount(walletAddr, 0x01);
         address controllerVault = E_USDC_2_GOVERNED;
         bool enableAsController = true;
         bool isDirect = true;

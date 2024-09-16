@@ -90,8 +90,8 @@ contract TestEulerV2ReorderCollaterals is EulerV2TestHelper {
         _baseTest(account, indexes, expectedOrderedCollaterals, isDirect);
     }
 
-    function test_should_reorder_collaterals_on_virtual_account() public revertToSnapshot {
-        address account = getVirtualAccount(walletAddr, 0x01);
+    function test_should_reorder_collaterals_on_sub_account() public revertToSnapshot {
+        address account = getSubAccount(walletAddr, 0x01);
         bool isDirect = true;
         address A = E_USDC_2_GOVERNED;
         address B = E_USDC_1_ESCROWED;

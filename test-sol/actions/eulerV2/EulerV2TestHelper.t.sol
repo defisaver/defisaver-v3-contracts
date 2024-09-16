@@ -28,11 +28,11 @@ contract EulerV2TestHelper is EulerV2Helper, EulerV2PositionCreator {
         return IPerspective(GOVERNED_PERSPECTIVE).verifiedArray();
     }
 
-    function getVirtualAccount(
+    function getSubAccount(
         address _mainAccount,
-        bytes1 _virtualAccountNumber
-    ) internal pure returns (address virtualAccount) {
+        bytes1 _subAccountNumber
+    ) internal pure returns (address subAccount) {
         bytes19 accountPrefix = getAddressPrefixInternal(_mainAccount);
-        virtualAccount = address(uint160(bytes20(abi.encodePacked(accountPrefix, _virtualAccountNumber))));
+        subAccount = address(uint160(bytes20(abi.encodePacked(accountPrefix, _subAccountNumber))));
     }
 }

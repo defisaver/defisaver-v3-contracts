@@ -7,7 +7,10 @@ import { ActionBase } from "../ActionBase.sol";
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
 import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 
+/// @title Switch if the account is in lock-down mode or not. When in lock-down mode, the account can't perform any authenticated actions
 contract EulerV2LockDownModeSwitch is ActionBase, EulerV2Helper {
+
+    /// @param enabled Whether to enable or disable the lock-down mode
     struct Params {
         bool enabled;
     }

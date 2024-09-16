@@ -7,7 +7,12 @@ import { ActionBase } from "../ActionBase.sol";
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
 import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 
+/// @title Switch if vault will be used as collateral or not
 contract EulerV2CollateralSwitch is ActionBase, EulerV2Helper {
+
+    /// @param vault The address of the vault
+    /// @param account The address of the Euler account, defaults to user's wallet
+    /// @param enableAsColl Whether to enable or disable the vault as collateral
     struct Params {
         address vault;
         address account;

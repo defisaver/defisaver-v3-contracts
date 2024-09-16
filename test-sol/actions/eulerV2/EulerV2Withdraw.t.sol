@@ -64,8 +64,8 @@ contract TestEulerV2Withdraw is EulerV2TestHelper {
         _baseTest(account, supplyAmountInUsd, withdrawAmountInUsd, isDirect, takeMaxUint256);
     }
 
-    function test_should_supply_and_fully_withdraw_on_virtual_account() public {
-        address account = getVirtualAccount(walletAddr, 0xff);
+    function test_should_supply_and_fully_withdraw_on_sub_account() public {
+        address account = getSubAccount(walletAddr, 0xff);
         uint256 supplyAmountInUsd = 100000;
         uint256 withdrawAmountInUsd = 0;
         bool isDirect = false;
@@ -94,8 +94,8 @@ contract TestEulerV2Withdraw is EulerV2TestHelper {
         _baseTest(account, supplyAmountInUsd, withdrawAmountInUsd, isDirect, takeMaxUint256);
     }
 
-    function test_should_supply_and_withdraw_on_virtual_account() public {
-        address account = getVirtualAccount(walletAddr, 0x01);
+    function test_should_supply_and_withdraw_on_sub_account() public {
+        address account = getSubAccount(walletAddr, 0x01);
         uint256 supplyAmountInUsd = 100000;
         uint256 withdrawAmountInUsd = 1;
         bool isDirect = false;

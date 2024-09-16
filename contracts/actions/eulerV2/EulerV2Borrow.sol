@@ -8,7 +8,14 @@ import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
 import { IBorrowing } from "../../interfaces/eulerV2/IEVault.sol";
 import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 
+/// @title Borrow assets from Euler vault
 contract EulerV2Borrow is ActionBase, EulerV2Helper {
+
+    /// @param vault The address of the Euler vault
+    /// @param account The address of the Euler account, defaults to user's wallet
+    /// @param receiver The address to receive the borrowed assets
+    /// @param amount The amount of assets to borrow
+    /// @param enableAsController Whether to enable borrow vault as controller. Can be skipped only if the vault is already enabled as controller
     struct Params {
         address vault;
         address account;
@@ -66,7 +73,7 @@ contract EulerV2Borrow is ActionBase, EulerV2Helper {
             IEVC(EVC_ADDR).enableController(_params.account, _params.vault);
         }
 
-        bytes memory vaultCallData = abi.encodeCall(
+        bytes memory borrowCallData = abi.encodeCall(
             IBorrowing.borrow,
             (_params.amount, _params.receiver)
         );
@@ -75,7 +82,7 @@ contract EulerV2Borrow is ActionBase, EulerV2Helper {
             _params.vault,
             _params.account,
             0,
-            vaultCallData
+            borrowCallData
         );
 
         _params.amount = abi.decode(result, (uint256));

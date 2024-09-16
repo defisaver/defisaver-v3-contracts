@@ -103,8 +103,8 @@ contract TestEulerV2Payback is EulerV2TestHelper {
         );
     }
 
-    function test_should_payback_full_amount_on_virtual_account_with_controller_removal() public {
-        address account = getVirtualAccount(walletAddr, 0x01);
+    function test_should_payback_full_amount_on_sub_account_with_controller_removal() public {
+        address account = getSubAccount(walletAddr, 0x01);
         bool isDirect = true;
         bool disableController = true;
         uint256 collateralAmountInUsd = 100000;

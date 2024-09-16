@@ -94,8 +94,8 @@ contract TestEulerV2Supply is EulerV2TestHelper {
         _baseTest(account, enableAsColl, isDirect, takeMaxUint256);
     }
 
-    function test_should_supply_with_virtual_account() public {
-        address account = getVirtualAccount(walletAddr, 0x01);
+    function test_should_supply_with_sub_account() public {
+        address account = getSubAccount(walletAddr, 0x01);
         bool enableAsColl = true;
         bool isDirect = true;
         bool takeMaxUint256 = false;
@@ -103,11 +103,11 @@ contract TestEulerV2Supply is EulerV2TestHelper {
         _baseTest(account, enableAsColl, isDirect, takeMaxUint256);
     }
 
-    function test_should_supply_with_main_and_two_virtual_accounts() public {
+    function test_should_supply_with_main_and_two_sub_accounts() public {
         address[] memory accounts = new address[](3);
         accounts[0] = walletAddr;
-        accounts[1] = getVirtualAccount(walletAddr, 0x01);
-        accounts[2] = getVirtualAccount(walletAddr, 0x02);
+        accounts[1] = getSubAccount(walletAddr, 0x01);
+        accounts[2] = getSubAccount(walletAddr, 0x02);
 
         bool enableAsColl = true;
         bool isDirect = true;

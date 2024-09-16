@@ -6,10 +6,12 @@ import { ActionBase } from "../ActionBase.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
 import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
-import { IRiskManager } from "../../interfaces/eulerV2/IEVault.sol";
 
+/// @title Reorder account collaterals. Can be used to optimize gas costs when checking account health status
 contract EulerV2ReorderCollaterals is ActionBase, EulerV2Helper {
 
+    /// @param account The address of the Euler account, defaults to user's wallet
+    /// @param indexes The array of swap steps to reorder collaterals
     struct Params {
         address account;
         uint8[][] indexes;

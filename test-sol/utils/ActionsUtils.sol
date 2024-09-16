@@ -33,7 +33,8 @@ import { EulerV2ControllerSwitch } from "../../contracts/actions/eulerV2/EulerV2
 import { EulerV2ReorderCollaterals } from "../../contracts/actions/eulerV2/EulerV2ReorderCollaterals.sol";
 import { EulerV2LockDownModeSwitch } from "../../contracts/actions/eulerV2/EulerV2LockDownModeSwitch.sol";
 import { EulerV2PermitDisabledModeSwitch } from "../../contracts/actions/eulerV2/EulerV2PermitDisabledModeSwitch.sol";
-
+import { EulerV2PaybackWithShares } from "../../contracts/actions/eulerV2/EulerV2PaybackWithShares.sol";
+import { EulerV2PullDebt } from "../../contracts/actions/eulerV2/EulerV2PullDebt.sol";
 
 contract ActionsUtils {
 
@@ -606,20 +607,56 @@ contract ActionsUtils {
     function eulerV2LockDownModeSwitchEncode(
         bool _enabled
     ) public pure returns (bytes memory params) {
-        EulerV2LockDownModeSwitch.Params memory _params = EulerV2LockDownModeSwitch.Params({
-            enabled: _enabled
-        });
-
-        return abi.encode(_params);
+        params = abi.encode(
+            EulerV2LockDownModeSwitch.Params({
+                enabled: _enabled
+            })
+        );
     }
 
-    function eulerV2PermitDisabledModeSwitch(
+    function eulerV2PermitDisabledModeSwitchEncode(
         bool _enabled
     ) public pure returns (bytes memory params) {
-        EulerV2PermitDisabledModeSwitch.Params memory _params = EulerV2PermitDisabledModeSwitch.Params({
-            enabled: _enabled
-        });
+        params = abi.encode(
+            EulerV2PermitDisabledModeSwitch.Params({
+                enabled: _enabled
+            })
+        );
+    }
 
-        return abi.encode(_params);
+    function eulerV2PaybackWithSharesEncode(
+        address _vault,
+        address _from,
+        address _account,
+        uint256 _amount,
+        bool _disableController
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            EulerV2PaybackWithShares.Params({
+                vault: _vault,
+                from: _from,
+                account: _account,
+                amount: _amount,
+                disableController: _disableController
+            })
+        );
+    }
+
+    function eulerV2PullDebtEncode(
+        address _vault,
+        address _account,
+        address _from,
+        uint256 _amount,
+        bool _enableAsController
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            EulerV2PullDebt.Params({
+                vault: _vault,
+                account: _account,
+                from: _from,
+                amount: _amount,
+                enableAsController: _enableAsController
+            })
+        );
     }
 }

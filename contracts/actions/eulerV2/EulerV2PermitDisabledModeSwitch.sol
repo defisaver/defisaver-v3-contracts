@@ -7,7 +7,10 @@ import { ActionBase } from "../ActionBase.sol";
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
 import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 
+/// @title Switch if permit disabled mode is enabled or not. When in permit disabled mode, no permit action can be executed for the account
 contract EulerV2PermitDisabledModeSwitch is ActionBase, EulerV2Helper {
+
+    /// @param enabled Whether to enable or disable the permit disabled mode
     struct Params {
         bool enabled;
     }

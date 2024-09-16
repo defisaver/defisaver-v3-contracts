@@ -3,27 +3,25 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IEVault, IRiskManager } from "../../interfaces/eulerV2/IEVault.sol";
+import { IBorrowing } from "../../interfaces/eulerV2/IEVault.sol";
 import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 
-/// @title Payback debt assets to a Euler vault
-contract EulerV2Payback is ActionBase, EulerV2Helper {
-    using TokenUtils for address;
+/// @title Pull debt from one Euler account to another
+contract EulerV2PullDebt is ActionBase, EulerV2Helper {
 
-    /// @param vault The address of the vault
-    /// @param account The address of the Euler account, defaults to user's wallet
-    /// @param from The address from which to pull tokens to be paid back
-    /// @param amount The amount of assets to pay back (uint256.max for full debt repayment)
-    /// @param disableController Whether to disable the controller if full debt repayment
+    /// @param vault The address of the Euler vault
+    /// @param account The address of the Euler account taking the debt, defaults to user's wallet
+    /// @param from The address of the Euler account from which debt is pulled
+    /// @param amount The amount of debt to be pulled (uint256.max for full debt pull)
+    /// @param enableAsController Whether to enable borrow vault as controller for account. Can be skipped only if the vault is already enabled as controller
     struct Params {
         address vault;
         address account;
         address from;
         uint256 amount;
-        bool disableController;
+        bool enableAsController;
     }
 
     /// @inheritdoc ActionBase
@@ -39,23 +37,23 @@ contract EulerV2Payback is ActionBase, EulerV2Helper {
         params.account = _parseParamAddr(params.account, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-        params.disableController = _parseParamUint(
-            params.disableController ? 1 : 0,
+        params.enableAsController = _parseParamUint(
+            params.enableAsController ? 1 : 0,
             _paramMapping[4],
             _subData,
             _returnValues
         ) == 1;
 
-        (uint256 paybackAmount, bytes memory logData) = _payback(params);
-        emit ActionEvent("EulerV2Payback", logData);
-        return bytes32(paybackAmount);
+        (uint256 pulledDebtAmount, bytes memory logData) = _pullDebt(params);
+        emit ActionEvent("EulerV2PullDebt", logData);
+        return bytes32(pulledDebtAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _payback(params);
-        logger.logActionDirectEvent("EulerV2Payback", logData);
+        (, bytes memory logData) = _pullDebt(params);
+        logger.logActionDirectEvent("EulerV2PullDebt", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -66,37 +64,35 @@ contract EulerV2Payback is ActionBase, EulerV2Helper {
     /*//////////////////////////////////////////////////////////////
                             ACTION LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _payback(Params memory _params) internal returns (uint256, bytes memory) {
-        address assetAddr = IEVault(_params.vault).asset();
-
+    function _pullDebt(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.account == address(0)) {
             _params.account = address(this);
         }
 
-        bool maxPayback;
-
-        uint256 currentAccountDebt = IEVault(_params.vault).debtOf(_params.account);
-        if (_params.amount > currentAccountDebt) {
-            _params.amount = currentAccountDebt;
-            maxPayback = true;
+        if (_params.enableAsController) {
+            IEVC(EVC_ADDR).enableController(_params.account, _params.vault);
         }
 
-        assetAddr.pullTokensIfNeeded(_params.from, _params.amount);
-        assetAddr.approveToken(_params.vault, _params.amount);
+        bytes memory pullDebtCallData = abi.encodeCall(
+            IBorrowing.pullDebt,
+            (_params.amount, _params.from)
+        );
 
-        _params.amount = IEVault(_params.vault).repay(_params.amount, _params.account);
+        uint256 accountDebtBefore = IBorrowing(_params.vault).debtOf(_params.account);
 
-        if (maxPayback && _params.disableController) {
-            IEVC(EVC_ADDR).call(
-                _params.vault,
-                _params.account,
-                0,
-                abi.encodeCall(IRiskManager.disableController, ())
-            );
-        }
+        IEVC(EVC_ADDR).call(
+            _params.vault,
+            _params.account,
+            0,
+            pullDebtCallData
+        );
+
+        uint256 accountDebtAfter = IBorrowing(_params.vault).debtOf(_params.account);
+
+        _params.amount = accountDebtAfter - accountDebtBefore;
 
         return (_params.amount, abi.encode(_params));
-    }   
+    }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));

@@ -9,9 +9,15 @@ import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
 import { IEVault } from "../../interfaces/eulerV2/IEVault.sol";
 import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 
+/// @title Supply assets to a Euler vault and gets eTokens vault shares
 contract EulerV2Supply is ActionBase, EulerV2Helper {
     using TokenUtils for address;
 
+    /// @param vault The address of the supply vault
+    /// @param account The address of the Euler account, defaults to user's wallet
+    /// @param from The address from which to pull tokens to be supplied
+    /// @param amount The amount of assets to supply
+    /// @param enableAsColl Whether to enable supply vault as collateral
     struct Params {
         address vault;
         address account;
