@@ -45,6 +45,10 @@ const {
     LOGGER_ADDR,
     getContractFromRegistry,
     approve,
+    impersonateAccount,
+    stopImpersonatingAccount,
+    sendEther,
+    setCode,
 } = require('../utils');
 const {
     getVaultsForUser,
@@ -1697,20 +1701,24 @@ const mcdTokenConverterTest = async () => {
         const MKR_ADDRESS = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
         const SKY_ADDRESS = '0x56072C95FAA701256059aa122697B133aDEd9279';
         const USDS_ADDRESS = '0xdC035D45d973E3EC169d2276DDab16f1e407384F';
-        const MKR_SKY_CONVERTER = '0xBDcFCA946b6CDd965f99a839e4435Bcdc1bc470B';
         const DAI_USDS_CONVERTER = '0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A';
 
         before(async () => {
             [senderAcc] = await hre.ethers.getSigners();
             proxy = await getProxy(senderAcc.address);
-            const converterContractsFillAmount = hre.ethers.utils.parseUnits('100000000', 18);
-            await setBalance(DAI_ADDRESS, DAI_USDS_CONVERTER, converterContractsFillAmount);
-            await setBalance(MKR_ADDRESS, MKR_SKY_CONVERTER, converterContractsFillAmount);
-            await setBalance(SKY_ADDRESS, MKR_SKY_CONVERTER, converterContractsFillAmount);
-            await setBalance(USDS_ADDRESS, DAI_USDS_CONVERTER, converterContractsFillAmount);
         });
-
         it('... should convert DAI to USDS', async () => {
+            // this should be deleted after it's deployed
+            await impersonateAccount('0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB');
+            const contractAddress = '0xdc035d45d973e3ec169d2276ddab16f1e407384f';
+            const abi = ['function rely(address usr) external'];
+            const signer = await hre.ethers.provider.getSigner('0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB');
+            const contract = new hre.ethers.Contract(contractAddress, abi, signer);
+            const addressToRely = '0x3c0f895007ca717aa01c8693e59df1e8c3777feb';
+            const tx = await contract.rely(addressToRely);
+            await tx.wait();
+            await stopImpersonatingAccount('0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB');
+            // ------
             const daiAmount = hre.ethers.utils.parseUnits('100', 18);
             await setBalance(DAI_ADDRESS, senderAcc.address, daiAmount);
             await setBalance(USDS_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
@@ -1718,22 +1726,46 @@ const mcdTokenConverterTest = async () => {
 
             await mcdTokenConvert(proxy, DAI_ADDRESS, senderAcc.address, senderAcc.address, daiAmount);
             const newUsdsBalance = await balanceOf(USDS_ADDRESS, senderAcc.address);
-            console.log(newUsdsBalance);
-            expect(newUsdsBalance).to.be.equal(daiAmount); // off by one wei
+            expect(newUsdsBalance).to.be.equal(daiAmount);
         });
         it('... should convert USDS to DAI', async () => {
+            // this should be deleted after it's deployed
+            const code = await hre.network.provider.send('eth_getCode', [DAI_USDS_CONVERTER]);
+            await setCode(DAI_USDS_CONVERTER, '0x');
+            await sendEther(senderAcc, DAI_USDS_CONVERTER, '0.1');
+            await setCode(DAI_USDS_CONVERTER, code);
+            const converterContractsFillAmount = hre.ethers.utils.parseUnits('100000000', 18);
+            await setBalance(DAI_ADDRESS, DAI_USDS_CONVERTER, converterContractsFillAmount);
+            await impersonateAccount(DAI_USDS_CONVERTER);
+            const abi = ['function join(address usr, uint256 wad) external'];
+            const signer = await hre.ethers.provider.getSigner(DAI_USDS_CONVERTER);
+            const contractAddress = '0x9759A6Ac90977b93B58547b4A71c78317f391A28';
+            const contract = new hre.ethers.Contract(contractAddress, abi, signer);
+            const tx = await contract.join('0x3C0f895007CA717Aa01c8693e59DF1e8C3777FEB', converterContractsFillAmount);
+            await tx.wait();
+            await stopImpersonatingAccount(DAI_USDS_CONVERTER);
+            // ---------
+
             const usdsAmount = hre.ethers.utils.parseUnits('100', 18);
             await setBalance(USDS_ADDRESS, senderAcc.address, usdsAmount);
             await setBalance(DAI_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
             await approve(USDS_ADDRESS, proxy.address);
-
             await mcdTokenConvert(proxy, USDS_ADDRESS, senderAcc.address, senderAcc.address, usdsAmount);
             const newDaiBalance = await balanceOf(DAI_ADDR, senderAcc.address);
-            console.log(newDaiBalance);
             expect(newDaiBalance).to.be.equal(usdsAmount);
         });
-
         it('... should convert MKR to SKY', async () => {
+            // this should be deleted after it's deployed
+            await impersonateAccount('0xbe8e3e3618f7474f8cb1d074a26affef007e98fb');
+            const contractAddress = '0x56072C95FAA701256059aa122697B133aDEd9279';
+            const abi = ['function rely(address usr) external'];
+            const signer = await hre.ethers.provider.getSigner('0xbe8e3e3618f7474f8cb1d074a26affef007e98fb');
+            const contract = new hre.ethers.Contract(contractAddress, abi, signer);
+            const addressToRely = '0xBDcFCA946b6CDd965f99a839e4435Bcdc1bc470B';
+            const tx = await contract.rely(addressToRely);
+            await tx.wait();
+            await stopImpersonatingAccount('0xbe8e3e3618f7474f8cb1d074a26affef007e98fb');
+
             const mkrAmount = hre.ethers.utils.parseUnits('100', 18);
             await setBalance(MKR_ADDRESS, senderAcc.address, mkrAmount);
             await setBalance(SKY_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
@@ -1741,10 +1773,21 @@ const mcdTokenConverterTest = async () => {
 
             await mcdTokenConvert(proxy, MKR_ADDRESS, senderAcc.address, senderAcc.address, mkrAmount);
             const newSkyBalance = await balanceOf(SKY_ADDRESS, senderAcc.address);
-            console.log(newSkyBalance);
             expect(newSkyBalance).to.be.equal(mkrAmount.mul('24000'));
         });
+
         it('... should convert SKY to MKR', async () => {
+            // this should be deleted after it's deployed
+            await impersonateAccount('0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB');
+            const contractAddress = '0x6eEB68B2C7A918f36B78E2DB80dcF279236DDFb8';
+            const abi = ['function rely(address usr) external'];
+            const signer = await hre.ethers.provider.getSigner('0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB');
+            const contract = new hre.ethers.Contract(contractAddress, abi, signer);
+            const addressToRely = '0xBDcFCA946b6CDd965f99a839e4435Bcdc1bc470B';
+            const tx = await contract.rely(addressToRely);
+            await tx.wait();
+            await stopImpersonatingAccount('0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB');
+
             const skyAmount = hre.ethers.utils.parseUnits('100', 18);
             await setBalance(SKY_ADDRESS, senderAcc.address, skyAmount);
             await setBalance(MKR_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
@@ -1752,7 +1795,6 @@ const mcdTokenConverterTest = async () => {
 
             await mcdTokenConvert(proxy, SKY_ADDRESS, senderAcc.address, senderAcc.address, skyAmount);
             const newMkrBalance = await balanceOf(MKR_ADDRESS, senderAcc.address);
-            console.log(newMkrBalance);
             expect(newMkrBalance).to.be.equal(skyAmount.div('24000'));
         });
     });

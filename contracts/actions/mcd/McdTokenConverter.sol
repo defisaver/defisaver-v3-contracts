@@ -30,7 +30,7 @@ contract McdTokenConverter is ActionBase, McdHelper {
 
         inputData.tokenAddr = _parseParamAddr(inputData.tokenAddr, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
-        inputData.from = _parseParamAddr(inputData.from, _paramMapping[2], _subData, _returnValues);
+        inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[3], _subData, _returnValues);
 
         (uint256 newTokenAmount, bytes memory logData) = _mcdConvert(inputData);
