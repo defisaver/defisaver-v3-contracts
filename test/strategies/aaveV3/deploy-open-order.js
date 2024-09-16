@@ -5,12 +5,12 @@
                         START PARAMS
 ////////////////////////////////////////////////////////////// */
 const SUB_TO_OPEN_ORDER_FROM_COLL = false;
-const COLLATERAL_TOKEN = 'DAI';
-const DEBT_TOKEN = 'WETH';
-const SUPPLY_AMOUNT_TOKEN = '50'; //  e.g. 50 DAI or 50 WETH
+const COLLATERAL_TOKEN = 'WETH';
+const DEBT_TOKEN = 'DAI';
+const SUPPLY_AMOUNT_TOKEN = '50000'; //  50k DAI
 const SUPPLY_TOKEN_DECIMALS = 18;
 const TARGET_RATIO = 130;
-const TRIGGER_PRICE = 0.0006; // 1 DAI = 0.0006 ETH, or e.g put 1 WETH = 4000 DAI if ETH/DAI position
+const TRIGGER_PRICE = 4000; // 1 DAI = 0.0006 ETH, or e.g put 1 WETH = 4000 DAI if ETH/DAI position
 /* //////////////////////////////////////////////////////////////
                         END PARAMS
 ////////////////////////////////////////////////////////////// */
@@ -76,7 +76,7 @@ const deployOpenOrderFromDebtStrategy = async (proxy, isFork) => {
     return aaveV3FLOpenOrderFromDebtStrategyId;
 };
 
-describe('AaveV3-Open-Order-From-Coll-Strategy-Test', function () {
+describe('Deploy open order strategies on fork', function () {
     this.timeout(1200000);
 
     const REGISTRY_ADDR = addrs[network].REGISTRY_ADDR;
