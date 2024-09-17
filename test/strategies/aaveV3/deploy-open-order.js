@@ -4,13 +4,17 @@
 /* //////////////////////////////////////////////////////////////
                         START PARAMS
 ////////////////////////////////////////////////////////////// */
-const SUB_TO_OPEN_ORDER_FROM_COLL = false;
+const USER_ID = 1; // value 1-5 to re-use same fork
+const SUB_TO_OPEN_ORDER_FROM_COLL = true;
 const COLLATERAL_TOKEN = 'WETH';
 const DEBT_TOKEN = 'DAI';
-const SUPPLY_AMOUNT_TOKEN = '50000'; //  50k DAI
 const SUPPLY_TOKEN_DECIMALS = 18;
+const SUPPLY_TOKEN_AMOUNT = '50';
+const INITIAL_DEBT_TOKEN = 'DAI';
+const INITIAL_DEBT_AMOUNT = '30000'; // 30k DAI
 const TARGET_RATIO = 130;
 const TRIGGER_PRICE = 4000; // 1 DAI = 0.0006 ETH, or e.g put 1 WETH = 4000 DAI if ETH/DAI position
+
 /* //////////////////////////////////////////////////////////////
                         END PARAMS
 ////////////////////////////////////////////////////////////// */
@@ -38,7 +42,7 @@ const {
 
 const { topUp } = require('../../../scripts/utils/fork');
 const { subAaveV3OpenOrder } = require('../../strategy-subs');
-const { aaveV3Supply } = require('../../actions');
+const { aaveV3Supply, aaveV3Borrow } = require('../../actions');
 const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromDebtStrategy } = require('../../strategies');
 const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromDebtL2Strategy } = require('../../l2-strategies');
 
@@ -88,7 +92,6 @@ describe('Deploy open order strategies on fork', function () {
     let senderAcc3;
     let senderAcc4;
     let senderAcc5;
-    let senderAcc6;
 
     let openOrderFromCollBundleId;
     let openOrderFromDebtStrategyId;
@@ -118,6 +121,18 @@ describe('Deploy open order strategies on fork', function () {
             supplyAssetReserveData.id,
             senderAcc.address,
             senderAcc,
+        );
+
+        const initialTokenAsset = getAssetInfo(INITIAL_DEBT_TOKEN);
+        const initialDebtReserveData = await pool.getReserveData(initialTokenAsset.address);
+        const initialBorrowAmount = hre.ethers.utils.parseUnits(INITIAL_DEBT_AMOUNT, initialTokenAsset.decimals);
+        await aaveV3Borrow(
+            proxy,
+            market,
+            initialBorrowAmount,
+            senderAcc.address,
+            2,
+            initialDebtReserveData.id,
         );
 
         const isBundle = subForOpenFromColl;
@@ -151,7 +166,6 @@ describe('Deploy open order strategies on fork', function () {
             senderAcc3,
             senderAcc4,
             senderAcc5,
-            senderAcc6,
         ] = await hre.ethers.getSigners();
 
         const mainnetBocAccounts = [
@@ -173,7 +187,6 @@ describe('Deploy open order strategies on fork', function () {
             await topUp(senderAcc3.address);
             await topUp(senderAcc4.address);
             await topUp(senderAcc5.address);
-            await topUp(senderAcc6.address);
             await topUp(getOwnerAddr());
             for (let i = 0; i < botAccounts.length; i++) {
                 await topUp(botAccounts[i]);
@@ -186,7 +199,12 @@ describe('Deploy open order strategies on fork', function () {
         openOrderFromCollBundleId = await deployOpenOrderFromCollBundle(proxy, isFork);
         openOrderFromDebtStrategyId = await deployOpenOrderFromDebtStrategy(proxy, isFork);
 
-        senderAcc = senderAcc1;
+        if (USER_ID === 1) senderAcc = senderAcc1;
+        if (USER_ID === 2) senderAcc = senderAcc2;
+        if (USER_ID === 3) senderAcc = senderAcc3;
+        if (USER_ID === 4) senderAcc = senderAcc4;
+        if (USER_ID === 5) senderAcc = senderAcc5;
+
         await setUpWallet();
 
         console.log('OpenOrderFromCollBundleId:', openOrderFromCollBundleId);
@@ -196,7 +214,7 @@ describe('Deploy open order strategies on fork', function () {
 
         const collAsset = getAssetInfo(COLLATERAL_TOKEN, chainIds[network]);
         const debtAsset = getAssetInfo(DEBT_TOKEN, chainIds[network]);
-        const supplyAmount = hre.ethers.utils.parseUnits(SUPPLY_AMOUNT_TOKEN, SUPPLY_TOKEN_DECIMALS);
+        const supplyAmount = hre.ethers.utils.parseUnits(SUPPLY_TOKEN_AMOUNT, SUPPLY_TOKEN_DECIMALS);
 
         await subToBundle(
             supplyAmount,
