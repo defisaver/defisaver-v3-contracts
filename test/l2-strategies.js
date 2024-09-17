@@ -674,7 +674,7 @@ const createAaveV3OpenOrderFromCollL2Strategy = () => {
         '%gasStart', // sent by backend
         '&collAsset',
         '$2', // output of sell action
-        '%dfsFeeDivider', // defaults at 0.05%
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
         '%l1GasCostInEth', // send custom amount for Optimism
     );
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
@@ -736,7 +736,7 @@ const createAaveV3FLOpenOrderFromCollL2Strategy = () => {
         '%gasStart', // sent by backend
         '&collAsset',
         '$2', // output of sell action
-        '%dfsFeeDivider', // defaults at 0.05%
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
         '%l1GasCostInEth', // send custom amount for Optimism
     );
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
@@ -820,7 +820,7 @@ const createAaveV3FLOpenOrderFromDebtL2Strategy = () => {
         '%gasStart', // sent by backend
         '&collAsset',
         '$4', // output of sell action
-        '%dfsFeeDivider', // defaults at 0.05%
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
         '%l1GasCostInEth', // send custom amount for Optimism
     );
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
