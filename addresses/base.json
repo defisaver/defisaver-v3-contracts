@@ -151,6 +151,17 @@
       "history": []
     },
     {
+      "name": "BotRefills",
+      "address": "",
+      "id": "",
+      "path": "contracts/utils/BotRefills.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "RecipeExecutor",
       "address": "0x7a87565b77dd65bbc153fe20e97743842f1a6e0c",
       "id": "0x4c69ee1e",
@@ -1075,6 +1086,28 @@
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": "0",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "DFSPricesView",
+        "address": "0x25d32455A36cA32CaB116B17a7Cfc8C68EB0ADAe",
+        "id": "0x3d82eb0c",
+        "path": "contracts/views/DFSPricesView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "GeneralView",
+        "address": "0xdff2b1bB068f5549e43DAC75C66fED555DE565fB",
+        "id": "0xc5831ea6",
+        "path": "contracts/views/GeneralView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
       },
