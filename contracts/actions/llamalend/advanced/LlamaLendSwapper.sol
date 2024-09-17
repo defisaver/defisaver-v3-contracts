@@ -3,17 +3,27 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../../../auth/AdminAuth.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
-import { DFSExchangeCore } from "../../../exchangeV3/DFSExchangeCore.sol";
+import { DFSExchangeWithTxSaver } from "../../../exchangeV3/DFSExchangeWithTxSaver.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
 import { FeeRecipient } from "../../../utils/FeeRecipient.sol";
 import { SafeERC20 } from "../../../utils/SafeERC20.sol";
 import { IERC20 } from "../../../interfaces/IERC20.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
-import { GasFeeHelper } from "../../../actions/fee/GasFeeTaker.sol";
+import { ActionsUtilHelper } from "../../utils/helpers/ActionsUtilHelper.sol";
+import { DFSRegistry } from "../../../core/DFSRegistry.sol";
+import { GasFeeHelper } from "../../fee/helpers/GasFeeHelper.sol";
+import { ReentrancyGuardTransient } from "../../../utils/ReentrancyGuardTransient.sol";
 
 /// @title LlamaLendSwapper Callback contract for Llamalend extended actions
-contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, AdminAuth {
+contract LlamaLendSwapper is 
+    LlamaLendHelper,
+    DFSExchangeWithTxSaver,
+    AdminAuth,
+    ActionsUtilHelper,
+    GasFeeHelper,
+    ReentrancyGuardTransient
+{
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -25,7 +35,6 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         uint256 collateral;
     }
 
-
     ///@dev called by llamalend controller after repay_extended
     ///@dev sends all collateral the user has to this contract, we swap a part or all of it
     ///@dev after swapping, llamalend will either recreate the position or close it fully
@@ -35,7 +44,7 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         uint256,
         uint256,
         uint256[] memory info
-    ) external returns (CallbackData memory cb) {
+    ) external nonReentrant returns (CallbackData memory cb) {
         uint256 gasUsed = info[0];
         if (!isControllerValid(msg.sender, info[1])) revert InvalidLlamaLendController();
 
@@ -43,9 +52,14 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         address collToken = exData.srcAddr;
         address debtToken = exData.destAddr;
 
-        (, uint256 receivedAmount, bool hasFee) = _sell(exData, _user);
+        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) = _sellWithTxSaverChoice(
+            exData,
+            _user,
+            DFSRegistry(REGISTRY_ADDR)
+        );
         
-        if (gasUsed > 0){
+        // can't take both automation fee and TxSaver fee
+        if (gasUsed > 0 && !txSaverFeeTaken){
             receivedAmount -= _takeAutomationFee(receivedAmount, debtToken, gasUsed, hasFee);
         }
 
@@ -67,16 +81,21 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         uint256,
         uint256,
         uint256[] memory info
-    ) external returns (CallbackData memory cb) {
+    ) external nonReentrant returns (CallbackData memory cb) {
         uint256 gasUsed = info[0];
         if (!isControllerValid(msg.sender, info[1])) revert InvalidLlamaLendController();
         ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
 
         address collToken = exData.destAddr;
 
-        (, uint256 receivedAmount, bool hasFee) = _sell(exData, _user);
+        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) = _sellWithTxSaverChoice(
+            exData,
+            _user,
+            DFSRegistry(REGISTRY_ADDR)
+        );
 
-        if (gasUsed > 0){
+        // can't take both automation fee and TxSaver fee
+        if (gasUsed > 0 && !txSaverFeeTaken){
             receivedAmount -= _takeAutomationFee(receivedAmount, collToken, gasUsed, hasFee);
         }
 
@@ -95,7 +114,7 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         uint256,
         uint256,
         uint256[] memory info
-    ) external returns (CallbackData memory cb) {
+    ) external nonReentrant returns (CallbackData memory cb) {
         uint256 gasUsed = info[0];
         if (!isControllerValid(msg.sender, info[1])) revert InvalidLlamaLendController();
         bool sellMax = info[2] > 0;
@@ -106,21 +125,27 @@ contract LlamaLendSwapper is LlamaLendHelper, DFSExchangeCore, GasFeeHelper, Adm
         if (sellMax) {
             exData.srcAmount = collToken.getBalance(address(this));
         }
-        (, uint256 receivedAmount, bool hasFee) = _sell(exData, _user);
 
-        if (gasUsed > 0){
+        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) = _sellWithTxSaverChoice(
+            exData,
+            _user,
+            DFSRegistry(REGISTRY_ADDR)
+        );
+
+        // can't take both automation fee and TxSaver fee
+        if (gasUsed > 0 && !txSaverFeeTaken) {
             receivedAmount -= _takeAutomationFee(receivedAmount, debtToken, gasUsed, hasFee);
         }
+
         cb.stablecoins = receivedAmount;
         cb.collateral = collToken.getBalance(address(this));
 
         IERC20(collToken).safeApprove(msg.sender, cb.collateral);
         IERC20(debtToken).safeApprove(msg.sender, cb.stablecoins);
-
     }
 
     /// @dev No funds should be stored on this contract, but if anything is left send back to the user
-    function withdrawAll(address _controllerAddress) external {
+    function withdrawAll(address _controllerAddress) external nonReentrant {
         address collToken = ILlamaLendController(_controllerAddress).collateral_token();
         address debtToken = ILlamaLendController(_controllerAddress).borrowed_token();
 

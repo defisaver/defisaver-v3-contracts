@@ -123,7 +123,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
         return payload = bytes.concat(abi.encodePacked(selector, _amounts, _minMintAmount), optional);
     }
 
-    function parseInputs(bytes memory _callData) internal pure returns (Params memory params) {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
 }

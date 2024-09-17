@@ -2,14 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import "../../exchangeV3/DFSExchangeCore.sol";
-import "../../exchangeV3/registries/TokenGroupRegistry.sol";
-import "../ActionBase.sol";
-
+import { DFSExchangeWithTxSaver } from "../../exchangeV3/DFSExchangeWithTxSaver.sol";
+import { TokenGroupRegistry } from "../../exchangeV3/registries/TokenGroupRegistry.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { ITxSaverBytesTransientStorage} from "../../interfaces/ITxSaverBytesTransientStorage.sol";
 
 /// @title A exchange sell action through the dfs exchange
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
-contract DFSSell is ActionBase, DFSExchangeCore {
+contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
 
     using TokenUtils for address;
 
@@ -51,8 +52,11 @@ contract DFSSell is ActionBase, DFSExchangeCore {
         );
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
+        
+        bool isDirect = _returnValues.length == 1 ? true : false;
 
-        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, false);
+        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, isDirect);
+
         emit ActionEvent("DFSSell", logData);
         return bytes32(exchangedAmount);
     }
@@ -128,8 +132,10 @@ contract DFSSell is ActionBase, DFSExchangeCore {
             _exchangeData.dfsFeeDivider = 0;
         }
         
+        address wrapper;
+        uint256 exchangedAmount;
 
-        (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
+        (wrapper, exchangedAmount,,) = _sellWithTxSaverChoice(_exchangeData, address(this), registry);
 
         if (isEthDest) {
             TokenUtils.withdrawWeth(exchangedAmount);

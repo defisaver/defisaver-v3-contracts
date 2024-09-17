@@ -26,7 +26,7 @@ contract CurveUsdHealthRatioTrigger is ITrigger, AdminAuth, TriggerHelper {
         view
         returns (bool)
     {   
-        SubParams memory triggerSubData = parseInputs(_subData);
+        SubParams memory triggerSubData = parseSubInputs(_subData);
         ICrvUsdController controller = ICrvUsdController(triggerSubData.market);
 
         if (!controller.loan_exists(triggerSubData.user)) {
@@ -38,7 +38,7 @@ contract CurveUsdHealthRatioTrigger is ITrigger, AdminAuth, TriggerHelper {
         return uint256(currentHealth) < triggerSubData.ratio;
     }
 
-    function parseInputs(bytes memory _subData) internal pure returns (SubParams memory params) {
+    function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
 

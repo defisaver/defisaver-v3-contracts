@@ -15,7 +15,7 @@ contract CBRebondTrigger is ITrigger, AdminAuth, CBHelper {
     }
 
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
-        SubParams memory triggerSubData = parseInputs(_subData);
+        SubParams memory triggerSubData = parseSubInputs(_subData);
         IChickenBondManager.BondData memory bondData = CBManager.getBondData(triggerSubData.bondID);
 
         // bond must be in active state
@@ -43,7 +43,7 @@ contract CBRebondTrigger is ITrigger, AdminAuth, CBHelper {
         return false;
     }
 
-    function parseInputs(bytes memory _subData) internal pure returns (SubParams memory params) {
+    function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
 

@@ -57,11 +57,7 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, To
         return false;
     }
 
-    function parseSubInputs(bytes memory _callData)
-        internal
-        pure
-        returns (SubParams memory params)
-    {
+    function parseSubInputs(bytes memory _callData) public pure returns (SubParams memory params) {
         params = abi.decode(_callData, (SubParams));
     }
 }

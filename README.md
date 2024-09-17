@@ -8,14 +8,6 @@ Run `yarn` in the repo folder.
 You will also need to create a `.env` file as in the `.env.example` and fill it in with appropriate api keys.
 For a quick start, you can copy `.env.example` with default values and rename it to `.env`.
 
-#### Link @defisaver/sdk package
-1. Clone sdk repo (https://github.com/defisaver/defisaver-sdk)
-2. Checkout to `refactor/v3.1` branch
-3. Run `yarn`
-4. Run `yarn build`
-5. Run `yarn link`
-6. Go back to defisaver-v3-contracts repo and run `yarn link @defisaver/sdk`
-
 ## How to run tests
 
 All of the tests are ran from the forked state of the mainnet. In the hardhat config you can change the 
@@ -38,7 +30,7 @@ After that you can run the tests, for example:
 
 `npm run test local ./aaveV3/full-test.js`
 
-### Running strategy core tests
+### Running core tests
 `npx hardhat test ./test/run-core-tests.js --network hardhat`
 
 ### Running foundry tests

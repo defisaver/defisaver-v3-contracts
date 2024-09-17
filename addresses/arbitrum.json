@@ -142,6 +142,17 @@
         "history": []
     },
     {
+      "name": "HandleAuth",
+      "address": "0xbfcab1339e1a56a0a836cbca6457eaf71f148fcb",
+      "id": "0xd951fa77",
+      "path": "contracts/actions/utils/HandleAuth.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
         "name": "ApproveToken",
         "address": "0x01058999f5ac434ef48dfb5cd942c57a7661787b",
         "id": "0xbb8027f4",
@@ -206,6 +217,17 @@
       "history": [
         "0x0EC0b0F3BaDD1d66235Eec303D698D4A7652E658"
       ]
+    },
+    {
+      "name": "OdosWrapper",
+      "address": "0x5Ff9cf41E82C84e4D25508fFf794dDF1dd6B434B",
+      "id": "0x79d17c0f",
+      "path": "contracts/exchangeV3/offchainWrappersV3/OdosWrapper.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
     },
     {
       "name": "ParaswapWrapper",
@@ -319,18 +341,20 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x35a329dda803ecced333647d7e6c14bafb14fe8a",
+        "address": "0x6c297a8c9b3cab08852c822b4d3fc2ba6e6ea6b5",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.3",
+        "version": "1.0.6",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x0f2320895940b81Af0cC53624570AB372d9D73F9",
           "0x2596e41933136E87C04b56f632CEcA2cdCCC2Cc6",
           "0x401E66549DF354a21B3CC95e3F548Df6854d6DEE",
           "0x8EF42fF40e9a9dD3E1ae81e7947D4E89e6d9f968",
-          "0xA74a85407D5A940542915458616aC3cf3f404E3b"
+          "0xA74a85407D5A940542915458616aC3cf3f404E3b",
+          "0x35a329dda803ecced333647d7e6c14bafb14fe8a"
       ]
     },
     {
@@ -401,14 +425,16 @@
       },
     {
       "name": "DFSSell",
-      "address": "0xF940aE73cb01c81e657916D14e5699c73a22566c",
+      "address": "0x1393eef11454ab068dd5e0d0be5eb922603eef1a",
       "id": "0x7f2a0f35",
       "path": "contracts/actions/exchange/DFSSell.sol",
-      "version": "1.0.2",
+      "version": "1.0.4",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0xdC2C741b8A60B40BCc170F67C4aF02038b5086a7",
+        "0xF940aE73cb01c81e657916D14e5699c73a22566c",
         "0x9109F34AB28D369cF894aF45C50E976B8E312a82",
         "0x49E1574Ba6b8134c29B1EbC010784A01D91b794F"
       ]
@@ -641,14 +667,15 @@
     },
     {
       "name": "RecipeExecutor",
-      "address": "0x4417bffFD5e3131069f62Fac07e40704EE234404",
+      "address": "0x7a25174229ea402d8ccd35fc6d55af079c399884",
       "id": "0x4c69ee1e",
       "path": "contracts/core/RecipeExecutor.sol",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
       "history": [
+        "0x4417bffFD5e3131069f62Fac07e40704EE234404",
         "0xe775c59e5662597bcE8aB4432C06380709554883",
         "0xc1cB462033D8319016dF4e8A1810f1afB06b50bB"
       ]
@@ -1038,14 +1065,14 @@
     },
     {
     "name": "CompV3View",
-    "address": "0x3A07Bb9eb0d71bf03295a84655d82b00A1450CD6",
+    "address": "0xdaAFACe18f75D941041Eef575255A41fdBC50a17",
     "id": "0x16be4292",
     "path": "contracts/views/CompV3View.sol",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "inRegistry": false,
     "changeTime": 0,
     "registryIds": [],
-    "history": []
+    "history": ["0x3A07Bb9eb0d71bf03295a84655d82b00A1450CD6"]
     },
     {
       "name": "BotRefillsL2",
@@ -1227,14 +1254,14 @@
     },
     {
       "name": "LlamaLendSwapper",
-      "address": "0x9b4a6d3674b099317d0c5dfe2592ed222057c878",
+      "address": "0xee41a84da283a82cbeadab051aa07dbb442eb0b4",
       "id": "0x4a94e2c3",
       "path": "contracts/actions/llamalend/advanced/LlamaLendSwapper.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
-      "history": []
+      "history": ["0x9b4a6d3674b099317d0c5dfe2592ed222057c878"]
     },
     {
       "name": "PermitToken",
@@ -1244,6 +1271,28 @@
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "TxSaverExecutor",
+      "address": "0x2d7993e134b820359c55ca0b12b997f29a74556a",
+      "id": "0x91bfbd87",
+      "path": "contracts/tx-saver/TxSaverExecutor.sol",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": ["0x70cc5952c111275c30ef9aafc675e715eaf77a69"]
+    },
+    {
+      "name": "BotAuthForTxSaver",
+      "address": "0xf9b14d41090429436f8da2b01c1d980cbe4f8e43",
+      "id": "0x5efaa232",
+      "path": "contracts/tx-saver/BotAuthForTxSaver.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": 0,
       "registryIds": [],
       "history": []
     }
