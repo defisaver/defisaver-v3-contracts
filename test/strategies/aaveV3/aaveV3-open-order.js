@@ -149,7 +149,6 @@ const aaveV3OpenOrderStrategyTest = async (isFork) => {
                 senderAcc,
             );
 
-            const rateMode = 2;
             const currCollPrice = await fetchTokenPriceInUSD('ETH');
             const triggerPrice = currCollPrice.mul(2);
 
@@ -167,7 +166,6 @@ const aaveV3OpenOrderStrategyTest = async (isFork) => {
                 market,
                 ratio,
                 triggerPrice,
-                rateMode,
                 isBundle,
             );
             console.log('SubId:', subId);

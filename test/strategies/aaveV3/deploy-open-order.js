@@ -120,8 +120,6 @@ describe('Deploy open order strategies on fork', function () {
             senderAcc,
         );
 
-        const rateMode = 2;
-
         const isBundle = subForOpenFromColl;
         const strategyOrBundleId = subForOpenFromColl ? openOrderFromCollBundleId : openOrderFromDebtStrategyId;
 
@@ -136,7 +134,6 @@ describe('Deploy open order strategies on fork', function () {
             market,
             ratio,
             TRIGGER_PRICE,
-            rateMode,
             isBundle,
         );
         console.log('SubId:', subId);

@@ -4465,7 +4465,6 @@ const createAaveV3OpenOrderFromCollStrategy = () => {
     aaveV3OpenOrderFromCollStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3OpenOrderFromCollStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3OpenOrderFromCollStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3OpenOrderFromCollStrategy.addSubSlot('&rateMode', 'uint8');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3OpenOrderFromCollStrategy.addTrigger(trigger);
@@ -4475,7 +4474,7 @@ const createAaveV3OpenOrderFromCollStrategy = () => {
         '&marketAddr',
         '%amount', // amount to borrow, must stay variable, sent from backend
         '&proxy',
-        '&rateMode',
+        '%rateMode', // hardcode to VARIABLE = 2
         '&debtAssetId',
         '&useOnBehalf',
         '%nullAddress',
@@ -4527,7 +4526,6 @@ const createAaveV3FLOpenOrderFromCollStrategy = () => {
     aaveV3OpenOrderFromCollStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3OpenOrderFromCollStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3OpenOrderFromCollStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3OpenOrderFromCollStrategy.addSubSlot('&rateMode', 'uint8');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3OpenOrderFromCollStrategy.addTrigger(trigger);
@@ -4571,7 +4569,7 @@ const createAaveV3FLOpenOrderFromCollStrategy = () => {
         '&marketAddr',
         '$1',
         '%flAddress', // fl address, sent by backend
-        '&rateMode',
+        '%rateMode', // hardcode to VARIABLE = 2
         '&debtAssetId',
         '&useOnBehalf',
         '%nullAddress',
@@ -4598,7 +4596,6 @@ const createAaveV3FLOpenOrderFromDebtStrategy = () => {
     aaveV3OpenOrderFromDebtStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3OpenOrderFromDebtStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3OpenOrderFromDebtStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3OpenOrderFromDebtStrategy.addSubSlot('&rateMode', 'uint8');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3OpenOrderFromDebtStrategy.addTrigger(trigger);
@@ -4653,7 +4650,7 @@ const createAaveV3FLOpenOrderFromDebtStrategy = () => {
         '&marketAddr',
         '$1',
         '%flAddress', // fl address, sent by backend
-        '&rateMode',
+        '%rateMode', // hardcode to VARIABLE = 2
         '&debtAssetId',
         '&useOnBehalf',
         '%nullAddress',

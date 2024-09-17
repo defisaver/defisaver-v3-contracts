@@ -817,7 +817,7 @@ const subMorphoBlueBoostBundle = async (
     return { subId, strategySub };
 };
 const subAaveV3OpenOrder = async (
-    proxy, strategyOrBundleId, collAsset, collAssetId, debtAsset, debtAssetId, marketAddr, targetRatio, triggerPrice, rateMode, isBundle = true,
+    proxy, strategyOrBundleId, collAsset, collAssetId, debtAsset, debtAssetId, marketAddr, targetRatio, triggerPrice, isBundle = true,
 ) => {
     const strategySub = automationSdk.strategySubService.aaveV3Encode.openOrder(
         strategyOrBundleId,
@@ -838,7 +838,6 @@ const subAaveV3OpenOrder = async (
             marketAddr,
             targetRatio,
             useOnBehalf: false,
-            rateMode,
         },
     );
     const subId = await subToStrategy(proxy, strategySub);
