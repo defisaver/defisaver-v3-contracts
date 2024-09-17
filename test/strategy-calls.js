@@ -5237,7 +5237,7 @@ const callAaveV3FLOpenOrderFromCollStrategy = async (strategyExecutor, strategyI
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
         false,
         placeHolderAddr,
-        flAmount,
+        0,
         flAddress,
         0,
         0,
@@ -5323,7 +5323,7 @@ const callAaveV3FLOpenOrderFromDebtStrategy = async (strategyExecutor, strategyI
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
         false,
         placeHolderAddr,
-        flAmount,
+        0,
         flAddress,
         0,
         0,

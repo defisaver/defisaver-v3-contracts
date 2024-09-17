@@ -753,7 +753,7 @@ const createAaveV3FLOpenOrderFromCollL2Strategy = () => {
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
         '%useDefaultMarket', // hardcode to false
         '&marketAddr',
-        '%flAmount', // fl amount, sent by backend
+        '$1',
         '%flAddress', // fl address, sent by backend
         '&rateMode',
         '&debtAssetId',
@@ -837,7 +837,7 @@ const createAaveV3FLOpenOrderFromDebtL2Strategy = () => {
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
         '%useDefaultMarket', // hardcode to false
         '&marketAddr',
-        '%flAmount', // fl amount + fee if needed, sent by backend
+        '$1',
         '%flAddress', // fl address, sent by backend
         '&rateMode',
         '&debtAssetId',
