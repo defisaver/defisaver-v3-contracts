@@ -175,6 +175,8 @@ describe('Deploy open order strategies on fork', function () {
             '0xC561281982c3042376eB8242d6A78Ab18062674F',
             '0x660B3515F493200C47Ef3DF195abEAfc57Bd6496',
             '0xF14e7451A6836725481d8E9042C22117b2039539',
+            '0xB1E5d1260A63163cdCC114cceD9bC0659de96EB8',
+            '0x36229a6999EEEb5217482299A6f6eeC76641757B',
         ];
         const l2BotAccounts = [
             '0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4',
