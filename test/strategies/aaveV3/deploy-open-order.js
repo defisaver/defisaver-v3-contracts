@@ -4,6 +4,8 @@
 /* //////////////////////////////////////////////////////////////
                         START PARAMS
 ////////////////////////////////////////////////////////////// */
+const ONLY_DEPLOY_BUNDLES = true;
+
 const USER_ID = 1; // value 1-5 to re-use same fork
 const SUB_TO_OPEN_ORDER_FROM_COLL = true;
 const COLLATERAL_TOKEN = 'WETH';
@@ -205,25 +207,26 @@ describe('Deploy open order strategies on fork', function () {
         if (USER_ID === 4) senderAcc = senderAcc4;
         if (USER_ID === 5) senderAcc = senderAcc5;
 
-        await setUpWallet();
-
         console.log('OpenOrderFromCollBundleId:', openOrderFromCollBundleId);
         console.log('OpenOrderFromDebtStrategyId:', openOrderFromDebtStrategyId);
         console.log('Sender:', senderAcc.address);
-        console.log('Proxy:', proxy.address);
 
-        const collAsset = getAssetInfo(COLLATERAL_TOKEN, chainIds[network]);
-        const debtAsset = getAssetInfo(DEBT_TOKEN, chainIds[network]);
-        const supplyAmount = hre.ethers.utils.parseUnits(SUPPLY_TOKEN_AMOUNT, SUPPLY_TOKEN_DECIMALS);
+        if (!ONLY_DEPLOY_BUNDLES) {
+            await setUpWallet();
+            console.log('Proxy:', proxy.address);
+            const collAsset = getAssetInfo(COLLATERAL_TOKEN, chainIds[network]);
+            const debtAsset = getAssetInfo(DEBT_TOKEN, chainIds[network]);
+            const supplyAmount = hre.ethers.utils.parseUnits(SUPPLY_TOKEN_AMOUNT, SUPPLY_TOKEN_DECIMALS);
 
-        await subToBundle(
-            supplyAmount,
-            SUB_TO_OPEN_ORDER_FROM_COLL,
-            TARGET_RATIO,
-            collAsset,
-            debtAsset,
-            SUB_TO_OPEN_ORDER_FROM_COLL,
-        );
+            await subToBundle(
+                supplyAmount,
+                SUB_TO_OPEN_ORDER_FROM_COLL,
+                TARGET_RATIO,
+                collAsset,
+                debtAsset,
+                SUB_TO_OPEN_ORDER_FROM_COLL,
+            );
+        }
 
         const currentBlockNumber = await hre.ethers.provider.getBlockNumber();
 
