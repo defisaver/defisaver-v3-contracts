@@ -746,6 +746,14 @@ const mcdDsrWithdraw = async (proxy, amount, to) => {
     return executeAction('McdDsrWithdraw', functionData, proxy);
 };
 
+const mcdTokenConvert = async (proxy, tokenAddr, from, to, amount) => {
+    const action = new dfs.actions.maker.MakerTokenConverterAction(
+        tokenAddr, from, to, amount,
+    );
+    const [, functionData] = action.encodeForDsProxyCall();
+    return executeAction('McdTokenConverter', functionData, proxy);
+};
+
 /*
   _______  __    __  .__   __.  __
  /  _____||  |  |  | |  \ |  | |  |
@@ -3406,6 +3414,7 @@ module.exports = {
     mcdGive,
     mcdMerge,
     openVaultForExactAmountInDecimals,
+    mcdTokenConvert,
 
     supplyAave,
     withdrawAave,

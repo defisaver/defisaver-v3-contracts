@@ -20,6 +20,7 @@ const {
     mcdFLRepayComposite,
     mcdDsrDeposit,
     mcdDsrWithdraw,
+    mcdTokenConvert,
 } = require('../actions');
 const {
     getProxy,
@@ -44,6 +45,10 @@ const {
     LOGGER_ADDR,
     getContractFromRegistry,
     approve,
+    impersonateAccount,
+    stopImpersonatingAccount,
+    sendEther,
+    setCode,
 } = require('../utils');
 const {
     getVaultsForUser,
@@ -1685,6 +1690,66 @@ const mcdDsrWithdrawTest = async () => {
     });
 };
 
+const mcdTokenConverterTest = async () => {
+    describe('Mcd-Token-converter', async function () {
+        this.timeout(80000);
+
+        let senderAcc;
+        let proxy;
+
+        const DAI_ADDRESS = '0x6B175474E89094C44Da98b954EedeAC495271d0F';
+        const MKR_ADDRESS = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
+        const SKY_ADDRESS = '0x56072C95FAA701256059aa122697B133aDEd9279';
+        const USDS_ADDRESS = '0xdC035D45d973E3EC169d2276DDab16f1e407384F';
+        const DAI_USDS_CONVERTER = '0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A';
+
+        before(async () => {
+            [senderAcc] = await hre.ethers.getSigners();
+            proxy = await getProxy(senderAcc.address);
+        });
+        it('... should convert DAI to USDS', async () => {
+            const daiAmount = hre.ethers.utils.parseUnits('100', 18);
+            await setBalance(DAI_ADDRESS, senderAcc.address, daiAmount);
+            await setBalance(USDS_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
+            await approve(DAI_ADDRESS, proxy.address);
+
+            await mcdTokenConvert(proxy, DAI_ADDRESS, senderAcc.address, senderAcc.address, daiAmount);
+            const newUsdsBalance = await balanceOf(USDS_ADDRESS, senderAcc.address);
+            expect(newUsdsBalance).to.be.equal(daiAmount);
+        });
+        it('... should convert USDS to DAI', async () => {
+            const usdsAmount = hre.ethers.utils.parseUnits('100', 18);
+            await setBalance(USDS_ADDRESS, senderAcc.address, usdsAmount);
+            await setBalance(DAI_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
+            await approve(USDS_ADDRESS, proxy.address);
+            await mcdTokenConvert(proxy, USDS_ADDRESS, senderAcc.address, senderAcc.address, usdsAmount);
+            const newDaiBalance = await balanceOf(DAI_ADDR, senderAcc.address);
+            expect(newDaiBalance).to.be.equal(usdsAmount);
+        });
+        it('... should convert MKR to SKY', async () => {
+            const mkrAmount = hre.ethers.utils.parseUnits('100', 18);
+            await setBalance(MKR_ADDRESS, senderAcc.address, mkrAmount);
+            await setBalance(SKY_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
+            await approve(MKR_ADDRESS, proxy.address);
+
+            await mcdTokenConvert(proxy, MKR_ADDRESS, senderAcc.address, senderAcc.address, mkrAmount);
+            const newSkyBalance = await balanceOf(SKY_ADDRESS, senderAcc.address);
+            expect(newSkyBalance).to.be.equal(mkrAmount.mul('24000'));
+        });
+
+        it('... should convert SKY to MKR', async () => {
+            const skyAmount = hre.ethers.utils.parseUnits('100', 18);
+            await setBalance(SKY_ADDRESS, senderAcc.address, skyAmount);
+            await setBalance(MKR_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
+            await approve(SKY_ADDRESS, proxy.address);
+
+            await mcdTokenConvert(proxy, SKY_ADDRESS, senderAcc.address, senderAcc.address, skyAmount);
+            const newMkrBalance = await balanceOf(MKR_ADDRESS, senderAcc.address);
+            expect(newMkrBalance).to.be.equal(skyAmount.div('24000'));
+        });
+    });
+};
+
 const mcdDeployContracts = async () => {
     await redeploy('McdOpen');
     await redeploy('McdSupply');
@@ -1726,5 +1791,6 @@ module.exports = {
     mcdBoostCompositeTest,
     mcdDsrDepositTest,
     mcdDsrWithdrawTest,
+    mcdTokenConverterTest,
     GENERATE_AMOUNT_IN_USD,
 };

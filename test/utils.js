@@ -782,7 +782,6 @@ const approve = async (tokenAddr, to, signer) => {
     const tokenContract = await hre.ethers.getContractAt('IERC20', tokenAddr);
 
     const from = signer ? signer.address : tokenContract.signer.address;
-
     const allowance = await tokenContract.allowance(from, to);
 
     if (allowance.toString() === '0') {
@@ -1468,6 +1467,7 @@ module.exports = {
     executeTxFromProxy,
     generateIds,
     approveContractInRegistry,
+    setCode,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
