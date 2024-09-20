@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 contract BaseUtilAddresses {
     address internal refillCaller = 0xBefc466abe547B1785f382883833330a47C573f7;
-    address internal feeAddr = 0x76720aC2574631530eC8163e4085d6F98513fb27;
+    address internal constant FEE_RECIPIENT_ADDR = 0xEDFc68e2874B0AFc0963e18AE4D68522aEc7f97D;
     address internal constant DEFAULT_BOT = 0x061DEa0E92ed3D2DE743791746373B14c3Ec123E;
     address internal constant BOT_REGISTRY_ADDRESS = 0xa2ABA81e65543d18dd1a1E4A31Bc41C4a86453cf;
     address internal constant FEE_RECIPIENT = 0xEDFc68e2874B0AFc0963e18AE4D68522aEc7f97D;
