@@ -29,7 +29,7 @@ const {
     setBalance,
     addrs,
     takeSnapshot,
-    revertToSnapshot,
+    revertToSnapshot, getNetwork, getContractFromRegistry, getOwnerAddr,
 } = require('../utils');
 const {
     predictSafeAddress, SAFE_MASTER_COPY_VERSIONS, deploySafe, SAFE_CONSTANTS,
@@ -41,47 +41,49 @@ const botRefillTest = async () => {
     describe('Bot-Refills', function () {
         this.timeout(80000);
 
-        let botRefills;
-        let refillCaller; let refillAddr; let feeAddr;
+        let botRefillsContract;
+        let feeRecipientContract;
+        let feeAddr;
+        let refillCaller;
+        let botAddr = '0x5aa40C7C8158D8E29CA480d7E05E5a32dD819332';
 
         before(async () => {
-            const botRefillsAddr = await getAddrFromRegistry('BotRefills');
-            botRefills = await hre.ethers.getContractAt('BotRefills', botRefillsAddr);
+            botRefillsContract = await getContractFromRegistry('BotRefills');
+            feeRecipientContract = await hre.ethers.getContractAt('FeeRecipient', addrs[getNetwork()].FEE_RECIPIENT_ADDR);
+            feeAddr = await feeRecipientContract.getFeeAddr();
+            refillCaller = addrs[getNetwork()].REFILL_CALLER
 
-            refillAddr = '0x5aa40C7C8158D8E29CA480d7E05E5a32dD819332';
-            feeAddr = '0x76720ac2574631530ec8163e4085d6f98513fb27';
-            refillCaller = '0x33fDb79aFB4456B604f376A45A546e7ae700e880';
-
-            // give approval to contract from feeAddr
+            // // give approval to botRefill contract from feeAddr
             await impersonateAccount(feeAddr);
 
-            let daiContract = await hre.ethers.getContractAt('IERC20', DAI_ADDR);
-            let wethContract = await hre.ethers.getContractAt('IERC20', WETH_ADDRESS);
+            let daiContract = await hre.ethers.getContractAt('IERC20', addrs[getNetwork()].DAI_ADDRESS);
+            let wethContract = await hre.ethers.getContractAt('IERC20', addrs[getNetwork()].WETH_ADDRESS);
 
-            const signer = await hre.ethers.provider.getSigner(feeAddr);
+            let signer = await hre.ethers.provider.getSigner(feeAddr);
             wethContract = wethContract.connect(signer);
             daiContract = daiContract.connect(signer);
 
-            await wethContract.approve(botRefills.address, MAX_UINT);
-            await daiContract.approve(botRefills.address, MAX_UINT);
-
-            // clean out all weth on fee addr for test to work
-            const wethFeeAddrBalance = await balanceOf(WETH_ADDRESS, feeAddr);
-            await wethContract.transfer(nullAddress, wethFeeAddrBalance);
+            await wethContract.approve(botRefillsContract.address, MAX_UINT);
+            await daiContract.approve(botRefillsContract.address, MAX_UINT);
 
             await stopImpersonatingAccount(feeAddr);
+
+            await impersonateAccount(getOwnerAddr());
+            signer = await hre.ethers.provider.getSigner(getOwnerAddr());
+            await botRefillsContract.connect(signer).setAdditionalBot(botAddr, true);
+            await stopImpersonatingAccount(getOwnerAddr());
         });
 
         it('... should call refill with WETH', async () => {
+            const [deployer] = await hre.ethers.getSigners();
+            await sendEther(deployer, refillCaller, '10');
+
             await impersonateAccount(refillCaller);
-
-            const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, refillAddr);
-
             const signer = await hre.ethers.provider.getSigner(refillCaller);
-            botRefills = botRefills.connect(signer);
+            botRefillsContract = botRefillsContract.connect(signer);
 
-            const ethRefillAmount = hre.ethers.utils.parseUnits('4', 18);
-
+            const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, botAddr);
+            const ethRefillAmount = hre.ethers.utils.parseEther('4');
             const wethFeeAddrBalance = await balanceOf(WETH_ADDRESS, feeAddr);
 
             if (wethFeeAddrBalance.lt(ethRefillAmount)) {
@@ -89,9 +91,8 @@ const botRefillTest = async () => {
                 await send(WETH_ADDRESS, feeAddr, ethRefillAmount);
             }
 
-            await botRefills.refill(ethRefillAmount, refillAddr);
-
-            const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, refillAddr);
+            await botRefillsContract.refill(ethRefillAmount, botAddr);
+            const ethBotAddrBalanceAfter = await balanceOf(ETH_ADDR, botAddr);
 
             expect(ethBotAddrBalanceAfter).to.be.eq(ethBotAddrBalanceBefore.add(ethRefillAmount));
 
