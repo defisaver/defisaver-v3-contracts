@@ -913,6 +913,17 @@
         "history": []
     },
     {
+        "name": "HandleAuth",
+        "address": "0xfc2e2b37c73d5d43cf5fcbd80a4049b620d60eba",
+        "id": "0xd951fa77",
+        "path": "contracts/actions/utils/HandleAuth.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "PullToken",
         "address": "0x29Bb266A72E585C661e292F7D8CA7C4581a0AF72",
         "id": "0xcc063de4",
@@ -1056,6 +1067,17 @@
             "0x02b0eE3b52e8E0749444a7255B9D86c50d18D19A",
             "0x555C5B5d3e49ae015d5dA5C0476f984386e906BD"
         ]
+    },
+    {
+        "name": "McdTokenConverter",
+        "address": "0x1ef664440dc7342253780472dad90d9a3258a71d",
+        "id": "0xdd5b6f15",
+        "path": "contracts/actions/mcd/McdTokenConverter.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "McdGenerate",
