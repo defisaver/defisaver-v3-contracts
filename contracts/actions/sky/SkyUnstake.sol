@@ -7,14 +7,14 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { SkyHelper } from "./helpers/SkyHelper.sol";
 import { IStakingRewards } from "../../interfaces/sky/IStakingRewards.sol";
 
-/// @title
+/// @title Unstake token from
 contract SkyUnstake is ActionBase, SkyHelper {
     using TokenUtils for address;
 
-    /// @param stakingContract
-    /// @param stakingToken
-    /// @param amount
-    /// @param to 
+    /// @param stakingContract address of the staking rewards contract
+    /// @param stakingToken address of the token being staked
+    /// @param amount amount of stakingToken to unstake
+    /// @param to address which will receive rewards
     struct Params {
         address stakingContract;
         address stakingToken;
@@ -61,6 +61,7 @@ contract SkyUnstake is ActionBase, SkyHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _skyUnstake(Params memory _inputData) internal returns (uint256, bytes memory logData) {
+        require(_inputData.to != address(0));
         if (_inputData.amount == type(uint256).max) _inputData.amount = _inputData.stakingContract.getBalance(address(this));
         IStakingRewards(_inputData.stakingContract).withdraw(_inputData.amount);
         _inputData.stakingToken.withdrawTokens(_inputData.to, _inputData.amount);

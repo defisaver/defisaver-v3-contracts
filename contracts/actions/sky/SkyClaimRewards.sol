@@ -7,13 +7,13 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { SkyHelper } from "./helpers/SkyHelper.sol";
 import { IStakingRewards } from "../../interfaces/sky/IStakingRewards.sol";
 
-/// @title
+/// @title Claim rewards earned by staking USDS on SKY
 contract SkyClaimRewards is ActionBase, SkyHelper {
     using TokenUtils for address;
 
-    /// @param stakingContract
-    /// @param stakingToken
-    /// @param to 
+    /// @param stakingContract address of the staking rewards contract
+    /// @param rewardToken address of the token given out as reward
+    /// @param to address which will receive rewardToken
     struct Params {
         address stakingContract;
         address rewardToken;
@@ -53,6 +53,7 @@ contract SkyClaimRewards is ActionBase, SkyHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _skyClaimRewards(Params memory _inputData) internal returns (uint256, bytes memory logData) {
+        require(_inputData.rewardToken != address(0));
         uint256 startingBalance = _inputData.rewardToken.getBalance(address(this));
         IStakingRewards(_inputData.stakingContract).getReward();
         uint256 amountClaimed = _inputData.rewardToken.getBalance(address(this)) - startingBalance;

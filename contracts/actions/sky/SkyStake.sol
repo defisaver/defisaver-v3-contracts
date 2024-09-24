@@ -7,14 +7,14 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { SkyHelper } from "./helpers/SkyHelper.sol";
 import { IStakingRewards } from "../../interfaces/sky/IStakingRewards.sol";
 
-/// @title
+/// @title Stake USDS via SKY for different rewards
 contract SkyStake is ActionBase, SkyHelper {
     using TokenUtils for address;
 
-    /// @param stakingContract
-    /// @param stakingToken
-    /// @param amount
-    /// @param from 
+    /// @param stakingContract address of the staking rewards contract
+    /// @param stakingToken address of the token being staked
+    /// @param amount amount of stakingToken to stake
+    /// @param from address from which to pull stakingToken
     struct Params {
         address stakingContract;
         address stakingToken;
