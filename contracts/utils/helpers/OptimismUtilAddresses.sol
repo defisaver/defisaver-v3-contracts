@@ -33,5 +33,5 @@ contract OptimismUtilAddresses {
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0x7E3D9e4E620842d61aB111a6DbF1be5a8cc91774;
 
-    address public constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
+    address internal constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
 }
