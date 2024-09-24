@@ -2,10 +2,10 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
+const automationSdk = require('@defisaver/automation-sdk');
 
 const {
     getProxy,
-    redeploy,
     setBalance,
     network,
     addrs,
@@ -73,7 +73,7 @@ const deployOpenOrderFromDebtStrategy = async (proxy, isFork) => {
     return aaveV3FLOpenOrderFromDebtStrategyId;
 };
 
-const aaveV3OpenOrderStrategyTest = async (isFork) => {
+const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
     describe('AaveV3-Open-Order-Strategy-Test', function () {
         this.timeout(1200000);
 
@@ -100,8 +100,6 @@ const aaveV3OpenOrderStrategyTest = async (isFork) => {
         };
 
         const setUpContracts = async () => {
-            await redeploy('AaveV3OpenRatioCheck', REGISTRY_ADDR, false, isFork);
-
             if (network === 'mainnet') {
                 strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
             } else {
@@ -112,8 +110,19 @@ const aaveV3OpenOrderStrategyTest = async (isFork) => {
         };
 
         const deployStrategies = async () => {
-            openOrderFromCollBundleId = await deployOpenOrderFromCollBundle(proxy, isFork);
-            openOrderFromDebtStrategyId = await deployOpenOrderFromDebtStrategy(proxy, isFork);
+            if (!useDeployedStrategies) {
+                openOrderFromCollBundleId = await deployOpenOrderFromCollBundle(proxy, isFork);
+                openOrderFromDebtStrategyId = await deployOpenOrderFromDebtStrategy(proxy, isFork);
+            } else if (network === 'mainnet') {
+                openOrderFromCollBundleId = automationSdk.enums.Bundles.MainnetIds.AAVE_V3_OPEN_ORDER_FROM_COLLATERAL;
+                openOrderFromDebtStrategyId = automationSdk.enums.Strategies.MainnetIds.AAVE_V3_OPEN_ORDER_FROM_DEBT;
+            } else if (network === 'arbitrum') {
+                openOrderFromCollBundleId = automationSdk.enums.Bundles.ArbitrumIds.AAVE_V3_OPEN_ORDER_FROM_COLLATERAL;
+                openOrderFromDebtStrategyId = automationSdk.enums.Strategies.ArbitrumIds.AAVE_V3_OPEN_ORDER_FROM_DEBT;
+            } else if (network === 'optimism') {
+                openOrderFromCollBundleId = automationSdk.enums.Bundles.OptimismIds.AAVE_V3_OPEN_ORDER_FROM_COLLATERAL;
+                openOrderFromDebtStrategyId = automationSdk.enums.Strategies.OptimismIds.AAVE_V3_OPEN_ORDER_FROM_DEBT;
+            }
         };
 
         before(async () => {
@@ -150,7 +159,7 @@ const aaveV3OpenOrderStrategyTest = async (isFork) => {
             );
 
             const currCollPrice = await fetchTokenPriceInUSD('ETH');
-            const triggerPrice = currCollPrice.mul(2);
+            const triggerPrice = currCollPrice.mul(2).div(hre.ethers.BigNumber.from(10).pow(8));
 
             const isBundle = subForOpenFromColl;
             const strategyOrBundleId = subForOpenFromColl ? openOrderFromCollBundleId : openOrderFromDebtStrategyId;
@@ -168,8 +177,6 @@ const aaveV3OpenOrderStrategyTest = async (isFork) => {
                 triggerPrice,
                 isBundle,
             );
-            console.log('SubId:', subId);
-            console.log('StrategySub:', strategySub);
             return { subId, strategySub };
         };
 
@@ -237,6 +244,10 @@ const aaveV3OpenOrderStrategyTest = async (isFork) => {
             );
         });
         it('... should call AaveV3 FL Open order from debt strategy', async () => {
+            // TODO: Remove once deployed
+            if (useDeployedStrategies) {
+                return;
+            }
             const supplyCollAsset = false;
             const subForOpenFromColl = false;
             const collAsset = getAssetInfo('WETH', chainIds[network]);
@@ -279,8 +290,10 @@ const aaveV3OpenOrderStrategyTest = async (isFork) => {
 describe('AaveV3 open order strategy test', function () {
     this.timeout(80000);
 
+    const useDeployedStrategies = true;
+
     it('... test AaveV3 open order strategy', async () => {
-        await aaveV3OpenOrderStrategyTest(isNetworkFork());
+        await aaveV3OpenOrderStrategyTest(isNetworkFork(), useDeployedStrategies);
     }).timeout(50000);
 });
 
