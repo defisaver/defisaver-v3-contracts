@@ -254,14 +254,15 @@ const paraswapTest = async () => {
             const networkId = '1';
             const options = {
                 method: 'GET',
-                baseURL: 'https://apiv5.paraswap.io',
-                url: `/prices?srcToken=${sellAssetInfo.address}&srcDecimals=${sellAssetInfo.decimals}&destToken=${buyAssetInfo.address}&destDecimals=${buyAssetInfo.decimals}&amount=${amount}&side=SELL&network=${networkId}`,
+                baseURL: 'https://api.paraswap.io',
+                url: `/prices?srcToken=${sellAssetInfo.address}&srcDecimals=${sellAssetInfo.decimals}&destToken=${buyAssetInfo.address}&destDecimals=${buyAssetInfo.decimals}&amount=${amount}&side=SELL&network=${networkId}&version=6.2`,
             };
             const priceObject = await axios(options).then((response) => response.data.priceRoute);
+            console.log(priceObject);
 
             const secondOptions = {
                 method: 'POST',
-                baseURL: 'https://apiv5.paraswap.io/transactions/1?ignoreChecks=true',
+                baseURL: 'https://api.paraswap.io/transactions/1?ignoreChecks=true',
                 data: {
                     priceRoute: priceObject,
                     srcToken: priceObject.srcToken,
@@ -382,7 +383,7 @@ const oneInchTest = async () => {
             const options = {
                 method: 'GET',
                 baseURL: 'https://api.1inch.dev/swap',
-                url: `/v5.2/${chainId}/swap?src=${sellAssetInfo.address}&dst=${buyAssetInfo.address}&amount=${amount}&from=${oneInchWrapper.address}`
+                url: `/v6.0/${chainId}/swap?src=${sellAssetInfo.address}&dst=${buyAssetInfo.address}&amount=${amount}&from=${oneInchWrapper.address}`
                 + '&slippage=1'
                 + '&usePatching=true'
                 + '&disableEstimate=true'
@@ -479,17 +480,12 @@ const zeroxTest = async () => {
 
         let senderAcc;
         let proxy;
-        let zxWrapper;
         let snapshot;
         const network = hre.network.config.name;
 
         before(async () => {
-            await redeploy('DFSSell');
-            zxWrapper = await redeploy('ZeroxWrapper');
-
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-            await setNewExchangeWrapper(senderAcc, zxWrapper.address);
         });
 
         beforeEach(async () => {
@@ -508,34 +504,37 @@ const zeroxTest = async () => {
             await setBalance(sellAssetInfo.address, senderAcc.address, sellAmount);
             await approve(sellAssetInfo.address, proxy.address);
 
+            const zeroxWrapper = addrs[getNetwork()].ZEROX_WRAPPER;
+
             const options = {
                 method: 'GET',
                 baseURL: 'https://api.0x.org',
-                url: `/swap/v1/quote?sellToken=${sellAssetInfo.address}&buyToken=${buyAssetInfo.address}&sellAmount=${sellAmount.toString()}`,
+                url: `/swap/allowance-holder/quote?chainId=${chainId}&sellToken=${sellAssetInfo.address}&buyToken=${buyAssetInfo.address}&sellAmount=${sellAmount.toString()}&taker=${zeroxWrapper}`,
                 headers: {
                     '0x-api-key': `${process.env.ZEROX_API_KEY}`,
+                    '0x-version': 'v2',
                 },
             };
             const priceObject = await axios(options).then((response) => response.data);
 
             // THIS IS CHANGEABLE WITH API INFORMATION
-            const allowanceTarget = priceObject.allowanceTarget;
+            const allowanceTarget = priceObject.transaction.to;
             const price = 1; // just for testing, anything bigger than 0 triggers offchain if
             const protocolFee = 0;
-            const callData = priceObject.data;
+            const callData = priceObject.transaction.data;
 
             const exchangeObject = formatExchangeObjForOffchain(
                 sellAssetInfo.address,
                 buyAssetInfo.address,
                 sellAmount,
-                zxWrapper.address,
-                priceObject.to,
+                zeroxWrapper,
+                allowanceTarget,
                 allowanceTarget,
                 price,
                 protocolFee,
                 callData,
             );
-            await addToExchangeAggregatorRegistry(senderAcc, priceObject.to);
+            await addToExchangeAggregatorRegistry(senderAcc, allowanceTarget);
 
             const sellAction = new dfs.actions.basic.SellAction(
                 exchangeObject, senderAcc.address, senderAcc.address,
