@@ -1075,15 +1075,15 @@
     "history": ["0x3A07Bb9eb0d71bf03295a84655d82b00A1450CD6"]
     },
     {
-      "name": "BotRefillsL2",
-      "address": "0x3BDbB73501F11350c36E66F2ACB3ab36c776E002",
-      "id": "0x96f884f7",
-      "path": "contracts/utils/BotRefillsL2.sol",
-      "version": "1.0.0",
+      "name": "BotRefills",
+      "address": "0x31711677A0A61835a6545DBD8ca109906256Ab62",
+      "id": "0x4fac91e4",
+      "path": "contracts/utils/BotRefills.sol",
+      "version": "1.0.1",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
-      "history": []
+      "history": ["0x3BDbB73501F11350c36E66F2ACB3ab36c776E002"]
     },
     {
       "name": "FLBalancer",

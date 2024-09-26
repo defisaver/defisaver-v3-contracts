@@ -188,14 +188,14 @@
     },
     {
         "name": "BotRefills",
-        "address": "0xCD73a63f2cb03d1a11c5C009B0fB2b5c9C430754",
+        "address": "0xe48A70FA252B869cF1099608348b0A75F58db353",
         "id": "0x4fac91e4",
         "path": "contracts/utils/BotRefills.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xCD73a63f2cb03d1a11c5C009B0fB2b5c9C430754"]
     },
     {
         "name": "UniV3WrapperV3",

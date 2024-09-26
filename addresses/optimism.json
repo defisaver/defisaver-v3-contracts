@@ -966,15 +966,15 @@
         "history": []
       },
       {
-        "name": "BotRefillsL2",
-        "address": "0x38255CD752c56b5dF093Bc56f4411eeb5831d334",
-        "id": "0x96f884f7",
-        "path": "contracts/utils/BotRefillsL2.sol",
-        "version": "1.0.0",
+        "name": "BotRefills",
+        "address": "0x39BfE5c753D81Cff4E0686Be86F1Ac0e3cdb78B2",
+        "id": "0x4fac91e4",
+        "path": "contracts/utils/BotRefills.sol",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x38255CD752c56b5dF093Bc56f4411eeb5831d334"]
       },
       {
         "name": "FLBalancer",
