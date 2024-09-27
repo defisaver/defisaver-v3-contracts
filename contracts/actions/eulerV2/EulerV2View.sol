@@ -5,18 +5,31 @@ pragma solidity =0.8.24;
 import { IEVault } from "../../interfaces/eulerV2/IEVault.sol";
 import { IPriceOracle } from "../../interfaces/eulerV2/IPriceOracle.sol";
 import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IIRM } from "../../interfaces/eulerV2/IIRM.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
 
-/// @title EulerV2View
+/// @title EulerV2View - aggregate various information about Euler vaults and users
 contract EulerV2View is EulerV2Helper {
+
+    /*//////////////////////////////////////////////////////////////
+                               CONSTANTS
+    //////////////////////////////////////////////////////////////*/
 
     // When flag is set, debt socialization during liquidation is disabled
     uint32 constant CFG_DONT_SOCIALIZE_DEBT = 1 << 0;
     // When flag is set, asset is considered to be compatible with EVC sub-accounts and protections
     // against sending assets to sub-accounts are disabled
     uint32 constant CFG_EVC_COMPATIBLE_ASSET = 1 << 1;
+    // max interest rate accepted from IRM. 1,000,000% APY: floor(((1000000 / 100 + 1)**(1/(86400*365.2425)) - 1) * 1e27)
+    uint256 constant MAX_ALLOWED_INTEREST_RATE = 291867278914945094175;
 
+
+    /*//////////////////////////////////////////////////////////////
+                          DATA FORMAT
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice Basic vault information
     struct VaultInfo {
         address vaultAddr;                  // Address of the Euler vault
         address assetAddr;                  // Address of the underlying asset
@@ -24,6 +37,7 @@ contract EulerV2View is EulerV2Helper {
         address[] supportedCollaterals;     // Supported collateral assets
     }
 
+    /// @notice Collateral information
     struct CollateralInfo {
         address vaultAddr;                  // Address of the Euler vault
         uint256 sharePriceInUnit;           // Price of one share in the unit of account. Scaled by 1e18
@@ -37,6 +51,7 @@ contract EulerV2View is EulerV2Helper {
         uint32 rampDuration;                // The time it takes for the liquidation LTV to converge from the initial value to the fully converged value
     }
 
+    /// @notice Full information about a vault
     struct VaultInfoFull {
         address vaultAddr;                  // Address of the Euler vault
         address assetAddr;                  // Address of the underlying asset 
@@ -85,6 +100,7 @@ contract EulerV2View is EulerV2Helper {
         address permit2Address;             // Address of the permit2 contract
     }
 
+    /// @notice User data with loan information
     struct UserData {
         address user;                       // Address of the user
         address owner;                      // Address of the owner address space. Same as user if user is not a sub-account
@@ -94,6 +110,16 @@ contract EulerV2View is EulerV2Helper {
         uint256 borrowAmountInUnit;         // Amount of borrowed assets in the unit of account
         address[] collaterals;              // Enabled collateral assets
         uint256[] collateralAmountsInUnit;  // Amounts of collaterals in unit of account. If coll is not supported by the borrow vault, returns 0
+    }
+
+    /// @notice Used for borrow rate estimation
+    /// @notice if isBorrowOperation => (liquidityAdded = repay, liquidityRemoved = borrow)
+    /// @notice if not, look at it as supply/withdraw operation => (liquidityAdded = supply, liquidityRemoved = withdraw)
+    struct LiquidityChangeParams {
+        address vault;                      // Address of the Euler vault          
+        bool isBorrowOperation;             // Flag indicating whether the operation is a borrow operation (repay/borrow), otherwise supply/withdraw
+        uint256 liquidityAdded;             // Amount of liquidity added to the vault
+        uint256 liquidityRemoved;           // Amount of liquidity removed from the vault
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -252,6 +278,67 @@ contract EulerV2View is EulerV2Helper {
             } else {
                 address[] memory collaterals = IEVC(EVC_ADDR).getCollaterals(subAccount);
                 accounts[i] = collaterals.length > 0 ? subAccount : address(0);
+            }
+        }
+    }
+
+    /// @notice Get borrow rate estimation after liquidity change
+    /// @dev Should be called with staticcall
+    function getApyAfterValuesEstimation(LiquidityChangeParams[] memory params) 
+        public returns (uint256[] memory estimatedBorrowRates) 
+    {
+        estimatedBorrowRates = new uint256[](params.length);
+        for (uint256 i = 0; i < params.length; ++i) {
+            IEVault v = IEVault(params[i].vault);
+            v.touch();
+
+            address irm = v.interestRateModel();
+            if (irm == address(0)) {
+                estimatedBorrowRates[i] = 0;
+                continue;
+            }
+
+            uint256 oldInterestRate = v.interestRate();
+            uint256 cash = v.cash();
+            uint256 totalBorrows = v.totalBorrows();
+            
+            if (params[i].isBorrowOperation) {
+                // when repaying
+                if (params[i].liquidityAdded > 0) {
+                    cash += params[i].liquidityAdded;
+                    totalBorrows = totalBorrows > params[i].liquidityAdded ? totalBorrows - params[i].liquidityAdded : 0;
+                }
+                // when borrowing
+                if (params[i].liquidityRemoved > 0) {
+                    cash = cash > params[i].liquidityRemoved ? cash - params[i].liquidityRemoved : 0;
+                    totalBorrows += params[i].liquidityRemoved;
+                }
+            } else {
+                // when supplying
+                if (params[i].liquidityAdded > 0) {
+                    cash += params[i].liquidityAdded;
+                }
+                // when withdrawing
+                if (params[i].liquidityRemoved > 0) {
+                    cash = cash > params[i].liquidityRemoved ? cash - params[i].liquidityRemoved : 0;
+                }
+            }
+
+            (bool success, bytes memory data) = irm.staticcall(
+                abi.encodeCall(
+                    IIRM.computeInterestRateView,
+                    (address(this), cash, totalBorrows)
+                )
+            );
+
+            if (success && data.length >= 32) {
+                uint256 newInterestRate = abi.decode(data, (uint256));
+                if (newInterestRate > MAX_ALLOWED_INTEREST_RATE) {
+                    newInterestRate = MAX_ALLOWED_INTEREST_RATE;
+                }
+                estimatedBorrowRates[i] = newInterestRate;
+            } else {
+                estimatedBorrowRates[i] = oldInterestRate;
             }
         }
     }
