@@ -17,4 +17,12 @@ contract EulerV2Helper is MainnetEulerV2Addresses {
     function getAddressPrefixInternal(address _account) internal pure returns (bytes19) {
         return bytes19(uint152(uint160(_account) >> ACCOUNT_ID_OFFSET));
     }
+
+    /// @notice Computes the sub-account address for a given address space prefix and sub-account number.
+    function getSubAccountByPrefix(
+        bytes19 _accountPrefix,
+        bytes1 _subAccountNumber
+    ) internal pure returns (address subAccount) {
+        subAccount = address(uint160(bytes20(abi.encodePacked(_accountPrefix, _subAccountNumber))));
+    }
 }
