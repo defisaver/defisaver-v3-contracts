@@ -2,15 +2,12 @@
 require('dotenv-safe').config();
 require('@nomiclabs/hardhat-waffle');
 require('@nomiclabs/hardhat-etherscan');
-const tdly = require('@tenderly/hardhat-tenderly');
 require('@nomiclabs/hardhat-ethers');
-// require("hardhat-gas-reporter");
+require('hardhat-gas-reporter');
 require('hardhat-log-remover');
 
 const Dec = require('decimal.js');
 const dfs = require('@defisaver/sdk');
-
-tdly.setup({ automaticVerifications: false });
 
 dfs.configure({
     testingMode: true,
@@ -39,6 +36,10 @@ module.exports = {
     defaultNetwork: 'fork',
     lightTesting: true,
     isWalletSafe: true,
+    gasReporter: {
+        currency: 'EUR',
+        enabled: true,
+    },
     networks: {
         ...testNetworks,
         local: {
@@ -75,7 +76,7 @@ module.exports = {
             timeout: 1000000,
             type: 'tenderly',
             name: 'mainnet',
-            hardfork: "cancun",
+            hardfork: 'cancun',
             chainId: 1,
         },
         hardhat: {
