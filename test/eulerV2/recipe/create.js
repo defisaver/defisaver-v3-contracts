@@ -1,5 +1,6 @@
 const hre = require('hardhat');
 
+const { getAssetInfo } = require('@defisaver/tokens');
 const {
     takeSnapshot,
     revertToSnapshot,
@@ -7,11 +8,12 @@ const {
     redeploy,
     addrs,
     getNetwork,
-    getOwnerAddr, getAddrFromRegistry, setBalance, approve, executeTxFromProxy, getGasUsed,
+    getOwnerAddr, setBalance, approve, getGasUsed,
 } = require('../../utils');
 const { topUp } = require('../../../scripts/utils/fork');
-const { getEulerV2TestPairs, eulerV2CreatePosition, getAccountRatio, EVC_ADDR} = require("../utils");
-const {getAssetInfo} = require("@defisaver/tokens");
+const {
+    getEulerV2TestPairs, eulerV2CreatePosition, EVC_ADDR,
+} = require('../utils');
 
 const eulerV2CreateTest = async (testPair) => {
     describe('EulerV2-Create-Compare', function () {
@@ -70,7 +72,9 @@ const eulerV2CreateTest = async (testPair) => {
             const borrowAmount = testPair.borrowAmount;
 
             const evcContract = await hre.ethers.getContractAt('IEVC', EVC_ADDR);
-            const erc4626Abi = [{"inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"},{"internalType": "address", "name": "receiver", "type": "address"}], "name": "deposit", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "stateMutability": "nonpayable", "type": "function"}]
+            const erc4626Abi = [{
+                inputs: [{ internalType: 'uint256', name: 'amount', type: 'uint256' }, { internalType: 'address', name: 'receiver', type: 'address' }], name: 'deposit', outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }], stateMutability: 'nonpayable', type: 'function',
+            }];
             const depositVaultContract = await hre.ethers.getContractAt(erc4626Abi, supplyVault);
             const borrowVaultContract = await hre.ethers.getContractAt('IBorrowing', borrowVault);
 
@@ -85,7 +89,7 @@ const eulerV2CreateTest = async (testPair) => {
                 value: 0,
                 data: evcContract.interface.encodeFunctionData(
                     'enableCollateral',
-                    [account, supplyVault]
+                    [account, supplyVault],
                 ),
             };
             const supplyCollateralCall = {
@@ -94,16 +98,16 @@ const eulerV2CreateTest = async (testPair) => {
                 value: 0,
                 data: depositVaultContract.interface.encodeFunctionData(
                     'deposit',
-                    [supplyAmount, account]
+                    [supplyAmount, account],
                 ),
-            }
+            };
             const enableControllerCall = {
                 targetContract: EVC_ADDR,
                 onBehalfOfAccount: hre.ethers.constants.AddressZero,
                 value: 0,
                 data: evcContract.interface.encodeFunctionData(
                     'enableController',
-                    [account, borrowVault]
+                    [account, borrowVault],
                 ),
             };
             const borrowFromControllerCall = {
@@ -112,7 +116,7 @@ const eulerV2CreateTest = async (testPair) => {
                 value: 0,
                 data: borrowVaultContract.interface.encodeFunctionData(
                     'borrow',
-                    [borrowAmount, account]
+                    [borrowAmount, account],
                 ),
             };
 
@@ -120,14 +124,14 @@ const eulerV2CreateTest = async (testPair) => {
                 enableCollateralCall,
                 supplyCollateralCall,
                 enableControllerCall,
-                borrowFromControllerCall
-            ], { gasLimit: 2000000});
+                borrowFromControllerCall,
+            ], { gasLimit: 2000000 });
 
             const gasUsed = await getGasUsed(receipt);
             console.log(`Gas used using multi-call; ${gasUsed}`);
         });
     });
-}
+};
 
 describe('EulerV2-Create', function () {
     this.timeout(80000);

@@ -2,6 +2,7 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 const dfs = require('@defisaver/sdk');
 
+const { getAssetInfo } = require('@defisaver/tokens');
 const {
     takeSnapshot,
     revertToSnapshot,
@@ -13,9 +14,8 @@ const {
     getOwnerAddr, getAddrFromRegistry,
 } = require('../../utils');
 const { topUp } = require('../../../scripts/utils/fork');
-const { getEulerV2TestPairs, eulerV2CreatePosition, getAccountRatio} = require("../utils");
-const {getAssetInfo} = require("@defisaver/tokens");
-const {executeAction} = require("../../actions");
+const { getEulerV2TestPairs, eulerV2CreatePosition, getAccountRatio } = require('../utils');
+const { executeAction } = require('../../actions');
 
 const eulerV2RepayTest = async (testPairs) => {
     describe('EulerV2-Repay-Recipe', function () {
@@ -182,7 +182,7 @@ const eulerV2RepayTest = async (testPairs) => {
             });
         }
     });
-}
+};
 
 describe('EulerV2-Repay-Recipe', function () {
     this.timeout(80000);
