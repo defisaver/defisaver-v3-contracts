@@ -20,7 +20,7 @@ contract EulerV2View is EulerV2Helper {
     struct VaultInfo {
         address vaultAddr;                  // Address of the Euler vault
         address assetAddr;                  // Address of the underlying asset
-        string symbol;                      // Symbol of the underlying asset
+        string symbol;                      // Vault symbol
         address[] supportedCollaterals;     // Supported collateral assets
     }
 
