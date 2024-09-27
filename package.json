@@ -64,8 +64,7 @@
     "decimal.js": "^10.3.1",
     "envfile": "^6.17.0",
     "express": "^4.19.2",
-    "hardhat-ethers": "^1.0.1",
-    "yarn": "^1.22.10"
+    "hardhat-ethers": "^1.0.1"
   },
   "husky": {
     "hooks": {
