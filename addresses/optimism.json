@@ -1129,5 +1129,16 @@
       "changeTime": 0,
       "registryIds": [],
       "history": []
+    },
+    {
+      "name": "AaveV3OpenRatioCheck",
+      "address": "0xA41baFAE6832D6D059eEcac0eBB46c4D8c16c248",
+      "id": "0x72b17abf",
+      "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
     }
 ]

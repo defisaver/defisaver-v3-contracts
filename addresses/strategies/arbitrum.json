@@ -732,5 +732,115 @@
       ]
     ],
     "bundleId": 5
+  },
+  {
+    "name": "AaveV3OpenOrderFromCollL2Strategy",
+    "id": 14,
+    "isContinuous": false,
+    "triggerIds": [
+      "AaveV3QuotePriceTrigger"
+    ],
+    "actionIds": [
+      "AaveV3Borrow",
+      "DFSSell",
+      "GasFeeTakerL2",
+      "AaveV3Supply",
+      "AaveV3OpenRatioCheck"
+    ],
+    "paramMapping": [
+      [
+        0,
+        "&proxy",
+        0,
+        "&4",
+        0,
+        "&7",
+        "&5",
+        0
+      ],
+      [
+        "&3",
+        "&1",
+        "$1",
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&1",
+        "$2",
+        0
+      ],
+      [
+        "$3",
+        "&proxy",
+        "&2",
+        0,
+        0,
+        "&7",
+        "&5",
+        0
+      ],
+      [
+        "&6",
+        "&5"
+      ]
+    ],
+    "bundleId": 6
+  },
+  {
+    "name": "AaveV3FLOpenOrderFromCollL2Strategy",
+    "id": 15,
+    "isContinuous": false,
+    "triggerIds": [
+      "AaveV3QuotePriceTrigger"
+    ],
+    "actionIds": [
+      "FLAction",
+      "DFSSell",
+      "GasFeeTakerL2",
+      "AaveV3Supply",
+      "AaveV3Borrow",
+      "AaveV3OpenRatioCheck"
+    ],
+    "paramMapping": [
+      [],
+      [
+        "&3",
+        "&1",
+        0,
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&1",
+        "$2",
+        0
+      ],
+      [
+        "$3",
+        "&proxy",
+        "&2",
+        0,
+        0,
+        "&7",
+        "&5",
+        0
+      ],
+      [
+        "$1",
+        0,
+        0,
+        "&4",
+        0,
+        "&7",
+        "&5",
+        0
+      ],
+      [
+        "&6",
+        "&5"
+      ]
+    ],
+    "bundleId": 6
   }
 ]
