@@ -5,6 +5,7 @@ require('@nomicfoundation/hardhat-verify');
 require('@nomiclabs/hardhat-ethers');
 require('hardhat-gas-reporter');
 require('hardhat-log-remover');
+require('hardhat-tracer');
 
 const Dec = require('decimal.js');
 const dfs = require('@defisaver/sdk');
@@ -38,7 +39,7 @@ module.exports = {
     isWalletSafe: true,
     gasReporter: {
         currency: 'EUR',
-        enabled: true,
+        enabled: false,
     },
     networks: {
         ...testNetworks,
