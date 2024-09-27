@@ -2711,6 +2711,28 @@ const curveUsdLevCreate = async (
     return receipt;
 };
 
+const curveUsdLevCreateTransient = async (
+    proxy,
+    controllerAddress,
+    from,
+    collateralAmount,
+    exData,
+    nBands,
+) => {
+    const action = new dfs.actions.curveusd.CurveUsdLevCreateTransientAction(
+        controllerAddress,
+        from,
+        collateralAmount,
+        nBands,
+        exData,
+        0,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('CurveUsdLevCreateTransient', functionData, proxy);
+
+    return receipt;
+};
+
 const curveUsdSelfLiquidateWithColl = async (
     proxy,
     controllerAddress,
@@ -2739,6 +2761,30 @@ const curveUsdSelfLiquidateWithColl = async (
 
     const functionData = action.encodeForDsProxyCall()[1];
     const receipt = await executeAction('CurveUsdSelfLiquidateWithColl', functionData, proxy);
+
+    return receipt;
+};
+
+const curveUsdSelfLiquidateWithCollTransient = async (
+    proxy,
+    controllerAddress,
+    percentage,
+    minCrvUsdExpected,
+    exData,
+    to,
+    sellAllCollateral,
+) => {
+    const action = new dfs.actions.curveusd.CurveUsdSelfLiquidateWithCollTransientAction(
+        controllerAddress,
+        percentage,
+        minCrvUsdExpected,
+        to,
+        exData,
+        sellAllCollateral,
+        0,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('CurveUsdSelfLiquidateWithCollTransient', functionData, proxy);
 
     return receipt;
 };
@@ -2875,6 +2921,24 @@ const curveUsdRepay = async (
 
     const functionData = action.encodeForDsProxyCall()[1];
     const receipt = await executeAction('CurveUsdRepay', functionData, proxy);
+
+    return receipt;
+};
+
+const curveUsdRepayTransient = async (
+    proxy,
+    controllerAddress,
+    exData,
+    to,
+) => {
+    const action = new dfs.actions.curveusd.CurveUsdRepayTransientAction(
+        controllerAddress,
+        to,
+        exData,
+        0,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('CurveUsdRepayTransient', functionData, proxy);
 
     return receipt;
 };
@@ -3585,6 +3649,9 @@ module.exports = {
     curveUsdLevCreate,
     curveUsdSelfLiquidateWithColl,
     curveUsdAdjust,
+    curveUsdLevCreateTransient,
+    curveUsdRepayTransient,
+    curveUsdSelfLiquidateWithCollTransient,
 
     tokenizedVaultAdapterDeposit,
     tokenizedVaultAdapterMint,
