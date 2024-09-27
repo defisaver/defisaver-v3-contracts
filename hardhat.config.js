@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 require('dotenv-safe').config();
 require('@nomiclabs/hardhat-waffle');
-require('@nomiclabs/hardhat-etherscan');
+require('@nomicfoundation/hardhat-verify');
 require('@nomiclabs/hardhat-ethers');
 require('hardhat-gas-reporter');
 require('hardhat-log-remover');
