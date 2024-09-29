@@ -638,7 +638,7 @@
     },
     {
         "name": "SkyStake",
-        "address": "0x30aB8926FBE6c3aeEf52aFC575E54FAD3ae84a24",
+        "address": "0x5803C399EE9f887C8b81075E4C185c448361c235",
         "id": "0xa2b6e191",
         "path": "contracts/actions/sky/SkyStake.sol",
         "version": "1.0.0",
