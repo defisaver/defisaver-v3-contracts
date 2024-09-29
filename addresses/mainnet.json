@@ -637,15 +637,48 @@
         "history": []
     },
     {
-        "name": "TokenizedVaultAdapter",
-        "address": "0x3944364Ce3a273D269707484F3a676fCa17E08b8",
-        "id": "0x3e46d5ba",
-        "path": "contracts/actions/utils/TokenizedVaultAdapter.sol",
+        "name": "SkyStake",
+        "address": "0x30aB8926FBE6c3aeEf52aFC575E54FAD3ae84a24",
+        "id": "0xa2b6e191",
+        "path": "contracts/actions/sky/SkyStake.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "SkyUnstake",
+        "address": "0x4b6d3A01465fa88D7D596333D15832434a568452",
+        "id": "0x30d15631",
+        "path": "contracts/actions/sky/SkyUnstake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SkyClaimRewards",
+        "address": "0x8A2A23DfC0CD1738bD4408F1668E2B12ACD95369",
+        "id": "0x742b59f2",
+        "path": "contracts/actions/sky/SkyClaimRewards.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TokenizedVaultAdapter",
+        "address": "0x30aB8926FBE6c3aeEf52aFC575E54FAD3ae84a24",
+        "id": "0x3e46d5ba",
+        "path": "contracts/actions/utils/TokenizedVaultAdapter.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x3944364Ce3a273D269707484F3a676fCa17E08b8"]
     },
     {
         "name": "ERC20View",
