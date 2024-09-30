@@ -40,6 +40,9 @@ contract EulerV2View is EulerV2Helper {
     /// @notice Collateral information
     struct CollateralInfo {
         address vaultAddr;                  // Address of the Euler vault
+        address assetAddr;                  // Address of the underlying asset
+        string vaultSymbol;                 // Vault symbol
+        uint256 decimals;                   // Decimals, the same as the asset's or 18 if the asset doesn't implement `decimals()`
         uint256 sharePriceInUnit;           // Price of one share in the unit of account. Scaled by 1e18
         uint256 cash;                       // Balance of vault assets as tracked by deposits/withdrawals and borrows/repays
         uint256 totalBorrows;               // Sum of all outstanding debts, in underlying units (increases as interest is accrued)
@@ -361,6 +364,9 @@ contract EulerV2View is EulerV2Helper {
             ) = IEVault(_vault).LTVFull(collaterals[i]);
 
             collateralsInfo[i].vaultAddr = collaterals[i];
+            collateralsInfo[i].assetAddr = IEVault(collaterals[i]).asset();
+            collateralsInfo[i].vaultSymbol = IEVault(collaterals[i]).symbol();
+            collateralsInfo[i].decimals = IEVault(collaterals[i]).decimals();
 
             collateralsInfo[i].sharePriceInUnit = _getOraclePriceInUnitOfAccount(
                 _oracle,
