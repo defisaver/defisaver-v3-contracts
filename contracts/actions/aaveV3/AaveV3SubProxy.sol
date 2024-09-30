@@ -66,6 +66,8 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Che
     function updateSubData(
         bytes calldata _encodedInput
     ) public {
+        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         AaveSubData memory subData = parseSubData(_encodedInput[8:]);
@@ -98,6 +100,8 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Che
     function activateSub(
         bytes calldata _encodedInput
     ) public {
+        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);
