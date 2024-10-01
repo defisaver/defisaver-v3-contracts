@@ -44,6 +44,7 @@ contract EulerV2View is EulerV2Helper {
         string vaultSymbol;                 // Vault symbol
         uint256 decimals;                   // Decimals, the same as the asset's or 18 if the asset doesn't implement `decimals()`
         uint256 sharePriceInUnit;           // Price of one share in the unit of account. Scaled by 1e18
+        uint256 assetPriceInUnit;           // Price of one asset in the unit of account. Scaled by 1e18
         uint256 cash;                       // Balance of vault assets as tracked by deposits/withdrawals and borrows/repays
         uint256 totalBorrows;               // Sum of all outstanding debts, in underlying units (increases as interest is accrued)
         uint256 supplyCap;                  // Maximum total amount of assets that can be supplied to the vault
@@ -371,6 +372,12 @@ contract EulerV2View is EulerV2Helper {
             collateralsInfo[i].sharePriceInUnit = _getOraclePriceInUnitOfAccount(
                 _oracle,
                 collaterals[i],
+                _unitOfAccount
+            );
+
+            collateralsInfo[i].assetPriceInUnit = _getOraclePriceInUnitOfAccount(
+                _oracle,
+                collateralsInfo[i].assetAddr,
                 _unitOfAccount
             );
 
