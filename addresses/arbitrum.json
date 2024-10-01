@@ -34,7 +34,7 @@
     },
     {
         "name": "SubProxy",
-        "address": "0x2edB8eb14e29F3CF0bd50958b4664C9EB1583Ec9",
+        "address": "0x740bc65044589fB67A6b62F604Cd58d9122d2D2e",
         "id": "0x15c87229",
         "path": "contracts/core/strategy/SubProxy.sol",
         "version": "1.0.1",
@@ -42,6 +42,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x2edB8eb14e29F3CF0bd50958b4664C9EB1583Ec9",
           "0x275A8f98dBA07Ad6380D3ea3F36B665DD6E02F25"
         ]
     },
@@ -61,7 +62,7 @@
     },
     {
         "name": "AaveV3SubProxy",
-        "address": "0x967b6dFd1485C30521F8311e39E60B9c4D4b6Dbf",
+        "address": "0xEcB617e9Cd0dBeD745F6a3C20Af7DEd6308Ac177",
         "id": "0x9275abae",
         "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
         "version": "1.0.2",
@@ -69,6 +70,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x967b6dFd1485C30521F8311e39E60B9c4D4b6Dbf",
           "0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4",
           "0x7524C98ECF884e4EC62347c34f5BaefD7D067C84"
         ]
@@ -887,14 +889,14 @@
     },
     {
       "name": "ToggleSub",
-      "address": "0x71015226EADFd4aC887fB56556F64338e352439b",
+      "address": "0x2eabbab99759c2ab6e9e309d42ee07d3bc7c38fe",
       "id": "0xd6499530",
       "path": "contracts/actions/utils/ToggleSub.sol",
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
-      "history": []
+      "history": ["0x71015226EADFd4aC887fB56556F64338e352439b"]
     },
     {
       "name": "UniCollectV3",
@@ -1052,7 +1054,7 @@
     },
     {
       "name": "CompV3SubProxyL2",
-      "address": "0x398129ee7b6B5F62F896998E036Ebb3032451f03",
+      "address": "0x066D87386475D24a70bE2712A14f22b10Ac449a3",
       "id": "0x49b12183",
       "path": "contracts/actions/compoundV3/CompV3SubProxyL2.sol",
       "version": "1.0.1",
@@ -1060,6 +1062,7 @@
       "changeTime": 0,
       "registryIds": [],
       "history": [
+        "0x398129ee7b6B5F62F896998E036Ebb3032451f03",
         "0x2F368325C53656BBEE6BDE1C04a39eEd717F1E43"
       ]
     },
