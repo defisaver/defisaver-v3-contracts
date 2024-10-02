@@ -112,6 +112,7 @@ contract EulerV2View is EulerV2Helper {
         bool inPermitDisabledMode;          // Flag indicating whether the account is in permit disabled mode
         address borrowVault;                // Address of the borrow vault (aka controller)
         uint256 borrowAmountInUnit;         // Amount of borrowed assets in the unit of account
+        uint256 borrowAmountInAsset;        // Amount of borrowed assets in the asset's decimals
         address[] collaterals;              // Enabled collateral assets
         uint256[] collateralAmountsInUnit;  // Amounts of collaterals in unit of account. If coll is not supported by the borrow vault, returns 0
     }
@@ -148,19 +149,22 @@ contract EulerV2View is EulerV2Helper {
         bool controllerEnabled = controllers.length > 0;
         address controller = controllerEnabled ? controllers[0] : address(0);
 
-        uint256 borrowAmount;
+        uint256 borrowAmountInUnit;
+        uint256 borrowAmountInAsset;
         uint256[] memory collateralAmounts = new uint256[](collaterals.length);
         if (controllerEnabled) {
-           (, collateralAmounts, borrowAmount) = IEVault(controller).accountLiquidityFull(_user, false);
+            borrowAmountInAsset = IEVault(controller).debtOf(_user);
+            (, collateralAmounts, borrowAmountInUnit) = IEVault(controller).accountLiquidityFull(_user, false);
         }
 
         data = UserData({
             user: _user,
             owner: IEVC(EVC_ADDR).getAccountOwner(_user),
             inLockDownMode: IEVC(EVC_ADDR).isLockdownMode(addressPrefix),
-            inPermitDisabledMode: IEVC(_user).isPermitDisabledMode(addressPrefix),
+            inPermitDisabledMode: IEVC(EVC_ADDR).isPermitDisabledMode(addressPrefix),
             borrowVault: controller,
-            borrowAmountInUnit: borrowAmount,
+            borrowAmountInUnit: borrowAmountInUnit,
+            borrowAmountInAsset: borrowAmountInAsset,
             collaterals: collaterals,
             collateralAmountsInUnit: collateralAmounts
         });
