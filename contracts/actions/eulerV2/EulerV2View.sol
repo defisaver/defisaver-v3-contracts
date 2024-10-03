@@ -8,9 +8,10 @@ import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 import { IIRM } from "../../interfaces/eulerV2/IIRM.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
+import { TokenPriceHelper } from "../../utils/TokenPriceHelper.sol";
 
 /// @title EulerV2View - aggregate various information about Euler vaults and users
-contract EulerV2View is EulerV2Helper {
+contract EulerV2View is EulerV2Helper, TokenPriceHelper {
 
     /*//////////////////////////////////////////////////////////////
                                CONSTANTS
@@ -53,6 +54,8 @@ contract EulerV2View is EulerV2Helper {
         uint16 initialLiquidationLTV;       // The initial value of the liquidation LTV, when the ramp began
         uint48 targetTimestamp;             // The timestamp when the liquidation LTV is considered fully converged
         uint32 rampDuration;                // The time it takes for the liquidation LTV to converge from the initial value to the fully converged value
+        uint256 interestFee;                // Interest that is redirected as a fee, as a fraction scaled by 1e4
+        uint256 interestRate;               // Current borrow interest rate for an asset in yield-per-second, scaled by 10**27
     }
 
     /// @notice Full information about a vault
@@ -85,6 +88,7 @@ contract EulerV2View is EulerV2Helper {
         address oracle;                     // Address of the oracle contract
         uint256 assetPriceInUnit;           // Price of one asset in the unit of account, scaled by 1e18
         uint256 sharePriceInUnit;           // Price of one share in the unit of account, scaled by 1e18
+        uint256 assetPriceInUsd;            // Price of one asset in USD, scaled by 1e8
         uint256 assetsPerShare;             // How much one share is worth in underlying asset, scaled by 1e18
         uint256 sharesPerAsset;             // How much one underlying asset is worth in shares, scaled by 1e18
 
@@ -216,6 +220,7 @@ contract EulerV2View is EulerV2Helper {
             oracle: oracle,
             assetPriceInUnit: _getOraclePriceInUnitOfAccount(oracle, asset, unitOfAccount),
             sharePriceInUnit: _getOraclePriceInUnitOfAccount(oracle, _vault, unitOfAccount),
+            assetPriceInUsd: getPriceInUSD(asset),
             assetsPerShare: v.convertToAssets(1e18),
             sharesPerAsset: v.convertToShares(1e18),
             accumulatedFeesInShares: v.accumulatedFees(),
@@ -391,6 +396,9 @@ contract EulerV2View is EulerV2Helper {
 
             (uint16 supplyCap,) = IEVault(collaterals[i]).caps();
             collateralsInfo[i].supplyCap = _resolveAmountCap(supplyCap);
+
+            collateralsInfo[i].interestFee = IEVault(collaterals[i]).interestFee();
+            collateralsInfo[i].interestRate = IEVault(collaterals[i]).interestRate();
         }
     }
 
