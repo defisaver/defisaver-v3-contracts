@@ -25,6 +25,7 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
     // max interest rate accepted from IRM. 1,000,000% APY: floor(((1000000 / 100 + 1)**(1/(86400*365.2425)) - 1) * 1e27)
     uint256 constant MAX_ALLOWED_INTEREST_RATE = 291867278914945094175;
 
+    address public constant USD = address(840);
 
     /*//////////////////////////////////////////////////////////////
                           DATA FORMAT
@@ -85,10 +86,10 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         bool evcCompatibleAssets;           // Flag indicating whether protection for sending assets to sub-accounts is disabled
 
         address unitOfAccount;              // Reference asset used for liquidity calculations
+        uint256 unitOfAccountInUsd;         // If unit of account is not USD, fetch its price in USD from chainlink in 1e8 scale
         address oracle;                     // Address of the oracle contract
         uint256 assetPriceInUnit;           // Price of one asset in the unit of account, scaled by 1e18
         uint256 sharePriceInUnit;           // Price of one share in the unit of account, scaled by 1e18
-        uint256 assetPriceInUsd;            // Price of one asset in USD, scaled by 1e8
         uint256 assetsPerShare;             // How much one share is worth in underlying asset, scaled by 1e18
         uint256 sharesPerAsset;             // How much one underlying asset is worth in shares, scaled by 1e18
 
@@ -217,10 +218,10 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
             badDebtSocializationEnabled: configFlags & CFG_DONT_SOCIALIZE_DEBT == 0,
             evcCompatibleAssets: configFlags & CFG_EVC_COMPATIBLE_ASSET == CFG_EVC_COMPATIBLE_ASSET,
             unitOfAccount: unitOfAccount,
+            unitOfAccountInUsd: unitOfAccount == USD ? 0 : getPriceInUSD(unitOfAccount),
             oracle: oracle,
             assetPriceInUnit: _getOraclePriceInUnitOfAccount(oracle, asset, unitOfAccount),
             sharePriceInUnit: _getOraclePriceInUnitOfAccount(oracle, _vault, unitOfAccount),
-            assetPriceInUsd: getPriceInUSD(asset),
             assetsPerShare: v.convertToAssets(1e18),
             sharesPerAsset: v.convertToShares(1e18),
             accumulatedFeesInShares: v.accumulatedFees(),
