@@ -12,7 +12,6 @@ import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
 import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
 import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
 import { IReserveInterestRateStrategy } from "../interfaces/aaveV3/IReserveInterestRateStrategy.sol";
-import { IStableDebtToken } from "../interfaces/aave/IStableDebtToken.sol";
 import { IScaledBalanceToken } from "../interfaces/aave/IScaledBalanceToken.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 import { WadRayMath } from "../utils/math/WadRayMath.sol";
@@ -24,7 +23,6 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant EMODE_CATEGORY_MASK =            0xFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant BORROWABLE_IN_ISOLATION_MASK =   0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant BORROWING_MASK =                 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant STABLE_BORROWING_MASK =          0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant LTV_MASK =                       0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000; // prettier-ignore
     uint256 internal constant RESERVE_FACTOR_MASK =            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant LIQUIDATION_THRESHOLD_MASK =     0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFF; // prettier-ignore
@@ -39,10 +37,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant LIQUIDATION_THRESHOLD_START_BIT_POSITION = 16;
     uint256 internal constant RESERVE_FACTOR_START_BIT_POSITION = 64;
     uint256 internal constant BORROWING_ENABLED_START_BIT_POSITION = 58;
-    uint256 internal constant STABLE_BORROWING_ENABLED_START_BIT_POSITION = 59;
     uint256 internal constant BORROW_CAP_START_BIT_POSITION = 80;
     uint256 internal constant SUPPLY_CAP_START_BIT_POSITION = 116;
-    uint256 internal constant EMODE_CATEGORY_START_BIT_POSITION = 168;
     uint256 internal constant DEBT_CEILING_START_BIT_POSITION = 212;
     uint256 internal constant FLASHLOAN_ENABLED_START_BIT_POSITION = 63;
 
@@ -63,7 +59,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint16 ltv;
         uint16 liquidationThreshold;
         uint16 liquidationBonus;
-        address priceSource;
+        address priceSource; // deprecated
         string label;
     }
 
@@ -111,11 +107,11 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint256 eModeCollateralFactor; //pool.getEModeCategoryData.ltv
         bool isFlashLoanEnabled;
         // emode category data
-        uint16 ltv;
-        uint16 liquidationThreshold;
-        uint16 liquidationBonus;
-        address priceSource;
-        string label;
+        uint16 ltv; // deprecated
+        uint16 liquidationThreshold; // deprecated
+        uint16 liquidationBonus; // deprecated
+        address priceSource; // deprecated
+        string label; // deprecated
         bool isActive;
         bool isPaused;
         bool isFrozen;
@@ -209,9 +205,9 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         for (uint256 i = 0; i < _tokens.length; i++) {
             DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_tokens[i]);
             userTokens[i].balance = reserveData.aTokenAddress.getBalance(_user);
-            userTokens[i].borrowsStable = reserveData.stableDebtTokenAddress.getBalance(_user);
+            userTokens[i].borrowsStable = 0;
             userTokens[i].borrowsVariable = reserveData.variableDebtTokenAddress.getBalance(_user);
-            userTokens[i].stableBorrowRate = reserveData.currentStableBorrowRate;
+            userTokens[i].stableBorrowRate = 0;
             DataTypes.UserConfigurationMap memory map = lendingPool.getUserConfiguration(_user);
             userTokens[i].enabledAsCollateral = isUsingAsCollateral(map, reserveData.id);
         }
@@ -260,13 +256,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         DataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(_tokenAddr);
 
         uint256 totalVariableBorrow = IERC20(reserveData.variableDebtTokenAddress).totalSupply();
-        uint256 totalStableBorrow = IERC20(reserveData.stableDebtTokenAddress).totalSupply();
 
-
-        uint256 eMode = getEModeCategory(config);
-        DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
-
-        (bool isActive, bool isFrozen, , , bool isPaused) = getFlags(config);
+        (bool isActive, bool isFrozen, , bool isPaused) = getFlags(config);
 
         _tokenInfo = TokenInfoFull({
             aTokenAddress: reserveData.aTokenAddress,
@@ -274,32 +265,32 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             assetId: reserveData.id,
             supplyRate: reserveData.currentLiquidityRate,
             borrowRateVariable: reserveData.currentVariableBorrowRate,
-            borrowRateStable: reserveData.currentStableBorrowRate,
+            borrowRateStable: 0,
             totalSupply: IERC20(reserveData.aTokenAddress).totalSupply() + reserveData.accruedToTreasury,
             availableLiquidity: _tokenAddr.getBalance(reserveData.aTokenAddress),
-            totalBorrow: totalVariableBorrow + totalStableBorrow,
+            totalBorrow: totalVariableBorrow,
             totalBorrowVar: totalVariableBorrow,
-            totalBorrowStab: totalStableBorrow,
+            totalBorrowStab: 0,
             collateralFactor: getLtv(config),
             liquidationRatio: getLiquidationThreshold(config),
             price: getAssetPrice(_market, _tokenAddr),
             supplyCap: getSupplyCap(config),
             borrowCap: getBorrowCap(config),
-            emodeCategory: eMode,
+            emodeCategory: 0,
             usageAsCollateralEnabled: getLiquidationThreshold(config) > 0,
             borrowingEnabled: getBorrowingEnabled(config),
-            stableBorrowRateEnabled: getStableRateBorrowingEnabled(config),
+            stableBorrowRateEnabled: false,
             isolationModeBorrowingEnabled: getBorrowableInIsolation(config),
             debtCeilingForIsolationMode: getDebtCeiling(config),
             isolationModeTotalDebt: reserveData.isolationModeTotalDebt,
             isSiloedForBorrowing: isSiloedForBorrowing(_market, _tokenAddr),
-            eModeCollateralFactor: getEModeCollateralFactor(uint8(getEModeCategory(config)), lendingPool),
+            eModeCollateralFactor: 0,
             isFlashLoanEnabled: getFlashLoanEnabled(config),
-            ltv: categoryData.ltv,
-            liquidationThreshold: categoryData.liquidationThreshold,
-            liquidationBonus: categoryData.liquidationBonus,
-            priceSource: categoryData.priceSource,
-            label: categoryData.label,
+            ltv: 0, // deprecated, not 1:1 related to asset
+            liquidationThreshold: 0, // deprecated, not 1:1 related to asset
+            liquidationBonus: 0, // deprecated, not 1:1 related to asset
+            priceSource: address(0), // deprecated, not 1:1 related to asset
+            label: "", // deprecated, not 1:1 related to asset
             isActive: isActive,
             isPaused: isPaused,
             isFrozen: isFrozen
@@ -317,6 +308,25 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         }
     }
 
+    function getAllEmodes(address _market) public view returns (DataTypes.EModeCategoryNew[] memory emodesData){
+        emodesData = new DataTypes.EModeCategoryNew[](256);
+        IPoolV3 lendingPool = getLendingPool(_market);
+        for (uint8 i = 1; i < 256; i++) {   
+            emodesData[i] = getEmodeData(lendingPool, i);
+        }
+    }
+
+    function getEmodeData(IPoolV3 _lendingPool, uint8 _id) public view returns (DataTypes.EModeCategoryNew memory emodeData){
+        DataTypes.CollateralConfig memory config = _lendingPool.getEModeCategoryCollateralConfig(_id);
+            emodeData = DataTypes.EModeCategoryNew({
+                ltv: config.ltv,
+                liquidationThreshold: config.liquidationThreshold,
+                liquidationBonus: config.liquidationBonus,
+                collateralBitmap: _lendingPool.getEModeCategoryCollateralBitmap(_id),
+                borrowableBitmap: _lendingPool.getEModeCategoryBorrowableBitmap(_id),
+                label: _lendingPool.getEModeCategoryLabel(_id)
+            });
+    }
 
     /// @notice Fetches all the collateral/debt address and amounts, denominated in ether
     /// @param _market Address of LendingPoolAddressesProvider for specific market
@@ -325,12 +335,12 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     function getLoanData(address _market, address _user) public view returns (LoanData memory data) {
         IPoolV3 lendingPool = getLendingPool(_market);
         address[] memory reserveList = lendingPool.getReservesList();
-        uint256 eMode = lendingPool.getUserEMode(_user);
+        uint256 eModeId = lendingPool.getUserEMode(_user);
         
-        DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
+        DataTypes.EModeCategoryNew memory categoryData = getEmodeData(lendingPool, uint8(eModeId));
         
         data = LoanData({
-            eMode: eMode,
+            eMode: eModeId,
             user: _user,
             ratio: 0,
             collAddr: new address[](reserveList.length),
@@ -342,7 +352,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             ltv: categoryData.ltv,
             liquidationThreshold: categoryData.liquidationThreshold,
             liquidationBonus: categoryData.liquidationBonus,
-            priceSource: categoryData.priceSource,
+            priceSource: address(0),
             label: categoryData.label
         });
 
@@ -363,15 +373,6 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
                     collPos++;
                 }
             }
-            
-            // Sum up debt in Usd
-            uint256 borrowsStable = reserveData.stableDebtTokenAddress.getBalance(_user);
-            if (borrowsStable > 0) {
-                uint256 userBorrowBalanceEth = (borrowsStable * price) / (10 ** (reserve.getTokenDecimals()));
-                data.borrowAddr[borrowPos] = reserve;
-                data.borrowStableAmounts[borrowPos] = userBorrowBalanceEth;
-            }
-
             // Sum up debt in Usd
             uint256 borrowsVariable = reserveData.variableDebtTokenAddress.getBalance(_user);
             if (borrowsVariable > 0) {
@@ -379,7 +380,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
                 data.borrowAddr[borrowPos] = reserve;
                 data.borrowVariableAmounts[borrowPos] = userBorrowBalanceEth;
             }
-            if (borrowsStable > 0 || borrowsVariable > 0) {
+            if (borrowsVariable > 0) {
                 borrowPos++;
             }
         }
@@ -456,28 +457,12 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         return (self.data & ~SUPPLY_CAP_MASK) >> SUPPLY_CAP_START_BIT_POSITION;
     }
 
-    function getEModeCategory(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (uint256)
-    {
-        return (self.data & ~EMODE_CATEGORY_MASK) >> EMODE_CATEGORY_START_BIT_POSITION;
-    }
-
     function getBorrowingEnabled(DataTypes.ReserveConfigurationMap memory self)
         internal
         pure
         returns (bool)
     {
         return (self.data & ~BORROWING_MASK) != 0;
-    }
-
-    function getStableRateBorrowingEnabled(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (bool)
-    {
-        return (self.data & ~STABLE_BORROWING_MASK) != 0;
     }
 
     function getBorrowableInIsolation(DataTypes.ReserveConfigurationMap memory self)
@@ -507,7 +492,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     }
 
     function getEModeCollateralFactor(uint256 emodeCategory, IPoolV3 lendingPool) public view returns (uint16){
-        DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(emodeCategory));
+        DataTypes.EModeCategoryLegacy memory categoryData = lendingPool.getEModeCategoryData(uint8(emodeCategory));
         return categoryData.ltv;
     }
 
@@ -521,19 +506,17 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
      * @return The state flag representing active
      * @return The state flag representing frozen
      * @return The state flag representing borrowing enabled
-     * @return The state flag representing stableRateBorrowing enabled
      * @return The state flag representing paused
      */
     function getFlags(
         DataTypes.ReserveConfigurationMap memory self
-    ) internal pure returns (bool, bool, bool, bool, bool) {
+    ) internal pure returns (bool, bool, bool, bool) {
         uint256 dataLocal = self.data;
 
         return (
         (dataLocal & ~ACTIVE_MASK) != 0,
         (dataLocal & ~FROZEN_MASK) != 0,
         (dataLocal & ~BORROWING_MASK) != 0,
-        (dataLocal & ~STABLE_BORROWING_MASK) != 0,
         (dataLocal & ~PAUSED_MASK) != 0
         );
     }
@@ -563,9 +546,6 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
 
             EstimatedRates memory estimatedRate;
             estimatedRate.reserveAddress = _reserveParams[i].reserveAddress;
-            
-            (uint256 currTotalStableDebt, uint256 currAvgStableBorrowRate) = IStableDebtToken(reserve.stableDebtTokenAddress)
-                .getTotalSupplyAndAvgRate();
 
             uint256 totalVarDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply().rayMul(_getNextVariableBorrowIndex(reserve));
 
@@ -577,16 +557,13 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
 
             (
                 estimatedRate.supplyRate,
-                ,
                 estimatedRate.variableBorrowRate
             ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
                 DataTypes.CalculateInterestRatesParams({
                     unbacked: reserve.unbacked,
                     liquidityAdded: _reserveParams[i].liquidityAdded,
                     liquidityTaken: _reserveParams[i].liquidityTaken,
-                    totalStableDebt: currTotalStableDebt,
-                    totalVariableDebt: totalVarDebt,
-                    averageStableBorrowRate: currAvgStableBorrowRate,
+                    totalDebt: totalVarDebt,
                     reserveFactor: getReserveFactor(reserve.configuration),
                     reserve: _reserveParams[i].reserveAddress,
                     usingVirtualBalance: isReserveUsingVirtualAccounting(config),
