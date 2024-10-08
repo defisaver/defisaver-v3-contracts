@@ -339,8 +339,6 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         address[] memory reserveList = lendingPool.getReservesList();
         uint256 eModeId = lendingPool.getUserEMode(_user);
         
-        DataTypes.EModeCategoryNew memory categoryData = getEmodeData(lendingPool, uint8(eModeId));
-        
         data = LoanData({
             eMode: eModeId,
             user: _user,
@@ -351,11 +349,11 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             collAmounts: new uint[](reserveList.length),
             borrowStableAmounts: new uint[](reserveList.length),
             borrowVariableAmounts: new uint[](reserveList.length),
-            ltv: categoryData.ltv,
-            liquidationThreshold: categoryData.liquidationThreshold,
-            liquidationBonus: categoryData.liquidationBonus,
+            ltv: 0,
+            liquidationThreshold: 0,
+            liquidationBonus: 0,
             priceSource: address(0),
-            label: categoryData.label
+            label: ""
         });
 
         uint64 collPos = 0;
