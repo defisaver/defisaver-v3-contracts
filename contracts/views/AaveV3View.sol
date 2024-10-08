@@ -311,8 +311,10 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     function getAllEmodes(address _market) public view returns (DataTypes.EModeCategoryNew[] memory emodesData){
         emodesData = new DataTypes.EModeCategoryNew[](256);
         IPoolV3 lendingPool = getLendingPool(_market);
-        for (uint8 i = 1; i < 256; i++) {   
-            emodesData[i] = getEmodeData(lendingPool, i);
+        for (uint8 i = 1; i < 255; i++) {
+            DataTypes.EModeCategoryNew memory nextEmodeData = getEmodeData(lendingPool, i);
+            if (bytes(nextEmodeData.label).length == 0) break;
+            emodesData[i-1] = nextEmodeData;
         }
     }
 
