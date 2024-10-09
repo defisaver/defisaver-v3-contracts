@@ -33,7 +33,6 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
         uint256 accountBorrowAmountInUsd;
         uint256 fromSupplyAmountInUsd;
         uint256 paybackAmountInUsd;
-        bool disableController;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -63,8 +62,7 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 accountSupplyAmountInUsd: 100000,
                 accountBorrowAmountInUsd: 50000,
                 fromSupplyAmountInUsd: 40000,
-                paybackAmountInUsd: 20000,
-                disableController: false
+                paybackAmountInUsd: 20000
             })
         );
     }
@@ -78,8 +76,7 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 accountSupplyAmountInUsd: 100000,
                 accountBorrowAmountInUsd: 50000,
                 fromSupplyAmountInUsd: 49000,
-                paybackAmountInUsd: 48999,
-                disableController: false
+                paybackAmountInUsd: 48999
             })
         );
     }
@@ -93,8 +90,7 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 accountSupplyAmountInUsd: 100000,
                 accountBorrowAmountInUsd: 60000,
                 fromSupplyAmountInUsd: 299,
-                paybackAmountInUsd: 100,
-                disableController: false
+                paybackAmountInUsd: 100
             })
         );
     }
@@ -108,8 +104,7 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 accountSupplyAmountInUsd: 20000,
                 accountBorrowAmountInUsd: 5000,
                 fromSupplyAmountInUsd: 30000,
-                paybackAmountInUsd: type(uint256).max,
-                disableController: true
+                paybackAmountInUsd: type(uint256).max
             })
         );
     }
@@ -123,8 +118,7 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 accountSupplyAmountInUsd: 20000,
                 accountBorrowAmountInUsd: 5000,
                 fromSupplyAmountInUsd: 30000,
-                paybackAmountInUsd: 4500,
-                disableController: false
+                paybackAmountInUsd: 4500
             })
         );
     }
@@ -138,8 +132,7 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 accountSupplyAmountInUsd: 20000,
                 accountBorrowAmountInUsd: 11111,
                 fromSupplyAmountInUsd: 11112,
-                paybackAmountInUsd: type(uint256).max,
-                disableController: true
+                paybackAmountInUsd: type(uint256).max
             })
         );
     }
@@ -202,8 +195,7 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 _vault,
                 _config.from,
                 _config.account,
-                paybackAmount,
-                _config.disableController
+                paybackAmount
             ),
             _config.isDirect
         );
@@ -223,16 +215,18 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
         uint256 accountDebtAfter = IEVault(_vault).debtOf(account);
 
         assertLt(fromVaultSharesAfter, fromVaultSharesBefore);
-        assertEq(IEVC(EVC_ADDR).isControllerEnabled(account, _vault), !_config.disableController);
 
         if (paybackAmount == type(uint256).max) {
             if (fromHasEnoughToCoverAccountFullDebt) {
                 assertEq(accountDebtAfter, 0);
+                assertEq(IEVC(EVC_ADDR).isControllerEnabled(account, _vault), false);
             } else {
                 assertEq(accountDebtAfter, accountDebtBefore - fromUnderlyingBefore);
+                assertEq(IEVC(EVC_ADDR).isControllerEnabled(account, _vault), true);
             }
         } else {
             assertEq(accountDebtAfter, accountDebtBefore - paybackAmount);
+            assertEq(IEVC(EVC_ADDR).isControllerEnabled(account, _vault), true);
         }
     }
 }

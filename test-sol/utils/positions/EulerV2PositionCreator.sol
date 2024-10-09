@@ -33,8 +33,7 @@ contract EulerV2PositionCreator is EulerV2ExecuteActions, CommonPositionCreator 
             vault: _params.debtAddr,
             account: account,
             receiver: _wallet.owner(),
-            amount: _params.debtAmount,
-            enableAsController: true
+            amount: _params.debtAmount
         });
 
         executeEulerV2Supply(supplyParams, _wallet, false, address(new EulerV2Supply()));

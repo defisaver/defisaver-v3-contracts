@@ -223,27 +223,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
-        it('Test aaveV3SwapBorrowRateModeEncode', async () => {
-            const AaveV3SwapBorrowRateMode = await hre.ethers.getContractFactory('AaveV3SwapBorrowRateMode');
-            const sdkEncoded = (
-                new sdk.actions.aaveV3.AaveV3SwapBorrowRateModeAction(
-                    useDefaultMarket,
-                    market,
-                    rateMode,
-                    assetId,
-                )
-            ).encodeForDsProxyCall()[1];
-
-            const foundryEncoded = AaveV3SwapBorrowRateMode.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.aaveV3SwapBorrowRateModeEncode(
-                    rateMode,
-                    assetId,
-                    useDefaultMarket,
-                    market,
-                ),
-            ]);
-            expect(sdkEncoded).to.be.eq(foundryEncoded);
-        });
         it('Test aaveV3SetEModeEncode', async () => {
             const categoryId = 1;
             const AaveV3SetEMode = await hre.ethers.getContractFactory('AaveV3SetEMode');
@@ -690,10 +669,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
         const tokenAddr = WETH_ADDRESS;
         const amount = 10000;
         const enableAsColl = true;
-        const enableAsController = true;
-        const disableController = false;
         const indexes = [[1, 2], [3, 4]];
-        const enabled = true;
 
         before(async () => {
             foundryContract = await getFoundryEncodingContract();
@@ -758,7 +734,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     account,
                     receiver,
                     amount,
-                    enableAsController,
                 )
             ).encodeForDsProxyCall()[1];
 
@@ -768,7 +743,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     account,
                     receiver,
                     amount,
-                    enableAsController,
                 ),
             ]);
 
@@ -784,7 +758,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     account,
                     from,
                     amount,
-                    disableController,
                 )
             ).encodeForDsProxyCall()[1];
 
@@ -794,7 +767,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     account,
                     from,
                     amount,
-                    disableController,
                 ),
             ]);
 
@@ -809,7 +781,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     account,
                     from,
                     amount,
-                    disableController,
                 )
             ).encodeForDsProxyCall()[1];
 
@@ -819,7 +790,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     from,
                     account,
                     amount,
-                    disableController,
                 ),
             ]);
 
@@ -834,7 +804,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     account,
                     from,
                     amount,
-                    enableAsController,
                 )
             ).encodeForDsProxyCall()[1];
 
@@ -844,7 +813,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     account,
                     from,
                     amount,
-                    enableAsController,
                 ),
             ]);
 
@@ -870,27 +838,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
 
-        it('Test eulerV2ControllerSwitchEncode', async () => {
-            const EulerV2ControllerSwitch = await hre.ethers.getContractFactory('EulerV2ControllerSwitch');
-            const sdkEncoded = (
-                new sdk.actions.eulerV2.EulerV2ControllerSwitchAction(
-                    vault,
-                    account,
-                    enableAsController,
-                )
-            ).encodeForDsProxyCall()[1];
-
-            const foundryEncoded = EulerV2ControllerSwitch.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.eulerV2ControllerSwitchEncode(
-                    vault,
-                    account,
-                    enableAsController,
-                ),
-            ]);
-
-            expect(sdkEncoded).to.be.eq(foundryEncoded);
-        });
-
         it('Test eulerV2CollateralSwitchEncode', async () => {
             const EulerV2CollateralSwitch = await hre.ethers.getContractFactory('EulerV2CollateralSwitch');
             const sdkEncoded = (
@@ -906,40 +853,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     vault,
                     account,
                     enableAsColl,
-                ),
-            ]);
-
-            expect(sdkEncoded).to.be.eq(foundryEncoded);
-        });
-
-        it('Test eulerV2LockDownModeSwitchEncode', async () => {
-            const EulerV2LockDownModeSwitch = await hre.ethers.getContractFactory('EulerV2LockDownModeSwitch');
-            const sdkEncoded = (
-                new sdk.actions.eulerV2.EulerV2LockDownModeSwitchAction(
-                    enabled,
-                )
-            ).encodeForDsProxyCall()[1];
-
-            const foundryEncoded = EulerV2LockDownModeSwitch.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.eulerV2LockDownModeSwitchEncode(
-                    enabled,
-                ),
-            ]);
-
-            expect(sdkEncoded).to.be.eq(foundryEncoded);
-        });
-
-        it('Test eulerV2PermitDisabledModeSwitchEncode', async () => {
-            const EulerV2PermitDisabledModeSwitch = await hre.ethers.getContractFactory('EulerV2PermitDisabledModeSwitch');
-            const sdkEncoded = (
-                new sdk.actions.eulerV2.EulerV2PermitDisabledModeSwitchAction(
-                    enabled,
-                )
-            ).encodeForDsProxyCall()[1];
-
-            const foundryEncoded = EulerV2PermitDisabledModeSwitch.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.eulerV2PermitDisabledModeSwitchEncode(
-                    enabled,
                 ),
             ]);
 

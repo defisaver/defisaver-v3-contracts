@@ -47,8 +47,7 @@ contract EulerV2ExecuteActions is ExecuteActionsBase {
             _params.vault,
             _params.account,
             _params.receiver,
-            _params.amount,
-            _params.enableAsController
+            _params.amount
         );
         bytes memory _calldata = abi.encodeWithSelector(
             EXECUTE_ACTION_DIRECT_SELECTOR,

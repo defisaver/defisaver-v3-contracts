@@ -31,7 +31,6 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         address vault;
         address account;
         uint256 borrowAmountInUsd;
-        bool enableAsController;
         bool isDirect;
     }
 
@@ -57,30 +56,27 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         address account = walletAddr;
         uint256 supplyAmountInUsd = 100000;
         uint256 borrowAmountInUsd = 50000;
-        bool enableAsController = true;
         bool isDirect = false;
 
-        _baseTest(account, supplyAmountInUsd, borrowAmountInUsd, enableAsController, isDirect);
+        _baseTest(account, supplyAmountInUsd, borrowAmountInUsd, isDirect);
     }
 
     function test_should_borrow_on_default_main_account() public {
         address account = address(0);
         uint256 supplyAmountInUsd = 100000;
         uint256 borrowAmountInUsd = 10;
-        bool enableAsController = true;
         bool isDirect = false;
 
-        _baseTest(account, supplyAmountInUsd, borrowAmountInUsd, enableAsController, isDirect);
+        _baseTest(account, supplyAmountInUsd, borrowAmountInUsd, isDirect);
     }
 
     function test_should_borrow_with_action_direct() public {
         address account = walletAddr;
         uint256 supplyAmountInUsd = 157;
         uint256 borrowAmountInUsd = 47;
-        bool enableAsController = true;
         bool isDirect = true;
 
-        _baseTest(account, supplyAmountInUsd, borrowAmountInUsd, enableAsController, isDirect);
+        _baseTest(account, supplyAmountInUsd, borrowAmountInUsd, isDirect);
     }
 
     function test_should_borrow_with_already_enabled_controller() public {
@@ -92,7 +88,6 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         uint256 firstBorrowAmountInUsd = 400000;
         uint256 secondBorrowAmountInUsd = 200000;
 
-        bool enableAsController = true;
         bool isDirect = true;
 
         uint256 snapshotId = vm.snapshot();
@@ -108,7 +103,6 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
                 borrowVault,
                 account,
                 firstBorrowAmountInUsd,
-                enableAsController,
                 isDirect
             )
         );
@@ -118,7 +112,6 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
                 borrowVault,
                 account,
                 secondBorrowAmountInUsd,
-                !enableAsController,
                 isDirect
             )
         );
@@ -136,7 +129,6 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         address borrowVault = E_WETH_2_GOVERNED;
         uint256 supplyAmountInUsd = 40000;
         uint256 borrowAmountInUsd = 15000;
-        bool enableAsController = true;
         bool isDirect = true;
 
         for (uint256 i = 0; i < accounts.length; ++i) {
@@ -150,7 +142,6 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
                     borrowVault,
                     accounts[i],
                     borrowAmountInUsd,
-                    enableAsController,
                     isDirect
                 )
             );
@@ -159,7 +150,6 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
 
     function test_should_borrow_using_two_collateral_vaults() public {
         address account = walletAddr;
-        bool enableAsController = true;
         bool isDirect = true;
 
         uint256 supplyAmountInUsdFirstCollVault = 50000;
@@ -195,7 +185,6 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
                 vault: borrowVault,
                 account: account,
                 borrowAmountInUsd: borrowAmountInUsdBorrowVault,
-                enableAsController: enableAsController,
                 isDirect: isDirect
             })
         );
@@ -207,7 +196,6 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         address _account,
         uint256 _supplyAmountInUsd,
         uint256 _borrowAmountInUsd,
-        bool _enableAsController,
         bool _isDirect
     ) internal {
         for (uint256 i = 0; i < testPairs.length; ++i) {
@@ -228,7 +216,6 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
                     vault: borrowVault,
                     account: _account,
                     borrowAmountInUsd: _borrowAmountInUsd,
-                    enableAsController: _enableAsController,
                     isDirect: _isDirect
                 })
             );
@@ -246,8 +233,7 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
                 _config.vault,
                 _config.account,
                 sender,
-                borrowAmount,
-                _config.enableAsController
+                borrowAmount
             ),
             _config.isDirect
         );

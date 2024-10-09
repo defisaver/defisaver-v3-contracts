@@ -41,7 +41,6 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
         uint256 fromBorrowAmountInUsd;
         uint256 accountSupplyAmountInUsd;
         uint256 pullDebtAmountInUsd;
-        bool enableAsController;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -75,8 +74,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 fromSupplyAmountInUsd: 10000,
                 fromBorrowAmountInUsd: 4000,
                 accountSupplyAmountInUsd: 9000,
-                pullDebtAmountInUsd: 2000,
-                enableAsController: true
+                pullDebtAmountInUsd: 2000
             })
         );
     }
@@ -90,8 +88,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 fromSupplyAmountInUsd: 100000,
                 fromBorrowAmountInUsd: 60000,
                 accountSupplyAmountInUsd: 97999,
-                pullDebtAmountInUsd: 59995,
-                enableAsController: true
+                pullDebtAmountInUsd: 59995
             })
         );
     }
@@ -105,8 +102,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 fromSupplyAmountInUsd: 15000,
                 fromBorrowAmountInUsd: 5000,
                 accountSupplyAmountInUsd: 100,
-                pullDebtAmountInUsd: 10,
-                enableAsController: true
+                pullDebtAmountInUsd: 10
             })
         );
     }
@@ -120,8 +116,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 fromSupplyAmountInUsd: 150000,
                 fromBorrowAmountInUsd: 75000,
                 accountSupplyAmountInUsd: 200000,
-                pullDebtAmountInUsd: type(uint256).max,
-                enableAsController: true
+                pullDebtAmountInUsd: type(uint256).max
             })
         );
     }
@@ -135,8 +130,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 fromSupplyAmountInUsd: 150000,
                 fromBorrowAmountInUsd: 75000,
                 accountSupplyAmountInUsd: 200000,
-                pullDebtAmountInUsd: type(uint256).max,
-                enableAsController: true
+                pullDebtAmountInUsd: type(uint256).max
             })
         );
     }
@@ -150,8 +144,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 fromSupplyAmountInUsd: 150000,
                 fromBorrowAmountInUsd: 75000,
                 accountSupplyAmountInUsd: 200000,
-                pullDebtAmountInUsd: 65000,
-                enableAsController: true
+                pullDebtAmountInUsd: 65000
             })
         );
     }
@@ -164,9 +157,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
             fromSupplyAmountInUsd: 10000,
             fromBorrowAmountInUsd: 4000,
             accountSupplyAmountInUsd: 9000,
-            pullDebtAmountInUsd: 3000,
-            // Since 'account' will have debt, no need to enable borrow vault as controller again
-            enableAsController: false
+            pullDebtAmountInUsd: 3000
         });
 
         // Make sure 'account' has debt before pulling more debt
@@ -252,8 +243,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 _vault,
                 _config.account,
                 _config.from,
-                pullDebtAmount,
-                _config.enableAsController
+                pullDebtAmount
             ),
             _config.isDirect
         );
@@ -267,6 +257,8 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
 
         uint256 accountDebtAfter = IEVault(_vault).debtOf(account);
         uint256 fromDebtAfter = IEVault(_vault).debtOf(_config.from);
+
+        assertEq(IEVC(EVC_ADDR).isControllerEnabled(account, _vault), true);
 
         if (pullDebtAmount == type(uint256).max) {
             assertEq(fromDebtAfter, 0);

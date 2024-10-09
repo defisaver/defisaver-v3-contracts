@@ -101,7 +101,6 @@ const eulerV2RepayTest = async (testPairs) => {
                     account,
                     proxy.address,
                     '$2',
-                    false,
                 );
                 const repayRecipe = new dfs.Recipe('EulerV2Repay', [
                     eulerV2WithdrawAction,
@@ -159,7 +158,6 @@ const eulerV2RepayTest = async (testPairs) => {
                     account,
                     proxy.address,
                     '$2',
-                    false,
                 );
                 const eulerV2WithdrawAction = new dfs.actions.eulerV2.EulerV2WithdrawAction(
                     supplyVault,

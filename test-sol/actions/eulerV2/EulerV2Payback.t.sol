@@ -29,7 +29,6 @@ contract TestEulerV2Payback is EulerV2TestHelper {
         address account;
         uint256 paybackAmountInUsd;
         bool isDirect;
-        bool disableController;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -52,7 +51,6 @@ contract TestEulerV2Payback is EulerV2TestHelper {
     function test_should_payback_on_main_account() public {
         address account = walletAddr;
         bool isDirect = false;
-        bool disableController = false;
         uint256 collateralAmountInUsd = 100000;
         uint256 borrowAmountInUsd = 50000;
         uint256 paybackAmountInUsd = 40000;
@@ -62,15 +60,13 @@ contract TestEulerV2Payback is EulerV2TestHelper {
             collateralAmountInUsd,
             borrowAmountInUsd,
             paybackAmountInUsd,
-            isDirect,
-            disableController
+            isDirect
         );
     }
 
     function test_should_payback_on_default_main_account() public {
         address account = address(0);
         bool isDirect = false;
-        bool disableController = false;
         uint256 collateralAmountInUsd = 100000;
         uint256 borrowAmountInUsd = 50000;
         uint256 paybackAmountInUsd = 10;
@@ -80,15 +76,13 @@ contract TestEulerV2Payback is EulerV2TestHelper {
             collateralAmountInUsd,
             borrowAmountInUsd,
             paybackAmountInUsd,
-            isDirect,
-            disableController
+            isDirect
         );
     }
 
     function test_should_payback_with_action_direct() public {
         address account = walletAddr;
         bool isDirect = true;
-        bool disableController = false;
         uint256 collateralAmountInUsd = 9000;
         uint256 borrowAmountInUsd = 5000;
         uint256 paybackAmountInUsd = 4999;
@@ -98,15 +92,13 @@ contract TestEulerV2Payback is EulerV2TestHelper {
             collateralAmountInUsd,
             borrowAmountInUsd,
             paybackAmountInUsd,
-            isDirect,
-            disableController
+            isDirect
         );
     }
 
     function test_should_payback_full_amount_on_sub_account_with_controller_removal() public {
         address account = getSubAccount(walletAddr, 0x01);
         bool isDirect = true;
-        bool disableController = true;
         uint256 collateralAmountInUsd = 100000;
         uint256 borrowAmountInUsd = 50000;
         uint256 paybackAmountInUsd = type(uint256).max;
@@ -116,15 +108,13 @@ contract TestEulerV2Payback is EulerV2TestHelper {
             collateralAmountInUsd,
             borrowAmountInUsd,
             paybackAmountInUsd,
-            isDirect,
-            disableController
+            isDirect
         );
     }
 
     function test_should_payback_full_amount() public {
         address account = walletAddr;
         bool isDirect = false;
-        bool disableController = false;
         uint256 collateralAmountInUsd = 100000;
         uint256 borrowAmountInUsd = 50000;
         uint256 paybackAmountInUsd = type(uint256).max;
@@ -134,15 +124,13 @@ contract TestEulerV2Payback is EulerV2TestHelper {
             collateralAmountInUsd,
             borrowAmountInUsd,
             paybackAmountInUsd,
-            isDirect,
-            disableController
+            isDirect
         );
     }
 
     function test_should_payback_full_amount_with_controller_removal() public {
         address account = walletAddr;
         bool isDirect = false;
-        bool disableController = true;
         uint256 collateralAmountInUsd = 100000;
         uint256 borrowAmountInUsd = 50000;
         uint256 paybackAmountInUsd = type(uint256).max;
@@ -152,8 +140,7 @@ contract TestEulerV2Payback is EulerV2TestHelper {
             collateralAmountInUsd,
             borrowAmountInUsd,
             paybackAmountInUsd,
-            isDirect,
-            disableController
+            isDirect
         );
     }
 
@@ -162,8 +149,7 @@ contract TestEulerV2Payback is EulerV2TestHelper {
         uint256 _collateralAmountInUsd,
         uint256 _borrowAmountInUsd,
         uint256 _paybackAmountInUsd,
-        bool _isDirect,
-        bool _disableController
+        bool _isDirect
     ) internal {
         for (uint256 i = 0; i < testPairs.length; ++i) {
             uint256 snapshotId = vm.snapshot();
@@ -186,8 +172,7 @@ contract TestEulerV2Payback is EulerV2TestHelper {
                     borrowVault,
                     _account,
                     _paybackAmountInUsd,
-                    _isDirect,
-                    _disableController
+                    _isDirect
                 )
             );
 
@@ -205,8 +190,7 @@ contract TestEulerV2Payback is EulerV2TestHelper {
                 _config.vault,
                 _config.account,
                 sender,
-                _config.paybackAmountInUsd,
-                _config.disableController
+                _config.paybackAmountInUsd
             ),
             _config.isDirect
         );
@@ -229,13 +213,14 @@ contract TestEulerV2Payback is EulerV2TestHelper {
         uint256 accountVaultDebtAfter = IEVault(_config.vault).debtOf(account);
 
         assertEq(receiverAssetBalanceAfter, receiverAssetBalanceBefore - paybackAmount);
-        assertEq(IEVC(EVC_ADDR).isControllerEnabled(account, _config.vault), !_config.disableController);
 
         if (isMaxPayback) {
             assertEq(accountVaultDebtAfter, 0);
+            assertEq(IEVC(EVC_ADDR).isControllerEnabled(account, _config.vault), false);
         } else {
             assertGt(accountVaultDebtAfter, 0);
             assertLt(accountVaultDebtAfter, accountVaultDebtBefore);
+            assertEq(IEVC(EVC_ADDR).isControllerEnabled(account, _config.vault), true);
         }
     }
 }

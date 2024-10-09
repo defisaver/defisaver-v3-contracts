@@ -165,7 +165,6 @@ const eulerV2BoostTest = async (testPairs) => {
                     account,
                     flAddress,
                     boostAmount,
-                    false,
                 );
 
                 const flbBoostRecipe = new dfs.Recipe('EulerV2Boost', [
