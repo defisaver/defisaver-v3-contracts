@@ -747,14 +747,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x1882BBB847425335CCe0b81eC10295674A982395",
+        "address": "0x6962a609A10051A5309Fe8c4d3dAb15366C481d2",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.2",
+        "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x1882BBB847425335CCe0b81eC10295674A982395",
           "0xa679fED396bfA42ca2E67FfDbe7E78D335548fA4",
           "0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b"
         ]
@@ -931,6 +932,17 @@
         "path": "contracts/tx-saver/BotAuthForTxSaver.sol",
         "version": "1.0.0",
         "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "BotRefills",
+        "address": "0xE3a7112d03D6cB928DE9cCE597892bDDF2173751",
+        "id": "0x4fac91e4",
+        "path": "contracts/utils/BotRefills.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": []

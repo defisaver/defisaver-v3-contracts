@@ -14,7 +14,6 @@ import { IFlashLoanBase } from "../../contracts/interfaces/flashloan/IFlashLoanB
 import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 import { AaveV3Withdraw } from "../../contracts/actions/aaveV3/AaveV3Withdraw.sol";
-import { AaveV3SwapBorrowRateMode } from "../../contracts/actions/aaveV3/AaveV3SwapBorrowRateMode.sol";
 import { AaveV3SetEMode } from "../../contracts/actions/aaveV3/AaveV3SetEMode.sol";
 import { AaveV3DelegateCredit } from "../../contracts/actions/aaveV3/AaveV3DelegateCredit.sol";
 import { AaveV3CollateralSwitch } from "../../contracts/actions/aaveV3/AaveV3CollateralSwitch.sol";
@@ -320,22 +319,6 @@ contract ActionsUtils {
                 useDefaultMarket: _useDefaultMarket,
                 amount: _amount,
                 to: _to,
-                market: _market
-            })
-        );
-    }
-
-    function aaveV3SwapBorrowRateModeEncode(
-        uint8 _rateMode,
-        uint16 _assetId,
-        bool _useDefaultMarket,
-        address _market
-    ) public pure returns (bytes memory params) {
-        params = abi.encode(
-            AaveV3SwapBorrowRateMode.Params({
-                rateMode: _rateMode,
-                assetId: _assetId,
-                useDefaultMarket: _useDefaultMarket,
                 market: _market
             })
         );
