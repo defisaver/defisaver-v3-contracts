@@ -17,13 +17,11 @@ contract EulerV2Payback is ActionBase, EulerV2Helper {
     /// @param account The address of the Euler account, defaults to user's wallet
     /// @param from The address from which to pull tokens to be paid back
     /// @param amount The amount of assets to pay back (uint256.max for full debt repayment)
-    /// @param disableController Whether to disable the controller if full debt repayment
     struct Params {
         address vault;
         address account;
         address from;
         uint256 amount;
-        bool disableController;
     }
 
     /// @inheritdoc ActionBase
@@ -39,12 +37,6 @@ contract EulerV2Payback is ActionBase, EulerV2Helper {
         params.account = _parseParamAddr(params.account, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-        params.disableController = _parseParamUint(
-            params.disableController ? 1 : 0,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        ) == 1;
 
         (uint256 paybackAmount, bytes memory logData) = _payback(params);
         emit ActionEvent("EulerV2Payback", logData);
@@ -86,7 +78,7 @@ contract EulerV2Payback is ActionBase, EulerV2Helper {
 
         _params.amount = IEVault(_params.vault).repay(_params.amount, _params.account);
 
-        if (maxPayback && _params.disableController) {
+        if (maxPayback) {
             IEVC(EVC_ADDR).call(
                 _params.vault,
                 _params.account,

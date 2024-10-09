@@ -15,13 +15,11 @@ contract EulerV2PullDebt is ActionBase, EulerV2Helper {
     /// @param account The address of the Euler account taking the debt, defaults to user's wallet
     /// @param from The address of the Euler account from which debt is pulled
     /// @param amount The amount of debt to be pulled (uint256.max for full debt pull)
-    /// @param enableAsController Whether to enable borrow vault as controller for account. Can be skipped only if the vault is already enabled as controller
     struct Params {
         address vault;
         address account;
         address from;
         uint256 amount;
-        bool enableAsController;
     }
 
     /// @inheritdoc ActionBase
@@ -37,12 +35,6 @@ contract EulerV2PullDebt is ActionBase, EulerV2Helper {
         params.account = _parseParamAddr(params.account, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-        params.enableAsController = _parseParamUint(
-            params.enableAsController ? 1 : 0,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        ) == 1;
 
         (uint256 pulledDebtAmount, bytes memory logData) = _pullDebt(params);
         emit ActionEvent("EulerV2PullDebt", logData);
@@ -69,7 +61,9 @@ contract EulerV2PullDebt is ActionBase, EulerV2Helper {
             _params.account = address(this);
         }
 
-        if (_params.enableAsController) {
+        bool isControllerEnabled = IEVC(EVC_ADDR).isControllerEnabled(_params.account, _params.vault);
+
+        if (!isControllerEnabled) {
             IEVC(EVC_ADDR).enableController(_params.account, _params.vault);
         }
 

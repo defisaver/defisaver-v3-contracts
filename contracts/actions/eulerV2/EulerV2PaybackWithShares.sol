@@ -15,13 +15,11 @@ contract EulerV2PaybackWithShares is ActionBase, EulerV2Helper {
     /// @param account The address of the Euler account for which debt is paid back, defaults to user's wallet
     /// @param from The address of the Euler account for which shares are burned to pay back debt for 'account', defaults to user's wallet
     /// @param amount The amount of asset tokens to be paid back (uint256.max for full debt repayment or up to the available deposit shares in 'from' account)
-    /// @param disableController Whether to disable the controller if full debt repayment
     struct Params {
         address vault;
         address account;
         address from;
         uint256 amount;
-        bool disableController;
     }
 
     /// @inheritdoc ActionBase
@@ -37,12 +35,6 @@ contract EulerV2PaybackWithShares is ActionBase, EulerV2Helper {
         params.account = _parseParamAddr(params.account, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-        params.disableController = _parseParamUint(
-            params.disableController ? 1 : 0,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        ) == 1;
 
         (uint256 paybackAmount, bytes memory logData) = _paybackWithShares(params);
         emit ActionEvent("EulerV2PaybackWithShares", logData);
@@ -91,7 +83,7 @@ contract EulerV2PaybackWithShares is ActionBase, EulerV2Helper {
 
         // When disabling controller, 'from' and 'account' should be controlled by the same owner
         // otherwise this will revert as authorization error on Euler side
-        if (_params.disableController && accountDebtAfter == 0) {
+        if (accountDebtAfter == 0) {
             IEVC(EVC_ADDR).call(
                 _params.vault,
                 _params.account,

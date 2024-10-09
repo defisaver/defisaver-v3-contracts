@@ -15,13 +15,11 @@ contract EulerV2Borrow is ActionBase, EulerV2Helper {
     /// @param account The address of the Euler account, defaults to user's wallet
     /// @param receiver The address to receive the borrowed assets
     /// @param amount The amount of assets to borrow
-    /// @param enableAsController Whether to enable borrow vault as controller. Can be skipped only if the vault is already enabled as controller
     struct Params {
         address vault;
         address account;
         address receiver;
         uint256 amount;
-        bool enableAsController;
     }
 
     /// @inheritdoc ActionBase
@@ -37,12 +35,6 @@ contract EulerV2Borrow is ActionBase, EulerV2Helper {
         params.account = _parseParamAddr(params.account, _paramMapping[1], _subData, _returnValues);
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-        params.enableAsController = _parseParamUint(
-            params.enableAsController ? 1 : 0,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        ) == 1;
 
         (uint256 borrowAmount, bytes memory logData) = _borrow(params);
         emit ActionEvent("EulerV2Borrow", logData);
@@ -69,7 +61,9 @@ contract EulerV2Borrow is ActionBase, EulerV2Helper {
             _params.account = address(this);
         }
 
-        if(_params.enableAsController) {
+        bool isControllerEnabled = IEVC(EVC_ADDR).isControllerEnabled(_params.account, _params.vault);
+
+        if(!isControllerEnabled) {
             IEVC(EVC_ADDR).enableController(_params.account, _params.vault);
         }
 
