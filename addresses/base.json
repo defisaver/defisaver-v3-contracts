@@ -1101,6 +1101,17 @@
         "history": []
       },
       {
+        "name": "BotRefills",
+        "address": "0xE3a7112d03D6cB928DE9cCE597892bDDF2173751",
+        "id": "0x4fac91e4",
+        "path": "contracts/utils/BotRefills.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
         "name": "GeneralView",
         "address": "0xdff2b1bB068f5549e43DAC75C66fED555DE565fB",
         "id": "0xc5831ea6",

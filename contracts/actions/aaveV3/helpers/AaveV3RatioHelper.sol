@@ -2,11 +2,11 @@
 pragma solidity =0.8.24;
 
 import { DSMath } from "../../../DS/DSMath.sol";
-import { MainnetAaveV3Addresses } from "./MainnetAaveV3Addresses.sol";
+import { BaseAaveV3Addresses } from "./BaseAaveV3Addresses.sol";
 import { IPoolV3 } from "../../../interfaces/aaveV3/IPoolV3.sol";
 import { IPoolAddressesProvider } from "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
 
-contract AaveV3RatioHelper is DSMath, MainnetAaveV3Addresses {
+contract AaveV3RatioHelper is DSMath, BaseAaveV3Addresses {
    function getSafetyRatio(address _market, address _user) public view returns (uint256) {
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(_market).getPool());
         (, uint256 totalDebtETH, uint256 availableBorrowsETH, , , ) = lendingPool

@@ -17,10 +17,6 @@ contract FeeReceiver is UtilHelper {
         _;
     }
 
-    /// @dev Approves bot refill as it needs to pull funds for gas feeds from this addr
-    constructor() {
-    }
-
     /// @notice Withdraws ERC20 tokens from the contract
     /// @param _tokenAddr ERC20 token address
     /// @param _to Address where the tokens will be sent

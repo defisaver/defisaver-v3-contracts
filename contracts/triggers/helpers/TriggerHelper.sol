@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { MainnetTriggerAddresses } from "./MainnetTriggerAddresses.sol";
+import { BaseTriggerAddresses } from "./BaseTriggerAddresses.sol";
 
 /// @title Utility functions and data used in Triggers
-contract TriggerHelper is MainnetTriggerAddresses {
+contract TriggerHelper is BaseTriggerAddresses {
 }

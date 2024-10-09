@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 contract ArbitrumUtilAddresses {
     address internal refillCaller = 0xcbA094ae1B2B363886CC7f428206dB1b116834A2;
-    address internal feeAddr = 0x76720aC2574631530eC8163e4085d6F98513fb27;
+    address internal constant FEE_RECIPIENT_ADDR = 0xe000e3c9428D539566259cCd89ed5fb85e655A01;
     address internal constant DEFAULT_BOT = 0x3b20F1394f4cf46c6f460Fd8D2799F88c23c37EA;
     address internal constant BOT_REGISTRY_ADDRESS = 0x75E2F915B37D49716365346b1E3E273Cb3E0cC33;
     address internal constant FEE_RECIPIENT = 0xe000e3c9428D539566259cCd89ed5fb85e655A01;
@@ -34,5 +34,5 @@ contract ArbitrumUtilAddresses {
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0x158E27De8B5E5bC3FA1C6D5b365a291c54f6b0Fd;
 
-    address public constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
+    address internal constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
 }
