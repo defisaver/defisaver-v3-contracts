@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { IEVault } from "../../interfaces/eulerV2/IEVault.sol";
-import { IPriceOracle } from "../../interfaces/eulerV2/IPriceOracle.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
-import { IIRM } from "../../interfaces/eulerV2/IIRM.sol";
+import { IEVault } from "../interfaces/eulerV2/IEVault.sol";
+import { IPriceOracle } from "../interfaces/eulerV2/IPriceOracle.sol";
+import { IEVC } from "../interfaces/eulerV2/IEVC.sol";
+import { IIRM } from "../interfaces/eulerV2/IIRM.sol";
 
-import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { TokenPriceHelper } from "../../utils/TokenPriceHelper.sol";
+import { EulerV2Helper } from "../actions/eulerV2/helpers/EulerV2Helper.sol";
+import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
 
 /// @title EulerV2View - aggregate various information about Euler vaults and users
 contract EulerV2View is EulerV2Helper, TokenPriceHelper {
