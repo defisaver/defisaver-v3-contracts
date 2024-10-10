@@ -484,6 +484,17 @@
       "history": []
     },
     {
+      "name": "ToggleSub",
+      "address": "0x5F16C0a08d52b67fc73706c494F7535Dd3382b58",
+      "id": "0xd6499530",
+      "path": "contracts/actions/utils/ToggleSub.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "CompV3RatioTrigger",
       "address": "0x7d84DCC2a1f547A8D267c85eed791fd3663562b8",
       "id": "0x506812d0",
@@ -1069,14 +1080,16 @@
       },
       {
         "name": "SubProxy",
-        "address": "0xbC36AE71e15865f4074B786d992F1105cdd8c196",
+        "address": "0xDC9441c4085B9B302506d64330e178E3C4890C87",
         "id": "0x15c87229",
         "path": "contracts/core/strategy/SubProxy.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": [
+          "0xbC36AE71e15865f4074B786d992F1105cdd8c196"
+        ]
       },
       {
         "name": "StrategyTriggerView",
@@ -1124,14 +1137,16 @@
       },
       {
         "name": "AaveV3SubProxy",
-        "address": "0x8489B4e243Ba8062D3351439D560E6AF477867ab",
+        "address": "0x3B0f3B0bdE9dcbDf95eB92aE8E713059d524f7e7",
         "id": "0x9275abae",
         "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": [
+          "0x8489B4e243Ba8062D3351439D560E6AF477867ab"
+        ]
       },
       {
         "name": "LimitOrderSubProxy",
@@ -1146,14 +1161,16 @@
       },
       {
         "name": "CompV3SubProxyL2",
-        "address": "0x33Ba53a1367527b09D429EB1392E57A43Cf83f99",
+        "address": "0x376d5BBB9e62de2Df23fB7B9fF6365E0231fD1a8",
         "id": "0x49b12183",
         "path": "contracts/actions/compoundV3/CompV3SubProxyL2.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": [
+          "0x33Ba53a1367527b09D429EB1392E57A43Cf83f99"
+        ]
       },
       {
         "name": "CompV3View",

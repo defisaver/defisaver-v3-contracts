@@ -9,7 +9,7 @@ import { SafeERC20 } from "./SafeERC20.sol";
 library TokenUtils {
     using SafeERC20 for IERC20;
 
-    address public constant WETH_ADDR = 0x4200000000000000000000000000000000000006;
+    address public constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     /// @dev Only approves the amount if allowance is lower than amount, does not decrease allowance

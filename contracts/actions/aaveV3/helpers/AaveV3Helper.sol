@@ -4,10 +4,10 @@ pragma solidity =0.8.24;
 import { IL2PoolV3 } from "../../../interfaces/aaveV3/IL2PoolV3.sol";
 import { IAaveProtocolDataProvider } from "../../../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
 import { IPoolAddressesProvider } from "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
-import { BaseAaveV3Addresses } from "./BaseAaveV3Addresses.sol";
+import { MainnetAaveV3Addresses } from "./MainnetAaveV3Addresses.sol";
 
 /// @title Utility functions and data used in AaveV3 actions
-contract AaveV3Helper is BaseAaveV3Addresses {
+contract AaveV3Helper is MainnetAaveV3Addresses {
     
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
