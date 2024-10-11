@@ -3,6 +3,13 @@
 pragma solidity =0.8.24;
 
 interface ITroveManager {
+    enum Status {
+        nonExistent,
+        active,
+        closedByOwner,
+        closedByLiquidation,
+        zombie
+    }
 
     struct LatestTroveData {
         uint256 entireDebt;
@@ -17,5 +24,26 @@ interface ITroveManager {
         uint256 lastInterestRateAdjTime;
     }
 
+    function Troves(uint256 _id)
+        external
+        view
+        returns (
+            uint256 debt,
+            uint256 coll,
+            uint256 stake,
+            Status status,
+            uint64 arrayIndex,
+            uint64 lastDebtUpdateTime,
+            uint64 lastInterestRateAdjTime,
+            uint256 annualInterestRate,
+            address interestBatchManager,
+            uint256 batchDebtShares
+        );
+
+    function shutdownTime() external view returns (uint256);
+    function troveNFT() external view returns (address);
     function getLatestTroveData(uint256 _troveId) external view returns (LatestTroveData memory);
+    function getCurrentICR(uint256 _troveId, uint256 _price) external view returns (uint256);
+    function getTroveStatus(uint256 _troveId) external view returns (Status);
+    function getTroveAnnualInterestRate(uint256 _troveId) external view returns (uint256);
 }
