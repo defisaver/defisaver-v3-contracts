@@ -120,6 +120,7 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         uint256 borrowAmountInAsset;        // Amount of borrowed assets in the asset's decimals
         address[] collaterals;              // Enabled collateral assets
         uint256[] collateralAmountsInUnit;  // Amounts of collaterals in unit of account. If coll is not supported by the borrow vault, returns 0
+        uint256[] collateralAmountsInAsset; // Amounts of collaterals in assets. If coll is not supported by the borrow vault, returns 0
     }
 
     /// @notice Used for borrow rate estimation
@@ -156,10 +157,17 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
 
         uint256 borrowAmountInUnit;
         uint256 borrowAmountInAsset;
-        uint256[] memory collateralAmounts = new uint256[](collaterals.length);
+        uint256[] memory collateralAmountsUnit = new uint256[](collaterals.length);
+        uint256[] memory collateralAmountsAsset = new uint256[](collaterals.length);
         if (controllerEnabled) {
             borrowAmountInAsset = IEVault(controller).debtOf(_user);
-            (, collateralAmounts, borrowAmountInUnit) = IEVault(controller).accountLiquidityFull(_user, false);
+            (, collateralAmountsUnit, borrowAmountInUnit) = IEVault(controller).accountLiquidityFull(_user, false);
+        }
+
+        for (uint256 i = 0; i < collaterals.length; ++i) {
+            collateralAmountsAsset[i] = collateralAmountsUnit[i] != 0 
+                ? IEVault(collaterals[i]).convertToAssets(IEVault(collaterals[i]).balanceOf(_user))
+                : 0;
         }
 
         data = UserData({
@@ -171,7 +179,8 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
             borrowAmountInUnit: borrowAmountInUnit,
             borrowAmountInAsset: borrowAmountInAsset,
             collaterals: collaterals,
-            collateralAmountsInUnit: collateralAmounts
+            collateralAmountsInUnit: collateralAmountsUnit,
+            collateralAmountsInAsset: collateralAmountsAsset
         });
     }
 
