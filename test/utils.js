@@ -382,6 +382,8 @@ async function findBalancesSlot(tokenAddress) {
         'IERC20',
         tokenAddress,
     );
+    const setStorageMethod = hre.network.config.isAnvil ? 'anvil_setStorageAt' : 'hardhat_setStorageAt';
+
     for (let i = 0; i < 100; i++) {
         {
             let probedSlot = hre.ethers.utils.keccak256(
@@ -396,7 +398,7 @@ async function findBalancesSlot(tokenAddress) {
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
 
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+            await hre.ethers.provider.send(setStorageMethod, [
                 tokenAddress,
                 probedSlot,
                 probe,
@@ -404,7 +406,7 @@ async function findBalancesSlot(tokenAddress) {
 
             const balance = await token.balanceOf(account);
             // reset to previous value
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+            await hre.ethers.provider.send(setStorageMethod, [
                 tokenAddress,
                 probedSlot,
                 prev,
@@ -430,7 +432,7 @@ async function findBalancesSlot(tokenAddress) {
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
 
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+            await hre.ethers.provider.send(setStorageMethod, [
                 tokenAddress,
                 probedSlot,
                 probe,
@@ -438,7 +440,7 @@ async function findBalancesSlot(tokenAddress) {
 
             const balance = await token.balanceOf(account);
             // reset to previous value
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+            await hre.ethers.provider.send(setStorageMethod, [
                 tokenAddress,
                 probedSlot,
                 prev,
@@ -570,14 +572,18 @@ const fetchStandardAmounts = async () => standardAmounts;
 
 const impersonateAccount = async (account) => {
     await hre.network.provider.request({
-        method: 'hardhat_impersonateAccount',
+        method: hre.network.config.isAnvil
+            ? 'anvil_impersonateAccount'
+            : 'hardhat_impersonateAccount',
         params: [account],
     });
 };
 
 const stopImpersonatingAccount = async (account) => {
     await hre.network.provider.request({
-        method: 'hardhat_stopImpersonatingAccount',
+        method: hre.network.config.isAnvil
+            ? 'anvil_stopImpersonatingAccount'
+            : 'hardhat_stopImpersonatingAccount',
         params: [account],
     });
 };
@@ -654,13 +660,20 @@ const sendEther = async (signer, toAddress, amount) => {
 // eslint-disable-next-line max-len
 const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly, isFork = false, ...args) => {
     if (!isFork) {
-        await hre.network.provider.send('hardhat_setBalance', [
+        const setBalanceMethod = hre.network.config.isAnvil ? 'anvil_setBalance' : 'hardhat_setBalance';
+        console.log(setBalanceMethod);
+        await hre.network.provider.send(setBalanceMethod, [
             getOwnerAddr(),
             '0xC9F2C9CD04674EDEA40000000',
         ]);
-        await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+
+        const setNextBlockBaseFeeMethod = hre.network.config.isAnvil
+            ? 'anvil_setNextBlockBaseFeePerGas'
+            : 'hardhat_setNextBlockBaseFeePerGas';
+        await hre.network.provider.send(setNextBlockBaseFeeMethod, [
             '0x1', // 1 wei
         ]);
+
         if (regAddr === addrs[getNetwork()].REGISTRY_ADDR) {
             await impersonateAccount(getOwnerAddr());
         }
@@ -674,7 +687,6 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);
-    // let deployer;
     // if (isFork) {
     //     // if script is consistenly failing due to tenderly delete this
     //     // deployer = await hre.ethers.provider.getSigner(getOwnerAddr());
@@ -769,7 +781,8 @@ const getContractFromRegistry = async (
 };
 
 const setCode = async (addr, code) => {
-    await hre.network.provider.send('hardhat_setCode', [addr, code]);
+    const setCodeMethod = hre.network.config.isAnvil ? 'anvil_setCode' : 'hardhat_setCode';
+    await hre.network.provider.send(setCodeMethod, [addr, code]);
 };
 
 const setContractAt = async ({ name, address, args = [] }) => {
@@ -1303,15 +1316,21 @@ const openStrategyAndBundleStorage = async (isFork) => {
 
 async function setForkForTesting() {
     const senderAcc = (await hre.ethers.getSigners())[0];
-    await hre.network.provider.send('hardhat_setBalance', [
+    const setBalanceMethod = hre.network.config.isAnvil ? 'anvil_setBalance' : 'hardhat_setBalance';
+    await hre.network.provider.send(setBalanceMethod, [
         senderAcc.address,
         '0xC9F2C9CD04674EDEA40000000',
     ]);
-    await hre.network.provider.send('hardhat_setBalance', [
+    await hre.network.provider.send(setBalanceMethod, [
         OWNER_ACC,
         '0xC9F2C9CD04674EDEA40000000',
     ]);
-    await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+
+    const setNextBlockBaseFeeMethod = hre.network.config.isAnvil
+        ? 'anvil_setNextBlockBaseFeePerGas'
+        : 'hardhat_setNextBlockBaseFeePerGas';
+
+    await hre.network.provider.send(setNextBlockBaseFeeMethod, [
         '0x1', // 1 wei
     ]);
 }
@@ -1324,9 +1343,11 @@ const resetForkToBlock = async (block) => {
         rpcUrl = process.env[`${network.toUpperCase()}_NODE`];
     }
 
+    const resetMethod = hre.network.config.isAnvil ? 'anvil_reset' : 'hardhat_reset';
+
     if (block) {
         await hre.network.provider.request({
-            method: 'hardhat_reset',
+            method: resetMethod,
             params: [
                 {
                     forking: {
@@ -1338,7 +1359,7 @@ const resetForkToBlock = async (block) => {
         });
     } else {
         await hre.network.provider.request({
-            method: 'hardhat_reset',
+            method: resetMethod,
             params: [
                 {
                     forking: {
