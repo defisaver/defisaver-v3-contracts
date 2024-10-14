@@ -488,11 +488,14 @@
       "address": "0xa91a1E214049d97f5c0a2504f5e18744ebBad1Ea",
       "id": "0x16be4292",
       "path": "contracts/views/CompV3View.sol",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
-      "history": ["0x22591183c0eb7B2Fe07F6F44fd360d1117D07b4f"]
+      "history": [
+        "0x7219E16B532a7B3Fb010e7806F22e077f4080c3b",
+        "0x22591183c0eb7B2Fe07F6F44fd360d1117D07b4f"
+      ]
     },
     {
       "name": "CompV3Transfer",
@@ -941,6 +944,39 @@
         "address": "0xE3a7112d03D6cB928DE9cCE597892bDDF2173751",
         "id": "0x4fac91e4",
         "path": "contracts/utils/BotRefills.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "SubProxy",
+        "address": "0xbC36AE71e15865f4074B786d992F1105cdd8c196",
+        "id": "0x15c87229",
+        "path": "contracts/core/strategy/SubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "CompV3SubProxyL2",
+        "address": "0x33Ba53a1367527b09D429EB1392E57A43Cf83f99",
+        "id": "0x49b12183",
+        "path": "contracts/actions/compoundV3/CompV3SubProxyL2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "AaveV3SubProxy",
+        "address": "0x8489B4e243Ba8062D3351439D560E6AF477867ab",
+        "id": "0x9275abae",
+        "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
