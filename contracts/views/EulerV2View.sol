@@ -165,9 +165,9 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         }
 
         for (uint256 i = 0; i < collaterals.length; ++i) {
-            collateralAmountsAsset[i] = collateralAmountsUnit[i] != 0 
-                ? IEVault(collaterals[i]).convertToAssets(IEVault(collaterals[i]).balanceOf(_user))
-                : 0;
+            collateralAmountsAsset[i] = IEVault(collaterals[i]).convertToAssets(
+                IEVault(collaterals[i]).balanceOf(_user)
+            );
         }
 
         data = UserData({
