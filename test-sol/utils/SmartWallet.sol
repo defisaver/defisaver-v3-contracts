@@ -9,6 +9,7 @@ import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterf
 import { DSProxy } from "../../contracts/DS/DSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { console } from "forge-std/console.sol";
 
 contract SmartWallet is BaseTest {
 
@@ -100,6 +101,18 @@ contract SmartWallet is BaseTest {
         } else {
             DSProxy(walletAddr).execute(_target, _calldata);
         }
+    }
+
+    function logExecute(
+        address _target,
+        bytes memory _calldata,
+        uint256 _value
+    ) public {
+        uint256 startGas = gasleft();
+        execute(_target, _calldata, _value);
+        uint256 gasUsed = startGas - gasleft();
+        console.log("--------- EXECUTING TX FROM WALLET ----------");
+        console.log("GAS USED: ", gasUsed);
     }
 
     function ownerApprove(address _token, uint256 _amount) public ownerAsSender() {
