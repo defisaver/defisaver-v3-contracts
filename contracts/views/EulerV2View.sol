@@ -2,6 +2,7 @@
 
 pragma solidity =0.8.24;
 
+import { IERC20 } from "../interfaces/IERC20.sol";
 import { IEVault } from "../interfaces/eulerV2/IEVault.sol";
 import { IPriceOracle } from "../interfaces/eulerV2/IPriceOracle.sol";
 import { IEVC } from "../interfaces/eulerV2/IEVC.sol";
@@ -109,6 +110,19 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         address permit2Address;             // Address of the permit2 contract
     }
 
+    /// @notice User collateral information   
+    struct UserCollateralInfo {
+        address collateralVault;            // Address of the collateral vault
+        bool usedInBorrow;                  // Flag indicating whether the collateral is used by the current user controller (if one exists)
+        uint256 collateralAmountInUnit;     // Amount of collateral in unit of account. If coll is NOT supported by the borrow vault, returns 0
+        uint256 collateralAmountInAsset;    // Amount of collateral in asset's decimals
+
+        uint256 collateralAmountInUSD;      // Amount of collateral in USD, in 18 decimals
+                                            // If collateralAmountInUnit is present AND unit of account is USD, this will be the same as collateralAmountInUnit
+                                            // If collateralAmountInUnit is present AND unit of account is not USD, this will return chainlink price in USD
+                                            // If collateralAmountInUnit is NOT present, this will return chainlink price in USD
+    }
+
     /// @notice User data with loan information
     struct UserData {
         address user;                       // Address of the user
@@ -118,9 +132,7 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         address borrowVault;                // Address of the borrow vault (aka controller)
         uint256 borrowAmountInUnit;         // Amount of borrowed assets in the unit of account
         uint256 borrowAmountInAsset;        // Amount of borrowed assets in the asset's decimals
-        address[] collaterals;              // Enabled collateral assets
-        uint256[] collateralAmountsInUnit;  // Amounts of collaterals in unit of account. If coll is not supported by the borrow vault, returns 0
-        uint256[] collateralAmountsInAsset; // Amounts of collaterals in assets. If coll is not supported by the borrow vault, returns 0
+        UserCollateralInfo[] collaterals;   // Collaterals information
     }
 
     /// @notice Used for borrow rate estimation
@@ -151,22 +163,24 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
 
         address[] memory controllers = IEVC(EVC_ADDR).getControllers(_user);
         address[] memory collaterals = IEVC(EVC_ADDR).getCollaterals(_user);
+        UserCollateralInfo[] memory collateralsInfo = new UserCollateralInfo[](collaterals.length);
 
-        bool controllerEnabled = controllers.length > 0;
-        address controller = controllerEnabled ? controllers[0] : address(0);
+        address controller = (controllers.length > 0) ? controllers[0] : address(0);
 
         uint256 borrowAmountInUnit;
         uint256 borrowAmountInAsset;
         uint256[] memory collateralAmountsUnit = new uint256[](collaterals.length);
-        uint256[] memory collateralAmountsAsset = new uint256[](collaterals.length);
-        if (controllerEnabled) {
+        if (controller != address(0)) {
             borrowAmountInAsset = IEVault(controller).debtOf(_user);
             (, collateralAmountsUnit, borrowAmountInUnit) = IEVault(controller).accountLiquidityFull(_user, false);
         }
 
         for (uint256 i = 0; i < collaterals.length; ++i) {
-            collateralAmountsAsset[i] = IEVault(collaterals[i]).convertToAssets(
-                IEVault(collaterals[i]).balanceOf(_user)
+            collateralsInfo[i] = _getUserCollateralInfo(
+                _user,
+                collaterals[i],
+                collateralAmountsUnit[i],
+                controller != address(0) ? IEVault(controller).unitOfAccount() : USD
             );
         }
 
@@ -178,9 +192,7 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
             borrowVault: controller,
             borrowAmountInUnit: borrowAmountInUnit,
             borrowAmountInAsset: borrowAmountInAsset,
-            collaterals: collaterals,
-            collateralAmountsInUnit: collateralAmountsUnit,
-            collateralAmountsInAsset: collateralAmountsAsset
+            collaterals: collateralsInfo
         });
     }
 
@@ -369,6 +381,40 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
     /*//////////////////////////////////////////////////////////////
                             INTERNAL METHODS
     //////////////////////////////////////////////////////////////*/
+
+    function _getUserCollateralInfo(
+        address _user,
+        address _collateral,
+        uint256 _collateralAmountInUnit,
+        address _unitOfAccount
+    ) internal view returns (UserCollateralInfo memory data) {
+        IEVault collVault = IEVault(_collateral);
+        
+        data.collateralVault = _collateral;
+        data.collateralAmountInUnit = _collateralAmountInUnit;
+        data.usedInBorrow = _collateralAmountInUnit != 0;
+        data.collateralAmountInAsset = collVault.convertToAssets(collVault.balanceOf(_user));
+
+        if (data.usedInBorrow) {
+            if (_unitOfAccount == USD) {
+                data.collateralAmountInUSD = _collateralAmountInUnit;
+            } else {
+                uint256 dec = IERC20(_unitOfAccount).decimals();
+                uint256 collAmountUnitWAD = dec > 18
+                    ? data.collateralAmountInUnit / 10 ** (dec - 18)
+                    : data.collateralAmountInUnit * 10 ** (18 - dec);
+                uint256 unitPriceWAD = getPriceInUSD(_unitOfAccount) * 1e10; 
+                data.collateralAmountInUSD = wmul(collAmountUnitWAD, unitPriceWAD);
+            }
+        } else {
+            uint256 dec = collVault.decimals();
+            uint256 collAmountWAD = dec > 18
+                ? data.collateralAmountInAsset / 10 ** (dec - 18)
+                : data.collateralAmountInAsset * 10 ** (18 - dec);
+            uint256 assetPriceWAD = getPriceInUSD(collVault.asset()) * 1e10;
+            data.collateralAmountInUSD = wmul(collAmountWAD, assetPriceWAD);
+        }
+    }
 
     function _getVaultCollaterals(address _vault, address _unitOfAccount, address _oracle) internal view returns (CollateralInfo[] memory collateralsInfo) {
         address[] memory collaterals = IEVault(_vault).LTVList();
