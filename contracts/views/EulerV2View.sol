@@ -169,18 +169,27 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
 
         uint256 borrowAmountInUnit;
         uint256 borrowAmountInAsset;
-        uint256[] memory collateralAmountsUnit = new uint256[](collaterals.length);
+        address unitOfAccount;
+        address oracle;
         if (controller != address(0)) {
+            unitOfAccount = IEVault(controller).unitOfAccount();
+            oracle = IEVault(controller).oracle();
             borrowAmountInAsset = IEVault(controller).debtOf(_user);
-            (, collateralAmountsUnit, borrowAmountInUnit) = IEVault(controller).accountLiquidityFull(_user, false);
+            borrowAmountInUnit = _getOracleAmountInUnitOfAccount(
+                oracle,
+                IEVault(controller).asset(),
+                unitOfAccount,
+                borrowAmountInAsset
+            );
         }
 
         for (uint256 i = 0; i < collaterals.length; ++i) {
             collateralsInfo[i] = _getUserCollateralInfo(
                 _user,
                 collaterals[i],
-                collateralAmountsUnit[i],
-                controller != address(0) ? IEVault(controller).unitOfAccount() : USD
+                controller,
+                unitOfAccount,
+                oracle
             );
         }
 
@@ -385,19 +394,36 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
     function _getUserCollateralInfo(
         address _user,
         address _collateral,
-        uint256 _collateralAmountInUnit,
-        address _unitOfAccount
+        address _controller,
+        address _unitOfAccount,
+        address _oracle
     ) internal view returns (UserCollateralInfo memory data) {
+
+        uint256 collateralAmountInUnit;
+
+        if (_controller != address(0)) {
+            uint16 borrowLTV = IEVault(_controller).LTVBorrow(_collateral);
+            if (borrowLTV != 0) {
+                uint256 userCollBalance = IEVault(_collateral).balanceOf(_user);
+                collateralAmountInUnit = _getOracleAmountInUnitOfAccount(
+                    _oracle,
+                    _collateral,
+                    _unitOfAccount,
+                    userCollBalance
+                );
+            }
+        }
+        
         IEVault collVault = IEVault(_collateral);
         
         data.collateralVault = _collateral;
-        data.collateralAmountInUnit = _collateralAmountInUnit;
-        data.usedInBorrow = _collateralAmountInUnit != 0;
+        data.collateralAmountInUnit = collateralAmountInUnit;
+        data.usedInBorrow = collateralAmountInUnit != 0;
         data.collateralAmountInAsset = collVault.convertToAssets(collVault.balanceOf(_user));
 
         if (data.usedInBorrow) {
             if (_unitOfAccount == USD) {
-                data.collateralAmountInUSD = _collateralAmountInUnit;
+                data.collateralAmountInUSD = collateralAmountInUnit;
             } else {
                 uint256 dec = IERC20(_unitOfAccount).decimals();
                 uint256 collAmountUnitWAD = dec > 18
@@ -468,6 +494,21 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         
         if (_oracle != address(0)) {
             try IPriceOracle(_oracle).getQuote(inAmount, _token, _unitOfAccount) returns (uint256 quote) {
+                return quote;
+            } catch {
+                return 0;
+            }
+        }
+    }
+
+    function _getOracleAmountInUnitOfAccount(
+        address _oracle,
+        address _token,
+        address _unitOfAccount,
+        uint256 _amount
+    ) internal view returns (uint256 price) {
+        if (_oracle != address(0)) {
+            try IPriceOracle(_oracle).getQuote(_amount, _token, _unitOfAccount) returns (uint256 quote) {
                 return quote;
             } catch {
                 return 0;
