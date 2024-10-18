@@ -28,4 +28,9 @@ library TokenAddresses {
     address public constant LUSD_ADDR = 0x5f98805A4E8be255a32880FDeC7F6728C6568bA0;
     address public constant LINK_ADDR = 0x514910771AF9Ca656af840dff83E8264EcF986CA;
     address public constant AAVE_ADDR = 0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9;
+
+    // EULER V2
+    address public constant E_WETH_2 = 0xD8b27CF359b7D15710a5BE299AF6e7Bf904984C2;
+    address public constant E_WSTETH_2 = 0xbC4B4AC47582c3E38Ce5940B80Da65401F4628f1;
+    address public constant E_USDC_2 = 0x797DD80692c3b2dAdabCe8e30C07fDE5307D48a9;
 }

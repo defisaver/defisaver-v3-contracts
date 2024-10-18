@@ -5,13 +5,23 @@
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [
-            { "supplyAsset": "WETH", "borrowAsset": "DAI"}
+            { "supplyAsset": "WETH", "borrowAsset": "DAI" }
         ],
         "fullPairs": [
-            { "supplyAsset": "WETH", "borrowAsset": "DAI"},
-            { "supplyAsset": "WBTC", "borrowAsset": "USDC"},
-            { "supplyAsset": "WSETH", "borrowAsset": "WETH"},
-            { "supplyAsset": "LINK", "borrowAsset": "LUSD"}
+            { "supplyAsset": "WETH", "borrowAsset": "DAI" },
+            { "supplyAsset": "WBTC", "borrowAsset": "USDC" },
+            { "supplyAsset": "WSETH", "borrowAsset": "WETH" },
+            { "supplyAsset": "LINK", "borrowAsset": "LUSD" }
+        ]
+    },
+    "EulerV2": {
+        "lightTesting": true,
+        "lightPairs": [
+            { "supplyAsset":  "eWETH-2", "borrowAsset":  "eUSDC-2" }
+        ],
+        "fullPairs": [
+            { "supplyAsset": "eWETH-2", "borrowAsset": "eUSDC-2" },
+            { "supplyAsset": "eWSTETH-2", "borrowAsset": "eUSDC-2" }
         ]
     }
 }
