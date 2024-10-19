@@ -40,7 +40,8 @@ const eulerV2ViewTest = async () => {
             // usdc borrowed: 0x1e17A75616cd74f5846B1b71622Aa8e10ea26Cc0
             const userData = await viewContract.getUserData('0x1e17A75616cd74f5846B1b71622Aa8e10ea26Cc0');
             console.log(userData);
-            // const accounts = await viewContract.fetchUsedAccounts('0x99fd78c210b3Dec66607d2235784C3f9512cb1C9', 250);
+            const accounts = await viewContract.fetchUsedAccounts('0x99fd78c210b3Dec66607d2235784C3f9512cb1C9', 8, 30);
+            console.log(accounts);
         });
     });
 };
