@@ -3658,6 +3658,61 @@
         "history": []
     },
     {
+        "name": "EulerV2Supply",
+        "address": "0xa067787D086841437D112e0C847dDB3e5D95173f",
+        "id": "0xc9533e95",
+        "path": "contracts/actions/eulerV2/EulerV2Supply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "EulerV2Withdraw",
+        "address": "0x5bf1a54fe1e65B134E7920e53A5eB0D14b9e6aD1",
+        "id": "0xa6354b21",
+        "path": "contracts/actions/eulerV2/EulerV2Withdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "EulerV2Borrow",
+        "address": "0x38d66ecD38b7800D8FD0Bc29489c2306170a9Ede",
+        "id": "0xbaf1284c",
+        "path": "contracts/actions/eulerV2/EulerV2Borrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "EulerV2Payback",
+        "address": "0x738b1df6b6962D8795Bda5bc5EFCd8b0B8c74d01",
+        "id": "0xda58dfbe",
+        "path": "contracts/actions/eulerV2/EulerV2Payback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "EulerV2View",
+        "address": "0x25eCA04532C085F77Ea6CE92C94E9e69896686E6",
+        "id": "0xe79618a8",
+        "path": "contracts/views/EulerV2View.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"
