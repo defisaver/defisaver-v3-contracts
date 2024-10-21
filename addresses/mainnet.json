@@ -3702,6 +3702,17 @@
         "history": []
     },
     {
+        "name": "EulerV2CollateralSwitch",
+        "address": "0x38950b50Fb38aC19D06e8CE5AAE632D6dF1EEb1a",
+        "id": "0x82b4e31e",
+        "path": "contracts/actions/eulerV2/EulerV2CollateralSwitch.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "EulerV2View",
         "address": "0x25eCA04532C085F77Ea6CE92C94E9e69896686E6",
         "id": "0xe79618a8",
