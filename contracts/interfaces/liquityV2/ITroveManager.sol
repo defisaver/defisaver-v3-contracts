@@ -24,6 +24,21 @@ interface ITroveManager {
         uint256 lastInterestRateAdjTime;
     }
 
+    struct LatestBatchData {
+        uint256 entireDebtWithoutRedistribution;
+        uint256 entireCollWithoutRedistribution;
+        uint256 accruedInterest;
+        uint256 recordedDebt;
+        uint256 annualInterestRate;
+        uint256 weightedRecordedDebt;
+        uint256 annualManagementFee;
+        uint256 accruedManagementFee;
+        uint256 weightedRecordedBatchManagementFee;
+        uint256 lastDebtUpdateTime;
+        uint256 lastInterestRateAdjTime;
+    }
+
+
     function Troves(uint256 _id)
         external
         view
@@ -46,4 +61,5 @@ interface ITroveManager {
     function getCurrentICR(uint256 _troveId, uint256 _price) external view returns (uint256);
     function getTroveStatus(uint256 _troveId) external view returns (Status);
     function getTroveAnnualInterestRate(uint256 _troveId) external view returns (uint256);
+    function getLatestBatchData(address _batchAddress) external view returns (LatestBatchData memory);
 }

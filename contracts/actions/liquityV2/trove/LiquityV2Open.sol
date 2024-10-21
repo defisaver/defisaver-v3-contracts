@@ -8,6 +8,7 @@ import { IBorrowerOperations } from "../../../interfaces/liquityV2/IBorrowerOper
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { IERC20 } from "../../../interfaces/IERC20.sol";
 
 contract LiquityV2Open is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
@@ -116,30 +117,31 @@ contract LiquityV2Open is ActionBase, LiquityV2Helper {
     }
 
     function _pullCollateralAndGasCompensation(Params memory _params, address _collToken) internal {
-        if (_collToken == TokenUtils.WETH_ADDR) {
+        if (_collToken == WETH_TOKEN) {
             bool isMaxPull = _params.collAmount == type(uint256).max;
-            _params.collAmount = _collToken.pullTokensIfNeeded(_params.from, _params.collAmount);
 
             // when pulling max amount, we need to leave some WETH for gas compensation
             if (isMaxPull) {
+                _params.collAmount = _collToken.pullTokensIfNeeded(_params.from, _params.collAmount);
                 if (_params.collAmount <= ETH_GAS_COMPENSATION) {
                     revert NotEnoughWethForCollateralAndGasCompensation(_params.collAmount);
                 }
                 _params.collAmount -= ETH_GAS_COMPENSATION;
+            } else {
+                _collToken.pullTokensIfNeeded(_params.from, _params.collAmount + ETH_GAS_COMPENSATION);
             }
-
         } else {
             _params.collAmount = _collToken.pullTokensIfNeeded(_params.from, _params.collAmount);
-            TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, ETH_GAS_COMPENSATION);
+            WETH_TOKEN.pullTokensIfNeeded(_params.from, ETH_GAS_COMPENSATION);
         }
     }
 
     function _approveCollateralAndGasCompensation(Params memory _params, address _collToken, address _borrowerOperations) internal {
-        if (_collToken == TokenUtils.WETH_ADDR) {
+        if (_collToken == WETH_TOKEN) {
             _collToken.approveToken(_borrowerOperations, _params.collAmount + ETH_GAS_COMPENSATION);
         } else {
             _collToken.approveToken(_borrowerOperations, _params.collAmount);
-            TokenUtils.WETH_ADDR.approveToken(_borrowerOperations, ETH_GAS_COMPENSATION);
+            WETH_TOKEN.approveToken(_borrowerOperations, ETH_GAS_COMPENSATION);
         }
     }
 

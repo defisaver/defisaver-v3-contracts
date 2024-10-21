@@ -57,6 +57,7 @@ contract LiquityV2Claim is ActionBase, LiquityV2Helper {
 
         uint256 claimableColl = ICollSurplusPool(collSurplusPool).getCollateral(address(this));
 
+        /// @dev Reverts on zero claimable collateral
         IBorrowerOperations(borrowerOperations).claimCollateral();
 
         collToken.withdrawTokens(_params.to, claimableColl);

@@ -8,4 +8,5 @@ interface ITroveNFT {
     function name() external view returns (string memory);
     function symbol() external view returns (string memory);
     function tokenURI(uint256 tokenId) external view returns (string memory);
+    function ownerOf(uint256 tokenId) external view returns (address);
 }

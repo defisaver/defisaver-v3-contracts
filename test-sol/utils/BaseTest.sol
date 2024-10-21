@@ -47,6 +47,12 @@ contract BaseTest is Config {
         uint256 mainnetFork = vm.createFork(mainnerRpc);
         vm.selectFork(mainnetFork);
     }
+    
+    function forkLocalAnvil() internal {
+        string memory anvilRpc = "http://localhost:8545";
+        uint256 anvilFork = vm.createFork(anvilRpc);
+        vm.selectFork(anvilFork);
+    }
 
     function approve(address _token, address _to, uint256 _amount) internal {
         IERC20(_token).safeApprove(_to, _amount);

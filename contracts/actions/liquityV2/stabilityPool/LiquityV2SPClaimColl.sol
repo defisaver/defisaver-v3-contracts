@@ -56,7 +56,7 @@ contract LiquityV2SPClaimColl is ActionBase, LiquityV2Helper {
 
         uint256 collGain = IStabilityPool(stabilityPool).stashedColl(address(this));
 
-        // will revert if user has some bold deposited
+        /// @dev this will revert if user has some bold deposited
         IStabilityPool(stabilityPool).claimAllCollGains();
 
         collToken.withdrawTokens(_params.to, collGain);

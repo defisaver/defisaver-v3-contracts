@@ -38,4 +38,9 @@ interface IHintHelpers {
         external
         view
         returns (uint256);
+
+    function predictOpenTroveAndJoinBatchUpfrontFee(uint256 _collIndex, uint256 _borrowedAmount, address _batchAddress)
+        external
+        view
+        returns (uint256);
 }

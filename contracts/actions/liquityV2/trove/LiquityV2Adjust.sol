@@ -73,6 +73,7 @@ contract LiquityV2Adjust is ActionBase, LiquityV2Helper {
 
         if (_params.collAction == CollActionType.SUPPLY) {
             _params.collAmount = collToken.pullTokensIfNeeded(_params.from, _params.collAmount);
+            collToken.approveToken(borrowerOperations, _params.collAmount);
         }
 
         if (_params.debtAction == DebtActionType.PAYBACK) {

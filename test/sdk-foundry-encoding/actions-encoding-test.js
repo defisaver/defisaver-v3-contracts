@@ -681,4 +681,329 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
+
+    describe('LiquityV2', () => {
+        const market = '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e';
+        const from = '0x0000000000000000000000000000000000000001';
+        const to = '0x0000000000000000000000000000000000000002';
+        const boldGainTo = '0x0000000000000000000000000000000000000003';
+        const collGainTo = '0x0000000000000000000000000000000000000004';
+        const amount = 10000;
+        const collAmount = 5000;
+        const boldAmount = 6000;
+        const upperHint = 1;
+        const lowerHint = 2;
+        const maxUpfrontFee = 100;
+        const troveId = 1;
+        const ownerIndex = 0;
+        const annualInterestRate = 5;
+        const collAction = 0;
+        const debtAction = 0;
+        const doClaim = false;
+        let foundryContract;
+        before(async () => {
+            foundryContract = await getFoundryEncodingContract();
+        });
+        it('Test liquityV2OpenEncode', async () => {
+            const LiquityV2Open = await hre.ethers.getContractFactory('LiquityV2Open');
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2OpenAction(
+                    market,
+                    from,
+                    to,
+                    nullAddress,
+                    nullAddress,
+                    ownerIndex,
+                    collAmount,
+                    boldAmount,
+                    upperHint,
+                    lowerHint,
+                    annualInterestRate,
+                    maxUpfrontFee,
+                )
+            ).encodeForDsProxyCall()[1];
+            const foundryEncoded = LiquityV2Open.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2OpenEncode(
+                    market,
+                    from,
+                    to,
+                    nullAddress,
+                    ownerIndex,
+                    collAmount,
+                    boldAmount,
+                    upperHint,
+                    lowerHint,
+                    annualInterestRate,
+                    maxUpfrontFee,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+        it('Test liquityV2AdjustEncode', async () => {
+            const LiquityV2Adjust = await hre.ethers.getContractFactory('LiquityV2Adjust');
+
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2AdjustAction(
+                    market,
+                    from,
+                    to,
+                    troveId,
+                    collAmount,
+                    boldAmount,
+                    maxUpfrontFee,
+                    collAction,
+                    debtAction,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = LiquityV2Adjust.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2AdjustEncode(
+                    market,
+                    from,
+                    to,
+                    troveId,
+                    collAmount,
+                    boldAmount,
+                    maxUpfrontFee,
+                    collAction,
+                    debtAction,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test liquityV2AdjustInterestRateEncode', async () => {
+            const LiquityV2AdjustInterestRate = await hre.ethers.getContractFactory('LiquityV2AdjustInterestRate');
+
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2AdjustInterestRateAction(
+                    market,
+                    troveId,
+                    annualInterestRate,
+                    upperHint,
+                    lowerHint,
+                    maxUpfrontFee,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = LiquityV2AdjustInterestRate.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2AdjustInterestRateEncode(
+                    market,
+                    troveId,
+                    annualInterestRate,
+                    upperHint,
+                    lowerHint,
+                    maxUpfrontFee,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test liquityV2BorrowEncode', async () => {
+            const LiquityV2Borrow = await hre.ethers.getContractFactory('LiquityV2Borrow');
+
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2BorrowAction(
+                    market,
+                    to,
+                    troveId,
+                    amount,
+                    maxUpfrontFee,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = LiquityV2Borrow.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2BorrowEncode(
+                    market,
+                    to,
+                    troveId,
+                    amount,
+                    maxUpfrontFee,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test liquityV2ClaimEncode', async () => {
+            const LiquityV2Claim = await hre.ethers.getContractFactory('LiquityV2Claim');
+
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2ClaimAction(
+                    market,
+                    to,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = LiquityV2Claim.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2ClaimEncode(
+                    market,
+                    to,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test liquityV2CloseEncode', async () => {
+            const LiquityV2Close = await hre.ethers.getContractFactory('LiquityV2Close');
+
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2CloseAction(
+                    market,
+                    from,
+                    to,
+                    troveId,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = LiquityV2Close.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2CloseEncode(
+                    market,
+                    from,
+                    to,
+                    troveId,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test liquityV2PaybackEncode', async () => {
+            const LiquityV2Payback = await hre.ethers.getContractFactory('LiquityV2Payback');
+
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2PaybackAction(
+                    market,
+                    from,
+                    troveId,
+                    amount,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = LiquityV2Payback.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2PaybackEncode(
+                    market,
+                    from,
+                    troveId,
+                    amount,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test liquityV2SupplyEncode', async () => {
+            const LiquityV2Supply = await hre.ethers.getContractFactory('LiquityV2Supply');
+
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2SupplyAction(
+                    market,
+                    from,
+                    nullAddress,
+                    troveId,
+                    amount,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = LiquityV2Supply.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2SupplyEncode(
+                    market,
+                    from,
+                    troveId,
+                    amount,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test liquityV2WithdrawEncode', async () => {
+            const LiquityV2Withdraw = await hre.ethers.getContractFactory('LiquityV2Withdraw');
+
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2WithdrawAction(
+                    market,
+                    to,
+                    troveId,
+                    amount,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = LiquityV2Withdraw.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2WithdrawEncode(
+                    market,
+                    to,
+                    troveId,
+                    amount,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test liquityV2SPClaimCollEncode', async () => {
+            const LiquityV2SPClaimColl = await hre.ethers.getContractFactory('LiquityV2SPClaimColl');
+
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2SPClaimCollAction(
+                    market,
+                    to,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = LiquityV2SPClaimColl.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2SPClaimCollEncode(
+                    market,
+                    to,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+        it('Test liquityV2SPDepositEncode', async () => {
+            const LiquityV2SPDeposit = await hre.ethers.getContractFactory('LiquityV2SPDeposit');
+
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2SPDepositAction(
+                    market,
+                    from,
+                    boldGainTo,
+                    collGainTo,
+                    amount,
+                    doClaim,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = LiquityV2SPDeposit.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2SPDepositEncode(
+                    market,
+                    from,
+                    boldGainTo,
+                    collGainTo,
+                    amount,
+                    doClaim,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test liquityV2SPWithdrawEncode', async () => {
+            const LiquityV2SPWithdraw = await hre.ethers.getContractFactory('LiquityV2SPWithdraw');
+
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2SPWithdrawAction(
+                    market,
+                    boldGainTo,
+                    collGainTo,
+                    amount,
+                    doClaim,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = LiquityV2SPWithdraw.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2SPWithdrawEncode(
+                    market,
+                    boldGainTo,
+                    collGainTo,
+                    amount,
+                    doClaim,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+    });
 });

@@ -146,12 +146,12 @@ contract LiquityV2View is LiquityV2Helper {
         (
             , , ,
             trove.status,
-            , , ,
-            trove.annualInterestRate,
+            , , , ,
             trove.interestBatchManager,
             trove.batchDebtShares
         ) = troveManager.Troves(_troveId);
 
+        trove.annualInterestRate = latestTroveData.annualInterestRate;
         trove.collAmount = latestTroveData.entireColl;
         trove.debtAmount = latestTroveData.entireDebt;
         trove.collPrice = priceFeed.lastGoodPrice();
@@ -192,7 +192,7 @@ contract LiquityV2View is LiquityV2Helper {
     {
         IStabilityPool stabilityPool = IStabilityPool(IAddressesRegistry(_market).stabilityPool());
         compoundedBOLD = stabilityPool.getCompoundedBoldDeposit(_depositor);
-        collGain = stabilityPool.getDepositorCollGain(_depositor);
+        collGain = stabilityPool.getDepositorCollGain(_depositor) + stabilityPool.stashedColl(_depositor);
         boldGain = stabilityPool.getDepositorYieldGain(_depositor);
     }
 
