@@ -10,13 +10,14 @@ const {
 const { topUp } = require('./utils/fork');
 
 async function main() {
-    const isFork = false;
+    const isFork = true;
     const senderAcc = (await hre.ethers.getSigners())[0];
     if (isFork) {
         await topUp(senderAcc.address);
         await topUp(getOwnerAddr());
     }
 
+    const liquityV2View = await redeploy('LiquityV2View', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2Open = await redeploy('LiquityV2Open', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2Close = await redeploy('LiquityV2Close', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2Supply = await redeploy('LiquityV2Supply', addrs[network].REGISTRY_ADDR, false, isFork);
@@ -26,8 +27,11 @@ async function main() {
     const liquityV2Claim = await redeploy('LiquityV2Claim', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2Adjust = await redeploy('LiquityV2Adjust', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2AdjustInterestRate = await redeploy('LiquityV2AdjustInterestRate', addrs[network].REGISTRY_ADDR, false, isFork);
-    const liquityV2View = await redeploy('LiquityV2View', addrs[network].REGISTRY_ADDR, false, isFork);
+    const liquityV2SPDeposit = await redeploy('LiquityV2SPDeposit', addrs[network].REGISTRY_ADDR, false, isFork);
+    const liquityV2SPWithdraw = await redeploy('LiquityV2SPWithdraw', addrs[network].REGISTRY_ADDR, false, isFork);
+    const liquityV2SPClaimColl = await redeploy('LiquityV2SPClaimColl', addrs[network].REGISTRY_ADDR, false, isFork);
 
+    console.log(`LiquityV2View: ${liquityV2View.address}`);
     console.log(`LiquityV2Open: ${liquityV2Open.address}`);
     console.log(`LiquityV2Close: ${liquityV2Close.address}`);
     console.log(`LiquityV2Supply: ${liquityV2Supply.address}`);
@@ -37,7 +41,9 @@ async function main() {
     console.log(`LiquityV2Claim: ${liquityV2Claim.address}`);
     console.log(`LiquityV2Adjust: ${liquityV2Adjust.address}`);
     console.log(`LiquityV2AdjustInterestRate: ${liquityV2AdjustInterestRate.address}`);
-    console.log(`LiquityV2View: ${liquityV2View.address}`);
+    console.log(`LiquityV2SPDeposit: ${liquityV2SPDeposit.address}`);
+    console.log(`LiquityV2SPWithdraw: ${liquityV2SPWithdraw.address}`);
+    console.log(`LiquityV2SPClaimColl: ${liquityV2SPClaimColl.address}`);
 
     process.exit(0);
 }

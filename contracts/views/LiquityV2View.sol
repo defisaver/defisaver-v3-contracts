@@ -17,11 +17,13 @@ contract LiquityV2View is LiquityV2Helper {
     using TokenUtils for address;
 
     struct TroveData {
+        uint256 troveId;
+        address collToken;
         ITroveManager.Status status;
         uint256 collAmount;
         uint256 debtAmount;
         uint256 collPrice;
-        uint256 TRCRatio;
+        uint256 TCRatio;
         uint256 annualInterestRate;
         address interestBatchManager;
         uint256 batchDebtShares;
@@ -34,6 +36,8 @@ contract LiquityV2View is LiquityV2Helper {
         uint256 SCR;
         uint256 LIQUIDATION_PENALTY_SP;
         uint256 LIQUIDATION_PENALTY_REDISTRIBUTION;
+        uint256 entireSystemColl;
+        uint256 entireSystemDebt;
         address collToken;
         address troveNFT;
         address borrowerOperations;
@@ -151,15 +155,18 @@ contract LiquityV2View is LiquityV2Helper {
             trove.batchDebtShares
         ) = troveManager.Troves(_troveId);
 
+        trove.troveId = _troveId;
         trove.annualInterestRate = latestTroveData.annualInterestRate;
         trove.collAmount = latestTroveData.entireColl;
         trove.debtAmount = latestTroveData.entireDebt;
         trove.collPrice = priceFeed.lastGoodPrice();
-        trove.TRCRatio = troveManager.getCurrentICR(_troveId, trove.collPrice);
+        trove.TCRatio = troveManager.getCurrentICR(_troveId, trove.collPrice);
+        trove.collToken = IAddressesRegistry(_market).collToken();
     }
 
     function getMarketData(address _market) external view returns (MarketData memory data) {
         IAddressesRegistry registry = IAddressesRegistry(_market);
+        address borrowerOperations = registry.borrowerOperations();
         data = MarketData({
             market: _market,
             CCR: registry.CCR(),
@@ -167,9 +174,11 @@ contract LiquityV2View is LiquityV2Helper {
             SCR: registry.SCR(),
             LIQUIDATION_PENALTY_SP: registry.LIQUIDATION_PENALTY_SP(),
             LIQUIDATION_PENALTY_REDISTRIBUTION: registry.LIQUIDATION_PENALTY_REDISTRIBUTION(),
+            entireSystemColl: IBorrowerOperations(borrowerOperations).getEntireSystemColl(),
+            entireSystemDebt: IBorrowerOperations(borrowerOperations).getEntireSystemDebt(),
             collToken: registry.collToken(),
             troveNFT: registry.troveNFT(),
-            borrowerOperations: registry.borrowerOperations(),
+            borrowerOperations: borrowerOperations,
             troveManager: registry.troveManager(),
             stabilityPool: registry.stabilityPool(),
             sortedTroves: registry.sortedTroves(),

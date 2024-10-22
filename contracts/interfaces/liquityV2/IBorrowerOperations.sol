@@ -159,4 +159,8 @@ interface IBorrowerOperations {
         uint256 _addLowerHint,
         uint256 _maxUpfrontFee
     ) external;
+
+    function getEntireSystemColl() external view returns (uint);
+
+    function getEntireSystemDebt() external view returns (uint);
 }
