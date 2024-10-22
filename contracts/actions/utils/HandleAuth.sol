@@ -3,15 +3,14 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { Permission } from "../../auth/Permission.sol";
+import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 
-/// @title ToggleSub - Sets the state of the sub to active or deactivated
-/// @dev User can only disable/enable his own subscriptions
-contract ToggleSub is ActionBase, Permission{
+/// @title Action to enable/disable smart wallet authorization
+contract HandleAuth is ActionBase, Permission {
+
     struct Params {
-        uint256 subId;
-        bool active;
+        bool enableAuth; // if true it'll enable authorization, if false it'll disable authorization
     }
 
     /// @inheritdoc ActionBase
@@ -22,16 +21,13 @@ contract ToggleSub is ActionBase, Permission{
         bytes32[] memory
     ) public virtual override payable returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
-
-        updateSubData(inputData);
-
-        return(bytes32(inputData.subId));
+        handleAuth(inputData);
+        return bytes32(0);
     }
 
     function executeActionDirect(bytes memory _callData) public override payable {
         Params memory inputData = parseInputs(_callData);
-
-        updateSubData(inputData);
+        handleAuth(inputData);
     }
 
     /// @inheritdoc ActionBase
@@ -40,14 +36,15 @@ contract ToggleSub is ActionBase, Permission{
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-
-    function updateSubData(Params memory _inputData) internal {
-        if (_inputData.active) {
-             /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-            giveWalletPermission(isDSProxy(address(this)));
-            SubStorage(SUB_STORAGE_ADDR).activateSub(_inputData.subId);
+   
+    function handleAuth(Params memory _inputData) internal {
+        bool isDSProxy = isDSProxy(address(this));
+        address authContract = isDSProxy ? PROXY_AUTH_ADDRESS : MODULE_AUTH_ADDRESS;
+        
+        if (_inputData.enableAuth){
+            isDSProxy ? giveProxyPermission(authContract) : enableModule(authContract);
         } else {
-            SubStorage(SUB_STORAGE_ADDR).deactivateSub(_inputData.subId);
+            isDSProxy ? removeProxyPermission(authContract): disableModule(authContract);
         }
     }
 

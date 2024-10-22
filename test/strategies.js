@@ -4454,6 +4454,222 @@ const createMorphoBlueFLDebtRepayStrategy = () => {
     repayStrategy.addAction(morphoBlueRatioCheckAction);
     return repayStrategy.encodeForDsProxyCall();
 };
+
+const createAaveV3OpenOrderFromCollStrategy = () => {
+    const aaveV3OpenOrderFromCollStrategy = new dfs.Strategy('AaveV3OpenOrderFromCollStrategy');
+
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3OpenOrderFromCollStrategy.addTrigger(trigger);
+
+    const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        '%useDefaultMarket', // hardcode to false
+        '&marketAddr',
+        '%amount', // amount to borrow, must stay variable, sent from backend
+        '&proxy',
+        '%rateMode', // hardcode to VARIABLE = 2
+        '&debtAssetId',
+        '&useOnBehalf',
+        '%nullAddress',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&debtAsset',
+            '&collAsset',
+            '$1', // output of borrow action
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // sent by backend
+        '&collAsset',
+        '$2', // output of sell action
+    );
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        '%useDefaultMarket', // hardcode to false
+        '&marketAddr',
+        '$3', // output of gas fee taker action
+        '&proxy',
+        '&collAsset',
+        '&collAssetId',
+        '%enableAsColl', // hardcode to true
+        '&useOnBehalf',
+        '%nullAddress',
+    );
+    const openRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
+        '&targetRatio',
+        '&marketAddr',
+    );
+    aaveV3OpenOrderFromCollStrategy.addAction(borrowAction);
+    aaveV3OpenOrderFromCollStrategy.addAction(sellAction);
+    aaveV3OpenOrderFromCollStrategy.addAction(feeTakingAction);
+    aaveV3OpenOrderFromCollStrategy.addAction(supplyAction);
+    aaveV3OpenOrderFromCollStrategy.addAction(openRatioCheckAction);
+    return aaveV3OpenOrderFromCollStrategy.encodeForDsProxyCall();
+};
+const createAaveV3FLOpenOrderFromCollStrategy = () => {
+    const aaveV3OpenOrderFromCollStrategy = new dfs.Strategy('AaveV3FLOpenOrderFromCollStrategy');
+
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3OpenOrderFromCollStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3OpenOrderFromCollStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%debtAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+            '%nullAddress',
+            [],
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&debtAsset',
+            '&collAsset',
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // sent by backend
+        '&collAsset',
+        '$2', // output of sell action
+    );
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        '%useDefaultMarket', // hardcode to false
+        '&marketAddr',
+        '$3', // output of gas fee taker action
+        '&proxy',
+        '&collAsset',
+        '&collAssetId',
+        '%enableAsColl', // hardcode to true
+        '&useOnBehalf',
+        '%nullAddress',
+    );
+    const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        '%useDefaultMarket', // hardcode to false
+        '&marketAddr',
+        '$1',
+        '%flAddress', // fl address, sent by backend
+        '%rateMode', // hardcode to VARIABLE = 2
+        '&debtAssetId',
+        '&useOnBehalf',
+        '%nullAddress',
+    );
+    const openRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
+        '&targetRatio',
+        '&marketAddr',
+    );
+    aaveV3OpenOrderFromCollStrategy.addAction(flAction);
+    aaveV3OpenOrderFromCollStrategy.addAction(sellAction);
+    aaveV3OpenOrderFromCollStrategy.addAction(feeTakingAction);
+    aaveV3OpenOrderFromCollStrategy.addAction(supplyAction);
+    aaveV3OpenOrderFromCollStrategy.addAction(borrowAction);
+    aaveV3OpenOrderFromCollStrategy.addAction(openRatioCheckAction);
+    return aaveV3OpenOrderFromCollStrategy.encodeForDsProxyCall();
+};
+const createAaveV3FLOpenOrderFromDebtStrategy = () => {
+    const aaveV3OpenOrderFromDebtStrategy = new dfs.Strategy('AaveV3FLOpenOrderFromDebtStrategy');
+
+    aaveV3OpenOrderFromDebtStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3OpenOrderFromDebtStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3OpenOrderFromDebtStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3OpenOrderFromDebtStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3OpenOrderFromDebtStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3OpenOrderFromDebtStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3OpenOrderFromDebtStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3OpenOrderFromDebtStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%debtAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+            '%nullAddress',
+            [],
+        ),
+    );
+    const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '%useDefaultMarket', // hardcode to false
+        '&marketAddr',
+        '%debtAssetAmount', // sent by backend
+        '&proxy',
+        '&debtAssetId',
+    );
+    const sumInputsAction = new dfs.actions.basic.SumInputsAction(
+        '%flAmount', // sent by backend
+        '$2', // output of withdraw action
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&debtAsset',
+            '&collAsset',
+            '$3', // output of sum inputs action
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // sent by backend
+        '&collAsset',
+        '$4', // output of sell action
+    );
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        '%useDefaultMarket', // hardcode to false
+        '&marketAddr',
+        '$5', // output of gas fee taker action
+        '&proxy',
+        '&collAsset',
+        '&collAssetId',
+        '%enableAsColl', // hardcode to true
+        '&useOnBehalf',
+        '%nullAddress',
+    );
+    const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        '%useDefaultMarket', // hardcode to false
+        '&marketAddr',
+        '$1',
+        '%flAddress', // fl address, sent by backend
+        '%rateMode', // hardcode to VARIABLE = 2
+        '&debtAssetId',
+        '&useOnBehalf',
+        '%nullAddress',
+    );
+    const openRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
+        '&targetRatio',
+        '&marketAddr',
+    );
+    aaveV3OpenOrderFromDebtStrategy.addAction(flAction);
+    aaveV3OpenOrderFromDebtStrategy.addAction(aaveV3WithdrawAction);
+    aaveV3OpenOrderFromDebtStrategy.addAction(sumInputsAction);
+    aaveV3OpenOrderFromDebtStrategy.addAction(sellAction);
+    aaveV3OpenOrderFromDebtStrategy.addAction(feeTakingAction);
+    aaveV3OpenOrderFromDebtStrategy.addAction(supplyAction);
+    aaveV3OpenOrderFromDebtStrategy.addAction(borrowAction);
+    aaveV3OpenOrderFromDebtStrategy.addAction(openRatioCheckAction);
+    return aaveV3OpenOrderFromDebtStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -4540,4 +4756,7 @@ module.exports = {
     createMorphoBlueRepayStrategy,
     createMorphoBlueFLCollRepayStrategy,
     createMorphoBlueFLDebtRepayStrategy,
+    createAaveV3OpenOrderFromCollStrategy,
+    createAaveV3FLOpenOrderFromCollStrategy,
+    createAaveV3FLOpenOrderFromDebtStrategy,
 };
