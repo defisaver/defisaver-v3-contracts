@@ -4669,6 +4669,324 @@ const createAaveV3FLOpenOrderFromDebtStrategy = () => {
     aaveV3OpenOrderFromDebtStrategy.addAction(openRatioCheckAction);
     return aaveV3OpenOrderFromDebtStrategy.encodeForDsProxyCall();
 };
+const createLiquityV2RepayStrategy = () => {
+    const liquityV2RepayStrategy = new dfs.Strategy('LiquityV2RepayStrategy');
+    liquityV2RepayStrategy.addSubSlot('&market', 'address');
+    liquityV2RepayStrategy.addSubSlot('&troveId', 'address');
+    liquityV2RepayStrategy.addSubSlot('&ratioState', 'uint256');
+    liquityV2RepayStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const liquityV2RatioTrigger = new dfs.triggers.LiquityV2RatioTrigger(
+        '&market',
+        '&troveId',
+        '&ratio',
+        '&ratioState',
+    );
+    liquityV2RepayStrategy.addTrigger(liquityV2RatioTrigger);
+
+    const liquityV2WithdrawAction = new dfs.actions.liquityV2.LiquityV2WithdrawAction(
+        '&market',
+        '&proxy',
+        '&troveId',
+        '%amount', // sent by backend
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collToken', // sent by backend
+            '&boldToken', // sent by backend
+            '$1',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gas', // sent by backend
+        '&boldToken', // sent by backend
+        '$2',
+    );
+    const liquityV2PaybackAction = new dfs.actions.liquityV2.LiquityV2PaybackAction(
+        '&market',
+        '&proxy',
+        '&troveId',
+        '$3',
+    );
+    const liquityV2RatioCheckAction = new dfs.actions.checkers.LiquityV2RatioCheckAction(
+        '&market',
+        '&troveId',
+        '&ratioState',
+        '&targetRatio',
+    );
+    liquityV2RepayStrategy.addAction(liquityV2WithdrawAction);
+    liquityV2RepayStrategy.addAction(sellAction);
+    liquityV2RepayStrategy.addAction(feeTakingAction);
+    liquityV2RepayStrategy.addAction(liquityV2PaybackAction);
+    liquityV2RepayStrategy.addAction(liquityV2RatioCheckAction);
+
+    return liquityV2RepayStrategy.encodeForDsProxyCall();
+};
+const createLiquityV2FLRepayStrategy = () => {
+    const liquityV2FLRepayStrategy = new dfs.Strategy('LiquityV2FLRepayStrategy');
+    liquityV2FLRepayStrategy.addSubSlot('&market', 'address');
+    liquityV2FLRepayStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLRepayStrategy.addSubSlot('&ratioState', 'uint256');
+    liquityV2FLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityV2FLRepayStrategy.addSubSlot('&CollActionType.WITHDRAW', 'uint8');
+    liquityV2FLRepayStrategy.addSubSlot('&DebtActionType.PAYBACK', 'uint8');
+
+    const liquityV2RatioTrigger = new dfs.triggers.LiquityV2RatioTrigger(
+        '&market',
+        '&troveId',
+        '&ratio',
+        '&ratioState',
+    );
+    liquityV2FLRepayStrategy.addTrigger(liquityV2RatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collToken'], // sent by backend
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collToken', // sent by backend
+            '%boldToken', // sent by backend
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gas', // sent by backend
+        '%boldToken', // sent by backend
+        '$2',
+    );
+    const liquityV2AdjustAction = new dfs.actions.liquityV2.LiquityV2AdjustAction(
+        '&market',
+        '&proxy',
+        '%flAddress', // sent by backend
+        '&troveId',
+        '$1',
+        '$3',
+        '%maxUpfrontFee', // sent by backend,
+        '&CollActionType.WITHDRAW',
+        '&DebtActionType.PAYBACK',
+    );
+    const liquityV2RatioCheckAction = new dfs.actions.checkers.LiquityV2RatioCheckAction(
+        '&market',
+        '&troveId',
+        '&ratioState',
+        '&targetRatio',
+    );
+    liquityV2FLRepayStrategy.addAction(flAction);
+    liquityV2FLRepayStrategy.addAction(sellAction);
+    liquityV2FLRepayStrategy.addAction(feeTakingAction);
+    liquityV2FLRepayStrategy.addAction(liquityV2AdjustAction);
+    liquityV2FLRepayStrategy.addAction(liquityV2RatioCheckAction);
+
+    return liquityV2FLRepayStrategy.encodeForDsProxyCall();
+};
+const createLiquityV2BoostStrategy = () => {
+    const liquityV2BoostStrategy = new dfs.Strategy('LiquityV2BoostStrategy');
+    liquityV2BoostStrategy.addSubSlot('&market', 'address');
+    liquityV2BoostStrategy.addSubSlot('&troveId', 'address');
+    liquityV2BoostStrategy.addSubSlot('&ratioState', 'uint256');
+    liquityV2BoostStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const liquityV2RatioTrigger = new dfs.triggers.LiquityV2RatioTrigger(
+        '&market',
+        '&troveId',
+        '&ratio',
+        '&ratioState',
+    );
+    liquityV2BoostStrategy.addTrigger(liquityV2RatioTrigger);
+
+    const liquityV2BorrowAction = new dfs.actions.liquityV2.LiquityV2BorrowAction(
+        '&market',
+        '&proxy',
+        '&troveId',
+        '%amount', // sent by backend
+        '%maxUpfrontFee', // sent by backend
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%boldToken', // sent by backend
+            '%collToken', // sent by backend
+            '$1',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gas', // sent by backend
+        '%collToken', // sent by backend
+        '$2',
+    );
+    const liquityV2SupplyAction = new dfs.actions.liquityV2.LiquityV2SupplyAction(
+        '&market',
+        '&proxy',
+        '%collToken', // sent by backend
+        '&troveId',
+        '$3',
+    );
+    const liquityV2RatioCheckAction = new dfs.actions.checkers.LiquityV2RatioCheckAction(
+        '&market',
+        '&troveId',
+        '&ratioState',
+        '&targetRatio',
+    );
+    liquityV2BoostStrategy.addAction(liquityV2BorrowAction);
+    liquityV2BoostStrategy.addAction(sellAction);
+    liquityV2BoostStrategy.addAction(feeTakingAction);
+    liquityV2BoostStrategy.addAction(liquityV2SupplyAction);
+    liquityV2BoostStrategy.addAction(liquityV2RatioCheckAction);
+
+    return liquityV2BoostStrategy.encodeForDsProxyCall();
+};
+const createLiquityV2FLBoostStrategy = () => {
+    const liquityV2FLBoostStrategy = new dfs.Strategy('LiquityV2FLBoostStrategy');
+    liquityV2FLBoostStrategy.addSubSlot('&market', 'address');
+    liquityV2FLBoostStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLBoostStrategy.addSubSlot('&ratioState', 'uint256');
+    liquityV2FLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityV2FLBoostStrategy.addSubSlot('&CollActionType.SUPPLY', 'uint8');
+    liquityV2FLBoostStrategy.addSubSlot('&DebtActionType.BORROW', 'uint8');
+
+    const liquityV2RatioTrigger = new dfs.triggers.LiquityV2RatioTrigger(
+        '&market',
+        '&troveId',
+        '&ratio',
+        '&ratioState',
+    );
+    liquityV2FLBoostStrategy.addTrigger(liquityV2RatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%boldToken'], // sent by backend
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%boldToken', // sent by backend
+            '%collToken', // sent by backend
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gas', // sent by backend
+        '%collToken', // sent by backend
+        '$2',
+    );
+    const liquityV2AdjustAction = new dfs.actions.liquityV2.LiquityV2AdjustAction(
+        '&market',
+        '&proxy',
+        '%flAddress', // sent by backend
+        '&troveId',
+        '$3',
+        '$1',
+        '%maxUpfrontFee', // sent by backend,
+        '&CollActionType.SUPPLY',
+        '&CollActionType.BORROW',
+    );
+    const liquityV2RatioCheckAction = new dfs.actions.checkers.LiquityV2RatioCheckAction(
+        '&market',
+        '&troveId',
+        '&ratioState',
+        '&targetRatio',
+    );
+    liquityV2FLBoostStrategy.addAction(flAction);
+    liquityV2FLBoostStrategy.addAction(sellAction);
+    liquityV2FLBoostStrategy.addAction(feeTakingAction);
+    liquityV2FLBoostStrategy.addAction(liquityV2AdjustAction);
+    liquityV2FLBoostStrategy.addAction(liquityV2RatioCheckAction);
+
+    return liquityV2FLBoostStrategy.encodeForDsProxyCall();
+};
+const createLiquityV2FLBoostWithCollStrategy = () => {
+    const liquityV2FLBoostWithCollStrategy = new dfs.Strategy('LiquityV2FLBoostWithCollStrategy');
+    liquityV2FLBoostWithCollStrategy.addSubSlot('&market', 'address');
+    liquityV2FLBoostWithCollStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLBoostWithCollStrategy.addSubSlot('&ratioState', 'uint256');
+    liquityV2FLBoostWithCollStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityV2FLBoostWithCollStrategy.addSubSlot('&CollActionType.SUPPLY', 'uint8');
+    liquityV2FLBoostWithCollStrategy.addSubSlot('&DebtActionType.BORROW', 'uint8');
+
+    const liquityV2RatioTrigger = new dfs.triggers.LiquityV2RatioTrigger(
+        '&market',
+        '&troveId',
+        '&ratio',
+        '&ratioState',
+    );
+    liquityV2FLBoostWithCollStrategy.addTrigger(liquityV2RatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collToken'], // sent by backend
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const liquityV2AdjustAction = new dfs.actions.liquityV2.LiquityV2AdjustAction(
+        '&market',
+        '&proxy',
+        '&proxy',
+        '&troveId',
+        '%flAmount', // sent by backend
+        '%debtAmount', // sent by backend
+        '%maxUpfrontFee', // sent by backend,
+        '&CollActionType.SUPPLY',
+        '&CollActionType.BORROW',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%boldToken', // sent by backend
+            '%collToken', // sent by backend
+            '$2', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gas', // sent by backend
+        '%collToken', // sent by backend
+        '$3',
+    );
+    const liquityV2SupplyAction = new dfs.actions.liquityV2.LiquityV2SupplyAction(
+        '&market',
+        '&proxy',
+        '%collToken', // sent by backend
+        '&troveId',
+        '$4',
+    );
+    const liquityV2WithdrawAction = new dfs.actions.liquityV2.LiquityV2WithdrawAction(
+        '&market',
+        '%flAddress', // sent by backend
+        '&troveId',
+        '$1',
+    );
+    const liquityV2RatioCheckAction = new dfs.actions.checkers.LiquityV2RatioCheckAction(
+        '&market',
+        '&troveId',
+        '&ratioState',
+        '&targetRatio',
+    );
+    liquityV2FLBoostWithCollStrategy.addAction(flAction);
+    liquityV2FLBoostWithCollStrategy.addAction(liquityV2AdjustAction);
+    liquityV2FLBoostWithCollStrategy.addAction(sellAction);
+    liquityV2FLBoostWithCollStrategy.addAction(feeTakingAction);
+    liquityV2FLBoostWithCollStrategy.addAction(liquityV2SupplyAction);
+    liquityV2FLBoostWithCollStrategy.addAction(liquityV2WithdrawAction);
+    liquityV2FLBoostWithCollStrategy.addAction(liquityV2RatioCheckAction);
+
+    return liquityV2FLBoostWithCollStrategy.encodeForDsProxyCall();
+};
 
 module.exports = {
     createUniV3RangeOrderStrategy,
@@ -4759,4 +5077,9 @@ module.exports = {
     createAaveV3OpenOrderFromCollStrategy,
     createAaveV3FLOpenOrderFromCollStrategy,
     createAaveV3FLOpenOrderFromDebtStrategy,
+    createLiquityV2RepayStrategy,
+    createLiquityV2FLRepayStrategy,
+    createLiquityV2BoostStrategy,
+    createLiquityV2FLBoostStrategy,
+    createLiquityV2FLBoostWithCollStrategy,
 };

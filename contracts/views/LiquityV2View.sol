@@ -9,6 +9,7 @@ import { IStabilityPool } from "../interfaces/liquityV2/IStabilityPool.sol";
 import { ISortedTroves } from "../interfaces/liquityV2/ISortedTroves.sol";
 import { IHintHelpers } from "../interfaces/liquityV2/IHintHelpers.sol";
 import { IPriceFeed } from "../interfaces/liquityV2/IPriceFeed.sol";
+import { ITroveNFT } from "../interfaces/liquityV2/ITroveNFT.sol";
 
 import { LiquityV2Helper } from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
@@ -18,6 +19,7 @@ contract LiquityV2View is LiquityV2Helper {
 
     struct TroveData {
         uint256 troveId;
+        address owner;
         address collToken;
         ITroveManager.Status status;
         uint256 collAmount;
@@ -146,6 +148,7 @@ contract LiquityV2View is LiquityV2Helper {
         ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
         IPriceFeed priceFeed = IPriceFeed(IAddressesRegistry(_market).priceFeed());
         ITroveManager.LatestTroveData memory latestTroveData = troveManager.getLatestTroveData(_troveId);
+        ITroveNFT troveNFT = ITroveNFT(IAddressesRegistry(_market).troveNFT());
 
         (
             , , ,
@@ -156,6 +159,7 @@ contract LiquityV2View is LiquityV2Helper {
         ) = troveManager.Troves(_troveId);
 
         trove.troveId = _troveId;
+        trove.owner = troveNFT.ownerOf(_troveId);
         trove.annualInterestRate = latestTroveData.annualInterestRate;
         trove.collAmount = latestTroveData.entireColl;
         trove.debtAmount = latestTroveData.entireDebt;
