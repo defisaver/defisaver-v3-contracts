@@ -36,6 +36,9 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         address vaultAddr;                  // Address of the Euler vault
         address assetAddr;                  // Address of the underlying asset
         string vaultSymbol;                 // Vault symbol
+        string name;                        // Vault name
+        address governorAdmin;              // Address of the governor admin of the vault, or address zero if escrow vault for example
+        bool isEscrowed;                    // Flag indicating whether the vault is escrowed meaning there is no borrow functionality
         uint256 decimals;                   // Decimals, the same as the asset's or 18 if the asset doesn't implement `decimals()`
         uint256 sharePriceInUnit;           // Price of one share in the unit of account. Scaled by 1e18
         uint256 assetPriceInUnit;           // Price of one asset in the unit of account. Scaled by 1e18
@@ -401,8 +404,11 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
                 collateralsInfo[i].targetTimestamp,
                 collateralsInfo[i].rampDuration
             ) = IEVault(_vault).LTVFull(collaterals[i]);
-
+            
             collateralsInfo[i].vaultAddr = collaterals[i];
+            collateralsInfo[i].name = IEVault(collaterals[i]).name();
+            collateralsInfo[i].governorAdmin = IEVault(collaterals[i]).governorAdmin();
+            collateralsInfo[i].isEscrowed = IEVault(collaterals[i]).LTVList().length == 0;
             collateralsInfo[i].assetAddr = IEVault(collaterals[i]).asset();
             collateralsInfo[i].vaultSymbol = IEVault(collaterals[i]).symbol();
             collateralsInfo[i].decimals = IEVault(collaterals[i]).decimals();
