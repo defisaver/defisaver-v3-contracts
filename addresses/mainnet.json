@@ -3714,14 +3714,16 @@
     },
     {
         "name": "EulerV2View",
-        "address": "0x25eCA04532C085F77Ea6CE92C94E9e69896686E6",
+        "address": "0x8932E46Ecf96b5Fe033F5e27Ab6dC755Cb668967",
         "id": "0xe79618a8",
         "path": "contracts/views/EulerV2View.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x25eCA04532C085F77Ea6CE92C94E9e69896686E6"
+        ]
     },
     {
         "name": "CompoundMonitorProxy",
