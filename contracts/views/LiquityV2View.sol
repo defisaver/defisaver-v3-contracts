@@ -222,6 +222,7 @@ contract LiquityV2View is LiquityV2Helper {
         debt = _acc;
         for (uint256 i = 0; i < _iterations; ++i) {
             next = sortedTroves.getNext(next);
+            if (next == 0) return (next, debt);
             debt += _getTroveDebt(troveManager, next);
         }
     }
@@ -254,6 +255,7 @@ contract LiquityV2View is LiquityV2Helper {
         uint256 next = sortedTroves.getLast();
 
         for (uint256 i = 0; i < _numTroves; i++) {
+            if (next == 0) return debt;
             debt += _getTroveDebt(troveManager, next);
             next = sortedTroves.getPrev(next);
         }
