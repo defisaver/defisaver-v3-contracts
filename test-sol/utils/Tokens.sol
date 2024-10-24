@@ -109,4 +109,11 @@ contract Tokens is Test {
         uint decimals = IERC20(_tokenAddr).decimals();
         return (_amountUSD * 10**(decimals + USD_DECIMALS) / t.getPriceInUSD(_tokenAddr));
     }
+
+    function amountInUSDPriceMock(address _tokenAddr, uint _amountUSD, uint256 _priceInUsdIn8Decimals) internal view returns (uint) {
+        uint USD_DECIMALS = 8;
+
+        uint decimals = IERC20(_tokenAddr).decimals();
+        return (_amountUSD * 10**(decimals + USD_DECIMALS) / _priceInUsdIn8Decimals);
+    }
 }
