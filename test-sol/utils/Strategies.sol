@@ -350,6 +350,90 @@ contract Strategies {
         return boostStrategy.createStrategy();
     }
 
+    function createAaveV3Repay() internal returns (uint256) {
+        StrategyBuilder repayStrategy = new StrategyBuilder("AaveV3Repay", true);
+
+        repayStrategy.addSubMapping("&targetRatio");
+        repayStrategy.addSubMapping("&checkRepayState");
+        repayStrategy.addSubMapping("&useDefaultMarket");
+        repayStrategy.addSubMapping("&useOnBehalf");
+
+        repayStrategy.addTrigger("AaveV3RatioTrigger");
+
+        string[] memory withdrawParams = new string[](5);
+        withdrawParams[1] = "&useDefaultMarket";
+        withdrawParams[3] = "&proxy";
+        repayStrategy.addAction("AaveV3Withdraw", withdrawParams);
+
+        string[] memory sellParams = new string[](5);
+        sellParams[0] = "&baseToken";
+        sellParams[2] = "$1";
+        sellParams[3] = "&proxy";
+        sellParams[4] = "&proxy";
+        repayStrategy.addAction("DFSSell", sellParams);
+
+        string[] memory gasFeeParams = new string[](3);
+        gasFeeParams[1] = "$2";
+        repayStrategy.addAction("GasFeeTaker", gasFeeParams);
+
+        string[] memory paybackParams = new string[](8);
+        paybackParams[0] = "$3";
+        paybackParams[1] = "&proxy";
+        paybackParams[4] = "&useDefaultMarket";
+        paybackParams[5] = "&useOnBehalf";
+        repayStrategy.addAction("AaveV3Payback", paybackParams);
+
+        string[] memory checkerParams = new string[](3);
+        checkerParams[0] = "&checkRepayState";
+        checkerParams[1] = "&targetRatio";
+        repayStrategy.addAction("AaveV3RatioCheck", checkerParams);
+
+        return repayStrategy.createStrategy();
+    }
+
+    function createAaveV3FLRepay() internal returns (uint256) {
+        StrategyBuilder repayStrategy = new StrategyBuilder("AaveV3FLRepay", true);
+
+        repayStrategy.addSubMapping("&targetRatio");
+        repayStrategy.addSubMapping("&checkRepayState");
+        repayStrategy.addSubMapping("&useDefaultMarket");
+        repayStrategy.addSubMapping("&useOnBehalf");
+
+        repayStrategy.addTrigger("AaveV3RatioTrigger");
+
+        string[] memory flParams = new string[](1);
+        repayStrategy.addAction("FLAction", flParams);
+
+        string[] memory sellParams = new string[](5);
+        sellParams[0] = "&baseToken";
+        sellParams[3] = "&proxy";
+        sellParams[4] = "&proxy";
+        repayStrategy.addAction("DFSSell", sellParams);
+
+        string[] memory gasFeeParams = new string[](3);
+        gasFeeParams[1] = "$2";
+        repayStrategy.addAction("GasFeeTaker", gasFeeParams);
+
+        string[] memory paybackParams = new string[](8);
+        paybackParams[0] = "$3";
+        paybackParams[1] = "&proxy";
+        paybackParams[4] = "&useDefaultMarket";
+        paybackParams[5] = "&useOnBehalf";
+        repayStrategy.addAction("AaveV3Payback", paybackParams);
+
+        string[] memory withdrawParams = new string[](5);
+        withdrawParams[1] = "&useDefaultMarket";
+        withdrawParams[2] = "$1";
+        repayStrategy.addAction("AaveV3Withdraw", withdrawParams);
+
+        string[] memory checkerParams = new string[](3);
+        checkerParams[0] = "&checkRepayState";
+        checkerParams[1] = "&targetRatio";
+        repayStrategy.addAction("AaveV3RatioCheck", checkerParams);
+
+        return repayStrategy.createStrategy();
+    }
+
     function createAaveV3Boost() internal returns (uint256) {
         StrategyBuilder boostStrategy = new StrategyBuilder("AaveV3Boost", true);
 
