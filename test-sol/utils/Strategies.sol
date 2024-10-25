@@ -349,4 +349,95 @@ contract Strategies {
 
         return boostStrategy.createStrategy();
     }
+
+    function createAaveV3Boost() internal returns (uint256) {
+        StrategyBuilder boostStrategy = new StrategyBuilder("AaveV3Boost", true);
+
+        boostStrategy.addSubMapping("&targetRatio");
+        boostStrategy.addSubMapping("&checkBoostState");
+        boostStrategy.addSubMapping("&useDefaultMarket");
+        boostStrategy.addSubMapping("&useOnBehalf");
+        boostStrategy.addSubMapping("&enableAsColl");
+
+        boostStrategy.addTrigger("AaveV3RatioTrigger");
+
+        string[] memory borrowParams = new string[](8);
+        borrowParams[1] = "&to";
+        borrowParams[4] = "&useDefaultMarket";
+        borrowParams[5] = "&useOnBehalf";
+        boostStrategy.addAction("AaveV3Borrow", borrowParams);
+
+        string[] memory sellParams = new string[](5);
+        sellParams[1] = "&baseToken";
+        sellParams[2] = "$1";
+        sellParams[3] = "&proxy";
+        sellParams[4] = "&proxy";
+        boostStrategy.addAction("DFSSell", sellParams);
+
+        string[] memory gasFeeParams = new string[](3);
+        gasFeeParams[1] = "$2";
+        boostStrategy.addAction("GasFeeTaker", gasFeeParams);
+
+        string[] memory supplyParams = new string[](8);
+        supplyParams[0] = "$3";
+        supplyParams[1] = "&proxy";
+        supplyParams[3] = "&enableAsColl";
+        supplyParams[4] = "&useDefaultMarket";
+        supplyParams[5] = "&useOnBehalf";
+        boostStrategy.addAction("AaveV3Supply", supplyParams);
+
+        string[] memory checkerParams = new string[](2);
+        checkerParams[0] = "&ratioState";
+        checkerParams[1] = "&targetRatio";
+        boostStrategy.addAction("AaveV3RatioCheck", checkerParams);
+
+        return boostStrategy.createStrategy();
+    }
+
+    function createAaveV3FLBoost() internal returns (uint256) {
+        StrategyBuilder boostStrategy = new StrategyBuilder("AaveV3FLBoost", true);
+
+        boostStrategy.addSubMapping("&targetRatio");
+        boostStrategy.addSubMapping("&checkBoostState");
+        boostStrategy.addSubMapping("&useDefaultMarket");
+        boostStrategy.addSubMapping("&useOnBehalf");
+        boostStrategy.addSubMapping("&enableAsColl");
+
+        boostStrategy.addTrigger("AaveV3RatioTrigger");
+
+        string[] memory flParams = new string[](1);
+        boostStrategy.addAction("FLAction", flParams);
+
+        string[] memory sellParams = new string[](5);
+        sellParams[1] = "&baseToken";
+        sellParams[3] = "&proxy";
+        sellParams[4] = "&proxy";
+        boostStrategy.addAction("DFSSell", sellParams);
+
+        string[] memory gasFeeParams = new string[](3);
+        gasFeeParams[1] = "$2";
+        boostStrategy.addAction("GasFeeTaker", gasFeeParams);
+
+        string[] memory supplyParams = new string[](8);
+        supplyParams[0] = "$3";
+        supplyParams[1] = "&proxy";
+        supplyParams[3] = "&enableAsColl";
+        supplyParams[4] = "&useDefaultMarket";
+        supplyParams[5] = "&useOnBehalf";
+        boostStrategy.addAction("AaveV3Supply", supplyParams);
+
+        string[] memory borrowParams = new string[](8);
+        borrowParams[0] = "$1";
+        borrowParams[1] = "&to";
+        borrowParams[4] = "&useDefaultMarket";
+        borrowParams[5] = "&useOnBehalf";
+        boostStrategy.addAction("AaveV3Borrow", borrowParams);
+
+        string[] memory checkerParams = new string[](2);
+        checkerParams[0] = "&checkBoostState";
+        checkerParams[1] = "&targetRatio";
+        boostStrategy.addAction("AaveV3RatioCheck", checkerParams);
+
+        return boostStrategy.createStrategy();
+    }
 }
