@@ -842,6 +842,34 @@ const subAaveV3OpenOrder = async (
 
     return { subId, strategySub };
 };
+const subLiquityV2RepayBundle = async (
+    proxy, market, troveId, minRatio, targetRatio, bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.liquityV2Encode.leverageManagement(
+        market,
+        troveId,
+        automationSdk.enums.RatioState.UNDER,
+        targetRatio,
+        minRatio,
+        bundleId,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+const subLiquityV2BoostBundle = async (
+    proxy, market, troveId, maxRatio, targetRatio, bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.liquityV2Encode.leverageManagement(
+        market,
+        troveId,
+        automationSdk.enums.RatioState.OVER,
+        targetRatio,
+        maxRatio,
+        bundleId,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
 
 module.exports = {
     subDcaStrategy,
@@ -878,4 +906,6 @@ module.exports = {
     subMorphoBlueBoostBundle,
     subMorphoBlueRepayBundle,
     subAaveV3OpenOrder,
+    subLiquityV2RepayBundle,
+    subLiquityV2BoostBundle,
 };

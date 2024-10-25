@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-else-return */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable no-await-in-loop */
@@ -382,7 +383,7 @@ async function findBalancesSlot(tokenAddress) {
         'IERC20',
         tokenAddress,
     );
-    const setStorageMethod = hre.network.config.isAnvil ? 'anvil_setStorageAt' : 'hardhat_setStorageAt';
+    const setStorageMethod = hre.network.config.isAnvil ? 'anvil_setStorageAt' : 'tenderly_setStorageAt';
 
     for (let i = 0; i < 100; i++) {
         {
@@ -475,7 +476,7 @@ const timeTravel = async (timeIncrease) => {
 };
 
 const setStorageAt = async (address, index, value) => {
-    let prefix = 'hardhat';
+    let prefix = 'tenderly';
 
     if (hre.network.config.type === 'tenderly') {
         prefix = 'tenderly';
@@ -1025,7 +1026,10 @@ const formatExchangeObjCurve = async (
     ];
 };
 
-const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
+// TODO[LiquityV2] remove bold 'boldSrc' and 'boldDest' once deployed. This is only used for temporary testing
+const formatExchangeObjSdk = async (
+    srcAddr, destAddr, amount, wrapper, boldSrc = false, boldDest = false,
+) => {
     console.log({ srcAddr, destAddr });
     const { AlphaRouter, SwapType } = await import('@uniswap/smart-order-router');
     const {
@@ -1034,9 +1038,9 @@ const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
         TradeType,
         Percent,
     } = await import('@uniswap/sdk-core');
-
     const chainId = chainIds[network];
-    const srcTokenInfo = getAssetInfoByAddress(srcAddr, chainId);
+    const boldInfo = { decimals: 18, symbol: 'Bold', name: 'Bold Stablecoin' };
+    const srcTokenInfo = boldSrc ? boldInfo : getAssetInfoByAddress(srcAddr, chainId);
     const srcToken = new Token(
         chainId,
         srcAddr,
@@ -1044,7 +1048,7 @@ const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
         srcTokenInfo.symbol,
         srcTokenInfo.name,
     );
-    const destTokenInfo = getAssetInfoByAddress(destAddr, chainId);
+    const destTokenInfo = boldDest ? boldInfo : getAssetInfoByAddress(destAddr, chainId);
     const destToken = new Token(
         chainId,
         destAddr,

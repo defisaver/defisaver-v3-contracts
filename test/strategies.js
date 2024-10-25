@@ -4692,8 +4692,8 @@ const createLiquityV2RepayStrategy = () => {
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '&collToken', // sent by backend
-            '&boldToken', // sent by backend
+            '%collToken', // sent by backend
+            '%boldToken', // sent by backend
             '$1',
             '%exchangeWrapper', // sent by backend
         ),
@@ -4702,7 +4702,7 @@ const createLiquityV2RepayStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '&boldToken', // sent by backend
+        '%boldToken', // sent by backend
         '$2',
     );
     const liquityV2PaybackAction = new dfs.actions.liquityV2.LiquityV2PaybackAction(
@@ -4770,7 +4770,7 @@ const createLiquityV2FLRepayStrategy = () => {
         '&troveId',
         '$1',
         '$3',
-        '%maxUpfrontFee', // sent by backend,
+        '%maxUpfrontFee', // sent by backend, hardcode to 0 as there is no additional borrow,
         '&CollActionType.WITHDRAW',
         '&DebtActionType.PAYBACK',
     );

@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable max-len */
 const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
@@ -19,7 +20,6 @@ const {
     MAX_UINT128,
     fetchAmountinUSDPrice,
     setBalance,
-    // getGasUsed,
     mineBlock,
     getGasUsed,
     formatExchangeObjCurve,
@@ -40,6 +40,7 @@ const { getSecondTokenAmount } = require('./utils-uni');
 const {
     LiquityActionIds, getHints, getRedemptionHints, collChangeId, debtChangeId,
 } = require('./utils-liquity');
+const { getLiquityV2MaxUpfrontFee, getLiquityV2Hints } = require('./utils-liquityV2');
 
 const network = hre.network.config.name;
 
@@ -3436,6 +3437,56 @@ const llamalendSelfLiquidate = async (
 
     return receipt;
 };
+
+const liquityV2Open = async (
+    proxy,
+    market,
+    collIndex,
+    collToken,
+    collAmount,
+    boldAmount,
+    interestRate,
+    interestBatchManager,
+    ownerIndex,
+    from,
+    to,
+    isFork = false,
+) => {
+    const { upperHint, lowerHint } = await getLiquityV2Hints(market, collIndex, interestRate, isFork);
+    const maxUpfrontFee = await getLiquityV2MaxUpfrontFee(market, collIndex, boldAmount, interestRate, interestBatchManager);
+    const liquityV2OpenAction = new dfs.actions.liquityV2.LiquityV2OpenAction(
+        market,
+        from,
+        to,
+        collToken,
+        interestBatchManager,
+        ownerIndex,
+        collAmount,
+        boldAmount,
+        upperHint,
+        lowerHint,
+        interestRate,
+        maxUpfrontFee,
+    );
+
+    const signer = await hre.ethers.provider.getSigner(from);
+    signer.address = from;
+    const ethGasCompensation = hre.ethers.utils.parseUnits('0.0375', 'ether');
+    if (collToken.toLowerCase() === WETH_ADDRESS.toLowerCase()) {
+        await setBalance(collToken, from, collAmount.add(ethGasCompensation));
+        await approve(collToken, proxy.address, signer);
+    } else {
+        await setBalance(collToken, from, collAmount);
+        await approve(collToken, proxy.address, signer);
+        await setBalance(WETH_ADDRESS, from, ethGasCompensation);
+        await approve(WETH_ADDRESS, proxy.address, signer);
+    }
+
+    const functionData = liquityV2OpenAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('LiquityV2Open', functionData, proxy);
+    return tx;
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -3652,4 +3703,6 @@ module.exports = {
     skyStake,
     skyUnstake,
     skyClaimRewards,
+
+    liquityV2Open,
 };

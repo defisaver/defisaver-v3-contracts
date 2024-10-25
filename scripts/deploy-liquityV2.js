@@ -30,6 +30,8 @@ async function main() {
     const liquityV2SPDeposit = await redeploy('LiquityV2SPDeposit', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2SPWithdraw = await redeploy('LiquityV2SPWithdraw', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2SPClaimColl = await redeploy('LiquityV2SPClaimColl', addrs[network].REGISTRY_ADDR, false, isFork);
+    const liquityV2RatioTrigger = await redeploy('LiquityV2RatioTrigger', addrs[network].REGISTRY_ADDR, false, isFork);
+    const liquityV2RatioCheck = await redeploy('LiquityV2RatioCheck', addrs[network].REGISTRY_ADDR, false, isFork);
 
     console.log(`LiquityV2View: ${liquityV2View.address}`);
     console.log(`LiquityV2Open: ${liquityV2Open.address}`);
@@ -44,6 +46,8 @@ async function main() {
     console.log(`LiquityV2SPDeposit: ${liquityV2SPDeposit.address}`);
     console.log(`LiquityV2SPWithdraw: ${liquityV2SPWithdraw.address}`);
     console.log(`LiquityV2SPClaimColl: ${liquityV2SPClaimColl.address}`);
+    console.log(`LiquityV2RatioTrigger: ${liquityV2RatioTrigger.address}`);
+    console.log(`LiquityV2RatioCheck: ${liquityV2RatioCheck.address}`);
 
     process.exit(0);
 }
