@@ -59,26 +59,41 @@ const getLiquityV2MaxUpfrontFee = async (
     return fee;
 };
 
-const getLiquityV2TestPairs = async (collAmount, boldAmount) => [
+const getLiquityV2AdjustBorrowMaxUpfrontFee = async (
+    market,
+    collIndex,
+    troveId,
+    debtIncrease,
+) => {
+    const marketContract = await hre.ethers.getContractAt('IAddressesRegistry', market);
+    const hintHelpersAddr = await marketContract.hintHelpers();
+    const hintHelpersContract = await hre.ethers.getContractAt('contracts/interfaces/liquityV2/IHintHelpers.sol:IHintHelpers', hintHelpersAddr);
+
+    const fee = await hintHelpersContract.predictAdjustTroveUpfrontFee(
+        collIndex,
+        troveId,
+        debtIncrease,
+    );
+    return fee;
+};
+
+const getLiquityV2TestPairs = async () => [
     {
-        market: '0xd7199b16945f1ebaa0b301bf3d05bf489caa408b',
+        market: '0x7d2d2c79ec89c7f1d718ae1586363ad2c56ded9d',
         supplyTokenSymbol: 'WETH',
         collIndex: 0,
-        supplyAmount: hre.ethers.utils.parseUnits(collAmount, 18),
-        boldAmount: hre.ethers.utils.parseUnits(boldAmount, 18),
     },
-    {
-        market: '0x0d22113a543826eeaf2ae0fc9d10aea66efba156',
-        supplyTokenSymbol: 'wstETH',
-        collIndex: 1,
-        supplyAmount: hre.ethers.utils.parseUnits(collAmount, 18),
-        boldAmount: hre.ethers.utils.parseUnits(boldAmount, 18),
-    },
+    // {
+    //     market: '0x83b74f12a2894fcf7a4864eff6090d7d8a060c6b',
+    //     supplyTokenSymbol: 'wstETH',
+    //     collIndex: 1,
+    // },
 ];
 
 module.exports = {
     getLiquityV2Hints,
     getLiquityV2MaxUpfrontFee,
+    getLiquityV2AdjustBorrowMaxUpfrontFee,
     getLiquityV2TestPairs,
     CollActionType,
     DebtActionType,

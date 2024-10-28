@@ -5465,6 +5465,200 @@ const callLiquityV2FLRepayStrategy = async (
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(`GasUsed callLiquityV2FLRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
+const callLiquityV2BoostStrategy = async (
+    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, boostAmount, collToken, maxUpFrontFee,
+) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+
+    const liquityV2BorrowAction = new dfs.actions.liquityV2.LiquityV2BorrowAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        0,
+        boostAmount,
+        maxUpFrontFee,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost,
+        collToken,
+        0,
+    );
+    const liquityV2SupplyAction = new dfs.actions.liquityV2.LiquityV2SupplyAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        collToken,
+        0,
+        0,
+    );
+    const liquityV2RatioCheckAction = new dfs.actions.checkers.LiquityV2RatioCheckAction(
+        placeHolderAddr,
+        0,
+        0,
+        0,
+    );
+    actionsCallData.push(liquityV2BorrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityV2SupplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityV2RatioCheckAction.encodeForRecipe()[0]);
+    triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint256', 'uint8'], [placeHolderAddr, 0, 0, 0]));
+    const { callData, receipt } = await executeStrategy(
+        false,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(`GasUsed callLiquityV2BoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+const callLiquityV2FLBoostStrategy = async (
+    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, boostAmount, collToken, boldToken, maxUpFrontFee, flAddr,
+) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+
+    /// @dev Use test pool with BOLD token and DAI
+    const token0 = boldToken;
+    const token1 = DAI_ADDR;
+    const fee = 100;
+    const uniswapV3FactoryContract = await hre.ethers.getContractAt('IUniswapV3Factory', '0x1F98431c8aD98523631AE4a59f267346ea31F984');
+    const uniV3Pool = await uniswapV3FactoryContract.getPool(token0, token1, fee);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.UniV3FlashLoanAction(
+            token0,
+            token1,
+            uniV3Pool,
+            boostAmount,
+            0,
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost,
+        collToken,
+        0,
+    );
+    const liquityV2AdjustAction = new dfs.actions.liquityV2.LiquityV2AdjustAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        flAddr,
+        0,
+        0,
+        0,
+        maxUpFrontFee,
+        0,
+        0,
+    );
+    const liquityV2RatioCheckAction = new dfs.actions.checkers.LiquityV2RatioCheckAction(
+        placeHolderAddr,
+        0,
+        0,
+        0,
+    );
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityV2AdjustAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityV2RatioCheckAction.encodeForRecipe()[0]);
+    triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint256', 'uint8'], [placeHolderAddr, 0, 0, 0]));
+    const { callData, receipt } = await executeStrategy(
+        false,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(`GasUsed callLiquityV2FLBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+const callLiquityV2FLBoostWithCollStrategy = async (
+    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, boostAmountInColl, boldAmount, collToken, boldToken, maxUpFrontFee, flAddr,
+) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+
+    const flAction = new dfs.actions.flashloan.FLAction(new dfs.actions.flashloan.BalancerFlashLoanAction([collToken], [boostAmountInColl]));
+    const liquityV2AdjustAction = new dfs.actions.liquityV2.LiquityV2AdjustAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        0,
+        boostAmountInColl,
+        boldAmount,
+        maxUpFrontFee,
+        0,
+        0,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        gasCost,
+        collToken,
+        0,
+    );
+    const liquityV2SupplyAction = new dfs.actions.liquityV2.LiquityV2SupplyAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        collToken,
+        0,
+        0,
+    );
+    const liquityV2WithdrawAction = new dfs.actions.liquityV2.LiquityV2WithdrawAction(
+        placeHolderAddr,
+        flAddr,
+        0,
+        0,
+    );
+    const liquityV2RatioCheckAction = new dfs.actions.checkers.LiquityV2RatioCheckAction(
+        placeHolderAddr,
+        0,
+        0,
+        0,
+    );
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityV2AdjustAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityV2SupplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityV2WithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityV2RatioCheckAction.encodeForRecipe()[0]);
+    triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint256', 'uint8'], [placeHolderAddr, 0, 0, 0]));
+    const { callData, receipt } = await executeStrategy(
+        false,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(`GasUsed callLiquityV2FLBoostWithCollStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
 
 module.exports = {
     callDcaStrategy,
@@ -5548,4 +5742,7 @@ module.exports = {
     callAaveV3FLOpenOrderFromDebtStrategy,
     callLiquityV2RepayStrategy,
     callLiquityV2FLRepayStrategy,
+    callLiquityV2BoostStrategy,
+    callLiquityV2FLBoostStrategy,
+    callLiquityV2FLBoostWithCollStrategy,
 };

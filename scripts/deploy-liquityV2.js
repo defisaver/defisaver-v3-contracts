@@ -5,9 +5,69 @@ const { start } = require('./utils/starter');
 
 const {
     redeploy, addrs, network, getOwnerAddr,
+    openStrategyAndBundleStorage,
+    DAI_ADDR,
+    setBalance,
+    getProxy,
 } = require('../test/utils');
 
 const { topUp } = require('./utils/fork');
+const {
+    createLiquityV2RepayStrategy,
+    createLiquityV2FLRepayStrategy,
+    createLiquityV2BoostStrategy,
+    createLiquityV2FLBoostStrategy,
+    createLiquityV2FLBoostWithCollStrategy,
+} = require('../test/strategies');
+const { createStrategy, createBundle } = require('../test/utils-strategies');
+const { uniV3CreatePool } = require('../test/actions');
+
+const BOLD_TOKEN = '0x2b4773b486e5ed382f4adb79e818519c6ba2ee58';
+
+const deployLiquityV2RepayBundle = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
+    const repayStrategy = createLiquityV2RepayStrategy();
+    const flRepayStrategy = createLiquityV2FLRepayStrategy();
+    const repayStrategyId = await createStrategy(proxy, ...repayStrategy, true);
+    const flRepayStrategyId = await createStrategy(proxy, ...flRepayStrategy, true);
+    const bundleId = await createBundle(proxy, [repayStrategyId, flRepayStrategyId]);
+    return bundleId;
+};
+
+const deployLiquityV2BoostBundle = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
+    const boostStrategy = createLiquityV2BoostStrategy();
+    const flBoostStrategy = createLiquityV2FLBoostStrategy();
+    const flBoostWithCollStrategy = createLiquityV2FLBoostWithCollStrategy();
+    const boostStrategyId = await createStrategy(proxy, ...boostStrategy, true);
+    const flBoostStrategyId = await createStrategy(proxy, ...flBoostStrategy, true);
+    const flBoostWithCollStrategyId = await createStrategy(proxy, ...flBoostWithCollStrategy, true);
+    const bundleId = await createBundle(
+        proxy, [boostStrategyId, flBoostStrategyId, flBoostWithCollStrategyId],
+    );
+    return bundleId;
+};
+
+const provideBoldLiquidity = async (proxy, senderAcc) => {
+    const dai = DAI_ADDR;
+    const boldAmount = hre.ethers.utils.parseUnits('1000000000', 18);
+    const daiAmount = hre.ethers.utils.parseUnits('1000000000', 18);
+    await setBalance(BOLD_TOKEN, senderAcc.address, boldAmount);
+    await setBalance(dai, senderAcc.address, daiAmount);
+    await uniV3CreatePool(
+        proxy,
+        BOLD_TOKEN,
+        dai,
+        '100',
+        -101, // math.floor(math.log(p, 1.0001)) where p is 0.99
+        99, // math.floor(math.log(p, 1.0001)) where p is 1.01
+        boldAmount,
+        daiAmount,
+        senderAcc.address,
+        senderAcc.address,
+        '79228162514264337593543950336', // 2**96
+    );
+};
 
 async function main() {
     const isFork = true;
@@ -16,6 +76,8 @@ async function main() {
         await topUp(senderAcc.address);
         await topUp(getOwnerAddr());
     }
+    let proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+    proxy = proxy.connect(senderAcc);
 
     const liquityV2View = await redeploy('LiquityV2View', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2Open = await redeploy('LiquityV2Open', addrs[network].REGISTRY_ADDR, false, isFork);
@@ -48,6 +110,14 @@ async function main() {
     console.log(`LiquityV2SPClaimColl: ${liquityV2SPClaimColl.address}`);
     console.log(`LiquityV2RatioTrigger: ${liquityV2RatioTrigger.address}`);
     console.log(`LiquityV2RatioCheck: ${liquityV2RatioCheck.address}`);
+
+    const repayBundleId = await deployLiquityV2RepayBundle(senderAcc, isFork);
+    const boostBundleId = await deployLiquityV2BoostBundle(senderAcc, isFork);
+
+    console.log(`Repay bundle id: ${repayBundleId}`);
+    console.log(`Boost bundle id: ${boostBundleId}`);
+
+    await provideBoldLiquidity(proxy, senderAcc);
 
     process.exit(0);
 }

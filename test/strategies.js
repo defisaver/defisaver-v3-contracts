@@ -4828,7 +4828,7 @@ const createLiquityV2BoostStrategy = () => {
     const liquityV2SupplyAction = new dfs.actions.liquityV2.LiquityV2SupplyAction(
         '&market',
         '&proxy',
-        '%collToken', // sent by backend
+        '%collToken',
         '&troveId',
         '$3',
     );
@@ -4893,7 +4893,7 @@ const createLiquityV2FLBoostStrategy = () => {
         '$1',
         '%maxUpfrontFee', // sent by backend,
         '&CollActionType.SUPPLY',
-        '&CollActionType.BORROW',
+        '&DebtActionType.BORROW',
     );
     const liquityV2RatioCheckAction = new dfs.actions.checkers.LiquityV2RatioCheckAction(
         '&market',
@@ -4941,7 +4941,7 @@ const createLiquityV2FLBoostWithCollStrategy = () => {
         '%debtAmount', // sent by backend
         '%maxUpfrontFee', // sent by backend,
         '&CollActionType.SUPPLY',
-        '&CollActionType.BORROW',
+        '&DebtActionType.BORROW',
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -4961,7 +4961,7 @@ const createLiquityV2FLBoostWithCollStrategy = () => {
     const liquityV2SupplyAction = new dfs.actions.liquityV2.LiquityV2SupplyAction(
         '&market',
         '&proxy',
-        '%collToken', // sent by backend
+        '%collToken',
         '&troveId',
         '$4',
     );
