@@ -38,7 +38,7 @@ import { StdCheats, StdCheatsSafe } from "forge-std/StdCheats.sol";
 import { StdUtils } from "forge-std/StdUtils.sol";
 import { Test } from "forge-std/Test.sol";
 
-contract TestAaveV3BoostAutomation is
+contract TestAaveV3Automation is
     Test,
     DSMath,
     Tokens,
