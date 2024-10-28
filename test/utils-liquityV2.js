@@ -16,7 +16,7 @@ const getLiquityV2Hints = async (market, collIndex, interestRate, isFork = false
     if (trovesSize <= 2) {
         return { upperHint: 0, lowerHint: 0 };
     }
-    const numTrials = 15 * Math.sqrt(trovesSize);
+    const numTrials = Math.floor(15 * Math.sqrt(trovesSize));
     const seed = 42;
 
     const regAddr = addrs[getNetwork()].REGISTRY_ADDR;
