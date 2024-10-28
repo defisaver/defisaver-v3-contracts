@@ -37,7 +37,6 @@ import { StdChains } from "forge-std/StdChains.sol";
 import { StdCheats, StdCheatsSafe } from "forge-std/StdCheats.sol";
 import { StdUtils } from "forge-std/StdUtils.sol";
 import { Test } from "forge-std/Test.sol";
-import { IERC20 } from "forge-std/interfaces/IERC20.sol";
 
 contract TestAaveV3Automation is
     Test,
