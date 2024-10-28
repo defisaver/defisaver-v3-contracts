@@ -273,6 +273,15 @@ contract LiquityV2View is LiquityV2Helper {
         }
     }
 
+    function predictAdjustTroveUpfrontFee(address _market, uint256 _collIndex, uint256 _troveId, uint256 _debtIncrease) 
+        external view returns (uint256)
+    {
+        IAddressesRegistry market = IAddressesRegistry(_market);
+        IHintHelpers hintHelpers = IHintHelpers(market.hintHelpers());
+
+        return hintHelpers.predictAdjustTroveUpfrontFee(_collIndex, _troveId, _debtIncrease);
+    }
+
     function _getTroveDebt(ITroveManager _troveManager, uint256 _troveId) internal view returns (uint256 debt) {
         (debt, , , , , , , , , ) = _troveManager.Troves(_troveId);
     }
