@@ -2,8 +2,6 @@
 pragma solidity =0.8.24;
 
 import { AaveV3SubProxy } from "../../../contracts/actions/aaveV3/AaveV3SubProxy.sol";
-import { Const } from "../../Const.sol";
-import { IComet } from "../../../contracts/interfaces/compoundV3/IComet.sol";
 import { UserWallet } from "../UserWallet.sol";
 
 contract AaveV3UserUtils is UserWallet {
