@@ -22,7 +22,7 @@ const {
 const { createStrategy, createBundle } = require('../test/utils-strategies');
 const { uniV3CreatePool } = require('../test/actions');
 
-const BOLD_TOKEN = '0x2b4773b486e5ed382f4adb79e818519c6ba2ee58';
+const BOLD_TOKEN = '0xC940b2CD3D66A173Baa8FDb1501288A2c1252b61';
 
 const deployLiquityV2RepayBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
