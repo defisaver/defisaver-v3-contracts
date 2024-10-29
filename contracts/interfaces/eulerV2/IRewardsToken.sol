@@ -21,4 +21,6 @@ interface IRewardsToken {
     function owner() external view returns (address);
 
     function depositFor(address account, uint256 amount) external returns (bool);
+
+    function balanceOf(address account) external view returns (uint256);
 }
