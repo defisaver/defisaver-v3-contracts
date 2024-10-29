@@ -78,6 +78,8 @@ contract EulerV2ClaimRewards is ActionBase, EulerV2Helper {
 
         uint256 claimedAmount = token.getBalance(address(this)) - balanceBefore;
 
+        token.withdrawTokens(_params.to, claimedAmount);
+
         return (claimedAmount, abi.encode(_params));
     }
 

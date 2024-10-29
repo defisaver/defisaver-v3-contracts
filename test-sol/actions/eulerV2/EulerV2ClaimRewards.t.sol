@@ -19,7 +19,6 @@ contract TestEulerV2ClaimRewards is EulerV2TestHelper {
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
-    uint256 public constant WHITELIST_STATUS_ADMIN = 1;
     uint256 public constant TEST_DEPOSIT_AMOUNT = 1 ether;
     uint256 public constant WAIT_FULL_CLAIM_PERIOD = 180 days;
 
@@ -46,11 +45,11 @@ contract TestEulerV2ClaimRewards is EulerV2TestHelper {
         cut = new EulerV2ClaimRewards();
         rEUL = IRewardsToken(REWARDS_EUL_TOKEN);
         rEULOwner = rEUL.owner();
-        rEULAdmin = address(0xadadad);
+        rEULAdmin = makeAddr("admin");
         rEULUnderlying = rEUL.underlying();
 
         vm.prank(rEULOwner);
-        rEUL.setWhitelistStatus(rEULAdmin, WHITELIST_STATUS_ADMIN);
+        rEUL.setWhitelistStatus(rEULAdmin, true);
         vm.stopPrank();
     }
 
@@ -101,11 +100,18 @@ contract TestEulerV2ClaimRewards is EulerV2TestHelper {
         }
 
         (uint256[] memory lockTimestamps, uint256[] memory amounts ) = rEUL.getLockedAmounts(walletAddr);
-        uint256 totalClaimedAmount;
-        for (uint256 i = 0; i < amounts.length; ++i) {
-            totalClaimedAmount += amounts[i];
+        uint256 totalClaimableAmountAfterFullClaimPeriod;
+        uint256 totalClaimableAmountRightNow;
+        uint256[] memory withdrawAmounts = new uint256[](lockTimestamps.length);
+
+        for (uint256 i = 0; i < lockTimestamps.length; ++i) {
+            totalClaimableAmountAfterFullClaimPeriod += amounts[i];
+            (withdrawAmounts[i],) = rEUL.getWithdrawAmountsByLockTimestamp(walletAddr, lockTimestamps[i]);
+            totalClaimableAmountRightNow += withdrawAmounts[i];
+
             console.log('lockTimestamps[i]: ', lockTimestamps[i]);
-            console.log('amounts[i]: ', amounts[i]);
+            console.log('full claimable amounts[i]: ', amounts[i]);
+            console.log('claimable amounts right now[i]: ', withdrawAmounts[i]);
         }
 
         uint256[] memory singleLockTimestamps = new uint256[](1);
@@ -128,17 +134,17 @@ contract TestEulerV2ClaimRewards is EulerV2TestHelper {
         uint256 senderAssetBalanceAfter = balanceOf(rEULUnderlying, sender);
 
         if (_singleLock) {
-            assertEq(senderAssetBalanceAfter, senderAssetBalanceBefore + amounts[0]);
+            assertEq(senderAssetBalanceAfter, senderAssetBalanceBefore + withdrawAmounts[0]);
         } else {
-            assertEq(senderAssetBalanceAfter, senderAssetBalanceBefore + totalClaimedAmount);
-        }
-        if (!_singleLock) {
+            assertEq(senderAssetBalanceAfter, senderAssetBalanceBefore + totalClaimableAmountRightNow);
             (lockTimestamps, ) = rEUL.getLockedAmounts(walletAddr);
             assertEq(lockTimestamps.length, 0);
         }
     }
 
     function _createLock() internal {
+        give(rEULUnderlying, rEULAdmin, TEST_DEPOSIT_AMOUNT);
+        approveAsSender(rEULAdmin, rEULUnderlying, address(rEUL), TEST_DEPOSIT_AMOUNT);
         vm.startPrank(rEULAdmin);
         rEUL.depositFor(walletAddr, TEST_DEPOSIT_AMOUNT);
         vm.stopPrank();

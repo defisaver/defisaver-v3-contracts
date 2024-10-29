@@ -16,7 +16,7 @@ interface IRewardsToken {
 
     function underlying() external view returns (address);
 
-    function setWhitelistStatus(address account, uint256 status) external;
+    function setWhitelistStatus(address account, bool status) external;
     
     function owner() external view returns (address);
 
