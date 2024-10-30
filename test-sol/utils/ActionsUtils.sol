@@ -22,6 +22,7 @@ import { AaveV3ATokenPayback } from "../../contracts/actions/aaveV3/AaveV3AToken
 import { SumInputs } from "../../contracts/actions/utils/SumInputs.sol";
 import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
 import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
+import { AaveV3RatioCheck } from "../../contracts/actions/checkers/AaveV3RatioCheck.sol";
 
 contract ActionsUtils {
 
@@ -406,6 +407,15 @@ contract ActionsUtils {
                 market: _market
             })
         );
+    }
+
+    function aaveV3RatioCheckEncode(uint8 _state, uint _targetRatio) public pure returns (bytes memory) {
+        AaveV3RatioCheck.Params memory params = AaveV3RatioCheck.Params({
+            ratioState: AaveV3RatioCheck.RatioState(_state),
+            targetRatio: _targetRatio
+        });
+
+        return abi.encode(params);
     }
 
     function sumInputsEncode(
