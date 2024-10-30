@@ -223,7 +223,8 @@ contract TestAaveV3Automation is
 
         uint beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
-        (, uint256 borrowAmountBefore,,,, ) = pool.getUserAccountData(wallet);
+        uint256 borrowAmountBefore = IERC20(debtAsset.variableDebtTokenAddress).balanceOf(wallet);
+
         uint256 txFeeBalanceBefore = IERC20(TokenAddresses.WETH_ADDR).balanceOf(TokenAddresses.FEE_RECEIVER);
 
         bytes[] memory _triggerCallData = new bytes[](1);
@@ -239,8 +240,9 @@ contract TestAaveV3Automation is
 
         uint afterRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
+        uint256 borrowAmountAfter = IERC20(debtAsset.variableDebtTokenAddress).balanceOf(wallet);
+
         uint256 txFeeBalanceAfter = IERC20(TokenAddresses.WETH_ADDR).balanceOf(TokenAddresses.FEE_RECEIVER);
-        (, uint256 borrowAmountAfter,,,, ) = pool.getUserAccountData(wallet);
 
         uint amountAfterFee = REPAY_AMOUNT_WETH - (REPAY_AMOUNT_WETH / 400);
 
@@ -279,7 +281,7 @@ contract TestAaveV3Automation is
         bytes[] memory _triggerCallData = new bytes[](1);
 
         bytes[] memory _actionsCallData = new bytes[](5);
-        _actionsCallData[0] = aaveV3BorrowEncode(BOOST_AMOUNT_DAI, wallet, 2, debtAsset.id, true, false, address(0), address(0));
+        _actionsCallData[0] = aaveV3BorrowEncode(BOOST_AMOUNT_DAI, address(0), 2, debtAsset.id, true, false, address(0), address(0));
         _actionsCallData[1] = sellEncode(TokenAddresses.DAI_ADDR, TokenAddresses.WETH_ADDR, 0, wallet, wallet, TokenAddresses.UNI_V2_WRAPPER);
         _actionsCallData[2] = gasFeeEncode(BOOST_GAS_COST, TokenAddresses.WETH_ADDR);
         _actionsCallData[3] = aaveV3SupplyEncode(0, wallet, collateralAsset.id, true, false, address(0), address(0));

@@ -366,7 +366,6 @@ contract Strategies {
         repayStrategy.addAction("AaveV3Withdraw", withdrawParams);
 
         string[] memory sellParams = new string[](5);
-        sellParams[0] = "&baseToken";
         sellParams[2] = "$1";
         sellParams[3] = "&proxy";
         sellParams[4] = "&proxy";
@@ -446,7 +445,7 @@ contract Strategies {
         boostStrategy.addTrigger("AaveV3RatioTrigger");
 
         string[] memory borrowParams = new string[](8);
-        borrowParams[1] = "&to";
+        borrowParams[1] = "&proxy";
         borrowParams[4] = "&useDefaultMarket";
         borrowParams[5] = "&useOnBehalf";
         boostStrategy.addAction("AaveV3Borrow", borrowParams);
@@ -512,7 +511,6 @@ contract Strategies {
 
         string[] memory borrowParams = new string[](8);
         borrowParams[0] = "$1";
-        borrowParams[1] = "&to";
         borrowParams[4] = "&useDefaultMarket";
         borrowParams[5] = "&useOnBehalf";
         boostStrategy.addAction("AaveV3Borrow", borrowParams);
