@@ -168,6 +168,50 @@ contract LiquityV2View is LiquityV2Helper {
         trove.collToken = IAddressesRegistry(_market).collToken();
     }
 
+    /// @notice Helper struct to store troves when fetching user troves
+    /// @param troveId The trove ID
+    /// @param ownedByUser Whether the trove is owned by the user or not
+    struct ExistingTrove {
+        uint256 troveId;
+        bool ownedByUser;
+    }
+
+    /// @notice Get the trove IDs for a user in a give market
+    /// @param _user The user address
+    /// @param _market The market address
+    /// @param _startIndex The start index to search for troves (inclusive)
+    /// @param _endIndex The end index to search for troves (exclusive)
+    /// @return troves The trove IDs for the given range
+    /// @return nextFreeTroveIndex The next free trove index if exists, or -1 if no free index found in given range
+    function getUserTroves(
+        address _user,
+        address _market,
+        uint256 _startIndex,
+        uint256 _endIndex
+    )   external view returns (ExistingTrove[] memory troves, int256 nextFreeTroveIndex) 
+    {   
+        nextFreeTroveIndex = -1; 
+        IAddressesRegistry market = IAddressesRegistry(_market);
+        ITroveManager troveManager = ITroveManager(market.troveManager());
+        ITroveNFT troveNFT = ITroveNFT(market.troveNFT());
+        
+        uint256 numTroves = _endIndex - _startIndex;
+        troves = new ExistingTrove[](numTroves);
+
+        for (uint256 i = _startIndex; i < _endIndex; ++i) {
+            uint256 troveId = uint256(keccak256(abi.encode(_user, i)));
+            ITroveManager.Status status = troveManager.getTroveStatus(troveId);
+            if (status == ITroveManager.Status.active || status == ITroveManager.Status.zombie) {
+                troves[i - _startIndex] = ExistingTrove({ 
+                    troveId: troveId,
+                    ownedByUser: troveNFT.ownerOf(troveId) == _user 
+                });
+            } else if (nextFreeTroveIndex == -1) {
+                nextFreeTroveIndex = int256(i);
+            }
+        }
+    }
+
     function getMarketData(address _market) external view returns (MarketData memory data) {
         IAddressesRegistry registry = IAddressesRegistry(_market);
         address borrowerOperations = registry.borrowerOperations();

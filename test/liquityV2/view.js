@@ -23,7 +23,7 @@ const eulerV2ViewTest = async () => {
             if (isFork) {
                 await topUp(senderAcc.address);
                 await topUp(getOwnerAddr());
-                viewContract = await hre.ethers.getContractAt('LiquityV2View', '0x88bBa5Ce5cE20286Cf866b9f310354FFB701A296');
+                viewContract = await hre.ethers.getContractAt('LiquityV2View', '0x7DC97868B4b2Fd31c1002E9bfFe9a4aF2b534c06');
             } else {
                 viewContract = await redeploy('LiquityV2View', addrs[network].REGISTRY_ADDR, false, isFork);
             }
@@ -35,11 +35,20 @@ const eulerV2ViewTest = async () => {
             await revertToSnapshot(snapshot);
         });
         it('...test view calls', async () => {
-            const data = await viewContract
-                .getMarketData('0xd7199b16945f1ebaa0b301bf3d05bf489caa408b');
+            const market = '0xd7199b16945f1ebaa0b301bf3d05bf489caa408b';
+            const troveId = '67424636261021319576291112307907375011768731867548422484544596741348990692391';
+
+            const data = await viewContract.getMarketData(market);
             console.log(data);
-            const troveInfo = await viewContract.getTroveInfo('0xd7199b16945f1ebaa0b301bf3d05bf489caa408b', '71810214906374185731654292089929598901308110473187727225692166795279417034813');
+            const troveInfo = await viewContract.getTroveInfo(market, troveId);
             console.log(troveInfo);
+            const trovesForOwner = await viewContract.getUserTroves(
+                troveInfo.owner,
+                market,
+                0,
+                10,
+            );
+            console.log(trovesForOwner);
         });
     });
 };
