@@ -84,9 +84,9 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         address supplyVault = E_WETH_2_GOVERNED;
         address borrowVault = E_USDC_2_GOVERNED;
 
-        uint256 supplyAmountInUsd = 1000000;
-        uint256 firstBorrowAmountInUsd = 400000;
-        uint256 secondBorrowAmountInUsd = 200000;
+        uint256 supplyAmountInUsd = 100000;
+        uint256 firstBorrowAmountInUsd = 40000;
+        uint256 secondBorrowAmountInUsd = 5000;
 
         bool isDirect = true;
 
