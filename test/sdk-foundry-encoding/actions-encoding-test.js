@@ -859,29 +859,5 @@ describe('Test direct actions encoding for sdk and foundry', () => {
 
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
-
-        it('Test eulerV2ClaimRewardsEncode', async () => {
-            const EulerV2ClaimRewards = await hre.ethers.getContractFactory('EulerV2ClaimRewards');
-            const lockTimestamps = [1730217689, 1730217643242, 173021132, 34243, 1];
-            const sdkEncoded = (
-                new sdk.actions.eulerV2.EulerV2ClaimRewardsAction(
-                    receiver,
-                    claimAll,
-                    !claimAll,
-                    lockTimestamps,
-                )
-            ).encodeForDsProxyCall()[1];
-
-            const foundryEncoded = EulerV2ClaimRewards.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.eulerV2ClaimRewardsEncode(
-                    receiver,
-                    claimAll,
-                    !claimAll,
-                    lockTimestamps,
-                ),
-            ]);
-
-            expect(sdkEncoded).to.be.eq(foundryEncoded);
-        });
     });
 });

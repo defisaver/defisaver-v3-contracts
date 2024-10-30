@@ -473,7 +473,7 @@ const timeTravel = async (timeIncrease) => {
 };
 
 const setStorageAt = async (address, index, value) => {
-    let prefix = 'tenderly';
+    let prefix = 'hardhat';
 
     if (hre.network.config.type === 'tenderly') {
         prefix = 'tenderly';
