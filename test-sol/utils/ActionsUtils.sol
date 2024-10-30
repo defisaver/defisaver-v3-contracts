@@ -31,6 +31,7 @@ import { EulerV2CollateralSwitch } from "../../contracts/actions/eulerV2/EulerV2
 import { EulerV2ReorderCollaterals } from "../../contracts/actions/eulerV2/EulerV2ReorderCollaterals.sol";
 import { EulerV2PaybackWithShares } from "../../contracts/actions/eulerV2/EulerV2PaybackWithShares.sol";
 import { EulerV2PullDebt } from "../../contracts/actions/eulerV2/EulerV2PullDebt.sol";
+import { AaveV3RatioCheck } from "../../contracts/actions/checkers/AaveV3RatioCheck.sol";
 
 contract ActionsUtils {
 
@@ -432,6 +433,15 @@ contract ActionsUtils {
                 market: _market
             })
         );
+    }
+
+    function aaveV3RatioCheckEncode(uint8 _state, uint _targetRatio) public pure returns (bytes memory) {
+        AaveV3RatioCheck.Params memory params = AaveV3RatioCheck.Params({
+            ratioState: AaveV3RatioCheck.RatioState(_state),
+            targetRatio: _targetRatio
+        });
+
+        return abi.encode(params);
     }
 
     function sumInputsEncode(

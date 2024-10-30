@@ -425,10 +425,10 @@ const balancerFLTest = async () => {
                 await setBalance(tokenAddrs[2], flBalancerContract.address, Float2BN('1', 0));
 
                 const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-                        tokenAddrs,
-                        amounts,
-                        nullAddress,
-                        [],
+                    tokenAddrs,
+                    amounts,
+                    nullAddress,
+                    [],
                 );
 
                 const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
@@ -550,9 +550,9 @@ const makerFLTest = async () => {
                 );
                 const feeAmount = '0';
                 const flAction = new dfs.actions.flashloan.MakerFlashLoanAction(
-                        loanAmount,
-                        nullAddress,
-                        [],
+                    loanAmount,
+                    nullAddress,
+                    [],
                 );
                 const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
                     flAction,
@@ -871,9 +871,8 @@ describe('Generalised flashloan test', function () {
             await makerFLTest();
             await ghoFLTest();
             await uniswapV3FlashloanTest();
-            await flMorphoBlueTest();
         }
-
+        await flMorphoBlueTest();
         await balancerFLTest();
         await aaveV3FlTest();
     });
