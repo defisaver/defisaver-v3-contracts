@@ -404,7 +404,6 @@ contract Strategies {
         repayStrategy.addAction("FLAction", flParams);
 
         string[] memory sellParams = new string[](5);
-        sellParams[0] = "&baseToken";
         sellParams[3] = "&proxy";
         sellParams[4] = "&proxy";
         repayStrategy.addAction("DFSSell", sellParams);
@@ -451,7 +450,6 @@ contract Strategies {
         boostStrategy.addAction("AaveV3Borrow", borrowParams);
 
         string[] memory sellParams = new string[](5);
-        sellParams[1] = "&baseToken";
         sellParams[2] = "$1";
         sellParams[3] = "&proxy";
         sellParams[4] = "&proxy";
@@ -492,7 +490,6 @@ contract Strategies {
         boostStrategy.addAction("FLAction", flParams);
 
         string[] memory sellParams = new string[](5);
-        sellParams[1] = "&baseToken";
         sellParams[3] = "&proxy";
         sellParams[4] = "&proxy";
         boostStrategy.addAction("DFSSell", sellParams);
