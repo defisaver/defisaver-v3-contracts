@@ -35,6 +35,7 @@ const addrs = {
         TOKEN_GROUP_REGISTRY: '0xcA49e64FE1FE8be40ED30F682edA1b27a6c8611c',
         FEE_RECEIVER: '0x6467e807dB1E71B9Ef04E0E3aFb962E4B0900B2B',
         TX_SAVER_FEE_RECEIVER: '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479',
+        FEE_RECIPIENT_ADDR: '0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A',
         EXCHANGE_OWNER_ADDR: '0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00',
         WRAPPER_EXCHANGE_REGISTRY: '0x653893375dD1D942D2C429caB51641F2bf14d426',
         SubProxy: '0x88B8cEb76b88Ee0Fb7160E6e2Ad86055a32D72d4',
@@ -65,6 +66,8 @@ const addrs = {
         STRATEGY_STORAGE_ADDR: '0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933',
         BUNDLE_STORAGE_ADDR: '0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf',
         ZEROX_WRAPPER: '0x11e048f19844B7bAa6D9eA4a20eD4fACF7b757b2',
+        STRATEGY_EXECUTOR_ADDR: '0xFaa763790b26E7ea354373072baB02e680Eeb07F',
+        REFILL_CALLER: '0x33fDb79aFB4456B604f376A45A546e7ae700e880',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -77,7 +80,7 @@ const addrs = {
         WRAPPER_EXCHANGE_REGISTRY: '0x82b039Ca3c16E971132603f960a6E98582d8F021',
         PROXY_AUTH_ADDR: '0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
-        SubProxy: '0x163c08d3F6d916AD6Af55b37728D547e968103F8',
+        SubProxy: '0xFF9f0B8d0a4270f98C52842d163fd34728109692',
         UNISWAP_V3_WRAPPER: '0xF723B39fe2Aa9102dE45Bc8ECd3417805aAC79Aa',
         AAVE_V3_VIEW: '0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc',
         AAVE_SUB_PROXY: '0x9E8aE909Af8A391b58f45819f0d36e4256991D19',
@@ -97,6 +100,9 @@ const addrs = {
         COMET_USDC_REWARDS_ADDR: '0x443EA0340cb75a160F31A440722dec7b5bc3C2E9',
         TX_SAVER_FEE_RECEIVER: '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479',
         ZEROX_WRAPPER: '0x031D6d3C95dD2188D1A1A57e8DcD8051f3B938ca',
+        STRATEGY_EXECUTOR_ADDR: '0x2f54a62b18483f395779cCD81A598133aBb7775d',
+        FEE_RECIPIENT_ADDR: '0x5b12C2B979CB3aB89DD4813837873bC4Dd1930D0',
+        REFILL_CALLER: '0xaFdFC3814921d49AA412d6a22e3F44Cc555dDcC8',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -110,10 +116,11 @@ const addrs = {
         WRAPPER_EXCHANGE_REGISTRY: '0x4a0c7BDF7F58AA04852Da07CDb3d367521f81446',
         FEE_RECEIVER: '0xe000e3c9428D539566259cCd89ed5fb85e655A01',
         TX_SAVER_FEE_RECEIVER: '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479',
+        FEE_RECIPIENT_ADDR: '0xe000e3c9428D539566259cCd89ed5fb85e655A01',
         TOKEN_GROUP_REGISTRY: '0xb03fe103f54841821C080C124312059c9A3a7B5c',
         PROXY_AUTH_ADDR: '0xF3A8479538319756e100C386b3E60BF783680d8f',
         AAVE_MARKET: '0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb',
-        SubProxy: '0x275A8f98dBA07Ad6380D3ea3F36B665DD6E02F25',
+        SubProxy: '0x2edB8eb14e29F3CF0bd50958b4664C9EB1583Ec9',
         AAVE_V3_VIEW: '0xA74a85407D5A940542915458616aC3cf3f404E3b',
         UNISWAP_V3_WRAPPER: '0x37236458C59F4dCF17b96Aa67FC07Bbf5578d873',
         ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
@@ -134,6 +141,8 @@ const addrs = {
         STRATEGY_STORAGE_ADDR: '0x6aeA695fcd0655650323e9dc5f80Ac0b15A91Da2',
         BUNDLE_STORAGE_ADDR: '0x8332F2a50A9a6C85a476e1ea33031681291cB694',
         ZEROX_WRAPPER: '0x94a58e456F1De766b13e45104D79201A218c1607',
+        STRATEGY_EXECUTOR_ADDR: '0xa4F087267828C3Ca8ac18b6fE7f456aB20781AA6',
+        REFILL_CALLER: '0xcbA094ae1B2B363886CC7f428206dB1b116834A2',
     },
     base: {
         PROXY_REGISTRY: '0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d',
@@ -164,6 +173,9 @@ const addrs = {
         BUNDLE_STORAGE_ADDR: '0x6AB90ff536f0E2a880DbCdef1bB665C2acC0eDdC',
         TX_SAVER_FEE_RECEIVER: '0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479',
         ZEROX_WRAPPER: '0xdAB5cC8CDCBA602E7ACfab262A4B09fDEEC20b51',
+        STRATEGY_EXECUTOR_ADDR: '0x0d099E38f6aF8778c5053349c350Aad906B1432F',
+        FEE_RECIPIENT_ADDR: '0xEDFc68e2874B0AFc0963e18AE4D68522aEc7f97D',
+        REFILL_CALLER: '0xBefc466abe547B1785f382883833330a47C573f7',
     },
 };
 
@@ -240,6 +252,7 @@ const setNetwork = (networkName) => {
 };
 
 const getNetwork = () => network;
+const isNetworkFork = () => hre.network.name === 'fork';
 
 const chainIds = {
     mainnet: 1,
@@ -523,7 +536,34 @@ const getLocalTokenPrice = (tokenSymbol) => {
     }
     return 0;
 };
+const getTokenHelperContract = async () => {
+    const contractName = chainIds[getNetwork()] === 1 ? 'TokenPriceHelper' : 'TokenPriceHelperL2';
+    console.log(`Deploying ${contractName}`);
+    const tokenPriceHelperFactory = await hre.ethers.getContractFactory(contractName);
+    const tokenHelper = await tokenPriceHelperFactory.deploy();
+    await tokenHelper.deployed();
+    return tokenHelper;
+};
+const fetchAmountInUSDPrice = async (tokenSymbol, amountUSD) => {
+    const { decimals, address } = getAssetInfo(tokenSymbol, chainIds[getNetwork()]);
+    const tokenHelper = await getTokenHelperContract();
 
+    const tokenPriceInUSD = await tokenHelper.getPriceInUSD(address);
+    const tokenPriceInUSDFormatted = tokenPriceInUSD / 10 ** 8;
+
+    const numOfTokens = (amountUSD / tokenPriceInUSDFormatted).toFixed(decimals);
+
+    return hre.ethers.utils.parseUnits(numOfTokens, decimals);
+};
+
+const fetchTokenPriceInUSD = async (tokenSymbol) => {
+    const { address } = getAssetInfo(tokenSymbol, chainIds[getNetwork()]);
+    const tokenHelper = await getTokenHelperContract();
+    const tokenPriceInUSD = await tokenHelper.getPriceInUSD(address);
+    return tokenPriceInUSD;
+};
+
+// TODO: remove once we replace it with fetchAmountInUSDPrice
 const fetchAmountinUSDPrice = (tokenSymbol, amountUSD) => {
     const { decimals } = getAssetInfo(tokenSymbol);
     const tokenPrice = getLocalTokenPrice(tokenSymbol);
@@ -1471,6 +1511,10 @@ module.exports = {
     executeTxFromProxy,
     generateIds,
     approveContractInRegistry,
+    isWalletNameDsProxy,
+    fetchAmountInUSDPrice,
+    fetchTokenPriceInUSD,
+    isNetworkFork,
     setCode,
     addrs,
     AVG_GAS_PRICE,
@@ -1528,5 +1572,4 @@ module.exports = {
     BOND_NFT_ADDR,
     AAVE_V2_MARKET_ADDR,
     WALLETS,
-    isWalletNameDsProxy,
 };

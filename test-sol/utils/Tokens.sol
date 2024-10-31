@@ -43,6 +43,9 @@ contract Tokens is Test {
             tokenNames["LUSD"] = TokenAddresses.LUSD_ADDR;
             tokenNames["LINK"] = TokenAddresses.LINK_ADDR;
             tokenNames["AAVE"] = TokenAddresses.AAVE_ADDR;
+            tokenNames["eWETH-2"] = TokenAddresses.E_WETH_2;
+            tokenNames["eWSTETH-2"] = TokenAddresses.E_WSTETH_2;
+            tokenNames["eUSDC-2"] = TokenAddresses.E_USDC_2;
 
             tokenNamesInitialized = true;
         }

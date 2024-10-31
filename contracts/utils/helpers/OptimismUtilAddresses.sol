@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 contract OptimismUtilAddresses {
     address internal refillCaller = 0xaFdFC3814921d49AA412d6a22e3F44Cc555dDcC8;
-    address internal feeAddr = 0x76720aC2574631530eC8163e4085d6F98513fb27;
+    address internal constant FEE_RECIPIENT_ADDR = 0x5b12C2B979CB3aB89DD4813837873bC4Dd1930D0;
     address internal constant DEFAULT_BOT = 0x16dd89D6e2f81d0528120fb31f6cFE8528E2738e;
     address internal constant BOT_REGISTRY_ADDRESS = 0xfD2aAeBAe937dd69E13119250B065de4C21FcdBe;
     address internal constant FEE_RECIPIENT = 0x5b12C2B979CB3aB89DD4813837873bC4Dd1930D0;
@@ -33,5 +33,5 @@ contract OptimismUtilAddresses {
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0x7E3D9e4E620842d61aB111a6DbF1be5a8cc91774;
 
-    address public constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
+    address internal constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
 }

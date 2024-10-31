@@ -2537,6 +2537,42 @@ const sDaiUnwrap = async (
     return receipt;
 };
 
+const skyStake = async (
+    proxy, stakingContract, stakingToken, from, amount,
+) => {
+    const action = new dfs.actions.sky.SkyStakeAction(
+        stakingContract, stakingToken, amount, from,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('SkyStake', functionData, proxy);
+
+    return receipt;
+};
+
+const skyUnstake = async (
+    proxy, stakingContract, stakingToken, to, amount,
+) => {
+    const action = new dfs.actions.sky.SkyUnstakeAction(
+        stakingContract, stakingToken, amount, to,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('SkyUnstake', functionData, proxy);
+
+    return receipt;
+};
+
+const skyClaimRewards = async (
+    proxy, stakingContract, rewardToken, to,
+) => {
+    const action = new dfs.actions.sky.SkyClaimRewardsAction(
+        stakingContract, rewardToken, to,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('SkyClaimRewards', functionData, proxy);
+
+    return receipt;
+};
+
 const morphoAaveV2Supply = async (
     proxy,
     tokenAddr,
@@ -3400,6 +3436,94 @@ const llamalendSelfLiquidate = async (
 
     return receipt;
 };
+
+const eulerV2Supply = async (
+    proxy,
+    vault,
+    asset,
+    account,
+    from,
+    amount,
+) => {
+    const action = new dfs.actions.eulerV2.EulerV2SupplyAction(
+        vault,
+        asset,
+        account,
+        from,
+        amount,
+        true,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('EulerV2Supply', functionData, proxy);
+
+    return receipt;
+};
+
+const eulerV2Withdraw = async (
+    proxy,
+    vault,
+    account,
+    receiver,
+    amount,
+) => {
+    const action = new dfs.actions.eulerV2.EulerV2WithdrawAction(
+        vault,
+        account,
+        receiver,
+        amount,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('EulerV2Withdraw', functionData, proxy);
+
+    return receipt;
+};
+
+const eulerV2Borrow = async (
+    proxy,
+    vault,
+    account,
+    receiver,
+    amount,
+) => {
+    const action = new dfs.actions.eulerV2.EulerV2BorrowAction(
+        vault,
+        account,
+        receiver,
+        amount,
+        true,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('EulerV2Borrow', functionData, proxy);
+
+    return receipt;
+};
+
+const eulerV2Payback = async (
+    proxy,
+    vault,
+    asset,
+    account,
+    from,
+    amount,
+) => {
+    const action = new dfs.actions.eulerV2.EulerV2PaybackAction(
+        vault,
+        asset,
+        account,
+        from,
+        amount,
+        true,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('EulerV2Payback', functionData, proxy);
+
+    return receipt;
+};
+
 module.exports = {
     executeAction,
     sell,
@@ -3612,4 +3736,13 @@ module.exports = {
     llamalendBoost,
     llamalendRepay,
     llamalendSelfLiquidateWithColl,
+
+    skyStake,
+    skyUnstake,
+    skyClaimRewards,
+
+    eulerV2Supply,
+    eulerV2Withdraw,
+    eulerV2Borrow,
+    eulerV2Payback,
 };

@@ -22,10 +22,10 @@
       "history": []
     },
     {
-      "name": "SubStorage",
+      "name": "SubStorageL2",
       "address": "0x44e98bB58d725F2eF93a195F518b335dCB784c78",
       "id": "0x9d6d05f4",
-      "path": "contracts/core/strategy/SubStorage.sol",
+      "path": "contracts/core/strategy/l2/SubStorageL2.sol",
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "86400",
@@ -151,6 +151,17 @@
       "history": []
     },
     {
+      "name": "BotRefills",
+      "address": "0xE3a7112d03D6cB928DE9cCE597892bDDF2173751",
+      "id": "0x4fac91e4",
+      "path": "contracts/utils/BotRefills.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": 0,
+      "registryIds": [],
+      "history": []
+    },
+    {
       "name": "RecipeExecutor",
       "address": "0x7a87565b77dd65bbc153fe20e97743842f1a6e0c",
       "id": "0x4c69ee1e",
@@ -210,36 +221,36 @@
     },
     {
       "name": "SendToken",
-      "address": "0x1420f4977E7B71AFddccBFc6F6e1505CefdF99F0",
+      "address": "0x2261F1eB2fBA22787dF48eE600616c8511667c69",
       "id": "0x02abc227",
       "path": "contracts/actions/utils/SendToken.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0x1420f4977E7B71AFddccBFc6F6e1505CefdF99F0"]
     },
     {
       "name": "SendTokenAndUnwrap",
-      "address": "0xF32d5d8D81f2662A02955CE537537088DF29daf5",
+      "address": "0x6cc5E79a59A3f2063450d2a1aD112Ce69b20F5a5",
       "id": "0x17782156",
       "path": "contracts/actions/utils/SendTokenAndUnwrap.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xF32d5d8D81f2662A02955CE537537088DF29daf5"]
     },
     {
       "name": "SendTokens",
-      "address": "0x17B4ecd173b3Df2F5cB02c53Df8AA34e23Bcb92E",
+      "address": "0xEDdD613910D9b055d8F59DE374d4E963a9f98533",
       "id": "0xa87d9d0e",
       "path": "contracts/actions/utils/SendTokens.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0x17B4ecd173b3Df2F5cB02c53Df8AA34e23Bcb92E"]
     },
     {
       "name": "HandleAuth",
@@ -276,14 +287,14 @@
     },
     {
       "name": "FLAction",
-      "address": "0xAAbd4B0372240E319F9722c4Fd1e2FE0C8d422D2",
+      "address": "0x5523E61fBEF59825831Ffbb1306aBc3Bb03BB3A4",
       "id": "0xbcab5e2a",
       "path": "contracts/actions/flashloan/FLAction.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": ["0xAAbd4B0372240E319F9722c4Fd1e2FE0C8d422D2"]
     },
     {
       "name": "FLAaveV3WithFee",
@@ -422,6 +433,83 @@
       "address": "0x1d2Fa7dAcC660A9124c3685EE8a6E699d10409Eb",
       "id": "0x72a6498a",
       "path": "contracts/actions/aaveV3/AaveV3Withdraw.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "AaveV3RatioTrigger",
+      "address": "0xA182A21d95Fee08107Bee151AdB8C9D47988CF6C",
+      "id": "0x21a42a26",
+      "path": "contracts/triggers/AaveV3RatioTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "AaveV3QuotePriceTrigger",
+      "address": "0x71Ce190fAD9e752A23BD2821E8c5D6898A6EFfac",
+      "id": "0xda3df4c8",
+      "path": "contracts/triggers/AaveV3QuotePriceTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "TimestampTrigger",
+      "address": "0xcB5b90bDE6FFba503f82A1ae5Fa52Dc2Ce66873f",
+      "id": "0xa051d9a9",
+      "path": "contracts/triggers/TimestampTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "OffchainPriceTrigger",
+      "address": "0x2B850dd1E9fde3B17c5F7cD8695a76F39EeAcE93",
+      "id": "0x3ef9c07c",
+      "path": "contracts/triggers/OffchainPriceTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "ToggleSub",
+      "address": "0x5F16C0a08d52b67fc73706c494F7535Dd3382b58",
+      "id": "0xd6499530",
+      "path": "contracts/actions/utils/ToggleSub.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "CompV3RatioTrigger",
+      "address": "0x7d84DCC2a1f547A8D267c85eed791fd3663562b8",
+      "id": "0x506812d0",
+      "path": "contracts/triggers/CompV3RatioTrigger.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "AaveV3RatioCheck",
+      "address": "0xfF4d02d551b863575feBA12a2947448Fc96984e7",
+      "id": "0x71ef3d4e",
+      "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
       "version": "1.0.0",
       "inRegistry": true,
       "changeTime": "86400",
@@ -747,14 +835,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x1882BBB847425335CCe0b81eC10295674A982395",
+        "address": "0x6962a609A10051A5309Fe8c4d3dAb15366C481d2",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.2",
+        "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x1882BBB847425335CCe0b81eC10295674A982395",
           "0xa679fED396bfA42ca2E67FfDbe7E78D335548fA4",
           "0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b"
         ]
@@ -903,6 +992,61 @@
         "history": []
       },
       {
+        "name": "GasFeeTakerL2",
+        "address": "0xAEe02caf404332c40Fd7FF8d5c25F91f7c1641d0",
+        "id": "0x7ec82077",
+        "path": "contracts/actions/fee/GasFeeTakerL2.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "LimitSellL2",
+        "address": "0xc78dEf78caD4a92cc02820eD691C978ddAe7d3e8",
+        "id": "0x5cc47139",
+        "path": "contracts/actions/exchange/LimitSellL2.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "CompV3RatioCheck",
+        "address": "0xC1ff2500790150c4a1c77B9e702e9984A252b60c",
+        "id": "0x2ce67bb9",
+        "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "MorphoBlueRatioTrigger",
+        "address": "0x50e492Fc6990eabb00ea63563FB4be3E4E90F04c",
+        "id": "0x98c39012",
+        "path": "contracts/triggers/MorphoBlueRatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "MorphoBlueRatioCheck",
+        "address": "0x50d3d563BEB6cdFBf4CeF0B236dD0a015Ccea227",
+        "id": "0xf913c3b7",
+        "path": "contracts/actions/checkers/MorphoBlueRatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+      },
+      {
         "name": "MorphoBlueView",
         "address": "0x53c0E962bd0AC53928ca04703238b2ec2894195B",
         "id": "0x942aef0a",
@@ -932,6 +1076,111 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "SubProxy",
+        "address": "0xDC9441c4085B9B302506d64330e178E3C4890C87",
+        "id": "0x15c87229",
+        "path": "contracts/core/strategy/SubProxy.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": [
+          "0xbC36AE71e15865f4074B786d992F1105cdd8c196"
+        ]
+      },
+      {
+        "name": "StrategyTriggerView",
+        "address": "0xb5d65DB3Fb71c816Ec5cF10A4eb5c308A1c4b891",
+        "id": "0x5e0ef18c",
+        "path": "contracts/views/StrategyTriggerView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "DFSPricesView",
+        "address": "0x25d32455A36cA32CaB116B17a7Cfc8C68EB0ADAe",
+        "id": "0x3d82eb0c",
+        "path": "contracts/views/DFSPricesView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "BotRefills",
+        "address": "0xE3a7112d03D6cB928DE9cCE597892bDDF2173751",
+        "id": "0x4fac91e4",
+        "path": "contracts/utils/BotRefills.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "GeneralView",
+        "address": "0xdff2b1bB068f5549e43DAC75C66fED555DE565fB",
+        "id": "0xc5831ea6",
+        "path": "contracts/views/GeneralView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "AaveV3SubProxy",
+        "address": "0x3B0f3B0bdE9dcbDf95eB92aE8E713059d524f7e7",
+        "id": "0x9275abae",
+        "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": [
+          "0x8489B4e243Ba8062D3351439D560E6AF477867ab"
+        ]
+      },
+      {
+        "name": "LimitOrderSubProxy",
+        "address": "0x7FD44E1BC67aC642C06c8051CaeF14F65E8127fE",
+        "id": "0x82fc0e77",
+        "path": "contracts/actions/exchange/LimitOrderSubProxy.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "CompV3SubProxyL2",
+        "address": "0x376d5BBB9e62de2Df23fB7B9fF6365E0231fD1a8",
+        "id": "0x49b12183",
+        "path": "contracts/actions/compoundV3/CompV3SubProxyL2.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": [
+          "0x33Ba53a1367527b09D429EB1392E57A43Cf83f99"
+        ]
+      },
+      {
+        "name": "CompV3View",
+        "address": "0x7219E16B532a7B3Fb010e7806F22e077f4080c3b",
+        "id": "0x16be4292",
+        "path": "contracts/views/CompV3View.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
       }
