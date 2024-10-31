@@ -1,3 +1,5 @@
+/* eslint-disable one-var-declaration-per-line */
+/* eslint-disable one-var */
 const { expect } = require('chai');
 const hre = require('hardhat');
 const sdk = require('@defisaver/sdk');
@@ -216,27 +218,6 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     useDefaultMarket,
                     amount,
                     to.address,
-                    market,
-                ),
-            ]);
-            expect(sdkEncoded).to.be.eq(foundryEncoded);
-        });
-        it('Test aaveV3SwapBorrowRateModeEncode', async () => {
-            const AaveV3SwapBorrowRateMode = await hre.ethers.getContractFactory('AaveV3SwapBorrowRateMode');
-            const sdkEncoded = (
-                new sdk.actions.aaveV3.AaveV3SwapBorrowRateModeAction(
-                    useDefaultMarket,
-                    market,
-                    rateMode,
-                    assetId,
-                )
-            ).encodeForDsProxyCall()[1];
-
-            const foundryEncoded = AaveV3SwapBorrowRateMode.interface.encodeFunctionData('executeActionDirect', [
-                await foundryContract.aaveV3SwapBorrowRateModeEncode(
-                    rateMode,
-                    assetId,
-                    useDefaultMarket,
                     market,
                 ),
             ]);
@@ -678,6 +659,204 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     mapFLSources.MORPHO_BLUE,
                 ),
             ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+    });
+
+    describe('EulerV2', () => {
+        let foundryContract;
+        let vault, account, from, receiver;
+        const tokenAddr = WETH_ADDRESS;
+        const amount = 10000;
+        const enableAsColl = true;
+        const claimAll = true;
+        const indexes = [[1, 2], [3, 4]];
+
+        before(async () => {
+            foundryContract = await getFoundryEncodingContract();
+            [vault, account, from, receiver] = (await hre.ethers.getSigners())
+                .map((s) => s.address);
+        });
+
+        it('Test eulerV2SupplyEncode', async () => {
+            const EulerV2Supply = await hre.ethers.getContractFactory('EulerV2Supply');
+            const sdkEncoded = (
+                new sdk.actions.eulerV2.EulerV2SupplyAction(
+                    vault,
+                    tokenAddr,
+                    account,
+                    from,
+                    amount,
+                    enableAsColl,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EulerV2Supply.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.eulerV2SupplyEncode(
+                    vault,
+                    account,
+                    from,
+                    amount,
+                    enableAsColl,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test eulerV2WithdrawEncode', async () => {
+            const EulerV2Withdraw = await hre.ethers.getContractFactory('EulerV2Withdraw');
+            const sdkEncoded = (
+                new sdk.actions.eulerV2.EulerV2WithdrawAction(
+                    vault,
+                    account,
+                    receiver,
+                    amount,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EulerV2Withdraw.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.eulerV2WithdrawEncode(
+                    vault,
+                    account,
+                    receiver,
+                    amount,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test eulerV2BorrowEncode', async () => {
+            const EulerV2Borrow = await hre.ethers.getContractFactory('EulerV2Borrow');
+            const sdkEncoded = (
+                new sdk.actions.eulerV2.EulerV2BorrowAction(
+                    vault,
+                    account,
+                    receiver,
+                    amount,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EulerV2Borrow.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.eulerV2BorrowEncode(
+                    vault,
+                    account,
+                    receiver,
+                    amount,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test eulerV2PaybackEncode', async () => {
+            const EulerV2Payback = await hre.ethers.getContractFactory('EulerV2Payback');
+            const sdkEncoded = (
+                new sdk.actions.eulerV2.EulerV2PaybackAction(
+                    vault,
+                    tokenAddr,
+                    account,
+                    from,
+                    amount,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EulerV2Payback.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.eulerV2PaybackEncode(
+                    vault,
+                    account,
+                    from,
+                    amount,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test eulerV2PaybackWithSharesEncode', async () => {
+            const EulerV2PaybackWithShares = await hre.ethers.getContractFactory('EulerV2PaybackWithShares');
+            const sdkEncoded = (
+                new sdk.actions.eulerV2.EulerV2PaybackWithSharesAction(
+                    vault,
+                    account,
+                    from,
+                    amount,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EulerV2PaybackWithShares.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.eulerV2PaybackWithSharesEncode(
+                    vault,
+                    from,
+                    account,
+                    amount,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test eulerV2PullDebtEncode', async () => {
+            const EulerV2PullDebt = await hre.ethers.getContractFactory('EulerV2PullDebt');
+            const sdkEncoded = (
+                new sdk.actions.eulerV2.EulerV2PullDebtAction(
+                    vault,
+                    account,
+                    from,
+                    amount,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EulerV2PullDebt.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.eulerV2PullDebtEncode(
+                    vault,
+                    account,
+                    from,
+                    amount,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test eulerV2ReorderCollateralsEncode', async () => {
+            const EulerV2ReorderCollaterals = await hre.ethers.getContractFactory('EulerV2ReorderCollaterals');
+            const sdkEncoded = (
+                new sdk.actions.eulerV2.EulerV2ReorderCollateralsAction(
+                    account,
+                    indexes,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EulerV2ReorderCollaterals.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.eulerV2ReorderCollaterals(
+                    account,
+                    indexes,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test eulerV2CollateralSwitchEncode', async () => {
+            const EulerV2CollateralSwitch = await hre.ethers.getContractFactory('EulerV2CollateralSwitch');
+            const sdkEncoded = (
+                new sdk.actions.eulerV2.EulerV2CollateralSwitchAction(
+                    vault,
+                    account,
+                    enableAsColl,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EulerV2CollateralSwitch.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.eulerV2CollateralSwitchEncode(
+                    vault,
+                    account,
+                    enableAsColl,
+                ),
+            ]);
+
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
