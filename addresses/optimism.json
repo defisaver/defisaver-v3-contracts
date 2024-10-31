@@ -34,28 +34,30 @@
     },
     {
         "name": "SubProxy",
-        "address": "0xFF9f0B8d0a4270f98C52842d163fd34728109692",
+        "address": "0xe4a84bcb69511c6b4c1bda8bd5bbde16b95df4b4",
         "id": "0x15c87229",
         "path": "contracts/core/strategy/SubProxy.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0xFF9f0B8d0a4270f98C52842d163fd34728109692",
           "0x163c08d3F6d916AD6Af55b37728D547e968103F8",
           "0xfE87DE5e11F580fBD3637f34089BaeeA2C393826"
         ]
     },
     {
         "name": "AaveV3SubProxy",
-        "address": "0xa950a534a6AB01D1FF5C6C82E5E7F515c19500e9",
+        "address": "0x9b8717066797bd46a2880b4a0f99e7c6e098ae34",
         "id": "0x9275abae",
         "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0xa950a534a6AB01D1FF5C6C82E5E7F515c19500e9",
           "0x9E8aE909Af8A391b58f45819f0d36e4256991D19",
           "0x4D93E49B8989222571c2D171B988c5A3C04C6621"
         ]
@@ -332,14 +334,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xF83052a8d9ec5c705B4D7A1C252A6C24A692e91C",
+        "address": "0xf56a2a8fa68d2e608ed7060be55e96e008dcc3ca",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0xF83052a8d9ec5c705B4D7A1C252A6C24A692e91C",
           "0x5075c6a7251485CC3FcbB4Ba59d6E6EF26a69d45",
           "0xB6aF2C91E3eBB250615aaa33Bb955f7a7f21AD17",
           "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
@@ -857,14 +860,14 @@
     },
     {
       "name": "ToggleSub",
-      "address": "0x988C5C24AE6348404196267e19962f36961CAc29",
+      "address": "0xfc19a12e35bb0b5e6a3d3017be9e9022a6486eee",
       "id": "0xd6499530",
       "path": "contracts/actions/utils/ToggleSub.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
-      "history": []
+      "history": ["0x988C5C24AE6348404196267e19962f36961CAc29"]
     },
     {
       "name": "UniCollectV3",
