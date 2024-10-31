@@ -27,6 +27,12 @@ contract BaseTest is Config {
         vm.stopPrank();
     }
 
+    modifier revertToSnapshot() {
+        uint256 snapshotId = vm.snapshot();
+        _;
+        vm.revertTo(snapshotId);
+    }
+
     function setUp() public virtual {
         vm.label(address(bob), "Bob");
         vm.label(address(alice), "Alice");

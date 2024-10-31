@@ -3438,6 +3438,93 @@ const llamalendSelfLiquidate = async (
     return receipt;
 };
 
+const eulerV2Supply = async (
+    proxy,
+    vault,
+    asset,
+    account,
+    from,
+    amount,
+) => {
+    const action = new dfs.actions.eulerV2.EulerV2SupplyAction(
+        vault,
+        asset,
+        account,
+        from,
+        amount,
+        true,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('EulerV2Supply', functionData, proxy);
+
+    return receipt;
+};
+
+const eulerV2Withdraw = async (
+    proxy,
+    vault,
+    account,
+    receiver,
+    amount,
+) => {
+    const action = new dfs.actions.eulerV2.EulerV2WithdrawAction(
+        vault,
+        account,
+        receiver,
+        amount,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('EulerV2Withdraw', functionData, proxy);
+
+    return receipt;
+};
+
+const eulerV2Borrow = async (
+    proxy,
+    vault,
+    account,
+    receiver,
+    amount,
+) => {
+    const action = new dfs.actions.eulerV2.EulerV2BorrowAction(
+        vault,
+        account,
+        receiver,
+        amount,
+        true,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('EulerV2Borrow', functionData, proxy);
+
+    return receipt;
+};
+
+const eulerV2Payback = async (
+    proxy,
+    vault,
+    asset,
+    account,
+    from,
+    amount,
+) => {
+    const action = new dfs.actions.eulerV2.EulerV2PaybackAction(
+        vault,
+        asset,
+        account,
+        from,
+        amount,
+        true,
+    );
+
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('EulerV2Payback', functionData, proxy);
+
+    return receipt;
+};
+
 const liquityV2Open = async (
     proxy,
     market,
@@ -3703,6 +3790,11 @@ module.exports = {
     skyStake,
     skyUnstake,
     skyClaimRewards,
+
+    eulerV2Supply,
+    eulerV2Withdraw,
+    eulerV2Borrow,
+    eulerV2Payback,
 
     liquityV2Open,
 };
