@@ -26,4 +26,6 @@ interface IRewardsToken {
         returns (uint256, uint256);
     
     function depositFor(address account, uint256 amount) external;
+
+    function balanceOf(address account) external view returns (uint256);
 }
