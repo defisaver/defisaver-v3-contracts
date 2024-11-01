@@ -31,6 +31,7 @@ import { EulerV2CollateralSwitch } from "../../contracts/actions/eulerV2/EulerV2
 import { EulerV2ReorderCollaterals } from "../../contracts/actions/eulerV2/EulerV2ReorderCollaterals.sol";
 import { EulerV2PaybackWithShares } from "../../contracts/actions/eulerV2/EulerV2PaybackWithShares.sol";
 import { EulerV2PullDebt } from "../../contracts/actions/eulerV2/EulerV2PullDebt.sol";
+import { EulerV2ClaimRewards } from "../../contracts/actions/eulerV2/EulerV2ClaimRewards.sol";
 import { AaveV3RatioCheck } from "../../contracts/actions/checkers/AaveV3RatioCheck.sol";
 
 contract ActionsUtils {
@@ -608,4 +609,19 @@ contract ActionsUtils {
         );
     }
 
+    function eulerV2ClaimRewardsEncode(
+        address _to,
+        bool _claimAll,
+        bool _allowRemainderLoss,
+        uint256[] memory _lockTimestamps
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            EulerV2ClaimRewards.Params({
+                to: _to,
+                claimAll: _claimAll,
+                allowRemainderLoss: _allowRemainderLoss,
+                lockTimestamps: _lockTimestamps
+            })
+        );
+    }
 }
