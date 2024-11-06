@@ -159,13 +159,18 @@ contract LiquityV2View is LiquityV2Helper {
         ) = troveManager.Troves(_troveId);
 
         trove.troveId = _troveId;
-        trove.owner = troveNFT.ownerOf(_troveId);
         trove.annualInterestRate = latestTroveData.annualInterestRate;
         trove.collAmount = latestTroveData.entireColl;
         trove.debtAmount = latestTroveData.entireDebt;
         trove.collPrice = priceFeed.lastGoodPrice();
         trove.TCRatio = troveManager.getCurrentICR(_troveId, trove.collPrice);
         trove.collToken = IAddressesRegistry(_market).collToken();
+
+        try troveNFT.ownerOf(_troveId) returns (address owner) {
+            trove.owner = owner;
+        } catch {
+            trove.owner = address(0);
+        }
     }
 
     /// @notice Helper struct to store troves when fetching user troves

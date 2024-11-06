@@ -50,7 +50,7 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkLocalAnvil();
+        forkTenderly();
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

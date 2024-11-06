@@ -60,6 +60,14 @@ contract BaseTest is Config {
         vm.selectFork(anvilFork);
     }
 
+    function forkTenderly() internal {
+        string memory tenderlyForkId = vm.envString("FORK_ID");
+        string memory base = "https://rpc.tenderly.co/fork/";
+        string memory forkUrl = string(abi.encodePacked(base, tenderlyForkId));
+        uint256 tenderlyFork = vm.createFork(forkUrl);
+        vm.selectFork(tenderlyFork);
+    }
+
     function approve(address _token, address _to, uint256 _amount) internal {
         IERC20(_token).safeApprove(_to, _amount);
     }
