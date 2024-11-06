@@ -117,7 +117,7 @@ contract LiquityV2Open is ActionBase, LiquityV2Helper {
     }
 
     function _pullCollateralAndGasCompensation(Params memory _params, address _collToken) internal {
-        if (_collToken == WETH_TOKEN) {
+        if (_collToken == TokenUtils.WETH_ADDR) {
             bool isMaxPull = _params.collAmount == type(uint256).max;
 
             // when pulling max amount, we need to leave some WETH for gas compensation
@@ -132,16 +132,16 @@ contract LiquityV2Open is ActionBase, LiquityV2Helper {
             }
         } else {
             _params.collAmount = _collToken.pullTokensIfNeeded(_params.from, _params.collAmount);
-            WETH_TOKEN.pullTokensIfNeeded(_params.from, ETH_GAS_COMPENSATION);
+            TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, ETH_GAS_COMPENSATION);
         }
     }
 
     function _approveCollateralAndGasCompensation(Params memory _params, address _collToken, address _borrowerOperations) internal {
-        if (_collToken == WETH_TOKEN) {
+        if (_collToken == TokenUtils.WETH_ADDR) {
             _collToken.approveToken(_borrowerOperations, _params.collAmount + ETH_GAS_COMPENSATION);
         } else {
             _collToken.approveToken(_borrowerOperations, _params.collAmount);
-            WETH_TOKEN.approveToken(_borrowerOperations, ETH_GAS_COMPENSATION);
+            TokenUtils.WETH_ADDR.approveToken(_borrowerOperations, ETH_GAS_COMPENSATION);
         }
     }
 

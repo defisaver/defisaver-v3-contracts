@@ -66,10 +66,10 @@ contract LiquityV2Close is ActionBase, LiquityV2Helper {
 
         IBorrowerOperations(borrowerOperations).closeTrove(_params.troveId);
 
-        if (collToken == WETH_TOKEN) {
+        if (collToken == TokenUtils.WETH_ADDR) {
             collToken.withdrawTokens(_params.to, troveData.entireColl + ETH_GAS_COMPENSATION);
         } else {
-            WETH_TOKEN.withdrawTokens(_params.to, ETH_GAS_COMPENSATION);
+            TokenUtils.WETH_ADDR.withdrawTokens(_params.to, ETH_GAS_COMPENSATION);
             collToken.withdrawTokens(_params.to, troveData.entireColl);
         }
 
