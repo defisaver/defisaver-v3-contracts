@@ -25,7 +25,7 @@ const {
 const { createStrategy, createBundle } = require('../test/utils-strategies');
 const { uniV3CreatePool } = require('../test/actions');
 
-const BOLD_TOKEN = '0xC940b2CD3D66A173Baa8FDb1501288A2c1252b61';
+const BOLD_TOKEN = '0xBB57F8Ad4bAF3970270E78f55EbEeB1e0bef3Ccb';
 
 const deployLiquityV2RepayBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
@@ -55,13 +55,15 @@ const deployLiquityV2CloseBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
     const closeToCollateral = createLiquityV2CloseToCollStrategy();
-    const closeToCollateralStrategyId = await createStrategy(proxy, ...closeToCollateral, true);
+    const closeToCollateralStrategyId = await createStrategy(proxy, ...closeToCollateral, false);
 
     const flCloseToCollateral = createLiquityV2FLCloseToCollStrategy();
-    const flCloseToCollateralStrategyId = await createStrategy(proxy, ...flCloseToCollateral, true);
+    const flCloseToCollateralStrategyId = await createStrategy(
+        proxy, ...flCloseToCollateral, false,
+    );
 
     const flCloseToDebt = createLiquityV2FLCloseToDebtStrategy();
-    const flCloseToDebtStrategyId = await createStrategy(proxy, ...flCloseToDebt, true);
+    const flCloseToDebtStrategyId = await createStrategy(proxy, ...flCloseToDebt, false);
 
     const bundleId = await createBundle(
         proxy,
