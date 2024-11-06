@@ -4996,8 +4996,6 @@ const createLiquityV2CloseToCollStrategy = () => {
     liquityV2CloseToCollStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2CloseToCollStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2CloseToCollStrategy.addSubSlot('&wethToken', 'uint256');
-    liquityV2CloseToCollStrategy.addSubSlot('&lowerTriggerPrice', 'uint256');
-    liquityV2CloseToCollStrategy.addSubSlot('&upperTriggerPrice', 'uint256');
     // only used by backend to determine which action to call
     liquityV2CloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
 
@@ -5061,8 +5059,6 @@ const createLiquityV2FLCloseToCollStrategy = () => {
     liquityV2FLCloseToCollStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2FLCloseToCollStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2FLCloseToCollStrategy.addSubSlot('&wethToken', 'uint256');
-    liquityV2FLCloseToCollStrategy.addSubSlot('&lowerTriggerPrice', 'uint256');
-    liquityV2FLCloseToCollStrategy.addSubSlot('&upperTriggerPrice', 'uint256');
     // only used by backend to determine which action to call
     liquityV2FLCloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
 
@@ -5133,8 +5129,6 @@ const createLiquityV2FLCloseToDebtStrategy = () => {
     liquityV2FLCloseToDebtStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2FLCloseToDebtStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2FLCloseToDebtStrategy.addSubSlot('&wethToken', 'uint256');
-    liquityV2FLCloseToDebtStrategy.addSubSlot('&lowerTriggerPrice', 'uint256');
-    liquityV2FLCloseToDebtStrategy.addSubSlot('&upperTriggerPrice', 'uint256');
     // only used by backend to determine which action to call
     liquityV2FLCloseToDebtStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
 
