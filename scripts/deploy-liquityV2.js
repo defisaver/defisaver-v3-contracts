@@ -18,6 +18,9 @@ const {
     createLiquityV2BoostStrategy,
     createLiquityV2FLBoostStrategy,
     createLiquityV2FLBoostWithCollStrategy,
+    createLiquityV2CloseToCollStrategy,
+    createLiquityV2FLCloseToCollStrategy,
+    createLiquityV2FLCloseToDebtStrategy,
 } = require('../test/strategies');
 const { createStrategy, createBundle } = require('../test/utils-strategies');
 const { uniV3CreatePool } = require('../test/actions');
@@ -44,6 +47,29 @@ const deployLiquityV2BoostBundle = async (proxy, isFork) => {
     const flBoostWithCollStrategyId = await createStrategy(proxy, ...flBoostWithCollStrategy, true);
     const bundleId = await createBundle(
         proxy, [boostStrategyId, flBoostStrategyId, flBoostWithCollStrategyId],
+    );
+    return bundleId;
+};
+
+const deployLiquityV2CloseBundle = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
+
+    const closeToCollateral = createLiquityV2CloseToCollStrategy();
+    const closeToCollateralStrategyId = await createStrategy(proxy, ...closeToCollateral, true);
+
+    const flCloseToCollateral = createLiquityV2FLCloseToCollStrategy();
+    const flCloseToCollateralStrategyId = await createStrategy(proxy, ...flCloseToCollateral, true);
+
+    const flCloseToDebt = createLiquityV2FLCloseToDebtStrategy();
+    const flCloseToDebtStrategyId = await createStrategy(proxy, ...flCloseToDebt, true);
+
+    const bundleId = await createBundle(
+        proxy,
+        [
+            closeToCollateralStrategyId,
+            flCloseToCollateralStrategyId,
+            flCloseToDebtStrategyId,
+        ],
     );
     return bundleId;
 };
@@ -94,6 +120,8 @@ async function main() {
     const liquityV2SPClaimColl = await redeploy('LiquityV2SPClaimColl', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2RatioTrigger = await redeploy('LiquityV2RatioTrigger', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2RatioCheck = await redeploy('LiquityV2RatioCheck', addrs[network].REGISTRY_ADDR, false, isFork);
+    const shouldClosePriceTrigger = await redeploy('ShouldClosePriceTrigger', addrs[network].REGISTRY_ADDR, false, isFork);
+    const sendTokensAndUnwrap = await redeploy('SendTokensAndUnwrap', addrs[network].REGISTRY_ADDR, false, isFork);
 
     console.log(`LiquityV2View: ${liquityV2View.address}`);
     console.log(`LiquityV2Open: ${liquityV2Open.address}`);
@@ -110,12 +138,16 @@ async function main() {
     console.log(`LiquityV2SPClaimColl: ${liquityV2SPClaimColl.address}`);
     console.log(`LiquityV2RatioTrigger: ${liquityV2RatioTrigger.address}`);
     console.log(`LiquityV2RatioCheck: ${liquityV2RatioCheck.address}`);
+    console.log(`ShouldClosePriceTrigger: ${shouldClosePriceTrigger.address}`);
+    console.log(`SendTokensAndUnwrap: ${sendTokensAndUnwrap.address}`);
 
     const repayBundleId = await deployLiquityV2RepayBundle(senderAcc, isFork);
     const boostBundleId = await deployLiquityV2BoostBundle(senderAcc, isFork);
+    const closeBundleId = await deployLiquityV2CloseBundle(senderAcc, isFork);
 
     console.log(`Repay bundle id: ${repayBundleId}`);
     console.log(`Boost bundle id: ${boostBundleId}`);
+    console.log(`Close bundle id: ${closeBundleId}`);
 
     await provideBoldLiquidity(proxy, senderAcc);
 

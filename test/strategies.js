@@ -4988,6 +4988,209 @@ const createLiquityV2FLBoostWithCollStrategy = () => {
     return liquityV2FLBoostWithCollStrategy.encodeForDsProxyCall();
 };
 
+const createLiquityV2CloseToCollStrategy = () => {
+    const liquityV2CloseToCollStrategy = new dfs.Strategy('LiquityV2CloseToCollStrategy');
+
+    liquityV2CloseToCollStrategy.addSubSlot('&market', 'address');
+    liquityV2CloseToCollStrategy.addSubSlot('&troveId', 'address');
+    liquityV2CloseToCollStrategy.addSubSlot('&collToken', 'uint256');
+    liquityV2CloseToCollStrategy.addSubSlot('&boldToken', 'uint256');
+    liquityV2CloseToCollStrategy.addSubSlot('&wethToken', 'uint256');
+    liquityV2CloseToCollStrategy.addSubSlot('&lowerTriggerPrice', 'uint256');
+    liquityV2CloseToCollStrategy.addSubSlot('&upperTriggerPrice', 'uint256');
+    // only used by backend to determine which action to call
+    liquityV2CloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
+
+    const shouldClosePriceTrigger = new dfs.triggers.ShouldClosePriceTrigger(
+        '&collToken',
+        '&lowerTriggerPrice',
+        '&upperTriggerPrice',
+    );
+    liquityV2CloseToCollStrategy.addTrigger(shouldClosePriceTrigger);
+
+    const withdrawAction = new dfs.actions.liquityV2.LiquityV2WithdrawAction(
+        '&market',
+        '&proxy',
+        '&troveId',
+        '%amount', // sent by backend
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collToken',
+            '&boldToken',
+            '$1',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const liquityV2CloseAction = new dfs.actions.liquityV2.LiquityV2CloseAction(
+        '&market',
+        '&proxy',
+        '&proxy',
+        '&troveId',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gas', // sent by backend
+        '&collToken',
+        '$3',
+    );
+    // return:
+    // 1. 0.0375 weth for gas compensation. This will unwrap weth to eth and send it to the eoa
+    // 2. All coll tokens that are left after the close. If this is weth, it will also be unwrapped
+    // 3. All bold tokens that are left after the close
+    const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
+        ['&wethToken', '&collToken', '&boldToken'],
+        ['&eoa', '&eoa', '&eoa'],
+        ['%0.0375', '%max(uint)', '%max(uint)'], // sent by backend
+    );
+
+    liquityV2CloseToCollStrategy.addAction(withdrawAction);
+    liquityV2CloseToCollStrategy.addAction(sellAction);
+    liquityV2CloseToCollStrategy.addAction(liquityV2CloseAction);
+    liquityV2CloseToCollStrategy.addAction(feeTakingAction);
+    liquityV2CloseToCollStrategy.addAction(sendTokensAction);
+
+    return liquityV2CloseToCollStrategy.encodeForDsProxyCall();
+};
+const createLiquityV2FLCloseToCollStrategy = () => {
+    const liquityV2FLCloseToCollStrategy = new dfs.Strategy('LiquityV2FLCloseToCollStrategy');
+
+    liquityV2FLCloseToCollStrategy.addSubSlot('&market', 'address');
+    liquityV2FLCloseToCollStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLCloseToCollStrategy.addSubSlot('&collToken', 'uint256');
+    liquityV2FLCloseToCollStrategy.addSubSlot('&boldToken', 'uint256');
+    liquityV2FLCloseToCollStrategy.addSubSlot('&wethToken', 'uint256');
+    liquityV2FLCloseToCollStrategy.addSubSlot('&lowerTriggerPrice', 'uint256');
+    liquityV2FLCloseToCollStrategy.addSubSlot('&upperTriggerPrice', 'uint256');
+    // only used by backend to determine which action to call
+    liquityV2FLCloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
+
+    const shouldClosePriceTrigger = new dfs.triggers.ShouldClosePriceTrigger(
+        '&collToken',
+        '&lowerTriggerPrice',
+        '&upperTriggerPrice',
+    );
+    liquityV2FLCloseToCollStrategy.addTrigger(shouldClosePriceTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['&collToken'],
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collToken',
+            '&boldToken',
+            '%amount', // sent by backend, kept variable if fl has fee
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const liquityV2CloseAction = new dfs.actions.liquityV2.LiquityV2CloseAction(
+        '&market',
+        '&proxy',
+        '&proxy',
+        '&troveId',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gas', // sent by backend
+        '&collToken',
+        '$3',
+    );
+    // return flashloan. This has to be separate action, because we don't want to unwrap weth
+    const sendFLAction = new dfs.actions.basic.SendTokenAction(
+        '&collToken',
+        '%flAddress', // sent by backend
+        '$1',
+    );
+    // return:
+    // 1. 0.0375 weth for gas compensation. This will unwrap weth to eth and send it to the eoa
+    // 2. All coll tokens that are left after the close. If this is weth, it will also be unwrapped
+    // 3. All bold tokens that are left after the close
+    const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
+        ['&wethToken', '&collToken', '&boldToken'],
+        ['&eoa', '&eoa', '&eoa'],
+        ['%0.0375', '%max(uint)', '%max(uint)'], // sent by backend
+    );
+
+    liquityV2FLCloseToCollStrategy.addAction(flAction);
+    liquityV2FLCloseToCollStrategy.addAction(sellAction);
+    liquityV2FLCloseToCollStrategy.addAction(liquityV2CloseAction);
+    liquityV2FLCloseToCollStrategy.addAction(feeTakingAction);
+    liquityV2FLCloseToCollStrategy.addAction(sendFLAction);
+    liquityV2FLCloseToCollStrategy.addAction(sendTokensAction);
+
+    return liquityV2FLCloseToCollStrategy.encodeForDsProxyCall();
+};
+const createLiquityV2FLCloseToDebtStrategy = () => {
+    const liquityV2FLCloseToDebtStrategy = new dfs.Strategy('LiquityV2FLCloseToDebtStrategy');
+
+    liquityV2FLCloseToDebtStrategy.addSubSlot('&market', 'address');
+    liquityV2FLCloseToDebtStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLCloseToDebtStrategy.addSubSlot('&collToken', 'uint256');
+    liquityV2FLCloseToDebtStrategy.addSubSlot('&boldToken', 'uint256');
+    liquityV2FLCloseToDebtStrategy.addSubSlot('&wethToken', 'uint256');
+    liquityV2FLCloseToDebtStrategy.addSubSlot('&lowerTriggerPrice', 'uint256');
+    liquityV2FLCloseToDebtStrategy.addSubSlot('&upperTriggerPrice', 'uint256');
+    // only used by backend to determine which action to call
+    liquityV2FLCloseToDebtStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
+
+    const shouldClosePriceTrigger = new dfs.triggers.ShouldClosePriceTrigger(
+        '&collToken',
+        '&lowerTriggerPrice',
+        '&upperTriggerPrice',
+    );
+    liquityV2FLCloseToDebtStrategy.addTrigger(shouldClosePriceTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['&boldToken'],
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const liquityV2CloseAction = new dfs.actions.liquityV2.LiquityV2CloseAction(
+        '&market',
+        '&proxy',
+        '&proxy',
+        '&troveId',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collToken',
+            '&boldToken',
+            '$2',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gas', // sent by backend
+        '&boldToken',
+        '$3',
+    );
+    // return:
+    // 1. Bold flashloan amount to flAddress
+    // 2. All bold that's left after the close and fl repayment
+    // 3. 0.0375 weth for gas compensation. This will unwrap weth to eth and send it to the eoa
+    const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
+        ['&boldToken', '&boldToken', '&wethToken'],
+        ['%flAddress', '&eoa', '&eoa'],
+        ['$1', '%max(uint)', '%0.0375'], // sent by backend
+    );
+
+    liquityV2FLCloseToDebtStrategy.addAction(flAction);
+    liquityV2FLCloseToDebtStrategy.addAction(liquityV2CloseAction);
+    liquityV2FLCloseToDebtStrategy.addAction(sellAction);
+    liquityV2FLCloseToDebtStrategy.addAction(feeTakingAction);
+    liquityV2FLCloseToDebtStrategy.addAction(sendTokensAction);
+
+    return liquityV2FLCloseToDebtStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -5082,4 +5285,7 @@ module.exports = {
     createLiquityV2BoostStrategy,
     createLiquityV2FLBoostStrategy,
     createLiquityV2FLBoostWithCollStrategy,
+    createLiquityV2CloseToCollStrategy,
+    createLiquityV2FLCloseToCollStrategy,
+    createLiquityV2FLCloseToDebtStrategy,
 };
