@@ -5,86 +5,25 @@ const { start } = require('./utils/starter');
 
 const {
     redeploy, addrs, network, getOwnerAddr,
-    openStrategyAndBundleStorage,
     DAI_ADDR,
     setBalance,
     getProxy,
+    BOLD_ADDR,
 } = require('../test/utils');
 
 const { topUp } = require('./utils/fork');
-const {
-    createLiquityV2RepayStrategy,
-    createLiquityV2FLRepayStrategy,
-    createLiquityV2BoostStrategy,
-    createLiquityV2FLBoostStrategy,
-    createLiquityV2FLBoostWithCollStrategy,
-    createLiquityV2CloseToCollStrategy,
-    createLiquityV2FLCloseToCollStrategy,
-    createLiquityV2FLCloseToDebtStrategy,
-} = require('../test/strategies');
-const { createStrategy, createBundle } = require('../test/utils-strategies');
 const { uniV3CreatePool } = require('../test/actions');
-
-const BOLD_TOKEN = '0xBB57F8Ad4bAF3970270E78f55EbEeB1e0bef3Ccb';
-
-const deployLiquityV2RepayBundle = async (proxy, isFork) => {
-    await openStrategyAndBundleStorage(isFork);
-    const repayStrategy = createLiquityV2RepayStrategy();
-    const flRepayStrategy = createLiquityV2FLRepayStrategy();
-    const repayStrategyId = await createStrategy(proxy, ...repayStrategy, true);
-    const flRepayStrategyId = await createStrategy(proxy, ...flRepayStrategy, true);
-    const bundleId = await createBundle(proxy, [repayStrategyId, flRepayStrategyId]);
-    return bundleId;
-};
-
-const deployLiquityV2BoostBundle = async (proxy, isFork) => {
-    await openStrategyAndBundleStorage(isFork);
-    const boostStrategy = createLiquityV2BoostStrategy();
-    const flBoostStrategy = createLiquityV2FLBoostStrategy();
-    const flBoostWithCollStrategy = createLiquityV2FLBoostWithCollStrategy();
-    const boostStrategyId = await createStrategy(proxy, ...boostStrategy, true);
-    const flBoostStrategyId = await createStrategy(proxy, ...flBoostStrategy, true);
-    const flBoostWithCollStrategyId = await createStrategy(proxy, ...flBoostWithCollStrategy, true);
-    const bundleId = await createBundle(
-        proxy, [boostStrategyId, flBoostStrategyId, flBoostWithCollStrategyId],
-    );
-    return bundleId;
-};
-
-const deployLiquityV2CloseBundle = async (proxy, isFork) => {
-    await openStrategyAndBundleStorage(isFork);
-
-    const closeToCollateral = createLiquityV2CloseToCollStrategy();
-    const closeToCollateralStrategyId = await createStrategy(proxy, ...closeToCollateral, false);
-
-    const flCloseToCollateral = createLiquityV2FLCloseToCollStrategy();
-    const flCloseToCollateralStrategyId = await createStrategy(
-        proxy, ...flCloseToCollateral, false,
-    );
-
-    const flCloseToDebt = createLiquityV2FLCloseToDebtStrategy();
-    const flCloseToDebtStrategyId = await createStrategy(proxy, ...flCloseToDebt, false);
-
-    const bundleId = await createBundle(
-        proxy,
-        [
-            closeToCollateralStrategyId,
-            flCloseToCollateralStrategyId,
-            flCloseToDebtStrategyId,
-        ],
-    );
-    return bundleId;
-};
+const { deployLiquityV2RepayBundle, deployLiquityV2BoostBundle, deployLiquityV2CloseBundle } = require('../test/utils-liquityV2');
 
 const provideBoldLiquidity = async (proxy, senderAcc) => {
     const dai = DAI_ADDR;
     const boldAmount = hre.ethers.utils.parseUnits('1000000000', 18);
     const daiAmount = hre.ethers.utils.parseUnits('1000000000', 18);
-    await setBalance(BOLD_TOKEN, senderAcc.address, boldAmount);
+    await setBalance(BOLD_ADDR, senderAcc.address, boldAmount);
     await setBalance(dai, senderAcc.address, daiAmount);
     await uniV3CreatePool(
         proxy,
-        BOLD_TOKEN,
+        BOLD_ADDR,
         dai,
         '100',
         -101, // math.floor(math.log(p, 1.0001)) where p is 0.99

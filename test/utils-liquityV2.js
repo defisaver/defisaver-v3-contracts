@@ -3,7 +3,10 @@ const {
     getContractFromRegistry,
     addrs,
     getNetwork,
+    openStrategyAndBundleStorage,
 } = require('./utils');
+const { createLiquityV2RepayStrategy, createLiquityV2FLRepayStrategy, createLiquityV2BoostStrategy, createLiquityV2FLBoostStrategy, createLiquityV2FLBoostWithCollStrategy, createLiquityV2CloseToCollStrategy, createLiquityV2FLCloseToCollStrategy, createLiquityV2FLCloseToDebtStrategy } = require('./strategies');
+const { createStrategy, createBundle } = require('./utils-strategies');
 
 const CollActionType = { SUPPLY: 0, WITHDRAW: 1 };
 const DebtActionType = { PAYBACK: 0, BORROW: 1 };
@@ -90,11 +93,63 @@ const getLiquityV2TestPairs = async () => [
     // },
 ];
 
+const deployLiquityV2RepayBundle = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
+    const repayStrategy = createLiquityV2RepayStrategy();
+    const flRepayStrategy = createLiquityV2FLRepayStrategy();
+    const repayStrategyId = await createStrategy(proxy, ...repayStrategy, true);
+    const flRepayStrategyId = await createStrategy(proxy, ...flRepayStrategy, true);
+    const bundleId = await createBundle(proxy, [repayStrategyId, flRepayStrategyId]);
+    return bundleId;
+};
+
+const deployLiquityV2BoostBundle = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
+    const boostStrategy = createLiquityV2BoostStrategy();
+    const flBoostStrategy = createLiquityV2FLBoostStrategy();
+    const flBoostWithCollStrategy = createLiquityV2FLBoostWithCollStrategy();
+    const boostStrategyId = await createStrategy(proxy, ...boostStrategy, true);
+    const flBoostStrategyId = await createStrategy(proxy, ...flBoostStrategy, true);
+    const flBoostWithCollStrategyId = await createStrategy(proxy, ...flBoostWithCollStrategy, true);
+    const bundleId = await createBundle(
+        proxy, [boostStrategyId, flBoostStrategyId, flBoostWithCollStrategyId],
+    );
+    return bundleId;
+};
+
+const deployLiquityV2CloseBundle = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
+
+    const closeToCollateral = createLiquityV2CloseToCollStrategy();
+    const closeToCollateralStrategyId = await createStrategy(proxy, ...closeToCollateral, false);
+
+    const flCloseToCollateral = createLiquityV2FLCloseToCollStrategy();
+    const flCloseToCollateralStrategyId = await createStrategy(
+        proxy, ...flCloseToCollateral, false,
+    );
+
+    const flCloseToDebt = createLiquityV2FLCloseToDebtStrategy();
+    const flCloseToDebtStrategyId = await createStrategy(proxy, ...flCloseToDebt, false);
+
+    const bundleId = await createBundle(
+        proxy,
+        [
+            closeToCollateralStrategyId,
+            flCloseToCollateralStrategyId,
+            flCloseToDebtStrategyId,
+        ],
+    );
+    return bundleId;
+};
+
 module.exports = {
     getLiquityV2Hints,
     getLiquityV2MaxUpfrontFee,
     getLiquityV2AdjustBorrowMaxUpfrontFee,
     getLiquityV2TestPairs,
+    deployLiquityV2RepayBundle,
+    deployLiquityV2BoostBundle,
+    deployLiquityV2CloseBundle,
     CollActionType,
     DebtActionType,
 };

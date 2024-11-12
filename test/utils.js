@@ -226,6 +226,8 @@ const UNI_ADDR = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984';
 const LINK_ADDR = '0x514910771af9ca656af840dff83e8264ecf986ca';
 const WBTC_ADDR = '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599';
 const LUSD_ADDR = '0x5f98805A4E8be255a32880FDeC7F6728C6568bA0';
+// TODO: Change once deployed
+const BOLD_ADDR = '0x4167ec9e6676876bcbcd1849d04220113bfbaa98';
 
 const USDT_ADDR = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 const BUSD_ADDR = '0x4fabb145d64652a948d72533023f6e7a623c7c53';
@@ -243,6 +245,8 @@ const MAX_UINT = '11579208923731619542357098500868790785326998466564056403945758
 const MAX_UINT128 = '340282366920938463463374607431768211455';
 
 const DFS_REG_CONTROLLER = '0xF8f8B3C98Cf2E63Df3041b73f80F362a4cf3A576';
+
+const BALANCER_VAULT_ADDR = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 
 const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
@@ -480,7 +484,7 @@ const timeTravel = async (timeIncrease) => {
 };
 
 const setStorageAt = async (address, index, value) => {
-    let prefix = 'tenderly';
+    let prefix = 'hardhat';
 
     if (hre.network.config.type === 'tenderly') {
         prefix = 'tenderly';
@@ -1597,4 +1601,6 @@ module.exports = {
     BOND_NFT_ADDR,
     AAVE_V2_MARKET_ADDR,
     WALLETS,
+    BOLD_ADDR,
+    BALANCER_VAULT_ADDR,
 };

@@ -5528,21 +5528,8 @@ const callLiquityV2FLBoostStrategy = async (
     const actionsCallData = [];
     const gasCost = 1000000;
 
-    /// @dev Use test pool with BOLD token and DAI
-    const token0 = boldToken;
-    const token1 = DAI_ADDR;
-    const fee = 100;
-    const uniswapV3FactoryContract = await hre.ethers.getContractAt('IUniswapV3Factory', '0x1F98431c8aD98523631AE4a59f267346ea31F984');
-    const uniV3Pool = await uniswapV3FactoryContract.getPool(token0, token1, fee);
-
     const flAction = new dfs.actions.flashloan.FLAction(
-        new dfs.actions.flashloan.UniV3FlashLoanAction(
-            token0,
-            token1,
-            uniV3Pool,
-            boostAmount,
-            0,
-        ),
+        new dfs.actions.flashloan.BalancerFlashLoanAction([boldToken], [boostAmount]),
     );
     const sellAction = new dfs.actions.basic.SellAction(
         exchangeObject,

@@ -28,6 +28,7 @@ const {
     BLUSD_ADDR,
     getNetwork,
     formatExchangeObjSdk,
+    sendEther,
 } = require('./utils');
 
 const {
@@ -3560,8 +3561,10 @@ const liquityV2Open = async (
     signer.address = from;
     const ethGasCompensation = hre.ethers.utils.parseUnits('0.0375', 'ether');
     if (collToken.toLowerCase() === WETH_ADDRESS.toLowerCase()) {
-        await setBalance(collToken, from, collAmount.add(ethGasCompensation));
-        await approve(collToken, proxy.address, signer);
+        const wethToken = await hre.ethers.getContractAt('IWETH', WETH_ADDRESS);
+        await sendEther((await hre.ethers.getSigners())[0], from, '1000');
+        await wethToken.deposit({ value: collAmount.add(ethGasCompensation) });
+        await approve(WETH_ADDRESS, proxy.address, signer);
     } else {
         await setBalance(collToken, from, collAmount);
         await approve(collToken, proxy.address, signer);
