@@ -41,6 +41,7 @@ const {
     getNetwork,
     getContractFromRegistry,
     chainIds,
+    BOLD_ADDR,
 } = require('./utils');
 const { BigNumber } = require('ethers');
 
@@ -870,6 +871,23 @@ const subLiquityV2BoostBundle = async (
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
+const subLiquityV2CloseBundle = async (
+    proxy, market, troveId, collToken, stopLossPrice, stopLossType, takeProfitPrice, takeProfitType, bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.liquityV2Encode.closeOnPrice(
+        bundleId,
+        market,
+        troveId,
+        collToken,
+        BOLD_ADDR,
+        stopLossPrice,
+        stopLossType,
+        takeProfitPrice,
+        takeProfitType,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
 
 module.exports = {
     subDcaStrategy,
@@ -908,4 +926,5 @@ module.exports = {
     subAaveV3OpenOrder,
     subLiquityV2RepayBundle,
     subLiquityV2BoostBundle,
+    subLiquityV2CloseBundle,
 };

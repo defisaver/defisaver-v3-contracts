@@ -18,6 +18,7 @@ class BoostTest extends BaseLiquityV2StrategyTest {
     }
 
     runTests() {
+        // eslint-disable-next-line no-unused-vars
         this.testPairs.forEach((pair, i) => {
             it('... should call LiquityV2 boost strategy', async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);

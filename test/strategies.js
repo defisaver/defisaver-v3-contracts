@@ -5071,7 +5071,7 @@ const createLiquityV2FLCloseToCollStrategy = () => {
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
-            ['&collToken'],
+            ['%collToken'], // sent by backend
             ['%flAmount'], // sent by backend
         ),
     );
@@ -5141,7 +5141,7 @@ const createLiquityV2FLCloseToDebtStrategy = () => {
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
-            ['&boldToken'],
+            ['%boldToken'], // sent by backend
             ['%flAmount'], // sent by backend
         ),
     );
