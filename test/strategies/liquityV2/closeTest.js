@@ -5,7 +5,7 @@ const { expect } = require('chai');
 const automationSdk = require('@defisaver/automation-sdk');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { getLiquityV2TestPairs, deployLiquityV2CloseBundle } = require('../../utils-liquityV2');
-const { BaseLiquityV2StrategyTest } = require('./baseTest');
+const { BaseLiquityV2StrategyTest } = require('./common');
 const { subLiquityV2CloseBundle } = require('../../strategy-subs');
 const {
     formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
@@ -231,7 +231,7 @@ class CloseTest extends BaseLiquityV2StrategyTest {
     }
 }
 
-(async () => {
+module.exports = async function runCloseTests() {
     const testPairs = await getLiquityV2TestPairs();
     const isFork = isNetworkFork();
     const closeTest = new CloseTest(testPairs, isFork);
@@ -242,4 +242,4 @@ class CloseTest extends BaseLiquityV2StrategyTest {
         afterEach(async () => { await closeTest.revertToSnapshot(); });
         closeTest.runTests();
     });
-})();
+};

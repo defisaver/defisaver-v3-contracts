@@ -2,7 +2,7 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { getLiquityV2TestPairs, deployLiquityV2BoostBundle, getLiquityV2AdjustBorrowMaxUpfrontFee } = require('../../utils-liquityV2');
-const { BaseLiquityV2StrategyTest } = require('./baseTest');
+const { BaseLiquityV2StrategyTest } = require('./common');
 const { subLiquityV2BoostBundle } = require('../../strategy-subs');
 const {
     formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
@@ -215,7 +215,7 @@ class BoostTest extends BaseLiquityV2StrategyTest {
     }
 }
 
-(async () => {
+module.exports = async function runBoostTests() {
     const testPairs = await getLiquityV2TestPairs();
     const isFork = isNetworkFork();
     const boostTest = new BoostTest(testPairs, isFork);
@@ -226,4 +226,4 @@ class BoostTest extends BaseLiquityV2StrategyTest {
         afterEach(async () => { await boostTest.revertToSnapshot(); });
         boostTest.runTests();
     });
-})();
+};

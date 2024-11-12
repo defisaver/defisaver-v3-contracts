@@ -86,11 +86,11 @@ const getLiquityV2TestPairs = async () => [
         supplyTokenSymbol: 'WETH',
         collIndex: 0,
     },
-    // {
-    //     market: '0x83b74f12a2894fcf7a4864eff6090d7d8a060c6b',
-    //     supplyTokenSymbol: 'wstETH',
-    //     collIndex: 1,
-    // },
+    {
+        market: '0x83b74f12a2894fcf7a4864eff6090d7d8a060c6b',
+        supplyTokenSymbol: 'wstETH',
+        collIndex: 1,
+    },
 ];
 
 const deployLiquityV2RepayBundle = async (proxy, isFork) => {

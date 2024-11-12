@@ -2,7 +2,7 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { deployLiquityV2RepayBundle, getLiquityV2TestPairs } = require('../../utils-liquityV2');
-const { BaseLiquityV2StrategyTest } = require('./baseTest');
+const { BaseLiquityV2StrategyTest } = require('./common');
 const { subLiquityV2RepayBundle } = require('../../strategy-subs');
 const {
     formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
@@ -134,7 +134,7 @@ class RepayTest extends BaseLiquityV2StrategyTest {
     }
 }
 
-(async () => {
+module.exports = async function runRepayTests() {
     const testPairs = await getLiquityV2TestPairs();
     const isFork = isNetworkFork();
     const repayTest = new RepayTest(testPairs, isFork);
@@ -145,4 +145,4 @@ class RepayTest extends BaseLiquityV2StrategyTest {
         afterEach(async () => { await repayTest.revertToSnapshot(); });
         repayTest.runTests();
     });
-})();
+};
