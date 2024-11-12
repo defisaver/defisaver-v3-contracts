@@ -44,6 +44,7 @@ import { EulerV2ReorderCollaterals } from "../../contracts/actions/eulerV2/Euler
 import { EulerV2PaybackWithShares } from "../../contracts/actions/eulerV2/EulerV2PaybackWithShares.sol";
 import { EulerV2PullDebt } from "../../contracts/actions/eulerV2/EulerV2PullDebt.sol";
 import { AaveV3RatioCheck } from "../../contracts/actions/checkers/AaveV3RatioCheck.sol";
+import { SendTokensAndUnwrap } from "../../contracts/actions/utils/SendTokensAndUnwrap.sol";
 
 contract ActionsUtils {
 
@@ -837,6 +838,20 @@ contract ActionsUtils {
                 collGainTo: _collGainTo,
                 amount: _amount,
                 doClaim: _doClaim
+            })
+        );
+    }
+
+    function sendTokensAndUnwrapEncode(
+        address[] memory _tokens,
+        address[] memory _receivers,
+        uint256[] memory _amounts
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SendTokensAndUnwrap.Params({
+                tokens: _tokens,
+                receivers: _receivers,
+                amounts: _amounts
             })
         );
     }
