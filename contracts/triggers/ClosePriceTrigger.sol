@@ -8,7 +8,7 @@ import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
 
 /// @title Trigger contract that verifies if the current price of token is outside of given range
-contract ShouldClosePriceTrigger is  ITrigger, AdminAuth, TriggerHelper, TokenPriceHelper {
+contract ClosePriceTrigger is  ITrigger, AdminAuth, TriggerHelper, TokenPriceHelper {
 
     struct SubParams {
         address tokenAddr;

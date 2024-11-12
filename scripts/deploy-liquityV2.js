@@ -61,7 +61,7 @@ async function main() {
     const liquityV2SPClaimColl = await redeploy('LiquityV2SPClaimColl', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2RatioTrigger = await redeploy('LiquityV2RatioTrigger', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2RatioCheck = await redeploy('LiquityV2RatioCheck', addrs[network].REGISTRY_ADDR, false, isFork);
-    const shouldClosePriceTrigger = await redeploy('ShouldClosePriceTrigger', addrs[network].REGISTRY_ADDR, false, isFork);
+    const closePriceTrigger = await redeploy('ClosePriceTrigger', addrs[network].REGISTRY_ADDR, false, isFork);
     const sendTokensAndUnwrap = await redeploy('SendTokensAndUnwrap', addrs[network].REGISTRY_ADDR, false, isFork);
 
     console.log(`LiquityV2View: ${liquityV2View.address}`);
@@ -79,7 +79,7 @@ async function main() {
     console.log(`LiquityV2SPClaimColl: ${liquityV2SPClaimColl.address}`);
     console.log(`LiquityV2RatioTrigger: ${liquityV2RatioTrigger.address}`);
     console.log(`LiquityV2RatioCheck: ${liquityV2RatioCheck.address}`);
-    console.log(`ShouldClosePriceTrigger: ${shouldClosePriceTrigger.address}`);
+    console.log(`ClosePriceTrigger: ${closePriceTrigger.address}`);
     console.log(`SendTokensAndUnwrap: ${sendTokensAndUnwrap.address}`);
 
     const repayBundleId = await deployLiquityV2RepayBundle(senderAcc, isFork);

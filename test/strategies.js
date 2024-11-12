@@ -4999,12 +4999,12 @@ const createLiquityV2CloseToCollStrategy = () => {
     // only used by backend to determine which action to call
     liquityV2CloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
 
-    const shouldClosePriceTrigger = new dfs.triggers.ShouldClosePriceTrigger(
+    const closePriceTrigger = new dfs.triggers.ClosePriceTrigger(
         '&collToken',
         '&lowerTriggerPrice',
         '&upperTriggerPrice',
     );
-    liquityV2CloseToCollStrategy.addTrigger(shouldClosePriceTrigger);
+    liquityV2CloseToCollStrategy.addTrigger(closePriceTrigger);
 
     const withdrawAction = new dfs.actions.liquityV2.LiquityV2WithdrawAction(
         '&market',
@@ -5062,12 +5062,12 @@ const createLiquityV2FLCloseToCollStrategy = () => {
     // only used by backend to determine which action to call
     liquityV2FLCloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
 
-    const shouldClosePriceTrigger = new dfs.triggers.ShouldClosePriceTrigger(
+    const closePriceTrigger = new dfs.triggers.ClosePriceTrigger(
         '&collToken',
         '&lowerTriggerPrice',
         '&upperTriggerPrice',
     );
-    liquityV2FLCloseToCollStrategy.addTrigger(shouldClosePriceTrigger);
+    liquityV2FLCloseToCollStrategy.addTrigger(closePriceTrigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -5132,12 +5132,12 @@ const createLiquityV2FLCloseToDebtStrategy = () => {
     // only used by backend to determine which action to call
     liquityV2FLCloseToDebtStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
 
-    const shouldClosePriceTrigger = new dfs.triggers.ShouldClosePriceTrigger(
+    const closePriceTrigger = new dfs.triggers.ClosePriceTrigger(
         '&collToken',
         '&lowerTriggerPrice',
         '&upperTriggerPrice',
     );
-    liquityV2FLCloseToDebtStrategy.addTrigger(shouldClosePriceTrigger);
+    liquityV2FLCloseToDebtStrategy.addTrigger(closePriceTrigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
