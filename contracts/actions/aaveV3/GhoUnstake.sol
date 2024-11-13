@@ -28,9 +28,10 @@ contract GhoUnstake is ActionBase, AaveV3Helper {
         Params memory params = parseInputs(_callData);
 
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
         (uint256 claimedAmount, bytes memory logData) = _unstake(params);
-        emit ActionEvent("GhoUnsake", logData);
+        emit ActionEvent("GhoUnstake", logData);
         return bytes32(claimedAmount);
     }
 
@@ -38,7 +39,7 @@ contract GhoUnstake is ActionBase, AaveV3Helper {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _unstake(params);
-        logger.logActionDirectEvent("GhoUnsake", logData);
+        logger.logActionDirectEvent("GhoUnstake", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -57,10 +58,10 @@ contract GhoUnstake is ActionBase, AaveV3Helper {
             address stakedToken = IStkAave(STAKED_GHO_TOKEN).STAKED_TOKEN();
             uint256 startingGHOBalance = stakedToken.getBalance(_params.to);
             IStkAave(STAKED_GHO_TOKEN).redeem(_params.to, _params.amount);
-            uint256 endingGHOBalance = stakedToken.getBalance(_params.to);
+            uint256 claimedGHOAmount = stakedToken.getBalance(_params.to) - startingGHOBalance;
 
-            logData = abi.encode(_params, endingGHOBalance - startingGHOBalance);
-            return (endingGHOBalance - startingGHOBalance, logData);
+            logData = abi.encode(_params, claimedGHOAmount);
+            return (claimedGHOAmount, logData);
         }
     }
 
