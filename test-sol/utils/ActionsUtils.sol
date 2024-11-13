@@ -31,6 +31,7 @@ import { LiquityV2Borrow } from "../../contracts/actions/liquityV2/trove/Liquity
 import { LiquityV2Payback } from "../../contracts/actions/liquityV2/trove/LiquityV2Payback.sol";
 import { LiquityV2Claim } from "../../contracts/actions/liquityV2/trove/LiquityV2Claim.sol";
 import { LiquityV2Adjust } from "../../contracts/actions/liquityV2/trove/LiquityV2Adjust.sol";
+import { LiquityV2AdjustZombieTrove } from "../../contracts/actions/liquityV2/trove/LiquityV2AdjustZombieTrove.sol";
 import { LiquityV2AdjustInterestRate } from "../../contracts/actions/liquityV2/trove/LiquityV2AdjustInterestRate.sol";
 import { LiquityV2SPDeposit } from "../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
 import { LiquityV2SPWithdraw } from "../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPWithdraw.sol";
@@ -671,6 +672,36 @@ contract ActionsUtils {
                 collAmount: _collAmount,
                 debtAmount: _debtAmount,
                 maxUpfrontFee: _maxUpfrontFee,
+                collAction: _collAction,
+                debtAction: _debtAction
+            })
+        );
+    }
+
+    function liquityV2AdjustZombieTroveEncode(
+        address _market,
+        address _from,
+        address _to,
+        uint256 _troveId,
+        uint256 _collAmount,
+        uint256 _debtAmount,
+        uint256 _upperHint,
+        uint256 _lowerHint,
+        uint256 _maxUpfrontFee,
+        LiquityV2AdjustZombieTrove.CollActionType _collAction,
+        LiquityV2AdjustZombieTrove.DebtActionType _debtAction
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2AdjustZombieTrove.Params({
+                market: _market,
+                from: _from,
+                to: _to,
+                troveId: _troveId,
+                collAmount: _collAmount,
+                debtAmount: _debtAmount,
+                maxUpfrontFee: _maxUpfrontFee,
+                upperHint: _upperHint,
+                lowerHint: _lowerHint,
                 collAction: _collAction,
                 debtAction: _debtAction
             })

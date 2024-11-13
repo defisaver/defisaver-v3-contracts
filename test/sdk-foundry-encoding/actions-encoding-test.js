@@ -942,6 +942,42 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
+        it('Test liquityV2AdjustZombieTroveEncode', async () => {
+            const LiquityV2Adjust = await hre.ethers.getContractFactory('LiquityV2AdjustZombieTrove');
+
+            const sdkEncoded = (
+                new sdk.actions.liquityV2.LiquityV2AdjustZombieTroveAction(
+                    market,
+                    from,
+                    to,
+                    troveId,
+                    collAmount,
+                    boldAmount,
+                    upperHint,
+                    lowerHint,
+                    maxUpfrontFee,
+                    collAction,
+                    debtAction,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = LiquityV2Adjust.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.liquityV2AdjustZombieTroveEncode(
+                    market,
+                    from,
+                    to,
+                    troveId,
+                    collAmount,
+                    boldAmount,
+                    upperHint,
+                    lowerHint,
+                    maxUpfrontFee,
+                    collAction,
+                    debtAction,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
         it('Test liquityV2AdjustInterestRateEncode', async () => {
             const LiquityV2AdjustInterestRate = await hre.ethers.getContractFactory('LiquityV2AdjustInterestRate');
 

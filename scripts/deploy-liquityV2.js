@@ -63,6 +63,7 @@ async function main() {
     const liquityV2RatioCheck = await redeploy('LiquityV2RatioCheck', addrs[network].REGISTRY_ADDR, false, isFork);
     const closePriceTrigger = await redeploy('ClosePriceTrigger', addrs[network].REGISTRY_ADDR, false, isFork);
     const sendTokensAndUnwrap = await redeploy('SendTokensAndUnwrap', addrs[network].REGISTRY_ADDR, false, isFork);
+    const liquityV2AdjustZombieTrove = await redeploy('LiquityV2AdjustZombieTrove', addrs[network].REGISTRY_ADDR, false, isFork);
 
     console.log(`LiquityV2View: ${liquityV2View.address}`);
     console.log(`LiquityV2Open: ${liquityV2Open.address}`);
@@ -81,6 +82,7 @@ async function main() {
     console.log(`LiquityV2RatioCheck: ${liquityV2RatioCheck.address}`);
     console.log(`ClosePriceTrigger: ${closePriceTrigger.address}`);
     console.log(`SendTokensAndUnwrap: ${sendTokensAndUnwrap.address}`);
+    console.log(`LiquityV2AdjustZombieTrove: ${liquityV2AdjustZombieTrove.address}`);
 
     const repayBundleId = await deployLiquityV2RepayBundle(senderAcc, isFork);
     const boostBundleId = await deployLiquityV2BoostBundle(senderAcc, isFork);
