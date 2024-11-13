@@ -7,10 +7,11 @@ import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
-contract StkGHOUnstake is ActionBase, AaveV3Helper {
+contract GhoUnstake is ActionBase, AaveV3Helper {
+
     using TokenUtils for address;
 
-    /// @param amount amount of stkGHO tokens to burn (max.uint to redeem whole balance)
+    /// @param amount amount of stkGHO tokens to burn (max.uint to redeem whole balance, 0 to start cooldown period)
     /// @param to address to receive GHO tokens
     struct Params {
         uint256 amount;
@@ -29,7 +30,7 @@ contract StkGHOUnstake is ActionBase, AaveV3Helper {
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
 
         (uint256 claimedAmount, bytes memory logData) = _unstake(params);
-        emit ActionEvent("StkGHOUnstake", logData);
+        emit ActionEvent("GhoUnsake", logData);
         return bytes32(claimedAmount);
     }
 
@@ -37,7 +38,7 @@ contract StkGHOUnstake is ActionBase, AaveV3Helper {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _unstake(params);
-        logger.logActionDirectEvent("StkGHOUnstake", logData);
+        logger.logActionDirectEvent("GhoUnsake", logData);
     }
 
     /// @inheritdoc ActionBase

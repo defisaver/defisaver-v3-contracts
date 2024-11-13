@@ -7,7 +7,7 @@ import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
-contract AaveClaimAAVE is ActionBase, AaveV3Helper {
+contract GhoClaimAAVE is ActionBase, AaveV3Helper {
 
     using TokenUtils for address;
 
@@ -28,16 +28,16 @@ contract AaveClaimAAVE is ActionBase, AaveV3Helper {
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
-        (uint256 claimedAmount, bytes memory logData) = _stkGHOClaimAAVE(params);
-        emit ActionEvent("StkGHOClaimAAVE", logData);
+        (uint256 claimedAmount, bytes memory logData) = _ghoClaimAAVE(params);
+        emit ActionEvent("GhoClaimAAVE", logData);
         return bytes32(claimedAmount);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _stkGHOClaimAAVE(params);
-        logger.logActionDirectEvent("StkGHOClaimAAVE", logData);
+        (, bytes memory logData) = _ghoClaimAAVE(params);
+        logger.logActionDirectEvent("GhoClaimAAVE", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -48,7 +48,7 @@ contract AaveClaimAAVE is ActionBase, AaveV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Claims AAVE reward from stkGHO token
-    function _stkGHOClaimAAVE(Params memory _params) internal returns (uint256 claimedAmount, bytes memory logData) {
+    function _ghoClaimAAVE(Params memory _params) internal returns (uint256 claimedAmount, bytes memory logData) {
         uint256 startingBalance = AAVE_GOV_TOKEN.getBalance(_params.to);
         IStkAave(STAKED_GHO_TOKEN).claimRewards(_params.to, _params.amount);
         claimedAmount = AAVE_GOV_TOKEN.getBalance(_params.to) - startingBalance;

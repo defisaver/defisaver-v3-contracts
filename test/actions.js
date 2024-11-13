@@ -237,6 +237,29 @@ const claimAaveFromStkAave = async (proxy, amount, to) => {
     return tx;
 };
 
+const claimAaveFromStkGho = async (proxy, amount, to) => {
+    const action = new dfs.actions.stkgho.GhoClaimAAVEAction(amount, to);
+
+    const functionData = action.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('GhoClaimAAVE', functionData, proxy);
+    return tx;
+};
+
+const startUnstakeGho = async (proxy) => {
+    const startUnstakeAction = new dfs.actions.stkgho.GhoStartUnstakeAction();
+    const functionData = startUnstakeAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('GhoUnstake', functionData, proxy);
+    return tx;
+};
+
+const finalizeUnstakeGho = async (proxy, to, amount) => {
+    const finalizeUnstakeAction = new dfs.actions.stkgho.GhoFinalizeUnstakeAction(amount, to);
+    const functionData = finalizeUnstakeAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('GhoUnstake', functionData, proxy);
+    return tx;
+};
+
 const startUnstakeAave = async (proxy) => {
     const startUnstakeAction = new dfs.actions.aave.AaveStartUnstakeAction();
     const functionData = startUnstakeAction.encodeForDsProxyCall()[1];
@@ -3745,4 +3768,8 @@ module.exports = {
     eulerV2Withdraw,
     eulerV2Borrow,
     eulerV2Payback,
+
+    claimAaveFromStkGho,
+    startUnstakeGho,
+    finalizeUnstakeGho,
 };
