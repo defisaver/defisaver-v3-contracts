@@ -141,7 +141,6 @@ const {
     subLiquityAutomationStrategy,
     subCompV2AutomationStrategy,
     subAaveV2AutomationStrategy,
-    subSparkCloseBundle,
     subSparkAutomationStrategy,
     subLiquityDebtInFrontRepayStrategy,
     subAaveV3CloseWithMaximumGasPriceBundle,
@@ -163,8 +162,6 @@ const { createRepayBundle, createBoostBundle } = require('../test/strategies/mcd
 
 const {
     deployBundles: deploySparkBundles,
-    deployCloseToCollBundle: deploySparkCloseToCollBundle,
-    deployCloseToDebtBundle: deploySparkCloseToDebtBundle,
 } = require('../test/strategies/spark/spark-tests');
 
 program.version('0.0.1');
@@ -1933,11 +1930,6 @@ const subSparkAutomation = async (
     if (await getLatestBundleId() < 18) {
         await deploySparkBundles(proxy, true)
             .then(({ repayBundleId, boostBundleId }) => console.log({ repayBundleId, boostBundleId }));
-
-        const closeToCollId = await deploySparkCloseToCollBundle(proxy, true);
-        const closeToDebtId = await deploySparkCloseToDebtBundle(proxy, true);
-
-        console.log({ closeToCollId, closeToDebtId });
     }
     // same as in L1
     const subIds = await subSparkAutomationStrategy(
@@ -1951,80 +1943,6 @@ const subSparkAutomation = async (
     );
 
     console.log(`Spark position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
-};
-
-const subSparkClose = async (
-    collSymbol,
-    debtSymbol,
-    triggerBaseSymbol,
-    triggerQuoteSymbol,
-    targetQuotePrice,
-    priceState,
-    sender,
-    closeToColl = false,
-) => {
-    let network = 'mainnet';
-    if (process.env.TEST_CHAIN_ID) {
-        network = process.env.TEST_CHAIN_ID;
-    }
-
-    configure({
-        chainId: chainIds[network],
-        testMode: true,
-    });
-
-    setNetwork(network);
-
-    let proxy;
-    let senderAcc = (await hre.ethers.getSigners())[0];
-    if (sender) {
-        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
-        senderAcc.address = senderAcc._address;
-    }
-    proxy = await getProxy(senderAcc.address,);
-    proxy = sender ? proxy.connect(senderAcc) : proxy;
-
-    await topUp(getOwnerAddr());
-    await topUp(senderAcc.address);
-
-    const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET);
-    const poolAddress = await sparkMarketContract.getPool();
-    const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
-
-    const baseAssetInfo = getAssetInfo(triggerBaseSymbol);
-    const quoteAssetInfo = getAssetInfo(triggerQuoteSymbol);
-    const collAssetInfo = getAssetInfo(collSymbol);
-    const debtAssetInfo = getAssetInfo(debtSymbol);
-    const collReserveData = await pool.getReserveData(collAssetInfo.address);
-    const debtReserveData = await pool.getReserveData(debtAssetInfo.address);
-    const collAssetId = collReserveData.id;
-    const debtAssetId = debtReserveData.id;
-
-    if (await getLatestBundleId() < 18) {
-        await deploySparkBundles(proxy, true)
-            .then(({ repayBundleId, boostBundleId }) => console.log({ repayBundleId, boostBundleId }));
-
-        const closeToCollId = await deploySparkCloseToCollBundle(proxy, true);
-        const closeToDebtId = await deploySparkCloseToDebtBundle(proxy, true);
-
-        console.log({ closeToCollId, closeToDebtId });
-    }
-
-    const bundleId = closeToColl ? '20' : '21';
-
-    await subSparkCloseBundle(
-        proxy,
-        bundleId,
-        baseAssetInfo.address,
-        quoteAssetInfo.address,
-        targetQuotePrice,
-        priceState,
-        collAssetInfo.address,
-        collAssetId,
-        debtAssetInfo.address,
-        debtAssetId,
-    ).then(({ subId }) => console.log(`subId: ${subId}`));
 };
 
 const subCompV3Automation = async (
@@ -3324,55 +3242,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 process.exit(0);
             },
         );
-
-    program
-        .command('sub-spark-close-to-debt <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
-        .description('Subscribes to Spark close to debt bundle')
-        .action(async (
-            collSymbol,
-            debtSymbol,
-            triggerBaseSymbol,
-            triggerQuoteSymbol,
-            triggerTargetPrice,
-            triggerState,
-            senderAddr,
-        ) => {
-            await subSparkClose(
-                collSymbol,
-                debtSymbol,
-                triggerBaseSymbol,
-                triggerQuoteSymbol,
-                triggerTargetPrice,
-                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
-                senderAddr,
-            );
-            process.exit(0);
-        });
-
-    program
-        .command('sub-spark-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
-        .description('Subscribes to Spark close to collateral bundle')
-        .action(async (
-            collSymbol,
-            debtSymbol,
-            triggerBaseSymbol,
-            triggerQuoteSymbol,
-            triggerTargetPrice,
-            triggerState,
-            senderAddr,
-        ) => {
-            await subSparkClose(
-                collSymbol,
-                debtSymbol,
-                triggerBaseSymbol,
-                triggerQuoteSymbol,
-                triggerTargetPrice,
-                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
-                senderAddr,
-                true,
-            );
-            process.exit(0);
-        });
 
     program
         .command(
