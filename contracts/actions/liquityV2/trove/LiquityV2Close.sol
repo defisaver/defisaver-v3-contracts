@@ -10,9 +10,15 @@ import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Closes a LiquityV2 trove on a specific market
+/// @notice Upon closing a trove on LiquityV2, fixed fee of 0.0375 WETH during opening is returned to the user
 contract LiquityV2Close is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 
+    /// @param market The address of the LiquityV2 market (collateral branch)
+    /// @param from The address to pull the bold tokens from
+    /// @param to The address to send the tokens to
+    /// @param troveId The ID of the trove to close
     struct Params {
         address market;
         address from;

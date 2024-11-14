@@ -9,10 +9,12 @@ import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
-// This action is only needed in the case a user has no deposit but still has remaining stashed Coll gains.
+/// @dev This action is only needed in the case a user has no deposit but still has remaining stashed Coll gains.
 contract LiquityV2SPClaimColl is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 
+    /// @param market The address of the LiquityV2 market (collateral branch)
+    /// @param to The address to send the tokens to
     struct Params {
         address market;
         address to;

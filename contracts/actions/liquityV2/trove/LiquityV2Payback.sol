@@ -10,9 +10,14 @@ import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Payback a bold amount on a LiquityV2 trove on a specific market
 contract LiquityV2Payback is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 
+    /// @param market The address of the LiquityV2 market (collateral branch)
+    /// @param from The address to pull the tokens from
+    /// @param troveId The ID of the trove to payback the tokens to
+    /// @param amount The amount of tokens to payback
     struct Params {
         address market;
         address from;

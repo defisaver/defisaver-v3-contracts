@@ -10,12 +10,27 @@ import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Adjusts a zombie trove on a specific market
+/// @dev For this action to work:
+/// 1. The trove has to be in Zombie state (it's removed from the list)
+/// 2. New trove debt after adjustment must be at least MIN_DEBT
 contract LiquityV2AdjustZombieTrove is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 
     enum CollActionType { SUPPLY, WITHDRAW }
     enum DebtActionType { PAYBACK, BORROW }
 
+    /// @param market The address of the LiquityV2 market (collateral branch)
+    /// @param from The address to pull the tokens from
+    /// @param to The address to send the tokens to
+    /// @param troveId The ID of the trove to adjust
+    /// @param collAmount The amount of collateral to supply or withdraw
+    /// @param debtAmount The amount of debt to payback or borrow
+    /// @param upperHint The upper hint for the trove
+    /// @param lowerHint The lower hint for the trove
+    /// @param maxUpfrontFee The maximum upfront fee to pay (see IHintHelpers:predictAdjustTroveUpfrontFee)
+    /// @param collAction The type of collateral action to perform. 0 for supply, 1 for withdraw
+    /// @param debtAction The type of debt action to perform. 0 for payback, 1 for borrow
     struct Params {
         address market;
         address from;

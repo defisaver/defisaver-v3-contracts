@@ -10,9 +10,13 @@ import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Claims the caller’s accumulated collateral from their liquidated Troves after collateral seizure at liquidation
+/// @notice This action will revert on zero claimable collateral
 contract LiquityV2Claim is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 
+    /// @param market The address of the LiquityV2 market (collateral branch)
+    /// @param to The address to send the tokens to
     struct Params {
         address market;
         address to;

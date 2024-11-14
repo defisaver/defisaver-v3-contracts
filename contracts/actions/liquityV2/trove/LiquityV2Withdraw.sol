@@ -9,9 +9,14 @@ import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Withdraws a token from a LiquityV2 trove on a specific market
 contract LiquityV2Withdraw is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 
+    /// @param market The address of the LiquityV2 market (collateral branch)
+    /// @param to The address to send the tokens to
+    /// @param troveId The ID of the trove to withdraw the tokens from
+    /// @param amount The amount of tokens to withdraw
     struct Params {
         address market;
         address to;

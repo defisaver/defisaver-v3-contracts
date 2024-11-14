@@ -9,9 +9,15 @@ import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Withdraws a token from the LiquityV2 Stability Pool
 contract LiquityV2SPWithdraw is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 
+    /// @param market The address of the LiquityV2 market (collateral branch)
+    /// @param boldTo The address to send the BOLD tokens to
+    /// @param collGainTo The address to send the collateral gains to
+    /// @param amount The amount of BOLD tokens to withdraw
+    /// @param doClaim If true, the action will claim the collateral gains if existent
     struct Params {
         address market;
         address boldTo;

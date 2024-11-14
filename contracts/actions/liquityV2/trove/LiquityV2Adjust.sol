@@ -10,12 +10,22 @@ import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Adjusts a LiquityV2 trove on a specific market
 contract LiquityV2Adjust is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 
     enum CollActionType { SUPPLY, WITHDRAW }
     enum DebtActionType { PAYBACK, BORROW }
 
+    /// @param market The address of the LiquityV2 market (collateral branch)
+    /// @param from The address to pull the tokens from
+    /// @param to The address to send the tokens to
+    /// @param troveId The ID of the trove to adjust
+    /// @param collAmount The amount of collateral to supply or withdraw
+    /// @param debtAmount The amount of debt to payback or borrow
+    /// @param maxUpfrontFee The maximum upfront fee to pay (see IHintHelpers:predictAdjustTroveUpfrontFee)
+    /// @param collAction The type of collateral action to perform. 0 for supply, 1 for withdraw
+    /// @param debtAction The type of debt action to perform. 0 for payback, 1 for borrow
     struct Params {
         address market;
         address from;

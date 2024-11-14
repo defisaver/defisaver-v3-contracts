@@ -8,7 +8,16 @@ import { IBorrowerOperations } from "../../../interfaces/liquityV2/IBorrowerOper
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
+/// @title Adjust the interest rate of a LiquityV2 trove on a specific market
 contract LiquityV2AdjustInterestRate is ActionBase, LiquityV2Helper {
+
+    /// @param market The address of the LiquityV2 market (collateral branch)
+    /// @param troveId The ID of the trove to adjust the interest rate of
+    /// @param newAnnualInterestRate The new annual interest rate for the trove
+    ///                              (in 1e16) - 50000000000000000 => 5% annual interest
+    /// @param upperHint The upper hint for the trove
+    /// @param lowerHint The lower hint for the trove
+    /// @param maxUpfrontFee The maximum upfront fee to pay (see IHintHelpers:predictAdjustTroveUpfrontFee)
     struct Params {
         address market;
         uint256 troveId;

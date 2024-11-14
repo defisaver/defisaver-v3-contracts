@@ -10,11 +10,29 @@ import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { IERC20 } from "../../../interfaces/IERC20.sol";
 
+/// @title Opens a LiquityV2 trove on a specific market
+/// @notice Opening a trove requires fixed fee of 0.0375 WETH on LiquityV2, regardless of market used. 
 contract LiquityV2Open is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 
     error NotEnoughWethForCollateralAndGasCompensation(uint256 amount);
 
+    /// @param market The address of the LiquityV2 market (collateral branch)
+    /// @param from The address to pull the tokens from
+    /// @param to The address to send the bold tokens to
+    /// @param interestBatchManager The address of the interest batch manager
+    ///                             (optional - set to address(0) if trove will not join the batch)
+    /// @param ownerIndex The index of the owner used to calculate the trove ID
+    ///                   troveId = keccak256(owner, ownerIndex)          
+    /// @param collAmount The amount of collateral to deposit
+    /// @param boldAmount The amount of BOLD to mint
+    /// @param upperHint The upper hint for the trove
+    /// @param lowerHint The lower hint for the trove. See LiquityV2View for fetching hints
+    /// @param annualInterestRate The annual interest rate for the trove
+    ///                           (in 1e16) - 50000000000000000 => 5% annual interest
+    ///                           Optional if joining interest batch manager
+    /// @param maxUpfrontFee The maximum upfront fee to pay
+    ///                      (see IHintHelpers:predictOpenTroveUpfrontFee && predictOpenTroveAndJoinBatchUpfrontFee)
     struct Params {
         address market;
         address from;
@@ -123,10 +141,13 @@ contract LiquityV2Open is ActionBase, LiquityV2Helper {
             // when pulling max amount, we need to leave some WETH for gas compensation
             if (isMaxPull) {
                 _params.collAmount = _collToken.pullTokensIfNeeded(_params.from, _params.collAmount);
+                
+                // This will revert on underflow anyway, added here to better communicate the error to the caller
                 if (_params.collAmount <= ETH_GAS_COMPENSATION) {
                     revert NotEnoughWethForCollateralAndGasCompensation(_params.collAmount);
                 }
                 _params.collAmount -= ETH_GAS_COMPENSATION;
+
             } else {
                 _collToken.pullTokensIfNeeded(_params.from, _params.collAmount + ETH_GAS_COMPENSATION);
             }
