@@ -3726,6 +3726,28 @@
         ]
     },
     {
+        "name": "GhoUnstake",
+        "address": "0x3fD02e65B4fb12381946D03815Ff3FF8Ebe2fC63",
+        "id": "0xe1c6999c",
+        "path": "contracts/actions/aaveV3/GhoUnstake.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "GhoClaimAAVE",
+        "address": "0xA53060d822cB31AFd5B26D899130a14E8Efc5917",
+        "id": "0x17ca00ae",
+        "path": "contracts/actions/aaveV3/GhoClaimAAVE.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"
