@@ -1397,7 +1397,6 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
     let receipt;
     if (isProxySafe(proxy)) {
         console.log('proxy signer address');
-        console.log(proxy.signer.address);
         receipt = await executeSafeTx(
             proxy.signer.address,
             proxy,
