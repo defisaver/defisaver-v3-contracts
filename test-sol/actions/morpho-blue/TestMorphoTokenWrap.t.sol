@@ -5,26 +5,12 @@ pragma solidity =0.8.24;
 import { MorphoTokenWrap } from "../../../contracts/actions/morpho-blue/MorphoTokenWrap.sol";
 import { MorphoBlueHelper } from "../../../contracts/actions/morpho-blue/helpers/MorphoBlueHelper.sol";
 import { IMorphoTokenWrapper } from "../../../contracts/interfaces/morpho-blue/IMorphoTokenWrapper.sol";
+import { ILegacyMorphoToken } from "../../../contracts/interfaces/morpho-blue/ILegacyMorphoToken.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 
-interface ILegacyMorphoToken {
-    function setUserRole(
-        address user,
-        uint8 role,
-        bool enabled
-    ) external;
-
-    function setRoleCapability(
-        uint8 role,
-        bytes4 functionSig,
-        bool enabled
-    ) external;
-
-    function owner() external view returns (address);
-}
 
 contract TestMorphoTokenWrap is BaseTest, ActionsUtils, MorphoBlueHelper {
 
