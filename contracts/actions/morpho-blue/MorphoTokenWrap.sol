@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IWrappedMorphoToken } from "../../interfaces/morpho-blue/IWrappedMorphoToken.sol";
+import { IMorphoTokenWrapper } from "../../interfaces/morpho-blue/IMorphoTokenWrapper.sol";
 
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
@@ -52,7 +52,7 @@ contract MorphoTokenWrap is ActionBase, MorphoBlueHelper {
 
         LEGACY_MORPHO_TOKEN.approveToken(MORPHO_TOKEN_WRAPPER, _params.amount);
 
-        IWrappedMorphoToken(MORPHO_TOKEN_WRAPPER).depositFor(
+        IMorphoTokenWrapper(MORPHO_TOKEN_WRAPPER).depositFor(
             _params.to, 
             _params.amount
         );
