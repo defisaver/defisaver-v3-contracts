@@ -860,4 +860,33 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
+
+    describe('MorphoBlue', () => {
+        let foundryContract;
+        let receiver;
+        before(async () => {
+            foundryContract = await getFoundryEncodingContract();
+            [receiver] = (await hre.ethers.getSigners()).map((s) => s.address);
+        });
+
+        it('Test morphoTokenWrapEncode', async () => {
+            const MorphoTokenWrap = await hre.ethers.getContractFactory('MorphoTokenWrap');
+            const sdkEncoded = (new sdk.actions.morphoblue.MorphoTokenWrapAction(receiver, 1000))
+                .encodeForDsProxyCall()[1];
+            const foundryEncoded = MorphoTokenWrap.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.morphoTokenWrapEncode(receiver, 1000),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+        it('Test morphoTokenWrapEncode maxUint256 amount', async () => {
+            const maxAmt = hre.ethers.constants.MaxUint256;
+            const MorphoTokenWrap = await hre.ethers.getContractFactory('MorphoTokenWrap');
+            const sdkEncoded = (new sdk.actions.morphoblue.MorphoTokenWrapAction(receiver, maxAmt))
+                .encodeForDsProxyCall()[1];
+            const foundryEncoded = MorphoTokenWrap.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.morphoTokenWrapEncode(receiver, maxAmt),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+    });
 });
