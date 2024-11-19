@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 contract MainnetUtilAddresses {
-    address internal refillCaller = 0x33fDb79aFB4456B604f376A45A546e7ae700e880;
-    address internal feeAddr = 0x76720aC2574631530eC8163e4085d6F98513fb27;
+    address internal refillCaller = 0x8973f5e6142ed2e2F50EEE8Bb34a47C2DAa6624a;
 
+    address internal constant FEE_RECIPIENT_ADDR = 0x39C4a92Dc506300c3Ea4c67ca4CA611102ee6F2A;
     address internal constant BOT_REGISTRY_ADDRESS = 0x637726f8b08a7ABE3aE3aCaB01A80E2d8ddeF77B;
     address internal constant UNI_V2_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
     address internal constant MKR_PROXY_REGISTRY = 0x4678f0a6958e4D2Bc4F1BAF7Bc52E8F3564f3fE4;
@@ -37,8 +37,8 @@ contract MainnetUtilAddresses {
     // not needed on mainnet
     address internal constant DEFAULT_BOT = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    address public constant CHAINLINK_FEED_REGISTRY = 0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf;
-    
-    address public constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
+    address internal constant CHAINLINK_FEED_REGISTRY = 0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf;
+
+    address internal constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
 
 }

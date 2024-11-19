@@ -19,4 +19,8 @@ interface IERC4626 is IERC20 {
     function totalAssets() external view returns (uint256);
 
     function asset() external view returns (address);
+
+    // These two are specific for sUSDS
+    function deposit(uint256 _assets, address _receiver, uint16 _referral) external returns (uint256 shares);
+    function mint(uint256 _shares, address _receiver, uint16 _referral) external returns (uint256 assets);
 }
