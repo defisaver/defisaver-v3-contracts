@@ -12,10 +12,10 @@ async function main() {
     const role = 1;
     const enabled = true;
     const transferFromSelector = hre.ethers.utils.id('transferFrom(address,address,uint256)').slice(0, 10);
-    legacyMorphoTokenContract.setRoleCapability(role, transferFromSelector, enabled);
+    await legacyMorphoTokenContract.setRoleCapability(role, transferFromSelector, enabled);
 
     const morphoTokenWrapper = '0x9D03bb2092270648d7480049d0E58d2FcF0E5123';
-    legacyMorphoTokenContract.setUserRole(morphoTokenWrapper, role, enabled);
+    await legacyMorphoTokenContract.setUserRole(morphoTokenWrapper, role, enabled);
 
     process.exit(0);
 }
