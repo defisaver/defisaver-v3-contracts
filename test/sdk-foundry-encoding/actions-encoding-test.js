@@ -860,4 +860,82 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
+
+    describe('EtherFi', () => {
+        let foundryContract;
+        let from;
+        let to;
+        const amount = 10000;
+        const shouldWrap = true;
+
+        before(async () => {
+            foundryContract = await getFoundryEncodingContract();
+            [from, to] = (await hre.ethers.getSigners()).map((s) => s.address);
+        });
+
+        it('Test etherFiStakeEncode', async () => {
+            const EtherFiStake = await hre.ethers.getContractFactory('EtherFiStake');
+            const sdkEncoded = (
+                new sdk.actions.etherfi.EtherFiStakeAction(
+                    amount,
+                    from,
+                    to,
+                    shouldWrap,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EtherFiStake.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.etherFiStakeEncode(
+                    amount,
+                    from,
+                    to,
+                    shouldWrap,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test etherFiWrap', async () => {
+            const EtherFiWrap = await hre.ethers.getContractFactory('EtherFiWrap');
+            const sdkEncoded = (
+                new sdk.actions.etherfi.EtherFiWrapAction(
+                    amount,
+                    from,
+                    to,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EtherFiWrap.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.etherFiWrapEncode(
+                    amount,
+                    from,
+                    to,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test etherFiUnwrap', async () => {
+            const EtherFiUnwrap = await hre.ethers.getContractFactory('EtherFiUnwrap');
+            const sdkEncoded = (
+                new sdk.actions.etherfi.EtherFiUnwrapAction(
+                    amount,
+                    from,
+                    to,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EtherFiUnwrap.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.etherFiUnwrapEncode(
+                    amount,
+                    from,
+                    to,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+    });
 });
