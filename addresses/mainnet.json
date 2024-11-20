@@ -3748,6 +3748,17 @@
         "history": []
     },
     {
+        "name": "MorphoTokenWrap",
+        "address": "0x71b6d268c2Aabcb0dA16CbA4c77e65d9e29b0644",
+        "id": "0x8b09e29d",
+        "path": "contracts/actions/morpho-blue/MorphoTokenWrap.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"
