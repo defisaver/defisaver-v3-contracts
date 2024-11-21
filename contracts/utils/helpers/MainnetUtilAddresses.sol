@@ -19,9 +19,13 @@ contract MainnetUtilAddresses {
     address internal constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant WSTETH_ADDR = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
     address internal constant STETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
+    address internal constant EETH_ADDR = 0x35fA164735182de50811E8e2E824cFb9B6118ac2;
+    address internal constant WEETH_ADDR = 0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee; 
     address internal constant WBTC_ADDR = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
     address internal constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+
+    address internal constant ETHER_FI_LIQUIDITY_POOL = 0x308861A430be4cce5502d0A12724771Fc6DaF216;
 
     address internal constant FEE_RECEIVER_ADMIN_ADDR = 0xA74e9791D7D66c6a14B2C571BdA0F2A1f6D64E06;
 
