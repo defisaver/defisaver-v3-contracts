@@ -32,6 +32,7 @@ import { EulerV2ReorderCollaterals } from "../../contracts/actions/eulerV2/Euler
 import { EulerV2PaybackWithShares } from "../../contracts/actions/eulerV2/EulerV2PaybackWithShares.sol";
 import { EulerV2PullDebt } from "../../contracts/actions/eulerV2/EulerV2PullDebt.sol";
 import { AaveV3RatioCheck } from "../../contracts/actions/checkers/AaveV3RatioCheck.sol";
+import { RenzoStake } from "../../contracts/actions/renzo/RenzoStake.sol";
 
 contract ActionsUtils {
 
@@ -604,6 +605,20 @@ contract ActionsUtils {
                 account: _account,
                 from: _from,
                 amount: _amount
+            })
+        );
+    }
+
+    function renzoStakeEncode(
+        uint256 _amount,
+        address _from,
+        address _to
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            RenzoStake.Params({
+                amount: _amount,
+                from: _from,
+                to: _to
             })
         );
     }
