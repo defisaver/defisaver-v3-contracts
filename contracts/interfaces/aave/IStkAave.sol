@@ -9,4 +9,6 @@ abstract contract IStkAave {
   function stake(address onBehalfOf, uint256 amount) external virtual;
   function claimRewards(address to, uint256 amount) external virtual;
   function STAKED_TOKEN() external virtual view returns (address);
+  function setCooldownSeconds(uint256 newCooldown) external virtual;
+  function getCooldownSeconds() external virtual view returns (uint256);
 } 
