@@ -32,6 +32,7 @@ import { EulerV2ReorderCollaterals } from "../../contracts/actions/eulerV2/Euler
 import { EulerV2PaybackWithShares } from "../../contracts/actions/eulerV2/EulerV2PaybackWithShares.sol";
 import { EulerV2PullDebt } from "../../contracts/actions/eulerV2/EulerV2PullDebt.sol";
 import { AaveV3RatioCheck } from "../../contracts/actions/checkers/AaveV3RatioCheck.sol";
+import { MorphoTokenWrap } from "../../contracts/actions/morpho-blue/MorphoTokenWrap.sol";
 
 contract ActionsUtils {
 
@@ -603,6 +604,18 @@ contract ActionsUtils {
                 vault: _vault,
                 account: _account,
                 from: _from,
+                amount: _amount
+            })
+        );
+    }
+
+    function morphoTokenWrapEncode(
+        address _to,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            MorphoTokenWrap.Params({
+                to: _to,
                 amount: _amount
             })
         );
