@@ -32,6 +32,7 @@ import { EulerV2ReorderCollaterals } from "../../contracts/actions/eulerV2/Euler
 import { EulerV2PaybackWithShares } from "../../contracts/actions/eulerV2/EulerV2PaybackWithShares.sol";
 import { EulerV2PullDebt } from "../../contracts/actions/eulerV2/EulerV2PullDebt.sol";
 import { AaveV3RatioCheck } from "../../contracts/actions/checkers/AaveV3RatioCheck.sol";
+import { RenzoStake } from "../../contracts/actions/renzo/RenzoStake.sol";
 import { EtherFiStake } from "../../contracts/actions/etherfi/EtherFiStake.sol";
 import { EtherFiWrap } from "../../contracts/actions/etherfi/EtherFiWrap.sol";
 import { EtherFiUnwrap } from "../../contracts/actions/etherfi/EtherFiUnwrap.sol";
@@ -611,7 +612,21 @@ contract ActionsUtils {
         );
     }
 
-    function etherFiStakeEncode(
+    function renzoStakeEncode(
+        uint256 _amount,
+        address _from,
+        address _to
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            RenzoStake.Params({
+                amount: _amount,
+                from: _from,
+                to: _to
+            })
+        );
+    }
+
+     function etherFiStakeEncode(
         uint256 _amount,
         address _from,
         address _to,
@@ -654,5 +669,4 @@ contract ActionsUtils {
             })
         );
     }
-
 }

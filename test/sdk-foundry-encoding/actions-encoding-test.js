@@ -938,4 +938,27 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
+
+    describe('Renzo', () => {
+        let foundryContract;
+        let from;
+        let to;
+        const amount = 10000;
+        before(async () => {
+            foundryContract = await getFoundryEncodingContract();
+            [from, to] = (await hre.ethers.getSigners()).map((s) => s.address);
+        });
+        it('Test renzoStakeEncode', async () => {
+            const RenzoStake = await hre.ethers.getContractFactory('RenzoStake');
+            const sdkEncoded = (
+                new sdk.actions.renzo.RenzoStakeAction(amount, from, to)
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = RenzoStake.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.renzoStakeEncode(amount, from, to),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+    });
 });
