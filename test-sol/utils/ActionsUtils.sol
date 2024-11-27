@@ -36,6 +36,7 @@ import { RenzoStake } from "../../contracts/actions/renzo/RenzoStake.sol";
 import { EtherFiStake } from "../../contracts/actions/etherfi/EtherFiStake.sol";
 import { EtherFiWrap } from "../../contracts/actions/etherfi/EtherFiWrap.sol";
 import { EtherFiUnwrap } from "../../contracts/actions/etherfi/EtherFiUnwrap.sol";
+import { MorphoTokenWrap } from "../../contracts/actions/morpho-blue/MorphoTokenWrap.sol";
 
 contract ActionsUtils {
 
@@ -666,6 +667,18 @@ contract ActionsUtils {
                 amount: _amount,
                 from: _from,
                 to: _to
+            })
+        );
+    }
+
+    function morphoTokenWrapEncode(
+        address _to,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            MorphoTokenWrap.Params({
+                to: _to,
+                amount: _amount
             })
         );
     }

@@ -1104,6 +1104,17 @@
         "history": []
       },
       {
+        "name": "StrategyTriggerViewNoRevert",
+        "address": "0xA9b7A32E879851c00844ac26E83B2089dc3576Ff",
+        "id": "0x37a21cb5",
+        "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
         "name": "DFSPricesView",
         "address": "0x25d32455A36cA32CaB116B17a7Cfc8C68EB0ADAe",
         "id": "0x3d82eb0c",
