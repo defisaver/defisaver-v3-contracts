@@ -3,6 +3,8 @@
 pragma solidity =0.8.24;
 
 import { IRestakeManager } from "../../interfaces/renzo/IRestakeManager.sol";
+import { IRenzoOracle } from "../../interfaces/renzo/IRenzoOracle.sol";
+import { IERC20 } from "../../interfaces/IERC20.sol";
 
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
@@ -80,6 +82,20 @@ contract RenzoStake is ActionBase, RenzoHelper {
         EZETH_ADDR.withdrawTokens(_inputData.to, ezEthReceivedAmount);
 
         logData = abi.encode(_inputData, ezEthReceivedAmount);
+    }
+
+    /// @notice Helper function to get the rate of ezEth per Eth
+    function ezEthPerEth() external view returns (uint256 ezEthRate) {
+        IRestakeManager manager = IRestakeManager(RENZO_MANAGER);
+        IRenzoOracle oracle = IRenzoOracle(manager.renzoOracle());
+        (, , uint256 totalTVL) = manager.calculateTVLs();
+        uint256 ezEthTotalSupply = IERC20(EZETH_ADDR).totalSupply();
+
+        ezEthRate = oracle.calculateMintAmount(
+            totalTVL,
+            1 ether,
+            ezEthTotalSupply
+        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
