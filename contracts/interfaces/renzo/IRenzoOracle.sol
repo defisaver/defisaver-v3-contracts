@@ -7,4 +7,10 @@ interface IRenzoOracle {
         uint256 _newValueAdded,
         uint256 _existingEzETHSupply
     ) external pure returns (uint256);
+
+    function calculateRedeemAmount(
+        uint256 _ezETHBeingBurned,
+        uint256 _existingEzETHSupply,
+        uint256 _currentValueInProtocol
+    ) external pure returns (uint256);
 }
