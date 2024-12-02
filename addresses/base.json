@@ -1194,5 +1194,27 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+      },
+      {
+        "name": "CreateSub",
+        "address": "0xeE739937085A716477BCB5b01b0f74e1BE046645",
+        "id": "0xf41e543f",
+        "path": "contracts/actions/utils/CreateSub.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "UpdateSub",
+        "address": "0x1601c6ABCDE6e6d8Ad96628AFe20d47908127Aea",
+        "id": "0xa985d903",
+        "path": "contracts/actions/utils/UpdateSub.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
       }
   ]
