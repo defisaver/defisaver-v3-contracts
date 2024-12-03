@@ -5356,6 +5356,132 @@ const callAaveV3FLOpenOrderFromDebtStrategy = async (strategyExecutor, strategyI
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(`GasUsed callAaveV3FLOpenOrderFromDebtStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
+const callMorphoBlueBoostOnTargetPriceStrategy = async (strategyExecutor, strategyIndex, subId, strategySub, borrowAmount, exchangeObject) => {
+    const isL2 = network !== 'mainnet';
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+    const borrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        0,
+        borrowAmount,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(exchangeObject, placeHolderAddr, placeHolderAddr);
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, '0');
+    const supplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        0,
+        0,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const targetRatioCheckAction = new dfs.actions.checkers.MorphoBlueTargetRatioCheckAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        0,
+        placeHolderAddr,
+        0,
+    );
+    actionsCallData.push(borrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(targetRatioCheckAction.encodeForRecipe()[0]);
+    triggerCallData.push(
+        abiCoder.encode(
+            [['address', 'address', 'address', 'address', 'uint256'], 'uint256', 'uint8'],
+            [[placeHolderAddr, placeHolderAddr, placeHolderAddr, placeHolderAddr, 0], 0, 0],
+        ),
+    );
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(`GasUsed callMorphoBlueBoostOnTargetPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+const callMorphoBlueFLBoostOnTargetPriceStrategy = async (strategyExecutor, strategyIndex, subId, strategySub, flAmount, exchangeObject, loanToken, flAddress) => {
+    const isL2 = network !== 'mainnet';
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+    const flAction = new dfs.actions.flashloan.FLAction(new dfs.actions.flashloan.BalancerFlashLoanAction([loanToken], [flAmount]));
+    const sellAction = new dfs.actions.basic.SellAction(exchangeObject, placeHolderAddr, placeHolderAddr);
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, '0');
+    const supplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        0,
+        0,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const borrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        0,
+        0,
+        placeHolderAddr,
+        flAddress,
+    );
+    const targetRatioCheckAction = new dfs.actions.checkers.MorphoBlueTargetRatioCheckAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        placeHolderAddr,
+        0,
+        placeHolderAddr,
+        0,
+    );
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(borrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(targetRatioCheckAction.encodeForRecipe()[0]);
+    triggerCallData.push(
+        abiCoder.encode(
+            [['address', 'address', 'address', 'address', 'uint256'], 'uint256', 'uint8'],
+            [[placeHolderAddr, placeHolderAddr, placeHolderAddr, placeHolderAddr, 0], 0, 0],
+        ),
+    );
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(`GasUsed callMorphoBlueFLBoostOnTargetPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
 
 module.exports = {
     callDcaStrategy,
@@ -5437,4 +5563,6 @@ module.exports = {
     callAaveV3OpenOrderFromCollStrategy,
     callAaveV3FLOpenOrderFromCollStrategy,
     callAaveV3FLOpenOrderFromDebtStrategy,
+    callMorphoBlueBoostOnTargetPriceStrategy,
+    callMorphoBlueFLBoostOnTargetPriceStrategy,
 };
