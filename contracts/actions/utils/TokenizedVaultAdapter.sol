@@ -14,6 +14,9 @@ contract TokenizedVaultAdapter is ActionBase {
     error TokenizedVaultSlippageHit(Params, uint256 returnAmount);
     error TokenizedVaultUndefinedAction();
 
+    uint16 constant SKY_REFERRAL_CODE = 1002;
+    address constant SKY_STAKED_USDS = 0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD;
+
     enum OperationId {
         DEPOSIT,
         MINT,
@@ -95,8 +98,15 @@ contract TokenizedVaultAdapter is ActionBase {
         if (_params.operationId == OperationId.DEPOSIT) {
             _params.amount = assetAddress.pullTokensIfNeeded(_params.from, _params.amount);
             assetAddress.approveToken(address(vault), _params.amount);
+            uint256 sharesMinted;
 
-            uint256 sharesMinted = vault.deposit(_params.amount, _params.to);
+            if (address(vault) == SKY_STAKED_USDS && block.chainid == 1){
+                sharesMinted = vault.deposit(_params.amount, _params.to, SKY_REFERRAL_CODE);
+            } else {
+                sharesMinted = vault.deposit(_params.amount, _params.to);
+            }
+            
+            
             if (sharesMinted < _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit(_params, sharesMinted);
             logData = abi.encode(_params, sharesMinted);
             return (logData, sharesMinted);
@@ -109,7 +119,13 @@ contract TokenizedVaultAdapter is ActionBase {
             uint256 pulledAssetAmount = assetAddress.pullTokensIfNeeded(_params.from, assetsToDeposit);
             assetAddress.approveToken(address(vault), pulledAssetAmount);
 
-            uint256 assetsDeposited = vault.mint(_params.amount, _params.to);
+            uint256 assetsDeposited;
+            if (address(vault) == SKY_STAKED_USDS && block.chainid == 1){
+                assetsDeposited = vault.mint(_params.amount, _params.to, SKY_REFERRAL_CODE);
+            } else {
+                assetsDeposited = vault.mint(_params.amount, _params.to);
+            }
+        
             if (pulledAssetAmount > assetsDeposited) {
                 assetAddress.withdrawTokens(_params.to, pulledAssetAmount - assetsDeposited);
             }

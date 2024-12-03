@@ -368,6 +368,10 @@ const balancerFLTest = async (flActionContract) => {
                     amounts,
                     nullAddress,
                     [],
+                    tokenAddrs,
+                    amounts,
+                    nullAddress,
+                    [],
                 );
                 const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
                     flAction,

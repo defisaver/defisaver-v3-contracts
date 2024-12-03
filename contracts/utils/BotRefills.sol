@@ -7,6 +7,7 @@ import { IBotRegistry } from "../interfaces/IBotRegistry.sol";
 import { TokenUtils } from "./TokenUtils.sol";
 import { UtilHelper } from "./helpers/UtilHelper.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
+import { FeeRecipient } from "./FeeRecipient.sol";
 
 /// @title Contract used to refill tx sending bots when they are low on eth
 contract BotRefills is AdminAuth, UtilHelper {
@@ -39,6 +40,7 @@ contract BotRefills is AdminAuth, UtilHelper {
         isRefillCaller
         isApprovedBot(_botAddress)
     {
+        address feeAddr = FeeRecipient(FEE_RECIPIENT_ADDR).getFeeAddr();
         IERC20(TokenUtils.WETH_ADDR).transferFrom(feeAddr, address(this), _ethAmount);
 
         TokenUtils.withdrawWeth(_ethAmount);
@@ -55,10 +57,6 @@ contract BotRefills is AdminAuth, UtilHelper {
 
     function setRefillCaller(address _newBot) public onlyOwner {
         refillCaller = _newBot;
-    }
-
-    function setFeeAddr(address _newFeeAddr) public onlyOwner {
-        feeAddr = _newFeeAddr;
     }
 
     function setAdditionalBot(address _botAddr, bool _approved) public onlyOwner {

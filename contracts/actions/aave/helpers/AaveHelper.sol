@@ -30,17 +30,6 @@ contract AaveHelper is MainnetAaveAddresses {
         ILendingPoolV2(lendingPool).setUserUseReserveAsCollateral(_tokenAddr, _useAsCollateral);
     }
 
-    /// @notice Switches the borrowing rate mode (stable/variable) for the user
-    function switchRateMode(
-        address _market,
-        address _tokenAddr,
-        uint256 _rateMode
-    ) public {
-        address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
-
-        ILendingPoolV2(lendingPool).swapBorrowRateMode(_tokenAddr, _rateMode);
-    }
-
     /// @notice Fetch the data provider for the specified market
     function getDataProvider(address _market) internal view returns (IAaveProtocolDataProviderV2) {
         return

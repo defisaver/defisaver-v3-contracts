@@ -64,6 +64,8 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Ch
         uint32 _subId2,
         LiquitySubData calldata _subData
     ) public {
+        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
 
         // update repay as we must have a subId, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
@@ -94,6 +96,8 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Ch
         uint32 _subId1,
         uint32 _subId2
     ) public {
+        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        giveWalletPermission(isDSProxy(address(this)));
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
 
         if (_subId2 != 0) {
