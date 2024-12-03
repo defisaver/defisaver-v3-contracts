@@ -10,7 +10,7 @@ contract MorphoBlueHelper is MainnetMorphoBlueAddresses {
     IMorphoBlue public constant morphoBlue = IMorphoBlue(MORPHO_BLUE_ADDRESS);
     
     uint256 internal constant MARKET_PARAMS_BYTES_LENGTH = 5 * 32;
-
+    uint256 internal constant ORACLE_PRICE_SCALE = 1e36;
     uint256 internal constant VIRTUAL_SHARES = 1e6;
     uint256 internal constant VIRTUAL_ASSETS = 1;
 
