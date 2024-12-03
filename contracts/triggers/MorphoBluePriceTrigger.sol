@@ -22,6 +22,9 @@ contract MorphoBluePriceTrigger is ITrigger, AdminAuth, MorphoBlueHelper {
         UNDER
     }
 
+    /// @param marketParams Morpho market parameters
+    /// @param price price of the collateral token in terms of the loan token that represents the triggerable point. 
+    /// @param state represents if we want the current price to be higher or lower than price param
     struct SubParams {
         MarketParams marketParams;
         uint256 price;
