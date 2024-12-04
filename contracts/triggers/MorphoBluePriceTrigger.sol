@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 import { IOracle } from "../interfaces/morpho-blue/IOracle.sol";
-import { MarketParams } from "../interfaces/morpho-blue/IMorphoBlue.sol";
 import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
 
 import { ITrigger } from "../interfaces/ITrigger.sol";
@@ -22,11 +21,15 @@ contract MorphoBluePriceTrigger is ITrigger, AdminAuth, MorphoBlueHelper {
         UNDER
     }
 
-    /// @param marketParams Morpho market parameters
+    /// @param oracle address of the morpho oracle from the market
+    /// @param collateralToken address of the collateral token from the market
+    /// @param loanToken address of the loan token from the market
     /// @param price price of the collateral token in terms of the loan token that represents the triggerable point. 
     /// @param state represents if we want the current price to be higher or lower than price param
     struct SubParams {
-        MarketParams marketParams;
+        address oracle;
+        address collateralToken;
+        address loanToken;
         uint256 price;
         uint8 state;
     }
@@ -34,9 +37,9 @@ contract MorphoBluePriceTrigger is ITrigger, AdminAuth, MorphoBlueHelper {
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerData = parseSubInputs(_subData);
 
-        uint256 oraclePrice = IOracle(triggerData.marketParams.oracle).price();
-        uint256 collDecimals = IERC20(triggerData.marketParams.collateralToken).decimals();
-        uint256 loanDecimals = IERC20(triggerData.marketParams.loanToken).decimals();
+        uint256 oraclePrice = IOracle(triggerData.oracle).price();
+        uint256 collDecimals = IERC20(triggerData.collateralToken).decimals();
+        uint256 loanDecimals = IERC20(triggerData.loanToken).decimals();
 
         /// @dev Examples:
         // 1. wstETH/weth
