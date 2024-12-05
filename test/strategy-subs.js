@@ -26,7 +26,7 @@ const {
     IN_REPAY,
     IN_BOOST,
     createMorphoBlueRatioTrigger,
-    createCurveUsdHealthRatioTrigger,
+    createChainLinkPriceTrigger,
 } = require('./triggers');
 
 const {
@@ -42,6 +42,7 @@ const {
     getContractFromRegistry,
     chainIds,
 } = require('./utils');
+const { BigNumber } = require('ethers');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -815,6 +816,32 @@ const subMorphoBlueBoostBundle = async (
 
     return { subId, strategySub };
 };
+const subAaveV3OpenOrder = async (
+    proxy, strategyOrBundleId, collAsset, collAssetId, debtAsset, debtAssetId, marketAddr, targetRatio, triggerPrice, isBundle = true,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.openOrder(
+        strategyOrBundleId,
+        isBundle,
+        {
+            baseTokenAddress: collAsset,
+            quoteTokenAddress: debtAsset,
+            price: triggerPrice,
+            state: RATIO_STATE_UNDER,
+        },
+        {
+            collAsset,
+            collAssetId,
+            debtAsset,
+            debtAssetId,
+            marketAddr,
+            targetRatio,
+            useOnBehalf: false,
+        },
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+
+    return { subId, strategySub };
+};
 
 module.exports = {
     subDcaStrategy,
@@ -850,4 +877,5 @@ module.exports = {
     subCurveUsdPaybackStrategy,
     subMorphoBlueBoostBundle,
     subMorphoBlueRepayBundle,
+    subAaveV3OpenOrder,
 };

@@ -266,7 +266,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         (bool isActive, bool isFrozen, , , bool isPaused) = getFlags(config);
 
         uint256 eMode = getEModeCategory(config);
-        DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
+        DataTypes.EModeCategoryLegacy memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
 
         _tokenInfo = TokenInfoFull({
             aTokenAddress: reserveData.aTokenAddress,
@@ -327,7 +327,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         address[] memory reserveList = lendingPool.getReservesList();
         uint256 eMode = lendingPool.getUserEMode(_user);
         
-        DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
+        DataTypes.EModeCategoryLegacy memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
         
         data = LoanData({
             eMode: eMode,
@@ -530,7 +530,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
     }
 
     function getEModeCollateralFactor(uint256 emodeCategory, IPoolV3 lendingPool) public view returns (uint16){
-        DataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(emodeCategory));
+        DataTypes.EModeCategoryLegacy memory categoryData = lendingPool.getEModeCategoryData(uint8(emodeCategory));
         return categoryData.ltv;
     }
 
