@@ -16,11 +16,13 @@ async function main() {
     const etherFiWrap = await redeploy('EtherFiWrap', addrs[network].REGISTRY_ADDR, false, true);
     const etherFiUnwrap = await redeploy('EtherFiUnwrap', addrs[network].REGISTRY_ADDR, false, true);
     const renzoStake = await redeploy('RenzoStake', addrs[network].REGISTRY_ADDR, false, true);
+    const lsvView = await redeploy('LSVView', addrs[network].REGISTRY_ADDR, false, true);
     console.log(`LSVSell: ${lsvSell.address}`);
     console.log(`EtherFiStake: ${etherFiStake.address}`);
     console.log(`EtherFiWrap: ${etherFiWrap.address}`);
     console.log(`EtherFiUnwrap: ${etherFiUnwrap.address}`);
     console.log(`RenzoStake: ${renzoStake.address}`);
+    console.log(`LSVView: ${lsvView.address}`);
 
     process.exit(0);
 }
