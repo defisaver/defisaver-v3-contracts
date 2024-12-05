@@ -842,6 +842,25 @@ const subAaveV3OpenOrder = async (
 
     return { subId, strategySub };
 };
+const subMorphoBlueLeverageManagementOnPrice = async (
+    proxy, strategyOrBundleId, marketParams, user, targetRatio, price, priceState, isBundle = true,
+) => {
+    const strategySub = automationSdk.strategySubService.morphoBlueEncode.leverageManagementOnPrice(
+        strategyOrBundleId,
+        isBundle,
+        marketParams.loanToken,
+        marketParams.collateralToken,
+        marketParams.oracle,
+        marketParams.irm,
+        marketParams.lltv,
+        user,
+        targetRatio,
+        price,
+        priceState,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
 
 module.exports = {
     subDcaStrategy,
@@ -878,4 +897,5 @@ module.exports = {
     subMorphoBlueBoostBundle,
     subMorphoBlueRepayBundle,
     subAaveV3OpenOrder,
+    subMorphoBlueLeverageManagementOnPrice,
 };

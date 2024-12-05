@@ -4684,8 +4684,7 @@ const createMorphoBlueBoostOnTargetPriceStrategy = () => {
     morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.MorphoBluePriceTrigger(
-        '&loanToken', '&collateralToken', '&oracle', '&irm', '&lltv',
-        '&price', '&priceState',
+        '&loanToken', '&collateralToken', '&oracle', '&price', '&priceState',
     );
     morphoBlueBoostOnTargetPriceStrategy.addTrigger(trigger);
 
@@ -4752,8 +4751,7 @@ const createMorphoBlueFLBoostOnTargetPriceStrategy = () => {
     morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.MorphoBluePriceTrigger(
-        '&loanToken', '&collateralToken', '&oracle', '&irm', '&lltv',
-        '&price', '&priceState',
+        '&loanToken', '&collateralToken', '&oracle', '&price', '&priceState',
     );
     morphoBlueFLBoostOnTargetPriceStrategy.addTrigger(trigger);
 

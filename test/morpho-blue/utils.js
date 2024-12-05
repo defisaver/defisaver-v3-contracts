@@ -1,6 +1,6 @@
 const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const hre = require('hardhat');
-const { setBalance, fetchAmountinUSDPrice, approve } = require('../utils');
+const { setBalance, fetchAmountinUSDPrice, approve, fetchAmountInUSDPrice } = require('../utils');
 
 const MORPHO_BLUE_ADDRESS = '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb';
 const loanTokenSupplyAmountInUsd = '50000';
@@ -41,6 +41,32 @@ const getMarkets = () => [
         '860000000000000000',
     ],
 ];
+const getBaseMarkets = () => [
+    // wstETH/ETH market
+    [
+        '0x4200000000000000000000000000000000000006',
+        '0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452',
+        '0x4A11590e5326138B514E08A9B52202D42077Ca65',
+        '0x46415998764C29aB2a25CbeA6254146D50D22687',
+        '945000000000000000',
+    ],
+    // cbBTC/ETH market
+    [
+        '0x4200000000000000000000000000000000000006',
+        '0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf',
+        '0x10b95702a0ce895972C91e432C4f7E19811D320E',
+        '0x46415998764C29aB2a25CbeA6254146D50D22687',
+        '915000000000000000',
+    ],
+    // cbETH/USDC market
+    [
+        '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+        '0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22',
+        '0xb40d93F44411D8C09aD17d7F88195eF9b05cCD96',
+        '0x46415998764C29aB2a25CbeA6254146D50D22687',
+        '860000000000000000',
+    ],
+];
 const supplyToMarket = async (marketParams) => {
     const [wallet] = await hre.ethers.getSigners();
     const morphoBlue = await hre.ethers.getContractAt('IMorphoBlue', MORPHO_BLUE_ADDRESS);
@@ -58,6 +84,7 @@ const supplyToMarket = async (marketParams) => {
 
 module.exports = {
     getMarkets,
+    getBaseMarkets,
     supplyToMarket,
     loanTokenSupplyAmountInUsd,
     collateralSupplyAmountInUsd,

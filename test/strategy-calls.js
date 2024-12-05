@@ -5401,8 +5401,8 @@ const callMorphoBlueBoostOnTargetPriceStrategy = async (strategyExecutor, strate
     actionsCallData.push(targetRatioCheckAction.encodeForRecipe()[0]);
     triggerCallData.push(
         abiCoder.encode(
-            [['address', 'address', 'address', 'address', 'uint256'], 'uint256', 'uint8'],
-            [[placeHolderAddr, placeHolderAddr, placeHolderAddr, placeHolderAddr, 0], 0, 0],
+            [['address', 'address', 'address'], 'uint256', 'uint8'],
+            [[placeHolderAddr, placeHolderAddr, placeHolderAddr], 0, 0],
         ),
     );
     const { callData, receipt } = await executeStrategy(
@@ -5465,8 +5465,8 @@ const callMorphoBlueFLBoostOnTargetPriceStrategy = async (strategyExecutor, stra
     actionsCallData.push(targetRatioCheckAction.encodeForRecipe()[0]);
     triggerCallData.push(
         abiCoder.encode(
-            [['address', 'address', 'address', 'address', 'uint256'], 'uint256', 'uint8'],
-            [[placeHolderAddr, placeHolderAddr, placeHolderAddr, placeHolderAddr, 0], 0, 0],
+            [['address', 'address', 'address'], 'uint256', 'uint8'],
+            [[placeHolderAddr, placeHolderAddr, placeHolderAddr], 0, 0],
         ),
     );
     const { callData, receipt } = await executeStrategy(
