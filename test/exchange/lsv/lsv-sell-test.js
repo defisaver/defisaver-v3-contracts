@@ -14,7 +14,6 @@ const {
     setBalance,
     EETH_ADDR,
     ETHER_FI_LIQUIDITY_POOL,
-    balanceOf,
 } = require('../../utils');
 const { executeAction } = require('../../actions');
 

@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { IWStEth } from "../../interfaces/lido/IWStEth.sol";
-import { IWeEth } from "../../interfaces/etherfi/IWeEth.sol";
-import { ILiquidityPool } from "../../interfaces/etherfi/ILiquidityPool.sol";
+import { IWeEth } from "../../interfaces/etherFi/IWeEth.sol";
+import { ILiquidityPool } from "../../interfaces/etherFi/ILiquidityPool.sol";
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";

@@ -7,7 +7,7 @@ import { ICBETH } from "../../../interfaces/LSTs/ICBETH.sol";
 import { IRETH } from "../../../interfaces/LSTs/IRETH.sol";
 import { IERC20 } from "../../../interfaces/IERC20.sol"; 
 import { IWstETH } from "../../../interfaces/LSTs/IWstETH.sol";
-import { IWeEth } from "../../../interfaces/etherfi/IWeEth.sol";
+import { IWeEth } from "../../../interfaces/etherFi/IWeEth.sol";
 import { IRestakeManager } from "../../../interfaces/renzo/IRestakeManager.sol";
 import { IRenzoOracle } from "../../../interfaces/renzo/IRenzoOracle.sol";
 import { DSMath } from "../../../DS/DSMath.sol";
