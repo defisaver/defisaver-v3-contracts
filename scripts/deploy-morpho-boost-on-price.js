@@ -16,8 +16,9 @@ const { topUp } = require('./utils/fork');
 const { addBotCaller, createStrategy, createBundle } = require('../test/utils-strategies');
 const {
     createMorphoBlueBoostOnTargetPriceL2Strategy,
+    createMorphoBlueFLBoostOnTargetPriceL2Strategy,
 } = require('../test/l2-strategies');
-const { createMorphoBlueBoostOnTargetPriceStrategy } = require('../test/strategies');
+const { createMorphoBlueBoostOnTargetPriceStrategy, createMorphoBlueFLBoostOnTargetPriceStrategy } = require('../test/strategies');
 
 const deployBoostOnPriceBundle = async (isFork) => {
     await openStrategyAndBundleStorage(isFork);
@@ -25,8 +26,8 @@ const deployBoostOnPriceBundle = async (isFork) => {
         ? createMorphoBlueBoostOnTargetPriceStrategy()
         : createMorphoBlueBoostOnTargetPriceL2Strategy();
     const flBoostOnPriceStrategy = getNetwork() === 'mainnet'
-        ? createMorphoBlueBoostOnTargetPriceStrategy()
-        : createMorphoBlueBoostOnTargetPriceL2Strategy();
+        ? createMorphoBlueFLBoostOnTargetPriceStrategy()
+        : createMorphoBlueFLBoostOnTargetPriceL2Strategy();
     const boostOnPriceStrategyId = await createStrategy(undefined, ...boostOnPriceStrategy, false);
     const flBoostOnPriceStrategyId = await createStrategy(
         undefined, ...flBoostOnPriceStrategy, false,
@@ -38,10 +39,12 @@ const deployBoostOnPriceBundle = async (isFork) => {
 };
 
 async function main() {
-    // configure({
-    //     chainId: 8453,
-    //     testMode: true,
-    // });
+    if (getNetwork() !== 'mainnet') {
+        configure({
+            chainId: 8453,
+            testMode: true,
+        });
+    }
     const isFork = true;
     const senderAcc = (await hre.ethers.getSigners())[0];
     await topUp(senderAcc.address);

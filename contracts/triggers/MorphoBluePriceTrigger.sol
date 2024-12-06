@@ -55,7 +55,7 @@ contract MorphoBluePriceTrigger is ITrigger, AdminAuth, MorphoBlueHelper {
         // with trigger price scaling = 4235.83245993136 * 1e8 = 423583245
         uint256 currPrice = 
             oraclePrice * TRIGGER_PRICE_SCALE /
-            10 ** (ORACLE_PRICE_SCALE + loanDecimals - collDecimals);
+            10 ** (ORACLE_PRICE_DECIMALS + loanDecimals - collDecimals);
 
         if (PriceState(triggerData.state) == PriceState.OVER) {
             if (currPrice > triggerData.price) return true;

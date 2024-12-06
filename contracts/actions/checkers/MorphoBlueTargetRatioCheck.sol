@@ -5,6 +5,7 @@ pragma solidity =0.8.24;
 import { MorphoBlueHelper } from "../../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
 import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
 import { ActionBase } from "../ActionBase.sol";
+import { console } from "hardhat/console.sol";
 
 /// @title Check if the current ratio for morpho position is within a certain range of the target ratio
 contract MorphoBlueTargetRatioCheck is ActionBase, MorphoBlueHelper {
@@ -42,6 +43,8 @@ contract MorphoBlueTargetRatioCheck is ActionBase, MorphoBlueHelper {
 
         uint256 currRatio = getRatioUsingParams(inputData.marketParams, inputData.user);
 
+        console.log("Current ratio: %d", currRatio);
+        console.log("Target ratio: %d", inputData.targetRatio);
         if (
             currRatio > (inputData.targetRatio + RATIO_OFFSET) ||
             currRatio < (inputData.targetRatio - RATIO_OFFSET)
