@@ -8,13 +8,20 @@ import { IERC20 } from "../../../interfaces/IERC20.sol";
 import { DSMath } from "../../../DS/DSMath.sol";
 import { MainnetCurveUsdAddresses } from "./MainnetCurveUsdAddresses.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { IBytesTransientStorage } from "../../../interfaces/IBytesTransientStorage.sol";
 
 contract CurveUsdHelper is MainnetCurveUsdAddresses, DSMath {
     using TokenUtils for address;
 
+    /// Reverts if the controller is invalid
     error CurveUsdInvalidController();
+    
+    /// Amount to supply or borrow cannot be 0
+    error ZeroAmountError();
 
+    IBytesTransientStorage constant transientStorage = IBytesTransientStorage(BYTES_TRANSIENT_STORAGE);
     bytes4 constant CURVE_SWAPPER_ID = bytes4(keccak256("CurveUsdSwapper"));
+    bytes4 constant CURVE_TRANSIENT_SWAPPER_ID = bytes4(keccak256("CurveUsdSwapperTransient"));
 
     function getCollateralRatio(address _user, address _controllerAddr) public view returns (uint256 collRatio, bool isInSoftLiquidation) {
         // fetch users debt
@@ -32,7 +39,7 @@ contract CurveUsdHelper is MainnetCurveUsdAddresses, DSMath {
         address collToken = ICrvUsdController(_controllerAddr).collateral_token();
         uint256 assetDec = IERC20(collToken).decimals();
         uint256 collAmountWAD = assetDec > 18 ? (collAmount / 10 ** (assetDec - 18)) : (collAmount * 10 ** (18 - assetDec));
-        
+
         collRatio = wdiv(wmul(collAmountWAD, oraclePrice) + crvUsdCollAmount, debt);
     }
 
@@ -68,6 +75,19 @@ contract CurveUsdHelper is MainnetCurveUsdAddresses, DSMath {
 
         CRVUSD_TOKEN_ADDR.withdrawTokens(_to, type(uint256).max);
         collToken.withdrawTokens(_to, type(uint256).max);
+    }
+
+    function _sendLeftoverFundsWithSnapshot(
+        address _collToken,
+        address _debtToken,
+        uint256 _collStartingBalance,
+        uint256 _debtStartingBalance,
+        address _to
+    ) internal returns (uint256 collTokenReceived, uint256 debtTokenReceived) {
+        collTokenReceived = _collToken.getBalance(address(this)) - _collStartingBalance;
+        debtTokenReceived = _debtToken.getBalance(address(this)) - _debtStartingBalance;
+        _collToken.withdrawTokens(_to, collTokenReceived);
+        _debtToken.withdrawTokens(_to, debtTokenReceived);
     }
 
     /// @dev Helper method for advanced actions to setup the curve path and write to transient storage in CurveUsdSwapper
