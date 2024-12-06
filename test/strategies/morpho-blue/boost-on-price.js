@@ -36,6 +36,7 @@ const { createMorphoBlueBoostOnTargetPriceStrategy, createMorphoBlueFLBoostOnTar
 const { createMorphoBlueBoostOnTargetPriceL2Strategy, createMorphoBlueFLBoostOnTargetPriceL2Strategy } = require('../../l2-strategies');
 const { morphoBlueSupplyCollateral, morphoBlueBorrow } = require('../../actions');
 const { callMorphoBlueBoostOnTargetPriceStrategy, callMorphoBlueFLBoostOnTargetPriceStrategy } = require('../../strategy-calls');
+const { MORPHO_BLUE_ADDRESS } = require('../../morpho-blue/utils');
 
 /* //////////////////////////////////////////////////////////////
                            CONSTANTS
@@ -133,6 +134,14 @@ const createPosition = async (
     proxy,
     user,
 ) => {
+    // give auth for EOA automation
+    if (user !== proxy.address) {
+        const morphoBlue = await hre.ethers.getContractAt('IMorphoBlue', MORPHO_BLUE_ADDRESS);
+        const isAuthorized = await morphoBlue.isAuthorized(senderAcc.address, proxy.address);
+        if (!isAuthorized) {
+            await morphoBlue.connect(senderAcc).setAuthorization(proxy.address, true);
+        }
+    }
     const borrowAmount = await fetchAmountInUSDPrice(loanToken.symbol, BORROW_AMOUNT_IN_USD);
     const supplyAmount = await fetchAmountInUSDPrice(collToken.symbol, COLL_AMOUNT_IN_USD);
     await setBalance(collToken.address, senderAcc.address, supplyAmount);
@@ -222,13 +231,6 @@ const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
 
             // add bot caller
             await addBotCaller(botAcc.address, REGISTRY_ADDR, isFork);
-
-            if (network !== 'mainnet') {
-                configure({
-                    chainId: 8453,
-                    testMode: true,
-                });
-            }
         });
         beforeEach(async () => { snapshotId = await takeSnapshot(); });
         afterEach(async () => { await revertToSnapshot(snapshotId); });
@@ -238,7 +240,7 @@ const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
             const loanToken = getAssetInfoByAddress(marketParams.loanToken, chainIds[network]);
             const collToken = getAssetInfoByAddress(marketParams.collateralToken, chainIds[network]);
 
-            it(`... should call regular Morpho blue boost on price strategy for position: [${collToken.symbol}/${loanToken.symbol}]`, async () => {
+            it(`... should call regular Morpho blue boost on price strategy for ${eoaBoost ? 'EOA' : 'wallet'} position: [${collToken.symbol}/${loanToken.symbol}]`, async () => {
                 // 1. create position
                 await createPosition(marketParams, loanToken, collToken, senderAcc, proxy, user);
 
@@ -281,7 +283,7 @@ const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
                 const ratioAfter = await view.callStatic.getRatioUsingParams(marketParams, user);
                 expect(ratioAfter).to.be.lt(ratioBefore);
             });
-            it(`... should call flash loan Morpho blue boost on price strategy for position: [${collToken.symbol}/${loanToken.symbol}]`, async () => {
+            it(`... should call flash loan Morpho blue boost on price strategy for ${eoaBoost ? 'EOA' : 'wallet'} position: [${collToken.symbol}/${loanToken.symbol}]`, async () => {
                 // 1. create position
                 await createPosition(marketParams, loanToken, collToken, senderAcc, proxy, user);
 
@@ -334,6 +336,7 @@ describe('Morpho Boost On Price Strategy Test', function () {
     this.timeout(80000);
     it('... test morpho boost on price strategies', async () => {
         await morphoBoostOnPriceStrategyTest(isNetworkFork(), false);
+        await morphoBoostOnPriceStrategyTest(isNetworkFork(), true);
     }).timeout(50000);
 });
 
