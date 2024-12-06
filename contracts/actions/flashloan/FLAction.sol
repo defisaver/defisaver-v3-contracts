@@ -2,11 +2,10 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-
 import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { FLHelper } from "./helpers/FLHelper.sol";
 
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
 import { IERC3156FlashLender } from "../../interfaces/flashloan/IERC3156FlashLender.sol";
 import { IERC3156FlashBorrower } from "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
@@ -15,9 +14,6 @@ import { IFlashLoans } from "../../interfaces/balancer/IFlashLoans.sol";
 import { IUniswapV3Pool } from "../../interfaces/uniswap/v3/IUniswapV3Pool.sol";
 import { IUniswapV3Factory } from "../../interfaces/uniswap/v3/IUniswapV3Factory.sol";
 import { IMorphoBlue } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
-import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
-
-import { FLHelper } from "./helpers/FLHelper.sol";
 
 /// @title Action that gets and receives FL from different variety of sources
 contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
@@ -41,7 +37,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         AAVEV3,
         UNIV3,
         SPARK,
-        MORPHO_BLUE
+        MORPHO_BLUE,
+        CURVEUSD
     }
 
     /// @inheritdoc ActionBase
@@ -86,6 +83,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
             _flSpark(_flParams);
         } else if (_source == FLSource.MORPHO_BLUE) {
             _flMorphoBlue(_flParams);
+        } else if (_source == FLSource.CURVEUSD) {
+            _flCurveUSD(_flParams);    
         } else {
             revert NonexistentFLSource();
         }
@@ -222,6 +221,17 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         emit ActionEvent("FLAction", abi.encode("MORPHOBLUE", _params.amounts[0]));
     }
 
+    function _flCurveUSD(FlashLoanParams memory _params) internal {
+        IERC3156FlashLender(CURVEUSD_FLASH_ADDR).flashLoan(
+            IERC3156FlashBorrower(address(this)),
+            CURVEUSD_ADDR,
+            _params.amounts[0],
+            _params.recipeData
+        );
+
+        emit ActionEvent("FLAction", abi.encode("CURVEUSD", _params.amounts[0]));
+    }
+
     /// @notice Aave callback function that formats and calls back RecipeExecutor
     /// FLSource == AAVE | SPARK
     function executeOperation(
@@ -301,7 +311,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     }
 
     /// @notice ERC3156 callback function that formats and calls back RecipeExecutor
-    /// FLSource == MAKER | GHO
+    /// FLSource == MAKER | GHO | CURVEUSD
     function onFlashLoan(
         address _initiator,
         address _token,
@@ -309,7 +319,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         uint256 _fee,
         bytes calldata _data
     ) external nonReentrant returns (bytes32) {
-        if (msg.sender != DSS_FLASH_ADDR && msg.sender != GHO_FLASH_MINTER_ADDR) {
+        if (msg.sender != DSS_FLASH_ADDR && msg.sender != GHO_FLASH_MINTER_ADDR && msg.sender != CURVEUSD_FLASH_ADDR) {
             revert UntrustedLender();
         }
         if (_initiator != address(this)) {
@@ -328,7 +338,11 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
             revert WrongPaybackAmountError();
         }
 
-        _token.approveToken(msg.sender, paybackAmount);
+        if (msg.sender == CURVEUSD_FLASH_ADDR) {
+            _token.withdrawTokens(msg.sender, paybackAmount);
+        } else {
+            _token.approveToken(msg.sender, paybackAmount);
+        }
 
         return keccak256("ERC3156FlashBorrower.onFlashLoan");
     }
