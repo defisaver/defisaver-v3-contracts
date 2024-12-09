@@ -3511,25 +3511,30 @@
     },
     {
         "name": "LSVSell",
-        "address": "0xd8F142FFaA386E639ae43c5ab0F52474Bc9432F4",
+        "address": "0xE4D93b8d55D7456e85afc0fcF91AC085aF26bbBA",
         "id": "0x9fde5493",
         "path": "contracts/actions/lsv/LSVSupply.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x0c1bb9A39d4A0EF4215Ade19Ce4F954E8419Dfd7"]
+        "history": [
+            "0xd8F142FFaA386E639ae43c5ab0F52474Bc9432F4",
+            "0x0c1bb9A39d4A0EF4215Ade19Ce4F954E8419Dfd7"
+        ]
     },
     {
         "name": "LSVSupply",
-        "address": "0x984c00DC098c98bed1CDfe2Ed786Fe1443da6671",
+        "address": "0x17a3e39a1aA6d9BA1Ffd80Ae0E388cA064a8D28F",
         "id": "0x2b24ec36",
         "path": "contracts/actions/lsv/LSVSupply.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x984c00DC098c98bed1CDfe2Ed786Fe1443da6671"
+        ]
     },
     {
         "name": "LSVBorrow",
@@ -3538,20 +3543,22 @@
         "path": "contracts/actions/lsv/LSVBorrow.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
     {
         "name": "LSVWithdraw",
-        "address": "0x0A4Ef5ADf759064b546441a50109eCbC2528A455",
+        "address": "0xB0197CF09cc4c9891B0c2fCbE4AD7323154cA8a5",
         "id": "0xbc21da53",
         "path": "contracts/actions/lsv/LSVWithdraw.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x0A4Ef5ADf759064b546441a50109eCbC2528A455"
+        ]
     },
     {
         "name": "LSVPayback",
@@ -3560,7 +3567,7 @@
         "path": "contracts/actions/lsv/LSVPayback.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -3588,14 +3595,15 @@
     },
     {
         "name": "LSVView",
-        "address": "0x096fd98653681dcf07687d2c21beb67807e0c8e6",
+        "address": "0xF3da52d6e45A967cB6835112B2A0BC34347952e6",
         "id": "0x373e1531",
         "path": "contracts/views/LSVView.sol",
-        "version": "1.0.0",
+        "version": "1.0.5",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x096fd98653681dcf07687d2c21beb67807e0c8e6",
             "0x2bf0643b4d7e3e63d0a859048af980fb3333b478",
             "0xECE15C12d8dCDb88c70fAfF38E8dAE4aC4ee69Ce",
             "0xFAb98E139EBeC1Ed76d226b6bd6E4C5f66B2fE1b",
@@ -3752,6 +3760,50 @@
         "address": "0x71b6d268c2Aabcb0dA16CbA4c77e65d9e29b0644",
         "id": "0x8b09e29d",
         "path": "contracts/actions/morpho-blue/MorphoTokenWrap.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "RenzoStake",
+        "address": "0x17DCF7132E30a0dC3d515C605E7c3D750c61E73c",
+        "id": "0xde82f951",
+        "path": "contracts/actions/renzo/RenzoStake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "EtherFiStake",
+        "address": "0xcadB650B6a60C89f7847Cba555A7eeCC220EA2e8",
+        "id": "0x7104bb41",
+        "path": "contracts/actions/etherfi/EtherFiStake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "EtherFiWrap",
+        "address": "0x086464be5c73f66cfbe6b64ec23aa5a86749ef58",
+        "id": "0xfc23725d",
+        "path": "contracts/actions/etherfi/EtherFiWrap.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "EtherFiUnwrap",
+        "address": "0x6Eb09948DDf9332d628d156950b9B1C0c091e8D8",
+        "id": "0x6d1f658a",
+        "path": "contracts/actions/etherfi/EtherFiUnwrap.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
