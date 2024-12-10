@@ -3760,6 +3760,50 @@
         "history": []
     },
     {
+        "name": "CurveUsdSelfLiquidateWithCollTransient",
+        "address": "0x9c41eA5D82AF27Fd436Cd4Cf525808313B35f0D1",
+        "id": "0x49b9a61e",
+        "path": "contracts/actions/curveusd/advanced/transient/CurveUsdSelfLiquidateWithCollTransient.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdRepayTransient",
+        "address": "0xa923a9111377F2f8614E8A1287DbC081e23a29b8",
+        "id": "0x9b788d56",
+        "path": "contracts/actions/curveusd/advanced/transient/CurveUsdRepayTransient.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdLevCreateTransient",
+        "address": "0x798eA3B6E1C6210c6594aD5A1dBDA5b6b3347920",
+        "id": "0x46ae7c0b",
+        "path": "contracts/actions/curveusd/advanced/transient/CurveUsdLevCreateTransient.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CurveUsdSwapperTransient",
+        "address": "0xcF0298592b8FCB3823d31Bb257b65afFCAcCb8b6",
+        "id": "0x2ed1d3be",
+        "path": "contracts/actions/curveusd/advanced/transient/CurveUsdSwapperTransient.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"
