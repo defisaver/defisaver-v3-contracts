@@ -3,6 +3,8 @@
 pragma solidity =0.8.24;
 
 import { IWStEth } from "../../interfaces/lido/IWStEth.sol";
+import { IWeEth } from "../../interfaces/etherFi/IWeEth.sol";
+import { ILiquidityPool } from "../../interfaces/etherFi/ILiquidityPool.sol";
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
@@ -120,17 +122,20 @@ contract LSVSell is ActionBase, UtilHelper, DFSExchangeCore {
         address wrapper;
         uint256 exchangedAmount;
 
-        if (_exchangeData.destAddr == WSTETH_ADDR){
-            if (_exchangeData.srcAddr == TokenUtils.WETH_ADDR || _exchangeData.srcAddr == STETH_ADDR){
-                shouldSell = _exchangeData.minPrice > IWStEth(WSTETH_ADDR).tokensPerStEth();
-            }
-            if (!shouldSell){
-                if (_exchangeData.srcAddr == TokenUtils.WETH_ADDR){
-                    exchangedAmount = _lidoStakeAndWrapWETH(_exchangeData.srcAmount);
-                } else if (_exchangeData.srcAddr == STETH_ADDR){
-                    exchangedAmount = _lidoWrapStEth(_exchangeData.srcAmount);
-                }
-            }
+        if (_exchangeData.destAddr == WSTETH_ADDR) {
+            (shouldSell, exchangedAmount) = _stakeWithLidoIfBetterRate(
+                _exchangeData.srcAddr,
+                _exchangeData.srcAmount,
+                _exchangeData.minPrice
+            );
+        }
+
+        if (_exchangeData.destAddr == WEETH_ADDR) {
+            (shouldSell, exchangedAmount) = _stakeWithEtherFiIfBetterRate(
+                _exchangeData.srcAddr,
+                _exchangeData.srcAmount,
+                _exchangeData.minPrice
+            );
         }
 
         if (shouldSell){
@@ -158,6 +163,27 @@ contract LSVSell is ActionBase, UtilHelper, DFSExchangeCore {
         return (exchangedAmount, logData);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                                  LIDO
+    //////////////////////////////////////////////////////////////*/
+    function _stakeWithLidoIfBetterRate(address _srcAddr, uint256 _srcAmount, uint256 _minPrice) internal returns (bool shouldSell, uint256 exchangedAmount) {
+        if (_srcAddr != TokenUtils.WETH_ADDR && _srcAddr != STETH_ADDR){
+            return (true, 0);
+        }
+
+        if (_minPrice > IWStEth(WSTETH_ADDR).tokensPerStEth()) {
+            return (true, 0);
+        }
+
+        if (_srcAddr == TokenUtils.WETH_ADDR){
+            exchangedAmount = _lidoStakeAndWrapWETH(_srcAmount);
+        } else if (_srcAddr == STETH_ADDR){
+            exchangedAmount = _lidoWrapStEth(_srcAmount);
+        }
+
+        return (false, exchangedAmount);
+    }
+
     function _lidoStakeAndWrapWETH(uint256 wethAmount) internal returns (uint256 wStEthReceivedAmount){
         TokenUtils.withdrawWeth(wethAmount);
 
@@ -175,8 +201,50 @@ contract LSVSell is ActionBase, UtilHelper, DFSExchangeCore {
         wStEthReceivedAmount = IWStEth(WSTETH_ADDR).wrap(_stethAmount);
     }
 
+    /*//////////////////////////////////////////////////////////////
+                                ETHER.FI
+    //////////////////////////////////////////////////////////////*/
+    function _stakeWithEtherFiIfBetterRate(address _srcAddr, uint256 _srcAmount, uint256 _minPrice) internal returns (bool shouldSell, uint256 exchangedAmount) {
+        if (_srcAddr != TokenUtils.WETH_ADDR && _srcAddr != EETH_ADDR){
+            return (true, 0);
+        }
+
+        if (_minPrice > IWeEth(WEETH_ADDR).getWeETHByeETH(1 ether)) {
+            return (true, 0);
+        }
+
+        if (_srcAddr == TokenUtils.WETH_ADDR){
+            exchangedAmount = _etherFiStake(_srcAmount);
+        } else if (_srcAddr == EETH_ADDR){
+            exchangedAmount = _etherFiWrapEeth(_srcAmount);
+        }
+
+        return (false, exchangedAmount);
+    }
+
+    function _etherFiStake(uint256 wethAmount) internal returns (uint256 weEthReceivedAmount){
+        TokenUtils.withdrawWeth(wethAmount);
+
+        uint256 eEthBalanceBefore = EETH_ADDR.getBalance(address(this));
+        ILiquidityPool(ETHER_FI_LIQUIDITY_POOL).deposit{value: wethAmount}();
+        uint256 eEthBalanceAfter = EETH_ADDR.getBalance(address(this));
+
+        uint256 eEthReceivedAmount = eEthBalanceAfter - eEthBalanceBefore;
+
+        weEthReceivedAmount = _etherFiWrapEeth(eEthReceivedAmount);
+    }
+
+    function _etherFiWrapEeth(uint256 _eethAmount) internal returns (uint256 weEthReceivedAmount){
+        EETH_ADDR.approveToken(WEETH_ADDR, _eethAmount);
+
+        weEthReceivedAmount = IWeEth(WEETH_ADDR).wrap(_eethAmount);
+    }
+
+
+    /*//////////////////////////////////////////////////////////////
+                                HELPERS
+    //////////////////////////////////////////////////////////////*/
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
-
 }
