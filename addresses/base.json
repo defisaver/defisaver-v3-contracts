@@ -1104,6 +1104,17 @@
         "history": []
       },
       {
+        "name": "StrategyTriggerViewNoRevert",
+        "address": "0xA9b7A32E879851c00844ac26E83B2089dc3576Ff",
+        "id": "0x37a21cb5",
+        "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+      },
+      {
         "name": "DFSPricesView",
         "address": "0x25d32455A36cA32CaB116B17a7Cfc8C68EB0ADAe",
         "id": "0x3d82eb0c",
@@ -1181,6 +1192,39 @@
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": "0",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "AaveV3OpenRatioCheck",
+        "address": "0xFaC6148cf103BcAf3E90f6EB52373a231861Df18",
+        "id": "0x72b17abf",
+        "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "CreateSub",
+        "address": "0xeE739937085A716477BCB5b01b0f74e1BE046645",
+        "id": "0xf41e543f",
+        "path": "contracts/actions/utils/CreateSub.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "UpdateSub",
+        "address": "0x1601c6ABCDE6e6d8Ad96628AFe20d47908127Aea",
+        "id": "0xa985d903",
+        "path": "contracts/actions/utils/UpdateSub.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
       }

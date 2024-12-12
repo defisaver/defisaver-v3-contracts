@@ -1,7 +1,7 @@
 /* eslint-disable array-callback-return */
 /* eslint-disable max-len */
 const { ethers } = require('hardhat');
-const { expect } = require('chai');
+const { expect, use } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
 const dfs = require('@defisaver/sdk');
 
@@ -22,6 +22,8 @@ const {
     STETH_ADDRESS,
     resetForkToBlock,
     getAddrFromRegistry,
+    formatMockExchangeObj,
+    setNewExchangeWrapper,
 } = require('../utils');
 
 const {
@@ -36,6 +38,10 @@ const {
     curveUsdLevCreate,
     curveUsdAdjust,
     proxyApproveToken,
+    curveUsdLevCreateTransient,
+    curveUsdRepayTransient,
+    sell,
+    curveUsdSelfLiquidateWithCollTransient,
 } = require('../actions');
 
 const crvusdAddress = getAssetInfo('crvUSD').address;
@@ -47,8 +53,10 @@ const debtCeilCheck = async (controllerAddress) => {
     expect(ceiling).to.be.gt(debt.add(ethers.utils.parseUnits('100000')), 'debt ceiling exceeded');
 };
 
-const crvUsdSwapperBalanceCheck = async (collAddr) => {
-    const crvUsdSwapper = await getContractFromRegistry('CurveUsdSwapper');
+const crvUsdSwapperBalanceCheck = async (collAddr, useTransientSwapper = false) => {
+    const crvUsdSwapper = await getContractFromRegistry(
+        useTransientSwapper ? 'CurveUsdSwapperTransient' : 'CurveUsdSwapper',
+    );
 
     const swapperBalanceCrvUsd = await balanceOf(crvusdAddress, crvUsdSwapper.address);
     expect(swapperBalanceCrvUsd).to.be.eq(0);
@@ -62,7 +70,7 @@ const crvUsdSwapperBalanceCheck = async (collAddr) => {
 
 const getUserInfo = async (controllerAddress, user) => {
     const llammaAddress = await ethers.getContractAt('ICrvUsdController', controllerAddress).then((c) => c.amm());
-    const [, collateral] = await ethers.getContractAt('ILLAMMA', llammaAddress).then((c) => c.get_sum_xy(user));
+    const [, collateral] = await ethers.getContractAt('contracts/interfaces/curveusd/ICurveUsd.sol:ILLAMMA', llammaAddress).then((c) => c.get_sum_xy(user));
     const debt = await ethers.getContractAt('ICrvUsdController', controllerAddress).then((c) => c.debt(user));
 
     return { collateral, debt };
@@ -70,7 +78,7 @@ const getUserInfo = async (controllerAddress, user) => {
 
 const getActiveBand = async (controllerAddress) => {
     const llammaAddress = await ethers.getContractAt('ICrvUsdController', controllerAddress).then((c) => c.amm());
-    const activeBand = await ethers.getContractAt('ILLAMMA', llammaAddress).then((c) => c.active_band_with_skip());
+    const activeBand = await ethers.getContractAt('contracts/interfaces/curveusd/ICurveUsd.sol:ILLAMMA', llammaAddress).then((c) => c.active_band_with_skip());
 
     return activeBand;
 };
@@ -202,6 +210,7 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
     let snapshot;
     let senderAcc;
     let proxy;
+    let mockWrapper;
 
     before(async () => {
         blocknumber = await ethers.provider.getBlockNumber();
@@ -210,9 +219,14 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
         await redeploy('CurveUsdSwapper');
         await redeploy('CurveUsdLevCreate');
         await redeploy('CurveUsdPayback');
+        await redeploy('CurveUsdSwapperTransient');
+        await redeploy('CurveUsdLevCreateTransient');
 
         [senderAcc] = await ethers.getSigners();
         proxy = await getProxy(senderAcc.address);
+
+        mockWrapper = await redeploy('MockExchangeWrapper');
+        await setNewExchangeWrapper(senderAcc, mockWrapper.address);
 
         snapshot = await takeSnapshot();
     });
@@ -267,9 +281,6 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                 await revertToSnapshot(snapshot);
                 snapshot = await takeSnapshot();
 
-                const userPosBef = await getUserInfo(controllerAddress, proxy.address);
-                console.log(userPosBef);
-
                 const collateralAmount = ethers.utils.parseUnits('3');
                 const debtAmount = '1000';
                 const debtAmountWei = ethers.utils.parseUnits(debtAmount);
@@ -300,6 +311,43 @@ const curveUsdCreateTest = () => describe('CurveUsd-Create', () => {
                 expect(debt).to.be.eq(debtAmountWei);
                 expect(collateral).to.be.gt(collateralAmount);
                 await crvUsdSwapperBalanceCheck(collateralAsset);
+            });
+
+            it(`... should test transient leverage create for ${assetSymbol} market`, async () => {
+                await revertToSnapshot(snapshot);
+                snapshot = await takeSnapshot();
+
+                const collateralAmount = ethers.utils.parseUnits('3');
+                const debtAmount = '1000';
+                const debtAmountWei = ethers.utils.parseUnits(debtAmount);
+
+                const nBands = 5;
+
+                await setBalance(collateralAsset, senderAcc.address, collateralAmount);
+                await approve(collateralAsset, proxy.address);
+
+                const collAssetInfo = getAssetInfo(assetSymbol);
+                const debtAssetInfo = getAssetInfo('crvUSD');
+                const exchangeData = await formatMockExchangeObj(
+                    debtAssetInfo,
+                    collAssetInfo,
+                    debtAmountWei,
+                );
+
+                await curveUsdLevCreateTransient(
+                    proxy,
+                    controllerAddress,
+                    senderAcc.address,
+                    collateralAmount,
+                    exchangeData,
+                    nBands,
+                );
+
+                const { collateral, debt } = await getUserInfo(controllerAddress, proxy.address);
+
+                expect(debt).to.be.eq(debtAmountWei);
+                expect(collateral).to.be.gt(collateralAmount);
+                await crvUsdSwapperBalanceCheck(collateralAsset, true);
             });
         });
 });
@@ -463,7 +511,7 @@ const curveUsdWithdrawTest = () => describe('CurveUsd-Withdraw', () => {
 
                     {
                         const controller = await ethers.getContractAt('ICrvUsdController', controllerAddress);
-                        const llamma = await ethers.getContractAt('ILLAMMA', controller.amm());
+                        const llamma = await ethers.getContractAt('contracts/interfaces/curveusd/ICurveUsd.sol:ILLAMMA', controller.amm());
 
                         const [, collateral] = await llamma.get_sum_xy(proxy.address);
                         const debt = await controller.debt(proxy.address);
@@ -800,10 +848,139 @@ const curveUsdRepayTest = () => describe('CurveUsd-Repay', () => {
         });
 });
 
+const curveUsdTransientRepayTest = () => describe('CurveUsd-Transient-Repay', () => {
+    let blocknumber;
+    let senderAcc;
+    let proxy;
+    let mockWrapper;
+
+    before(async () => {
+        blocknumber = await ethers.provider.getBlockNumber();
+
+        await redeploy('CurveUsdCreate');
+        await redeploy('CurveUsdWithdraw');
+        await redeploy('CurveUsdPayback');
+        await redeploy('CurveUsdRepayTransient');
+        await redeploy('CurveUsdSwapperTransient');
+
+        [senderAcc] = await ethers.getSigners();
+        proxy = await getProxy(senderAcc.address);
+
+        mockWrapper = await redeploy('MockExchangeWrapper');
+        await setNewExchangeWrapper(senderAcc, mockWrapper.address);
+    });
+
+    after(async () => { await resetForkToBlock(blocknumber); });
+
+    Object.entries(curveusdMarkets)
+        .map(([assetSymbol, { controllerAddress }]) => {
+            const collateralAsset = getAssetInfo(assetSymbol);
+            let snapshot;
+            let collateralAmount;
+
+            it('Create new curve position to be repaid', async () => {
+                await debtCeilCheck(controllerAddress);
+
+                collateralAmount = ethers.utils.parseUnits(fetchAmountinUSDPrice(assetSymbol, '50000'), collateralAsset.decimals);
+                const debtAmount = ethers.utils.parseUnits('10000');
+                const nBands = 4;
+
+                await setBalance(collateralAsset.address, senderAcc.address, collateralAmount);
+                await testCreate({
+                    proxy,
+                    collateralAsset: collateralAsset.address,
+                    controllerAddress,
+                    from: senderAcc.address,
+                    to: senderAcc.address,
+                    collateralAmount,
+                    debtAmount,
+                    nBands,
+                });
+
+                snapshot = await takeSnapshot();
+            });
+
+            it(`... should test partial repay for ${assetSymbol} position`, async () => {
+                const collAmountRepay = fetchAmountinUSDPrice(assetSymbol, '5000');
+
+                const collAmountRepayWei = ethers.utils.parseUnits(collAmountRepay, collateralAsset.decimals);
+
+                const collAssetInfo = getAssetInfo(assetSymbol);
+                const debtAssetInfo = getAssetInfo('crvUSD');
+
+                const exchangeData = await formatMockExchangeObj(
+                    collAssetInfo,
+                    debtAssetInfo,
+                    collAmountRepayWei,
+                );
+
+                const userInfoBefore = await getUserInfo(controllerAddress, proxy.address);
+
+                await curveUsdRepayTransient(
+                    proxy,
+                    controllerAddress,
+                    exchangeData,
+                    senderAcc.address,
+                );
+
+                const userInfoAfter = await getUserInfo(controllerAddress, proxy.address);
+
+                expect(userInfoAfter.collateral).to.be.lt(userInfoBefore.collateral);
+                expect(userInfoAfter.debt).to.be.lt(userInfoBefore.debt);
+                await crvUsdSwapperBalanceCheck(collateralAsset.address, true);
+                await crvUsdSwapperBalanceCheck(debtAssetInfo.address, true);
+
+                await revertToSnapshot(snapshot);
+                snapshot = await takeSnapshot();
+            });
+
+            it(`... should test full repay for ${assetSymbol} position`, async () => {
+                await revertToSnapshot(snapshot);
+                snapshot = await takeSnapshot();
+
+                const collAmountRepay = fetchAmountinUSDPrice(assetSymbol, '20000');
+                const collAmountRepayWei = ethers.utils.parseUnits(collAmountRepay, collateralAsset.decimals);
+                console.log('collAmountRepayWei', collAmountRepayWei.toString());
+
+                const collAssetInfo = getAssetInfo(assetSymbol);
+                const debtAssetInfo = getAssetInfo('crvUSD');
+
+                const exchangeData = await formatMockExchangeObj(
+                    collAssetInfo,
+                    debtAssetInfo,
+                    collAmountRepayWei,
+                );
+
+                const userBalanceBefore = await balanceOf(collateralAsset.address, senderAcc.address);
+                const userCrvUsdBalanceBefore = await balanceOf(crvusdAddress, senderAcc.address);
+
+                await curveUsdRepayTransient(
+                    proxy,
+                    controllerAddress,
+                    exchangeData,
+                    senderAcc.address,
+                );
+
+                const userBalanceAfter = await balanceOf(collateralAsset.address, senderAcc.address);
+                const userCrvUsdBalanceAfter = await balanceOf(crvusdAddress, senderAcc.address);
+
+                const userInfoAfter = await getUserInfo(controllerAddress, proxy.address);
+                expect(userInfoAfter.debt).to.be.eq(0);
+
+                expect(userBalanceAfter).to.be.gt(userBalanceBefore);
+                expect(userCrvUsdBalanceAfter).to.be.gt(userCrvUsdBalanceBefore);
+
+                await crvUsdSwapperBalanceCheck(collateralAsset.address, true);
+                await crvUsdSwapperBalanceCheck(debtAssetInfo.address, true);
+            });
+        });
+});
+
 const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () => {
     let blocknumber;
     let senderAcc;
     let proxy;
+    let mockWrapper;
 
     before(async () => {
         blocknumber = await ethers.provider.getBlockNumber();
@@ -812,9 +989,14 @@ const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () =
         await redeploy('CurveUsdSelfLiquidate');
         await redeploy('CurveUsdSelfLiquidateWithColl');
         await redeploy('CurveUsdSwapper');
+        await redeploy('CurveUsdSelfLiquidateWithCollTransient');
+        await redeploy('CurveUsdSwapperTransient');
 
         [senderAcc] = await ethers.getSigners();
         proxy = await getProxy(senderAcc.address);
+
+        mockWrapper = await redeploy('MockExchangeWrapper');
+        await setNewExchangeWrapper(senderAcc, mockWrapper.address);
     });
 
     after(async () => { await resetForkToBlock(blocknumber); });
@@ -840,7 +1022,7 @@ const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () =
 
                 const crvController = await ethers.getContractAt('ICrvUsdController', controllerAddress);
                 llammaAddress = await crvController.amm();
-                llammaExchange = await ethers.getContractAt('ILLAMMA', llammaAddress);
+                llammaExchange = await ethers.getContractAt('contracts/interfaces/curveusd/ICurveUsd.sol:ILLAMMA', llammaAddress);
 
                 collateralAmount = ethers.utils.parseUnits('3', collateralAsset.decimals);
                 nBands = 4;
@@ -868,7 +1050,8 @@ const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () =
                 console.log('ActiveBand before: ', currActiveBand.toString());
 
                 const minAmount = 1;
-                const swapAmount = ethers.utils.parseUnits(sellAmountsPerAsset[assetSymbol], 18);
+                const sellAmount = sellAmountsPerAsset[assetSymbol] ? sellAmountsPerAsset[assetSymbol] : '30000000';
+                const swapAmount = ethers.utils.parseUnits(sellAmount, 18);
 
                 await setBalance(crvusdAddress, senderAcc.address, swapAmount);
                 await approve(crvusdAddress, llammaAddress);
@@ -963,6 +1146,48 @@ const curveUsdSelfLiquidateTest = () => describe('CurveUsd-Self-Liquidate', () =
                 const userInfoAfterClose = await getUserInfo(controllerAddress, proxy.address);
 
                 await crvUsdSwapperBalanceCheck(collateralAsset.address);
+
+                expect(userInfoAfterClose.collateral).to.be.eq(0);
+                expect(userInfoAfterClose.debt).to.be.eq(0);
+                expect(crvUsdBalanceAfter).to.be.gt(crvUsdBalanceBefore);
+            });
+
+            it(`... should test transient liquidate with collateral selling all coll for crvUSD for ${assetSymbol}`, async () => {
+                revertToSnapshot(snapshot);
+                snapshot = await takeSnapshot();
+
+                const collAssetInfo = getAssetInfo(assetSymbol);
+                const debtAssetInfo = getAssetInfo('crvUSD');
+
+                const exchangeData = await formatMockExchangeObj(
+                    collAssetInfo,
+                    debtAssetInfo,
+                    collateralAmount / 10 ** collateralAsset.decimals,
+                );
+
+                const [crvUsdColl, collateral] = await llammaExchange.get_sum_xy(proxy.address);
+
+                console.log('crvUsd coll: ', crvUsdColl / 1e18);
+                console.log('collateral: ', collateral / 10 ** collateralAsset.decimals);
+                console.log('crvUsd debt: ', debtAmount / 1e18);
+
+                const crvUsdBalanceBefore = await balanceOf(crvusdAddress, senderAcc.address);
+
+                await curveUsdSelfLiquidateWithCollTransient(
+                    proxy,
+                    controllerAddress,
+                    ethers.utils.parseUnits('1', 18), // 100% liquidation
+                    0, // min expected collateral in crvUsd
+                    exchangeData,
+                    senderAcc.address,
+                    true,
+                );
+
+                const crvUsdBalanceAfter = await balanceOf(crvusdAddress, senderAcc.address);
+                const userInfoAfterClose = await getUserInfo(controllerAddress, proxy.address);
+
+                await crvUsdSwapperBalanceCheck(collateralAsset.address, true);
+                await crvUsdSwapperBalanceCheck(debtAssetInfo.address, true);
 
                 expect(userInfoAfterClose.collateral).to.be.eq(0);
                 expect(userInfoAfterClose.debt).to.be.eq(0);
@@ -1103,6 +1328,7 @@ const curveUsdFullTest = () => {
     curveUsdPaybackTest();
     curveUsdRepayTest();
     curveUsdSelfLiquidateTest();
+    curveUsdTransientRepayTest();
 };
 
 module.exports = {
@@ -1117,4 +1343,5 @@ module.exports = {
     curveUsdAdjustTest,
     getActiveBand,
     curveUsdImportTest,
+    curveUsdTransientRepayTest,
 };
