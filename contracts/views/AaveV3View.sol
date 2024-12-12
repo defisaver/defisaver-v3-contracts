@@ -230,10 +230,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
                 _tokenAddresses[i]
             );
             uint256 collFactor = config.data & ~LTV_MASK;
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
-                _tokenAddresses[i]
-            );
-            address aTokenAddr = reserveData.aTokenAddress;
+            address aTokenAddr = lendingPool.getReserveAToken(_tokenAddresses[i]);
             address priceOracleAddress = IPoolAddressesProvider(_market).getPriceOracle();
             uint256 price = IAaveV3Oracle(priceOracleAddress).getAssetPrice(_tokenAddresses[i]);
             tokens[i] = TokenInfo({
@@ -539,45 +536,47 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         IPoolV3 lendingPool = getLendingPool(_market);
         EstimatedRates[] memory estimatedRates = new EstimatedRates[](_reserveParams.length);
         for (uint256 i = 0; i < _reserveParams.length; ++i) {
-            DataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(
-                _reserveParams[i].reserveAddress
-            );
-            DataTypes.ReserveDataExtended memory reserve = lendingPool.getReserveDataExtended(_reserveParams[i].reserveAddress);
-
-            EstimatedRates memory estimatedRate;
-            estimatedRate.reserveAddress = _reserveParams[i].reserveAddress;
-
-            uint256 totalVarDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply().rayMul(_getNextVariableBorrowIndex(reserve));
+            address asset = _reserveParams[i].reserveAddress;
+            DataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(asset);
+            DataTypes.ReserveData memory reserve = lendingPool.getReserveData(asset);
+            
+            uint256 totalVarDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress)
+                .scaledTotalSupply()
+                .rayMul(_getNextVariableBorrowIndex(reserve));
 
             if (_reserveParams[i].isDebtAsset) {
                 totalVarDebt += _reserveParams[i].liquidityTaken;
-                totalVarDebt = _reserveParams[i].liquidityAdded >= totalVarDebt ? 0
+                totalVarDebt = _reserveParams[i].liquidityAdded >= totalVarDebt 
+                    ? 0 
                     : totalVarDebt - _reserveParams[i].liquidityAdded;
             }
 
-            (
-                estimatedRate.supplyRate,
-                estimatedRate.variableBorrowRate
-            ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
+            (uint256 estimatedSupplyRate, uint256 estimatedVariableBorrowRate) = IReserveInterestRateStrategy(
+                reserve.interestRateStrategyAddress
+            ).calculateInterestRates(
                 DataTypes.CalculateInterestRatesParams({
-                    unbacked: reserve.unbacked,
+                    unbacked: reserve.unbacked + lendingPool.getReserveDeficit(asset),
                     liquidityAdded: _reserveParams[i].liquidityAdded,
                     liquidityTaken: _reserveParams[i].liquidityTaken,
                     totalDebt: totalVarDebt,
                     reserveFactor: getReserveFactor(reserve.configuration),
-                    reserve: _reserveParams[i].reserveAddress,
+                    reserve: asset,
                     usingVirtualBalance: isReserveUsingVirtualAccounting(config),
-                    virtualUnderlyingBalance: reserve.virtualUnderlyingBalance
+                    virtualUnderlyingBalance: lendingPool.getVirtualUnderlyingBalance(asset)
                 })
             );
 
-            estimatedRates[i] = estimatedRate;
+            estimatedRates[i] = EstimatedRates({
+                reserveAddress: asset,
+                supplyRate: estimatedSupplyRate,
+                variableBorrowRate: estimatedVariableBorrowRate
+            });
         }
 
         return estimatedRates;
     }
 
-    function _getNextVariableBorrowIndex(DataTypes.ReserveDataExtended memory _reserve) internal view returns (uint128 variableBorrowIndex) {
+    function _getNextVariableBorrowIndex(DataTypes.ReserveData memory _reserve) internal view returns (uint128 variableBorrowIndex) {
         uint256 scaledVariableDebt = IScaledBalanceToken(_reserve.variableDebtTokenAddress).scaledTotalSupply();
         variableBorrowIndex = _reserve.variableBorrowIndex;
         if (scaledVariableDebt > 0) {

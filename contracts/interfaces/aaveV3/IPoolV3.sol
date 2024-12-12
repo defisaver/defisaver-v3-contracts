@@ -578,13 +578,6 @@ interface IPoolV3 {
   function getReserveData(address asset) external view returns (DataTypes.ReserveData memory);
 
   /**
-   * @notice Returns the state and configuration of the reserve
-   * @param asset The address of the underlying asset of the reserve
-   * @return The state and configuration data of the reserve
-   **/
-  function getReserveDataExtended(address asset) external view returns (DataTypes.ReserveDataExtended memory);
-
-  /**
    * @notice Validates and finalizes an aToken transfer
    * @dev Only callable by the overlying aToken of the `asset`
    * @param asset The address of the underlying asset of the aToken
@@ -778,4 +771,31 @@ interface IPoolV3 {
    */
   function getEModeCategoryBorrowableBitmap(uint8 id) external view returns (uint128);
 
+    /**
+   * @notice Returns the current deficit of a reserve.
+   * @param asset The address of the underlying asset of the reserve
+   * @return The current deficit of the reserve
+   */
+  function getReserveDeficit(address asset) external view returns (uint256);
+
+  /**
+   * @notice Returns the aToken address of a reserve.
+   * @param asset The address of the underlying asset of the reserve
+   * @return The address of the aToken
+   */
+  function getReserveAToken(address asset) external view returns (address);
+
+  /**
+   * @notice Returns the variableDebtToken address of a reserve.
+   * @param asset The address of the underlying asset of the reserve
+   * @return The address of the variableDebtToken
+   */
+  function getReserveVariableDebtToken(address asset) external view returns (address);
+
+  /**
+   * @notice Returns the virtual underlying balance of the reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @return The reserve virtual underlying balance
+   */
+  function getVirtualUnderlyingBalance(address asset) external view returns (uint128);
 }
