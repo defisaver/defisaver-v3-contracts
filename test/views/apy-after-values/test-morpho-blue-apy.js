@@ -2,6 +2,7 @@
 const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const hre = require('hardhat');
+const dfs = require('@defisaver/sdk');
 
 const {
     morphoBlueSupply,
@@ -9,6 +10,7 @@ const {
     morphoBlueBorrow,
     morphoBlueWithdraw,
     morphoBluePayback,
+    executeAction,
 } = require('../../actions');
 
 const {
@@ -68,7 +70,10 @@ const morphoBlueApyAfterValuesTest = async () => {
                 }
 
                 const estimatedBorrowRateWithMarket = await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
-                    [marketParams, true, '0', borrowAmount],
+                    marketParams,
+                    [
+                        [true, '0', borrowAmount],
+                    ],
                 );
                 const estimatedBorrowRate = estimatedBorrowRateWithMarket.borrowRate;
 
@@ -97,7 +102,10 @@ const morphoBlueApyAfterValuesTest = async () => {
                 expect(estimatedBorrowRate).to.be.closeTo(realBorrowRate, 1e6);
 
                 const estimatedBorrowRateWithMarketAfterRepay = await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
-                    [marketParams, true, repayAmount, '0'],
+                    marketParams,
+                    [
+                        [true, repayAmount, '0'],
+                    ],
                 );
                 const estimatedBorrowRateAfterRepay = estimatedBorrowRateWithMarketAfterRepay.borrowRate;
 
@@ -130,7 +138,10 @@ const morphoBlueApyAfterValuesTest = async () => {
                 const borrowRateBefore = marketInfo.borrowRate;
 
                 const estimatedBorrowRateWithMarket = await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
-                    [marketParams, false, supplyAmount, withdrawAmount],
+                    marketParams,
+                    [
+                        [false, supplyAmount, withdrawAmount],
+                    ],
                 );
 
                 const estimatedBorrowRate = estimatedBorrowRateWithMarket.borrowRate;
@@ -150,6 +161,84 @@ const morphoBlueApyAfterValuesTest = async () => {
                     wallet.address,
                     senderAcc.address,
                 );
+                marketInfo = await morphoBlueViewContract.callStatic.getMarketInfo(marketParams);
+                const realBorrowRate = marketInfo.borrowRate;
+
+                console.log('Borrow rate before:', borrowRateBefore.toString());
+                console.log('Estimated borrow rate:', estimatedBorrowRate.toString());
+                console.log('Real borrow rate:', realBorrowRate.toString());
+
+                expect(estimatedBorrowRate).to.be.closeTo(realBorrowRate, 1e9);
+            });
+            it(`... should estimate borrow rate when supplying and borrowing ${debtAsset.symbol}`, async () => {
+                const supplyDebtAssetAmount = hre.ethers.utils.parseUnits(
+                    fetchAmountinUSDPrice(debtAsset.symbol, '1000000'),
+                    debtAsset.decimals,
+                );
+                const supplyCollAssetAmount = hre.ethers.utils.parseUnits(
+                    fetchAmountinUSDPrice(collAsset.symbol, '1000000'),
+                    collAsset.decimals,
+                );
+                const borrowAmount = hre.ethers.utils.parseUnits(
+                    fetchAmountinUSDPrice(debtAsset.symbol, '500000'),
+                    debtAsset.decimals,
+                );
+                await setBalance(debtAsset.address, senderAcc.address, supplyDebtAssetAmount);
+                await setBalance(collAsset.address, senderAcc.address, supplyCollAssetAmount);
+                await approve(debtAsset.address, wallet.address, senderAcc);
+                await approve(collAsset.address, wallet.address, senderAcc);
+
+                let marketInfo = await morphoBlueViewContract.callStatic.getMarketInfo(marketParams);
+                const borrowRateBefore = marketInfo.borrowRate;
+
+                const estimatedBorrowRateWithMarket = await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
+                    marketParams,
+                    [
+                        [false, supplyDebtAssetAmount, '0'],
+                        [true, '0', borrowAmount],
+                    ],
+                );
+                const estimatedBorrowRate = estimatedBorrowRateWithMarket.borrowRate;
+
+                const recipe = new dfs.Recipe('Create', [
+                    // supply debt asset
+                    new dfs.actions.morphoblue.MorphoBlueSupplyAction(
+                        marketParams[0],
+                        marketParams[1],
+                        marketParams[2],
+                        marketParams[3],
+                        marketParams[4],
+                        supplyDebtAssetAmount,
+                        senderAcc.address,
+                        wallet.address,
+                    ),
+                    // supply collateral asset so we can borrow debt asset
+                    new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
+                        marketParams[0],
+                        marketParams[1],
+                        marketParams[2],
+                        marketParams[3],
+                        marketParams[4],
+                        supplyCollAssetAmount,
+                        senderAcc.address,
+                        wallet.address,
+                    ),
+                    // borrow debt asset
+                    new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+                        marketParams[0],
+                        marketParams[1],
+                        marketParams[2],
+                        marketParams[3],
+                        marketParams[4],
+                        borrowAmount,
+                        wallet.address,
+                        senderAcc.address,
+                    ),
+                ]);
+                const functionData = recipe.encodeForDsProxyCall()[1];
+                wallet = wallet.connect(senderAcc);
+                await executeAction('RecipeExecutor', functionData, wallet);
+
                 marketInfo = await morphoBlueViewContract.callStatic.getMarketInfo(marketParams);
                 const realBorrowRate = marketInfo.borrowRate;
 

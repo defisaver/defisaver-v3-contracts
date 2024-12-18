@@ -31,6 +31,11 @@ contract ArbitrumUtilAddresses {
     address internal constant AAVE_V3_MARKET = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant SPARK_MARKET = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
+    address internal constant EETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant WEETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; 
+
+    address internal constant ETHER_FI_LIQUIDITY_POOL = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0x158E27De8B5E5bC3FA1C6D5b365a291c54f6b0Fd;
 

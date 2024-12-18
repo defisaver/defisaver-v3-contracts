@@ -32,7 +32,6 @@ contract MorphoBlueView is MorphoBlueHelper {
     }
 
     struct LiquidityChangeParams {
-        MarketParams marketParams;
         bool isBorrowOperation;
         uint256 liquidityAdded;
         uint256 liquidityRemoved;
@@ -101,46 +100,53 @@ contract MorphoBlueView is MorphoBlueHelper {
         });
     }
 
-    function getApyAfterValuesEstimation(LiquidityChangeParams memory params) public returns (uint256 borrowRate, Market memory market) {
-        Id marketId = MarketParamsLib.id(params.marketParams);
-        morphoBlue.accrueInterest(params.marketParams);
+    function getApyAfterValuesEstimation(
+        MarketParams memory _marketParams,
+        LiquidityChangeParams[] memory _params
+    ) public returns (uint256 borrowRate, Market memory market) {
+        Id marketId = MarketParamsLib.id(_marketParams);
+        morphoBlue.accrueInterest(_marketParams);
         market = morphoBlue.market(marketId);
 
-        // if isBorrowOperation => (liquidityAdded = repay, liquidityRemoved = borrow)
-        // if not, look at it as supply/withdraw operation => (liquidityAdded = supply, liquidityRemoved = withdraw)
-        // collateral is not part of interest rate strategy calculations
-        if (params.isBorrowOperation) {
-            // when repaying
-            if (params.liquidityAdded > 0) {
-                uint256 shares = params.liquidityAdded.toSharesDown(market.totalBorrowAssets, market.totalBorrowShares);
-                market.totalBorrowShares = shares > market.totalBorrowShares ? 0 
-                    : market.totalBorrowShares - uint128(shares);
-                market.totalBorrowAssets = params.liquidityAdded > market.totalBorrowAssets ? 0
-                    : market.totalBorrowAssets - uint128(params.liquidityAdded);
-            }
-            // when borrowing
-            if (params.liquidityRemoved > 0) {
-                uint256 shares = params.liquidityRemoved.toSharesUp(market.totalBorrowAssets, market.totalBorrowShares);
-                market.totalBorrowShares += uint128(shares);
-                market.totalBorrowAssets += uint128(params.liquidityRemoved);
-            }
-        } else {
-            // when supplying
-            if (params.liquidityAdded > 0) {
-                uint256 shares = params.liquidityAdded.toSharesDown(market.totalSupplyAssets, market.totalSupplyShares);
-                market.totalSupplyShares += uint128(shares);
-                market.totalSupplyAssets += uint128(params.liquidityAdded);    
-            }
-            // when withdrawing
-            if (params.liquidityRemoved > 0) {
-                uint256 shares = params.liquidityRemoved.toSharesUp(market.totalSupplyAssets, market.totalSupplyShares);
-                market.totalSupplyShares = shares > market.totalSupplyShares ? 0 
-                    : market.totalSupplyShares - uint128(shares);
-                market.totalSupplyAssets = params.liquidityRemoved > market.totalSupplyAssets ? 0
-                    : market.totalSupplyAssets - uint128(params.liquidityRemoved);
+        for (uint256 i = 0; i < _params.length; ++i) {
+            LiquidityChangeParams memory params = _params[i];
+
+            // if isBorrowOperation => (liquidityAdded = repay, liquidityRemoved = borrow)
+            // if not, look at it as supply/withdraw operation => (liquidityAdded = supply, liquidityRemoved = withdraw)
+            // collateral is not part of interest rate strategy calculations
+            if (params.isBorrowOperation) {
+                // when repaying
+                if (params.liquidityAdded > 0) {
+                    uint256 shares = params.liquidityAdded.toSharesDown(market.totalBorrowAssets, market.totalBorrowShares);
+                    market.totalBorrowShares = shares > market.totalBorrowShares ? 0 
+                        : market.totalBorrowShares - uint128(shares);
+                    market.totalBorrowAssets = params.liquidityAdded > market.totalBorrowAssets ? 0
+                        : market.totalBorrowAssets - uint128(params.liquidityAdded);
+                }
+                // when borrowing
+                if (params.liquidityRemoved > 0) {
+                    uint256 shares = params.liquidityRemoved.toSharesUp(market.totalBorrowAssets, market.totalBorrowShares);
+                    market.totalBorrowShares += uint128(shares);
+                    market.totalBorrowAssets += uint128(params.liquidityRemoved);
+                }
+            } else {
+                // when supplying
+                if (params.liquidityAdded > 0) {
+                    uint256 shares = params.liquidityAdded.toSharesDown(market.totalSupplyAssets, market.totalSupplyShares);
+                    market.totalSupplyShares += uint128(shares);
+                    market.totalSupplyAssets += uint128(params.liquidityAdded);    
+                }
+                // when withdrawing
+                if (params.liquidityRemoved > 0) {
+                    uint256 shares = params.liquidityRemoved.toSharesUp(market.totalSupplyAssets, market.totalSupplyShares);
+                    market.totalSupplyShares = shares > market.totalSupplyShares ? 0 
+                        : market.totalSupplyShares - uint128(shares);
+                    market.totalSupplyAssets = params.liquidityRemoved > market.totalSupplyAssets ? 0
+                        : market.totalSupplyAssets - uint128(params.liquidityRemoved);
+                }
             }
         }
-        borrowRate = IIrm(params.marketParams.irm).borrowRateView(params.marketParams, market);
+        borrowRate = IIrm(_marketParams.irm).borrowRateView(_marketParams, market);
     }
 
 }
