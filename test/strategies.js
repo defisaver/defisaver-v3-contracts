@@ -2389,8 +2389,8 @@ const createAaveV3RepayOnPriceStrategy = () => {
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '&collAddr',
-            '&debtAddr',
+            '&collAsset',
+            '&debtAsset',
             '$1', //  hardcoded piped from withdraw
             '%exchangeWrapper', // can pick exchange wrapper
         ),
@@ -2400,7 +2400,7 @@ const createAaveV3RepayOnPriceStrategy = () => {
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '0', // must stay variable backend sets gasCost
-        '&debtAddr',
+        '&debtAsset',
         '$2', // hardcoded output from sell action
         '%dfsFeeDivider', // defaults at 0.05%
     );
@@ -2417,9 +2417,9 @@ const createAaveV3RepayOnPriceStrategy = () => {
         '%onBehalf', // hardcoded 0 as its false
     );
 
-    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
-        '&checkRepayState',
+    const checkerAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
+        '&marketAddr',
     );
 
     aaveV3RepayOnPriceStrategy.addAction(withdrawAction);
@@ -2456,8 +2456,8 @@ const createAaveV3FlRepayOnPriceStrategy = () => {
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '&collAddr',
-            '&debtAddr',
+            '&collAsset',
+            '&debtAsset',
             '0', //  can't hard code because of fee
             '%exchangeWrapper', // can pick exchange wrapper
         ),
@@ -2467,7 +2467,7 @@ const createAaveV3FlRepayOnPriceStrategy = () => {
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '0', // must stay variable backend sets gasCost
-        '&debtAddr',
+        '&debtAsset',
         '$2', // hardcoded output from sell
         '%dfsFeeDivider', // defaults at 0.05%
     );
@@ -2492,9 +2492,9 @@ const createAaveV3FlRepayOnPriceStrategy = () => {
         '&collAssetId',
     );
 
-    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
-        '&checkRepayState',
+    const checkerAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
+        '&marketAddr',
     );
 
     aaveV3FlRepayOnPriceStrategy.addAction(sellAction);
