@@ -216,7 +216,7 @@ const morphoBlueReallocateLiquidityTest = async (isFork) => {
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             allocateContract = await redeploy('MorphoBlueReallocateLiquidity', addrs[network].REGISTRY_ADDR, false, isFork);
             console.log('Deployed MorphoBlueReallocateLiquidity to address:', allocateContract.address);
-            view = await hre.ethers.getContractAt('MorphoBlueView', addrs[network].MORPHO_BLUE_VIEW);
+            view = await redeploy('MorphoBlueView', addrs[network].REGISTRY_ADDR, false, isFork);
         });
         beforeEach(async () => { snapshotId = await takeSnapshot(); });
         afterEach(async () => { await revertToSnapshot(snapshotId); });
@@ -258,11 +258,10 @@ const morphoBlueReallocateLiquidityTest = async (isFork) => {
             const borrowRateBeforeOpen = marketInfo.borrowRate;
 
             const estimatedBorrowRateWithMarket = await view.callStatic.getApyAfterValuesEstimation(
+                MARKET_PARAMS,
                 [
-                    MARKET_PARAMS,
-                    true,
-                    totalReallocated,
-                    amountToBorrow,
+                    [false, totalReallocated, '0'],
+                    [true, '0', amountToBorrow],
                 ],
             );
             const estimatedBorrowRate = estimatedBorrowRateWithMarket.borrowRate;
