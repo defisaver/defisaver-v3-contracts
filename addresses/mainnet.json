@@ -1709,14 +1709,17 @@
     },
     {
         "name": "MorphoBlueView",
-        "address": "0x10B621823D4f3E85fBDF759e252598e4e097C1fd",
+        "address": "0xCbFc68c2e07d4CAb24d80D426A9f85Dbe26bAdA9",
         "id": "0x942aef0a",
         "path": "contracts/views/MorphoBlueView.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0xE29175a86B60138403a9534A391acaDb19f1E9a6"]
+        "history": [
+            "0x10B621823D4f3E85fBDF759e252598e4e097C1fd",
+            "0xE29175a86B60138403a9534A391acaDb19f1E9a6"
+        ]
     },
     {
         "name": "MorphoAaveV2View",
