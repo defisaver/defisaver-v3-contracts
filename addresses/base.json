@@ -1058,6 +1058,17 @@
         "history": []
       },
       {
+        "name": "MorphoBlueReallocateLiquidity",
+        "address": "0x5Ea7F30E40F6A25BE2aD23A6FC1C31A6c95F3dc8",
+        "id": "0x75852bc7",
+        "path": "contracts/actions/morpho-blue/MorphoBlueReallocateLiquidity",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+      },
+      {
         "name": "MorphoBlueView",
         "address": "0x53c0E962bd0AC53928ca04703238b2ec2894195B",
         "id": "0x942aef0a",
