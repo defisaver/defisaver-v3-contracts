@@ -2384,7 +2384,7 @@ const createAaveV3RepayOnPriceStrategy = () => {
         '&marketAddr',
         '%amount', // must stay variable
         '&proxy', // hardcoded
-        '&collAssetId', // must stay variable can choose diff. asset
+        '&collAssetId',
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -2486,7 +2486,7 @@ const createAaveV3FlRepayOnPriceStrategy = () => {
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '%useDefaultMarket',
-        '%market', // hardcoded because default market is true
+        '&marketAddr',
         '$1', // repay fl amount
         '%flAddr', // flAddr not hardcoded (tx will fail if not returned to correct addr)
         '&collAssetId',
