@@ -2399,7 +2399,7 @@ const createAaveV3RepayOnPriceStrategy = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', // must stay variable backend sets gasCost
+        '%gasStart', // must stay variable backend sets gasCost
         '&debtAsset',
         '$2', // hardcoded output from sell action
         '%dfsFeeDivider', // defaults at 0.05%
@@ -2466,9 +2466,9 @@ const createAaveV3FlRepayOnPriceStrategy = () => {
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '0', // must stay variable backend sets gasCost
+        '%gasStart', // must stay variable backend sets gasCost
         '&debtAsset',
-        '$2', // hardcoded output from sell
+        '$2', // hardcoded output from sell action
         '%dfsFeeDivider', // defaults at 0.05%
     );
 
