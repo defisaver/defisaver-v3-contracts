@@ -9,7 +9,7 @@ const {
 const {
     createAaveV3RepayOnPriceL2Strategy,
     createAaveV3FlRepayOnPriceL2Strategy,
-} = require('../test/strategies');
+} = require('../test/l2-strategies');
 const { createStrategy, createBundle } = require('../test/utils-strategies');
 
 const deployBundleL2 = async () => {
