@@ -1595,6 +1595,17 @@
         "history": []
     },
     {
+        "name": "MorphoBlueReallocateLiquidity",
+        "address": "0x17cCA8194602020e855CC8Bc11ffA82d8F998A93",
+        "id": "0x75852bc7",
+        "path": "contracts/actions/morpho-blue/MorphoBlueReallocateLiquidity",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FLMorphoBlue",
         "address": "0x6206C96EAc5EAC546861438A9f953B6BEa50EBAB",
         "id": "0x025e64d8",
@@ -1698,14 +1709,17 @@
     },
     {
         "name": "MorphoBlueView",
-        "address": "0x10B621823D4f3E85fBDF759e252598e4e097C1fd",
+        "address": "0xCbFc68c2e07d4CAb24d80D426A9f85Dbe26bAdA9",
         "id": "0x942aef0a",
         "path": "contracts/views/MorphoBlueView.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0xE29175a86B60138403a9534A391acaDb19f1E9a6"]
+        "history": [
+            "0x10B621823D4f3E85fBDF759e252598e4e097C1fd",
+            "0xE29175a86B60138403a9534A391acaDb19f1E9a6"
+        ]
     },
     {
         "name": "MorphoAaveV2View",
@@ -2050,7 +2064,7 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x23ef4a553fc2af2784a5bf8ce4345d1f0a355a15",
+        "address": "0x3f9f232187b95476947c999ff8e6c65a90be686a",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.7",
@@ -2058,6 +2072,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x23ef4a553fc2af2784a5bf8ce4345d1f0a355a15",
             "0x3789ae0ea3bc9a4641ed0c5fd90b51e5ed4a3551",
             "0xb49b5f783381408eBda3C3b4C5f34142B4B289EC",
             "0x8095fFFC3cDdE58C4F537D39f9795A40a103e633",

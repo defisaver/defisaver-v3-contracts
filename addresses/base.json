@@ -835,7 +835,7 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x6962a609A10051A5309Fe8c4d3dAb15366C481d2",
+        "address": "0x5410BBB107B490f7A5789CfdB3667D2AbdE9c0eC",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.7",
@@ -843,6 +843,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x6962a609A10051A5309Fe8c4d3dAb15366C481d2",
           "0x1882BBB847425335CCe0b81eC10295674A982395",
           "0xa679fED396bfA42ca2E67FfDbe7E78D335548fA4",
           "0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b"
@@ -858,6 +859,17 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+      "name": "MerklClaim",
+      "address": "0xA2C6Cd875c52Bf5c27516FAe3B6ba9241790908a",
+      "id": "0x79b06cc7",
+      "path": "contracts/actions/merkl/MerklClaim.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
     },
     {
         "name": "TransientStorage",
@@ -1043,6 +1055,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
+        "registryIds": [],
+        "history": []
+      },
+      {
+        "name": "MorphoBlueReallocateLiquidity",
+        "address": "0x5Ea7F30E40F6A25BE2aD23A6FC1C31A6c95F3dc8",
+        "id": "0x75852bc7",
+        "path": "contracts/actions/morpho-blue/MorphoBlueReallocateLiquidity",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
       },
