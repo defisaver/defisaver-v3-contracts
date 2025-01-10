@@ -56,7 +56,9 @@ async function main() {
     ];
     const l1BotAccounts = [
         '0x1b6c1a0e20af6f8b7f7b9e3e2f3b3d3d5f1b0e5a',
-        '0x1b6c1a0e20af6f8b7f7b9e3e2f3b3d3d5f1b0e5a',
+        '0x660B3515F493200C47Ef3DF195abEAfc57Bd6496',
+        '0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4',
+        '0xC561281982c3042376eB8242d6A78Ab18062674F',
     ];
     const bots = getNetwork() === 'mainnet' ? l1BotAccounts : l2BotAccounts;
     for (let i = 0; i < bots.length; ++i) {
