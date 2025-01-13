@@ -1250,5 +1250,27 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
-      }
+      },
+      {
+        "name": "MorphoBluePriceTrigger",
+        "address": "0xF8042Ad17c9C01363f5534cfe2dc0b84B934c54c",
+        "id": "0x6730402c",
+        "path": "contracts/triggers/MorphoBluePriceTrigger",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueTargetRatioCheck",
+        "address": "0x394fA7AeFe3ceCB3a79E0226c792134B0904dc4b",
+        "id": "0x49f12f40",
+        "path": "contracts/actions/checker/MorphoBlueTargetRatioCheck",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    }
   ]

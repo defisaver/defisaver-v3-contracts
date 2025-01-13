@@ -3871,6 +3871,28 @@
         "history": []
     },
     {
+        "name": "MorphoBluePriceTrigger",
+        "address": "0x2DcBE45068257350c11a6decD81019156C70f5fb",
+        "id": "0x6730402c",
+        "path": "contracts/triggers/MorphoBluePriceTrigger",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueTargetRatioCheck",
+        "address": "0xC7D545749732dD4ce799ABd7Fc8e0900eEB2E564",
+        "id": "0x49f12f40",
+        "path": "contracts/actions/checker/MorphoBlueTargetRatioCheck",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"
