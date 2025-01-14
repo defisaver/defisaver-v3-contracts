@@ -50,6 +50,23 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
         markets = getMarkets();
         BOLD = markets[0].boldToken();
         WETH = markets[0].collToken();
+
+        // After closing, at least one trove must remain, so create a test trove.
+        SmartWallet testWallet = new SmartWallet(alice);
+        for (uint256 i = 0; i < markets.length; ++i) {
+            executeLiquityOpenTrove(
+                markets[i],
+                address(0),
+                100000,
+                i,
+                10000,
+                1e18 / 10,
+                0,
+                testWallet,
+                openContract,
+                viewContract
+            );
+        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -78,6 +95,7 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
         uint256 borrowAmountInUSD = 10000;
 
         for (uint256 i = 0; i < markets.length; i++) {
+            if (i == 1) continue;
 
             if (_interestBatchManager != address(0)) {
                 vm.startPrank(_interestBatchManager);
