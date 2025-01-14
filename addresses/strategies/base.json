@@ -1718,5 +1718,125 @@
       ]
     ],
     "bundleId": 11
+  },
+  {
+    "name": "MorphoBlueBoostOnTargetPriceL2Strategy",
+    "id": 30,
+    "isContinuous": false,
+    "triggerIds": [
+      "MorphoBluePriceTrigger"
+    ],
+    "actionIds": [
+      "MorphoBlueBorrow",
+      "DFSSell",
+      "GasFeeTakerL2",
+      "MorphoBlueSupplyCollateral",
+      "MorphoBlueTargetRatioCheck"
+    ],
+    "paramMapping": [
+      [
+        "&1",
+        "&2",
+        "&3",
+        "&4",
+        "&5",
+        0,
+        "&7",
+        "&proxy"
+      ],
+      [
+        "&1",
+        "&2",
+        "$1",
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&2",
+        "$2",
+        0
+      ],
+      [
+        "&1",
+        "&2",
+        "&3",
+        "&4",
+        "&5",
+        "$3",
+        "&proxy",
+        "&7"
+      ],
+      [
+        "&1",
+        "&2",
+        "&3",
+        "&4",
+        "&5",
+        "&7",
+        "&6"
+      ]
+    ],
+    "bundleId": 12
+  },
+  {
+    "name": "MorphoBlueFLBoostOnTargetPriceL2Strategy",
+    "id": 31,
+    "isContinuous": false,
+    "triggerIds": [
+      "MorphoBluePriceTrigger"
+    ],
+    "actionIds": [
+      "FLAction",
+      "DFSSell",
+      "GasFeeTakerL2",
+      "MorphoBlueSupplyCollateral",
+      "MorphoBlueBorrow",
+      "MorphoBlueTargetRatioCheck"
+    ],
+    "paramMapping": [
+      [],
+      [
+        "&1",
+        "&2",
+        0,
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&2",
+        "$2",
+        0
+      ],
+      [
+        "&1",
+        "&2",
+        "&3",
+        "&4",
+        "&5",
+        "$3",
+        "&proxy",
+        "&7"
+      ],
+      [
+        "&1",
+        "&2",
+        "&3",
+        "&4",
+        "&5",
+        "$1",
+        "&7",
+        0
+      ],
+      [
+        "&1",
+        "&2",
+        "&3",
+        "&4",
+        "&5",
+        "&7",
+        "&6"
+      ]
+    ],
+    "bundleId": 12
   }
 ]

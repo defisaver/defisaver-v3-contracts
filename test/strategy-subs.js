@@ -26,7 +26,6 @@ const {
     IN_REPAY,
     IN_BOOST,
     createMorphoBlueRatioTrigger,
-    createChainLinkPriceTrigger,
 } = require('./triggers');
 
 const {
@@ -43,7 +42,6 @@ const {
     chainIds,
     BOLD_ADDR,
 } = require('./utils');
-const { BigNumber } = require('ethers');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -888,6 +886,25 @@ const subLiquityV2CloseBundle = async (
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
+const subMorphoBlueLeverageManagementOnPrice = async (
+    proxy, strategyOrBundleId, marketParams, user, targetRatio, price, priceState, isBundle = true,
+) => {
+    const strategySub = automationSdk.strategySubService.morphoBlueEncode.leverageManagementOnPrice(
+        strategyOrBundleId,
+        isBundle,
+        marketParams.loanToken,
+        marketParams.collateralToken,
+        marketParams.oracle,
+        marketParams.irm,
+        marketParams.lltv,
+        user,
+        targetRatio,
+        price,
+        priceState,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
 
 module.exports = {
     subDcaStrategy,
@@ -927,4 +944,5 @@ module.exports = {
     subLiquityV2RepayBundle,
     subLiquityV2BoostBundle,
     subLiquityV2CloseBundle,
+    subMorphoBlueLeverageManagementOnPrice,
 };
