@@ -5,8 +5,8 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { LiquityV2RatioHelper } from "../liquityV2/helpers/LiquityV2RatioHelper.sol";
 
-/// @title LiquityV2RatioCheck - Checks liquity target ratio for trove and reverts if faulty
-contract LiquityV2RatioCheck is ActionBase, LiquityV2RatioHelper {
+/// @title LiquityV2TargetRatioCheck - Checks liquity target ratio for trove and reverts if faulty
+contract LiquityV2TargetRatioCheck is ActionBase, LiquityV2RatioHelper {
 
     /// @dev 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
