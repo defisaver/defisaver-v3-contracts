@@ -92,6 +92,7 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
                 i,
                 borrowAmountInUSD,
                 1e18 / 10,
+                0,
                 wallet,
                 openContract,
                 viewContract

@@ -78,6 +78,7 @@ contract TestLiquityV2AdjustInterestRate is LiquityV2ExecuteActions {
                 i,
                 borrowAmountInUSD,
                 currInterestRate,
+                0,
                 wallet,
                 openContract,
                 viewContract

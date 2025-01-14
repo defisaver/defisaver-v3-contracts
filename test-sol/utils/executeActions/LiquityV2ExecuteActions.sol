@@ -37,6 +37,7 @@ contract LiquityV2ExecuteActions is ExecuteActionsBase, LiquityV2TestHelper {
         uint256 _collIndex,
         uint256 _borrowAmountInUSD,
         uint256 _annualInterestRate,
+        uint256 _nonce,
         SmartWallet _wallet,
         LiquityV2Open _openContract,
         LiquityV2View _viewContract
@@ -84,7 +85,7 @@ contract LiquityV2ExecuteActions is ExecuteActionsBase, LiquityV2TestHelper {
                 _wallet.owner(),
                 _wallet.owner(),
                 _batchManager,
-                0,
+                _nonce,
                 vars.collAmount,
                 vars.borrowAmount,
                 vars.upperHint,
@@ -96,6 +97,6 @@ contract LiquityV2ExecuteActions is ExecuteActionsBase, LiquityV2TestHelper {
 
         _wallet.execute(address(_openContract), vars.openCalldata, 0);
 
-        troveId = uint256(keccak256(abi.encode(_wallet.walletAddr(), 0)));
+        troveId = uint256(keccak256(abi.encode(_wallet.walletAddr(), _nonce)));
     }
 }

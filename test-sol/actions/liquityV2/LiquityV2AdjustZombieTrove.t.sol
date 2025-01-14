@@ -165,6 +165,7 @@ contract TestLiquityV2AdjustZombieTrove is LiquityV2ExecuteActions {
                 i,
                 _config.openBorrowAmountInUSD,
                 1e18 / 10,
+                0,
                 wallet,
                 openContract,
                 viewContract

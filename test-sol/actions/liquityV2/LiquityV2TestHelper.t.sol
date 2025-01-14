@@ -15,8 +15,8 @@ contract LiquityV2TestHelper is LiquityV2Helper {
     // @dev ordered by collateral index. Ith market will have Ith collateral index in CollateralRegistry
     function getMarkets() internal pure returns (IAddressesRegistry[] memory markets) {
         markets = new IAddressesRegistry[](2);
-        markets[0] = IAddressesRegistry(address(0x7d2D2c79EC89C7F1d718ae1586363AD2c56ded9D));
-        markets[1] = IAddressesRegistry(address(0x83b74f12A2894FcF7A4864EfF6090D7d8A060C6B));
+        markets[0] = IAddressesRegistry(address(0xc3fe668b43439525F70FE860F89882F0BE312504));
+        markets[1] = IAddressesRegistry(address(0x9B27787Ff66Aa3CeA8dBC47772328459A1FA05aC));
     }
 
     function getInsertPosition(
