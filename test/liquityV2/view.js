@@ -9,7 +9,7 @@ const {
 } = require('../utils');
 const { topUp } = require('../../scripts/utils/fork');
 
-const eulerV2ViewTest = async () => {
+const liquityV2ViewTest = async () => {
     describe('LiquityV2-View', function () {
         this.timeout(100000);
         let isFork;
@@ -57,6 +57,6 @@ describe('LiquityV2-View', function () {
     this.timeout(80000);
 
     it('...test LiquityV2 view', async () => {
-        await eulerV2ViewTest();
+        await liquityV2ViewTest();
     }).timeout(50000);
 });
