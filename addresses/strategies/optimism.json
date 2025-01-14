@@ -642,5 +642,109 @@
       ]
     ],
     "bundleId": 4
+  },
+  {
+    "name": "AaveV3RepayOnPriceL2",
+    "id": 12,
+    "isContinuous": false,
+    "triggerIds": [
+      "AaveV3QuotePriceTrigger"
+    ],
+    "actionIds": [
+      "AaveV3Withdraw",
+      "DFSSell",
+      "GasFeeTakerL2",
+      "AaveV3Payback",
+      "AaveV3OpenRatioCheck"
+    ],
+    "paramMapping": [
+      [
+        "&2",
+        0,
+        0,
+        "&proxy",
+        "&5"
+      ],
+      [
+        "&1",
+        "&3",
+        "$1",
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&3",
+        "$2",
+        0
+      ],
+      [
+        "$3",
+        "&proxy",
+        0,
+        "&4",
+        0,
+        "&7",
+        "&5",
+        0
+      ],
+      [
+        "&6",
+        "&5"
+      ]
+    ],
+    "bundleId": 5
+  },
+  {
+    "name": "AaveV3FlRepayOnPriceL2",
+    "id": 13,
+    "isContinuous": false,
+    "triggerIds": [
+      "AaveV3QuotePriceTrigger"
+    ],
+    "actionIds": [
+      "FLAction",
+      "DFSSell",
+      "GasFeeTakerL2",
+      "AaveV3Payback",
+      "AaveV3Withdraw",
+      "AaveV3OpenRatioCheck"
+    ],
+    "paramMapping": [
+      [],
+      [
+        "&1",
+        "&3",
+        0,
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&3",
+        "$2",
+        0
+      ],
+      [
+        "$3",
+        "&proxy",
+        0,
+        "&4",
+        0,
+        "&7",
+        "&5",
+        0
+      ],
+      [
+        "&2",
+        0,
+        "$1",
+        0,
+        "&5"
+      ],
+      [
+        "&6",
+        "&5"
+      ]
+    ],
+    "bundleId": 5
   }
 ]

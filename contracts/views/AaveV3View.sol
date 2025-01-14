@@ -18,6 +18,7 @@ import { WadRayMath } from "../utils/math/WadRayMath.sol";
 import { MathUtils } from "../utils/math/MathUtils.sol";
 
 contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
+    uint256 internal constant LIQUIDATION_BONUS_MASK =         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFF; // prettier-ignore
     uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant SUPPLY_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant EMODE_CATEGORY_MASK =            0xFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -33,8 +34,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant PAUSED_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant VIRTUAL_ACC_ACTIVE =             0xEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
 
-    
     uint256 internal constant LIQUIDATION_THRESHOLD_START_BIT_POSITION = 16;
+    uint256 internal constant LIQUIDATION_BONUS_START_BIT_POSITION = 32;
     uint256 internal constant RESERVE_FACTOR_START_BIT_POSITION = 64;
     uint256 internal constant BORROWING_ENABLED_START_BIT_POSITION = 58;
     uint256 internal constant BORROW_CAP_START_BIT_POSITION = 80;
@@ -286,9 +287,9 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             isSiloedForBorrowing: isSiloedForBorrowing(_market, _tokenAddr),
             eModeCollateralFactor: 0,
             isFlashLoanEnabled: getFlashLoanEnabled(config),
-            ltv: 0, // deprecated, not 1:1 related to asset
-            liquidationThreshold: 0, // deprecated, not 1:1 related to asset
-            liquidationBonus: 0, // deprecated, not 1:1 related to asset
+            ltv: 0, // same as collateralFactor
+            liquidationThreshold: 0,// same as liquidationRatio
+            liquidationBonus: uint16(getLiquidationBonus(config)),
             priceSource: address(0), // deprecated, not 1:1 related to asset
             label: "", // deprecated, not 1:1 related to asset
             isActive: isActive,
@@ -430,6 +431,15 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     {
         return
             (self.data & ~LIQUIDATION_THRESHOLD_MASK) >> LIQUIDATION_THRESHOLD_START_BIT_POSITION;
+    }
+
+    function getLiquidationBonus(DataTypes.ReserveConfigurationMap memory self)
+        internal
+        pure
+        returns (uint256)
+    {
+        return
+            (self.data & ~LIQUIDATION_BONUS_MASK) >> LIQUIDATION_BONUS_START_BIT_POSITION;
     }
 
     function getAssetPrice(address _market, address _tokenAddr)

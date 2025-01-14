@@ -69,6 +69,7 @@ const addrs = {
         ZEROX_WRAPPER: '0x11e048f19844B7bAa6D9eA4a20eD4fACF7b757b2',
         STRATEGY_EXECUTOR_ADDR: '0xFaa763790b26E7ea354373072baB02e680Eeb07F',
         REFILL_CALLER: '0x33fDb79aFB4456B604f376A45A546e7ae700e880',
+        MORPHO_BLUE_VIEW: '0x10B621823D4f3E85fBDF759e252598e4e097C1fd',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -177,6 +178,7 @@ const addrs = {
         STRATEGY_EXECUTOR_ADDR: '0x0d099E38f6aF8778c5053349c350Aad906B1432F',
         FEE_RECIPIENT_ADDR: '0xEDFc68e2874B0AFc0963e18AE4D68522aEc7f97D',
         REFILL_CALLER: '0xBefc466abe547B1785f382883833330a47C573f7',
+        MORPHO_BLUE_VIEW: '0x53c0E962bd0AC53928ca04703238b2ec2894195B',
     },
 };
 
@@ -187,6 +189,8 @@ const config = require('../hardhat.config');
 
 const nullAddress = '0x0000000000000000000000000000000000000000';
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+const EETH_ADDR = '0x35fA164735182de50811E8e2E824cFb9B6118ac2';
+const ETHER_FI_LIQUIDITY_POOL = '0x308861A430be4cce5502d0A12724771Fc6DaF216';
 const KYBER_WRAPPER = '0x71C8dc1d6315a48850E88530d18d3a97505d2065';
 const UNISWAP_WRAPPER = '0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54';
 const OASIS_WRAPPER = '0x2aD7D86C56b7a09742213e1e649C727cB4991A54';
@@ -1426,7 +1430,6 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
     let receipt;
     if (isProxySafe(proxy)) {
         console.log('proxy signer address');
-        console.log(proxy.signer.address);
         receipt = await executeSafeTx(
             proxy.signer.address,
             proxy,
@@ -1603,4 +1606,6 @@ module.exports = {
     WALLETS,
     BOLD_ADDR,
     BALANCER_VAULT_ADDR,
+    EETH_ADDR,
+    ETHER_FI_LIQUIDITY_POOL,
 };

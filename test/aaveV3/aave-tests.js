@@ -7,6 +7,9 @@ const {
     balanceOf, setBalance, redeploy,
     takeSnapshot, revertToSnapshot, addrs, approve,
     impersonateAccount, getAddrFromRegistry,
+    resetForkToBlock,
+    sendEther,
+    timeTravel,
 } = require('../utils');
 const { isAssetBorrowableV3 } = require('../utils-aave');
 const {
@@ -18,6 +21,10 @@ const {
     aaveV3ClaimRewards,
     aaveV3DelegateCredit,
     aaveV3DelegateCreditWithSig,
+    claimAaveFromStkGho,
+    startUnstakeGho,
+    finalizeUnstakeAave,
+    finalizeUnstakeGho,
 } = require('../actions');
 
 const aaveV3SupplyTest = async () => {
@@ -1225,6 +1232,90 @@ const aaveV3DelegateCreditWithSigTest = async () => {
     });
 };
 
+const ghoClaimAAVEtest = async () => {
+    describe('Test claiming AAVE from stkGHO', function () {
+        this.timeout(150000);
+
+        let senderAcc; let proxy;
+        const AAVE_ADDR = '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9';
+        const USER_ACC = '0x9c6a52c6F736BA3Cd9c21bd13eEBE08760f931E5';
+        const SAFE_ACC = '0x43303C5B97D2858557610aCDb28992ab709C26b2';
+
+        before(async () => {
+            await resetForkToBlock(21176924);
+            // at this block user can claim 0.04 AAVE on his proxy
+            await redeploy('GhoClaimAAVE');
+            senderAcc = await hre.ethers.provider.getSigner(USER_ACC);
+
+            proxy = await hre.ethers.getContractAt('ISafe', SAFE_ACC);
+            console.log(proxy.address);
+            proxy = proxy.connect(senderAcc);
+            proxy.signer.address = USER_ACC;
+            const filledAcc = (await hre.ethers.getSigners())[0];
+            await sendEther(filledAcc, USER_ACC, '10');
+            await impersonateAccount(USER_ACC);
+        });
+
+        it('... should claim 0.01 AAVE (out of 0.04) for DSProxy from Staking Aave', async () => {
+            const amountToClaim = hre.ethers.utils.parseUnits('0.01', 18);
+            const aaveBalanceBefore = await balanceOf(AAVE_ADDR, USER_ACC);
+            await claimAaveFromStkGho(proxy, amountToClaim, USER_ACC);
+            const aaveBalanceAfter = await balanceOf(AAVE_ADDR, USER_ACC);
+            console.log(aaveBalanceBefore.toString());
+            console.log(aaveBalanceAfter.toString());
+            expect(aaveBalanceAfter.sub(aaveBalanceBefore)).to.be.eq(amountToClaim);
+        });
+
+        it('... should claim all accrued rewards when amount > unclaimed rewards', async () => {
+            const amountToClaim = hre.ethers.constants.MaxUint256;
+            const aaveBalanceBefore = await balanceOf(AAVE_ADDR, USER_ACC);
+            await claimAaveFromStkGho(proxy, amountToClaim, USER_ACC);
+            const aaveBalanceAfter = await balanceOf(AAVE_ADDR, USER_ACC);
+            console.log(aaveBalanceBefore.toString());
+            console.log(aaveBalanceAfter.toString());
+            expect(aaveBalanceAfter.sub(aaveBalanceBefore)).to.be.gt('0');
+        });
+    });
+};
+const ghoUnstakeTest = async () => {
+    describe('GHO-stake on behalf of proxy and unstake test', function () {
+        this.timeout(150000);
+        const stkGHO = '0x1a88df1cfe15af22b3c4c783d4e6f7f9e0c1885d';
+        const gho = '0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f';
+
+        let senderAcc; let proxy; let stkGhoContract; let snapshot;
+        before(async () => {
+            await redeploy('GhoUnstake');
+            stkGhoContract = await hre.ethers.getContractAt('IStkAave', stkGHO);
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+            snapshot = await takeSnapshot();
+        });
+
+        it('... should stake 100 GHO on behalf of DSProxy', async () => {
+            const amount = hre.ethers.utils.parseUnits('100', 18);
+            await setBalance(gho, senderAcc.address, amount);
+            await approve(gho, stkGHO, senderAcc);
+            await stkGhoContract.stake(proxy.address, amount);
+            console.log(await balanceOf(stkGHO, proxy.address));
+        });
+
+        it('... should start the process of unstaking', async () => {
+            await startUnstakeGho(proxy);
+            const aaveUnstakeCooldown = 1728001;
+            await timeTravel(aaveUnstakeCooldown);
+        });
+
+        it('... should unstake all stkGHO', async () => {
+            const amount = await balanceOf(stkGHO, proxy.address);
+            await finalizeUnstakeGho(proxy, senderAcc.address, amount);
+            const endingBalance = await balanceOf(gho, senderAcc.address);
+            expect(endingBalance).to.be.eq(amount);
+            await revertToSnapshot(snapshot);
+        });
+    });
+};
+
 const aaveV3DeployContracts = async () => {
     await redeploy('AaveV3Supply');
     await redeploy('AaveV3Borrow');
@@ -1263,4 +1354,6 @@ module.exports = {
     aaveV3ClaimRewardsTest,
     aaveV3DelegateCreditTest,
     aaveV3DelegateCreditWithSigTest,
+    ghoClaimAAVEtest,
+    ghoUnstakeTest,
 };

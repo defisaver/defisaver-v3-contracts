@@ -853,6 +853,138 @@ describe('Test direct actions encoding for sdk and foundry', () => {
         });
     });
 
+    describe('EtherFi', () => {
+        let foundryContract;
+        let from;
+        let to;
+        const amount = 10000;
+        const shouldWrap = true;
+
+        before(async () => {
+            foundryContract = await getFoundryEncodingContract();
+            [from, to] = (await hre.ethers.getSigners()).map((s) => s.address);
+        });
+
+        it('Test etherFiStakeEncode', async () => {
+            const EtherFiStake = await hre.ethers.getContractFactory('EtherFiStake');
+            const sdkEncoded = (
+                new sdk.actions.etherfi.EtherFiStakeAction(
+                    amount,
+                    from,
+                    to,
+                    shouldWrap,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EtherFiStake.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.etherFiStakeEncode(
+                    amount,
+                    from,
+                    to,
+                    shouldWrap,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test etherFiWrap', async () => {
+            const EtherFiWrap = await hre.ethers.getContractFactory('EtherFiWrap');
+            const sdkEncoded = (
+                new sdk.actions.etherfi.EtherFiWrapAction(
+                    amount,
+                    from,
+                    to,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EtherFiWrap.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.etherFiWrapEncode(
+                    amount,
+                    from,
+                    to,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test etherFiUnwrap', async () => {
+            const EtherFiUnwrap = await hre.ethers.getContractFactory('EtherFiUnwrap');
+            const sdkEncoded = (
+                new sdk.actions.etherfi.EtherFiUnwrapAction(
+                    amount,
+                    from,
+                    to,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = EtherFiUnwrap.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.etherFiUnwrapEncode(
+                    amount,
+                    from,
+                    to,
+                ),
+            ]);
+
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+    });
+
+    describe('Renzo', () => {
+        let foundryContract;
+        let from;
+        let to;
+        const amount = 10000;
+        before(async () => {
+            foundryContract = await getFoundryEncodingContract();
+            [from, to] = (await hre.ethers.getSigners()).map((s) => s.address);
+        });
+        it('Test renzoStakeEncode', async () => {
+            const RenzoStake = await hre.ethers.getContractFactory('RenzoStake');
+            const sdkEncoded = (
+                new sdk.actions.renzo.RenzoStakeAction(amount, from, to)
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = RenzoStake.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.renzoStakeEncode(amount, from, to),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+    });
+
+    describe('MorphoBlue', () => {
+        let foundryContract;
+        let receiver;
+        before(async () => {
+            foundryContract = await getFoundryEncodingContract();
+            [receiver] = (await hre.ethers.getSigners()).map((s) => s.address);
+        });
+
+        it('Test morphoTokenWrapEncode', async () => {
+            const MorphoTokenWrap = await hre.ethers.getContractFactory('MorphoTokenWrap');
+            const sdkEncoded = (new sdk.actions.morphoblue.MorphoTokenWrapAction(receiver, 1000))
+                .encodeForDsProxyCall()[1];
+            const foundryEncoded = MorphoTokenWrap.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.morphoTokenWrapEncode(receiver, 1000),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+        it('Test morphoTokenWrapEncode maxUint256 amount', async () => {
+            const maxAmt = hre.ethers.constants.MaxUint256;
+            const MorphoTokenWrap = await hre.ethers.getContractFactory('MorphoTokenWrap');
+            const sdkEncoded = (new sdk.actions.morphoblue.MorphoTokenWrapAction(receiver, maxAmt))
+                .encodeForDsProxyCall()[1];
+            const foundryEncoded = MorphoTokenWrap.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.morphoTokenWrapEncode(receiver, maxAmt),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+    });
+
+    /* //////////////////////////////////////////////////////////////
+                           LIQUITY_V2
+    ////////////////////////////////////////////////////////////// */
     describe('LiquityV2', () => {
         const market = '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e';
         const from = '0x0000000000000000000000000000000000000001';
