@@ -43,8 +43,6 @@ async function main() {
         await topUp(senderAcc.address);
         await topUp(getOwnerAddr());
     }
-    let proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-    proxy = proxy.connect(senderAcc);
 
     const liquityV2View = await redeploy('LiquityV2View', addrs[network].REGISTRY_ADDR, false, isFork);
     const liquityV2Open = await redeploy('LiquityV2Open', addrs[network].REGISTRY_ADDR, false, isFork);
@@ -91,8 +89,6 @@ async function main() {
     console.log(`Repay bundle id: ${repayBundleId}`);
     console.log(`Boost bundle id: ${boostBundleId}`);
     console.log(`Close bundle id: ${closeBundleId}`);
-
-    await provideBoldLiquidity(proxy, senderAcc);
 
     process.exit(0);
 }
