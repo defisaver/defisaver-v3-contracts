@@ -5,36 +5,10 @@ const { start } = require('./utils/starter');
 
 const {
     redeploy, addrs, network, getOwnerAddr,
-    DAI_ADDR,
-    setBalance,
-    getProxy,
-    BOLD_ADDR,
 } = require('../test/utils');
 
 const { topUp } = require('./utils/fork');
-const { uniV3CreatePool } = require('../test/actions');
 const { deployLiquityV2RepayBundle, deployLiquityV2BoostBundle, deployLiquityV2CloseBundle } = require('../test/utils-liquityV2');
-
-const provideBoldLiquidity = async (proxy, senderAcc) => {
-    const dai = DAI_ADDR;
-    const boldAmount = hre.ethers.utils.parseUnits('1000000000', 18);
-    const daiAmount = hre.ethers.utils.parseUnits('1000000000', 18);
-    await setBalance(BOLD_ADDR, senderAcc.address, boldAmount);
-    await setBalance(dai, senderAcc.address, daiAmount);
-    await uniV3CreatePool(
-        proxy,
-        BOLD_ADDR,
-        dai,
-        '100',
-        -101, // math.floor(math.log(p, 1.0001)) where p is 0.99
-        99, // math.floor(math.log(p, 1.0001)) where p is 1.01
-        boldAmount,
-        daiAmount,
-        senderAcc.address,
-        senderAcc.address,
-        '79228162514264337593543950336', // 2**96
-    );
-};
 
 async function main() {
     const isFork = true;
