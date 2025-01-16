@@ -4812,6 +4812,150 @@ const createAaveV3FLOpenOrderFromDebtStrategy = () => {
     aaveV3OpenOrderFromDebtStrategy.addAction(openRatioCheckAction);
     return aaveV3OpenOrderFromDebtStrategy.encodeForDsProxyCall();
 };
+const createMorphoBlueBoostOnTargetPriceStrategy = () => {
+    const morphoBlueBoostOnTargetPriceStrategy = new dfs.Strategy('MorphoBlueBoostOnTargetPriceStrategy');
+
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&loanToken', 'address');
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&oracle', 'address');
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&irm', 'address');
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&user', 'address');
+
+    const trigger = new dfs.triggers.MorphoBluePriceTrigger(
+        '&loanToken', '&collateralToken', '&oracle', '&price', '&priceState',
+    );
+    morphoBlueBoostOnTargetPriceStrategy.addTrigger(trigger);
+
+    const borrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%amountToBorrow', // sent by backend
+        '&user',
+        '&proxy',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&loanToken',
+            '&collateralToken',
+            '$1',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // sent by backend
+        '&collateralToken',
+        '$2',
+    );
+    const supplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$3',
+        '&proxy',
+        '&user',
+    );
+    const targetRatioCheckAction = new dfs.actions.checkers.MorphoBlueTargetRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&targetRatio',
+    );
+    morphoBlueBoostOnTargetPriceStrategy.addAction(borrowAction);
+    morphoBlueBoostOnTargetPriceStrategy.addAction(sellAction);
+    morphoBlueBoostOnTargetPriceStrategy.addAction(feeTakingAction);
+    morphoBlueBoostOnTargetPriceStrategy.addAction(supplyAction);
+    morphoBlueBoostOnTargetPriceStrategy.addAction(targetRatioCheckAction);
+    return morphoBlueBoostOnTargetPriceStrategy.encodeForDsProxyCall();
+};
+const createMorphoBlueFLBoostOnTargetPriceStrategy = () => {
+    const morphoBlueFLBoostOnTargetPriceStrategy = new dfs.Strategy('MorphoBlueFLBoostOnTargetPriceStrategy');
+
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&loanToken', 'address');
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&oracle', 'address');
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&irm', 'address');
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&user', 'address');
+
+    const trigger = new dfs.triggers.MorphoBluePriceTrigger(
+        '&loanToken', '&collateralToken', '&oracle', '&price', '&priceState',
+    );
+    morphoBlueFLBoostOnTargetPriceStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['&loanToken'],
+            ['%flAmount'], // sent by backend
+            '%nullAddress',
+            [],
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&loanToken',
+            '&collateralToken',
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // sent by backend
+        '&collateralToken',
+        '$2',
+    );
+    const supplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$3',
+        '&proxy',
+        '&user',
+    );
+    const borrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$1',
+        '&user',
+        '%flAddress', // sent by backend
+    );
+    const targetRatioCheckAction = new dfs.actions.checkers.MorphoBlueTargetRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&targetRatio',
+    );
+    morphoBlueFLBoostOnTargetPriceStrategy.addAction(flAction);
+    morphoBlueFLBoostOnTargetPriceStrategy.addAction(sellAction);
+    morphoBlueFLBoostOnTargetPriceStrategy.addAction(feeTakingAction);
+    morphoBlueFLBoostOnTargetPriceStrategy.addAction(supplyAction);
+    morphoBlueFLBoostOnTargetPriceStrategy.addAction(borrowAction);
+    morphoBlueFLBoostOnTargetPriceStrategy.addAction(targetRatioCheckAction);
+    return morphoBlueFLBoostOnTargetPriceStrategy.encodeForDsProxyCall();
+};
+
 const createLiquityV2RepayStrategy = () => {
     const liquityV2RepayStrategy = new dfs.Strategy('LiquityV2RepayStrategy');
     liquityV2RepayStrategy.addSubSlot('&market', 'address');
@@ -5130,7 +5274,6 @@ const createLiquityV2FLBoostWithCollStrategy = () => {
 
     return liquityV2FLBoostWithCollStrategy.encodeForDsProxyCall();
 };
-
 const createLiquityV2CloseToCollStrategy = () => {
     const liquityV2CloseToCollStrategy = new dfs.Strategy('LiquityV2CloseToCollStrategy');
 
@@ -5327,7 +5470,6 @@ const createLiquityV2FLCloseToDebtStrategy = () => {
 
     return liquityV2FLCloseToDebtStrategy.encodeForDsProxyCall();
 };
-
 const createLiquityV2BoostOnPriceStrategy = () => {
     const liquityV2BoostOnPriceStrategy = new dfs.Strategy('LiquityV2BoostOnPriceStrategy');
 
@@ -5383,7 +5525,6 @@ const createLiquityV2BoostOnPriceStrategy = () => {
     liquityV2BoostOnPriceStrategy.addAction(targetRatioCheckAction);
     return liquityV2BoostOnPriceStrategy.encodeForDsProxyCall();
 };
-
 const createLiquityV2FLBoostOnPriceStrategy = () => {
     const liquityV2FLBoostStrategy = new dfs.Strategy('LiquityV2FLBoostOnPriceStrategy');
     liquityV2FLBoostStrategy.addSubSlot('&market', 'address');
@@ -5442,7 +5583,6 @@ const createLiquityV2FLBoostOnPriceStrategy = () => {
 
     return liquityV2FLBoostStrategy.encodeForDsProxyCall();
 };
-
 const createLiquityV2FLBoostWithCollOnPriceStrategy = () => {
     const liquityV2FLBoostWithCollStrategy = new dfs.Strategy('LiquityV2FLBoostWithCollOnPriceStrategy');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&market', 'address');
@@ -5517,7 +5657,6 @@ const createLiquityV2FLBoostWithCollOnPriceStrategy = () => {
 
     return liquityV2FLBoostWithCollStrategy.encodeForDsProxyCall();
 };
-
 const createLiquityV2RepayOnPriceStrategy = () => {
     const liquityV2BoostOnPriceStrategy = new dfs.Strategy('LiquityV2RepayOnPriceStrategy');
 
@@ -5629,150 +5768,6 @@ const createLiquityV2FLRepayOnPriceStrategy = () => {
     return liquityV2FLRepayStrategy.encodeForDsProxyCall();
 };
 
-const createMorphoBlueBoostOnTargetPriceStrategy = () => {
-    const morphoBlueBoostOnTargetPriceStrategy = new dfs.Strategy('MorphoBlueBoostOnTargetPriceStrategy');
-
-    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&loanToken', 'address');
-    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&collateralToken', 'address');
-    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&oracle', 'address');
-    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&irm', 'address');
-    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&lltv', 'uint256');
-    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&user', 'address');
-
-    const trigger = new dfs.triggers.MorphoBluePriceTrigger(
-        '&loanToken', '&collateralToken', '&oracle', '&price', '&priceState',
-    );
-    morphoBlueBoostOnTargetPriceStrategy.addTrigger(trigger);
-
-    const borrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
-        '&loanToken',
-        '&collateralToken',
-        '&oracle',
-        '&irm',
-        '&lltv',
-        '%amountToBorrow', // sent by backend
-        '&user',
-        '&proxy',
-    );
-    const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            '&loanToken',
-            '&collateralToken',
-            '$1',
-            '%exchangeWrapper', // sent by backend
-        ),
-        '&proxy',
-        '&proxy',
-    );
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '%gasStart', // sent by backend
-        '&collateralToken',
-        '$2',
-    );
-    const supplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
-        '&loanToken',
-        '&collateralToken',
-        '&oracle',
-        '&irm',
-        '&lltv',
-        '$3',
-        '&proxy',
-        '&user',
-    );
-    const targetRatioCheckAction = new dfs.actions.checkers.MorphoBlueTargetRatioCheckAction(
-        '&loanToken',
-        '&collateralToken',
-        '&oracle',
-        '&irm',
-        '&lltv',
-        '&user',
-        '&targetRatio',
-    );
-    morphoBlueBoostOnTargetPriceStrategy.addAction(borrowAction);
-    morphoBlueBoostOnTargetPriceStrategy.addAction(sellAction);
-    morphoBlueBoostOnTargetPriceStrategy.addAction(feeTakingAction);
-    morphoBlueBoostOnTargetPriceStrategy.addAction(supplyAction);
-    morphoBlueBoostOnTargetPriceStrategy.addAction(targetRatioCheckAction);
-    return morphoBlueBoostOnTargetPriceStrategy.encodeForDsProxyCall();
-};
-const createMorphoBlueFLBoostOnTargetPriceStrategy = () => {
-    const morphoBlueFLBoostOnTargetPriceStrategy = new dfs.Strategy('MorphoBlueFLBoostOnTargetPriceStrategy');
-
-    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&loanToken', 'address');
-    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&collateralToken', 'address');
-    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&oracle', 'address');
-    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&irm', 'address');
-    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&lltv', 'uint256');
-    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&user', 'address');
-
-    const trigger = new dfs.triggers.MorphoBluePriceTrigger(
-        '&loanToken', '&collateralToken', '&oracle', '&price', '&priceState',
-    );
-    morphoBlueFLBoostOnTargetPriceStrategy.addTrigger(trigger);
-
-    const flAction = new dfs.actions.flashloan.FLAction(
-        new dfs.actions.flashloan.BalancerFlashLoanAction(
-            ['&loanToken'],
-            ['%flAmount'], // sent by backend
-            '%nullAddress',
-            [],
-        ),
-    );
-    const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            '&loanToken',
-            '&collateralToken',
-            '%flAmount', // sent by backend
-            '%exchangeWrapper', // sent by backend
-        ),
-        '&proxy',
-        '&proxy',
-    );
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        '%gasStart', // sent by backend
-        '&collateralToken',
-        '$2',
-    );
-    const supplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
-        '&loanToken',
-        '&collateralToken',
-        '&oracle',
-        '&irm',
-        '&lltv',
-        '$3',
-        '&proxy',
-        '&user',
-    );
-    const borrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
-        '&loanToken',
-        '&collateralToken',
-        '&oracle',
-        '&irm',
-        '&lltv',
-        '$1',
-        '&user',
-        '%flAddress', // sent by backend
-    );
-    const targetRatioCheckAction = new dfs.actions.checkers.MorphoBlueTargetRatioCheckAction(
-        '&loanToken',
-        '&collateralToken',
-        '&oracle',
-        '&irm',
-        '&lltv',
-        '&user',
-        '&targetRatio',
-    );
-    morphoBlueFLBoostOnTargetPriceStrategy.addAction(flAction);
-    morphoBlueFLBoostOnTargetPriceStrategy.addAction(sellAction);
-    morphoBlueFLBoostOnTargetPriceStrategy.addAction(feeTakingAction);
-    morphoBlueFLBoostOnTargetPriceStrategy.addAction(supplyAction);
-    morphoBlueFLBoostOnTargetPriceStrategy.addAction(borrowAction);
-    morphoBlueFLBoostOnTargetPriceStrategy.addAction(targetRatioCheckAction);
-    return morphoBlueFLBoostOnTargetPriceStrategy.encodeForDsProxyCall();
-};
-
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -5862,6 +5857,10 @@ module.exports = {
     createAaveV3OpenOrderFromCollStrategy,
     createAaveV3FLOpenOrderFromCollStrategy,
     createAaveV3FLOpenOrderFromDebtStrategy,
+    createMorphoBlueBoostOnTargetPriceStrategy,
+    createMorphoBlueFLBoostOnTargetPriceStrategy,
+    createAaveV3RepayOnPriceStrategy,
+    createAaveV3FlRepayOnPriceStrategy,
     createLiquityV2RepayStrategy,
     createLiquityV2FLRepayStrategy,
     createLiquityV2BoostStrategy,
@@ -5870,10 +5869,6 @@ module.exports = {
     createLiquityV2CloseToCollStrategy,
     createLiquityV2FLCloseToCollStrategy,
     createLiquityV2FLCloseToDebtStrategy,
-    createMorphoBlueBoostOnTargetPriceStrategy,
-    createMorphoBlueFLBoostOnTargetPriceStrategy,
-    createAaveV3RepayOnPriceStrategy,
-    createAaveV3FlRepayOnPriceStrategy,
     createLiquityV2BoostOnPriceStrategy,
     createLiquityV2FLBoostOnPriceStrategy,
     createLiquityV2FLBoostWithCollOnPriceStrategy,
