@@ -4960,6 +4960,8 @@ const createLiquityV2RepayStrategy = () => {
     const liquityV2RepayStrategy = new dfs.Strategy('LiquityV2RepayStrategy');
     liquityV2RepayStrategy.addSubSlot('&market', 'address');
     liquityV2RepayStrategy.addSubSlot('&troveId', 'address');
+    liquityV2RepayStrategy.addSubSlot('&collToken', 'address');
+    liquityV2RepayStrategy.addSubSlot('&boldToken', 'address');
     liquityV2RepayStrategy.addSubSlot('&ratioState', 'uint256');
     liquityV2RepayStrategy.addSubSlot('&targetRatio', 'uint256');
 
@@ -4979,8 +4981,8 @@ const createLiquityV2RepayStrategy = () => {
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%collToken', // sent by backend
-            '%boldToken', // sent by backend
+            '&collToken',
+            '&boldToken',
             '$1',
             '%exchangeWrapper', // sent by backend
         ),
@@ -4989,7 +4991,7 @@ const createLiquityV2RepayStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '%boldToken', // sent by backend
+        '&boldToken',
         '$2',
     );
     const liquityV2PaybackAction = new dfs.actions.liquityV2.LiquityV2PaybackAction(
@@ -5016,6 +5018,8 @@ const createLiquityV2FLRepayStrategy = () => {
     const liquityV2FLRepayStrategy = new dfs.Strategy('LiquityV2FLRepayStrategy');
     liquityV2FLRepayStrategy.addSubSlot('&market', 'address');
     liquityV2FLRepayStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLRepayStrategy.addSubSlot('&collToken', 'address');
+    liquityV2FLRepayStrategy.addSubSlot('&boldToken', 'address');
     liquityV2FLRepayStrategy.addSubSlot('&ratioState', 'uint256');
     liquityV2FLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
     liquityV2FLRepayStrategy.addSubSlot('&CollActionType.WITHDRAW', 'uint8');
@@ -5031,14 +5035,14 @@ const createLiquityV2FLRepayStrategy = () => {
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
-            ['%collToken'], // sent by backend
+            ['%collToken'], // sent by backend. No piping available in fl actions
             ['%flAmount'], // sent by backend
         ),
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%collToken', // sent by backend
-            '%boldToken', // sent by backend
+            '&collToken',
+            '&boldToken',
             '%flAmount', // sent by backend
             '%exchangeWrapper', // sent by backend
         ),
@@ -5047,7 +5051,7 @@ const createLiquityV2FLRepayStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '%boldToken', // sent by backend
+        '&boldToken',
         '$2',
     );
     const liquityV2AdjustAction = new dfs.actions.liquityV2.LiquityV2AdjustAction(
@@ -5079,6 +5083,8 @@ const createLiquityV2BoostStrategy = () => {
     const liquityV2BoostStrategy = new dfs.Strategy('LiquityV2BoostStrategy');
     liquityV2BoostStrategy.addSubSlot('&market', 'address');
     liquityV2BoostStrategy.addSubSlot('&troveId', 'address');
+    liquityV2BoostStrategy.addSubSlot('&collToken', 'address');
+    liquityV2BoostStrategy.addSubSlot('&boldToken', 'address');
     liquityV2BoostStrategy.addSubSlot('&ratioState', 'uint256');
     liquityV2BoostStrategy.addSubSlot('&targetRatio', 'uint256');
 
@@ -5099,8 +5105,8 @@ const createLiquityV2BoostStrategy = () => {
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%boldToken', // sent by backend
-            '%collToken', // sent by backend
+            '&boldToken',
+            '&collToken',
             '$1',
             '%exchangeWrapper', // sent by backend
         ),
@@ -5109,13 +5115,13 @@ const createLiquityV2BoostStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '%collToken', // sent by backend
+        '&collToken',
         '$2',
     );
     const liquityV2SupplyAction = new dfs.actions.liquityV2.LiquityV2SupplyAction(
         '&market',
         '&proxy',
-        '%collToken',
+        '&collToken',
         '&troveId',
         '$3',
     );
@@ -5137,6 +5143,8 @@ const createLiquityV2FLBoostStrategy = () => {
     const liquityV2FLBoostStrategy = new dfs.Strategy('LiquityV2FLBoostStrategy');
     liquityV2FLBoostStrategy.addSubSlot('&market', 'address');
     liquityV2FLBoostStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLBoostStrategy.addSubSlot('&collToken', 'address');
+    liquityV2FLBoostStrategy.addSubSlot('&boldToken', 'address');
     liquityV2FLBoostStrategy.addSubSlot('&ratioState', 'uint256');
     liquityV2FLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
     liquityV2FLBoostStrategy.addSubSlot('&CollActionType.SUPPLY', 'uint8');
@@ -5152,14 +5160,14 @@ const createLiquityV2FLBoostStrategy = () => {
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
-            ['%boldToken'], // sent by backend
+            ['%boldToken'], // sent by backend. No piping available in fl actions
             ['%flAmount'], // sent by backend
         ),
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%boldToken', // sent by backend
-            '%collToken', // sent by backend
+            '&boldToken',
+            '&collToken',
             '%flAmount', // sent by backend
             '%exchangeWrapper', // sent by backend
         ),
@@ -5168,7 +5176,7 @@ const createLiquityV2FLBoostStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '%collToken', // sent by backend
+        '&collToken',
         '$2',
     );
     const liquityV2AdjustAction = new dfs.actions.liquityV2.LiquityV2AdjustAction(
@@ -5200,6 +5208,8 @@ const createLiquityV2FLBoostWithCollStrategy = () => {
     const liquityV2FLBoostWithCollStrategy = new dfs.Strategy('LiquityV2FLBoostWithCollStrategy');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&market', 'address');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLBoostWithCollStrategy.addSubSlot('&collToken', 'address');
+    liquityV2FLBoostWithCollStrategy.addSubSlot('&boldToken', 'address');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&ratioState', 'uint256');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&targetRatio', 'uint256');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&CollActionType.SUPPLY', 'uint8');
@@ -5215,7 +5225,7 @@ const createLiquityV2FLBoostWithCollStrategy = () => {
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
-            ['%collToken'], // sent by backend
+            ['%collToken'], // sent by backend. No piping available in fl actions
             ['%flAmount'], // sent by backend
         ),
     );
@@ -5232,8 +5242,8 @@ const createLiquityV2FLBoostWithCollStrategy = () => {
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%boldToken', // sent by backend
-            '%collToken', // sent by backend
+            '&boldToken',
+            '&collToken',
             '$2', // sent by backend
             '%exchangeWrapper', // sent by backend
         ),
@@ -5242,13 +5252,13 @@ const createLiquityV2FLBoostWithCollStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '%collToken', // sent by backend
+        '&collToken',
         '$3',
     );
     const liquityV2SupplyAction = new dfs.actions.liquityV2.LiquityV2SupplyAction(
         '&market',
         '&proxy',
-        '%collToken',
+        '&collToken',
         '&troveId',
         '$4',
     );
@@ -5282,6 +5292,7 @@ const createLiquityV2CloseToCollStrategy = () => {
     liquityV2CloseToCollStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2CloseToCollStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2CloseToCollStrategy.addSubSlot('&wethToken', 'uint256');
+    liquityV2CloseToCollStrategy.addSubSlot('&gasCompensation', 'uint256'); // 0.0375 weth
     // only used by backend to determine which action to call
     liquityV2CloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
 
@@ -5326,7 +5337,11 @@ const createLiquityV2CloseToCollStrategy = () => {
     const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
         ['&wethToken', '&collToken', '&boldToken'],
         ['&eoa', '&eoa', '&eoa'],
-        ['%0.0375', '%max(uint)', '%max(uint)'], // sent by backend
+        [
+            '&gasCompensation',
+            '%max(uint)', // sent by backend
+            '%max(uint)', // sent by backend
+        ],
     );
 
     liquityV2CloseToCollStrategy.addAction(withdrawAction);
@@ -5345,6 +5360,7 @@ const createLiquityV2FLCloseToCollStrategy = () => {
     liquityV2FLCloseToCollStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2FLCloseToCollStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2FLCloseToCollStrategy.addSubSlot('&wethToken', 'uint256');
+    liquityV2FLCloseToCollStrategy.addSubSlot('&gasCompensation', 'uint256'); // 0.0375 weth
     // only used by backend to determine which action to call
     liquityV2FLCloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
 
@@ -5357,7 +5373,7 @@ const createLiquityV2FLCloseToCollStrategy = () => {
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
-            ['%collToken'], // sent by backend
+            ['%collToken'], // sent by backend. No piping available in fl actions
             ['%flAmount'], // sent by backend
         ),
     );
@@ -5365,7 +5381,7 @@ const createLiquityV2FLCloseToCollStrategy = () => {
         formatExchangeObj(
             '&collToken',
             '&boldToken',
-            '%amount', // sent by backend, kept variable if fl has fee
+            '%flAmount', // sent by backend
             '%exchangeWrapper', // sent by backend
         ),
         '&proxy',
@@ -5395,7 +5411,11 @@ const createLiquityV2FLCloseToCollStrategy = () => {
     const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
         ['&wethToken', '&collToken', '&boldToken'],
         ['&eoa', '&eoa', '&eoa'],
-        ['%0.0375', '%max(uint)', '%max(uint)'], // sent by backend
+        [
+            '&gasCompensation',
+            '%max(uint)', // sent by backend
+            '%max(uint)', // sent by backend
+        ],
     );
 
     liquityV2FLCloseToCollStrategy.addAction(flAction);
@@ -5415,6 +5435,7 @@ const createLiquityV2FLCloseToDebtStrategy = () => {
     liquityV2FLCloseToDebtStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2FLCloseToDebtStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2FLCloseToDebtStrategy.addSubSlot('&wethToken', 'uint256');
+    liquityV2FLCloseToDebtStrategy.addSubSlot('&gasCompensation', 'uint256'); // 0.0375 weth
     // only used by backend to determine which action to call
     liquityV2FLCloseToDebtStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
 
@@ -5427,7 +5448,7 @@ const createLiquityV2FLCloseToDebtStrategy = () => {
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
-            ['%boldToken'], // sent by backend
+            ['%boldToken'], // sent by backend. No piping available in fl actions
             ['%flAmount'], // sent by backend
         ),
     );
@@ -5457,9 +5478,21 @@ const createLiquityV2FLCloseToDebtStrategy = () => {
     // 2. All bold that's left after the close and fl repayment
     // 3. 0.0375 weth for gas compensation. This will unwrap weth to eth and send it to the eoa
     const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
-        ['&boldToken', '&boldToken', '&wethToken'],
-        ['%flAddress', '&eoa', '&eoa'],
-        ['$1', '%max(uint)', '%0.0375'], // sent by backend
+        [
+            '&boldToken',
+            '&boldToken',
+            '&wethToken',
+        ],
+        [
+            '%flAddress', // sent by backend
+            '&eoa',
+            '&eoa',
+        ],
+        [
+            '$1',
+            '%max(uint)', // sent by backend
+            '&gasCompensation',
+        ],
     );
 
     liquityV2FLCloseToDebtStrategy.addAction(flAction);
