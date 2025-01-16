@@ -10,7 +10,7 @@ import { IAddressesRegistry } from "../interfaces/liquityV2/IAddressesRegistry.s
 import { IPriceFeed } from "../interfaces/liquityV2/IPriceFeed.sol";
 
 /// @title Trigger contract that verifies if price of collateral on a chosen LiquityV2 market went over or under a certain threshold
-contract LiquityV2RatioTrigger is 
+contract LiquityV2QuotePriceTrigger is 
     ITrigger,
     AdminAuth,
     TriggerHelper

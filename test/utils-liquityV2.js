@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const hre = require('hardhat');
 const {
     getContractFromRegistry,
@@ -5,7 +6,7 @@ const {
     getNetwork,
     openStrategyAndBundleStorage,
 } = require('./utils');
-const { createLiquityV2RepayStrategy, createLiquityV2FLRepayStrategy, createLiquityV2BoostStrategy, createLiquityV2FLBoostStrategy, createLiquityV2FLBoostWithCollStrategy, createLiquityV2CloseToCollStrategy, createLiquityV2FLCloseToCollStrategy, createLiquityV2FLCloseToDebtStrategy } = require('./strategies');
+const { createLiquityV2RepayStrategy, createLiquityV2FLRepayStrategy, createLiquityV2BoostStrategy, createLiquityV2FLBoostStrategy, createLiquityV2FLBoostWithCollStrategy, createLiquityV2CloseToCollStrategy, createLiquityV2FLCloseToCollStrategy, createLiquityV2FLCloseToDebtStrategy, createLiquityV2BoostOnPriceStrategy, createLiquityV2FLBoostOnPriceStrategy, createLiquityV2RepayOnPriceStrategy, createLiquityV2FLRepayOnPriceStrategy, createLiquityV2FLBoostWithCollOnPriceStrategy } = require('./strategies');
 const { createStrategy, createBundle } = require('./utils-strategies');
 
 const CollActionType = { SUPPLY: 0, WITHDRAW: 1 };
@@ -142,6 +143,47 @@ const deployLiquityV2CloseBundle = async (proxy, isFork) => {
     return bundleId;
 };
 
+const deployLiquityV2BoostOnPriceBundle = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
+
+    const liquityV2BoostOnPriceStrategy = createLiquityV2BoostOnPriceStrategy();
+    const liquityV2BoostOnPriceStrategyId = await createStrategy(proxy, ...liquityV2BoostOnPriceStrategy, false);
+
+    const liquityV2FLBoostOnPriceStrategy = createLiquityV2FLBoostOnPriceStrategy();
+    const liquityV2FLBoostOnPriceStrategyId = await createStrategy(proxy, ...liquityV2FLBoostOnPriceStrategy, false);
+
+    const liquityV2FLBoostWithCollOnPriceStrategy = createLiquityV2FLBoostWithCollOnPriceStrategy();
+    const liquityV2FLBoostWithCollOnPriceStrategyId = await createStrategy(proxy, ...liquityV2FLBoostWithCollOnPriceStrategy, false);
+
+    const bundleId = await createBundle(
+        proxy,
+        [
+            liquityV2BoostOnPriceStrategyId,
+            liquityV2FLBoostOnPriceStrategyId,
+            liquityV2FLBoostWithCollOnPriceStrategyId,
+        ],
+    );
+    return bundleId;
+};
+
+const deployLiquityV2RepayOnPriceBundle = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
+    const liquityV2RepayOnPriceStrategy = createLiquityV2RepayOnPriceStrategy();
+    const liquityV2RepayOnPriceStrategyId = await createStrategy(proxy, ...liquityV2RepayOnPriceStrategy, false);
+
+    const liquityV2FLRepayOnPriceStrategy = createLiquityV2FLRepayOnPriceStrategy();
+    const liquityV2FLRepayOnPriceStrategyId = await createStrategy(proxy, ...liquityV2FLRepayOnPriceStrategy, false);
+
+    const bundleId = await createBundle(
+        proxy,
+        [
+            liquityV2RepayOnPriceStrategyId,
+            liquityV2FLRepayOnPriceStrategyId,
+        ],
+    );
+    return bundleId;
+};
+
 module.exports = {
     getLiquityV2Hints,
     getLiquityV2MaxUpfrontFee,
@@ -150,6 +192,8 @@ module.exports = {
     deployLiquityV2RepayBundle,
     deployLiquityV2BoostBundle,
     deployLiquityV2CloseBundle,
+    deployLiquityV2BoostOnPriceBundle,
+    deployLiquityV2RepayOnPriceBundle,
     CollActionType,
     DebtActionType,
 };

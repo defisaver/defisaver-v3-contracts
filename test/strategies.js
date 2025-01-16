@@ -5506,11 +5506,11 @@ const createLiquityV2FLCloseToDebtStrategy = () => {
 const createLiquityV2BoostOnPriceStrategy = () => {
     const liquityV2BoostOnPriceStrategy = new dfs.Strategy('LiquityV2BoostOnPriceStrategy');
 
-    liquityV2BoostOnPriceStrategy.addSubSlot('market', 'uint256');
-    liquityV2BoostOnPriceStrategy.addSubSlot('troveId', 'uint256');
+    liquityV2BoostOnPriceStrategy.addSubSlot('&market', 'uint256');
+    liquityV2BoostOnPriceStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2BoostOnPriceStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2BoostOnPriceStrategy.addSubSlot('&boldToken', 'uint256');
-    liquityV2BoostOnPriceStrategy.addSubSlot('targetRatio', 'uint256');
+    liquityV2BoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
 
     const trigger = new dfs.triggers.LiquityV2QuotePriceTrigger(
         '&market', '&price', '&priceState',
@@ -5693,11 +5693,11 @@ const createLiquityV2FLBoostWithCollOnPriceStrategy = () => {
 const createLiquityV2RepayOnPriceStrategy = () => {
     const liquityV2BoostOnPriceStrategy = new dfs.Strategy('LiquityV2RepayOnPriceStrategy');
 
-    liquityV2BoostOnPriceStrategy.addSubSlot('market', 'uint256');
-    liquityV2BoostOnPriceStrategy.addSubSlot('troveId', 'uint256');
+    liquityV2BoostOnPriceStrategy.addSubSlot('&market', 'uint256');
+    liquityV2BoostOnPriceStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2BoostOnPriceStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2BoostOnPriceStrategy.addSubSlot('&boldToken', 'uint256');
-    liquityV2BoostOnPriceStrategy.addSubSlot('targetRatio', 'uint256');
+    liquityV2BoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
 
     const trigger = new dfs.triggers.LiquityV2QuotePriceTrigger(
         '&market', '&price', '&priceState',
