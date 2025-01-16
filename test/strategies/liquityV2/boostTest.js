@@ -71,7 +71,6 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     strategySub,
                     exchangeObject,
                     boostAmount,
-                    collAsset.address,
                     maxUpfrontFee,
                 );
 
@@ -134,7 +133,6 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     strategySub,
                     exchangeObject,
                     boldFlAmount,
-                    collAsset.address,
                     BOLD_ADDR,
                     maxUpfrontFee,
                     this.contracts.flAction.address,
@@ -200,7 +198,6 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     collFlAmount,
                     boostBoldAmount,
                     collAsset.address,
-                    BOLD_ADDR,
                     maxUpfrontFee,
                     this.contracts.flAction.address,
                 );

@@ -5485,7 +5485,7 @@ const callMorphoBlueFLBoostOnTargetPriceStrategy = async (strategyExecutor, stra
     console.log(`GasUsed callMorphoBlueFLBoostOnTargetPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 const callLiquityV2RepayStrategy = async (
-    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, repayAmount, boldToken,
+    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, repayAmount,
 ) => {
     const triggerCallData = [];
     const actionsCallData = [];
@@ -5504,7 +5504,7 @@ const callLiquityV2RepayStrategy = async (
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         gasCost,
-        boldToken,
+        placeHolderAddr,
         0,
     );
     const liquityV2PaybackAction = new dfs.actions.liquityV2.LiquityV2PaybackAction(
@@ -5539,7 +5539,7 @@ const callLiquityV2RepayStrategy = async (
     console.log(`GasUsed callLiquityV2RepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 const callLiquityV2FLRepayStrategy = async (
-    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, repayAmount, collToken, boldToken, flAddr,
+    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, repayAmount, collToken, flAddr,
 ) => {
     const triggerCallData = [];
     const actionsCallData = [];
@@ -5553,7 +5553,7 @@ const callLiquityV2FLRepayStrategy = async (
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         gasCost,
-        boldToken,
+        placeHolderAddr,
         0,
     );
     const liquityV2AdjustAction = new dfs.actions.liquityV2.LiquityV2AdjustAction(
@@ -5593,7 +5593,7 @@ const callLiquityV2FLRepayStrategy = async (
     console.log(`GasUsed callLiquityV2FLRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 const callLiquityV2BoostStrategy = async (
-    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, boostAmount, collToken, maxUpFrontFee,
+    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, boostAmount, maxUpFrontFee,
 ) => {
     const triggerCallData = [];
     const actionsCallData = [];
@@ -5613,13 +5613,13 @@ const callLiquityV2BoostStrategy = async (
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         gasCost,
-        collToken,
+        placeHolderAddr,
         0,
     );
     const liquityV2SupplyAction = new dfs.actions.liquityV2.LiquityV2SupplyAction(
         placeHolderAddr,
         placeHolderAddr,
-        collToken,
+        placeHolderAddr,
         0,
         0,
     );
@@ -5649,7 +5649,7 @@ const callLiquityV2BoostStrategy = async (
     console.log(`GasUsed callLiquityV2BoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 const callLiquityV2FLBoostStrategy = async (
-    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, boostAmount, collToken, boldToken, maxUpFrontFee, flAddr,
+    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, boostAmount, boldToken, maxUpFrontFee, flAddr,
 ) => {
     const triggerCallData = [];
     const actionsCallData = [];
@@ -5665,7 +5665,7 @@ const callLiquityV2FLBoostStrategy = async (
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         gasCost,
-        collToken,
+        placeHolderAddr,
         0,
     );
     const liquityV2AdjustAction = new dfs.actions.liquityV2.LiquityV2AdjustAction(
@@ -5705,7 +5705,7 @@ const callLiquityV2FLBoostStrategy = async (
     console.log(`GasUsed callLiquityV2FLBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 const callLiquityV2FLBoostWithCollStrategy = async (
-    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, boostAmountInColl, boldAmount, collToken, boldToken, maxUpFrontFee, flAddr,
+    strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, boostAmountInColl, boldAmount, collToken, maxUpFrontFee, flAddr,
 ) => {
     const triggerCallData = [];
     const actionsCallData = [];
@@ -5730,13 +5730,13 @@ const callLiquityV2FLBoostWithCollStrategy = async (
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         gasCost,
-        collToken,
+        placeHolderAddr,
         0,
     );
     const liquityV2SupplyAction = new dfs.actions.liquityV2.LiquityV2SupplyAction(
         placeHolderAddr,
         placeHolderAddr,
-        collToken,
+        placeHolderAddr,
         0,
         0,
     );
@@ -6013,6 +6013,8 @@ module.exports = {
     callAaveV3OpenOrderFromCollStrategy,
     callAaveV3FLOpenOrderFromCollStrategy,
     callAaveV3FLOpenOrderFromDebtStrategy,
+    callMorphoBlueBoostOnTargetPriceStrategy,
+    callMorphoBlueFLBoostOnTargetPriceStrategy,
     callLiquityV2RepayStrategy,
     callLiquityV2FLRepayStrategy,
     callLiquityV2BoostStrategy,
@@ -6021,6 +6023,4 @@ module.exports = {
     callLiquityV2CloseToCollStrategy,
     callLiquityV2FLCloseToCollStrategy,
     callLiquityV2FLCloseToDebtStrategy,
-    callMorphoBlueBoostOnTargetPriceStrategy,
-    callMorphoBlueFLBoostOnTargetPriceStrategy,
 };

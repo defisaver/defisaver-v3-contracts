@@ -61,7 +61,6 @@ class RepayTest extends BaseLiquityV2StrategyTest {
                     strategySub,
                     exchangeObject,
                     repayAmount,
-                    BOLD_ADDR,
                 );
 
                 const troveInfoAfter = await this.contracts.view.getTroveInfo(
@@ -117,7 +116,6 @@ class RepayTest extends BaseLiquityV2StrategyTest {
                     exchangeObject,
                     repayAmount,
                     collAsset.address,
-                    BOLD_ADDR,
                     this.contracts.flAction.address,
                 );
 
