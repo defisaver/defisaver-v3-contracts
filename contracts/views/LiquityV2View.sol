@@ -47,6 +47,7 @@ contract LiquityV2View is LiquityV2Helper {
         address stabilityPool;
         address sortedTroves;
         address collSurplusPool;
+        address activePool;
         address hintHelpers;
         address priceFeed;
         uint256 collPrice;
@@ -236,6 +237,7 @@ contract LiquityV2View is LiquityV2Helper {
             stabilityPool: registry.stabilityPool(),
             sortedTroves: registry.sortedTroves(),
             collSurplusPool: registry.collSurplusPool(),
+            activePool: registry.activePool(),
             hintHelpers: registry.hintHelpers(),
             priceFeed: registry.priceFeed(),
             collPrice: IPriceFeed(registry.priceFeed()).lastGoodPrice(),
