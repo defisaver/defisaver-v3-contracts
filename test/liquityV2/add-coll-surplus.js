@@ -32,7 +32,7 @@ const addCollateralSurplus = async () => {
                 troveManagerSigner,
             );
             collSurplusPoolContract.accountSurplus(account, claimableColl);
-            await setBalance(collateralAddr, account, claimableColl.mul(10));
+            await setBalance(collateralAddr, collSurplusPoolAddr, claimableColl.mul(100));
         });
 
         it('...test', async () => {});
