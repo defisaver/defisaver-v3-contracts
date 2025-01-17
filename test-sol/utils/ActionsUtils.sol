@@ -23,6 +23,19 @@ import { AaveV3ATokenPayback } from "../../contracts/actions/aaveV3/AaveV3AToken
 import { SumInputs } from "../../contracts/actions/utils/SumInputs.sol";
 import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
 import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
+import { LiquityV2Open } from "../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
+import { LiquityV2Close } from "../../contracts/actions/liquityV2/trove/LiquityV2Close.sol";
+import { LiquityV2Supply } from "../../contracts/actions/liquityV2/trove/LiquityV2Supply.sol";
+import { LiquityV2Withdraw } from "../../contracts/actions/liquityV2/trove/LiquityV2Withdraw.sol";
+import { LiquityV2Borrow } from "../../contracts/actions/liquityV2/trove/LiquityV2Borrow.sol";
+import { LiquityV2Payback } from "../../contracts/actions/liquityV2/trove/LiquityV2Payback.sol";
+import { LiquityV2Claim } from "../../contracts/actions/liquityV2/trove/LiquityV2Claim.sol";
+import { LiquityV2Adjust } from "../../contracts/actions/liquityV2/trove/LiquityV2Adjust.sol";
+import { LiquityV2AdjustZombieTrove } from "../../contracts/actions/liquityV2/trove/LiquityV2AdjustZombieTrove.sol";
+import { LiquityV2AdjustInterestRate } from "../../contracts/actions/liquityV2/trove/LiquityV2AdjustInterestRate.sol";
+import { LiquityV2SPDeposit } from "../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
+import { LiquityV2SPWithdraw } from "../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPWithdraw.sol";
+import { LiquityV2SPClaimColl } from "../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPClaimColl.sol";
 import { EulerV2Supply } from "../../contracts/actions/eulerV2/EulerV2Supply.sol";
 import { EulerV2Withdraw } from "../../contracts/actions/eulerV2/EulerV2Withdraw.sol";
 import { EulerV2Borrow } from "../../contracts/actions/eulerV2/EulerV2Borrow.sol";
@@ -32,6 +45,7 @@ import { EulerV2ReorderCollaterals } from "../../contracts/actions/eulerV2/Euler
 import { EulerV2PaybackWithShares } from "../../contracts/actions/eulerV2/EulerV2PaybackWithShares.sol";
 import { EulerV2PullDebt } from "../../contracts/actions/eulerV2/EulerV2PullDebt.sol";
 import { AaveV3RatioCheck } from "../../contracts/actions/checkers/AaveV3RatioCheck.sol";
+import { SendTokensAndUnwrap } from "../../contracts/actions/utils/SendTokensAndUnwrap.sol";
 import { RenzoStake } from "../../contracts/actions/renzo/RenzoStake.sol";
 import { EtherFiStake } from "../../contracts/actions/etherfi/EtherFiStake.sol";
 import { EtherFiWrap } from "../../contracts/actions/etherfi/EtherFiWrap.sol";
@@ -41,7 +55,7 @@ import { MorphoTokenWrap } from "../../contracts/actions/morpho-blue/MorphoToken
 contract ActionsUtils {
 
     bytes32[] internal subData = new bytes32[](0);
-    uint8[]  internal paramMapping = new uint8[](8);
+    uint8[]  internal paramMapping = new uint8[](15);
     bytes32[] internal returnValues = new bytes32[](0);
 
     enum FLSource {
@@ -523,22 +537,6 @@ contract ActionsUtils {
         );
     }
 
-    function eulerV2BorrowEncode(
-        address _vault,
-        address _account,
-        address _receiver,
-        uint256 _amount
-    ) public pure returns (bytes memory params) {
-        params = abi.encode(
-            EulerV2Borrow.Params({
-                vault: _vault,
-                account: _account,
-                receiver: _receiver,
-                amount: _amount
-            })
-        );
-    }
-
     function eulerV2PaybackEncode(
         address _vault,
         address _account,
@@ -550,6 +548,22 @@ contract ActionsUtils {
                 vault: _vault,
                 account: _account,
                 from: _from,
+                amount: _amount
+            })
+        );
+    }
+
+    function eulerV2BorrowEncode(
+        address _vault,
+        address _account,
+        address _receiver,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            EulerV2Borrow.Params({
+                vault: _vault,
+                account: _account,
+                receiver: _receiver,
                 amount: _amount
             })
         );
@@ -627,7 +641,7 @@ contract ActionsUtils {
         );
     }
 
-     function etherFiStakeEncode(
+    function etherFiStakeEncode(
         uint256 _amount,
         address _from,
         address _to,
@@ -671,6 +685,270 @@ contract ActionsUtils {
         );
     }
 
+    function liquityV2PaybackEncode(
+        address _market,
+        address _from,
+        uint256 _troveId,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2Payback.Params({
+                market: _market,
+                from: _from,
+                troveId: _troveId,
+                amount: _amount
+            })
+        );
+    }
+    
+    function liquityV2SupplyEncode(
+        address _market,
+        address _from,
+        uint256 _troveId,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2Supply.Params({
+                market: _market,
+                from: _from,
+                troveId: _troveId,
+                amount: _amount
+            })
+        );
+    }
+
+    function liquityV2WithdrawEncode(
+        address _market,
+        address _to,
+        uint256 _troveId,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2Withdraw.Params({
+                market: _market,
+                to: _to,
+                troveId: _troveId,
+                amount: _amount
+            })
+        );
+    }
+
+    function liquityV2SPClaimCollEncode(
+        address _market,
+        address _to
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2SPClaimColl.Params({
+                market: _market,
+                to: _to
+            })
+        );
+    }
+
+    function liquityV2SPDepositEncode(
+        address _market,
+        address _from,
+        address _boldGainTo,
+        address _collGainTo,
+        uint256 _amount,
+        bool _doClaim
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2SPDeposit.Params({
+                market: _market,
+                from: _from,
+                boldGainTo: _boldGainTo,
+                collGainTo: _collGainTo,
+                amount: _amount,
+                doClaim: _doClaim
+                })
+        );
+    }
+
+    function liquityV2SPWithdrawEncode(
+        address _market,
+        address _boldTo,
+        address _collGainTo,
+        uint256 _amount,
+        bool _doClaim
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2SPWithdraw.Params({
+                market: _market,
+                boldTo: _boldTo,
+                collGainTo: _collGainTo,
+                amount: _amount,
+                doClaim: _doClaim
+            })
+        );
+    }
+
+    function liquityV2CloseEncode(
+        address _market,
+        address _from,
+        address _to,
+        uint256 _troveId
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2Close.Params({
+                market: _market,
+                from: _from,
+                to: _to,
+                troveId: _troveId
+                })
+        );
+    }
+
+    function liquityV2OpenEncode(
+        address _market,
+        address _from,
+        address _to,
+        address _interestBatchManager,
+        uint256 _ownerIndex,
+        uint256 _collAmount,
+        uint256 _boldAmount,
+        uint256 _upperHint,
+        uint256 _lowerHint,
+        uint256 _annualInterestRate,
+        uint256 _maxUpfrontFee
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2Open.Params({
+                market: _market,
+                from: _from,
+                to: _to,
+                interestBatchManager: _interestBatchManager,
+                ownerIndex: _ownerIndex,
+                collAmount: _collAmount,
+                boldAmount: _boldAmount,
+                upperHint: _upperHint,
+                lowerHint: _lowerHint,
+                annualInterestRate: _annualInterestRate,
+                maxUpfrontFee: _maxUpfrontFee
+            })
+        );
+    }
+
+    function liquityV2AdjustEncode(
+        address _market,
+        address _from,
+        address _to,
+        uint256 _troveId,
+        uint256 _collAmount,
+        uint256 _debtAmount,
+        uint256 _maxUpfrontFee,
+        LiquityV2Adjust.CollActionType _collAction,
+        LiquityV2Adjust.DebtActionType _debtAction
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2Adjust.Params({
+                market: _market,
+                from: _from,
+                to: _to,
+                troveId: _troveId,
+                collAmount: _collAmount,
+                debtAmount: _debtAmount,
+                maxUpfrontFee: _maxUpfrontFee,
+                collAction: _collAction,
+                debtAction: _debtAction
+            })
+        );
+    }
+
+    function liquityV2AdjustZombieTroveEncode(
+        address _market,
+        address _from,
+        address _to,
+        uint256 _troveId,
+        uint256 _collAmount,
+        uint256 _debtAmount,
+        uint256 _upperHint,
+        uint256 _lowerHint,
+        uint256 _maxUpfrontFee,
+        LiquityV2AdjustZombieTrove.CollActionType _collAction,
+        LiquityV2AdjustZombieTrove.DebtActionType _debtAction
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2AdjustZombieTrove.Params({
+                market: _market,
+                from: _from,
+                to: _to,
+                troveId: _troveId,
+                collAmount: _collAmount,
+                debtAmount: _debtAmount,
+                maxUpfrontFee: _maxUpfrontFee,
+                upperHint: _upperHint,
+                lowerHint: _lowerHint,
+                collAction: _collAction,
+                debtAction: _debtAction
+            })
+        );
+    }
+
+    function liquityV2AdjustInterestRateEncode(
+        address _market,
+        uint256 _troveId,
+        uint256 _newAnnualInterestRate,
+        uint256 _upperHint,
+        uint256 _lowerHint,
+        uint256 _maxUpfrontFee
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2AdjustInterestRate.Params({
+                market: _market,
+                troveId: _troveId,
+                newAnnualInterestRate: _newAnnualInterestRate,
+                upperHint: _upperHint,
+                lowerHint: _lowerHint,
+                maxUpfrontFee: _maxUpfrontFee
+            })
+        );
+    }
+
+    function liquityV2BorrowEncode(
+        address _market,
+        address _to,
+        uint256 _troveId,
+        uint256 _amount,
+        uint256 _maxUpfrontFee
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2Borrow.Params({
+                market: _market,
+                to: _to,
+                troveId: _troveId,
+                amount: _amount,
+                maxUpfrontFee: _maxUpfrontFee
+            })
+        );
+    }
+
+    function liquityV2ClaimEncode(
+        address _market,
+        address _to
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2Claim.Params({
+                market: _market,
+                to: _to
+            })
+        );
+    }
+
+    function sendTokensAndUnwrapEncode(
+        address[] memory _tokens,
+        address[] memory _receivers,
+        uint256[] memory _amounts
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SendTokensAndUnwrap.Params({
+                tokens: _tokens,
+                receivers: _receivers,
+                amounts: _amounts
+                })
+        );
+    }
+    
     function morphoTokenWrapEncode(
         address _to,
         uint256 _amount
