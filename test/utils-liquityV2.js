@@ -6,7 +6,21 @@ const {
     getNetwork,
     openStrategyAndBundleStorage,
 } = require('./utils');
-const { createLiquityV2RepayStrategy, createLiquityV2FLRepayStrategy, createLiquityV2BoostStrategy, createLiquityV2FLBoostStrategy, createLiquityV2FLBoostWithCollStrategy, createLiquityV2CloseToCollStrategy, createLiquityV2FLCloseToCollStrategy, createLiquityV2FLCloseToDebtStrategy, createLiquityV2BoostOnPriceStrategy, createLiquityV2FLBoostOnPriceStrategy, createLiquityV2RepayOnPriceStrategy, createLiquityV2FLRepayOnPriceStrategy, createLiquityV2FLBoostWithCollOnPriceStrategy } = require('./strategies');
+const {
+    createLiquityV2RepayStrategy,
+    createLiquityV2FLRepayStrategy,
+    createLiquityV2BoostStrategy,
+    createLiquityV2FLBoostStrategy,
+    createLiquityV2FLBoostWithCollStrategy,
+    createLiquityV2CloseToCollStrategy,
+    createLiquityV2FLCloseToCollStrategy,
+    createLiquityV2FLCloseToDebtStrategy,
+    createLiquityV2BoostOnPriceStrategy,
+    createLiquityV2FLBoostOnPriceStrategy,
+    createLiquityV2RepayOnPriceStrategy,
+    createLiquityV2FLRepayOnPriceStrategy,
+    createLiquityV2FLBoostWithCollOnPriceStrategy,
+} = require('./strategies');
 const { createStrategy, createBundle } = require('./utils-strategies');
 
 const CollActionType = { SUPPLY: 0, WITHDRAW: 1 };
@@ -83,12 +97,12 @@ const getLiquityV2AdjustBorrowMaxUpfrontFee = async (
 
 const getLiquityV2TestPairs = async () => [
     {
-        market: '0x7d2d2c79ec89c7f1d718ae1586363ad2c56ded9d',
+        market: '0xc3fe668b43439525f70fe860f89882f0be312504',
         supplyTokenSymbol: 'WETH',
         collIndex: 0,
     },
     {
-        market: '0x83b74f12a2894fcf7a4864eff6090d7d8a060c6b',
+        market: '0x9b27787ff66aa3cea8dbc47772328459a1fa05ac',
         supplyTokenSymbol: 'wstETH',
         collIndex: 1,
     },

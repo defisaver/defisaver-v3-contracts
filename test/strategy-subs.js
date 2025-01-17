@@ -842,11 +842,13 @@ const subAaveV3OpenOrder = async (
     return { subId, strategySub };
 };
 const subLiquityV2RepayBundle = async (
-    proxy, market, troveId, minRatio, targetRatio, bundleId,
+    proxy, market, troveId, collToken, minRatio, targetRatio, bundleId,
 ) => {
     const strategySub = automationSdk.strategySubService.liquityV2Encode.leverageManagement(
         market,
         troveId,
+        collToken,
+        BOLD_ADDR,
         automationSdk.enums.RatioState.UNDER,
         targetRatio,
         minRatio,
@@ -856,11 +858,13 @@ const subLiquityV2RepayBundle = async (
     return { subId, strategySub };
 };
 const subLiquityV2BoostBundle = async (
-    proxy, market, troveId, maxRatio, targetRatio, bundleId,
+    proxy, market, troveId, collToken, maxRatio, targetRatio, bundleId,
 ) => {
     const strategySub = automationSdk.strategySubService.liquityV2Encode.leverageManagement(
         market,
         troveId,
+        collToken,
+        BOLD_ADDR,
         automationSdk.enums.RatioState.OVER,
         targetRatio,
         maxRatio,
