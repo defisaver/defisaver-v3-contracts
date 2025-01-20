@@ -395,7 +395,7 @@ async function findBalancesSlot(tokenAddress) {
         'IERC20',
         tokenAddress,
     );
-    const setStorageMethod = hre.network.config.isAnvil ? 'anvil_setStorageAt' : 'tenderly_setStorageAt';
+    const setStorageMethod = hre.network.config.isAnvil ? 'anvil_setStorageAt' : 'hardhat_setStorageAt';
 
     for (let i = 0; i < 100; i++) {
         {
@@ -493,6 +493,7 @@ const setStorageAt = async (address, index, value) => {
     if (hre.network.config.type === 'tenderly') {
         prefix = 'tenderly';
     }
+    console.log(`${prefix}_setStorageAt`);
 
     await hre.ethers.provider.send(`${prefix}_setStorageAt`, [address, index, value]);
     await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
