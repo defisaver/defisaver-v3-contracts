@@ -47,7 +47,8 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
         viewContract = new LiquityV2View();
         openContract = new LiquityV2Open();
 
-        markets = getMarkets();
+        markets = new IAddressesRegistry[](1);
+        markets[0] = IAddressesRegistry(WETH_MARKET);
         BOLD = markets[0].boldToken();
         WETH = markets[0].collToken();
 
@@ -95,8 +96,6 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
         uint256 borrowAmountInUSD = 10000;
 
         for (uint256 i = 0; i < markets.length; i++) {
-            if (i == 1) continue;
-
             if (_interestBatchManager != address(0)) {
                 vm.startPrank(_interestBatchManager);
                 registerBatchManager(markets[i]);
