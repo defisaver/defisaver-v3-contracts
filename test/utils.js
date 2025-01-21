@@ -395,7 +395,14 @@ async function findBalancesSlot(tokenAddress) {
         'IERC20',
         tokenAddress,
     );
-    const setStorageMethod = hre.network.config.isAnvil ? 'anvil_setStorageAt' : 'hardhat_setStorageAt';
+    let setStorageMethod;
+    if (hre.network.config.isAnvil) {
+        setStorageMethod = 'anvil_setStorageAt';
+    } else if (hre.network.config.type === 'tenderly') {
+        setStorageMethod = 'tenderly_setStorageAt';
+    } else {
+        setStorageMethod = 'hardhat_setStorageAt';
+    }
 
     for (let i = 0; i < 100; i++) {
         {

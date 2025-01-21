@@ -6,6 +6,7 @@ const { BaseLiquityV2StrategyTest } = require('./common');
 const { subLiquityV2RepayBundle } = require('../../strategy-subs');
 const {
     formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
+    fetchAmountInUSDPrice,
 } = require('../../utils');
 const { callLiquityV2RepayStrategy, callLiquityV2FLRepayStrategy } = require('../../strategy-calls');
 
@@ -20,7 +21,7 @@ class RepayTest extends BaseLiquityV2StrategyTest {
         this.testPairs.forEach((pair, i) => {
             it('... should call LiquityV2 repay strategy', async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
-                const supplyAmount = hre.ethers.utils.parseUnits('10', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, '30000');
                 const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
                 console.log('Trove ID created:', troveId.toString());
@@ -75,7 +76,7 @@ class RepayTest extends BaseLiquityV2StrategyTest {
             });
             it('... should call LiquityV2 FL repay strategy', async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
-                const supplyAmount = hre.ethers.utils.parseUnits('10', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, '30000');
                 const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
                 console.log('troveId', troveId);

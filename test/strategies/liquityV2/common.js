@@ -9,6 +9,7 @@ const {
     DAI_ADDR,
     takeSnapshot,
     revertToSnapshot,
+    redeploy,
 } = require('../../utils');
 const { uniV3CreatePool, liquityV2Open } = require('../../actions');
 const { addBotCaller } = require('../../utils-strategies');
@@ -58,7 +59,15 @@ class BaseLiquityV2StrategyTest {
         const strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
         this.contracts.strategyExecutor = strategyExecutor.connect(this.botAcc);
         this.contracts.flAction = await getContractFromRegistry('FLAction', this.registryAddr, false, this.isFork);
-        this.contracts.view = await getContractFromRegistry('LiquityV2View', this.registryAddr, false, this.isFork);
+        this.contracts.view = await redeploy('LiquityV2View', this.registryAddr, false, this.isFork);
+        await redeploy('LiquityV2Open', this.registryAddr, false, this.isFork);
+        await redeploy('LiquityV2RatioCheck', this.registryAddr, false, this.isFork);
+        await redeploy('LiquityV2Borrow', this.registryAddr, false, this.isFork);
+        await redeploy('LiquityV2Supply', this.registryAddr, false, this.isFork);
+        await redeploy('LiquityV2RatioTrigger', this.registryAddr, false, this.isFork);
+        await redeploy('LiquityV2Adjust', this.registryAddr, false, this.isFork);
+        await redeploy('LiquityV2Withdraw', this.registryAddr, false, this.isFork);
+        await redeploy('LiquityV2Payback', this.registryAddr, false, this.isFork);
     }
 
     async addLiquidity() {
@@ -79,8 +88,8 @@ class BaseLiquityV2StrategyTest {
             fee,
             lowerTick,
             upperTick,
-            token0Amount,
-            token1Amount,
+            '999999999999999983222784',
+            '990074318382128470949888',
             this.senderAcc.address,
             this.senderAcc.address,
             currentSqrtPriceX96.toString(),

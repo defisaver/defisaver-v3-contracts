@@ -14,6 +14,7 @@ const {
     ETH_ADDR,
     BALANCER_VAULT_ADDR,
     setBalance,
+    fetchAmountInUSDPrice,
 } = require('../../utils');
 const { callLiquityV2CloseToCollStrategy, callLiquityV2FLCloseToCollStrategy, callLiquityV2FLCloseToDebtStrategy } = require('../../strategy-calls');
 
@@ -92,7 +93,7 @@ class CloseTest extends BaseLiquityV2StrategyTest {
             it('... should call LiquityV2 close to collateral strategy', async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
 
-                const supplyAmount = hre.ethers.utils.parseUnits('100', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, '30000');
                 const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
                 console.log('troveId', troveId);
@@ -136,7 +137,7 @@ class CloseTest extends BaseLiquityV2StrategyTest {
             it('... should call LiquityV2 fl close to collateral strategy', async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
 
-                const supplyAmount = hre.ethers.utils.parseUnits('100', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, '30000');
                 const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
                 console.log('troveId', troveId);
@@ -182,7 +183,7 @@ class CloseTest extends BaseLiquityV2StrategyTest {
             it('... should call LiquityV2 fl close to debt strategy', async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
 
-                const supplyAmount = hre.ethers.utils.parseUnits('100', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, '30000');
                 const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
                 console.log('troveId', troveId);
