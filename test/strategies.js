@@ -5526,8 +5526,8 @@ const createLiquityV2BoostOnPriceStrategy = () => {
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%boldToken', // sent by backend
-            '%collToken', // sent by backend
+            '&boldToken',
+            '&collToken',
             '$1',
             '%exchangeWrapper', // sent by backend
         ),
@@ -5536,13 +5536,13 @@ const createLiquityV2BoostOnPriceStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '%collToken', // sent by backend
+        '&collToken',
         '$2',
     );
     const liquityV2SupplyAction = new dfs.actions.liquityV2.LiquityV2SupplyAction(
         '&market',
         '&proxy',
-        '%collToken',
+        '&collToken',
         '&troveId',
         '$3',
     );
@@ -5562,6 +5562,8 @@ const createLiquityV2FLBoostOnPriceStrategy = () => {
     const liquityV2FLBoostStrategy = new dfs.Strategy('LiquityV2FLBoostOnPriceStrategy');
     liquityV2FLBoostStrategy.addSubSlot('&market', 'address');
     liquityV2FLBoostStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLBoostStrategy.addSubSlot('&collToken', 'uint256');
+    liquityV2FLBoostStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2FLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
     liquityV2FLBoostStrategy.addSubSlot('&CollActionType.SUPPLY', 'uint8');
     liquityV2FLBoostStrategy.addSubSlot('&DebtActionType.BORROW', 'uint8');
@@ -5579,8 +5581,8 @@ const createLiquityV2FLBoostOnPriceStrategy = () => {
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%boldToken', // sent by backend
-            '%collToken', // sent by backend
+            '&boldToken',
+            '&collToken',
             '%flAmount', // sent by backend
             '%exchangeWrapper', // sent by backend
         ),
@@ -5589,7 +5591,7 @@ const createLiquityV2FLBoostOnPriceStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '%collToken', // sent by backend
+        '&collToken',
         '$2',
     );
     const liquityV2AdjustAction = new dfs.actions.liquityV2.LiquityV2AdjustAction(
@@ -5620,7 +5622,8 @@ const createLiquityV2FLBoostWithCollOnPriceStrategy = () => {
     const liquityV2FLBoostWithCollStrategy = new dfs.Strategy('LiquityV2FLBoostWithCollOnPriceStrategy');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&market', 'address');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&troveId', 'address');
-    liquityV2FLBoostWithCollStrategy.addSubSlot('&ratioState', 'uint256');
+    liquityV2FLBoostWithCollStrategy.addSubSlot('&collToken', 'uint256');
+    liquityV2FLBoostWithCollStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&targetRatio', 'uint256');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&CollActionType.SUPPLY', 'uint8');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&DebtActionType.BORROW', 'uint8');
@@ -5649,8 +5652,8 @@ const createLiquityV2FLBoostWithCollOnPriceStrategy = () => {
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%boldToken', // sent by backend
-            '%collToken', // sent by backend
+            '&boldToken',
+            '&collToken',
             '$2', // sent by backend
             '%exchangeWrapper', // sent by backend
         ),
@@ -5659,13 +5662,13 @@ const createLiquityV2FLBoostWithCollOnPriceStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '%collToken', // sent by backend
+        '&collToken', // sent by backend
         '$3',
     );
     const liquityV2SupplyAction = new dfs.actions.liquityV2.LiquityV2SupplyAction(
         '&market',
         '&proxy',
-        '%collToken',
+        '&collToken',
         '&troveId',
         '$4',
     );
@@ -5711,8 +5714,8 @@ const createLiquityV2RepayOnPriceStrategy = () => {
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%collToken', // sent by backend
-            '%boldToken', // sent by backend
+            '&collToken',
+            '&boldToken',
             '$1',
             '%exchangeWrapper', // sent by backend
         ),
@@ -5721,7 +5724,7 @@ const createLiquityV2RepayOnPriceStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '%boldToken', // sent by backend
+        '&boldToken',
         '$2',
     );
     const liquityV2PaybackAction = new dfs.actions.liquityV2.LiquityV2PaybackAction(
@@ -5746,6 +5749,8 @@ const createLiquityV2FLRepayOnPriceStrategy = () => {
     const liquityV2FLRepayStrategy = new dfs.Strategy('LiquityV2FLRepayOnPriceStrategy');
     liquityV2FLRepayStrategy.addSubSlot('&market', 'address');
     liquityV2FLRepayStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLRepayStrategy.addSubSlot('&collToken', 'uint256');
+    liquityV2FLRepayStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2FLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
     liquityV2FLRepayStrategy.addSubSlot('&CollActionType.WITHDRAW', 'uint8');
     liquityV2FLRepayStrategy.addSubSlot('&DebtActionType.PAYBACK', 'uint8');
@@ -5763,8 +5768,8 @@ const createLiquityV2FLRepayOnPriceStrategy = () => {
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '%collToken', // sent by backend
-            '%boldToken', // sent by backend
+            '&collToken',
+            '&boldToken',
             '%flAmount', // sent by backend
             '%exchangeWrapper', // sent by backend
         ),
@@ -5773,7 +5778,7 @@ const createLiquityV2FLRepayOnPriceStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '%boldToken', // sent by backend
+        '&boldToken',
         '$2',
     );
     const liquityV2AdjustAction = new dfs.actions.liquityV2.LiquityV2AdjustAction(
