@@ -3904,6 +3904,17 @@
         "history": []
     },
     {
+        "name": "LiquityV2Close",
+        "address": "0xBD97F8fCfdb03ca29F0C9baCA7Cb09c5A51E4adE",
+        "id": "0x3dcf3785",
+        "path": "contracts/actions/liquityV2/trove/LiquityV2Close.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "LiquityV2Supply",
         "address": "0x89403Bc80FDb1adbcf4Ea7b6acFB26197E47F2AA",
         "id": "0xaaf3b40f",
