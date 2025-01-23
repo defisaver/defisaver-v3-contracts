@@ -198,4 +198,10 @@ interface IFluidVaultResolver {
     function positionByNftId(
         uint nftId_
     ) external view returns (UserPosition memory userPosition_, VaultEntireData memory vaultData_);
+
+    /// @notice Returns an array of NFT IDs for all positions of a given user.
+    /// @param user_ The address of the user for whom to fetch positions.
+    /// @return nftIds_ An array of NFT IDs representing the user's positions.
+    function positionsNftIdOfUser(address user_) external view returns (uint[] memory nftIds_);
+
 }
