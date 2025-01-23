@@ -137,7 +137,7 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
             assertEq(userPosition.isLiquidated, false);
             assertEq(userPosition.isSupplyPosition, borrowAmount == 0);
 
-            // _logData(supplyAmount, borrowAmount, userPosition);
+            _logData(supplyAmount, borrowAmount, userPosition);
         }
     }
 
