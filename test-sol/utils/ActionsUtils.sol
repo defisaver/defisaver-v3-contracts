@@ -51,6 +51,12 @@ import { EtherFiStake } from "../../contracts/actions/etherfi/EtherFiStake.sol";
 import { EtherFiWrap } from "../../contracts/actions/etherfi/EtherFiWrap.sol";
 import { EtherFiUnwrap } from "../../contracts/actions/etherfi/EtherFiUnwrap.sol";
 import { MorphoTokenWrap } from "../../contracts/actions/morpho-blue/MorphoTokenWrap.sol";
+import { FluidVaultT1Open } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
+import { FluidVaultT1Supply } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Supply.sol";
+import { FluidVaultT1Withdraw } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw.sol";
+import { FluidVaultT1Borrow } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Borrow.sol";
+import { FluidVaultT1Payback } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Payback.sol";
+import { FluidVaultT1Adjust } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Adjust.sol";
 
 contract ActionsUtils {
 
@@ -960,4 +966,111 @@ contract ActionsUtils {
             })
         );
     }
+
+    function fluidVaultT1OpenEncode(
+        address _vault,
+        uint256 _collAmount,
+        uint256 _debtAmount,
+        address _from,
+        address _to
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            FluidVaultT1Open.Params({
+                vault: _vault,
+                collAmount: _collAmount,
+                debtAmount: _debtAmount,
+                from: _from,
+                to: _to
+            })
+        );
+    }
+
+    function fluidVaultT1SupplyEncode(
+        address _vault,
+        uint256 _nftId,
+        uint256 _amount,
+        address _from
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            FluidVaultT1Supply.Params({
+                vault: _vault,
+                nftId: _nftId,
+                amount: _amount,
+                from: _from
+            })
+        );
+    }
+
+    function fluidVaultT1WithdrawEncode(
+        address _vault,
+        uint256 _nftId,
+        uint256 _amount,
+        address _to
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            FluidVaultT1Withdraw.Params({
+                vault: _vault,
+                nftId: _nftId,
+                amount: _amount,
+                to: _to
+            })
+        );
+    }
+
+    function fluidVaultT1BorrowEncode(
+        address _vault,
+        uint256 _nftId,
+        uint256 _amount,
+        address _to
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            FluidVaultT1Borrow.Params({
+                vault: _vault,
+                nftId: _nftId,
+                amount: _amount,
+                to: _to
+            })
+        );
+    }
+
+    function fluidVaultT1PaybackEncode(
+        address _vault,
+        uint256 _nftId,
+        uint256 _amount,
+        address _from
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            FluidVaultT1Payback.Params({
+                vault: _vault,
+                nftId: _nftId,
+                amount: _amount,
+                from: _from
+            })
+        );
+    }
+
+    function fluidVaultT1AdjustEncode(
+        address _vault,
+        uint256 _nftId,
+        uint256 _collAmount,
+        uint256 _debtAmount,
+        address _from,
+        address _to,
+        FluidVaultT1Adjust.CollActionType _collAction,
+        FluidVaultT1Adjust.DebtActionType _debtAction
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            FluidVaultT1Adjust.Params({
+                vault: _vault,
+                nftId: _nftId,
+                collAmount: _collAmount,
+                debtAmount: _debtAmount,
+                from: _from,
+                to: _to,
+                collAction: _collAction,
+                debtAction: _debtAction
+            })
+        );
+    }
+
 }
