@@ -8,6 +8,7 @@ import { FluidHelper } from "../helpers/FluidHelper.sol";
 
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { console } from "forge-std/console.sol";
 
 /// @title Payback debt to Fluid Vault T1 (1_col:1_debt)
 contract FluidVaultT1Payback is ActionBase, FluidHelper {
@@ -61,20 +62,25 @@ contract FluidVaultT1Payback is ActionBase, FluidHelper {
         (IFluidVaultResolver.UserPosition memory userPosition, ) = 
             IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_params.nftId);
 
+        uint256 borrowTokenBalanceBefore;
         bool maxPayback;
-        if (_params.amount >= userPosition.borrow) {
-            _params.amount = userPosition.borrow;
+        if (_params.amount > userPosition.borrow) {
             maxPayback = true;
+            // The exact full payback amount is dynamically calculated inside the vault and can surpass the recorded debt.
+            // To account for this, we need to pull slightly more than the recorded debt.
+            // We will increase the amount by 0.001% and add an extra fixed margin of 5 units.
+            // Note that even though an amount higher than the recorded debt is categorized as max payback,
+            // the user must still have sufficient tokens and allowance to cover this extra amount.
+            _params.amount = userPosition.borrow * 100001 / 100000 + 5;
+            // If we pull more than necessary, we will take a snapshot and refund any dust amount.
+            borrowTokenBalanceBefore = borrowToken.getBalance(address(this));
         }
-
-        // As there is no direct way of knowing what is the 'exact' full payback amount
-        // We are ok with pulling slightly more, take a snapshot and refund the dust amount.
-        uint256 borrowTokenBalanceBefore = borrowToken.getBalance(address(this));
 
         borrowToken.pullTokensIfNeeded(_params.from, _params.amount);
         borrowToken.approveToken(_params.vault, _params.amount);
 
-        int256 paybackAmount =  maxPayback ? type(int256).max : -int256(_params.amount);
+        // type(int256).min will trigger max payback inside the vault.
+        int256 paybackAmount =  maxPayback ? type(int256).min : -int256(_params.amount);
 
         ( , , int256 exactPaybackAmount) = IFluidVaultT1(_params.vault).operate(
             _params.nftId,
@@ -83,16 +89,19 @@ contract FluidVaultT1Payback is ActionBase, FluidHelper {
             address(0)
         );
 
-        uint256 borrowTokenBalanceAfter = borrowToken.getBalance(address(this));
+        if (maxPayback) {
+            uint256 borrowTokenBalanceAfter = borrowToken.getBalance(address(this));
 
-        // Sanity check. There should never be the case that we end up with less borrow token than before.
-        require(borrowTokenBalanceAfter >= borrowTokenBalanceBefore);
+            // Sanity check. There should never be a case where we end up with fewer borrowed tokens than before.
+            require(borrowTokenBalanceAfter >= borrowTokenBalanceBefore);
 
-        // We pulled slightly more than needed, so refund dust amount to 'from' address.
-        if (borrowTokenBalanceAfter > borrowTokenBalanceBefore) {
-            uint256 dustAmount = borrowTokenBalanceAfter - borrowTokenBalanceBefore;
-            borrowToken.withdrawTokens(_params.from, dustAmount);
-            borrowToken.approveToken(_params.vault, 0);
+            // We pulled slightly more than needed, so refund dust amount to 'from' address.
+            if (borrowTokenBalanceAfter > borrowTokenBalanceBefore) {
+                uint256 dustAmount = borrowTokenBalanceAfter - borrowTokenBalanceBefore;
+                borrowToken.withdrawTokens(_params.from, dustAmount);
+                // Remove any dust approval left.
+                borrowToken.approveToken(_params.vault, 0);
+            }
         }
 
         return (uint256(-exactPaybackAmount), abi.encode(_params));
