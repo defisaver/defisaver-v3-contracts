@@ -4,9 +4,10 @@ import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/IFlu
 import { IFluidVaultFactory } from "../../../../contracts/interfaces/fluid/IFluidVaultFactory.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import { FluidVaultT1Payback } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Payback.sol";
-
+import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { FluidExecuteActions } from "../../../utils/executeActions/FluidExecuteActions.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
+import { Vm } from "forge-std/Vm.sol";
 import { console } from "forge-std/console.sol";
 
 contract TestFluidVaultT1Payback is FluidExecuteActions {
@@ -120,6 +121,16 @@ contract TestFluidVaultT1Payback is FluidExecuteActions {
             );
         }
     }
+
+    struct TempLocalVars {
+        uint256 senderBorrowTokenBalanceBefore;
+        uint256 senderBorrowTokenBalanceAfter;
+        uint256 senderEthBalanceBefore;
+        uint256 senderEthBalanceAfter;
+        uint256 walletBorrowTokenBalanceBefore;
+        uint256 walletBorrowTokenBalanceAfter;
+    }
+
     function _baseTest(
         bool _isDirect,
         bool _isMaxPayback,
@@ -137,6 +148,8 @@ contract TestFluidVaultT1Payback is FluidExecuteActions {
             );
 
             IFluidVaultT1.ConstantViews memory constants = vaults[i].constantsView();
+            bool isNativePayback = constants.borrowToken == TokenUtils.ETH_ADDR;
+            constants.borrowToken = isNativePayback ? TokenUtils.WETH_ADDR : constants.borrowToken;
 
             (IFluidVaultResolver.UserPosition memory userPositionBefore, ) = 
                 IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);
@@ -159,29 +172,59 @@ contract TestFluidVaultT1Payback is FluidExecuteActions {
                 _isDirect
             );
 
-            uint256 senderBorrowTokenBalanceBefore = balanceOf(constants.borrowToken, sender);
-            uint256 walletBorrowTokenBalanceBefore = balanceOf(constants.borrowToken, walletAddr);
+            TempLocalVars memory vars;
 
+            vars.senderBorrowTokenBalanceBefore = balanceOf(constants.borrowToken, sender);
+            vars.senderEthBalanceBefore = address(sender).balance;
+            vars.walletBorrowTokenBalanceBefore = isNativePayback
+                ? address(walletAddr).balance
+                : balanceOf(constants.borrowToken, walletAddr);
+
+            vm.recordLogs();
             wallet.execute(address(cut), executeActionCallData, 0);
+            Vm.Log[] memory logs = vm.getRecordedLogs();
 
-            uint256 senderBorrowTokenBalanceAfter = balanceOf(constants.borrowToken, sender);
-            uint256 walletBorrowTokenBalanceAfter = balanceOf(constants.borrowToken, walletAddr);
+            vars.senderBorrowTokenBalanceAfter = balanceOf(constants.borrowToken, sender);
+            vars.senderEthBalanceAfter = address(sender).balance;
+            vars.walletBorrowTokenBalanceAfter = isNativePayback
+                ? address(walletAddr).balance
+                : balanceOf(constants.borrowToken, walletAddr);
 
             (IFluidVaultResolver.UserPosition memory userPositionAfter, ) = 
                 IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);
 
             // make sure no dust is left on wallet
-            assertEq(walletBorrowTokenBalanceAfter, walletBorrowTokenBalanceBefore);
+            assertEq(vars.walletBorrowTokenBalanceAfter, vars.walletBorrowTokenBalanceBefore);
             
             if (_isMaxPayback) {
-                assertApproxEqRel(
-                    senderBorrowTokenBalanceAfter,
-                    senderBorrowTokenBalanceBefore - userPositionBefore.borrow,
-                    1e15 // 0.1% tolerance
-                );
                 assertEq(userPositionAfter.borrow, 0);
+
+                if (isNativePayback) {
+                    uint256 pulledWeth = vars.senderBorrowTokenBalanceBefore - vars.senderBorrowTokenBalanceAfter;
+                    uint256 exactPaybackAmount;
+                    // parse logs to find exact payback amount
+                    for (uint256 i = 0; i < logs.length; ++i) {
+                        if (logs[i].topics[0] == IFluidVaultT1.LogOperate.selector) {
+                            ( , , , int256 debtAmt , ) = abi.decode(
+                                logs[i].data,
+                                (address, uint256, int256, int256, address)
+                            );
+                            exactPaybackAmount = uint256(-debtAmt);
+                            break;
+                        }
+                    }
+                    assertTrue(exactPaybackAmount > 0);
+                    uint256 expectedEthRefund = pulledWeth - exactPaybackAmount;
+                    assertEq(vars.senderEthBalanceAfter - vars.senderEthBalanceBefore, expectedEthRefund);
+                } else {
+                    assertApproxEqRel(
+                        vars.senderBorrowTokenBalanceAfter,
+                        vars.senderBorrowTokenBalanceBefore - userPositionBefore.borrow,
+                        1e15 // 0.1% tolerance
+                    );
+                }
             } else {
-                assertEq(senderBorrowTokenBalanceAfter, senderBorrowTokenBalanceBefore - paybackAmount);
+                assertEq(vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore - paybackAmount);
                 assertApproxEqRel(
                     userPositionAfter.borrow,
                     userPositionBefore.borrow - paybackAmount,

@@ -59,15 +59,29 @@ contract FluidVaultT1Open is ActionBase, FluidHelper {
         IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(_params.vault).constantsView();
         address supplyToken = constants.supplyToken;
 
-        _params.collAmount = supplyToken.pullTokensIfNeeded(_params.from, _params.collAmount);
-        supplyToken.approveToken(_params.vault, _params.collAmount);
+        uint256 nftId;
 
-        (uint256 nftId , , ) = IFluidVaultT1(_params.vault).operate(
-            0,
-            int256(_params.collAmount),
-            int256(_params.debtAmount),
-            _params.to
-        );
+        if (supplyToken == TokenUtils.ETH_ADDR) {
+            _params.collAmount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.collAmount);
+            TokenUtils.withdrawWeth(_params.collAmount);
+
+            (nftId , , ) = IFluidVaultT1(_params.vault).operate{value: _params.collAmount}(
+                0,
+                int256(_params.collAmount),
+                int256(_params.debtAmount),
+                _params.to
+            );
+        } else {
+            _params.collAmount = supplyToken.pullTokensIfNeeded(_params.from, _params.collAmount);
+            supplyToken.approveToken(_params.vault, _params.collAmount);
+            
+            (nftId , , ) = IFluidVaultT1(_params.vault).operate(
+                0,
+                int256(_params.collAmount),
+                int256(_params.debtAmount),
+                _params.to
+            );
+        }
 
         return (nftId, abi.encode(_params));
     }

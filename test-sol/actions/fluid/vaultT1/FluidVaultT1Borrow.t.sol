@@ -4,7 +4,7 @@ import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/IFlu
 import { IFluidVaultFactory } from "../../../../contracts/interfaces/fluid/IFluidVaultFactory.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import { FluidVaultT1Borrow } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Borrow.sol";
-
+import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { FluidExecuteActions } from "../../../utils/executeActions/FluidExecuteActions.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { console } from "forge-std/console.sol";
@@ -73,8 +73,11 @@ contract TestFluidVaultT1Borrow is FluidExecuteActions {
             );
 
             IFluidVaultT1.ConstantViews memory constants = vaults[i].constantsView();
-
-            uint256 borrowAmount = amountInUSDPrice(constants.borrowToken, _borrowAmountUSD);
+            bool isNativeBorrow = constants.borrowToken == TokenUtils.ETH_ADDR;
+            uint256 borrowAmount = amountInUSDPrice(
+                isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken,
+                _borrowAmountUSD
+            );
 
             bytes memory executeActionCallData = executeActionCalldata(
                 fluidVaultT1BorrowEncode(
@@ -89,13 +92,21 @@ contract TestFluidVaultT1Borrow is FluidExecuteActions {
             (IFluidVaultResolver.UserPosition memory userPositionBefore, ) = 
                 IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);
 
-            uint256 senderBorrowTokenBalanceBefore = balanceOf(constants.borrowToken, sender);
-            uint256 walletBorrowTokenBalanceBefore = balanceOf(constants.borrowToken, walletAddr);
+            uint256 senderBorrowTokenBalanceBefore = isNativeBorrow 
+                ? address(sender).balance 
+                : balanceOf(constants.borrowToken, sender);
+            uint256 walletBorrowTokenBalanceBefore = isNativeBorrow 
+                ? address(walletAddr).balance 
+                : balanceOf(constants.borrowToken, walletAddr);
 
             wallet.execute(address(cut), executeActionCallData, 0);
 
-            uint256 senderBorrowTokenBalanceAfter = balanceOf(constants.borrowToken, sender);
-            uint256 walletBorrowTokenBalanceAfter = balanceOf(constants.borrowToken, walletAddr);
+            uint256 senderBorrowTokenBalanceAfter = isNativeBorrow 
+                ? address(sender).balance 
+                : balanceOf(constants.borrowToken, sender);
+            uint256 walletBorrowTokenBalanceAfter = isNativeBorrow 
+                ? address(walletAddr).balance 
+                : balanceOf(constants.borrowToken, walletAddr);
 
             (IFluidVaultResolver.UserPosition memory userPositionAfter, ) = 
                 IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);

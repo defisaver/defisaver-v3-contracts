@@ -4,7 +4,7 @@ import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/IFlu
 import { IFluidVaultFactory } from "../../../../contracts/interfaces/fluid/IFluidVaultFactory.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import { FluidVaultT1Withdraw } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw.sol";
-
+import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { FluidExecuteActions } from "../../../utils/executeActions/FluidExecuteActions.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { console } from "forge-std/console.sol";
@@ -84,10 +84,11 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
             );
 
             IFluidVaultT1.ConstantViews memory constants = vaults[i].constantsView();
+            bool isNativeWithdraw = constants.supplyToken == TokenUtils.ETH_ADDR;
 
             uint256 withdrawAmount = _takeMaxUint256
                 ? type(uint256).max
-                : amountInUSDPrice(constants.supplyToken, _withdrawAmountUSD);
+                : amountInUSDPrice(isNativeWithdraw ? TokenUtils.WETH_ADDR : constants.supplyToken, _withdrawAmountUSD);
 
             bytes memory executeActionCallData = executeActionCalldata(
                 fluidVaultT1WithdrawEncode(
@@ -102,13 +103,21 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
             (IFluidVaultResolver.UserPosition memory userPositionBefore, ) = 
                 IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);
 
-            uint256 senderSupplyTokenBalanceBefore = balanceOf(constants.supplyToken, sender);
-            uint256 walletSupplyTokenBalanceBefore = balanceOf(constants.supplyToken, walletAddr);
+            uint256 senderSupplyTokenBalanceBefore = isNativeWithdraw 
+                ? address(sender).balance 
+                : balanceOf(constants.supplyToken, sender);
+            uint256 walletSupplyTokenBalanceBefore = isNativeWithdraw 
+                ? address(walletAddr).balance 
+                : balanceOf(constants.supplyToken, walletAddr);
 
             wallet.execute(address(cut), executeActionCallData, 0);
 
-            uint256 senderSupplyTokenBalanceAfter = balanceOf(constants.supplyToken, sender);
-            uint256 walletSupplyTokenBalanceAfter = balanceOf(constants.supplyToken, walletAddr);
+            uint256 senderSupplyTokenBalanceAfter = isNativeWithdraw 
+                ? address(sender).balance 
+                : balanceOf(constants.supplyToken, sender);
+            uint256 walletSupplyTokenBalanceAfter = isNativeWithdraw
+                ? address(walletAddr).balance 
+                : balanceOf(constants.supplyToken, walletAddr);
 
             (IFluidVaultResolver.UserPosition memory userPositionAfter, ) = 
                 IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);

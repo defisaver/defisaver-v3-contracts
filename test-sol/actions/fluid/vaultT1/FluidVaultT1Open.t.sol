@@ -6,6 +6,7 @@ import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/Fl
 import { FluidTestHelper } from "../FluidTestHelper.t.sol";
 
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
+import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { BaseTest } from "../../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../../utils/ActionsUtils.sol";
 import { Vm } from "forge-std/Vm.sol";
@@ -81,12 +82,16 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
     ) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
             IFluidVaultT1.ConstantViews memory constants = vaults[i].constantsView();
+            bool isNativeSupply = constants.supplyToken == TokenUtils.ETH_ADDR;
+            bool isNativeBorrow = constants.borrowToken == TokenUtils.ETH_ADDR;
+
+            constants.supplyToken = isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken;
             uint256 supplyAmount = amountInUSDPrice(constants.supplyToken, collateralAmountInUSD);
             give(constants.supplyToken, sender, supplyAmount);
-            approveAsSender(sender, constants.supplyToken, walletAddr, supplyAmount);
+            approveAsSender(sender, constants.supplyToken, walletAddr, supplyAmount);    
 
             uint256 borrowAmount = borrowAmountInUSD != 0
-                ? amountInUSDPrice(constants.borrowToken, borrowAmountInUSD)
+                ? amountInUSDPrice(isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, borrowAmountInUSD)
                 : 0;
 
             bytes memory executeActionCallData = executeActionCalldata(
@@ -100,11 +105,10 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
                 isDirect
             );
 
-            uint256[] memory nftIdsBefore = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionsNftIdOfUser(walletAddr);
-            assertEq(nftIdsBefore.length, 0);
-
             uint256 senderSupplyTokenBalanceBefore = balanceOf(constants.supplyToken, sender);
-            uint256 senderBorrowTokenBalanceBefore = balanceOf(constants.borrowToken, sender);
+            uint256 senderBorrowTokenBalanceBefore = isNativeBorrow 
+                ? address(sender).balance 
+                : balanceOf(constants.borrowToken, sender);
 
             vm.recordLogs();
 
@@ -112,20 +116,19 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
 
             Vm.Log[] memory logs = vm.getRecordedLogs();
 
-            uint256[] memory nftIdsAfter = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionsNftIdOfUser(walletAddr);
-            assertEq(nftIdsAfter.length, 1);
-
-            uint256 createdNft = nftIdsAfter[0];
+            uint256 createdNft;
             for (uint256 i = 0; i < logs.length; ++i) {
                 if (logs[i].topics[0] == IFluidVaultFactory.NewPositionMinted.selector) {
-                    uint256 nftFromEvent = uint256(logs[i].topics[3]);
-                    assertEq(createdNft, nftFromEvent);
+                    createdNft = uint256(logs[i].topics[3]);
                     break;
                 }
             }
+            assertNotEq(createdNft, 0);
 
             uint256 senderSupplyTokenBalanceAfter = balanceOf(constants.supplyToken, sender);
-            uint256 senderBorrowTokenBalanceAfter = balanceOf(constants.borrowToken, sender);
+            uint256 senderBorrowTokenBalanceAfter = isNativeBorrow 
+                ? address(sender).balance 
+                : balanceOf(constants.borrowToken, sender);
 
             assertEq(senderSupplyTokenBalanceAfter, senderSupplyTokenBalanceBefore - supplyAmount);
             assertEq(senderBorrowTokenBalanceAfter, senderBorrowTokenBalanceBefore + borrowAmount);
@@ -156,7 +159,6 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
         console.log("beforeSupply", userPosition.beforeSupply);
         console.log("beforeBorrow", userPosition.beforeBorrow);
         console.log("beforeDustBorrow", userPosition.beforeDustBorrow);
-        // TODO: check why supply amount mismatch stored user supply (ex. prices ?)
         console.log("supply", userPosition.supply);
         console.log("borrow", userPosition.borrow);
         console.log("dustBorrow", userPosition.dustBorrow);

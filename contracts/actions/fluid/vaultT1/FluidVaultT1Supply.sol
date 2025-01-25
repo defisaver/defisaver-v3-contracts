@@ -57,15 +57,27 @@ contract FluidVaultT1Supply is ActionBase, FluidHelper {
         IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(_params.vault).constantsView();
         address supplyToken = constants.supplyToken;
 
-        _params.amount = supplyToken.pullTokensIfNeeded(_params.from, _params.amount);
-        supplyToken.approveToken(_params.vault, _params.amount);
+        if (supplyToken == TokenUtils.ETH_ADDR) {
+            _params.amount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.amount);
+            TokenUtils.withdrawWeth(_params.amount);
 
-        IFluidVaultT1(_params.vault).operate(
-            _params.nftId,
-            int256(_params.amount),
-            0,
-            address(0)
-        );
+            IFluidVaultT1(_params.vault).operate{value: _params.amount}(
+                _params.nftId,
+                int256(_params.amount),
+                0,
+                address(0)
+            );
+        } else {
+            _params.amount = supplyToken.pullTokensIfNeeded(_params.from, _params.amount);
+            supplyToken.approveToken(_params.vault, _params.amount);
+
+            IFluidVaultT1(_params.vault).operate(
+                _params.nftId,
+                int256(_params.amount),
+                0,
+                address(0)
+            );
+        }
 
         return (_params.amount, abi.encode(_params));
     }

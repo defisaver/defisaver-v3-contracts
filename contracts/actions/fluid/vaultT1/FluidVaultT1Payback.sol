@@ -58,6 +58,7 @@ contract FluidVaultT1Payback is ActionBase, FluidHelper {
     function _payback(Params memory _params) internal returns (uint256, bytes memory) {
         IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(_params.vault).constantsView();
         address borrowToken = constants.borrowToken;
+        bool isEthPayback = borrowToken == TokenUtils.ETH_ADDR;
 
         (IFluidVaultResolver.UserPosition memory userPosition, ) = 
             IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_params.nftId);
@@ -73,16 +74,26 @@ contract FluidVaultT1Payback is ActionBase, FluidHelper {
             // the user must still have sufficient tokens and allowance to cover this extra amount.
             _params.amount = userPosition.borrow * 100001 / 100000 + 5;
             // If we pull more than necessary, we will take a snapshot and refund any dust amount.
-            borrowTokenBalanceBefore = borrowToken.getBalance(address(this));
+            borrowTokenBalanceBefore = isEthPayback
+                ? address(this).balance
+                : borrowToken.getBalance(address(this));
         }
 
-        borrowToken.pullTokensIfNeeded(_params.from, _params.amount);
-        borrowToken.approveToken(_params.vault, _params.amount);
+        if (isEthPayback) {
+            _params.amount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.amount);
+            TokenUtils.withdrawWeth(_params.amount);
+        } else {
+            _params.amount = borrowToken.pullTokensIfNeeded(_params.from, _params.amount);
+            borrowToken.approveToken(_params.vault, _params.amount);
+        }
 
         // type(int256).min will trigger max payback inside the vault.
         int256 paybackAmount =  maxPayback ? type(int256).min : -int256(_params.amount);
 
-        ( , , int256 exactPaybackAmount) = IFluidVaultT1(_params.vault).operate(
+        // If we send more ETH than needed, the vault will refund the dust.
+        uint256 msgValue = isEthPayback ? _params.amount : 0;
+
+        ( , , int256 exactPaybackAmount) = IFluidVaultT1(_params.vault).operate{value: msgValue}(
             _params.nftId,
             0,
             paybackAmount,
@@ -90,7 +101,9 @@ contract FluidVaultT1Payback is ActionBase, FluidHelper {
         );
 
         if (maxPayback) {
-            uint256 borrowTokenBalanceAfter = borrowToken.getBalance(address(this));
+            uint256 borrowTokenBalanceAfter = isEthPayback
+                ? address(this).balance
+                : borrowToken.getBalance(address(this));
 
             // Sanity check. There should never be a case where we end up with fewer borrowed tokens than before.
             require(borrowTokenBalanceAfter >= borrowTokenBalanceBefore);
@@ -98,9 +111,12 @@ contract FluidVaultT1Payback is ActionBase, FluidHelper {
             // We pulled slightly more than needed, so refund dust amount to 'from' address.
             if (borrowTokenBalanceAfter > borrowTokenBalanceBefore) {
                 uint256 dustAmount = borrowTokenBalanceAfter - borrowTokenBalanceBefore;
+                // This also supports plain ETH.
                 borrowToken.withdrawTokens(_params.from, dustAmount);
                 // Remove any dust approval left.
-                borrowToken.approveToken(_params.vault, 0);
+                if (!isEthPayback) {
+                    borrowToken.approveToken(_params.vault, 0);
+                }
             }
         }
 

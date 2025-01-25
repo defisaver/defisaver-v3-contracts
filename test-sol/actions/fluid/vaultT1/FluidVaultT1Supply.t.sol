@@ -4,6 +4,7 @@ import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/IFlu
 import { IFluidVaultFactory } from "../../../../contracts/interfaces/fluid/IFluidVaultFactory.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import { FluidVaultT1Supply } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Supply.sol";
+import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 
 import { FluidExecuteActions } from "../../../utils/executeActions/FluidExecuteActions.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
@@ -82,6 +83,10 @@ contract TestFluidVaultT1Supply is FluidExecuteActions {
             );
 
             IFluidVaultT1.ConstantViews memory constants = vaults[i].constantsView();
+            if (constants.supplyToken == TokenUtils.ETH_ADDR) {
+                constants.supplyToken = TokenUtils.WETH_ADDR;
+            }
+
             uint256 supplyAmount = amountInUSDPrice(constants.supplyToken, _collateralAmountInUSD);
             give(constants.supplyToken, sender, supplyAmount);
             approveAsSender(sender, constants.supplyToken, walletAddr, supplyAmount);
