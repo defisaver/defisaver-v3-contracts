@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../../contracts/interfaces/fluid/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/IFluidVaultResolver.sol";
@@ -203,10 +206,10 @@ contract TestFluidVaultT1Payback is FluidExecuteActions {
                     uint256 pulledWeth = vars.senderBorrowTokenBalanceBefore - vars.senderBorrowTokenBalanceAfter;
                     uint256 exactPaybackAmount;
                     // parse logs to find exact payback amount
-                    for (uint256 i = 0; i < logs.length; ++i) {
-                        if (logs[i].topics[0] == IFluidVaultT1.LogOperate.selector) {
+                    for (uint256 j = 0; i < logs.length; ++j) {
+                        if (logs[j].topics[0] == IFluidVaultT1.LogOperate.selector) {
                             ( , , , int256 debtAmt , ) = abi.decode(
-                                logs[i].data,
+                                logs[j].data,
                                 (address, uint256, int256, int256, address)
                             );
                             exactPaybackAmount = uint256(-debtAmt);

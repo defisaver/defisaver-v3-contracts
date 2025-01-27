@@ -12,6 +12,11 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 contract FluidVaultT1Open is ActionBase, FluidHelper {
     using TokenUtils for address;
 
+    /// @param vault The address of the Fluid Vault T1
+    /// @param collAmount Amount of collateral to deposit.
+    /// @param debtAmount Amount of debt to borrow. Can be 0 if only depositing collateral.
+    /// @param from Address to pull the collateral from.
+    /// @param to Address to send the borrowed assets to.
     struct Params {
         address vault;
         uint256 collAmount;

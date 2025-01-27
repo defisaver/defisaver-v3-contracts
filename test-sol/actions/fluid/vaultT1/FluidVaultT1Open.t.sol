@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../../contracts/interfaces/fluid/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/IFluidVaultResolver.sol";
@@ -117,9 +120,9 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
             Vm.Log[] memory logs = vm.getRecordedLogs();
 
             uint256 createdNft;
-            for (uint256 i = 0; i < logs.length; ++i) {
-                if (logs[i].topics[0] == IFluidVaultFactory.NewPositionMinted.selector) {
-                    createdNft = uint256(logs[i].topics[3]);
+            for (uint256 j = 0; j < logs.length; ++j) {
+                if (logs[j].topics[0] == IFluidVaultFactory.NewPositionMinted.selector) {
+                    createdNft = uint256(logs[j].topics[3]);
                     break;
                 }
             }
@@ -148,7 +151,7 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
         uint256 supplyAmount,
         uint256 borrowAmount,
         IFluidVaultResolver.UserPosition memory userPosition
-    ) internal {
+    ) internal view {
         console.log("supplyAmount", supplyAmount);
         console.log("borrowAmount", borrowAmount);
         console.log("owner", userPosition.owner);

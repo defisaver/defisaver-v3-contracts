@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../../contracts/interfaces/fluid/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/IFluidVaultResolver.sol";

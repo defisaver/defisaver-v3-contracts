@@ -4,14 +4,15 @@ pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../interfaces/fluid/IFluidVaultT1.sol";
 import { FluidHelper } from "../helpers/FluidHelper.sol";
-
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
 /// @title Borrow assets from Fluid Vault T1 (1_col:1_debt)
 contract FluidVaultT1Borrow is ActionBase, FluidHelper {
-    using TokenUtils for address;
 
+    /// @param vault The address of the Fluid Vault T1
+    /// @param nftId ID of the NFT representing the position
+    /// @param amount Amount to borrow
+    /// @param to Address to send the borrowed assets to
     struct Params {
         address vault;
         uint256 nftId;

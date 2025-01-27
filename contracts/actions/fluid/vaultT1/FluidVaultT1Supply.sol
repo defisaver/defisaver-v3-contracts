@@ -12,6 +12,10 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 contract FluidVaultT1Supply is ActionBase, FluidHelper {
     using TokenUtils for address;
 
+    /// @param vault The address of the Fluid Vault T1
+    /// @param nftId ID of the NFT representing the position
+    /// @param amount Amount to supply
+    /// @param from Address to pull the tokens from
     struct Params {
         address vault;
         uint256 nftId;

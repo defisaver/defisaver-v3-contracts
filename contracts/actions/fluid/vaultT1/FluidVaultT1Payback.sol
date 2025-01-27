@@ -5,15 +5,17 @@ pragma solidity =0.8.24;
 import { IFluidVaultT1 } from "../../../interfaces/fluid/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../../interfaces/fluid/IFluidVaultResolver.sol";
 import { FluidHelper } from "../helpers/FluidHelper.sol";
-
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { console } from "forge-std/console.sol";
 
 /// @title Payback debt to Fluid Vault T1 (1_col:1_debt)
 contract FluidVaultT1Payback is ActionBase, FluidHelper {
     using TokenUtils for address;
 
+    /// @param vault The address of the Fluid Vault T1
+    /// @param nftId ID of the NFT representing the position
+    /// @param amount Amount to payback
+    /// @param from Address to pull the tokens from
     struct Params {
         address vault;
         uint256 nftId;
