@@ -204,4 +204,13 @@ interface IFluidVaultResolver {
     /// @return nftIds_ An array of NFT IDs representing the user's positions.
     function positionsNftIdOfUser(address user_) external view returns (uint[] memory nftIds_);
 
+    /// @notice Get the addresses of all the vaults.
+    /// @return vaults_ The addresses of all the vaults.
+    function getAllVaultsAddresses() external view returns (address[] memory vaults_);
+
+    function getVaultId(address vault_) external view returns (uint id_);
+
+    function getVaultAddress(uint vaultId_) external view returns (address vault_);
+
+    function getVaultEntireData(address vault_) external view returns (VaultEntireData memory vaultData_);
 }
