@@ -20,11 +20,11 @@ contract FluidView is FluidHelper {
     }
 
     struct VaultData {
-        address vault;
-        uint256 vaultId;
-        uint256 vaultType;
-        bool isSmartColl;
-        bool isSmartDebt;
+        address vault; // address of the vault
+        uint256 vaultId; // unique id of the vault
+        uint256 vaultType; // 10000 = Vault(1 coll / 1 debt), 20000 = 2/1, 30000 = 1/2, 40000 = 2/2
+        bool isSmartColl; // smart collateral vaults have 2 tokens as collateral
+        bool isSmartDebt; // smart debt vaults have 2 tokens as debt
         address supplyToken0; // always present
         address supplyToken1; // only used for smart collateral vaults
         address borrowToken0; // always present
@@ -35,7 +35,7 @@ contract FluidView is FluidHelper {
         uint16 withdrawalGap; // Safety non-withdrawable amount to guarantee liquidations. E.g 500 = 5%
         uint16 liquidationPenalty; // e.g 100 = 1%, 500 = 5%
         uint16 borrowFee;
-        address oracle;
+        address oracle; // address of the oracle
         uint256 oraclePriceOperate;
         uint256 oraclePriceLiquidate;
         uint256 vaultSupplyExchangePrice;
@@ -44,18 +44,15 @@ contract FluidView is FluidHelper {
         int borrowRateVault;
         int rewardsOrFeeRateSupply;
         int rewardsOrFeeRateBorrow;
-        uint256 totalPositions;
-
+        uint256 totalPositions; // Total positions in the vault
         uint256 totalSupplyVault; // Total supplied assets to the vault
         uint256 totalBorrowVault; // Total borrowed assets from the vault
-
         uint256 withdrawalLimit; // The limit until where you can withdraw. If 0, all users can withdraw
         uint256 withdrawableUntilLimit; // The amount that can be withdrawn until the limit
         uint256 withdrawable; // min(supply - withdrawalGap - currentLimit, availableBalance)
         uint256 baseWithdrawalLimit; // The minimum limit for a vault's withdraw. The further expansion happens on this base
         uint256 withdrawExpandPercent; // The rate at which limits would increase or decrease over the given duration. E.g 2500 = 25%
         uint256 withdrawExpandDuration; // The time for which the limits expand at the given rate (in seconds)
-
         uint256 borrowLimit; // The limit until where user can borrow
         uint256 borrowableUntilLimit; // borrowable amount until any borrow limit (incl. max utilization limit)
         uint256 borrowable; // min(currentLimit - borrow, borrowableMaxUtilization - borrow, availableBalance)

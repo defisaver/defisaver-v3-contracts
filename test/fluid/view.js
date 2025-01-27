@@ -35,10 +35,10 @@ const fluidViewTest = async () => {
             await revertToSnapshot(snapshot);
         });
         it('...call fluid resolver', async () => {
-            const VAULT_ID = 1;
+            const VAULT_ID = 28;
             const vaultAddr = await resolverContract.getVaultAddress(VAULT_ID);
             const vaultDataFromOurView = await viewContract.getVaultData(vaultAddr);
-            const vaultData = await resolverContract.getVaultEntireData(vaultAddr);
+            //const vaultData = await resolverContract.getVaultEntireData(vaultAddr);
             console.log(vaultDataFromOurView);
         });
     });
