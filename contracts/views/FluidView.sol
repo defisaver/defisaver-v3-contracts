@@ -5,8 +5,9 @@ pragma solidity =0.8.24;
 import { IFluidVaultT1 } from "../../contracts/interfaces/fluid/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../contracts/interfaces/fluid/IFluidVaultResolver.sol";
 import { FluidHelper } from "../../contracts/actions/fluid/helpers/FluidHelper.sol";
+import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
 
-contract FluidView is FluidHelper {
+contract FluidView is FluidHelper, TokenPriceHelper {
 
     struct UserPosition {
         uint256 nftId;
@@ -38,6 +39,10 @@ contract FluidView is FluidHelper {
         address oracle; // address of the oracle
         uint256 oraclePriceOperate;
         uint256 oraclePriceLiquidate;
+        uint256 priceOfSupplyToken0InUSD; // Price of the collateral token 0 in USD. Scaled by 1e8
+        uint256 priceOfSupplyToken1InUSD; // Price of the collateral token 1 in USD. Scaled by 1e8. 0 if not present
+        uint256 priceOfBorrowToken0InUSD; // Price of the debt token 0 in USD. Scaled by 1e8
+        uint256 priceOfBorrowToken1InUSD; // Price of the debt token 1 in USD. Scaled by 1e8. 0 if not present
         uint256 vaultSupplyExchangePrice;
         uint256 vaultBorrowExchangePrice;
         int supplyRateVault;
@@ -114,16 +119,21 @@ contract FluidView is FluidHelper {
         IFluidVaultResolver.VaultEntireData memory data = 
             IFluidVaultResolver(FLUID_VAULT_RESOLVER).getVaultEntireData(_vault);
 
+        address supplyToken0 = data.constantVariables.supplyToken.token0;
+        address supplyToken1 = data.constantVariables.supplyToken.token1;
+        address borrowToken0 = data.constantVariables.borrowToken.token0;
+        address borrowToken1 = data.constantVariables.borrowToken.token1;
+
         vaultData = VaultData({
             vault: _vault,
             vaultId: data.constantVariables.vaultId,
             vaultType: data.constantVariables.vaultType,
             isSmartColl: data.isSmartCol,
             isSmartDebt: data.isSmartDebt,
-            supplyToken0: data.constantVariables.supplyToken.token0,
-            supplyToken1: data.constantVariables.supplyToken.token1,
-            borrowToken0: data.constantVariables.borrowToken.token0,
-            borrowToken1: data.constantVariables.borrowToken.token1,
+            supplyToken0: supplyToken0,
+            supplyToken1: supplyToken1,
+            borrowToken0: borrowToken0,
+            borrowToken1: borrowToken1,
 
             collateralFactor: data.configs.collateralFactor,
             liquidationThreshold: data.configs.liquidationThreshold,
@@ -134,6 +144,10 @@ contract FluidView is FluidHelper {
             oracle: data.configs.oracle,
             oraclePriceOperate: data.configs.oraclePriceOperate,
             oraclePriceLiquidate: data.configs.oraclePriceLiquidate,
+            priceOfSupplyToken0InUSD: getPriceInUSD(data.constantVariables.supplyToken.token0),
+            priceOfSupplyToken1InUSD: supplyToken1 != address(0) ? getPriceInUSD(data.constantVariables.supplyToken.token1) : 0,
+            priceOfBorrowToken0InUSD: getPriceInUSD(data.constantVariables.borrowToken.token0),
+            priceOfBorrowToken1InUSD: borrowToken1 != address(0) ? getPriceInUSD(data.constantVariables.borrowToken.token1) : 0,
 
             vaultSupplyExchangePrice: data.exchangePricesAndRates.vaultSupplyExchangePrice,
             vaultBorrowExchangePrice: data.exchangePricesAndRates.vaultBorrowExchangePrice,
