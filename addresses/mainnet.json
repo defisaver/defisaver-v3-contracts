@@ -2732,14 +2732,15 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0xfaE5e10014Dc90A85ABdE21E0fa85CcB78521aB5",
+        "address": "0xb29c4a8ad8fb58b04512a0c479278ad53ad9b5aa",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xfaE5e10014Dc90A85ABdE21E0fa85CcB78521aB5",
             "0x558A8B92EE6a2B724afDEd319b61Ac55B7259826",
             "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
             "0x431F1E1A9859EF99953801dbdeB31d2846ADcc0d",
