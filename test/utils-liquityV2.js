@@ -97,12 +97,12 @@ const getLiquityV2AdjustBorrowMaxUpfrontFee = async (
 
 const getLiquityV2TestPairs = async () => [
     {
-        market: '0xc3fe668b43439525f70fe860f89882f0be312504',
+        market: '0x38e1f07b954cfab7239d7acab49997fbaad96476',
         supplyTokenSymbol: 'WETH',
         collIndex: 0,
     },
     {
-        market: '0x9b27787ff66aa3cea8dbc47772328459a1fa05ac',
+        market: '0x2d4ef56cb626e9a4c90c156018ba9ce269573c61',
         supplyTokenSymbol: 'wstETH',
         collIndex: 1,
     },

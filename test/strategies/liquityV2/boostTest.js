@@ -8,6 +8,7 @@ const {
     formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
     setBalance,
     BALANCER_VAULT_ADDR,
+    fetchAmountInUSDPrice,
 } = require('../../utils');
 const { callLiquityV2BoostStrategy, callLiquityV2FLBoostWithCollStrategy, callLiquityV2FLBoostStrategy } = require('../../strategy-calls');
 
@@ -23,12 +24,11 @@ class BoostTest extends BaseLiquityV2StrategyTest {
             it('... should call LiquityV2 boost strategy', async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
 
-                const supplyAmount = hre.ethers.utils.parseUnits('20', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, '40000');
                 const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
-                console.log('troveId', troveId);
 
-                const maxRatio = 300;
+                const maxRatio = 200;
                 const targetRatio = 150;
                 const { subId, strategySub } = await subLiquityV2BoostBundle(
                     this.proxy,
@@ -45,7 +45,6 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     troveId,
                 );
                 const ratioBefore = troveInfoBefore.TCRatio;
-                console.log('ratioBefore', ratioBefore.toString());
 
                 const boostAmount = boldAmount.div(8);
 
@@ -83,13 +82,13 @@ class BoostTest extends BaseLiquityV2StrategyTest {
             });
             it('... should call LiquityV2 fl boost strategy', async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
-                const supplyAmount = hre.ethers.utils.parseUnits('20', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.address, '40000');
                 const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
                 console.log('troveId', troveId);
 
-                const maxRatio = 300;
-                const targetRatio = 250;
+                const maxRatio = 200;
+                const targetRatio = 150;
                 const { subId, strategySub } = await subLiquityV2BoostBundle(
                     this.proxy,
                     pair.market,
@@ -149,12 +148,12 @@ class BoostTest extends BaseLiquityV2StrategyTest {
             it('... should call LiquityV2 fl boost with collateral strategy', async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
 
-                const supplyAmount = hre.ethers.utils.parseUnits('20', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.address, '40000');
                 const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
                 console.log('troveId', troveId);
 
-                const maxRatio = 300;
+                const maxRatio = 200;
                 const targetRatio = 150;
                 const { subId, strategySub } = await subLiquityV2BoostBundle(
                     this.proxy,
@@ -173,7 +172,7 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                 const ratioBefore = troveInfoBefore.TCRatio;
                 console.log('ratioBefore', ratioBefore.toString());
 
-                const collFlAmount = hre.ethers.utils.parseUnits('2', 18);
+                const collFlAmount = await fetchAmountInUSDPrice(collAsset.address, '5000');
                 const boostBoldAmount = hre.ethers.utils.parseUnits('5000', 18);
 
                 const exchangeObject = await formatExchangeObjSdk(
