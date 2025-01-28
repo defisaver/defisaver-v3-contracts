@@ -6,6 +6,7 @@ import { IFluidVaultT1 } from "../../contracts/interfaces/fluid/IFluidVaultT1.so
 import { IFluidVaultResolver } from "../../contracts/interfaces/fluid/IFluidVaultResolver.sol";
 import { FluidHelper } from "../../contracts/actions/fluid/helpers/FluidHelper.sol";
 import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 contract FluidView is FluidHelper, TokenPriceHelper {
 
@@ -30,6 +31,10 @@ contract FluidView is FluidHelper, TokenPriceHelper {
         address supplyToken1; // only used for smart collateral vaults
         address borrowToken0; // always present
         address borrowToken1; // only used for smart debt vaults
+        uint256 supplyToken0Decimals; // decimals of the collateral token 0
+        uint256 supplyToken1Decimals; // decimals of the collateral token 1. 0 if not present
+        uint256 borrowToken0Decimals; // decimals of the debt token 0
+        uint256 borrowToken1Decimals; // decimals of the debt token 1. 0 if not present
         uint16 collateralFactor; // e.g 8500 = 85%
         uint16 liquidationThreshold; // e.g 9000 = 90%
         uint16 liquidationMaxLimit;  // LML is the threshold above which 100% of your position gets liquidated instantly
@@ -130,10 +135,16 @@ contract FluidView is FluidHelper, TokenPriceHelper {
             vaultType: data.constantVariables.vaultType,
             isSmartColl: data.isSmartCol,
             isSmartDebt: data.isSmartDebt,
+            
             supplyToken0: supplyToken0,
             supplyToken1: supplyToken1,
             borrowToken0: borrowToken0,
             borrowToken1: borrowToken1,
+
+            supplyToken0Decimals: supplyToken0 != ETH_ADDR ? IERC20(supplyToken0).decimals() : 18,
+            supplyToken1Decimals: supplyToken1 != address(0) ? (supplyToken1 != ETH_ADDR ? IERC20(supplyToken1).decimals() : 18) : 0,
+            borrowToken0Decimals: borrowToken0 != ETH_ADDR ? IERC20(borrowToken0).decimals(): 18,
+            borrowToken1Decimals: borrowToken1 != address(0) ? (borrowToken1 != ETH_ADDR ? IERC20(borrowToken1).decimals() : 18) : 0,
 
             collateralFactor: data.configs.collateralFactor,
             liquidationThreshold: data.configs.liquidationThreshold,
