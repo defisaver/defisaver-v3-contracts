@@ -115,6 +115,7 @@ contract TokenPriceHelper is DSMath, UtilHelper {
 
     /// @dev If there's no USD price feed can fallback to ETH price feed, if there's no USD or ETH price feed return 0
     function getChainlinkPriceInUSD(address _inputTokenAddr, bool _useFallback) public view returns (int256 chainlinkPriceInUSD) {
+        if (_inputTokenAddr == 0xb01dd87B29d187F3E3a4Bf6cdAebfb97F3D9aB98) return 100000000;
         try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.USD) returns (uint80, int256 answer, uint256, uint256, uint80){
             chainlinkPriceInUSD = answer;
         } catch {
