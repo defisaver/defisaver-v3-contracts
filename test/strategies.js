@@ -5819,7 +5819,7 @@ const createFluidT1RepayStrategy = () => {
         '&ratio',
         '&ratioState',
     );
-    fluidRatioTrigger.addTrigger(fluidRatioTrigger);
+    fluidT1RepayStrategy.addTrigger(fluidRatioTrigger);
 
     const fluidWithdrawAction = new dfs.actions.fluid.FluidVaultT1WithdrawAction(
         '&vault',
@@ -5877,7 +5877,7 @@ const createFluidT1FLRepayStrategy = () => {
         '&ratio',
         '&ratioState',
     );
-    fluidRatioTrigger.addTrigger(fluidRatioTrigger);
+    fluidT1FLRepayStrategy.addTrigger(fluidRatioTrigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -5937,7 +5937,7 @@ const createFluidT1BoostStrategy = () => {
         '&ratio',
         '&ratioState',
     );
-    fluidRatioTrigger.addTrigger(fluidRatioTrigger);
+    fluidT1BoostStrategy.addTrigger(fluidRatioTrigger);
 
     const fluidBorrowAction = new dfs.actions.fluid.FluidVaultT1BorrowAction(
         '&vault',
@@ -5995,7 +5995,7 @@ const createFluidT1FLBoostStrategy = () => {
         '&ratio',
         '&ratioState',
     );
-    fluidRatioTrigger.addTrigger(fluidRatioTrigger);
+    fluidT1FLBoostStrategy.addTrigger(fluidRatioTrigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
