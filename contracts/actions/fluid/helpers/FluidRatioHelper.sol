@@ -10,10 +10,10 @@ import { DSMath } from "../../../DS/DSMath.sol";
 /// @title Helper methods for Fluid ratio calc.
 contract FluidRatioHelper is DSMath, FluidHelper {
 
-    uint256 internal constant T1_VAULT_ID = 1000;
-    uint256 internal constant T2_VAULT_ID = 2000;
-    uint256 internal constant T3_VAULT_ID = 3000;
-    uint256 internal constant T4_VAULT_ID = 4000;
+    uint256 internal constant T1_VAULT_ID = 10000;
+    uint256 internal constant T2_VAULT_ID = 20000;
+    uint256 internal constant T3_VAULT_ID = 30000;
+    uint256 internal constant T4_VAULT_ID = 40000;
 
     uint256 internal constant ORACLE_PRICE_DECIMALS = 27;
 
