@@ -89,6 +89,10 @@ contract FluidView is FluidHelper, TokenPriceHelper {
         return (positions, vaults);
     }
 
+    function getUserNftIds(address _user) external view returns (uint256[] memory) {
+        return IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionsNftIdOfUser(_user);
+    }
+
     function getVaultAddresses(uint256[] calldata _ids, bool _fetchAll) external view returns (address[] memory) {
         if (_fetchAll) {
             return IFluidVaultResolver(FLUID_VAULT_RESOLVER).getAllVaultsAddresses();
