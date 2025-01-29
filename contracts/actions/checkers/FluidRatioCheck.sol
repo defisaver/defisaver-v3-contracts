@@ -6,7 +6,7 @@ import { ActionBase } from "../ActionBase.sol";
 import { FluidRatioHelper } from "../fluid/helpers/FluidRatioHelper.sol";
 import { TransientStorage } from "../../utils/TransientStorage.sol";
 
-/// @title FluidRatioCheck - Checks liquity ratio for fluid position and reverts if faulty
+/// @title FluidRatioCheck - Checks ratio for fluid position and reverts if faulty
 contract FluidRatioCheck is ActionBase, FluidRatioHelper {
 
     /// @dev 5% offset acceptable

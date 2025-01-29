@@ -27,7 +27,7 @@ contract FluidRatioTrigger is
         uint256 ratio;
         uint8 state;
     }
-    /// @dev checks current ratio of a LiquityV2 trove and triggers if it's in a correct state
+    /// @dev checks current ratio of a fluid position and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData)
         public
         override
