@@ -5806,6 +5806,58 @@ const createLiquityV2FLRepayOnPriceStrategy = () => {
     return liquityV2FLRepayStrategy.encodeForDsProxyCall();
 };
 
+const createLiquityV2PaybackFromSPStrategy = () => {
+    const liquityV2PaybackFromSPStrategy = new dfs.Strategy('LiquityV2PaybackFromSPStrategy');
+    liquityV2PaybackFromSPStrategy.addSubSlot('&market', 'address');
+    liquityV2PaybackFromSPStrategy.addSubSlot('&troveId', 'address');
+    liquityV2PaybackFromSPStrategy.addSubSlot('&boldToken', 'uint256');
+    liquityV2PaybackFromSPStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityV2PaybackFromSPStrategy.addSubSlot('&ratioState', 'uint256');
+
+    const liquityV2RatioTrigger = new dfs.triggers.LiquityV2RatioTrigger(
+        '&market',
+        '&troveId',
+        '&ratio',
+        '&ratioState',
+    );
+    liquityV2PaybackFromSPStrategy.addTrigger(liquityV2RatioTrigger);
+
+    const liquityV2WithdrawSP = new dfs.actions.liquityV2.LiquityV2SPWithdrawAction(
+        '&market',
+        '&proxy', // where to send bold tokens
+        '&proxy', // where to send coll. gains
+        '%boldAmount', // calc. by backend to hit ratio trigger
+        '%doClaim' // set false by backend
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gas', // sent by backend
+        '&boldToken',
+        '$1',
+    );
+
+    const liquityV2Payback = new dfs.actions.liquityV2.LiquityV2PaybackAction(
+        '&market',
+        '&proxy',
+        '&troveId',
+        '$2'
+    );
+
+    const liquityV2RatioCheckAction = new dfs.actions.checkers.LiquityV2RatioCheckAction(
+        '&market',
+        '&troveId',
+        '&ratioState',
+        '&targetRatio',
+    );
+
+    liquityV2PaybackFromSPStrategy.addAction(liquityV2WithdrawSP);
+    liquityV2PaybackFromSPStrategy.addAction(feeTakingAction);
+    liquityV2PaybackFromSPStrategy.addAction(liquityV2Payback);
+    liquityV2PaybackFromSPStrategy.addAction(liquityV2RatioCheckAction);
+
+    return liquityV2PaybackFromSPStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createUniV3RangeOrderStrategy,
     createRepayStrategy,
@@ -5912,4 +5964,5 @@ module.exports = {
     createLiquityV2FLBoostWithCollOnPriceStrategy,
     createLiquityV2RepayOnPriceStrategy,
     createLiquityV2FLRepayOnPriceStrategy,
+    createLiquityV2PaybackFromSPStrategy,
 };
