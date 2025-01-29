@@ -20,6 +20,7 @@ const {
     createLiquityV2RepayOnPriceStrategy,
     createLiquityV2FLRepayOnPriceStrategy,
     createLiquityV2FLBoostWithCollOnPriceStrategy,
+    createLiquityV2PaybackFromSPStrategy,
 } = require('./strategies');
 const { createStrategy, createBundle } = require('./utils-strategies');
 
@@ -198,6 +199,15 @@ const deployLiquityV2RepayOnPriceBundle = async (proxy, isFork) => {
     return bundleId;
 };
 
+const deployLiquityV2PaybackFromSPStrategy = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
+
+    const liquityV2PaybackFromSPStrategy = createLiquityV2PaybackFromSPStrategy();
+    const liquityV2PaybackFromSPStrategyId = await createStrategy(proxy, ...liquityV2PaybackFromSPStrategy, false);
+
+    return liquityV2PaybackFromSPStrategyId;
+};
+
 module.exports = {
     getLiquityV2Hints,
     getLiquityV2MaxUpfrontFee,
@@ -208,6 +218,7 @@ module.exports = {
     deployLiquityV2CloseBundle,
     deployLiquityV2BoostOnPriceBundle,
     deployLiquityV2RepayOnPriceBundle,
+    deployLiquityV2PaybackFromSPStrategy,
     CollActionType,
     DebtActionType,
 };
