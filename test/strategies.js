@@ -5813,6 +5813,7 @@ const createFluidT1RepayStrategy = () => {
     fluidT1RepayStrategy.addSubSlot('&debtToken', 'uint256');
     fluidT1RepayStrategy.addSubSlot('&ratioState', 'uint256');
     fluidT1RepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    fluidT1RepayStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
 
     const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
         '&nftId',
@@ -5826,11 +5827,12 @@ const createFluidT1RepayStrategy = () => {
         '&nftId',
         '%amount', // sent by backend
         '&proxy',
+        '&wrapEth',
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '&collToken',
-            '&debtToken',
+            '%collToken', // sent by backend. If collToken is ETH, pass WETH address
+            '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
             '$1',
             '%exchangeWrapper', // sent by backend
         ),
@@ -5839,7 +5841,7 @@ const createFluidT1RepayStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '&debtToken',
+        '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
         '$2',
     );
     const fluidPaybackAction = new dfs.actions.fluid.FluidVaultT1PaybackAction(
@@ -5869,6 +5871,7 @@ const createFluidT1FLRepayStrategy = () => {
     fluidT1FLRepayStrategy.addSubSlot('&debtToken', 'uint256');
     fluidT1FLRepayStrategy.addSubSlot('&ratioState', 'uint256');
     fluidT1FLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    fluidT1FLRepayStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
     fluidT1FLRepayStrategy.addSubSlot('&CollActionType.WITHDRAW', 'uint8');
     fluidT1FLRepayStrategy.addSubSlot('&DebtActionType.PAYBACK', 'uint8');
 
@@ -5881,14 +5884,14 @@ const createFluidT1FLRepayStrategy = () => {
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
-            ['%collToken'], // sent by backend. No piping available in fl actions
+            ['%collToken'], // sent by backend. If collToken is ETH, pass WETH address
             ['%flAmount'], // sent by backend
         ),
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '&collToken',
-            '&debtToken',
+            '%collToken', // sent by backend. If collToken is ETH, pass WETH address
+            '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
             '%flAmount', // sent by backend
             '%exchangeWrapper', // sent by backend
         ),
@@ -5897,7 +5900,7 @@ const createFluidT1FLRepayStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '&debtToken',
+        '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
         '$2',
     );
     const fluidAdjustAction = new dfs.actions.fluid.FluidVaultT1AdjustAction(
@@ -5907,6 +5910,7 @@ const createFluidT1FLRepayStrategy = () => {
         '$3',
         '&proxy',
         '%flAddress', // sent by backend
+        '&wrapEth',
         '&CollActionType.WITHDRAW',
         '&DebtActionType.PAYBACK',
     );
@@ -5931,6 +5935,7 @@ const createFluidT1BoostStrategy = () => {
     fluidT1BoostStrategy.addSubSlot('&debtToken', 'uint256');
     fluidT1BoostStrategy.addSubSlot('&ratioState', 'uint256');
     fluidT1BoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    fluidT1BoostStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
 
     const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
         '&nftId',
@@ -5944,11 +5949,12 @@ const createFluidT1BoostStrategy = () => {
         '&nftId',
         '%amount', // sent by backend
         '&proxy',
+        '&wrapEth',
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '&debtToken',
-            '&collToken',
+            '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
+            '%collToken', // sent by backend. If collToken is ETH, pass WETH address
             '$1',
             '%exchangeWrapper', // sent by backend
         ),
@@ -5957,7 +5963,7 @@ const createFluidT1BoostStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '&collToken',
+        '%collToken', // sent by backend. If collToken is ETH, pass WETH address
         '$2',
     );
     const fluidSupplyAction = new dfs.actions.fluid.FluidVaultT1SupplyAction(
@@ -5987,6 +5993,7 @@ const createFluidT1FLBoostStrategy = () => {
     fluidT1FLBoostStrategy.addSubSlot('&debtToken', 'uint256');
     fluidT1FLBoostStrategy.addSubSlot('&ratioState', 'uint256');
     fluidT1FLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    fluidT1FLBoostStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
     fluidT1FLBoostStrategy.addSubSlot('&CollActionType.SUPPLY', 'uint8');
     fluidT1FLBoostStrategy.addSubSlot('&DebtActionType.BORROW', 'uint8');
 
@@ -5999,14 +6006,14 @@ const createFluidT1FLBoostStrategy = () => {
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
-            ['%debtToken'], // sent by backend. No piping available in fl actions
+            ['%debtToken'], // sent by backend. If debtToken is ETH, pass WETH address
             ['%flAmount'], // sent by backend
         ),
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
-            '&debtToken',
-            '&collToken',
+            '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
+            '%collToken', // sent by backend. If collToken is ETH, pass WETH address
             '%flAmount', // sent by backend
             '%exchangeWrapper', // sent by backend
         ),
@@ -6015,7 +6022,7 @@ const createFluidT1FLBoostStrategy = () => {
     );
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '%gas', // sent by backend
-        '&collToken',
+        '%collToken', // sent by backend. If collToken is ETH, pass WETH address
         '$2',
     );
     const fluidAdjustAction = new dfs.actions.fluid.FluidVaultT1AdjustAction(
@@ -6025,6 +6032,7 @@ const createFluidT1FLBoostStrategy = () => {
         '$1',
         '&proxy',
         '%flAddress', // sent by backend
+        '&wrapEth',
         '&CollActionType.SUPPLY',
         '&DebtActionType.BORROW',
     );
