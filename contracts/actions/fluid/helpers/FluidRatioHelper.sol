@@ -5,6 +5,7 @@ pragma solidity =0.8.24;
 import { IERC20 } from "../../../interfaces/IERC20.sol";
 import { IFluidVaultResolver } from "../../../interfaces/fluid/IFluidVaultResolver.sol";
 import { FluidHelper } from "./FluidHelper.sol";
+import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { DSMath } from "../../../DS/DSMath.sol";
 
 /// @title Helper methods for Fluid ratio calc.
@@ -28,12 +29,15 @@ contract FluidRatioHelper is DSMath, FluidHelper {
         // TODO: For now, only handle the case for T1 Vaults
         if (vaultData.constantVariables.vaultId == T1_VAULT_ID) {
             uint256 collAmount = userPosition.supply;
+            address collToken = vaultData.constantVariables.supplyToken.token0;
+
             uint256 debtAmount = userPosition.borrow;
+            address debtToken = vaultData.constantVariables.borrowToken.token0;
 
             if (debtAmount == 0) return uint256(0);
 
-            uint256 collDec = IERC20(vaultData.constantVariables.supplyToken.token0).decimals();
-            uint256 debtDec = IERC20(vaultData.constantVariables.borrowToken.token0).decimals();
+            uint256 collDec = collToken != TokenUtils.ETH_ADDR ? IERC20(collToken).decimals() : 18;
+            uint256 debtDec = debtToken != TokenUtils.ETH_ADDR ? IERC20(debtToken).decimals() : 18;
 
             /// @dev Examples:
             // price = Price of collateral token in debt token scaled by priceScaler
