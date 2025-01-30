@@ -54,27 +54,47 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
         bool takeMaxUint256 = false;
         uint256 initialSupplyAmountUSD = 50000;
         uint256 withdrawAmountUSD = 30000;
-        _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD);
+        bool wrapWithdrawnEth = false;
+        _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD, wrapWithdrawnEth);
     }
     function test_should_withdraw_direct_action() public {
         bool isDirect = true;
         bool takeMaxUint256 = false;
         uint256 initialSupplyAmountUSD = 50000;
         uint256 withdrawAmountUSD = 30000;
-        _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD);
+        bool wrapWithdrawnEth = false;
+        _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD, wrapWithdrawnEth);
     }
     function test_should_max_withdraw() public {
         bool isDirect = false;
         bool takeMaxUint256 = true;
         uint256 initialSupplyAmountUSD = 50000;
         uint256 withdrawAmountUSD = type(uint256).max;
-        _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD);
+        bool wrapWithdrawnEth = false;
+        _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD, wrapWithdrawnEth);
+    }
+    function test_should_max_withdraw_with_wrapping() public {
+        bool isDirect = false;
+        bool takeMaxUint256 = true;
+        uint256 initialSupplyAmountUSD = 50000;
+        uint256 withdrawAmountUSD = type(uint256).max;
+        bool wrapWithdrawnEth = true;
+        _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD, wrapWithdrawnEth);
+    }
+    function test_should_withdraw_part_with_wrapping() public {
+        bool isDirect = false;
+        bool takeMaxUint256 = false;
+        uint256 initialSupplyAmountUSD = 50000;
+        uint256 withdrawAmountUSD = 30000;
+        bool wrapWithdrawnEth = true;
+        _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD, wrapWithdrawnEth);
     }
     function _baseTest(
         bool _isDirect,
         bool _takeMaxUint256,
         uint256 _initialSupplyAmountUSD,
-        uint256 _withdrawAmountUSD
+        uint256 _withdrawAmountUSD,
+        bool _wrapWithdrawnEth
     ) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
 
@@ -98,7 +118,8 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
                     address(vaults[i]),
                     nftId,
                     withdrawAmount,
-                    sender
+                    sender,
+                    _wrapWithdrawnEth
                 ),
                 _isDirect
             );
@@ -107,7 +128,9 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
                 IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);
 
             uint256 senderSupplyTokenBalanceBefore = isNativeWithdraw 
-                ? address(sender).balance 
+                ? (
+                    _wrapWithdrawnEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance
+                )
                 : balanceOf(constants.supplyToken, sender);
             uint256 walletSupplyTokenBalanceBefore = isNativeWithdraw 
                 ? address(walletAddr).balance 
@@ -116,7 +139,9 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
             wallet.execute(address(cut), executeActionCallData, 0);
 
             uint256 senderSupplyTokenBalanceAfter = isNativeWithdraw 
-                ? address(sender).balance 
+                ? (
+                    _wrapWithdrawnEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance
+                )
                 : balanceOf(constants.supplyToken, sender);
             uint256 walletSupplyTokenBalanceAfter = isNativeWithdraw
                 ? address(walletAddr).balance 
