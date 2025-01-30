@@ -1349,6 +1349,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
         const debtAmount = 500;
         const collAction = 0; // 0: SUPPLY, 1: WITHDRAW
         const debtAction = 0; // 0: PAYBACK, 1: BORROW
+        const shouldWrap = true;
         let foundryContract;
 
         before(async () => {
@@ -1363,6 +1364,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     debtAmount,
                     from,
                     to,
+                    shouldWrap,
                 )
             ).encodeForDsProxyCall()[1];
             const foundryEncoded = FluidVaultT1Open.interface.encodeFunctionData('executeActionDirect', [
@@ -1372,6 +1374,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     debtAmount,
                     from,
                     to,
+                    shouldWrap,
                 ),
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -1386,6 +1389,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     debtAmount,
                     from,
                     to,
+                    shouldWrap,
                     collAction,
                     debtAction,
                 )
@@ -1398,6 +1402,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     debtAmount,
                     from,
                     to,
+                    shouldWrap,
                     collAction,
                     debtAction,
                 ),
@@ -1432,6 +1437,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     nftId,
                     collAmount,
                     to,
+                    shouldWrap,
                 )
             ).encodeForDsProxyCall()[1];
             const foundryEncoded = FluidVaultT1Withdraw.interface.encodeFunctionData('executeActionDirect', [
@@ -1440,6 +1446,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     nftId,
                     collAmount,
                     to,
+                    shouldWrap,
                 ),
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
@@ -1473,6 +1480,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     nftId,
                     debtAmount,
                     to,
+                    shouldWrap,
                 )
             ).encodeForDsProxyCall()[1];
             const foundryEncoded = FluidVaultT1Borrow.interface.encodeFunctionData('executeActionDirect', [
@@ -1481,6 +1489,7 @@ describe('Test direct actions encoding for sdk and foundry', () => {
                     nftId,
                     debtAmount,
                     to,
+                    shouldWrap,
                 ),
             ]);
             expect(sdkEncoded).to.be.eq(foundryEncoded);
