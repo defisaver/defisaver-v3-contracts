@@ -1062,6 +1062,7 @@ contract ActionsUtils {
         uint256 _debtAmount,
         address _from,
         address _to,
+        bool _sendWrappedEth,
         FluidVaultT1Adjust.CollActionType _collAction,
         FluidVaultT1Adjust.DebtActionType _debtAction
     ) public pure returns (bytes memory params) {
@@ -1073,6 +1074,7 @@ contract ActionsUtils {
                 debtAmount: _debtAmount,
                 from: _from,
                 to: _to,
+                sendWrappedEth: _sendWrappedEth,
                 collAction: _collAction,
                 debtAction: _debtAction
             })
