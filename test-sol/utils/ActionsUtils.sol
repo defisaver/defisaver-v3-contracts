@@ -1023,14 +1023,16 @@ contract ActionsUtils {
         address _vault,
         uint256 _nftId,
         uint256 _amount,
-        address _to
+        address _to,
+        bool _wrapBorrowedEth
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             FluidVaultT1Borrow.Params({
                 vault: _vault,
                 nftId: _nftId,
                 amount: _amount,
-                to: _to
+                to: _to,
+                wrapBorrowedEth: _wrapBorrowedEth
             })
         );
     }
