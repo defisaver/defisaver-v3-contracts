@@ -70,10 +70,6 @@ contract FluidVaultT1Open is ActionBase, FluidHelper {
     function _open(Params memory _params) internal returns (uint256, bytes memory) {
         IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(_params.vault).constantsView();
         address supplyToken = constants.supplyToken;
-        bool shouldWrapBorrowedEth = 
-            _params.wrapBorrowedEth &&
-            _params.debtAmount > 0 &&
-            constants.borrowToken == TokenUtils.ETH_ADDR;
 
         uint256 nftId;
 
@@ -85,9 +81,14 @@ contract FluidVaultT1Open is ActionBase, FluidHelper {
                 0,
                 int256(_params.collAmount),
                 int256(_params.debtAmount),
-                shouldWrapBorrowedEth ? address(this) : _params.to
+                _params.to
             );
         } else {
+            bool shouldWrapBorrowedEth = 
+                _params.wrapBorrowedEth &&
+                _params.debtAmount > 0 &&
+                constants.borrowToken == TokenUtils.ETH_ADDR;
+
             _params.collAmount = supplyToken.pullTokensIfNeeded(_params.from, _params.collAmount);
             supplyToken.approveToken(_params.vault, _params.collAmount);
             
@@ -97,11 +98,11 @@ contract FluidVaultT1Open is ActionBase, FluidHelper {
                 int256(_params.debtAmount),
                 shouldWrapBorrowedEth ? address(this) : _params.to
             );
-        }
 
-        if (shouldWrapBorrowedEth) {
-            TokenUtils.depositWeth(_params.debtAmount);
-            TokenUtils.WETH_ADDR.withdrawTokens(_params.to, _params.debtAmount);    
+            if (shouldWrapBorrowedEth) {
+                TokenUtils.depositWeth(_params.debtAmount);
+                TokenUtils.WETH_ADDR.withdrawTokens(_params.to, _params.debtAmount);    
+            }
         }
 
         return (nftId, abi.encode(_params));
