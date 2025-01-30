@@ -972,7 +972,8 @@ contract ActionsUtils {
         uint256 _collAmount,
         uint256 _debtAmount,
         address _from,
-        address _to
+        address _to,
+        bool _wrapBorrowedEth
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             FluidVaultT1Open.Params({
@@ -980,7 +981,8 @@ contract ActionsUtils {
                 collAmount: _collAmount,
                 debtAmount: _debtAmount,
                 from: _from,
-                to: _to
+                to: _to,
+                wrapBorrowedEth: _wrapBorrowedEth
             })
         );
     }
@@ -1005,14 +1007,16 @@ contract ActionsUtils {
         address _vault,
         uint256 _nftId,
         uint256 _amount,
-        address _to
+        address _to,
+        bool _wrapWithdrawnEth
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             FluidVaultT1Withdraw.Params({
                 vault: _vault,
                 nftId: _nftId,
                 amount: _amount,
-                to: _to
+                to: _to,
+                wrapWithdrawnEth: _wrapWithdrawnEth
             })
         );
     }
@@ -1021,14 +1025,16 @@ contract ActionsUtils {
         address _vault,
         uint256 _nftId,
         uint256 _amount,
-        address _to
+        address _to,
+        bool _wrapBorrowedEth
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             FluidVaultT1Borrow.Params({
                 vault: _vault,
                 nftId: _nftId,
                 amount: _amount,
-                to: _to
+                to: _to,
+                wrapBorrowedEth: _wrapBorrowedEth
             })
         );
     }
@@ -1056,6 +1062,7 @@ contract ActionsUtils {
         uint256 _debtAmount,
         address _from,
         address _to,
+        bool _sendWrappedEth,
         FluidVaultT1Adjust.CollActionType _collAction,
         FluidVaultT1Adjust.DebtActionType _debtAction
     ) public pure returns (bytes memory params) {
@@ -1067,6 +1074,7 @@ contract ActionsUtils {
                 debtAmount: _debtAmount,
                 from: _from,
                 to: _to,
+                sendWrappedEth: _sendWrappedEth,
                 collAction: _collAction,
                 debtAction: _debtAction
             })

@@ -4,7 +4,6 @@ pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../interfaces/fluid/IFluidVaultT1.sol";
 import { FluidHelper } from "../helpers/FluidHelper.sol";
-
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
@@ -17,12 +16,14 @@ contract FluidVaultT1Open is ActionBase, FluidHelper {
     /// @param debtAmount Amount of debt to borrow. Can be 0 if only depositing collateral.
     /// @param from Address to pull the collateral from.
     /// @param to Address to send the borrowed assets to.
+    /// @param wrapBorrowedEth Whether to wrap the borrowed ETH into WETH if the borrowed asset is ETH.
     struct Params {
         address vault;
         uint256 collAmount;
         uint256 debtAmount;
         address from;
         address to;
+        bool wrapBorrowedEth;
     }
 
     /// @inheritdoc ActionBase
@@ -39,6 +40,12 @@ contract FluidVaultT1Open is ActionBase, FluidHelper {
         params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
+        params.wrapBorrowedEth = _parseParamUint(
+            params.wrapBorrowedEth ? 1 : 0,
+            _paramMapping[5],
+            _subData,
+            _returnValues
+        ) == 1;
 
         (uint256 nftId, bytes memory logData) = _open(params);
         emit ActionEvent("FluidVaultT1Open", logData);
@@ -77,6 +84,11 @@ contract FluidVaultT1Open is ActionBase, FluidHelper {
                 _params.to
             );
         } else {
+            bool shouldWrapBorrowedEth = 
+                _params.wrapBorrowedEth &&
+                _params.debtAmount > 0 &&
+                constants.borrowToken == TokenUtils.ETH_ADDR;
+
             _params.collAmount = supplyToken.pullTokensIfNeeded(_params.from, _params.collAmount);
             supplyToken.approveToken(_params.vault, _params.collAmount);
             
@@ -84,8 +96,13 @@ contract FluidVaultT1Open is ActionBase, FluidHelper {
                 0,
                 int256(_params.collAmount),
                 int256(_params.debtAmount),
-                _params.to
+                shouldWrapBorrowedEth ? address(this) : _params.to
             );
+
+            if (shouldWrapBorrowedEth) {
+                TokenUtils.depositWeth(_params.debtAmount);
+                TokenUtils.WETH_ADDR.withdrawTokens(_params.to, _params.debtAmount);    
+            }
         }
 
         return (nftId, abi.encode(_params));

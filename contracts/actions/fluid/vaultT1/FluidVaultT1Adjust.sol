@@ -21,6 +21,11 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     /// @param debtAmount Amount of debt to payback/borrow
     /// @param from Address to pull tokens from
     /// @param to Address to send tokens to
+    /// @param sendWrappedEth Whether to wrap the ETH into WETH before sending to 'to' address
+    ///                       Applicable if one of the following conditions is met:
+    ///                       - Supply token is ETH and collActionType is WITHDRAW
+    ///                       - Borrow token is ETH and debtActionType is BORROW
+    ///                       Note: One flag is enough, because there won't be ETH on both sides.
     /// @param collAction Type of collateral action to perform. 0 for supply, 1 for withdraw
     /// @param debtAction Type of debt action to perform. 0 for payback, 1 for borrow
     struct Params {
@@ -30,6 +35,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
         uint256 debtAmount;
         address from;
         address to;
+        bool sendWrappedEth;
         CollActionType collAction;
         DebtActionType debtAction;
     }
@@ -42,6 +48,16 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
         bool maxPayback;
         uint256 borrowTokenBalanceBefore;
         uint256 borrowTokenBalanceAfter;
+    }
+
+    /// @dev Helper struct to group local variables for adjust action. Avoids stack too deep errors.
+    struct AdjustLocalVars {
+        uint256 msgValue;
+        int supplyTokenAmount;
+        int borrowTokenAmount;
+        bool sendWithdrawnEthAsWrapped;
+        bool sendBorrowedEthAsWrapped;
+        address sendTokensTo;
     }
 
     /// @inheritdoc ActionBase
@@ -59,8 +75,18 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
         params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[3], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[5], _subData, _returnValues);
-        params.collAction = CollActionType(_parseParamUint(uint8(params.collAction), _paramMapping[6], _subData, _returnValues));
-        params.debtAction = DebtActionType(_parseParamUint(uint8(params.debtAction), _paramMapping[7], _subData, _returnValues));
+        params.sendWrappedEth = _parseParamUint(
+            params.sendWrappedEth ? 1 : 0,
+            _paramMapping[6],
+            _subData,
+            _returnValues
+        ) == 1;
+        params.collAction = CollActionType(
+            _parseParamUint(uint8(params.collAction), _paramMapping[7], _subData, _returnValues)
+        );
+        params.debtAction = DebtActionType(
+            _parseParamUint(uint8(params.debtAction), _paramMapping[8], _subData, _returnValues)
+        );
 
         (uint256 debtAmount, bytes memory logData) = _adjust(params);
         emit ActionEvent("FluidVaultT1Adjust", logData);
@@ -85,43 +111,77 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     function _adjust(Params memory _params) internal returns (uint256, bytes memory) {
         IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(_params.vault).constantsView();
 
-        uint256 msgValue;
-        int256 supplyTokenAmount;
-        int256 borrowTokenAmount;
-        
+        AdjustLocalVars memory vars;
+
+        vars.sendWithdrawnEthAsWrapped =
+            _params.sendWrappedEth && 
+            _params.collAction == CollActionType.WITHDRAW &&
+            constants.supplyToken == TokenUtils.ETH_ADDR &&
+            _params.collAmount > 0;
+
+        vars.sendBorrowedEthAsWrapped =
+            _params.sendWrappedEth && 
+            _params.debtAction == DebtActionType.BORROW &&
+            constants.borrowToken == TokenUtils.ETH_ADDR &&
+            _params.debtAmount > 0;
+
         if (_params.collAction == CollActionType.SUPPLY) {
-            (supplyTokenAmount, msgValue) = _handleSupply(_params, constants.supplyToken);
+            (vars.supplyTokenAmount, vars.msgValue) = _handleSupply(_params, constants.supplyToken);
         }
 
         if (_params.collAction == CollActionType.WITHDRAW) {
-            supplyTokenAmount = _handleWithdraw(_params);
+            vars.supplyTokenAmount = _handleWithdraw(_params);
         }
 
         MaxPaybackSnapshot memory paybackSnapshot;
         if (_params.debtAction == DebtActionType.PAYBACK) {
-            (paybackSnapshot, msgValue, borrowTokenAmount) = _handlePayback(
+            (paybackSnapshot, vars.msgValue, vars.borrowTokenAmount) = _handlePayback(
                 _params,
                 constants.borrowToken,
-                msgValue
+                vars.msgValue
             );
         }
 
         if (_params.debtAction == DebtActionType.BORROW) {
-            borrowTokenAmount = _handleBorrow(_params);
+            vars.borrowTokenAmount = _handleBorrow(_params);
         }
 
-        ( , , int256 debtAmt) = IFluidVaultT1(_params.vault).operate{value: msgValue}(
+        vars.sendTokensTo = (vars.sendWithdrawnEthAsWrapped || vars.sendBorrowedEthAsWrapped) 
+            ? address(this)
+            : _params.to;
+
+        ( , int exactCollAmt, int256 exactDebtAmt) = IFluidVaultT1(_params.vault).operate{ value: vars.msgValue }(
             _params.nftId,
-            supplyTokenAmount,
-            borrowTokenAmount,
-            _params.to
+            vars.supplyTokenAmount,
+            vars.borrowTokenAmount,
+            vars.sendTokensTo
         );
+
+        if (vars.sendWithdrawnEthAsWrapped) {
+            TokenUtils.depositWeth(uint256(-exactCollAmt));
+            TokenUtils.WETH_ADDR.withdrawTokens(_params.to, uint256(-exactCollAmt));
+
+            if (_params.debtAction == DebtActionType.BORROW) {
+                constants.borrowToken.withdrawTokens(_params.to, uint256(exactDebtAmt));
+            }
+        }
+
+        if (vars.sendBorrowedEthAsWrapped) {
+            TokenUtils.depositWeth(uint256(exactDebtAmt));
+            TokenUtils.WETH_ADDR.withdrawTokens(_params.to, uint256(exactDebtAmt));
+
+            if (_params.collAction == CollActionType.WITHDRAW) {
+                constants.supplyToken.withdrawTokens(_params.to, uint256(-exactCollAmt));
+            }
+        }
 
         if (paybackSnapshot.maxPayback) {
             _handleMaxPaybackRefund(_params, constants.borrowToken, paybackSnapshot);
         }
 
-        uint256 retVal = _params.debtAction == DebtActionType.BORROW ? uint256(debtAmt) : uint256(-debtAmt);
+        uint256 retVal = _params.debtAction == DebtActionType.BORROW
+            ? uint256(exactDebtAmt)
+            : uint256(-exactDebtAmt);
 
         return (retVal, abi.encode(_params));
     }

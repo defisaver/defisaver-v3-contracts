@@ -6,6 +6,7 @@ const {
     redeploy, addrs, network, getOwnerAddr,
 } = require('../test/utils');
 const { topUp } = require('./utils/fork');
+const { deployFluidT1RepayBundle, deployFluidT1BoostBundle } = require('../test/utils-fluid');
 
 async function main() {
     const isFork = true;
@@ -22,6 +23,8 @@ async function main() {
     const fluidT1Borrow = await redeploy('FluidVaultT1Borrow', addrs[network].REGISTRY_ADDR, false, isFork);
     const fluidT1Payback = await redeploy('FluidVaultT1Payback', addrs[network].REGISTRY_ADDR, false, isFork);
     const fluidT1Adjust = await redeploy('FluidVaultT1Adjust', addrs[network].REGISTRY_ADDR, false, isFork);
+    const fluidRatioTrigger = await redeploy('FluidRatioTrigger', addrs[network].REGISTRY_ADDR, false, isFork);
+    const fluidRatioChecker = await redeploy('FluidRatioCheck', addrs[network].REGISTRY_ADDR, false, isFork);
     const view = await redeploy('FluidView', addrs[network].REGISTRY_ADDR, false, isFork);
 
     console.log(`FluidVaultT1Open: ${fluidT1Open.address}`);
@@ -30,7 +33,18 @@ async function main() {
     console.log(`FluidVaultT1Borrow: ${fluidT1Borrow.address}`);
     console.log(`FluidVaultT1Payback: ${fluidT1Payback.address}`);
     console.log(`FluidVaultT1Adjust: ${fluidT1Adjust.address}`);
+    console.log(`FluidRatioTrigger: ${fluidRatioTrigger.address}`);
+    console.log(`FluidRatioCheck: ${fluidRatioChecker.address}`);
     console.log(`FluidView: ${view.address}`);
+
+    /* //////////////////////////////////////////////////////////////
+                            AUTOMATION
+    ////////////////////////////////////////////////////////////// */
+    const repayBundleId = await deployFluidT1RepayBundle(senderAcc, isFork);
+    const boostBundleId = await deployFluidT1BoostBundle(senderAcc, isFork);
+
+    console.log(`Repay bundle id: ${repayBundleId}`);
+    console.log(`Boost bundle id: ${boostBundleId}`);
 
     process.exit(0);
 }
