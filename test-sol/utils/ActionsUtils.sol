@@ -972,7 +972,8 @@ contract ActionsUtils {
         uint256 _collAmount,
         uint256 _debtAmount,
         address _from,
-        address _to
+        address _to,
+        bool _wrapBorrowedEth
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             FluidVaultT1Open.Params({
@@ -980,7 +981,8 @@ contract ActionsUtils {
                 collAmount: _collAmount,
                 debtAmount: _debtAmount,
                 from: _from,
-                to: _to
+                to: _to,
+                wrapBorrowedEth: _wrapBorrowedEth
             })
         );
     }

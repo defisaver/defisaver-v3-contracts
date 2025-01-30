@@ -54,34 +54,47 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
         bool takeMaxUint256 = false;
         uint256 collateralAmountInUSD = 30000;
         uint256 borrowAmountInUSD = 10000;
-        _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD);
+        bool wrapBorrowedEth = false;
+        _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
     function test_should_open_position_direct_action() public {
         bool isDirect = true;
         bool takeMaxUint256 = false;
         uint256 collateralAmountInUSD = 30000;
         uint256 borrowAmountInUSD = 10000;
-        _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD);
+        bool wrapBorrowedEth = false;
+        _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
     function test_should_open_position_with_maxUint256() public {
         bool isDirect = false;
         bool takeMaxUint256 = true;
         uint256 collateralAmountInUSD = 30000;
         uint256 borrowAmountInUSD = 10000;
-        _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD);
+        bool wrapBorrowedEth = false;
+        _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
     function test_should_open_only_supply_position() public {
         bool isDirect = false;
         bool takeMaxUint256 = false;
         uint256 collateralAmountInUSD = 30000;
         uint256 borrowAmountInUSD = 0;
-        _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD);
+        bool wrapBorrowedEth = false;
+        _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
+    }
+    function test_should_open_position_with_borrow_eth_wrap() public {
+        bool isDirect = false;
+        bool takeMaxUint256 = false;
+        uint256 collateralAmountInUSD = 30000;
+        uint256 borrowAmountInUSD = 10000;
+        bool wrapBorrowedEth = true;
+        _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
     function _baseTest(
         bool isDirect,
         bool takeMaxUint256,
         uint256 collateralAmountInUSD,
-        uint256 borrowAmountInUSD
+        uint256 borrowAmountInUSD,
+        bool wrapBorrowedEth
     ) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
             IFluidVaultT1.ConstantViews memory constants = vaults[i].constantsView();
@@ -103,14 +116,17 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
                     takeMaxUint256 ? type(uint256).max : supplyAmount,
                     borrowAmount,
                     sender,
-                    sender
+                    sender,
+                    wrapBorrowedEth
                 ),
                 isDirect
             );
 
             uint256 senderSupplyTokenBalanceBefore = balanceOf(constants.supplyToken, sender);
             uint256 senderBorrowTokenBalanceBefore = isNativeBorrow 
-                ? address(sender).balance 
+                ? (
+                    wrapBorrowedEth? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance
+                )
                 : balanceOf(constants.borrowToken, sender);
 
             vm.recordLogs();
@@ -130,7 +146,9 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
 
             uint256 senderSupplyTokenBalanceAfter = balanceOf(constants.supplyToken, sender);
             uint256 senderBorrowTokenBalanceAfter = isNativeBorrow 
-                ? address(sender).balance 
+                ? (
+                    wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance 
+                ) 
                 : balanceOf(constants.borrowToken, sender);
 
             assertEq(senderSupplyTokenBalanceAfter, senderSupplyTokenBalanceBefore - supplyAmount);
