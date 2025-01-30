@@ -4,11 +4,11 @@ pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../contracts/interfaces/fluid/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../contracts/interfaces/fluid/IFluidVaultResolver.sol";
-import { FluidHelper } from "../../contracts/actions/fluid/helpers/FluidHelper.sol";
+import { FluidRatioHelper } from "../../contracts/actions/fluid/helpers/FluidRatioHelper.sol";
 import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 
-contract FluidView is FluidHelper, TokenPriceHelper {
+contract FluidView is FluidRatioHelper, TokenPriceHelper {
 
     struct UserPosition {
         uint256 nftId;
@@ -17,6 +17,7 @@ contract FluidView is FluidHelper, TokenPriceHelper {
         bool isSupplyPosition;
         uint256 supply;
         uint256 borrow;
+        uint256 ratio;
         int tick;
         uint256 tickId;
     }
@@ -117,6 +118,7 @@ contract FluidView is FluidHelper, TokenPriceHelper {
             isSupplyPosition: userPosition.isSupplyPosition,
             supply: userPosition.supply,
             borrow: userPosition.borrow,
+            ratio: getRatio(userPosition.nftId),
             tick: userPosition.tick,
             tickId: userPosition.tickId
         });
