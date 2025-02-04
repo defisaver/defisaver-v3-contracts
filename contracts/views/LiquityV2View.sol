@@ -194,7 +194,7 @@ contract LiquityV2View is LiquityV2Helper {
         address _market,
         uint256 _startIndex,
         uint256 _endIndex
-    )   external returns (ExistingTrove[] memory troves, int256 nextFreeTroveIndex) 
+    ) external view returns (ExistingTrove[] memory troves, int256 nextFreeTroveIndex) 
     {   
         nextFreeTroveIndex = -1; 
         IAddressesRegistry market = IAddressesRegistry(_market);
