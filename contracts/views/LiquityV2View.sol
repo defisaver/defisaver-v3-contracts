@@ -52,6 +52,7 @@ contract LiquityV2View is LiquityV2Helper {
         address priceFeed;
         uint256 collPrice;
         bool isShutDown;
+        uint256 boldDepositInSp;
     }
 
     function isShutDown(address _market) public view returns (bool) {
@@ -242,7 +243,8 @@ contract LiquityV2View is LiquityV2Helper {
             hintHelpers: registry.hintHelpers(),
             priceFeed: registry.priceFeed(),
             collPrice: collPrice,
-            isShutDown: isShutDown(_market)
+            isShutDown: isShutDown(_market),
+            boldDepositInSp: IStabilityPool(registry.stabilityPool()).getTotalBoldDeposits()
         });
     }
 
