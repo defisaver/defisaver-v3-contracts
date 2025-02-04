@@ -10,12 +10,15 @@ import { ISortedTroves } from "../interfaces/liquityV2/ISortedTroves.sol";
 import { IHintHelpers } from "../interfaces/liquityV2/IHintHelpers.sol";
 import { IPriceFeed } from "../interfaces/liquityV2/IPriceFeed.sol";
 import { ITroveNFT } from "../interfaces/liquityV2/ITroveNFT.sol";
+import { IMultiTroveGetter } from "../interfaces/liquityV2/IMultiTroveGetter.sol";
 
 import { LiquityV2Helper } from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
 
 contract LiquityV2View is LiquityV2Helper {
     using TokenUtils for address;
+
+    error InvalidMarketAddress();
 
     struct TroveData {
         uint256 troveId;
@@ -338,5 +341,47 @@ contract LiquityV2View is LiquityV2Helper {
 
     function _getTroveDebt(ITroveManager _troveManager, uint256 _troveId) internal view returns (uint256 debt) {
         (debt, , , , , , , , , ) = _troveManager.Troves(_troveId);
+    }
+
+    function getMultipleSortedTroves(address _market, int256 _startIdx, uint256 _count)
+        external view returns (IMultiTroveGetter.CombinedTroveData[] memory) 
+    {
+        uint256 collIndex = _getCollIndexFromMarket(_market);
+        ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
+
+        IMultiTroveGetter.CombinedTroveData[] memory troves = 
+            IMultiTroveGetter(MULTI_TROVE_GETTER_ADDR).getMultipleSortedTroves(collIndex, _startIdx, _count);
+
+        for (uint256 i = 0; i < troves.length; i++) {
+            ITroveManager.LatestTroveData memory latestTroveData = troveManager.getLatestTroveData(troves[i].id);
+
+            troves[i].debt = latestTroveData.entireDebt;
+            troves[i].coll = latestTroveData.entireColl;
+            troves[i].annualInterestRate = latestTroveData.annualInterestRate;
+            troves[i].lastInterestRateAdjTime = latestTroveData.lastInterestRateAdjTime;
+        }
+
+        return troves;
+    }
+
+    function getBatchManagerInfo(address _market, address _manager)
+        external view returns (
+            IBorrowerOperations.InterestBatchManager memory managerData,
+            ITroveManager.LatestBatchData memory batchData
+        )
+    {
+        IBorrowerOperations borrowOps = IBorrowerOperations(IAddressesRegistry(_market).borrowerOperations());
+        ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
+
+        managerData = borrowOps.getInterestBatchManager(_manager);
+        batchData = troveManager.getLatestBatchData(_manager);
+    }
+
+    function _getCollIndexFromMarket(address _market) internal pure returns (uint256) {
+        if (_market == WETH_MARKET_ADDR) return WETH_COLL_INDEX;
+        if (_market == WSTETH_MARKET_ADDR) return WSTETH_COLL_INDEX;
+        if (_market == RETH_MARKET_ADDR) return RETH_COLL_INDEX;
+
+        revert InvalidMarketAddress();
     }
 }
