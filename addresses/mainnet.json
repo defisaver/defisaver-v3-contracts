@@ -4038,14 +4038,17 @@
     },
     {
         "name": "LiquityV2View",
-        "address": "0xb1CCB64689F03cC7fd066a2095A285471c8A8554",
+        "address": "0x60128705250fDf19F1e18b197D1436B30eDa3899",
         "id": "0xe993f355",
         "path": "contracts/views/LiquityV2View.sol",
-        "version": "1.0.0",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0x9C43F5ED37042Fd4bA7f98aa734026c6C7Fb1Db0"]
+        "history": [
+            "0xb1CCB64689F03cC7fd066a2095A285471c8A8554",
+            "0x9C43F5ED37042Fd4bA7f98aa734026c6C7Fb1Db0"
+        ]
     },
     {
         "name": "LiquityV2RatioTrigger",
