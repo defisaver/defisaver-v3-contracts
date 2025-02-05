@@ -203,7 +203,7 @@ const deployLiquityV2PaybackFromSPStrategy = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
     const liquityV2PaybackFromSPStrategy = createLiquityV2PaybackFromSPStrategy();
-    const liquityV2PaybackFromSPStrategyId = await createStrategy(proxy, ...liquityV2PaybackFromSPStrategy, false);
+    const liquityV2PaybackFromSPStrategyId = await createStrategy(proxy, ...liquityV2PaybackFromSPStrategy, true);
 
     return liquityV2PaybackFromSPStrategyId;
 };
