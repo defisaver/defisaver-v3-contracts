@@ -32,6 +32,7 @@ contract LiquityV2View is LiquityV2Helper {
         uint256 annualInterestRate;
         address interestBatchManager;
         uint256 batchDebtShares;
+        uint256 lastInterestRateAdjTime;
     }
 
     struct MarketData {
@@ -170,6 +171,7 @@ contract LiquityV2View is LiquityV2Helper {
         (trove.collPrice, ) = priceFeed.fetchPrice();
         trove.TCRatio = troveManager.getCurrentICR(_troveId, trove.collPrice);
         trove.collToken = IAddressesRegistry(_market).collToken();
+        trove.lastInterestRateAdjTime = latestTroveData.lastInterestRateAdjTime;
 
         try troveNFT.ownerOf(_troveId) returns (address owner) {
             trove.owner = owner;
