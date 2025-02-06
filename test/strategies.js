@@ -5823,7 +5823,7 @@ const createLiquityV2PaybackFromSPStrategy = () => {
     liquityV2PaybackFromSPStrategy.addTrigger(liquityV2RatioTrigger);
 
     const liquityV2WithdrawSP = new dfs.actions.liquityV2.LiquityV2SPWithdrawAction(
-        '&market',
+        '%marketForSP',
         '&proxy', // where to send bold tokens
         '&proxy', // where to send coll. gains
         '%boldAmount', // calc. by backend to hit ratio trigger
