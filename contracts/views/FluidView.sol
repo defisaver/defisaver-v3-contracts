@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../contracts/interfaces/fluid/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../contracts/interfaces/fluid/IFluidVaultResolver.sol";
 import { FluidRatioHelper } from "../../contracts/actions/fluid/helpers/FluidRatioHelper.sol";
 import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
