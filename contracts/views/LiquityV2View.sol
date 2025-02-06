@@ -342,7 +342,8 @@ contract LiquityV2View is LiquityV2Helper {
     }
 
     function _getTroveDebt(ITroveManager _troveManager, uint256 _troveId) internal view returns (uint256 debt) {
-        (debt, , , , , , , , , ) = _troveManager.Troves(_troveId);
+        ITroveManager.LatestTroveData memory latestTroveData = _troveManager.getLatestTroveData(_troveId);
+        debt = latestTroveData.entireDebt;
     }
 
     function getMultipleSortedTroves(address _market, int256 _startIdx, uint256 _count)
