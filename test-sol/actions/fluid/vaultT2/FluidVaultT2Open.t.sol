@@ -7,8 +7,8 @@ import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/IFlu
 import { IFluidDexResolver } from "../../../../contracts/interfaces/fluid/IFluidDexResolver.sol";
 import { IFluidVaultFactory } from "../../../../contracts/interfaces/fluid/IFluidVaultFactory.sol";
 import { FluidVaultT2Open } from "../../../../contracts/actions/fluid/vaultT2/FluidVaultT2Open.sol";
+import { FluidSupplyDexCommon } from "../../../../contracts/actions/fluid/vaultT2/shared/FluidSupplyDexCommon.sol";
 import { FluidTestHelper } from "../FluidTestHelper.t.sol";
-
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { BaseTest } from "../../../utils/BaseTest.sol";
@@ -33,7 +33,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     IFluidVaultT2[] vaults;
 
     struct TestConfig {
-        FluidVaultT2Open.ShareType shareType;
+        FluidSupplyDexCommon.ShareType shareType;
         uint256 collAmount0InUSD;
         uint256 collAmount1InUSD;
         bool takeMaxUint256CollAmount0;
@@ -58,8 +58,8 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
         uint256 createdNft;
         uint256 exactPulledCollAmount0;
         uint256 exactPulledCollAmount1;
-        FluidVaultT2Open.ShareExactData shareExactData;
-        FluidVaultT2Open.ShareVariableData shareVariableData;
+        FluidSupplyDexCommon.SupplyExactData shareExactData;
+        FluidSupplyDexCommon.SupplyVariableData shareVariableData;
         IFluidDexResolver.DexEntireData dexData;
         uint256 shares;
     }
@@ -85,7 +85,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_variable_position_with_coll_0() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                shareType: FluidSupplyDexCommon.ShareType.VARIABLE,
                 collAmount0InUSD: 30000,
                 collAmount1InUSD: 0,
                 takeMaxUint256CollAmount0: false,
@@ -99,7 +99,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_variable_position_with_coll_1() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                shareType: FluidSupplyDexCommon.ShareType.VARIABLE,
                 collAmount0InUSD: 0,
                 collAmount1InUSD: 30000,
                 takeMaxUint256CollAmount0: false,
@@ -113,7 +113,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_variable_position_with_both_coll() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                shareType: FluidSupplyDexCommon.ShareType.VARIABLE,
                 collAmount0InUSD: 30000,
                 collAmount1InUSD: 20000,
                 takeMaxUint256CollAmount0: false,
@@ -127,7 +127,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_variable_position_only_supply() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                shareType: FluidSupplyDexCommon.ShareType.VARIABLE,
                 collAmount0InUSD: 11000,
                 collAmount1InUSD: 5000,
                 takeMaxUint256CollAmount0: false,
@@ -141,7 +141,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_variable_position_action_direct() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                shareType: FluidSupplyDexCommon.ShareType.VARIABLE,
                 collAmount0InUSD: 30000,
                 collAmount1InUSD: 0,
                 takeMaxUint256CollAmount0: false,
@@ -155,7 +155,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_variable_position_with_coll_0_maxUint256() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                shareType: FluidSupplyDexCommon.ShareType.VARIABLE,
                 collAmount0InUSD: 30000,
                 collAmount1InUSD: 0,
                 takeMaxUint256CollAmount0: true,
@@ -169,7 +169,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_variable_position_with_coll_1_maxUint256() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                shareType: FluidSupplyDexCommon.ShareType.VARIABLE,
                 collAmount0InUSD: 30000,
                 collAmount1InUSD: 25000,
                 takeMaxUint256CollAmount0: false,
@@ -183,7 +183,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_variable_position_with_borrow_eth_wrap() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                shareType: FluidSupplyDexCommon.ShareType.VARIABLE,
                 collAmount0InUSD: 30000,
                 collAmount1InUSD: 0,
                 takeMaxUint256CollAmount0: false,
@@ -197,7 +197,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_exact_position() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.EXACT,
+                shareType: FluidSupplyDexCommon.ShareType.EXACT,
                 collAmount0InUSD: 25000,
                 collAmount1InUSD: 5000,
                 takeMaxUint256CollAmount0: false,
@@ -211,7 +211,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_exact_position_only_supply() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.EXACT,
+                shareType: FluidSupplyDexCommon.ShareType.EXACT,
                 collAmount0InUSD: 21111,
                 collAmount1InUSD: 4342,
                 takeMaxUint256CollAmount0: false,
@@ -225,7 +225,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_exact_position_action_direct() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.EXACT,
+                shareType: FluidSupplyDexCommon.ShareType.EXACT,
                 collAmount0InUSD: 25000,
                 collAmount1InUSD: 5000,
                 takeMaxUint256CollAmount0: false,
@@ -239,7 +239,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_exact_position_with_coll_0_maxUint256() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.EXACT,
+                shareType: FluidSupplyDexCommon.ShareType.EXACT,
                 collAmount0InUSD: 25000,
                 collAmount1InUSD: 5000,
                 takeMaxUint256CollAmount0: true,
@@ -253,7 +253,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_exact_position_with_coll_1_maxUint256() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.EXACT,
+                shareType: FluidSupplyDexCommon.ShareType.EXACT,
                 collAmount0InUSD: 25000,
                 collAmount1InUSD: 5000,
                 takeMaxUint256CollAmount0: false,
@@ -267,7 +267,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
     function test_should_open_exact_position_with_borrow_eth_wrap() public {
         _baseTest(
             TestConfig({
-                shareType: FluidVaultT2Open.ShareType.EXACT,
+                shareType: FluidSupplyDexCommon.ShareType.EXACT,
                 collAmount0InUSD: 25000,
                 collAmount1InUSD: 5000,
                 takeMaxUint256CollAmount0: false,
@@ -293,7 +293,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
                 if (_config.collAmount0InUSD > 0) {
                     vars.collAmount0 = amountInUSDPrice(constants.supplyToken.token0, _config.collAmount0InUSD);
                 }
-                if (_config.shareType == FluidVaultT2Open.ShareType.VARIABLE) {
+                if (_config.shareType == FluidSupplyDexCommon.ShareType.VARIABLE) {
                     give(constants.supplyToken.token0, sender, vars.collAmount0);
                     approveAsSender(sender, constants.supplyToken.token0, walletAddr, vars.collAmount0);
                 }
@@ -305,7 +305,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
                 if (_config.collAmount1InUSD > 0) {
                     vars.collAmount1 = amountInUSDPrice(constants.supplyToken.token1, _config.collAmount1InUSD);
                 }
-                if (_config.shareType == FluidVaultT2Open.ShareType.VARIABLE) {
+                if (_config.shareType == FluidSupplyDexCommon.ShareType.VARIABLE) {
                     give(constants.supplyToken.token1, sender, vars.collAmount1);
                     approveAsSender(sender, constants.supplyToken.token1, walletAddr, vars.collAmount1);
                 }
@@ -319,7 +319,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
                     1 /* minCollShares */
                 );
                 // For exact share type, calculate exact coll amounts.
-                if (_config.shareType == FluidVaultT2Open.ShareType.EXACT) {
+                if (_config.shareType == FluidSupplyDexCommon.ShareType.EXACT) {
                     (vars.collAmount0, vars.collAmount1) = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateDepositPerfect(
                         constants.supply,
                         vars.shares,
@@ -357,14 +357,14 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
             }
             // Encode call.
             {
-                if (_config.shareType == FluidVaultT2Open.ShareType.VARIABLE) {
-                    vars.shareVariableData = FluidVaultT2Open.ShareVariableData({
+                if (_config.shareType == FluidSupplyDexCommon.ShareType.VARIABLE) {
+                    vars.shareVariableData = FluidSupplyDexCommon.SupplyVariableData({
                         collAmount0: _config.takeMaxUint256CollAmount0 ? type(uint256).max : vars.collAmount0,
                         collAmount1: _config.takeMaxUint256CollAmount1 ? type(uint256).max : vars.collAmount1,
                         minCollShares: vars.shares
                     });
                 } else {
-                    vars.shareExactData = FluidVaultT2Open.ShareExactData({
+                    vars.shareExactData = FluidSupplyDexCommon.SupplyExactData({
                         perfectCollShares: vars.shares,
                         maxCollAmount0: _config.takeMaxUint256CollAmount0 ? type(uint256).max : vars.collAmount0,
                         maxCollAmount1: _config.takeMaxUint256CollAmount1 ? type(uint256).max : vars.collAmount1
@@ -425,7 +425,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
                 assertNotEq(vars.createdNft, 0);
                 assertEq(vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore + vars.borrowAmount);
 
-                if (_config.shareType == FluidVaultT2Open.ShareType.EXACT) {
+                if (_config.shareType == FluidSupplyDexCommon.ShareType.EXACT) {
                     assertGe(vars.senderCollToken0BalanceAfter, vars.senderCollToken0BalanceBefore - vars.collAmount0);
                     assertGe(vars.senderCollToken1BalanceAfter, vars.senderCollToken1BalanceBefore - vars.collAmount1);
                 } else {

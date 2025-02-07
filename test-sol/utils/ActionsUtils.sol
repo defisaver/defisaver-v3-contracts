@@ -58,6 +58,7 @@ import { FluidVaultT1Borrow } from "../../contracts/actions/fluid/vaultT1/FluidV
 import { FluidVaultT1Payback } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Payback.sol";
 import { FluidVaultT1Adjust } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Adjust.sol";
 import { FluidVaultT2Open } from "../../contracts/actions/fluid/vaultT2/FluidVaultT2Open.sol";
+import { FluidSupplyDexCommon } from "../../contracts/actions/fluid/vaultT2/shared/FluidSupplyDexCommon.sol";
 
 
 contract ActionsUtils {
@@ -1085,9 +1086,9 @@ contract ActionsUtils {
 
     function fluidVaultT2OpenEncode(
         address _vault,
-        FluidVaultT2Open.ShareType _shareType,
-        FluidVaultT2Open.ShareVariableData memory _variableData,
-        FluidVaultT2Open.ShareExactData memory _exactData,
+        FluidSupplyDexCommon.ShareType _shareType,
+        FluidSupplyDexCommon.SupplyVariableData memory _variableData,
+        FluidSupplyDexCommon.SupplyExactData memory _exactData,
         uint256 _debtAmount,
         address _from,
         address _to,
