@@ -4038,14 +4038,15 @@
     },
     {
         "name": "LiquityV2View",
-        "address": "0x8ABc5D6850DF33D621c30ae487bab843deb9CB63",
+        "address": "0x111b737CF5233734cE16A6Ee2599aE862fB04485",
         "id": "0xe993f355",
         "path": "contracts/views/LiquityV2View.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
         "history": [
+            "0x8ABc5D6850DF33D621c30ae487bab843deb9CB63",
             "0x60128705250fDf19F1e18b197D1436B30eDa3899",
             "0xb1CCB64689F03cC7fd066a2095A285471c8A8554",
             "0x9C43F5ED37042Fd4bA7f98aa734026c6C7Fb1Db0"
