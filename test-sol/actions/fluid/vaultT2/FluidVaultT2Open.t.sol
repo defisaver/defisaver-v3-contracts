@@ -34,16 +34,10 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
 
     struct TestConfig {
         FluidVaultT2Open.ShareType shareType;
-        // used for variable share type
         uint256 collAmount0InUSD;
         uint256 collAmount1InUSD;
         bool takeMaxUint256CollAmount0;
         bool takeMaxUint256CollAmount1;
-        // used for exact share type
-        uint256 perfectCollShares;
-        uint256 maxCollAmount0InUSD;
-        uint256 maxCollAmount1InUSD;
-        // used for borrow
         uint256 borrowAmountInUSD;
         bool wrapBorrowedEth;
         bool isDirect;
@@ -67,6 +61,7 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
         FluidVaultT2Open.ShareExactData shareExactData;
         FluidVaultT2Open.ShareVariableData shareVariableData;
         IFluidDexResolver.DexEntireData dexData;
+        uint256 shares;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -88,119 +83,200 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
                                       TESTS
     ////////////////////////////////////////////////////////////////////////*/
     function test_should_open_variable_position_with_coll_0() public {
-        TestConfig memory t;
-        t.collAmount0InUSD = 30000;
-        t.collAmount1InUSD = 0;
-        t.takeMaxUint256CollAmount0 = false;
-        t.takeMaxUint256CollAmount1 = false;
-        t.borrowAmountInUSD = 10000;
-        t.wrapBorrowedEth = false;
-        t.isDirect = false;
-
-        _baseTest(_variableConfigPlaceHolder(t));
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                collAmount0InUSD: 30000,
+                collAmount1InUSD: 0,
+                takeMaxUint256CollAmount0: false,
+                takeMaxUint256CollAmount1: false,
+                borrowAmountInUSD: 10000,
+                wrapBorrowedEth: false,
+                isDirect: false
+            })
+        );
     }
     function test_should_open_variable_position_with_coll_1() public {
-        TestConfig memory t;
-        t.collAmount0InUSD = 0;
-        t.collAmount1InUSD = 30000;
-        t.takeMaxUint256CollAmount0 = false;
-        t.takeMaxUint256CollAmount1 = false;
-        t.borrowAmountInUSD = 10000;
-        t.wrapBorrowedEth = false;
-        t.isDirect = false;
-
-        _baseTest(_variableConfigPlaceHolder(t));
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                collAmount0InUSD: 0,
+                collAmount1InUSD: 30000,
+                takeMaxUint256CollAmount0: false,
+                takeMaxUint256CollAmount1: false,
+                borrowAmountInUSD: 10000,
+                wrapBorrowedEth: false,
+                isDirect: false
+            })
+        );
     }
     function test_should_open_variable_position_with_both_coll() public {
-        TestConfig memory t;
-        t.collAmount0InUSD = 30000;
-        t.collAmount1InUSD = 20000;
-        t.takeMaxUint256CollAmount0 = false;
-        t.takeMaxUint256CollAmount1 = false;
-        t.borrowAmountInUSD = 12000;
-        t.wrapBorrowedEth = false;
-        t.isDirect = false;
-
-        _baseTest(_variableConfigPlaceHolder(t));
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                collAmount0InUSD: 30000,
+                collAmount1InUSD: 20000,
+                takeMaxUint256CollAmount0: false,
+                takeMaxUint256CollAmount1: false,
+                borrowAmountInUSD: 12000,
+                wrapBorrowedEth: false,
+                isDirect: false
+            })
+        );
     }
     function test_should_open_variable_position_only_supply() public {
-        TestConfig memory t;
-        t.collAmount0InUSD = 11000;
-        t.collAmount1InUSD = 5000;
-        t.takeMaxUint256CollAmount0 = false;
-        t.takeMaxUint256CollAmount1 = false;
-        t.borrowAmountInUSD = 0;
-        t.wrapBorrowedEth = false;
-        t.isDirect = false;
-
-        _baseTest(_variableConfigPlaceHolder(t));
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                collAmount0InUSD: 11000,
+                collAmount1InUSD: 5000,
+                takeMaxUint256CollAmount0: false,
+                takeMaxUint256CollAmount1: false,
+                borrowAmountInUSD: 0,
+                wrapBorrowedEth: false,
+                isDirect: false
+            })
+        );
     }
     function test_should_open_variable_position_action_direct() public {
-        TestConfig memory t;
-        t.collAmount0InUSD = 30000;
-        t.collAmount1InUSD = 0;
-        t.takeMaxUint256CollAmount0 = false;
-        t.takeMaxUint256CollAmount1 = false;
-        t.borrowAmountInUSD = 10000;
-        t.wrapBorrowedEth = false;
-        t.isDirect = true;
-
-        _baseTest(_variableConfigPlaceHolder(t));
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                collAmount0InUSD: 30000,
+                collAmount1InUSD: 0,
+                takeMaxUint256CollAmount0: false,
+                takeMaxUint256CollAmount1: false,
+                borrowAmountInUSD: 10000,
+                wrapBorrowedEth: false,
+                isDirect: true
+            })
+        );
     }
     function test_should_open_variable_position_with_coll_0_maxUint256() public {
-        TestConfig memory t;
-        t.collAmount0InUSD = 30000;
-        t.collAmount1InUSD = 0;
-        t.takeMaxUint256CollAmount0 = true;
-        t.takeMaxUint256CollAmount1 = false;
-        t.borrowAmountInUSD = 10000;
-        t.wrapBorrowedEth = false;
-        t.isDirect = false;
-
-        _baseTest(_variableConfigPlaceHolder(t));
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                collAmount0InUSD: 30000,
+                collAmount1InUSD: 0,
+                takeMaxUint256CollAmount0: true,
+                takeMaxUint256CollAmount1: false,
+                borrowAmountInUSD: 10000,
+                wrapBorrowedEth: false,
+                isDirect: false
+            })
+        );
     }
     function test_should_open_variable_position_with_coll_1_maxUint256() public {
-        TestConfig memory t;
-        t.collAmount0InUSD = 30000;
-        t.collAmount1InUSD = 25000;
-        t.takeMaxUint256CollAmount0 = false;
-        t.takeMaxUint256CollAmount1 = true;
-        t.borrowAmountInUSD = 10000;
-        t.wrapBorrowedEth = false;
-        t.isDirect = false;
-
-        _baseTest(_variableConfigPlaceHolder(t));
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                collAmount0InUSD: 30000,
+                collAmount1InUSD: 25000,
+                takeMaxUint256CollAmount0: false,
+                takeMaxUint256CollAmount1: true,
+                borrowAmountInUSD: 10000,
+                wrapBorrowedEth: false,
+                isDirect: false
+            })
+        );
     }
     function test_should_open_variable_position_with_borrow_eth_wrap() public {
-        TestConfig memory t;
-        t.collAmount0InUSD = 25000;
-        t.collAmount1InUSD = 5000;
-        t.takeMaxUint256CollAmount0 = false;
-        t.takeMaxUint256CollAmount1 = false;
-        t.borrowAmountInUSD = 10000;
-        t.wrapBorrowedEth = true;
-        t.isDirect = false;
-
-        _baseTest(_variableConfigPlaceHolder(t));
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.VARIABLE,
+                collAmount0InUSD: 30000,
+                collAmount1InUSD: 0,
+                takeMaxUint256CollAmount0: false,
+                takeMaxUint256CollAmount1: false,
+                borrowAmountInUSD: 10000,
+                wrapBorrowedEth: true,
+                isDirect: false
+            })
+        );
     }
-
-    function _variableConfigPlaceHolder(
-        TestConfig memory _config
-    ) internal pure returns (TestConfig memory) {
-        _config.shareType = FluidVaultT2Open.ShareType.VARIABLE;
-        _config.perfectCollShares = 0;
-        _config.maxCollAmount0InUSD = 0;
-        _config.maxCollAmount1InUSD = 0;
-        return _config;
+    function test_should_open_exact_position() public {
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.EXACT,
+                collAmount0InUSD: 25000,
+                collAmount1InUSD: 5000,
+                takeMaxUint256CollAmount0: false,
+                takeMaxUint256CollAmount1: false,
+                borrowAmountInUSD: 10000,
+                wrapBorrowedEth: false,
+                isDirect: false
+            })
+        );
     }
-
-    function _exactConfigPlaceHolder(
-        TestConfig memory _config
-    ) internal pure returns (TestConfig memory) {
-        _config.shareType = FluidVaultT2Open.ShareType.EXACT;
-        _config.collAmount0InUSD = 0;
-        _config.collAmount1InUSD = 0;
-        return _config;
+    function test_should_open_exact_position_only_supply() public {
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.EXACT,
+                collAmount0InUSD: 21111,
+                collAmount1InUSD: 4342,
+                takeMaxUint256CollAmount0: false,
+                takeMaxUint256CollAmount1: false,
+                borrowAmountInUSD: 0,
+                wrapBorrowedEth: false,
+                isDirect: false
+            })
+        );
+    }
+    function test_should_open_exact_position_action_direct() public {
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.EXACT,
+                collAmount0InUSD: 25000,
+                collAmount1InUSD: 5000,
+                takeMaxUint256CollAmount0: false,
+                takeMaxUint256CollAmount1: false,
+                borrowAmountInUSD: 10000,
+                wrapBorrowedEth: false,
+                isDirect: true
+            })
+        );
+    }
+    function test_should_open_exact_position_with_coll_0_maxUint256() public {
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.EXACT,
+                collAmount0InUSD: 25000,
+                collAmount1InUSD: 5000,
+                takeMaxUint256CollAmount0: true,
+                takeMaxUint256CollAmount1: false,
+                borrowAmountInUSD: 10000,
+                wrapBorrowedEth: false,
+                isDirect: false
+            })
+        );
+    }
+    function test_should_open_exact_position_with_coll_1_maxUint256() public {
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.EXACT,
+                collAmount0InUSD: 25000,
+                collAmount1InUSD: 5000,
+                takeMaxUint256CollAmount0: false,
+                takeMaxUint256CollAmount1: true,
+                borrowAmountInUSD: 10000,
+                wrapBorrowedEth: false,
+                isDirect: false
+            })
+        );
+    }
+    function test_should_open_exact_position_with_borrow_eth_wrap() public {
+        _baseTest(
+            TestConfig({
+                shareType: FluidVaultT2Open.ShareType.EXACT,
+                collAmount0InUSD: 25000,
+                collAmount1InUSD: 5000,
+                takeMaxUint256CollAmount0: false,
+                takeMaxUint256CollAmount1: false,
+                borrowAmountInUSD: 10000,
+                wrapBorrowedEth: true,
+                isDirect: false
+            })
+        );
     }
 
     function _baseTest(
@@ -210,39 +286,64 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
             IFluidVaultT2.ConstantViews memory constants = vaults[i].constantsView();
             LocalVars memory vars;
 
-            vars.dexData = IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(constants.supply);
-
-            console.log(vars.dexData.configs.maxSupplyShares);
-            console.log(vars.dexData.dexState.totalSupplyShares);
-
-            // Handle collateral 0 setup.
+            // Handle collateral 0 setup for variable open.
             {
                 bool isNativeColl0 = constants.supplyToken.token0 == TokenUtils.ETH_ADDR;
                 constants.supplyToken.token0 = isNativeColl0 ? TokenUtils.WETH_ADDR : constants.supplyToken.token0;
-                if (_config.shareType == FluidVaultT2Open.ShareType.VARIABLE && _config.collAmount0InUSD > 0) {
+                if (_config.collAmount0InUSD > 0) {
                     vars.collAmount0 = amountInUSDPrice(constants.supplyToken.token0, _config.collAmount0InUSD);
+                }
+                if (_config.shareType == FluidVaultT2Open.ShareType.VARIABLE) {
                     give(constants.supplyToken.token0, sender, vars.collAmount0);
                     approveAsSender(sender, constants.supplyToken.token0, walletAddr, vars.collAmount0);
                 }
-                if (_config.shareType == FluidVaultT2Open.ShareType.EXACT && _config.maxCollAmount0InUSD > 0) {
-                    vars.collAmount0 = amountInUSDPrice(constants.supplyToken.token0, _config.maxCollAmount0InUSD);
-                    give(constants.supplyToken.token0, sender, vars.collAmount0);
-                    approveAsSender(sender, constants.supplyToken.token0, walletAddr, vars.collAmount0);
-                }    
             }
-            // Handle collateral 1 setup.
+            // Handle collateral 1 setup for variable open.
             {
                 bool isNativeColl1 = constants.supplyToken.token1 == TokenUtils.ETH_ADDR;
                 constants.supplyToken.token1 = isNativeColl1 ? TokenUtils.WETH_ADDR : constants.supplyToken.token1;
-                if (_config.shareType == FluidVaultT2Open.ShareType.VARIABLE && _config.collAmount1InUSD > 0) {
+                if (_config.collAmount1InUSD > 0) {
                     vars.collAmount1 = amountInUSDPrice(constants.supplyToken.token1, _config.collAmount1InUSD);
+                }
+                if (_config.shareType == FluidVaultT2Open.ShareType.VARIABLE) {
                     give(constants.supplyToken.token1, sender, vars.collAmount1);
                     approveAsSender(sender, constants.supplyToken.token1, walletAddr, vars.collAmount1);
                 }
-                if (_config.shareType == FluidVaultT2Open.ShareType.EXACT && _config.maxCollAmount0InUSD > 0) {
-                    vars.collAmount1 = amountInUSDPrice(constants.supplyToken.token1, _config.maxCollAmount0InUSD);
+            }
+            // Estimate shares.
+            {
+                vars.shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateDeposit(
+                    constants.supply,
+                    vars.collAmount0,
+                    vars.collAmount1,
+                    1 /* minCollShares */
+                );
+                // For exact share type, calculate exact coll amounts.
+                if (_config.shareType == FluidVaultT2Open.ShareType.EXACT) {
+                    (vars.collAmount0, vars.collAmount1) = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateDepositPerfect(
+                        constants.supply,
+                        vars.shares,
+                        vars.collAmount0, /* unused in estimation */
+                        vars.collAmount1 /* unused in estimation */
+                    );
+                    // Fund user with exact coll amounts.
+                    give(constants.supplyToken.token0, sender, vars.collAmount0);
                     give(constants.supplyToken.token1, sender, vars.collAmount1);
+                    // Approve wallet to pull exact coll amounts.
+                    approveAsSender(sender, constants.supplyToken.token0, walletAddr, vars.collAmount0);
                     approveAsSender(sender, constants.supplyToken.token1, walletAddr, vars.collAmount1);
+                }
+                // Slightly reduce shares.
+                // For variable share type, this means we expect at least this amount of shares.
+                // For exact share type, this means we will pull slightly less collateral than exact coll amounts.
+                vars.shares = vars.shares * 100 / 101;
+            }
+            // Validate shares supply limit.
+            {
+                vars.dexData = IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(constants.supply);
+                if (vars.dexData.configs.maxSupplyShares < vars.dexData.dexState.totalSupplyShares + vars.shares) {
+                    console.log("Skipping smart coll vault due to supply limit reached");
+                    continue;
                 }
             }
             // Handle borrow setup.
@@ -260,11 +361,11 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
                     vars.shareVariableData = FluidVaultT2Open.ShareVariableData({
                         collAmount0: _config.takeMaxUint256CollAmount0 ? type(uint256).max : vars.collAmount0,
                         collAmount1: _config.takeMaxUint256CollAmount1 ? type(uint256).max : vars.collAmount1,
-                        minCollShares: 1
+                        minCollShares: vars.shares
                     });
                 } else {
                     vars.shareExactData = FluidVaultT2Open.ShareExactData({
-                        perfectCollShares: _config.perfectCollShares,
+                        perfectCollShares: vars.shares,
                         maxCollAmount0: _config.takeMaxUint256CollAmount0 ? type(uint256).max : vars.collAmount0,
                         maxCollAmount1: _config.takeMaxUint256CollAmount1 ? type(uint256).max : vars.collAmount1
                     });

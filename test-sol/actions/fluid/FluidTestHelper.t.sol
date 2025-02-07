@@ -23,9 +23,9 @@ contract FluidTestHelper is FluidHelper {
     }
 
     function getT2Vaults() internal pure returns (IFluidVaultT2[] memory vaults) {
-        vaults = new IFluidVaultT2[](1);
-        // vaults[0] = IFluidVaultT2(0xf7FA55D14C71241e3c970E30C509Ff58b5f5D557); // id:52 - WBTC-cbBTC/USDT
-        vaults[0] = IFluidVaultT2(0xb4a15526d427f4d20b0dAdaF3baB4177C85A699A); // id:74 - weETH-ETH/wstETH
-        // vaults[2] = IFluidVaultT2(0x7503b58Bb29937e7E2980f70D3FD021B7ebeA6d0); // id:92 - sUSDe-USDT/USDT
+        vaults = new IFluidVaultT2[](3);
+        vaults[0] = IFluidVaultT2(0xf7FA55D14C71241e3c970E30C509Ff58b5f5D557); // id:52 - WBTC-cbBTC/USDT
+        vaults[1] = IFluidVaultT2(0xb4a15526d427f4d20b0dAdaF3baB4177C85A699A); // id:74 - weETH-ETH/wstETH
+        vaults[2] = IFluidVaultT2(0x7503b58Bb29937e7E2980f70D3FD021B7ebeA6d0); // id:92 - sUSDe-USDT/USDT
     }
 }
