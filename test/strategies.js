@@ -5816,9 +5816,9 @@ const createFluidT1RepayStrategy = () => {
     fluidT1RepayStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
 
     const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
-        '&nftId',
-        '&ratio',
-        '&ratioState',
+        'nftId',
+        'ratio',
+        'ratioState',
     );
     fluidT1RepayStrategy.addTrigger(fluidRatioTrigger);
 
@@ -5876,9 +5876,9 @@ const createFluidT1FLRepayStrategy = () => {
     fluidT1FLRepayStrategy.addSubSlot('&DebtActionType.PAYBACK', 'uint8');
 
     const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
-        '&nftId',
-        '&ratio',
-        '&ratioState',
+        'nftId',
+        'ratio',
+        'ratioState',
     );
     fluidT1FLRepayStrategy.addTrigger(fluidRatioTrigger);
 
@@ -5938,9 +5938,9 @@ const createFluidT1BoostStrategy = () => {
     fluidT1BoostStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
 
     const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
-        '&nftId',
-        '&ratio',
-        '&ratioState',
+        'nftId',
+        'ratio',
+        'ratioState',
     );
     fluidT1BoostStrategy.addTrigger(fluidRatioTrigger);
 
@@ -5998,9 +5998,9 @@ const createFluidT1FLBoostStrategy = () => {
     fluidT1FLBoostStrategy.addSubSlot('&DebtActionType.BORROW', 'uint8');
 
     const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
-        '&nftId',
-        '&ratio',
-        '&ratioState',
+        'nftId',
+        'ratio',
+        'ratioState',
     );
     fluidT1FLBoostStrategy.addTrigger(fluidRatioTrigger);
 
