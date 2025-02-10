@@ -49,12 +49,23 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
         uint256 borrowAmount;
         bool isNativeBorrow;
         bytes executeActionCallData;
+
         uint256 senderCollToken0BalanceBefore;
         uint256 senderCollToken1BalanceBefore;
         uint256 senderBorrowTokenBalanceBefore;
         uint256 senderCollToken0BalanceAfter;
         uint256 senderCollToken1BalanceAfter;
         uint256 senderBorrowTokenBalanceAfter;
+
+        uint256 walletCollToken0BalanceBefore;
+        uint256 walletCollToken1BalanceBefore;
+        uint256 walletBorrowTokenBalanceBefore;
+        uint256 walletEthBalanceBefore;
+        uint256 walletCollToken0BalanceAfter;
+        uint256 walletCollToken1BalanceAfter;
+        uint256 walletBorrowTokenBalanceAfter;
+        uint256 walletEthBalanceAfter;
+        
         uint256 createdNft;
         uint256 exactPulledCollAmount0;
         uint256 exactPulledCollAmount1;
@@ -393,7 +404,14 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
                     ? (
                         _config.wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance
                     )
-                    : balanceOf(constants.borrowToken.token0, sender);    
+                    : balanceOf(constants.borrowToken.token0, sender);
+
+                vars.walletCollToken0BalanceBefore = balanceOf(constants.supplyToken.token0, walletAddr);
+                vars.walletCollToken1BalanceBefore = balanceOf(constants.supplyToken.token1, walletAddr);
+                vars.walletBorrowTokenBalanceBefore = vars.isNativeBorrow
+                    ? balanceOf(TokenUtils.WETH_ADDR, walletAddr)
+                    : balanceOf(constants.borrowToken.token0, walletAddr);
+                vars.walletEthBalanceBefore = address(walletAddr).balance;
             }
             // Execute action.
             {
@@ -418,10 +436,23 @@ contract TestFluidVaultT2Open is BaseTest, FluidTestHelper, ActionsUtils {
                     ? (
                         _config.wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance 
                     ) 
-                    : balanceOf(constants.borrowToken.token0, sender);    
+                    : balanceOf(constants.borrowToken.token0, sender);  
+
+                vars.walletCollToken0BalanceAfter = balanceOf(constants.supplyToken.token0, walletAddr);
+                vars.walletCollToken1BalanceAfter = balanceOf(constants.supplyToken.token1, walletAddr);
+                vars.walletBorrowTokenBalanceAfter = vars.isNativeBorrow
+                    ? balanceOf(TokenUtils.WETH_ADDR, walletAddr)
+                    : balanceOf(constants.borrowToken.token0, walletAddr);
+                vars.walletEthBalanceAfter = address(walletAddr).balance;  
             }
             // Assertions.
-            {
+            {   
+                // Verify no dust left on wallet.
+                assertEq(vars.walletCollToken0BalanceAfter, vars.walletCollToken0BalanceBefore);
+                assertEq(vars.walletCollToken1BalanceAfter, vars.walletCollToken1BalanceBefore);
+                assertEq(vars.walletBorrowTokenBalanceAfter, vars.walletBorrowTokenBalanceBefore);
+                assertEq(vars.walletEthBalanceAfter, vars.walletEthBalanceBefore);
+
                 assertNotEq(vars.createdNft, 0);
                 assertEq(vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore + vars.borrowAmount);
 
