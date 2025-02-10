@@ -90,7 +90,7 @@ contract FluidVaultT1Payback is ActionBase, FluidHelper {
         }
 
         // type(int256).min will trigger max payback inside the vault.
-        int256 paybackAmount =  maxPayback ? type(int256).min : -int256(_params.amount);
+        int256 paybackAmount =  maxPayback ? type(int256).min : -signed256(_params.amount);
 
         // If we send more ETH than needed, the vault will refund the dust.
         uint256 msgValue = isEthPayback ? _params.amount : 0;

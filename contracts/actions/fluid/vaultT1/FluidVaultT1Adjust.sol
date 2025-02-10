@@ -210,7 +210,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             _supplyToken.approveToken(_params.vault, _params.collAmount);
         }
         
-        supplyTokenAmount = int256(_params.collAmount);
+        supplyTokenAmount = signed256(_params.collAmount);
     }
 
     /// @dev Helper function to handle withdraw action
@@ -221,7 +221,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
 
         supplyTokenAmount = _params.collAmount == type(uint256).max
             ? type(int256).min
-            : -int256(_params.collAmount);
+            : -signed256(_params.collAmount);
     }
 
     /// @dev Helper function to handle borrow action
@@ -230,7 +230,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     function _handleBorrow(Params memory _params) internal pure returns (int256 borrowTokenAmount) {
         if (_params.debtAmount == 0) return 0;
 
-        borrowTokenAmount = int256(_params.debtAmount);
+        borrowTokenAmount = signed256(_params.debtAmount);
     }
 
     /// @dev Helper function to handle payback action
@@ -278,7 +278,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             _borrowToken.approveToken(_params.vault, _params.debtAmount);
         }
 
-        borrowTokenAmount = snapshot.maxPayback ? type(int256).min : -int256(_params.debtAmount);
+        borrowTokenAmount = snapshot.maxPayback ? type(int256).min : -signed256(_params.debtAmount);
     }
 
     /// @dev Helper function to handle max payback refund

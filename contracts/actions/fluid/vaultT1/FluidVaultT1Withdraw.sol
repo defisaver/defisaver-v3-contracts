@@ -72,7 +72,7 @@ contract FluidVaultT1Withdraw is ActionBase, FluidHelper {
         // type(int256).min will trigger max withdrawal inside the vault
         int256 withdrawAmount = _params.amount == type(uint256).max
             ? type(int256).min
-            : -int256(_params.amount);
+            : -signed256(_params.amount);
 
         (, withdrawAmount ,) = IFluidVaultT1(_params.vault).operate(
             _params.nftId,

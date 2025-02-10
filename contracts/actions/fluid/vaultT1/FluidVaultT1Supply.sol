@@ -67,7 +67,7 @@ contract FluidVaultT1Supply is ActionBase, FluidHelper {
 
             IFluidVaultT1(_params.vault).operate{value: _params.amount}(
                 _params.nftId,
-                int256(_params.amount),
+                signed256(_params.amount),
                 0,
                 address(0)
             );
@@ -77,7 +77,7 @@ contract FluidVaultT1Supply is ActionBase, FluidHelper {
 
             IFluidVaultT1(_params.vault).operate(
                 _params.nftId,
-                int256(_params.amount),
+                signed256(_params.amount),
                 0,
                 address(0)
             );

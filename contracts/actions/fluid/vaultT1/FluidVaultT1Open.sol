@@ -79,8 +79,8 @@ contract FluidVaultT1Open is ActionBase, FluidHelper {
 
             (nftId , , ) = IFluidVaultT1(_params.vault).operate{value: _params.collAmount}(
                 0,
-                int256(_params.collAmount),
-                int256(_params.debtAmount),
+                signed256(_params.collAmount),
+                signed256(_params.debtAmount),
                 _params.to
             );
         } else {
@@ -94,8 +94,8 @@ contract FluidVaultT1Open is ActionBase, FluidHelper {
             
             (nftId , , ) = IFluidVaultT1(_params.vault).operate(
                 0,
-                int256(_params.collAmount),
-                int256(_params.debtAmount),
+                signed256(_params.collAmount),
+                signed256(_params.debtAmount),
                 shouldWrapBorrowedEth ? address(this) : _params.to
             );
 
