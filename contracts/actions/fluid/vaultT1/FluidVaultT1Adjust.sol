@@ -18,7 +18,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     /// @param vault Address of the Fluid Vault T1
     /// @param nftId ID of the NFT representing the position
     /// @param collAmount Amount of collateral to supply/withdraw. In case of max withdraw, use type(uint256).max
-    /// @param debtAmount Amount of debt to payback/borrow
+    /// @param debtAmount Amount of debt to payback/borrow. In case of max payback, use type(uint256).max
     /// @param from Address to pull tokens from
     /// @param to Address to send tokens to
     /// @param sendWrappedEth Whether to wrap the ETH into WETH before sending to 'to' address

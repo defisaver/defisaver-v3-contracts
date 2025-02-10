@@ -69,6 +69,7 @@ contract FluidVaultT1Withdraw is ActionBase, FluidHelper {
 
         bool shouldWrapWithdrawnEth = _params.wrapWithdrawnEth && constants.supplyToken == TokenUtils.ETH_ADDR;
 
+        // type(int256).min will trigger max withdrawal inside the vault
         int256 withdrawAmount = _params.amount == type(uint256).max
             ? type(int256).min
             : -int256(_params.amount);
