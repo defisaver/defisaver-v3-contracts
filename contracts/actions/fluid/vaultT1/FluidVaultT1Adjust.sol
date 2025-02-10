@@ -294,8 +294,11 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             ? address(this).balance
             : _borrowToken.getBalance(address(this));
 
-        // Sanity check. There should never be a case where we end up with fewer borrowed tokens than before.
-        require(borrowTokenBalanceAfter >= _snapshot.borrowTokenBalanceBefore);
+        // Sanity check: if we didn't perform a max payback directly from the wallet,
+        // the number of borrowed tokens should not decrease.
+        if (_params.from != address(this)) {
+            require(borrowTokenBalanceAfter >= _snapshot.borrowTokenBalanceBefore);
+        }
 
         // We pulled slightly more than needed, so refund dust amount to 'from' address.
         if (borrowTokenBalanceAfter > _snapshot.borrowTokenBalanceBefore) {
