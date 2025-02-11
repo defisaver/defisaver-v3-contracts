@@ -5935,6 +5935,7 @@ const callLiquityV2FLCloseToDebtStrategy = async (
 const callFluidT1RepayStrategy = async (
     strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, repayAmount, debtToken,
 ) => {
+    const isL2 = network !== 'mainnet';
     const triggerCallData = [];
     const actionsCallData = [];
     const gasCost = 1000000;
@@ -5951,11 +5952,9 @@ const callFluidT1RepayStrategy = async (
         placeHolderAddr,
         placeHolderAddr,
     );
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        gasCost,
-        debtToken,
-        0,
-    );
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, debtToken, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, debtToken, '0');
     const fluidT1PaybackAction = new dfs.actions.fluid.FluidVaultT1PaybackAction(
         placeHolderAddr,
         0,
@@ -5974,7 +5973,7 @@ const callFluidT1RepayStrategy = async (
     actionsCallData.push(fluidRatioCheckAction.encodeForRecipe()[0]);
     triggerCallData.push(abiCoder.encode(['uint256', 'uint256', 'uint8'], [0, 0, 0]));
     const { callData, receipt } = await executeStrategy(
-        false,
+        isL2,
         strategyExecutor,
         subId,
         strategyIndex,
@@ -5989,6 +5988,7 @@ const callFluidT1RepayStrategy = async (
 const callFluidT1FLRepayStrategy = async (
     strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, repayAmount, collToken, debtToken, flAddr,
 ) => {
+    const isL2 = network !== 'mainnet';
     const triggerCallData = [];
     const actionsCallData = [];
     const gasCost = 1000000;
@@ -5999,11 +5999,9 @@ const callFluidT1FLRepayStrategy = async (
         placeHolderAddr,
         placeHolderAddr,
     );
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        gasCost,
-        debtToken,
-        0,
-    );
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, debtToken, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, debtToken, '0');
     const fluidT1AdjustAction = new dfs.actions.fluid.FluidVaultT1AdjustAction(
         placeHolderAddr,
         0,
@@ -6027,7 +6025,7 @@ const callFluidT1FLRepayStrategy = async (
     actionsCallData.push(fluidRatioCheckAction.encodeForRecipe()[0]);
     triggerCallData.push(abiCoder.encode(['uint256', 'uint256', 'uint8'], [0, 0, 0]));
     const { callData, receipt } = await executeStrategy(
-        false,
+        isL2,
         strategyExecutor,
         subId,
         strategyIndex,
@@ -6042,6 +6040,7 @@ const callFluidT1FLRepayStrategy = async (
 const callFluidT1BoostStrategy = async (
     strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, boostAmount, collToken,
 ) => {
+    const isL2 = network !== 'mainnet';
     const triggerCallData = [];
     const actionsCallData = [];
     const gasCost = 1000000;
@@ -6058,11 +6057,9 @@ const callFluidT1BoostStrategy = async (
         placeHolderAddr,
         placeHolderAddr,
     );
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        gasCost,
-        collToken,
-        0,
-    );
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, collToken, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, collToken, '0');
     const fluidT1SupplyAction = new dfs.actions.fluid.FluidVaultT1SupplyAction(
         placeHolderAddr,
         0,
@@ -6081,7 +6078,7 @@ const callFluidT1BoostStrategy = async (
     actionsCallData.push(fluidRatioCheckAction.encodeForRecipe()[0]);
     triggerCallData.push(abiCoder.encode(['uint256', 'uint256', 'uint8'], [0, 0, 0]));
     const { callData, receipt } = await executeStrategy(
-        false,
+        isL2,
         strategyExecutor,
         subId,
         strategyIndex,
@@ -6096,6 +6093,7 @@ const callFluidT1BoostStrategy = async (
 const callFluidT1FLBoostStrategy = async (
     strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, boostAmount, collToken, debtToken, flAddr,
 ) => {
+    const isL2 = network !== 'mainnet';
     const triggerCallData = [];
     const actionsCallData = [];
     const gasCost = 1000000;
@@ -6106,11 +6104,9 @@ const callFluidT1FLBoostStrategy = async (
         placeHolderAddr,
         placeHolderAddr,
     );
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
-        gasCost,
-        collToken,
-        0,
-    );
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, collToken, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, collToken, '0');
     const fluidT1AdjustAction = new dfs.actions.fluid.FluidVaultT1AdjustAction(
         placeHolderAddr,
         0,
@@ -6134,7 +6130,7 @@ const callFluidT1FLBoostStrategy = async (
     actionsCallData.push(fluidRatioCheckAction.encodeForRecipe()[0]);
     triggerCallData.push(abiCoder.encode(['uint256', 'uint256', 'uint8'], [0, 0, 0]));
     const { callData, receipt } = await executeStrategy(
-        false,
+        isL2,
         strategyExecutor,
         subId,
         strategyIndex,

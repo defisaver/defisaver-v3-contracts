@@ -80,7 +80,7 @@ class BoostTest extends BaseFluidT1StrategyTest {
 
                 expect(ratioAfter).to.be.lt(ratioBefore);
             });
-            it.skip('... should call Fluid T1 FL boost strategy', async () => {
+            it('... should call Fluid T1 FL boost strategy', async () => {
                 const {
                     collAsset, debtAsset, nftId, subId, strategySub, boostAmount, exchangeObject, ratioBefore,
                 } = await this.openAndSubscribe(pair);

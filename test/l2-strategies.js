@@ -1614,6 +1614,259 @@ const createAaveV3FlRepayOnPriceL2Strategy = () => {
 
     return aaveV3FlRepayOnPriceStrategy.encodeForDsProxyCall();
 };
+const createFluidT1RepayL2Strategy = () => {
+    const fluidT1RepayStrategy = new dfs.Strategy('FluidT1RepayL2Strategy');
+    fluidT1RepayStrategy.addSubSlot('&nftId', 'uint256');
+    fluidT1RepayStrategy.addSubSlot('&vault', 'uint256');
+    fluidT1RepayStrategy.addSubSlot('&collToken', 'uint256');
+    fluidT1RepayStrategy.addSubSlot('&debtToken', 'uint256');
+    fluidT1RepayStrategy.addSubSlot('&ratioState', 'uint256');
+    fluidT1RepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    fluidT1RepayStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
+
+    const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
+        'nftId',
+        'ratio',
+        'ratioState',
+    );
+    fluidT1RepayStrategy.addTrigger(fluidRatioTrigger);
+
+    const fluidWithdrawAction = new dfs.actions.fluid.FluidVaultT1WithdrawAction(
+        '&vault',
+        '&nftId',
+        '%amount', // sent by backend
+        '&proxy',
+        '&wrapEth',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collToken', // sent by backend. If collToken is ETH, pass WETH address
+            '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
+            '$1',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+    const fluidPaybackAction = new dfs.actions.fluid.FluidVaultT1PaybackAction(
+        '&vault',
+        '&nftId',
+        '$3',
+        '&proxy',
+    );
+    const fluidRatioCheckAction = new dfs.actions.checkers.FluidRatioCheckAction(
+        '&nftId',
+        '&ratioState',
+        '&targetRatio',
+    );
+    fluidT1RepayStrategy.addAction(fluidWithdrawAction);
+    fluidT1RepayStrategy.addAction(sellAction);
+    fluidT1RepayStrategy.addAction(feeTakingAction);
+    fluidT1RepayStrategy.addAction(fluidPaybackAction);
+    fluidT1RepayStrategy.addAction(fluidRatioCheckAction);
+
+    return fluidT1RepayStrategy.encodeForDsProxyCall();
+};
+const createFluidT1FLRepayL2Strategy = () => {
+    const fluidT1FLRepayStrategy = new dfs.Strategy('FluidT1FLRepayL2Strategy');
+    fluidT1FLRepayStrategy.addSubSlot('&nftId', 'uint256');
+    fluidT1FLRepayStrategy.addSubSlot('&vault', 'uint256');
+    fluidT1FLRepayStrategy.addSubSlot('&collToken', 'uint256');
+    fluidT1FLRepayStrategy.addSubSlot('&debtToken', 'uint256');
+    fluidT1FLRepayStrategy.addSubSlot('&ratioState', 'uint256');
+    fluidT1FLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    fluidT1FLRepayStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
+    fluidT1FLRepayStrategy.addSubSlot('&CollActionType.WITHDRAW', 'uint8');
+    fluidT1FLRepayStrategy.addSubSlot('&DebtActionType.PAYBACK', 'uint8');
+
+    const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
+        'nftId',
+        'ratio',
+        'ratioState',
+    );
+    fluidT1FLRepayStrategy.addTrigger(fluidRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collToken'], // sent by backend. If collToken is ETH, pass WETH address
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collToken', // sent by backend. If collToken is ETH, pass WETH address
+            '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gas', // sent by backend
+        '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+    const fluidAdjustAction = new dfs.actions.fluid.FluidVaultT1AdjustAction(
+        '&vault',
+        '&nftId',
+        '$1',
+        '$3',
+        '&proxy',
+        '%flAddress', // sent by backend
+        '&wrapEth',
+        '&CollActionType.WITHDRAW',
+        '&DebtActionType.PAYBACK',
+    );
+    const fluidRatioCheckAction = new dfs.actions.checkers.FluidRatioCheckAction(
+        '&nftId',
+        '&ratioState',
+        '&targetRatio',
+    );
+    fluidT1FLRepayStrategy.addAction(flAction);
+    fluidT1FLRepayStrategy.addAction(sellAction);
+    fluidT1FLRepayStrategy.addAction(feeTakingAction);
+    fluidT1FLRepayStrategy.addAction(fluidAdjustAction);
+    fluidT1FLRepayStrategy.addAction(fluidRatioCheckAction);
+
+    return fluidT1FLRepayStrategy.encodeForDsProxyCall();
+};
+const createFluidT1BoostL2Strategy = () => {
+    const fluidT1BoostStrategy = new dfs.Strategy('FluidT1BoostL2Strategy');
+    fluidT1BoostStrategy.addSubSlot('&nftId', 'uint256');
+    fluidT1BoostStrategy.addSubSlot('&vault', 'uint256');
+    fluidT1BoostStrategy.addSubSlot('&collToken', 'uint256');
+    fluidT1BoostStrategy.addSubSlot('&debtToken', 'uint256');
+    fluidT1BoostStrategy.addSubSlot('&ratioState', 'uint256');
+    fluidT1BoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    fluidT1BoostStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
+
+    const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
+        'nftId',
+        'ratio',
+        'ratioState',
+    );
+    fluidT1BoostStrategy.addTrigger(fluidRatioTrigger);
+
+    const fluidBorrowAction = new dfs.actions.fluid.FluidVaultT1BorrowAction(
+        '&vault',
+        '&nftId',
+        '%amount', // sent by backend
+        '&proxy',
+        '&wrapEth',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
+            '%collToken', // sent by backend. If collToken is ETH, pass WETH address
+            '$1',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gas', // sent by backend
+        '%collToken', // sent by backend. If collToken is ETH, pass WETH address
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+    const fluidSupplyAction = new dfs.actions.fluid.FluidVaultT1SupplyAction(
+        '&vault',
+        '&nftId',
+        '$3',
+        '&proxy',
+    );
+    const fluidRatioCheckAction = new dfs.actions.checkers.FluidRatioCheckAction(
+        '&nftId',
+        '&ratioState',
+        '&targetRatio',
+    );
+    fluidT1BoostStrategy.addAction(fluidBorrowAction);
+    fluidT1BoostStrategy.addAction(sellAction);
+    fluidT1BoostStrategy.addAction(feeTakingAction);
+    fluidT1BoostStrategy.addAction(fluidSupplyAction);
+    fluidT1BoostStrategy.addAction(fluidRatioCheckAction);
+
+    return fluidT1BoostStrategy.encodeForDsProxyCall();
+};
+const createFluidT1FLBoostL2Strategy = () => {
+    const fluidT1FLBoostStrategy = new dfs.Strategy('FluidT1FLBoostL2Strategy');
+    fluidT1FLBoostStrategy.addSubSlot('&nftId', 'uint256');
+    fluidT1FLBoostStrategy.addSubSlot('&vault', 'uint256');
+    fluidT1FLBoostStrategy.addSubSlot('&collToken', 'uint256');
+    fluidT1FLBoostStrategy.addSubSlot('&debtToken', 'uint256');
+    fluidT1FLBoostStrategy.addSubSlot('&ratioState', 'uint256');
+    fluidT1FLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    fluidT1FLBoostStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
+    fluidT1FLBoostStrategy.addSubSlot('&CollActionType.SUPPLY', 'uint8');
+    fluidT1FLBoostStrategy.addSubSlot('&DebtActionType.BORROW', 'uint8');
+
+    const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
+        'nftId',
+        'ratio',
+        'ratioState',
+    );
+    fluidT1FLBoostStrategy.addTrigger(fluidRatioTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%debtToken'], // sent by backend. If debtToken is ETH, pass WETH address
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%debtToken', // sent by backend. If debtToken is ETH, pass WETH address
+            '%collToken', // sent by backend. If collToken is ETH, pass WETH address
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gas', // sent by backend
+        '%collToken', // sent by backend. If collToken is ETH, pass WETH address
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+    const fluidAdjustAction = new dfs.actions.fluid.FluidVaultT1AdjustAction(
+        '&vault',
+        '&nftId',
+        '$3',
+        '$1',
+        '&proxy',
+        '%flAddress', // sent by backend
+        '&wrapEth',
+        '&CollActionType.SUPPLY',
+        '&DebtActionType.BORROW',
+    );
+    const fluidRatioCheckAction = new dfs.actions.checkers.FluidRatioCheckAction(
+        '&nftId',
+        '&ratioState',
+        '&targetRatio',
+    );
+    fluidT1FLBoostStrategy.addAction(flAction);
+    fluidT1FLBoostStrategy.addAction(sellAction);
+    fluidT1FLBoostStrategy.addAction(feeTakingAction);
+    fluidT1FLBoostStrategy.addAction(fluidAdjustAction);
+    fluidT1FLBoostStrategy.addAction(fluidRatioCheckAction);
+
+    return fluidT1FLBoostStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createAaveV3RepayL2Strategy,
     createAaveFLV3RepayL2Strategy,
@@ -1643,4 +1896,8 @@ module.exports = {
     createMorphoBlueFLBoostOnTargetPriceL2Strategy,
     createAaveV3RepayOnPriceL2Strategy,
     createAaveV3FlRepayOnPriceL2Strategy,
+    createFluidT1RepayL2Strategy,
+    createFluidT1FLRepayL2Strategy,
+    createFluidT1BoostL2Strategy,
+    createFluidT1FLBoostL2Strategy,
 };
