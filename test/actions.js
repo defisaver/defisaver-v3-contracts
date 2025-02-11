@@ -3808,6 +3808,27 @@ const liquityV2Open = async (
 |  |     |  `----.|  `--'  | |  | |  '--'  |
 |__|     |_______| \______/  |__| |_______/
 */
+const fluidT1VaultOpen = async (
+    proxy,
+    vault,
+    collAmount,
+    debtAmount,
+    from,
+    to,
+    wrapBorrowedEth,
+) => {
+    const action = new dfs.actions.fluid.FluidVaultT1OpenAction(
+        vault,
+        collAmount,
+        debtAmount,
+        from,
+        to,
+        wrapBorrowedEth,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const tx = await executeAction('FluidVaultT1Open', functionData, proxy);
+    return tx;
+};
 
 module.exports = {
     executeAction,
@@ -4034,4 +4055,6 @@ module.exports = {
     finalizeUnstakeGho,
 
     liquityV2Open,
+
+    fluidT1VaultOpen,
 };

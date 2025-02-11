@@ -9,6 +9,29 @@ const {
 } = require('./strategies');
 const { createStrategy, createBundle } = require('./utils-strategies');
 
+const getFluidVaultT1TestPairs = async () => [
+    {
+        vault: '0x1982CC7b1570C2503282d0A0B41F69b3B28fdcc3',
+        collSymbol: 'wstETH',
+        debtSymbol: 'USDC',
+    },
+    {
+        vault: '0x6F72895Cf6904489Bcd862c941c3D02a3eE4f03e',
+        collSymbol: 'WBTC',
+        debtSymbol: 'USDC',
+    },
+    {
+        vault: '0x0C8C77B7FF4c2aF7F6CEBbe67350A490E3DD6cB3',
+        collSymbol: 'WETH',
+        debtSymbol: 'USDC',
+    },
+    {
+        vault: '0x82B27fA821419F5689381b565a8B0786aA2548De',
+        collSymbol: 'wstETH',
+        debtSymbol: 'WETH',
+    },
+];
+
 const deployFluidT1RepayBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
     const repayStrategy = createFluidT1RepayStrategy();
@@ -32,4 +55,5 @@ const deployFluidT1BoostBundle = async (proxy, isFork) => {
 module.exports = {
     deployFluidT1RepayBundle,
     deployFluidT1BoostBundle,
+    getFluidVaultT1TestPairs,
 };

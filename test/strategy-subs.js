@@ -909,7 +909,38 @@ const subMorphoBlueLeverageManagementOnPrice = async (
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
-
+const subFluidVaultT1RepayBundle = async (
+    proxy, bundleId, nftId, vault, collToken, debtToken, targetRatio, triggerRatio,
+) => {
+    const strategySub = automationSdk.strategySubService.fluidEncode.leverageManagement(
+        nftId,
+        vault,
+        collToken,
+        debtToken,
+        automationSdk.enums.RatioState.UNDER,
+        targetRatio,
+        triggerRatio,
+        bundleId,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+const subFluidVaultT1BoostBundle = async (
+    proxy, bundleId, nftId, vault, collToken, debtToken, targetRatio, triggerRatio,
+) => {
+    const strategySub = automationSdk.strategySubService.fluidEncode.leverageManagement(
+        nftId,
+        vault,
+        collToken,
+        debtToken,
+        automationSdk.enums.RatioState.OVER,
+        targetRatio,
+        triggerRatio,
+        bundleId,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
 module.exports = {
     subDcaStrategy,
     subMcdCloseToCollStrategy,
@@ -949,4 +980,6 @@ module.exports = {
     subLiquityV2BoostBundle,
     subLiquityV2CloseBundle,
     subMorphoBlueLeverageManagementOnPrice,
+    subFluidVaultT1RepayBundle,
+    subFluidVaultT1BoostBundle,
 };
