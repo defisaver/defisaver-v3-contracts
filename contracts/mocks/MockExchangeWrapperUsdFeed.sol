@@ -31,7 +31,8 @@ contract MockExchangeWrapperUsdFeed is IExchangeV3, TokenPriceHelper {
         uint256 destTokenPriceInUSD = getPriceInUSD(_destAddr);
         uint256 destTokenDec = IERC20(_destAddr).decimals();
 
-        uint256 amountOut = _srcAmount * srcTokenPriceInUSD * 10**destTokenDec / (10**srcTokenDec * destTokenPriceInUSD);
+         uint256 amountOut = _srcAmount * srcTokenPriceInUSD * (10 ** destTokenDec) / 
+                             ((10 ** srcTokenDec) * destTokenPriceInUSD);
 
         _destAddr.withdrawTokens(msg.sender, amountOut);
 
