@@ -7,8 +7,12 @@ import {ITrigger} from "../interfaces/ITrigger.sol";
 import {TriggerHelper} from "./helpers/TriggerHelper.sol";
 import {IAddressesRegistry} from "../interfaces/liquityV2/IAddressesRegistry.sol";
 import {ITroveManager} from "../interfaces/liquityV2/ITroveManager.sol";
+import {IBorrowerOperations} from "../interfaces/liquityV2/IBorrowerOperations.sol";
 
-/// @title Trigger contract that verifies if current LiquityV2 position adjust time has passed for a given troveId
+/// @title Trigger contract that verifies if current LiquityV2 position adjust time has passed.
+/// @dev If the trove has an interest batch manager, the trigger will not be triggered.
+/// @dev If the trove is not active, the trigger will not be triggered.
+/// @dev Adjust time is 7 days.
 contract LiquityV2AdjustTimeTrigger is
 ITrigger,
 AdminAuth,
@@ -30,17 +34,27 @@ TriggerHelper
     {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
-        return isAdjustTimePassed(triggerSubData.market, triggerSubData.troveId);
+        return isAdjustmentFeeZero(triggerSubData.market, triggerSubData.troveId);
     }
 
-    function isAdjustTimePassed(address _market, uint256 _troveId) public view returns (bool) {
+    function isAdjustmentFeeZero(address _market, uint256 _troveId) public view returns (bool) {
         IAddressesRegistry market = IAddressesRegistry(_market);
         ITroveManager troveManager = ITroveManager(market.troveManager());
+        IBorrowerOperations borrowerOperations = IBorrowerOperations(market.borrowerOperations());
         ITroveManager.LatestTroveData memory troveData = troveManager.getLatestTroveData(_troveId);
 
-        uint currentTime = block.timestamp;
+        // return false if trove has an interest batch manager
+        if (borrowerOperations.interestBatchManagerOf(_troveId) != address(0)) {
+            return false;
+        }
+
+        if (troveManager.getTroveStatus(_troveId) != ITroveManager.Status.active) {
+            return false;
+        }
+
+        uint256 currentTime = block.timestamp;
         // liquityV2 trove adjust time is 7 days
-        uint sevenDaysInSeconds = 604_800;
+        uint256 sevenDaysInSeconds = 604_800;
         return currentTime > troveData.lastInterestRateAdjTime + sevenDaysInSeconds;
     }
 

@@ -15,7 +15,7 @@ describe('LiquityV2AdjustTimeTrigger', () => {
     it('should return false when current time <= lastInterestRateAdjTime', async () => {
         const TROVE_ID = "85477273572205332762981165440397157497675549875521584498577322101534395139618";
 
-        const triggered = await trigger.isAdjustTimePassed(MARKET_ADDRESS, TROVE_ID)
+        const triggered = await trigger.isAdjustmentFeeZero(MARKET_ADDRESS, TROVE_ID)
 
         console.log("isAdjustTimePassed:", triggered);
 
