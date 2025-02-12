@@ -2,23 +2,18 @@
 
 pragma solidity =0.8.24;
 
-import {AdminAuth} from "../auth/AdminAuth.sol";
-import {ITrigger} from "../interfaces/ITrigger.sol";
-import {TriggerHelper} from "./helpers/TriggerHelper.sol";
-import {IAddressesRegistry} from "../interfaces/liquityV2/IAddressesRegistry.sol";
-import {ITroveManager} from "../interfaces/liquityV2/ITroveManager.sol";
-import {IBorrowerOperations} from "../interfaces/liquityV2/IBorrowerOperations.sol";
+import {AdminAuth} from '../auth/AdminAuth.sol';
+import {ITrigger} from '../interfaces/ITrigger.sol';
+import {TriggerHelper} from './helpers/TriggerHelper.sol';
+import {IAddressesRegistry} from '../interfaces/liquityV2/IAddressesRegistry.sol';
+import {ITroveManager} from '../interfaces/liquityV2/ITroveManager.sol';
+import {IBorrowerOperations} from '../interfaces/liquityV2/IBorrowerOperations.sol';
 
 /// @title Trigger contract that verifies if current LiquityV2 position adjust time has passed.
 /// @dev If the trove has an interest batch manager, the trigger will not be triggered.
 /// @dev If the trove is not active, the trigger will not be triggered.
 /// @dev Adjust time is 7 days.
-contract LiquityV2AdjustTimeTrigger is
-ITrigger,
-AdminAuth,
-TriggerHelper
-{
-
+contract LiquityV2AdjustTimeTrigger is ITrigger, AdminAuth, TriggerHelper {
     /// @param market address of the market where the trove is
     /// @param troveId id of the trove
     struct SubParams {
@@ -27,11 +22,7 @@ TriggerHelper
     }
 
     /// @dev checks if the adjust time has passed
-    function isTriggered(bytes memory, bytes memory _subData)
-    public
-    override
-    returns (bool)
-    {
+    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         return isAdjustmentFeeZero(triggerSubData.market, triggerSubData.troveId);
@@ -64,7 +55,7 @@ TriggerHelper
 
     function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
 
-    function isChangeable() public pure override returns (bool){
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 }
