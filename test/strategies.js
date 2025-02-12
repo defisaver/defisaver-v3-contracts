@@ -5808,9 +5808,9 @@ const createLiquityV2FLRepayOnPriceStrategy = () => {
 const createFluidT1RepayStrategy = () => {
     const fluidT1RepayStrategy = new dfs.Strategy('FluidT1RepayStrategy');
     fluidT1RepayStrategy.addSubSlot('&nftId', 'uint256');
-    fluidT1RepayStrategy.addSubSlot('&vault', 'uint256');
-    fluidT1RepayStrategy.addSubSlot('&collToken', 'uint256');
-    fluidT1RepayStrategy.addSubSlot('&debtToken', 'uint256');
+    fluidT1RepayStrategy.addSubSlot('&vault', 'address');
+    fluidT1RepayStrategy.addSubSlot('&collToken', 'address');
+    fluidT1RepayStrategy.addSubSlot('&debtToken', 'address');
     fluidT1RepayStrategy.addSubSlot('&ratioState', 'uint256');
     fluidT1RepayStrategy.addSubSlot('&targetRatio', 'uint256');
     fluidT1RepayStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
@@ -5866,9 +5866,9 @@ const createFluidT1RepayStrategy = () => {
 const createFluidT1FLRepayStrategy = () => {
     const fluidT1FLRepayStrategy = new dfs.Strategy('FluidT1FLRepayStrategy');
     fluidT1FLRepayStrategy.addSubSlot('&nftId', 'uint256');
-    fluidT1FLRepayStrategy.addSubSlot('&vault', 'uint256');
-    fluidT1FLRepayStrategy.addSubSlot('&collToken', 'uint256');
-    fluidT1FLRepayStrategy.addSubSlot('&debtToken', 'uint256');
+    fluidT1FLRepayStrategy.addSubSlot('&vault', 'address');
+    fluidT1FLRepayStrategy.addSubSlot('&collToken', 'address');
+    fluidT1FLRepayStrategy.addSubSlot('&debtToken', 'address');
     fluidT1FLRepayStrategy.addSubSlot('&ratioState', 'uint256');
     fluidT1FLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
     fluidT1FLRepayStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
@@ -5930,9 +5930,9 @@ const createFluidT1FLRepayStrategy = () => {
 const createFluidT1BoostStrategy = () => {
     const fluidT1BoostStrategy = new dfs.Strategy('FluidT1BoostStrategy');
     fluidT1BoostStrategy.addSubSlot('&nftId', 'uint256');
-    fluidT1BoostStrategy.addSubSlot('&vault', 'uint256');
-    fluidT1BoostStrategy.addSubSlot('&collToken', 'uint256');
-    fluidT1BoostStrategy.addSubSlot('&debtToken', 'uint256');
+    fluidT1BoostStrategy.addSubSlot('&vault', 'address');
+    fluidT1BoostStrategy.addSubSlot('&collToken', 'address');
+    fluidT1BoostStrategy.addSubSlot('&debtToken', 'address');
     fluidT1BoostStrategy.addSubSlot('&ratioState', 'uint256');
     fluidT1BoostStrategy.addSubSlot('&targetRatio', 'uint256');
     fluidT1BoostStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
@@ -5988,9 +5988,9 @@ const createFluidT1BoostStrategy = () => {
 const createFluidT1FLBoostStrategy = () => {
     const fluidT1FLBoostStrategy = new dfs.Strategy('FluidT1FLBoostStrategy');
     fluidT1FLBoostStrategy.addSubSlot('&nftId', 'uint256');
-    fluidT1FLBoostStrategy.addSubSlot('&vault', 'uint256');
-    fluidT1FLBoostStrategy.addSubSlot('&collToken', 'uint256');
-    fluidT1FLBoostStrategy.addSubSlot('&debtToken', 'uint256');
+    fluidT1FLBoostStrategy.addSubSlot('&vault', 'address');
+    fluidT1FLBoostStrategy.addSubSlot('&collToken', 'address');
+    fluidT1FLBoostStrategy.addSubSlot('&debtToken', 'address');
     fluidT1FLBoostStrategy.addSubSlot('&ratioState', 'uint256');
     fluidT1FLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
     fluidT1FLBoostStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
