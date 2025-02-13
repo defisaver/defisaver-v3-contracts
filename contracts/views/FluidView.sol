@@ -5,10 +5,9 @@ pragma solidity =0.8.24;
 import { IFluidVaultT1 } from "../../contracts/interfaces/fluid/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../contracts/interfaces/fluid/IFluidVaultResolver.sol";
 import { FluidRatioHelper } from "../../contracts/actions/fluid/helpers/FluidRatioHelper.sol";
-import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 
-contract FluidView is FluidRatioHelper, TokenPriceHelper {
+contract FluidView is FluidRatioHelper {
 
     struct UserPosition {
         uint256 nftId;
@@ -45,10 +44,6 @@ contract FluidView is FluidRatioHelper, TokenPriceHelper {
         address oracle; // address of the oracle
         uint256 oraclePriceOperate;
         uint256 oraclePriceLiquidate;
-        uint256 priceOfSupplyToken0InUSD; // Price of the collateral token 0 in USD. Scaled by 1e8
-        uint256 priceOfSupplyToken1InUSD; // Price of the collateral token 1 in USD. Scaled by 1e8. 0 if not present
-        uint256 priceOfBorrowToken0InUSD; // Price of the debt token 0 in USD. Scaled by 1e8
-        uint256 priceOfBorrowToken1InUSD; // Price of the debt token 1 in USD. Scaled by 1e8. 0 if not present
         uint256 vaultSupplyExchangePrice;
         uint256 vaultBorrowExchangePrice;
         int supplyRateVault;
@@ -161,10 +156,6 @@ contract FluidView is FluidRatioHelper, TokenPriceHelper {
             oracle: data.configs.oracle,
             oraclePriceOperate: data.configs.oraclePriceOperate,
             oraclePriceLiquidate: data.configs.oraclePriceLiquidate,
-            priceOfSupplyToken0InUSD: getPriceInUSD(data.constantVariables.supplyToken.token0),
-            priceOfSupplyToken1InUSD: supplyToken1 != address(0) ? getPriceInUSD(data.constantVariables.supplyToken.token1) : 0,
-            priceOfBorrowToken0InUSD: getPriceInUSD(data.constantVariables.borrowToken.token0),
-            priceOfBorrowToken1InUSD: borrowToken1 != address(0) ? getPriceInUSD(data.constantVariables.borrowToken.token1) : 0,
 
             vaultSupplyExchangePrice: data.exchangePricesAndRates.vaultSupplyExchangePrice,
             vaultBorrowExchangePrice: data.exchangePricesAndRates.vaultBorrowExchangePrice,
