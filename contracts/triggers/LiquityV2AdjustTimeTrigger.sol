@@ -2,18 +2,20 @@
 
 pragma solidity =0.8.24;
 
-import {AdminAuth} from '../auth/AdminAuth.sol';
-import {ITrigger} from '../interfaces/ITrigger.sol';
-import {TriggerHelper} from './helpers/TriggerHelper.sol';
-import {IAddressesRegistry} from '../interfaces/liquityV2/IAddressesRegistry.sol';
-import {ITroveManager} from '../interfaces/liquityV2/ITroveManager.sol';
-import {IBorrowerOperations} from '../interfaces/liquityV2/IBorrowerOperations.sol';
+import {AdminAuth} from "../auth/AdminAuth.sol";
+import {ITrigger} from "../interfaces/ITrigger.sol";
+import {TriggerHelper} from "./helpers/TriggerHelper.sol";
+import {IAddressesRegistry} from "../interfaces/liquityV2/IAddressesRegistry.sol";
+import {ITroveManager} from "../interfaces/liquityV2/ITroveManager.sol";
+import {IBorrowerOperations} from "../interfaces/liquityV2/IBorrowerOperations.sol";
 
 /// @title Trigger contract that verifies if current LiquityV2 position adjust time has passed.
 /// @dev If the trove has an interest batch manager, the trigger will not be triggered.
 /// @dev If the trove is not active, the trigger will not be triggered.
 /// @dev Adjust time is 7 days.
 contract LiquityV2AdjustTimeTrigger is ITrigger, AdminAuth, TriggerHelper {
+    uint256  constant INTEREST_RATE_ADJ_COOLDOWN = 7 days;
+
     /// @param market address of the market where the trove is
     /// @param troveId id of the trove
     struct SubParams {
@@ -44,9 +46,7 @@ contract LiquityV2AdjustTimeTrigger is ITrigger, AdminAuth, TriggerHelper {
         }
 
         uint256 currentTime = block.timestamp;
-        // liquityV2 trove adjust time is 7 days
-        uint256 sevenDaysInSeconds = 604_800;
-        return currentTime > troveData.lastInterestRateAdjTime + sevenDaysInSeconds;
+        return currentTime >= troveData.lastInterestRateAdjTime + INTEREST_RATE_ADJ_COOLDOWN;
     }
 
     function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
