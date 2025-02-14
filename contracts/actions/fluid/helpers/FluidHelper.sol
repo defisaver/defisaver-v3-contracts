@@ -3,11 +3,7 @@
 pragma solidity =0.8.24;
 
 import {MainnetFluidAddresses} from "./MainnetFluidAddresses.sol";
+import {DFSMath} from "../../../utils/math/DFSMath.sol";
 
-contract FluidHelper is MainnetFluidAddresses {
-
-    function signed256(uint256 x) internal pure returns (int256) {
-        require(x <= uint256(type(int256).max));
-        return int256(x);
-    }
+contract FluidHelper is DFSMath, MainnetFluidAddresses {
 }
