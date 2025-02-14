@@ -13,11 +13,7 @@ import {IStabilityPool} from "../interfaces/liquityV2/IStabilityPool.sol";
 
 // TODO update comment
 /// @title Trigger contract that calculates the debt in front of a trove taking all the branches into account
-contract LiquityV2DebtInFrontTrigger is
-ITrigger,
-AdminAuth,
-TriggerHelper
-{
+contract LiquityV2DebtInFrontTrigger is ITrigger, AdminAuth, TriggerHelper {
     address internal constant ETH_MARKET = 0x38e1F07b954cFaB7239D7acab49997FBaAD96476;
     address internal constant WST_ETH_MARKET = 0x2D4ef56cb626E9a4C90c156018BA9CE269573c61;
     address internal constant RETH_MARKET = 0x3b48169809DD827F22C9e0F2d71ff12Ea7A94a2F;
@@ -31,11 +27,7 @@ TriggerHelper
     }
 
     /// @dev checks if the adjust time has passed
-    function isTriggered(bytes memory, bytes memory _subData)
-    public
-    override
-    returns (bool)
-    {
+    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 debtInFront = getDebtInFront(triggerSubData.market, triggerSubData.troveId);
@@ -54,14 +46,44 @@ TriggerHelper
 
         uint256 totalDebtInFront = branchDebtInFront;
         if (_market == ETH_MARKET) {
-            totalDebtInFront += getRedeemAmount(wstEthTotalDebt, branchDebtInFront, wstEthUnbackedBold, ethUnbackedBold);
-            totalDebtInFront += getRedeemAmount(rEthTotalDebt, branchDebtInFront, rEthUnbackedBold, ethUnbackedBold);
+            totalDebtInFront += getRedeemAmount(
+                wstEthTotalDebt,
+                branchDebtInFront,
+                wstEthUnbackedBold,
+                ethUnbackedBold
+            );
+            totalDebtInFront += getRedeemAmount(
+                rEthTotalDebt,
+                branchDebtInFront,
+                rEthUnbackedBold,
+                ethUnbackedBold
+            );
         } else if (_market == WST_ETH_MARKET) {
-            totalDebtInFront += getRedeemAmount(ethTotalDebt, branchDebtInFront, ethUnbackedBold, wstEthUnbackedBold);
-            totalDebtInFront += getRedeemAmount(rEthTotalDebt, branchDebtInFront, rEthUnbackedBold, wstEthUnbackedBold);
+            totalDebtInFront += getRedeemAmount(
+                ethTotalDebt,
+                branchDebtInFront,
+                ethUnbackedBold,
+                wstEthUnbackedBold
+            );
+            totalDebtInFront += getRedeemAmount(
+                rEthTotalDebt,
+                branchDebtInFront,
+                rEthUnbackedBold,
+                wstEthUnbackedBold
+            );
         } else if (_market == RETH_MARKET) {
-            totalDebtInFront += getRedeemAmount(ethTotalDebt, branchDebtInFront, ethUnbackedBold, rEthUnbackedBold);
-            totalDebtInFront += getRedeemAmount(wstEthTotalDebt, branchDebtInFront, wstEthUnbackedBold, rEthUnbackedBold);
+            totalDebtInFront += getRedeemAmount(
+                ethTotalDebt,
+                branchDebtInFront,
+                ethUnbackedBold,
+                rEthUnbackedBold
+            );
+            totalDebtInFront += getRedeemAmount(
+                wstEthTotalDebt,
+                branchDebtInFront,
+                wstEthUnbackedBold,
+                rEthUnbackedBold
+            );
         } else {
             // TODO return 0 or revert?
             return 0;
@@ -88,8 +110,14 @@ TriggerHelper
         }
     }
 
-    function getRedeemAmount(uint256 totalBorrowOnBranch, uint256 debtInFrontOnBranch, uint256 unbackedBoldOnBranch, uint256 selectedMarketUnbackedData) public pure returns (uint256) {
-        uint256 totalDebtInFront = debtInFrontOnBranch * unbackedBoldOnBranch / selectedMarketUnbackedData;
+    function getRedeemAmount(
+        uint256 totalBorrowOnBranch,
+        uint256 debtInFrontOnBranch,
+        uint256 unbackedBoldOnBranch,
+        uint256 selectedMarketUnbackedData
+    ) public pure returns (uint256) {
+        uint256 totalDebtInFront = (debtInFrontOnBranch * unbackedBoldOnBranch) /
+            selectedMarketUnbackedData;
         if (totalBorrowOnBranch < totalDebtInFront) {
             return totalBorrowOnBranch;
         } else {
@@ -103,20 +131,26 @@ TriggerHelper
 
     function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
 
-    function isChangeable() public pure override returns (bool){
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 
-    function getUnbackedDebt(address _market) internal view returns (uint256 systemDebt, uint256 unbackedBold) {
+    function getUnbackedDebt(
+        address _market
+    ) internal view returns (uint256 systemDebt, uint256 unbackedBold) {
         IAddressesRegistry registry = IAddressesRegistry(_market);
         systemDebt = IBorrowerOperations(registry.borrowerOperations()).getEntireSystemDebt();
         uint256 boldDeposits = IStabilityPool(registry.stabilityPool()).getTotalBoldDeposits();
         unbackedBold = systemDebt - boldDeposits;
     }
 
-    function _getDebtInFrontOnTrovesBranch(ITroveManager _troveManager, uint256 _troveId) internal view returns (uint256 debt) {
-        ITroveManager.LatestTroveData memory latestTroveData = _troveManager.getLatestTroveData(_troveId);
+    function _getDebtInFrontOnTrovesBranch(
+        ITroveManager _troveManager,
+        uint256 _troveId
+    ) internal view returns (uint256 debt) {
+        ITroveManager.LatestTroveData memory latestTroveData = _troveManager.getLatestTroveData(
+            _troveId
+        );
         debt = latestTroveData.entireDebt;
     }
-
 }
