@@ -374,6 +374,8 @@ const coinGeckoHelper = {
     OP: 'optimism',
     cbETH: 'cb-eth',
     FRAX: 'frax',
+    GHO: 'gho',
+    sUSDS: 'sUSDS',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;
@@ -503,7 +505,6 @@ const setStorageAt = async (address, index, value) => {
     if (hre.network.config.type === 'tenderly') {
         prefix = 'tenderly';
     }
-    console.log(`${prefix}_setStorageAt`);
 
     await hre.ethers.provider.send(`${prefix}_setStorageAt`, [address, index, value]);
     await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
