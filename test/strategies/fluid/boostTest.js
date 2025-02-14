@@ -34,8 +34,6 @@ class BoostTest extends BaseFluidT1StrategyTest {
             this.bundles.boost,
             nftId,
             pair.vault,
-            collAsset.address,
-            debtAsset.address,
             targetRatio,
             maxRatio,
         );

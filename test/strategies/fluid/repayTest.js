@@ -34,8 +34,6 @@ class RepayTest extends BaseFluidT1StrategyTest {
             this.bundles.repay,
             nftId,
             pair.vault,
-            collAsset.address,
-            debtAsset.address,
             targetRatio,
             minRatio,
         );

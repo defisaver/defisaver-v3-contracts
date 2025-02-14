@@ -910,13 +910,11 @@ const subMorphoBlueLeverageManagementOnPrice = async (
     return { subId, strategySub };
 };
 const subFluidVaultT1RepayBundle = async (
-    proxy, bundleId, nftId, vault, collToken, debtToken, targetRatio, triggerRatio,
+    proxy, bundleId, nftId, vault, targetRatio, triggerRatio,
 ) => {
     const strategySub = automationSdk.strategySubService.fluidEncode.leverageManagement(
         nftId,
         vault,
-        collToken,
-        debtToken,
         automationSdk.enums.RatioState.UNDER,
         targetRatio,
         triggerRatio,
@@ -926,13 +924,11 @@ const subFluidVaultT1RepayBundle = async (
     return { subId, strategySub };
 };
 const subFluidVaultT1BoostBundle = async (
-    proxy, bundleId, nftId, vault, collToken, debtToken, targetRatio, triggerRatio,
+    proxy, bundleId, nftId, vault, targetRatio, triggerRatio,
 ) => {
     const strategySub = automationSdk.strategySubService.fluidEncode.leverageManagement(
         nftId,
         vault,
-        collToken,
-        debtToken,
         automationSdk.enums.RatioState.OVER,
         targetRatio,
         triggerRatio,
