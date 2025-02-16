@@ -2,11 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../contracts/interfaces/fluid/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../contracts/interfaces/fluid/IFluidVaultResolver.sol";
+import { IFluidLendingResolver } from "../../contracts/interfaces/fluid/IFluidLendingResolver.sol";
 import { FluidRatioHelper } from "../../contracts/actions/fluid/helpers/FluidRatioHelper.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 
+/// @title FluidView - aggregate various information about Fluid vaults and users
 contract FluidView is FluidRatioHelper {
 
     struct UserPosition {
@@ -17,7 +18,7 @@ contract FluidView is FluidRatioHelper {
         uint256 supply;
         uint256 borrow;
         uint256 ratio;
-        int tick;
+        int256 tick;
         uint256 tickId;
     }
 
@@ -46,10 +47,10 @@ contract FluidView is FluidRatioHelper {
         uint256 oraclePriceLiquidate;
         uint256 vaultSupplyExchangePrice;
         uint256 vaultBorrowExchangePrice;
-        int supplyRateVault;
-        int borrowRateVault;
-        int rewardsOrFeeRateSupply;
-        int rewardsOrFeeRateBorrow;
+        int256 supplyRateVault;
+        int256 borrowRateVault;
+        int256 rewardsOrFeeRateSupply;
+        int256 rewardsOrFeeRateBorrow;
         uint256 totalPositions; // Total positions in the vault
         uint256 totalSupplyVault; // Total supplied assets to the vault
         uint256 totalBorrowVault; // Total borrowed assets from the vault
@@ -69,7 +70,40 @@ contract FluidView is FluidRatioHelper {
         uint256 baseBorrowLimit; // The minimum limit for a vault's borrow. The further expansion happens on this base
         uint256 minimumBorrowing; // The minimum amount that can be borrowed from the vault
     }
+    
+    struct NftWithVault {
+        uint256 nftId;
+        uint256 vaultId;
+        address vaultAddr;
+    }
 
+    struct UserEarnPosition {
+        uint256 fTokenShares;
+        uint256 underlyingAssets;
+        uint256 underlyingBalance;
+        uint256 allowance;
+    }
+
+    struct FTokenData {
+        address tokenAddress;
+        bool isNativeUnderlying;
+        string name;
+        string symbol;
+        uint256 decimals;
+        address asset;
+        uint256 totalAssets;
+        uint256 totalSupply;
+        uint256 convertToShares;
+        uint256 convertToAssets;
+        uint256 rewardsRate; // additional yield from rewards, if active
+        uint256 supplyRate; // yield at Liquidity
+        uint256 withdrawable; // actual currently withdrawable amount (supply - withdrawal Limit) & considering balance
+        bool modeWithInterest; // true if mode = with interest, false = without interest
+        uint256 expandPercent; // withdrawal limit expand percent in 1e2
+        uint256 expandDuration; // withdrawal limit expand duration in seconds
+    }
+
+    /// @notice Get all user positions with vault data
     function getUserPositions(address _user) 
         external view returns (UserPosition[] memory positions, VaultData[] memory vaults) 
     {
@@ -85,21 +119,29 @@ contract FluidView is FluidRatioHelper {
         return (positions, vaults);
     }
 
+    /// @notice Get all nftIds for a specific user
     function getUserNftIds(address _user) external view returns (uint256[] memory) {
         return IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionsNftIdOfUser(_user);
     }
 
-    function getVaultAddresses(uint256[] calldata _ids, bool _fetchAll) external view returns (address[] memory) {
-        if (_fetchAll) {
-            return IFluidVaultResolver(FLUID_VAULT_RESOLVER).getAllVaultsAddresses();
+    /// @notice Get all nftIds with vaultIds for a specific user
+    function getUserNftIdsWithVaultIds(address _user) external view returns (NftWithVault[] memory retVal) {
+        uint256[] memory nftIds = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionsNftIdOfUser(_user);
+        retVal = new NftWithVault[](nftIds.length);
+
+        for (uint256 i = 0; i < nftIds.length; i++) {
+            address vaultByNft = IFluidVaultResolver(FLUID_VAULT_RESOLVER).vaultByNftId(nftIds[i]);
+            uint256 vaultId = IFluidVaultResolver(FLUID_VAULT_RESOLVER).getVaultId(vaultByNft);
+
+            retVal[i] = NftWithVault({
+                nftId: nftIds[i],
+                vaultId: vaultId,
+                vaultAddr: vaultByNft
+            });
         }
-        address[] memory vaults = new address[](_ids.length);
-        for (uint256 i = 0; i < _ids.length; i++) {
-            vaults[i] = IFluidVaultResolver(FLUID_VAULT_RESOLVER).getVaultAddress(_ids[i]);    
-        }
-        return vaults;
     }
 
+    /// @notice Get position data with vault data for a specific nftId
     function getPositionByNftId(uint256 _nftId) public view returns (UserPosition memory position, VaultData memory vault) {
         (
             IFluidVaultResolver.UserPosition memory userPosition,
@@ -121,6 +163,7 @@ contract FluidView is FluidRatioHelper {
         vault = getVaultData(vaultData.vault);
     }
 
+    /// @notice Get vault data for a specific vault address
     function getVaultData(address _vault) public view returns (VaultData memory vaultData) {
         IFluidVaultResolver.VaultEntireData memory data = 
             IFluidVaultResolver(FLUID_VAULT_RESOLVER).getVaultEntireData(_vault);
@@ -186,6 +229,116 @@ contract FluidView is FluidRatioHelper {
             baseBorrowLimit: data.liquidityUserBorrowData.baseBorrowLimit,
 
             minimumBorrowing: data.limitsAndAvailability.minimumBorrowing
+        });
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                        FLUID EARN - F TOKENs UTILS
+    //////////////////////////////////////////////////////////////*/
+    /// @notice Get all fTokens addresses
+    function getAllFTokens() external view returns (address[] memory) {
+        return IFluidLendingResolver(FLUID_LENDING_RESOLVER).getAllFTokens();
+    }
+
+    /// @notice Get fToken data for a specific fToken address
+    function getFTokenData(address _fToken) public view returns (FTokenData memory fTokenData) {
+        
+        IFluidLendingResolver.FTokenDetails memory details;
+
+        // Fluid Lending Resolver checks if the fToken's underlying asset supports EIP-2612.
+        // For WETH, this triggers the fallback function, which attempts a deposit.
+        // This panics because of write protection and consumes all gas, leaving only 1/64th for the caller (EIP-150).
+        // To lower the gas cost, we cap the gas limit at 9M, ensuring ~140k gas remains for fetching fWETH details
+        // and enough gas is left for further operations within the same block.
+        // For arbitrum, we don't need to cap as WETH will have EIP-2612 support.
+        if (_fToken == F_WETH_TOKEN_ADDR && block.chainid != 42161) {
+            details = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getFTokenDetails{ gas: 9_000_000 }(_fToken);
+        } else {
+            details = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getFTokenDetails(_fToken);
+        }
+        
+        fTokenData = _filterFTokenData(details);
+    }
+
+    /// @notice Get fToken data for all fTokens
+    function getAllFTokensData() public view returns (FTokenData[] memory) {
+        address[] memory fTokens = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getAllFTokens();
+        FTokenData[] memory fTokenData = new FTokenData[](fTokens.length);
+
+        for (uint256 i = 0; i < fTokens.length; i++) {
+            fTokenData[i] = getFTokenData(fTokens[i]);
+        } 
+
+        return fTokenData;
+    }
+
+    /// @notice Get user position for a specific fToken address
+    function getUserEarnPosition(address _fToken, address _user) public view returns (UserEarnPosition memory) {
+        IFluidLendingResolver.UserPosition memory data = 
+            IFluidLendingResolver(FLUID_LENDING_RESOLVER).getUserPosition(_fToken, _user);
+
+        return UserEarnPosition({
+            fTokenShares: data.fTokenShares,
+            underlyingAssets: data.underlyingAssets,
+            underlyingBalance: data.underlyingBalance,
+            allowance: data.allowance
+        });
+    }
+
+    /// @notice Get user position for a specific fToken address
+    function getUserEarnPositionWithFToken(
+        address _fToken,
+        address _user
+    ) public view returns (UserEarnPosition memory userPosition, FTokenData memory fTokenData) {
+        IFluidLendingResolver.UserPosition memory userData = 
+            IFluidLendingResolver(FLUID_LENDING_RESOLVER).getUserPosition(_fToken, _user);
+
+        userPosition = UserEarnPosition({
+            fTokenShares: userData.fTokenShares,
+            underlyingAssets: userData.underlyingAssets,
+            underlyingBalance: userData.underlyingBalance,
+            allowance: userData.allowance
+        });
+
+        fTokenData = getFTokenData(_fToken);
+    }
+
+    /// @notice Get user positions for all fTokens
+    function getAllUserEarnPositionsWithFTokens(address _user)
+        external
+        view
+        returns (UserEarnPosition[] memory userPositions, FTokenData[] memory fTokensData)
+    {
+        fTokensData = getAllFTokensData();
+
+        userPositions = new UserEarnPosition[](fTokensData.length);
+
+        for (uint256 i = 0; i < fTokensData.length; i++) {
+            userPositions[i] = getUserEarnPosition(fTokensData[i].tokenAddress, _user);
+        }
+    }
+
+    /// @notice Helper function to filter FTokenDetails to FTokenData
+    function _filterFTokenData(
+        IFluidLendingResolver.FTokenDetails memory _details
+    ) internal pure returns (FTokenData memory fTokenData) {
+        fTokenData = FTokenData({
+            tokenAddress: _details.tokenAddress,
+            isNativeUnderlying: _details.isNativeUnderlying,
+            name: _details.name,
+            symbol: _details.symbol,
+            decimals: _details.decimals,
+            asset: _details.asset,
+            totalAssets: _details.totalAssets,
+            totalSupply: _details.totalSupply,
+            convertToShares: _details.convertToShares,
+            convertToAssets: _details.convertToAssets,
+            rewardsRate: _details.rewardsRate,
+            supplyRate: _details.supplyRate,
+            withdrawable: _details.liquidityUserSupplyData.withdrawable,
+            modeWithInterest: _details.liquidityUserSupplyData.modeWithInterest,
+            expandPercent: _details.liquidityUserSupplyData.expandPercent,
+            expandDuration: _details.liquidityUserSupplyData.expandDuration
         });
     }
 }
