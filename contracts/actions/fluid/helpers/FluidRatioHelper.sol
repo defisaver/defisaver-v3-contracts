@@ -27,7 +27,7 @@ contract FluidRatioHelper is FluidHelper {
             IFluidVaultResolver.VaultEntireData memory vaultData
         ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
 
-        // TODO: For now, only handle the case for T1 Vaults
+        // For now, only handle the case for T1 Vaults
         if (vaultData.constantVariables.vaultType == T1_VAULT_TYPE) {
             uint256 collAmount = userPosition.supply;
             address collToken = vaultData.constantVariables.supplyToken.token0;
