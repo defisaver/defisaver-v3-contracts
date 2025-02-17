@@ -141,7 +141,7 @@ contract LiquityV2View is LiquityV2Helper {
         if (nextId == _troveId) nextId = sortedTroves.getNext(_troveId);
     }
 
-    function getTroveInfo(address _market, uint256 _troveId) external view returns (TroveData memory trove) {
+    function getTroveInfo(address _market, uint256 _troveId) external returns (TroveData memory trove) {
         ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
         IPriceFeed priceFeed = IPriceFeed(IAddressesRegistry(_market).priceFeed());
         ITroveManager.LatestTroveData memory latestTroveData = troveManager.getLatestTroveData(_troveId);
@@ -159,7 +159,7 @@ contract LiquityV2View is LiquityV2Helper {
         trove.annualInterestRate = latestTroveData.annualInterestRate;
         trove.collAmount = latestTroveData.entireColl;
         trove.debtAmount = latestTroveData.entireDebt;
-        trove.collPrice = priceFeed.lastGoodPrice();
+        (trove.collPrice, ) = priceFeed.fetchPrice();
         trove.TCRatio = troveManager.getCurrentICR(_troveId, trove.collPrice);
         trove.collToken = IAddressesRegistry(_market).collToken();
 
@@ -190,7 +190,7 @@ contract LiquityV2View is LiquityV2Helper {
         address _market,
         uint256 _startIndex,
         uint256 _endIndex
-    )   external view returns (ExistingTrove[] memory troves, int256 nextFreeTroveIndex) 
+    )   external returns (ExistingTrove[] memory troves, int256 nextFreeTroveIndex) 
     {   
         nextFreeTroveIndex = -1; 
         IAddressesRegistry market = IAddressesRegistry(_market);
@@ -214,9 +214,10 @@ contract LiquityV2View is LiquityV2Helper {
         }
     }
 
-    function getMarketData(address _market) external view returns (MarketData memory data) {
+    function getMarketData(address _market) external returns (MarketData memory data) {
         IAddressesRegistry registry = IAddressesRegistry(_market);
         address borrowerOperations = registry.borrowerOperations();
+        (uint256 collPrice, ) = IPriceFeed(registry.priceFeed()).fetchPrice();
         data = MarketData({
             market: _market,
             CCR: registry.CCR(),
@@ -236,7 +237,7 @@ contract LiquityV2View is LiquityV2Helper {
             activePool: registry.activePool(),
             hintHelpers: registry.hintHelpers(),
             priceFeed: registry.priceFeed(),
-            collPrice: IPriceFeed(registry.priceFeed()).lastGoodPrice(),
+            collPrice: collPrice,
             isShutDown: isShutDown(_market)
         });
     }
