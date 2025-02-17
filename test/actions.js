@@ -3613,6 +3613,22 @@ const eulerV2Payback = async (
     return receipt;
 };
 
+const kingClaim = async (
+    proxy,
+    to,
+    amount,
+    root,
+    proof,
+) => {
+    const action = new dfs.actions.basic.KingClaimAction(
+        to, amount, root, proof,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('KingClaim', functionData, proxy);
+
+    return receipt;
+};
+
 const liquityV2Open = async (
     proxy,
     market,
@@ -3893,4 +3909,6 @@ module.exports = {
     claimAaveFromStkGho,
     startUnstakeGho,
     finalizeUnstakeGho,
+
+    kingClaim,
 };

@@ -47,6 +47,7 @@ const {
     updateSubData,
     createChickenBond,
     transferNFT,
+    kingClaim,
 } = require('../actions');
 const { addBotCaller, createStrategy, subToStrategy } = require('../utils-strategies');
 const { createMcdCloseStrategy } = require('../strategies');
@@ -1042,6 +1043,65 @@ const transferNFTTest = async () => {
     });
 };
 
+const kingClaimTest = async () => {
+    describe('Claim KING token', function () {
+        this.timeout(1000000);
+
+        let senderAcc;
+        let proxy;
+        let CLAIMER_EOA;
+
+        before(async () => {
+            await redeploy('KingClaim');
+
+            CLAIMER_EOA = '0xd7215DbBd6e595a57e4dDc7786EF068F8dA8B564';
+            const CLAIMER_SW = '0x6a1F4f0AD047C7050F7ddc0563c0aaD3931C4771';
+
+            // send some eth to senderAcc
+            const zeroAddress = hre.ethers.constants.AddressZero;
+            const zeroAcc = await hre.ethers.provider.getSigner(zeroAddress);
+            await impersonateAccount(zeroAddress);
+            await sendEther(zeroAcc, CLAIMER_EOA, '5');
+
+            await impersonateAccount(CLAIMER_EOA);
+            senderAcc = await hre.ethers.provider.getSigner(CLAIMER_EOA);
+            proxy = await hre.ethers.getContractAt('IDSProxy', CLAIMER_SW);
+            proxy = proxy.connect(senderAcc);
+        });
+
+        it('... should transfer a nft from proxy', async () => {
+            const amount = '54828777210681748232';
+            const root = '0x2643c31ec7b7d9d1e8aa5202453912b1d02fd33c91b2b07c4dc3fc5965e473c5';
+            const proofs = [
+                '0xce3b0e9d8e457ea2f34674437c4f1545124cbc5c8ba232cc00a4df86d4bca925',
+                '0x9832eba0cfbcd5d45167002e2731115a909e6f137ec473742e5690b09fbca0c2',
+                '0xc57ecb7b9498e59468dd8d4e4f08b2378a1ecb6f432ae213cf4bd4e83b85196b',
+                '0xf2504cde069ba76e707c4dd232c1d3a98e0864cd45862ca049c2dddbe187646d',
+                '0xe00a819ae4d6085599af1362024d87235aae09a61bd6743d4b426f08596907eb',
+                '0x7abad045ad476d86a34ffff1e011fcebf2e056e14a120585359590d6d8b380ba',
+                '0xe736f578c28e41b97fac9ed776299243718faa403f0cc2b8d09f429ae83eafee',
+                '0x5d8112314b3c49c901483d9a58bb85b3526b5f9b243cf6f8bb5360f17a33fe57',
+                '0xf7529a3b24d2481c893f391fc0f55d6dc86df5ae588dafcd3e6d92ab649510fe',
+                '0x24f1c608f3073ac6155595b27f7532a6a6fa42acda0c079bc373016d01ccb255',
+                '0x2dfba18c8a9129cb5a4315cea917e64107bf0d42b0ccf462809d485148d95211',
+                '0x5490528d35e6367e477ed62ba4aae078f4c04e370336c4a899f022cbcdb738d8',
+                '0x07cc8ffd39c9a1fdc8b36c70df7f980c18d2a22eb90095e0b01963bff4e16738',
+                '0x1dd856a0ae64cbf033ae41de4ae796d94c0a7c7b8ae59158ef22994051a6ecb4',
+                '0xf1e9c75979ef59d6eba5cb84a528c1781f2aa0bc6dd3d910c7db0fd16036c856',
+                '0x3d07078075364fe963edacb88bea86f59af72035777a6c70b4ef68c5ee6b7bfc',
+                '0x937fc65e59dee9333ca48b9e7856503d9ee7d4bb6a976237adf78204955eb2cd',
+                '0x31db96f1d6414944499d1744f6f248b702c9dc15ff7dd9602313ef634d023fb2',
+                '0x9c93e0557e3de0a70f3fa159063624ae636966ace1605b3504011c90e55a0c1e',
+            ];
+            const balanceBefore = await balanceOf('0x8F08B70456eb22f6109F57b8fafE862ED28E6040', CLAIMER_EOA);
+            await kingClaim(proxy, CLAIMER_EOA, amount, root, proofs);
+            const balanceAfter = await balanceOf('0x8F08B70456eb22f6109F57b8fafE862ED28E6040', CLAIMER_EOA);
+            console.log(balanceAfter);
+            expect((balanceAfter).sub(balanceBefore)).to.be.eq(amount);
+        });
+    });
+};
+
 const deployUtilsActionsContracts = async () => {
     await redeploy('SendTokenAndUnwrap');
     await redeploy('WrapEth');
@@ -1057,6 +1117,7 @@ const deployUtilsActionsContracts = async () => {
     await redeploy('UpdateSub');
     await redeploy('ToggleSub');
     await redeploy('TransferNFT');
+    await redeploy('KingClaim');
 };
 
 const utilsActionsFullTest = async () => {
@@ -1092,4 +1153,5 @@ module.exports = {
     sendTokensTest,
     approveTokenTest,
     permitTokenTest,
+    kingClaimTest,
 };
