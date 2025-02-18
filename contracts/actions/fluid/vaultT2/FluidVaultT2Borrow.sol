@@ -15,11 +15,13 @@ contract FluidVaultT2Borrow is ActionBase, FluidHelper {
     /// @param nftId ID of the NFT representing the position
     /// @param amount Amount to borrow
     /// @param to Address to send the borrowed assets to
+    /// @param wrapBorrowedEth Whether to wrap the borrowed ETH into WETH if the borrowed asset is ETH.
     struct Params {
         address vault;
         uint256 nftId;
         uint256 amount;
         address to;
+        bool wrapBorrowedEth;
     }
 
     /// @inheritdoc ActionBase
@@ -35,6 +37,12 @@ contract FluidVaultT2Borrow is ActionBase, FluidHelper {
         params.nftId = _parseParamUint(params.nftId, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
+        params.wrapBorrowedEth = _parseParamUint(
+            params.wrapBorrowedEth ? 1 : 0,
+            _paramMapping[4],
+            _subData,
+            _returnValues
+        ) == 1;
 
         (uint256 amount, bytes memory logData) = _borrow(params);
         emit ActionEvent("FluidVaultT2Borrow", logData);
@@ -59,7 +67,7 @@ contract FluidVaultT2Borrow is ActionBase, FluidHelper {
     function _borrow(Params memory _params) internal returns (uint256, bytes memory) {
         IFluidVaultT2.ConstantViews memory constants = IFluidVaultT2(_params.vault).constantsView();
 
-        bool shouldWrapBorrowedEth = constants.borrowToken.token0 == TokenUtils.ETH_ADDR;
+        bool shouldWrapBorrowedEth = _params.wrapBorrowedEth && constants.borrowToken.token0 == TokenUtils.ETH_ADDR;
 
         IFluidVaultT2(_params.vault).operate(
             _params.nftId,

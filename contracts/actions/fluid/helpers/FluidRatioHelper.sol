@@ -10,11 +10,6 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 /// @title Helper methods for Fluid ratio calc.
 contract FluidRatioHelper is FluidHelper {
 
-    uint256 internal constant T1_VAULT_TYPE = 1e4;
-    uint256 internal constant T2_VAULT_TYPE = 2e4;
-    uint256 internal constant T3_VAULT_TYPE = 3e4;
-    uint256 internal constant T4_VAULT_TYPE = 4e4;
-
     uint256 internal constant ORACLE_PRICE_DECIMALS = 27;
     uint256 internal constant ETH_DECIMALS = 18;
     uint256 internal constant WAD = 1e18;
