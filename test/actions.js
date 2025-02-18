@@ -68,7 +68,78 @@ const executeAction = async (actionName, functionData, proxy, regAddr = addrs[ne
     }
 };
 
-// eslint-disable-next-line max-len
+/*
+ __    __  .___________. __   __          _______.
+|  |  |  | |           ||  | |  |        /       |
+|  |  |  | `---|  |----`|  | |  |       |   (----`
+|  |  |  |     |  |     |  | |  |        \   \
+|  `--'  |     |  |     |  | |  `----.----)   |
+ \______/      |__|     |__| |_______|_______/
+*/
+const updateSubData = async (proxy, subId, sub) => {
+    const updateSubAction = new dfs.actions.basic.UpdateSubAction(
+        subId,
+        sub,
+    );
+    const functionData = updateSubAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('UpdateSub', functionData, proxy);
+    return tx;
+};
+
+const pullTokensInstDSA = async (proxy, dsaAddress, tokens, amounts, to) => {
+    const instPullTokenAction = new dfs.actions.insta.InstPullTokensAction(
+        dsaAddress,
+        tokens,
+        amounts,
+        to,
+    );
+    const functionData = instPullTokenAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('InstPullTokens', functionData, proxy);
+    return tx;
+};
+
+const changeProxyOwner = async (proxy, newOwner) => {
+    const changeProxyOwnerAction = new dfs.actions.basic.ChangeProxyOwnerAction(newOwner);
+    const functionData = changeProxyOwnerAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('ChangeProxyOwner', functionData, proxy);
+    return tx;
+};
+
+const automationV2Unsub = async (proxy, protocol, cdpId = 0) => {
+    const automationV2UnsubAction = new dfs.actions.basic.AutomationV2Unsub(protocol, cdpId);
+
+    const functionData = automationV2UnsubAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('AutomationV2Unsub', functionData, proxy);
+    return tx;
+};
+
+const proxyApproveToken = async (
+    proxy,
+    tokenAddr,
+    spender,
+    amount,
+) => {
+    const approveAction = new dfs.actions.basic.ApproveTokenAction(
+        tokenAddr, spender, amount,
+    );
+    const functionData = approveAction.encodeForDsProxyCall()[1];
+
+    const receipt = await executeAction('ApproveToken', functionData, proxy);
+
+    return receipt;
+};
+
+/*
+ __________   ___   ______  __    __       ___      .__   __.   _______  _______
+|   ____\  \ /  /  /      ||  |  |  |     /   \     |  \ |  |  /  _____||   ____|
+|  |__   \  V  /  |  ,----'|  |__|  |    /  ^  \    |   \|  | |  |  __  |  |__
+|   __|   >   <   |  |     |   __   |   /  /_\  \   |  . `  | |  | |_ | |   __|
+|  |____ /  .  \  |  `----.|  |  |  |  /  _____  \  |  |\   | |  |__| | |  |____
+|_______/__/ \__\  \______||__|  |__| /__/     \__\ |__| \__|  \______| |_______|
+*/
 const sell = async (
     proxy,
     sellAddr,
@@ -130,30 +201,29 @@ const sell = async (
     const tx = await executeAction('DFSSell', functionData, proxy, regAddr);
     return tx;
 };
-
-const paybackMcd = async (proxy, vaultId, amount, from, daiAddr, mcdManager = MCD_MANAGER_ADDR) => {
-    await approve(daiAddr, proxy.address);
-
-    const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
-        vaultId,
-        amount,
-        from,
-        mcdManager,
-    );
-    const functionData = mcdPaybackAction.encodeForDsProxyCall()[1];
-
-    const tx = await executeAction('McdPayback', functionData, proxy);
-    return tx;
-};
-const updateSubData = async (proxy, subId, sub) => {
-    const updateSubAction = new dfs.actions.basic.UpdateSubAction(
-        subId,
-        sub,
-    );
-    const functionData = updateSubAction.encodeForDsProxyCall()[1];
-
-    const tx = await executeAction('UpdateSub', functionData, proxy);
-    return tx;
+const buyTokenIfNeeded = async (
+    tokenAddr,
+    senderAcc,
+    proxy,
+    standardAmount,
+    wrapper = UNISWAP_WRAPPER,
+) => {
+    const tokenBalance = await balanceOf(tokenAddr, senderAcc.address);
+    if (tokenBalance.lt(standardAmount)) {
+        if (isEth(tokenAddr)) {
+            await depositToWeth(standardAmount.toString());
+        } else {
+            await sell(
+                proxy,
+                WETH_ADDRESS,
+                tokenAddr,
+                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '55000'), 18),
+                wrapper,
+                senderAcc.address,
+                senderAcc.address,
+            );
+        }
+    }
 };
 
 /*
@@ -348,6 +418,28 @@ const reflexerWithdrawStuckFunds = async (proxy, safeId, to) => {
     const functionData = reflexerWithdrawStuckFundsAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('ReflexerWithdrawStuckFunds', functionData, proxy);
+    return tx;
+};
+const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount) => {
+    // eslint-disable-next-line max-len
+    const reflexerSaviourDepositAction = new dfs.actions.reflexer.ReflexerNativeUniV2SaviourDepositAction(
+        from,
+        safeId,
+        lpTokenAmount,
+    );
+    const functionData = reflexerSaviourDepositAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('ReflexerNativeUniV2SaviourDeposit', functionData, proxy);
+    return tx;
+};
+const reflexerSaviourWithdraw = async (proxy, to, safeId, lpTokenAmount) => {
+    // eslint-disable-next-line max-len
+    const reflexerSaviourWithdrawAction = new dfs.actions.reflexer.ReflexerNativeUniV2SaviourWithdrawAction(
+        to,
+        safeId,
+        lpTokenAmount,
+    );
+    const functionData = reflexerSaviourWithdrawAction.encodeForDsProxyCall()[1];
+    const tx = await executeAction('ReflexerNativeUniV2SaviourWithdraw', functionData, proxy);
     return tx;
 };
 /*
@@ -589,6 +681,20 @@ const generateMcd = async (proxy, vaultId, amount, to, mcdManager = MCD_MANAGER_
     const functionData = mcdGenerateAction.encodeForDsProxyCall()[1];
 
     const tx = await executeAction('McdGenerate', functionData, proxy);
+    return tx;
+};
+const paybackMcd = async (proxy, vaultId, amount, from, daiAddr, mcdManager = MCD_MANAGER_ADDR) => {
+    await approve(daiAddr, proxy.address);
+
+    const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
+        vaultId,
+        amount,
+        from,
+        mcdManager,
+    );
+    const functionData = mcdPaybackAction.encodeForDsProxyCall()[1];
+
+    const tx = await executeAction('McdPayback', functionData, proxy);
     return tx;
 };
 
@@ -1141,11 +1247,14 @@ const yearnWithdraw = async (token, amount, from, to, proxy) => {
     const tx = await executeAction('YearnWithdraw', functionData, proxy);
     return tx;
 };
+
 /*
-*
-*
-*
-*
+ __       __    ______      __    __   __  .___________.____    ____
+|  |     |  |  /  __  \    |  |  |  | |  | |           |\   \  /   /
+|  |     |  | |  |  |  |   |  |  |  | |  | `---|  |----` \   \/   /
+|  |     |  | |  |  |  |   |  |  |  | |  |     |  |       \_    _/
+|  `----.|  | |  `--'  '--.|  `--'  | |  |     |  |         |  |
+|_______||__|  \_____\_____\\______/  |__|     |__|         |__|
 */
 const liquityOpen = async (proxy, maxFeePercentage, collAmount, LUSDAmount, from, to, isFork = false) => {
     const { upperHint, lowerHint } = await getHints(
@@ -1411,13 +1520,12 @@ const liquityEthGainToTrove = async (proxy, lqtyTo) => {
 };
 
 /*
- _____ _     _      _               ______                 _
-/  __ \ |   (_)    | |              | ___ \               | |
-| /  \/ |__  _  ___| | _____ _ __   | |_/ / ___  _ __   __| |___
-| |   | '_ \| |/ __| |/ / _ \ '_ \  | ___ \/ _ \| '_ \ / _` / __|
-| \__/\ | | | | (__|   <  __/ | | | | |_/ / (_) | | | | (_| \__ \
- \____/_| |_|_|\___|_|\_\___|_| |_| \____/ \___/|_| |_|\__,_|___/
-
+  ______  __    __   __    ______  __  ___  _______ .__   __.    .______     ______   .__   __.  _______       _______.
+ /      ||  |  |  | |  |  /      ||  |/  / |   ____||  \ |  |    |   _  \   /  __  \  |  \ |  | |       \     /       |
+|  ,----'|  |__|  | |  | |  ,----'|  '  /  |  |__   |   \|  |    |  |_)  | |  |  |  | |   \|  | |  .--.  |   |   (----`
+|  |     |   __   | |  | |  |     |    <   |   __|  |  . `  |    |   _  <  |  |  |  | |  . `  | |  |  |  |    \   \
+|  `----.|  |  |  | |  | |  `----.|  .  \  |  |____ |  |\   |    |  |_)  | |  `--'  | |  |\   | |  '--'  |.----)   |
+ \______||__|  |__| |__|  \______||__|\__\ |_______||__| \__|    |______/   \______/  |__| \__| |_______/ |_______/
  */
 
 const createChickenBond = async (proxy, lusdAmount, from, signer) => {
@@ -1488,7 +1596,14 @@ const transferNFT = async (proxy, nftAddr, tokenId, from, to) => {
     const tx = await executeAction('TransferNFT', functionData, proxy);
     return tx;
 };
-
+/*
+ _______  ____    ____  _______  ___   ___
+|       \ \   \  /   / |       \ \  \ /  /
+|  .--.  | \   \/   /  |  .--.  | \  V  /
+|  |  |  |  \_    _/   |  |  |  |  >   <
+|  '--'  |    |  |     |  '--'  | /  .  \
+|_______/     |__|     |_______/ /__/ \__\
+*/
 const dydxSupply = async (proxy, tokenAddr, amount, from) => {
     await approve(tokenAddr, proxy.address);
 
@@ -1506,32 +1621,14 @@ const dydxWithdraw = async (proxy, tokenAddr, amount, to) => {
     const tx = await executeAction('DyDxWithdraw', functionData, proxy);
     return tx;
 };
-
-const buyTokenIfNeeded = async (
-    tokenAddr,
-    senderAcc,
-    proxy,
-    standardAmount,
-    wrapper = UNISWAP_WRAPPER,
-) => {
-    const tokenBalance = await balanceOf(tokenAddr, senderAcc.address);
-    if (tokenBalance.lt(standardAmount)) {
-        if (isEth(tokenAddr)) {
-            await depositToWeth(standardAmount.toString());
-        } else {
-            await sell(
-                proxy,
-                WETH_ADDRESS,
-                tokenAddr,
-                hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '55000'), 18),
-                wrapper,
-                senderAcc.address,
-                senderAcc.address,
-            );
-        }
-    }
-};
-
+/*
+ __       __   _______   ______
+|  |     |  | |       \ /  __  \
+|  |     |  | |  .--.  |  |  |  |
+|  |     |  | |  |  |  |  |  |  |
+|  `----.|  | |  '--'  |  `--'  |
+|_______||__| |_______/ \______/
+*/
 const lidoStake = async (amount, from, to, proxy) => {
     const lidoStakeAction = new dfs.actions.lido.LidoStakeAction(amount, from, to);
     const functionData = lidoStakeAction.encodeForDsProxyCall()[1];
@@ -1551,51 +1648,14 @@ const lidoWrap = async (amount, from, to, useEth, proxy) => {
     const tx = await executeAction('LidoWrap', functionData, proxy);
     return tx;
 };
-
-const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount) => {
-    // eslint-disable-next-line max-len
-    const reflexerSaviourDepositAction = new dfs.actions.reflexer.ReflexerNativeUniV2SaviourDepositAction(
-        from,
-        safeId,
-        lpTokenAmount,
-    );
-    const functionData = reflexerSaviourDepositAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('ReflexerNativeUniV2SaviourDeposit', functionData, proxy);
-    return tx;
-};
-
-const reflexerSaviourWithdraw = async (proxy, to, safeId, lpTokenAmount) => {
-    // eslint-disable-next-line max-len
-    const reflexerSaviourWithdrawAction = new dfs.actions.reflexer.ReflexerNativeUniV2SaviourWithdrawAction(
-        to,
-        safeId,
-        lpTokenAmount,
-    );
-    const functionData = reflexerSaviourWithdrawAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('ReflexerNativeUniV2SaviourWithdraw', functionData, proxy);
-    return tx;
-};
-
-const pullTokensInstDSA = async (proxy, dsaAddress, tokens, amounts, to) => {
-    const instPullTokenAction = new dfs.actions.insta.InstPullTokensAction(
-        dsaAddress,
-        tokens,
-        amounts,
-        to,
-    );
-    const functionData = instPullTokenAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('InstPullTokens', functionData, proxy);
-    return tx;
-};
-
-const changeProxyOwner = async (proxy, newOwner) => {
-    const changeProxyOwnerAction = new dfs.actions.basic.ChangeProxyOwnerAction(newOwner);
-    const functionData = changeProxyOwnerAction.encodeForDsProxyCall()[1];
-
-    const tx = await executeAction('ChangeProxyOwner', functionData, proxy);
-    return tx;
-};
-
+/*
+  ______  __    __  .______     ____    ____  _______
+ /      ||  |  |  | |   _  \    \   \  /   / |   ____|
+|  ,----'|  |  |  | |  |_)  |    \   \/   /  |  |__
+|  |     |  |  |  | |      /      \      /   |   __|
+|  `----.|  `--'  | |  |\  \----.  \    /    |  |____
+ \______| \______/  | _| `._____|   \__/     |_______|
+*/
 const curveDeposit = async (
     proxy,
     sender,
@@ -1740,15 +1800,14 @@ const curveStethPoolWithdraw = async (
     return tx;
 };
 
-const automationV2Unsub = async (proxy, protocol, cdpId = 0) => {
-    const automationV2UnsubAction = new dfs.actions.basic.AutomationV2Unsub(protocol, cdpId);
-
-    const functionData = automationV2UnsubAction.encodeForDsProxyCall()[1];
-
-    const tx = await executeAction('AutomationV2Unsub', functionData, proxy);
-    return tx;
-};
-
+/*
+  ______   ______   .__   __. ____    ____  __________   ___
+ /      | /  __  \  |  \ |  | \   \  /   / |   ____\  \ /  /
+|  ,----'|  |  |  | |   \|  |  \   \/   /  |  |__   \  V  /
+|  |     |  |  |  | |  . `  |   \      /   |   __|   >   <
+|  `----.|  `--'  | |  |\   |    \    /    |  |____ /  .  \
+ \______| \______/  |__| \__|     \__/     |_______/__/ \__\
+*/
 const convexDeposit = async (
     proxy,
     from,
@@ -1826,6 +1885,14 @@ const convexClaim = async (
     return executeAction('ConvexClaim', functionData, proxy);
 };
 
+/*
+.___  ___.   ______   .______      .______    __    __    ______           ___           ___   ____    ____  _______    ____    ____  ____
+|   \/   |  /  __  \  |   _  \     |   _  \  |  |  |  |  /  __  \         /   \         /   \  \   \  /   / |   ____|   \   \  /   / |___ \
+|  \  /  | |  |  |  | |  |_)  |    |  |_)  | |  |__|  | |  |  |  |       /  ^  \       /  ^  \  \   \/   /  |  |__       \   \/   /    __) |
+|  |\/|  | |  |  |  | |      /     |   ___/  |   __   | |  |  |  |      /  /_\  \     /  /_\  \  \      /   |   __|       \      /    |__ <
+|  |  |  | |  `--'  | |  |\  \----.|  |      |  |  |  | |  `--'  |     /  _____  \   /  _____  \  \    /    |  |____       \    /     ___) |
+|__|  |__|  \______/  | _| `._____|| _|      |__|  |__|  \______/     /__/     \__\ /__/     \__\  \__/     |_______|       \__/     |____/
+*/
 const morphoAaveV3Supply = async (
     proxy, emodeId, tokenAddr, amount, from, onBehalf, supplyAsColl = true, maxIterations = 0,
 ) => {
@@ -1903,6 +1970,14 @@ const morphoAaveV3Borrow = async (
     return receipt;
 };
 
+/*
+     ___           ___   ____    ____  _______    ____    ____  ____
+    /   \         /   \  \   \  /   / |   ____|   \   \  /   / |___ \
+   /  ^  \       /  ^  \  \   \/   /  |  |__       \   \/   /    __) |
+  /  /_\  \     /  /_\  \  \      /   |   __|       \      /    |__ <
+ /  _____  \   /  _____  \  \    /    |  |____       \    /     ___) |
+/__/     \__\ /__/     \__\  \__/     |_______|       \__/     |____/
+*/
 const aaveV3DelegateCredit = async (
     proxy, assetId, amount, rateMode, delegatee,
 ) => {
@@ -1915,6 +1990,7 @@ const aaveV3DelegateCredit = async (
 
     return receipt;
 };
+
 const aaveV3DelegateCreditWithSig = async (
     proxy, debtToken, delegator, delegatee, value, deadline, v, r, s,
 ) => {
@@ -2181,6 +2257,7 @@ const aaveV3SetEModeCalldataOptimised = async (
 
     return receipt;
 };
+
 const aaveV3ClaimRewards = async (
     proxy, assets, amount, to, rewardsAsset,
 ) => {
@@ -2235,7 +2312,14 @@ const aaveV3SwitchCollateralCallDataOptimised = async (
 
     return receipt;
 };
-
+/*
+     _______..______      ___      .______       __  ___
+    /       ||   _  \    /   \     |   _  \     |  |/  /
+   |   (----`|  |_)  |  /  ^  \    |  |_)  |    |  '  /
+    \   \    |   ___/  /  /_\  \   |      /     |    <
+.----)   |   |  |     /  _____  \  |  |\  \----.|  .  \
+|_______/    | _|    /__/     \__\ | _| `._____||__|\__\
+*/
 const sparkSupply = async (
     proxy, market, amount, tokenAddr, assetId, from, signer,
 ) => {
@@ -2561,7 +2645,14 @@ const sDaiUnwrap = async (
 
     return receipt;
 };
-
+/*
+     _______. __  ___ ____    ____
+    /       ||  |/  / \   \  /   /
+   |   (----`|  '  /   \   \/   /
+    \   \    |    <     \_    _/
+.----)   |   |  .  \      |  |
+|_______/    |__|\__\     |__|
+*/
 const skyStake = async (
     proxy, stakingContract, stakingToken, from, amount,
 ) => {
@@ -2598,6 +2689,14 @@ const skyClaimRewards = async (
     return receipt;
 };
 
+/*
+.___  ___.   ______   .______      .______    __    __    ______           ___           ___   ____    ____  _______
+|   \/   |  /  __  \  |   _  \     |   _  \  |  |  |  |  /  __  \         /   \         /   \  \   \  /   / |   ____|
+|  \  /  | |  |  |  | |  |_)  |    |  |_)  | |  |__|  | |  |  |  |       /  ^  \       /  ^  \  \   \/   /  |  |__
+|  |\/|  | |  |  |  | |      /     |   ___/  |   __   | |  |  |  |      /  /_\  \     /  /_\  \  \      /   |   __|
+|  |  |  | |  `--'  | |  |\  \----.|  |      |  |  |  | |  `--'  |     /  _____  \   /  _____  \  \    /    |  |____
+|__|  |__|  \______/  | _| `._____|| _|      |__|  |__|  \______/     /__/     \__\ /__/     \__\  \__/     |_______|
+*/
 const morphoAaveV2Supply = async (
     proxy,
     tokenAddr,
@@ -2682,6 +2781,14 @@ const morphoClaim = async (
     return receipt;
 };
 
+/*
+.______   .______   .______        ______   .___________.  ______     ______   ______    __
+|   _  \  |   _  \  |   _  \      /  __  \  |           | /  __  \   /      | /  __  \  |  |
+|  |_)  | |  |_)  | |  |_)  |    |  |  |  | `---|  |----`|  |  |  | |  ,----'|  |  |  | |  |
+|   _  <  |   ___/  |      /     |  |  |  |     |  |     |  |  |  | |  |     |  |  |  | |  |
+|  |_)  | |  |      |  |\  \----.|  `--'  |     |  |     |  `--'  | |  `----.|  `--'  | |  `----.
+|______/  | _|      | _| `._____| \______/      |__|      \______/   \______| \______/  |_______|
+*/
 const bprotocolLiquitySPDeposit = async (
     proxy,
     lusdAmount,
@@ -2713,7 +2820,14 @@ const bprotocolLiquitySPWithdraw = async (
 
     return receipt;
 };
-
+/*
+  ______  __    __  .______     ____    ____  _______     __    __       _______. _______
+ /      ||  |  |  | |   _  \    \   \  /   / |   ____|   |  |  |  |     /       ||       \
+|  ,----'|  |  |  | |  |_)  |    \   \/   /  |  |__      |  |  |  |    |   (----`|  .--.  |
+|  |     |  |  |  | |      /      \      /   |   __|     |  |  |  |     \   \    |  |  |  |
+|  `----.|  `--'  | |  |\  \----.  \    /    |  |____    |  `--'  | .----)   |   |  '--'  |
+ \______| \______/  | _| `._____|   \__/     |_______|    \______/  |_______/    |_______/
+*/
 const curveUsdCreate = async (
     proxy,
     controllerAddress,
@@ -3024,6 +3138,14 @@ const curveUsdSelfLiquidate = async (
     return receipt;
 };
 
+/*
+____    ____  ___      __    __   __      .___________.        ___       _______       ___      .______   .___________. _______ .______
+\   \  /   / /   \    |  |  |  | |  |     |           |       /   \     |       \     /   \     |   _  \  |           ||   ____||   _  \
+ \   \/   / /  ^  \   |  |  |  | |  |     `---|  |----`      /  ^  \    |  .--.  |   /  ^  \    |  |_)  | `---|  |----`|  |__   |  |_)  |
+  \      / /  /_\  \  |  |  |  | |  |         |  |          /  /_\  \   |  |  |  |  /  /_\  \   |   ___/      |  |     |   __|  |      /
+   \    / /  _____  \ |  `--'  | |  `----.    |  |         /  _____  \  |  '--'  | /  _____  \  |  |          |  |     |  |____ |  |\  \----.
+    \__/ /__/     \__\ \______/  |_______|    |__|        /__/     \__\ |_______/ /__/     \__\ | _|          |__|     |_______|| _| `._____|
+*/
 const tokenizedVaultAdapterDeposit = async ({
     proxy,
     amount,
@@ -3116,22 +3238,14 @@ const tokenizedVaultAdapterWithdraw = async ({
     return { receipt, assetsToApprove: await action.getAssetsToApprove() };
 };
 
-const proxyApproveToken = async (
-    proxy,
-    tokenAddr,
-    spender,
-    amount,
-) => {
-    const approveAction = new dfs.actions.basic.ApproveTokenAction(
-        tokenAddr, spender, amount,
-    );
-    const functionData = approveAction.encodeForDsProxyCall()[1];
-
-    const receipt = await executeAction('ApproveToken', functionData, proxy);
-
-    return receipt;
-};
-
+/*
+.___  ___.   ______   .______      .______    __    __    ______      .______    __       __    __   _______
+|   \/   |  /  __  \  |   _  \     |   _  \  |  |  |  |  /  __  \     |   _  \  |  |     |  |  |  | |   ____|
+|  \  /  | |  |  |  | |  |_)  |    |  |_)  | |  |__|  | |  |  |  |    |  |_)  | |  |     |  |  |  | |  |__
+|  |\/|  | |  |  |  | |      /     |   ___/  |   __   | |  |  |  |    |   _  <  |  |     |  |  |  | |   __|
+|  |  |  | |  `--'  | |  |\  \----.|  |      |  |  |  | |  `--'  |    |  |_)  | |  `----.|  `--'  | |  |____
+|__|  |__|  \______/  | _| `._____|| _|      |__|  |__|  \______/     |______/  |_______| \______/  |_______|
+*/
 const morphoBlueSupply = async (
     proxy,
     marketParams,
@@ -3220,7 +3334,6 @@ const morphoBlueWithdrawCollateral = async (
 
     return receipt;
 };
-
 const morphoBlueBorrow = async (
     proxy,
     marketParams,
@@ -3304,7 +3417,14 @@ const morphoBlueSetAuthWithSig = async (
 
     return receipt;
 };
-
+/*
+ __       __          ___      .___  ___.      ___       __       _______ .__   __.  _______
+|  |     |  |        /   \     |   \/   |     /   \     |  |     |   ____||  \ |  | |       \
+|  |     |  |       /  ^  \    |  \  /  |    /  ^  \    |  |     |  |__   |   \|  | |  .--.  |
+|  |     |  |      /  /_\  \   |  |\/|  |   /  /_\  \   |  |     |   __|  |  . `  | |  |  |  |
+|  `----.|  `----./  _____  \  |  |  |  |  /  _____  \  |  `----.|  |____ |  |\   | |  '--'  |
+|_______||_______/__/     \__\ |__|  |__| /__/     \__\ |_______||_______||__| \__| |_______/
+*/
 const llamalendCreate = async (
     proxy,
     controllerAddress,
@@ -3526,6 +3646,14 @@ const llamalendSelfLiquidate = async (
     return receipt;
 };
 
+/*
+ _______  __    __   __       _______ .______     ____    ____  ___
+|   ____||  |  |  | |  |     |   ____||   _  \    \   \  /   / |__ \
+|  |__   |  |  |  | |  |     |  |__   |  |_)  |    \   \/   /     ) |
+|   __|  |  |  |  | |  |     |   __|  |      /      \      /     / /
+|  |____ |  `--'  | |  `----.|  |____ |  |\  \----.  \    /     / /_
+|_______| \______/  |_______||_______|| _| `._____|   \__/     |____|
+*/
 const eulerV2Supply = async (
     proxy,
     vault,
@@ -3613,6 +3741,14 @@ const eulerV2Payback = async (
     return receipt;
 };
 
+/*
+ __       __    ______      __    __   __  .___________.____    ____    ____    ____  ___
+|  |     |  |  /  __  \    |  |  |  | |  | |           |\   \  /   /    \   \  /   / |__ \
+|  |     |  | |  |  |  |   |  |  |  | |  | `---|  |----` \   \/   /      \   \/   /     ) |
+|  |     |  | |  |  |  |   |  |  |  | |  |     |  |       \_    _/        \      /     / /
+|  `----.|  | |  `--'  '--.|  `--'  | |  |     |  |         |  |           \    /     / /_
+|_______||__|  \_____\_____\\______/  |__|     |__|         |__|            \__/     |____|
+*/
 const liquityV2Open = async (
     proxy,
     market,
@@ -3664,9 +3800,46 @@ const liquityV2Open = async (
     return tx;
 };
 
+/*
+ _______  __       __    __   __   _______
+|   ____||  |     |  |  |  | |  | |       \
+|  |__   |  |     |  |  |  | |  | |  .--.  |
+|   __|  |  |     |  |  |  | |  | |  |  |  |
+|  |     |  `----.|  `--'  | |  | |  '--'  |
+|__|     |_______| \______/  |__| |_______/
+*/
+const fluidT1VaultOpen = async (
+    proxy,
+    vault,
+    collAmount,
+    debtAmount,
+    from,
+    to,
+    wrapBorrowedEth,
+) => {
+    const action = new dfs.actions.fluid.FluidVaultT1OpenAction(
+        vault,
+        collAmount,
+        debtAmount,
+        from,
+        to,
+        wrapBorrowedEth,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const tx = await executeAction('FluidVaultT1Open', functionData, proxy);
+    return tx;
+};
+
 module.exports = {
     executeAction,
     sell,
+
+    buyTokenIfNeeded,
+    pullTokensInstDSA,
+    changeProxyOwner,
+    automationV2Unsub,
+    updateSubData,
+    proxyApproveToken,
 
     openMcd,
     supplyMcd,
@@ -3747,20 +3920,12 @@ module.exports = {
 
     curveDeposit,
     curveWithdraw,
-
     curveGaugeDeposit,
     curveGaugeWithdraw,
     curveMintCrv,
     curveClaimFees,
-
     curveStethPoolDeposit,
     curveStethPoolWithdraw,
-
-    buyTokenIfNeeded,
-    pullTokensInstDSA,
-
-    changeProxyOwner,
-    automationV2Unsub,
 
     gUniDeposit,
     gUniWithdraw,
@@ -3805,8 +3970,6 @@ module.exports = {
     sDaiWrap,
     sDaiUnwrap,
     sparkDelegateCredit,
-
-    updateSubData,
 
     convexDeposit,
     convexWithdraw,
@@ -3858,8 +4021,6 @@ module.exports = {
     tokenizedVaultAdapterRedeem,
     tokenizedVaultAdapterWithdraw,
 
-    proxyApproveToken,
-
     morphoBlueSupply,
     morphoBlueWithdraw,
     morphoBlueSupplyCollateral,
@@ -3889,8 +4050,11 @@ module.exports = {
     eulerV2Borrow,
     eulerV2Payback,
 
-    liquityV2Open,
     claimAaveFromStkGho,
     startUnstakeGho,
     finalizeUnstakeGho,
+
+    liquityV2Open,
+
+    fluidT1VaultOpen,
 };

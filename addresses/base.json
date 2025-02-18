@@ -1272,5 +1272,104 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
-    }
-  ]
+    },
+    {
+      "name": "FluidVaultT1Open",
+      "address": "0xCd4d5896AEAf97e738d3E7215ac01c2CF97474bc",
+      "id": "0x35b25e65",
+      "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Open",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidVaultT1Supply",
+      "address": "0x028ACA45244d4897ff80ef65ed0b735Bb0D4B0A5",
+      "id": "0xaf5b03c0",
+      "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Supply",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidVaultT1Withdraw",
+      "address": "0x26bE6a2EdE97aE826ed9DA8Fb79428037fe55cEB",
+      "id": "0xf304b35f",
+      "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidVaultT1Borrow",
+      "address": "0x8dCBF436cC0971FE29886E58CE0CAeb36d43E91E",
+      "id": "0x237b3650",
+      "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Borrow",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidVaultT1Payback",
+      "address": "0x56ca4b24D85c33F3A4Be918b7f2ce2831a723704",
+      "id": "0x101b4845",
+      "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidVaultT1Adjust",
+      "address": "0x93bFBf44b87be48D46b25Fe0C7F549A79Ca05167",
+      "id": "0xce25def6",
+      "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidRatioTrigger",
+      "address": "0xc105d88118EC10f5BCBdF11E3897746De0De3C2f",
+      "id": "0x6de6c127",
+      "path": "contracts/actions/fluid/vaultT1/FluidRatioTrigger",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidRatioCheck",
+      "address": "0x676dfB55F94a22FA2C9569BC3eCBEb8074A36B06",
+      "id": "0xac7a850e",
+      "path": "contracts/actions/fluid/vaultT1/FluidRatioCheck",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidView",
+      "address": "0x5835CaDbA8843CD6d6d55782908351E9c74221aD",
+      "id": "0xae75a797",
+      "path": "contracts/actions/fluid/vaultT1/FluidView",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  }
+]

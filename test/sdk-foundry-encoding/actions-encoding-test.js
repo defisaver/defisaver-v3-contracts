@@ -1336,4 +1336,163 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
+
+    /* //////////////////////////////////////////////////////////////
+                           FLUID_VAULT
+    ////////////////////////////////////////////////////////////// */
+    describe('FluidVaultT1', () => {
+        const vault = '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e';
+        const nftId = 1;
+        const from = '0x0000000000000000000000000000000000000002';
+        const to = '0x0000000000000000000000000000000000000003';
+        const collAmount = 1000;
+        const debtAmount = 500;
+        const collAction = 0; // 0: SUPPLY, 1: WITHDRAW
+        const debtAction = 0; // 0: PAYBACK, 1: BORROW
+        const shouldWrap = true;
+        let foundryContract;
+
+        before(async () => {
+            foundryContract = await getFoundryEncodingContract();
+        });
+        it('Test fluidVaultT1OpenEncode', async () => {
+            const FluidVaultT1Open = await hre.ethers.getContractFactory('FluidVaultT1Open');
+            const sdkEncoded = (
+                new sdk.actions.fluid.FluidVaultT1OpenAction(
+                    vault,
+                    collAmount,
+                    debtAmount,
+                    from,
+                    to,
+                    shouldWrap,
+                )
+            ).encodeForDsProxyCall()[1];
+            const foundryEncoded = FluidVaultT1Open.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.fluidVaultT1OpenEncode(
+                    vault,
+                    collAmount,
+                    debtAmount,
+                    from,
+                    to,
+                    shouldWrap,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+        it('Test fluidVaultT1AdjustEncode', async () => {
+            const FluidVaultT1Adjust = await hre.ethers.getContractFactory('FluidVaultT1Adjust');
+            const sdkEncoded = (
+                new sdk.actions.fluid.FluidVaultT1AdjustAction(
+                    vault,
+                    nftId,
+                    collAmount,
+                    debtAmount,
+                    from,
+                    to,
+                    shouldWrap,
+                    collAction,
+                    debtAction,
+                )
+            ).encodeForDsProxyCall()[1];
+            const foundryEncoded = FluidVaultT1Adjust.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.fluidVaultT1AdjustEncode(
+                    vault,
+                    nftId,
+                    collAmount,
+                    debtAmount,
+                    from,
+                    to,
+                    shouldWrap,
+                    collAction,
+                    debtAction,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+        it('Test fluidVaultT1PaybackEncode', async () => {
+            const FluidVaultT1Payback = await hre.ethers.getContractFactory('FluidVaultT1Payback');
+            const sdkEncoded = (
+                new sdk.actions.fluid.FluidVaultT1PaybackAction(
+                    vault,
+                    nftId,
+                    debtAmount,
+                    from,
+                )
+            ).encodeForDsProxyCall()[1];
+            const foundryEncoded = FluidVaultT1Payback.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.fluidVaultT1PaybackEncode(
+                    vault,
+                    nftId,
+                    debtAmount,
+                    from,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+        it('Test fluidVaultT1WithdrawEncode', async () => {
+            const FluidVaultT1Withdraw = await hre.ethers.getContractFactory('FluidVaultT1Withdraw');
+            const sdkEncoded = (
+                new sdk.actions.fluid.FluidVaultT1WithdrawAction(
+                    vault,
+                    nftId,
+                    collAmount,
+                    to,
+                    shouldWrap,
+                )
+            ).encodeForDsProxyCall()[1];
+            const foundryEncoded = FluidVaultT1Withdraw.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.fluidVaultT1WithdrawEncode(
+                    vault,
+                    nftId,
+                    collAmount,
+                    to,
+                    shouldWrap,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test fluidVaultT1SupplyEncode', async () => {
+            const FluidVaultT1Supply = await hre.ethers.getContractFactory('FluidVaultT1Supply');
+            const sdkEncoded = (
+                new sdk.actions.fluid.FluidVaultT1SupplyAction(
+                    vault,
+                    nftId,
+                    collAmount,
+                    from,
+                )
+            ).encodeForDsProxyCall()[1];
+            const foundryEncoded = FluidVaultT1Supply.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.fluidVaultT1SupplyEncode(
+                    vault,
+                    nftId,
+                    collAmount,
+                    from,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+        it('Test fluidVaultT1BorrowEncode', async () => {
+            const FluidVaultT1Borrow = await hre.ethers.getContractFactory('FluidVaultT1Borrow');
+            const sdkEncoded = (
+                new sdk.actions.fluid.FluidVaultT1BorrowAction(
+                    vault,
+                    nftId,
+                    debtAmount,
+                    to,
+                    shouldWrap,
+                )
+            ).encodeForDsProxyCall()[1];
+            const foundryEncoded = FluidVaultT1Borrow.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.fluidVaultT1BorrowEncode(
+                    vault,
+                    nftId,
+                    debtAmount,
+                    to,
+                    shouldWrap,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+    });
 });
