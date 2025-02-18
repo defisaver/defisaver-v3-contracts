@@ -72,7 +72,7 @@ contract FluidVaultT1Borrow is ActionBase, FluidHelper {
         IFluidVaultT1(_params.vault).operate(
             _params.nftId,
             0,
-            int256(_params.amount),
+            signed256(_params.amount),
             shouldWrapBorrowedEth ? address(this) : _params.to
         );
 

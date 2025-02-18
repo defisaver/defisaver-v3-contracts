@@ -5808,17 +5808,15 @@ const createLiquityV2FLRepayOnPriceStrategy = () => {
 const createFluidT1RepayStrategy = () => {
     const fluidT1RepayStrategy = new dfs.Strategy('FluidT1RepayStrategy');
     fluidT1RepayStrategy.addSubSlot('&nftId', 'uint256');
-    fluidT1RepayStrategy.addSubSlot('&vault', 'uint256');
-    fluidT1RepayStrategy.addSubSlot('&collToken', 'uint256');
-    fluidT1RepayStrategy.addSubSlot('&debtToken', 'uint256');
+    fluidT1RepayStrategy.addSubSlot('&vault', 'address');
     fluidT1RepayStrategy.addSubSlot('&ratioState', 'uint256');
     fluidT1RepayStrategy.addSubSlot('&targetRatio', 'uint256');
     fluidT1RepayStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
 
     const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
-        '&nftId',
-        '&ratio',
-        '&ratioState',
+        'nftId',
+        'ratio',
+        'ratioState',
     );
     fluidT1RepayStrategy.addTrigger(fluidRatioTrigger);
 
@@ -5866,9 +5864,7 @@ const createFluidT1RepayStrategy = () => {
 const createFluidT1FLRepayStrategy = () => {
     const fluidT1FLRepayStrategy = new dfs.Strategy('FluidT1FLRepayStrategy');
     fluidT1FLRepayStrategy.addSubSlot('&nftId', 'uint256');
-    fluidT1FLRepayStrategy.addSubSlot('&vault', 'uint256');
-    fluidT1FLRepayStrategy.addSubSlot('&collToken', 'uint256');
-    fluidT1FLRepayStrategy.addSubSlot('&debtToken', 'uint256');
+    fluidT1FLRepayStrategy.addSubSlot('&vault', 'address');
     fluidT1FLRepayStrategy.addSubSlot('&ratioState', 'uint256');
     fluidT1FLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
     fluidT1FLRepayStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
@@ -5876,9 +5872,9 @@ const createFluidT1FLRepayStrategy = () => {
     fluidT1FLRepayStrategy.addSubSlot('&DebtActionType.PAYBACK', 'uint8');
 
     const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
-        '&nftId',
-        '&ratio',
-        '&ratioState',
+        'nftId',
+        'ratio',
+        'ratioState',
     );
     fluidT1FLRepayStrategy.addTrigger(fluidRatioTrigger);
 
@@ -5930,17 +5926,15 @@ const createFluidT1FLRepayStrategy = () => {
 const createFluidT1BoostStrategy = () => {
     const fluidT1BoostStrategy = new dfs.Strategy('FluidT1BoostStrategy');
     fluidT1BoostStrategy.addSubSlot('&nftId', 'uint256');
-    fluidT1BoostStrategy.addSubSlot('&vault', 'uint256');
-    fluidT1BoostStrategy.addSubSlot('&collToken', 'uint256');
-    fluidT1BoostStrategy.addSubSlot('&debtToken', 'uint256');
+    fluidT1BoostStrategy.addSubSlot('&vault', 'address');
     fluidT1BoostStrategy.addSubSlot('&ratioState', 'uint256');
     fluidT1BoostStrategy.addSubSlot('&targetRatio', 'uint256');
     fluidT1BoostStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
 
     const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
-        '&nftId',
-        '&ratio',
-        '&ratioState',
+        'nftId',
+        'ratio',
+        'ratioState',
     );
     fluidT1BoostStrategy.addTrigger(fluidRatioTrigger);
 
@@ -5988,9 +5982,7 @@ const createFluidT1BoostStrategy = () => {
 const createFluidT1FLBoostStrategy = () => {
     const fluidT1FLBoostStrategy = new dfs.Strategy('FluidT1FLBoostStrategy');
     fluidT1FLBoostStrategy.addSubSlot('&nftId', 'uint256');
-    fluidT1FLBoostStrategy.addSubSlot('&vault', 'uint256');
-    fluidT1FLBoostStrategy.addSubSlot('&collToken', 'uint256');
-    fluidT1FLBoostStrategy.addSubSlot('&debtToken', 'uint256');
+    fluidT1FLBoostStrategy.addSubSlot('&vault', 'address');
     fluidT1FLBoostStrategy.addSubSlot('&ratioState', 'uint256');
     fluidT1FLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
     fluidT1FLBoostStrategy.addSubSlot('&wrapEth', 'bool'); // hardcode to true
@@ -5998,9 +5990,9 @@ const createFluidT1FLBoostStrategy = () => {
     fluidT1FLBoostStrategy.addSubSlot('&DebtActionType.BORROW', 'uint8');
 
     const fluidRatioTrigger = new dfs.triggers.FluidRatioTrigger(
-        '&nftId',
-        '&ratio',
-        '&ratioState',
+        'nftId',
+        'ratio',
+        'ratioState',
     );
     fluidT1FLBoostStrategy.addTrigger(fluidRatioTrigger);
 
@@ -6048,6 +6040,58 @@ const createFluidT1FLBoostStrategy = () => {
     fluidT1FLBoostStrategy.addAction(fluidRatioCheckAction);
 
     return fluidT1FLBoostStrategy.encodeForDsProxyCall();
+};
+
+const createLiquityV2PaybackFromSPStrategy = () => {
+    const liquityV2PaybackFromSPStrategy = new dfs.Strategy('LiquityV2PaybackFromSPStrategy');
+    liquityV2PaybackFromSPStrategy.addSubSlot('&market', 'address');
+    liquityV2PaybackFromSPStrategy.addSubSlot('&troveId', 'address');
+    liquityV2PaybackFromSPStrategy.addSubSlot('&boldToken', 'uint256');
+    liquityV2PaybackFromSPStrategy.addSubSlot('&targetRatio', 'uint256');
+    liquityV2PaybackFromSPStrategy.addSubSlot('&ratioState', 'uint256');
+
+    const liquityV2RatioTrigger = new dfs.triggers.LiquityV2RatioTrigger(
+        '&market',
+        '&troveId',
+        '&ratio',
+        '&ratioState',
+    );
+    liquityV2PaybackFromSPStrategy.addTrigger(liquityV2RatioTrigger);
+
+    const liquityV2WithdrawSP = new dfs.actions.liquityV2.LiquityV2SPWithdrawAction(
+        '%marketForSP',
+        '&proxy', // where to send bold tokens
+        '&proxy', // where to send coll. gains
+        '%boldAmount', // calc. by backend to hit ratio trigger
+        '%doClaim' // set false by backend
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gas', // sent by backend
+        '&boldToken',
+        '$1',
+    );
+
+    const liquityV2Payback = new dfs.actions.liquityV2.LiquityV2PaybackAction(
+        '&market',
+        '&proxy',
+        '&troveId',
+        '$2'
+    );
+
+    const liquityV2RatioCheckAction = new dfs.actions.checkers.LiquityV2RatioCheckAction(
+        '&market',
+        '&troveId',
+        '&ratioState',
+        '&targetRatio',
+    );
+
+    liquityV2PaybackFromSPStrategy.addAction(liquityV2WithdrawSP);
+    liquityV2PaybackFromSPStrategy.addAction(feeTakingAction);
+    liquityV2PaybackFromSPStrategy.addAction(liquityV2Payback);
+    liquityV2PaybackFromSPStrategy.addAction(liquityV2RatioCheckAction);
+
+    return liquityV2PaybackFromSPStrategy.encodeForDsProxyCall();
 };
 
 module.exports = {
@@ -6160,4 +6204,5 @@ module.exports = {
     createFluidT1FLRepayStrategy,
     createFluidT1BoostStrategy,
     createFluidT1FLBoostStrategy,
+    createLiquityV2PaybackFromSPStrategy,
 };

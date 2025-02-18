@@ -90,7 +90,7 @@ contract FluidVaultT1Payback is ActionBase, FluidHelper {
         }
 
         // type(int256).min will trigger max payback inside the vault.
-        int256 paybackAmount =  maxPayback ? type(int256).min : -int256(_params.amount);
+        int256 paybackAmount =  maxPayback ? type(int256).min : -signed256(_params.amount);
 
         // If we send more ETH than needed, the vault will refund the dust.
         uint256 msgValue = isEthPayback ? _params.amount : 0;
@@ -107,8 +107,11 @@ contract FluidVaultT1Payback is ActionBase, FluidHelper {
                 ? address(this).balance
                 : borrowToken.getBalance(address(this));
 
-            // Sanity check. There should never be a case where we end up with fewer borrowed tokens than before.
-            require(borrowTokenBalanceAfter >= borrowTokenBalanceBefore);
+            // Sanity check: if we didn't perform a max payback directly from the wallet,
+            // the number of borrowed tokens should not decrease.
+            if (_params.from != address(this)) {
+                require(borrowTokenBalanceAfter >= borrowTokenBalanceBefore);
+            }
 
             // We pulled slightly more than needed, so refund dust amount to 'from' address.
             if (borrowTokenBalanceAfter > borrowTokenBalanceBefore) {

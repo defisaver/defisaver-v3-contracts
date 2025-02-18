@@ -6,10 +6,9 @@ import { IERC20 } from "../../../interfaces/IERC20.sol";
 import { IFluidVaultResolver } from "../../../interfaces/fluid/IFluidVaultResolver.sol";
 import { FluidHelper } from "./FluidHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { DSMath } from "../../../DS/DSMath.sol";
 
 /// @title Helper methods for Fluid ratio calc.
-contract FluidRatioHelper is DSMath, FluidHelper {
+contract FluidRatioHelper is FluidHelper {
 
     uint256 internal constant T1_VAULT_TYPE = 1e4;
     uint256 internal constant T2_VAULT_TYPE = 2e4;
@@ -17,6 +16,8 @@ contract FluidRatioHelper is DSMath, FluidHelper {
     uint256 internal constant T4_VAULT_TYPE = 4e4;
 
     uint256 internal constant ORACLE_PRICE_DECIMALS = 27;
+    uint256 internal constant ETH_DECIMALS = 18;
+    uint256 internal constant WAD = 1e18;
 
     /// @notice Gets ratio for a fluid position
     /// @param _nftId nft id of the fluid position
@@ -26,7 +27,7 @@ contract FluidRatioHelper is DSMath, FluidHelper {
             IFluidVaultResolver.VaultEntireData memory vaultData
         ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
 
-        // TODO: For now, only handle the case for T1 Vaults
+        // For now, only handle the case for T1 Vaults
         if (vaultData.constantVariables.vaultType == T1_VAULT_TYPE) {
             uint256 collAmount = userPosition.supply;
             address collToken = vaultData.constantVariables.supplyToken.token0;
@@ -36,8 +37,8 @@ contract FluidRatioHelper is DSMath, FluidHelper {
 
             if (debtAmount == 0) return uint256(0);
 
-            uint256 collDec = collToken != TokenUtils.ETH_ADDR ? IERC20(collToken).decimals() : 18;
-            uint256 debtDec = debtToken != TokenUtils.ETH_ADDR ? IERC20(debtToken).decimals() : 18;
+            uint256 collDec = collToken != TokenUtils.ETH_ADDR ? IERC20(collToken).decimals() : ETH_DECIMALS;
+            uint256 debtDec = debtToken != TokenUtils.ETH_ADDR ? IERC20(debtToken).decimals() : ETH_DECIMALS;
 
             /**
             * @dev Examples:

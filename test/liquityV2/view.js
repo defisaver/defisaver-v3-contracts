@@ -1,61 +1,41 @@
-const hre = require('hardhat');
-const {
-    takeSnapshot,
-    revertToSnapshot,
-    getOwnerAddr,
-    addrs,
-    network,
-    redeploy,
-} = require('../utils');
-const { topUp } = require('../../scripts/utils/fork');
+const { redeploy } = require('../utils');
 
 const liquityV2ViewTest = async () => {
     describe('LiquityV2-View', function () {
         this.timeout(100000);
-        let isFork;
-        let snapshot;
-        let senderAcc;
         let viewContract;
-
         before(async () => {
-            senderAcc = (await hre.ethers.getSigners())[0];
-            isFork = hre.network.name === 'fork';
-            if (isFork) {
-                await topUp(senderAcc.address);
-                await topUp(getOwnerAddr());
-                viewContract = await hre.ethers.getContractAt('LiquityV2View', '0x7DC97868B4b2Fd31c1002E9bfFe9a4aF2b534c06');
-            } else {
-                viewContract = await redeploy('LiquityV2View', addrs[network].REGISTRY_ADDR, false, isFork);
-            }
-        });
-        beforeEach(async () => {
-            snapshot = await takeSnapshot();
-        });
-        afterEach(async () => {
-            await revertToSnapshot(snapshot);
+            viewContract = await redeploy('LiquityV2View');
         });
         it('...test view calls', async () => {
-            const market = '0xd7199b16945f1ebaa0b301bf3d05bf489caa408b';
-            const troveId = '67424636261021319576291112307907375011768731867548422484544596741348990692391';
+            const wethMarket = '0x38e1F07b954cFaB7239D7acab49997FBaAD96476';
+            const wstEthMarket = '0x2D4ef56cb626E9a4C90c156018BA9CE269573c61';
+            const manager = '0x0000000000b1B2EA2ECDaEd0C7A3c402218E3CB0';
+            const troveId = '94475724957201766309293177327232136323947474751316324443378021355493015469143';
+            const troveIdInBatch = '100971632194317813901703704274499391669891555930010698877408310628094817035824';
 
-            const data = await viewContract.getMarketData(market);
-            console.log(data);
-            const troveInfo = await viewContract.getTroveInfo(market, troveId);
-            console.log(troveInfo);
-            const trovesForOwner = await viewContract.getUserTroves(
-                troveInfo.owner,
-                market,
-                0,
-                10,
+            const troveData = await viewContract.callStatic.getTroveInfo(wethMarket, troveId);
+            console.log(troveData);
+
+            const troveDataBatch = await viewContract.callStatic.getTroveInfo(
+                wstEthMarket, troveIdInBatch,
             );
-            console.log(trovesForOwner);
+            console.log(troveDataBatch);
+
+            const marketData = await viewContract.callStatic.getMarketData(wethMarket);
+            console.log(marketData);
+
+            const sortedTrovesData = await viewContract.getMultipleSortedTroves(wethMarket, 0, 10);
+            console.log(sortedTrovesData);
+
+            const batchManagerData = await viewContract.getBatchManagerInfo(wethMarket, manager);
+            console.log(batchManagerData);
         });
     });
 };
 
 describe('LiquityV2-View', function () {
     this.timeout(80000);
-
     it('...test LiquityV2 view', async () => {
         await liquityV2ViewTest();
     }).timeout(50000);

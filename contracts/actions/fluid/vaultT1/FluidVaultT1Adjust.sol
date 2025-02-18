@@ -18,7 +18,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     /// @param vault Address of the Fluid Vault T1
     /// @param nftId ID of the NFT representing the position
     /// @param collAmount Amount of collateral to supply/withdraw. In case of max withdraw, use type(uint256).max
-    /// @param debtAmount Amount of debt to payback/borrow
+    /// @param debtAmount Amount of debt to payback/borrow. In case of max payback, use type(uint256).max
     /// @param from Address to pull tokens from
     /// @param to Address to send tokens to
     /// @param sendWrappedEth Whether to wrap the ETH into WETH before sending to 'to' address
@@ -210,7 +210,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             _supplyToken.approveToken(_params.vault, _params.collAmount);
         }
         
-        supplyTokenAmount = int256(_params.collAmount);
+        supplyTokenAmount = signed256(_params.collAmount);
     }
 
     /// @dev Helper function to handle withdraw action
@@ -221,7 +221,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
 
         supplyTokenAmount = _params.collAmount == type(uint256).max
             ? type(int256).min
-            : -int256(_params.collAmount);
+            : -signed256(_params.collAmount);
     }
 
     /// @dev Helper function to handle borrow action
@@ -230,7 +230,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     function _handleBorrow(Params memory _params) internal pure returns (int256 borrowTokenAmount) {
         if (_params.debtAmount == 0) return 0;
 
-        borrowTokenAmount = int256(_params.debtAmount);
+        borrowTokenAmount = signed256(_params.debtAmount);
     }
 
     /// @dev Helper function to handle payback action
@@ -278,7 +278,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             _borrowToken.approveToken(_params.vault, _params.debtAmount);
         }
 
-        borrowTokenAmount = snapshot.maxPayback ? type(int256).min : -int256(_params.debtAmount);
+        borrowTokenAmount = snapshot.maxPayback ? type(int256).min : -signed256(_params.debtAmount);
     }
 
     /// @dev Helper function to handle max payback refund
@@ -294,8 +294,11 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             ? address(this).balance
             : _borrowToken.getBalance(address(this));
 
-        // Sanity check. There should never be a case where we end up with fewer borrowed tokens than before.
-        require(borrowTokenBalanceAfter >= _snapshot.borrowTokenBalanceBefore);
+        // Sanity check: if we didn't perform a max payback directly from the wallet,
+        // the number of borrowed tokens should not decrease.
+        if (_params.from != address(this)) {
+            require(borrowTokenBalanceAfter >= _snapshot.borrowTokenBalanceBefore);
+        }
 
         // We pulled slightly more than needed, so refund dust amount to 'from' address.
         if (borrowTokenBalanceAfter > _snapshot.borrowTokenBalanceBefore) {

@@ -10,9 +10,13 @@ import { ISortedTroves } from "../interfaces/liquityV2/ISortedTroves.sol";
 import { IHintHelpers } from "../interfaces/liquityV2/IHintHelpers.sol";
 import { IPriceFeed } from "../interfaces/liquityV2/IPriceFeed.sol";
 import { ITroveNFT } from "../interfaces/liquityV2/ITroveNFT.sol";
+import { IMultiTroveGetter } from "../interfaces/liquityV2/IMultiTroveGetter.sol";
 import { LiquityV2Helper } from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
 
 contract LiquityV2View is LiquityV2Helper {
+
+    error InvalidMarketAddress();
+
     struct TroveData {
         uint256 troveId;
         address owner;
@@ -25,6 +29,7 @@ contract LiquityV2View is LiquityV2Helper {
         uint256 annualInterestRate;
         address interestBatchManager;
         uint256 batchDebtShares;
+        uint256 lastInterestRateAdjTime;
     }
 
     struct MarketData {
@@ -48,6 +53,7 @@ contract LiquityV2View is LiquityV2Helper {
         address priceFeed;
         uint256 collPrice;
         bool isShutDown;
+        uint256 boldDepositInSp;
     }
 
     function isShutDown(address _market) public view returns (bool) {
@@ -141,7 +147,7 @@ contract LiquityV2View is LiquityV2Helper {
         if (nextId == _troveId) nextId = sortedTroves.getNext(_troveId);
     }
 
-    function getTroveInfo(address _market, uint256 _troveId) external view returns (TroveData memory trove) {
+    function getTroveInfo(address _market, uint256 _troveId) external returns (TroveData memory trove) {
         ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
         IPriceFeed priceFeed = IPriceFeed(IAddressesRegistry(_market).priceFeed());
         ITroveManager.LatestTroveData memory latestTroveData = troveManager.getLatestTroveData(_troveId);
@@ -159,9 +165,10 @@ contract LiquityV2View is LiquityV2Helper {
         trove.annualInterestRate = latestTroveData.annualInterestRate;
         trove.collAmount = latestTroveData.entireColl;
         trove.debtAmount = latestTroveData.entireDebt;
-        trove.collPrice = priceFeed.lastGoodPrice();
+        (trove.collPrice, ) = priceFeed.fetchPrice();
         trove.TCRatio = troveManager.getCurrentICR(_troveId, trove.collPrice);
         trove.collToken = IAddressesRegistry(_market).collToken();
+        trove.lastInterestRateAdjTime = latestTroveData.lastInterestRateAdjTime;
 
         try troveNFT.ownerOf(_troveId) returns (address owner) {
             trove.owner = owner;
@@ -190,7 +197,7 @@ contract LiquityV2View is LiquityV2Helper {
         address _market,
         uint256 _startIndex,
         uint256 _endIndex
-    )   external view returns (ExistingTrove[] memory troves, int256 nextFreeTroveIndex) 
+    ) external view returns (ExistingTrove[] memory troves, int256 nextFreeTroveIndex) 
     {   
         nextFreeTroveIndex = -1; 
         IAddressesRegistry market = IAddressesRegistry(_market);
@@ -214,9 +221,10 @@ contract LiquityV2View is LiquityV2Helper {
         }
     }
 
-    function getMarketData(address _market) external view returns (MarketData memory data) {
+    function getMarketData(address _market) external returns (MarketData memory data) {
         IAddressesRegistry registry = IAddressesRegistry(_market);
         address borrowerOperations = registry.borrowerOperations();
+        (uint256 collPrice, ) = IPriceFeed(registry.priceFeed()).fetchPrice();
         data = MarketData({
             market: _market,
             CCR: registry.CCR(),
@@ -236,8 +244,9 @@ contract LiquityV2View is LiquityV2Helper {
             activePool: registry.activePool(),
             hintHelpers: registry.hintHelpers(),
             priceFeed: registry.priceFeed(),
-            collPrice: IPriceFeed(registry.priceFeed()).lastGoodPrice(),
-            isShutDown: isShutDown(_market)
+            collPrice: collPrice,
+            isShutDown: isShutDown(_market),
+            boldDepositInSp: IStabilityPool(registry.stabilityPool()).getTotalBoldDeposits()
         });
     }
 
@@ -330,6 +339,49 @@ contract LiquityV2View is LiquityV2Helper {
     }
 
     function _getTroveDebt(ITroveManager _troveManager, uint256 _troveId) internal view returns (uint256 debt) {
-        (debt, , , , , , , , , ) = _troveManager.Troves(_troveId);
+        ITroveManager.LatestTroveData memory latestTroveData = _troveManager.getLatestTroveData(_troveId);
+        debt = latestTroveData.entireDebt;
+    }
+
+    function getMultipleSortedTroves(address _market, int256 _startIdx, uint256 _count)
+        external view returns (IMultiTroveGetter.CombinedTroveData[] memory) 
+    {
+        uint256 collIndex = _getCollIndexFromMarket(_market);
+        ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
+
+        IMultiTroveGetter.CombinedTroveData[] memory troves = 
+            IMultiTroveGetter(MULTI_TROVE_GETTER_ADDR).getMultipleSortedTroves(collIndex, _startIdx, _count);
+
+        for (uint256 i = 0; i < troves.length; i++) {
+            ITroveManager.LatestTroveData memory latestTroveData = troveManager.getLatestTroveData(troves[i].id);
+
+            troves[i].debt = latestTroveData.entireDebt;
+            troves[i].coll = latestTroveData.entireColl;
+            troves[i].annualInterestRate = latestTroveData.annualInterestRate;
+            troves[i].lastInterestRateAdjTime = latestTroveData.lastInterestRateAdjTime;
+        }
+
+        return troves;
+    }
+
+    function getBatchManagerInfo(address _market, address _manager)
+        external view returns (
+            IBorrowerOperations.InterestBatchManager memory managerData,
+            ITroveManager.LatestBatchData memory batchData
+        )
+    {
+        IBorrowerOperations borrowOps = IBorrowerOperations(IAddressesRegistry(_market).borrowerOperations());
+        ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
+
+        managerData = borrowOps.getInterestBatchManager(_manager);
+        batchData = troveManager.getLatestBatchData(_manager);
+    }
+
+    function _getCollIndexFromMarket(address _market) internal pure returns (uint256) {
+        if (_market == WETH_MARKET_ADDR) return WETH_COLL_INDEX;
+        if (_market == WSTETH_MARKET_ADDR) return WSTETH_COLL_INDEX;
+        if (_market == RETH_MARKET_ADDR) return RETH_COLL_INDEX;
+
+        revert InvalidMarketAddress();
     }
 }
