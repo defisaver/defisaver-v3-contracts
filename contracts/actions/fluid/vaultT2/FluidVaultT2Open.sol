@@ -20,7 +20,6 @@ contract FluidVaultT2Open is ActionBase, FluidHelper, FluidSupplyDexCommon {
         uint256 debtAmount;
         address from;
         address to;
-        bool wrapBorrowedEth;
     }
 
     /// @inheritdoc ActionBase
@@ -76,12 +75,6 @@ contract FluidVaultT2Open is ActionBase, FluidHelper, FluidSupplyDexCommon {
         params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[8], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[9], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[10], _subData, _returnValues);
-        params.wrapBorrowedEth = _parseParamUint(
-            params.wrapBorrowedEth ? 1 : 0,
-            _paramMapping[11],
-            _subData,
-            _returnValues
-        ) == 1;
 
         (uint256 nftId, bytes memory logData) = _open(params);
         emit ActionEvent("FluidVaultT2Open", logData);
@@ -106,10 +99,7 @@ contract FluidVaultT2Open is ActionBase, FluidHelper, FluidSupplyDexCommon {
     function _open(Params memory _params) internal returns (uint256, bytes memory) {
         IFluidVaultT2.ConstantViews memory constants = IFluidVaultT2(_params.vault).constantsView();
 
-        bool shouldWrapBorrowedEth = 
-            _params.wrapBorrowedEth &&
-            _params.debtAmount > 0 &&
-            constants.borrowToken.token0 == TokenUtils.ETH_ADDR;
+        bool shouldWrapBorrowedEth = _params.debtAmount > 0 && constants.borrowToken.token0 == TokenUtils.ETH_ADDR;
 
         SupplyDexParams memory dexData = SupplyDexParams({
             vault: _params.vault,

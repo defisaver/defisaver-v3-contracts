@@ -41,7 +41,6 @@ contract FluidVaultT2Withdraw is ActionBase, FluidHelper {
         ShareVariableData variableData;
         ShareExactData exactData;
         address to;
-        bool wrapWithdrawnEth;
     }
 
     /// @inheritdoc ActionBase
@@ -93,12 +92,6 @@ contract FluidVaultT2Withdraw is ActionBase, FluidHelper {
             _returnValues
         );
         params.to = _parseParamAddr(params.to, _paramMapping[9], _subData, _returnValues);
-        params.wrapWithdrawnEth = _parseParamUint(
-            params.wrapWithdrawnEth ? 1 : 0,
-            _paramMapping[10],
-            _subData,
-            _returnValues
-        ) == 1;
 
         (uint256 shares, bytes memory logData) = _withdraw(params);
         emit ActionEvent("FluidVaultT2Withdraw", logData);
@@ -136,12 +129,10 @@ contract FluidVaultT2Withdraw is ActionBase, FluidHelper {
         IFluidVaultT2.Tokens memory _tokens
     ) internal returns (uint256 collSharesBurned) {
         bool sendColl0AsWrapped =
-            _params.wrapWithdrawnEth &&
             _tokens.token0 == TokenUtils.ETH_ADDR &&
             _params.variableData.collAmount0 > 0;
 
         bool sendColl1AsWrapped =
-            _params.wrapWithdrawnEth &&
             _tokens.token1 == TokenUtils.ETH_ADDR &&
             _params.variableData.collAmount1 > 0;
 
@@ -149,9 +140,9 @@ contract FluidVaultT2Withdraw is ActionBase, FluidHelper {
 
         ( , int256 collShares , ) = IFluidVaultT2(_params.vault).operate(
             _params.nftId,
-            -int256(_params.variableData.collAmount0),
-            -int256(_params.variableData.collAmount1),
-            -int256(_params.variableData.maxCollSharesToBurn),
+            -signed256(_params.variableData.collAmount0),
+            -signed256(_params.variableData.collAmount1),
+            -signed256(_params.variableData.maxCollSharesToBurn),
             0, /* newDebt_ */
             sendTokensTo
         );
@@ -182,12 +173,10 @@ contract FluidVaultT2Withdraw is ActionBase, FluidHelper {
         IFluidVaultT2.Tokens memory _tokens
     ) internal returns (uint256 collSharesBurned) {
         bool sendColl0AsWrapped =
-            _params.wrapWithdrawnEth &&
             _tokens.token0 == TokenUtils.ETH_ADDR &&
             _params.exactData.minCollAmount0 > 0;
 
         bool sendColl1AsWrapped =
-            _params.wrapWithdrawnEth &&
             _tokens.token1 == TokenUtils.ETH_ADDR &&
             _params.exactData.minCollAmount1 > 0;
 
@@ -196,13 +185,13 @@ contract FluidVaultT2Withdraw is ActionBase, FluidHelper {
         // type(int256).min will burn all the user's shares inside the vault
         int256 sharesToBurn = _params.exactData.perfectCollShares == type(uint256).max
             ? type(int256).min
-            : -int256(_params.exactData.perfectCollShares);
+            : -signed256(_params.exactData.perfectCollShares);
 
         ( , int256[] memory retVals ) = IFluidVaultT2(_params.vault).operatePerfect(
             _params.nftId,
             sharesToBurn,
-            -int256(_params.exactData.minCollAmount0),
-            -int256(_params.exactData.minCollAmount1),
+            -signed256(_params.exactData.minCollAmount0),
+            -signed256(_params.exactData.minCollAmount1),
             0, /* newDebt_ */
             sendTokensTo
         );

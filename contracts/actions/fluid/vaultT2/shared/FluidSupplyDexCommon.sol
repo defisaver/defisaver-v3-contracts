@@ -4,8 +4,9 @@ pragma solidity =0.8.24;
 
 import { IFluidVaultT2 } from "../../../../interfaces/fluid/IFluidVaultT2.sol";
 import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { FluidHelper } from "../../helpers/FluidHelper.sol";
 
-contract FluidSupplyDexCommon {
+contract FluidSupplyDexCommon is FluidHelper {
     using TokenUtils for address;
 
     enum ShareType {
@@ -13,6 +14,7 @@ contract FluidSupplyDexCommon {
         EXACT
     }
 
+    // TODO: Refactor later, debt data should not be here
     struct SupplyDexParams {
         address vault;
         ShareType shareType;
@@ -73,14 +75,14 @@ contract FluidSupplyDexCommon {
             ? vars.collAmount0
             : (vars.isColl1Native ? vars.collAmount1 : 0);
 
-        int exactCollSharesMinted;
+        int256 exactCollSharesMinted;
 
         (nftId, exactCollSharesMinted, ) = IFluidVaultT2(_params.vault).operate{ value: msgValue }(
             0, /* _nftId */
-            int256(vars.collAmount0),
-            int256(vars.collAmount1),
-            int256(_params.variableData.minCollShares),
-            int256(_params.debtAmount),
+            signed256(vars.collAmount0),
+            signed256(vars.collAmount1),
+            signed256(_params.variableData.minCollShares),
+            signed256(_params.debtAmount),
             _params.to
         );
 
@@ -116,10 +118,10 @@ contract FluidSupplyDexCommon {
 
         (nftId, retVals) = IFluidVaultT2(_params.vault).operatePerfect{ value: msgValue }(
             0, /* _nftId */
-            int256(_params.exactData.perfectCollShares),
-            int256(vars.collAmount0),
-            int256(vars.collAmount1),
-            int256(_params.debtAmount),
+            signed256(_params.exactData.perfectCollShares),
+            signed256(vars.collAmount0),
+            signed256(vars.collAmount1),
+            signed256(_params.debtAmount),
             _params.to
         );
 
