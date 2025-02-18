@@ -132,6 +132,22 @@ const proxyApproveToken = async (
     return receipt;
 };
 
+const kingClaim = async (
+    proxy,
+    to,
+    amount,
+    root,
+    proof,
+) => {
+    const action = new dfs.actions.basic.KingClaimAction(
+        to, amount, root, proof,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('KingClaim', functionData, proxy);
+
+    return receipt;
+};
+
 /*
  __________   ___   ______  __    __       ___      .__   __.   _______  _______
 |   ____\  \ /  /  /      ||  |  |  |     /   \     |  \ |  |  /  _____||   ____|
@@ -4057,4 +4073,6 @@ module.exports = {
     liquityV2Open,
 
     fluidT1VaultOpen,
+
+    kingClaim,
 };
