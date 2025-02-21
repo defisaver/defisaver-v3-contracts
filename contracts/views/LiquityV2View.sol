@@ -11,12 +11,9 @@ import { IHintHelpers } from "../interfaces/liquityV2/IHintHelpers.sol";
 import { IPriceFeed } from "../interfaces/liquityV2/IPriceFeed.sol";
 import { ITroveNFT } from "../interfaces/liquityV2/ITroveNFT.sol";
 import { IMultiTroveGetter } from "../interfaces/liquityV2/IMultiTroveGetter.sol";
-
 import { LiquityV2Helper } from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
 
 contract LiquityV2View is LiquityV2Helper {
-    using TokenUtils for address;
 
     error InvalidMarketAddress();
 

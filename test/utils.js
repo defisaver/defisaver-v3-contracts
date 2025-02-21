@@ -9,6 +9,7 @@ const hre = require('hardhat');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const storageSlots = require('./storageSlots.json');
+const { BigNumber } = hre.ethers;
 
 const { getAllFiles } = require('../scripts/hardhat-tasks-functions');
 
@@ -70,6 +71,7 @@ const addrs = {
         STRATEGY_EXECUTOR_ADDR: '0xFaa763790b26E7ea354373072baB02e680Eeb07F',
         REFILL_CALLER: '0x33fDb79aFB4456B604f376A45A546e7ae700e880',
         MORPHO_BLUE_VIEW: '0x10B621823D4f3E85fBDF759e252598e4e097C1fd',
+        FLUID_VAULT_T1_RESOLVER_ADDR: '0x814c8C7ceb1411B364c2940c4b9380e739e06686',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -145,6 +147,7 @@ const addrs = {
         ZEROX_WRAPPER: '0x94a58e456F1De766b13e45104D79201A218c1607',
         STRATEGY_EXECUTOR_ADDR: '0xa4F087267828C3Ca8ac18b6fE7f456aB20781AA6',
         REFILL_CALLER: '0xcbA094ae1B2B363886CC7f428206dB1b116834A2',
+        FLUID_VAULT_T1_RESOLVER_ADDR: '0xD6373b375665DE09533478E8859BeCF12427Bb5e',
     },
     base: {
         PROXY_REGISTRY: '0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d',
@@ -179,6 +182,7 @@ const addrs = {
         FEE_RECIPIENT_ADDR: '0xEDFc68e2874B0AFc0963e18AE4D68522aEc7f97D',
         REFILL_CALLER: '0xBefc466abe547B1785f382883833330a47C573f7',
         MORPHO_BLUE_VIEW: '0x53c0E962bd0AC53928ca04703238b2ec2894195B',
+        FLUID_VAULT_T1_RESOLVER_ADDR: '0x79B3102173EB84E6BCa182C7440AfCa5A41aBcF8',
     },
 };
 
@@ -370,6 +374,8 @@ const coinGeckoHelper = {
     OP: 'optimism',
     cbETH: 'cb-eth',
     FRAX: 'frax',
+    GHO: 'gho',
+    sUSDS: 'sUSDS',
 };
 
 const BN2Float = hre.ethers.utils.formatUnits;
@@ -499,7 +505,6 @@ const setStorageAt = async (address, index, value) => {
     if (hre.network.config.type === 'tenderly') {
         prefix = 'tenderly';
     }
-    console.log(`${prefix}_setStorageAt`);
 
     await hre.ethers.provider.send(`${prefix}_setStorageAt`, [address, index, value]);
     await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
@@ -943,6 +948,53 @@ const formatMockExchangeObj = async (
     ];
 };
 
+/// @notice formats exchange object and sets mock wrapper balance.
+/// Rate is calculated based on USD feeds inside TokenPriceHelper contract.
+const formatMockExchangeObjUsdFeed = async (
+    srcTokenInfo,
+    destTokenInfo,
+    srcAmount,
+    wrapperContract,
+) => {
+    const tokenHelper = await getTokenHelperContract();
+    const srcTokenPriceInUSD = await tokenHelper.getPriceInUSD(srcTokenInfo.addresses[chainIds[network]]);
+    const destTokenPriceInUSD = await tokenHelper.getPriceInUSD(destTokenInfo.addresses[chainIds[network]]);
+
+    const srcTokenPriceInUsdBN = BigNumber.from(srcTokenPriceInUSD);
+    const destTokenPriceInUsdBN = BigNumber.from(destTokenPriceInUSD);
+    const ten = BigNumber.from(10);
+    const destScale = ten.pow(destTokenInfo.decimals);
+    const srcScale = ten.pow(srcTokenInfo.decimals);
+
+    const destTokenAmountBN = srcAmount
+        .mul(srcTokenPriceInUsdBN)
+        .mul(destScale)
+        .div(destTokenPriceInUsdBN)
+        .div(srcScale)
+        .mul(2);
+
+    console.log(destTokenAmountBN);
+
+    await setBalance(
+        destTokenInfo.addresses[chainIds[network]],
+        wrapperContract.address,
+        destTokenAmountBN,
+    );
+
+    return [
+        srcTokenInfo.addresses[chainIds[network]],
+        destTokenInfo.addresses[chainIds[network]],
+        srcAmount,
+        0,
+        0,
+        0,
+        nullAddress,
+        wrapperContract.address,
+        hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [0]),
+        [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
+    ];
+};
+
 // eslint-disable-next-line max-len
 const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee, minPrice = 0) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
@@ -1049,7 +1101,6 @@ const formatExchangeObjCurve = async (
 const formatExchangeObjSdk = async (
     srcAddr, destAddr, amount, wrapper, boldSrc = false, boldDest = false,
 ) => {
-    console.log({ srcAddr, destAddr });
     const { AlphaRouter, SwapType } = await import('@uniswap/smart-order-router');
     const {
         CurrencyAmount,
@@ -1500,6 +1551,7 @@ module.exports = {
     formatExchangeObj,
     formatExchangeObjSdk,
     formatExchangeObjForOffchain,
+    formatMockExchangeObjUsdFeed,
     isEth,
     sendEther,
     impersonateAccount,
