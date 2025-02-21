@@ -57,9 +57,6 @@ import { FluidVaultT1Withdraw } from "../../contracts/actions/fluid/vaultT1/Flui
 import { FluidVaultT1Borrow } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Borrow.sol";
 import { FluidVaultT1Payback } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Payback.sol";
 import { FluidVaultT1Adjust } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Adjust.sol";
-import { FluidVaultT2Open } from "../../contracts/actions/fluid/vaultT2/FluidVaultT2Open.sol";
-import { FluidSupplyDexCommon } from "../../contracts/actions/fluid/vaultT2/shared/FluidSupplyDexCommon.sol";
-
 
 contract ActionsUtils {
 
@@ -1083,29 +1080,4 @@ contract ActionsUtils {
             })
         );
     }
-
-    function fluidVaultT2OpenEncode(
-        address _vault,
-        FluidSupplyDexCommon.ShareType _shareType,
-        FluidSupplyDexCommon.SupplyVariableData memory _variableData,
-        FluidSupplyDexCommon.SupplyExactData memory _exactData,
-        uint256 _debtAmount,
-        address _from,
-        address _to,
-        bool _wrapBorrowedEth
-    ) public pure returns (bytes memory params) {
-        params = abi.encode(
-            FluidVaultT2Open.Params({
-                vault: _vault,
-                shareType: _shareType,
-                variableData: _variableData,
-                exactData: _exactData,
-                debtAmount: _debtAmount,
-                from: _from,
-                to: _to,
-                wrapBorrowedEth: _wrapBorrowedEth
-            })
-        );
-    }
-
 }

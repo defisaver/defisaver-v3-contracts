@@ -3,11 +3,15 @@
 pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../interfaces/fluid/IFluidVaultT1.sol";
-import { FluidLiquidityPaybackCommon } from "../common/liquidity/FluidLiquidityPaybackCommon.sol";
+import { IFluidVaultResolver } from "../../../interfaces/fluid/IFluidVaultResolver.sol";
+import { FluidPaybackLiquidityLogic } from "../logic/liquidity/FluidPaybackLiquidityLogic.sol";
+import { FluidLiquidityModel } from "../helpers/FluidLiquidityModel.sol";
+import { FluidHelper } from "../helpers/FluidHelper.sol";
+import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Payback debt to Fluid Vault T1 (1_col:1_debt)
-contract FluidVaultT1Payback is ActionBase, FluidLiquidityPaybackCommon {
+contract FluidVaultT1Payback is ActionBase, FluidHelper {
 
     /// @param vault The address of the Fluid Vault T1
     /// @param nftId ID of the NFT representing the position
@@ -57,14 +61,18 @@ contract FluidVaultT1Payback is ActionBase, FluidLiquidityPaybackCommon {
     function _payback(Params memory _params) internal returns (uint256, bytes memory) {
         IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(_params.vault).constantsView();
 
-        uint256 exactPaybackAmount = _liquidityPayback(
-            LiquidityPaybackParams({
-                from: _params.from,
+        (IFluidVaultResolver.UserPosition memory userPosition, ) = 
+            IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_params.nftId);
+
+        uint256 exactPaybackAmount = FluidPaybackLiquidityLogic.payback(
+            FluidLiquidityModel.PaybackData({
                 vault: _params.vault,
-                borrowToken: constants.borrowToken,
+                vaultType: FluidVaultTypes.T1_VAULT_TYPE,
                 nftId: _params.nftId,
+                borrowToken: constants.borrowToken,
                 amount: _params.amount,
-                vaultType: T1_VAULT_TYPE
+                from: _params.from,
+                position: userPosition
             })
         );
 

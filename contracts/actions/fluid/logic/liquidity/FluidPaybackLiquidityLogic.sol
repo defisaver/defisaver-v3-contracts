@@ -4,68 +4,59 @@ pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../../interfaces/fluid/IFluidVaultT1.sol";
 import { IFluidVaultT2 } from "../../../../interfaces/fluid/IFluidVaultT2.sol";
-import { IFluidVaultResolver } from "../../../../interfaces/fluid/IFluidVaultResolver.sol";
-import { FluidHelper } from "../../helpers/FluidHelper.sol";
+
+import { FluidLiquidityModel } from "../../helpers/FluidLiquidityModel.sol";
+import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
+
 import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { DFSMath } from "../../../../utils/math/DFSMath.sol";
 
-contract FluidLiquidityPaybackCommon is FluidHelper {
+library FluidPaybackLiquidityLogic {
     using TokenUtils for address;
+    using DFSMath for uint256;
+    using FluidVaultTypes for uint256;
 
-    error InvalidVaultType(uint256 vaultType);
-
-    struct LiquidityPaybackParams {
-        address from;
-        address vault;
-        address borrowToken;
-        uint256 nftId;
-        uint256 amount;
-        uint256 vaultType;
-    }
-
-    function _liquidityPayback(
-        LiquidityPaybackParams memory _params
+    function payback(
+        FluidLiquidityModel.PaybackData memory _data
     ) internal returns (uint256) {
-        _requireT1orT2Vault(_params.vaultType);
+        _data.vaultType.requireT1orT2Vault();
 
-        bool isEthPayback = _params.borrowToken == TokenUtils.ETH_ADDR;
-
-        (IFluidVaultResolver.UserPosition memory userPosition, ) = 
-            IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_params.nftId);
+        bool isEthPayback = _data.borrowToken == TokenUtils.ETH_ADDR;
 
         uint256 borrowTokenBalanceBefore;
         bool maxPayback;
-        if (_params.amount > userPosition.borrow) {
+        if (_data.amount > _data.position.borrow) {
             maxPayback = true;
             // The exact full payback amount is dynamically calculated inside the vault and can surpass the recorded debt.
             // To account for this, we need to pull slightly more than the recorded debt.
             // We will increase the amount by 0.001% and add an extra fixed margin of 5 units.
             // Note that even though an amount higher than the recorded debt is categorized as max payback,
             // the user must still have sufficient tokens and allowance to cover this extra amount.
-            _params.amount = userPosition.borrow * 100001 / 100000 + 5;
+            _data.amount = _data.position.borrow * 100001 / 100000 + 5;
             // If we pull more than necessary, we will take a snapshot and refund any dust amount.
             borrowTokenBalanceBefore = isEthPayback
                 ? address(this).balance
-                : _params.borrowToken.getBalance(address(this));
+                : _data.borrowToken.getBalance(address(this));
         }
 
         if (isEthPayback) {
-            _params.amount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.amount);
-            TokenUtils.withdrawWeth(_params.amount);
+            _data.amount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_data.from, _data.amount);
+            TokenUtils.withdrawWeth(_data.amount);
         } else {
-            _params.amount = _params.borrowToken.pullTokensIfNeeded(_params.from, _params.amount);
-            _params.borrowToken.approveToken(_params.vault, _params.amount);
+            _data.amount = _data.borrowToken.pullTokensIfNeeded(_data.from, _data.amount);
+            _data.borrowToken.approveToken(_data.vault, _data.amount);
         }
 
         // type(int256).min will trigger max payback inside the vault.
-        int256 paybackAmount =  maxPayback ? type(int256).min : -int256(_params.amount);
+        int256 paybackAmount =  maxPayback ? type(int256).min : -_data.amount.signed256();
 
         // If we send more ETH than needed, the vault will refund the dust.
-        uint256 msgValue = isEthPayback ? _params.amount : 0;
+        uint256 msgValue = isEthPayback ? _data.amount : 0;
 
         int256 exactPaybackAmount = _executePayback(
-            _params.vault,
-            _params.vaultType,
-            _params.nftId,
+            _data.vault,
+            _data.vaultType,
+            _data.nftId,
             paybackAmount,
             msgValue
         );
@@ -73,11 +64,11 @@ contract FluidLiquidityPaybackCommon is FluidHelper {
         if (maxPayback) {
             uint256 borrowTokenBalanceAfter = isEthPayback
                 ? address(this).balance
-                : _params.borrowToken.getBalance(address(this));
+                : _data.borrowToken.getBalance(address(this));
 
             // Sanity check: if we didn't perform a max payback directly from the wallet,
             // the number of borrowed tokens should not decrease.
-            if (_params.from != address(this)) {
+            if (_data.from != address(this)) {
                 require(borrowTokenBalanceAfter >= borrowTokenBalanceBefore);
             }
 
@@ -85,21 +76,15 @@ contract FluidLiquidityPaybackCommon is FluidHelper {
             if (borrowTokenBalanceAfter > borrowTokenBalanceBefore) {
                 uint256 dustAmount = borrowTokenBalanceAfter - borrowTokenBalanceBefore;
                 // This also supports plain ETH.
-                _params.borrowToken.withdrawTokens(_params.from, dustAmount);
+                _data.borrowToken.withdrawTokens(_data.from, dustAmount);
                 // Remove any dust approval left.
                 if (!isEthPayback) {
-                    _params.borrowToken.approveToken(_params.vault, 0);
+                    _data.borrowToken.approveToken(_data.vault, 0);
                 }
             }
         }
 
         return (uint256(-exactPaybackAmount));
-    }
-
-    function _requireT1orT2Vault(uint256 _vaultType) internal pure {
-        if (_vaultType != T1_VAULT_TYPE && _vaultType != T2_VAULT_TYPE) {
-            revert InvalidVaultType(_vaultType);
-        }
     }
 
     function _executePayback(
@@ -109,7 +94,7 @@ contract FluidLiquidityPaybackCommon is FluidHelper {
         int256 _paybackAmount,
         uint256 _msgValue
     ) internal returns (int256 exactPaybackAmount) {
-        if (_vaultType == T1_VAULT_TYPE) {
+        if (_vaultType.isT1Vault()) {
             ( , , exactPaybackAmount) = IFluidVaultT1(_vault).operate{value: _msgValue}(
                 _nftId,
                 0,
@@ -125,7 +110,7 @@ contract FluidLiquidityPaybackCommon is FluidHelper {
             0, /* newColToken1_ */
             0, /* colSharesMinMax_ */
             _paybackAmount,
-            address(0)
+            address(0) /* to_ */
         );
     }
 }
