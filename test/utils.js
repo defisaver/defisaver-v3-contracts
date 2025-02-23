@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-else-return */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable no-await-in-loop */
@@ -68,6 +69,7 @@ const addrs = {
         ZEROX_WRAPPER: '0x11e048f19844B7bAa6D9eA4a20eD4fACF7b757b2',
         STRATEGY_EXECUTOR_ADDR: '0xFaa763790b26E7ea354373072baB02e680Eeb07F',
         REFILL_CALLER: '0x33fDb79aFB4456B604f376A45A546e7ae700e880',
+        MORPHO_BLUE_VIEW: '0x10B621823D4f3E85fBDF759e252598e4e097C1fd',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -155,7 +157,7 @@ const addrs = {
         WRAPPER_EXCHANGE_REGISTRY: '0x586328A3F24E2c1A41D9A3a5B2Ed123A156dB82e',
         PROXY_AUTH_ADDR: '0xD34BBE7398F7F08952b033bbaF2D2xC84231dCEdc',
         AAVE_MARKET: '0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D',
-        SubProxy: '',
+        SubProxy: '0xDC9441c4085B9B302506d64330e178E3C4890C87',
         UNISWAP_V3_WRAPPER: '0x914A50910fF1404Fe62D04846a559c49C55219c3',
         AAVE_V3_VIEW: '0x125b8b832BD7F2EBD77Eef148A6319AdE751C44b',
         AAVE_SUB_PROXY: '',
@@ -176,6 +178,7 @@ const addrs = {
         STRATEGY_EXECUTOR_ADDR: '0x0d099E38f6aF8778c5053349c350Aad906B1432F',
         FEE_RECIPIENT_ADDR: '0xEDFc68e2874B0AFc0963e18AE4D68522aEc7f97D',
         REFILL_CALLER: '0xBefc466abe547B1785f382883833330a47C573f7',
+        MORPHO_BLUE_VIEW: '0x53c0E962bd0AC53928ca04703238b2ec2894195B',
     },
 };
 
@@ -227,6 +230,7 @@ const UNI_ADDR = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984';
 const LINK_ADDR = '0x514910771af9ca656af840dff83e8264ecf986ca';
 const WBTC_ADDR = '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599';
 const LUSD_ADDR = '0x5f98805A4E8be255a32880FDeC7F6728C6568bA0';
+const BOLD_ADDR = '0xb01dd87b29d187f3e3a4bf6cdaebfb97f3d9ab98';
 
 const USDT_ADDR = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 const BUSD_ADDR = '0x4fabb145d64652a948d72533023f6e7a623c7c53';
@@ -244,6 +248,8 @@ const MAX_UINT = '11579208923731619542357098500868790785326998466564056403945758
 const MAX_UINT128 = '340282366920938463463374607431768211455';
 
 const DFS_REG_CONTROLLER = '0xF8f8B3C98Cf2E63Df3041b73f80F362a4cf3A576';
+
+const BALANCER_VAULT_ADDR = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 
 const dydxTokens = ['WETH', 'USDC', 'DAI'];
 
@@ -388,6 +394,15 @@ async function findBalancesSlot(tokenAddress) {
         'IERC20',
         tokenAddress,
     );
+    let setStorageMethod;
+    if (hre.network.config.isAnvil) {
+        setStorageMethod = 'anvil_setStorageAt';
+    } else if (hre.network.config.type === 'tenderly') {
+        setStorageMethod = 'tenderly_setStorageAt';
+    } else {
+        setStorageMethod = 'hardhat_setStorageAt';
+    }
+
     for (let i = 0; i < 100; i++) {
         {
             let probedSlot = hre.ethers.utils.keccak256(
@@ -402,7 +417,7 @@ async function findBalancesSlot(tokenAddress) {
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
 
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+            await hre.ethers.provider.send(setStorageMethod, [
                 tokenAddress,
                 probedSlot,
                 probe,
@@ -410,7 +425,7 @@ async function findBalancesSlot(tokenAddress) {
 
             const balance = await token.balanceOf(account);
             // reset to previous value
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+            await hre.ethers.provider.send(setStorageMethod, [
                 tokenAddress,
                 probedSlot,
                 prev,
@@ -436,7 +451,7 @@ async function findBalancesSlot(tokenAddress) {
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
 
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+            await hre.ethers.provider.send(setStorageMethod, [
                 tokenAddress,
                 probedSlot,
                 probe,
@@ -444,7 +459,7 @@ async function findBalancesSlot(tokenAddress) {
 
             const balance = await token.balanceOf(account);
             // reset to previous value
-            await hre.ethers.provider.send('hardhat_setStorageAt', [
+            await hre.ethers.provider.send(setStorageMethod, [
                 tokenAddress,
                 probedSlot,
                 prev,
@@ -484,6 +499,7 @@ const setStorageAt = async (address, index, value) => {
     if (hre.network.config.type === 'tenderly') {
         prefix = 'tenderly';
     }
+    console.log(`${prefix}_setStorageAt`);
 
     await hre.ethers.provider.send(`${prefix}_setStorageAt`, [address, index, value]);
     await hre.ethers.provider.send('evm_mine', []); // Just mines to the next block
@@ -576,14 +592,18 @@ const fetchStandardAmounts = async () => standardAmounts;
 
 const impersonateAccount = async (account) => {
     await hre.network.provider.request({
-        method: 'hardhat_impersonateAccount',
+        method: hre.network.config.isAnvil
+            ? 'anvil_impersonateAccount'
+            : 'hardhat_impersonateAccount',
         params: [account],
     });
 };
 
 const stopImpersonatingAccount = async (account) => {
     await hre.network.provider.request({
-        method: 'hardhat_stopImpersonatingAccount',
+        method: hre.network.config.isAnvil
+            ? 'anvil_stopImpersonatingAccount'
+            : 'hardhat_stopImpersonatingAccount',
         params: [account],
     });
 };
@@ -660,13 +680,20 @@ const sendEther = async (signer, toAddress, amount) => {
 // eslint-disable-next-line max-len
 const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly, isFork = false, ...args) => {
     if (!isFork) {
-        await hre.network.provider.send('hardhat_setBalance', [
+        const setBalanceMethod = hre.network.config.isAnvil ? 'anvil_setBalance' : 'hardhat_setBalance';
+        console.log(setBalanceMethod);
+        await hre.network.provider.send(setBalanceMethod, [
             getOwnerAddr(),
             '0xC9F2C9CD04674EDEA40000000',
         ]);
-        await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+
+        const setNextBlockBaseFeeMethod = hre.network.config.isAnvil
+            ? 'anvil_setNextBlockBaseFeePerGas'
+            : 'hardhat_setNextBlockBaseFeePerGas';
+        await hre.network.provider.send(setNextBlockBaseFeeMethod, [
             '0x1', // 1 wei
         ]);
+
         if (regAddr === addrs[getNetwork()].REGISTRY_ADDR) {
             await impersonateAccount(getOwnerAddr());
         }
@@ -680,7 +707,6 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);
-    // let deployer;
     // if (isFork) {
     //     // if script is consistenly failing due to tenderly delete this
     //     // deployer = await hre.ethers.provider.getSigner(getOwnerAddr());
@@ -775,7 +801,8 @@ const getContractFromRegistry = async (
 };
 
 const setCode = async (addr, code) => {
-    await hre.network.provider.send('hardhat_setCode', [addr, code]);
+    const setCodeMethod = hre.network.config.isAnvil ? 'anvil_setCode' : 'hardhat_setCode';
+    await hre.network.provider.send(setCodeMethod, [addr, code]);
 };
 
 const setContractAt = async ({ name, address, args = [] }) => {
@@ -1018,7 +1045,10 @@ const formatExchangeObjCurve = async (
     ];
 };
 
-const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
+// TODO[LiquityV2] remove bold 'boldSrc' and 'boldDest' once deployed. This is only used for temporary testing
+const formatExchangeObjSdk = async (
+    srcAddr, destAddr, amount, wrapper, boldSrc = false, boldDest = false,
+) => {
     console.log({ srcAddr, destAddr });
     const { AlphaRouter, SwapType } = await import('@uniswap/smart-order-router');
     const {
@@ -1027,9 +1057,9 @@ const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
         TradeType,
         Percent,
     } = await import('@uniswap/sdk-core');
-
     const chainId = chainIds[network];
-    const srcTokenInfo = getAssetInfoByAddress(srcAddr, chainId);
+    const boldInfo = { decimals: 18, symbol: 'Bold', name: 'Bold Stablecoin' };
+    const srcTokenInfo = boldSrc ? boldInfo : getAssetInfoByAddress(srcAddr, chainId);
     const srcToken = new Token(
         chainId,
         srcAddr,
@@ -1037,7 +1067,7 @@ const formatExchangeObjSdk = async (srcAddr, destAddr, amount, wrapper) => {
         srcTokenInfo.symbol,
         srcTokenInfo.name,
     );
-    const destTokenInfo = getAssetInfoByAddress(destAddr, chainId);
+    const destTokenInfo = boldDest ? boldInfo : getAssetInfoByAddress(destAddr, chainId);
     const destToken = new Token(
         chainId,
         destAddr,
@@ -1309,15 +1339,21 @@ const openStrategyAndBundleStorage = async (isFork) => {
 
 async function setForkForTesting() {
     const senderAcc = (await hre.ethers.getSigners())[0];
-    await hre.network.provider.send('hardhat_setBalance', [
+    const setBalanceMethod = hre.network.config.isAnvil ? 'anvil_setBalance' : 'hardhat_setBalance';
+    await hre.network.provider.send(setBalanceMethod, [
         senderAcc.address,
         '0xC9F2C9CD04674EDEA40000000',
     ]);
-    await hre.network.provider.send('hardhat_setBalance', [
+    await hre.network.provider.send(setBalanceMethod, [
         OWNER_ACC,
         '0xC9F2C9CD04674EDEA40000000',
     ]);
-    await hre.network.provider.send('hardhat_setNextBlockBaseFeePerGas', [
+
+    const setNextBlockBaseFeeMethod = hre.network.config.isAnvil
+        ? 'anvil_setNextBlockBaseFeePerGas'
+        : 'hardhat_setNextBlockBaseFeePerGas';
+
+    await hre.network.provider.send(setNextBlockBaseFeeMethod, [
         '0x1', // 1 wei
     ]);
 }
@@ -1330,9 +1366,11 @@ const resetForkToBlock = async (block) => {
         rpcUrl = process.env[`${network.toUpperCase()}_NODE`];
     }
 
+    const resetMethod = hre.network.config.isAnvil ? 'anvil_reset' : 'hardhat_reset';
+
     if (block) {
         await hre.network.provider.request({
-            method: 'hardhat_reset',
+            method: resetMethod,
             params: [
                 {
                     forking: {
@@ -1344,7 +1382,7 @@ const resetForkToBlock = async (block) => {
         });
     } else {
         await hre.network.provider.request({
-            method: 'hardhat_reset',
+            method: resetMethod,
             params: [
                 {
                     forking: {
@@ -1573,6 +1611,8 @@ module.exports = {
     BOND_NFT_ADDR,
     AAVE_V2_MARKET_ADDR,
     WALLETS,
+    BOLD_ADDR,
+    BALANCER_VAULT_ADDR,
     EETH_ADDR,
     ETHER_FI_LIQUIDITY_POOL,
 };

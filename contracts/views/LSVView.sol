@@ -95,6 +95,8 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
 
         positions = _getPositions(_collTokens, users);
 
+        proxies = new address[](positions.length);
+
         for (uint256 i = 0; i < positions.length; i++) {
             proxies[i] = positions[i].proxy;
         }

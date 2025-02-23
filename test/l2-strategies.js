@@ -1324,7 +1324,296 @@ const createMorphoBlueFLDebtRepayL2Strategy = () => {
     repayStrategy.addAction(morphoBlueRatioCheckAction);
     return repayStrategy.encodeForDsProxyCall();
 };
+const createMorphoBlueBoostOnTargetPriceL2Strategy = () => {
+    const morphoBlueBoostOnTargetPriceStrategy = new dfs.Strategy('MorphoBlueBoostOnTargetPriceL2Strategy');
 
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&loanToken', 'address');
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&oracle', 'address');
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&irm', 'address');
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    morphoBlueBoostOnTargetPriceStrategy.addSubSlot('&user', 'address');
+
+    const trigger = new dfs.triggers.MorphoBluePriceTrigger(
+        '&loanToken', '&collateralToken', '&oracle', '&price', '&priceState',
+    );
+    morphoBlueBoostOnTargetPriceStrategy.addTrigger(trigger);
+
+    const borrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%amountToBorrow', // sent by backend
+        '&user',
+        '&proxy',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&loanToken',
+            '&collateralToken',
+            '$1',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&collateralToken',
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send additional gas cost for L1
+    );
+    const supplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$3',
+        '&proxy',
+        '&user',
+    );
+    const targetRatioCheckAction = new dfs.actions.checkers.MorphoBlueTargetRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&targetRatio',
+    );
+    morphoBlueBoostOnTargetPriceStrategy.addAction(borrowAction);
+    morphoBlueBoostOnTargetPriceStrategy.addAction(sellAction);
+    morphoBlueBoostOnTargetPriceStrategy.addAction(feeTakingAction);
+    morphoBlueBoostOnTargetPriceStrategy.addAction(supplyAction);
+    morphoBlueBoostOnTargetPriceStrategy.addAction(targetRatioCheckAction);
+    return morphoBlueBoostOnTargetPriceStrategy.encodeForDsProxyCall();
+};
+const createMorphoBlueFLBoostOnTargetPriceL2Strategy = () => {
+    const morphoBlueFLBoostOnTargetPriceStrategy = new dfs.Strategy('MorphoBlueFLBoostOnTargetPriceL2Strategy');
+
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&loanToken', 'address');
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&oracle', 'address');
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&irm', 'address');
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    morphoBlueFLBoostOnTargetPriceStrategy.addSubSlot('&user', 'address');
+
+    const trigger = new dfs.triggers.MorphoBluePriceTrigger(
+        '&loanToken', '&collateralToken', '&oracle', '&price', '&priceState',
+    );
+    morphoBlueFLBoostOnTargetPriceStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['&loanToken'],
+            ['%flAmount'], // sent by backend
+            '%nullAddress',
+            [],
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&loanToken',
+            '&collateralToken',
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&collateralToken',
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send additional gas cost for L1
+    );
+    const supplyAction = new dfs.actions.morphoblue.MorphoBlueSupplyCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$3',
+        '&proxy',
+        '&user',
+    );
+    const borrowAction = new dfs.actions.morphoblue.MorphoBlueBorrowAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '$1',
+        '&user',
+        '%flAddress', // sent by backend
+    );
+    const targetRatioCheckAction = new dfs.actions.checkers.MorphoBlueTargetRatioCheckAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '&user',
+        '&targetRatio',
+    );
+    morphoBlueFLBoostOnTargetPriceStrategy.addAction(flAction);
+    morphoBlueFLBoostOnTargetPriceStrategy.addAction(sellAction);
+    morphoBlueFLBoostOnTargetPriceStrategy.addAction(feeTakingAction);
+    morphoBlueFLBoostOnTargetPriceStrategy.addAction(supplyAction);
+    morphoBlueFLBoostOnTargetPriceStrategy.addAction(borrowAction);
+    morphoBlueFLBoostOnTargetPriceStrategy.addAction(targetRatioCheckAction);
+    return morphoBlueFLBoostOnTargetPriceStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3RepayOnPriceL2Strategy = () => {
+    const aaveV3RepayOnPriceStrategy = new dfs.Strategy('AaveV3RepayOnPriceL2');
+
+    aaveV3RepayOnPriceStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3RepayOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3RepayOnPriceStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3RepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3RepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3RepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3RepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const aaveV3Trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3RepayOnPriceStrategy.addTrigger(aaveV3Trigger);
+
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '%useDefaultMarket',
+        '&marketAddr',
+        '%amount', // must stay variable
+        '&proxy', // hardcoded
+        '&collAssetId',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&debtAsset',
+            '$1', //  hardcoded piped from withdraw
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&debtAsset',
+        '$2', // output of sell action
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+
+    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        '%useDefaultMarket',
+        '&marketAddr',
+        '$3', // amount hardcoded piped from fee taking
+        '&proxy', // proxy hardcoded
+        '%rateMode', // variable type of debt
+        '&debtAsset',
+        '&debtAssetId',
+        '&useOnBehalf', // hardcoded false
+        '%onBehalf', // hardcoded 0 as its false
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
+        '&targetRatio',
+        '&marketAddr',
+    );
+
+    aaveV3RepayOnPriceStrategy.addAction(withdrawAction);
+    aaveV3RepayOnPriceStrategy.addAction(sellAction);
+    aaveV3RepayOnPriceStrategy.addAction(feeTakingAction);
+    aaveV3RepayOnPriceStrategy.addAction(paybackAction);
+    aaveV3RepayOnPriceStrategy.addAction(checkerAction);
+
+    return aaveV3RepayOnPriceStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3FlRepayOnPriceL2Strategy = () => {
+    const aaveV3FlRepayOnPriceStrategy = new dfs.Strategy('AaveV3FlRepayOnPriceL2');
+
+    aaveV3FlRepayOnPriceStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3FlRepayOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3FlRepayOnPriceStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3FlRepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3FlRepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3FlRepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3FlRepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3FlRepayOnPriceStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
+        ['&collAsset'],
+        ['%loanAmount'],
+        nullAddress,
+        [],
+    );
+
+    aaveV3FlRepayOnPriceStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&debtAsset',
+            '0', //  can't hard code because of fee
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&debtAsset',
+        '$2', // output of sell action
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+
+    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        '%useDefaultMarket',
+        '&marketAddr',
+        '$3', // amount hardcoded output from fee taking
+        '&proxy', // proxy hardcoded
+        '%rateMode', // variable type of debt
+        '&debtAsset',
+        '&debtAssetId',
+        '&useOnBehalf', // hardcoded false
+        '%onBehalf', // hardcoded 0 as its false
+    );
+
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '%useDefaultMarket',
+        '&marketAddr',
+        '$1', // repay fl amount
+        '%flAddr', // flAddr not hardcoded (tx will fail if not returned to correct addr)
+        '&collAssetId',
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
+        '&targetRatio',
+        '&marketAddr',
+    );
+
+    aaveV3FlRepayOnPriceStrategy.addAction(sellAction);
+    aaveV3FlRepayOnPriceStrategy.addAction(feeTakingAction);
+    aaveV3FlRepayOnPriceStrategy.addAction(paybackAction);
+    aaveV3FlRepayOnPriceStrategy.addAction(withdrawAction);
+    aaveV3FlRepayOnPriceStrategy.addAction(checkerAction);
+
+    return aaveV3FlRepayOnPriceStrategy.encodeForDsProxyCall();
+};
 module.exports = {
     createAaveV3RepayL2Strategy,
     createAaveFLV3RepayL2Strategy,
@@ -1350,4 +1639,8 @@ module.exports = {
     createMorphoBlueRepayL2Strategy,
     createMorphoBlueFLCollRepayL2Strategy,
     createMorphoBlueFLDebtRepayL2Strategy,
+    createMorphoBlueBoostOnTargetPriceL2Strategy,
+    createMorphoBlueFLBoostOnTargetPriceL2Strategy,
+    createAaveV3RepayOnPriceL2Strategy,
+    createAaveV3FlRepayOnPriceL2Strategy,
 };

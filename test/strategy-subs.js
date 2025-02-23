@@ -26,7 +26,6 @@ const {
     IN_REPAY,
     IN_BOOST,
     createMorphoBlueRatioTrigger,
-    createChainLinkPriceTrigger,
 } = require('./triggers');
 
 const {
@@ -41,8 +40,8 @@ const {
     getNetwork,
     getContractFromRegistry,
     chainIds,
+    BOLD_ADDR,
 } = require('./utils');
-const { BigNumber } = require('ethers');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -842,6 +841,74 @@ const subAaveV3OpenOrder = async (
 
     return { subId, strategySub };
 };
+const subLiquityV2RepayBundle = async (
+    proxy, market, troveId, collToken, minRatio, targetRatio, bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.liquityV2Encode.leverageManagement(
+        market,
+        troveId,
+        collToken,
+        BOLD_ADDR,
+        automationSdk.enums.RatioState.UNDER,
+        targetRatio,
+        minRatio,
+        bundleId,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+const subLiquityV2BoostBundle = async (
+    proxy, market, troveId, collToken, maxRatio, targetRatio, bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.liquityV2Encode.leverageManagement(
+        market,
+        troveId,
+        collToken,
+        BOLD_ADDR,
+        automationSdk.enums.RatioState.OVER,
+        targetRatio,
+        maxRatio,
+        bundleId,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+const subLiquityV2CloseBundle = async (
+    proxy, market, troveId, collToken, stopLossPrice, stopLossType, takeProfitPrice, takeProfitType, bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.liquityV2Encode.closeOnPrice(
+        bundleId,
+        market,
+        troveId,
+        collToken,
+        BOLD_ADDR,
+        stopLossPrice,
+        stopLossType,
+        takeProfitPrice,
+        takeProfitType,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+const subMorphoBlueLeverageManagementOnPrice = async (
+    proxy, strategyOrBundleId, marketParams, user, targetRatio, price, priceState, isBundle = true,
+) => {
+    const strategySub = automationSdk.strategySubService.morphoBlueEncode.leverageManagementOnPrice(
+        strategyOrBundleId,
+        isBundle,
+        marketParams.loanToken,
+        marketParams.collateralToken,
+        marketParams.oracle,
+        marketParams.irm,
+        marketParams.lltv,
+        user,
+        targetRatio,
+        price,
+        priceState,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
 
 module.exports = {
     subDcaStrategy,
@@ -878,4 +945,8 @@ module.exports = {
     subMorphoBlueBoostBundle,
     subMorphoBlueRepayBundle,
     subAaveV3OpenOrder,
+    subLiquityV2RepayBundle,
+    subLiquityV2BoostBundle,
+    subLiquityV2CloseBundle,
+    subMorphoBlueLeverageManagementOnPrice,
 };

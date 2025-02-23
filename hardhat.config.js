@@ -72,6 +72,12 @@ module.exports = {
             name: 'base',
             chainId: 8453,
         },
+        anvil: {
+            name: 'mainnet',
+            isAnvil: true,
+            url: 'http://127.0.0.1:8545',
+            chainId: 1,
+        },
         fork: {
             url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
             timeout: 1000000,
