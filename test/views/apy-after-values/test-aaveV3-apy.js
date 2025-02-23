@@ -18,13 +18,16 @@ const {
     fetchAmountinUSDPrice,
     setBalance,
     approve,
+    isNetworkFork,
+    getOwnerAddr,
+    getNetwork,
 } = require('../../utils');
+const { topUp } = require('../../../scripts/utils/fork');
 
-// const collateralTokens = ['wstETH', 'WETH', 'USDC', 'USDT', 'rETH', 'LINK', 'MKR', 'UNI'];
-const collateralTokens = ['WETH'];
-const debtTokens = ['DAI', 'USDC', 'WETH', 'LINK', 'UNI'];
+const collateralTokens = ['WETH', 'wstETH', 'USDC', 'USDT', 'LINK'];
+const debtTokens = ['DAI', 'USDC', 'WETH', 'LINK'];
 
-const aaveV3ApyAfterValuesTest = async () => {
+const aaveV3ApyAfterValuesTest = async (isFork) => {
     describe('Test Aave V3 apy after values', async () => {
         let senderAcc;
         let wallet;
@@ -34,7 +37,11 @@ const aaveV3ApyAfterValuesTest = async () => {
         before(async () => {
             [senderAcc] = await hre.ethers.getSigners();
             wallet = await getProxy(senderAcc.address);
-            aaveV3ViewContract = await redeploy('AaveV3View');
+            if (isFork) {
+                await topUp(senderAcc.address);
+                await topUp(getOwnerAddr());
+            }
+            aaveV3ViewContract = await redeploy('AaveV3View', addrs[getNetwork()].REGISTRY_ADDR, false, isFork);
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -166,10 +173,13 @@ const aaveV3ApyAfterValuesTest = async () => {
                         debtAssetVariableBorrowRate: borrowTokenInfoFullAfter.borrowRateVariable,
                     };
                     console.log('=======================');
+                    console.log('STATE BEFORE');
                     console.log(stateBefore);
                     console.log('----');
+                    console.log('ESTIMATED STATE AFTER');
                     console.log(estimatedStateAfter);
                     console.log('----');
+                    console.log('STATE AFTER');
                     console.log(stateAfter);
                 });
             }
@@ -179,7 +189,8 @@ const aaveV3ApyAfterValuesTest = async () => {
 
 describe('AaveV3-apy-after-values', () => {
     it('... should test AaveV3 APY after values', async () => {
-        await aaveV3ApyAfterValuesTest();
+        const isFork = isNetworkFork();
+        await aaveV3ApyAfterValuesTest(isFork);
     });
 });
 
