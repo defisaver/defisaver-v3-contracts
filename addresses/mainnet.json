@@ -4121,6 +4121,105 @@
         "history": []
     },
     {
+        "name": "FluidVaultT1Open",
+        "address": "0x372404335C05C2493Ff156Ef60cC0B286f6f2971",
+        "id": "0x35b25e65",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Open",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidVaultT1Supply",
+        "address": "0x0c6100209D8A0bb14CC7d18e45dA1bd1E7a3a187",
+        "id": "0xaf5b03c0",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Supply",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidVaultT1Withdraw",
+        "address": "0x5673b9ab4A035C5C7474C344664Be91DaFafa17E",
+        "id": "0xf304b35f",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidVaultT1Borrow",
+        "address": "0x36AF0cE762a016e8b4a80c70Af406DFcBc1FCbD4",
+        "id": "0x237b3650",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Borrow",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidVaultT1Payback",
+        "address": "0x13b021b52989e257537b4C0ee6Ef12E77AFD4652",
+        "id": "0x101b4845",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidVaultT1Adjust",
+        "address": "0x792D40CAE821905A2B57522BF8a77347e7BB0c0a",
+        "id": "0xce25def6",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidRatioTrigger",
+        "address": "0x42EC8D99a10f213D5B891331659C65a93eaF8feC",
+        "id": "0x6de6c127",
+        "path": "contracts/actions/fluid/vaultT1/FluidRatioTrigger",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidRatioCheck",
+        "address": "0x82392FAa69528BbFE3610a5914534A6E1505e680",
+        "id": "0xac7a850e",
+        "path": "contracts/actions/fluid/vaultT1/FluidRatioCheck",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidView",
+        "address": "0xf8e3bbf7c95057be1fD5E741a9ADb73E956dC724",
+        "id": "0xae75a797",
+        "path": "contracts/actions/fluid/vaultT1/FluidView",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "KingClaim",
         "address": "0x483816678e2348bf87f88b0f4eb6a923017de0d6",
         "id": "0xb5997e1a",
