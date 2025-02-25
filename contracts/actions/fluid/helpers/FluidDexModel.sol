@@ -4,8 +4,15 @@ pragma solidity =0.8.24;
 
 import { IFluidVaultResolver } from "../../../interfaces/fluid/IFluidVaultResolver.sol";
 
+/// @title Helper library containing data structs used for interaction with Fluid DEX
 library FluidDexModel {
 
+    /// @notice Enum defining the type of action to be executed
+    /// LIQUIDITY - Interaction goes through the liquidity layer
+    /// VARIABLE_DEX - Interaction goes through the DEX with amounts of tokens specified.
+    ///                Fluid DEX will perform internal swaps and calculate the exact shares to mint/burn.
+    /// EXACT_DEX - Interaction goes through the DEX with exact amount of shares specified.
+    ///             Fluid DEX will calculate the amount of tokens to deposit/withdraw. 
     enum ActionType {
         LIQUIDITY,
         VARIABLE_DEX,
@@ -84,6 +91,48 @@ library FluidDexModel {
         uint256 maxDebtAmount1;
     }
 
+    /// @notice Data struct for supplying liquidity to a Fluid DEX
+    /// @param vault Address of the vault
+    /// @param vaultType Type of the vault. For supply, it will be T2 or T4
+    /// @param nftId NFT id of the position
+    /// @param from Address to pull the tokens from
+    /// @param variableData Data for supplying liquidity with variable amounts. Can be empty
+    /// @param exactData Data for supplying liquidity with exact shares. Can be empty
+    struct SupplyDexData {
+        address vault;
+        uint256 vaultType;
+        uint256 nftId;
+        address from;
+        SupplyVariableData variableData;
+        SupplyExactData exactData;
+    }
+
+    /// @notice Data struct for withdrawing liquidity from a Fluid DEX
+    /// @param vault Address of the vault
+    /// @param vaultType Type of the vault. For withdraw, it will be T2 or T4
+    /// @param nftId NFT id of the position
+    /// @param to Address to send the tokens to
+    /// @param variableData Data for withdrawing liquidity with variable amounts. Can be empty
+    /// @param exactData Data for withdrawing liquidity with exact shares. Can be empty
+    /// @param wrapWithdrawnEth Whether to wrap withdrawn ETH into WETH
+    struct WithdrawDexData {
+        address vault;
+        uint256 vaultType;
+        uint256 nftId;
+        address to;
+        WithdrawVariableData variableData;
+        WithdrawExactData exactData;
+        bool wrapWithdrawnEth;
+    }
+
+    /// @notice Data struct for borrowing tokens from a Fluid DEX
+    /// @param vault Address of the vault
+    /// @param vaultType Type of the vault. For borrow, it will be T3 or T4
+    /// @param nftId NFT id of the position
+    /// @param to Address to send the borrowed tokens to
+    /// @param variableData Data for borrowing tokens with variable amounts. Can be empty
+    /// @param exactData Data for borrowing tokens with exact shares. Can be empty
+    /// @param wrapBorrowedEth Whether to wrap borrowed ETH into WETH
     struct BorrowDexData {
         address vault;
         uint256 vaultType;
@@ -94,6 +143,14 @@ library FluidDexModel {
         bool wrapBorrowedEth;
     }
 
+    /// @notice Data struct for paying back borrowed tokens to a Fluid DEX
+    /// @param vault Address of the vault
+    /// @param vaultType Type of the vault. For payback, it will be T3 or T4
+    /// @param nftId NFT id of the position
+    /// @param from Address to pull the tokens from
+    /// @param variableData Data for paying back borrowed tokens with variable amounts. Can be empty
+    /// @param exactData Data for paying back borrowed tokens with exact shares. Can be empty
+    /// @param position User position data fetched from Fluid Vault Resolver
     struct PaybackDexData {
         address vault;
         uint256 vaultType;
@@ -102,24 +159,5 @@ library FluidDexModel {
         PaybackVariableData variableData;
         PaybackExactData exactData;
         IFluidVaultResolver.UserPosition position;
-    }
-
-    struct SupplyDexData {
-        address vault;
-        uint256 vaultType;
-        uint256 nftId;
-        address from;
-        SupplyVariableData variableData;
-        SupplyExactData exactData;
-    }
-
-    struct WithdrawDexData {
-        address vault;
-        uint256 vaultType;
-        uint256 nftId;
-        address to;
-        WithdrawVariableData variableData;
-        WithdrawExactData exactData;
-        bool wrapWithdrawnEth;
     }
 }

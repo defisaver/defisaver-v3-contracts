@@ -12,13 +12,21 @@ import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Borrow tokens from Fluid DEX vault (T2, T3, T4)
 contract FluidDexBorrow is ActionBase, FluidHelper {
     using TokenUtils for address;
     using FluidVaultTypes for uint256;
 
+    /// @param vault The address of the Fluid DEX vault.
+    /// @param to Address to send the borrowed assets to.
+    /// @param nftId The NFT ID of the position.
+    /// @param borrowAction Borrow action type.
+    /// @param borrowAmount Amount of debt to borrow. Used if borrow action is LIQUIDITY.
+    /// @param borrowVariableData Variable data for borrow action. Used if borrow action is VARIABLE_DEX.
+    /// @param borrowExactData Exact data for borrow action. Used if borrow action is EXACT_DEX.
+    /// @param wrapBorrowedEth Whether to wrap the borrowed ETH into WETH if one of the borrowed assets is ETH.
     struct Params {
         address vault;
-        address from;
         address to;
         uint256 nftId;
         FluidDexModel.ActionType borrowAction;
@@ -38,19 +46,18 @@ contract FluidDexBorrow is ActionBase, FluidHelper {
         Params memory params = parseInputs(_callData);
 
         params.vault = _parseParamAddr(params.vault, _paramMapping[0], _subData, _returnValues);
-        params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
-        params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
-        params.nftId = _parseParamUint(params.nftId, _paramMapping[3], _subData, _returnValues);
+        params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
+        params.nftId = _parseParamUint(params.nftId, _paramMapping[2], _subData, _returnValues);
 
-        params.borrowAction = FluidDexModel.ActionType(_parseParamUint(uint8(params.borrowAction), _paramMapping[4], _subData, _returnValues));
-        params.borrowAmount = _parseParamUint(params.borrowAmount, _paramMapping[5], _subData, _returnValues);
-        params.borrowVariableData.debtAmount0 = _parseParamUint(params.borrowVariableData.debtAmount0, _paramMapping[6], _subData, _returnValues);
-        params.borrowVariableData.debtAmount1 = _parseParamUint(params.borrowVariableData.debtAmount1, _paramMapping[7], _subData, _returnValues);
-        params.borrowVariableData.minDebtShares = _parseParamUint(params.borrowVariableData.minDebtShares, _paramMapping[8], _subData, _returnValues);
-        params.borrowExactData.perfectDebtShares = _parseParamUint(params.borrowExactData.perfectDebtShares, _paramMapping[9], _subData, _returnValues);
-        params.borrowExactData.minDebtAmount0 = _parseParamUint(params.borrowExactData.minDebtAmount0, _paramMapping[10], _subData, _returnValues);
-        params.borrowExactData.minDebtAmount1 = _parseParamUint(params.borrowExactData.minDebtAmount1, _paramMapping[11], _subData, _returnValues);
-        params.wrapBorrowedEth = _parseParamUint(params.wrapBorrowedEth ? 1 : 0, _paramMapping[12], _subData, _returnValues) == 1;
+        params.borrowAction = FluidDexModel.ActionType(_parseParamUint(uint8(params.borrowAction), _paramMapping[3], _subData, _returnValues));
+        params.borrowAmount = _parseParamUint(params.borrowAmount, _paramMapping[4], _subData, _returnValues);
+        params.borrowVariableData.debtAmount0 = _parseParamUint(params.borrowVariableData.debtAmount0, _paramMapping[5], _subData, _returnValues);
+        params.borrowVariableData.debtAmount1 = _parseParamUint(params.borrowVariableData.debtAmount1, _paramMapping[6], _subData, _returnValues);
+        params.borrowVariableData.minDebtShares = _parseParamUint(params.borrowVariableData.minDebtShares, _paramMapping[7], _subData, _returnValues);
+        params.borrowExactData.perfectDebtShares = _parseParamUint(params.borrowExactData.perfectDebtShares, _paramMapping[8], _subData, _returnValues);
+        params.borrowExactData.minDebtAmount0 = _parseParamUint(params.borrowExactData.minDebtAmount0, _paramMapping[9], _subData, _returnValues);
+        params.borrowExactData.minDebtAmount1 = _parseParamUint(params.borrowExactData.minDebtAmount1, _paramMapping[10], _subData, _returnValues);
+        params.wrapBorrowedEth = _parseParamUint(params.wrapBorrowedEth ? 1 : 0, _paramMapping[11], _subData, _returnValues) == 1;
 
         (uint256 borrowAmountOrShares, bytes memory logData) = _borrow(params);
         emit ActionEvent("FluidDexBorrow", logData);

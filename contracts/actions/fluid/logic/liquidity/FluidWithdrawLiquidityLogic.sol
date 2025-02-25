@@ -4,22 +4,25 @@ pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../../interfaces/fluid/IFluidVaultT1.sol";
 import { IFluidVaultT3 } from "../../../../interfaces/fluid/IFluidVaultT3.sol";
-
 import { FluidLiquidityModel } from "../../helpers/FluidLiquidityModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
-
 import { TokenUtils } from "../../../../utils/TokenUtils.sol";
 import { DFSMath } from "../../../../utils/math/DFSMath.sol";
 
+/// @title FluidSupplyLiquidityLogic - Implements the supply of tokens to Fluid liquidity layer
+/// @dev Used only for vaults with liquidity collateral (T1 and T3)
 library FluidWithdrawLiquidityLogic {
     using TokenUtils for address;
     using DFSMath for uint256;
     using FluidVaultTypes for uint256;
 
+    /// @notice Withdraws tokens from a Fluid liquidity layer
+    /// @param _data Withdraw data
+    /// @return Amount of tokens withdrawn. In case of max withdrawal, it will be the exact total amount withdrawn.
     function withdraw(
         FluidLiquidityModel.WithdrawData memory _data
     ) internal returns (uint256) {
-        _data.vaultType.requireT1orT3Vault();
+        _data.vaultType.requireLiquidityCollateral();
 
         bool shouldWrapWithdrawnEth = _data.wrapWithdrawnEth && _data.supplyToken == TokenUtils.ETH_ADDR;
 
@@ -30,15 +33,14 @@ library FluidWithdrawLiquidityLogic {
             ? type(int256).min
             : -_data.amount.signed256();
 
-        if (_data.vaultType.isT1Vault()) {
-            (, withdrawAmount ,) = IFluidVaultT1(_data.vault).operate(
+        ( , withdrawAmount , ) = _data.vaultType.isT1Vault()
+            ? IFluidVaultT1(_data.vault).operate(
                 _data.nftId,
                 withdrawAmount,
-                0, /* newDebt */
+                0, /* newDebt_ */
                 sendTokensTo
-            );
-        } else {
-            (, withdrawAmount ,) = IFluidVaultT3(_data.vault).operate(
+            )
+            : IFluidVaultT3(_data.vault).operate(
                 _data.nftId,
                 withdrawAmount,
                 0, /* newDebtToken0_ */
@@ -46,7 +48,6 @@ library FluidWithdrawLiquidityLogic {
                 0, /* debtSharesMinMax_ */
                 sendTokensTo
             );
-        }
 
         uint256 exactAmount = uint256(-withdrawAmount);
 

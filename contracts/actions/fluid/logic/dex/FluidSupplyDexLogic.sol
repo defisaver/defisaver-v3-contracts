@@ -8,136 +8,121 @@ import { IFluidVaultT4 } from "../../../../interfaces/fluid/IFluidVaultT4.sol";
 
 import { FluidDexModel } from "../../helpers/FluidDexModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
+import { FluidDexTokensUtils } from "../../helpers/FluidDexTokensUtils.sol";
 
 import { TokenUtils } from "../../../../utils/TokenUtils.sol";
 import { DFSMath } from "../../../../utils/math/DFSMath.sol";
 
+/// @title FluidSupplyDexLogic - Implements the supplying of tokens to Fluid DEX
+/// @dev Used only for vaults with smart collateral (T2 and T4)
 library FluidSupplyDexLogic  {
     using TokenUtils for address;
     using DFSMath for uint256;
     using FluidVaultTypes for uint256;
 
-    // Helper struct to store local variables
-    struct PulledCollateralVars {
-        uint256 collAmount0;
-        uint256 collAmount1;
-        bool isColl0Native;
-        bool isColl1Native;
-    }
-
+    /// @notice Supplies tokens to a Fluid DEX using variable amount of shares.
+    /// @param _data Supply data
+    /// @param _tokens Tokens data
+    /// @return nftId NFT ID of the position
+    /// @return collShares Amount of collateral shares minted.
     function supplyVariable(
         FluidDexModel.SupplyDexData memory _data,
         IFluidVault.Tokens memory _tokens
     ) internal returns (uint256 nftId, uint256 collShares) {
-        _data.vaultType.requireT2orT4Vault();
+        _data.vaultType.requireSmartCollateral();
 
-        PulledCollateralVars memory vars;
-
-        (vars.collAmount0, vars.isColl0Native) = _pullTokensIfNeededWithApproval(
+        FluidDexTokensUtils.PulledTokensData memory vars = FluidDexTokensUtils.pullTokensIfNeededWithApproval(
+            _tokens,
+            _data.from,
+            _data.vault,
             _data.variableData.collAmount0,
-            _tokens.token0,
-            _data.from,
-            _data.vault
+            _data.variableData.collAmount1
         );
 
-        (vars.collAmount1, vars.isColl1Native) = _pullTokensIfNeededWithApproval(
-            _data.variableData.collAmount1,
-            _tokens.token1,
-            _data.from,
-            _data.vault
-        );
-
-        uint256 msgValue = vars.isColl0Native
-            ? vars.collAmount0
-            : (vars.isColl1Native ? vars.collAmount1 : 0);
+        uint256 msgValue = vars.isToken0Native
+            ? vars.amount0
+            : (vars.isToken1Native ? vars.amount1 : 0);
 
         int256 exactCollSharesMinted;
 
-        if (_data.vaultType.isT2Vault()) {
-            (nftId, exactCollSharesMinted, ) = IFluidVaultT2(_data.vault).operate{ value: msgValue }(
+        (nftId, exactCollSharesMinted, ) = _data.vaultType.isT2Vault()
+            ? IFluidVaultT2(_data.vault).operate{ value: msgValue }(
                 _data.nftId,
-                vars.collAmount0.signed256(),
-                vars.collAmount1.signed256(),
+                vars.amount0.signed256(),
+                vars.amount1.signed256(),
                 _data.variableData.minCollShares.signed256(),
                 0, /* debtAmount */
                 address(0) /* to */
-            );
-        } else {
-            (nftId, exactCollSharesMinted, ) = IFluidVaultT4(_data.vault).operate{ value: msgValue}(
+            )
+            : IFluidVaultT4(_data.vault).operate{ value: msgValue}(
                 _data.nftId,
-                vars.collAmount0.signed256(),
-                vars.collAmount1.signed256(),
+                vars.amount0.signed256(),
+                vars.amount1.signed256(),
                 _data.variableData.minCollShares.signed256(),
                 0, /* debtAmount0 */
                 0, /* debtAmount1 */
                 0, /* minDebtShares */
                 address(0) /* to */
             );
-        }
 
         collShares = uint256(exactCollSharesMinted);
     }
 
+    /// @notice Supplies tokens to a Fluid DEX using exact amount of shares.
+    /// @param _data Supply data
+    /// @param _tokens Tokens data
+    /// @return nftId NFT ID of the position
+    /// @return collShares Amount of collateral shares minted.
     function supplyExact(
         FluidDexModel.SupplyDexData memory _data,
         IFluidVault.Tokens memory _tokens
     ) internal returns (uint256 nftId, uint256 collShares) {
-        _data.vaultType.requireT2orT4Vault();
+        _data.vaultType.requireSmartCollateral();
 
-        PulledCollateralVars memory vars;
-
-        // We always pull the max amount of collateral0 and refund the difference later
-        (vars.collAmount0, vars.isColl0Native) = _pullTokensIfNeededWithApproval(
+        // We always pull the max amount of collateral0/1 and refund the difference later
+        FluidDexTokensUtils.PulledTokensData memory vars = FluidDexTokensUtils.pullTokensIfNeededWithApproval(
+            _tokens,
+            _data.from,
+            _data.vault,
             _data.exactData.maxCollAmount0,
-            _tokens.token0,
-            _data.from,
-            _data.vault
+            _data.exactData.maxCollAmount1
         );
 
-        // We always pull the max amount of collateral1 and refund the difference later
-        (vars.collAmount1, vars.isColl1Native) = _pullTokensIfNeededWithApproval(
-            _data.exactData.maxCollAmount1,
-            _tokens.token1,
-            _data.from,
-            _data.vault
-        );
-
-        uint256 msgValue = vars.isColl0Native
-            ? vars.collAmount0
-            : (vars.isColl1Native ? vars.collAmount1 : 0);
+        uint256 msgValue = vars.isToken0Native
+            ? vars.amount0
+            : (vars.isToken1Native ? vars.amount1 : 0);
 
         int256[] memory operatePerfectData;
 
-        if (_data.vaultType.isT2Vault()) {
-            (nftId, operatePerfectData) = IFluidVaultT2(_data.vault).operatePerfect{ value: msgValue }(
+        (nftId, operatePerfectData) = _data.vaultType.isT2Vault()
+            ? IFluidVaultT2(_data.vault).operatePerfect{ value: msgValue }(
                 _data.nftId,
                 _data.exactData.perfectCollShares.signed256(),
-                vars.collAmount0.signed256(),
-                vars.collAmount1.signed256(),
+                vars.amount0.signed256(),
+                vars.amount1.signed256(),
                 0, /* debtAmount */
                 address(0) /* to */
-            );
-        } else {
-            (nftId, operatePerfectData) = IFluidVaultT4(_data.vault).operatePerfect{ value: msgValue}(
+            )
+            : IFluidVaultT4(_data.vault).operatePerfect{ value: msgValue}(
                 _data.nftId,
                 _data.exactData.perfectCollShares.signed256(),
-                vars.collAmount0.signed256(),
-                vars.collAmount1.signed256(),
+                vars.amount0.signed256(),
+                vars.amount1.signed256(),
                 0, /* perfectDebtShares */
                 0, /* minDebtAmount0 */ 
                 0, /* minDebtAmount1 */
                 address(0) /* to */
             );
-        }
 
+        // Indexing of collateral data is same for T2 and T4 vaults.
         collShares = uint256(operatePerfectData[0]);
 
         {   // Refund any excess collateral0
             uint256 pulledCollAmount0 = uint256(operatePerfectData[1]);
-            if (pulledCollAmount0 < vars.collAmount0) {
-                uint256 refund = vars.collAmount0 - pulledCollAmount0;
+            if (pulledCollAmount0 < vars.amount0) {
+                uint256 refund = vars.amount0 - pulledCollAmount0;
                 // Refund ETH as WETH
-                if (vars.isColl0Native) {
+                if (vars.isToken0Native) {
                     TokenUtils.depositWeth(refund);
                     TokenUtils.WETH_ADDR.withdrawTokens(_data.from, refund);
                 } else {
@@ -148,10 +133,10 @@ library FluidSupplyDexLogic  {
         }
         {   // Refund any excess collateral1
             uint256 pulledCollAmount1 = uint256(operatePerfectData[2]);
-            if (pulledCollAmount1 < vars.collAmount1) {
-                uint256 refund = vars.collAmount1 - pulledCollAmount1;
+            if (pulledCollAmount1 < vars.amount1) {
+                uint256 refund = vars.amount1 - pulledCollAmount1;
                 // Refund ETH as WETH
-                if (vars.isColl1Native) {
+                if (vars.isToken1Native) {
                     TokenUtils.depositWeth(refund);
                     TokenUtils.WETH_ADDR.withdrawTokens(_data.from, refund);
                 } else {
@@ -160,25 +145,5 @@ library FluidSupplyDexLogic  {
                 }
             }
         }
-    }
-
-    function _pullTokensIfNeededWithApproval(
-        uint256 _amount,
-        address _token,
-        address _from,
-        address _approvalTarget
-    ) internal returns (uint256 amount, bool isNative) {
-        if (_amount == 0) return (0, false);
-
-        if (_token == TokenUtils.ETH_ADDR) {
-            _amount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_from, _amount);
-            TokenUtils.withdrawWeth(_amount);
-            return (_amount, true);
-        }
-
-        _amount = _token.pullTokensIfNeeded(_from, _amount);
-        _token.approveToken(_approvalTarget, _amount);
-
-        return (_amount, false);
     }
 }

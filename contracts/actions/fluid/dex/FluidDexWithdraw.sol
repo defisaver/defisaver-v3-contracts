@@ -12,10 +12,19 @@ import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Withdraw tokens from Fluid DEX vault (T2, T3, T4)
 contract FluidDexWithdraw is ActionBase, FluidHelper {
     using TokenUtils for address;
     using FluidVaultTypes for uint256;
 
+    /// @param vault The address of the Fluid DEX vault.
+    /// @param to Address to send the withdrawn assets to.
+    /// @param nftId The NFT ID of the position.
+    /// @param withdrawAction Withdraw action type.
+    /// @param withdrawAmount Amount of collateral to withdraw. Used if withdraw action is LIQUIDITY.
+    /// @param withdrawVariableData Variable data for withdraw action. Used if withdraw action is VARIABLE_DEX.
+    /// @param withdrawExactData Exact data for withdraw action. Used if withdraw action is EXACT_DEX.
+    /// @param wrapWithdrawnEth Whether to wrap the withdrawn ETH into WETH if one of the withdrawn assets is ETH.
     struct Params {
         address vault;
         address to;

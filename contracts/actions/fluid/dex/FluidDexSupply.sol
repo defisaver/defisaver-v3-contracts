@@ -12,10 +12,18 @@ import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Supply tokens to Fluid DEX vault (T2, T3, T4)
 contract FluidDexSupply is ActionBase, FluidHelper {
     using TokenUtils for address;
     using FluidVaultTypes for uint256;
 
+    /// @param vault The address of the Fluid DEX vault.
+    /// @param from Address to pull the collateral from.
+    /// @param nftId The NFT ID of the position.
+    /// @param supplyAction Supply action type.
+    /// @param supplyAmount Amount of collateral to deposit. Used if supply action is LIQUIDITY.
+    /// @param supplyVariableData Variable data for supply action. Used if supply action is VARIABLE_DEX.
+    /// @param supplyExactData Exact data for supply action. Used if supply action is EXACT_DEX.
     struct Params {
         address vault;
         address from;

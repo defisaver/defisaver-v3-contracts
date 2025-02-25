@@ -14,10 +14,23 @@ import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Open position on Fluid DEX vault (T2, T3, T4)
 contract FluidDexOpen is ActionBase, FluidHelper {
     using TokenUtils for address;
     using FluidVaultTypes for uint256;
 
+    /// @param vault The address of the Fluid DEX vault.
+    /// @param from Address to pull the collateral from.
+    /// @param to Address to send the borrowed assets to.
+    /// @param supplyAction Supply action type.
+    /// @param supplyAmount Amount of collateral to deposit. Used if supply action is LIQUIDITY.
+    /// @param supplyVariableData Variable data for supply action. Used if supply action is VARIABLE_DEX.
+    /// @param supplyExactData Exact data for supply action. Used if supply action is EXACT_DEX.
+    /// @param borrowAction Borrow action type.
+    /// @param borrowAmount Amount of debt to borrow. Used if borrow action is LIQUIDITY.
+    /// @param borrowVariableData Variable data for borrow action. Used if borrow action is VARIABLE_DEX.
+    /// @param borrowExactData Exact data for borrow action. Used if borrow action is EXACT_DEX.
+    /// @param wrapBorrowedEth Whether to wrap the borrowed ETH into WETH if one of the borrowed assets is ETH.
     struct Params {
         address vault;
         address from;
@@ -89,6 +102,11 @@ contract FluidDexOpen is ActionBase, FluidHelper {
         IFluidVault.ConstantViews memory constants = IFluidVault(_params.vault).constantsView();
         constants.vaultType.requireDexVault();
 
+        // We are deliberately performing open in two separate calls to the vault.  
+        // This will incur more gas, but it will significantly simplify logic
+        // and reduce the complexity of passing borrow data to the supply logic.  
+        // This also gives us the ability to combine different DEX action types,
+        // like supply variable and borrow exact, which would not be possible in a single call.  
         uint256 nftId = _supply(_params, constants);
 
         _borrow(_params, constants, nftId);

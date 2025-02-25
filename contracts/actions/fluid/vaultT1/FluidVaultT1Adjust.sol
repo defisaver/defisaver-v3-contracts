@@ -55,8 +55,8 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     /// @dev Helper struct to group local variables for adjust action. Avoids stack too deep errors.
     struct AdjustLocalVars {
         uint256 msgValue;
-        int supplyTokenAmount;
-        int borrowTokenAmount;
+        int256 supplyTokenAmount;
+        int256 borrowTokenAmount;
         bool sendWithdrawnEthAsWrapped;
         bool sendBorrowedEthAsWrapped;
         address sendTokensTo;
@@ -152,7 +152,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             ? address(this)
             : _params.to;
 
-        ( , int exactCollAmt, int256 exactDebtAmt) = IFluidVaultT1(_params.vault).operate{ value: vars.msgValue }(
+        ( , int256 exactCollAmt, int256 exactDebtAmt) = IFluidVaultT1(_params.vault).operate{ value: vars.msgValue }(
             _params.nftId,
             vars.supplyTokenAmount,
             vars.borrowTokenAmount,
