@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidDexT1 } from "./IFluidDexT1.sol";
+import { IFluidDexT1 } from "../IFluidDexT1.sol";
 import { IFluidLiquidityResolverStructs } from "./IFluidLiquidityResolverStructs.sol";
 
 interface IFluidDexResolver {

@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { FluidHelper } from "../../../contracts/actions/fluid/helpers/FluidHelper.sol";
-import { IFluidVaultT1 } from "../../../contracts/interfaces/fluid/IFluidVaultT1.sol";
-import { IFluidVaultT2 } from "../../../contracts/interfaces/fluid/IFluidVaultT2.sol";
+import { IFluidVaultT1 } from "../../../contracts/interfaces/fluid/vaults/IFluidVaultT1.sol";
+import { IFluidVaultT2 } from "../../../contracts/interfaces/fluid/vaults/IFluidVaultT2.sol";
 
 contract FluidTestHelper is FluidHelper {
 

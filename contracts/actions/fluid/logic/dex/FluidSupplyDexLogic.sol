@@ -2,14 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVault } from "../../../../interfaces/fluid/IFluidVault.sol";
-import { IFluidVaultT2 } from "../../../../interfaces/fluid/IFluidVaultT2.sol";
-import { IFluidVaultT4 } from "../../../../interfaces/fluid/IFluidVaultT4.sol";
-
+import { IFluidVault } from "../../../../interfaces/fluid/vaults/IFluidVault.sol";
+import { IFluidVaultT2 } from "../../../../interfaces/fluid/vaults/IFluidVaultT2.sol";
+import { IFluidVaultT4 } from "../../../../interfaces/fluid/vaults/IFluidVaultT4.sol";
 import { FluidDexModel } from "../../helpers/FluidDexModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
 import { FluidDexTokensUtils } from "../../helpers/FluidDexTokensUtils.sol";
-
 import { TokenUtils } from "../../../../utils/TokenUtils.sol";
 import { DFSMath } from "../../../../utils/math/DFSMath.sol";
 

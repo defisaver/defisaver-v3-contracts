@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultResolver } from "../../../interfaces/fluid/IFluidVaultResolver.sol";
+import { IFluidVaultResolver } from "../../../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
 import { IERC20 } from "../../../interfaces/IERC20.sol";
 
 import { FluidVaultTypes } from "./FluidVaultTypes.sol";

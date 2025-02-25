@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../../interfaces/fluid/IFluidVaultT1.sol";
+import { IFluidVaultT1 } from "../../../interfaces/fluid/vaults/IFluidVaultT1.sol";
 import { FluidWithdrawLiquidityLogic } from "../logic/liquidity/FluidWithdrawLiquidityLogic.sol"; 
 import { FluidLiquidityModel } from "../helpers/FluidLiquidityModel.sol";
 import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";

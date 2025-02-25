@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../../interfaces/fluid/IFluidVaultT1.sol";
-import { IFluidVaultResolver } from "../../../interfaces/fluid/IFluidVaultResolver.sol";
+import { IFluidVaultT1 } from "../../../interfaces/fluid/vaults/IFluidVaultT1.sol";
+import { IFluidVaultResolver } from "../../../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidHelper } from "../helpers/FluidHelper.sol";
 import { DFSMath } from "../../../utils/math/DFSMath.sol";
 import { ActionBase } from "../../ActionBase.sol";

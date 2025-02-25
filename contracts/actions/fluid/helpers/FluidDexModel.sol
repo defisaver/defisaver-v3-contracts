@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultResolver } from "../../../interfaces/fluid/IFluidVaultResolver.sol";
+import { IFluidVaultResolver } from "../../../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
 
 /// @title Helper library containing data structs used for interaction with Fluid DEX
 library FluidDexModel {
