@@ -10,15 +10,13 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 contract MorphoBlueClaim is ActionBase {
     using TokenUtils for address;
 
-    /// @param to The address to which to send the reward tokens. Only used if claiming for the smart wallet.
-    /// @param onBehalfOf The address for which to claim the rewards.
+    /// @param to The address to which to send the reward tokens.
     /// @param token The address of the token to claim.
     /// @param distributor The address of the morpho distributor contract.
     /// @param claimable The overall claimable amount of token rewards.
     /// @param merkleProof The merkle proof to claim the rewards.
     struct Params {
         address to;
-        address onBehalfOf;
         address token;
         address distributor;
         uint256 claimable;
@@ -34,7 +32,6 @@ contract MorphoBlueClaim is ActionBase {
         Params memory params = parseInputs(_callData);
 
         params.to = _parseParamAddr(params.to, _paramMapping[0], _subData, _returnValues);
-        params.onBehalfOf = _parseParamAddr(params.onBehalfOf, _paramMapping[1], _subData, _returnValues);
         params.token = _parseParamAddr(params.token, _paramMapping[2], _subData, _returnValues);
         params.distributor = _parseParamAddr(params.distributor, _paramMapping[3], _subData, _returnValues);
         params.claimable = _parseParamUint(params.claimable, _paramMapping[4], _subData, _returnValues);
@@ -56,22 +53,14 @@ contract MorphoBlueClaim is ActionBase {
     }
 
     function _claim(Params memory _params) internal returns (uint256, bytes memory) {
-        // Defaults to user wallet
-        if (_params.onBehalfOf == address(0)) {
-            _params.onBehalfOf = address(this);
-        }
-
         uint256 claimed = IUniversalRewardsDistributor(_params.distributor).claim(
-            _params.onBehalfOf,
+            address(this),
             _params.token,
             _params.claimable,
             _params.merkleProof
         );
 
-        // If claiming for the smart wallet, transfer the tokens to specified address
-        if (_params.onBehalfOf == address(this)) {
-            _params.token.withdrawTokens(_params.to, claimed);
-        }
+        _params.token.withdrawTokens(_params.to, claimed);
 
         return (claimed, abi.encode(_params));
     }
