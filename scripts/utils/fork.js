@@ -33,14 +33,22 @@ const createFork = async (network) => {
 };
 
 const topUp = async (account) => {
-    const headers = {
-        'Content-Type': 'application/json',
-        'X-Access-Key': process.env.TENDERLY_ACCESS_KEY,
+    const body = {
+        jsonrpc: '2.0',
+        method: 'tenderly_setBalance',
+        params: [[account], '0xFFFFFFFFFFFFFFFFFF'], // ~4700 ETH
+        id: '1234',
     };
 
-    const body = { accounts: [account], amount: 1000000 };
+    const headers = {
+        'Content-Type': 'application/json',
+    };
 
-    await axios.post(`https://api.tenderly.co/api/v1/account/defisaver-v2/project/strategies/fork/${process.env.FORK_ID}/balance`, body, { headers });
+    try {
+        await axios.post(`https://virtual.mainnet.rpc.tenderly.co/${process.env.FORK_ID}`, body, { headers });
+    } catch (error) {
+        console.error('Error:', error.response ? error.response.data : error.message);
+    }
 };
 
 module.exports = {

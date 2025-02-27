@@ -6,6 +6,7 @@ require('@nomiclabs/hardhat-ethers');
 require('hardhat-gas-reporter');
 require('hardhat-log-remover');
 require('hardhat-tracer');
+require('@tenderly/hardhat-tenderly');
 
 const Dec = require('decimal.js');
 const dfs = require('@defisaver/sdk');
@@ -79,7 +80,7 @@ module.exports = {
             chainId: 1,
         },
         fork: {
-            url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
+            url: `https://virtual.mainnet.rpc.tenderly.co/${process.env.FORK_ID}`,
             timeout: 1000000,
             type: 'tenderly',
             name: 'mainnet',
