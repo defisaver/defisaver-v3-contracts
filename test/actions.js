@@ -3433,6 +3433,22 @@ const morphoBlueSetAuthWithSig = async (
 
     return receipt;
 };
+const morphoBlueClaim = async (
+    proxy,
+    to,
+    token,
+    distributor,
+    claimable,
+    merkleProof,
+) => {
+    const action = new dfs.actions.morphoblue.MorphoBlueClaimAction(
+        to, token, distributor, claimable, merkleProof,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('MorphoBlueClaim', functionData, proxy);
+
+    return receipt;
+};
 /*
  __       __          ___      .___  ___.      ___       __       _______ .__   __.  _______
 |  |     |  |        /   \     |   \/   |     /   \     |  |     |   ____||  \ |  | |       \
@@ -4045,6 +4061,7 @@ module.exports = {
     morphoBluePayback,
     morphoBlueSetAuth,
     morphoBlueSetAuthWithSig,
+    morphoBlueClaim,
 
     llamalendCreate,
     llamalendBorrow,
