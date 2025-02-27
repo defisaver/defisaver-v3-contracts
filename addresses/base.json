@@ -1005,6 +1005,17 @@
         "history": []
       },
       {
+        "name": "MorphoBlueClaim",
+        "address": "0xE279E9100d6d524602f98E8736BA5F8f065Dd3e0",
+        "id": "0x07f9b8e2",
+        "path": "contracts/actions/morpho-blue/MorphoBlueClaim",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+      },
+      {
         "name": "GasFeeTakerL2",
         "address": "0xAEe02caf404332c40Fd7FF8d5c25F91f7c1641d0",
         "id": "0x7ec82077",
