@@ -32,9 +32,9 @@ contract MorphoBlueClaim is ActionBase {
         Params memory params = parseInputs(_callData);
 
         params.to = _parseParamAddr(params.to, _paramMapping[0], _subData, _returnValues);
-        params.token = _parseParamAddr(params.token, _paramMapping[2], _subData, _returnValues);
-        params.distributor = _parseParamAddr(params.distributor, _paramMapping[3], _subData, _returnValues);
-        params.claimable = _parseParamUint(params.claimable, _paramMapping[4], _subData, _returnValues);
+        params.token = _parseParamAddr(params.token, _paramMapping[1], _subData, _returnValues);
+        params.distributor = _parseParamAddr(params.distributor, _paramMapping[2], _subData, _returnValues);
+        params.claimable = _parseParamUint(params.claimable, _paramMapping[3], _subData, _returnValues);
 
         (uint256 claimed, bytes memory logData) = _claim(params);
         emit ActionEvent("MorphoBlueClaim", logData);
