@@ -67,7 +67,6 @@ const {
 } = require('../../actions');
 
 const { RATIO_STATE_OVER } = require('../../triggers');
-const { execShellCommand } = require('../../../scripts/hardhat-tasks-functions');
 
 const deployBundles = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
@@ -534,10 +533,6 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
                     );
                 } catch (error) {
                     console.log(error);
-                    const blockNum = await hre.ethers.provider.getBlockNumber();
-                    const block = await hre.ethers.provider.getBlockWithTransactions(blockNum);
-                    const txHash = block.transactions[0].hash;
-                    await execShellCommand(`tenderly export ${txHash}`);
                     throw error;
                 }
 
