@@ -86,16 +86,16 @@ const deployBundles = async (proxy) => {
     const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
     const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
 
-    const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
-    const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
+    const strategyId1 = await createStrategy(...aaveRepayStrategyEncoded, true);
+    const strategyId2 = await createStrategy(...aaveRepayFLStrategyEncoded, true);
 
     await createBundle(proxy, [strategyId1, strategyId2]);
 
     const aaveBoostStrategyEncoded = createAaveV3BoostL2Strategy();
     const aaveBoostFLStrategyEncoded = createAaveFLV3BoostL2Strategy();
 
-    const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
-    const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
+    const strategyId11 = await createStrategy(...aaveBoostStrategyEncoded, true);
+    const strategyId22 = await createStrategy(...aaveBoostFLStrategyEncoded, true);
 
     await createBundle(proxy, [strategyId11, strategyId22]);
 };
@@ -109,16 +109,8 @@ const deployCloseToDebtBundle = async (proxy, isFork = undefined, isL1 = false) 
     const flCloseStrategy = isL1 ? createAaveV3FLCloseToDebtStrategy()
         : createAaveV3FLCloseToDebtL2Strategy();
 
-    const aaveV3CloseToDebtL2StrategyId = await createStrategy(
-        proxy,
-        ...closeStrategy,
-        false,
-    );
-    const aaveV3FLCloseToDebtL2StrategyId = await createStrategy(
-        proxy,
-        ...flCloseStrategy,
-        false,
-    );
+    const aaveV3CloseToDebtL2StrategyId = await createStrategy(...closeStrategy, false);
+    const aaveV3FLCloseToDebtL2StrategyId = await createStrategy(...flCloseStrategy, false);
     const aaveV3CloseToDebtBundleId = await createBundle(
         proxy,
         [aaveV3CloseToDebtL2StrategyId, aaveV3FLCloseToDebtL2StrategyId],
@@ -137,12 +129,10 @@ const deployCloseToCollBundle = async (proxy, isFork = undefined, isL1 = false) 
         : createAaveV3FLCloseToCollL2Strategy();
 
     const aaveV3CloseToCollL2StrategyId = await createStrategy(
-        proxy,
         ...closeStrategy,
         false,
     );
     const aaveV3FLCloseToCollL2StrategyId = await createStrategy(
-        proxy,
         ...flCloseStrategy,
         false,
     );

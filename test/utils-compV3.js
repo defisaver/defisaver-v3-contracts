@@ -26,14 +26,10 @@ const createNewCompV3AutomationBundles = async () => {
     const compV3EOABoostFLStrategyEncoded = createCompV3EOAFlBoostStrategy();
 
     // create new strategies
-    const newRepayFLStrategyId = await createStrategy(null, ...compV3RepayFLStrategyEncoded, true);
-    const newBoostFLStrategyId = await createStrategy(null, ...compV3BoostFLStrategyEncoded, true);
-    const newRepayEOAFLStrategyId = await createStrategy(
-        null, ...compV3EOARepayFLStrategyEncoded, true,
-    );
-    const newBoostEOAFLStrategyId = await createStrategy(
-        null, ...compV3EOABoostFLStrategyEncoded, true,
-    );
+    const newRepayFLStrategyId = await createStrategy(...compV3RepayFLStrategyEncoded, true);
+    const newBoostFLStrategyId = await createStrategy(...compV3BoostFLStrategyEncoded, true);
+    const newRepayEOAFLStrategyId = await createStrategy(...compV3EOARepayFLStrategyEncoded, true);
+    const newBoostEOAFLStrategyId = await createStrategy(...compV3EOABoostFLStrategyEncoded, true);
 
     // create new bundles
     const repayBundleId = await createBundle(

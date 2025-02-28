@@ -51,7 +51,7 @@ const getLatestSubId = async () => {
 };
 
 // eslint-disable-next-line max-len
-const createStrategy = async (proxy, strategyName, triggerIds, actionIds, paramMapping, continuous) => {
+const createStrategy = async (strategyName, triggerIds, actionIds, paramMapping, continuous) => {
     const storageAddr = await getAddrFromRegistry('StrategyStorage');
     const storage = await hre.ethers.getContractAt('StrategyStorage', storageAddr);
     const receipt = await storage.createStrategy(

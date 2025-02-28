@@ -50,16 +50,16 @@ const deployBundles = async (proxy) => {
     const compV3RepayStrategyEncoded = createCompV3RepayL2Strategy();
     const compV3FLRepayStrategyEncoded = createCompV3FLRepayL2Strategy();
 
-    const repayStrategyId1 = await createStrategy(proxy, ...compV3RepayStrategyEncoded, true);
-    const repayStrategyId2 = await createStrategy(proxy, ...compV3FLRepayStrategyEncoded, true);
+    const repayStrategyId1 = await createStrategy(...compV3RepayStrategyEncoded, true);
+    const repayStrategyId2 = await createStrategy(...compV3FLRepayStrategyEncoded, true);
 
     const repayBundleId = await createBundle(proxy, [repayStrategyId1, repayStrategyId2]);
 
     const compV3BoostStrategyEncoded = createCompV3BoostL2Strategy();
     const compV3FLBoostStrategyEncoded = createCompV3FLBoostL2Strategy();
 
-    const boostStrategyId1 = await createStrategy(proxy, ...compV3BoostStrategyEncoded, true);
-    const boostStrategyId2 = await createStrategy(proxy, ...compV3FLBoostStrategyEncoded, true);
+    const boostStrategyId1 = await createStrategy(...compV3BoostStrategyEncoded, true);
+    const boostStrategyId2 = await createStrategy(...compV3FLBoostStrategyEncoded, true);
 
     const boostBundleId = await createBundle(proxy, [boostStrategyId1, boostStrategyId2]);
 

@@ -84,12 +84,10 @@ const deployCloseToCollWithMaximumGasPriceBundle = async (proxy, isFork = false)
     const flCloseStrategy = createAaveV3FLCloseToCollWithMaximumGasPriceStrategy();
 
     const aaveV3CloseToCollStrategyId = await createStrategy(
-        proxy,
         ...closeStrategy,
         false,
     );
     const aaveV3FLCloseToCollStrategyId = await createStrategy(
-        proxy,
         ...flCloseStrategy,
         false,
     );
@@ -109,12 +107,10 @@ const deployCloseToDebtWithMaximumGasPriceBundle = async (proxy, isFork = false)
     const flCloseStrategy = createAaveV3FLCloseToDebtWithMaximumGasPriceStrategy();
 
     const aaveV3CloseToDebtStrategyId = await createStrategy(
-        proxy,
         ...closeStrategy,
         false,
     );
     const aaveV3FLCloseToDebtStrategyId = await createStrategy(
-        proxy,
         ...flCloseStrategy,
         false,
     );

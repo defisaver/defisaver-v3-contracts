@@ -749,11 +749,11 @@ const aaveAutomationSub = async ({
 
             await openStrategyAndBundleStorage(true);
 
-            const repayId1 = await createStrategy(proxy, ...repayAaveStrategyEncoded, true);
-            const repayId2 = await createStrategy(proxy, ...repayFLAaveStrategyEncoded, true);
+            const repayId1 = await createStrategy(...repayAaveStrategyEncoded, true);
+            const repayId2 = await createStrategy(...repayFLAaveStrategyEncoded, true);
 
-            const boostId1 = await createStrategy(proxy, ...boostAaveStrategyEncoded, true);
-            const boostId2 = await createStrategy(proxy, ...boostFLAaveStrategyEncoded, true);
+            const boostId1 = await createStrategy(...boostAaveStrategyEncoded, true);
+            const boostId2 = await createStrategy(...boostFLAaveStrategyEncoded, true);
 
             const repayBundleId = await createBundle(
                 proxy,
@@ -814,11 +814,11 @@ const compAutomationSub = async ({
 
             await openStrategyAndBundleStorage(true);
 
-            const repayId1 = await createStrategy(proxy, ...repayCompStrategyEncoded, true);
-            const repayId2 = await createStrategy(proxy, ...repayFLCompStrategyEncoded, true);
+            const repayId1 = await createStrategy(...repayCompStrategyEncoded, true);
+            const repayId2 = await createStrategy(...repayFLCompStrategyEncoded, true);
 
-            const boostId1 = await createStrategy(proxy, ...boostCompStrategyEncoded, true);
-            const boostId2 = await createStrategy(proxy, ...boostFLCompStrategyEncoded, true);
+            const boostId1 = await createStrategy(...boostCompStrategyEncoded, true);
+            const boostId2 = await createStrategy(...boostFLCompStrategyEncoded, true);
 
             const repayBundleId = await createBundle(
                 proxy,
@@ -898,7 +898,7 @@ const liquityCloseToCollStrategySub = async (price, priceState, sender) => {
     // create
     const liquityCloseToCollStrategy = createLiquityCloseToCollStrategy();
 
-    const strategyId = await createStrategy(proxy, ...liquityCloseToCollStrategy, false);
+    const strategyId = await createStrategy(...liquityCloseToCollStrategy, false);
 
     console.log('strategyId: ', strategyId);
 
@@ -1709,16 +1709,16 @@ const subAaveV3MainnetAutomation = async (
     // const aaveRepayStrategyEncoded = createAaveV3RepayStrategy();
     // const aaveRepayFLStrategyEncoded = createAaveFLV3RepayStrategy();
 
-    // const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
-    // const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
+    // const strategyId1 = await createStrategy(...aaveRepayStrategyEncoded, true);
+    // const strategyId2 = await createStrategy(...aaveRepayFLStrategyEncoded, true);
 
     // await createBundle(proxy, [strategyId1, strategyId2]);
 
     // const aaveBoostStrategyEncoded = createAaveV3BoostStrategy();
     // const aaveBoostFLStrategyEncoded = createAaveFLV3BoostStrategy();
 
-    // const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
-    // const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
+    // const strategyId11 = await createStrategy(...aaveBoostStrategyEncoded, true);
+    // const strategyId22 = await createStrategy(...aaveBoostFLStrategyEncoded, true);
 
     // await createBundle(proxy, [strategyId11, strategyId22]);
 
@@ -2162,7 +2162,7 @@ const subLimitOrder = async (
     // const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
     await openStrategyAndBundleStorage(true);
 
-    let strategyId = '51'; // await createStrategy(proxy, ...strategyData, false);
+    let strategyId = '51'; // await createStrategy(...strategyData, false);
 
     if (network !== 'mainnet') {
         strategyId = '9';
@@ -2225,8 +2225,8 @@ const subMorphoAaveV2Automation = async (
             const strategyData = createMorphoAaveV2RepayStrategy();
             const flStrategyData = createMorphoAaveV2FLRepayStrategy();
 
-            const strategyId = await createStrategy(undefined, ...strategyData, true);
-            const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
+            const strategyId = await createStrategy(...strategyData, true);
+            const flStrategyId = await createStrategy(...flStrategyData, true);
             repayBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
         }
 
@@ -2235,8 +2235,8 @@ const subMorphoAaveV2Automation = async (
             const strategyData = createMorphoAaveV2BoostStrategy();
             const flStrategyData = createMorphoAaveV2FLBoostStrategy();
 
-            const strategyId = await createStrategy(undefined, ...strategyData, true);
-            const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
+            const strategyId = await createStrategy(...strategyData, true);
+            const flStrategyId = await createStrategy(...flStrategyData, true);
             boostBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
         }
 
@@ -2408,8 +2408,8 @@ const subLiquityAutomation = async (
             const strategyData = createLiquityRepayStrategy();
             const flStrategyData = createLiquityFLRepayStrategy();
 
-            const strategyId = await createStrategy(undefined, ...strategyData, true);
-            const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
+            const strategyId = await createStrategy(...strategyData, true);
+            const flStrategyId = await createStrategy(...flStrategyData, true);
             repayBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
         }
 
@@ -2418,9 +2418,9 @@ const subLiquityAutomation = async (
             const flStrategyData = createLiquityFLBoostStrategy();
             const bigFlStrategyData = createLiquityFLBoostWithCollStrategy();
 
-            const strategyId = await createStrategy(undefined, ...strategyData, true);
-            const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
-            const bigFlStrategyId = await createStrategy(undefined, ...bigFlStrategyData, true);
+            const strategyId = await createStrategy(...strategyData, true);
+            const flStrategyId = await createStrategy(...flStrategyData, true);
+            const bigFlStrategyId = await createStrategy(...bigFlStrategyData, true);
             boostBundleId = await createBundle(undefined, [strategyId, flStrategyId, bigFlStrategyId]);
         }
 
@@ -2635,16 +2635,16 @@ const updateAaveV3AutomationSub = async (
     const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
     const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
 
-    const strategyId1 = await createStrategy(proxy, ...aaveRepayStrategyEncoded, true);
-    const strategyId2 = await createStrategy(proxy, ...aaveRepayFLStrategyEncoded, true);
+    const strategyId1 = await createStrategy(...aaveRepayStrategyEncoded, true);
+    const strategyId2 = await createStrategy(...aaveRepayFLStrategyEncoded, true);
 
     await createBundle(proxy, [strategyId1, strategyId2]);
 
     const aaveBoostStrategyEncoded = createAaveV3BoostL2Strategy();
     const aaveBoostFLStrategyEncoded = createAaveFLV3BoostL2Strategy();
 
-    const strategyId11 = await createStrategy(proxy, ...aaveBoostStrategyEncoded, true);
-    const strategyId22 = await createStrategy(proxy, ...aaveBoostFLStrategyEncoded, true);
+    const strategyId11 = await createStrategy(...aaveBoostStrategyEncoded, true);
+    const strategyId22 = await createStrategy(...aaveBoostFLStrategyEncoded, true);
 
     await createBundle(proxy, [strategyId11, strategyId22]);
 
@@ -3920,8 +3920,8 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             const paybackStrategy = createLiquityDsrPaybackStrategy();
             const supplyStrategy = createLiquityDsrSupplyStrategy();
 
-            const paybackStrategyId = await createStrategy(undefined, ...paybackStrategy, true);
-            const supplyStrategyId = await createStrategy(undefined, ...supplyStrategy, true);
+            const paybackStrategyId = await createStrategy(...paybackStrategy, true);
+            const supplyStrategyId = await createStrategy(...supplyStrategy, true);
             console.log({ paybackStrategyId, supplyStrategyId });
             process.exit(0);
         });

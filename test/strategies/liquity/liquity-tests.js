@@ -159,10 +159,10 @@ const liquityBoostStrategyTest = async () => {
 
             await openStrategyAndBundleStorage();
 
-            const strategyId1 = await createStrategy(proxy, ...liquityBoostStrategy, true);
-            const strategyId2 = await createStrategy(proxy, ...liquityFLBoostStrategy, true);
+            const strategyId1 = await createStrategy(...liquityBoostStrategy, true);
+            const strategyId2 = await createStrategy(...liquityFLBoostStrategy, true);
             // eslint-disable-next-line max-len
-            const strategyId3 = await createStrategy(proxy, ...LiquityFLBoostWithCollStrategy, true);
+            const strategyId3 = await createStrategy(...LiquityFLBoostWithCollStrategy, true);
 
             const bundleId = await createBundle(proxy, [strategyId1, strategyId2, strategyId3]);
 
@@ -301,8 +301,8 @@ const liquityRepayStrategyTest = async () => {
 
             await openStrategyAndBundleStorage();
 
-            const strategyId1 = await createStrategy(proxy, ...liquityRepayStrategy, true);
-            const strategyId2 = await createStrategy(proxy, ...liquityFLRepayStrategy, true);
+            const strategyId1 = await createStrategy(...liquityRepayStrategy, true);
+            const strategyId2 = await createStrategy(...liquityFLRepayStrategy, true);
 
             const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
 
@@ -461,8 +461,8 @@ const liquityCBPaybackTest = async () => {
             const liqInStrategyEncoded = createLiquityPaybackChickenInStrategy();
             const liqOutFLStrategyEncoded = createLiquityPaybackChickenOutStrategy();
 
-            const strategyId1 = await createStrategy(proxy, ...liqInStrategyEncoded, false);
-            const strategyId2 = await createStrategy(proxy, ...liqOutFLStrategyEncoded, false);
+            const strategyId1 = await createStrategy(...liqInStrategyEncoded, false);
+            const strategyId2 = await createStrategy(...liqOutFLStrategyEncoded, false);
 
             bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
             console.log(`Bundle Id is ${bundleId} and should be 7`);
@@ -731,7 +731,7 @@ const liquityCloseToCollStrategyTest = async () => {
 
             await openStrategyAndBundleStorage();
 
-            const strategyId = await createStrategy(proxy, ...liquityCloseToCollStrategy, false);
+            const strategyId = await createStrategy(...liquityCloseToCollStrategy, false);
 
             const percentage = 10;
 

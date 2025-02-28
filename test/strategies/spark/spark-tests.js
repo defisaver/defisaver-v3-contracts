@@ -73,15 +73,15 @@ const deployBundles = async (proxy, isFork) => {
     const sparkRepayStrategyEncoded = createSparkRepayStrategy();
     const sparkRepayFLStrategyEncoded = createSparkFLRepayStrategy();
 
-    const strategyId1 = await createStrategy(proxy, ...sparkRepayStrategyEncoded, true);
-    const strategyId2 = await createStrategy(proxy, ...sparkRepayFLStrategyEncoded, true);
+    const strategyId1 = await createStrategy(...sparkRepayStrategyEncoded, true);
+    const strategyId2 = await createStrategy(...sparkRepayFLStrategyEncoded, true);
 
     const repayBundleId = await createBundle(proxy, [strategyId1, strategyId2]);
     const sparkBoostStrategyEncoded = createSparkBoostStrategy();
     const sparkBoostFLStrategyEncoded = createSparkFLBoostStrategy();
 
-    const strategyId11 = await createStrategy(proxy, ...sparkBoostStrategyEncoded, true);
-    const strategyId22 = await createStrategy(proxy, ...sparkBoostFLStrategyEncoded, true);
+    const strategyId11 = await createStrategy(...sparkBoostStrategyEncoded, true);
+    const strategyId22 = await createStrategy(...sparkBoostFLStrategyEncoded, true);
 
     const boostBundleId = await createBundle(proxy, [strategyId11, strategyId22]);
 
@@ -99,12 +99,10 @@ const deployCloseToDebtBundle = async (proxy, isFork = undefined, isL1 = true) =
         : createSparkFLCloseToDebtStrategy();
 
     const sparkCloseToDebtStrategyId = await createStrategy(
-        proxy,
         ...closeStrategy,
         false,
     );
     const sparkFLCloseToDebtStrategyId = await createStrategy(
-        proxy,
         ...flCloseStrategy,
         false,
     );
@@ -126,12 +124,10 @@ const deployCloseToCollBundle = async (proxy, isFork = undefined, isL1 = true) =
         : createSparkFLCloseToCollStrategy();
 
     const sparkCloseToCollStrategyId = await createStrategy(
-        proxy,
         ...closeStrategy,
         false,
     );
     const sparkFLCloseToCollStrategyId = await createStrategy(
-        proxy,
         ...flCloseStrategy,
         false,
     );

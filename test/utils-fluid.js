@@ -71,8 +71,8 @@ const deployFluidT1RepayBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
     const repayStrategy = network !== 'mainnet' ? createFluidT1RepayL2Strategy() : createFluidT1RepayStrategy();
     const flRepayStrategy = network !== 'mainnet' ? createFluidT1FLRepayL2Strategy() : createFluidT1FLRepayStrategy();
-    const repayStrategyId = await createStrategy(proxy, ...repayStrategy, true);
-    const flRepayStrategyId = await createStrategy(proxy, ...flRepayStrategy, true);
+    const repayStrategyId = await createStrategy(...repayStrategy, true);
+    const flRepayStrategyId = await createStrategy(...flRepayStrategy, true);
     const bundleId = await createBundle(proxy, [repayStrategyId, flRepayStrategyId]);
     return bundleId;
 };
@@ -81,8 +81,8 @@ const deployFluidT1BoostBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
     const boostStrategy = network !== 'mainnet' ? createFluidT1BoostL2Strategy() : createFluidT1BoostStrategy();
     const flBoostStrategy = network !== 'mainnet' ? createFluidT1FLBoostL2Strategy() : createFluidT1FLBoostStrategy();
-    const boostStrategyId = await createStrategy(proxy, ...boostStrategy, true);
-    const flBoostStrategyId = await createStrategy(proxy, ...flBoostStrategy, true);
+    const boostStrategyId = await createStrategy(...boostStrategy, true);
+    const flBoostStrategyId = await createStrategy(...flBoostStrategy, true);
     const bundleId = await createBundle(proxy, [boostStrategyId, flBoostStrategyId]);
     return bundleId;
 };

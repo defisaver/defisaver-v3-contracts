@@ -516,7 +516,7 @@ const curveUsdPaybackStrategyTest = async () => {
                     const curveUsdPaybackStrategy = createCurveUsdPaybackStrategy();
                     const isFork = false;
                     await openStrategyAndBundleStorage(isFork);
-                    strategyId = await createStrategy(proxy, ...curveUsdPaybackStrategy, true);
+                    strategyId = await createStrategy(...curveUsdPaybackStrategy, true);
                 });
                 it(`... should executes a payback strategy for ${assetSymbol} market using payback amount from subData`, async () => {
                     snapshot = await takeSnapshot();

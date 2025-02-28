@@ -28,7 +28,7 @@ const deployBoostOnPriceBundle = async (isFork) => {
     const flBoostOnPriceStrategy = getNetwork() === 'mainnet'
         ? createMorphoBlueFLBoostOnTargetPriceStrategy()
         : createMorphoBlueFLBoostOnTargetPriceL2Strategy();
-    const boostOnPriceStrategyId = await createStrategy(undefined, ...boostOnPriceStrategy, false);
+    const boostOnPriceStrategyId = await createStrategy(...boostOnPriceStrategy, false);
     const flBoostOnPriceStrategyId = await createStrategy(
         undefined, ...flBoostOnPriceStrategy, false,
     );

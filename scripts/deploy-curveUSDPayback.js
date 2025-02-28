@@ -28,7 +28,7 @@ async function main() {
     await openStrategyAndBundleStorage(true);
 
     const curveUsdPaybackStrategy = createCurveUsdPaybackStrategy();
-    const strategyId = await createStrategy(undefined, ...curveUsdPaybackStrategy, true);
+    const strategyId = await createStrategy(...curveUsdPaybackStrategy, true);
 
     console.log('RecipeExecutor deployed to:', recipeExecutor.address);
     console.log('SafeModuleAuth deployed to:', safeModuleAuth.address);

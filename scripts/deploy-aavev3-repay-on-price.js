@@ -17,8 +17,8 @@ const deployBundle = async () => {
     const aaveV3RepayOnPriceStrategyEncoded = createAaveV3RepayOnPriceStrategy();
     const aaveV3FlRepayOnPriceStrategyEncoded = createAaveV3FlRepayOnPriceStrategy();
 
-    const repayStrategyId1 = await createStrategy(null, ...aaveV3RepayOnPriceStrategyEncoded, false);
-    const repayStrategyId2 = await createStrategy(null, ...aaveV3FlRepayOnPriceStrategyEncoded, false);
+    const repayStrategyId1 = await createStrategy(...aaveV3RepayOnPriceStrategyEncoded, false);
+    const repayStrategyId2 = await createStrategy(...aaveV3FlRepayOnPriceStrategyEncoded, false);
 
     const repayBundleId = await createBundle(null, [repayStrategyId1, repayStrategyId2]);
 

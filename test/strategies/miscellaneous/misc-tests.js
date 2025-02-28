@@ -102,7 +102,7 @@ const limitOrderStrategyTest = async () => {
             const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
             await openStrategyAndBundleStorage();
 
-            strategyId = await createStrategy(proxy, ...strategyData, false);
+            strategyId = await createStrategy(...strategyData, false);
 
             await redeploy('LimitOrderSubProxy', false, strategyId);
         });

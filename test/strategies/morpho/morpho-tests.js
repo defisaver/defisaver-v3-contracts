@@ -105,8 +105,8 @@ const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', fun
         const strategyData = createMorphoAaveV2BoostStrategy();
         const flStrategyData = createMorphoAaveV2FLBoostStrategy();
 
-        const strategyId = await createStrategy(undefined, ...strategyData, true);
-        const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
+        const strategyId = await createStrategy(...strategyData, true);
+        const flStrategyId = await createStrategy(...flStrategyData, true);
         bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
 
         await redeploy('MorphoAaveV2SubProxy', '0', bundleId);
@@ -246,8 +246,8 @@ const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', fun
         const strategyData = createMorphoAaveV2RepayStrategy();
         const flStrategyData = createMorphoAaveV2FLRepayStrategy();
 
-        const strategyId = await createStrategy(undefined, ...strategyData, true);
-        const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
+        const strategyId = await createStrategy(...strategyData, true);
+        const flStrategyId = await createStrategy(...flStrategyData, true);
         const bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
 
         await redeploy('MorphoAaveV2SubProxy', bundleId, '0');

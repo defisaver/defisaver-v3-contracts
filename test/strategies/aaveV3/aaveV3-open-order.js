@@ -44,16 +44,8 @@ const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
 
     const openStrategy = getNetwork() === 'mainnet' ? createAaveV3OpenOrderFromCollStrategy() : createAaveV3OpenOrderFromCollL2Strategy();
     const flOpenStrategy = getNetwork() === 'mainnet' ? createAaveV3FLOpenOrderFromCollStrategy() : createAaveV3FLOpenOrderFromCollL2Strategy();
-    const aaveV3OpenOrderFromCollStrategyId = await createStrategy(
-        proxy,
-        ...openStrategy,
-        false,
-    );
-    const aaveV3FLOpenOrderFromCollStrategyId = await createStrategy(
-        proxy,
-        ...flOpenStrategy,
-        false,
-    );
+    const aaveV3OpenOrderFromCollStrategyId = await createStrategy(...openStrategy, false);
+    const aaveV3FLOpenOrderFromCollStrategyId = await createStrategy(...flOpenStrategy, false);
     const aaveV3OpenOrderFromCollBundleId = await createBundle(
         proxy,
         [aaveV3OpenOrderFromCollStrategyId, aaveV3FLOpenOrderFromCollStrategyId],
@@ -65,11 +57,7 @@ const deployOpenOrderFromDebtStrategy = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
     const openStrategy = getNetwork() === 'mainnet' ? createAaveV3FLOpenOrderFromDebtStrategy() : createAaveV3FLOpenOrderFromDebtL2Strategy();
-    const aaveV3FLOpenOrderFromDebtStrategyId = await createStrategy(
-        proxy,
-        ...openStrategy,
-        false,
-    );
+    const aaveV3FLOpenOrderFromDebtStrategyId = await createStrategy(...openStrategy, false);
     return aaveV3FLOpenOrderFromDebtStrategyId;
 };
 

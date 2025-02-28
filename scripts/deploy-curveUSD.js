@@ -28,9 +28,9 @@ async function main() {
     const curveUsdAdvancedRepayStrategy = createCurveUsdAdvancedRepayStrategy();
     const curveUsdRepayStrategy = createCurveUsdRepayStrategy();
     const curveUsdFLRepayStrategy = createCurveUsdFLRepayStrategy();
-    const strategyRepayIdFirst = await createStrategy(undefined, ...curveUsdAdvancedRepayStrategy, true);
-    const strategyRepayIdSecond = await createStrategy(undefined, ...curveUsdRepayStrategy, true);
-    const strategyRepayIdThird = await createStrategy(undefined, ...curveUsdFLRepayStrategy, true);
+    const strategyRepayIdFirst = await createStrategy(...curveUsdAdvancedRepayStrategy, true);
+    const strategyRepayIdSecond = await createStrategy(...curveUsdRepayStrategy, true);
+    const strategyRepayIdThird = await createStrategy(...curveUsdFLRepayStrategy, true);
 
     const repayBundleId = await createBundle(
         undefined,
@@ -40,9 +40,9 @@ async function main() {
     const curveUsdBoostStrategy = createCurveUsdBoostStrategy();
     const curveUsdFLCollBoostStrategy = createCurveUsdFLCollBoostStrategy();
     const curveUsdFLDebtBoostStrategy = createCurveUsdFLDebtBoostStrategy();
-    const strategyIdFirst = await createStrategy(undefined, ...curveUsdBoostStrategy, true);
-    const strategyIdSecond = await createStrategy(undefined, ...curveUsdFLCollBoostStrategy, true);
-    const strategyIdThird = await createStrategy(undefined, ...curveUsdFLDebtBoostStrategy, true);
+    const strategyIdFirst = await createStrategy(...curveUsdBoostStrategy, true);
+    const strategyIdSecond = await createStrategy(...curveUsdFLCollBoostStrategy, true);
+    const strategyIdThird = await createStrategy(...curveUsdFLDebtBoostStrategy, true);
     const boostBundleId = await createBundle(
         undefined,
         [strategyIdFirst, strategyIdSecond, strategyIdThird],

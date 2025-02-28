@@ -112,8 +112,8 @@ const deployLiquityV2RepayBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
     const repayStrategy = createLiquityV2RepayStrategy();
     const flRepayStrategy = createLiquityV2FLRepayStrategy();
-    const repayStrategyId = await createStrategy(proxy, ...repayStrategy, true);
-    const flRepayStrategyId = await createStrategy(proxy, ...flRepayStrategy, true);
+    const repayStrategyId = await createStrategy(...repayStrategy, true);
+    const flRepayStrategyId = await createStrategy(...flRepayStrategy, true);
     const bundleId = await createBundle(proxy, [repayStrategyId, flRepayStrategyId]);
     return bundleId;
 };
@@ -123,9 +123,9 @@ const deployLiquityV2BoostBundle = async (proxy, isFork) => {
     const boostStrategy = createLiquityV2BoostStrategy();
     const flBoostStrategy = createLiquityV2FLBoostStrategy();
     const flBoostWithCollStrategy = createLiquityV2FLBoostWithCollStrategy();
-    const boostStrategyId = await createStrategy(proxy, ...boostStrategy, true);
-    const flBoostStrategyId = await createStrategy(proxy, ...flBoostStrategy, true);
-    const flBoostWithCollStrategyId = await createStrategy(proxy, ...flBoostWithCollStrategy, true);
+    const boostStrategyId = await createStrategy(...boostStrategy, true);
+    const flBoostStrategyId = await createStrategy(...flBoostStrategy, true);
+    const flBoostWithCollStrategyId = await createStrategy(...flBoostWithCollStrategy, true);
     const bundleId = await createBundle(
         proxy, [boostStrategyId, flBoostStrategyId, flBoostWithCollStrategyId],
     );
@@ -136,15 +136,13 @@ const deployLiquityV2CloseBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
     const closeToCollateral = createLiquityV2CloseToCollStrategy();
-    const closeToCollateralStrategyId = await createStrategy(proxy, ...closeToCollateral, false);
+    const closeToCollateralStrategyId = await createStrategy(...closeToCollateral, false);
 
     const flCloseToCollateral = createLiquityV2FLCloseToCollStrategy();
-    const flCloseToCollateralStrategyId = await createStrategy(
-        proxy, ...flCloseToCollateral, false,
-    );
+    const flCloseToCollateralStrategyId = await createStrategy(...flCloseToCollateral, false);
 
     const flCloseToDebt = createLiquityV2FLCloseToDebtStrategy();
-    const flCloseToDebtStrategyId = await createStrategy(proxy, ...flCloseToDebt, false);
+    const flCloseToDebtStrategyId = await createStrategy(...flCloseToDebt, false);
 
     const bundleId = await createBundle(
         proxy,
@@ -161,13 +159,13 @@ const deployLiquityV2BoostOnPriceBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
     const liquityV2BoostOnPriceStrategy = createLiquityV2BoostOnPriceStrategy();
-    const liquityV2BoostOnPriceStrategyId = await createStrategy(proxy, ...liquityV2BoostOnPriceStrategy, false);
+    const liquityV2BoostOnPriceStrategyId = await createStrategy(...liquityV2BoostOnPriceStrategy, false);
 
     const liquityV2FLBoostOnPriceStrategy = createLiquityV2FLBoostOnPriceStrategy();
-    const liquityV2FLBoostOnPriceStrategyId = await createStrategy(proxy, ...liquityV2FLBoostOnPriceStrategy, false);
+    const liquityV2FLBoostOnPriceStrategyId = await createStrategy(...liquityV2FLBoostOnPriceStrategy, false);
 
     const liquityV2FLBoostWithCollOnPriceStrategy = createLiquityV2FLBoostWithCollOnPriceStrategy();
-    const liquityV2FLBoostWithCollOnPriceStrategyId = await createStrategy(proxy, ...liquityV2FLBoostWithCollOnPriceStrategy, false);
+    const liquityV2FLBoostWithCollOnPriceStrategyId = await createStrategy(...liquityV2FLBoostWithCollOnPriceStrategy, false);
 
     const bundleId = await createBundle(
         proxy,
@@ -183,10 +181,10 @@ const deployLiquityV2BoostOnPriceBundle = async (proxy, isFork) => {
 const deployLiquityV2RepayOnPriceBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
     const liquityV2RepayOnPriceStrategy = createLiquityV2RepayOnPriceStrategy();
-    const liquityV2RepayOnPriceStrategyId = await createStrategy(proxy, ...liquityV2RepayOnPriceStrategy, false);
+    const liquityV2RepayOnPriceStrategyId = await createStrategy(...liquityV2RepayOnPriceStrategy, false);
 
     const liquityV2FLRepayOnPriceStrategy = createLiquityV2FLRepayOnPriceStrategy();
-    const liquityV2FLRepayOnPriceStrategyId = await createStrategy(proxy, ...liquityV2FLRepayOnPriceStrategy, false);
+    const liquityV2FLRepayOnPriceStrategyId = await createStrategy(...liquityV2FLRepayOnPriceStrategy, false);
 
     const bundleId = await createBundle(
         proxy,
@@ -202,7 +200,7 @@ const deployLiquityV2PaybackFromSPStrategy = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
     const liquityV2PaybackFromSPStrategy = createLiquityV2PaybackFromSPStrategy();
-    const liquityV2PaybackFromSPStrategyId = await createStrategy(proxy, ...liquityV2PaybackFromSPStrategy, true);
+    const liquityV2PaybackFromSPStrategyId = await createStrategy(...liquityV2PaybackFromSPStrategy, true);
 
     return liquityV2PaybackFromSPStrategyId;
 };

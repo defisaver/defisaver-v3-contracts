@@ -44,11 +44,11 @@ const createBundleAndStrategy = async (proxy) => {
 
     await openStrategyAndBundleStorage(false);
 
-    const repayId1 = await createStrategy(proxy, ...repayCompStrategyEncoded, true);
-    const repayId2 = await createStrategy(proxy, ...repayFLCompStrategyEncoded, true);
+    const repayId1 = await createStrategy(...repayCompStrategyEncoded, true);
+    const repayId2 = await createStrategy(...repayFLCompStrategyEncoded, true);
 
-    const boostId1 = await createStrategy(proxy, ...boostCompStrategyEncoded, true);
-    const boostId2 = await createStrategy(proxy, ...boostFLCompStrategyEncoded, true);
+    const boostId1 = await createStrategy(...boostCompStrategyEncoded, true);
+    const boostId2 = await createStrategy(...boostFLCompStrategyEncoded, true);
 
     const repayBundleId = await createBundle(
         proxy,

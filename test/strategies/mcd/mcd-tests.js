@@ -80,9 +80,9 @@ const createRepayBundle = async (proxy, isFork) => {
 
     await openStrategyAndBundleStorage(isFork);
 
-    const strategyId1 = await createStrategy(proxy, ...repayCompositeStrategyEncoded, true);
+    const strategyId1 = await createStrategy(...repayCompositeStrategyEncoded, true);
     // eslint-disable-next-line max-len
-    const strategyId2 = await createStrategy(proxy, ...flRepayCompositeStrategyEncoded, true);
+    const strategyId2 = await createStrategy(...flRepayCompositeStrategyEncoded, true);
 
     return createBundle(
         proxy,
@@ -96,8 +96,8 @@ const createBoostBundle = async (proxy, isFork) => {
 
     await openStrategyAndBundleStorage(isFork);
 
-    const strategyId1 = await createStrategy(proxy, ...boostCompositeStrategy, true);
-    const strategyId2 = await createStrategy(proxy, ...flBoostCompositeStrategy, true);
+    const strategyId1 = await createStrategy(...boostCompositeStrategy, true);
+    const strategyId2 = await createStrategy(...flBoostCompositeStrategy, true);
 
     return createBundle(
         proxy,
@@ -437,8 +437,8 @@ const mcdRepayFromYearnStrategyTest = async () => {
 
             await openStrategyAndBundleStorage();
 
-            const strategyId1 = await createStrategy(proxy, ...repayStrategyEncoded, true);
-            const strategyId2 = await createStrategy(proxy, ...flRepayStrategyEncoded, true);
+            const strategyId1 = await createStrategy(...repayStrategyEncoded, true);
+            const strategyId2 = await createStrategy(...flRepayStrategyEncoded, true);
 
             const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
 

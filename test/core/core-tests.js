@@ -86,7 +86,7 @@ const addPlaceholderStrategy = async (proxy, maxGasPrice) => {
 
     const callData = dummyStrategy.encodeForDsProxyCall();
 
-    const strategyId = await createStrategy(proxy, ...callData, false);
+    const strategyId = await createStrategy(...callData, false);
 
     const amountEncoded = abiCoder.encode(['uint256'], [pullAmount]);
 

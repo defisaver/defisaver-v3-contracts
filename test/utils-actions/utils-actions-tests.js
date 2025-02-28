@@ -886,7 +886,7 @@ const updateSubDataTest = async () => {
             await openStrategyAndBundleStorage();
 
             const strategyData = createMcdCloseStrategy();
-            const strategyId = await createStrategy(proxy, ...strategyData, false);
+            const strategyId = await createStrategy(...strategyData, false);
 
             const currPrice = await getChainLinkPrice(ETH_ADDR);
             let strategySub;
@@ -952,7 +952,7 @@ const toggleSubDataTest = async () => {
 
             const callData = dummyStrategy.encodeForDsProxyCall();
 
-            const strategyId = await createStrategy(proxy, ...callData, false);
+            const strategyId = await createStrategy(...callData, false);
 
             const amountEncoded = abiCoder.encode(['uint256'], [0]);
 
