@@ -789,7 +789,7 @@ const approveContractInRegistry = async (name, regAddr = addrs[getNetwork()].REG
 const getContractFromRegistry = async (
     name,
     regAddr = addrs[getNetwork()].REGISTRY_ADDR,
-    isFork = undefined,
+    isFork = false,
     ...args
 ) => {
     const contractAddr = await getAddrFromRegistry(name, regAddr);

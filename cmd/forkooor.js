@@ -1560,21 +1560,21 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 };
 
 const deployMorphoContracts = async () => {
-    await getContractFromRegistry('MorphoAaveV2Supply', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2Borrow', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2Withdraw', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2Payback', undefined, false, true);
-    await getContractFromRegistry('MorphoClaim', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2RatioTrigger', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2RatioCheck', undefined, false, true);
+    await getContractFromRegistry('MorphoAaveV2Supply', undefined, true);
+    await getContractFromRegistry('MorphoAaveV2Borrow', undefined, true);
+    await getContractFromRegistry('MorphoAaveV2Withdraw', undefined, true);
+    await getContractFromRegistry('MorphoAaveV2Payback', undefined, true);
+    await getContractFromRegistry('MorphoClaim', undefined, true);
+    await getContractFromRegistry('MorphoAaveV2View', undefined, true);
+    await getContractFromRegistry('MorphoAaveV2RatioTrigger', undefined, true);
+    await getContractFromRegistry('MorphoAaveV2RatioCheck', undefined, true);
 };
 
 const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmount, sender) => {
     const { senderAcc, proxy, network } = await forkSetup(sender);
 
     await deployMorphoContracts();
-    const view = await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
+    const view = await getContractFromRegistry('MorphoAaveV2View', undefined, true);
 
     const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol, chainIds[network]);
     const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol, chainIds[network]);
@@ -2260,7 +2260,7 @@ const subMorphoAaveV2Automation = async (
 
         await deployMorphoContracts();
         await getContractFromRegistry(
-            'MorphoAaveV2SubProxy', undefined, undefined, true, repayBundleId, boostBundleId,
+            'MorphoAaveV2SubProxy', undefined, true, repayBundleId, boostBundleId,
         );
     }
 
@@ -2380,13 +2380,13 @@ const updateSubDataCompV2 = async (
 };
 
 const deployLiquityContracts = async () => {
-    await getContractFromRegistry('LiquityRatioTrigger', undefined, undefined, true).then(({ address }) => {
+    await getContractFromRegistry('LiquityRatioTrigger', undefined, true).then(({ address }) => {
         if (compare(address, '0x7dDA9F944c3Daf27fbe3B8f27EC5f14FE3fa94BF')) {
             return redeploy('LiquityRatioTrigger', undefined, undefined, true);
         }
         return address;
     });
-    await getContractFromRegistry('LiquityRatioCheck', undefined, undefined, true);
+    await getContractFromRegistry('LiquityRatioCheck', undefined, true);
 };
 
 const liqDebtInFrontRepaySub = async (
@@ -2444,7 +2444,7 @@ const subLiquityAutomation = async (
 
         await deployLiquityContracts();
         await getContractFromRegistry(
-            'LiquitySubProxy', undefined, undefined, true, repayBundleId, boostBundleId,
+            'LiquitySubProxy', undefined, true, repayBundleId, boostBundleId,
         );
     }
 
@@ -3829,7 +3829,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .description('MorphoAaveV2 position view, default to proxy')
         .action(async (isEOA, addr) => {
             const { senderAcc, proxy } = await forkSetup(addr);
-            const view = await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
+            const view = await getContractFromRegistry('MorphoAaveV2View', undefined, true);
 
             const user = compare(isEOA, 'false') ? proxy.address : senderAcc.address;
             console.log(`Fetching position for ${user}`);
