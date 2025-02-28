@@ -19,7 +19,6 @@ const {
     getContractFromRegistry,
     formatExchangeObj,
     openStrategyAndBundleStorage,
-    
     balanceOf,
 } = require('../../utils');
 

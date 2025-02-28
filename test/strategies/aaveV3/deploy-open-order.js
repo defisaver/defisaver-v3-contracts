@@ -32,7 +32,6 @@ const {
     getOwnerAddr,
     chainIds,
     openStrategyAndBundleStorage,
-    
     setBalance,
 } = require('../../utils');
 
@@ -223,18 +222,6 @@ describe('Deploy open order strategies on fork', function () {
                 SUB_TO_OPEN_ORDER_FROM_COLL,
             );
         }
-
-        const currentBlockNumber = await hre.ethers.provider.getBlockNumber();
-
-        console.log('#######################################################################');
-        console.log('\n');
-        console.log(`make fork-automation-cli-dont-delete-db rpc=https://rpc.tenderly.co/fork/${process.env.FORK_ID} env=dev block=${currentBlockNumber - 11} net=mainnet publickey=asd`);
-        console.log('\n');
-        console.log('#######################################################################');
-
-        // const aaveV3View = await getContractFromRegistry('AaveV3View', isFork);
-        // const res = await aaveV3View.getSafetyRatio(addrs[network].AAVE_MARKET, proxyAddr);
-        // console.log(res);
     });
 
     it('Deploy on fork', async () => {});

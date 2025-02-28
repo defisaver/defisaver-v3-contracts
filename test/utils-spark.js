@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
-const {  addrs, nullAddress, network } = require('./utils');
+const { addrs, nullAddress, network } = require('./utils');
 
 const getSparkReserveData = async (dataProvider, tokenAddr) => {
     const tokens = await dataProvider.getReserveData(tokenAddr);

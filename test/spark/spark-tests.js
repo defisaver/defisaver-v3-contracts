@@ -7,7 +7,7 @@ const {
     getProxy,
     balanceOf, setBalance, redeploy,
     takeSnapshot, revertToSnapshot, addrs, approve, impersonateAccount,
-     Float2BN, getAddrFromRegistry,
+    Float2BN, getAddrFromRegistry,
     network,
 } = require('../utils');
 
@@ -28,15 +28,14 @@ const sparkSupplyTest = async () => {
 
         let senderAcc; let proxy; let pool; let snapshotId;
         let WETH_ADDRESS; let spWETH;
-        const network = hre.network.config.name;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await sparkMarketContract.getPool();
+            const poolAddress = await sparkMarketContract.getPool();
 
-            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
+            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
 
             spWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
@@ -102,15 +101,14 @@ const sparkBorrowTest = async () => {
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let spWETH; let DAI_ADDRESS;
-        const network = hre.network.config.name;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await sparkMarketContract.getPool();
+            const poolAddress = await sparkMarketContract.getPool();
 
-            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
+            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             DAI_ADDRESS = addrs[network].DAI_ADDRESS;
 
@@ -195,15 +193,14 @@ const sparkWithdrawTest = async () => {
 
         let senderAcc; let proxy; let pool; let snapshotId;
         let WETH_ADDRESS; let spWETH;
-        const network = hre.network.config.name;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await sparkMarketContract.getPool();
+            const poolAddress = await sparkMarketContract.getPool();
 
-            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
+            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
 
             spWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
@@ -291,15 +288,14 @@ const sparkPaybackTest = async () => {
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let spWETH; let DAI_ADDRESS;
-        const network = hre.network.config.name;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await sparkMarketContract.getPool();
+            const poolAddress = await sparkMarketContract.getPool();
 
-            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
+            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             DAI_ADDRESS = addrs[network].DAI_ADDRESS;
 
@@ -468,15 +464,14 @@ const sparkSwapBorrowRateTest = async () => {
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let spWETH; let DAI_ADDRESS;
-        const network = hre.network.config.name;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await sparkMarketContract.getPool();
+            const poolAddress = await sparkMarketContract.getPool();
 
-            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
+            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             DAI_ADDRESS = addrs[network].DAI_ADDRESS;
 
@@ -595,15 +590,14 @@ const sparkSetEModeTest = async () => {
 
         let senderAcc; let proxy; let snapshotId; let pool;
         let WETH_ADDRESS; let spWETH;
-        const network = hre.network.config.name;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await sparkMarketContract.getPool();
+            const poolAddress = await sparkMarketContract.getPool();
 
-            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
+            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
 
             spWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
@@ -645,7 +639,7 @@ const sparkSetEModeTest = async () => {
             expect(userEmode).to.be.eq(1);
             console.log(`Users emode before changing: ${userEmode}`);
         });
-        it('... should supply WETH to Sparkwith calldata optimised', async () => {
+        it('... should supply WETH to Spark with calldata optimised', async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -682,15 +676,14 @@ const sparkCollSwitchTest = async () => {
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let spWETH; let DAI_ADDRESS; let spDai;
-        const network = hre.network.config.name;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await sparkMarketContract.getPool();
+            const poolAddress = await sparkMarketContract.getPool();
 
-            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
+            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             DAI_ADDRESS = addrs[network].DAI_ADDRESS;
 
@@ -793,15 +786,14 @@ const sparkSpTokenPaybackTest = async () => {
         let senderAcc; let proxy; let pool; let snapshotId;
 
         let WETH_ADDRESS; let spWETH; let DAI_ADDRESS;
-        const network = hre.network.config.name;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
             const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', sparkMarket);
-            const poolAddres = await sparkMarketContract.getPool();
+            const poolAddress = await sparkMarketContract.getPool();
 
-            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddres);
+            pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
             DAI_ADDRESS = addrs[network].DAI_ADDRESS;
 

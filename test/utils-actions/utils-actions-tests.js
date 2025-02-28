@@ -67,7 +67,6 @@ const permitTokenTest = async () => {
         });
         it('... should permit tokens for DSProxy to pull from eoa', async () => {
             const snapshot = await takeSnapshot();
-            const network = hre.network.config.name;
             const chainId = chainIds[network];
             const wsteth = getAssetInfo('wsteth', chainId);
             const wstethAddress = wsteth.address;
@@ -1069,7 +1068,7 @@ const kingClaimTest = async () => {
             proxy = proxy.connect(senderAcc);
         });
 
-        it('... should clain KING token from proxy to eoa', async () => {
+        it('... should claim KING token from proxy to eoa', async () => {
             const amount = '54828777210681748232';
             const root = '0x2643c31ec7b7d9d1e8aa5202453912b1d02fd33c91b2b07c4dc3fc5965e473c5';
             const proofs = [

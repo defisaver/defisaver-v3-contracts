@@ -5,7 +5,6 @@ const {
     getProxy,
     redeploy,
     addrs,
-    
     setBalance,
     network,
 } = require('../../utils');

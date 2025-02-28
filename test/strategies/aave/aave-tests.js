@@ -36,7 +36,7 @@ const { createStrategy, addBotCaller, createBundle } = require('../../utils-stra
 
 const VARIABLE_RATE_MODE = 2;
 
-const createBundleAndStrategy = async (proxy) => {
+const createBundleAndStrategy = async () => {
     const repayAaveStrategyEncoded = createAaveV2RepayStrategy();
     const repayFLAaveStrategyEncoded = createAaveFLV2RepayStrategy();
 
@@ -113,7 +113,7 @@ const aaveV2BoostTest = () => describe('Aave-Boost-Strategy', function () {
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
         await addBotCaller(botAcc.address);
 
-        await createBundleAndStrategy(proxy);
+        await createBundleAndStrategy();
     });
 
     for (let i = 0; i < testPairs.length; i++) {
@@ -247,7 +247,7 @@ const aaveV2RepayTest = () => describe('Aave-Repay-Strategy', function () {
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
         await addBotCaller(botAcc.address);
 
-        await createBundleAndStrategy(proxy);
+        await createBundleAndStrategy();
     });
 
     for (let i = 0; i < testPairs.length; i++) {

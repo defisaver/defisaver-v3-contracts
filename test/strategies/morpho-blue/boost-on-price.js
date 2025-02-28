@@ -19,7 +19,6 @@ const {
     getContractFromRegistry,
     formatExchangeObj,
     openStrategyAndBundleStorage,
-    
     redeploy,
     approve,
 } = require('../../utils');

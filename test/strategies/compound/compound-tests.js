@@ -35,7 +35,7 @@ const {
 } = require('../../utils');
 const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
 
-const createBundleAndStrategy = async (proxy) => {
+const createBundleAndStrategy = async () => {
     const repayCompStrategyEncoded = createCompV2RepayStrategy();
     const repayFLCompStrategyEncoded = createCompFLV2RepayStrategy();
 
@@ -111,7 +111,7 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
         await addBotCaller(botAcc.address);
 
-        await createBundleAndStrategy(proxy);
+        await createBundleAndStrategy();
     });
 
     for (let i = 0; i < testPairs.length; i++) {
@@ -252,7 +252,7 @@ const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
         await addBotCaller(botAcc.address);
 
-        await createBundleAndStrategy(proxy);
+        await createBundleAndStrategy();
     });
 
     for (let i = 0; i < testPairs.length; i++) {

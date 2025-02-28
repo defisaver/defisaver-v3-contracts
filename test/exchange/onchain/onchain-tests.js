@@ -18,7 +18,6 @@ const {
     addrs,
     placeHolderAddr,
     approve,
-    
     network,
 } = require('../../utils');
 
@@ -162,8 +161,6 @@ const dfsSellSameAssetTest = async () => {
 
         let senderAcc;
         let proxy;
-
-        const network = hre.network.config.name;
 
         before(async () => {
             await redeploy('DFSSell');

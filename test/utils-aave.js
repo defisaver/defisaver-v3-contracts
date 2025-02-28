@@ -3,7 +3,7 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const { addrs,  nullAddress, network } = require('./utils');
+const { addrs, nullAddress, network } = require('./utils');
 
 const aaveV2assetsDefaultMarket = [
     'ETH', 'DAI', 'SUSD', 'USDC', 'USDT', 'WBTC',

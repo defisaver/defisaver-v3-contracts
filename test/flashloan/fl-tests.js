@@ -22,7 +22,6 @@ const {
     addrs,
     AAVE_V3_FL_FEE,
     chainIds,
-    
     getSparkFLFee,
     WALLETS,
     isWalletNameDsProxy,
@@ -143,7 +142,6 @@ const aaveV3FlTest = async (flActionContract) => {
 
                 it(`... should get an ${tokenSymbol} AaveV3 flash loan using ${WALLETS[i]}`, async () => {
                     determineActiveWallet(WALLETS[i]);
-                    const network = hre.network.config.name;
                     const assetInfo = getAssetInfo(tokenSymbol, chainIds[network]);
 
                     // test if balance will brick fl action
@@ -322,7 +320,6 @@ const balancerFLTest = async (flActionContract) => {
             safe = await getProxy(senderAcc.address, true);
         });
 
-        const network = hre.network.config.name;
         const tokenDetails = [
             { address: addrs[network].WETH_ADDRESS, amount: hre.ethers.utils.parseUnits('1', 18) },
             { address: addrs[network].DAI_ADDRESS, amount: hre.ethers.utils.parseUnits('100', 18) },
@@ -769,7 +766,6 @@ const flMorphoBlueTest = async (flActionContract) => {
             proxy = await getProxy(senderAcc.address);
             safe = await getProxy(senderAcc.address, true);
         });
-        const network = hre.network.config.name;
         const amountWeth = hre.ethers.utils.parseUnits(
             '1',
             18,

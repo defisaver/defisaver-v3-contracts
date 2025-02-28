@@ -395,7 +395,6 @@ const tokenPriceHelperL2Test = async () => {
 
         for (let i = 0; i < assets.length; i++) {
             it(`... should get USD and ETH price for ${assets[i].symbol} `, async () => {
-                const network = hre.network.config.name;
                 const chainId = chainIds[network];
                 if (assets[i].symbol === 'rETH') {
                     assets[i].addresses[42161] = '0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8';
@@ -434,7 +433,6 @@ const priceFeedTest = async () => {
         before(async () => {
             console.log(priceFeeds);
 
-            const network = hre.network.config.name;
             const chainId = chainIds[network];
 
             let priceFeedAddr;
@@ -525,7 +523,6 @@ const dfsSafeFactoryTest = async () => {
                 safeFactory,
             );
 
-            const network = hre.network.config.name;
             await setBalance(addrs[network].WETH_ADDRESS, predictedAddress, hre.ethers.utils.parseUnits('10', 18));
             const tokenBalanceAction = new sdk.actions.basic.TokenBalanceAction(
                 addrs[network].WETH_ADDRESS,

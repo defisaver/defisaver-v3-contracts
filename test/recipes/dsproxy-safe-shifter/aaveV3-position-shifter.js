@@ -5,7 +5,6 @@ const {
     getProxy,
     redeploy,
     addrs,
-    
     WETH_ADDRESS,
     LUSD_ADDR,
     setBalance,

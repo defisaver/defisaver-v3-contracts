@@ -10,6 +10,7 @@ const hre = require('hardhat');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const storageSlots = require('./storageSlots.json');
+
 const { BigNumber } = hre.ethers;
 
 const { getAllFiles } = require('../scripts/hardhat-tasks-functions');
@@ -189,8 +190,6 @@ const addrs = {
 
 const REGISTRY_ADDR = '0x287778F121F134C66212FB16c9b53eC991D32f5b';
 require('dotenv-safe').config();
-
-const config = require('../hardhat.config');
 
 const nullAddress = '0x0000000000000000000000000000000000000000';
 const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';

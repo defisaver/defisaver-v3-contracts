@@ -182,7 +182,7 @@ const {
     RATIO_STATE_UNDER,
 } = require('../test/triggers');
 // const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies/l2/l2-tests');
-const { deployCloseToCollWithMaximumGasPriceBundle, deployCloseToDebtWithMaximumGasPriceBundle } = require('../test/strategies/aave/tests');
+const { deployCloseToCollWithMaximumGasPriceBundle, deployCloseToDebtWithMaximumGasPriceBundle } = require('../test/strategies/aaveV3/gasprice/aaveV3-tests');
 const { createRepayBundle, createBoostBundle } = require('../test/strategies/mcd/mcd-tests');
 
 const {
@@ -1661,7 +1661,7 @@ const subAaveAutomation = async (
         maxRatio > 0,
     );
 
-    console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+    console.log(`Aave position subbed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
 };
 
 const subAaveV3MainnetAutomation = async (
@@ -1731,7 +1731,7 @@ const subAaveV3MainnetAutomation = async (
         boostEnabled,
     );
 
-    console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+    console.log(`Aave position subbed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
 };
 
 const subAaveClose = async (
@@ -1954,7 +1954,7 @@ const subSparkAutomation = async (
         boostEnabled,
     );
 
-    console.log(`Spark position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+    console.log(`Spark position subbed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
 };
 
 const subSparkClose = async (
@@ -2102,7 +2102,7 @@ const subCompV3Automation = async (
         isEOA === 'true',
     );
 
-    console.log(`CompV3 position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+    console.log(`CompV3 position subbed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
 };
 
 const subLimitOrder = async (
@@ -2197,7 +2197,7 @@ const subLimitOrder = async (
         orderTypeFormatted,
     );
 
-    console.log(`Limit order subed, subId ${subData.subId}`);
+    console.log(`Limit order subbed, subId ${subData.subId}`);
 };
 
 const subMorphoAaveV2Automation = async (
@@ -2255,7 +2255,7 @@ const subMorphoAaveV2Automation = async (
         boostEnabled,
     );
 
-    console.log('MorphoAaveV2 position subed', { repaySubId, boostSubId });
+    console.log('MorphoAaveV2 position subbed', { repaySubId, boostSubId });
 };
 
 const updateSubDataMorphoAaveV2 = async (
@@ -2380,7 +2380,7 @@ const liqDebtInFrontRepaySub = async (
         ratioIncrease,
     );
 
-    console.log('Liquity debtInFront repay position subed', subId);
+    console.log('Liquity debtInFront repay position subbed', subId);
 };
 
 const subLiquityAutomation = async (
@@ -2439,7 +2439,7 @@ const subLiquityAutomation = async (
         boostEnabled,
     );
 
-    console.log('Liquity position subed', { repaySubId, boostSubId });
+    console.log('Liquity position subbed', { repaySubId, boostSubId });
 };
 
 const updateLiquity = async (
@@ -2955,7 +2955,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('deploy ')
         .description('Deploys the whole system to the fork and builds strategies')
         .action(async () => {
-            console.log('This might take a few minutes dont stop the process');
+            console.log('This might take a few minutes do not stop the process');
 
             await spawnSync('npm run deploy fork deploy-on-fork',
                 {
@@ -3017,7 +3017,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
 
     program
         .command('sub-mcd-automation <vaultId> <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]')
-        .description('Subscribes to Maker repay and (optionaly) boost bundles')
+        .description('Subscribes to Maker repay and (optionally) boost bundles')
         .action(async (
             vaultId,
             minRatio,
@@ -3039,7 +3039,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
 
     program
         .command('sub-aaveV2-automation <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]')
-        .description('Subscribes to AaveV2 repay and (optionaly) boost bundles')
+        .description('Subscribes to AaveV2 repay and (optionally) boost bundles')
         .action(async (
             minRatio,
             maxRatio,
@@ -3059,7 +3059,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
 
     program
         .command('sub-compV2-automation <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]')
-        .description('Subscribes to CompoundV2 repay and (optionaly) boost bundles')
+        .description('Subscribes to CompoundV2 repay and (optionally) boost bundles')
         .action(async (
             minRatio,
             maxRatio,
@@ -3848,11 +3848,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('redeploy <contractName>')
         .description('Sets price in a mock chainlink oracle used on fork')
         .action(async (contractName) => {
-            let network = 'mainnet';
-
-            if (process.env.TEST_CHAIN_ID) {
-                network = process.env.TEST_CHAIN_ID;
-            }
             await redeploy(contractName.toString(), true);
 
             process.exit(0);
@@ -3862,11 +3857,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('deploy-spark-contracts')
         .description('Deploys all Spark contracts on fork')
         .action(async () => {
-            let network = 'mainnet';
-
-            if (process.env.TEST_CHAIN_ID) {
-                network = process.env.TEST_CHAIN_ID;
-            }
             const sparkContracts = [
                 'SDaiWrap',
                 'SDaiUnwrap',
@@ -3895,12 +3885,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('deploy-liquity-dsr-strategies')
         .description('Deploys Liquity Dsr strategies as well as updated McdView')
         .action(async () => {
-            let network = 'mainnet';
-
-            if (process.env.TEST_CHAIN_ID) {
-                network = process.env.TEST_CHAIN_ID;
-            }
-
             if (latestStrategyId >= 70) return;
 
             const contractsToDeploy = [

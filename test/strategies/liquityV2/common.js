@@ -2,7 +2,7 @@ const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { topUp } = require('../../../scripts/utils/fork');
 const {
-    getProxy, addrs,  getContractFromRegistry,
+    getProxy, addrs, getContractFromRegistry,
     getOwnerAddr,
     setBalance,
     BOLD_ADDR,

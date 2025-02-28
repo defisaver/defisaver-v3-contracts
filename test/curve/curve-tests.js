@@ -178,7 +178,7 @@ const curveDepositTest = async (testLength) => {
                 );
             });
             it(`... should deposit underlyingCoins [${poolName}]`, async function () {
-                /// @dev notest if no underlying
+                /// @dev no test if no underlying
                 if (!pool.depositContract && !pool.underlyingFlag) this.skip();
                 await testDeposit(
                     proxy,
@@ -253,7 +253,7 @@ const curveWithdrawOneCoinTest = async (testLength) => {
                 );
             });
             it(`... should deposit then withdraw one underlying coin [${poolName}]`, async function () {
-                /// @dev notest if no underlying
+                /// @dev no test if no underlying
                 if (!pool.depositContract && !pool.underlyingFlag) this.skip();
                 const lpMinted = await testDeposit(
                     proxy,
@@ -335,7 +335,7 @@ const curveWithdrawTest = async (testLength) => {
                 );
             });
             it(`... should deposit then withdraw underlyingCoins [${poolName}]`, async function () {
-                /// @dev notest if no underlying
+                /// @dev no test if no underlying
                 if (!pool.depositContract && !pool.underlyingFlag) this.skip();
                 const lpMinted = await testDeposit(
                     proxy,
@@ -423,7 +423,7 @@ const curveWithdrawExactTest = async (testLength) => {
                     it(`... should deposit then withdraw exact underlyingCoins [${poolName}]`, async function () {
                         /// @dev factory pools dont implement this method
                         if (pool.isFactory) this.skip();
-                        /// @dev notest if no underlying
+                        /// @dev no test if no underlying
                         if (!pool.depositContract && !pool.underlyingFlag) this.skip();
                         const lpMinted = await testDeposit(
                             proxy,

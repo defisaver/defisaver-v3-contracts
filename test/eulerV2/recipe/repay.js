@@ -10,7 +10,6 @@ const {
     redeploy,
     addrs,
     formatExchangeObj,
-    
     getOwnerAddr, getAddrFromRegistry,
     network,
 } = require('../../utils');

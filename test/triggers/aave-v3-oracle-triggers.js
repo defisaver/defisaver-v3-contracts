@@ -1,10 +1,11 @@
+/* eslint-disable no-shadow */
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { deployContract } = require('../../scripts/utils/deployer');
 const { RATIO_STATE_UNDER, RATIO_STATE_OVER } = require('../triggers');
 const {
-    redeploy, setNetwork,  getLocalTokenPrice, chainIds, BN2Float, Float2BN,
+    redeploy, setNetwork, getLocalTokenPrice, chainIds, BN2Float, Float2BN,
     setContractAt,
     network,
 } = require('../utils');
