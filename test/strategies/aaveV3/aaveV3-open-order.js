@@ -19,7 +19,7 @@ const {
     getContractFromRegistry,
     formatExchangeObj,
     openStrategyAndBundleStorage,
-    getNetwork,
+    
     balanceOf,
 } = require('../../utils');
 
@@ -42,8 +42,8 @@ const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromColl
 const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const openStrategy = getNetwork() === 'mainnet' ? createAaveV3OpenOrderFromCollStrategy() : createAaveV3OpenOrderFromCollL2Strategy();
-    const flOpenStrategy = getNetwork() === 'mainnet' ? createAaveV3FLOpenOrderFromCollStrategy() : createAaveV3FLOpenOrderFromCollL2Strategy();
+    const openStrategy = network === 'mainnet' ? createAaveV3OpenOrderFromCollStrategy() : createAaveV3OpenOrderFromCollL2Strategy();
+    const flOpenStrategy = network === 'mainnet' ? createAaveV3FLOpenOrderFromCollStrategy() : createAaveV3FLOpenOrderFromCollL2Strategy();
     const aaveV3OpenOrderFromCollStrategyId = await createStrategy(...openStrategy, false);
     const aaveV3FLOpenOrderFromCollStrategyId = await createStrategy(...flOpenStrategy, false);
     const aaveV3OpenOrderFromCollBundleId = await createBundle(
@@ -55,7 +55,7 @@ const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
 const deployOpenOrderFromDebtStrategy = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const openStrategy = getNetwork() === 'mainnet' ? createAaveV3FLOpenOrderFromDebtStrategy() : createAaveV3FLOpenOrderFromDebtL2Strategy();
+    const openStrategy = network === 'mainnet' ? createAaveV3FLOpenOrderFromDebtStrategy() : createAaveV3FLOpenOrderFromDebtL2Strategy();
     const aaveV3FLOpenOrderFromDebtStrategyId = await createStrategy(...openStrategy, false);
     return aaveV3FLOpenOrderFromDebtStrategyId;
 };
@@ -86,9 +86,9 @@ const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
 
         const setUpContracts = async () => {
             if (network === 'mainnet') {
-                strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
+                strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[network].STRATEGY_EXECUTOR_ADDR);
             } else {
-                strategyExecutor = await hre.ethers.getContractAt('StrategyExecutorL2', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
+                strategyExecutor = await hre.ethers.getContractAt('StrategyExecutorL2', addrs[network].STRATEGY_EXECUTOR_ADDR);
             }
             strategyExecutor = strategyExecutor.connect(botAcc);
             flAction = await getContractFromRegistry('FLAction', isFork);

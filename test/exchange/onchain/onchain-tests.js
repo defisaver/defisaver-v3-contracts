@@ -18,7 +18,8 @@ const {
     addrs,
     placeHolderAddr,
     approve,
-    getNetwork,
+    
+    network,
 } = require('../../utils');
 
 const { sell, executeAction } = require('../../actions');
@@ -113,7 +114,7 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
 
     const expectedOutput = amount.mul(rate).div(Float2BN('1'));
 
-    const feeReceiverAmountBefore = await balanceOf(sellAssetInfo.address, addrs[getNetwork()].FEE_RECEIVER);
+    const feeReceiverAmountBefore = await balanceOf(sellAssetInfo.address, addrs[network].FEE_RECEIVER);
 
     await sell(
         proxy,
@@ -130,12 +131,12 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         true, // sell in recipe so we can check the fee
     );
 
-    const feeReceiverAmountAfter = await balanceOf(sellAssetInfo.address, addrs[getNetwork()].FEE_RECEIVER);
+    const feeReceiverAmountAfter = await balanceOf(sellAssetInfo.address, addrs[network].FEE_RECEIVER);
 
     const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
 
     // test fee amount
-    const tokenGroupRegistry = await hre.ethers.getContractAt('TokenGroupRegistry', addrs[getNetwork()].TOKEN_GROUP_REGISTRY);
+    const tokenGroupRegistry = await hre.ethers.getContractAt('TokenGroupRegistry', addrs[network].TOKEN_GROUP_REGISTRY);
     const fee = await tokenGroupRegistry.getFeeForTokens(sellAssetInfo.address, buyAssetInfo.address);
     const feeAmount = amount.div(fee);
 

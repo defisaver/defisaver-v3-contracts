@@ -4,8 +4,9 @@ const { ethers } = require('hardhat');
 const { deployContract } = require('../../scripts/utils/deployer');
 const { RATIO_STATE_UNDER, RATIO_STATE_OVER } = require('../triggers');
 const {
-    redeploy, setNetwork, getNetwork, getLocalTokenPrice, chainIds, BN2Float, Float2BN,
+    redeploy, setNetwork,  getLocalTokenPrice, chainIds, BN2Float, Float2BN,
     setContractAt,
+    network,
 } = require('../utils');
 
 const aaveV3QuotePriceTriggerTest = () => {
@@ -381,8 +382,8 @@ const aaveV3TrailingQuotePriceTriggerTest = () => {
                 address: aaveV3OracleAddress,
             }).then(async (c) => c.addFeeds(
                 [
-                    getAssetInfo('WBTC', chainIds[getNetwork()]).address,
-                    getAssetInfo('WETH', chainIds[getNetwork()]).address,
+                    getAssetInfo('WBTC', chainIds[network]).address,
+                    getAssetInfo('WETH', chainIds[network]).address,
                 ],
                 [
                     mockWbtcFeed.address,

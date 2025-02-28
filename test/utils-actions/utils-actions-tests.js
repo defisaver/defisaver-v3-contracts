@@ -34,8 +34,8 @@ const {
     revertToSnapshot,
     WBTC_ADDR,
     addrs,
-    getNetwork,
     chainIds,
+    network,
 } = require('../utils');
 
 const { fetchMakerAddresses } = require('../utils-mcd');
@@ -658,7 +658,6 @@ const changeOwnerTest = async () => {
         this.timeout(80000);
 
         let senderAcc; let senderAcc2; let proxy;
-        const network = getNetwork();
 
         const ADMIN_VAULT = addrs[network].ADMIN_VAULT;
         const ADMIN_ACC = addrs[network].ADMIN_ACC;

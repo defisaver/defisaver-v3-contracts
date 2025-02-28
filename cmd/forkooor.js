@@ -62,7 +62,6 @@ const {
     WBTC_ADDR,
     redeploy,
     setNetwork,
-    getNetwork,
     addrs,
     ETH_ADDR,
     getOwnerAddr,
@@ -75,6 +74,7 @@ const {
     getContractFromRegistry,
     filterEthersObject,
     setBalance,
+    network,
 } = require('../test/utils');
 
 const {
@@ -677,7 +677,7 @@ const mcdBoostRepaySub = async ({
     proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
 
     { // deploy if not live
-        const registry = await hre.ethers.getContractAt('DFSRegistry', addrs[getNetwork()].REGISTRY_ADDR);
+        const registry = await hre.ethers.getContractAt('DFSRegistry', addrs[network].REGISTRY_ADDR);
         if (await registry.isRegistered(hre.ethers.utils.id('McdSubProxy').slice(0, 10)).then((e) => !e)) {
             const repayBundleId = await createRepayBundle(proxy, true);
             const boostBundleId = await createBoostBundle(proxy, true);
@@ -739,7 +739,7 @@ const aaveAutomationSub = async ({
     proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
 
     { // deploy if not live
-        const registry = await hre.ethers.getContractAt('DFSRegistry', addrs[getNetwork()].REGISTRY_ADDR);
+        const registry = await hre.ethers.getContractAt('DFSRegistry', addrs[network].REGISTRY_ADDR);
         if (await registry.isRegistered(hre.ethers.utils.id('AaveSubProxy').slice(0, 10)).then((e) => !e)) {
             const repayAaveStrategyEncoded = createAaveV2RepayStrategy();
             const repayFLAaveStrategyEncoded = createAaveFLV2RepayStrategy();
@@ -802,7 +802,7 @@ const compAutomationSub = async ({
     proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
 
     { // deploy if not live
-        const registry = await hre.ethers.getContractAt('DFSRegistry', addrs[getNetwork()].REGISTRY_ADDR);
+        const registry = await hre.ethers.getContractAt('DFSRegistry', addrs[network].REGISTRY_ADDR);
         if (await registry.isRegistered(hre.ethers.utils.id('CompSubProxy').slice(0, 10)).then((e) => !e)) {
             const repayCompStrategyEncoded = createCompV2RepayStrategy();
             const repayFLCompStrategyEncoded = createCompFLV2RepayStrategy();

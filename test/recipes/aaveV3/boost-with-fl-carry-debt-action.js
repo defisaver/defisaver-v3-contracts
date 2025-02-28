@@ -9,7 +9,7 @@ const {
     revertToSnapshot,
     setBalance,
     addrs,
-    getNetwork,
+    
     redeploy,
     nullAddress,
     formatExchangeObj,
@@ -17,6 +17,7 @@ const {
     approve,
     WALLETS,
     isWalletNameDsProxy,
+    network,
 } = require('../../utils');
 
 const { executeAction } = require('../../actions');
@@ -52,7 +53,7 @@ const aaveV3BoostWithNewFL = async () => {
             const recipe = new dfs.Recipe('CreateAaveV3Position', [
                 new dfs.actions.aaveV3.AaveV3SupplyAction(
                     true,
-                    addrs[getNetwork()].AAVE_MARKET,
+                    addrs[network].AAVE_MARKET,
                     collAmount.toString(),
                     senderAddr,
                     collAddress,
@@ -63,7 +64,7 @@ const aaveV3BoostWithNewFL = async () => {
                 ),
                 new dfs.actions.aaveV3.AaveV3BorrowAction(
                     true,
-                    addrs[getNetwork()].AAVE_MARKET,
+                    addrs[network].AAVE_MARKET,
                     debtAmount.toString(),
                     senderAddr,
                     VARIABLE_RATE,
@@ -109,7 +110,7 @@ const aaveV3BoostWithNewFL = async () => {
             ),
             aaveV3SupplyAction: () => new dfs.actions.aaveV3.AaveV3SupplyAction(
                 true, // use default market
-                addrs[getNetwork()].AAVE_MARKET,
+                addrs[network].AAVE_MARKET,
                 '$3', // pipe from fee taking action
                 wallet.address,
                 WETH_ADDRESS,
@@ -120,7 +121,7 @@ const aaveV3BoostWithNewFL = async () => {
             ),
             aaveV3BorrowAction: () => new dfs.actions.aaveV3.AaveV3BorrowAction(
                 true,
-                addrs[getNetwork()].AAVE_MARKET,
+                addrs[network].AAVE_MARKET,
                 '$1', // fl amount
                 flActionAddress,
                 VARIABLE_RATE,
@@ -130,7 +131,7 @@ const aaveV3BoostWithNewFL = async () => {
             ),
             delegateCreditOnAaveV3Action: (amount) => new dfs.actions.aaveV3.AaveV3DelegateCredit(
                 true,
-                addrs[getNetwork()].AAVE_MARKET,
+                addrs[network].AAVE_MARKET,
                 amount,
                 VARIABLE_RATE,
                 LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
@@ -176,7 +177,7 @@ const aaveV3BoostWithNewFL = async () => {
                 await createAaveV3Position(collAmount, debtAmount);
 
                 const loanDataBeforeBoost = await aaveV3View.getLoanData(
-                    addrs[getNetwork()].AAVE_MARKET, wallet.address,
+                    addrs[network].AAVE_MARKET, wallet.address,
                 );
 
                 const boostAmount = debtAmount.div(20);
@@ -193,7 +194,7 @@ const aaveV3BoostWithNewFL = async () => {
                 await executeAction('RecipeExecutor', functionData[1], wallet);
 
                 const loanDataAfterBoost = await aaveV3View.getLoanData(
-                    addrs[getNetwork()].AAVE_MARKET, wallet.address,
+                    addrs[network].AAVE_MARKET, wallet.address,
                 );
                 console.log(`Ratio before: ${loanDataBeforeBoost.ratio / 1e16}`);
                 console.log(`Ratio After: ${loanDataAfterBoost.ratio / 1e16}`);
@@ -208,7 +209,7 @@ const aaveV3BoostWithNewFL = async () => {
                 await createAaveV3Position(collAmount, debtAmount);
 
                 const loanDataBeforeBoost = await aaveV3View.getLoanData(
-                    addrs[getNetwork()].AAVE_MARKET, wallet.address,
+                    addrs[network].AAVE_MARKET, wallet.address,
                 );
 
                 const boostAmount = debtAmount.div(20);
@@ -225,7 +226,7 @@ const aaveV3BoostWithNewFL = async () => {
                 await executeAction('RecipeExecutor', functionData[1], wallet);
 
                 const loanDataAfterBoost = await aaveV3View.getLoanData(
-                    addrs[getNetwork()].AAVE_MARKET, wallet.address,
+                    addrs[network].AAVE_MARKET, wallet.address,
                 );
                 console.log(`Ratio before: ${loanDataBeforeBoost.ratio / 1e16}`);
                 console.log(`Ratio After: ${loanDataAfterBoost.ratio / 1e16}`);

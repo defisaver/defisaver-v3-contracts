@@ -3,7 +3,7 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 
-const { addrs, getNetwork, nullAddress } = require('./utils');
+const { addrs,  nullAddress, network } = require('./utils');
 
 const aaveV2assetsDefaultMarket = [
     'ETH', 'DAI', 'SUSD', 'USDC', 'USDT', 'WBTC',
@@ -54,7 +54,7 @@ const getAaveReserveData = async (dataProvider, tokenAddr) => {
 };
 
 const getEstimatedTotalLiquidityForToken = async (tokenAddr) => {
-    const dataProvider = await hre.ethers.getContractAt('IAaveProtocolDataProvider', addrs[getNetwork()].AAVE_V3_POOL_DATA_PROVIDER);
+    const dataProvider = await hre.ethers.getContractAt('IAaveProtocolDataProvider', addrs[network].AAVE_V3_POOL_DATA_PROVIDER);
     const reserveData = await getAaveReserveData(dataProvider, tokenAddr);
     const totalAToken = reserveData.totalAToken;
     const totalDebt = reserveData.totalVariableDebt;
@@ -78,7 +78,7 @@ const isAssetBorrowableV3 = async (dataProviderAddr, tokenAddr, checkStableBorro
 };
 
 const getAaveV3PositionInfo = async (user, aaveV3View) => {
-    const market = addrs[getNetwork()].AAVE_MARKET;
+    const market = addrs[network].AAVE_MARKET;
     const pool = await hre.ethers.getContractAt('IPoolAddressesProvider', market).then((c) => hre.ethers.getContractAt('IPoolV3', c.getPool()));
     const {
         eMode: emodeCategoryId,

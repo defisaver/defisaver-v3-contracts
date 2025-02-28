@@ -32,7 +32,7 @@ const {
     getOwnerAddr,
     chainIds,
     openStrategyAndBundleStorage,
-    getNetwork,
+    
     setBalance,
 } = require('../../utils');
 
@@ -51,8 +51,8 @@ const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromColl
 const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const openStrategy = getNetwork() === 'mainnet' ? createAaveV3OpenOrderFromCollStrategy() : createAaveV3OpenOrderFromCollL2Strategy();
-    const flOpenStrategy = getNetwork() === 'mainnet' ? createAaveV3FLOpenOrderFromCollStrategy() : createAaveV3FLOpenOrderFromCollL2Strategy();
+    const openStrategy = network === 'mainnet' ? createAaveV3OpenOrderFromCollStrategy() : createAaveV3OpenOrderFromCollL2Strategy();
+    const flOpenStrategy = network === 'mainnet' ? createAaveV3FLOpenOrderFromCollStrategy() : createAaveV3FLOpenOrderFromCollL2Strategy();
     const aaveV3OpenOrderFromCollStrategyId = await createStrategy(
         ...openStrategy,
         false,
@@ -70,7 +70,7 @@ const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
 const deployOpenOrderFromDebtStrategy = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const openStrategy = getNetwork() === 'mainnet' ? createAaveV3FLOpenOrderFromDebtStrategy() : createAaveV3FLOpenOrderFromDebtL2Strategy();
+    const openStrategy = network === 'mainnet' ? createAaveV3FLOpenOrderFromDebtStrategy() : createAaveV3FLOpenOrderFromDebtL2Strategy();
     const aaveV3FLOpenOrderFromDebtStrategyId = await createStrategy(
         ...openStrategy,
         false,
@@ -176,7 +176,7 @@ describe('Deploy open order strategies on fork', function () {
             '0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4',
             '0xC561281982c3042376eB8242d6A78Ab18062674F',
         ];
-        const botAccounts = getNetwork() === 'mainnet' ? mainnetBocAccounts : l2BotAccounts;
+        const botAccounts = network === 'mainnet' ? mainnetBocAccounts : l2BotAccounts;
 
         // ---- Fork setup ----
         if (isFork) {

@@ -264,7 +264,6 @@ const setNetwork = (networkName) => {
     network = networkName;
 };
 
-const getNetwork = () => network;
 const isNetworkFork = () => hre.network.name === 'fork';
 
 const chainIds = {
@@ -280,8 +279,8 @@ const MIN_VAULT_DAI_AMOUNT = '45010'; // TODO: can we fetch this dynamically
 const MIN_VAULT_RAI_AMOUNT = '3000'; // TODO: can we fetch this dynamically
 
 const getSparkFLFee = async () => {
-    console.log(getNetwork(), addrs[getNetwork()].SPARK_MARKET);
-    return hre.ethers.getContractAt('IPoolAddressesProvider', addrs[getNetwork()].SPARK_MARKET)
+    console.log(network, addrs[network].SPARK_MARKET);
+    return hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET)
         .then((addressProvider) => addressProvider.getPool())
         .then((poolAddr) => hre.ethers.getContractAt('IPoolV3', poolAddr))
         .then((pool) => pool.FLASHLOAN_PREMIUM_TOTAL());
@@ -561,7 +560,7 @@ const getLocalTokenPrice = (tokenSymbol) => {
     return 0;
 };
 const getTokenHelperContract = async () => {
-    const contractName = chainIds[getNetwork()] === 1 ? 'TokenPriceHelper' : 'TokenPriceHelperL2';
+    const contractName = chainIds[network] === 1 ? 'TokenPriceHelper' : 'TokenPriceHelperL2';
     console.log(`Deploying ${contractName}`);
     const tokenPriceHelperFactory = await hre.ethers.getContractFactory(contractName);
     const tokenHelper = await tokenPriceHelperFactory.deploy();
@@ -569,7 +568,7 @@ const getTokenHelperContract = async () => {
     return tokenHelper;
 };
 const fetchAmountInUSDPrice = async (tokenSymbol, amountUSD) => {
-    const { decimals, address } = getAssetInfo(tokenSymbol, chainIds[getNetwork()]);
+    const { decimals, address } = getAssetInfo(tokenSymbol, chainIds[network]);
     const tokenHelper = await getTokenHelperContract();
 
     const tokenPriceInUSD = await tokenHelper.getPriceInUSD(address);
@@ -581,7 +580,7 @@ const fetchAmountInUSDPrice = async (tokenSymbol, amountUSD) => {
 };
 
 const fetchTokenPriceInUSD = async (tokenSymbol) => {
-    const { address } = getAssetInfo(tokenSymbol, chainIds[getNetwork()]);
+    const { address } = getAssetInfo(tokenSymbol, chainIds[network]);
     const tokenHelper = await getTokenHelperContract();
     const tokenPriceInUSD = await tokenHelper.getPriceInUSD(address);
     return tokenPriceInUSD;
@@ -685,7 +684,7 @@ const sendEther = async (signer, toAddress, amount) => {
 };
 
 const redeploy = async (name, isFork = false, ...args) => {
-    const regAddr = addrs[getNetwork()].REGISTRY_ADDR;
+    const regAddr = addrs[network].REGISTRY_ADDR;
     if (!isFork) {
         const setBalanceMethod = hre.network.config.isAnvil ? 'anvil_setBalance' : 'hardhat_setBalance';
         await hre.network.provider.send(setBalanceMethod, [
@@ -716,7 +715,7 @@ const redeploy = async (name, isFork = false, ...args) => {
     if (name === 'StrategyExecutor' || name === 'StrategyExecutorL2') {
         name = 'StrategyExecutorID';
     }
-    if (name === 'KyberInputScalingHelperL2' && getNetwork() !== 'mainnet') {
+    if (name === 'KyberInputScalingHelperL2' && network !== 'mainnet') {
         name = 'KyberInputScalingHelper';
     }
 
@@ -751,7 +750,7 @@ const redeploy = async (name, isFork = false, ...args) => {
     return c;
 };
 
-const approveContractInRegistry = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR) => {
+const approveContractInRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR) => {
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
     const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
     let registry = await registryInstance.attach(regAddr);
@@ -1561,7 +1560,6 @@ module.exports = {
     isProxySafe,
     getSparkFLFee,
     setNetwork,
-    getNetwork,
     setBalance,
     takeSnapshot,
     revertToSnapshot,

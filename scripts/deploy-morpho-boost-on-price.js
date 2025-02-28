@@ -7,8 +7,8 @@ const { start } = require('./utils/starter');
 const {
     getOwnerAddr,
     openStrategyAndBundleStorage,
-    getNetwork,
     redeploy,
+    network,
 } = require('../test/utils');
 const { topUp } = require('./utils/fork');
 const { addBotCaller, createStrategy, createBundle } = require('../test/utils-strategies');
@@ -20,10 +20,10 @@ const { createMorphoBlueBoostOnTargetPriceStrategy, createMorphoBlueFLBoostOnTar
 
 const deployBoostOnPriceBundle = async (isFork) => {
     await openStrategyAndBundleStorage(isFork);
-    const boostOnPriceStrategy = getNetwork() === 'mainnet'
+    const boostOnPriceStrategy = network === 'mainnet'
         ? createMorphoBlueBoostOnTargetPriceStrategy()
         : createMorphoBlueBoostOnTargetPriceL2Strategy();
-    const flBoostOnPriceStrategy = getNetwork() === 'mainnet'
+    const flBoostOnPriceStrategy = network === 'mainnet'
         ? createMorphoBlueFLBoostOnTargetPriceStrategy()
         : createMorphoBlueFLBoostOnTargetPriceL2Strategy();
     const boostOnPriceStrategyId = await createStrategy(...boostOnPriceStrategy, false);
@@ -37,7 +37,7 @@ const deployBoostOnPriceBundle = async (isFork) => {
 };
 
 async function main() {
-    if (getNetwork() !== 'mainnet') {
+    if (network !== 'mainnet') {
         configure({
             chainId: 8453,
             testMode: true,
@@ -58,7 +58,7 @@ async function main() {
         '0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4',
         '0xC561281982c3042376eB8242d6A78Ab18062674F',
     ];
-    const bots = getNetwork() === 'mainnet' ? l1BotAccounts : l2BotAccounts;
+    const bots = network === 'mainnet' ? l1BotAccounts : l2BotAccounts;
     for (let i = 0; i < bots.length; ++i) {
         await topUp(bots[i]);
         await addBotCaller(bots[i], isFork);

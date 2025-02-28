@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
-const { getNetwork, addrs, nullAddress } = require('./utils');
+const {  addrs, nullAddress, network } = require('./utils');
 
 const getSparkReserveData = async (dataProvider, tokenAddr) => {
     const tokens = await dataProvider.getReserveData(tokenAddr);
@@ -10,7 +10,7 @@ const getSparkReserveData = async (dataProvider, tokenAddr) => {
 };
 
 const getSparkPositionInfo = async (user, sparkView) => {
-    const market = addrs[getNetwork()].SPARK_MARKET;
+    const market = addrs[network].SPARK_MARKET;
     const pool = await hre.ethers.getContractAt('IPoolAddressesProvider', market).then((c) => hre.ethers.getContractAt('IPoolV3', c.getPool()));
     const {
         eMode: emodeCategoryId,

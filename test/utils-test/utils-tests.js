@@ -28,7 +28,8 @@ const {
     setBalance,
     addrs,
     takeSnapshot,
-    revertToSnapshot, getNetwork, getContractFromRegistry, getOwnerAddr,
+    revertToSnapshot, getContractFromRegistry, getOwnerAddr,
+    network,
 } = require('../utils');
 const {
     predictSafeAddress,
@@ -48,13 +49,13 @@ const botRefillTest = async () => {
 
         before(async () => {
             botRefillsContract = await getContractFromRegistry('BotRefills');
-            feeRecipientContract = await hre.ethers.getContractAt('FeeRecipient', addrs[getNetwork()].FEE_RECIPIENT_ADDR);
+            feeRecipientContract = await hre.ethers.getContractAt('FeeRecipient', addrs[network].FEE_RECIPIENT_ADDR);
             feeReceiverAddr = await feeRecipientContract.getFeeAddr();
-            refillCaller = addrs[getNetwork()].REFILL_CALLER;
+            refillCaller = addrs[network].REFILL_CALLER;
 
             await impersonateAccount(feeReceiverAddr);
 
-            let wethContract = await hre.ethers.getContractAt('IERC20', addrs[getNetwork()].WETH_ADDRESS);
+            let wethContract = await hre.ethers.getContractAt('IERC20', addrs[network].WETH_ADDRESS);
 
             let signer = await hre.ethers.provider.getSigner(feeReceiverAddr);
             wethContract = wethContract.connect(signer);

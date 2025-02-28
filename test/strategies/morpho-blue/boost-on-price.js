@@ -19,7 +19,7 @@ const {
     getContractFromRegistry,
     formatExchangeObj,
     openStrategyAndBundleStorage,
-    getNetwork,
+    
     redeploy,
     approve,
 } = require('../../utils');
@@ -108,10 +108,10 @@ const TARGET_RATIO = 175;
 
 const deployBoostOnPriceBundle = async (isFork) => {
     await openStrategyAndBundleStorage(isFork);
-    const boostOnPriceStrategy = getNetwork() === 'mainnet'
+    const boostOnPriceStrategy = network === 'mainnet'
         ? createMorphoBlueBoostOnTargetPriceStrategy()
         : createMorphoBlueBoostOnTargetPriceL2Strategy();
-    const flBoostOnPriceStrategy = getNetwork() === 'mainnet'
+    const flBoostOnPriceStrategy = network === 'mainnet'
         ? createMorphoBlueFLBoostOnTargetPriceStrategy()
         : createMorphoBlueFLBoostOnTargetPriceL2Strategy();
     const boostOnPriceStrategyId = await createStrategy(...boostOnPriceStrategy, false);
@@ -218,10 +218,10 @@ const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
 
             // setup contracts
             const strategyContractName = network === 'mainnet' ? 'StrategyExecutor' : 'StrategyExecutorL2';
-            strategyExecutor = await hre.ethers.getContractAt(strategyContractName, addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
+            strategyExecutor = await hre.ethers.getContractAt(strategyContractName, addrs[network].STRATEGY_EXECUTOR_ADDR);
             strategyExecutor = strategyExecutor.connect(botAcc);
             flAction = await getContractFromRegistry('FLAction', isFork);
-            view = await hre.ethers.getContractAt('MorphoBlueHelper', addrs[getNetwork()].MORPHO_BLUE_VIEW);
+            view = await hre.ethers.getContractAt('MorphoBlueHelper', addrs[network].MORPHO_BLUE_VIEW);
             await redeploy('MorphoBluePriceTrigger', isFork);
             await redeploy('MorphoBlueTargetRatioCheck', isFork);
 

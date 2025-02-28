@@ -14,11 +14,12 @@ const {
     revertToSnapshot,
     setBalance,
     addrs,
-    getNetwork,
+    
     balanceOf,
     redeploy,
     WALLETS,
     isWalletNameDsProxy,
+    network,
 } = require('../../utils');
 
 const { liquityOpen, executeAction } = require('../../actions');
@@ -94,7 +95,7 @@ const aaveV3Shifter = async () => {
             ),
             aaveV3SupplyAction: () => new dfs.actions.aaveV3.AaveV3SupplyAction(
                 true, // use default market
-                addrs[getNetwork()].AAVE_MARKET,
+                addrs[network].AAVE_MARKET,
                 '$3', // pipe from lido wrap action
                 wallet.address,
                 WSTETH_ADDRESS,
@@ -105,7 +106,7 @@ const aaveV3Shifter = async () => {
             ),
             aaveV3BorrowAction: (debtAmount) => new dfs.actions.aaveV3.AaveV3BorrowAction(
                 true, // use default market
-                addrs[getNetwork()].AAVE_MARKET,
+                addrs[network].AAVE_MARKET,
                 debtAmount.toString(), // debt amount
                 wallet.address,
                 VARIABLE_RATE,
@@ -125,7 +126,7 @@ const aaveV3Shifter = async () => {
             ),
             delegateCreditOnAaveV3Action: (amount) => new dfs.actions.aaveV3.AaveV3DelegateCredit(
                 true,
-                addrs[getNetwork()].AAVE_MARKET,
+                addrs[network].AAVE_MARKET,
                 amount, // from FL action
                 VARIABLE_RATE,
                 LUSD_ASSET_ID_IN_AAVE_V3_MARKET,

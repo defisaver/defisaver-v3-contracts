@@ -2,7 +2,7 @@ const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { topUp } = require('../../../scripts/utils/fork');
 const {
-    getProxy, addrs, getNetwork, getContractFromRegistry,
+    getProxy, addrs,  getContractFromRegistry,
     getOwnerAddr,
     setBalance,
     BOLD_ADDR,
@@ -10,6 +10,7 @@ const {
     takeSnapshot,
     revertToSnapshot,
     redeploy,
+    network,
 } = require('../../utils');
 const { uniV3CreatePool, liquityV2Open } = require('../../actions');
 const { addBotCaller } = require('../../utils-strategies');
@@ -55,7 +56,7 @@ class BaseLiquityV2StrategyTest {
     }
 
     async setUpContracts() {
-        const strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
+        const strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[network].STRATEGY_EXECUTOR_ADDR);
         this.contracts.strategyExecutor = strategyExecutor.connect(this.botAcc);
         this.contracts.flAction = await getContractFromRegistry('FLAction', this.isFork);
         this.contracts.view = await redeploy('LiquityV2View', this.isFork);

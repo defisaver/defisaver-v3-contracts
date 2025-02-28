@@ -35,10 +35,10 @@ const {
     LUSD_ADDR,
     USDC_ADDR,
     BLUSD_ADDR,
-    getNetwork,
     getContractFromRegistry,
     chainIds,
     BOLD_ADDR,
+    network,
 } = require('./utils');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
@@ -72,7 +72,7 @@ const subDcaStrategy = async (
         amount,
         lastTimestamp,
         interval,
-        chainIds[getNetwork()],
+        chainIds[network],
     );
     const subId = await subToStrategy(proxy, strategySub);
 
@@ -175,7 +175,7 @@ const subLiquityCloseToCollStrategy = async (proxy, targetPrice, tokenState) => 
         targetPrice,
         WETH_ADDRESS,
         WETH_ADDRESS,
-        chainIds[getNetwork()],
+        chainIds[network],
     );
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
@@ -187,7 +187,7 @@ const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId)
         WETH_ADDRESS,
         WETH_ADDRESS,
         roundId,
-        chainIds[getNetwork()],
+        chainIds[network],
     );
     const subId = await subToStrategy(proxy, strategySub);
 

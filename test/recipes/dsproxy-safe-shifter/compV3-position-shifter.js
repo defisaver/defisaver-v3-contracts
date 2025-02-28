@@ -5,8 +5,9 @@ const {
     getProxy,
     redeploy,
     addrs,
-    getNetwork,
+    
     setBalance,
+    network,
 } = require('../../utils');
 const {
     supplyCompV3, borrowCompV3, executeAction,
@@ -16,7 +17,7 @@ const { signSafeTx } = require('../../utils-safe');
 describe('Safe-CompV3-Shift-Position', function () {
     this.timeout(200000);
 
-    const market = addrs[getNetwork()].COMET_USDC_ADDR;
+    const market = addrs[network].COMET_USDC_ADDR;
 
     let senderAcc;
     let proxy;
@@ -181,9 +182,9 @@ describe('Safe-CompV3-Shift-Position', function () {
 
     it('... should shift compV3 position from dsProxy to safe', async () => {
         const positionData = {
-            collAddr: addrs[getNetwork()].WETH_ADDRESS,
+            collAddr: addrs[network].WETH_ADDRESS,
             collAmount: ethers.utils.parseUnits('10', 18),
-            debtAddr: addrs[getNetwork()].USDC_ADDR,
+            debtAddr: addrs[network].USDC_ADDR,
             debtAmount: ethers.utils.parseUnits('10000', 6),
         };
         await createCompV3Position(positionData);

@@ -5,11 +5,12 @@ const {
     getProxy,
     redeploy,
     addrs,
-    getNetwork,
+    
     WETH_ADDRESS,
     LUSD_ADDR,
     setBalance,
     nullAddress,
+    network,
 } = require('../../utils');
 const { aaveV3Supply, aaveV3Borrow, executeAction } = require('../../actions');
 
@@ -36,7 +37,7 @@ describe('Safe-AaveV3-Shift-Position', function () {
         await setBalance(positionObj.collAddr, senderAcc.address, positionObj.collAmount);
         await aaveV3Supply(
             proxy,
-            addrs[getNetwork()].AAVE_MARKET,
+            addrs[network].AAVE_MARKET,
             positionObj.collAmount,
             positionObj.collAddr,
             positionObj.collAssetId,
@@ -45,7 +46,7 @@ describe('Safe-AaveV3-Shift-Position', function () {
         );
         await aaveV3Borrow(
             proxy,
-            addrs[getNetwork()].AAVE_MARKET,
+            addrs[network].AAVE_MARKET,
             positionObj.debtAmount,
             senderAcc.address,
             VARIABLE_RATE,
@@ -66,7 +67,7 @@ describe('Safe-AaveV3-Shift-Position', function () {
         );
         const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
             true,
-            addrs[getNetwork()].AAVE_MARKET,
+            addrs[network].AAVE_MARKET,
             ethers.constants.MaxUint256, // repay whole debt
             safe.address,
             VARIABLE_RATE,
@@ -83,7 +84,7 @@ describe('Safe-AaveV3-Shift-Position', function () {
         );
         const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
             true,
-            addrs[getNetwork()].AAVE_MARKET,
+            addrs[network].AAVE_MARKET,
             '$1', // fl amount
             flAction.address, // return fl amount to FLAction
             VARIABLE_RATE,
@@ -154,11 +155,11 @@ describe('Safe-AaveV3-Shift-Position', function () {
 
     const validateMigration = async (positionData, proxyLoanBefore) => {
         const proxyLoanAfter = await aaveV3View.getLoanData(
-            addrs[getNetwork()].AAVE_MARKET,
+            addrs[network].AAVE_MARKET,
             proxy.address,
         );
         const safeLoanAfter = await aaveV3View.getLoanData(
-            addrs[getNetwork()].AAVE_MARKET,
+            addrs[network].AAVE_MARKET,
             safe.address,
         );
 
@@ -222,7 +223,7 @@ describe('Safe-AaveV3-Shift-Position', function () {
 
         console.log('Getting loan data for dsProxy before shift...');
         const proxyLoanBefore = await aaveV3View.getLoanData(
-            addrs[getNetwork()].AAVE_MARKET,
+            addrs[network].AAVE_MARKET,
             proxy.address,
         );
 

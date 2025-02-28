@@ -13,13 +13,13 @@ const {
     redeployCore,
     timeTravel,
     getAddrFromRegistry,
-    getNetwork,
     sendEther,
     getOwnerAddr,
     setBalance,
     addrs,
     chainIds,
     setNewExchangeWrapper,
+    network,
 } = require('../../utils');
 
 const { callDcaStrategy } = require('../../strategy-calls');
@@ -66,7 +66,6 @@ const limitOrderStrategyTest = async () => {
         let currPrice;
         let minPrice;
         let uniV3Wrapper;
-        let network;
         let strategyId;
         let sellAmountWei;
         let tokenAddrSell;
@@ -78,8 +77,6 @@ const limitOrderStrategyTest = async () => {
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
-
-            network = getNetwork();
 
             set('network', chainIds[network]);
 
@@ -291,7 +288,6 @@ const dcaStrategyTest = async () => {
         let subStorage;
         let lastTimestamp;
         let subStorageAddr;
-        let network;
         let tokenAddrSell;
         let tokenAddrBuy;
         let sellAmountWei;
@@ -299,8 +295,6 @@ const dcaStrategyTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
-
-            network = getNetwork();
 
             set('network', chainIds[network]);
 

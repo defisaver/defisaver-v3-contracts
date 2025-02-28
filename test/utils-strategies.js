@@ -8,7 +8,6 @@ const {
     AVG_GAS_PRICE,
     addrs,
     network,
-    getNetwork,
     getContractFromRegistry,
     executeTxFromProxy,
     isProxySafe,
@@ -92,7 +91,7 @@ const createBundle = async (proxy, strategyIds) => {
 };
 
 const subToStrategy = async (proxy, strategySub) => {
-    const SubProxyAddr = addrs[getNetwork()].SubProxy;
+    const SubProxyAddr = addrs[network].SubProxy;
     const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
     const functionData = SubProxyProxy.interface.encodeFunctionData(
         'subscribeToStrategy',
@@ -129,7 +128,7 @@ const activateSub = async (proxy, subId) => {
 };
 
 const subToAaveV3Proxy = async (proxy, inputData) => {
-    const aaveSubProxyAddr = addrs[getNetwork()].AAVE_SUB_PROXY;
+    const aaveSubProxyAddr = addrs[network].AAVE_SUB_PROXY;
 
     const AaveSubProxy = await hre.ethers.getContractFactory('AaveV3SubProxy');
     const functionData = AaveSubProxy.interface.encodeFunctionData(
@@ -160,7 +159,7 @@ const subToAaveV3Proxy = async (proxy, inputData) => {
 };
 
 const subToSparkProxy = async (proxy, inputData) => {
-    const sparkSubProxyAddr = await getAddrFromRegistry('SparkSubProxy'); // addrs[getNetwork()].AAVE_SUB_PROXY;
+    const sparkSubProxyAddr = await getAddrFromRegistry('SparkSubProxy');
 
     const SparkSubProxy = await hre.ethers.getContractFactory('SparkSubProxy');
     const functionData = SparkSubProxy.interface.encodeFunctionData(
@@ -580,10 +579,10 @@ const subToLimitOrderProxy = async (proxy, inputData) => {
 
 const addBotCaller = async (botAddr, isFork = false) => {
     if (!isFork) {
-        await impersonateAccount(addrs[getNetwork()].OWNER_ACC);
+        await impersonateAccount(addrs[network].OWNER_ACC);
     }
 
-    const signer = await hre.ethers.provider.getSigner(addrs[getNetwork()].OWNER_ACC);
+    const signer = await hre.ethers.provider.getSigner(addrs[network].OWNER_ACC);
     const botAuthAddr = await getAddrFromRegistry('BotAuth');
 
     const botAuthInstance = await hre.ethers.getContractFactory('BotAuth', signer);
@@ -594,7 +593,7 @@ const addBotCaller = async (botAddr, isFork = false) => {
     await botAuth.addCaller(botAddr, { gasLimit: 800000 });
 
     if (!isFork) {
-        await stopImpersonatingAccount(addrs[getNetwork()].OWNER_ACC);
+        await stopImpersonatingAccount(addrs[network].OWNER_ACC);
     }
 };
 

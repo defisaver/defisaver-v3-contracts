@@ -22,10 +22,11 @@ const {
     addrs,
     AAVE_V3_FL_FEE,
     chainIds,
-    getNetwork,
+    
     getSparkFLFee,
     WALLETS,
     isWalletNameDsProxy,
+    network,
 } = require('../utils');
 
 const { sell, executeAction } = require('../actions');
@@ -228,7 +229,7 @@ const sparkFlTest = async (flActionContract) => {
 
                 it(`... should get an ${tokenSymbol} Spark flash loan using ${WALLETS[i]}`, async () => {
                     determineActiveWallet(WALLETS[i]);
-                    const assetInfo = getAssetInfo(tokenSymbol, chainIds[getNetwork()]);
+                    const assetInfo = getAssetInfo(tokenSymbol, chainIds[network]);
 
                     // test if balance will brick fl action
                     await setBalance(assetInfo.address, flActionContract.address, Float2BN('1', 0));

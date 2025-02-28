@@ -2,8 +2,6 @@
 const hre = require('hardhat');
 const {
     getContractFromRegistry,
-    addrs,
-    getNetwork,
     openStrategyAndBundleStorage,
 } = require('./utils');
 const {

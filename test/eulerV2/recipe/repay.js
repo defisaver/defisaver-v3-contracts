@@ -10,8 +10,9 @@ const {
     redeploy,
     addrs,
     formatExchangeObj,
-    getNetwork,
+    
     getOwnerAddr, getAddrFromRegistry,
+    network,
 } = require('../../utils');
 const { topUp } = require('../../../scripts/utils/fork');
 const { getEulerV2TestPairs, eulerV2CreatePosition, getAccountRatio } = require('../utils');
@@ -87,7 +88,7 @@ const eulerV2RepayTest = async (testPairs) => {
                         supplyToken,
                         borrowToken,
                         '$1',
-                        addrs[getNetwork()].UNISWAP_V3_WRAPPER,
+                        addrs[network].UNISWAP_V3_WRAPPER,
                         0,
                         100,
                     ),
@@ -144,7 +145,7 @@ const eulerV2RepayTest = async (testPairs) => {
                         supplyToken,
                         borrowToken,
                         repayAmount,
-                        addrs[getNetwork()].UNISWAP_V3_WRAPPER,
+                        addrs[network].UNISWAP_V3_WRAPPER,
                         0,
                         100,
                     ),

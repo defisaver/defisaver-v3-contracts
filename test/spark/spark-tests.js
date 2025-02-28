@@ -7,10 +7,11 @@ const {
     getProxy,
     balanceOf, setBalance, redeploy,
     takeSnapshot, revertToSnapshot, addrs, approve, impersonateAccount,
-    getNetwork, Float2BN, getAddrFromRegistry,
+     Float2BN, getAddrFromRegistry,
+    network,
 } = require('../utils');
 
-const sparkMarket = addrs[getNetwork()].SPARK_MARKET;
+const sparkMarket = addrs[network].SPARK_MARKET;
 
 const {
     sparkSupply, sparkSupplyCalldataOptimised, sparkBorrow, sparkWithdraw,

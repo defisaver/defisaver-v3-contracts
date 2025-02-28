@@ -18,7 +18,7 @@ const {
     chainIds,
     takeSnapshot,
     revertToSnapshot,
-    getNetwork,
+    network,
 } = require('../../utils');
 
 const { executeAction } = require('../../actions');
@@ -77,7 +77,6 @@ const kyberTest = async () => {
         for (let i = 0; i < 1; ++i) {
             const trade = trades[i];
             it(`... should try to sell ${trade.sellToken} for ${trade.buyToken} with offchain calldata (Kyber) in a single DFSSell action`, async () => {
-                const network = hre.network.config.name;
                 const chainId = chainIds[network];
                 const sellAssetInfo = getAssetInfo(trade.sellToken, chainId);
                 const buyAssetInfo = getAssetInfo(trade.buyToken, chainId);
@@ -145,7 +144,6 @@ const kyberTest = async () => {
                 await revertToSnapshot(snapshot);
             });
             it(`... should try to sell ${trade.sellToken} for ${trade.buyToken} with offchain calldata (Kyber) in a recipe`, async () => {
-                const network = hre.network.config.name;
                 const chainId = chainIds[network];
                 const sellAssetInfo = getAssetInfo(trade.sellToken, chainId);
                 const buyAssetInfo = getAssetInfo(trade.buyToken, chainId);
@@ -362,7 +360,7 @@ const oneInchTest = async () => {
         let sellAssetInfo;
 
         before(async () => {
-            const chainId = chainIds[getNetwork()];
+            const chainId = chainIds[network];
 
             await redeploy('DFSSell');
             await redeploy('PullToken');
@@ -481,7 +479,6 @@ const zeroxTest = async () => {
         let senderAcc;
         let proxy;
         let snapshot;
-        const network = hre.network.config.name;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -504,7 +501,7 @@ const zeroxTest = async () => {
             await setBalance(sellAssetInfo.address, senderAcc.address, sellAmount);
             await approve(sellAssetInfo.address, proxy.address);
 
-            const zeroxWrapper = addrs[getNetwork()].ZEROX_WRAPPER;
+            const zeroxWrapper = addrs[network].ZEROX_WRAPPER;
 
             const options = {
                 method: 'GET',
@@ -569,7 +566,7 @@ const odosTest = async () => {
         let sellAssetInfo;
 
         before(async () => {
-            const chainId = chainIds[getNetwork()];
+            const chainId = chainIds[network];
 
             await redeploy('DFSSell');
             await redeploy('PullToken');

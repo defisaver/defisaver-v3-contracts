@@ -5,7 +5,7 @@ const hre = require('hardhat');
 const { start } = require('./utils/starter');
 
 const {
-    redeploy, addrs, network, openStrategyAndBundleStorage, getOwnerAddr, getNetwork,
+    redeploy, openStrategyAndBundleStorage, getOwnerAddr,
 } = require('../test/utils');
 
 const { topUp } = require('./utils/fork');
