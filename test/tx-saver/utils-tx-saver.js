@@ -22,10 +22,7 @@ const {
 const { supplyToMarket } = require('../llamalend/utils');
 const { signSafeTx } = require('../utils-safe');
 
-const addBotCallerForTxSaver = async (
-    botAddr,
-    isFork = false,
-) => {
+const addBotCallerForTxSaver = async (botAddr, isFork = false) => {
     if (!isFork) {
         await impersonateAccount(getOwnerAddr());
     }

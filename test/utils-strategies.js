@@ -582,17 +582,12 @@ const subToLimitOrderProxy = async (proxy, inputData, regAddr = addrs[network].R
     return { subId: latestSubId, strategySub };
 };
 
-const addBotCaller = async (
-    botAddr,
-    regAddr = addrs[getNetwork()].REGISTRY_ADDR,
-    isFork = false,
-    networkInjected = getNetwork(),
-) => {
-    if (regAddr === addrs[getNetwork()].REGISTRY_ADDR && !isFork) {
+const addBotCaller = async (botAddr, isFork = false) => {
+    if (!isFork) {
         await impersonateAccount(addrs[getNetwork()].OWNER_ACC);
     }
 
-    const signer = await hre.ethers.provider.getSigner(addrs[networkInjected].OWNER_ACC);
+    const signer = await hre.ethers.provider.getSigner(addrs[getNetwork()].OWNER_ACC);
     const botAuthAddr = await getAddrFromRegistry('BotAuth');
 
     const botAuthInstance = await hre.ethers.getContractFactory('BotAuth', signer);
@@ -602,7 +597,7 @@ const addBotCaller = async (
 
     await botAuth.addCaller(botAddr, { gasLimit: 800000 });
 
-    if (regAddr === addrs[getNetwork()].REGISTRY_ADDR && !isFork) {
+    if (!isFork) {
         await stopImpersonatingAccount(addrs[getNetwork()].OWNER_ACC);
     }
 };

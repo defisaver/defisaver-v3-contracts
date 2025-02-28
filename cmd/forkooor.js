@@ -2705,7 +2705,7 @@ const setBotAuth = async (addr) => {
 
     await topUp(addrs[network].OWNER_ACC);
 
-    await addBotCaller(addr, true, network);
+    await addBotCaller(addr, true);
 };
 
 const setMockChainlinkPrice = async (tokenLabel, price) => {

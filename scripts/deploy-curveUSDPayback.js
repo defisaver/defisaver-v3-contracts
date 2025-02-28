@@ -43,9 +43,9 @@ async function main() {
     await topUp('0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4');
     await topUp('0xC561281982c3042376eB8242d6A78Ab18062674F');
     await topUp('0x660B3515F493200C47Ef3DF195abEAfc57Bd6496');
-    await addBotCaller('0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4', addrs[getNetwork()].REGISTRY_ADDR, true);
-    await addBotCaller('0xC561281982c3042376eB8242d6A78Ab18062674F', addrs[getNetwork()].REGISTRY_ADDR, true);
-    await addBotCaller('0x660B3515F493200C47Ef3DF195abEAfc57Bd6496', addrs[getNetwork()].REGISTRY_ADDR, true);
+    await addBotCaller('0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4', true);
+    await addBotCaller('0xC561281982c3042376eB8242d6A78Ab18062674F', true);
+    await addBotCaller('0x660B3515F493200C47Ef3DF195abEAfc57Bd6496', true);
 
     process.exit(0);
 }
