@@ -25,7 +25,6 @@ class BaseFluidT1StrategyTest {
         this.snapshotId = null;
         this.contracts = {};
         this.bundles = {};
-        this.registryAddr = addrs[network].REGISTRY_ADDR;
     }
 
     async baseSetUp() {

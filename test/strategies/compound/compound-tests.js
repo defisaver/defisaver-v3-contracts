@@ -30,7 +30,6 @@ const {
     approve,
     setBalance,
     redeploy,
-    REGISTRY_ADDR,
     WETH_ADDRESS,
     redeployCore,
 } = require('../../utils');

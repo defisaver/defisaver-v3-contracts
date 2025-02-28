@@ -6,8 +6,6 @@ const {
     revertToSnapshot,
     getProxy,
     redeploy,
-    addrs,
-    getNetwork,
     getOwnerAddr, setBalance, approve, getGasUsed,
 } = require('../../utils');
 const { topUp } = require('../../../scripts/utils/fork');
@@ -19,7 +17,6 @@ const eulerV2CreateTest = async (testPair) => {
     describe('EulerV2-Create-Compare', function () {
         this.timeout(100000);
         let isFork;
-        const REGISTRY_ADDR = addrs[getNetwork()].REGISTRY_ADDR;
 
         let snapshot;
         let senderAcc;

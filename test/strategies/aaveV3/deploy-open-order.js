@@ -85,8 +85,6 @@ const deployOpenOrderFromDebtStrategy = async (proxy, isFork) => {
 describe('Deploy open order strategies on fork', function () {
     this.timeout(1200000);
 
-    const REGISTRY_ADDR = addrs[network].REGISTRY_ADDR;
-
     let proxy;
     let senderAcc;
     let senderAcc1;

@@ -21,7 +21,6 @@ class BaseLiquityV2StrategyTest {
         this.snapshotId = null;
         this.contracts = {};
         this.bundles = {};
-        this.registryAddr = addrs[getNetwork()].REGISTRY_ADDR;
     }
 
     async baseSetUp() {

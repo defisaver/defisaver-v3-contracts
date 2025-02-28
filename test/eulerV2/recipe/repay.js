@@ -21,7 +21,6 @@ const eulerV2RepayTest = async (testPairs) => {
     describe('EulerV2-Repay-Recipe', function () {
         this.timeout(100000);
         let isFork;
-        const REGISTRY_ADDR = addrs[getNetwork()].REGISTRY_ADDR;
 
         let snapshot;
         let senderAcc;

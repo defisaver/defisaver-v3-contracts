@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable max-len */
 /* eslint-disable no-else-return */
 /* eslint-disable import/no-unresolved */
@@ -683,12 +684,10 @@ const sendEther = async (signer, toAddress, amount) => {
     });
 };
 
-// eslint-disable-next-line max-len
 const redeploy = async (name, isFork = false, ...args) => {
     const regAddr = addrs[getNetwork()].REGISTRY_ADDR;
     if (!isFork) {
         const setBalanceMethod = hre.network.config.isAnvil ? 'anvil_setBalance' : 'hardhat_setBalance';
-        console.log(setBalanceMethod);
         await hre.network.provider.send(setBalanceMethod, [
             getOwnerAddr(),
             '0xC9F2C9CD04674EDEA40000000',
@@ -701,9 +700,7 @@ const redeploy = async (name, isFork = false, ...args) => {
             '0x1', // 1 wei
         ]);
 
-        if (regAddr === addrs[getNetwork()].REGISTRY_ADDR) {
-            await impersonateAccount(getOwnerAddr());
-        }
+        await impersonateAccount(getOwnerAddr());
 
         const ethSender = (await hre.ethers.getSigners())[0];
         await sendEther(ethSender, getOwnerAddr(), '100');
@@ -714,24 +711,14 @@ const redeploy = async (name, isFork = false, ...args) => {
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);
-    // if (isFork) {
-    //     // if script is consistenly failing due to tenderly delete this
-    //     // deployer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    // }
     const c = await deployAsOwner(name, signer, ...args);
+
     if (name === 'StrategyExecutor' || name === 'StrategyExecutorL2') {
-        // eslint-disable-next-line no-param-reassign
         name = 'StrategyExecutorID';
     }
     if (name === 'KyberInputScalingHelperL2' && getNetwork() !== 'mainnet') {
-        // eslint-disable-next-line no-param-reassign
         name = 'KyberInputScalingHelper';
     }
-
-    // if (name === 'FLAaveV3') {
-    //     // eslint-disable-next-line no-param-reassign
-    //     name = 'FLActionL2';
-    // }
 
     const id = getNameId(name);
 
@@ -757,10 +744,8 @@ const redeploy = async (name, isFork = false, ...args) => {
         await storageContract.changeEditPermission(true);
     }
 
-    if (hre.network.config.type !== 'tenderly') {
-        if (regAddr === addrs[network].REGISTRY_ADDR) {
-            await stopImpersonatingAccount(getOwnerAddr());
-        }
+    if (!isFork) {
+        await stopImpersonatingAccount(getOwnerAddr());
     }
 
     return c;

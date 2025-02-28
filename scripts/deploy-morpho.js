@@ -16,8 +16,6 @@ async function main() {
 
     // const morphoMarketStorage = await redeploy(
     //     'MorphoMarketStorage',
-    //     addrs[network].REGISTRY_ADDR,
-    //     true,
     //     true,
     //     MORPHO_GENERAL_ADDR,
     //     MORPHO_ETH_ADDR,

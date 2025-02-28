@@ -201,7 +201,6 @@ try {
 }
 
 const MOCK_CHAINLINK_ORACLE = '0x5d0e4672C77A2743F8b583D152A8935121D8F879';
-const REGISTRY_ADDR = '0x287778F121F134C66212FB16c9b53eC991D32f5b'; // forkedAddresses.DFSRegistry;
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
 function setEnv(key, value) {
@@ -291,7 +290,6 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
                 senderAcc.address,
                 proxy.address,
                 proxy,
-                REGISTRY_ADDR,
             );
         }
 
@@ -464,7 +462,7 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio,
     const bundleId = 0;
 
     const { subId } = await subRepayFromSavingsStrategy(
-        proxy, bundleId, vaultId, minRatio, targetRatio, REGISTRY_ADDR,
+        proxy, bundleId, vaultId, minRatio, targetRatio,
     );
 
     console.log(`Subscribed to ${protocol} bundle with sub id #${subId}`);
@@ -504,7 +502,6 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
         price.toString(),
         ilkObj.assetAddress,
         formattedPriceState,
-        REGISTRY_ADDR,
     );
 
     console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
@@ -609,7 +606,6 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
             ilkObj.assetAddress,
             percentage,
             oracleData.roundId,
-            REGISTRY_ADDR,
         );
 
         console.log(`Subscribed to trailing mcd close to dai strategy with sub id #${subInfo.subId}`);
@@ -620,7 +616,6 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
             ilkObj.assetAddress,
             percentage,
             oracleData.roundId,
-            REGISTRY_ADDR,
         );
 
         console.log(`Subscribed to trailing mcd close to coll strategy with sub id #${subInfo.subId}`);
@@ -656,7 +651,6 @@ const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sende
         price.toString(),
         ilkObj.assetAddress,
         formattedPriceState,
-        REGISTRY_ADDR,
     );
 
     console.log(`Subscribed to mcd close strategy with sub id #${subId}`);
@@ -882,7 +876,6 @@ const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
         proxy,
         percentage,
         oracleData.roundId,
-        REGISTRY_ADDR,
     );
 
     console.log(`Subscribed to trailing liquity close strategy with sub id #${subInfo.subId}`);
@@ -920,7 +913,6 @@ const liquityCloseToCollStrategySub = async (price, priceState, sender) => {
         proxy,
         price,
         formattedPriceState,
-        REGISTRY_ADDR,
     );
 
     console.log(`Subscribed to liquity close strategy with sub id #${subId}`);
@@ -1671,7 +1663,6 @@ const subAaveAutomation = async (
         optimalRatioBoost,
         optimalRatioRepay,
         maxRatio > 0,
-        addrs[network].REGISTRY_ADDR,
     );
 
     console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
@@ -1742,7 +1733,6 @@ const subAaveV3MainnetAutomation = async (
         optimalRatioBoost,
         optimalRatioRepay,
         boostEnabled,
-        addrs[network].REGISTRY_ADDR,
     );
 
     console.log(`Aave position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
@@ -1966,7 +1956,6 @@ const subSparkAutomation = async (
         optimalRatioBoost,
         optimalRatioRepay,
         boostEnabled,
-        addrs[network].REGISTRY_ADDR,
     );
 
     console.log(`Spark position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
@@ -2115,7 +2104,6 @@ const subCompV3Automation = async (
         optimalRatioRepay,
         boostEnabled,
         isEOA === 'true',
-        addrs[network].REGISTRY_ADDR,
     );
 
     console.log(`CompV3 position subed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
@@ -2211,7 +2199,6 @@ const subLimitOrder = async (
         targetPriceInWei,
         goodUntilDuration,
         orderTypeFormatted,
-        addrs[network].REGISTRY_ADDR,
     );
 
     console.log(`Limit order subed, subId ${subData.subId}`);
@@ -2676,7 +2663,6 @@ const updateAaveV3AutomationSub = async (
         optimalRatioBoostFormatted.toHexString().slice(2),
         optimalRatioRepayFormatted.toHexString().slice(2),
         boostEnabled,
-        addrs[network].REGISTRY_ADDR,
     );
 
     console.log('Aave position updated');

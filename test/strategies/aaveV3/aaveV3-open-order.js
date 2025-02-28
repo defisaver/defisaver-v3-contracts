@@ -77,8 +77,6 @@ const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
     describe('AaveV3-Open-Order-Strategy-Test', function () {
         this.timeout(1200000);
 
-        const REGISTRY_ADDR = addrs[network].REGISTRY_ADDR;
-
         let snapshotId;
         let senderAcc;
         let proxy;

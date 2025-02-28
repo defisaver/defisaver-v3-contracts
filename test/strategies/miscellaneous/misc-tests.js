@@ -141,7 +141,6 @@ const limitOrderStrategyTest = async () => {
                     targetPrice,
                     goodUntilDuration,
                     automationSdk.enums.OrderType.TAKE_PROFIT,
-                    addrs[getNetwork()].REGISTRY_ADDR,
                 ));
             });
 
@@ -224,7 +223,6 @@ const limitOrderStrategyTest = async () => {
                     targetPrice,
                     goodUntilDuration,
                     automationSdk.enums.OrderType.STOP_LOSS,
-                    addrs[getNetwork()].REGISTRY_ADDR,
                 ));
             });
 

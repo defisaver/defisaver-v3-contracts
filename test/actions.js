@@ -12,7 +12,6 @@ const {
     nullAddress,
     WETH_ADDRESS,
     UNISWAP_WRAPPER,
-    REGISTRY_ADDR,
     balanceOf,
     formatExchangeObj,
     isEth,
@@ -23,10 +22,8 @@ const {
     mineBlock,
     getGasUsed,
     formatExchangeObjCurve,
-    addrs,
     LUSD_ADDR,
     BLUSD_ADDR,
-    getNetwork,
     formatExchangeObjSdk,
     sendEther,
 } = require('./utils');

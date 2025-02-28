@@ -189,7 +189,6 @@ const formatExchangeObjForMarket = (marketParams, amount) => formatExchangeObj(
 const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
     describe('Morpho Boost On Price Strategy Test', function () {
         this.timeout(1200000);
-        const REGISTRY_ADDR = addrs[network].REGISTRY_ADDR;
         let snapshotId;
         let senderAcc;
         let proxy;

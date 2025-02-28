@@ -34,7 +34,6 @@ const {
     DAI_ADDR,
     UNISWAP_WRAPPER,
     MAX_UINT,
-    REGISTRY_ADDR,
     setNewExchangeWrapper,
     Float2BN,
     takeSnapshot,
@@ -45,10 +44,6 @@ const {
     LOGGER_ADDR,
     getContractFromRegistry,
     approve,
-    impersonateAccount,
-    stopImpersonatingAccount,
-    sendEther,
-    setCode,
 } = require('../utils');
 const {
     getVaultsForUser,

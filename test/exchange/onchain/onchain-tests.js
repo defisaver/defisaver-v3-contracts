@@ -15,7 +15,6 @@ const {
     formatExchangeObj,
     BN2Float,
     formatExchangeObjCurve,
-    REGISTRY_ADDR,
     addrs,
     placeHolderAddr,
     approve,

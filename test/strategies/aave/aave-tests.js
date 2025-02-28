@@ -29,7 +29,6 @@ const {
     approve,
     setBalance,
     redeploy,
-    REGISTRY_ADDR,
     AAVE_V2_MARKET_ADDR,
     redeployCore,
 } = require('../../utils');

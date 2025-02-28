@@ -20,7 +20,6 @@ const subAaveV3L2AutomationStrategy = async (
     optimalRatioBoost,
     optimalRatioRepay,
     boostEnabled,
-    regAddr = addrs[network].REGISTRY_ADDR,
 ) => {
     const subInput = automationSdk.strategySubService.aaveV3Encode.leverageManagement(
         minRatio,
@@ -30,7 +29,7 @@ const subAaveV3L2AutomationStrategy = async (
         boostEnabled,
     );
 
-    const subId = await subToAaveV3Proxy(proxy, subInput, regAddr);
+    const subId = await subToAaveV3Proxy(proxy, subInput);
 
     let subId1 = '0';
     let subId2 = '0';
@@ -57,7 +56,6 @@ const updateAaveV3L2AutomationStrategy = async (
     optimalRatioBoost,
     optimalRatioRepay,
     boostEnabled,
-    regAddr = addrs[network].REGISTRY_ADDR,
 ) => {
     let subInput = '0x';
 
@@ -73,7 +71,7 @@ const updateAaveV3L2AutomationStrategy = async (
     subInput = subInput.concat(optimalRatioRepay.padStart(32, '0'));
     subInput = subInput.concat(boostEnabled ? '01' : '00');
 
-    const subId = await updateAaveProxy(proxy, subInput, regAddr);
+    const subId = await updateAaveProxy(proxy, subInput);
 
     if (subId2 === '0' && boostEnabled === true) {
         // eslint-disable-next-line no-param-reassign
@@ -128,7 +126,6 @@ const subToCompV3L2AutomationStrategy = async (
     optimalRatioBoost,
     optimalRatioRepay,
     boostEnabled,
-    regAddr = addrs[network].REGISTRY_ADDR,
 ) => {
     const subInput = automationSdk.strategySubService.compoundV3L2Encode.leverageManagement(
         market,
@@ -140,7 +137,7 @@ const subToCompV3L2AutomationStrategy = async (
         boostEnabled,
     );
 
-    const subId = await subToCompV3ProxyL2(proxy, [subInput], regAddr);
+    const subId = await subToCompV3ProxyL2(proxy, [subInput]);
 
     let subId1 = '0';
     let subId2 = '0';
