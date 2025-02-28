@@ -203,7 +203,6 @@ const mcdSupplyTest = async (mcdTestLength) => {
                 cropData.tokenAddr,
                 cropData.joinAddr,
                 from,
-                REGISTRY_ADDR,
                 CROPPER_ADDR,
             );
 
@@ -312,7 +311,6 @@ const mcdGenerateTest = async (mcdTestLength) => {
                 cropData.tokenAddr,
                 cropData.joinAddr,
                 from,
-                REGISTRY_ADDR,
                 CROPPER_ADDR,
             );
             const infoBefore = await getVaultInfo(mcdView, vaultId, cropJoinIlks[0], CROPPER_ADDR);
@@ -681,7 +679,6 @@ const mcdPaybackTest = async (mcdTestLength) => {
                 cropData.tokenAddr,
                 cropData.joinAddr,
                 from,
-                REGISTRY_ADDR,
                 CROPPER_ADDR,
             );
 
@@ -861,13 +858,12 @@ const mcdWithdrawTest = async (mcdTestLength) => {
                 cropData.tokenAddr,
                 cropData.joinAddr,
                 from,
-                REGISTRY_ADDR,
                 CROPPER_ADDR,
             );
 
             const infoBefore = await getVaultInfo(mcdView, vaultId, cropJoinIlks[0], CROPPER_ADDR);
 
-            await withdrawMcd(proxy, vaultId, withdrawAmountWei, cropData.joinAddr, to, REGISTRY_ADDR, CROPPER_ADDR);
+            await withdrawMcd(proxy, vaultId, withdrawAmountWei, cropData.joinAddr, to, CROPPER_ADDR);
 
             const infoAfter = await getVaultInfo(mcdView, vaultId, cropJoinIlks[0], CROPPER_ADDR);
 
@@ -904,7 +900,6 @@ const mcdClaimTest = async () => {
                 cropData.tokenAddr,
                 cropData.joinAddr,
                 from,
-                REGISTRY_ADDR,
                 CROPPER_ADDR,
             );
 

@@ -1370,7 +1370,6 @@ const supplyCdp = async (type, cdpId, amount, sender) => {
             tokenData.address,
             ilkObj.join,
             senderAcc.address,
-            REGISTRY_ADDR,
         );
 
         console.log(`Supplied to cdp ${cdpId}`);
@@ -1450,7 +1449,6 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
             amountInWei,
             ilkObj.join,
             senderAcc.address,
-            REGISTRY_ADDR,
         );
 
         console.log(`Withdraw from cdp ${cdpId}`);

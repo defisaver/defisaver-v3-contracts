@@ -636,7 +636,7 @@ const openMcd = async (proxy, joinAddr, mcdManager = MCD_MANAGER_ADDR) => {
         return vaultIds[vaultIds.length - 1].toString();
     }
 };
-const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from, regAddr = REGISTRY_ADDR, mcdManager = MCD_MANAGER_ADDR) => {
+const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from, mcdManager = MCD_MANAGER_ADDR) => {
     // AAVE & renBTC
     if (
         tokenAddr.toLowerCase() === '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9'.toLowerCase()
@@ -744,7 +744,7 @@ const openVaultForExactAmountInDecimals = async (
     return vaultId;
 };
 
-const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to, regAddr = REGISTRY_ADDR, mcdManager = MCD_MANAGER_ADDR) => {
+const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to, mcdManager = MCD_MANAGER_ADDR) => {
     const mcdWithdrawAction = new dfs.actions.maker.MakerWithdrawAction(
         vaultId,
         amount,
