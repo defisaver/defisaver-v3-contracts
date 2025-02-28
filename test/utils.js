@@ -683,7 +683,7 @@ const sendEther = async (signer, toAddress, amount) => {
 };
 
 // eslint-disable-next-line max-len
-const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveOnTenderly = config.saveOnTenderly, isFork = false, ...args) => {
+const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, isFork = false, ...args) => {
     if (!isFork) {
         const setBalanceMethod = hre.network.config.isAnvil ? 'anvil_setBalance' : 'hardhat_setBalance';
         console.log(setBalanceMethod);
@@ -761,13 +761,6 @@ const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, saveO
         }
     }
 
-    if (saveOnTenderly) {
-        await hre.tenderly.persistArtifacts({
-            name,
-            address: c.address,
-        });
-    }
-
     return c;
 };
 
@@ -796,13 +789,12 @@ const approveContractInRegistry = async (name, regAddr = addrs[getNetwork()].REG
 const getContractFromRegistry = async (
     name,
     regAddr = addrs[getNetwork()].REGISTRY_ADDR,
-    saveOnTenderly = undefined,
     isFork = undefined,
     ...args
 ) => {
     const contractAddr = await getAddrFromRegistry(name, regAddr);
     if (contractAddr !== nullAddress) return hre.ethers.getContractAt(name, contractAddr);
-    return redeploy(name, regAddr, saveOnTenderly, isFork, ...args);
+    return redeploy(name, regAddr, isFork, ...args);
 };
 
 const setCode = async (addr, code) => {
