@@ -272,7 +272,6 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
             senderAcc.address,
             0,
             senderAcc,
-            REGISTRY_ADDR,
         );
     } catch (err) {
         console.log('Buying dai failed');
@@ -1171,7 +1170,6 @@ const createMcdVault = async (type, coll, debt, sender) => {
                 senderAcc.address,
                 0,
                 senderAcc,
-                REGISTRY_ADDR,
             );
         } catch (err) {
             console.log(`Buying ${tokenData.name} failed`);
@@ -1325,7 +1323,6 @@ const callSell = async (srcTokenLabel, destTokenLabel, srcAmount, sender) => {
             senderAcc.address,
             0,
             senderAcc,
-            REGISTRY_ADDR,
         );
 
         console.log(`${srcAmount} ${srcTokenLabel} -> ${destTokenLabel}`);
@@ -2773,7 +2770,6 @@ const createCompV3Position = async (
                 senderAcc.address,
                 0,
                 senderAcc,
-                REGISTRY_ADDR,
             );
         } catch (err) {
             console.log(`Buying ${collToken.name} failed`);

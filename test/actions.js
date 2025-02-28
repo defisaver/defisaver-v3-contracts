@@ -158,7 +158,6 @@ const sell = async (
     to,
     fee = 0,
     signer,
-    regAddr = addrs[getNetwork()].REGISTRY_ADDR,
     isCurve = false,
     uniSdk = false,
     sellInRecipe = false,

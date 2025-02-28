@@ -126,7 +126,6 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         senderAcc.address,
         trade.fee,
         senderAcc,
-        REGISTRY_ADDR,
         isCurve,
         false,
         true, // sell in recipe so we can check the fee
