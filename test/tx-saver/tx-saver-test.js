@@ -111,7 +111,7 @@ describe('TxSaver tests', function () {
         await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, isFork);
         await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, isFork);
 
-        recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor', addrs[network].REGISTRY_ADDR);
+        recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
         txSaverExecutor = await redeploy('TxSaverExecutor', addrs[network].REGISTRY_ADDR, isFork);
 
         const tokenPriceHelperFactory = await hre.ethers.getContractFactory(

@@ -314,10 +314,10 @@ const updateMcdCloseStrategySub = async (subId, vaultId, type, price, priceState
     let proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
+    const subProxyAddr = await getAddrFromRegistry('SubProxy');
     const subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
 
-    const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
+    const subStorageAddr = await getAddrFromRegistry('SubStorage');
     const subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
     const formattedPrice = (price * 1e8).toString();
@@ -387,10 +387,10 @@ const updateMcdCloseToCollStrategySub = async (subId, vaultId, type, price, pric
     let proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
+    const subProxyAddr = await getAddrFromRegistry('SubProxy');
     const subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
 
-    const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
+    const subStorageAddr = await getAddrFromRegistry('SubStorage');
     const subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
     const formattedPrice = (price * 1e8).toString();
@@ -942,10 +942,10 @@ const updateSmartSavingsStrategySub = async (protocol, subId, vaultId, minRatio,
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
+    const subProxyAddr = await getAddrFromRegistry('SubProxy');
     const subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
 
-    const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
+    const subStorageAddr = await getAddrFromRegistry('SubStorage');
     const subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
     const ratioUnderWei = hre.ethers.utils.parseUnits(minRatio, '16');
@@ -1001,10 +1001,10 @@ const activateSub = async (subId, sender) => {
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
+    const subProxyAddr = await getAddrFromRegistry('SubProxy');
     const subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
 
-    const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
+    const subStorageAddr = await getAddrFromRegistry('SubStorage');
     const subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
     const functionData = subProxy.interface.encodeFunctionData('activateSub', [subId]);
@@ -1042,7 +1042,7 @@ const deactivateSub = async (subId, sender) => {
     const subProxyAddr = '0xd18d4756bbf848674cc35f1a0b86afef20787382';
     const subProxy = await hre.ethers.getContractAt('SubProxy', subProxyAddr);
 
-    const subStorageAddr = await getAddrFromRegistry('SubStorage', REGISTRY_ADDR);
+    const subStorageAddr = await getAddrFromRegistry('SubStorage');
     const subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
 
     const functionData = subProxy.interface.encodeFunctionData('deactivateSub', [subId]);
@@ -1180,7 +1180,7 @@ const createMcdVault = async (type, coll, debt, sender) => {
 
     await approve(tokenData.address, proxy.address, senderAcc);
 
-    const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor', REGISTRY_ADDR);
+    const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
     const createVaultRecipe = new dfs.Recipe('CreateVaultRecipe', [
         new dfs.actions.maker.MakerOpenVaultAction(ilkObj.join, MCD_MANAGER_ADDR),
@@ -1253,7 +1253,7 @@ const createCB = async (lusdAmount, sender) => {
 };
 
 const getDFSAddr = async (actionName) => {
-    const addr = await getAddrFromRegistry(actionName, REGISTRY_ADDR);
+    const addr = await getAddrFromRegistry(actionName);
 
     console.log(`Address: ${addr}`);
 };

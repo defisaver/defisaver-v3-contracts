@@ -46,7 +46,7 @@ const { getLiquityV2MaxUpfrontFee, getLiquityV2Hints } = require('./utils-liquit
 const network = hre.network.config.name;
 
 const executeAction = async (actionName, functionData, proxy, regAddr = addrs[network].REGISTRY_ADDR, ethValue = 0) => {
-    const actionAddr = await getAddrFromRegistry(actionName, regAddr);
+    const actionAddr = await getAddrFromRegistry(actionName);
     let receipt;
     try {
         mineBlock();

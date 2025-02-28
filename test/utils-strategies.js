@@ -39,7 +39,7 @@ const getLatestStrategyId = async () => {
 };
 
 const getLatestSubId = async (regAddr = addrs[network].REGISTRY_ADDR) => {
-    const subStorageAddr = await getAddrFromRegistry('SubStorage', regAddr);
+    const subStorageAddr = await getAddrFromRegistry('SubStorage');
 
     const subStorageInstance = await hre.ethers.getContractFactory('SubStorage');
     const subStorage = await subStorageInstance.attach(subStorageAddr);
@@ -111,7 +111,7 @@ const subToStrategy = async (proxy, strategySub, regAddr = addrs[getNetwork()].R
 };
 
 const activateSub = async (proxy, subId, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const SubProxyAddr = await getAddrFromRegistry('SubProxy', regAddr);
+    const SubProxyAddr = await getAddrFromRegistry('SubProxy');
 
     const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
     const functionData = SubProxyProxy.interface.encodeFunctionData(
@@ -200,7 +200,7 @@ const subToSparkProxy = async (proxy, inputData, regAddr = addrs[getNetwork()].R
 };
 
 const subToCompV3Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const compV3SubProxyAddr = await getAddrFromRegistry('CompV3SubProxy', regAddr);
+    const compV3SubProxyAddr = await getAddrFromRegistry('CompV3SubProxy');
 
     const CompV3SubProxy = await hre.ethers.getContractFactory('CompV3SubProxy');
     const functionData = CompV3SubProxy.interface.encodeFunctionData(
@@ -220,7 +220,7 @@ const subToCompV3Proxy = async (proxy, inputData, regAddr = addrs[network].REGIS
 };
 
 const subToCompV3ProxyL2 = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const compV3SubProxyAddr = await getAddrFromRegistry('CompV3SubProxyL2', regAddr);
+    const compV3SubProxyAddr = await getAddrFromRegistry('CompV3SubProxyL2');
 
     const CompV3SubProxyL2 = await hre.ethers.getContractFactory('CompV3SubProxyL2');
     const functionData = CompV3SubProxyL2.interface.encodeFunctionData(
@@ -238,7 +238,7 @@ const subToCompV3ProxyL2 = async (proxy, inputData, regAddr = addrs[network].REG
 };
 
 const subToCompV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const compV2SubProxyAddr = await getAddrFromRegistry('CompSubProxy', regAddr);
+    const compV2SubProxyAddr = await getAddrFromRegistry('CompSubProxy');
 
     const CompV2SubProxy = await hre.ethers.getContractFactory('CompSubProxy');
     const functionData = CompV2SubProxy.interface.encodeFunctionData(
@@ -268,7 +268,7 @@ const updateToCompV2Proxy = async (
     inputData,
     regAddr = addrs[network].REGISTRY_ADDR,
 ) => {
-    const compV2SubProxyAddr = await getAddrFromRegistry('CompSubProxy', regAddr);
+    const compV2SubProxyAddr = await getAddrFromRegistry('CompSubProxy');
 
     const CompV2SubProxy = await hre.ethers.getContractFactory('CompSubProxy');
     const functionData = CompV2SubProxy.interface.encodeFunctionData('updateSubData', [
@@ -295,7 +295,7 @@ const updateToCompV2Proxy = async (
 };
 
 const subToAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const aaveV2SubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
+    const aaveV2SubProxyAddr = await getAddrFromRegistry('AaveSubProxy');
 
     console.log('aaveV2SubProxyAddr: ', aaveV2SubProxyAddr);
 
@@ -327,7 +327,7 @@ const updateToAaveV2Proxy = async (
     inputData,
     regAddr = addrs[network].REGISTRY_ADDR,
 ) => {
-    const aaveV2SubProxyAddr = await getAddrFromRegistry('AaveSubProxy', regAddr);
+    const aaveV2SubProxyAddr = await getAddrFromRegistry('AaveSubProxy');
 
     const AaveV2SubProxy = await hre.ethers.getContractFactory('AaveSubProxy');
     const functionData = AaveV2SubProxy.interface.encodeFunctionData('updateSubData', [
@@ -354,7 +354,7 @@ const updateToAaveV2Proxy = async (
 };
 
 const subToCBRebondProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const cbRebondSubProxyAddr = await getAddrFromRegistry('CBRebondSubProxy', regAddr);
+    const cbRebondSubProxyAddr = await getAddrFromRegistry('CBRebondSubProxy');
 
     const CBRebondSubProxy = await hre.ethers.getContractFactory('CBRebondSubProxy');
     const functionData = CBRebondSubProxy.interface.encodeFunctionData(
@@ -374,7 +374,7 @@ const subToCBRebondProxy = async (proxy, inputData, regAddr = addrs[network].REG
 };
 
 const subToMorphoAaveV2Proxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const subProxyAddr = await getAddrFromRegistry('MorphoAaveV2SubProxy', regAddr);
+    const subProxyAddr = await getAddrFromRegistry('MorphoAaveV2SubProxy');
 
     const subProxyFactory = await hre.ethers.getContractFactory('MorphoAaveV2SubProxy');
     const functionData = subProxyFactory.interface.encodeFunctionData(
@@ -402,7 +402,7 @@ const updateSubDataMorphoAaveV2Proxy = async (
 ) => {
     const subInput = [minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled];
 
-    const subProxyAddr = await getAddrFromRegistry('MorphoAaveV2SubProxy', regAddr);
+    const subProxyAddr = await getAddrFromRegistry('MorphoAaveV2SubProxy');
 
     const subProxyFactory = await hre.ethers.getContractFactory('MorphoAaveV2SubProxy');
 
@@ -427,7 +427,7 @@ const updateSubDataMorphoAaveV2Proxy = async (
 };
 
 const subToLiquityProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const subProxyAddr = await getAddrFromRegistry('LiquitySubProxy', regAddr);
+    const subProxyAddr = await getAddrFromRegistry('LiquitySubProxy');
 
     console.log({ subProxyAddr });
 
@@ -457,7 +457,7 @@ const updateLiquityProxy = async (
 ) => {
     const subInput = [minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled];
 
-    const subProxyAddr = await getAddrFromRegistry('LiquitySubProxy', regAddr);
+    const subProxyAddr = await getAddrFromRegistry('LiquitySubProxy');
 
     const subProxyFactory = await hre.ethers.getContractFactory('LiquitySubProxy');
 
@@ -523,7 +523,7 @@ const updateSparkProxy = async (proxy, inputData, regAddr = addrs[network].REGIS
 };
 
 const subToMcdProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const subProxyAddr = await getAddrFromRegistry('McdSubProxy', regAddr);
+    const subProxyAddr = await getAddrFromRegistry('McdSubProxy');
     const subProxy = await hre.ethers.getContractAt('McdSubProxy', subProxyAddr);
 
     // false for _shouldLegacyUnsub, no longer needed, kept to keep the function sig the same
@@ -555,7 +555,7 @@ const subToMcdProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY
 };
 
 const subToLimitOrderProxy = async (proxy, inputData, regAddr = addrs[network].REGISTRY_ADDR) => {
-    const limitOrderSubProxyAddr = await getAddrFromRegistry('LimitOrderSubProxy', regAddr);
+    const limitOrderSubProxyAddr = await getAddrFromRegistry('LimitOrderSubProxy');
 
     const LimitOrderSubProxy = await hre.ethers.getContractFactory('LimitOrderSubProxy');
     const functionData = LimitOrderSubProxy.interface.encodeFunctionData(
@@ -593,7 +593,7 @@ const addBotCaller = async (
     }
 
     const signer = await hre.ethers.provider.getSigner(addrs[networkInjected].OWNER_ACC);
-    const botAuthAddr = await getAddrFromRegistry('BotAuth', regAddr);
+    const botAuthAddr = await getAddrFromRegistry('BotAuth');
 
     const botAuthInstance = await hre.ethers.getContractFactory('BotAuth', signer);
     let botAuth = await botAuthInstance.attach(botAuthAddr);

@@ -619,7 +619,8 @@ const getNameId = (name) => {
     return hash.substr(0, 10);
 };
 
-const getAddrFromRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR) => {
+const getAddrFromRegistry = async (name) => {
+    const regAddr = addrs[network].REGISTRY_ADDR;
     const registryInstance = await hre.ethers.getContractFactory('DFSRegistry');
     const registry = registryInstance.attach(regAddr);
 
@@ -792,7 +793,7 @@ const getContractFromRegistry = async (
     isFork = false,
     ...args
 ) => {
-    const contractAddr = await getAddrFromRegistry(name, regAddr);
+    const contractAddr = await getAddrFromRegistry(name);
     if (contractAddr !== nullAddress) return hre.ethers.getContractAt(name, contractAddr);
     return redeploy(name, regAddr, isFork, ...args);
 };
@@ -816,18 +817,18 @@ const setContractAt = async ({ name, address, args = [] }) => {
 };
 
 const redeployCore = async (isL2 = false) => {
-    const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage', addrs[network].REGISTRY_ADDR);
+    const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
     await setCode(strategyStorageAddr, strategyStorageBytecode);
 
-    const subStorageAddr = await getAddrFromRegistry('SubStorage', addrs[network].REGISTRY_ADDR);
+    const subStorageAddr = await getAddrFromRegistry('SubStorage');
 
     if (isL2) await setCode(subStorageAddr, subStorageBytecodeL2);
     else await setCode(subStorageAddr, subStorageBytecode);
 
-    const bundleStorageAddr = await getAddrFromRegistry('BundleStorage', addrs[network].REGISTRY_ADDR);
+    const bundleStorageAddr = await getAddrFromRegistry('BundleStorage');
     await setCode(bundleStorageAddr, bundleStorageBytecode);
 
-    const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor', addrs[network].REGISTRY_ADDR);
+    const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
     await setCode(recipeExecutorAddr, recipeExecutorBytecode);
 
     await setCode(addrs[network].PROXY_AUTH_ADDR, proxyAuthBytecode);
