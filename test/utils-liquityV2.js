@@ -39,7 +39,7 @@ const getLiquityV2Hints = async (market, collIndex, interestRate, isFork = false
     const seed = 42;
 
     const regAddr = addrs[getNetwork()].REGISTRY_ADDR;
-    const viewContract = await getContractFromRegistry('LiquityV2View', regAddr, false, isFork);
+    const viewContract = await getContractFromRegistry('LiquityV2View', regAddr, isFork);
     const { upperHint, lowerHint } = await viewContract.getInsertPosition(
         market,
         collIndex,

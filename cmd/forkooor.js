@@ -2,6 +2,30 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-use-before-define */
 /* eslint-disable import/no-extraneous-dependencies */
+/*
+ *
+ *
+ *
+ *
+ *
+ *
+ _______   _______ .______   .______       _______   ______     ___   .___________. _______  _______
+|       \ |   ____||   _  \  |   _  \     |   ____| /      |   /   \  |           ||   ____||       \
+|  .--.  ||  |__   |  |_)  | |  |_)  |    |  |__   |  ,----'  /  ^  \ `---|  |----`|  |__   |  .--.  |
+|  |  |  ||   __|  |   ___/  |      /     |   __|  |  |      /  /_\  \    |  |     |   __|  |  |  |  |
+|  '--'  ||  |____ |  |      |  |\  \----.|  |____ |  `----./  _____  \   |  |     |  |____ |  '--'  |
+|_______/ |_______|| _|      | _| `._____||_______| \______/__/     \__\  |__|     |_______||_______/
+
+USE: https://github.com/defisaver/defisaver-forkooor
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
 const path = require('path');
 const fs = require('fs');
 const { spawnSync } = require('child_process');
@@ -215,7 +239,7 @@ const forkSetup = async (sender) => {
 
     setNetwork(network);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     console.log({ sender: senderAcc.address, proxy: proxy.address });
@@ -509,9 +533,9 @@ const cbRebondSub = async (bondId, sender) => {
 
 const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
-    await redeploy('FetchBondId', REGISTRY_ADDR, false, true);
-    await redeploy('LiquityPayback', REGISTRY_ADDR, false, true);
-    await redeploy('CBCreateRebondSub', REGISTRY_ADDR, false, true);
+    await redeploy('FetchBondId', REGISTRY_ADDR, true);
+    await redeploy('LiquityPayback', REGISTRY_ADDR, true);
+    await redeploy('CBCreateRebondSub', REGISTRY_ADDR, true);
 
     let formattedPriceState;
 
@@ -532,7 +556,7 @@ const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState,
         // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const { subId } = await subLiquityCBPaybackStrategy(
@@ -545,7 +569,7 @@ const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState,
 const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
-    await redeploy('TrailingStopTrigger', REGISTRY_ADDR, false, true);
+    await redeploy('TrailingStopTrigger', REGISTRY_ADDR, true);
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
@@ -553,7 +577,7 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
@@ -613,7 +637,7 @@ const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sende
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await openStrategyAndBundleStorage(true);
@@ -656,7 +680,7 @@ const mcdBoostRepaySub = async ({
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
 
     { // deploy if not live
@@ -664,7 +688,7 @@ const mcdBoostRepaySub = async ({
         if (await registry.isRegistered(hre.ethers.utils.id('McdSubProxy').slice(0, 10)).then((e) => !e)) {
             const repayBundleId = await createRepayBundle(proxy, true);
             const boostBundleId = await createBoostBundle(proxy, true);
-            await redeploy('McdSubProxy', REGISTRY_ADDR, false, true, repayBundleId, boostBundleId);
+            await redeploy('McdSubProxy', REGISTRY_ADDR, true, repayBundleId, boostBundleId);
             console.log({ repayBundleId, boostBundleId });
         }
     }
@@ -718,7 +742,7 @@ const aaveAutomationSub = async ({
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
 
     { // deploy if not live
@@ -747,10 +771,10 @@ const aaveAutomationSub = async ({
                 proxy,
                 [boostId1, boostId2],
             );
-            await redeploy('AaveSubProxy', REGISTRY_ADDR, false, true, repayBundleId, boostBundleId);
+            await redeploy('AaveSubProxy', REGISTRY_ADDR, true, repayBundleId, boostBundleId);
             console.log({ repayBundleId, boostBundleId });
 
-            await redeploy('AaveV2RatioCheck', REGISTRY_ADDR, false, true);
+            await redeploy('AaveV2RatioCheck', REGISTRY_ADDR, true);
         }
     }
 
@@ -783,7 +807,7 @@ const compAutomationSub = async ({
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
 
     { // deploy if not live
@@ -812,11 +836,11 @@ const compAutomationSub = async ({
                 proxy,
                 [boostId1, boostId2],
             );
-            await redeploy('CompSubProxy', REGISTRY_ADDR, false, true, repayBundleId, boostBundleId);
+            await redeploy('CompSubProxy', REGISTRY_ADDR, true, repayBundleId, boostBundleId);
             console.log({ repayBundleId, boostBundleId });
 
-            await redeploy('CompV2RatioCheck', REGISTRY_ADDR, false, true);
-            await redeploy('CompoundRatioTrigger', REGISTRY_ADDR, false, true);
+            await redeploy('CompV2RatioCheck', REGISTRY_ADDR, true);
+            await redeploy('CompoundRatioTrigger', REGISTRY_ADDR, true);
         }
     }
 
@@ -836,7 +860,7 @@ const compAutomationSub = async ({
 const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
-    await redeploy('TrailingStopTrigger', REGISTRY_ADDR, false, true);
+    await redeploy('TrailingStopTrigger', REGISTRY_ADDR, true);
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
@@ -844,7 +868,7 @@ const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     // grab latest roundId from chainlink
@@ -874,7 +898,7 @@ const liquityCloseToCollStrategySub = async (price, priceState, sender) => {
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await openStrategyAndBundleStorage(true);
@@ -915,7 +939,7 @@ const updateSmartSavingsStrategySub = async (protocol, subId, vaultId, minRatio,
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
@@ -974,7 +998,7 @@ const activateSub = async (subId, sender) => {
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const subProxyAddr = await getAddrFromRegistry('SubProxy', REGISTRY_ADDR);
@@ -1012,7 +1036,7 @@ const deactivateSub = async (subId, sender) => {
         senderAcc.address = senderAcc._address;
     }
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const subProxyAddr = '0xd18d4756bbf848674cc35f1a0b86afef20787382';
@@ -1065,9 +1089,9 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
     setNetwork(network);
 
-    await redeploy('LiquityView', REGISTRY_ADDR, false, true);
+    await redeploy('LiquityView', REGISTRY_ADDR, true);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const amountColl = hre.ethers.utils.parseUnits(coll, 18);
@@ -1121,7 +1145,7 @@ const createMcdVault = async (type, coll, debt, sender) => {
 
     await topUp(senderAcc.address);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
@@ -1191,7 +1215,7 @@ const createCB = async (lusdAmount, sender) => {
 
     await topUp(senderAcc.address);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     let network = 'mainnet';
@@ -1260,7 +1284,7 @@ const getTrove = async (acc) => {
     if (!acc) {
         const senderAcc = (await hre.ethers.getSigners())[0];
 
-        const proxy = await getProxy(senderAcc.address,);
+        const proxy = await getProxy(senderAcc.address);
         // eslint-disable-next-line no-param-reassign
         acc = proxy.address;
     }
@@ -1287,7 +1311,7 @@ const callSell = async (srcTokenLabel, destTokenLabel, srcAmount, sender) => {
     }
 
     await topUp(senderAcc.address);
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     try {
@@ -1328,7 +1352,7 @@ const supplyCdp = async (type, cdpId, amount, sender) => {
     }
 
     await topUp(senderAcc.address);
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
@@ -1372,7 +1396,7 @@ const withdrawLiquity = async (collAmount, sender) => {
     await topUp(senderAcc.address);
     await redeploy('LiquityView');
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const collAmountWei = hre.ethers.utils.parseUnits(collAmount, 18);
@@ -1409,7 +1433,7 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
 
     await topUp(senderAcc.address);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const ilkObj = ilks.find((i) => i.ilkLabel === type);
@@ -1467,7 +1491,7 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
     const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol, chainIds[network]);
     const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol, chainIds[network]);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
@@ -1536,21 +1560,21 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 };
 
 const deployMorphoContracts = async () => {
-    await getContractFromRegistry('MorphoAaveV2Supply', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2Borrow', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2Withdraw', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2Payback', undefined, false, true);
-    await getContractFromRegistry('MorphoClaim', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2RatioTrigger', undefined, false, true);
-    await getContractFromRegistry('MorphoAaveV2RatioCheck', undefined, false, true);
+    await getContractFromRegistry('MorphoAaveV2Supply', undefined, true);
+    await getContractFromRegistry('MorphoAaveV2Borrow', undefined, true);
+    await getContractFromRegistry('MorphoAaveV2Withdraw', undefined, true);
+    await getContractFromRegistry('MorphoAaveV2Payback', undefined, true);
+    await getContractFromRegistry('MorphoClaim', undefined, true);
+    await getContractFromRegistry('MorphoAaveV2View', undefined, true);
+    await getContractFromRegistry('MorphoAaveV2RatioTrigger', undefined, true);
+    await getContractFromRegistry('MorphoAaveV2RatioCheck', undefined, true);
 };
 
 const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmount, sender) => {
     const { senderAcc, proxy, network } = await forkSetup(sender);
 
     await deployMorphoContracts();
-    const view = await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
+    const view = await getContractFromRegistry('MorphoAaveV2View', undefined, true);
 
     const { address: collAddr, ...collAssetInfo } = getAssetInfo(collSymbol, chainIds[network]);
     const { address: debtAddr, ...debtAssetInfo } = getAssetInfo(debtSymbol, chainIds[network]);
@@ -1642,7 +1666,7 @@ const subAaveAutomation = async (
     setNetwork(network);
     await topUp(getOwnerAddr());
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const subIds = await subAaveV3L2AutomationStrategy(
@@ -1692,7 +1716,7 @@ const subAaveV3MainnetAutomation = async (
     setNetwork(network);
     await topUp(getOwnerAddr());
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     // await openStrategyAndBundleStorage(true);
@@ -1712,8 +1736,8 @@ const subAaveV3MainnetAutomation = async (
 
     // await createBundle(proxy, [strategyId11, strategyId22]);
 
-    await redeploy('AaveV3RatioTrigger', addrs[network].REGISTRY_ADDR, false, true);
-    await redeploy('AaveV3RatioCheck', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('AaveV3RatioTrigger', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('AaveV3RatioCheck', addrs[network].REGISTRY_ADDR, true);
 
     // same as in L1
     const subIds = await subAaveV3L2AutomationStrategy(
@@ -1758,7 +1782,7 @@ const subAaveClose = async (
         // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
-    proxy = await getProxy(senderAcc.address,);
+    proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await topUp(getOwnerAddr());
@@ -1839,7 +1863,7 @@ const subAaveCloseWithMaximumGasPrice = async (
         // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
-    proxy = await getProxy(senderAcc.address,);
+    proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await topUp(getOwnerAddr());
@@ -1927,7 +1951,7 @@ const subSparkAutomation = async (
     setNetwork(network);
     await topUp(getOwnerAddr());
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     if (await getLatestBundleId() < 18) {
@@ -1982,7 +2006,7 @@ const subSparkClose = async (
         // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
-    proxy = await getProxy(senderAcc.address,);
+    proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await topUp(getOwnerAddr());
@@ -2061,7 +2085,7 @@ const subCompV3Automation = async (
 
     setNetwork(network);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const bundleId = await getLatestBundleId();
@@ -2083,7 +2107,7 @@ const subCompV3Automation = async (
 
         // redeploy CompV3SubProxy with new bundles
         await redeploy(
-            'CompV3SubProxy', addrs[network].REGISTRY_ADDR, false, true, repayBundleId, boostBundleId, repayBundleEOAId, boostBundleEOAId,
+            'CompV3SubProxy', addrs[network].REGISTRY_ADDR, true, repayBundleId, boostBundleId, repayBundleEOAId, boostBundleEOAId,
         );
     }
 
@@ -2137,19 +2161,19 @@ const subLimitOrder = async (
     setNetwork(network);
     set('network', chainIds[network]);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await topUp(addrs[network].OWNER_ACC);
 
     // deploy contracts and strategy
-    await redeploy('OffchainPriceTrigger', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('OffchainPriceTrigger', addrs[network].REGISTRY_ADDR, true);
 
     console.log(network);
     // eslint-disable-next-line no-unused-expressions
     network === 'mainnet'
-        ? (await redeploy('LimitSell', addrs[network].REGISTRY_ADDR, false, true))
-        : (await redeploy('LimitSellL2', addrs[network].REGISTRY_ADDR, false, true));
+        ? (await redeploy('LimitSell', addrs[network].REGISTRY_ADDR, true))
+        : (await redeploy('LimitSellL2', addrs[network].REGISTRY_ADDR, true));
 
     // eslint-disable-next-line max-len
     // const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
@@ -2161,7 +2185,7 @@ const subLimitOrder = async (
         strategyId = '9';
     }
 
-    await redeploy('LimitOrderSubProxy', addrs[network].REGISTRY_ADDR, false, true, strategyId);
+    await redeploy('LimitOrderSubProxy', addrs[network].REGISTRY_ADDR, true, strategyId);
 
     // format sub data
     const srcToken = getAssetInfo(srcTokenLabel);
@@ -2236,7 +2260,7 @@ const subMorphoAaveV2Automation = async (
 
         await deployMorphoContracts();
         await getContractFromRegistry(
-            'MorphoAaveV2SubProxy', undefined, undefined, true, repayBundleId, boostBundleId,
+            'MorphoAaveV2SubProxy', undefined, true, repayBundleId, boostBundleId,
         );
     }
 
@@ -2356,13 +2380,13 @@ const updateSubDataCompV2 = async (
 };
 
 const deployLiquityContracts = async () => {
-    await getContractFromRegistry('LiquityRatioTrigger', undefined, undefined, true).then(({ address }) => {
+    await getContractFromRegistry('LiquityRatioTrigger', undefined, true).then(({ address }) => {
         if (compare(address, '0x7dDA9F944c3Daf27fbe3B8f27EC5f14FE3fa94BF')) {
             return redeploy('LiquityRatioTrigger', undefined, undefined, true);
         }
         return address;
     });
-    await getContractFromRegistry('LiquityRatioCheck', undefined, undefined, true);
+    await getContractFromRegistry('LiquityRatioCheck', undefined, true);
 };
 
 const liqDebtInFrontRepaySub = async (
@@ -2420,7 +2444,7 @@ const subLiquityAutomation = async (
 
         await deployLiquityContracts();
         await getContractFromRegistry(
-            'LiquitySubProxy', undefined, undefined, true, repayBundleId, boostBundleId,
+            'LiquitySubProxy', undefined, true, repayBundleId, boostBundleId,
         );
     }
 
@@ -2498,7 +2522,7 @@ const getAavePos = async (
 
     setNetwork(network);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const aaveView = await hre.ethers.getContractAt('AaveV3View', addrs[network].AAVE_V3_VIEW);
@@ -2567,7 +2591,7 @@ const getCompV3Pos = async (
 
     setNetwork(network);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const compV3View = await hre.ethers.getContractAt('CompV3View', '0x5e07E953dac1d7c19091c3b493579ba7283572a4');
@@ -2622,7 +2646,7 @@ const updateAaveV3AutomationSub = async (
 
     setNetwork(network);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     await openStrategyAndBundleStorage(true);
@@ -2730,7 +2754,7 @@ const createCompV3Position = async (
     const collAmountWei = hre.ethers.utils.parseUnits(collAmount, collToken.decimals);
     const debtAmountWei = hre.ethers.utils.parseUnits(debtAmount, 6);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     console.log(proxy.address);
@@ -2824,12 +2848,12 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
     set('network', chainIds[network]);
     setNetwork(network);
 
-    let proxy = await getProxy(senderAcc.address,);
+    let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     // const strategyData = network === 'mainnet' ? createDCAStrategy() : createDCAL2Strategy();
     // await openStrategyAndBundleStorage(true);
-    await redeploy('TimestampTrigger', addrs[network].REGISTRY_ADDR, false, true);
+    await redeploy('TimestampTrigger', addrs[network].REGISTRY_ADDR, true);
 
     const srcToken = getAssetInfo(srcTokenLabel);
     const destToken = getAssetInfo(destTokenLabel);
@@ -3805,7 +3829,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .description('MorphoAaveV2 position view, default to proxy')
         .action(async (isEOA, addr) => {
             const { senderAcc, proxy } = await forkSetup(addr);
-            const view = await getContractFromRegistry('MorphoAaveV2View', undefined, false, true);
+            const view = await getContractFromRegistry('MorphoAaveV2View', undefined, true);
 
             const user = compare(isEOA, 'false') ? proxy.address : senderAcc.address;
             console.log(`Fetching position for ${user}`);
@@ -3853,7 +3877,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             if (process.env.TEST_CHAIN_ID) {
                 network = process.env.TEST_CHAIN_ID;
             }
-            await redeploy(contractName.toString(), addrs[network].REGISTRY_ADDR, false, true);
+            await redeploy(contractName.toString(), addrs[network].REGISTRY_ADDR, true);
 
             process.exit(0);
         });
@@ -3886,7 +3910,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 'SparkQuotePriceTrigger',
             ];
 
-            const deployments = await sparkContracts.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, addrs[network].REGISTRY_ADDR, false, true).then((c) => c.address) }), {});
+            const deployments = await sparkContracts.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, addrs[network].REGISTRY_ADDR, true).then((c) => c.address) }), {});
             console.log(deployments);
 
             process.exit(0);
@@ -3907,7 +3931,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 'McdView',
             ];
 
-            const deployments = await contractsToDeploy.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, addrs[network].REGISTRY_ADDR, false, true).then((c) => c.address) }), {});
+            const deployments = await contractsToDeploy.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, addrs[network].REGISTRY_ADDR, true).then((c) => c.address) }), {});
             console.log(deployments);
 
             const latestStrategyId = await getLatestStrategyId();

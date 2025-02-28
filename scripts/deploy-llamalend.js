@@ -15,18 +15,18 @@ async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
     await topUp(senderAcc.address);
     await topUp(getOwnerAddr());
-    await redeploy('LlamaLendCreate', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('LlamaLendSupply', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('LlamaLendBorrow', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('LlamaLendSelfLiquidate', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('LlamaLendPayback', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('LlamaLendWithdraw', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('LlamaLendGetDebt', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('LlamaLendBoost', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('LlamaLendRepay', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('LlamaLendLevCreate', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('LlamaLendSelfLiquidateWithColl', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('LlamaLendSwapper', addrs[network].REGISTRY_ADDR, true, true);
+    await redeploy('LlamaLendCreate', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('LlamaLendSupply', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('LlamaLendBorrow', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('LlamaLendSelfLiquidate', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('LlamaLendPayback', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('LlamaLendWithdraw', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('LlamaLendGetDebt', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('LlamaLendBoost', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('LlamaLendRepay', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('LlamaLendLevCreate', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('LlamaLendSelfLiquidateWithColl', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('LlamaLendSwapper', addrs[network].REGISTRY_ADDR, true);
 }
 
 start(main);

@@ -49,17 +49,3 @@ task('encryptPrivateKey', 'Encrypt private key')
     .setAction(async () => {
         encryptPrivateKey();
     });
-
-task('create-fork', 'Starts a new mainnet fork')
-    .setAction(async () => {
-        const forkId = await createFork();
-
-        console.log(`Fork id: ${forkId}\nRpc url https://rpc.tenderly.co/fork/${forkId}`);
-    });
-
-task('gib-fork-money', 'Gives specified account 100 Eth on fork')
-    .addOptionalPositionalParam('account', 'Account you want to add Eth to')
-    .setAction(async (args) => {
-        await topUp(args.account);
-        console.log(`Acc: ${args.account} credited with 100 Eth`);
-    });

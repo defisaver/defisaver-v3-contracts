@@ -71,7 +71,7 @@ app.post('/tx-saver', async (req, res) => {
     await topUp(getOwnerAddr());
     await addBotCallerForTxSaver(botAcc.address, true);
 
-    const txSaverExecutor = await getContractFromRegistry('TxSaverExecutor', addrs.mainnet.REGISTRY_ADDR, false, true);
+    const txSaverExecutor = await getContractFromRegistry('TxSaverExecutor', addrs.mainnet.REGISTRY_ADDR, true);
     const txSaverExecutorByBot = txSaverExecutor.connect(botAcc);
 
     const txParams = {

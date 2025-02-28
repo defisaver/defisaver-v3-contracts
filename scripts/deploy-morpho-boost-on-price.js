@@ -66,8 +66,8 @@ async function main() {
         await addBotCaller(bots[i], addrs[network].REGISTRY_ADDR, isFork);
     }
 
-    const morphoBluePriceTrigger = await redeploy('MorphoBluePriceTrigger', addrs[network].REGISTRY_ADDR, false, isFork);
-    const morphoBlueTargetRatioCheck = await redeploy('MorphoBlueTargetRatioCheck', addrs[network].REGISTRY_ADDR, false, isFork);
+    const morphoBluePriceTrigger = await redeploy('MorphoBluePriceTrigger', addrs[network].REGISTRY_ADDR, isFork);
+    const morphoBlueTargetRatioCheck = await redeploy('MorphoBlueTargetRatioCheck', addrs[network].REGISTRY_ADDR, isFork);
     console.log('MorphoBluePriceTrigger:', morphoBluePriceTrigger.address);
     console.log('MorphoBlueTargetRatioCheck:', morphoBlueTargetRatioCheck.address);
 

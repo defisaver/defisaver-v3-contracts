@@ -17,15 +17,15 @@ async function main() {
         await topUp(getOwnerAddr());
     }
 
-    const fluidT1Open = await redeploy('FluidVaultT1Open', addrs[network].REGISTRY_ADDR, false, isFork);
-    const fluidT1Supply = await redeploy('FluidVaultT1Supply', addrs[network].REGISTRY_ADDR, false, isFork);
-    const fluidT1Withdraw = await redeploy('FluidVaultT1Withdraw', addrs[network].REGISTRY_ADDR, false, isFork);
-    const fluidT1Borrow = await redeploy('FluidVaultT1Borrow', addrs[network].REGISTRY_ADDR, false, isFork);
-    const fluidT1Payback = await redeploy('FluidVaultT1Payback', addrs[network].REGISTRY_ADDR, false, isFork);
-    const fluidT1Adjust = await redeploy('FluidVaultT1Adjust', addrs[network].REGISTRY_ADDR, false, isFork);
-    const fluidRatioTrigger = await redeploy('FluidRatioTrigger', addrs[network].REGISTRY_ADDR, false, isFork);
-    const fluidRatioChecker = await redeploy('FluidRatioCheck', addrs[network].REGISTRY_ADDR, false, isFork);
-    const view = await redeploy('FluidView', addrs[network].REGISTRY_ADDR, false, isFork);
+    const fluidT1Open = await redeploy('FluidVaultT1Open', addrs[network].REGISTRY_ADDR, isFork);
+    const fluidT1Supply = await redeploy('FluidVaultT1Supply', addrs[network].REGISTRY_ADDR, isFork);
+    const fluidT1Withdraw = await redeploy('FluidVaultT1Withdraw', addrs[network].REGISTRY_ADDR, isFork);
+    const fluidT1Borrow = await redeploy('FluidVaultT1Borrow', addrs[network].REGISTRY_ADDR, isFork);
+    const fluidT1Payback = await redeploy('FluidVaultT1Payback', addrs[network].REGISTRY_ADDR, isFork);
+    const fluidT1Adjust = await redeploy('FluidVaultT1Adjust', addrs[network].REGISTRY_ADDR, isFork);
+    const fluidRatioTrigger = await redeploy('FluidRatioTrigger', addrs[network].REGISTRY_ADDR, isFork);
+    const fluidRatioChecker = await redeploy('FluidRatioCheck', addrs[network].REGISTRY_ADDR, isFork);
+    const view = await redeploy('FluidView', addrs[network].REGISTRY_ADDR, isFork);
 
     console.log(`FluidVaultT1Open: ${fluidT1Open.address}`);
     console.log(`FluidVaultT1Supply: ${fluidT1Supply.address}`);

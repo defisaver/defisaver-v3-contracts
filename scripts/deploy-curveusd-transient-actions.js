@@ -10,11 +10,11 @@ async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
     await topUp(senderAcc.address);
     await topUp(getOwnerAddr());
-    const curveUsdLevCreateTransient = await redeploy('CurveUsdLevCreateTransient', addrs[network].REGISTRY_ADDR, false, true);
-    const curveUsdRepayTransient = await redeploy('CurveUsdRepayTransient', addrs[network].REGISTRY_ADDR, false, true);
-    const curveUsdSelfLiquidateWithCollTransient = await redeploy('CurveUsdSelfLiquidateWithCollTransient', addrs[network].REGISTRY_ADDR, false, true);
-    const curveUsdSwapperTransient = await redeploy('CurveUsdSwapperTransient', addrs[network].REGISTRY_ADDR, false, true);
-    const flAction = await redeploy('FLAction', addrs[network].REGISTRY_ADDR, false, true);
+    const curveUsdLevCreateTransient = await redeploy('CurveUsdLevCreateTransient', addrs[network].REGISTRY_ADDR, true);
+    const curveUsdRepayTransient = await redeploy('CurveUsdRepayTransient', addrs[network].REGISTRY_ADDR, true);
+    const curveUsdSelfLiquidateWithCollTransient = await redeploy('CurveUsdSelfLiquidateWithCollTransient', addrs[network].REGISTRY_ADDR, true);
+    const curveUsdSwapperTransient = await redeploy('CurveUsdSwapperTransient', addrs[network].REGISTRY_ADDR, true);
+    const flAction = await redeploy('FLAction', addrs[network].REGISTRY_ADDR, true);
     console.log('CurveUsdLevCreateTransient deployed to:', curveUsdLevCreateTransient.address);
     console.log('CurveUsdRepayTransient deployed to:', curveUsdRepayTransient.address);
     console.log('CurveUsdSelfLiquidateWithCollTransient deployed to:', curveUsdSelfLiquidateWithCollTransient.address);
