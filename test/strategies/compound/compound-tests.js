@@ -51,12 +51,10 @@ const createBundleAndStrategy = async (proxy) => {
     const boostId2 = await createStrategy(...boostFLCompStrategyEncoded, true);
 
     const repayBundleId = await createBundle(
-        proxy,
         [repayId1, repayId2],
     );
 
     const boostBundleId = await createBundle(
-        proxy,
         [boostId1, boostId2],
     );
     await redeploy('CompSubProxy', false, repayBundleId, boostBundleId);

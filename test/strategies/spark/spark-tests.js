@@ -76,14 +76,14 @@ const deployBundles = async (proxy, isFork) => {
     const strategyId1 = await createStrategy(...sparkRepayStrategyEncoded, true);
     const strategyId2 = await createStrategy(...sparkRepayFLStrategyEncoded, true);
 
-    const repayBundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+    const repayBundleId = await createBundle([strategyId1, strategyId2]);
     const sparkBoostStrategyEncoded = createSparkBoostStrategy();
     const sparkBoostFLStrategyEncoded = createSparkFLBoostStrategy();
 
     const strategyId11 = await createStrategy(...sparkBoostStrategyEncoded, true);
     const strategyId22 = await createStrategy(...sparkBoostFLStrategyEncoded, true);
 
-    const boostBundleId = await createBundle(proxy, [strategyId11, strategyId22]);
+    const boostBundleId = await createBundle([strategyId11, strategyId22]);
 
     await getContractFromRegistry('SparkSubProxy', isFork, repayBundleId, boostBundleId);
     return { repayBundleId, boostBundleId };
@@ -107,7 +107,6 @@ const deployCloseToDebtBundle = async (proxy, isFork = undefined, isL1 = true) =
         false,
     );
     const sparkCloseToDebtBundleId = await createBundle(
-        proxy,
         [sparkCloseToDebtStrategyId, sparkFLCloseToDebtStrategyId],
     );
 
@@ -132,7 +131,6 @@ const deployCloseToCollBundle = async (proxy, isFork = undefined, isL1 = true) =
         false,
     );
     const sparkCloseToCollBundleId = await createBundle(
-        proxy,
         [sparkCloseToCollStrategyId, sparkFLCloseToCollStrategyId],
     );
 

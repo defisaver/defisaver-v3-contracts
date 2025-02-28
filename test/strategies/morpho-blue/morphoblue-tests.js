@@ -42,7 +42,6 @@ const createRepayBundle = async (proxy, isFork) => {
     const strategyIdSecond = await createStrategy(...flCollRepayStrategy, true);
     const strategyIdThird = await createStrategy(...flDebtRepayStrategy, true);
     return createBundle(
-        proxy,
         [strategyIdFirst, strategyIdSecond, strategyIdThird],
     );
 };
@@ -55,7 +54,6 @@ const createBoostBundle = async (proxy, isFork) => {
     const strategyIdSecond = await createStrategy(...flDebtBoostStrategy, true);
     const strategyIdThird = await createStrategy(...fLCollBoostStrategy, true);
     return createBundle(
-        proxy,
         [strategyIdFirst, strategyIdSecond, strategyIdThird],
     );
 };

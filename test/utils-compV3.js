@@ -33,16 +33,16 @@ const createNewCompV3AutomationBundles = async () => {
 
     // create new bundles
     const repayBundleId = await createBundle(
-        null, [existingCompV3RepayStrategyId, newRepayFLStrategyId],
+        [existingCompV3RepayStrategyId, newRepayFLStrategyId],
     );
     const boostBundleId = await createBundle(
-        null, [existingCompV3BoostStrategyId, newBoostFLStrategyId],
+        [existingCompV3BoostStrategyId, newBoostFLStrategyId],
     );
     const repayBundleEOAId = await createBundle(
-        null, [existingCompV3EOARepayStrategyId, newRepayEOAFLStrategyId],
+        [existingCompV3EOARepayStrategyId, newRepayEOAFLStrategyId],
     );
     const boostBundleEOAId = await createBundle(
-        null, [existingCompV3EOABoostStrategyId, newBoostEOAFLStrategyId],
+        [existingCompV3EOABoostStrategyId, newBoostEOAFLStrategyId],
     );
 
     console.log(`Repay bundle id: ${repayBundleId}`);

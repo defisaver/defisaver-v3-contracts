@@ -5,10 +5,8 @@ const hre = require('hardhat');
 const { configure } = require('@defisaver/sdk');
 const { start } = require('./utils/starter');
 const {
-    addrs,
     getOwnerAddr,
     openStrategyAndBundleStorage,
-    network,
     getNetwork,
     redeploy,
 } = require('../test/utils');
@@ -30,10 +28,10 @@ const deployBoostOnPriceBundle = async (isFork) => {
         : createMorphoBlueFLBoostOnTargetPriceL2Strategy();
     const boostOnPriceStrategyId = await createStrategy(...boostOnPriceStrategy, false);
     const flBoostOnPriceStrategyId = await createStrategy(
-        undefined, ...flBoostOnPriceStrategy, false,
+        ...flBoostOnPriceStrategy, false,
     );
     const boostOnPriceBundleId = await createBundle(
-        undefined, [boostOnPriceStrategyId, flBoostOnPriceStrategyId],
+        [boostOnPriceStrategyId, flBoostOnPriceStrategyId],
     );
     return boostOnPriceBundleId;
 };

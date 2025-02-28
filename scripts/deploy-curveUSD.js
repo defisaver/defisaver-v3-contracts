@@ -33,7 +33,6 @@ async function main() {
     const strategyRepayIdThird = await createStrategy(...curveUsdFLRepayStrategy, true);
 
     const repayBundleId = await createBundle(
-        undefined,
         [strategyRepayIdFirst, strategyRepayIdSecond, strategyRepayIdThird],
     );
 
@@ -44,7 +43,6 @@ async function main() {
     const strategyIdSecond = await createStrategy(...curveUsdFLCollBoostStrategy, true);
     const strategyIdThird = await createStrategy(...curveUsdFLDebtBoostStrategy, true);
     const boostBundleId = await createBundle(
-        undefined,
         [strategyIdFirst, strategyIdSecond, strategyIdThird],
     );
 

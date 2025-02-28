@@ -114,7 +114,7 @@ const deployLiquityV2RepayBundle = async (proxy, isFork) => {
     const flRepayStrategy = createLiquityV2FLRepayStrategy();
     const repayStrategyId = await createStrategy(...repayStrategy, true);
     const flRepayStrategyId = await createStrategy(...flRepayStrategy, true);
-    const bundleId = await createBundle(proxy, [repayStrategyId, flRepayStrategyId]);
+    const bundleId = await createBundle([repayStrategyId, flRepayStrategyId]);
     return bundleId;
 };
 
@@ -127,7 +127,7 @@ const deployLiquityV2BoostBundle = async (proxy, isFork) => {
     const flBoostStrategyId = await createStrategy(...flBoostStrategy, true);
     const flBoostWithCollStrategyId = await createStrategy(...flBoostWithCollStrategy, true);
     const bundleId = await createBundle(
-        proxy, [boostStrategyId, flBoostStrategyId, flBoostWithCollStrategyId],
+        [boostStrategyId, flBoostStrategyId, flBoostWithCollStrategyId],
     );
     return bundleId;
 };
@@ -145,7 +145,6 @@ const deployLiquityV2CloseBundle = async (proxy, isFork) => {
     const flCloseToDebtStrategyId = await createStrategy(...flCloseToDebt, false);
 
     const bundleId = await createBundle(
-        proxy,
         [
             closeToCollateralStrategyId,
             flCloseToCollateralStrategyId,
@@ -168,7 +167,6 @@ const deployLiquityV2BoostOnPriceBundle = async (proxy, isFork) => {
     const liquityV2FLBoostWithCollOnPriceStrategyId = await createStrategy(...liquityV2FLBoostWithCollOnPriceStrategy, false);
 
     const bundleId = await createBundle(
-        proxy,
         [
             liquityV2BoostOnPriceStrategyId,
             liquityV2FLBoostOnPriceStrategyId,
@@ -187,7 +185,6 @@ const deployLiquityV2RepayOnPriceBundle = async (proxy, isFork) => {
     const liquityV2FLRepayOnPriceStrategyId = await createStrategy(...liquityV2FLRepayOnPriceStrategy, false);
 
     const bundleId = await createBundle(
-        proxy,
         [
             liquityV2RepayOnPriceStrategyId,
             liquityV2FLRepayOnPriceStrategyId,

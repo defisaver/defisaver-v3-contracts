@@ -20,7 +20,7 @@ const deployBundle = async () => {
     const repayStrategyId1 = await createStrategy(...aaveV3RepayOnPriceStrategyEncoded, false);
     const repayStrategyId2 = await createStrategy(...aaveV3FlRepayOnPriceStrategyEncoded, false);
 
-    const repayBundleId = await createBundle(null, [repayStrategyId1, repayStrategyId2]);
+    const repayBundleId = await createBundle([repayStrategyId1, repayStrategyId2]);
 
     return { repayBundleId };
 };

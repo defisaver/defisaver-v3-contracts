@@ -164,7 +164,7 @@ const liquityBoostStrategyTest = async () => {
             // eslint-disable-next-line max-len
             const strategyId3 = await createStrategy(...LiquityFLBoostWithCollStrategy, true);
 
-            const bundleId = await createBundle(proxy, [strategyId1, strategyId2, strategyId3]);
+            const bundleId = await createBundle([strategyId1, strategyId2, strategyId3]);
 
             const ratioOver = MAX_RATIO;
             const targetRatio = TARGET_BOOST;
@@ -304,7 +304,7 @@ const liquityRepayStrategyTest = async () => {
             const strategyId1 = await createStrategy(...liquityRepayStrategy, true);
             const strategyId2 = await createStrategy(...liquityFLRepayStrategy, true);
 
-            const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+            const bundleId = await createBundle([strategyId1, strategyId2]);
 
             const ratioUnder = MIN_RATIO;
             const targetRatio = TARGET_REPAY;
@@ -464,7 +464,7 @@ const liquityCBPaybackTest = async () => {
             const strategyId1 = await createStrategy(...liqInStrategyEncoded, false);
             const strategyId2 = await createStrategy(...liqOutFLStrategyEncoded, false);
 
-            bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+            bundleId = await createBundle([strategyId1, strategyId2]);
             console.log(`Bundle Id is ${bundleId} and should be 7`);
         });
 

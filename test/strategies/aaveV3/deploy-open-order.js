@@ -62,7 +62,6 @@ const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
         false,
     );
     const aaveV3OpenOrderFromCollBundleId = await createBundle(
-        proxy,
         [aaveV3OpenOrderFromCollStrategyId, aaveV3FLOpenOrderFromCollStrategyId],
     );
     return aaveV3OpenOrderFromCollBundleId;

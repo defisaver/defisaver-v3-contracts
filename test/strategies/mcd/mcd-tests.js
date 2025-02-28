@@ -85,7 +85,6 @@ const createRepayBundle = async (proxy, isFork) => {
     const strategyId2 = await createStrategy(...flRepayCompositeStrategyEncoded, true);
 
     return createBundle(
-        proxy,
         [strategyId1, strategyId2],
     );
 };
@@ -100,7 +99,6 @@ const createBoostBundle = async (proxy, isFork) => {
     const strategyId2 = await createStrategy(...flBoostCompositeStrategy, true);
 
     return createBundle(
-        proxy,
         [strategyId1, strategyId2],
     );
 };
@@ -440,7 +438,7 @@ const mcdRepayFromYearnStrategyTest = async () => {
             const strategyId1 = await createStrategy(...repayStrategyEncoded, true);
             const strategyId2 = await createStrategy(...flRepayStrategyEncoded, true);
 
-            const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+            const bundleId = await createBundle([strategyId1, strategyId2]);
 
             // create vault
             vaultId = await openVault(

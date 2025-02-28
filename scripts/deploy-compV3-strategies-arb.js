@@ -25,7 +25,7 @@ const deployBundles = async () => {
     const repayStrategyId1 = await createStrategy(...compV3RepayStrategyEncoded, true);
     const repayStrategyId2 = await createStrategy(...compV3FLRepayStrategyEncoded, true);
 
-    const repayBundleId = await createBundle(null, [repayStrategyId1, repayStrategyId2]);
+    const repayBundleId = await createBundle([repayStrategyId1, repayStrategyId2]);
 
     const compV3BoostStrategyEncoded = createCompV3BoostL2Strategy();
     const compV3FLBoostStrategyEncoded = createCompV3FLBoostL2Strategy();
@@ -33,7 +33,7 @@ const deployBundles = async () => {
     const boostStrategyId1 = await createStrategy(...compV3BoostStrategyEncoded, true);
     const boostStrategyId2 = await createStrategy(...compV3FLBoostStrategyEncoded, true);
 
-    const boostBundleId = await createBundle(null, [boostStrategyId1, boostStrategyId2]);
+    const boostBundleId = await createBundle([boostStrategyId1, boostStrategyId2]);
 
     return { repayBundleId, boostBundleId };
 };

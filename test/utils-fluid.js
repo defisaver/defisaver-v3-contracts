@@ -73,7 +73,7 @@ const deployFluidT1RepayBundle = async (proxy, isFork) => {
     const flRepayStrategy = network !== 'mainnet' ? createFluidT1FLRepayL2Strategy() : createFluidT1FLRepayStrategy();
     const repayStrategyId = await createStrategy(...repayStrategy, true);
     const flRepayStrategyId = await createStrategy(...flRepayStrategy, true);
-    const bundleId = await createBundle(proxy, [repayStrategyId, flRepayStrategyId]);
+    const bundleId = await createBundle([repayStrategyId, flRepayStrategyId]);
     return bundleId;
 };
 
@@ -83,7 +83,7 @@ const deployFluidT1BoostBundle = async (proxy, isFork) => {
     const flBoostStrategy = network !== 'mainnet' ? createFluidT1FLBoostL2Strategy() : createFluidT1FLBoostStrategy();
     const boostStrategyId = await createStrategy(...boostStrategy, true);
     const flBoostStrategyId = await createStrategy(...flBoostStrategy, true);
-    const bundleId = await createBundle(proxy, [boostStrategyId, flBoostStrategyId]);
+    const bundleId = await createBundle([boostStrategyId, flBoostStrategyId]);
     return bundleId;
 };
 

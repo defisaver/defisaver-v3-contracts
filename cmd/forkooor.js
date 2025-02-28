@@ -756,12 +756,10 @@ const aaveAutomationSub = async ({
             const boostId2 = await createStrategy(...boostFLAaveStrategyEncoded, true);
 
             const repayBundleId = await createBundle(
-                proxy,
                 [repayId1, repayId2],
             );
 
             const boostBundleId = await createBundle(
-                proxy,
                 [boostId1, boostId2],
             );
             await redeploy('AaveSubProxy', true, repayBundleId, boostBundleId);
@@ -821,12 +819,10 @@ const compAutomationSub = async ({
             const boostId2 = await createStrategy(...boostFLCompStrategyEncoded, true);
 
             const repayBundleId = await createBundle(
-                proxy,
                 [repayId1, repayId2],
             );
 
             const boostBundleId = await createBundle(
-                proxy,
                 [boostId1, boostId2],
             );
             await redeploy('CompSubProxy', true, repayBundleId, boostBundleId);
@@ -1712,7 +1708,7 @@ const subAaveV3MainnetAutomation = async (
     // const strategyId1 = await createStrategy(...aaveRepayStrategyEncoded, true);
     // const strategyId2 = await createStrategy(...aaveRepayFLStrategyEncoded, true);
 
-    // await createBundle(proxy, [strategyId1, strategyId2]);
+    // await createBundle([strategyId1, strategyId2]);
 
     // const aaveBoostStrategyEncoded = createAaveV3BoostStrategy();
     // const aaveBoostFLStrategyEncoded = createAaveFLV3BoostStrategy();
@@ -1720,7 +1716,7 @@ const subAaveV3MainnetAutomation = async (
     // const strategyId11 = await createStrategy(...aaveBoostStrategyEncoded, true);
     // const strategyId22 = await createStrategy(...aaveBoostFLStrategyEncoded, true);
 
-    // await createBundle(proxy, [strategyId11, strategyId22]);
+    // await createBundle([strategyId11, strategyId22]);
 
     await redeploy('AaveV3RatioTrigger', true);
     await redeploy('AaveV3RatioCheck', true);
@@ -2227,7 +2223,7 @@ const subMorphoAaveV2Automation = async (
 
             const strategyId = await createStrategy(...strategyData, true);
             const flStrategyId = await createStrategy(...flStrategyData, true);
-            repayBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
+            repayBundleId = await createBundle([strategyId, flStrategyId]);
         }
 
         {
@@ -2237,7 +2233,7 @@ const subMorphoAaveV2Automation = async (
 
             const strategyId = await createStrategy(...strategyData, true);
             const flStrategyId = await createStrategy(...flStrategyData, true);
-            boostBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
+            boostBundleId = await createBundle([strategyId, flStrategyId]);
         }
 
         await deployMorphoContracts();
@@ -2410,7 +2406,7 @@ const subLiquityAutomation = async (
 
             const strategyId = await createStrategy(...strategyData, true);
             const flStrategyId = await createStrategy(...flStrategyData, true);
-            repayBundleId = await createBundle(undefined, [strategyId, flStrategyId]);
+            repayBundleId = await createBundle([strategyId, flStrategyId]);
         }
 
         {
@@ -2421,7 +2417,7 @@ const subLiquityAutomation = async (
             const strategyId = await createStrategy(...strategyData, true);
             const flStrategyId = await createStrategy(...flStrategyData, true);
             const bigFlStrategyId = await createStrategy(...bigFlStrategyData, true);
-            boostBundleId = await createBundle(undefined, [strategyId, flStrategyId, bigFlStrategyId]);
+            boostBundleId = await createBundle([strategyId, flStrategyId, bigFlStrategyId]);
         }
 
         await deployLiquityContracts();
@@ -2638,7 +2634,7 @@ const updateAaveV3AutomationSub = async (
     const strategyId1 = await createStrategy(...aaveRepayStrategyEncoded, true);
     const strategyId2 = await createStrategy(...aaveRepayFLStrategyEncoded, true);
 
-    await createBundle(proxy, [strategyId1, strategyId2]);
+    await createBundle([strategyId1, strategyId2]);
 
     const aaveBoostStrategyEncoded = createAaveV3BoostL2Strategy();
     const aaveBoostFLStrategyEncoded = createAaveFLV3BoostL2Strategy();
@@ -2646,7 +2642,7 @@ const updateAaveV3AutomationSub = async (
     const strategyId11 = await createStrategy(...aaveBoostStrategyEncoded, true);
     const strategyId22 = await createStrategy(...aaveBoostFLStrategyEncoded, true);
 
-    await createBundle(proxy, [strategyId11, strategyId22]);
+    await createBundle([strategyId11, strategyId22]);
 
     const minRatioFormatted = hre.ethers.utils.parseUnits(minRatio, '16');
     const maxRatioFormatted = hre.ethers.utils.parseUnits(maxRatio, '16');

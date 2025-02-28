@@ -116,7 +116,7 @@ const deployBoostOnPriceBundle = async (isFork) => {
         : createMorphoBlueFLBoostOnTargetPriceL2Strategy();
     const boostOnPriceStrategyId = await createStrategy(...boostOnPriceStrategy, false);
     const flBoostOnPriceStrategyId = await createStrategy(...flBoostOnPriceStrategy, false);
-    const boostOnPriceBundleId = await createBundle(undefined, [boostOnPriceStrategyId, flBoostOnPriceStrategyId]);
+    const boostOnPriceBundleId = await createBundle([boostOnPriceStrategyId, flBoostOnPriceStrategyId]);
     return boostOnPriceBundleId;
 };
 const formatMarketParams = (marketParams) => [
