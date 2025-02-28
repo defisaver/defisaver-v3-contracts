@@ -2,9 +2,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 const hre = require('hardhat');
-const { start } = require('./utils/starter');
-
-const { 
+const {
     addToExchangeAggregatorRegistry,
     setNewExchangeWrapper,
     approveContractInRegistry,
@@ -19,7 +17,6 @@ const { topUp } = require('./utils/fork');
 // const zeroxWrapper = '0x94a58e456F1De766b13e45104D79201A218c1607';
 // const curveWrapperV3 = '0x506bC549432Ae8357385C86a20163960E3C9b33b';
 // const uniV3WrapperV3 = '0x6945432Cc46B2956Cd4583836c463284212d96A6';
-
 
 // Optimism
 const kyberAggregatorWrapper = '0xd94BeaAC0d40fDe0F85D2172DC568E9CfC4C389E';
@@ -64,7 +61,6 @@ async function main() {
     await addToExchangeAggregatorRegistry(senderAcc, zeroXTargetAddr, true);
     await addToExchangeAggregatorRegistry(senderAcc, kyberTargetAddr, true);
     await addToExchangeAggregatorRegistry(senderAcc, paraswapTargetAddr, true);
-
 
     console.log('Change done!');
     process.exit(0);

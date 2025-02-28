@@ -3,8 +3,6 @@ const {
     takeSnapshot,
     revertToSnapshot,
     getOwnerAddr,
-    addrs,
-    network,
     redeploy,
 } = require('../utils');
 const { topUp } = require('../../scripts/utils/fork');

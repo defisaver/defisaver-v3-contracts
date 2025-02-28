@@ -3,7 +3,7 @@
 const hre = require('hardhat');
 const { start } = require('./utils/starter');
 const {
-    redeploy, addrs, network, getOwnerAddr,
+    redeploy, getOwnerAddr,
 } = require('../test/utils');
 const { topUp } = require('./utils/fork');
 const { deployFluidT1RepayBundle, deployFluidT1BoostBundle } = require('../test/utils-fluid');

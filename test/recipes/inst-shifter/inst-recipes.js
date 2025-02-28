@@ -59,7 +59,7 @@ const instAaveDebtShiftTest = async () => {
             const dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
             sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
             proxy = await getProxy(OWNER_ACC);
-            // Approve dsproxy to have authoritiy over DSA account!
+            // Approve dsproxy to have authority over DSA account!
             await impersonateAccount(OWNER_ACC);
             ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
             const dsaContractImpersonated = await dsaContract.connect(ownerAcc);
@@ -170,7 +170,7 @@ const instAaveDebtShiftTest = async () => {
 
             sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
             proxy = await getProxy(OWNER_ACC);
-            // Approve dsproxy to have authoritiy over DSA account!
+            // Approve dsproxy to have authority over DSA account!
             await impersonateAccount(OWNER_ACC);
             ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
             const dsaContractImpersonated = await dsaContract.connect(ownerAcc);
@@ -318,7 +318,7 @@ const instAaveNoDebtShiftTest = async () => {
             dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
         });
         it('... Migrate aave debtless position from INST ', async () => {
-        // Approve dsproxy to have authoritiy over DSA account!
+        // Approve dsproxy to have authority over DSA account!
             await impersonateAccount(OWNER_ACC);
             ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
             const dsaContractImpersonated = dsaContract.connect(ownerAcc);
@@ -398,7 +398,7 @@ const instCompDebtShiftTest = async () => {
             const dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
             sendEther((await hre.ethers.getSigners())[0], OWNER_ACC, '10');
             proxy = await getProxy(OWNER_ACC);
-            // Approve dsproxy to have authoritiy over DSA account!
+            // Approve dsproxy to have authority over DSA account!
             await impersonateAccount(OWNER_ACC);
             ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
             const dsaContractImpersonated = await dsaContract.connect(ownerAcc);

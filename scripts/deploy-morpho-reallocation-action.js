@@ -4,7 +4,6 @@ const { configure } = require('@defisaver/sdk');
 const { start } = require('./utils/starter');
 const {
     redeploy,
-    addrs,
     network,
     getOwnerAddr,
     chainIds,

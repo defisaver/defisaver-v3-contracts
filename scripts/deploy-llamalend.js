@@ -1,11 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 const hre = require('hardhat');
-const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const { start } = require('./utils/starter');
 
 const {
-    redeploy, addrs, network, fetchAmountinUSDPrice, approve, setBalance,
+    redeploy,
     getOwnerAddr,
 } = require('../test/utils');
 

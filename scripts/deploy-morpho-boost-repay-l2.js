@@ -5,10 +5,8 @@ const hre = require('hardhat');
 const { configure } = require('@defisaver/sdk');
 const { start } = require('./utils/starter');
 const {
-    addrs,
     getOwnerAddr,
     openStrategyAndBundleStorage,
-    network,
 } = require('../test/utils');
 const { topUp } = require('./utils/fork');
 const { addBotCaller, createStrategy, createBundle } = require('../test/utils-strategies');

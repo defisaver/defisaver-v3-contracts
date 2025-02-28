@@ -20,7 +20,6 @@ const {
     approve,
     isNetworkFork,
     getOwnerAddr,
-    
 } = require('../../utils');
 const { topUp } = require('../../../scripts/utils/fork');
 

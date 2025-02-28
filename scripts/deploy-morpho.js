@@ -3,7 +3,7 @@
 const hre = require('hardhat');
 const { start } = require('./utils/starter');
 
-const { redeploy, addrs, network } = require('../test/utils');
+const { redeploy } = require('../test/utils');
 
 const { topUp } = require('./utils/fork');
 

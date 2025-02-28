@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-const hre = require('hardhat');
 const automationSdk = require('@defisaver/automation-sdk');
 const {
     subToAaveV3Proxy,
@@ -7,11 +6,6 @@ const {
     subToStrategy,
     subToCompV3ProxyL2,
 } = require('./utils-strategies');
-
-const {
-    addrs,
-    network,
-} = require('./utils');
 
 const subAaveV3L2AutomationStrategy = async (
     proxy,

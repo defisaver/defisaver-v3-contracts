@@ -10,10 +10,6 @@ const {
     changeNetworkNameForAddresses,
 } = require('./hardhat-tasks-functions');
 
-const {
-    createFork, topUp,
-} = require('./utils/fork');
-
 task('fladepver', 'Deploys and verifies contract on etherscan')
     .addOptionalPositionalParam('contractName', 'The name of the contract to flatten, deploy and verify')
     .addOptionalPositionalParam('gas', 'The price (in gwei) per unit of gas')

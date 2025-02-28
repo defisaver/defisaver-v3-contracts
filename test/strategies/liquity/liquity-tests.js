@@ -385,7 +385,7 @@ const liquityCBPaybackTest = async () => {
         const lusdDebt = '10000';
         const lusdDebtHalf = (lusdDebt / 2).toString();
         const troveAmount = Float2BN(fetchAmountinUSDPrice('WETH', '20000'));
-        const forkedBlock = 16035000; // doing this to optimize hints fetching
+        // const forkedBlock = 16035000; // doing this to optimize hints fetching
 
         before(async () => {
             await ethers.provider.getBlockNumber()
@@ -1049,7 +1049,6 @@ const liquityDebtInFrontRepayStrategyTest = async () => {
         let liquityView;
         let strategySub;
         let currDebtInFront;
-        let snapshotId;
 
         before(async () => {
             await resetForkToBlock(18275000);
@@ -1107,7 +1106,7 @@ const liquityDebtInFrontRepayStrategyTest = async () => {
                 proxy, debtInFront, targetRatioIncrease,
             ));
 
-            snapshotId = await takeSnapshot();
+            await takeSnapshot();
         });
 
         it('... should trigger a Liquity debt in front Repay strategy', async () => {

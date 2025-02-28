@@ -45,7 +45,7 @@ const {
 
 const STRATEGY_EXECUTOR_L2_ADDR = '0x9652f91B10045Cd2a36ca8D87df4A800eD2AF05D';
 
-const deployBundles = async (proxy) => {
+const deployBundles = async () => {
     await openStrategyAndBundleStorage();
     const compV3RepayStrategyEncoded = createCompV3RepayL2Strategy();
     const compV3FLRepayStrategyEncoded = createCompV3FLRepayL2Strategy();
@@ -168,7 +168,7 @@ describe('CompV3 L2 automation tests', function () {
 
         strategyExecutorL2 = await hre.ethers.getContractAt('StrategyExecutorL2', STRATEGY_EXECUTOR_L2_ADDR);
 
-        const { repayBundleId, boostBundleId } = await deployBundles(proxy);
+        const { repayBundleId, boostBundleId } = await deployBundles();
         await redeploy('CompV3SubProxyL2', false, repayBundleId, boostBundleId);
     });
 

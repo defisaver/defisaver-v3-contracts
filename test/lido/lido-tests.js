@@ -12,7 +12,7 @@ const {
     WSTETH_ADDRESS,
 } = require('../utils');
 
-const { lidoStake, lidoWrap, lidoUnwrap } = require('../actions.js');
+const { lidoStake, lidoWrap, lidoUnwrap } = require('../actions');
 
 const lidoStakeTest = async () => {
     describe('Lido WETH staking', function () {

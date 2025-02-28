@@ -10,7 +10,6 @@ const {
     Float2BN, formatExchangeObjCurve, addrs, getAddrFromRegistry, balanceOf,
     setNewExchangeWrapper,
     openStrategyAndBundleStorage,
-    nullAddress,
 } = require('../../utils');
 const { addBotCaller, createStrategy } = require('../../utils-strategies');
 const { curveUsdCreate } = require('../../actions');
@@ -447,7 +446,6 @@ const curveUsdPaybackStrategyTest = async () => {
         let proxy;
         let botAcc;
         let strategyExecutor;
-        let strategyId;
         let crvusdView;
 
         before(async () => {
@@ -516,7 +514,7 @@ const curveUsdPaybackStrategyTest = async () => {
                     const curveUsdPaybackStrategy = createCurveUsdPaybackStrategy();
                     const isFork = false;
                     await openStrategyAndBundleStorage(isFork);
-                    strategyId = await createStrategy(...curveUsdPaybackStrategy, true);
+                    await createStrategy(...curveUsdPaybackStrategy, true);
                 });
                 it(`... should executes a payback strategy for ${assetSymbol} market using payback amount from subData`, async () => {
                     snapshot = await takeSnapshot();

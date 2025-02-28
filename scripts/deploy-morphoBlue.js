@@ -5,14 +5,14 @@ const hre = require('hardhat');
 const { start } = require('./utils/starter');
 
 const {
-    approve, setBalance, getProxy, nullAddress, redeploy, addrs,
+    approve, setBalance, getProxy, nullAddress,
 } = require('../test/utils');
 
 const { topUp } = require('./utils/fork');
 const { morphoBlueBorrow } = require('../test/actions');
 
 async function main() {
-    // replace hardhat_setStorage to hardhat_setStorage accross the repo
+    // replace hardhat_setStorage to hardhat_setStorage across the repo
     // RUN SCRIPT WITH: node scripts/deploy-morphoBlue --network fork
 
     // const lsvView = await redeploy('LSVView', true);
@@ -27,6 +27,7 @@ async function main() {
     ];
     const wallet = await hre.ethers.provider.getSigner('0xEA57Dc30959eb17c506E4dA095fa9181f3E0Ac6D');
     console.log(wallet.address);
+    // eslint-disable-next-line no-underscore-dangle
     wallet.address = wallet._address;
     let proxy = await getProxy(wallet.address);
     proxy = proxy.connect(wallet);

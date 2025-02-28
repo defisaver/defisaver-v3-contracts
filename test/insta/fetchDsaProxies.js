@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 /* eslint-disable import/no-extraneous-dependencies */
 require('dotenv').config();
 const { Alchemy, Network, Utils } = require('alchemy-sdk');

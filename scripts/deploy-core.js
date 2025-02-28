@@ -1,14 +1,8 @@
-const { deployContract, deployAsOwner } = require('./utils/deployer');
 const { start } = require('./utils/starter');
-
-const { changeConstantInFiles } = require('./utils/utils');
 
 const { redeploy } = require('../test/utils');
 
 async function main() {
-    const proxyAuth = await deployContract('ProxyAuth');
-    const reg = await deployAsOwner('DFSRegistry');
-
     // await changeConstantInFiles(
     //     './contracts',
     //     ['StrategyExecutor'],

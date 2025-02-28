@@ -13,7 +13,7 @@ const {
     YEARN_REGISTRY_ADDRESS,
 } = require('../utils');
 
-const { yearnSupply, sell, yearnWithdraw } = require('../actions.js');
+const { yearnSupply, sell, yearnWithdraw } = require('../actions');
 
 const yearnSupplyTest = async (testLength) => {
     describe('Yearn-Supply', function () {

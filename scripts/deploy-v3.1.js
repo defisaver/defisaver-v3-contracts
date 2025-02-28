@@ -2,9 +2,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 const hre = require('hardhat');
-const { start } = require('./utils/starter');
 
-const { redeploy, addrs, network, setNewExchangeWrapper } = require('../test/utils');
+const { redeploy, setNewExchangeWrapper } = require('../test/utils');
 
 const { topUp } = require('./utils/fork');
 
@@ -49,7 +48,6 @@ async function main() {
 
     const uniV3WrapperV3 = await redeploy('UniV3WrapperV3', true);
     await setNewExchangeWrapper('UniV3WrapperV3', uniV3WrapperV3.address, true);
-
 
     // sub proxies
     const subProxy = await redeploy('SubProxy', true);

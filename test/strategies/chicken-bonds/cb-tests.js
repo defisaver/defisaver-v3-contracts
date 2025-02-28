@@ -74,7 +74,7 @@ const cbRebondStrategyTest = async () => {
             await redeploy('CBRebondSubProxy');
             await redeploy('CBUpdateRebondSub');
 
-            await setContractAt({ name: 'WrapperExchangeRegistry', address: addrs['mainnet'].WRAPPER_EXCHANGE_REGISTRY });
+            await setContractAt({ name: 'WrapperExchangeRegistry', address: addrs.mainnet.WRAPPER_EXCHANGE_REGISTRY });
 
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 

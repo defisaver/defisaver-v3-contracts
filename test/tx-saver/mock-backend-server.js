@@ -7,7 +7,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { topUp } = require('../../scripts/utils/fork');
-const { getOwnerAddr, getContractFromRegistry, addrs } = require('../utils');
+const { getOwnerAddr, getContractFromRegistry } = require('../utils');
 const {
     addBotCallerForTxSaver,
     emptyInjectedOrder,

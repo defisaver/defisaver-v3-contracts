@@ -1,7 +1,7 @@
 /* eslint-disable array-callback-return */
 /* eslint-disable max-len */
 const { ethers } = require('hardhat');
-const { expect, use } = require('chai');
+const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
 const dfs = require('@defisaver/sdk');
 
@@ -40,7 +40,6 @@ const {
     proxyApproveToken,
     curveUsdLevCreateTransient,
     curveUsdRepayTransient,
-    sell,
     curveUsdSelfLiquidateWithCollTransient,
 } = require('../actions');
 

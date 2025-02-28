@@ -4,8 +4,6 @@ const { start } = require('./utils/starter');
 
 const {
     redeploy,
-    addrs,
-    network,
     getOwnerAddr,
 } = require('../test/utils');
 

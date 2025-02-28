@@ -1,14 +1,10 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
 /* eslint-disable import/no-extraneous-dependencies */
 
 const hre = require('hardhat');
-const { start } = require('./utils/starter');
 
-const { 
-    addToExchangeAggregatorRegistry,
-    setNewExchangeWrapper,
-    approveContractInRegistry,
-} = require('../test/utils');
+const { approveContractInRegistry } = require('../test/utils');
 
 const { topUp } = require('./utils/fork');
 
@@ -65,7 +61,6 @@ async function main() {
     // await addToExchangeAggregatorRegistry(senderAcc, zeroXTargetAddr, true);
     // await addToExchangeAggregatorRegistry(senderAcc, kyberTargetAddr, true);
     // await addToExchangeAggregatorRegistry(senderAcc, paraswapTargetAddr, true);
-
 
     console.log('Change done!');
     process.exit(0);

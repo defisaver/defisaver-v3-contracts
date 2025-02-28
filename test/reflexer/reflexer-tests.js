@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 const { expect } = require('chai');
+const { BigNumber } = require('ethers');
 const hre = require('hardhat');
 const {
     reflexerOpen,
@@ -40,7 +41,6 @@ const {
     NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS,
     REFLEXER_SAFE_MANAGER_ADDR,
 } = require('../utils-reflexer');
-const { BigNumber } = require('ethers');
 
 const WETH_SUPPLY_AMOUNT_IN_USD = '100000';
 const SAFE_ENGINE_ADDR = '0xCC88a9d330da1133Df3A7bD823B95e52511A6962';

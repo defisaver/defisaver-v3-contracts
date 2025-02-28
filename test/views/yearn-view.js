@@ -10,7 +10,7 @@ const {
     YEARN_REGISTRY_ADDRESS,
 } = require('../utils');
 
-const { yearnSupply, yearnWithdraw } = require('../actions.js');
+const { yearnSupply, yearnWithdraw } = require('../actions');
 
 describe('Yearn-view', function () {
     this.timeout(80000);

@@ -2,7 +2,6 @@
 /* eslint-disable no-mixed-operators */
 const hre = require('hardhat');
 const Dec = require('decimal.js');
-const { expect } = require('chai');
 
 const {
     getSystemInfo,
@@ -12,7 +11,7 @@ const {
 } = require('../utils-cb');
 
 const {
-    redeploy, takeSnapshot, revertToSnapshot,
+    redeploy,
 } = require('../utils');
 
 describe('CB-rebond-trigger', function () {

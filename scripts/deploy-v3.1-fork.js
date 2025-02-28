@@ -2,9 +2,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 const hre = require('hardhat');
-const { start } = require('./utils/starter');
-
-const { redeploy, addrs, network, setNewExchangeWrapper } = require('../test/utils');
+const { redeploy, addrs, network } = require('../test/utils');
 
 const { topUp } = require('./utils/fork');
 
@@ -17,7 +15,6 @@ async function main() {
     await redeploy('CreateSub', true);
     await redeploy('McdRepayComposite', true);
     await redeploy('McdBoostComposite', true);
-
 
     // const recipeExecutor = await redeploy('RecipeExecutor', true);
 

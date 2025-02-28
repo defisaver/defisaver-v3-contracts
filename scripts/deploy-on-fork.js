@@ -94,7 +94,7 @@ async function main() {
     );
     await run('compile');
 
-    const recipeExecutor = await redeploy('RecipeExecutor');
+    await redeploy('RecipeExecutor');
     await redeploy('SubProxy');
 
     await changeConstantInFiles(

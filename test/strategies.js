@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const dfs = require('@defisaver/sdk');
 
 const {
@@ -6063,7 +6064,7 @@ const createLiquityV2PaybackFromSPStrategy = () => {
         '&proxy', // where to send bold tokens
         '&proxy', // where to send coll. gains
         '%boldAmount', // calc. by backend to hit ratio trigger
-        '%doClaim' // set false by backend
+        '%doClaim', // set false by backend
     );
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
@@ -6076,7 +6077,7 @@ const createLiquityV2PaybackFromSPStrategy = () => {
         '&market',
         '&proxy',
         '&troveId',
-        '$2'
+        '$2',
     );
 
     const liquityV2RatioCheckAction = new dfs.actions.checkers.LiquityV2RatioCheckAction(

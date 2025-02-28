@@ -1,6 +1,6 @@
 const { yearnFullTest } = require('./yearn-tests');
 
-const config = require('../../hardhat.config.js');
+const config = require('../../hardhat.config');
 
 describe('Utils full test', () => {
     it('... should do full Utils test', async () => {

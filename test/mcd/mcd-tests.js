@@ -323,7 +323,6 @@ const mcdGiveTest = async () => {
     describe('Mcd-Give', () => {
         let senderAcc;
         let secondAcc;
-        let thirdAcc;
         let proxy;
         // let mcdView;
         let mcdManager;
@@ -331,7 +330,6 @@ const mcdGiveTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             secondAcc = (await hre.ethers.getSigners())[1];
-            thirdAcc = (await hre.ethers.getSigners())[2];
             proxy = await getProxy(senderAcc.address);
 
             // mcdView = await redeploy('McdView');
@@ -932,7 +930,7 @@ const mcdFLRepayCompositeTest = async () => {
         const repayGasUsed = 2_000_000;
         const USD_REPAY_AMOUNT = '10000';
 
-        let feeReciever;
+        let feeReceiver;
         let mockWrapper;
         let senderAcc;
         let proxy;
@@ -959,7 +957,7 @@ const mcdFLRepayCompositeTest = async () => {
             proxy = await getProxy(senderAcc.address);
 
             const feeRecipient = await repayComposite.feeRecipient();
-            feeReciever = hre.ethers.utils.defaultAbiCoder.decode(
+            feeReceiver = hre.ethers.utils.defaultAbiCoder.decode(
                 ['address'],
                 await senderAcc.call({
                     to: feeRecipient,
@@ -1023,8 +1021,8 @@ const mcdFLRepayCompositeTest = async () => {
                     mockWrapper.address,
                 );
 
-                const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReciever);
-                const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
+                const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReceiver);
+                const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReceiver);
                 const receipt = await (await mcdFLRepayComposite(
                     proxy,
                     vaultId,
@@ -1032,8 +1030,8 @@ const mcdFLRepayCompositeTest = async () => {
                     repayGasUsed,
                     exchangeOrder,
                 )).wait();
-                const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReciever);
-                const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
+                const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReceiver);
+                const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReceiver);
 
                 const recipeEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('RecipeEvent(address,string)')
                     && e.topics[1] === hre.ethers.utils.defaultAbiCoder.encode(['address'], [repayComposite.address])
@@ -1099,7 +1097,7 @@ const mcdRepayCompositeTest = async () => {
         const repayGasUsed = 2_000_000;
         const USD_REPAY_AMOUNT = '10000';
 
-        let feeReciever;
+        let feeReceiver;
         let mockWrapper;
         let senderAcc;
         let proxy;
@@ -1125,7 +1123,7 @@ const mcdRepayCompositeTest = async () => {
             proxy = await getProxy(senderAcc.address);
 
             const feeRecipient = await repayComposite.feeRecipient();
-            feeReciever = hre.ethers.utils.defaultAbiCoder.decode(
+            feeReceiver = hre.ethers.utils.defaultAbiCoder.decode(
                 ['address'],
                 await senderAcc.call({
                     to: feeRecipient,
@@ -1189,8 +1187,8 @@ const mcdRepayCompositeTest = async () => {
                     mockWrapper.address,
                 );
 
-                const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReciever);
-                const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
+                const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReceiver);
+                const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReceiver);
                 const receipt = await (await mcdRepayComposite(
                     proxy,
                     vaultId,
@@ -1198,8 +1196,8 @@ const mcdRepayCompositeTest = async () => {
                     repayGasUsed,
                     exchangeOrder,
                 )).wait();
-                const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReciever);
-                const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
+                const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReceiver);
+                const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReceiver);
 
                 const actionEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('ActionDirectEvent(address,string,bytes)')
                     && e.address === LOGGER_ADDR);
@@ -1265,7 +1263,7 @@ const mcdFLBoostCompositeTest = async () => {
         let proxy;
         let mcdView;
         let boostComposite;
-        let feeReciever;
+        let feeReceiver;
 
         let snapshot;
 
@@ -1287,7 +1285,7 @@ const mcdFLBoostCompositeTest = async () => {
             proxy = await getProxy(senderAcc.address);
 
             const feeRecipient = await boostComposite.feeRecipient();
-            feeReciever = hre.ethers.utils.defaultAbiCoder.decode(
+            feeReceiver = hre.ethers.utils.defaultAbiCoder.decode(
                 ['address'],
                 await senderAcc.call({
                     to: feeRecipient,
@@ -1351,8 +1349,8 @@ const mcdFLBoostCompositeTest = async () => {
                     mockWrapper.address,
                 );
 
-                const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReciever);
-                const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
+                const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReceiver);
+                const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReceiver);
                 const receipt = await (await mcdFLBoostComposite(
                     proxy,
                     vaultId,
@@ -1360,8 +1358,8 @@ const mcdFLBoostCompositeTest = async () => {
                     boostGasUsed,
                     exchangeOrder,
                 )).wait();
-                const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReciever);
-                const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
+                const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReceiver);
+                const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReceiver);
 
                 const recipeEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('RecipeEvent(address,string)')
                     && e.topics[1] === hre.ethers.utils.defaultAbiCoder.encode(['address'], [boostComposite.address])
@@ -1427,7 +1425,7 @@ const mcdBoostCompositeTest = async () => {
         let proxy;
         let mcdView;
         let boostComposite;
-        let feeReciever;
+        let feeReceiver;
 
         let snapshot;
 
@@ -1449,7 +1447,7 @@ const mcdBoostCompositeTest = async () => {
             proxy = await getProxy(senderAcc.address);
 
             const feeRecipient = await boostComposite.feeRecipient();
-            feeReciever = hre.ethers.utils.defaultAbiCoder.decode(
+            feeReceiver = hre.ethers.utils.defaultAbiCoder.decode(
                 ['address'],
                 await senderAcc.call({
                     to: feeRecipient,
@@ -1521,8 +1519,8 @@ const mcdBoostCompositeTest = async () => {
                     mockWrapper.address,
                 );
 
-                const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReciever);
-                const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
+                const feesBeforeCollateralAsset = await balanceOf(tokenData.address, feeReceiver);
+                const feesBeforeDebtAsset = await balanceOf(DAI_ADDR, feeReceiver);
                 const receipt = await (await mcdBoostComposite(
                     proxy,
                     vaultId,
@@ -1530,8 +1528,8 @@ const mcdBoostCompositeTest = async () => {
                     boostGasUsed,
                     exchangeOrder,
                 )).wait();
-                const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReciever);
-                const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReciever);
+                const feesAfterCollateralAsset = await balanceOf(tokenData.address, feeReceiver);
+                const feesAfterDebtAsset = await balanceOf(DAI_ADDR, feeReceiver);
 
                 const actionEvent = receipt.events.find((e) => e.topics[0] === hre.ethers.utils.id('ActionDirectEvent(address,string,bytes)')
                     && e.address === LOGGER_ADDR);
@@ -1691,7 +1689,6 @@ const mcdTokenConverterTest = async () => {
         const MKR_ADDRESS = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
         const SKY_ADDRESS = '0x56072C95FAA701256059aa122697B133aDEd9279';
         const USDS_ADDRESS = '0xdC035D45d973E3EC169d2276DDab16f1e407384F';
-        const DAI_USDS_CONVERTER = '0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A';
 
         before(async () => {
             [senderAcc] = await hre.ethers.getSigners();

@@ -37,7 +37,7 @@ const SUPPLY_AMOUNT_IN_USD = '150000';
 const GENERATE_AMOUNT_IN_USD = '50000';
 const {
     openVaultForExactAmountInDecimals, gUniDeposit, openVault, executeAction,
-} = require('../../actions.js');
+} = require('../../actions');
 
 const McdPaybackAction = dfs.actions.maker.MakerPaybackAction;
 const McdWithdrawAction = dfs.actions.maker.MakerWithdrawAction;
@@ -730,15 +730,6 @@ const mcdCreateTest = async () => {
                 expect(info2.debt).to.be.gte(parseInt(amount, 10));
             });
         }
-
-        // it(`... should create a leveraged UNIV2ETHDAI vault`, async () => {
-        //     const uniJoinAddr = '';
-
-        //     const uniVaultRecipe = new dfs.Recipe("CreateVaultRecipe", [
-        //         new dfs.actions.maker.MakerOpenVaultAction(uniJoinAddr, MCD_MANAGER_ADDR),
-
-        //     ]);
-        // });
     });
 };
 

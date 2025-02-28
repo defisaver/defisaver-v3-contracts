@@ -2,7 +2,7 @@ const { resetForkToBlock } = require('../utils');
 const { aaveV2assetsDefaultMarket } = require('../utils-aave');
 const { aaveFullTest } = require('./aave-tests');
 
-const config = require('../../hardhat.config.js');
+const config = require('../../hardhat.config');
 
 describe('Aave full test', () => {
     it('... should do full Aave test', async () => {

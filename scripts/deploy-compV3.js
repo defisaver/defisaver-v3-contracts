@@ -3,7 +3,7 @@
 const hre = require('hardhat');
 const { start } = require('./utils/starter');
 
-const { redeploy, addrs, network, getOwnerAddr } = require('../test/utils');
+const { redeploy, getOwnerAddr } = require('../test/utils');
 
 const { topUp } = require('./utils/fork');
 
@@ -12,7 +12,7 @@ async function main() {
     await topUp(senderAcc.address);
     await topUp(getOwnerAddr());
 
-    const compV3RatioCheck = await redeploy('StarknetClaim', true);
+    await redeploy('StarknetClaim', true);
     process.exit(0);
 }
 

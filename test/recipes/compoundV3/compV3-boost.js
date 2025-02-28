@@ -15,9 +15,7 @@ const {
     fetchAmountinUSDPrice,
     UNISWAP_WRAPPER,
     nullAddress,
-    approve,
     getAddrFromRegistry,
-    setBalance,
 } = require('../../utils');
 
 const cometABI = [
@@ -87,9 +85,8 @@ describe('CompoundV3 Boost recipe test', function () {
             const to = proxy.address;
             const collToken = tokenData.address;
             const fromToken = getAssetInfo('USDC').address;
-            
-            // Borrow more asset
 
+            // Borrow more asset
             const compV3BorrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(
                 boostAmount,
                 to,
@@ -121,7 +118,7 @@ describe('CompoundV3 Boost recipe test', function () {
                 sellAction,
                 supplyCompV3Action,
             ]);
-            
+
             const functionData = boostRecipe.encodeForDsProxyCall();
 
             await executeAction('RecipeExecutor', functionData[1], proxy);
@@ -158,7 +155,6 @@ describe('CompoundV3 Boost recipe test', function () {
             );
 
             await borrowCompV3(proxy, borrowingAmount, senderAcc.address);
-
 
             // Get ratio before
             const colBefore = await comet.collateralBalanceOf(proxy.address, tokenData.address);
@@ -197,7 +193,7 @@ describe('CompoundV3 Boost recipe test', function () {
                     aaveV2FlAddr,
                 ),
             ]);
-            
+
             const functionData = boostRecipe.encodeForDsProxyCall();
 
             await executeAction('RecipeExecutor', functionData[1], proxy);

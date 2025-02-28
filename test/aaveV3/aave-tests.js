@@ -23,7 +23,6 @@ const {
     aaveV3DelegateCreditWithSig,
     claimAaveFromStkGho,
     startUnstakeGho,
-    finalizeUnstakeAave,
     finalizeUnstakeGho,
 } = require('../actions');
 

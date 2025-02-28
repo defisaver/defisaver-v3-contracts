@@ -81,7 +81,7 @@ const {
 
 const { RATIO_STATE_OVER } = require('../../triggers');
 
-const deployBundles = async (proxy) => {
+const deployBundles = async () => {
     await openStrategyAndBundleStorage();
     const aaveRepayStrategyEncoded = createAaveV3RepayL2Strategy();
     const aaveRepayFLStrategyEncoded = createAaveFLV3RepayL2Strategy();
@@ -254,7 +254,7 @@ const aaveV3RepayStrategyTest = async (numTestPairs) => {
                     debtAssetId,
                 );
 
-                await deployBundles(proxy);
+                await deployBundles();
 
                 const targetRatio = 230;
                 const ratioUnder = 220;
@@ -436,7 +436,7 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
                     debtAssetId,
                 );
 
-                await deployBundles(proxy);
+                await deployBundles();
 
                 const targetRatio = 150;
                 const ratioOver = 170;

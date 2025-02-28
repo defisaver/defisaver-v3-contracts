@@ -2,7 +2,6 @@
 
 const hre = require('hardhat');
 const {
-    addrs,
     redeploy,
     getOwnerAddr,
 } = require('../utils');
@@ -14,7 +13,6 @@ describe('Deploy tx saver contracts', function () {
     this.timeout(80000);
     let senderAcc;
     let safeWallet;
-    const network = 'mainnet';
 
     const setUpSafeWallet = async () => {
         const safeAddr = await createSafe(senderAcc.address);

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 const { poolInfo } = require('@defisaver/sdk/src/utils/convex-utils');
 const hre = require('hardhat');
 const { getAddrFromRegistry } = require('./utils');
