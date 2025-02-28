@@ -41,7 +41,7 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                 await topUp(senderAcc.address);
                 await topUp(getOwnerAddr());
             }
-            aaveV3ViewContract = await redeploy('AaveV3View', addrs[getNetwork()].REGISTRY_ADDR, false, isFork);
+            aaveV3ViewContract = await redeploy('AaveV3View', addrs[network].REGISTRY_ADDR, isFork);
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();

@@ -109,7 +109,7 @@ const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', fun
         const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
         bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
 
-        await redeploy('MorphoAaveV2SubProxy', undefined, undefined, undefined, '0', bundleId);
+        await redeploy('MorphoAaveV2SubProxy', undefined, undefined, '0', bundleId);
         triggerRatio = 220;
         const minRatio = 100;
         const targetRepay = 200;
@@ -250,7 +250,7 @@ const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', fun
         const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
         const bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
 
-        await redeploy('MorphoAaveV2SubProxy', undefined, undefined, undefined, bundleId, '0');
+        await redeploy('MorphoAaveV2SubProxy', undefined, undefined, bundleId, '0');
         triggerRatio = 280;
         const targetRatio = 300;
 

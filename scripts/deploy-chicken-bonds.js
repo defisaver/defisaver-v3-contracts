@@ -11,13 +11,13 @@ async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
     await topUp(senderAcc.address);
 
-    const chickenBondsView = await redeploy('ChickenBondsView', addrs[network].REGISTRY_ADDR, true, true);
+    const chickenBondsView = await redeploy('ChickenBondsView', addrs[network].REGISTRY_ADDR, true);
 
-    const cbChickenIn = await redeploy('CBChickenIn', addrs[network].REGISTRY_ADDR, true, true);
-    const cbChickenOut = await redeploy('CBChickenOut', addrs[network].REGISTRY_ADDR, true, true);
-    const cbCreate = await redeploy('CBCreate', addrs[network].REGISTRY_ADDR, true, true);
-    const cbRedeem = await redeploy('CBRedeem', addrs[network].REGISTRY_ADDR, true, true);
-    const transferNFT = await redeploy('TransferNFT', addrs[network].REGISTRY_ADDR, true, true);
+    const cbChickenIn = await redeploy('CBChickenIn', addrs[network].REGISTRY_ADDR, true);
+    const cbChickenOut = await redeploy('CBChickenOut', addrs[network].REGISTRY_ADDR, true);
+    const cbCreate = await redeploy('CBCreate', addrs[network].REGISTRY_ADDR, true);
+    const cbRedeem = await redeploy('CBRedeem', addrs[network].REGISTRY_ADDR, true);
+    const transferNFT = await redeploy('TransferNFT', addrs[network].REGISTRY_ADDR, true);
 
     console.log(`ChickenBondsView: ${chickenBondsView.address}`);
 

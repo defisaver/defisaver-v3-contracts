@@ -17,13 +17,13 @@ async function main() {
     await topUp(senderAcc.address);
     await topUp(getOwnerAddr());
 
-    const recipeExecutor = await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, true, true);
-    const safeModuleAuth = await redeploy('SafeModuleAuth', addrs[network].REGISTRY_ADDR, true, true);
-    const strategyExecutor = await redeploy('StrategyExecutor', addrs[network].REGISTRY_ADDR, true, true);
-    const subProxy = await redeploy('SubProxy', addrs[network].REGISTRY_ADDR, true, true);
+    const recipeExecutor = await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, true);
+    const safeModuleAuth = await redeploy('SafeModuleAuth', addrs[network].REGISTRY_ADDR, true);
+    const strategyExecutor = await redeploy('StrategyExecutor', addrs[network].REGISTRY_ADDR, true);
+    const subProxy = await redeploy('SubProxy', addrs[network].REGISTRY_ADDR, true);
 
-    const curveUsdPayback = await redeploy('CurveUsdPayback', addrs[network].REGISTRY_ADDR, true, true);
-    const curveUsdHealthRatioTrigger = await redeploy('CurveUsdHealthRatioTrigger', addrs[network].REGISTRY_ADDR, true, true);
+    const curveUsdPayback = await redeploy('CurveUsdPayback', addrs[network].REGISTRY_ADDR, true);
+    const curveUsdHealthRatioTrigger = await redeploy('CurveUsdHealthRatioTrigger', addrs[network].REGISTRY_ADDR, true);
 
     await openStrategyAndBundleStorage(true);
 
