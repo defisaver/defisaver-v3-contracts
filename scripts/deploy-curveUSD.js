@@ -18,10 +18,10 @@ async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
     await topUp(senderAcc.address);
 
-    const curveUsdRepay = await redeploy('CurveUsdRepay', addrs[network].REGISTRY_ADDR, true);
-    const curveUsdCollRatioTrigger = await redeploy('CurveUsdCollRatioTrigger', addrs[network].REGISTRY_ADDR, true);
-    const curveUsdCollRatioCheck = await redeploy('CurveUsdCollRatioCheck', addrs[network].REGISTRY_ADDR, true);
-    const curveUsdSwapper = await redeploy('CurveUsdSwapper', addrs[network].REGISTRY_ADDR, true);
+    const curveUsdRepay = await redeploy('CurveUsdRepay', true);
+    const curveUsdCollRatioTrigger = await redeploy('CurveUsdCollRatioTrigger', true);
+    const curveUsdCollRatioCheck = await redeploy('CurveUsdCollRatioCheck', true);
+    const curveUsdSwapper = await redeploy('CurveUsdSwapper', true);
 
     await openStrategyAndBundleStorage(true);
 

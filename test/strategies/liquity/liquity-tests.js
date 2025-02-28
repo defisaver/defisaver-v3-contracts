@@ -169,7 +169,7 @@ const liquityBoostStrategyTest = async () => {
             const ratioOver = MAX_RATIO;
             const targetRatio = TARGET_BOOST;
 
-            await redeploy('LiquitySubProxy', undefined, undefined, undefined, '0', bundleId);
+            await redeploy('LiquitySubProxy', false, '0', bundleId);
             ({ boostSubId: subId, boostSub: strategySub } = await subLiquityAutomationStrategy(
                 proxy,
                 0,

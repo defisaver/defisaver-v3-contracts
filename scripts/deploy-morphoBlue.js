@@ -15,7 +15,7 @@ async function main() {
     // replace hardhat_setStorage to hardhat_setStorage accross the repo
     // RUN SCRIPT WITH: node scripts/deploy-morphoBlue --network fork
 
-    // const lsvView = await redeploy('LSVView', addrs.mainnet.REGISTRY_ADDR, true);
+    // const lsvView = await redeploy('LSVView', true);
 
     // console.log('LSVView deployed to:', lsvView.address);
     const marketParams = [

@@ -35,10 +35,10 @@ const eulerV2RepayTest = async (testPairs) => {
                 await topUp(getOwnerAddr());
             }
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-            await redeploy('EulerV2Supply', REGISTRY_ADDR, isFork);
-            await redeploy('EulerV2Borrow', REGISTRY_ADDR, isFork);
-            await redeploy('EulerV2Withdraw', REGISTRY_ADDR, isFork);
-            await redeploy('EulerV2Payback', REGISTRY_ADDR, isFork);
+            await redeploy('EulerV2Supply', isFork);
+            await redeploy('EulerV2Borrow', isFork);
+            await redeploy('EulerV2Withdraw', isFork);
+            await redeploy('EulerV2Payback', isFork);
         });
         beforeEach(async () => {
             snapshot = await takeSnapshot();

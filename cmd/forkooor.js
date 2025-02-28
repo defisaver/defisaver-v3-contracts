@@ -533,9 +533,9 @@ const cbRebondSub = async (bondId, sender) => {
 
 const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
-    await redeploy('FetchBondId', REGISTRY_ADDR, true);
-    await redeploy('LiquityPayback', REGISTRY_ADDR, true);
-    await redeploy('CBCreateRebondSub', REGISTRY_ADDR, true);
+    await redeploy('FetchBondId', true);
+    await redeploy('LiquityPayback', true);
+    await redeploy('CBCreateRebondSub', true);
 
     let formattedPriceState;
 
@@ -569,7 +569,7 @@ const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState,
 const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
-    await redeploy('TrailingStopTrigger', REGISTRY_ADDR, true);
+    await redeploy('TrailingStopTrigger', true);
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
@@ -688,7 +688,7 @@ const mcdBoostRepaySub = async ({
         if (await registry.isRegistered(hre.ethers.utils.id('McdSubProxy').slice(0, 10)).then((e) => !e)) {
             const repayBundleId = await createRepayBundle(proxy, true);
             const boostBundleId = await createBoostBundle(proxy, true);
-            await redeploy('McdSubProxy', REGISTRY_ADDR, true, repayBundleId, boostBundleId);
+            await redeploy('McdSubProxy', true, repayBundleId, boostBundleId);
             console.log({ repayBundleId, boostBundleId });
         }
     }
@@ -771,10 +771,10 @@ const aaveAutomationSub = async ({
                 proxy,
                 [boostId1, boostId2],
             );
-            await redeploy('AaveSubProxy', REGISTRY_ADDR, true, repayBundleId, boostBundleId);
+            await redeploy('AaveSubProxy', true, repayBundleId, boostBundleId);
             console.log({ repayBundleId, boostBundleId });
 
-            await redeploy('AaveV2RatioCheck', REGISTRY_ADDR, true);
+            await redeploy('AaveV2RatioCheck', true);
         }
     }
 
@@ -836,11 +836,11 @@ const compAutomationSub = async ({
                 proxy,
                 [boostId1, boostId2],
             );
-            await redeploy('CompSubProxy', REGISTRY_ADDR, true, repayBundleId, boostBundleId);
+            await redeploy('CompSubProxy', true, repayBundleId, boostBundleId);
             console.log({ repayBundleId, boostBundleId });
 
-            await redeploy('CompV2RatioCheck', REGISTRY_ADDR, true);
-            await redeploy('CompoundRatioTrigger', REGISTRY_ADDR, true);
+            await redeploy('CompV2RatioCheck', true);
+            await redeploy('CompoundRatioTrigger', true);
         }
     }
 
@@ -860,7 +860,7 @@ const compAutomationSub = async ({
 const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
-    await redeploy('TrailingStopTrigger', REGISTRY_ADDR, true);
+    await redeploy('TrailingStopTrigger', true);
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
@@ -1089,7 +1089,7 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
     setNetwork(network);
 
-    await redeploy('LiquityView', REGISTRY_ADDR, true);
+    await redeploy('LiquityView', true);
 
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
@@ -1736,8 +1736,8 @@ const subAaveV3MainnetAutomation = async (
 
     // await createBundle(proxy, [strategyId11, strategyId22]);
 
-    await redeploy('AaveV3RatioTrigger', addrs[network].REGISTRY_ADDR, true);
-    await redeploy('AaveV3RatioCheck', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('AaveV3RatioTrigger', true);
+    await redeploy('AaveV3RatioCheck', true);
 
     // same as in L1
     const subIds = await subAaveV3L2AutomationStrategy(
@@ -1804,10 +1804,10 @@ const subAaveClose = async (
     const debtAssetId = debtReserveData.id;
 
     // const triggerAddr = await redeploy(
-    //     'AaveV3QuotePriceTrigger', undefined, false, true,
+    //     'AaveV3QuotePriceTrigger', true,
     // ).then((c) => c.address);
     // const viewAddr = await redeploy(
-    //     'AaveV3OracleView', undefined, false, true,
+    //     'AaveV3OracleView', true,
     // ).then((c) => c.address);
 
     // console.log('AaveQuotePriceTrigger address:', triggerAddr);
@@ -1886,10 +1886,10 @@ const subAaveCloseWithMaximumGasPrice = async (
     //     'AaveV3QuotePriceTrigger', undefined, false, true,
     // ).then((c) => c.address);
     // const gasPriceTriggerAddr = await redeploy(
-    //     'GasPriceTrigger', undefined, false, true,
+    //     'GasPriceTrigger', true,
     // ).then((c) => c.address);
     // const viewAddr = await redeploy(
-    //     'AaveV3OracleView', undefined, false, true,
+    //     'AaveV3OracleView', true,
     // ).then((c) => c.address);
 
     // console.log('AaveQuotePriceTrigger address:', priceTriggerAddr);
@@ -2107,7 +2107,7 @@ const subCompV3Automation = async (
 
         // redeploy CompV3SubProxy with new bundles
         await redeploy(
-            'CompV3SubProxy', addrs[network].REGISTRY_ADDR, true, repayBundleId, boostBundleId, repayBundleEOAId, boostBundleEOAId,
+            'CompV3SubProxy', true, repayBundleId, boostBundleId, repayBundleEOAId, boostBundleEOAId,
         );
     }
 
@@ -2167,13 +2167,13 @@ const subLimitOrder = async (
     await topUp(addrs[network].OWNER_ACC);
 
     // deploy contracts and strategy
-    await redeploy('OffchainPriceTrigger', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('OffchainPriceTrigger', true);
 
     console.log(network);
     // eslint-disable-next-line no-unused-expressions
     network === 'mainnet'
-        ? (await redeploy('LimitSell', addrs[network].REGISTRY_ADDR, true))
-        : (await redeploy('LimitSellL2', addrs[network].REGISTRY_ADDR, true));
+        ? (await redeploy('LimitSell', true))
+        : (await redeploy('LimitSellL2', true));
 
     // eslint-disable-next-line max-len
     // const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
@@ -2185,7 +2185,7 @@ const subLimitOrder = async (
         strategyId = '9';
     }
 
-    await redeploy('LimitOrderSubProxy', addrs[network].REGISTRY_ADDR, true, strategyId);
+    await redeploy('LimitOrderSubProxy', true, strategyId);
 
     // format sub data
     const srcToken = getAssetInfo(srcTokenLabel);
@@ -2382,7 +2382,7 @@ const updateSubDataCompV2 = async (
 const deployLiquityContracts = async () => {
     await getContractFromRegistry('LiquityRatioTrigger', undefined, true).then(({ address }) => {
         if (compare(address, '0x7dDA9F944c3Daf27fbe3B8f27EC5f14FE3fa94BF')) {
-            return redeploy('LiquityRatioTrigger', undefined, undefined, true);
+            return redeploy('LiquityRatioTrigger', true);
         }
         return address;
     });
@@ -2705,7 +2705,7 @@ const setBotAuth = async (addr) => {
 
     await topUp(addrs[network].OWNER_ACC);
 
-    await addBotCaller(addr, addrs[network].REGISTRY_ADDR, true, network);
+    await addBotCaller(addr, true, network);
 };
 
 const setMockChainlinkPrice = async (tokenLabel, price) => {
@@ -2853,7 +2853,7 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
 
     // const strategyData = network === 'mainnet' ? createDCAStrategy() : createDCAL2Strategy();
     // await openStrategyAndBundleStorage(true);
-    await redeploy('TimestampTrigger', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('TimestampTrigger', true);
 
     const srcToken = getAssetInfo(srcTokenLabel);
     const destToken = getAssetInfo(destTokenLabel);
@@ -2968,7 +2968,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                     // eslint-disable-next-line no-await-in-loop
                     await topUp(botAddr);
                     // eslint-disable-next-line no-await-in-loop
-                    await addBotCaller(botAddr, addrs[network].REGISTRY_ADDR, true);
+                    await addBotCaller(botAddr, true);
                 }
             }
             topUp(addrs[network].OWNER_ACC);
@@ -3877,7 +3877,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             if (process.env.TEST_CHAIN_ID) {
                 network = process.env.TEST_CHAIN_ID;
             }
-            await redeploy(contractName.toString(), addrs[network].REGISTRY_ADDR, true);
+            await redeploy(contractName.toString(), true);
 
             process.exit(0);
         });
@@ -3910,7 +3910,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 'SparkQuotePriceTrigger',
             ];
 
-            const deployments = await sparkContracts.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, addrs[network].REGISTRY_ADDR, true).then((c) => c.address) }), {});
+            const deployments = await sparkContracts.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, true).then((c) => c.address) }), {});
             console.log(deployments);
 
             process.exit(0);
@@ -3931,7 +3931,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 'McdView',
             ];
 
-            const deployments = await contractsToDeploy.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, addrs[network].REGISTRY_ADDR, true).then((c) => c.address) }), {});
+            const deployments = await contractsToDeploy.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, true).then((c) => c.address) }), {});
             console.log(deployments);
 
             const latestStrategyId = await getLatestStrategyId();

@@ -143,7 +143,7 @@ const mcdBoostStrategyTest = async (numTests) => {
         it('... should create boost and repay bundle', async () => {
             const repayBundleId = await createRepayBundle(proxy);
             const boostBundleId = await createBoostBundle(proxy);
-            await redeploy('McdSubProxy', undefined, undefined, undefined, repayBundleId, boostBundleId);
+            await redeploy('McdSubProxy', false, repayBundleId, boostBundleId);
         });
 
         const ilkSubset = ilks.reduce((acc, curr) => {
@@ -280,7 +280,7 @@ const mcdRepayStrategyTest = async (numTests) => {
 
         it('... should create a repay bundle', async () => {
             const repayBundleId = await createRepayBundle(proxy);
-            await redeploy('McdSubProxy', undefined, undefined, undefined, repayBundleId, 0);
+            await redeploy('McdSubProxy', false, repayBundleId, 0);
         });
 
         const ilkSubset = ilks.reduce((acc, curr) => {

@@ -55,7 +55,7 @@ async function main() {
     await run('compile');
 
     // core
-    const strategyStorage = await redeploy('StrategyStorage', reg.address);
+    const strategyStorage = await redeploy('StrategyStorage');
 
     await changeConstantInFiles(
         './contracts',
@@ -65,7 +65,7 @@ async function main() {
     );
     await run('compile');
 
-    const bundleStorage = await redeploy('BundleStorage', reg.address);
+    const bundleStorage = await redeploy('BundleStorage');
 
     await changeConstantInFiles(
         './contracts',
@@ -75,9 +75,9 @@ async function main() {
     );
     await run('compile');
 
-    const subStorage = await redeploy('SubStorage', reg.address);
+    const subStorage = await redeploy('SubStorage');
 
-    const proxyAuth = await redeploy('ProxyAuth', reg.address);
+    const proxyAuth = await redeploy('ProxyAuth');
 
     await changeConstantInFiles(
         './contracts',
@@ -94,8 +94,8 @@ async function main() {
     );
     await run('compile');
 
-    const recipeExecutor = await redeploy('RecipeExecutor', reg.address);
-    await redeploy('SubProxy', reg.address);
+    const recipeExecutor = await redeploy('RecipeExecutor');
+    await redeploy('SubProxy');
 
     await changeConstantInFiles(
         './contracts',
@@ -105,35 +105,35 @@ async function main() {
     );
     await run('compile');
 
-    const strategyExecutor = await redeploy('StrategyExecutor', reg.address);
+    const strategyExecutor = await redeploy('StrategyExecutor');
 
     // mcd actions
-    await redeploy('McdSupply', reg.address);
-    await redeploy('McdWithdraw', reg.address);
-    await redeploy('McdGenerate', reg.address);
-    await redeploy('McdPayback', reg.address);
-    await redeploy('McdOpen', reg.address);
-    await redeploy('BotAuth', reg.address);
-    await redeploy('GasFeeTaker', reg.address);
+    await redeploy('McdSupply');
+    await redeploy('McdWithdraw');
+    await redeploy('McdGenerate');
+    await redeploy('McdPayback');
+    await redeploy('McdOpen');
+    await redeploy('BotAuth');
+    await redeploy('GasFeeTaker');
 
-    await addBotCaller('0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4', reg.address);
-    await addBotCaller('0x660B3515F493200C47Ef3DF195abEAfc57Bd6496', reg.address);
-    await addBotCaller('0x4E4cF1Cc07C7A1bA00740434004163ac2821efa7', reg.address);
+    await addBotCaller('0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4');
+    await addBotCaller('0x660B3515F493200C47Ef3DF195abEAfc57Bd6496');
+    await addBotCaller('0x4E4cF1Cc07C7A1bA00740434004163ac2821efa7');
 
     // exchange
-    await redeploy('DFSSell', reg.address);
+    await redeploy('DFSSell');
 
-    const strategyTriggerView = await redeploy('StrategyTriggerView', reg.address);
+    const strategyTriggerView = await redeploy('StrategyTriggerView');
 
     // yearn
-    await redeploy('YearnSupply', reg.address);
-    await redeploy('YearnWithdraw', reg.address);
+    await redeploy('YearnSupply');
+    await redeploy('YearnWithdraw');
 
-    await redeploy('McdView', reg.address);
-    const rariView = await redeploy('RariView', reg.address);
+    await redeploy('McdView');
+    const rariView = await redeploy('RariView');
 
-    const yearnView = await redeploy('YearnView', reg.address);
-    await redeploy('McdRatioTrigger', reg.address);
+    const yearnView = await redeploy('YearnView');
+    await redeploy('McdRatioTrigger');
 
     // SS style strategies
     console.log(...(createYearnRepayStrategy()));

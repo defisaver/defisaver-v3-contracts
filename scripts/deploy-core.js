@@ -24,13 +24,13 @@ async function main() {
     // await redeploy('RecipeExecutor');
 
     // // mcd actions
-    await redeploy('McdSupply', reg.address);
-    await redeploy('McdWithdraw', reg.address);
-    await redeploy('McdGenerate', reg.address);
-    await redeploy('McdPayback', reg.address);
-    await redeploy('McdOpen', reg.address);
-    await redeploy('McdGive', reg.address);
-    await redeploy('McdMerge', reg.address);
+    await redeploy('McdSupply');
+    await redeploy('McdWithdraw');
+    await redeploy('McdGenerate');
+    await redeploy('McdPayback');
+    await redeploy('McdOpen');
+    await redeploy('McdGive');
+    await redeploy('McdMerge');
 
     // // aave actions
     // await redeploy('AaveSupply');

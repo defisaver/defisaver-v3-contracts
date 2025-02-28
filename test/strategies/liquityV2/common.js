@@ -30,7 +30,7 @@ class BaseLiquityV2StrategyTest {
         await this.setUpCallers();
         await this.setUpContracts();
         await this.addLiquidity();
-        await addBotCaller(this.botAcc.address, this.registryAddr, this.isFork);
+        await addBotCaller(this.botAcc.address, this.isFork);
     }
 
     async takeSnapshot() {
@@ -58,16 +58,16 @@ class BaseLiquityV2StrategyTest {
     async setUpContracts() {
         const strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
         this.contracts.strategyExecutor = strategyExecutor.connect(this.botAcc);
-        this.contracts.flAction = await getContractFromRegistry('FLAction', this.registryAddr, this.isFork);
-        this.contracts.view = await redeploy('LiquityV2View', this.registryAddr, this.isFork);
-        await redeploy('LiquityV2Open', this.registryAddr, this.isFork);
-        await redeploy('LiquityV2RatioCheck', this.registryAddr, this.isFork);
-        await redeploy('LiquityV2Borrow', this.registryAddr, this.isFork);
-        await redeploy('LiquityV2Supply', this.registryAddr, this.isFork);
-        await redeploy('LiquityV2RatioTrigger', this.registryAddr, this.isFork);
-        await redeploy('LiquityV2Adjust', this.registryAddr, this.isFork);
-        await redeploy('LiquityV2Withdraw', this.registryAddr, this.isFork);
-        await redeploy('LiquityV2Payback', this.registryAddr, this.isFork);
+        this.contracts.flAction = await getContractFromRegistry('FLAction', this.isFork);
+        this.contracts.view = await redeploy('LiquityV2View', this.isFork);
+        await redeploy('LiquityV2Open', this.isFork);
+        await redeploy('LiquityV2RatioCheck', this.isFork);
+        await redeploy('LiquityV2Borrow', this.isFork);
+        await redeploy('LiquityV2Supply', this.isFork);
+        await redeploy('LiquityV2RatioTrigger', this.isFork);
+        await redeploy('LiquityV2Adjust', this.isFork);
+        await redeploy('LiquityV2Withdraw', this.isFork);
+        await redeploy('LiquityV2Payback', this.isFork);
     }
 
     async addLiquidity() {

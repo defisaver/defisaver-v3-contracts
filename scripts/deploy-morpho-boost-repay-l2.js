@@ -65,7 +65,7 @@ async function main() {
     ];
     for (let i = 0; i < l2BotAccounts.length; ++i) {
         await topUp(l2BotAccounts[i]);
-        await addBotCaller(l2BotAccounts[i], addrs[network].REGISTRY_ADDR, isFork);
+        await addBotCaller(l2BotAccounts[i], isFork);
     }
     const repayBundle = await createRepayBundle(isFork);
     const boostBundle = await createBoostBundle(isFork);

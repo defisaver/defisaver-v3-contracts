@@ -214,9 +214,9 @@ const morphoBlueReallocateLiquidityTest = async (isFork) => {
                 await topUp(getOwnerAddr());
             }
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-            allocateContract = await redeploy('MorphoBlueReallocateLiquidity', addrs[network].REGISTRY_ADDR, isFork);
+            allocateContract = await redeploy('MorphoBlueReallocateLiquidity', isFork);
             console.log('Deployed MorphoBlueReallocateLiquidity to address:', allocateContract.address);
-            view = await redeploy('MorphoBlueView', addrs[network].REGISTRY_ADDR, isFork);
+            view = await redeploy('MorphoBlueView', isFork);
         });
         beforeEach(async () => { snapshotId = await takeSnapshot(); });
         afterEach(async () => { await revertToSnapshot(snapshotId); });

@@ -63,11 +63,11 @@ async function main() {
     const bots = getNetwork() === 'mainnet' ? l1BotAccounts : l2BotAccounts;
     for (let i = 0; i < bots.length; ++i) {
         await topUp(bots[i]);
-        await addBotCaller(bots[i], addrs[network].REGISTRY_ADDR, isFork);
+        await addBotCaller(bots[i], isFork);
     }
 
-    const morphoBluePriceTrigger = await redeploy('MorphoBluePriceTrigger', addrs[network].REGISTRY_ADDR, isFork);
-    const morphoBlueTargetRatioCheck = await redeploy('MorphoBlueTargetRatioCheck', addrs[network].REGISTRY_ADDR, isFork);
+    const morphoBluePriceTrigger = await redeploy('MorphoBluePriceTrigger', isFork);
+    const morphoBlueTargetRatioCheck = await redeploy('MorphoBlueTargetRatioCheck', isFork);
     console.log('MorphoBluePriceTrigger:', morphoBluePriceTrigger.address);
     console.log('MorphoBlueTargetRatioCheck:', morphoBlueTargetRatioCheck.address);
 

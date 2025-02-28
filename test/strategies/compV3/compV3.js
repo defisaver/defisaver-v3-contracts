@@ -169,7 +169,7 @@ describe('CompV3 L2 automation tests', function () {
         strategyExecutorL2 = await hre.ethers.getContractAt('StrategyExecutorL2', STRATEGY_EXECUTOR_L2_ADDR);
 
         const { repayBundleId, boostBundleId } = await deployBundles(proxy);
-        await redeploy('CompV3SubProxyL2', addrs[network].REGISTRY_ADDR, false, repayBundleId, boostBundleId);
+        await redeploy('CompV3SubProxyL2', false, repayBundleId, boostBundleId);
     });
 
     beforeEach(async () => {

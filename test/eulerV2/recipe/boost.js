@@ -35,8 +35,8 @@ const eulerV2BoostTest = async (testPairs) => {
                 await topUp(getOwnerAddr());
             }
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-            await redeploy('EulerV2Supply', REGISTRY_ADDR, isFork);
-            await redeploy('EulerV2Borrow', REGISTRY_ADDR, isFork);
+            await redeploy('EulerV2Supply', isFork);
+            await redeploy('EulerV2Borrow', isFork);
         });
         beforeEach(async () => {
             snapshot = await takeSnapshot();

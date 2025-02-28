@@ -11,17 +11,17 @@ async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
     await topUp(senderAcc.address);
 
-    const aaveV3ATokenPayback = await redeploy('AaveV3ATokenPayback', addrs[network].REGISTRY_ADDR, true);
-    const aaveV3Borrow = await redeploy('AaveV3Borrow', addrs[network].REGISTRY_ADDR, true);
-    const aaveV3ClaimRewards = await redeploy('AaveV3ClaimRewards', addrs[network].REGISTRY_ADDR, true);
-    const aaveV3CollateralSwitch = await redeploy('AaveV3CollateralSwitch', addrs[network].REGISTRY_ADDR, true);
-    const aaveV3Payback = await redeploy('AaveV3Payback', addrs[network].REGISTRY_ADDR, true);
-    const aaveV3SetEMode = await redeploy('AaveV3SetEMode', addrs[network].REGISTRY_ADDR, true);
-    const aaveV3Supply = await redeploy('AaveV3Supply', addrs[network].REGISTRY_ADDR, true);
-    const aaveV3SwapBorrowRateMode = await redeploy('AaveV3SwapBorrowRateMode', addrs[network].REGISTRY_ADDR, true);
-    const aaveV3Withdraw = await redeploy('AaveV3Withdraw', addrs[network].REGISTRY_ADDR, true);
-    const aaveV3View = await redeploy('AaveV3View', addrs[network].REGISTRY_ADDR, true);
-    const aaveFL = await redeploy('FLAaveV3', addrs[network].REGISTRY_ADDR, true);
+    const aaveV3ATokenPayback = await redeploy('AaveV3ATokenPayback', true);
+    const aaveV3Borrow = await redeploy('AaveV3Borrow', true);
+    const aaveV3ClaimRewards = await redeploy('AaveV3ClaimRewards', true);
+    const aaveV3CollateralSwitch = await redeploy('AaveV3CollateralSwitch', true);
+    const aaveV3Payback = await redeploy('AaveV3Payback', true);
+    const aaveV3SetEMode = await redeploy('AaveV3SetEMode', true);
+    const aaveV3Supply = await redeploy('AaveV3Supply', true);
+    const aaveV3SwapBorrowRateMode = await redeploy('AaveV3SwapBorrowRateMode', true);
+    const aaveV3Withdraw = await redeploy('AaveV3Withdraw', true);
+    const aaveV3View = await redeploy('AaveV3View', true);
+    const aaveFL = await redeploy('FLAaveV3', true);
 
     console.log(`AaveV3ATokenPayback: ${aaveV3ATokenPayback.address}`);
     console.log(`AaveV3Borrow: ${aaveV3Borrow.address}`);

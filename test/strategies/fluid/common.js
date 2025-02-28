@@ -38,7 +38,7 @@ class BaseFluidT1StrategyTest {
 
         await this.setUpCallers();
         await this.setUpContracts();
-        await addBotCaller(this.botAcc.address, this.registryAddr, this.isFork);
+        await addBotCaller(this.botAcc.address, this.isFork);
     }
 
     async takeSnapshot() {
@@ -69,19 +69,19 @@ class BaseFluidT1StrategyTest {
             strategyContractName, addrs[network].STRATEGY_EXECUTOR_ADDR,
         );
         this.contracts.strategyExecutor = strategyExecutor.connect(this.botAcc);
-        this.contracts.flAction = await getContractFromRegistry('FLAction', this.registryAddr, this.isFork);
-        this.contracts.view = await redeploy('FluidView', this.registryAddr, this.isFork);
-        await redeploy('FluidVaultT1Open', this.registryAddr, this.isFork);
-        await redeploy('FluidRatioCheck', this.registryAddr, this.isFork);
-        await redeploy('FluidVaultT1Borrow', this.registryAddr, this.isFork);
-        await redeploy('FluidVaultT1Supply', this.registryAddr, this.isFork);
-        await redeploy('FluidRatioTrigger', this.registryAddr, this.isFork);
-        await redeploy('FluidVaultT1Adjust', this.registryAddr, this.isFork);
-        await redeploy('FluidVaultT1Withdraw', this.registryAddr, this.isFork);
-        await redeploy('FluidVaultT1Payback', this.registryAddr, this.isFork);
+        this.contracts.flAction = await getContractFromRegistry('FLAction', this.isFork);
+        this.contracts.view = await redeploy('FluidView', this.isFork);
+        await redeploy('FluidVaultT1Open', this.isFork);
+        await redeploy('FluidRatioCheck', this.isFork);
+        await redeploy('FluidVaultT1Borrow', this.isFork);
+        await redeploy('FluidVaultT1Supply', this.isFork);
+        await redeploy('FluidRatioTrigger', this.isFork);
+        await redeploy('FluidVaultT1Adjust', this.isFork);
+        await redeploy('FluidVaultT1Withdraw', this.isFork);
+        await redeploy('FluidVaultT1Payback', this.isFork);
         const mockExchangeName = network === 'mainnet' ? 'MockExchangeWrapperUsdFeed' : 'MockExchangeWrapperUsdFeedL2';
         this.contracts.mockWrapper = await redeploy(
-            mockExchangeName, this.registryAddr, this.isFork,
+            mockExchangeName, this.isFork,
         );
         await setNewExchangeWrapper(this.senderAcc, this.contracts.mockWrapper.address);
     }

@@ -115,11 +115,11 @@ describe('DSA-AaveV3-Import', function () {
         dsaProxy = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
         dsaProxy = dsaProxy.connect(userAcc);
 
-        aaveV3View = await getContractFromRegistry('AaveV3View', addrs[network].REGISTRY_ADDR, isFork);
-        const flContract = await getContractFromRegistry('FLAction', addrs[network].REGISTRY_ADDR, isFork);
+        aaveV3View = await getContractFromRegistry('AaveV3View', isFork);
+        const flContract = await getContractFromRegistry('FLAction', isFork);
         flAddress = flContract.address;
 
-        await redeploy('InstPullTokens', addrs[network].REGISTRY_ADDR, isFork);
+        await redeploy('InstPullTokens', isFork);
         wallet = await getProxy(userAddress, hre.config.isWalletSafe);
         wallet = wallet.connect(userAcc);
 

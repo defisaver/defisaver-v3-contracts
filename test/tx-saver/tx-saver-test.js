@@ -107,12 +107,12 @@ describe('TxSaver tests', function () {
     };
 
     const redeployContracts = async () => {
-        await redeploy('BotAuthForTxSaver', addrs[network].REGISTRY_ADDR, isFork);
-        await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, isFork);
-        await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, isFork);
+        await redeploy('BotAuthForTxSaver', isFork);
+        await redeploy('RecipeExecutor', isFork);
+        await redeploy('DFSSell', isFork);
 
         recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
-        txSaverExecutor = await redeploy('TxSaverExecutor', addrs[network].REGISTRY_ADDR, isFork);
+        txSaverExecutor = await redeploy('TxSaverExecutor', isFork);
 
         const tokenPriceHelperFactory = await hre.ethers.getContractFactory(
             chainIds[network] === 1 ? 'TokenPriceHelper' : 'TokenPriceHelperL2',
@@ -123,9 +123,9 @@ describe('TxSaver tests', function () {
 
     const redeployForLlamaLend = async () => {
         // for testing LlamaLendSwapper with TxSaver
-        await redeploy('LlamaLendLevCreate', addrs[network].REGISTRY_ADDR, isFork);
-        await redeploy('LlamaLendSwapper', addrs[network].REGISTRY_ADDR, isFork);
-        const mockWrapper = await redeploy('MockExchangeWrapper', addrs[network].REGISTRY_ADDR, isFork);
+        await redeploy('LlamaLendLevCreate', isFork);
+        await redeploy('LlamaLendSwapper', isFork);
+        const mockWrapper = await redeploy('MockExchangeWrapper', isFork);
         await setNewExchangeWrapper(senderAcc, mockWrapper.address, isFork);
     };
 

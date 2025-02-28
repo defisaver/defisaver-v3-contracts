@@ -60,7 +60,7 @@ const createBundleAndStrategy = async (proxy) => {
         proxy,
         [boostId1, boostId2],
     );
-    await redeploy('CompSubProxy', REGISTRY_ADDR, false, repayBundleId, boostBundleId);
+    await redeploy('CompSubProxy', false, repayBundleId, boostBundleId);
     return { repayBundleId, boostBundleId };
 };
 

@@ -24,10 +24,10 @@ async function main() {
     // );
     // console.log(`MorphoMarketStorage: ${morphoMarketStorage.address}`);
 
-    const morphoAaveV3Supply = await redeploy('MorphoAaveV3Supply', addrs[network].REGISTRY_ADDR, true);
-    const morphoAaveV3Borrow = await redeploy('MorphoAaveV3Borrow', addrs[network].REGISTRY_ADDR, true);
-    const morphoAaveV3Withdraw = await redeploy('MorphoAaveV3Withdraw', addrs[network].REGISTRY_ADDR, true);
-    const morphoAaveV3Payback = await redeploy('MorphoAaveV3Payback', addrs[network].REGISTRY_ADDR, true);
+    const morphoAaveV3Supply = await redeploy('MorphoAaveV3Supply', true);
+    const morphoAaveV3Borrow = await redeploy('MorphoAaveV3Borrow', true);
+    const morphoAaveV3Withdraw = await redeploy('MorphoAaveV3Withdraw', true);
+    const morphoAaveV3Payback = await redeploy('MorphoAaveV3Payback', true);
 
     console.log(`MorphoAaveV3Supply: ${morphoAaveV3Supply.address}`);
     console.log(`MorphoAaveV3Borrow: ${morphoAaveV3Borrow.address}`);

@@ -18,6 +18,6 @@ async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
     await topUp(senderAcc.address);
     await topUp(getOwnerAddr());
-    await redeploy('MorphoBlueReallocateLiquidity', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('MorphoBlueReallocateLiquidity', true);
 }
 start(main);

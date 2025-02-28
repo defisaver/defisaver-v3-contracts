@@ -25,7 +25,7 @@ const eulerV2ViewTest = async () => {
                 await topUp(getOwnerAddr());
                 viewContract = await hre.ethers.getContractAt('EulerV2View', '0x561013c605A17f5dC5b738C8a3fF9c5F33DbC3d8');
             } else {
-                viewContract = await redeploy('EulerV2View', addrs[network].REGISTRY_ADDR, isFork);
+                viewContract = await redeploy('EulerV2View', isFork);
             }
         });
         beforeEach(async () => {

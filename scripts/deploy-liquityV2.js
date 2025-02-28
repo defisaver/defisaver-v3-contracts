@@ -24,13 +24,13 @@ async function main() {
         await topUp(getOwnerAddr());
     }
 
-    const liquityV2View = await redeploy('LiquityV2View', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2Open = await redeploy('LiquityV2Open', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2Close = await redeploy('LiquityV2Close', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2Supply = await redeploy('LiquityV2Supply', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2Withdraw = await redeploy('LiquityV2Withdraw', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2Borrow = await redeploy('LiquityV2Borrow', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2Payback = await redeploy('LiquityV2Payback', addrs[network].REGISTRY_ADDR, isFork);
+    const liquityV2View = await redeploy('LiquityV2View', isFork);
+    const liquityV2Open = await redeploy('LiquityV2Open', isFork);
+    const liquityV2Close = await redeploy('LiquityV2Close', isFork);
+    const liquityV2Supply = await redeploy('LiquityV2Supply', isFork);
+    const liquityV2Withdraw = await redeploy('LiquityV2Withdraw', isFork);
+    const liquityV2Borrow = await redeploy('LiquityV2Borrow', isFork);
+    const liquityV2Payback = await redeploy('LiquityV2Payback', isFork);
     console.log(`LiquityV2View: ${liquityV2View.address}`);
     console.log(`LiquityV2Open: ${liquityV2Open.address}`);
     console.log(`LiquityV2Close: ${liquityV2Close.address}`);
@@ -39,13 +39,13 @@ async function main() {
     console.log(`LiquityV2Borrow: ${liquityV2Borrow.address}`);
     console.log(`LiquityV2Payback: ${liquityV2Payback.address}`);
 
-    const liquityV2Claim = await redeploy('LiquityV2Claim', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2Adjust = await redeploy('LiquityV2Adjust', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2AdjustInterestRate = await redeploy('LiquityV2AdjustInterestRate', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2SPDeposit = await redeploy('LiquityV2SPDeposit', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2SPWithdraw = await redeploy('LiquityV2SPWithdraw', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2SPClaimColl = await redeploy('LiquityV2SPClaimColl', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2AdjustZombieTrove = await redeploy('LiquityV2AdjustZombieTrove', addrs[network].REGISTRY_ADDR, isFork);
+    const liquityV2Claim = await redeploy('LiquityV2Claim', isFork);
+    const liquityV2Adjust = await redeploy('LiquityV2Adjust', isFork);
+    const liquityV2AdjustInterestRate = await redeploy('LiquityV2AdjustInterestRate', isFork);
+    const liquityV2SPDeposit = await redeploy('LiquityV2SPDeposit', isFork);
+    const liquityV2SPWithdraw = await redeploy('LiquityV2SPWithdraw', isFork);
+    const liquityV2SPClaimColl = await redeploy('LiquityV2SPClaimColl', isFork);
+    const liquityV2AdjustZombieTrove = await redeploy('LiquityV2AdjustZombieTrove', isFork);
     console.log(`LiquityV2Claim: ${liquityV2Claim.address}`);
     console.log(`LiquityV2Adjust: ${liquityV2Adjust.address}`);
     console.log(`LiquityV2AdjustInterestRate: ${liquityV2AdjustInterestRate.address}`);
@@ -57,12 +57,12 @@ async function main() {
     /* //////////////////////////////////////////////////////////////
                             AUTOMATION
     ////////////////////////////////////////////////////////////// */
-    const liquityV2RatioTrigger = await redeploy('LiquityV2RatioTrigger', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2RatioCheck = await redeploy('LiquityV2RatioCheck', addrs[network].REGISTRY_ADDR, isFork);
-    const closePriceTrigger = await redeploy('ClosePriceTrigger', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2TargetRatioCheck = await redeploy('LiquityV2TargetRatioCheck', addrs[network].REGISTRY_ADDR, isFork);
-    const liquityV2QuotePriceTrigger = await redeploy('LiquityV2QuotePriceTrigger', addrs[network].REGISTRY_ADDR, isFork);
-    const sendTokensAndUnwrap = await redeploy('SendTokensAndUnwrap', addrs[network].REGISTRY_ADDR, isFork);
+    const liquityV2RatioTrigger = await redeploy('LiquityV2RatioTrigger', isFork);
+    const liquityV2RatioCheck = await redeploy('LiquityV2RatioCheck', isFork);
+    const closePriceTrigger = await redeploy('ClosePriceTrigger', isFork);
+    const liquityV2TargetRatioCheck = await redeploy('LiquityV2TargetRatioCheck', isFork);
+    const liquityV2QuotePriceTrigger = await redeploy('LiquityV2QuotePriceTrigger', isFork);
+    const sendTokensAndUnwrap = await redeploy('SendTokensAndUnwrap', isFork);
     console.log(`LiquityV2RatioTrigger: ${liquityV2RatioTrigger.address}`);
     console.log(`LiquityV2RatioCheck: ${liquityV2RatioCheck.address}`);
     console.log(`ClosePriceTrigger: ${closePriceTrigger.address}`);

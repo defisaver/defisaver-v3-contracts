@@ -221,16 +221,16 @@ const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
             const strategyContractName = network === 'mainnet' ? 'StrategyExecutor' : 'StrategyExecutorL2';
             strategyExecutor = await hre.ethers.getContractAt(strategyContractName, addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
             strategyExecutor = strategyExecutor.connect(botAcc);
-            flAction = await getContractFromRegistry('FLAction', REGISTRY_ADDR, isFork);
+            flAction = await getContractFromRegistry('FLAction', isFork);
             view = await hre.ethers.getContractAt('MorphoBlueHelper', addrs[getNetwork()].MORPHO_BLUE_VIEW);
-            await redeploy('MorphoBluePriceTrigger', REGISTRY_ADDR, isFork);
-            await redeploy('MorphoBlueTargetRatioCheck', REGISTRY_ADDR, isFork);
+            await redeploy('MorphoBluePriceTrigger', isFork);
+            await redeploy('MorphoBlueTargetRatioCheck', isFork);
 
             // deploy bundle
             boostOnPriceBundleId = await deployBoostOnPriceBundle(isFork);
 
             // add bot caller
-            await addBotCaller(botAcc.address, REGISTRY_ADDR, isFork);
+            await addBotCaller(botAcc.address, isFork);
         });
         beforeEach(async () => { snapshotId = await takeSnapshot(); });
         afterEach(async () => { await revertToSnapshot(snapshotId); });

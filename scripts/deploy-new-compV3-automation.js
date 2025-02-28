@@ -23,7 +23,7 @@ async function main() {
     console.log(repayBundleId, boostBundleId, repayBundleEOAId, boostBundleEOAId);
 
     await redeploy(
-        'CompV3SubProxy', addrs[network].REGISTRY_ADDR, true, repayBundleId, boostBundleId, repayBundleEOAId, boostBundleEOAId,
+        'CompV3SubProxy', true, repayBundleId, boostBundleId, repayBundleEOAId, boostBundleEOAId,
     );
 
     process.exit(0);

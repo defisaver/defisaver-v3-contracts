@@ -12,7 +12,7 @@ async function main() {
     await topUp(senderAcc.address);
     await topUp(getOwnerAddr());
 
-    const compV3RatioCheck = await redeploy('StarknetClaim', addrs[network].REGISTRY_ADDR, true);
+    const compV3RatioCheck = await redeploy('StarknetClaim', true);
     process.exit(0);
 }
 

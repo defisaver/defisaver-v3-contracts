@@ -31,7 +31,7 @@ const fluidViewTest = async () => {
         let viewContract;
 
         before(async () => {
-            viewContract = await redeploy('FluidView', addrs[network].REGISTRY_ADDR, false);
+            viewContract = await redeploy('FluidView', false);
         });
         it('... should call getUserPositions', async () => {
             const userPositions = await viewContract.getUserPositions(TEST_DATA[network].BORROW_USER);

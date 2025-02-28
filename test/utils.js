@@ -684,7 +684,8 @@ const sendEther = async (signer, toAddress, amount) => {
 };
 
 // eslint-disable-next-line max-len
-const redeploy = async (name, regAddr = addrs[getNetwork()].REGISTRY_ADDR, isFork = false, ...args) => {
+const redeploy = async (name, isFork = false, ...args) => {
+    const regAddr = addrs[getNetwork()].REGISTRY_ADDR;
     if (!isFork) {
         const setBalanceMethod = hre.network.config.isAnvil ? 'anvil_setBalance' : 'hardhat_setBalance';
         console.log(setBalanceMethod);
@@ -795,7 +796,7 @@ const getContractFromRegistry = async (
 ) => {
     const contractAddr = await getAddrFromRegistry(name);
     if (contractAddr !== nullAddress) return hre.ethers.getContractAt(name, contractAddr);
-    return redeploy(name, regAddr, isFork, ...args);
+    return redeploy(name, isFork, ...args);
 };
 
 const setCode = async (addr, code) => {
@@ -833,12 +834,12 @@ const redeployCore = async (isL2 = false) => {
 
     await setCode(addrs[network].PROXY_AUTH_ADDR, proxyAuthBytecode);
 
-    await redeploy('SubProxy', addrs[network].REGISTRY_ADDR);
+    await redeploy('SubProxy');
 
     let strategyExecutorName = 'StrategyExecutor';
     if (isL2) strategyExecutorName = 'StrategyExecutorL2';
 
-    const strategyExecutor = await redeploy(strategyExecutorName, addrs[network].REGISTRY_ADDR);
+    const strategyExecutor = await redeploy(strategyExecutorName);
 
     return strategyExecutor;
 };
@@ -909,7 +910,7 @@ const formatMockExchangeObj = async (
 ) => {
     if (!wrapper) {
         // eslint-disable-next-line no-param-reassign
-        wrapper = await getContractFromRegistry('MockExchangeWrapper', addrs[network].REGISTRY_ADDR);
+        wrapper = await getContractFromRegistry('MockExchangeWrapper');
     }
 
     const rateDecimals = 18 + destTokenInfo.decimals - srcTokenInfo.decimals;

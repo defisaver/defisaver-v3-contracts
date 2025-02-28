@@ -14,26 +14,26 @@ async function main() {
 
     await topUp(addrs[network].OWNER_ACC);
 
-    await redeploy('CreateSub', addrs[network].REGISTRY_ADDR, true);
-    await redeploy('McdRepayComposite', addrs[network].REGISTRY_ADDR, true);
-    await redeploy('McdBoostComposite', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('CreateSub', true);
+    await redeploy('McdRepayComposite', true);
+    await redeploy('McdBoostComposite', true);
 
 
-    // const recipeExecutor = await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, true);
+    // const recipeExecutor = await redeploy('RecipeExecutor', true);
 
-    // const safeModuleAuth = await redeploy('SafeModuleAuth', addrs[network].REGISTRY_ADDR, true);
+    // const safeModuleAuth = await redeploy('SafeModuleAuth', true);
 
-    // const flAction = await redeploy('FLAction', addrs[network].REGISTRY_ADDR, true);
+    // const flAction = await redeploy('FLAction', true);
 
-    // const dfsSell = await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, true);
+    // const dfsSell = await redeploy('DFSSell', true);
 
-    // const uniswapWrapper = await redeploy('UniswapWrapperV3', addrs[network].REGISTRY_ADDR, true);
+    // const uniswapWrapper = await redeploy('UniswapWrapperV3', true);
     // await setNewExchangeWrapper('UniswapWrapperV3', uniswapWrapper.address, true);
 
-    // const uniV3WrapperV3 = await redeploy('UniV3WrapperV3', addrs[network].REGISTRY_ADDR, true);
+    // const uniV3WrapperV3 = await redeploy('UniV3WrapperV3', true);
     // await setNewExchangeWrapper('UniV3WrapperV3', uniV3WrapperV3.address, true);
 
-    // const curveWrapperV3 = await redeploy('CurveWrapperV3', addrs[network].REGISTRY_ADDR, true);
+    // const curveWrapperV3 = await redeploy('CurveWrapperV3', true);
     // await setNewExchangeWrapper('CurveWrapperV3', curveWrapperV3.address, true);
 
     // console.log('CurveWrapperV3 deployed to:', curveWrapperV3.address);
