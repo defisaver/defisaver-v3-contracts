@@ -78,7 +78,7 @@ const getHints = async (
 
     if (hints !== undefined) return hints;
 
-    const liquityView = await getContractFromRegistry('LiquityView', undefined, isFork);
+    const liquityView = await getContractFromRegistry('LiquityView', isFork);
 
     const NICR = await liquityView['predictNICRForAdjust(address,uint8,uint8,address,uint256,uint256)'](troveOwner, actionId, actionId2, from, collAmount, LUSDamount);
 

@@ -38,8 +38,7 @@ const getLiquityV2Hints = async (market, collIndex, interestRate, isFork = false
     const numTrials = Math.floor(15 * Math.sqrt(trovesSize));
     const seed = 42;
 
-    const regAddr = addrs[getNetwork()].REGISTRY_ADDR;
-    const viewContract = await getContractFromRegistry('LiquityV2View', regAddr, isFork);
+    const viewContract = await getContractFromRegistry('LiquityV2View', isFork);
     const { upperHint, lowerHint } = await viewContract.getInsertPosition(
         market,
         collIndex,

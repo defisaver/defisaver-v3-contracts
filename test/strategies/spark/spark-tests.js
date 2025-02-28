@@ -85,7 +85,7 @@ const deployBundles = async (proxy, isFork) => {
 
     const boostBundleId = await createBundle(proxy, [strategyId11, strategyId22]);
 
-    await getContractFromRegistry('SparkSubProxy', undefined, isFork, repayBundleId, boostBundleId);
+    await getContractFromRegistry('SparkSubProxy', isFork, repayBundleId, boostBundleId);
     return { repayBundleId, boostBundleId };
 };
 

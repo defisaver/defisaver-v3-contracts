@@ -309,7 +309,7 @@ const liquityRepayStrategyTest = async () => {
             const ratioUnder = MIN_RATIO;
             const targetRatio = TARGET_REPAY;
 
-            await getContractFromRegistry('LiquitySubProxy', undefined, undefined, undefined, bundleId, '0');
+            await getContractFromRegistry('LiquitySubProxy', false, bundleId, '0');
             ({ repaySubId: subId, repaySub: strategySub } = await subLiquityAutomationStrategy(
                 proxy,
                 ratioUnder,
