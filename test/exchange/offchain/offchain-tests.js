@@ -338,7 +338,7 @@ const paraswapTest = async () => {
             ]);
             const functionData = sellRecipe.encodeForDsProxyCall()[1];
 
-            await executeAction('RecipeExecutor', functionData, proxy, addrs[getNetwork()].REGISTRY_ADDR, amount);
+            await executeAction('RecipeExecutor', functionData, proxy, amount);
 
             const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
 
@@ -465,7 +465,7 @@ const oneInchTest = async () => {
             ]);
             const functionData = sellRecipe.encodeForDsProxyCall()[1];
 
-            await executeAction('RecipeExecutor', functionData, proxy, addrs[getNetwork()].REGISTRY_ADDR, amount);
+            await executeAction('RecipeExecutor', functionData, proxy, amount);
 
             const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
 
@@ -688,7 +688,7 @@ const odosTest = async () => {
             ]);
             const functionData = sellRecipe.encodeForDsProxyCall()[1];
 
-            await executeAction('RecipeExecutor', functionData, proxy, addrs[getNetwork()].REGISTRY_ADDR, amount);
+            await executeAction('RecipeExecutor', functionData, proxy, amount);
 
             const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
 

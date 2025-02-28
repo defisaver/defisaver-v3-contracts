@@ -43,9 +43,7 @@ const {
 } = require('./utils-liquity');
 const { getLiquityV2MaxUpfrontFee, getLiquityV2Hints } = require('./utils-liquityV2');
 
-const network = hre.network.config.name;
-
-const executeAction = async (actionName, functionData, proxy, regAddr = addrs[network].REGISTRY_ADDR, ethValue = 0) => {
+const executeAction = async (actionName, functionData, proxy, ethValue = 0) => {
     const actionAddr = await getAddrFromRegistry(actionName);
     let receipt;
     try {
@@ -203,12 +201,12 @@ const sell = async (
     if (sellInRecipe) {
         const recipe = new dfs.Recipe('Sell', [sellAction]);
         const functionData = recipe.encodeForDsProxyCall()[1];
-        const tx = await executeAction('RecipeExecutor', functionData, proxy, regAddr);
+        const tx = await executeAction('RecipeExecutor', functionData, proxy);
         return tx;
     }
 
     const functionData = sellAction.encodeForDsProxyCall()[1];
-    const tx = await executeAction('DFSSell', functionData, proxy, regAddr);
+    const tx = await executeAction('DFSSell', functionData, proxy);
     return tx;
 };
 const buyTokenIfNeeded = async (
@@ -678,7 +676,7 @@ const supplyMcd = async (proxy, vaultId, amount, tokenAddr, joinAddr, from, regA
     );
     const functionData = mcdSupplyAction.encodeForDsProxyCall()[1];
 
-    const tx = await executeAction('McdSupply', functionData, proxy, regAddr);
+    const tx = await executeAction('McdSupply', functionData, proxy);
     return tx;
 };
 const generateMcd = async (proxy, vaultId, amount, to, mcdManager = MCD_MANAGER_ADDR) => {
@@ -757,7 +755,7 @@ const withdrawMcd = async (proxy, vaultId, amount, joinAddr, to, regAddr = REGIS
     );
     const functionData = mcdWithdrawAction.encodeForDsProxyCall()[1];
 
-    const tx = await executeAction('McdWithdraw', functionData, proxy, regAddr);
+    const tx = await executeAction('McdWithdraw', functionData, proxy);
     return tx;
 };
 

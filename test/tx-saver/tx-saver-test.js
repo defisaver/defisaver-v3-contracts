@@ -273,7 +273,7 @@ describe('TxSaver tests', function () {
         const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
         const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
 
-        await executeAction('RecipeExecutor', functionData, safeWallet, addrs[network].REGISTRY_ADDR);
+        await executeAction('RecipeExecutor', functionData, safeWallet);
 
         const eoaFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, senderAcc.address);
         const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
