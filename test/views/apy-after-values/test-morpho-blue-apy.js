@@ -22,7 +22,7 @@ const {
     setBalance,
     approve,
 } = require('../../utils/utils');
-const { getMarkets } = require('../../morpho-blue/utils');
+const { getMarkets } = require('../../utils/morpho-blue');
 
 const morphoBlueApyAfterValuesTest = async () => {
     describe('Test Morpho Blue apy after values', async () => {

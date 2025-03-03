@@ -31,7 +31,7 @@ const {
     callMorphoBlueFLDebtRepayStrategy,
     callMorphoBlueRepayStrategy,
 } = require('../utils/strategy-calls');
-const { getMarkets, supplyToMarket, MORPHO_BLUE_ADDRESS } = require('../../morpho-blue/utils');
+const { getMarkets, supplyToMarket, MORPHO_BLUE_ADDRESS } = require('../../utils/morpho-blue');
 
 const createRepayBundle = async (proxy, isFork) => {
     const repayStrategy = createMorphoBlueRepayStrategy();

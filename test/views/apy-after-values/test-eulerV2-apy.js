@@ -18,7 +18,7 @@ const {
     setBalance,
     approve,
 } = require('../../utils/utils');
-const { getEulerV2TestPairs } = require('../../eulerV2/utils');
+const { getEulerV2TestPairs } = require('../../utils/eulerV2');
 
 const eulerV2ApyAfterValuesTest = async (testPairs) => {
     describe('Test EulerV2 apy after values', async () => {
