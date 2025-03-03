@@ -19,7 +19,7 @@ const {
     chainIds,
     formatMockExchangeObj,
 } = require('../utils');
-const { supplyToMarket } = require('../llamalend/utils');
+const { supplyToMarket } = require('../utils-llamalend');
 const { signSafeTx } = require('../utils-safe');
 
 const addBotCallerForTxSaver = async (botAddr, isFork = false) => {

@@ -40,7 +40,7 @@ const {
     llamaLendLevCreateEncodedData,
 } = require('./utils-tx-saver');
 const { executeAction } = require('../actions');
-const { getControllers } = require('../llamalend/utils');
+const { getControllers } = require('../utils-llamalend');
 
 describe('TxSaver tests', function () {
     this.timeout(80000);

@@ -1,6 +1,6 @@
 const { resetForkToBlock } = require('../utils');
 const { compRecipesFullTest } = require('./compound/comp-tests');
-const { fullInstRecipesTest } = require('./inst-shifter/inst-recipes');
+const { fullInstRecipesTest } = require('./shift/inst/inst-recipes');
 const { mcdRecipesFullTest } = require('./mcd/mcd-tests');
 
 describe('Recipes full test', () => {
