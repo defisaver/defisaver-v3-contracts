@@ -1,20 +1,20 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 const hre = require('hardhat');
-const { start } = require('./utils/starter');
+const { start } = require('../utils/starter');
 
 const {
     redeploy, getOwnerAddr,
-} = require('../test/utils');
+} = require('../../test/utils');
 
-const { topUp } = require('./utils/fork');
+const { topUp } = require('../utils/fork');
 const {
     deployLiquityV2RepayBundle,
     deployLiquityV2BoostBundle,
     deployLiquityV2CloseBundle,
     deployLiquityV2RepayOnPriceBundle,
     deployLiquityV2BoostOnPriceBundle,
-} = require('../test/utils-liquityV2');
+} = require('../../test/utils-liquityV2');
 
 async function main() {
     const isFork = true;
