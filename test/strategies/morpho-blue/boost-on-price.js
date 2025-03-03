@@ -31,11 +31,11 @@ const {
 
 const { topUp } = require('../../../scripts/utils/fork');
 const { subMorphoBlueLeverageManagementOnPrice } = require('../utils/strategy-subs');
-const { createMorphoBlueBoostOnTargetPriceStrategy, createMorphoBlueFLBoostOnTargetPriceStrategy } = require('../../strategies');
-const { createMorphoBlueBoostOnTargetPriceL2Strategy, createMorphoBlueFLBoostOnTargetPriceL2Strategy } = require('../../l2-strategies');
+const { createMorphoBlueBoostOnTargetPriceStrategy, createMorphoBlueFLBoostOnTargetPriceStrategy } = require('../../../strategies-spec/mainnet');
+const { createMorphoBlueBoostOnTargetPriceL2Strategy, createMorphoBlueFLBoostOnTargetPriceL2Strategy } = require('../../../strategies-spec/l2');
 const { morphoBlueSupplyCollateral, morphoBlueBorrow } = require('../../utils/actions');
 const { callMorphoBlueBoostOnTargetPriceStrategy, callMorphoBlueFLBoostOnTargetPriceStrategy } = require('../utils/strategy-calls');
-const { MORPHO_BLUE_ADDRESS } = require('../../morpho-blue/utils');
+const { MORPHO_BLUE_ADDRESS } = require('../../utils/morpho-blue');
 
 /* //////////////////////////////////////////////////////////////
                            CONSTANTS

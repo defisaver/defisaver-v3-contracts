@@ -74,7 +74,7 @@ const {
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
     createLiquityFLBoostWithCollStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 
 const { RATIO_STATE_OVER } = require('../utils/triggers');
 

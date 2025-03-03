@@ -43,7 +43,7 @@ const {
     createSparkFLCloseToCollStrategy,
     createSparkCloseToDebtStrategy,
     createSparkCloseToCollStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 
 const {
     subSparkAutomationStrategy,

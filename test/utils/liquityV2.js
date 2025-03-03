@@ -19,7 +19,7 @@ const {
     createLiquityV2FLRepayOnPriceStrategy,
     createLiquityV2FLBoostWithCollOnPriceStrategy,
     createLiquityV2PaybackFromSPStrategy,
-} = require('../strategies');
+} = require('../../strategies-spec/mainnet');
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
 
 const CollActionType = { SUPPLY: 0, WITHDRAW: 1 };

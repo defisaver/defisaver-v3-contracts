@@ -26,7 +26,7 @@ const {
     createCompV3FLRepayL2Strategy,
     createCompV3BoostL2Strategy,
     createCompV3FLBoostL2Strategy,
-} = require('../../l2-strategies');
+} = require('../../../strategies-spec/l2');
 
 const {
     callCompV3RepayL2Strategy,

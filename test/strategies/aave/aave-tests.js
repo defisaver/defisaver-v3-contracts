@@ -9,7 +9,7 @@ const {
     createAaveV2RepayStrategy,
     createAaveFLV2BoostStrategy,
     createAaveFLV2RepayStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 
 const {
     callAaveV2BoostStrategy,

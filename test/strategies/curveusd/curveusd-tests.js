@@ -24,7 +24,7 @@ const {
     callCurveUsdPaybackStrategy,
 } = require('../utils/strategy-calls');
 const { getActiveBand } = require('../../curveusd/curveusd-tests');
-const { createCurveUsdPaybackStrategy } = require('../../strategies');
+const { createCurveUsdPaybackStrategy } = require('../../../strategies-spec/mainnet');
 
 const crvUsdAddress = getAssetInfo('crvUSD').address;
 

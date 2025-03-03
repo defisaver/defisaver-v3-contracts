@@ -1,10 +1,12 @@
+/* eslint-disable import/no-extraneous-dependencies */
+
 const dfs = require('@defisaver/sdk');
 
 const {
     formatExchangeObj,
     nullAddress,
     placeHolderAddr,
-} = require('./utils/utils');
+} = require('../test/utils/utils');
 
 const createAaveV3RepayL2Strategy = () => {
     const aaveV3RepayL2Strategy = new dfs.Strategy('AaveV3RepayL2');

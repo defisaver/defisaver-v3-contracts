@@ -7,14 +7,14 @@ const {
     createFluidT1FLRepayStrategy,
     createFluidT1BoostStrategy,
     createFluidT1FLBoostStrategy,
-} = require('../strategies');
+} = require('../../strategies-spec/mainnet');
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
 const {
     createFluidT1RepayL2Strategy,
     createFluidT1BoostL2Strategy,
     createFluidT1FLRepayL2Strategy,
     createFluidT1FLBoostL2Strategy,
-} = require('../l2-strategies');
+} = require('../../strategies-spec/l2');
 
 const t1Vaults = {
     mainnet: [

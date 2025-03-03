@@ -10,7 +10,7 @@ const {
     createMorphoAaveV2RepayStrategy,
     createMorphoAaveV2FLBoostStrategy,
     createMorphoAaveV2FLRepayStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 const {
     callMorphoAaveV2BoostStrategy,
     callMorphoAaveV2RepayStrategy,

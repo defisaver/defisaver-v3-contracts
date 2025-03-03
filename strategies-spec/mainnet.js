@@ -1,11 +1,13 @@
 /* eslint-disable max-len */
+/* eslint-disable import/no-extraneous-dependencies */
+
 const dfs = require('@defisaver/sdk');
 
 const {
     formatExchangeObj,
     nullAddress,
     placeHolderAddr,
-} = require('./utils/utils');
+} = require('../test/utils/utils');
 
 const createUniV3RangeOrderStrategy = () => {
     const rangeOrderStrategy = new dfs.Strategy('UniV3RangeOrderStrategy');

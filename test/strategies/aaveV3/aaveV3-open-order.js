@@ -35,8 +35,8 @@ const {
 const { topUp } = require('../../../scripts/utils/fork');
 const { subAaveV3OpenOrder } = require('../utils/strategy-subs');
 const { callAaveV3OpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromDebtStrategy } = require('../utils/strategy-calls');
-const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromDebtStrategy } = require('../../strategies');
-const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromDebtL2Strategy } = require('../../l2-strategies');
+const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromDebtStrategy } = require('../../../strategies-spec/mainnet');
+const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromDebtL2Strategy } = require('../../../strategies-spec/l2');
 
 const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);

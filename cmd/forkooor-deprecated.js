@@ -82,7 +82,7 @@ const {
     createAaveFLV3RepayL2Strategy,
     createAaveV3BoostL2Strategy,
     createAaveFLV3BoostL2Strategy,
-} = require('../test/l2-strategies');
+} = require('../strategies-spec/l2');
 
 const {
     getVaultsForUser,
@@ -146,7 +146,7 @@ const {
     createCompFLV2BoostStrategy,
     createLiquityDsrPaybackStrategy,
     createLiquityDsrSupplyStrategy,
-} = require('../test/strategies');
+} = require('../strategies-spec/mainnet');
 
 const {
     subRepayFromSavingsStrategy,
@@ -181,7 +181,7 @@ const {
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
 } = require('../test/strategies/utils/triggers');
-// const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies/l2/l2-tests');
+// const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies-spec/l2/l2-tests');
 const { deployCloseToCollWithMaximumGasPriceBundle, deployCloseToDebtWithMaximumGasPriceBundle } = require('../test/strategies/aaveV3/gasprice/aaveV3-tests');
 const { createRepayBundle, createBoostBundle } = require('../test/strategies/mcd/mcd-tests');
 

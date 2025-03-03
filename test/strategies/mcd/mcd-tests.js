@@ -47,7 +47,7 @@ const {
     createMcdFLBoostCompositeStrategy,
     createMcdRepayCompositeStrategy,
     createMcdFLRepayCompositeStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 
 const {
     callMcdRepayFromYearnStrategy,

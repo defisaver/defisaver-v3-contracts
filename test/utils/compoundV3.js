@@ -3,7 +3,7 @@ const {
     createCompV3FlBoostStrategy,
     createFlCompV3EOARepayStrategy,
     createCompV3EOAFlBoostStrategy,
-} = require('../strategies');
+} = require('../../strategies-spec/mainnet');
 
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
 

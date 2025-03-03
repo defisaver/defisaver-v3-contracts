@@ -9,7 +9,7 @@ const {
     createMorphoBlueBoostStrategy,
     createMorphoBlueFLDebtBoostStrategy,
     createMorphoBlueFLCollBoostStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 const {
     openStrategyAndBundleStorage,
     redeploy, getProxy,

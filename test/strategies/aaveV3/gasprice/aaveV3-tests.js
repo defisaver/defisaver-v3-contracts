@@ -45,7 +45,7 @@ const {
     createAaveV3FLCloseToCollWithMaximumGasPriceStrategy,
     createAaveV3CloseToDebtWithMaximumGasPriceStrategy,
     createAaveV3FLCloseToDebtWithMaximumGasPriceStrategy,
-} = require('../../../strategies');
+} = require('../../../../strategies-spec/mainnet');
 
 const {
     aaveV3Supply,

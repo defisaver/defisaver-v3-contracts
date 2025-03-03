@@ -10,7 +10,7 @@ const {
     createCompV2RepayStrategy,
     createCompFLV2BoostStrategy,
     createCompFLV2RepayStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 
 const {
     callCompV2BoostStrategy,

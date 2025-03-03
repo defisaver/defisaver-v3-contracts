@@ -50,7 +50,7 @@ const {
     kingClaim,
 } = require('../../utils/actions');
 const { addBotCaller, createStrategy, subToStrategy } = require('../../strategies/utils/utils-strategies');
-const { createMcdCloseStrategy } = require('../../strategies');
+const { createMcdCloseStrategy } = require('../../../strategies-spec/mainnet');
 const { subMcdCloseStrategy } = require('../../strategies/utils/strategy-subs');
 const { RATIO_STATE_OVER, createChainLinkPriceTrigger } = require('../../strategies/utils/triggers');
 

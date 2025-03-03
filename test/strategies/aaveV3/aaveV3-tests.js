@@ -43,14 +43,14 @@ const {
     createAaveV3FLCloseToCollL2Strategy,
     createAaveV3CloseToDebtL2Strategy,
     createAaveV3CloseToCollL2Strategy,
-} = require('../../l2-strategies');
+} = require('../../../strategies-spec/l2');
 
 const {
     createAaveV3CloseToCollStrategy,
     createAaveV3FLCloseToCollStrategy,
     createAaveV3CloseToDebtStrategy,
     createAaveV3FLCloseToDebtStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 const {
     subAaveV3L2AutomationStrategy,
     updateAaveV3L2AutomationStrategy,
