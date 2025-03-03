@@ -1,4 +1,4 @@
-const { resetForkToBlock } = require('../../utils');
+const { resetForkToBlock } = require('../../utils/utils');
 const { guniFullTest } = require('./guni-tests');
 
 describe('GUni full test', () => {

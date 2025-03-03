@@ -1,4 +1,4 @@
-const { resetForkToBlock } = require('../../utils');
+const { resetForkToBlock } = require('../../utils/utils');
 const { lidoFullTest } = require('./lido-tests');
 
 describe('Lido full test', () => {

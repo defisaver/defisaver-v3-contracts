@@ -7,11 +7,11 @@ const {
     formatMockExchangeObj,
     setNewExchangeWrapper,
     chainIds,
-} = require('../../utils');
+} = require('../../utils/utils');
 const {
     getControllers, collateralSupplyAmountInUsd, levBorrowAmountInUsd, supplyToMarket,
-} = require('../../utils-llamalend');
-const { llamalendLevCreate } = require('../../actions');
+} = require('../../utils/llamalend');
+const { llamalendLevCreate } = require('../../utils/actions');
 
 describe('LlamaLend-Lev-Create', function () {
     this.timeout(80000);

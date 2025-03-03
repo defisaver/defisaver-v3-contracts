@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const { aaveUnstakeTest } = require('./aave-tests');
 

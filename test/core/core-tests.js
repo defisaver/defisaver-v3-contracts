@@ -26,7 +26,7 @@ const {
     getAdminAddr,
     WALLETS,
     isWalletNameDsProxy,
-} = require('../utils');
+} = require('../utils/utils');
 
 const { deployContract } = require('../../scripts/utils/deployer');
 const {
@@ -35,9 +35,9 @@ const {
     subToStrategy,
     createStrategy,
     getSubHash,
-} = require('../utils-strategies');
-const { executeSafeTx } = require('../utils-safe');
-const { CoreAddressesInjector } = require('../addressInjector');
+} = require('../strategies/utils/utils-strategies');
+const { executeSafeTx } = require('../utils/safe');
+const { CoreAddressesInjector } = require('../utils/addressInjector');
 
 const THREE_HOURS = 3 * 60 * 60;
 const TWO_DAYS = 48 * 60 * 60;

@@ -4,7 +4,7 @@ const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const {
     morphoAaveV2Supply, morphoAaveV2Withdraw, morphoAaveV2Borrow, morphoAaveV2Payback, morphoClaim,
-} = require('../../../actions');
+} = require('../../../utils/actions');
 const {
     getContractFromRegistry,
     getProxy,
@@ -18,7 +18,7 @@ const {
     revertToSnapshot,
     resetForkToBlock,
     BN2Float,
-} = require('../../../utils');
+} = require('../../../utils/utils');
 
 const morphoMarkets = [
     'DAI',

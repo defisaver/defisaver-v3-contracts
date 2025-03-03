@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../utils');
+} = require('../utils/utils');
 const { feeReceiverTest } = require('./utils-tests');
 
 describe('Fee-Receiver', function () {

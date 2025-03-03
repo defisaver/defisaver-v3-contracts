@@ -15,7 +15,7 @@ const {
     WETH_ADDRESS,
     UNIV3ROUTER_ADDR,
     resetForkToBlock,
-} = require('../../../utils');
+} = require('../../../utils/utils');
 
 const {
     uniV3CreatePool,
@@ -23,7 +23,7 @@ const {
     uniV3Supply,
     uniV3Withdraw,
     uniV3Collect,
-} = require('../../../actions');
+} = require('../../../utils/actions');
 
 const univ3CreatePoolTest = async () => {
     describe('Uni-Create-V3', () => {

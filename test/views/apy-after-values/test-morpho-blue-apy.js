@@ -11,7 +11,7 @@ const {
     morphoBlueWithdraw,
     morphoBluePayback,
     executeAction,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 const {
     getProxy,
@@ -21,7 +21,7 @@ const {
     fetchAmountinUSDPrice,
     setBalance,
     approve,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { getMarkets } = require('../../morpho-blue/utils');
 
 const morphoBlueApyAfterValuesTest = async () => {

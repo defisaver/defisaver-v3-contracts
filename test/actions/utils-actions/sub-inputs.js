@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { subInputsTest } = require('./utils-actions-tests');
 
 describe('Sub-Inputs', function () {

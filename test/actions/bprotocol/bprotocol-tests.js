@@ -12,9 +12,9 @@ const {
     takeSnapshot,
     revertToSnapshot,
     WETH_ADDRESS,
-} = require('../../utils');
-const { bprotocolLiquitySPDeposit, bprotocolLiquitySPWithdraw } = require('../../actions');
-const { getLocalTokenPrice } = require('../../utils');
+} = require('../../utils/utils');
+const { bprotocolLiquitySPDeposit, bprotocolLiquitySPWithdraw } = require('../../utils/actions');
+const { getLocalTokenPrice } = require('../../utils/utils');
 
 const lusdAddress = getAssetInfo('LUSD').address;
 const lqtyAddress = getAssetInfo('LQTY').address;

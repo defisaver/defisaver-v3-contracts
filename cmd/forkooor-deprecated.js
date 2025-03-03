@@ -75,7 +75,7 @@ const {
     filterEthersObject,
     setBalance,
     network,
-} = require('../test/utils');
+} = require('../test/utils/utils');
 
 const {
     createAaveV3RepayL2Strategy,
@@ -89,7 +89,7 @@ const {
     getRatio,
     getVaultInfo,
     MCD_MANAGER_ADDR,
-} = require('../test/utils-mcd');
+} = require('../test/utils/mcd');
 
 const {
     sell,
@@ -105,9 +105,9 @@ const {
     createChickenBond,
     morphoAaveV2Supply,
     morphoAaveV2Borrow,
-} = require('../test/actions');
+} = require('../test/utils/actions');
 
-const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy, subAaveV3CloseBundle } = require('../test/l2-strategy-subs');
+const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy, subAaveV3CloseBundle } = require('../test/strategies/utils/l2-strategy-subs');
 
 const { deployContract } = require('../scripts/utils/deployer');
 
@@ -123,7 +123,7 @@ const {
     updateLiquityProxy,
     updateToAaveV2Proxy,
     updateToCompV2Proxy,
-} = require('../test/utils-strategies');
+} = require('../test/strategies/utils/utils-strategies');
 
 const {
     createLiquityCloseToCollStrategy,
@@ -169,18 +169,18 @@ const {
     subSparkAutomationStrategy,
     subLiquityDebtInFrontRepayStrategy,
     subAaveV3CloseWithMaximumGasPriceBundle,
-} = require('../test/strategy-subs');
+} = require('../test/strategies/utils/strategy-subs');
 
-const { getTroveInfo, getDebtInFront } = require('../test/utils-liquity');
+const { getTroveInfo, getDebtInFront } = require('../test/utils/liquity');
 
-const { createNewCompV3AutomationBundles } = require('../test/utils-compV3');
+const { createNewCompV3AutomationBundles } = require('../test/utils/compoundV3');
 
 const {
     createMcdTrigger,
     createChainLinkPriceTrigger,
     RATIO_STATE_OVER,
     RATIO_STATE_UNDER,
-} = require('../test/triggers');
+} = require('../test/strategies/utils/triggers');
 // const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies/l2/l2-tests');
 const { deployCloseToCollWithMaximumGasPriceBundle, deployCloseToDebtWithMaximumGasPriceBundle } = require('../test/strategies/aaveV3/gasprice/aaveV3-tests');
 const { createRepayBundle, createBoostBundle } = require('../test/strategies/mcd/mcd-tests');

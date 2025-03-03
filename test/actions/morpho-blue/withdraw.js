@@ -4,9 +4,9 @@ const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const {
     takeSnapshot, revertToSnapshot, getProxy, redeploy,
     setBalance, approve, nullAddress, fetchAmountinUSDPrice, balanceOf,
-} = require('../../utils');
-const { getMarkets, loanTokenSupplyAmountInUsd } = require('../../utils-morpho-blue');
-const { morphoBlueSupply, morphoBlueWithdraw } = require('../../actions');
+} = require('../../utils/utils');
+const { getMarkets, loanTokenSupplyAmountInUsd } = require('../../utils/morpho-blue');
+const { morphoBlueSupply, morphoBlueWithdraw } = require('../../utils/actions');
 
 describe('Morpho-Blue-Withdraw', function () {
     this.timeout(80000);

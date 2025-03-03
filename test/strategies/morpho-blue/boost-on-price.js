@@ -21,20 +21,20 @@ const {
     openStrategyAndBundleStorage,
     redeploy,
     approve,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     addBotCaller,
     createStrategy,
     createBundle,
-} = require('../../utils-strategies');
+} = require('../utils/utils-strategies');
 
 const { topUp } = require('../../../scripts/utils/fork');
-const { subMorphoBlueLeverageManagementOnPrice } = require('../../strategy-subs');
+const { subMorphoBlueLeverageManagementOnPrice } = require('../utils/strategy-subs');
 const { createMorphoBlueBoostOnTargetPriceStrategy, createMorphoBlueFLBoostOnTargetPriceStrategy } = require('../../strategies');
 const { createMorphoBlueBoostOnTargetPriceL2Strategy, createMorphoBlueFLBoostOnTargetPriceL2Strategy } = require('../../l2-strategies');
-const { morphoBlueSupplyCollateral, morphoBlueBorrow } = require('../../actions');
-const { callMorphoBlueBoostOnTargetPriceStrategy, callMorphoBlueFLBoostOnTargetPriceStrategy } = require('../../strategy-calls');
+const { morphoBlueSupplyCollateral, morphoBlueBorrow } = require('../../utils/actions');
+const { callMorphoBlueBoostOnTargetPriceStrategy, callMorphoBlueFLBoostOnTargetPriceStrategy } = require('../utils/strategy-calls');
 const { MORPHO_BLUE_ADDRESS } = require('../../morpho-blue/utils');
 
 /* //////////////////////////////////////////////////////////////

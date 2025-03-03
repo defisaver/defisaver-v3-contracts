@@ -29,19 +29,19 @@ const {
     addrs,
     network,
     BOLD_ADDR,
-} = require('./utils');
+} = require('../../utils/utils');
 
 const {
     MCD_MANAGER_ADDR,
-} = require('./utils-mcd');
+} = require('../../utils/mcd');
 
-const { ADAPTER_ADDRESS } = require('./utils-reflexer');
+const { ADAPTER_ADDRESS } = require('../../utils/reflexer');
 
 const {
     getTroveInfo,
     findInsertPosition,
-} = require('./utils-liquity');
-const { CollActionType, DebtActionType } = require('./utils-liquityV2');
+} = require('../../utils/liquity');
+const { CollActionType, DebtActionType } = require('../../utils/liquityV2');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 

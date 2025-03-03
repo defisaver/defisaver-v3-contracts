@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { toggleSubDataTest } = require('./utils-actions-tests');
 
 describe('Toggle-sub', function () {

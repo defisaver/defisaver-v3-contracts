@@ -11,9 +11,9 @@ const {
     revertToSnapshot,
     redeploy,
     network,
-} = require('../../utils');
-const { uniV3CreatePool, liquityV2Open } = require('../../actions');
-const { addBotCaller } = require('../../utils-strategies');
+} = require('../../utils/utils');
+const { uniV3CreatePool, liquityV2Open } = require('../../utils/actions');
+const { addBotCaller } = require('../utils/utils-strategies');
 
 class BaseLiquityV2StrategyTest {
     constructor(testPairs, isFork) {

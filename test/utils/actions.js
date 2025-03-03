@@ -33,12 +33,12 @@ const {
     canGenerateDebt,
     getCropJoinVaultIds,
     MCD_MANAGER_ADDR,
-} = require('./utils-mcd');
-const { getSecondTokenAmount } = require('./utils-uni');
+} = require('./mcd');
+const { getSecondTokenAmount } = require('./uniswap');
 const {
     LiquityActionIds, getHints, getRedemptionHints, collChangeId, debtChangeId,
-} = require('./utils-liquity');
-const { getLiquityV2MaxUpfrontFee, getLiquityV2Hints } = require('./utils-liquityV2');
+} = require('./liquity');
+const { getLiquityV2MaxUpfrontFee, getLiquityV2Hints } = require('./liquityV2');
 
 const executeAction = async (actionName, functionData, proxy, ethValue = 0) => {
     const actionAddr = await getAddrFromRegistry(actionName);

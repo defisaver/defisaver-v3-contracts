@@ -1,4 +1,4 @@
-const { redeploy } = require('../../../utils');
+const { redeploy } = require('../../../utils/utils');
 const { uniV3WithdrawTest } = require('./univ3-tests');
 
 describe('Uni-Supply-V3', () => {

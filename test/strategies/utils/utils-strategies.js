@@ -11,7 +11,7 @@ const {
     getContractFromRegistry,
     executeTxFromProxy,
     isProxySafe,
-} = require('./utils');
+} = require('../../utils/utils');
 
 const getLatestBundleId = async () => {
     const bundleStorageAddr = await getAddrFromRegistry('BundleStorage');

@@ -8,9 +8,9 @@ const {
     balanceOf,
     WETH_ADDRESS,
     YEARN_REGISTRY_ADDRESS,
-} = require('../utils');
+} = require('../utils/utils');
 
-const { yearnSupply, yearnWithdraw } = require('../actions');
+const { yearnSupply, yearnWithdraw } = require('../utils/actions');
 
 describe('Yearn-view', function () {
     this.timeout(80000);

@@ -4,7 +4,7 @@ const {
     formatExchangeObj,
     nullAddress,
     placeHolderAddr,
-} = require('./utils');
+} = require('./utils/utils');
 
 const createAaveV3RepayL2Strategy = () => {
     const aaveV3RepayL2Strategy = new dfs.Strategy('AaveV3RepayL2');

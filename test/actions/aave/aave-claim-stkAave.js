@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { aaveClaimStkAaveTest } = require('./aave-tests');
 
 describe('Aave-claim staked aave test', function () {

@@ -10,10 +10,10 @@ const {
     Float2BN, formatExchangeObjCurve, addrs, getAddrFromRegistry, balanceOf,
     setNewExchangeWrapper,
     openStrategyAndBundleStorage,
-} = require('../../utils');
-const { addBotCaller, createStrategy } = require('../../utils-strategies');
-const { curveUsdCreate } = require('../../actions');
-const { subCurveUsdRepayBundle, subCurveUsdBoostBundle, subCurveUsdPaybackStrategy } = require('../../strategy-subs');
+} = require('../../utils/utils');
+const { addBotCaller, createStrategy } = require('../utils/utils-strategies');
+const { curveUsdCreate } = require('../../utils/actions');
+const { subCurveUsdRepayBundle, subCurveUsdBoostBundle, subCurveUsdPaybackStrategy } = require('../utils/strategy-subs');
 const {
     callCurveUsdRepayStrategy,
     callCurveUsdAdvancedRepayStrategy,
@@ -22,7 +22,7 @@ const {
     callCurveUsdFLDebtBoostStrategy,
     callCurveUsdFLCollBoostStrategy,
     callCurveUsdPaybackStrategy,
-} = require('../../strategy-calls');
+} = require('../utils/strategy-calls');
 const { getActiveBand } = require('../../curveusd/curveusd-tests');
 const { createCurveUsdPaybackStrategy } = require('../../strategies');
 

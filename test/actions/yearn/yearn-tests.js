@@ -11,9 +11,9 @@ const {
     UNISWAP_WRAPPER,
     depositToWeth,
     YEARN_REGISTRY_ADDRESS,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { yearnSupply, sell, yearnWithdraw } = require('../../actions');
+const { yearnSupply, sell, yearnWithdraw } = require('../../utils/actions');
 
 const yearnSupplyTest = async (testLength) => {
     describe('Yearn-Supply', function () {

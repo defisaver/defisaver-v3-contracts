@@ -28,7 +28,7 @@ const {
     revertToSnapshot,
     Float2BN,
     setNewExchangeWrapper,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     createBundle,
@@ -36,9 +36,9 @@ const {
     addBotCaller,
     setMCDPriceVerifier,
     subToMcdProxy,
-} = require('../../utils-strategies');
+} = require('../utils/utils-strategies');
 
-const { getRatio } = require('../../utils-mcd');
+const { getRatio } = require('../../utils/mcd');
 
 const {
     createYearnRepayStrategy,
@@ -58,7 +58,7 @@ const {
     callMcdFLRepayCompositeStrategy,
     callMcdRepayCompositeStrategy,
     callMcdCloseToDaiStrategy,
-} = require('../../strategy-calls');
+} = require('../utils/strategy-calls');
 
 const {
     subRepayFromSavingsStrategy,
@@ -66,14 +66,14 @@ const {
     subMcdCloseToCollStrategy,
     subMcdTrailingCloseToCollStrategy,
     subMcdTrailingCloseToDaiStrategy,
-} = require('../../strategy-subs');
+} = require('../utils/strategy-subs');
 
 const {
     openVault,
     yearnSupply,
-} = require('../../actions');
+} = require('../../utils/actions');
 
-const { RATIO_STATE_OVER } = require('../../triggers');
+const { RATIO_STATE_OVER } = require('../utils/triggers');
 
 const createRepayBundle = async (proxy, isFork) => {
     const repayCompositeStrategyEncoded = createMcdRepayCompositeStrategy();

@@ -1,5 +1,5 @@
-const { resetForkToBlock } = require('../../utils');
-const { aaveV2assetsDefaultMarket } = require('../../utils-aave');
+const { resetForkToBlock } = require('../../utils/utils');
+const { aaveV2assetsDefaultMarket } = require('../../utils/aave');
 const { aaveFullTest } = require('./aave-tests');
 
 const config = require('../../../hardhat.config');

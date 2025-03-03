@@ -9,23 +9,23 @@ const fs = require('fs');
 const hre = require('hardhat');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
 const { expect } = require('chai');
-const storageSlots = require('./storageSlots.json');
+const storageSlots = require('../storageSlots.json');
 
 const { BigNumber } = hre.ethers;
 
-const { getAllFiles } = require('../scripts/hardhat-tasks-functions');
+const { getAllFiles } = require('../../scripts/hardhat-tasks-functions');
 
-const { deployAsOwner, deployContract } = require('../scripts/utils/deployer');
+const { deployAsOwner, deployContract } = require('../../scripts/utils/deployer');
 
-const { createSafe, executeSafeTx } = require('./utils-safe');
+const { createSafe, executeSafeTx } = require('./safe');
 
-const strategyStorageBytecode = require('../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
-const subStorageBytecode = require('../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
-const subStorageBytecodeL2 = require('../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
-const bundleStorageBytecode = require('../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
-const recipeExecutorBytecode = require('../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
-const proxyAuthBytecode = require('../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
-const mockChainlinkFeedRegistryBytecode = require('../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
+const strategyStorageBytecode = require('../../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
+const subStorageBytecode = require('../../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
+const subStorageBytecodeL2 = require('../../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
+const bundleStorageBytecode = require('../../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
+const recipeExecutorBytecode = require('../../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
+const proxyAuthBytecode = require('../../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
+const mockChainlinkFeedRegistryBytecode = require('../../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
 
 const addrs = {
     mainnet: {

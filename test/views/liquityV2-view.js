@@ -1,4 +1,4 @@
-const { redeploy } = require('../utils');
+const { redeploy } = require('../utils/utils');
 
 const liquityV2ViewTest = async () => {
     describe('LiquityV2-View', function () {

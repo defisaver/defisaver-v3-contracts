@@ -26,9 +26,9 @@ const {
     WALLETS,
     isWalletNameDsProxy,
     network,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { sell, executeAction } = require('../../actions');
+const { sell, executeAction } = require('../../utils/actions');
 
 const aaveFlTest = async (flActionContract) => {
     describe('FL-AaveV2', function () {

@@ -7,11 +7,11 @@ const {
     takeSnapshot, revertToSnapshot, getProxy, redeploy,
     setBalance, approve, nullAddress, fetchAmountinUSDPrice,
     formatMockExchangeObj, setNewExchangeWrapper, getAddrFromRegistry,
-} = require('../../utils');
+} = require('../../utils/utils');
 const {
     getMarkets, collateralSupplyAmountInUsd, supplyToMarket, borrowAmountInUsd,
-} = require('../../utils-morpho-blue');
-const { morphoBlueSupplyCollateral, morphoBlueBorrow, executeAction } = require('../../actions');
+} = require('../../utils/morpho-blue');
+const { morphoBlueSupplyCollateral, morphoBlueBorrow, executeAction } = require('../../utils/actions');
 
 describe('Morpho-Blue-Repay', function () {
     this.timeout(80000);

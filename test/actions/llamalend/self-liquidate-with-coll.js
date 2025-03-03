@@ -6,12 +6,12 @@ const {
     formatMockExchangeObj,
     setNewExchangeWrapper,
     chainIds,
-} = require('../../utils');
+} = require('../../utils/utils');
 const {
     getControllers, collateralSupplyAmountInUsd, supplyToMarket,
     borrowAmountInUsd,
-} = require('../../utils-llamalend');
-const { llamalendCreate, llamalendSelfLiquidateWithColl } = require('../../actions');
+} = require('../../utils/llamalend');
+const { llamalendCreate, llamalendSelfLiquidateWithColl } = require('../../utils/actions');
 
 describe('LlamaLend-Self-Liq-With-Coll', function () {
     this.timeout(80000);

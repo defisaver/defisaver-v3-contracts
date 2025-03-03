@@ -1,6 +1,6 @@
-const dfs = require('@defisaver/sdk');
 const { MAXUINT } = require('@defisaver/tokens');
 const hre = require('hardhat');
+const dfs = require('@defisaver/sdk');
 
 const {
     formatExchangeObj,
@@ -11,7 +11,7 @@ const {
     addrs,
     network,
     formatMockExchangeObj,
-} = require('./utils');
+} = require('../../utils/utils');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 

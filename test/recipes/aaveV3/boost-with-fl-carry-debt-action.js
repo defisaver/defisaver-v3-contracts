@@ -17,16 +17,16 @@ const {
     WALLETS,
     isWalletNameDsProxy,
     network,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { executeAction } = require('../../actions');
+const { executeAction } = require('../../utils/actions');
 
 const {
     VARIABLE_RATE,
     AAVE_NO_DEBT_MODE,
     WETH_ASSET_ID_IN_AAVE_V3_MARKET,
     LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
-} = require('../../utils-aave');
+} = require('../../utils/aave');
 
 const aaveV3BoostWithNewFL = async () => {
     describe('Aave V3 AaveV3 Boost Tests With Carry Debt FL', () => {

@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { pullTokenTest } = require('./utils-actions-tests');
 
 describe('Pull-Token', function () {

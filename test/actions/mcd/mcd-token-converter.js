@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { mcdTokenConverterTest } = require('./mcd-tests');
 
 describe('Mcd-Convert-tokens', function () {

@@ -1,6 +1,6 @@
 const hre = require('hardhat');
-const { fetchAmountInUSDPrice, setBalance, approve } = require('./utils');
 const dfs = require('@defisaver/sdk');
+const { fetchAmountInUSDPrice, setBalance, approve } = require('./utils');
 const { executeAction } = require('./actions');
 
 const E_WETH_2_GOVERNED = '0xD8b27CF359b7D15710a5BE299AF6e7Bf904984C2';

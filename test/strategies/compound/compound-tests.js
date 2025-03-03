@@ -4,7 +4,7 @@ const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { supplyComp, borrowComp } = require('../../actions');
+const { supplyComp, borrowComp } = require('../../utils/actions');
 const {
     createCompV2BoostStrategy,
     createCompV2RepayStrategy,
@@ -17,9 +17,9 @@ const {
     callCompV2RepayStrategy,
     callCompFLV2BoostStrategy,
     callCompFLV2RepayStrategy,
-} = require('../../strategy-calls');
+} = require('../utils/strategy-calls');
 
-const { subCompV2AutomationStrategy } = require('../../strategy-subs');
+const { subCompV2AutomationStrategy } = require('../utils/strategy-subs');
 const {
     getContractFromRegistry,
     setNetwork,
@@ -32,8 +32,8 @@ const {
     redeploy,
     WETH_ADDRESS,
     redeployCore,
-} = require('../../utils');
-const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
+} = require('../../utils/utils');
+const { createStrategy, addBotCaller, createBundle } = require('../utils/utils-strategies');
 
 const createBundleAndStrategy = async () => {
     const repayCompStrategyEncoded = createCompV2RepayStrategy();

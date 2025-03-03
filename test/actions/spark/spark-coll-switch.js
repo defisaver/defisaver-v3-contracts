@@ -1,4 +1,4 @@
-const { redeploy } = require('../../utils');
+const { redeploy } = require('../../utils/utils');
 const { sparkCollSwitchTest } = require('./spark-tests');
 
 describe('Spark-Coll-Switch', function () {

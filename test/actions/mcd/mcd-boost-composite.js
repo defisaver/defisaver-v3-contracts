@@ -2,7 +2,7 @@ const { ilks } = require('@defisaver/tokens');
 
 const {
     redeploy, resetForkToBlock,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { mcdBoostCompositeTest } = require('./mcd-tests');
 
 describe('Mcd-Boost-Composite', function () {

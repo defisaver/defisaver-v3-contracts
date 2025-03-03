@@ -3,7 +3,7 @@ const { getAssetInfo } = require('@defisaver/tokens');
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { supplyAave, borrowAave } = require('../../actions');
+const { supplyAave, borrowAave } = require('../../utils/actions');
 const {
     createAaveV2BoostStrategy,
     createAaveV2RepayStrategy,
@@ -16,9 +16,9 @@ const {
     callAaveV2RepayStrategy,
     callAaveFLV2BoostStrategy,
     callAaveFLV2RepayStrategy,
-} = require('../../strategy-calls');
+} = require('../utils/strategy-calls');
 
-const { subAaveV2AutomationStrategy } = require('../../strategy-subs');
+const { subAaveV2AutomationStrategy } = require('../utils/strategy-subs');
 const {
     getContractFromRegistry,
     setNetwork,
@@ -31,8 +31,8 @@ const {
     redeploy,
     AAVE_V2_MARKET_ADDR,
     redeployCore,
-} = require('../../utils');
-const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
+} = require('../../utils/utils');
+const { createStrategy, addBotCaller, createBundle } = require('../utils/utils-strategies');
 
 const VARIABLE_RATE_MODE = 2;
 

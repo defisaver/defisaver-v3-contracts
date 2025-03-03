@@ -1,4 +1,4 @@
-const { redeploy } = require('../../../utils');
+const { redeploy } = require('../../../utils/utils');
 const { morphoAaveV3SupplyTest } = require('./morpho-aaveV3-tests');
 
 describe('Morpho-Aave-V3-Supply', function () {

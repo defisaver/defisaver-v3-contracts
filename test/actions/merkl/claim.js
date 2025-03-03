@@ -1,10 +1,10 @@
 const hre = require('hardhat');
 const dfs = require('@defisaver/sdk');
 const { expect } = require('chai');
-const { executeAction } = require('../../actions');
+const { executeAction } = require('../../utils/actions');
 const {
     resetForkToBlock, redeploy, sendEther, impersonateAccount, getProxy, WETH_ADDRESS, balanceOf,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 describe('Merkl-Claim', function () {
     this.timeout(80000);

@@ -1,4 +1,4 @@
-const { redeploy } = require('../../utils');
+const { redeploy } = require('../../utils/utils');
 const { aaveV3DelegateCreditWithSigTest } = require('./aave-tests');
 
 describe('Aave-Delegate-Credi-With-Sig', function () {

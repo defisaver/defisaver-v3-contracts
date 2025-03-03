@@ -9,13 +9,13 @@ const {
     stopImpersonatingAccount,
     balanceOf,
     setBalance,
-} = require('../../utils');
-const { pullTokensInstDSA } = require('../../actions');
+} = require('../../utils/utils');
+const { pullTokensInstDSA } = require('../../utils/actions');
 const {
     AUNI_ADDR,
     AWETH_ADDR,
     ADAI_ADDR,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const instaPullTokensTest = async () => {
     // @dev DSA proxy present at block: 20484188 with owner=OWNER_ACC

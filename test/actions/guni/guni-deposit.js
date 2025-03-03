@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { guniDepositTest } = require('./guni-tests');
 
 describe('GUNI deposit', function () {

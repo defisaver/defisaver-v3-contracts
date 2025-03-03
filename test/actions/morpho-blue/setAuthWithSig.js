@@ -2,11 +2,11 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 const {
     takeSnapshot, revertToSnapshot, getProxy, redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const {
     MORPHO_BLUE_ADDRESS,
-} = require('../../utils-morpho-blue');
-const { morphoBlueSetAuthWithSig } = require('../../actions');
+} = require('../../utils/morpho-blue');
+const { morphoBlueSetAuthWithSig } = require('../../utils/actions');
 const { chainIds } = require('../../../scripts/utils/fork');
 
 describe('Morpho-Blue-SetAuthWithSig', function () {

@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../utils');
+} = require('../utils/utils');
 
 const user = '0x7d790D3fca1232e6D7D7643cAD2b27951E20378A';
 

@@ -7,8 +7,8 @@ const {
     SAFE_CONSTANTS,
     deploySafe,
     getSafeCreationArgs,
-} = require('../utils-safe');
-const { nullAddress } = require('../utils');
+} = require('../utils/safe');
+const { nullAddress } = require('../utils/utils');
 
 describe('Safe-Create-Test', () => {
     let deployedSafes;

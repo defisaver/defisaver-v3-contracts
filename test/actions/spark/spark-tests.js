@@ -9,7 +9,7 @@ const {
     takeSnapshot, revertToSnapshot, addrs, approve, impersonateAccount,
     Float2BN, getAddrFromRegistry,
     network,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const sparkMarket = addrs[network].SPARK_MARKET;
 
@@ -20,7 +20,7 @@ const {
     sparkSetEMode, sparkSwitchCollateral, sparkSwitchCollateralCallDataOptimised,
     sparkSpTokenPaybackCalldataOptimised, sparkSpTokenPayback,
     sparkBorrowCalldataOptimised, sparkClaimRewards, sDaiWrap, sDaiUnwrap, sparkDelegateCredit,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 const sparkSupplyTest = async () => {
     describe('Spark-Supply', function () {

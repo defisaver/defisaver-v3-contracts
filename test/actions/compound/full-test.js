@@ -1,5 +1,5 @@
 const { assets, getAssetInfo } = require('@defisaver/tokens');
-const { resetForkToBlock } = require('../../utils');
+const { resetForkToBlock } = require('../../utils/utils');
 const { compoundFullTest } = require('./comp-tests');
 const config = require('../../../hardhat.config');
 

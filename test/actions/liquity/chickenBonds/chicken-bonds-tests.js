@@ -10,11 +10,11 @@ const {
     MAX_UINT,
     BLUSD_ADDR,
     timeTravel,
-} = require('../../../utils');
+} = require('../../../utils/utils');
 
 const {
     createChickenBond, chickenOut, chickenIn, chickenRedeem,
-} = require('../../../actions');
+} = require('../../../utils/actions');
 
 const FIFTEEN_DAYS = 1296000;
 

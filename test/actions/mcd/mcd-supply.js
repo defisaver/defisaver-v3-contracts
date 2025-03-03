@@ -2,7 +2,7 @@ const { ilks } = require('@defisaver/tokens');
 
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { mcdSupplyTest } = require('./mcd-tests');
 
 describe('Mcd-Supply', function () {

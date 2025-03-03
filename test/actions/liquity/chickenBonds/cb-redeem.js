@@ -1,5 +1,5 @@
 const { cbRedeemTest } = require('./chicken-bonds-tests');
-const { redeploy } = require('../../../utils');
+const { redeploy } = require('../../../utils/utils');
 
 describe('CB-Redeem', () => {
     before(async () => {

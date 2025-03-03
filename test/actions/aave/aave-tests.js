@@ -12,7 +12,7 @@ const {
     VARIABLE_RATE,
     STABLE_RATE,
     aaveV2assetsDefaultMarket,
-} = require('../../utils-aave');
+} = require('../../utils/aave');
 
 const {
     getProxy,
@@ -30,7 +30,7 @@ const {
     resetForkToBlock,
     impersonateAccount,
     sendEther,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     supplyAave,
@@ -41,7 +41,7 @@ const {
     startUnstakeAave,
     finalizeUnstakeAave,
     claimAaveFromStkAave,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 const aaveSupplyTest = async (testLength) => {
     describe('Aave-Supply', function () {

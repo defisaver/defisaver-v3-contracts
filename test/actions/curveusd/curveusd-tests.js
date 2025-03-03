@@ -24,7 +24,7 @@ const {
     getAddrFromRegistry,
     formatMockExchangeObj,
     setNewExchangeWrapper,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     curveUsdCreate,
@@ -41,7 +41,7 @@ const {
     curveUsdLevCreateTransient,
     curveUsdRepayTransient,
     curveUsdSelfLiquidateWithCollTransient,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 const crvusdAddress = getAssetInfo('crvUSD').address;
 

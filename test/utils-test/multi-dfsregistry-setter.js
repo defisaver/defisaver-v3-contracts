@@ -10,7 +10,7 @@ const {
     ADMIN_ACC,
     addrs,
     WETH_ADDRESS,
-} = require('../utils');
+} = require('../utils/utils');
 
 const { deployAsOwner } = require('../../scripts/utils/deployer');
 

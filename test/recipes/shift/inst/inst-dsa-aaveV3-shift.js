@@ -16,13 +16,13 @@ const {
     redeploy,
     network,
     getOwnerAddr,
-} = require('../../../utils');
+} = require('../../../utils/utils');
 const {
     VARIABLE_RATE,
     getAaveV3PositionInfo,
     expectTwoAaveV3PositionsToBeEqual,
-} = require('../../../utils-aave');
-const { executeAction } = require('../../../actions');
+} = require('../../../utils/aave');
+const { executeAction } = require('../../../utils/actions');
 const { topUp } = require('../../../../scripts/utils/fork');
 
 const createAaveV3ImportRecipe = ({

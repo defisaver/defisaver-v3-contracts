@@ -21,7 +21,7 @@ const {
     setNetwork,
     getContractFromRegistry,
     ETH_ADDR,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     curveDeposit,
@@ -31,7 +31,7 @@ const {
     curveClaimFees,
     curveStethPoolDeposit,
     curveStethPoolWithdraw,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 console.log({ poolInfoLength: poolInfo.length });
 poolInfo = poolInfo.filter(({ name }) => !['aave'].includes(name));

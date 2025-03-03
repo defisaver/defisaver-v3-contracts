@@ -4,7 +4,7 @@ const {
     revertToSnapshot,
     getOwnerAddr,
     redeploy,
-} = require('../utils');
+} = require('../utils/utils');
 const { topUp } = require('../../scripts/utils/fork');
 
 const eulerV2ViewTest = async () => {

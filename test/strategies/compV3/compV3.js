@@ -13,13 +13,13 @@ const {
     getAddrFromRegistry,
     fetchAmountinUSDPrice,
     chainIds,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     addBotCaller,
     createStrategy,
     createBundle,
-} = require('../../utils-strategies');
+} = require('../utils/utils-strategies');
 
 const {
     createCompV3RepayL2Strategy,
@@ -33,15 +33,15 @@ const {
     callCompV3FLRepayL2Strategy,
     callCompV3BoostL2Strategy,
     callCompV3FLBoostL2Strategy,
-} = require('../../l2-strategy-calls');
+} = require('../utils/l2-strategy-calls');
 
 const {
     subToCompV3L2AutomationStrategy,
-} = require('../../l2-strategy-subs');
+} = require('../utils/l2-strategy-subs');
 
 const {
     borrowCompV3, supplyCompV3,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 const STRATEGY_EXECUTOR_L2_ADDR = '0x9652f91B10045Cd2a36ca8D87df4A800eD2AF05D';
 

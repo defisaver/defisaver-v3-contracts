@@ -3,8 +3,8 @@ const hre = require('hardhat');
 const {
     redeploy,
     getProxy,
-} = require('../utils');
-const { createSafe } = require('../utils-safe');
+} = require('../utils/utils');
+const { createSafe } = require('../utils/safe');
 
 describe('CheckWalletType', () => {
     let senderAcc;

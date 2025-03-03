@@ -25,8 +25,8 @@ const {
     AUNI_ADDR,
     ADAI_ADDR,
     UNI_ADDR,
-} = require('../../../utils');
-const { executeAction } = require('../../../actions');
+} = require('../../../utils/utils');
+const { executeAction } = require('../../../utils/actions');
 
 const instAaveDebtShiftTest = async () => {
     describe('Inst Aave position shift', function () {

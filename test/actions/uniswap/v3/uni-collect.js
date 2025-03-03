@@ -2,7 +2,7 @@
 
 const {
     redeploy,
-} = require('../../../utils');
+} = require('../../../utils/utils');
 
 const { uniV3CollectTest } = require('./univ3-tests');
 

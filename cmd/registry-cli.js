@@ -7,8 +7,8 @@ require('dotenv-safe').config();
 const ethers = require('ethers');
 const { program } = require('commander');
 
-const { addrs } = require('../test/utils');
-const { getNameId, generateIds } = require('../test/utils');
+const { addrs } = require('../test/utils/utils');
+const { getNameId, generateIds } = require('../test/utils/utils');
 
 const registryAbi = require('../artifacts/contracts/core/DFSRegistry.sol/DFSRegistry.json').abi;
 

@@ -5,7 +5,7 @@ const {
     formatExchangeObj,
     nullAddress,
     placeHolderAddr,
-} = require('./utils');
+} = require('./utils/utils');
 
 const createUniV3RangeOrderStrategy = () => {
     const rangeOrderStrategy = new dfs.Strategy('UniV3RangeOrderStrategy');

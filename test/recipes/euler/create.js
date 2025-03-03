@@ -7,11 +7,11 @@ const {
     getProxy,
     redeploy,
     getOwnerAddr, setBalance, approve, getGasUsed,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { topUp } = require('../../../scripts/utils/fork');
 const {
     getEulerV2TestPairs, eulerV2CreatePosition, EVC_ADDR,
-} = require('../../utils-eulerV2');
+} = require('../../utils/eulerV2');
 
 const eulerV2CreateTest = async (testPair) => {
     describe('EulerV2-Create-Compare', function () {

@@ -36,9 +36,9 @@ const {
     addrs,
     chainIds,
     network,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { fetchMakerAddresses } = require('../../utils-mcd');
+const { fetchMakerAddresses } = require('../../utils/mcd');
 const {
     changeProxyOwner,
     automationV2Unsub,
@@ -48,11 +48,11 @@ const {
     createChickenBond,
     transferNFT,
     kingClaim,
-} = require('../../actions');
-const { addBotCaller, createStrategy, subToStrategy } = require('../../utils-strategies');
+} = require('../../utils/actions');
+const { addBotCaller, createStrategy, subToStrategy } = require('../../strategies/utils/utils-strategies');
 const { createMcdCloseStrategy } = require('../../strategies');
-const { subMcdCloseStrategy } = require('../../strategy-subs');
-const { RATIO_STATE_OVER, createChainLinkPriceTrigger } = require('../../triggers');
+const { subMcdCloseStrategy } = require('../../strategies/utils/strategy-subs');
+const { RATIO_STATE_OVER, createChainLinkPriceTrigger } = require('../../strategies/utils/triggers');
 
 const permitTokenTest = async () => {
     /// @dev for running this test you need to add chainId : 1 to local and hardhat networks in cfg

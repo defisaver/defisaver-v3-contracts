@@ -5,7 +5,7 @@ const hre = require('hardhat');
 const sdk = require('@defisaver/sdk');
 const {
     WETH_ADDRESS, DAI_ADDR, nullAddress,
-} = require('../utils');
+} = require('../utils/utils');
 
 describe('Test direct actions encoding for sdk and foundry', () => {
     const getFoundryEncodingContract = async () => {

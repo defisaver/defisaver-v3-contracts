@@ -25,14 +25,14 @@ const {
     ETH_ADDR,
     getContractFromRegistry,
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     addBotCaller,
     createStrategy,
     createBundle,
     activateSub,
-} = require('../../utils-strategies');
+} = require('../utils/utils-strategies');
 
 const {
     createSparkRepayStrategy,
@@ -49,7 +49,7 @@ const {
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
     subSparkCloseBundle,
-} = require('../../strategy-subs');
+} = require('../utils/strategy-subs');
 
 const {
     callSparkRepayStrategy,
@@ -60,13 +60,13 @@ const {
     callSparkCloseToDebtStrategy,
     callSparkFLCloseToDebtStrategy,
     callSparkFLCloseToCollStrategy,
-} = require('../../strategy-calls');
+} = require('../utils/strategy-calls');
 
 const {
     sparkSupply, sparkBorrow,
-} = require('../../actions');
+} = require('../../utils/actions');
 
-const { RATIO_STATE_OVER } = require('../../triggers');
+const { RATIO_STATE_OVER } = require('../utils/triggers');
 
 const deployBundles = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);

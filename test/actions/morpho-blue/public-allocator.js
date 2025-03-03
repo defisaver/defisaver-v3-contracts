@@ -22,8 +22,8 @@ const {
     approve,
     revertToSnapshot,
     takeSnapshot,
-} = require('../../utils');
-const { executeAction } = require('../../actions');
+} = require('../../utils/utils');
+const { executeAction } = require('../../utils/actions');
 const { topUp } = require('../../../scripts/utils/fork');
 
 // wstETH/ETH 0.965 market on mainnet

@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { compV3SupplyTest } = require('./compV3-tests');
 
 describe('CompV3-Supply', function () {

@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { reflexerGenerateTest } = require('./reflexer-tests');
 
 describe('Reflexer-Generate', () => {

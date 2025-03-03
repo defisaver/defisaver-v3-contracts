@@ -10,8 +10,8 @@ const {
     resetForkToBlock,
     sendEther,
     timeTravel,
-} = require('../../utils');
-const { isAssetBorrowableV3 } = require('../../utils-aave');
+} = require('../../utils/utils');
+const { isAssetBorrowableV3 } = require('../../utils/aave');
 const {
     aaveV3Supply, aaveV3SupplyCalldataOptimised, aaveV3Borrow, aaveV3Withdraw,
     aaveV3WithdrawCalldataOptimised, aaveV3Payback, aaveV3PaybackCalldataOptimised,
@@ -24,7 +24,7 @@ const {
     claimAaveFromStkGho,
     startUnstakeGho,
     finalizeUnstakeGho,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 const aaveV3SupplyTest = async () => {
     describe('Aave-Supply', function () {

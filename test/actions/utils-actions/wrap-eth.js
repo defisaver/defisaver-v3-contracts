@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const { wrapEthTest } = require('./utils-actions-tests');
 

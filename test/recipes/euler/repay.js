@@ -12,10 +12,10 @@ const {
     formatExchangeObj,
     getOwnerAddr, getAddrFromRegistry,
     network,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { topUp } = require('../../../scripts/utils/fork');
-const { getEulerV2TestPairs, eulerV2CreatePosition, getAccountRatio } = require('../../utils-eulerV2');
-const { executeAction } = require('../../actions');
+const { getEulerV2TestPairs, eulerV2CreatePosition, getAccountRatio } = require('../../utils/eulerV2');
+const { executeAction } = require('../../utils/actions');
 
 const eulerV2RepayTest = async (testPairs) => {
     describe('EulerV2-Repay-Recipe', function () {

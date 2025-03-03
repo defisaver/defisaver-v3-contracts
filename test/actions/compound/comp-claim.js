@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { compClaimTest } = require('./comp-tests');
 
 describe('Comp-Borrow', function () {

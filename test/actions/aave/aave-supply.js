@@ -1,7 +1,7 @@
 const {
     redeploy,
-} = require('../../utils');
-const { aaveV2assetsDefaultMarket } = require('../../utils-aave');
+} = require('../../utils/utils');
+const { aaveV2assetsDefaultMarket } = require('../../utils/aave');
 const { aaveSupplyTest } = require('./aave-tests');
 
 describe('Aave-Supply', function () {

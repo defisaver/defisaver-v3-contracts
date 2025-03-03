@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../../utils');
+} = require('../../../utils/utils');
 const { uniWithdrawTest } = require('./uni-tests');
 
 describe('Uni-Withdraw', function () {

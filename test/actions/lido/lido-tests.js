@@ -10,9 +10,9 @@ const {
     depositToWeth,
     STETH_ADDRESS,
     WSTETH_ADDRESS,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { lidoStake, lidoWrap, lidoUnwrap } = require('../../actions');
+const { lidoStake, lidoWrap, lidoUnwrap } = require('../../utils/actions');
 
 const lidoStakeTest = async () => {
     describe('Lido WETH staking', function () {

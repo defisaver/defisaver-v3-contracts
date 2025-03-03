@@ -1,4 +1,4 @@
-const { redeploy } = require('../../utils');
+const { redeploy } = require('../../utils/utils');
 const { aaveV3BorrowTest } = require('./aave-tests');
 
 describe('Aave-Borrow-L2', function () {

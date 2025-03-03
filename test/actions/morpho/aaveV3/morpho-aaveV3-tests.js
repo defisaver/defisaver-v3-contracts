@@ -11,7 +11,7 @@ const {
     approve,
     WETH_ADDRESS,
     redeploy,
-} = require('../../../utils');
+} = require('../../../utils/utils');
 
 const {
     morphoAaveV3Supply,
@@ -19,7 +19,7 @@ const {
     morphoAaveV3Borrow,
     morphoAaveV3Payback,
     executeAction,
-} = require('../../../actions');
+} = require('../../../utils/actions');
 
 const EMODE = {
     GENERAL: 0,

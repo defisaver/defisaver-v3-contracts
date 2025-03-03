@@ -2,7 +2,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 const hre = require('hardhat');
-const { redeploy, getOwnerAddr } = require('../../test/utils');
+const { redeploy, getOwnerAddr } = require('../../test/utils/utils');
 const { topUp } = require('./fork');
 
 async function deployOnFork(contractNames) {

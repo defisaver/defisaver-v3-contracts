@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { updateSubDataTest } = require('./utils-actions-tests');
 
 describe('Update-sub-data', function () {

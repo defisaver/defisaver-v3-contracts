@@ -10,9 +10,9 @@ const {
     USDT_ADDR,
     setBalance,
     ETH_ADDR,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { gUniDeposit, gUniWithdraw } = require('../../actions');
+const { gUniDeposit, gUniWithdraw } = require('../../utils/actions');
 
 const guniDepositTest = async () => {
     describe('GUNI deposit', function () {

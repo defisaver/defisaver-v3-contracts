@@ -39,7 +39,7 @@ const {
     chainIds,
     BOLD_ADDR,
     network,
-} = require('./utils');
+} = require('../../utils/utils');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 

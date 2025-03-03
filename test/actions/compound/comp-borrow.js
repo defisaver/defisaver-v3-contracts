@@ -1,7 +1,7 @@
 const { compoundCollateralAssets } = require('@defisaver/tokens');
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { compBorrowTest } = require('./comp-tests');
 
 describe('Comp-Borrow', function () {

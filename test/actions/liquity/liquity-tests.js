@@ -13,7 +13,7 @@ const {
     fetchAmountinUSDPrice,
     MAX_UINT,
     WETH_ADDRESS,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     liquityOpen,
@@ -32,9 +32,9 @@ const {
     liquityUnstake,
 
     liquityRedeem,
-} = require('../../actions');
+} = require('../../utils/actions');
 
-const { collChangeId, debtChangeId } = require('../../utils-liquity');
+const { collChangeId, debtChangeId } = require('../../utils/liquity');
 
 const lusdAddr = getAssetInfo('LUSD').address;
 const lqtyAddr = getAssetInfo('LQTY').address;

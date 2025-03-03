@@ -12,7 +12,7 @@ const {
     withdrawCompV3,
     claimCompV3,
     paybackCompV3,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 const {
     redeploy,
@@ -28,7 +28,7 @@ const {
     addrs,
     USDC_ADDR,
     chainIds,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const network = hre.network.config.name;
 const chainId = chainIds[network];

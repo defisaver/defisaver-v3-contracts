@@ -8,7 +8,7 @@ const {
     eulerV2Borrow,
     eulerV2Payback,
     eulerV2Withdraw,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 const {
     getProxy,
@@ -17,7 +17,7 @@ const {
     revertToSnapshot,
     setBalance,
     approve,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { getEulerV2TestPairs } = require('../../eulerV2/utils');
 
 const eulerV2ApyAfterValuesTest = async (testPairs) => {

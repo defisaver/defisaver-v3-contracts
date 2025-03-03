@@ -19,9 +19,9 @@ const {
     takeSnapshot,
     revertToSnapshot,
     network,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { executeAction } = require('../../actions');
+const { executeAction } = require('../../utils/actions');
 
 const trades = [
     {

@@ -3,9 +3,9 @@ const {
     createCompV3FlBoostStrategy,
     createFlCompV3EOARepayStrategy,
     createCompV3EOAFlBoostStrategy,
-} = require('./strategies');
+} = require('../strategies');
 
-const { createStrategy, createBundle } = require('./utils-strategies');
+const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
 
 const getSupportedAssets = async (compV3View) => {
     const assets = await compV3View.getAssets();

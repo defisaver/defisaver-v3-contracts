@@ -7,11 +7,11 @@ const {
     addrs,
     setBalance,
     network,
-} = require('../../../utils');
+} = require('../../../utils/utils');
 const {
     supplyCompV3, borrowCompV3, executeAction,
-} = require('../../../actions');
-const { signSafeTx } = require('../../../utils-safe');
+} = require('../../../utils/actions');
+const { signSafeTx } = require('../../../utils/safe');
 
 describe('Safe-CompV3-Shift-Position', function () {
     this.timeout(200000);

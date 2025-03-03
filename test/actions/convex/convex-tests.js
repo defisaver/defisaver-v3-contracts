@@ -3,7 +3,7 @@
 /* eslint-disable no-param-reassign */
 const { expect } = require('chai');
 const hre = require('hardhat');
-const { convexDeposit, convexWithdraw, convexClaim } = require('../../actions');
+const { convexDeposit, convexWithdraw, convexClaim } = require('../../utils/actions');
 const {
     getProxy,
     redeploy,
@@ -14,7 +14,7 @@ const {
     takeSnapshot,
     revertToSnapshot,
     timeTravel,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     noTest: _noTest,
@@ -22,7 +22,7 @@ const {
     DepositOptions,
     getRewards,
     WithdrawOptions,
-} = require('../../utils-convex');
+} = require('../../utils/convex');
 
 let noTest = _noTest;
 let poolInfo = _poolInfo;

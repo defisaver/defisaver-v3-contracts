@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { yearnSupplyTest } = require('./yearn-tests');
 
 describe('Yearn-Supply', function () {

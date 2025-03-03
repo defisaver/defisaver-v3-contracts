@@ -1,4 +1,4 @@
-const { resetForkToBlock } = require('../utils');
+const { resetForkToBlock } = require('../utils/utils');
 const { offchainExchangeFullTest } = require('./offchain/offchain-tests');
 const { onchainExchangeFullTest } = require('./onchain/onchain-tests');
 

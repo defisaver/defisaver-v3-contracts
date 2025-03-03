@@ -8,11 +8,11 @@ const {
     redeploy,
     balanceOf,
     fetchAmountinUSDPrice,
-} = require('../../../utils');
+} = require('../../../utils/utils');
 
-const { getPair } = require('../../../utils-uni');
+const { getPair } = require('../../../utils/uniswap');
 
-const { uniSupply, uniWithdraw } = require('../../../actions');
+const { uniSupply, uniWithdraw } = require('../../../utils/actions');
 
 const uniSupplyTest = async () => {
     describe('Uni-Supply', function () {

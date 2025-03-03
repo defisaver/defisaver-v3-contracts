@@ -21,7 +21,7 @@ const {
     mcdDsrDeposit,
     mcdDsrWithdraw,
     mcdTokenConvert,
-} = require('../../actions');
+} = require('../../utils/actions');
 const {
     getProxy,
     redeploy,
@@ -44,7 +44,7 @@ const {
     LOGGER_ADDR,
     getContractFromRegistry,
     approve,
-} = require('../../utils');
+} = require('../../utils/utils');
 const {
     getVaultsForUser,
     fetchMakerAddresses,
@@ -56,7 +56,7 @@ const {
     LDO_ADDR,
     cropData,
     getRatio,
-} = require('../../utils-mcd');
+} = require('../../utils/mcd');
 
 const SUPPLY_AMOUNT_IN_USD = '150000';
 const GENERATE_AMOUNT_IN_USD = '50000';

@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-const { network, redeploy } = require('../utils');
+const { network, redeploy } = require('../utils/utils');
 
 const TEST_DATA = {
     mainnet: {

@@ -8,11 +8,11 @@ const {
     setNewExchangeWrapper,
     balanceOf,
     chainIds,
-} = require('../../utils');
+} = require('../../utils/utils');
 const {
     getControllers, collateralSupplyAmountInUsd, borrowAmountInUsd, supplyToMarket,
-} = require('../../utils-llamalend');
-const { llamalendCreate, llamalendRepay } = require('../../actions');
+} = require('../../utils/llamalend');
+const { llamalendCreate, llamalendRepay } = require('../../utils/actions');
 
 describe('LlamaLend-Repay', function () {
     this.timeout(80000);

@@ -1,4 +1,4 @@
-const { resetForkToBlock } = require('../utils');
+const { resetForkToBlock } = require('../utils/utils');
 const { compRecipesFullTest } = require('./compound/comp-tests');
 const { fullInstRecipesTest } = require('./shift/inst/inst-recipes');
 const { mcdRecipesFullTest } = require('./mcd/mcd-tests');

@@ -23,12 +23,12 @@ const {
     formatExchangeObj,
     chainIds,
     network,
-} = require('../utils');
+} = require('../utils/utils');
 const {
     predictSafeAddress,
     SAFE_MASTER_COPY_VERSIONS,
     deploySafe,
-} = require('../utils-safe');
+} = require('../utils/safe');
 const { topUp } = require('../../scripts/utils/fork');
 const {
     addBotCallerForTxSaver,
@@ -39,8 +39,8 @@ const {
     calculateExpectedFeeTaken,
     llamaLendLevCreateEncodedData,
 } = require('./utils-tx-saver');
-const { executeAction } = require('../actions');
-const { getControllers } = require('../utils-llamalend');
+const { executeAction } = require('../utils/actions');
+const { getControllers } = require('../utils/llamalend');
 
 describe('TxSaver tests', function () {
     this.timeout(80000);

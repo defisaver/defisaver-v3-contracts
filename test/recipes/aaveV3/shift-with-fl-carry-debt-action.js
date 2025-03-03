@@ -19,17 +19,17 @@ const {
     WALLETS,
     isWalletNameDsProxy,
     network,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { liquityOpen, executeAction } = require('../../actions');
-const { getTroveInfo } = require('../../utils-liquity');
+const { liquityOpen, executeAction } = require('../../utils/actions');
+const { getTroveInfo } = require('../../utils/liquity');
 const {
     getEstimatedTotalLiquidityForToken,
     VARIABLE_RATE,
     AAVE_NO_DEBT_MODE,
     WSETH_ASSET_ID_IN_AAVE_V3_MARKET,
     LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
-} = require('../../utils-aave');
+} = require('../../utils/aave');
 
 const ETH_USD_PRICE_FEED = '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419';
 

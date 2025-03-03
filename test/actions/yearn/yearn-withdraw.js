@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const { yearnWithdrawTest } = require('./yearn-tests');
 

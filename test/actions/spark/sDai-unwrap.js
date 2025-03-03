@@ -1,4 +1,4 @@
-const { redeploy } = require('../../utils');
+const { redeploy } = require('../../utils/utils');
 const { sDaiUnwrapTest } = require('./spark-tests');
 
 describe('sDai-Unwrap', function () {

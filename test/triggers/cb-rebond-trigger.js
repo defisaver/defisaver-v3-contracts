@@ -8,11 +8,11 @@ const {
     calcCBondsBLUSDMarketPremium,
     calcRebondMs,
     calcAccruedAmountForMs,
-} = require('../utils-cb');
+} = require('../utils/cb');
 
 const {
     redeploy,
-} = require('../utils');
+} = require('../utils/utils');
 
 describe('CB-rebond-trigger', function () {
     this.timeout(80000);

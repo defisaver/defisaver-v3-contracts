@@ -8,7 +8,7 @@ const compoundCollateralAssets = assets.filter((a) => a.compoundCollateral).map(
 
 const {
     supplyComp, withdrawComp, borrowComp, paybackComp, claimComp,
-} = require('../../actions');
+} = require('../../utils/actions');
 const {
     fetchAmountinUSDPrice,
     balanceOf,
@@ -16,8 +16,8 @@ const {
     getProxy,
     WETH_ADDRESS,
     getAddrFromRegistry,
-} = require('../../utils');
-const { getBorrowBalance, COMP_ADDR } = require('../../utils-comp');
+} = require('../../utils/utils');
+const { getBorrowBalance, COMP_ADDR } = require('../../utils/compound');
 
 const compSupplyTest = async (compTestLength) => {
     describe('Comp-Supply', function () {

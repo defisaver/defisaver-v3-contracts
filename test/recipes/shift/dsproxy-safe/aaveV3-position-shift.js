@@ -10,8 +10,8 @@ const {
     setBalance,
     nullAddress,
     network,
-} = require('../../../utils');
-const { aaveV3Supply, aaveV3Borrow, executeAction } = require('../../../actions');
+} = require('../../../utils/utils');
+const { aaveV3Supply, aaveV3Borrow, executeAction } = require('../../../utils/actions');
 
 const {
     VARIABLE_RATE,
@@ -19,8 +19,8 @@ const {
     LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
     AAVE_NO_DEBT_MODE,
     A_WETH_ADDRESS_V3,
-} = require('../../../utils-aave');
-const { signSafeTx } = require('../../../utils-safe');
+} = require('../../../utils/aave');
+const { signSafeTx } = require('../../../utils/safe');
 
 describe('Safe-AaveV3-Shift-Position', function () {
     this.timeout(200000);

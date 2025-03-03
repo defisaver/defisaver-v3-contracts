@@ -1,4 +1,4 @@
-const { resetForkToBlock } = require('../../utils');
+const { resetForkToBlock } = require('../../utils/utils');
 const { compoundV3FullTest } = require('./compV3-tests');
 
 describe('CompoundV3 full test', () => {

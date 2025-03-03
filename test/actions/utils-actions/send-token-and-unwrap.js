@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { sendTokenAndUnwrapTest } = require('./utils-actions-tests');
 
 describe('Send-Token-And-Unwrap', function () {

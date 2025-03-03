@@ -1,6 +1,6 @@
 const {
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { sendTokensTest } = require('./utils-actions-tests');
 
 describe('Send-Tokens-multiple-action', function () {

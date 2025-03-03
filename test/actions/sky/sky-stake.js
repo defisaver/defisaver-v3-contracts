@@ -3,8 +3,8 @@ const { expect } = require('chai');
 const {
     takeSnapshot, revertToSnapshot, getProxy, redeploy,
     setBalance, approve,
-} = require('../../utils');
-const { skyStake } = require('../../actions');
+} = require('../../utils/utils');
+const { skyStake } = require('../../utils/actions');
 
 const stakingRewardsContracts = ['0x0650CAF159C5A49f711e8169D4336ECB9b950275', '0x10ab606B067C9C461d8893c47C7512472E19e2Ce'];
 

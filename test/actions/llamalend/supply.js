@@ -5,11 +5,11 @@ const {
     takeSnapshot, revertToSnapshot, getProxy, redeploy,
     setBalance, approve, fetchAmountinUSDPrice, nullAddress,
     chainIds,
-} = require('../../utils');
+} = require('../../utils/utils');
 const {
     getControllers, collateralSupplyAmountInUsd, borrowAmountInUsd, supplyToMarket,
-} = require('../../utils-llamalend');
-const { llamalendCreate, llamalendSupply } = require('../../actions');
+} = require('../../utils/llamalend');
+const { llamalendCreate, llamalendSupply } = require('../../utils/actions');
 
 describe('LlamaLend-Supply', function () {
     this.timeout(80000);

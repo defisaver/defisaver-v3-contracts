@@ -14,8 +14,8 @@ const {
     setBalance,
     EETH_ADDR,
     ETHER_FI_LIQUIDITY_POOL,
-} = require('../../utils');
-const { executeAction } = require('../../actions');
+} = require('../../utils/utils');
+const { executeAction } = require('../../utils/actions');
 
 describe('LsvSell', function () {
     this.timeout(80000);
