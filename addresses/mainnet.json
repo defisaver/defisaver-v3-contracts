@@ -1606,6 +1606,17 @@
         "history": []
     },
     {
+        "name": "MorphoBlueClaim",
+        "address": "0xBB562a790AD7773D54A423bD2A10E4073cb98142",
+        "id": "0x07f9b8e2",
+        "path": "contracts/actions/morpho-blue/MorphoBlueClaim",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FLMorphoBlue",
         "address": "0x6206C96EAc5EAC546861438A9f953B6BEa50EBAB",
         "id": "0x025e64d8",
