@@ -25,7 +25,10 @@ const { createSafe, executeSafeTx, SAFE_CONSTANTS } = require('../utils/safe');
 
 const adminAuthTest = async () => {
     describe('Admin-Auth', () => {
-        let sender; let ownerAcc; let adminAuth;
+        let sender;
+        let ownerAcc;
+        let adminAuth;
+
         before(async () => {
             const adminAuthAddr = await getAddrFromRegistry('AdminAuth');
             adminAuth = await hre.ethers.getContractAt('AdminAuth', adminAuthAddr);
@@ -77,11 +80,13 @@ const adminAuthTest = async () => {
         });
     });
 };
-
 const adminVaultTest = async () => {
     describe('Admin-Vault', () => {
-        let notOwner; let adminAcc; let adminVault; let
-            newOwner; let newAdminAcc;
+        let notOwner;
+        let adminAcc;
+        let adminVault;
+        let newOwner;
+        let newAdminAcc;
 
         before(async () => {
             adminVault = await redeploy('AdminVault');
@@ -99,7 +104,7 @@ const adminVaultTest = async () => {
             await impersonateAccount(ADMIN_ACC);
 
             const adminVaultByAdmin = adminVault.connect(adminAcc);
-            await adminVaultByAdmin.changeOwner(newOwner.address);
+            await adminVaultByAdmin.changeOwner(newOwner.address, { gasLimit: 200000 });
             const currOwner = await adminVaultByAdmin.owner();
 
             await stopImpersonatingAccount(ADMIN_ACC);
@@ -109,8 +114,11 @@ const adminVaultTest = async () => {
 
         it('... should fail to change the owner address if not called by admin', async () => {
             try {
-                await adminVault.changeAdmin(newOwner.address);
-                expect(true).to.be(false);
+                await adminVault
+                    .connect(notOwner)
+                    .changeAdmin(newOwner.address, { gasLimit: 200000 });
+
+                expect(true).to.eq(false);
             } catch (err) {
                 expect(err.toString()).to.have.string('SenderNotAdmin');
             }
@@ -120,7 +128,7 @@ const adminVaultTest = async () => {
             await impersonateAccount(ADMIN_ACC);
 
             const adminVaultByAdmin = adminVault.connect(adminAcc);
-            await adminVaultByAdmin.changeAdmin(newAdminAcc.address);
+            await adminVaultByAdmin.changeAdmin(newAdminAcc.address, { gasLimit: 200000 });
             const currAdmin = await adminVaultByAdmin.admin();
 
             await stopImpersonatingAccount(ADMIN_ACC);
@@ -130,9 +138,11 @@ const adminVaultTest = async () => {
 
         it('... should fail to change the admin address if not called by admin', async () => {
             try {
-                await adminVault.changeAdmin(notOwner.address);
+                await adminVault
+                    .connect(notOwner)
+                    .changeAdmin(notOwner.address, { gasLimit: 200000 });
 
-                expect(true).to.be(false);
+                expect(true).to.eq(false);
             } catch (err) {
                 expect(err.toString()).to.have.string('SenderNotAdmin');
             }
@@ -141,8 +151,10 @@ const adminVaultTest = async () => {
 };
 const dsProxyPermissionTest = async () => {
     describe('DSProxy-Permission', () => {
-        let ownerAcc1; let ownerAcc2; let
-            proxy; let dsProxyPermission;
+        let ownerAcc1;
+        let ownerAcc2;
+        let proxy;
+        let dsProxyPermission;
 
         before(async () => {
             dsProxyPermission = await deployContract('DSProxyPermission');
@@ -180,7 +192,6 @@ const dsProxyPermissionTest = async () => {
         });
     });
 };
-
 const safeModulePermissionTest = async () => {
     describe('SafeModulePermission', () => {
         let modulePermissionContract;
@@ -341,7 +352,6 @@ const safeModulePermissionTest = async () => {
         });
     });
 };
-
 const authDeployContracts = async () => {
     await redeploy('AdminAuth');
     await redeploy('AdminVault');
