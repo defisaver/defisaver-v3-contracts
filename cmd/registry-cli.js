@@ -6,6 +6,9 @@ require('dotenv-safe').config();
 
 const ethers = require('ethers');
 const { program } = require('commander');
+const { readFileSync, existsSync, writeFileSync } = require('fs');
+const { join } = require('path');
+const { createInterface } = require('readline');
 
 const { addrs } = require('../test/utils');
 const { getNameId, generateIds } = require('../test/utils');
@@ -200,6 +203,139 @@ const approveContractChangeCall = async (idOrName, options) => {
     };
 };
 
+const compareRegistryWithJson = async (options) => {
+    const registry = await setRegistry(options);
+
+    // fetch newContract events
+    const filter = registry.filters.AddNewContract();
+    const events = await registry.queryFilter(filter);
+
+    // Get all registered contracts from on-chain events
+    let registeredContracts = [];
+    events.forEach(async (e) => {
+        const entry = parseAddNewContractEvent(e);
+        registeredContracts.push(entry);
+    });
+
+    // Remove duplicates by id
+    registeredContracts = registeredContracts.filter((contract, index, self) => (
+        index === self.findIndex((c) => c.id === contract.id)
+    ));
+
+    // Get the network name
+    const network = options.network.length === 0 ? 'mainnet' : options.network;
+
+    // Read the JSON file for the network
+    const jsonPath = join(__dirname, '..', 'addresses', `${network}.json`);
+    if (!existsSync(jsonPath)) {
+        console.log(`No JSON file found for network ${network}`);
+        return;
+    }
+
+    const fileContent = readFileSync(jsonPath, 'utf8');
+    const jsonData = JSON.parse(fileContent);
+
+    // Get the mapping of all contract IDs to their file info
+    const idsMap = generateIds();
+
+    // Find contracts that are in registry but not in JSON
+    const missingContracts = [];
+    const addressMatchContracts = [];
+    registeredContracts.forEach((contract) => {
+        const jsonContract = jsonData.find((c) => c.id === contract.id);
+        const hasMatchingAddr = (c) => c.address.toLowerCase() === contract.addr.toLowerCase();
+        const addrInHistory = (c) => c.history && c.history.some((addr) => (
+            addr.toLowerCase() === contract.addr.toLowerCase()
+        ));
+        const addressExists = jsonData.some((c) => hasMatchingAddr(c) || addrInHistory(c));
+
+        if (!jsonContract) {
+            // The contract info is directly stored in idsMap[id]
+            const contractInfo = idsMap[contract.id];
+            const entry = {
+                name: contractInfo ? contractInfo.fileName : 'Unknown',
+                address: contract.addr,
+                id: contract.id,
+                path: contractInfo ? contractInfo.filePath : '',
+                version: '1.0.0',
+                inRegistry: true,
+                changeTime: contract.waitTime.toString(),
+                registryIds: [],
+                history: [],
+            };
+
+            if (addressExists) {
+                // Find where this address exists
+                const existingEntry = jsonData.find((c) => (
+                    hasMatchingAddr(c) || addrInHistory(c)
+                ));
+                addressMatchContracts.push({
+                    newEntry: entry,
+                    existingEntry: {
+                        name: existingEntry.name,
+                        address: existingEntry.address,
+                        id: existingEntry.id,
+                    },
+                });
+            } else {
+                missingContracts.push(entry);
+            }
+        }
+    });
+
+    if (missingContracts.length === 0 && addressMatchContracts.length === 0) {
+        console.log('All registry contracts are properly documented in JSON file');
+        return;
+    }
+
+    if (addressMatchContracts.length > 0) {
+        console.log('\nWARNING: Found contracts with same address but different IDs/names:');
+        addressMatchContracts.forEach((match) => {
+            console.log('\nRegistry entry:');
+            console.log(JSON.stringify(match.newEntry, null, 2));
+            console.log('Matches existing JSON entry:');
+            console.log(JSON.stringify(match.existingEntry, null, 2));
+        });
+    }
+
+    if (missingContracts.length > 0) {
+        console.log('\nContracts that exist on-chain but missing from JSON:');
+        console.log(JSON.stringify(missingContracts, null, 2));
+
+        // Ask for confirmation before updating the file
+        const rl = createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+
+        const answer = await new Promise((resolve) => {
+            rl.question('\nDo you want to update the JSON file with these entries? (y/N): ', resolve);
+        });
+        rl.close();
+
+        if (answer.toLowerCase() === 'y') {
+            // Find the last closing bracket in the file
+            const lastBracketIndex = fileContent.lastIndexOf(']');
+            if (lastBracketIndex === -1) {
+                console.log('Error: Invalid JSON file format');
+                return;
+            }
+
+            // Insert the new entries before the last bracket
+            const newContent = fileContent.slice(0, lastBracketIndex).trimEnd();
+            const entriesString = missingContracts
+                .map((entry) => JSON.stringify(entry, null, 4))
+                .join(',\n');
+
+            const updatedContent = `${newContent},\n${entriesString}\n]`;
+
+            // Write back to file
+            writeFileSync(jsonPath, updatedContent);
+            console.log(`\nUpdated ${jsonPath} with ${missingContracts.length} new entries`);
+        }
+    }
+};
+
 (async () => {
     program
         .command('dump')
@@ -207,6 +343,15 @@ const approveContractChangeCall = async (idOrName, options) => {
         .description('Returns all the correctly registered contracts in the registry')
         .action(async (options) => {
             await fetchAllContractsInRegistry(options);
+            process.exit(0);
+        });
+
+    program
+        .command('check-missing-contracts')
+        .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
+        .description('Checks for contracts that are in registry but missing from JSON files')
+        .action(async (options) => {
+            await compareRegistryWithJson(options);
             process.exit(0);
         });
 
