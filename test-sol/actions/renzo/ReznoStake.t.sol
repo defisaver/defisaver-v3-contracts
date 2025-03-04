@@ -8,7 +8,7 @@ import { RenzoHelper } from "../../../contracts/actions/renzo/helpers/RenzoHelpe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-import { TokenAddresses } from "../../TokenAddresses.sol";
+import {Addresses } from "../../utils/Addresses.sol";
 
 contract TestRenzoStake is BaseTest, ActionsUtils, RenzoHelper {
 
@@ -28,7 +28,7 @@ contract TestRenzoStake is BaseTest, ActionsUtils, RenzoHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("RenzoStake");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -66,8 +66,8 @@ contract TestRenzoStake is BaseTest, ActionsUtils, RenzoHelper {
         bool _isMaxUint256,
         uint256 _amount
     ) internal {
-        give(TokenAddresses.WETH_ADDR, sender, _amount);
-        approveAsSender(sender, TokenAddresses.WETH_ADDR, walletAddr, _amount);
+        give(Addresses.WETH_ADDR, sender, _amount);
+        approveAsSender(sender, Addresses.WETH_ADDR, walletAddr, _amount);
 
         bytes memory executeActionCallData = executeActionCalldata(
             renzoStakeEncode(
@@ -78,12 +78,12 @@ contract TestRenzoStake is BaseTest, ActionsUtils, RenzoHelper {
             _isDirect
         );
 
-        uint256 senderWethBalanceBefore = balanceOf(TokenAddresses.WETH_ADDR, sender);
+        uint256 senderWethBalanceBefore = balanceOf(Addresses.WETH_ADDR, sender);
         uint256 senderEzethBalanceBefore = balanceOf(EZETH_ADDR, sender);
 
         wallet.execute(address(cut), executeActionCallData, 0);
 
-        uint256 senderWethBalanceAfter = balanceOf(TokenAddresses.WETH_ADDR, sender);
+        uint256 senderWethBalanceAfter = balanceOf(Addresses.WETH_ADDR, sender);
         uint256 senderEzethBalanceAfter = balanceOf(EZETH_ADDR, sender);
 
         if (_isMaxUint256) {

@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { SendTokensAndUnwrap } from "../../contracts/actions/utils/SendTokensAndUnwrap.sol";
-import { TokenAddresses } from "../TokenAddresses.sol";
+import { SendTokensAndUnwrap } from "../../../contracts/actions/utils/SendTokensAndUnwrap.sol";
+import {Addresses } from "../../utils/Addresses.sol";
 
-import { SmartWallet } from "../utils/SmartWallet.sol";
-import { BaseTest } from "../utils/BaseTest.sol";
-import { ActionsUtils } from "../utils/ActionsUtils.sol";
+import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { BaseTest } from "../../utils/BaseTest.sol";
+import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 
 contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
     
@@ -45,8 +45,8 @@ contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
         address[] memory receivers = new address[](2);
         uint256[] memory amounts = new uint256[](2);
         bool[] memory isMaxUint256 = new bool[](2);
-        tokens[0] = TokenAddresses.WBTC_ADDR;
-        tokens[1] = TokenAddresses.DAI_ADDR;
+        tokens[0] = Addresses.WBTC_ADDR;
+        tokens[1] = Addresses.DAI_ADDR;
         receivers[0] = alice;
         receivers[1] = alice;
         amounts[0] = 10e8;
@@ -63,8 +63,8 @@ contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
         address[] memory receivers = new address[](2);
         uint256[] memory amounts = new uint256[](2);
         bool[] memory isMaxUint256 = new bool[](2);
-        tokens[0] = TokenAddresses.WETH_ADDR;
-        tokens[1] = TokenAddresses.USDC_ADDR;
+        tokens[0] = Addresses.WETH_ADDR;
+        tokens[1] = Addresses.USDC_ADDR;
         receivers[0] = alice;
         receivers[1] = bob;
         amounts[0] = 10 ether;
@@ -81,7 +81,7 @@ contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
         address[] memory receivers = new address[](1);
         uint256[] memory amounts = new uint256[](1);
         bool[] memory isMaxUint256 = new bool[](1);
-        tokens[0] = TokenAddresses.WETH_ADDR;
+        tokens[0] = Addresses.WETH_ADDR;
         receivers[0] = alice;
         amounts[0] = 10 ether;
         isMaxUint256[0] = false;
@@ -93,8 +93,8 @@ contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
         address[] memory tokens = new address[](2);
         address[] memory receivers = new address[](1);
         uint256[] memory amounts = new uint256[](1);
-        tokens[0] = TokenAddresses.WETH_ADDR;
-        tokens[1] = TokenAddresses.USDC_ADDR;
+        tokens[0] = Addresses.WETH_ADDR;
+        tokens[1] = Addresses.USDC_ADDR;
         receivers[0] = alice;
         amounts[0] = 10 ether;
 
@@ -113,9 +113,9 @@ contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
         address[] memory receivers = new address[](3);
         uint256[] memory amounts = new uint256[](3);
         bool[] memory isMaxUint256 = new bool[](3);
-        tokens[0] = TokenAddresses.WETH_ADDR;
-        tokens[1] = TokenAddresses.USDC_ADDR;
-        tokens[2] = TokenAddresses.WBTC_ADDR;
+        tokens[0] = Addresses.WETH_ADDR;
+        tokens[1] = Addresses.USDC_ADDR;
+        tokens[2] = Addresses.WBTC_ADDR;
         receivers[0] = alice;
         receivers[1] = bob;
         receivers[2] = alice;
@@ -148,7 +148,7 @@ contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
             
             walletBalancesBefore[i] = balanceOf(_tokens[i], walletAddr);
 
-            receiverBalancesBefore[i] = _tokens[i] == TokenAddresses.WETH_ADDR
+            receiverBalancesBefore[i] = _tokens[i] == Addresses.WETH_ADDR
                 ? address(_receivers[i]).balance
                 : balanceOf(_tokens[i], _receivers[i]);
         }
@@ -163,7 +163,7 @@ contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
         for (uint256 i = 0; i < size; ++i) {
             uint256 walletBalancesAfter = balanceOf(_tokens[i], walletAddr);
 
-            uint256 receiverBalancesAfter = _tokens[i] == TokenAddresses.WETH_ADDR
+            uint256 receiverBalancesAfter = _tokens[i] == Addresses.WETH_ADDR
                 ? address(_receivers[i]).balance
                 : balanceOf(_tokens[i], _receivers[i]);
 

@@ -1,17 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import "forge-std/Test.sol";
-
-import { TokenAddresses } from "../../TokenAddresses.sol";
-import { Const } from "../../Const.sol";
-import { CheatCodes } from "../../CheatCodes.sol";
-import { Tokens } from "../../utils/Tokens.sol";
-import { CompUser } from "../../utils/compV3/CompUser.sol";
-import { BundleBuilder } from "../../utils/BundleBuilder.sol";
-import { RegistryUtils } from "../../utils/RegistryUtils.sol";
-import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-import { Strategies } from "../../utils/Strategies.sol";
+import { IComet } from "../../../contracts/interfaces/compoundV3/IComet.sol";
+import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
 import { StrategyModel } from "../../../contracts/core/strategy/StrategyModel.sol";
 import { StrategyExecutor } from "../../../contracts/core/strategy/StrategyExecutor.sol";
 import { RecipeExecutor } from "../../../contracts/core/RecipeExecutor.sol";
@@ -22,24 +13,25 @@ import { DFSSell } from "../../../contracts/actions/exchange/DFSSell.sol";
 import { CompV3SubProxy } from "../../../contracts/actions/compoundV3/CompV3SubProxy.sol";
 import { CompV3RatioCheck } from "../../../contracts/actions/checkers/CompV3RatioCheck.sol";
 import { FLAction } from "../../../contracts/actions/flashloan/FLAction.sol";
-import { DSMath } from "../../../contracts/DS/DSMath.sol";
 import { SubStorage } from "../../../contracts/core/strategy/SubStorage.sol";
 import { CompV3Supply } from "../../../contracts/actions/compoundV3/CompV3Supply.sol";
 import { CompV3Withdraw } from "../../../contracts/actions/compoundV3/CompV3Withdraw.sol";
 import { CompV3Borrow } from "../../../contracts/actions/compoundV3/CompV3Borrow.sol";
 import { CompV3Payback } from "../../../contracts/actions/compoundV3/CompV3Payback.sol";
 import { WrapperExchangeRegistry } from "../../../contracts/exchangeV3/registries/WrapperExchangeRegistry.sol";
-import { IComet } from "../../../contracts/interfaces/compoundV3/IComet.sol";
-import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
+import { CompUser } from "../../utils/compV3/CompUser.sol";
+import { BundleBuilder } from "../../utils/BundleBuilder.sol";
+import { RegistryUtils } from "../../utils/RegistryUtils.sol";
+import { ActionsUtils } from "../../utils/ActionsUtils.sol";
+import { Strategies } from "../../utils/Strategies.sol";
+import { Addresses } from "../../utils/Addresses.sol";
+import { BaseTest } from '../../utils/BaseTest.sol';
 
-contract TestCompV3Automation is
-    Test,
-    DSMath,
-    Tokens,
-    RegistryUtils,
-    ActionsUtils,
-    Strategies
-{   
+contract TestCompV3Automation is BaseTest, RegistryUtils, ActionsUtils {
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                     VARIABLES
+    //////////////////////////////////////////////////////////////////////////*/   
     CompUser user1;
     address wallet;
 
@@ -61,7 +53,12 @@ contract TestCompV3Automation is
     uint256 boostFLGasCost = 1_350_000;
     uint256 repayFLGasCost = 1_350_000;
 
-    constructor() {
+    /*//////////////////////////////////////////////////////////////////////////
+                                  SETUP FUNCTION
+    //////////////////////////////////////////////////////////////////////////*/
+    function setUp() public override {
+        forkMainnetLatest();
+
         trigger = new CompV3RatioTrigger();
         flAction = new FLAction();
         user1 = new CompUser();
@@ -69,9 +66,12 @@ contract TestCompV3Automation is
 
         _redeployContracts();
         _setUpExchangeWrapper();
+
         vm.etch(SUB_STORAGE_ADDR, address(new SubStorage()).code);
-        vm.etch(Const.LEGACY_RECIPE_EXECUTOR_ADDR_V3, address(new RecipeExecutor()).code);
+        vm.etch(Addresses.LEGACY_RECIPE_EXECUTOR_ADDR_V3, address(new RecipeExecutor()).code);
+
         addBotCaller(address(this));
+        
         _initRepayBundle();
         _initBoostBundle();
     }
@@ -92,15 +92,15 @@ contract TestCompV3Automation is
     }
 
     function _setUpExchangeWrapper() internal {
-        WrapperExchangeRegistry exchangeRegistry = WrapperExchangeRegistry(Const.WRAPPER_EXCHANGE_REGISTRY);
-        vm.startPrank(Const.OWNER_ACC);
-        exchangeRegistry.addWrapper(TokenAddresses.UNI_V2_WRAPPER);
+        WrapperExchangeRegistry exchangeRegistry = WrapperExchangeRegistry(Addresses.WRAPPER_EXCHANGE_REGISTRY);
+        vm.startPrank(Addresses.OWNER_ACC);
+        exchangeRegistry.addWrapper(Addresses.UNI_V2_WRAPPER);
         vm.stopPrank();
     }
 
     function _initRepayBundle() internal {
-        uint256 repayId = createCompV3Repay();
-        uint256 repayFLId = createCompV3FLRepay();
+        uint256 repayId = Strategies.createCompV3Repay();
+        uint256 repayFLId = Strategies.createCompV3FLRepay();
 
         BundleBuilder bundleBuilder = new BundleBuilder();
 
@@ -111,8 +111,8 @@ contract TestCompV3Automation is
     }
 
     function _initBoostBundle() internal {
-        uint256 boostId = createCompV3Boost();
-        uint256 boostFLId = createCompV3FLBoost();
+        uint256 boostId = Strategies.createCompV3Boost();
+        uint256 boostFLId = Strategies.createCompV3FLBoost();
 
         BundleBuilder bundleBuilder = new BundleBuilder();
 
@@ -123,10 +123,10 @@ contract TestCompV3Automation is
     }
 
     function _createCompPosition(bool _isSafe, address _wallet) internal {
-        gibTokens(_wallet, TokenAddresses.WETH_ADDR, 1000 ether);
-        uint ethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 15_000);
-        user1.supply(_isSafe, TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, ethAmount);
-        user1.borrow(_isSafe, TokenAddresses.COMET_USDC, 10_000e6);
+        gibTokens(_wallet, Addresses.WETH_ADDR, 1000 ether);
+        uint ethAmount = amountInUSDPrice(Addresses.WETH_ADDR, 15_000);
+        user1.supply(_isSafe, Addresses.COMET_USDC, Addresses.WETH_ADDR, ethAmount);
+        user1.borrow(_isSafe, Addresses.COMET_USDC, 10_000e6);
     }
 
     function _subToAutomationBundles(bool _isSafe) internal {
@@ -161,8 +161,9 @@ contract TestCompV3Automation is
         _subToAutomationBundles(_isSafe);
     }
 
-    //////////////////////////////// TESTs /////////////////////////////////////////////
-
+    /*//////////////////////////////////////////////////////////////////////////
+                                     TESTS
+    //////////////////////////////////////////////////////////////////////////*/
     function testCompV3RepayStrategy() public {
         _testCompV3RepayStrategy(false);
         _testCompV3RepayStrategy(true);
@@ -186,28 +187,28 @@ contract TestCompV3Automation is
     function _testCompV3RepayStrategy(bool _isSafe) internal {
         _walletSetUpBeforeEachTest(_isSafe);    
 
-        uint wethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 1_000);
+        uint wethAmount = amountInUSDPrice(Addresses.WETH_ADDR, 1_000);
         uint256 repayIndex = 0;
 
-        uint256 borrowAmountBefore = IComet(TokenAddresses.COMET_USDC).borrowBalanceOf(wallet);
-        uint256 txFeeBalanceBefore = IERC20(TokenAddresses.WETH_ADDR).balanceOf(TokenAddresses.FEE_RECEIVER);
+        uint256 borrowAmountBefore = IComet(Addresses.COMET_USDC).borrowBalanceOf(wallet);
+        uint256 txFeeBalanceBefore = IERC20(Addresses.WETH_ADDR).balanceOf(Addresses.FEE_RECEIVER);
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
         bytes[] memory _actionsCallData = new bytes[](5);
-        _actionsCallData[0] = compV3WithdrawEncode(TokenAddresses.COMET_USDC, wallet, TokenAddresses.WETH_ADDR, wethAmount);
-        _actionsCallData[1] = sellEncode(TokenAddresses.WETH_ADDR, TokenAddresses.USDC_ADDR, 0, wallet, wallet, TokenAddresses.UNI_V2_WRAPPER);
-        _actionsCallData[2] = gasFeeEncode(repayGasCost, TokenAddresses.USDC_ADDR);
-        _actionsCallData[3] = compV3PaybackEncode(TokenAddresses.COMET_USDC, wallet, 0);
+        _actionsCallData[0] = compV3WithdrawEncode(Addresses.COMET_USDC, wallet, Addresses.WETH_ADDR, wethAmount);
+        _actionsCallData[1] = sellEncode(Addresses.WETH_ADDR, Addresses.USDC_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER);
+        _actionsCallData[2] = gasFeeEncode(repayGasCost, Addresses.USDC_ADDR);
+        _actionsCallData[3] = compV3PaybackEncode(Addresses.COMET_USDC, wallet, 0);
         _actionsCallData[4] = compV3RatioCheckEncode(0, 0, address(0));
 
-        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, wallet);
+        uint beforeRatio = trigger.getSafetyRatio(Addresses.COMET_USDC, wallet);
 
         executor.executeStrategy(repaySubId, repayIndex, _triggerCallData, _actionsCallData, repaySub);
 
-        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, wallet);
-        uint256 txFeeBalanceAfter = IERC20(TokenAddresses.WETH_ADDR).balanceOf(TokenAddresses.FEE_RECEIVER);
-        uint256 borrowAmountAfter = IComet(TokenAddresses.COMET_USDC).borrowBalanceOf(wallet);
+        uint afterRatio = trigger.getSafetyRatio(Addresses.COMET_USDC, wallet);
+        uint256 txFeeBalanceAfter = IERC20(Addresses.WETH_ADDR).balanceOf(Addresses.FEE_RECEIVER);
+        uint256 borrowAmountAfter = IComet(Addresses.COMET_USDC).borrowBalanceOf(wallet);
 
         uint amountAfterFee = wethAmount - (wethAmount / 400);
 
@@ -220,25 +221,25 @@ contract TestCompV3Automation is
     function _testCompV3FLRepayStrategy(bool _isSafe) internal {
         _walletSetUpBeforeEachTest(_isSafe);    
 
-        uint wethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 1_000);
+        uint wethAmount = amountInUSDPrice(Addresses.WETH_ADDR, 1_000);
 
         uint256 repayIndex = 1;
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
         bytes[] memory _actionsCallData = new bytes[](6);
-        _actionsCallData[0] = flActionEncode(TokenAddresses.WETH_ADDR, wethAmount, FLSource.BALANCER);
-        _actionsCallData[1] = sellEncode(TokenAddresses.WETH_ADDR, TokenAddresses.USDC_ADDR, wethAmount, wallet, wallet, TokenAddresses.UNI_V2_WRAPPER);
-        _actionsCallData[2] = gasFeeEncode(repayFLGasCost, TokenAddresses.USDC_ADDR);
-        _actionsCallData[3] = compV3PaybackEncode(TokenAddresses.COMET_USDC, wallet, 0);
-        _actionsCallData[4] = compV3WithdrawEncode(TokenAddresses.COMET_USDC, address(flAction), TokenAddresses.WETH_ADDR, wethAmount);
+        _actionsCallData[0] = flActionEncode(Addresses.WETH_ADDR, wethAmount, FLSource.BALANCER);
+        _actionsCallData[1] = sellEncode(Addresses.WETH_ADDR, Addresses.USDC_ADDR, wethAmount, wallet, wallet, Addresses.UNI_V2_WRAPPER);
+        _actionsCallData[2] = gasFeeEncode(repayFLGasCost, Addresses.USDC_ADDR);
+        _actionsCallData[3] = compV3PaybackEncode(Addresses.COMET_USDC, wallet, 0);
+        _actionsCallData[4] = compV3WithdrawEncode(Addresses.COMET_USDC, address(flAction), Addresses.WETH_ADDR, wethAmount);
         _actionsCallData[5] = compV3RatioCheckEncode(0, 0, address(0));
 
-        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, wallet);
+        uint beforeRatio = trigger.getSafetyRatio(Addresses.COMET_USDC, wallet);
 
         executor.executeStrategy(repaySubId, repayIndex, _triggerCallData, _actionsCallData, repaySub);
 
-        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, wallet);
+        uint afterRatio = trigger.getSafetyRatio(Addresses.COMET_USDC, wallet);
         assertGt(afterRatio, beforeRatio);
     }
 
@@ -248,22 +249,22 @@ contract TestCompV3Automation is
         uint256 usdcAmount = 500e6;
         uint256 boostIndex = 0;
 
-        uint ethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 15_000);
-        user1.supply(_isSafe, TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, ethAmount);
+        uint ethAmount = amountInUSDPrice(Addresses.WETH_ADDR, 15_000);
+        user1.supply(_isSafe, Addresses.COMET_USDC, Addresses.WETH_ADDR, ethAmount);
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
         bytes[] memory _actionsCallData = new bytes[](5);
-        _actionsCallData[0] = compV3BorrowEncode(TokenAddresses.COMET_USDC, usdcAmount, wallet);
-        _actionsCallData[1] = sellEncode(TokenAddresses.USDC_ADDR, TokenAddresses.WETH_ADDR, 0, wallet, wallet, TokenAddresses.UNI_V2_WRAPPER);
-        _actionsCallData[2] = gasFeeEncode(boostGasCost, TokenAddresses.WETH_ADDR);
-        _actionsCallData[3] = compV3SupplyEncode(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, 0, wallet);
+        _actionsCallData[0] = compV3BorrowEncode(Addresses.COMET_USDC, usdcAmount, wallet);
+        _actionsCallData[1] = sellEncode(Addresses.USDC_ADDR, Addresses.WETH_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER);
+        _actionsCallData[2] = gasFeeEncode(boostGasCost, Addresses.WETH_ADDR);
+        _actionsCallData[3] = compV3SupplyEncode(Addresses.COMET_USDC, Addresses.WETH_ADDR, 0, wallet);
         _actionsCallData[4] = compV3RatioCheckEncode(0, 0, address(0));
 
-        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, wallet);
+        uint beforeRatio = trigger.getSafetyRatio(Addresses.COMET_USDC, wallet);
 
         executor.executeStrategy(boostSubId, boostIndex, _triggerCallData, _actionsCallData, boostSub);
-        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, wallet);
+        uint afterRatio = trigger.getSafetyRatio(Addresses.COMET_USDC, wallet);
 
         assertGt(beforeRatio, afterRatio);
     }
@@ -274,24 +275,24 @@ contract TestCompV3Automation is
         uint256 usdcAmount = 500e6;
         uint256 boostIndex = 1;
 
-        uint ethAmount = amountInUSDPrice(TokenAddresses.WETH_ADDR, 15_000);
-        user1.supply(_isSafe, TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, ethAmount);
+        uint ethAmount = amountInUSDPrice(Addresses.WETH_ADDR, 15_000);
+        user1.supply(_isSafe, Addresses.COMET_USDC, Addresses.WETH_ADDR, ethAmount);
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
         bytes[] memory _actionsCallData = new bytes[](6);
-        _actionsCallData[0] = flActionEncode(TokenAddresses.USDC_ADDR, usdcAmount, FLSource.BALANCER);
-        _actionsCallData[1] = sellEncode(TokenAddresses.USDC_ADDR, TokenAddresses.WETH_ADDR, usdcAmount, wallet, wallet, TokenAddresses.UNI_V2_WRAPPER);
-        _actionsCallData[2] = gasFeeEncode(boostFLGasCost, TokenAddresses.WETH_ADDR);
-        _actionsCallData[3] = compV3SupplyEncode(TokenAddresses.COMET_USDC, TokenAddresses.WETH_ADDR, 0, wallet);
-        _actionsCallData[4] = compV3BorrowEncode(TokenAddresses.COMET_USDC, usdcAmount, address(flAction));
+        _actionsCallData[0] = flActionEncode(Addresses.USDC_ADDR, usdcAmount, FLSource.BALANCER);
+        _actionsCallData[1] = sellEncode(Addresses.USDC_ADDR, Addresses.WETH_ADDR, usdcAmount, wallet, wallet, Addresses.UNI_V2_WRAPPER);
+        _actionsCallData[2] = gasFeeEncode(boostFLGasCost, Addresses.WETH_ADDR);
+        _actionsCallData[3] = compV3SupplyEncode(Addresses.COMET_USDC, Addresses.WETH_ADDR, 0, wallet);
+        _actionsCallData[4] = compV3BorrowEncode(Addresses.COMET_USDC, usdcAmount, address(flAction));
         _actionsCallData[5] = compV3RatioCheckEncode(0, 0, address(0));
 
-        uint beforeRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, wallet);
+        uint beforeRatio = trigger.getSafetyRatio(Addresses.COMET_USDC, wallet);
 
         executor.executeStrategy(boostSubId, boostIndex, _triggerCallData, _actionsCallData, boostSub);
 
-        uint afterRatio = trigger.getSafetyRatio(TokenAddresses.COMET_USDC, wallet);
+        uint afterRatio = trigger.getSafetyRatio(Addresses.COMET_USDC, wallet);
 
         assertGt(beforeRatio, afterRatio);
     }
