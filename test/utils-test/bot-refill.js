@@ -1,4 +1,4 @@
-const { redeploy } = require('../utils');
+const { redeploy } = require('../utils/utils');
 const { botRefillTest } = require('./utils-tests');
 
 describe('Bot-Refills', function () {

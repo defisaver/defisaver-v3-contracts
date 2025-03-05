@@ -8,9 +8,9 @@ const {
     aaveV3Supply,
     aaveV3Borrow,
     aaveV3Payback,
-} = require('../../actions');
+} = require('../../utils/actions');
 
-const { isAssetBorrowableV3, VARIABLE_RATE } = require('../../utils-aave');
+const { isAssetBorrowableV3, VARIABLE_RATE } = require('../../utils/aave');
 const {
     getProxy, redeploy, takeSnapshot, revertToSnapshot,
     addrs,
@@ -20,7 +20,7 @@ const {
     approve,
     isNetworkFork,
     getOwnerAddr,
-} = require('../../utils');
+} = require('../../utils/utils');
 const { topUp } = require('../../../scripts/utils/fork');
 
 const collateralTokens = ['WETH', 'wstETH', 'USDC', 'USDT', 'LINK'];

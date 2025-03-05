@@ -19,9 +19,9 @@ const {
     WETH_ADDRESS,
     takeSnapshot,
     revertToSnapshot,
-} = require('../utils');
+} = require('../utils/utils');
 
-const { createSafe, executeSafeTx, SAFE_CONSTANTS } = require('../utils-safe');
+const { createSafe, executeSafeTx, SAFE_CONSTANTS } = require('../utils/safe');
 
 const adminAuthTest = async () => {
     describe('Admin-Auth', () => {

@@ -4,20 +4,20 @@ const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { morphoAaveV2Supply, morphoAaveV2Borrow } = require('../../actions');
+const { morphoAaveV2Supply, morphoAaveV2Borrow } = require('../../utils/actions');
 const {
     createMorphoAaveV2BoostStrategy,
     createMorphoAaveV2RepayStrategy,
     createMorphoAaveV2FLBoostStrategy,
     createMorphoAaveV2FLRepayStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 const {
     callMorphoAaveV2BoostStrategy,
     callMorphoAaveV2RepayStrategy,
     callMorphoAaveV2FLBoostStrategy,
     callMorphoAaveV2FLRepayStrategy,
-} = require('../../strategy-calls');
-const { subMorphoAaveV2AutomationStrategy } = require('../../strategy-subs');
+} = require('../utils/strategy-calls');
+const { subMorphoAaveV2AutomationStrategy } = require('../utils/strategy-subs');
 const {
     getContractFromRegistry,
     setNetwork,
@@ -33,8 +33,8 @@ const {
     revertToSnapshot,
     redeployCore,
     redeploy,
-} = require('../../utils');
-const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
+} = require('../../utils/utils');
+const { createStrategy, addBotCaller, createBundle } = require('../utils/utils-strategies');
 
 const cAsset = getAssetInfo('WETH');
 const dAsset = getAssetInfo('DAI');

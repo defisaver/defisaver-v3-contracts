@@ -31,35 +31,35 @@ const {
     takeSnapshot,
     revertToSnapshot,
     ETH_ADDR,
-} = require('../../../utils');
+} = require('../../../utils/utils');
 
 const {
     addBotCaller,
     createStrategy,
     createBundle,
     activateSub,
-} = require('../../../utils-strategies');
+} = require('../../utils/utils-strategies');
 
 const {
     createAaveV3CloseToCollWithMaximumGasPriceStrategy,
     createAaveV3FLCloseToCollWithMaximumGasPriceStrategy,
     createAaveV3CloseToDebtWithMaximumGasPriceStrategy,
     createAaveV3FLCloseToDebtWithMaximumGasPriceStrategy,
-} = require('../../../strategies');
+} = require('../../../../strategies-spec/mainnet');
 
 const {
     aaveV3Supply,
     aaveV3Borrow,
-} = require('../../../actions');
+} = require('../../../utils/actions');
 
-const { RATIO_STATE_OVER } = require('../../../triggers');
-const { subAaveV3CloseWithMaximumGasPriceBundle } = require('../../../strategy-subs');
+const { RATIO_STATE_OVER } = require('../../utils/triggers');
+const { subAaveV3CloseWithMaximumGasPriceBundle } = require('../../utils/strategy-subs');
 const {
     callAaveCloseToCollWithMaximumGasPriceStrategy,
     callAaveFLCloseToCollWithMaximumGasPriceStrategy,
     callAaveCloseToDebtWithMaximumGasPriceStrategy,
     callAaveFLCloseToDebtWithMaximumGasPriceStrategy,
-} = require('../../../strategy-calls');
+} = require('../../utils/strategy-calls');
 
 const testPairs = [
     {

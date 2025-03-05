@@ -20,7 +20,7 @@ const {
     approve,
     setBalance,
     UNISWAP_WRAPPER,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     fetchMakerAddresses,
@@ -29,7 +29,7 @@ const {
     MCD_MANAGER_ADDR,
     getVaultsForUser,
     canGenerateDebt,
-} = require('../../utils-mcd');
+} = require('../../utils/mcd');
 
 const BigNumber = hre.ethers.BigNumber;
 
@@ -37,7 +37,7 @@ const SUPPLY_AMOUNT_IN_USD = '150000';
 const GENERATE_AMOUNT_IN_USD = '50000';
 const {
     openVaultForExactAmountInDecimals, gUniDeposit, openVault, executeAction,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 const McdPaybackAction = dfs.actions.maker.MakerPaybackAction;
 const McdWithdrawAction = dfs.actions.maker.MakerWithdrawAction;

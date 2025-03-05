@@ -1,14 +1,14 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
-const { deployLiquityV2RepayBundle, getLiquityV2TestPairs } = require('../../utils-liquityV2');
+const { deployLiquityV2RepayBundle, getLiquityV2TestPairs } = require('../../utils/liquityV2');
 const { BaseLiquityV2StrategyTest } = require('./common');
-const { subLiquityV2RepayBundle } = require('../../strategy-subs');
+const { subLiquityV2RepayBundle } = require('../utils/strategy-subs');
 const {
     formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
     fetchAmountInUSDPrice,
-} = require('../../utils');
-const { callLiquityV2RepayStrategy, callLiquityV2FLRepayStrategy } = require('../../strategy-calls');
+} = require('../../utils/utils');
+const { callLiquityV2RepayStrategy, callLiquityV2FLRepayStrategy } = require('../utils/strategy-calls');
 
 class RepayTest extends BaseLiquityV2StrategyTest {
     async setUp() {

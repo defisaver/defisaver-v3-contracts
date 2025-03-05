@@ -30,12 +30,12 @@ const {
     takeSnapshot,
     revertToSnapshot, getContractFromRegistry, getOwnerAddr,
     network,
-} = require('../utils');
+} = require('../utils/utils');
 const {
     predictSafeAddress,
     signSafeTx,
     encodeSetupArgs,
-} = require('../utils-safe');
+} = require('../utils/safe');
 
 const botRefillTest = async () => {
     describe('Bot-Refills', function () {

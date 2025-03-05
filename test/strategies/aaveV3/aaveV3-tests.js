@@ -25,14 +25,14 @@ const {
     revertToSnapshot,
     ETH_ADDR,
     BLOCKS_PER_6H,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     addBotCaller,
     createStrategy,
     createBundle,
     activateSub,
-} = require('../../utils-strategies');
+} = require('../utils/utils-strategies');
 
 const {
     createAaveV3RepayL2Strategy,
@@ -43,19 +43,19 @@ const {
     createAaveV3FLCloseToCollL2Strategy,
     createAaveV3CloseToDebtL2Strategy,
     createAaveV3CloseToCollL2Strategy,
-} = require('../../l2-strategies');
+} = require('../../../strategies-spec/l2');
 
 const {
     createAaveV3CloseToCollStrategy,
     createAaveV3FLCloseToCollStrategy,
     createAaveV3CloseToDebtStrategy,
     createAaveV3FLCloseToDebtStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 const {
     subAaveV3L2AutomationStrategy,
     updateAaveV3L2AutomationStrategy,
     subAaveV3CloseBundle,
-} = require('../../l2-strategy-subs');
+} = require('../utils/l2-strategy-subs');
 
 const {
     callAaveV3RepayL2Strategy,
@@ -66,20 +66,20 @@ const {
     callAaveCloseToDebtL2Strategy,
     callAaveFLCloseToDebtL2Strategy,
     callAaveFLCloseToCollL2Strategy,
-} = require('../../l2-strategy-calls');
+} = require('../utils/l2-strategy-calls');
 
 const {
     callAaveCloseToCollStrategy,
     callAaveFLCloseToCollStrategy,
     callAaveCloseToDebtStrategy,
     callAaveFLCloseToDebtStrategy,
-} = require('../../strategy-calls');
+} = require('../utils/strategy-calls');
 
 const {
     aaveV3Supply, aaveV3Borrow,
-} = require('../../actions');
+} = require('../../utils/actions');
 
-const { RATIO_STATE_OVER } = require('../../triggers');
+const { RATIO_STATE_OVER } = require('../utils/triggers');
 
 const deployBundles = async () => {
     await openStrategyAndBundleStorage();

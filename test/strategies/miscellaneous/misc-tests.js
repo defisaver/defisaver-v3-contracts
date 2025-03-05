@@ -20,17 +20,17 @@ const {
     chainIds,
     setNewExchangeWrapper,
     network,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { callDcaStrategy } = require('../../strategy-calls');
-const { subDcaStrategy } = require('../../strategy-subs');
-const { createLimitOrderL2Strategy } = require('../../l2-strategies');
+const { callDcaStrategy } = require('../utils/strategy-calls');
+const { subDcaStrategy } = require('../utils/strategy-subs');
+const { createLimitOrderL2Strategy } = require('../../../strategies-spec/l2');
 
-const { createStrategy, addBotCaller, getUpdatedStrategySub } = require('../../utils-strategies');
+const { createStrategy, addBotCaller, getUpdatedStrategySub } = require('../utils/utils-strategies');
 
-const { callLimitOrderStrategy } = require('../../strategy-calls');
-const { subLimitOrderStrategy } = require('../../strategy-subs');
-const { createLimitOrderStrategy } = require('../../strategies');
+const { callLimitOrderStrategy } = require('../utils/strategy-calls');
+const { subLimitOrderStrategy } = require('../utils/strategy-subs');
+const { createLimitOrderStrategy } = require('../../../strategies-spec/mainnet');
 
 const DAY = 1 * 24 * 60 * 60;
 const TWO_DAYS = 2 * 24 * 60 * 60;

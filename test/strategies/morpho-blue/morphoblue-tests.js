@@ -9,7 +9,7 @@ const {
     createMorphoBlueBoostStrategy,
     createMorphoBlueFLDebtBoostStrategy,
     createMorphoBlueFLCollBoostStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 const {
     openStrategyAndBundleStorage,
     redeploy, getProxy,
@@ -17,12 +17,12 @@ const {
     setBalance, approve, revertToSnapshot,
     Float2BN, getAddrFromRegistry,
     balanceOf, nullAddress, formatMockExchangeObj, setNewExchangeWrapper,
-} = require('../../utils');
-const { createStrategy, createBundle, addBotCaller } = require('../../utils-strategies');
+} = require('../../utils/utils');
+const { createStrategy, createBundle, addBotCaller } = require('../utils/utils-strategies');
 const {
     morphoBlueBorrow, morphoBlueSupplyCollateral,
-} = require('../../actions');
-const { subMorphoBlueBoostBundle, subMorphoBlueRepayBundle } = require('../../strategy-subs');
+} = require('../../utils/actions');
+const { subMorphoBlueBoostBundle, subMorphoBlueRepayBundle } = require('../utils/strategy-subs');
 const {
     callMorphoBlueBoostStrategy,
     callMorphoBlueFLCollBoostStrategy,
@@ -30,8 +30,8 @@ const {
     callMorphoBlueFLCollRepayStrategy,
     callMorphoBlueFLDebtRepayStrategy,
     callMorphoBlueRepayStrategy,
-} = require('../../strategy-calls');
-const { getMarkets, supplyToMarket, MORPHO_BLUE_ADDRESS } = require('../../morpho-blue/utils');
+} = require('../utils/strategy-calls');
+const { getMarkets, supplyToMarket, MORPHO_BLUE_ADDRESS } = require('../../utils/morpho-blue');
 
 const createRepayBundle = async (proxy, isFork) => {
     const repayStrategy = createMorphoBlueRepayStrategy();

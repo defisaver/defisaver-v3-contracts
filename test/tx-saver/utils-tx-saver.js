@@ -18,9 +18,9 @@ const {
     fetchAmountinUSDPrice,
     chainIds,
     formatMockExchangeObj,
-} = require('../utils');
-const { supplyToMarket } = require('../llamalend/utils');
-const { signSafeTx } = require('../utils-safe');
+} = require('../utils/utils');
+const { supplyToMarket } = require('../utils/llamalend');
+const { signSafeTx } = require('../utils/safe');
 
 const addBotCallerForTxSaver = async (botAddr, isFork = false) => {
     if (!isFork) {

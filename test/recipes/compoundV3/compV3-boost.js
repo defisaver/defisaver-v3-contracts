@@ -5,7 +5,7 @@ const hre = require('hardhat');
 const ethers = require('ethers');
 const { getAssetInfo, assetAmountInWei } = require('@defisaver/tokens');
 const dfs = require('@defisaver/sdk');
-const { supplyCompV3, borrowCompV3, executeAction } = require('../../actions');
+const { supplyCompV3, borrowCompV3, executeAction } = require('../../utils/actions');
 
 const {
     getProxy,
@@ -16,7 +16,7 @@ const {
     UNISWAP_WRAPPER,
     nullAddress,
     getAddrFromRegistry,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const cometABI = [
     'function collateralBalanceOf(address account, address asset) external view returns (uint128)',

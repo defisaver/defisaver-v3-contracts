@@ -32,13 +32,13 @@ const {
     setContractAt,
     getAddrFromRegistry,
     UNISWAP_WRAPPER,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
+const { createStrategy, addBotCaller, createBundle } = require('../utils/utils-strategies');
 
 const {
     getRatio, getHints, LiquityActionIds, getTroveInfo,
-} = require('../../utils-liquity');
+} = require('../../utils/liquity');
 
 const {
     callLiquityBoostStrategy,
@@ -52,7 +52,7 @@ const {
     callLiquityDsrPaybackStrategy,
     callLiquityDsrSupplyStrategy,
     callLiquityDebtInFrontRepayStrategy,
-} = require('../../strategy-calls');
+} = require('../utils/strategy-calls');
 
 const {
     subLiquityCloseToCollStrategy,
@@ -63,7 +63,7 @@ const {
     subLiquityDsrPaybackStrategy,
     subLiquityDsrSupplyStrategy,
     subLiquityDebtInFrontRepayStrategy,
-} = require('../../strategy-subs');
+} = require('../utils/strategy-subs');
 
 const {
     createLiquityBoostStrategy,
@@ -74,11 +74,11 @@ const {
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
     createLiquityFLBoostWithCollStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 
-const { RATIO_STATE_OVER } = require('../../triggers');
+const { RATIO_STATE_OVER } = require('../utils/triggers');
 
-const { liquityOpen, createChickenBond, mcdDsrDeposit } = require('../../actions');
+const { liquityOpen, createChickenBond, mcdDsrDeposit } = require('../../utils/actions');
 
 const BLOCKS_PER_6H = 1662;
 

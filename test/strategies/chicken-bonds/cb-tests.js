@@ -15,18 +15,18 @@ const {
     addrs,
     setContractAt,
     resetForkToBlock,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     getRebondTime,
-} = require('../../utils-cb');
+} = require('../../utils/cb');
 
-const { createChickenBond } = require('../../actions');
+const { createChickenBond } = require('../../utils/actions');
 
-const { addBotCaller } = require('../../utils-strategies');
+const { addBotCaller } = require('../utils/utils-strategies');
 
-const { callCbRebondStrategy } = require('../../strategy-calls');
-const { subCbRebondStrategy } = require('../../strategy-subs');
+const { callCbRebondStrategy } = require('../utils/strategy-calls');
+const { subCbRebondStrategy } = require('../utils/strategy-subs');
 
 const cbRebondStrategyTest = async () => {
     describe('Chicken-Bond-Rebond-Strategy', function () {

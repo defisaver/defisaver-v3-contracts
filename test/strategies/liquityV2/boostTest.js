@@ -1,16 +1,16 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
-const { getLiquityV2TestPairs, deployLiquityV2BoostBundle, getLiquityV2AdjustBorrowMaxUpfrontFee } = require('../../utils-liquityV2');
+const { getLiquityV2TestPairs, deployLiquityV2BoostBundle, getLiquityV2AdjustBorrowMaxUpfrontFee } = require('../../utils/liquityV2');
 const { BaseLiquityV2StrategyTest } = require('./common');
-const { subLiquityV2BoostBundle } = require('../../strategy-subs');
+const { subLiquityV2BoostBundle } = require('../utils/strategy-subs');
 const {
     formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
     setBalance,
     BALANCER_VAULT_ADDR,
     fetchAmountInUSDPrice,
-} = require('../../utils');
-const { callLiquityV2BoostStrategy, callLiquityV2FLBoostWithCollStrategy, callLiquityV2FLBoostStrategy } = require('../../strategy-calls');
+} = require('../../utils/utils');
+const { callLiquityV2BoostStrategy, callLiquityV2FLBoostWithCollStrategy, callLiquityV2FLBoostStrategy } = require('../utils/strategy-calls');
 
 class BoostTest extends BaseLiquityV2StrategyTest {
     async setUp() {

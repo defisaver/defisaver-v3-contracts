@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+const { execSync } = require('child_process');
 
 const {
     flatten,
@@ -44,4 +45,17 @@ task('changeRepoNetwork', 'Changes addresses in helper files')
 task('encryptPrivateKey', 'Encrypt private key')
     .setAction(async () => {
         encryptPrivateKey();
+    });
+
+task('deployOnFork', 'Deploys contracts on an existing fork')
+    .addVariadicPositionalParam('contractNames', 'The names of the contracts to deploy', [], types.string)
+    .setAction(async (args) => {
+        const contractNames = args.contractNames.join(' ');
+        const cmd = `CONTRACTS="${contractNames}" npx hardhat run ./scripts/utils/deploy-on-fork.js --network fork`;
+        try {
+            execSync(cmd, { stdio: 'inherit', shell: true });
+        } catch (error) {
+            console.error(`Command failed: ${error}`);
+            process.exit(1);
+        }
     });

@@ -14,9 +14,9 @@ const {
     chainIds,
     setNewExchangeWrapper,
     network,
-} = require('../../utils');
-const { addBotCaller } = require('../../utils-strategies');
-const { fluidT1VaultOpen } = require('../../actions');
+} = require('../../utils/utils');
+const { addBotCaller } = require('../utils/utils-strategies');
+const { fluidT1VaultOpen } = require('../../utils/actions');
 
 class BaseFluidT1StrategyTest {
     constructor(testPairs, isFork) {

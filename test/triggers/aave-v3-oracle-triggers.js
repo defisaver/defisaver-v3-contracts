@@ -3,12 +3,12 @@ const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { deployContract } = require('../../scripts/utils/deployer');
-const { RATIO_STATE_UNDER, RATIO_STATE_OVER } = require('../triggers');
+const { RATIO_STATE_UNDER, RATIO_STATE_OVER } = require('../strategies/utils/triggers');
 const {
     redeploy, setNetwork, getLocalTokenPrice, chainIds, BN2Float, Float2BN,
     setContractAt,
     network,
-} = require('../utils');
+} = require('../utils/utils');
 
 const aaveV3QuotePriceTriggerTest = () => {
     const testAssets = [
