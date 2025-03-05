@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const dfs = require('@defisaver/sdk');
-const { supplyCompV3, borrowCompV3, executeAction } = require('../../actions');
+const { supplyCompV3, borrowCompV3, executeAction } = require('../../utils/actions');
 
 const {
     getProxy,
@@ -14,7 +14,7 @@ const {
     nullAddress,
     approve,
     getAddrFromRegistry,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 describe('CompoundV3 Repay recipe test', function () {
     this.timeout(80000);

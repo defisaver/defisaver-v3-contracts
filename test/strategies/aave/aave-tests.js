@@ -3,22 +3,22 @@ const { getAssetInfo } = require('@defisaver/tokens');
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { supplyAave, borrowAave } = require('../../actions');
+const { supplyAave, borrowAave } = require('../../utils/actions');
 const {
     createAaveV2BoostStrategy,
     createAaveV2RepayStrategy,
     createAaveFLV2BoostStrategy,
     createAaveFLV2RepayStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 
 const {
     callAaveV2BoostStrategy,
     callAaveV2RepayStrategy,
     callAaveFLV2BoostStrategy,
     callAaveFLV2RepayStrategy,
-} = require('../../strategy-calls');
+} = require('../utils/strategy-calls');
 
-const { subAaveV2AutomationStrategy } = require('../../strategy-subs');
+const { subAaveV2AutomationStrategy } = require('../utils/strategy-subs');
 const {
     getContractFromRegistry,
     setNetwork,
@@ -29,15 +29,14 @@ const {
     approve,
     setBalance,
     redeploy,
-    REGISTRY_ADDR,
     AAVE_V2_MARKET_ADDR,
     redeployCore,
-} = require('../../utils');
-const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
+} = require('../../utils/utils');
+const { createStrategy, addBotCaller, createBundle } = require('../utils/utils-strategies');
 
 const VARIABLE_RATE_MODE = 2;
 
-const createBundleAndStrategy = async (proxy) => {
+const createBundleAndStrategy = async () => {
     const repayAaveStrategyEncoded = createAaveV2RepayStrategy();
     const repayFLAaveStrategyEncoded = createAaveFLV2RepayStrategy();
 
@@ -46,22 +45,20 @@ const createBundleAndStrategy = async (proxy) => {
 
     await openStrategyAndBundleStorage(false);
 
-    const repayId1 = await createStrategy(proxy, ...repayAaveStrategyEncoded, true);
-    const repayId2 = await createStrategy(proxy, ...repayFLAaveStrategyEncoded, true);
+    const repayId1 = await createStrategy(...repayAaveStrategyEncoded, true);
+    const repayId2 = await createStrategy(...repayFLAaveStrategyEncoded, true);
 
-    const boostId1 = await createStrategy(proxy, ...boostAaveStrategyEncoded, true);
-    const boostId2 = await createStrategy(proxy, ...boostFLAaveStrategyEncoded, true);
+    const boostId1 = await createStrategy(...boostAaveStrategyEncoded, true);
+    const boostId2 = await createStrategy(...boostFLAaveStrategyEncoded, true);
 
     const repayBundleId = await createBundle(
-        proxy,
         [repayId1, repayId2],
     );
 
     const boostBundleId = await createBundle(
-        proxy,
         [boostId1, boostId2],
     );
-    await redeploy('AaveSubProxy', REGISTRY_ADDR, false, false, repayBundleId, boostBundleId);
+    await redeploy('AaveSubProxy', false, repayBundleId, boostBundleId);
     return { repayBundleId, boostBundleId };
 };
 
@@ -116,7 +113,7 @@ const aaveV2BoostTest = () => describe('Aave-Boost-Strategy', function () {
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
         await addBotCaller(botAcc.address);
 
-        await createBundleAndStrategy(proxy);
+        await createBundleAndStrategy();
     });
 
     for (let i = 0; i < testPairs.length; i++) {
@@ -250,7 +247,7 @@ const aaveV2RepayTest = () => describe('Aave-Repay-Strategy', function () {
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
         await addBotCaller(botAcc.address);
 
-        await createBundleAndStrategy(proxy);
+        await createBundleAndStrategy();
     });
 
     for (let i = 0; i < testPairs.length; i++) {

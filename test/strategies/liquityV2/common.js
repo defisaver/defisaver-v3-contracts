@@ -2,7 +2,7 @@ const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { topUp } = require('../../../scripts/utils/fork');
 const {
-    getProxy, addrs, getNetwork, getContractFromRegistry,
+    getProxy, addrs, getContractFromRegistry,
     getOwnerAddr,
     setBalance,
     BOLD_ADDR,
@@ -10,9 +10,10 @@ const {
     takeSnapshot,
     revertToSnapshot,
     redeploy,
-} = require('../../utils');
-const { uniV3CreatePool, liquityV2Open } = require('../../actions');
-const { addBotCaller } = require('../../utils-strategies');
+    network,
+} = require('../../utils/utils');
+const { uniV3CreatePool, liquityV2Open } = require('../../utils/actions');
+const { addBotCaller } = require('../utils/utils-strategies');
 
 class BaseLiquityV2StrategyTest {
     constructor(testPairs, isFork) {
@@ -21,7 +22,6 @@ class BaseLiquityV2StrategyTest {
         this.snapshotId = null;
         this.contracts = {};
         this.bundles = {};
-        this.registryAddr = addrs[getNetwork()].REGISTRY_ADDR;
     }
 
     async baseSetUp() {
@@ -30,7 +30,7 @@ class BaseLiquityV2StrategyTest {
         await this.setUpCallers();
         await this.setUpContracts();
         await this.addLiquidity();
-        await addBotCaller(this.botAcc.address, this.registryAddr, this.isFork);
+        await addBotCaller(this.botAcc.address, this.isFork);
     }
 
     async takeSnapshot() {
@@ -56,18 +56,18 @@ class BaseLiquityV2StrategyTest {
     }
 
     async setUpContracts() {
-        const strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
+        const strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[network].STRATEGY_EXECUTOR_ADDR);
         this.contracts.strategyExecutor = strategyExecutor.connect(this.botAcc);
-        this.contracts.flAction = await getContractFromRegistry('FLAction', this.registryAddr, false, this.isFork);
-        this.contracts.view = await redeploy('LiquityV2View', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2Open', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2RatioCheck', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2Borrow', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2Supply', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2RatioTrigger', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2Adjust', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2Withdraw', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2Payback', this.registryAddr, false, this.isFork);
+        this.contracts.flAction = await getContractFromRegistry('FLAction', this.isFork);
+        this.contracts.view = await redeploy('LiquityV2View', this.isFork);
+        await redeploy('LiquityV2Open', this.isFork);
+        await redeploy('LiquityV2RatioCheck', this.isFork);
+        await redeploy('LiquityV2Borrow', this.isFork);
+        await redeploy('LiquityV2Supply', this.isFork);
+        await redeploy('LiquityV2RatioTrigger', this.isFork);
+        await redeploy('LiquityV2Adjust', this.isFork);
+        await redeploy('LiquityV2Withdraw', this.isFork);
+        await redeploy('LiquityV2Payback', this.isFork);
     }
 
     async addLiquidity() {

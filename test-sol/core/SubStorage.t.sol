@@ -7,7 +7,7 @@ import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Const } from "../Const.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_SubStorage is SubStorage, BaseTest {
 

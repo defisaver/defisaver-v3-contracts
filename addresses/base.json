@@ -1005,6 +1005,17 @@
         "history": []
       },
       {
+        "name": "MorphoBlueClaim",
+        "address": "0xE279E9100d6d524602f98E8736BA5F8f065Dd3e0",
+        "id": "0x07f9b8e2",
+        "path": "contracts/actions/morpho-blue/MorphoBlueClaim",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+      },
+      {
         "name": "GasFeeTakerL2",
         "address": "0xAEe02caf404332c40Fd7FF8d5c25F91f7c1641d0",
         "id": "0x7ec82077",
@@ -1281,7 +1292,7 @@
       "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Open",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
   },
@@ -1292,7 +1303,7 @@
       "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Supply",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
   },
@@ -1303,7 +1314,7 @@
       "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
   },
@@ -1314,7 +1325,7 @@
       "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Borrow",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
   },
@@ -1325,7 +1336,7 @@
       "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
   },
@@ -1336,7 +1347,7 @@
       "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
   },
@@ -1347,7 +1358,7 @@
       "path": "contracts/actions/fluid/vaultT1/FluidRatioTrigger",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
   },
@@ -1358,7 +1369,7 @@
       "path": "contracts/actions/fluid/vaultT1/FluidRatioCheck",
       "version": "1.0.0",
       "inRegistry": true,
-      "changeTime": "0",
+      "changeTime": "86400",
       "registryIds": [],
       "history": []
   },
@@ -1372,5 +1383,27 @@
       "changeTime": "0",
       "registryIds": [],
       "history": []
-  }
+  },
+{
+    "name": "TokenizedVaultAdapter",
+    "address": "0x88cF6CFa51b6F771570F6Df450Edf1C886212d3e",
+    "id": "0x3e46d5ba",
+    "path": "contracts/actions/utils/TokenizedVaultAdapter.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+},
+{
+    "name": "TransferNFT",
+    "address": "0xe49c70c673c3ef9019fe9c875ED5ed3Dc02F5613",
+    "id": "0xa3443678",
+    "path": "contracts/actions/utils/TransferNFT.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+}
 ]

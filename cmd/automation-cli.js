@@ -10,7 +10,7 @@ const { program } = require('commander');
 const {
     addrs,
     generateIds,
-} = require('../test/utils');
+} = require('../test/utils/utils');
 
 const strategyStorageAbi = require('../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').abi;
 const bundleStorageAbi = require('../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').abi;

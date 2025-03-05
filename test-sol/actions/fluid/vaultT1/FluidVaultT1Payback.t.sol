@@ -35,7 +35,7 @@ contract TestFluidVaultT1Payback is FluidExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("FluidVaultT1Payback");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

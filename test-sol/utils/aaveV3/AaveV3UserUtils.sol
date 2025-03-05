@@ -33,8 +33,9 @@ contract AaveV3UserUtils is UserWallet {
         executeWithWallet(_isSafe, _subProxy, fnData, 0);
     }
 
-    ///////////////////////////////// HELPER FUNCTIONS /////////////////////////////////
-
+    /*//////////////////////////////////////////////////////////////////////////
+                                       HELPERS
+    //////////////////////////////////////////////////////////////////////////*/
     function encodeSubData(AaveV3SubProxy.AaveSubData memory user) public pure returns (bytes memory) {
         return abi.encodePacked(
             bytes16(uint128(user.minRatio)),

@@ -2,18 +2,17 @@
 /* eslint-disable no-mixed-operators */
 const hre = require('hardhat');
 const Dec = require('decimal.js');
-const { expect } = require('chai');
 
 const {
     getSystemInfo,
     calcCBondsBLUSDMarketPremium,
     calcRebondMs,
     calcAccruedAmountForMs,
-} = require('../utils-cb');
+} = require('../utils/cb');
 
 const {
-    redeploy, takeSnapshot, revertToSnapshot,
-} = require('../utils');
+    redeploy,
+} = require('../utils/utils');
 
 describe('CB-rebond-trigger', function () {
     this.timeout(80000);

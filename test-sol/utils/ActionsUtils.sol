@@ -60,8 +60,11 @@ import { FluidVaultT1Adjust } from "../../contracts/actions/fluid/vaultT1/FluidV
 
 contract ActionsUtils {
 
+    // @dev Change this value if we ever need to add more parameters to any action.
+    uint256 internal constant MAX_PARAM_MAPPING_SIZE = 15;
+
     bytes32[] internal subData = new bytes32[](0);
-    uint8[]  internal paramMapping = new uint8[](15);
+    uint8[]  internal paramMapping = new uint8[](MAX_PARAM_MAPPING_SIZE);
     bytes32[] internal returnValues = new bytes32[](0);
 
     enum FLSource {
