@@ -1,18 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import "forge-std/Test.sol";
-
 import { DFSRegistry } from "../../contracts/core/DFSRegistry.sol";
 import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
 import { CoreHelper } from "../../contracts/core/helpers/CoreHelper.sol";
 import { AdminVault } from "../../contracts/auth/AdminAuth.sol";
-import { CheatCodes } from "../CheatCodes.sol";
+import { CheatCodes } from "./CheatCodes.sol";
 
-contract RegistryUtils is CoreHelper {
+contract RegistryUtils is CoreHelper, CheatCodes {
     function redeploy(string memory _actionName, address _newAddr) public {
         DFSRegistry registry = DFSRegistry(REGISTRY_ADDR);
-        CheatCodes cheats = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
         bytes4 actionId = bytes4(keccak256(abi.encodePacked(_actionName)));
 
@@ -43,7 +40,6 @@ contract RegistryUtils is CoreHelper {
     }
 
     function addBotCaller(address _newBot) public {
-        CheatCodes cheats = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
         BotAuth botAuth = BotAuth(getAddr("BotAuth"));
 
         address owner = AdminVault(botAuth.adminVault()).owner();
@@ -52,5 +48,4 @@ contract RegistryUtils is CoreHelper {
         botAuth.addCaller(_newBot);
         cheats.stopPrank();
     }
-
 }

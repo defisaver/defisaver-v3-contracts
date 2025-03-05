@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { DSMath } from "../../../contracts/DS/DSMath.sol";
 import { AaveV3Borrow } from "../../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 import { AaveV3Payback } from "../../../contracts/actions/aaveV3/AaveV3Payback.sol";
 import { AaveV3SubProxy } from "../../../contracts/actions/aaveV3/AaveV3SubProxy.sol";
@@ -23,30 +22,23 @@ import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 import { IPoolAddressesProvider } from "../../../contracts/interfaces/aaveV3/IPoolAddressesProvider.sol";
 import { IPoolV3 } from "../../../contracts/interfaces/aaveV3/IPoolV3.sol";
 import { AaveV3RatioTrigger } from "../../../contracts/triggers/AaveV3RatioTrigger.sol";
-import { Const } from "../../Const.sol";
-import { TokenAddresses } from "../../TokenAddresses.sol";
+import { Addresses } from "../../utils/Addresses.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { BundleBuilder } from "../../utils/BundleBuilder.sol";
 import { RegistryUtils } from "../../utils/RegistryUtils.sol";
 import { Strategies } from "../../utils/Strategies.sol";
-import { Tokens } from "../../utils/Tokens.sol";
 import { AaveV3User } from "../../utils/aaveV3/AaveV3User.sol";
-import { CommonBase } from "forge-std/Base.sol";
-import { StdAssertions } from "forge-std/StdAssertions.sol";
-import { StdChains } from "forge-std/StdChains.sol";
-import { StdCheats, StdCheatsSafe } from "forge-std/StdCheats.sol";
-import { StdUtils } from "forge-std/StdUtils.sol";
-import { Test } from "forge-std/Test.sol";
+import { BaseTest } from "../../utils/BaseTest.sol";
 
-contract TestAaveV3Automation is
-    Test,
-    DSMath,
-    Tokens,
-    RegistryUtils,
-    ActionsUtils,
-    Strategies
-{
+contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                     VARIABLES
+    //////////////////////////////////////////////////////////////////////////*/ 
     address internal constant AAVE_MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
+
+    uint256 internal REPAY_AMOUNT_WETH;
+    uint256 internal INITIAL_COLLATERAL_WETH_AMOUNT;
 
     uint128 internal constant MIN_RATIO = 180e16;
     uint128 internal constant MAX_RATIO = 220e16;
@@ -54,15 +46,12 @@ contract TestAaveV3Automation is
     uint128 internal constant TARGET_RATIO_REPAY = 200e16;
 
     uint256 internal constant INITIAL_TOKEN_AMOUNT = 1000 ether;
-    uint256 internal INITIAL_COLLATERAL_WETH_AMOUNT = amountInUSDPrice(TokenAddresses.WETH_ADDR, 15_000);
     uint256 internal constant INITIAL_DEBT_DAI_AMOUNT = 10_000e18;
 
     uint256 internal constant INDEX_REPAY = 0;
     uint256 internal constant INDEX_REPAY_FL = 1;
     uint256 internal constant INDEX_BOOST = 0;
     uint256 internal constant INDEX_BOOST_FL = 1;
-
-    uint256 internal REPAY_AMOUNT_WETH = amountInUSDPrice(TokenAddresses.WETH_ADDR, 1_000);
 
     uint256 internal constant BOOST_AMOUNT_DAI = 500e18;
 
@@ -93,12 +82,20 @@ contract TestAaveV3Automation is
     uint256 internal boostSubId;
     uint64 internal boostBundleId;
 
-    constructor() {
+    /*//////////////////////////////////////////////////////////////////////////
+                                  SETUP FUNCTION
+    //////////////////////////////////////////////////////////////////////////*/
+    function setUp() public override {
+        forkMainnetLatest();
+
+        REPAY_AMOUNT_WETH = amountInUSDPrice(Addresses.WETH_ADDR, 1_000);
+        INITIAL_COLLATERAL_WETH_AMOUNT = amountInUSDPrice(Addresses.WETH_ADDR, 15_000);
+
         poolAddressesProvider = IPoolAddressesProvider(AAVE_MARKET);
         pool = IPoolV3(poolAddressesProvider.getPool());
 
-        collateralAsset = pool.getReserveData(TokenAddresses.WETH_ADDR);
-        debtAsset = pool.getReserveData(TokenAddresses.DAI_ADDR);
+        collateralAsset = pool.getReserveData(Addresses.WETH_ADDR);
+        debtAsset = pool.getReserveData(Addresses.DAI_ADDR);
 
         user = new AaveV3User();
 
@@ -110,7 +107,7 @@ contract TestAaveV3Automation is
         _setUpExchangeWrapper();
 
         vm.etch(SUB_STORAGE_ADDR, address(new SubStorage()).code);
-        vm.etch(Const.LEGACY_RECIPE_EXECUTOR_ADDR_V3, address(new RecipeExecutor()).code);
+        vm.etch(Addresses.LEGACY_RECIPE_EXECUTOR_ADDR_V3, address(new RecipeExecutor()).code);
 
         addBotCaller(address(this));
 
@@ -134,15 +131,15 @@ contract TestAaveV3Automation is
     }
 
     function _setUpExchangeWrapper() internal {
-        WrapperExchangeRegistry exchangeRegistry = WrapperExchangeRegistry(Const.WRAPPER_EXCHANGE_REGISTRY);
-        vm.startPrank(Const.OWNER_ACC);
-        exchangeRegistry.addWrapper(TokenAddresses.UNI_V2_WRAPPER);
+        WrapperExchangeRegistry exchangeRegistry = WrapperExchangeRegistry(Addresses.WRAPPER_EXCHANGE_REGISTRY);
+        vm.startPrank(Addresses.OWNER_ACC);
+        exchangeRegistry.addWrapper(Addresses.UNI_V2_WRAPPER);
         vm.stopPrank();
     }
 
     function _initRepayBundle() internal {
-        uint256 repayId = createAaveV3Repay();
-        uint256 repayFLId = createAaveV3FLRepay();
+        uint256 repayId = Strategies.createAaveV3Repay();
+        uint256 repayFLId = Strategies.createAaveV3FLRepay();
 
         BundleBuilder bundleBuilder = new BundleBuilder();
 
@@ -153,8 +150,8 @@ contract TestAaveV3Automation is
     }
 
     function _initBoostBundle() internal {
-        uint256 boostId = createAaveV3Boost();
-        uint256 boostFLId = createAaveV3FLBoost();
+        uint256 boostId = Strategies.createAaveV3Boost();
+        uint256 boostFLId = Strategies.createAaveV3FLBoost();
 
         BundleBuilder bundleBuilder = new BundleBuilder();
 
@@ -165,7 +162,7 @@ contract TestAaveV3Automation is
     }
 
     function _createAaveV3Position(bool _isSafe, address _wallet) internal {
-        gibTokens(_wallet, TokenAddresses.WETH_ADDR, INITIAL_TOKEN_AMOUNT);
+        gibTokens(_wallet, Addresses.WETH_ADDR, INITIAL_TOKEN_AMOUNT);
 
         user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET);
         user.borrow(_isSafe, AAVE_MARKET, INITIAL_DEBT_DAI_AMOUNT, 2, debtAsset.id);
@@ -196,8 +193,9 @@ contract TestAaveV3Automation is
         _subToAutomationBundles(_isSafe);
     }
 
-    //////////////////////////////// TESTs /////////////////////////////////////////////
-
+    /*//////////////////////////////////////////////////////////////////////////
+                                     TESTS
+    //////////////////////////////////////////////////////////////////////////*/
     function testAaveV3RepayStrategy() public {
         _testAaveV3RepayStrategy(false);
         _testAaveV3RepayStrategy(true);
@@ -225,14 +223,14 @@ contract TestAaveV3Automation is
 
         uint256 borrowAmountBefore = IERC20(debtAsset.variableDebtTokenAddress).balanceOf(wallet);
 
-        uint256 txFeeBalanceBefore = IERC20(TokenAddresses.WETH_ADDR).balanceOf(TokenAddresses.FEE_RECEIVER);
+        uint256 txFeeBalanceBefore = IERC20(Addresses.WETH_ADDR).balanceOf(Addresses.FEE_RECEIVER);
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
         bytes[] memory _actionsCallData = new bytes[](5);
         _actionsCallData[0] = aaveV3WithdrawEncode(collateralAsset.id, true, REPAY_AMOUNT_WETH, wallet, address(0));
-        _actionsCallData[1] = sellEncode(TokenAddresses.WETH_ADDR, TokenAddresses.DAI_ADDR, 0, wallet, wallet, TokenAddresses.UNI_V2_WRAPPER);
-        _actionsCallData[2] = gasFeeEncode(REPAY_GAS_COST, TokenAddresses.DAI_ADDR);
+        _actionsCallData[1] = sellEncode(Addresses.WETH_ADDR, Addresses.DAI_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER);
+        _actionsCallData[2] = gasFeeEncode(REPAY_GAS_COST, Addresses.DAI_ADDR);
         _actionsCallData[3] = aaveV3PaybackEncode(0, wallet, 2, debtAsset.id,true, false, address(0), address(0));
         _actionsCallData[4] = aaveV3RatioCheckEncode(0, 0);
 
@@ -242,7 +240,7 @@ contract TestAaveV3Automation is
 
         uint256 borrowAmountAfter = IERC20(debtAsset.variableDebtTokenAddress).balanceOf(wallet);
 
-        uint256 txFeeBalanceAfter = IERC20(TokenAddresses.WETH_ADDR).balanceOf(TokenAddresses.FEE_RECEIVER);
+        uint256 txFeeBalanceAfter = IERC20(Addresses.WETH_ADDR).balanceOf(Addresses.FEE_RECEIVER);
 
         uint amountAfterFee = REPAY_AMOUNT_WETH - (REPAY_AMOUNT_WETH / 400);
 
@@ -257,9 +255,9 @@ contract TestAaveV3Automation is
         bytes[] memory _triggerCallData = new bytes[](1);
 
         bytes[] memory _actionsCallData = new bytes[](6);
-        _actionsCallData[0] = flActionEncode(TokenAddresses.WETH_ADDR, REPAY_AMOUNT_WETH, FLSource.BALANCER);
-        _actionsCallData[1] = sellEncode(TokenAddresses.WETH_ADDR, TokenAddresses.DAI_ADDR, REPAY_AMOUNT_WETH, wallet, wallet, TokenAddresses.UNI_V2_WRAPPER);
-        _actionsCallData[2] = gasFeeEncode(REPAY_FL_GAS_COST, TokenAddresses.DAI_ADDR);
+        _actionsCallData[0] = flActionEncode(Addresses.WETH_ADDR, REPAY_AMOUNT_WETH, FLSource.BALANCER);
+        _actionsCallData[1] = sellEncode(Addresses.WETH_ADDR, Addresses.DAI_ADDR, REPAY_AMOUNT_WETH, wallet, wallet, Addresses.UNI_V2_WRAPPER);
+        _actionsCallData[2] = gasFeeEncode(REPAY_FL_GAS_COST, Addresses.DAI_ADDR);
         _actionsCallData[3] = aaveV3PaybackEncode(0, wallet, 2, debtAsset.id,true, false, address(0), address(0));
         _actionsCallData[4] = aaveV3WithdrawEncode(collateralAsset.id, true, 0, address(flAction), address(0));
         _actionsCallData[5] = aaveV3RatioCheckEncode(0, 0);
@@ -282,8 +280,8 @@ contract TestAaveV3Automation is
 
         bytes[] memory _actionsCallData = new bytes[](5);
         _actionsCallData[0] = aaveV3BorrowEncode(BOOST_AMOUNT_DAI, address(0), 2, debtAsset.id, true, false, address(0), address(0));
-        _actionsCallData[1] = sellEncode(TokenAddresses.DAI_ADDR, TokenAddresses.WETH_ADDR, 0, wallet, wallet, TokenAddresses.UNI_V2_WRAPPER);
-        _actionsCallData[2] = gasFeeEncode(BOOST_GAS_COST, TokenAddresses.WETH_ADDR);
+        _actionsCallData[1] = sellEncode(Addresses.DAI_ADDR, Addresses.WETH_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER);
+        _actionsCallData[2] = gasFeeEncode(BOOST_GAS_COST, Addresses.WETH_ADDR);
         _actionsCallData[3] = aaveV3SupplyEncode(0, wallet, collateralAsset.id, true, false, address(0), address(0));
         _actionsCallData[4] = aaveV3RatioCheckEncode(0, 0);
 
@@ -303,9 +301,9 @@ contract TestAaveV3Automation is
         bytes[] memory _triggerCallData = new bytes[](1);
 
         bytes[] memory _actionsCallData = new bytes[](6);
-        _actionsCallData[0] = flActionEncode(TokenAddresses.DAI_ADDR, BOOST_AMOUNT_DAI, FLSource.BALANCER);
-        _actionsCallData[1] = sellEncode(TokenAddresses.DAI_ADDR, TokenAddresses.WETH_ADDR, BOOST_AMOUNT_DAI, wallet, wallet, TokenAddresses.UNI_V2_WRAPPER);
-        _actionsCallData[2] = gasFeeEncode(BOOST_FL_GAS_COST, TokenAddresses.WETH_ADDR);
+        _actionsCallData[0] = flActionEncode(Addresses.DAI_ADDR, BOOST_AMOUNT_DAI, FLSource.BALANCER);
+        _actionsCallData[1] = sellEncode(Addresses.DAI_ADDR, Addresses.WETH_ADDR, BOOST_AMOUNT_DAI, wallet, wallet, Addresses.UNI_V2_WRAPPER);
+        _actionsCallData[2] = gasFeeEncode(BOOST_FL_GAS_COST, Addresses.WETH_ADDR);
         _actionsCallData[3] = aaveV3SupplyEncode(0, wallet, collateralAsset.id, true, false, address(0), address(0));
         _actionsCallData[4] = aaveV3BorrowEncode(0, address(flAction), 2, debtAsset.id, true, false, address(0), address(0));
         _actionsCallData[5] = aaveV3RatioCheckEncode(0, 0);
@@ -319,8 +317,9 @@ contract TestAaveV3Automation is
         assertGt(beforeRatio, afterRatio);
     }
 
-    ///////////////////////////////// HELPER FUNCTIONS /////////////////////////////////
-
+    /*//////////////////////////////////////////////////////////////////////////
+                                       HELPERS
+    //////////////////////////////////////////////////////////////////////////*/
     function _formatRepaySub(AaveV3SubProxy.AaveSubData memory _user) public view returns (StrategyModel.StrategySub memory sub) {
         sub.strategyOrBundleId = repayBundleId;
         sub.isBundle = true;

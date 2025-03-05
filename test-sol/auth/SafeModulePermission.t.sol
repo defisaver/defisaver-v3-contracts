@@ -6,7 +6,7 @@ import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
-import { Const } from "../Const.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_SafeModulePermission is SafeModulePermission, BaseTest {
     

@@ -1,3 +1,9 @@
+/// @dev This contract is temporarily commented out so that `forge coverage` can pass.
+/// See https://github.com/foundry-rs/foundry/issues/3357 for more context on coverage and stack to deep errors.
+/// Compiling this with `forge build --optimize=false` will result in a "stack too deep" error.
+/// Even though the source of this contract could be optimized, it will not be changed, as it can be compiled with optimization enabled.
+/// NOTE This contract is not used in the production environment and is only left here for reference.
+/*
 // SPDX-License-Identifier: MIT
 
 pragma solidity =0.8.24;
@@ -55,3 +61,4 @@ contract UniV3CurrentTickTrigger is ITrigger, AdminAuth, TriggerHelper {
         params = abi.decode(_subData, (SubParams));
     }
 }
+*/

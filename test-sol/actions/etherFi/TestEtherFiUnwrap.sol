@@ -11,7 +11,7 @@ import { EtherFiHelper } from "../../../contracts/actions/etherfi/helpers/EtherF
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-import { TokenAddresses } from "../../TokenAddresses.sol";
+import {Addresses } from "../../utils/Addresses.sol";
 
 contract TestEtherFiUnwrap is BaseTest, ActionsUtils, EtherFiHelper {
 
@@ -31,7 +31,7 @@ contract TestEtherFiUnwrap is BaseTest, ActionsUtils, EtherFiHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("EtherFiUnwrap" );
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

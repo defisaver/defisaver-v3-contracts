@@ -5,7 +5,7 @@ import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterf
 import { DSProxy } from "../../contracts/DS/DSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
-import { Const } from "../Const.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 abstract contract UserWallet {
     DSProxy public proxy;
@@ -20,7 +20,7 @@ abstract contract UserWallet {
     }
 
     function createDSProxy() internal {
-        proxy = DSProxyFactoryInterface(Const.DS_PROXY_FACTORY).build();
+        proxy = DSProxyFactoryInterface(Addresses.DS_PROXY_FACTORY).build();
         proxyAddr = address(proxy);
     }
 
@@ -40,8 +40,8 @@ abstract contract UserWallet {
             0,
             payable(address(0))
         );
-        safeAddr = ISafeProxyFactory(Const.SAFE_PROXY_FACTORY).createProxyWithNonce(
-            Const.SAFE_SINGLETON,
+        safeAddr = ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY).createProxyWithNonce(
+            Addresses.SAFE_SINGLETON,
             setupData,
             saltNonce
         );

@@ -34,7 +34,7 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("FluidVaultT1Withdraw");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
