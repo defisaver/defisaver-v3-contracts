@@ -1145,5 +1145,16 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": []
-    }
+    },
+{
+    "name": "CompV3RatioTrigger",
+    "address": "0x321639cc7492D97294ADA6B6Ad867d93673316D4",
+    "id": "0x506812d0",
+    "path": "contracts/triggers/CompV3RatioTrigger.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+}
 ]

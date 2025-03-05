@@ -1383,5 +1383,27 @@
       "changeTime": "0",
       "registryIds": [],
       "history": []
-  }
+  },
+{
+    "name": "TokenizedVaultAdapter",
+    "address": "0x88cF6CFa51b6F771570F6Df450Edf1C886212d3e",
+    "id": "0x3e46d5ba",
+    "path": "contracts/actions/utils/TokenizedVaultAdapter.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+},
+{
+    "name": "TransferNFT",
+    "address": "0xe49c70c673c3ef9019fe9c875ED5ed3Dc02F5613",
+    "id": "0xa3443678",
+    "path": "contracts/actions/utils/TransferNFT.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+}
 ]
