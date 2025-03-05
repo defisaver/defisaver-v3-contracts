@@ -4127,7 +4127,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Open",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4138,7 +4138,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Supply",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4149,7 +4149,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4160,7 +4160,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Borrow",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4171,7 +4171,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4182,7 +4182,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4193,7 +4193,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidRatioTrigger",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4204,7 +4204,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidRatioCheck",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
