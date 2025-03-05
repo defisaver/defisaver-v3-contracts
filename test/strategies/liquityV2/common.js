@@ -58,16 +58,16 @@ class BaseLiquityV2StrategyTest {
     async setUpContracts() {
         const strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
         this.contracts.strategyExecutor = strategyExecutor.connect(this.botAcc);
-        this.contracts.flAction = await getContractFromRegistry('FLAction', this.registryAddr, false, this.isFork);
-        this.contracts.view = await redeploy('LiquityV2View', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2Open', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2RatioCheck', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2Borrow', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2Supply', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2RatioTrigger', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2Adjust', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2Withdraw', this.registryAddr, false, this.isFork);
-        await redeploy('LiquityV2Payback', this.registryAddr, false, this.isFork);
+        this.contracts.flAction = await getContractFromRegistry('FLAction', this.registryAddr, this.isFork);
+        this.contracts.view = await redeploy('LiquityV2View', this.registryAddr, this.isFork);
+        await redeploy('LiquityV2Open', this.registryAddr, this.isFork);
+        await redeploy('LiquityV2RatioCheck', this.registryAddr, this.isFork);
+        await redeploy('LiquityV2Borrow', this.registryAddr, this.isFork);
+        await redeploy('LiquityV2Supply', this.registryAddr, this.isFork);
+        await redeploy('LiquityV2RatioTrigger', this.registryAddr, this.isFork);
+        await redeploy('LiquityV2Adjust', this.registryAddr, this.isFork);
+        await redeploy('LiquityV2Withdraw', this.registryAddr, this.isFork);
+        await redeploy('LiquityV2Payback', this.registryAddr, this.isFork);
     }
 
     async addLiquidity() {

@@ -62,7 +62,7 @@ contract BaseTest is Config {
 
     function forkTenderly() internal {
         string memory tenderlyForkId = vm.envString("FORK_ID");
-        string memory base = "https://rpc.tenderly.co/fork/";
+        string memory base = "https://virtual.mainnet.rpc.tenderly.co/";
         string memory forkUrl = string(abi.encodePacked(base, tenderlyForkId));
         uint256 tenderlyFork = vm.createFork(forkUrl);
         vm.selectFork(tenderlyFork);

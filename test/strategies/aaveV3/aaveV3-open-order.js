@@ -106,7 +106,7 @@ const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
                 strategyExecutor = await hre.ethers.getContractAt('StrategyExecutorL2', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
             }
             strategyExecutor = strategyExecutor.connect(botAcc);
-            flAction = await getContractFromRegistry('FLAction', REGISTRY_ADDR, false, isFork);
+            flAction = await getContractFromRegistry('FLAction', REGISTRY_ADDR, isFork);
         };
 
         const deployStrategies = async () => {

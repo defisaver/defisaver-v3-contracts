@@ -13,68 +13,68 @@ async function main() {
     await topUp(senderAcc.address);
 
     // core
-    const recipeExecutor = await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, true, true);
-    const safeModuleAuth = await redeploy('SafeModuleAuth', addrs[network].REGISTRY_ADDR, true, true);
-    const strategyExecutor = await redeploy('StrategyExecutor', addrs[network].REGISTRY_ADDR, true, true);
+    const recipeExecutor = await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, true);
+    const safeModuleAuth = await redeploy('SafeModuleAuth', addrs[network].REGISTRY_ADDR, true);
+    const strategyExecutor = await redeploy('StrategyExecutor', addrs[network].REGISTRY_ADDR, true);
 
     // new fl action
-    const flAction = await redeploy('FLAction', addrs[network].REGISTRY_ADDR, true, true);
+    const flAction = await redeploy('FLAction', addrs[network].REGISTRY_ADDR, true);
 
     // actions with sell that had .owner()
-    const dfsSell = await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, true, true);
-    const limitSell = await redeploy('LimitSell', addrs[network].REGISTRY_ADDR, true, true);
-    const lsvSell = await redeploy('LSVSell', addrs[network].REGISTRY_ADDR, true, true);
+    const dfsSell = await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, true);
+    const limitSell = await redeploy('LimitSell', addrs[network].REGISTRY_ADDR, true);
+    const lsvSell = await redeploy('LSVSell', addrs[network].REGISTRY_ADDR, true);
 
     // wrappers
-    const kyberAggregatorWrapper = await redeploy('KyberAggregatorWrapper', addrs[network].REGISTRY_ADDR, true, true);
+    const kyberAggregatorWrapper = await redeploy('KyberAggregatorWrapper', addrs[network].REGISTRY_ADDR, true);
     await setNewExchangeWrapper('KyberAggregatorWrapper', kyberAggregatorWrapper.address, true);
 
-    const oneInchWrapper = await redeploy('OneInchWrapper', addrs[network].REGISTRY_ADDR, true, true);
+    const oneInchWrapper = await redeploy('OneInchWrapper', addrs[network].REGISTRY_ADDR, true);
     await setNewExchangeWrapper('OneInchWrapper', oneInchWrapper.address, true);
 
-    const paraswapWrapper = await redeploy('ParaswapWrapper', addrs[network].REGISTRY_ADDR, true, true);
+    const paraswapWrapper = await redeploy('ParaswapWrapper', addrs[network].REGISTRY_ADDR, true);
     await setNewExchangeWrapper('ParaswapWrapper', paraswapWrapper.address, true);
 
-    const zeroxWrapper = await redeploy('ZeroxWrapper', addrs[network].REGISTRY_ADDR, true, true);
+    const zeroxWrapper = await redeploy('ZeroxWrapper', addrs[network].REGISTRY_ADDR, true);
     await setNewExchangeWrapper('ZeroxWrapper', zeroxWrapper.address, true);
 
-    const curveWrapperV3 = await redeploy('CurveWrapperV3', addrs[network].REGISTRY_ADDR, true, true);
+    const curveWrapperV3 = await redeploy('CurveWrapperV3', addrs[network].REGISTRY_ADDR, true);
     await setNewExchangeWrapper('CurveWrapperV3', curveWrapperV3.address, true);
 
-    const kyberWrapperV3 = await redeploy('KyberWrapperV3', addrs[network].REGISTRY_ADDR, true, true);
+    const kyberWrapperV3 = await redeploy('KyberWrapperV3', addrs[network].REGISTRY_ADDR, true);
     await setNewExchangeWrapper('KyberWrapperV3', kyberWrapperV3.address, true);
 
-    const uniswapWrapper = await redeploy('UniswapWrapperV3', addrs[network].REGISTRY_ADDR, true, true);
+    const uniswapWrapper = await redeploy('UniswapWrapperV3', addrs[network].REGISTRY_ADDR, true);
     await setNewExchangeWrapper('UniswapWrapperV3', uniswapWrapper.address, true);
 
-    const uniV3WrapperV3 = await redeploy('UniV3WrapperV3', addrs[network].REGISTRY_ADDR, true, true);
+    const uniV3WrapperV3 = await redeploy('UniV3WrapperV3', addrs[network].REGISTRY_ADDR, true);
     await setNewExchangeWrapper('UniV3WrapperV3', uniV3WrapperV3.address, true);
 
 
     // sub proxies
-    const subProxy = await redeploy('SubProxy', addrs[network].REGISTRY_ADDR, true, true);
-    const aaveSubProxy = await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, true, true, 22, 23);
-    const aaveV3SubProxy = await redeploy('AaveV3SubProxy', addrs[network].REGISTRY_ADDR, true, true, 8, 9);
-    const compSubProxy = await redeploy('CompSubProxy', addrs[network].REGISTRY_ADDR, true, true, 20, 21);
-    const compV3SubProxy = await redeploy('CompV3SubProxy', addrs[network].REGISTRY_ADDR, true, true, 28, 29, 30, 31);
-    const limitOrderSubProxy = await redeploy('LimitOrderSubProxy', addrs[network].REGISTRY_ADDR, true, true, 51);
-    const liquitySubProxy = await redeploy('LiquitySubProxy', addrs[network].REGISTRY_ADDR, true, true, 16, 17);
-    const cbRebondSubProxy = await redeploy('CBRebondSubProxy', addrs[network].REGISTRY_ADDR, true, true);
-    const mcdSubProxy = await redeploy('McdSubProxy', addrs[network].REGISTRY_ADDR, true, true, 10, 11);
-    const morphoAaveV2SubProxy = await redeploy('MorphoAaveV2SubProxy', addrs[network].REGISTRY_ADDR, true, true, 14, 15);
-    const sparkSubProxy = await redeploy('SparkSubProxy', addrs[network].REGISTRY_ADDR, true, true, 18, 19);
+    const subProxy = await redeploy('SubProxy', addrs[network].REGISTRY_ADDR, true);
+    const aaveSubProxy = await redeploy('AaveSubProxy', addrs[network].REGISTRY_ADDR, true, 22, 23);
+    const aaveV3SubProxy = await redeploy('AaveV3SubProxy', addrs[network].REGISTRY_ADDR, true, 8, 9);
+    const compSubProxy = await redeploy('CompSubProxy', addrs[network].REGISTRY_ADDR, true, 20, 21);
+    const compV3SubProxy = await redeploy('CompV3SubProxy', addrs[network].REGISTRY_ADDR, true, 28, 29, 30, 31);
+    const limitOrderSubProxy = await redeploy('LimitOrderSubProxy', addrs[network].REGISTRY_ADDR, true, 51);
+    const liquitySubProxy = await redeploy('LiquitySubProxy', addrs[network].REGISTRY_ADDR, true, 16, 17);
+    const cbRebondSubProxy = await redeploy('CBRebondSubProxy', addrs[network].REGISTRY_ADDR, true);
+    const mcdSubProxy = await redeploy('McdSubProxy', addrs[network].REGISTRY_ADDR, true, 10, 11);
+    const morphoAaveV2SubProxy = await redeploy('MorphoAaveV2SubProxy', addrs[network].REGISTRY_ADDR, true, 14, 15);
+    const sparkSubProxy = await redeploy('SparkSubProxy', addrs[network].REGISTRY_ADDR, true, 18, 19);
 
     // actions that use &eoa
-    const sendTokenAndUnwrap = await redeploy('SendTokenAndUnwrap', addrs[network].REGISTRY_ADDR, true, true);
-    const sendTokens = await redeploy('SendTokens', addrs[network].REGISTRY_ADDR, true, true);
-    const sendToken = await redeploy('SendToken', addrs[network].REGISTRY_ADDR, true, true);
-    const curveUsdRepay = await redeploy('CurveUsdRepay', addrs[network].REGISTRY_ADDR, true, true);
-    const curveUsdPayback = await redeploy('CurveUsdPayback', addrs[network].REGISTRY_ADDR, true, true);
-    const compoundV3Withdraw = await redeploy('CompV3Withdraw', addrs[network].REGISTRY_ADDR, true, true);
-    const compoundV3Payback = await redeploy('CompV3Payback', addrs[network].REGISTRY_ADDR, true, true);
-    const compoundV3RatioCheck = await redeploy('CompV3RatioCheck', addrs[network].REGISTRY_ADDR, true, true);
-    const compoundV3Borrow = await redeploy('CompV3Borrow', addrs[network].REGISTRY_ADDR, true, true);
-    const compoundV3Supply = await redeploy('CompV3Supply', addrs[network].REGISTRY_ADDR, true, true);
+    const sendTokenAndUnwrap = await redeploy('SendTokenAndUnwrap', addrs[network].REGISTRY_ADDR, true);
+    const sendTokens = await redeploy('SendTokens', addrs[network].REGISTRY_ADDR, true);
+    const sendToken = await redeploy('SendToken', addrs[network].REGISTRY_ADDR, true);
+    const curveUsdRepay = await redeploy('CurveUsdRepay', addrs[network].REGISTRY_ADDR, true);
+    const curveUsdPayback = await redeploy('CurveUsdPayback', addrs[network].REGISTRY_ADDR, true);
+    const compoundV3Withdraw = await redeploy('CompV3Withdraw', addrs[network].REGISTRY_ADDR, true);
+    const compoundV3Payback = await redeploy('CompV3Payback', addrs[network].REGISTRY_ADDR, true);
+    const compoundV3RatioCheck = await redeploy('CompV3RatioCheck', addrs[network].REGISTRY_ADDR, true);
+    const compoundV3Borrow = await redeploy('CompV3Borrow', addrs[network].REGISTRY_ADDR, true);
+    const compoundV3Supply = await redeploy('CompV3Supply', addrs[network].REGISTRY_ADDR, true);
 
     console.log('KyberAggregatorWrapper deployed to:', kyberAggregatorWrapper.address);
     console.log('OneInchWrapper deployed to:', oneInchWrapper.address);

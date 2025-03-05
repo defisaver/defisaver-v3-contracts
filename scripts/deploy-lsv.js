@@ -16,8 +16,8 @@ async function main() {
     // STEP 1 : npx hardhat compile
 
     // STEP 2 : Deploy LSVProxyRegistry & LSVProfitTracker (node scripts/deploy-lsv --network fork)
-    const proxyRegistry = await redeploy('LSVProxyRegistry', addrs[network].REGISTRY_ADDR, true, true);
-    const profitTracker = await redeploy('LSVProfitTracker', addrs[network].REGISTRY_ADDR, true, true);
+    const proxyRegistry = await redeploy('LSVProxyRegistry', addrs[network].REGISTRY_ADDR, true);
+    const profitTracker = await redeploy('LSVProfitTracker', addrs[network].REGISTRY_ADDR, true);
 
     console.log('LSVProxyRegistry deployed to:', proxyRegistry.address);
     console.log('LSVProfitTracker deployed to:', profitTracker.address);
@@ -30,14 +30,14 @@ async function main() {
 
     /*
     // STEP 7 : Deploy all other actions (node scripts/deploy-lsv --network fork)
-    const test1 = await redeploy('LSVSupply', addrs[network].REGISTRY_ADDR, true, true);
-    const test2 = await redeploy('LSVBorrow', addrs[network].REGISTRY_ADDR, true, true);
-    const test3 = await redeploy('LSVPayback', addrs[network].REGISTRY_ADDR, true, true);
-    const test4 = await redeploy('LSVWithdraw', addrs[network].REGISTRY_ADDR, true, true);
-    const test5 = await redeploy('LSVSell', addrs[network].REGISTRY_ADDR, true, true);
-    const test6 = await redeploy('ApproveToken', addrs[network].REGISTRY_ADDR, true, true);
-    const test7 = await redeploy('MorphoAaveV3SetManager', addrs[network].REGISTRY_ADDR, true, true);
-    const test8 = await redeploy('LSVView', addrs[network].REGISTRY_ADDR, true, true);
+    const test1 = await redeploy('LSVSupply', addrs[network].REGISTRY_ADDR, true);
+    const test2 = await redeploy('LSVBorrow', addrs[network].REGISTRY_ADDR, true);
+    const test3 = await redeploy('LSVPayback', addrs[network].REGISTRY_ADDR, true);
+    const test4 = await redeploy('LSVWithdraw', addrs[network].REGISTRY_ADDR, true);
+    const test5 = await redeploy('LSVSell', addrs[network].REGISTRY_ADDR, true);
+    const test6 = await redeploy('ApproveToken', addrs[network].REGISTRY_ADDR, true);
+    const test7 = await redeploy('MorphoAaveV3SetManager', addrs[network].REGISTRY_ADDR, true);
+    const test8 = await redeploy('LSVView', addrs[network].REGISTRY_ADDR, true);
 
     console.log('LSVSupply deployed to:', test1.address);
     console.log('LSVBorrow deployed to:', test2.address);

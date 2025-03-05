@@ -22,11 +22,11 @@ describe('Deploy tx saver contracts', function () {
     };
 
     const redeployContracts = async (isFork) => {
-        const bothAuthForTxSaver = await redeploy('BotAuthForTxSaver', addrs[network].REGISTRY_ADDR, false, isFork);
-        const recipeExecutor = await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
-        const dfsSell = await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, false, isFork);
-        const llamaLendSwapper = await redeploy('LlamaLendSwapper', addrs[network].REGISTRY_ADDR, false, isFork);
-        const txSaverExecutor = await redeploy('TxSaverExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
+        const bothAuthForTxSaver = await redeploy('BotAuthForTxSaver', addrs[network].REGISTRY_ADDR, isFork);
+        const recipeExecutor = await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, isFork);
+        const dfsSell = await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, isFork);
+        const llamaLendSwapper = await redeploy('LlamaLendSwapper', addrs[network].REGISTRY_ADDR, isFork);
+        const txSaverExecutor = await redeploy('TxSaverExecutor', addrs[network].REGISTRY_ADDR, isFork);
 
         console.log('Sender:', senderAcc.address);
         console.log('Safe wallet:', safeWallet.address);

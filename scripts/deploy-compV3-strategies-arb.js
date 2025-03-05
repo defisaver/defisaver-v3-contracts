@@ -46,10 +46,10 @@ async function main() {
 
     console.log(repayBundleId, boostBundleId);
 
-    await redeploy('CompV3SubProxyL2', addrs[network].REGISTRY_ADDR, true, true, repayBundleId, boostBundleId);
-    await redeploy('CompV3View', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('CompV3RatioCheck', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('CompV3RatioTrigger', addrs[network].REGISTRY_ADDR, true, true);
+    await redeploy('CompV3SubProxyL2', addrs[network].REGISTRY_ADDR, true, repayBundleId, boostBundleId);
+    await redeploy('CompV3View', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('CompV3RatioCheck', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('CompV3RatioTrigger', addrs[network].REGISTRY_ADDR, true);
 
     process.exit(0);
 }

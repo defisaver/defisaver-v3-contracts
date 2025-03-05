@@ -104,7 +104,7 @@ const limitOrderStrategyTest = async () => {
 
             strategyId = await createStrategy(proxy, ...strategyData, false);
 
-            await redeploy('LimitOrderSubProxy', addrs[getNetwork()].REGISTRY_ADDR, false, false, strategyId);
+            await redeploy('LimitOrderSubProxy', addrs[network].REGISTRY_ADDR, false, strategyId);
         });
 
         for (let i = 0; i < tokenPairs.length; i++) {

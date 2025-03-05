@@ -196,7 +196,7 @@ describe('Deploy open order strategies on fork', function () {
                 await topUp(botAccounts[i]);
             }
         }
-        await redeploy('AaveV3OpenRatioCheck', REGISTRY_ADDR, false, isFork);
+        await redeploy('AaveV3OpenRatioCheck', REGISTRY_ADDR, isFork);
         for (let i = 0; i < botAccounts.length; i++) {
             await addBotCaller(botAccounts[i], REGISTRY_ADDR, isFork);
         }
@@ -238,7 +238,7 @@ describe('Deploy open order strategies on fork', function () {
         console.log('\n');
         console.log('#######################################################################');
 
-        // const aaveV3View = await getContractFromRegistry('AaveV3View', REGISTRY_ADDR, false, isFork);
+        // const aaveV3View = await getContractFromRegistry('AaveV3View', REGISTRY_ADDR, isFork);
         // const res = await aaveV3View.getSafetyRatio(addrs[network].AAVE_MARKET, proxyAddr);
         // console.log(res);
     });

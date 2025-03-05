@@ -14,26 +14,26 @@ async function main() {
 
     await topUp(addrs[network].OWNER_ACC);
 
-    await redeploy('CreateSub', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('McdRepayComposite', addrs[network].REGISTRY_ADDR, true, true);
-    await redeploy('McdBoostComposite', addrs[network].REGISTRY_ADDR, true, true);
+    await redeploy('CreateSub', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('McdRepayComposite', addrs[network].REGISTRY_ADDR, true);
+    await redeploy('McdBoostComposite', addrs[network].REGISTRY_ADDR, true);
 
 
-    // const recipeExecutor = await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, true, true);
+    // const recipeExecutor = await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, true);
 
-    // const safeModuleAuth = await redeploy('SafeModuleAuth', addrs[network].REGISTRY_ADDR, true, true);
+    // const safeModuleAuth = await redeploy('SafeModuleAuth', addrs[network].REGISTRY_ADDR, true);
 
-    // const flAction = await redeploy('FLAction', addrs[network].REGISTRY_ADDR, true, true);
+    // const flAction = await redeploy('FLAction', addrs[network].REGISTRY_ADDR, true);
 
-    // const dfsSell = await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, true, true);
+    // const dfsSell = await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, true);
 
-    // const uniswapWrapper = await redeploy('UniswapWrapperV3', addrs[network].REGISTRY_ADDR, true, true);
+    // const uniswapWrapper = await redeploy('UniswapWrapperV3', addrs[network].REGISTRY_ADDR, true);
     // await setNewExchangeWrapper('UniswapWrapperV3', uniswapWrapper.address, true);
 
-    // const uniV3WrapperV3 = await redeploy('UniV3WrapperV3', addrs[network].REGISTRY_ADDR, true, true);
+    // const uniV3WrapperV3 = await redeploy('UniV3WrapperV3', addrs[network].REGISTRY_ADDR, true);
     // await setNewExchangeWrapper('UniV3WrapperV3', uniV3WrapperV3.address, true);
 
-    // const curveWrapperV3 = await redeploy('CurveWrapperV3', addrs[network].REGISTRY_ADDR, true, true);
+    // const curveWrapperV3 = await redeploy('CurveWrapperV3', addrs[network].REGISTRY_ADDR, true);
     // await setNewExchangeWrapper('CurveWrapperV3', curveWrapperV3.address, true);
 
     // console.log('CurveWrapperV3 deployed to:', curveWrapperV3.address);

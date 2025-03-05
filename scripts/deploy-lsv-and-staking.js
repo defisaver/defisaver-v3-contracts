@@ -11,12 +11,12 @@ async function main() {
     await topUp(senderAcc.address);
     await topUp(getOwnerAddr());
 
-    const lsvSell = await redeploy('LSVSell', addrs[network].REGISTRY_ADDR, false, true);
-    const etherFiStake = await redeploy('EtherFiStake', addrs[network].REGISTRY_ADDR, false, true);
-    const etherFiWrap = await redeploy('EtherFiWrap', addrs[network].REGISTRY_ADDR, false, true);
-    const etherFiUnwrap = await redeploy('EtherFiUnwrap', addrs[network].REGISTRY_ADDR, false, true);
-    const renzoStake = await redeploy('RenzoStake', addrs[network].REGISTRY_ADDR, false, true);
-    const lsvView = await redeploy('LSVView', addrs[network].REGISTRY_ADDR, false, true);
+    const lsvSell = await redeploy('LSVSell', addrs[network].REGISTRY_ADDR, true);
+    const etherFiStake = await redeploy('EtherFiStake', addrs[network].REGISTRY_ADDR, true);
+    const etherFiWrap = await redeploy('EtherFiWrap', addrs[network].REGISTRY_ADDR, true);
+    const etherFiUnwrap = await redeploy('EtherFiUnwrap', addrs[network].REGISTRY_ADDR, true);
+    const renzoStake = await redeploy('RenzoStake', addrs[network].REGISTRY_ADDR, true);
+    const lsvView = await redeploy('LSVView', addrs[network].REGISTRY_ADDR, true);
     console.log(`LSVSell: ${lsvSell.address}`);
     console.log(`EtherFiStake: ${etherFiStake.address}`);
     console.log(`EtherFiWrap: ${etherFiWrap.address}`);
