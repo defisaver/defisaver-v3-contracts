@@ -100,7 +100,7 @@ const addPlaceholderStrategy = async (proxy, maxGasPrice) => {
 };
 
 const dfsRegistryTest = async () => {
-    describe('DFS-Registry', function () {
+    describe('DFS-Registry', () => {
         let registry;
         let senderAcc2;
         let owner;
@@ -119,8 +119,6 @@ const dfsRegistryTest = async () => {
         const gasLimit = { gasLimit: 200000 };
 
         before(async () => {
-            this.timeout(40000);
-
             senderAcc2 = (await hre.ethers.getSigners())[1];
             registry = await deployContract('DFSRegistry');
 
@@ -757,7 +755,6 @@ const safeModuleAuthTest = async () => {
 
 const recipeExecutorTest = async () => {
     describe('RecipeExecutor', () => {
-        this.timeout(200000);
         const coreAddressesInjector = new CoreAddressesInjector();
         let snapshotId;
 
@@ -866,7 +863,7 @@ const recipeExecutorTest = async () => {
 
             await addBotCaller(botAcc.address);
             await giveAuthPermissionsToWallets();
-        }).timeout(200000);
+        })
 
         after(async () => {
             await coreAddressesInjector.rollBack();
@@ -898,7 +895,7 @@ const recipeExecutorTest = async () => {
                         expectError(err.toString(), 'SafeExecutionError()');
                     }
                 }
-            }).timeout(200000);
+            });
 
             it(`...should execute recipe by strategy through ${WALLETS[i]}`, async () => {
                 setupWallet(WALLETS[i]);
@@ -932,7 +929,7 @@ const recipeExecutorTest = async () => {
 
                 const afterBalance = await balanceOf(WETH_ADDRESS, wallet.address);
                 expect(beforeBalance.add(pullAmount)).to.be.eq(afterBalance);
-            }).timeout(200000);
+            });
 
             it(`...should execute basic placeholder recipe through ${WALLETS[i]}`, async () => {
                 setupWallet(WALLETS[i]);
@@ -958,7 +955,7 @@ const recipeExecutorTest = async () => {
 
                 const afterBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
                 expect(beforeBalance.add(pullAmount)).to.be.eq(afterBalance);
-            }).timeout(200000);
+            });
 
             it(`...should execute basic recipe with FL through ${WALLETS[i]}`, async () => {
                 setupWallet(WALLETS[i]);
@@ -980,7 +977,7 @@ const recipeExecutorTest = async () => {
 
                 const afterBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
                 expect(beforeBalance).to.be.eq(afterBalance);
-            }).timeout(200000);
+            });
         }
     });
 };
