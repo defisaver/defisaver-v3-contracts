@@ -1502,6 +1502,9 @@ const generateIds = () => {
     files.push('/FLAaveV2.sol');
     files.push('/FLMaker.sol');
     files.push('/FLBalancer.sol');
+    files.push('/BalancerV2Supply.sol');
+    files.push('/BalancerV2Withdraw.sol');
+    files.push('/BalancerV2Claim.sol');
 
     files.forEach((filePath) => {
         const fileName = filePath.split('/').pop().split('.')[0];
