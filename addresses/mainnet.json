@@ -1606,6 +1606,17 @@
         "history": []
     },
     {
+        "name": "MorphoBlueClaim",
+        "address": "0xBB562a790AD7773D54A423bD2A10E4073cb98142",
+        "id": "0x07f9b8e2",
+        "path": "contracts/actions/morpho-blue/MorphoBlueClaim",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FLMorphoBlue",
         "address": "0x6206C96EAc5EAC546861438A9f953B6BEa50EBAB",
         "id": "0x025e64d8",
@@ -4127,7 +4138,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Open",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4138,7 +4149,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Supply",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4149,7 +4160,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4160,7 +4171,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Borrow",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4171,7 +4182,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4182,7 +4193,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4193,7 +4204,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidRatioTrigger",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4204,7 +4215,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidRatioCheck",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4289,5 +4300,49 @@
         "name": "MCDSaverTaker",
         "address": "0x99DDE0B130833Ce0a6D9EFcFE330327aCf38006E",
         "path": "old_contracts"
-    }
+    },
+{
+    "name": "BalancerV2Supply",
+    "address": "0xE48123018Db5e9075841C61EA702cEca51621191",
+    "id": "0x443f994c",
+    "path": "/BalancerV2Supply.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+},
+{
+    "name": "BalancerV2Withdraw",
+    "address": "0xbED38692438b90AF738F8A7A3142C217DE8fB069",
+    "id": "0x54f465c5",
+    "path": "/BalancerV2Withdraw.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+},
+{
+    "name": "BalancerV2Claim",
+    "address": "0xEac7c5bEFaA6E17f1A2e86947eEd6419c74A7C03",
+    "id": "0xde8dbbc2",
+    "path": "/BalancerV2Claim.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+},
+{
+    "name": "MorphoAaveV2RatioCheck",
+    "address": "0x904C30Dad119cfF4527d1E4E2aFaF79ac6c05e10",
+    "id": "0xb22cb584",
+    "path": "contracts/actions/checkers/MorphoAaveV2RatioCheck.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+}
 ]
