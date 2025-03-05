@@ -19,6 +19,7 @@ const {
     WETH_ADDRESS,
     takeSnapshot,
     revertToSnapshot,
+    expectError,
 } = require('../utils/utils');
 
 const { createSafe, executeSafeTx, SAFE_CONSTANTS } = require('../utils/safe');
@@ -65,7 +66,7 @@ const adminAuthTest = async () => {
 
                 expect(true).to.be(false);
             } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotOwner');
+                expectError(err.toString(), 'SenderNotOwner()');
             }
         });
 
@@ -75,7 +76,7 @@ const adminAuthTest = async () => {
 
                 expect(true).to.be(false);
             } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotAdmin');
+                expectError(err.toString(), 'SenderNotAdmin()');
             }
         });
     });
@@ -120,7 +121,7 @@ const adminVaultTest = async () => {
 
                 expect(true).to.eq(false);
             } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotAdmin');
+                expectError(err.toString(), 'SenderNotAdmin()');
             }
         });
 
@@ -144,7 +145,7 @@ const adminVaultTest = async () => {
 
                 expect(true).to.eq(false);
             } catch (err) {
-                expect(err.toString()).to.have.string('SenderNotAdmin');
+                expectError(err.toString(), 'SenderNotAdmin()');
             }
         });
     });
