@@ -3,8 +3,8 @@ const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
 const {
     redeploy, getProxy, fetchAmountinUSDPrice, Float2BN, setBalance, approve, BN2Float,
-} = require('../utils');
-const { curveUsdCreate } = require('../actions');
+} = require('../utils/utils');
+const { curveUsdCreate } = require('../utils/actions');
 
 const softLiquidationTriggerTest = () => describe('CurveUsd-Soft-Liquidation-Trigger', () => {
     const WSTETH_MARKET = '0x100dAa78fC509Db39Ef7D04DE0c1ABD299f4C6CE';

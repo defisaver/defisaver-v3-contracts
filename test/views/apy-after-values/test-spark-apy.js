@@ -8,8 +8,8 @@ const {
     sparkSupply,
     sparkBorrow,
     sparkPayback,
-} = require('../../actions');
-const { VARIABLE_RATE } = require('../../utils-aave');
+} = require('../../utils/actions');
+const { VARIABLE_RATE } = require('../../utils/aave');
 
 const {
     getProxy,
@@ -21,7 +21,7 @@ const {
     fetchAmountinUSDPrice,
     setBalance,
     approve,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const collateralTokens = ['wbtc', 'wstETH', 'rETH'];
 const debtTokens = ['USDC', 'DAI'];

@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import "forge-std/Test.sol";
-
 import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";
-import { CheatCodes } from "../CheatCodes.sol";
+import { CheatCodes } from "./CheatCodes.sol";
+import { Addresses } from "./Addresses.sol";
 
-contract StrategyBuilder {
+contract StrategyBuilder is CheatCodes {
     string name;
     bool isContinuos;
     bytes4[] actions;
@@ -14,10 +13,6 @@ contract StrategyBuilder {
     mapping(bytes4 => string[]) public params;
 
     mapping(string => uint8) public subValues;
-    address internal OWNER_ADDR = 0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00;
-    address internal STORAGE_ADDR = 0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933;
-
-    CheatCodes constant cheats = CheatCodes(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
     uint8 startSubIndex = 128;
 
@@ -44,7 +39,7 @@ contract StrategyBuilder {
     }
 
     function createStrategy() public returns (uint256) {
-        StrategyStorage strategyStorage = StrategyStorage(STORAGE_ADDR);
+        StrategyStorage strategyStorage = StrategyStorage(Addresses.STORAGE_ADDR);
 
         uint8[][] memory paramMappings = new uint8[][](actions.length);
 
@@ -57,7 +52,7 @@ contract StrategyBuilder {
             }
         }
 
-        cheats.startPrank(OWNER_ADDR);
+        cheats.startPrank(Addresses.OWNER_ACC);
 
         bytes memory subCallData = abi.encodeWithSignature(
             "createStrategy(string,bytes4[],bytes4[],uint8[][],bool)",

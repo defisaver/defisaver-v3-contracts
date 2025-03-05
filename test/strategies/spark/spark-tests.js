@@ -25,14 +25,14 @@ const {
     ETH_ADDR,
     getContractFromRegistry,
     redeploy,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     addBotCaller,
     createStrategy,
     createBundle,
     activateSub,
-} = require('../../utils-strategies');
+} = require('../utils/utils-strategies');
 
 const {
     createSparkRepayStrategy,
@@ -43,13 +43,13 @@ const {
     createSparkFLCloseToCollStrategy,
     createSparkCloseToDebtStrategy,
     createSparkCloseToCollStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 
 const {
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
     subSparkCloseBundle,
-} = require('../../strategy-subs');
+} = require('../utils/strategy-subs');
 
 const {
     callSparkRepayStrategy,
@@ -60,32 +60,32 @@ const {
     callSparkCloseToDebtStrategy,
     callSparkFLCloseToDebtStrategy,
     callSparkFLCloseToCollStrategy,
-} = require('../../strategy-calls');
+} = require('../utils/strategy-calls');
 
 const {
     sparkSupply, sparkBorrow,
-} = require('../../actions');
+} = require('../../utils/actions');
 
-const { RATIO_STATE_OVER } = require('../../triggers');
+const { RATIO_STATE_OVER } = require('../utils/triggers');
 
 const deployBundles = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
     const sparkRepayStrategyEncoded = createSparkRepayStrategy();
     const sparkRepayFLStrategyEncoded = createSparkFLRepayStrategy();
 
-    const strategyId1 = await createStrategy(proxy, ...sparkRepayStrategyEncoded, true);
-    const strategyId2 = await createStrategy(proxy, ...sparkRepayFLStrategyEncoded, true);
+    const strategyId1 = await createStrategy(...sparkRepayStrategyEncoded, true);
+    const strategyId2 = await createStrategy(...sparkRepayFLStrategyEncoded, true);
 
-    const repayBundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+    const repayBundleId = await createBundle([strategyId1, strategyId2]);
     const sparkBoostStrategyEncoded = createSparkBoostStrategy();
     const sparkBoostFLStrategyEncoded = createSparkFLBoostStrategy();
 
-    const strategyId11 = await createStrategy(proxy, ...sparkBoostStrategyEncoded, true);
-    const strategyId22 = await createStrategy(proxy, ...sparkBoostFLStrategyEncoded, true);
+    const strategyId11 = await createStrategy(...sparkBoostStrategyEncoded, true);
+    const strategyId22 = await createStrategy(...sparkBoostFLStrategyEncoded, true);
 
-    const boostBundleId = await createBundle(proxy, [strategyId11, strategyId22]);
+    const boostBundleId = await createBundle([strategyId11, strategyId22]);
 
-    await getContractFromRegistry('SparkSubProxy', undefined, isFork, repayBundleId, boostBundleId);
+    await getContractFromRegistry('SparkSubProxy', isFork, repayBundleId, boostBundleId);
     return { repayBundleId, boostBundleId };
 };
 
@@ -99,17 +99,14 @@ const deployCloseToDebtBundle = async (proxy, isFork = undefined, isL1 = true) =
         : createSparkFLCloseToDebtStrategy();
 
     const sparkCloseToDebtStrategyId = await createStrategy(
-        proxy,
         ...closeStrategy,
         false,
     );
     const sparkFLCloseToDebtStrategyId = await createStrategy(
-        proxy,
         ...flCloseStrategy,
         false,
     );
     const sparkCloseToDebtBundleId = await createBundle(
-        proxy,
         [sparkCloseToDebtStrategyId, sparkFLCloseToDebtStrategyId],
     );
 
@@ -126,17 +123,14 @@ const deployCloseToCollBundle = async (proxy, isFork = undefined, isL1 = true) =
         : createSparkFLCloseToCollStrategy();
 
     const sparkCloseToCollStrategyId = await createStrategy(
-        proxy,
         ...closeStrategy,
         false,
     );
     const sparkFLCloseToCollStrategyId = await createStrategy(
-        proxy,
         ...flCloseStrategy,
         false,
     );
     const sparkCloseToCollBundleId = await createBundle(
-        proxy,
         [sparkCloseToCollStrategyId, sparkFLCloseToCollStrategyId],
     );
 

@@ -35,7 +35,7 @@ contract TestFluidVaultT1Borrow is FluidExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("FluidVaultT1Borrow");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

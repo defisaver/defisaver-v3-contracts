@@ -3,8 +3,8 @@ const { expect } = require('chai');
 const hre = require('hardhat');
 const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const dfs = require('@defisaver/sdk');
-const { executeAction, withdrawCompV3 } = require('../../actions');
-const { takeSnapshot, revertToSnapshot } = require('../../utils');
+const { executeAction, withdrawCompV3 } = require('../../utils/actions');
+const { takeSnapshot, revertToSnapshot } = require('../../utils/utils');
 
 const {
     getProxy,
@@ -16,9 +16,9 @@ const {
     getAddrFromRegistry,
     setBalance,
     nullAddress,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { getSupportedAssets, COMET_ADDR } = require('../../utils-compV3');
+const { getSupportedAssets, COMET_ADDR } = require('../../utils/compoundV3');
 
 describe('CompoundV3 Import recipe test', function () {
     this.timeout(80000);

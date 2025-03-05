@@ -17,8 +17,7 @@ import {BaseTest} from '../utils/BaseTest.sol';
 import {RegistryUtils} from '../utils/RegistryUtils.sol';
 import {ActionsUtils} from '../utils/ActionsUtils.sol';
 import {SmartWallet} from '../utils/SmartWallet.sol';
-import {Const} from '../Const.sol';
-import {TokenAddresses} from '../TokenAddresses.sol';
+import {Addresses} from '../utils/Addresses.sol';
 import {StrategyBuilder} from '../utils/StrategyBuilder.sol';
 
 contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
@@ -86,7 +85,7 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
     function test_should_fail_to_call_execute_when_sub_data_hash_mismatch() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_dummy_strategy(
             DummySubData({
-                token: TokenAddresses.WETH_ADDR,
+                token: Addresses.WETH_ADDR,
                 amount: 1,
                 maxGasPrice: type(uint256).max
             })
@@ -112,7 +111,7 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
     function test_should_fail_to_call_execute_when_sub_is_not_enabled() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_dummy_strategy(
             DummySubData({
-                token: TokenAddresses.WETH_ADDR,
+                token: Addresses.WETH_ADDR,
                 amount: 1,
                 maxGasPrice: type(uint256).max
             })
@@ -128,7 +127,7 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
 
     function test_should_call_strategy() public {
         DummySubData memory subData = DummySubData({
-            token: TokenAddresses.WETH_ADDR,
+            token: Addresses.WETH_ADDR,
             amount: 1 ether,
             maxGasPrice: type(uint256).max
         });
@@ -165,7 +164,7 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
 
     function test_should_fail_to_execute_strategy_for_inactive_triggers() public {
         DummySubData memory subData = DummySubData({
-            token: TokenAddresses.WETH_ADDR,
+            token: Addresses.WETH_ADDR,
             amount: 1,
             maxGasPrice: 0
         });
@@ -256,7 +255,7 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
     }
 
     function _add_bot_caller() internal {
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         BotAuth(botAuthAddr).addCaller(address(this));
     }
 }

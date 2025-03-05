@@ -8,20 +8,20 @@ const {
     getAaveDataProvider,
     VARIABLE_RATE,
     getPriceOracle,
-} = require('../../utils-aave');
+} = require('../../utils/aave');
 
 const {
     supplyAave,
     borrowAave,
     paybackAave,
-} = require('../../actions');
+} = require('../../utils/actions');
 const {
     takeSnapshot, revertToSnapshot, getProxy, redeploy,
     fetchAmountinUSDPrice,
     AAVE_MARKET,
     setBalance,
     approve,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const collateralTokens = ['WBTC', 'WETH', 'DAI', 'USDC'];
 const debtTokens = ['DAI', 'USDT', 'WBTC', 'WETH', 'USDC'];

@@ -36,7 +36,7 @@ contract TestLiquityV2AdjustInterestRate is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("LiquityV2AdjustInterestRate");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

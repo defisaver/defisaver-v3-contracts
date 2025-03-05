@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
 
@@ -27,7 +28,7 @@ const {
     revertToSnapshot,
     Float2BN,
     setNewExchangeWrapper,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     createBundle,
@@ -35,9 +36,9 @@ const {
     addBotCaller,
     setMCDPriceVerifier,
     subToMcdProxy,
-} = require('../../utils-strategies');
+} = require('../utils/utils-strategies');
 
-const { getRatio } = require('../../utils-mcd');
+const { getRatio } = require('../../utils/mcd');
 
 const {
     createYearnRepayStrategy,
@@ -46,7 +47,7 @@ const {
     createMcdFLBoostCompositeStrategy,
     createMcdRepayCompositeStrategy,
     createMcdFLRepayCompositeStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 
 const {
     callMcdRepayFromYearnStrategy,
@@ -57,7 +58,7 @@ const {
     callMcdFLRepayCompositeStrategy,
     callMcdRepayCompositeStrategy,
     callMcdCloseToDaiStrategy,
-} = require('../../strategy-calls');
+} = require('../utils/strategy-calls');
 
 const {
     subRepayFromSavingsStrategy,
@@ -65,14 +66,14 @@ const {
     subMcdCloseToCollStrategy,
     subMcdTrailingCloseToCollStrategy,
     subMcdTrailingCloseToDaiStrategy,
-} = require('../../strategy-subs');
+} = require('../utils/strategy-subs');
 
 const {
     openVault,
     yearnSupply,
-} = require('../../actions');
+} = require('../../utils/actions');
 
-const { RATIO_STATE_OVER } = require('../../triggers');
+const { RATIO_STATE_OVER } = require('../utils/triggers');
 
 const createRepayBundle = async (proxy, isFork) => {
     const repayCompositeStrategyEncoded = createMcdRepayCompositeStrategy();
@@ -80,12 +81,11 @@ const createRepayBundle = async (proxy, isFork) => {
 
     await openStrategyAndBundleStorage(isFork);
 
-    const strategyId1 = await createStrategy(proxy, ...repayCompositeStrategyEncoded, true);
+    const strategyId1 = await createStrategy(...repayCompositeStrategyEncoded, true);
     // eslint-disable-next-line max-len
-    const strategyId2 = await createStrategy(proxy, ...flRepayCompositeStrategyEncoded, true);
+    const strategyId2 = await createStrategy(...flRepayCompositeStrategyEncoded, true);
 
     return createBundle(
-        proxy,
         [strategyId1, strategyId2],
     );
 };
@@ -96,11 +96,10 @@ const createBoostBundle = async (proxy, isFork) => {
 
     await openStrategyAndBundleStorage(isFork);
 
-    const strategyId1 = await createStrategy(proxy, ...boostCompositeStrategy, true);
-    const strategyId2 = await createStrategy(proxy, ...flBoostCompositeStrategy, true);
+    const strategyId1 = await createStrategy(...boostCompositeStrategy, true);
+    const strategyId2 = await createStrategy(...flBoostCompositeStrategy, true);
 
     return createBundle(
-        proxy,
         [strategyId1, strategyId2],
     );
 };
@@ -143,7 +142,7 @@ const mcdBoostStrategyTest = async (numTests) => {
         it('... should create boost and repay bundle', async () => {
             const repayBundleId = await createRepayBundle(proxy);
             const boostBundleId = await createBoostBundle(proxy);
-            await redeploy('McdSubProxy', undefined, undefined, undefined, repayBundleId, boostBundleId);
+            await redeploy('McdSubProxy', false, repayBundleId, boostBundleId);
         });
 
         const ilkSubset = ilks.reduce((acc, curr) => {
@@ -280,7 +279,7 @@ const mcdRepayStrategyTest = async (numTests) => {
 
         it('... should create a repay bundle', async () => {
             const repayBundleId = await createRepayBundle(proxy);
-            await redeploy('McdSubProxy', undefined, undefined, undefined, repayBundleId, 0);
+            await redeploy('McdSubProxy', false, repayBundleId, 0);
         });
 
         const ilkSubset = ilks.reduce((acc, curr) => {
@@ -437,10 +436,10 @@ const mcdRepayFromYearnStrategyTest = async () => {
 
             await openStrategyAndBundleStorage();
 
-            const strategyId1 = await createStrategy(proxy, ...repayStrategyEncoded, true);
-            const strategyId2 = await createStrategy(proxy, ...flRepayStrategyEncoded, true);
+            const strategyId1 = await createStrategy(...repayStrategyEncoded, true);
+            const strategyId2 = await createStrategy(...flRepayStrategyEncoded, true);
 
-            const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+            const bundleId = await createBundle([strategyId1, strategyId2]);
 
             // create vault
             vaultId = await openVault(

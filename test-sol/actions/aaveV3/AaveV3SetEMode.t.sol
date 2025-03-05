@@ -8,7 +8,7 @@ import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3He
 import { IL2PoolV3 } from "../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
 import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 
-import { TokenAddresses } from "../../TokenAddresses.sol";
+import {Addresses } from "../../utils/Addresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 
@@ -48,7 +48,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_change_eMode() public {
-        address token = TokenAddresses.WETH_ADDR;
+        address token = Addresses.WETH_ADDR;
         uint256 supplyAmount = amountInUSDPrice(token, 100_000);
         _supply(token, supplyAmount);
 
@@ -59,7 +59,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
     }
 
     function test_should_change_eMode_l2_direct() public {
-        address token = TokenAddresses.WETH_ADDR;
+        address token = Addresses.WETH_ADDR;
         uint256 supplyAmount = amountInUSDPrice(token, 100_000);
         _supply(token, supplyAmount);
 

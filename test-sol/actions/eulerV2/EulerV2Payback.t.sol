@@ -35,7 +35,7 @@ contract TestEulerV2Payback is EulerV2TestHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("EulerV2Payback");
         initTestPairs("EulerV2");
 
         wallet = new SmartWallet(bob);

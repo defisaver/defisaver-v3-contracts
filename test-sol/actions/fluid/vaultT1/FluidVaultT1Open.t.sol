@@ -35,7 +35,7 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("FluidVaultT1Open");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

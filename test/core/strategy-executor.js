@@ -1,4 +1,4 @@
-const { resetForkToBlock } = require('../utils');
+const { resetForkToBlock } = require('../utils/utils');
 const { strategyExecutorTest } = require('./core-tests');
 
 describe('Strategy-Executor', () => {

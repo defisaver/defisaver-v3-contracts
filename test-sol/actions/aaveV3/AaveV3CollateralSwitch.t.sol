@@ -11,7 +11,7 @@ import { IAaveProtocolDataProvider } from "../../../contracts/interfaces/aaveV3/
 import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
-import { TokenAddresses } from "../../TokenAddresses.sol";
+import {Addresses } from "../../utils/Addresses.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
@@ -55,16 +55,16 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
         aaveV3SupplyContractAddr = address(new AaveV3Supply());
 
         assets[0] = TestAsset({
-            asset: TokenAddresses.WETH_ADDR,
-            assetId: pool.getReserveData(TokenAddresses.WETH_ADDR).id
+            asset: Addresses.WETH_ADDR,
+            assetId: pool.getReserveData(Addresses.WETH_ADDR).id
         });
         assets[1] = TestAsset({
-            asset: TokenAddresses.DAI_ADDR,
-            assetId: pool.getReserveData(TokenAddresses.DAI_ADDR).id
+            asset: Addresses.DAI_ADDR,
+            assetId: pool.getReserveData(Addresses.DAI_ADDR).id
         });
         assets[2] = TestAsset({
-            asset: TokenAddresses.WBTC_ADDR,
-            assetId: pool.getReserveData(TokenAddresses.WBTC_ADDR).id
+            asset: Addresses.WBTC_ADDR,
+            assetId: pool.getReserveData(Addresses.WBTC_ADDR).id
         });
     }
 

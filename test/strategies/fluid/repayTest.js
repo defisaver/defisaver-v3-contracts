@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
-const { subFluidVaultT1RepayBundle } = require('../../strategy-subs');
-const { callFluidT1FLRepayStrategy, callFluidT1RepayStrategy } = require('../../strategy-calls');
-const { deployFluidT1RepayBundle, getFluidVaultT1TestPairs } = require('../../utils-fluid');
+const { subFluidVaultT1RepayBundle } = require('../utils/strategy-subs');
+const { callFluidT1FLRepayStrategy, callFluidT1RepayStrategy } = require('../utils/strategy-calls');
+const { deployFluidT1RepayBundle, getFluidVaultT1TestPairs } = require('../../utils/fluid');
 const { BaseFluidT1StrategyTest } = require('./common');
 const {
     network,
@@ -11,7 +11,7 @@ const {
     fetchAmountInUSDPrice,
     chainIds,
     formatMockExchangeObjUsdFeed,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 class RepayTest extends BaseFluidT1StrategyTest {
     async setUp() {

@@ -9,7 +9,7 @@ import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 import { CoreHelper } from "../../contracts/core/helpers/CoreHelper.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Const } from "../Const.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_BundleStorage is BaseTest, CoreHelper {
 
@@ -42,7 +42,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
     }
 
     function test_should_add_and_fetch_bundle_as_owner() public {
-        address sender = Const.OWNER_ACC;
+        address sender = Addresses.OWNER_ACC;
         _should_add_and_fetch_bundle(sender);
     }
 
@@ -118,7 +118,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
             uint64[] memory dummyStrategyIds = new uint64[](2);
             dummyStrategyIds[0] = uint64(firstId);
             dummyStrategyIds[1] = uint64(secondId);
-            vm.prank(Const.OWNER_ACC);
+            vm.prank(Addresses.OWNER_ACC);
             cut.createBundle(dummyStrategyIds);
             (firstId, secondId,) = _add_dummy_strategies();
             counter++;
@@ -168,7 +168,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
         uint256 _realSize
     ) internal {
         for (uint256 i = 0; i < _realSize; ++i) {
-            assertEq(_fetchedBundles[i].creator, Const.OWNER_ACC);
+            assertEq(_fetchedBundles[i].creator, Addresses.OWNER_ACC);
             assertEq(_fetchedBundles[i].strategyIds.length, 2);
         }
         // empty bundles are returned if the requested count is more than the actual count
@@ -211,7 +211,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
     }
 
     function _change_edit_permission_as_owner(bool _isOpenToPublic) internal {
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         cut.changeEditPermission(_isOpenToPublic);
     }
 
@@ -224,7 +224,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
         uint8[][] memory paramMapping = new uint8[][](0);
         bool continuous = true;
 
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
         firstId = strategyStorage.createStrategy("First", triggersForFirstAndSecondStrategy, actionsIds, paramMapping, continuous);
         secondId = strategyStorage.createStrategy("Second", triggersForFirstAndSecondStrategy, actionsIds, paramMapping, continuous);
         thirdId = strategyStorage.createStrategy("Third", new bytes4[](0), actionsIds, paramMapping, continuous);

@@ -38,7 +38,7 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("EulerV2Borrow");
         initTestPairs("EulerV2");
 
         wallet = new SmartWallet(bob);
@@ -152,8 +152,8 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         address account = walletAddr;
         bool isDirect = true;
 
-        uint256 supplyAmountInUsdFirstCollVault = 50000;
-        uint256 supplyAmountInUsdSecondCollVault = 50000;
+        uint256 supplyAmountInUsdFirstCollVault = 100000;
+        uint256 supplyAmountInUsdSecondCollVault = 100000;
         uint256 borrowAmountInUsdBorrowVault = 60000;
 
         address borrowVault = E_USDC_2_GOVERNED;

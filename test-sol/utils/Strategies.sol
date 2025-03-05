@@ -3,9 +3,9 @@ pragma solidity =0.8.24;
 
 import { StrategyBuilder } from "./StrategyBuilder.sol";
 
-contract Strategies {
+library Strategies {
 
-    function createCompV3Repay() internal returns (uint256) {
+    function createCompV3Repay() public returns (uint256) {
         StrategyBuilder repayStrategy = new StrategyBuilder("CompV3Repay", true);
         repayStrategy.addSubMapping("&market");
         repayStrategy.addSubMapping("&baseToken");
@@ -47,7 +47,7 @@ contract Strategies {
         return repayStrategy.createStrategy();
     }
 
-    function createCompV3EOARepay() internal returns (uint256) {
+    function createCompV3EOARepay() public returns (uint256) {
         StrategyBuilder repayStrategy = new StrategyBuilder("CompV3EOARepay", true);
         repayStrategy.addSubMapping("&market");
         repayStrategy.addSubMapping("&baseToken");
@@ -91,7 +91,7 @@ contract Strategies {
         return repayStrategy.createStrategy();
     }
 
-    function createCompV3FLEOARepay() internal returns (uint256) {
+    function createCompV3FLEOARepay() public returns (uint256) {
         StrategyBuilder repayStrategy = new StrategyBuilder("CompV3FLEOARepay", true);
         repayStrategy.addSubMapping("&market");
         repayStrategy.addSubMapping("&baseToken");
@@ -137,7 +137,7 @@ contract Strategies {
         return repayStrategy.createStrategy();
     }
 
-    function createCompV3FLRepay() internal returns (uint256) {
+    function createCompV3FLRepay() public returns (uint256) {
         StrategyBuilder repayStrategy = new StrategyBuilder("CompV3FLRepay", true);
         repayStrategy.addSubMapping("&market");
         repayStrategy.addSubMapping("&baseToken");

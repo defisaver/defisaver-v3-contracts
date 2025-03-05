@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const CoinGecko = require('coingecko-api');
 const fs = require('fs');
 

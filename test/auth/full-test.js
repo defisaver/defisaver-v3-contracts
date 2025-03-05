@@ -1,4 +1,4 @@
-const { resetForkToBlock } = require('../utils');
+const { resetForkToBlock } = require('../utils/utils');
 const { authFullTest } = require('./auth-tests');
 
 describe('Auth full test', () => {

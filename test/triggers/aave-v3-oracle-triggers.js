@@ -1,12 +1,14 @@
+/* eslint-disable no-shadow */
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const { deployContract } = require('../../scripts/utils/deployer');
-const { RATIO_STATE_UNDER, RATIO_STATE_OVER } = require('../triggers');
+const { RATIO_STATE_UNDER, RATIO_STATE_OVER } = require('../strategies/utils/triggers');
 const {
-    redeploy, setNetwork, getNetwork, getLocalTokenPrice, chainIds, BN2Float, Float2BN,
+    redeploy, setNetwork, getLocalTokenPrice, chainIds, BN2Float, Float2BN,
     setContractAt,
-} = require('../utils');
+    network,
+} = require('../utils/utils');
 
 const aaveV3QuotePriceTriggerTest = () => {
     const testAssets = [
@@ -381,8 +383,8 @@ const aaveV3TrailingQuotePriceTriggerTest = () => {
                 address: aaveV3OracleAddress,
             }).then(async (c) => c.addFeeds(
                 [
-                    getAssetInfo('WBTC', chainIds[getNetwork()]).address,
-                    getAssetInfo('WETH', chainIds[getNetwork()]).address,
+                    getAssetInfo('WBTC', chainIds[network]).address,
+                    getAssetInfo('WETH', chainIds[network]).address,
                 ],
                 [
                     mockWbtcFeed.address,

@@ -11,8 +11,7 @@ import { IERC20 } from "../../contracts/interfaces/IERC20.sol";
 import { TokenPriceHelper } from "../../contracts/utils/TokenPriceHelper.sol";
 import { TokenUtils } from "../../contracts/utils/TokenUtils.sol";
 
-import { TokenAddresses } from "../TokenAddresses.sol";
-import { Const } from "../Const.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 import { console } from "forge-std/console.sol";
 
@@ -35,17 +34,17 @@ contract Tokens is Test {
 
     function initTokenNamesIfNeeded() public {
         if (!tokenNamesInitialized) {
-            tokenNames["WETH"] = TokenAddresses.WETH_ADDR;
-            tokenNames["WBTC"] = TokenAddresses.WBTC_ADDR;
-            tokenNames["DAI"] = TokenAddresses.DAI_ADDR;
-            tokenNames["USDC"] = TokenAddresses.USDC_ADDR;
-            tokenNames["WSETH"] = TokenAddresses.WSTETH_ADDR;
-            tokenNames["LUSD"] = TokenAddresses.LUSD_ADDR;
-            tokenNames["LINK"] = TokenAddresses.LINK_ADDR;
-            tokenNames["AAVE"] = TokenAddresses.AAVE_ADDR;
-            tokenNames["eWETH-2"] = TokenAddresses.E_WETH_2;
-            tokenNames["eWSTETH-2"] = TokenAddresses.E_WSTETH_2;
-            tokenNames["eUSDC-2"] = TokenAddresses.E_USDC_2;
+            tokenNames["WETH"] = Addresses.WETH_ADDR;
+            tokenNames["WBTC"] = Addresses.WBTC_ADDR;
+            tokenNames["DAI"] = Addresses.DAI_ADDR;
+            tokenNames["USDC"] = Addresses.USDC_ADDR;
+            tokenNames["WSETH"] = Addresses.WSTETH_ADDR;
+            tokenNames["LUSD"] = Addresses.LUSD_ADDR;
+            tokenNames["LINK"] = Addresses.LINK_ADDR;
+            tokenNames["AAVE"] = Addresses.AAVE_ADDR;
+            tokenNames["eWETH-2"] = Addresses.E_WETH_2;
+            tokenNames["eWSTETH-2"] = Addresses.E_WSTETH_2;
+            tokenNames["eUSDC-2"] = Addresses.E_USDC_2;
 
             tokenNamesInitialized = true;
         }
@@ -53,8 +52,8 @@ contract Tokens is Test {
 
     function initBlacklistedTokensIfNeeded() public {
         if (!blacklistedTokensInitialized) {
-            blacklistedTokensForDeal[TokenAddresses.USDC_ADDR] = true;
-            blacklistedTokensForDeal[TokenAddresses.AAVE_ADDR] = true;
+            blacklistedTokensForDeal[Addresses.USDC_ADDR] = true;
+            blacklistedTokensForDeal[Addresses.AAVE_ADDR] = true;
 
             blacklistedTokensInitialized = true;
         }
@@ -86,9 +85,9 @@ contract Tokens is Test {
         if (isTokenBlacklistedForDeal(_token)) {
             vm.deal(_to, type(uint96).max);
             
-            IUniswapRouter router = IUniswapRouter(Const.UNISWAP_ROUTER);
+            IUniswapRouter router = IUniswapRouter(Addresses.UNISWAP_ROUTER);
             address[] memory path = new address[](2);
-            path[0] = TokenAddresses.WETH_ADDR;
+            path[0] = Addresses.WETH_ADDR;
             path[1] = _token;
             
             vm.prank(_to);

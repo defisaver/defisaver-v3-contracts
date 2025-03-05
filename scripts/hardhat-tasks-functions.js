@@ -201,9 +201,6 @@ async function verifyContract(contractAddress, contractName) {
     let solVersion;
     // https://etherscan.io/solcversions see supported sol versions
     switch (hardhatSettings.solidity.compilers[0].version) {
-    case ('=0.8.10'):
-        solVersion = 'v0.8.10+commit.fc410830';
-        break;
     case ('=0.8.24'):
         solVersion = 'v0.8.24+commit.e11b9ed9';
         break;

@@ -1,4 +1,4 @@
-const { resetForkToBlock } = require('../../utils');
+const { resetForkToBlock } = require('../../utils/utils');
 const { morphoBlueBoostStrategyTest } = require('./morphoblue-tests');
 
 describe('MorphoBlue Boost Strategy test', function () {

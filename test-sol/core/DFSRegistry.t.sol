@@ -6,7 +6,7 @@ import { DFSRegistry } from "../../contracts/core/DFSRegistry.sol";
 import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Const } from "../Const.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
 
@@ -76,9 +76,9 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         address newContractAddr = address(this);
         uint256 _waitPeriod = 0;
         
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         vm.expectEmit(false, false, false, true, address(cut));
-        emit AddNewContract(Const.OWNER_ACC, TEST_ID, newContractAddr, _waitPeriod);
+        emit AddNewContract(Addresses.OWNER_ACC, TEST_ID, newContractAddr, _waitPeriod);
         cut.addNewContract(TEST_ID, newContractAddr, _waitPeriod);
 
         address storedNewAddress = cut.getAddr(TEST_ID);
@@ -106,16 +106,16 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         address newContractAddr = address(this);
         uint256 _waitPeriod = 0;
         
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         cut.addNewContract(TEST_ID, newContractAddr, _waitPeriod);
 
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         vm.expectRevert(abi.encodeWithSelector(EntryAlreadyExistsError.selector, TEST_ID));
         cut.addNewContract(TEST_ID, newContractAddr, _waitPeriod);
     }
 
     function test_should_revert_to_previous_address() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address previousContractAddr = address(0xaa);
         cut.addNewContract(TEST_ID, previousContractAddr, 0);
@@ -126,7 +126,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         cut.approveContractChange(TEST_ID);
 
         vm.expectEmit(false, false, false, true, address(cut));
-        emit RevertToPreviousAddress(Const.OWNER_ACC, TEST_ID, newContractAddr, previousContractAddr);
+        emit RevertToPreviousAddress(Addresses.OWNER_ACC, TEST_ID, newContractAddr, previousContractAddr);
         cut.revertToPreviousAddress(TEST_ID);
 
         address storedPreviousAddress = cut.getAddr(TEST_ID);
@@ -136,13 +136,13 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_revert_to_previous_address_when_entry_does_not_exist() public {
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         vm.expectRevert(abi.encodeWithSelector(EntryNonExistentError.selector, TEST_ID));
         cut.revertToPreviousAddress(TEST_ID);
     }
 
     function test_revert_to_previous_address_when_previous_address_is_empty() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address previousContractAddr = address(0);
         cut.addNewContract(TEST_ID, previousContractAddr, 0);
@@ -159,14 +159,14 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_should_start_contract_change() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         cut.addNewContract(TEST_ID, firstContractAddr, 0);
 
         address newContractAddr = address(0xbb);
         vm.expectEmit(false, false, false, false, address(cut));
-        emit StartContractChange(Const.OWNER_ACC, TEST_ID, firstContractAddr, newContractAddr);
+        emit StartContractChange(Addresses.OWNER_ACC, TEST_ID, firstContractAddr, newContractAddr);
         cut.startContractChange(TEST_ID, newContractAddr);
 
         (,,uint256 changeStartTime,bool inContractChange,,) = cut.entries(TEST_ID);
@@ -180,13 +180,13 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
 
     function test_start_contract_change_when_entry_does_not_exist() public {
         address newContractAddr = address(this);
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         vm.expectRevert(abi.encodeWithSelector(EntryNonExistentError.selector, TEST_ID));
         cut.startContractChange(TEST_ID, newContractAddr);
     }
 
     function test_start_contract_change_when_entry_already_in_wait_period_change() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         cut.addNewContract(TEST_ID, firstContractAddr, 0);
@@ -199,7 +199,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_approve_contract_change() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         uint256 waitPeriod = 604800;
@@ -211,7 +211,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         vm.warp(block.timestamp + waitPeriod);
 
         vm.expectEmit(false, false, false, true, address(cut));
-        emit ApproveContractChange(Const.OWNER_ACC, TEST_ID, firstContractAddr, newContractAddr);
+        emit ApproveContractChange(Addresses.OWNER_ACC, TEST_ID, firstContractAddr, newContractAddr);
         cut.approveContractChange(TEST_ID);
 
         address storedPreviousAddress = cut.previousAddresses(TEST_ID);
@@ -229,13 +229,13 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_approve_contract_change_when_entry_does_not_exist() public {
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         vm.expectRevert(abi.encodeWithSelector(EntryNonExistentError.selector, TEST_ID));
         cut.approveContractChange(TEST_ID);
     }
 
     function test_approve_contract_change_when_entry_not_in_contract_change() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         cut.addNewContract(TEST_ID, firstContractAddr, 0);
@@ -247,7 +247,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_approve_contract_change_when_change_not_ready() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         uint256 waitPeriod = 604800;
@@ -269,7 +269,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_cancel_contract_change() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         cut.addNewContract(TEST_ID, firstContractAddr, 0);
@@ -278,7 +278,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         cut.startContractChange(TEST_ID, newContractAddr);
 
         vm.expectEmit(false, false, false, true, address(cut));
-        emit CancelContractChange(Const.OWNER_ACC, TEST_ID, newContractAddr, firstContractAddr);
+        emit CancelContractChange(Addresses.OWNER_ACC, TEST_ID, newContractAddr, firstContractAddr);
         cut.cancelContractChange(TEST_ID);
 
         address storedPendingAddress = cut.pendingAddresses(TEST_ID);
@@ -293,13 +293,13 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_cancel_contract_change_when_entry_does_not_exist() public {
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         vm.expectRevert(abi.encodeWithSelector(EntryNonExistentError.selector, TEST_ID));
         cut.cancelContractChange(TEST_ID);
     }
 
     function test_cancel_contract_change_when_entry_not_in_contract_change() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         cut.addNewContract(TEST_ID, firstContractAddr, 0);
@@ -311,14 +311,14 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_start_wait_period_change() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         cut.addNewContract(TEST_ID, firstContractAddr, 0);
 
         uint256 waitPeriod = 604800;
         vm.expectEmit(false, false, false, false, address(cut));
-        emit StartWaitPeriodChange(Const.OWNER_ACC, TEST_ID, waitPeriod);
+        emit StartWaitPeriodChange(Addresses.OWNER_ACC, TEST_ID, waitPeriod);
         cut.startWaitPeriodChange(TEST_ID, waitPeriod);
 
         (,,uint256 changeStartTime,bool inContractChange,bool inWaitPeriodChange,) = cut.entries(TEST_ID);
@@ -333,13 +333,13 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
 
     function test_start_wait_period_change_when_entry_does_not_exist() public {
         uint256 waitPeriod = 604800;
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         vm.expectRevert(abi.encodeWithSelector(EntryNonExistentError.selector, TEST_ID));
         cut.startWaitPeriodChange(TEST_ID, waitPeriod);
     }
 
     function test_start_wait_period_change_when_entry_already_in_contract_change() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         cut.addNewContract(TEST_ID, firstContractAddr, 0);
@@ -353,7 +353,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_approve_wait_period_change() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         uint256 waitPeriod = 604800;
@@ -365,7 +365,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         vm.warp(block.timestamp + waitPeriod);
 
         vm.expectEmit(false, false, false, true, address(cut));
-        emit ApproveWaitPeriodChange(Const.OWNER_ACC, TEST_ID, waitPeriod, newWaitPeriod);
+        emit ApproveWaitPeriodChange(Addresses.OWNER_ACC, TEST_ID, waitPeriod, newWaitPeriod);
         cut.approveWaitPeriodChange(TEST_ID);
 
         (
@@ -388,13 +388,13 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_approve_wait_period_change_when_entry_does_not_exist() public {
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         vm.expectRevert(abi.encodeWithSelector(EntryNonExistentError.selector, TEST_ID));
         cut.approveWaitPeriodChange(TEST_ID);
     }
 
     function test_approve_wait_period_change_when_entry_not_in_wait_period_change() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         cut.addNewContract(TEST_ID, firstContractAddr, 0);
@@ -406,7 +406,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_approve_wait_period_change_when_change_not_ready() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         uint256 waitPeriod = 604800;
@@ -432,7 +432,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_cancel_wait_period_change() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         uint256 oldWaitPeriod = 0;
@@ -442,7 +442,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         cut.startWaitPeriodChange(TEST_ID, newWaitPeriod);
 
         vm.expectEmit(false, false, false, true, address(cut));
-        emit CancelWaitPeriodChange(Const.OWNER_ACC, TEST_ID, newWaitPeriod, oldWaitPeriod);
+        emit CancelWaitPeriodChange(Addresses.OWNER_ACC, TEST_ID, newWaitPeriod, oldWaitPeriod);
         cut.cancelWaitPeriodChange(TEST_ID);
 
         (,,uint256 changeStartTime,bool inContractChange,bool inWaitPeriodChange,) = cut.entries(TEST_ID);
@@ -456,13 +456,13 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_cancel_wait_period_change_when_entry_does_not_exist() public {
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         vm.expectRevert(abi.encodeWithSelector(EntryNonExistentError.selector, TEST_ID));
         cut.cancelWaitPeriodChange(TEST_ID);
     }
 
     function test_cancel_wait_period_change_when_entry_not_in_wait_period_change() public {
-        startPrank(Const.OWNER_ACC);
+        startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
         cut.addNewContract(TEST_ID, firstContractAddr, 0);

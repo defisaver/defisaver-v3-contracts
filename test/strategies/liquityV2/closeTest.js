@@ -4,9 +4,9 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 const automationSdk = require('@defisaver/automation-sdk');
 const { getAssetInfo } = require('@defisaver/tokens');
-const { getLiquityV2TestPairs, deployLiquityV2CloseBundle } = require('../../utils-liquityV2');
+const { getLiquityV2TestPairs, deployLiquityV2CloseBundle } = require('../../utils/liquityV2');
 const { BaseLiquityV2StrategyTest } = require('./common');
-const { subLiquityV2CloseBundle } = require('../../strategy-subs');
+const { subLiquityV2CloseBundle } = require('../utils/strategy-subs');
 const {
     formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
     balanceOf,
@@ -15,8 +15,8 @@ const {
     BALANCER_VAULT_ADDR,
     setBalance,
     fetchAmountInUSDPrice,
-} = require('../../utils');
-const { callLiquityV2CloseToCollStrategy, callLiquityV2FLCloseToCollStrategy, callLiquityV2FLCloseToDebtStrategy } = require('../../strategy-calls');
+} = require('../../utils/utils');
+const { callLiquityV2CloseToCollStrategy, callLiquityV2FLCloseToCollStrategy, callLiquityV2FLCloseToDebtStrategy } = require('../utils/strategy-calls');
 
 class CloseTest extends BaseLiquityV2StrategyTest {
     async setUp() {
