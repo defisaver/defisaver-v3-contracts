@@ -7,7 +7,7 @@ const execAsync = promisify(exec);
 
 class CoreAddressesInjector {
     constructor() {
-        this.contractFilePath = path.join(__dirname, '../contracts/core/helpers/MainnetCoreAddresses.sol');
+        this.contractFilePath = path.join(__dirname, '../../contracts/core/helpers/MainnetCoreAddresses.sol');
         this.contentBeforeInjection = null;
         this.encoding = 'utf8';
     }
