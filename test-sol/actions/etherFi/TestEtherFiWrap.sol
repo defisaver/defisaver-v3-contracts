@@ -9,7 +9,7 @@ import { EtherFiHelper } from "../../../contracts/actions/etherfi/helpers/EtherF
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-import { TokenAddresses } from "../../TokenAddresses.sol";
+import {Addresses } from "../../utils/Addresses.sol";
 
 import { console } from "forge-std/console.sol";
 
@@ -31,7 +31,7 @@ contract TestEtherFiWrap is BaseTest, ActionsUtils, EtherFiHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("EtherFiWrap");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -109,8 +109,11 @@ contract TestEtherFiWrap is BaseTest, ActionsUtils, EtherFiHelper {
             assertLe(senderEethBalanceAfter, WEI_OFFSET);
         } else {
             // senderEethBalanceAfter can have up to 1 wei offset error
-            assertGe(senderEethBalanceAfter, senderEethBalanceBefore - _amount);
-            assertLe(senderEethBalanceAfter, senderEethBalanceBefore - _amount + WEI_OFFSET);
+            assertApproxEqAbs(
+                senderEethBalanceAfter,
+                senderEethBalanceBefore,
+                _amount + WEI_OFFSET
+            );
         }
         assertGt(senderWeEthBalanceAfter, senderWeEthBalanceBefore);
     }

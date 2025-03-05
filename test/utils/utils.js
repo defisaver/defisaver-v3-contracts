@@ -1518,6 +1518,15 @@ const generateIds = () => {
     return idsMap;
 };
 
+const expectError = (errString, expectedErrSig) => {
+    const expectedErrName = expectedErrSig.split('(')[0];
+    if (errString.includes(expectedErrName) || errString.includes(getNameId(expectedErrSig))) {
+        expect(true).to.be.equal(true);
+    } else {
+        expect(true).to.be.equal(false);
+    }
+};
+
 module.exports = {
     addToExchangeAggregatorRegistry,
     getAddrFromRegistry,
@@ -1585,6 +1594,7 @@ module.exports = {
     fetchTokenPriceInUSD,
     isNetworkFork,
     setCode,
+    expectError,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,

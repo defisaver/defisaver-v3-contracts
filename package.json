@@ -62,7 +62,7 @@
     "readline-sync": "^1.4.10",
     "solhint": "^3.3.6",
     "solhint-plugin-prettier": "0.0.5",
-    "solidity-coverage": "^0.7.13"
+    "solidity-coverage": "^0.8.14"
   },
   "husky": {
     "hooks": {

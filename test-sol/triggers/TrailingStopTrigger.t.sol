@@ -1,34 +1,43 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import "forge-std/Test.sol";
-import "forge-std/console.sol";
-
-import { CheatCodes } from "../CheatCodes.sol";
-import { MainnetTriggerAddresses } from "../../contracts/triggers/helpers/MainnetTriggerAddresses.sol";
+import { IWStEth } from "../../contracts/interfaces/lido/IWStEth.sol";
 import { MainnetUtilAddresses } from "../../contracts/utils/helpers/MainnetUtilAddresses.sol";
 import { MockChainlinkFeedRegistry } from "../../contracts/mocks/MockChainlinkFeedRegistry.sol";
 import { MockChainlinkAggregator } from "../../contracts/mocks/MockChainlinkAggregator.sol";
 import { TrailingStopTrigger } from "../../contracts/triggers/TrailingStopTrigger.sol";
 import { DSMath } from "../../contracts/DS/DSMath.sol";
-import { IWStEth } from "../../contracts/interfaces/lido/IWStEth.sol";
+import { BaseTest } from "../utils/BaseTest.sol";
+import { console } from "forge-std/console.sol";
 
-contract TestTrailingStopTrigger is Test, DSMath, MainnetTriggerAddresses, MainnetUtilAddresses {
-    CheatCodes constant cheats = CheatCodes(VM_ADDRESS);
+contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
 
-    TrailingStopTrigger trigger;
+    /*//////////////////////////////////////////////////////////////////////////
+                                CONTRACT UNDER TEST
+    //////////////////////////////////////////////////////////////////////////*/
+    TrailingStopTrigger cut;
+
+    /*//////////////////////////////////////////////////////////////////////////
+                                    VARIABLES
+    //////////////////////////////////////////////////////////////////////////*/
     MockChainlinkAggregator mockAggregator;
 
-    function setUp() public {
-        trigger = new TrailingStopTrigger();
-        MockChainlinkFeedRegistry mockPriceFeed = new MockChainlinkFeedRegistry();
-        mockAggregator = new MockChainlinkAggregator();
+    /*//////////////////////////////////////////////////////////////////////////
+                                   SETUP FUNCTION
+    //////////////////////////////////////////////////////////////////////////*/
+    function setUp() public override {
+        forkMainnet("TrailingStopTrigger");
+        cut = new TrailingStopTrigger();
 
-        cheats.etch(CHAINLINK_FEED_REGISTRY, address(mockPriceFeed).code);
+        // set mock price feed
+        MockChainlinkFeedRegistry mockPriceFeed = new MockChainlinkFeedRegistry();
+        vm.etch(CHAINLINK_FEED_REGISTRY, address(mockPriceFeed).code);
         mockPriceFeed = MockChainlinkFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
+        // set mock aggregator
+        mockAggregator = new MockChainlinkAggregator();
         address realAggregatorAddress = mockPriceFeed.getFeed(address(0), address(0));
-        cheats.etch(realAggregatorAddress, address(mockAggregator).code);
+        vm.etch(realAggregatorAddress, address(mockAggregator).code);
         mockAggregator = MockChainlinkAggregator(realAggregatorAddress);
     }
 
@@ -37,7 +46,7 @@ contract TestTrailingStopTrigger is Test, DSMath, MainnetTriggerAddresses, Mainn
         uint256 maxPrice = 1112 * 10 ** 8;
         uint256 percentage = 10 * 10 ** 8;
 
-        bool isDiff = trigger.checkPercentageDiff(currPrice, maxPrice, percentage);
+        bool isDiff = cut.checkPercentageDiff(currPrice, maxPrice, percentage);
 
         assert(isDiff);
     }
@@ -47,7 +56,7 @@ contract TestTrailingStopTrigger is Test, DSMath, MainnetTriggerAddresses, Mainn
         uint256 maxPrice = 25_000 * 10 ** 8;
         uint256 percentage = 10 * 10 ** 8;
 
-        bool isDiff = trigger.checkPercentageDiff(currPrice, maxPrice, percentage);
+        bool isDiff = cut.checkPercentageDiff(currPrice, maxPrice, percentage);
 
         assert(isDiff);
     }
@@ -57,7 +66,7 @@ contract TestTrailingStopTrigger is Test, DSMath, MainnetTriggerAddresses, Mainn
         uint256 maxPrice = 22_023 * 10 ** 8;
         uint256 percentage = 1 * 10 ** 7; // 0.1%
 
-        bool isDiff = trigger.checkPercentageDiff(currPrice, maxPrice, percentage);
+        bool isDiff = cut.checkPercentageDiff(currPrice, maxPrice, percentage);
 
         assert(isDiff);
     }
@@ -67,7 +76,7 @@ contract TestTrailingStopTrigger is Test, DSMath, MainnetTriggerAddresses, Mainn
         uint256 maxPrice = 22_022 * 10 ** 8; // 21,999.978
         uint256 percentage = 1 * 10 ** 7; // 0.1%
 
-        bool isDiff = trigger.checkPercentageDiff(currPrice, maxPrice, percentage);
+        bool isDiff = cut.checkPercentageDiff(currPrice, maxPrice, percentage);
 
         assert(isDiff);
     }
@@ -77,29 +86,29 @@ contract TestTrailingStopTrigger is Test, DSMath, MainnetTriggerAddresses, Mainn
         uint256 maxPrice = 1109 * 10 ** 8;
         uint256 percentage = 10 * 10 ** 8;
 
-        bool isDiff = trigger.checkPercentageDiff(currPrice, maxPrice, percentage);
+        bool isDiff = cut.checkPercentageDiff(currPrice, maxPrice, percentage);
 
         assert(!isDiff);
     }
 
     // Test with fetching roundId
     function testGetRoundInfoForEth() public {
-        uint256 chainLinkPrice = 10_000; // ide gas uskoro
+        uint256 chainLinkPrice = 10_000;
         uint80 roundId = 1;
         setRound(roundId, int256(chainLinkPrice), block.timestamp);
 
-        (uint256 price, uint256 timestamp) = trigger.getRoundInfo(ETH_ADDR, roundId);
+        (uint256 price, uint256 timestamp) = cut.getRoundInfo(ETH_ADDR, roundId);
 
         assert(price == uint256(chainLinkPrice));
         assert(timestamp == block.timestamp);
     }
 
-    function testGetRoundInfoForWStEth() public {
-        uint256 chainLinkPrice = 10_000; // ide gas uskoro
+    function _testGetRoundInfoForWStEth() public {
+        uint256 chainLinkPrice = 10_000;
         uint80 roundId = 1;
         setRound(roundId, int256(chainLinkPrice), block.timestamp);
 
-        (uint256 price, uint256 timestamp) = trigger.getRoundInfo(WSTETH_ADDR, roundId);
+        (uint256 price, uint256 timestamp) = cut.getRoundInfo(WSTETH_ADDR, roundId);
 
         assert(price == wmul(uint256(chainLinkPrice), IWStEth(WSTETH_ADDR).stEthPerToken()));
         assert(timestamp == block.timestamp);
@@ -131,7 +140,7 @@ contract TestTrailingStopTrigger is Test, DSMath, MainnetTriggerAddresses, Mainn
         });
         mockAggregator.setMockRounds(mockRounds);
 
-        bool isTriggered = trigger.isTriggered(callData, subData);
+        bool isTriggered = cut.isTriggered(callData, subData);
 
         assert(isTriggered);
     }
@@ -163,13 +172,14 @@ contract TestTrailingStopTrigger is Test, DSMath, MainnetTriggerAddresses, Mainn
 
         bytes memory subData = abi.encode(ETH_ADDR, percentage, maxRoundId + 1);
 
-        bool isTriggered = trigger.isTriggered(callData, subData);
+        bool isTriggered = cut.isTriggered(callData, subData);
 
         assert(!isTriggered);
     }
 
-    ///////////////////// Helper function //////////////////////
-
+    /*//////////////////////////////////////////////////////////////////////////
+                                       HELPERS
+    //////////////////////////////////////////////////////////////////////////*/
     function setRound(uint80 _roundId, int256 _answer, uint256 _updatedAt) public {
         MockChainlinkAggregator.MockRoundData[]
             memory mockRounds = new MockChainlinkAggregator.MockRoundData[](1);

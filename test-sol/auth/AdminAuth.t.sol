@@ -4,8 +4,7 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Const } from "../Const.sol";
-import { TokenAddresses } from "../TokenAddresses.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_AdminAuth is AdminAuth, BaseTest {
     
@@ -31,7 +30,7 @@ contract TestCore_AdminAuth is AdminAuth, BaseTest {
 
         uint256 balanceBefore = address(this).balance;
 
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         cut.withdrawStuckFunds(
             0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE,
             address(this),
@@ -45,12 +44,12 @@ contract TestCore_AdminAuth is AdminAuth, BaseTest {
 
     function test_should_withdraw_stuck_erc20() public {
         uint256 stuckAmount = 1000;
-        address token = TokenAddresses.WETH_ADDR;
+        address token = Addresses.WETH_ADDR;
         deal(token, address(cut), stuckAmount);
 
         uint256 balanceBefore = balanceOf(token, address(this));
 
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         cut.withdrawStuckFunds(token, address(this), stuckAmount);
 
         uint256 balanceAfter = balanceOf(token, address(this));
@@ -60,14 +59,14 @@ contract TestCore_AdminAuth is AdminAuth, BaseTest {
 
     function test_withdraw_stuck_funds_when_caller_not_owner() public {
         vm.expectRevert(abi.encodeWithSelector(AdminAuth.SenderNotOwner.selector));
-        cut.withdrawStuckFunds(TokenAddresses.WETH_ADDR, address(this), 1000);
+        cut.withdrawStuckFunds(Addresses.WETH_ADDR, address(this), 1000);
     }
 
     function test_should_kill_contract() public {
         vm.deal(address(cut), 1000);
         uint256 cutBalance = address(cut).balance;
 
-        address caller = Const.ADMIN_ACC;
+        address caller = Addresses.ADMIN_ACC;
 
         uint256 callerBalanceBefore = caller.balance;
 

@@ -5,7 +5,7 @@ import { Pausable } from "../../contracts/auth/Pausable.sol";
 import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Const } from "../Const.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 /// @dev Used so we can call external setPaused function and test notPaused modifier 
 contract PausableContract is Pausable {
@@ -34,10 +34,10 @@ contract TestCore_Pausable is Pausable, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_set_paused_than_unpause_again() public {
         assertFalse(pausable.isPaused());
-        prank(Const.ADMIN_ACC);
+        prank(Addresses.ADMIN_ACC);
         pausable.setPaused(true);
         assertTrue(pausable.isPaused());
-        prank(Const.ADMIN_ACC);
+        prank(Addresses.ADMIN_ACC);
         pausable.setPaused(false);
         assertFalse(pausable.isPaused());
     }
@@ -48,7 +48,7 @@ contract TestCore_Pausable is Pausable, BaseTest {
     }
 
     function test_should_revert_when_contract_is_paused() public {
-        prank(Const.ADMIN_ACC);
+        prank(Addresses.ADMIN_ACC);
         pausable.setPaused(true);
         vm.expectRevert(abi.encodeWithSelector(Pausable.ContractPaused.selector));
         pausable.testModifier();

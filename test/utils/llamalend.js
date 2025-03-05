@@ -62,7 +62,7 @@ const supplyToMarket = async (controllerAddr, chainId) => {
         supplyAmountInWei,
     );
     await approve(loanToken.address, vaultAddr, wallet);
-    const vaultContract = await hre.ethers.getContractAt('IERC4626', vaultAddr);
+    const vaultContract = await hre.ethers.getContractAt('contracts/interfaces/IERC4626.sol:IERC4626', vaultAddr);
     await vaultContract.deposit(supplyAmountInWei, wallet.address, { gasLimit: 3000000 });
 };
 

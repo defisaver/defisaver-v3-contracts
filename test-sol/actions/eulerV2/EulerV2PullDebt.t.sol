@@ -47,7 +47,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("EulerV2PullDebt");
         initTestPairs("EulerV2");
 
         accountWallet = new SmartWallet(bob);
