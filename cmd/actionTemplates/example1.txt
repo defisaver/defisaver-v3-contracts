@@ -1,0 +1,32 @@
+USAGE: node ./cmd/generate-cli.js genSol LiquityV2Open -t ./cmd/template/example1.txt
+
+
+/// @param market The address of the LiquityV2 market (collateral branch)
+/// @param from The address to pull the tokens from
+/// @param to The address to send the bold tokens to
+/// @param interestBatchManager The address of the interest batch manager
+///                             (optional - set to address(0) if trove will not join the batch)
+/// @param ownerIndex The index of the owner used to calculate the trove ID
+///                   troveId = keccak256(owner, ownerIndex)          
+/// @param collAmount The amount of collateral to deposit
+/// @param boldAmount The amount of BOLD to mint
+/// @param upperHint The upper hint for the trove
+/// @param lowerHint The lower hint for the trove. See LiquityV2View for fetching hints
+/// @param annualInterestRate The annual interest rate for the trove
+///                           (in 1e16) - 50000000000000000 => 5% annual interest
+///                           Optional if joining interest batch manager
+/// @param maxUpfrontFee The maximum upfront fee to pay
+///                      (see IHintHelpers:predictOpenTroveUpfrontFee && predictOpenTroveAndJoinBatchUpfrontFee)
+struct Params {
+    address market; // p
+    address from; // p
+    address to; // p
+    address interestBatchManager; // p
+    uint256 ownerIndex; // p
+    uint256 collAmount; // p
+    uint256 boldAmount; // p
+    uint256 upperHint; // p
+    uint256 lowerHint; // p
+    uint256 annualInterestRate; // p
+    uint256 maxUpfrontFee; // p
+}

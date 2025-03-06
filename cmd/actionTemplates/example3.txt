@@ -1,0 +1,28 @@
+USAGE: node ./cmd/generate-cli.js genSol LiquityV2Adjust -t ./cmd/template/example3.txt
+
+/// @param CollActionType - type of collateral action to perform
+enum CollActionType { SUPPLY, WITHDRAW } // !! Enums has to be in one line for the parser to work
+
+/// @param DebtActionType - type of debt action to perform
+enum DebtActionType { PAYBACK, BORROW } // !! Enums has to be in one line for the parser to work
+
+/// @param market The address of the LiquityV2 market (collateral branch)
+/// @param from The address to pull the tokens from
+/// @param to The address to send the tokens to
+/// @param troveId The ID of the trove to adjust
+/// @param collAmount The amount of collateral to supply or withdraw
+/// @param debtAmount The amount of debt to payback or borrow
+/// @param maxUpfrontFee The maximum upfront fee to pay (see IHintHelpers:predictAdjustTroveUpfrontFee)
+/// @param collAction The type of collateral action to perform. 0 for supply, 1 for withdraw
+/// @param debtAction The type of debt action to perform. 0 for payback, 1 for borrow
+struct Params {
+    address market; // p
+    address from; // p
+    address to; // p
+    uint256 troveId; // p
+    uint256 collAmount; // p
+    uint256 debtAmount; // p
+    uint256 maxUpfrontFee; // p
+    CollActionType collAction; // p
+    DebtActionType debtAction; // p
+}
