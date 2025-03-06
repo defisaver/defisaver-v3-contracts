@@ -39,6 +39,8 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
         wallet = new SmartWallet(bob);
         safeWalletAddr = wallet.createSafe();
 
+        SafeModuleAuth newCut = new SafeModuleAuth();
+        vm.etch(MODULE_AUTH_ADDR, address(newCut).code);
         cut = SafeModuleAuth(MODULE_AUTH_ADDR);
 
         safeModulePermissionAddr = address(new SafeModulePermission());

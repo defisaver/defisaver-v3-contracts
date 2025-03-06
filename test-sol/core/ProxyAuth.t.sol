@@ -38,6 +38,8 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
         wallet = new SmartWallet(bob);
         dsProxyAddr = wallet.createDSProxy();
 
+        ProxyAuth newCut = new ProxyAuth();
+        vm.etch(PROXY_AUTH_ADDR, address(newCut).code);
         cut = ProxyAuth(PROXY_AUTH_ADDR);
 
         dsProxyPermissionAddr = address(new DSProxyPermission());
