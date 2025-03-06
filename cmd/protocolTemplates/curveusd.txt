@@ -1,4 +1,4 @@
-USAGE: node ./cmd/generate-cli.js genProtocol -t ./cmd/protocolTemplates/curveusd.txt
+USAGE: node ./cmd/generate-cli.js genProtocolSol -t ./cmd/protocolTemplates/curveusd.txt
 
 
 PROTOCOL_NAME = "CurveUsd2";

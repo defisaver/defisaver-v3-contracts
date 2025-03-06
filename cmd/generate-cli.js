@@ -354,6 +354,277 @@ const generateProtocolActions = (templatePath, outputPath) => {
     console.log(`Generated helper files in ${join(protocolDir, 'helpers')}`);
 };
 
+// List of supported TypeScript types
+const SUPPORTED_TYPES = new Set([
+    'EthAddress',
+    'bytes32',
+    'bytes',
+    'uint256',
+    'uint160',
+    'uint128',
+    'uint80',
+    'uint64',
+    'uint32',
+    'uint24',
+    'uint16',
+    'uint8',
+    'int256',
+    'int24',
+]);
+
+// Helper to generate type array for nested structs
+const generateNestedTypeArray = (field, structs) => {
+    const struct = structs[field.type];
+    if (!struct) return `'${field.type}'`;
+
+    return `[${struct.fields.map((f) => {
+        if (structs[f.type]) {
+            return generateNestedTypeArray(f, structs);
+        }
+        return `'${f.type}'`;
+    }).join(', ')}]`;
+};
+
+// Helper to convert Solidity type to TypeScript type
+const solToTsType = (solType, enums, structs) => {
+    if (structs && structs[solType]) return 'Array<any>';
+    if (enums && enums[solType]) return 'uint8';
+    if (solType === 'address') return 'EthAddress';
+    if (solType === 'bool') return 'boolean';
+    if (solType === 'bytes32') return 'bytes32';
+    if (solType === 'bytes') return 'bytes';
+    // Handle array types
+    if (solType.endsWith('[]')) {
+        const baseType = solType.slice(0, -2);
+        return `Array<${solToTsType(baseType, enums, structs)}>`;
+    }
+    if (solType.startsWith('uint')) {
+        const bits = solType.replace('uint', '');
+        const type = `uint${bits || '256'}`;
+        return SUPPORTED_TYPES.has(type) ? type : 'string';
+    }
+    if (solType.startsWith('int')) {
+        const bits = solType.replace('int', '');
+        const type = `int${bits || '256'}`;
+        return SUPPORTED_TYPES.has(type) ? type : 'string';
+    }
+    return solType;
+};
+
+// Helper to get required type imports based on struct fields
+const getRequiredTypes = (struct, enums, structs) => {
+    const types = new Set();
+    struct.fields.forEach((field) => {
+        const tsType = solToTsType(field.type, enums, structs);
+        if (SUPPORTED_TYPES.has(tsType)) {
+            types.add(tsType);
+        }
+    });
+    return Array.from(types).sort();
+};
+
+// Helper to generate constructor parameters from struct fields
+const generateConstructorParams = (struct, enums, structs) => struct.fields
+    .map((field) => `    ${field.name}: ${solToTsType(field.type, enums, structs)}`)
+    .join(',\n');
+
+// Helper to parse struct comments and match them to fields
+const parseStructComments = (comments) => {
+    const fieldComments = {};
+    let currentField = null;
+    let currentComment = [];
+
+    comments.forEach((comment) => {
+        const paramMatch = comment.match(/@param\s+(\w+)\s+(.*)/);
+        if (paramMatch) {
+            // If we were building a previous field's comment, save it
+            if (currentField) {
+                fieldComments[currentField] = currentComment.join(' ');
+                currentComment = [];
+            }
+            currentField = paramMatch[1];
+            currentComment.push(paramMatch[2]);
+        } else if (currentField && comment.trim()) {
+            // Continue building the current field's comment
+            currentComment.push(comment.trim());
+        }
+    });
+
+    // Save the last field's comment
+    if (currentField) {
+        fieldComments[currentField] = currentComment.join(' ');
+    }
+
+    return fieldComments;
+};
+
+// Helper to generate constructor parameter docs
+const generateParamDocs = (struct) => {
+    const fieldComments = parseStructComments(struct.comments);
+    return struct.fields
+        .map((field) => {
+            const comment = fieldComments[field.name] || 'No description provided';
+            return `   * @param ${field.name} ${comment}`;
+        })
+        .join('\n');
+};
+
+// Helper to generate type array for super call
+const generateTypeArray = (struct, enums, structs) => {
+    const types = struct.fields.map((field) => {
+        if (structs[field.type]) {
+            return generateNestedTypeArray(field, structs);
+        }
+        return `'${enums && enums[field.type] ? 'uint8' : field.type}'`;
+    });
+
+    if (types.some((t) => t.startsWith('['))) {
+        return `[\n        ${types.join(',\n        ')}\n      ]`;
+    }
+    return `[${types.join(', ')}]`;
+};
+
+// Helper to generate args array for super call
+const generateArgsArray = (struct) => struct.fields
+    .map((field) => field.name)
+    .join(', ');
+
+// Helper to find piped fields in nested structs
+const findPipedFieldsInStruct = (field, structs, prefix = '', index = '') => {
+    const struct = structs[field.type];
+    if (!struct) {
+        return field.isPiped ? [`this.args${index}`] : [];
+    }
+
+    return struct.fields.flatMap((f, i) => {
+        const newPrefix = prefix ? `${prefix}.${f.name}` : f.name;
+        const newIndex = `${index}[${i}]`;
+        return findPipedFieldsInStruct(f, structs, newPrefix, newIndex);
+    });
+};
+
+// Helper to generate mappable args
+const generateMappableArgs = (struct, structs) => {
+    const mappableArgs = struct.fields.flatMap((field, i) => {
+        if (structs[field.type]) {
+            return findPipedFieldsInStruct(field, structs, field.name, `[${i}]`);
+        }
+        return field.isPiped ? [`this.args[${i}]`] : [];
+    });
+
+    return mappableArgs
+        .map((arg) => `      ${arg},`)
+        .join('\n');
+};
+
+const generateTypeScriptAction = (templateContent, actionName) => {
+    const { structs, enums } = parseDefinitions(templateContent);
+
+    if (!structs.Params) {
+        throw new Error('Template must contain a Params struct');
+    }
+
+    // Get required type imports
+    const requiredTypes = getRequiredTypes(structs.Params, enums, structs);
+
+    // Get struct level comments for class description
+    const structComments = structs.Params.comments.join(' ');
+
+    // Check if there are any piped fields
+    const hasPipedFields = structs.Params.fields.some((field) => {
+        if (structs[field.type]) {
+            const pipedFields = findPipedFieldsInStruct(field, structs);
+            return pipedFields.length > 0;
+        }
+        return field.isPiped;
+    });
+
+    const mappableArgsSection = hasPipedFields ? `
+    this.mappableArgs = [
+${generateMappableArgs(structs.Params, structs)}
+    ];` : '';
+
+    const template = `import { Action } from '../../Action';
+import { getAddr } from '../../addresses';
+import { ${requiredTypes.join(', ')} } from '../../types';
+
+/**
+ * ${actionName}Action -
+ *
+ * @category ${actionName}
+ */
+export class ${actionName}Action extends Action {
+  /**
+${generateParamDocs(structs.Params)}
+   */
+  constructor(
+${generateConstructorParams(structs.Params, enums, structs)}
+  ) {
+    super(
+      '${actionName}',
+      getAddr('${actionName}'),
+      ${generateTypeArray(structs.Params, enums, structs)},
+      [${generateArgsArray(structs.Params)}],
+    );${mappableArgsSection}
+  }
+}
+`;
+
+    return template;
+};
+
+const generateActionSdk = (templatePath, actionName, outputPath) => {
+    if (!existsSync(templatePath)) {
+        console.error(`Template file not found at ${templatePath}`);
+        process.exit(1);
+    }
+
+    const templateContent = readFileSync(templatePath, 'utf8');
+    const tsCode = generateTypeScriptAction(templateContent, actionName);
+
+    // If outputPath is a directory, append the file name
+    if (existsSync(outputPath) && statSync(outputPath).isDirectory()) {
+        outputPath = join(outputPath, `${actionName}Action.ts`);
+    }
+
+    writeFileSync(outputPath, tsCode);
+    console.log(`Generated TypeScript SDK action at ${outputPath}`);
+};
+
+const generateProtocolSdk = (templatePath, outputPath) => {
+    if (!existsSync(templatePath)) {
+        console.error(`Template file not found at ${templatePath}`);
+        process.exit(1);
+    }
+
+    const templateContent = readFileSync(templatePath, 'utf8');
+    const { protocolName, actions } = parseProtocolTemplate(templateContent);
+
+    // Create protocol directory
+    const protocolDir = join(outputPath, protocolName.toLowerCase());
+    if (!existsSync(protocolDir)) {
+        mkdirSync(protocolDir, { recursive: true });
+    }
+
+    // Generate each action
+    const actionNames = [];
+    actions.forEach((action) => {
+        const actionContent = action.lines.join('\n');
+        const tsCode = generateTypeScriptAction(actionContent, action.name);
+        const outputFile = join(protocolDir, `${action.name}Action.ts`);
+        writeFileSync(outputFile, tsCode);
+        actionNames.push(action.name);
+        console.log(`Generated TypeScript SDK action at ${outputFile}`);
+    });
+
+    // Generate index.ts
+    const indexContent = actionNames
+        .map((name) => `export * from './${name}Action';`)
+        .join('\n');
+    writeFileSync(join(protocolDir, 'index.ts'), indexContent);
+    console.log(`Generated index.ts in ${protocolDir}`);
+};
+
 (async () => {
     program
         .command('genActionSol <actionName>')
@@ -368,7 +639,7 @@ const generateProtocolActions = (templatePath, outputPath) => {
         });
 
     program
-        .command('genProtocol')
+        .command('genProtocolSol')
         .description('Generate multiple Solidity action files from a protocol template')
         .option('-t, --template <path>', 'Template file path (defaults to cmd/protocolTemplates/defaultTemplate.sol)')
         .option('-o, --output <path>', 'Output directory for the generated files (defaults to contracts/actions)')
@@ -376,6 +647,30 @@ const generateProtocolActions = (templatePath, outputPath) => {
             const templatePath = options.template || join(process.cwd(), 'cmd', './protocolTemplates/defaultTemplate.sol');
             const outputPath = options.output || join(process.cwd(), 'contracts', 'actions');
             generateProtocolActions(templatePath, outputPath);
+            process.exit(0);
+        });
+
+    program
+        .command('genActionSdk <actionName>')
+        .description('Generate a TypeScript SDK action file from a template')
+        .option('-t, --template <path>', 'Template file path (defaults to cmd/actionTemplates/defaultTemplate.sol)')
+        .option('-o, --output <path>', 'Output path for the generated TypeScript file (defaults to sdk/actions/<actionName>Action.ts)')
+        .action((actionName, options) => {
+            const templatePath = options.template || join(process.cwd(), 'cmd', './actionTemplates/defaultTemplate.sol');
+            const outputPath = options.output || join(process.cwd(), 'sdk-gen', `${actionName}Action.ts`);
+            generateActionSdk(templatePath, actionName, outputPath);
+            process.exit(0);
+        });
+
+    program
+        .command('genProtocolSdk')
+        .description('Generate TypeScript SDK action files from a protocol template')
+        .option('-t, --template <path>', 'Template file path (defaults to cmd/protocolTemplates/defaultTemplate.sol)')
+        .option('-o, --output <path>', 'Output directory for the generated files (defaults to sdk-gen)')
+        .action((options) => {
+            const templatePath = options.template || join(process.cwd(), 'cmd', './protocolTemplates/defaultTemplate.sol');
+            const outputPath = options.output || join(process.cwd(), 'sdk-gen');
+            generateProtocolSdk(templatePath, outputPath);
             process.exit(0);
         });
 
