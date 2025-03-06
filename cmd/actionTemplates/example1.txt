@@ -1,4 +1,4 @@
-USAGE: node ./cmd/generate-cli.js genSol LiquityV2Open -t ./cmd/template/example1.txt
+USAGE: node ./cmd/generate-cli.js genActionSol LiquityV2Open -t ./cmd/actionTemplates/example1.txt
 
 
 /// @param market The address of the LiquityV2 market (collateral branch)

@@ -1,4 +1,4 @@
-USAGE: node ./cmd/generate-cli.js genSol LiquityV2Adjust -t ./cmd/template/example3.txt
+USAGE: node ./cmd/generate-cli.js genActionSol LiquityV2Adjust -t ./cmd/actionTemplates/example3.txt
 
 /// @param CollActionType - type of collateral action to perform
 enum CollActionType { SUPPLY, WITHDRAW } // !! Enums has to be in one line for the parser to work
