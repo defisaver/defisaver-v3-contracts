@@ -5,6 +5,7 @@
 require('dotenv-safe').config();
 
 const { program } = require('commander');
+const { execSync } = require('child_process');
 const {
     readFileSync,
     writeFileSync,
@@ -13,6 +14,7 @@ const {
     mkdirSync,
 } = require('fs');
 const { join } = require('path');
+const { getNameId } = require('../test/utils/utils');
 
 // Helper to extract struct and enum definitions from template
 const parseDefinitions = (content) => {
@@ -527,9 +529,6 @@ const generateTypeScriptAction = (templateContent, actionName) => {
     // Get required type imports
     const requiredTypes = getRequiredTypes(structs.Params, enums, structs);
 
-    // Get struct level comments for class description
-    const structComments = structs.Params.comments.join(' ');
-
     // Check if there are any piped fields
     const hasPipedFields = structs.Params.fields.some((field) => {
         if (structs[field.type]) {
@@ -625,6 +624,170 @@ const generateProtocolSdk = (templatePath, outputPath) => {
     console.log(`Generated index.ts in ${protocolDir}`);
 };
 
+// Helper to extract NatSpec comments from a string
+const extractNatSpec = (content) => {
+    const natspec = {
+        title: '',
+        notice: [], // Array to store multiple @notice comments
+        dev: [], // Array to store multiple @dev comments
+        other: {}, // Store other NatSpec tags
+    };
+
+    const lines = content.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.startsWith('///')) {
+            const match = line.match(/\/\/\/\s*@(\w+)\s+(.*)/);
+            if (match) {
+                const [, tag, value] = match;
+                if (tag === 'title') {
+                    natspec.title = value.trim();
+                } else if (tag === 'dev') {
+                    natspec.dev.push(value.trim());
+                } else if (tag === 'notice') {
+                    natspec.notice.push(value.trim());
+                } else {
+                    natspec.other[tag] = value.trim();
+                }
+            }
+        }
+    }
+    return natspec;
+};
+
+// Helper to extract struct params with natspec comments
+const extractParamsWithComments = (content) => {
+    const structMatch = content.match(/struct\s+Params\s*{([^}]+)}/s);
+    if (!structMatch) return '';
+
+    // Find the position of struct Params
+    const structIndex = content.indexOf('struct Params');
+    if (structIndex === -1) return '';
+
+    // Look backwards from struct to find all @param comments
+    const contentBeforeStruct = content.substring(0, structIndex);
+    const lines = contentBeforeStruct.split('\n').reverse();
+
+    // Find all @param comments until we hit a non-comment line
+    const paramComments = lines.reduce((comments, line) => {
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith('/// @param')) {
+            comments.unshift(trimmedLine);
+        }
+        return comments;
+    }, []);
+
+    // Get the struct content and format it
+    const structContent = structMatch[1].trim();
+    const params = structContent.split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.endsWith(';'));
+
+    // Format comments above struct and params inside
+    return `    ${paramComments.join('\n    ')}\n    struct Params {\n        ${params.join('\n        ')}\n    }`;
+};
+
+// Helper to extract return value
+const extractReturnValue = (content) => {
+    const returnMatch = content.match(/return\s*\(.*?\);/g);
+    if (!returnMatch) return 'unknown';
+
+    return returnMatch[0];
+};
+
+// Helper to extract event information and log data
+const extractEvents = (content) => {
+    const actionEventMatch = content.match(/emit\s+ActionEvent\("([^"]+)"/);
+    const logDirectMatch = content.match(/logActionDirectEvent\("([^"]+)"/);
+    if (!actionEventMatch || !logDirectMatch) {
+        return `\`\`\`solidity
+\`\`\``;
+    }
+
+    return `\`\`\`solidity
+emit ActionEvent("${actionEventMatch[1]}", logData);
+logger.logActionDirectEvent("${logDirectMatch[1]}", logData);
+bytes memory logData = abi.encode(params);
+\`\`\``;
+};
+
+// Helper to find contract file by name
+const findContractFile = (contractName) => {
+    try {
+        // Use find command to locate the contract file
+        const result = execSync(`find contracts -type f -name "${contractName}.sol"`, { encoding: 'utf8' });
+        const files = result.trim().split('\n');
+        if (!files[0]) {
+            throw new Error(`Contract ${contractName} not found`);
+        }
+        return files[0]; // Return the first match
+    } catch (error) {
+        console.error(`Could not find contract file for ${contractName}`);
+        return null;
+    }
+};
+
+// Main function to generate action documentation
+const genActionDoc = (contractName, outputPath = 'gen/docs') => {
+    const contractPath = findContractFile(contractName);
+    if (!contractPath) {
+        console.error(`Contract ${contractName} not found`);
+        process.exit(1);
+    }
+
+    const content = readFileSync(contractPath, 'utf8');
+    const natspec = extractNatSpec(content);
+    const actionId = getNameId(contractName);
+    const actionTypeMatch = content.match(/actionType\(\).*?return\s+uint8\(ActionType\.(\w+)\)/s);
+    const actionType = actionTypeMatch ? actionTypeMatch[1] : 'UNKNOWN';
+    const paramsStruct = extractParamsWithComments(content);
+    const returnValue = extractReturnValue(content);
+    const events = extractEvents(content);
+
+    // Create output directory if it doesn't exist
+    if (!existsSync(outputPath)) {
+        mkdirSync(outputPath, { recursive: true });
+    }
+
+    const markdown = `# ${contractName}
+
+## Description
+${natspec.title || 'No description available'}
+
+${natspec.notice.length > 0 ? `> **Notes**\n>\n> ${natspec.notice.join('\n> ')}\n` : ''}
+
+## Action ID
+\`${actionId}\`
+
+## SDK Action
+\`\`\`ts
+const ${contractName[0].toLowerCase()}${contractName.slice(1)}Action = new dfs.actions.${contractName}Action(
+    ...args
+);
+\`\`\`
+
+## Action Type
+\`${actionType}\`
+
+## Input Parameters
+\`\`\`solidity
+${paramsStruct}
+\`\`\`
+
+## Return Value
+\`\`\`solidity
+${returnValue}
+\`\`\`
+
+## Events and Logs
+${events}
+`;
+
+    const finalOutputPath = join(outputPath, `${contractName}.md`);
+    writeFileSync(finalOutputPath, markdown);
+    console.log(`Documentation generated for ${contractName} at ${finalOutputPath}`);
+};
+
 (async () => {
     program
         .command('genActionSol <actionName>')
@@ -657,7 +820,7 @@ const generateProtocolSdk = (templatePath, outputPath) => {
         .option('-o, --output <path>', 'Output path for the generated TypeScript file (defaults to sdk/actions/<actionName>Action.ts)')
         .action((actionName, options) => {
             const templatePath = options.template || join(process.cwd(), 'cmd', './actionTemplates/defaultTemplate.sol');
-            const outputPath = options.output || join(process.cwd(), 'sdk-gen', `${actionName}Action.ts`);
+            const outputPath = options.output || join(process.cwd(), 'gen/sdk', `${actionName}Action.ts`);
             generateActionSdk(templatePath, actionName, outputPath);
             process.exit(0);
         });
@@ -666,11 +829,21 @@ const generateProtocolSdk = (templatePath, outputPath) => {
         .command('genProtocolSdk')
         .description('Generate TypeScript SDK action files from a protocol template')
         .option('-t, --template <path>', 'Template file path (defaults to cmd/protocolTemplates/defaultTemplate.sol)')
-        .option('-o, --output <path>', 'Output directory for the generated files (defaults to sdk-gen)')
+        .option('-o, --output <path>', 'Output directory for the generated files (defaults to gen/sdk)')
         .action((options) => {
             const templatePath = options.template || join(process.cwd(), 'cmd', './protocolTemplates/defaultTemplate.sol');
-            const outputPath = options.output || join(process.cwd(), 'sdk-gen');
+            const outputPath = options.output || join(process.cwd(), 'gen/sdk');
             generateProtocolSdk(templatePath, outputPath);
+            process.exit(0);
+        });
+
+    program
+        .command('genActionDoc <contractPath>')
+        .description('Generate documentation from a contract source file')
+        .option('-o, --output <path>', 'Output directory for documentation (defaults to gen/docs)')
+        .action((contractName, options) => {
+            const outputPath = options.output || join(process.cwd(), 'gen/docs');
+            genActionDoc(contractName, outputPath);
             process.exit(0);
         });
 
