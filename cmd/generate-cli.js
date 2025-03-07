@@ -624,6 +624,26 @@ const generateProtocolSdk = (templatePath, outputPath) => {
     console.log(`Generated index.ts in ${protocolDir}`);
 };
 
+// Helper to find SDK signature for an action
+const findSdkSignature = (actionName) => {
+    try {
+        const signaturesPath = join(process.cwd(), 'cmd', 'sdkSignatures', 'signatures.txt');
+        const signatures = readFileSync(signaturesPath, 'utf8');
+        // Convert action name to camelCase for matching
+        const camelCaseName = actionName[0].toLowerCase() + actionName.slice(1);
+        // Look for the signature block
+        const regex = new RegExp(`const ${camelCaseName}Action = new dfs\\.actions\\.[\\w.]+\\([\\s\\S]+?\\);`, 'g');
+        const match = signatures.match(regex);
+        if (match && match[0]) {
+            return match[0];
+        }
+        return null;
+    } catch (error) {
+        console.error(`Could not find SDK signature for ${actionName}`);
+        return null;
+    }
+};
+
 // Helper to extract NatSpec comments from a string
 const extractNatSpec = (content) => {
     const natspec = {
@@ -744,6 +764,14 @@ const genActionDoc = (contractName, outputPath = 'gen/docs') => {
     const returnValue = extractReturnValue(content);
     const events = extractEvents(content);
 
+    // Find SDK signature from signatures.txt
+    const sdkSignature = findSdkSignature(contractName);
+    let sdkSection = sdkSignature
+        ? `\n${sdkSignature}`
+        : `\nconst ${contractName[0].toLowerCase()}${contractName.slice(1)}Action = new dfs.actions.${contractName}Action(\n    ...args\n);\n`;
+
+    sdkSection = `\`\`\`ts${sdkSection}\n\`\`\``;
+
     // Create output directory if it doesn't exist
     if (!existsSync(outputPath)) {
         mkdirSync(outputPath, { recursive: true });
@@ -760,11 +788,7 @@ ${natspec.notice.length > 0 ? `> **Notes**\n>\n> ${natspec.notice.join('\n> ')}\
 \`${actionId}\`
 
 ## SDK Action
-\`\`\`ts
-const ${contractName[0].toLowerCase()}${contractName.slice(1)}Action = new dfs.actions.${contractName}Action(
-    ...args
-);
-\`\`\`
+\`${sdkSection}\`
 
 ## Action Type
 \`${actionType}\`
