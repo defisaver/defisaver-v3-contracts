@@ -709,25 +709,33 @@ const extractParamsWithComments = (content) => {
 
 // Helper to extract return value
 const extractReturnValue = (content) => {
-    const returnMatch = content.match(/return\s*\(.*?\);/g);
+    const returnMatch = content.match(/return\s+[^;]+;/g);
     if (!returnMatch) return 'unknown';
 
+    if (returnMatch[0].includes('return uint8(ActionType.')) {
+        return '';
+    }
     return returnMatch[0];
 };
 
 // Helper to extract event information and log data
-const extractEvents = (content) => {
+const extractEvents = (content, contractName) => {
     const actionEventMatch = content.match(/emit\s+ActionEvent\("([^"]+)"/);
     const logDirectMatch = content.match(/logActionDirectEvent\("([^"]+)"/);
-    if (!actionEventMatch || !logDirectMatch) {
+    const lines = [];
+    if (actionEventMatch) {
+        lines.push(`emit ActionEvent("${actionEventMatch[1]}", logData);`);
+    }
+    if (logDirectMatch) {
+        lines.push(`logger.logActionDirectEvent("${logDirectMatch[1]}", logData);`);
+    }
+    if (lines.length) {
+        lines.push(`bytes memory logData = abi.encode(${contractName.endsWith('Check') ? 'currRatio' : 'params'});`);
         return `\`\`\`solidity
+${lines.join('\n')}
 \`\`\``;
     }
-
     return `\`\`\`solidity
-emit ActionEvent("${actionEventMatch[1]}", logData);
-logger.logActionDirectEvent("${logDirectMatch[1]}", logData);
-bytes memory logData = abi.encode(params);
 \`\`\``;
 };
 
@@ -762,7 +770,7 @@ const genActionDoc = (contractName, outputPath = 'gen/docs') => {
     const actionType = actionTypeMatch ? actionTypeMatch[1] : 'UNKNOWN';
     const paramsStruct = extractParamsWithComments(content);
     const returnValue = extractReturnValue(content);
-    const events = extractEvents(content);
+    const events = extractEvents(content, contractName);
 
     // Find SDK signature from signatures.txt
     const sdkSignature = findSdkSignature(contractName);
@@ -810,6 +818,105 @@ ${events}
     const finalOutputPath = join(outputPath, `${contractName}.md`);
     writeFileSync(finalOutputPath, markdown);
     console.log(`Documentation generated for ${contractName} at ${finalOutputPath}`);
+};
+
+// Helper to extract all action names from signatures.txt
+const getAllActionNames = () => {
+    try {
+        const signaturesPath = join(process.cwd(), 'cmd', 'sdkSignatures', 'signatures.txt');
+        const signatures = readFileSync(signaturesPath, 'utf8');
+        // Match all action declarations
+        const actionRegex = /const\s+(\w+)Action\s*=/g;
+        const matches = [...signatures.matchAll(actionRegex)];
+        // Convert from camelCase to PascalCase and remove 'Action' suffix
+        return matches.map((match) => {
+            const actionName = match[1];
+            // Convert first character to uppercase
+            return actionName[0].toUpperCase() + actionName.slice(1).replace('Action', '');
+        });
+    } catch (error) {
+        console.error('Could not read signatures.txt');
+        return [];
+    }
+};
+
+// Function to generate empty markdown for actions without contracts
+const generateEmptyDoc = (actionName, outputPath) => {
+    const markdown = `# ${actionName}
+
+## Description
+No contract found for this action.
+
+## Action ID
+\`Not Available\`
+
+## SDK Action
+\`\`\`ts
+${findSdkSignature(actionName)}
+\`\`\`
+
+## Action Type
+\`UNKNOWN\`
+
+## Input Parameters
+\`\`\`solidity
+No contract found
+\`\`\`
+
+## Return Value
+\`\`\`solidity
+No contract found
+\`\`\`
+
+## Events and Logs
+\`\`\`solidity
+No contract found
+\`\`\`
+`;
+
+    const finalOutputPath = join(outputPath, `${actionName}.md`);
+    writeFileSync(finalOutputPath, markdown);
+    console.log(`Generated empty documentation for ${actionName} at ${finalOutputPath}`);
+};
+
+// Function to generate documentation for all actions
+const generateAllDocs = (outputPath = 'gen/docs') => {
+    // Create output directory if it doesn't exist
+    if (!existsSync(outputPath)) {
+        mkdirSync(outputPath, { recursive: true });
+    }
+
+    const actionNames = getAllActionNames();
+    console.log(`Found ${actionNames.length} actions in signatures.txt`);
+
+    let generated = 0;
+    let empty = 0;
+
+    actionNames.forEach((actionName) => {
+        try {
+            // Try to find the contract file
+            const contractPath = findContractFile(actionName);
+            if (contractPath) {
+                // Generate full documentation if contract exists
+                genActionDoc(actionName, outputPath);
+                generated++;
+            } else {
+                // Generate empty documentation if no contract found
+                generateEmptyDoc(actionName, outputPath);
+                empty++;
+            }
+        } catch (error) {
+            console.error(`Error generating documentation for ${actionName}:`, error.message);
+            // Generate empty documentation on error
+            generateEmptyDoc(actionName, outputPath);
+            empty++;
+        }
+    });
+
+    console.log('\nDocumentation generation complete:');
+    console.log(`- Generated full documentation for ${generated} actions`);
+    console.log(`- Generated empty documentation for ${empty} actions`);
+    console.log(`- Total actions processed: ${actionNames.length}`);
 };
 
 (async () => {
@@ -868,6 +975,16 @@ ${events}
         .action((contractName, options) => {
             const outputPath = options.output || join(process.cwd(), 'gen/docs');
             genActionDoc(contractName, outputPath);
+            process.exit(0);
+        });
+
+    program
+        .command('genDocs')
+        .description('Generate documentation for all actions found in signatures.txt')
+        .option('-o, --output <path>', 'Output directory for documentation (defaults to gen/docs)')
+        .action((options) => {
+            const outputPath = options.output || join(process.cwd(), 'gen/docs');
+            generateAllDocs(outputPath);
             process.exit(0);
         });
 
