@@ -8,8 +8,13 @@
 
 /* Generated action will be a standard action. */
 
-/* By default, generated action will be placed in `./contracts/actions/`. If you need different location, place -o path. E.g. `-o ./contracts/actions/utils`  */
+/* By default, generated action will be placed in `gen/sol`. If you need different location, place -o path. E.g. `-o ./contracts/actions/utils`  */
 
 
 /*---------------------------START OF TEMPLATE---------------------------*/
+
+// TODO: place your Params definition here and run:
+// TODO: for solidity action generation:  `node ./cmd/generate-cli.js genActionSol <ContractName> [Optional -o path]`
+// TODO: for sdk action generation:       `node ./cmd/generate-cli.js genActionSdk <ContractName> [Optional -o path]`
+
 

@@ -1,4 +1,8 @@
-USAGE: node ./cmd/generate-cli.js genActionSol LiquityV2Adjust -t ./cmd/actionTemplates/example3.txt
+USAGE: 
+For solidity action generation:  node ./cmd/generate-cli.js genActionSol LiquityV2Adjust -t templates/solSdk/action/liquityV2Adjust-example.txt
+For sdk action generation:       node ./cmd/generate-cli.js genActionSdk LiquityV2Adjust -t templates/solSdk/action/liquityV2Adjust-example.txt
+
+/*---------------------------START OF TEMPLATE---------------------------*/
 
 /// @param CollActionType - type of collateral action to perform
 enum CollActionType { SUPPLY, WITHDRAW } // !! Enums has to be in one line for the parser to work

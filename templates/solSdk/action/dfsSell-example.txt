@@ -1,4 +1,8 @@
-USAGE: node ./cmd/generate-cli.js genActionSol DFSSell -t ./cmd/actionTemplates/example2.txt
+USAGE:
+For solidity action generation:  node ./cmd/generate-cli.js genActionSol DFSSell -t templates/solSdk/action/dfsSell-example.txt
+For sdk action generation:       node ./cmd/generate-cli.js genActionSdk DFSSell -t templates/solSdk/action/dfsSell-example.txt
+
+/*---------------------------START OF TEMPLATE---------------------------*/
 
 /// @param wrapper - dfs wrapper address for the aggregator (must be in WrapperExchangeRegistry)
 /// @param exchangeAddr - exchange address we are calling to execute the order (must be in ExchangeAggregatorRegistry)

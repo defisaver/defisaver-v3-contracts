@@ -8,8 +8,11 @@
 
 /* Generated actions will be a standard actions. */
 
-/* By default, protocol actions will be placed in `./contracts/actions/{protocolNameFolder}`. If you need different location, place -o path. */
+/* By default, protocol actions will be placed in `gen/sol/{protocolNameFolder}`. If you need different location, place -o path. */
 
 
 /*---------------------------START OF TEMPLATE---------------------------*/
 
+// TODO: place your Params definition here and run:
+// TODO: for solidity contracts generation:  `node ./cmd/generate-cli.js genProtocolSol [Optional -o path]`
+// TODO: for sdk actions generation:         `node ./cmd/generate-cli.js genProtocolSdk [Optional -o path]`

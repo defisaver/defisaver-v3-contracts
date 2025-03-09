@@ -1,5 +1,8 @@
-USAGE: node ./cmd/generate-cli.js genActionSol LiquityV2Open -t ./cmd/actionTemplates/example1.txt
+USAGE: 
+For solidity action generation:  node ./cmd/generate-cli.js genActionSol LiquityV2Open -t templates/solSdk/action/liquityV2Open-example.txt
+For sdk action generation:       node ./cmd/generate-cli.js genActionSdk LiquityV2Open -t templates/solSdk/action/liquityV2Open-example.txt
 
+/*---------------------------START OF TEMPLATE---------------------------*/
 
 /// @param market The address of the LiquityV2 market (collateral branch)
 /// @param from The address to pull the tokens from
