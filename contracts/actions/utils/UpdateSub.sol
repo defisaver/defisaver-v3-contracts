@@ -7,8 +7,11 @@ import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 
 /// @title Updates users sub information on SubStorage contract
-/// @dev user can only change his own subscriptions
+/// @notice User can only change his own subscriptions
 contract UpdateSub is ActionBase {
+
+    /// @param subId Id of the Subscription
+    /// @param sub Object that represents the updated sub
     struct Params {
         uint256 subId;
         StrategyModel.StrategySub sub;
@@ -31,7 +34,7 @@ contract UpdateSub is ActionBase {
 
         updateSubData(inputData);
 
-        return(bytes32(inputData.subId));
+        return (bytes32(inputData.subId));
     }
 
     function executeActionDirect(bytes memory _callData) public override payable {

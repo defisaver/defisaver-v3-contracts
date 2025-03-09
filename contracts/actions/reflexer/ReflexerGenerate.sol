@@ -12,6 +12,9 @@ import { ReflexerHelper } from "./helpers/ReflexerHelper.sol";
 contract ReflexerGenerate is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
+    /// @param safeId Id of the safe
+    /// @param amount Amount of rai to be generated
+    /// @param to Address which will receive the rai
     struct Params {
         uint256 safeId;
         uint256 amount;
@@ -52,7 +55,6 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Generates rai from a specified safe
     /// @param _safeId Id of the safe
     /// @param _amount Amount of rai to be generated
     /// @param _to Address which will receive the rai
@@ -88,7 +90,7 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
         params = abi.decode(_callData, (Params));
     }
 
-    /// @notice Gets delta debt generated (Total Safe debt minus available safeHandler COIN balance)
+    /// @dev Gets delta debt generated (Total Safe debt minus available safeHandler COIN balance)
     /// @param taxCollector address
     /// @param safeHandler address
     /// @param collateralType bytes32

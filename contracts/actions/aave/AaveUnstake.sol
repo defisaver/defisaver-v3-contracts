@@ -7,6 +7,7 @@ import { ActionBase } from "../ActionBase.sol";
 import { AaveHelper } from "./helpers/AaveHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
+/// @title Action to unstake stkAave tokens
 contract AaveUnstake is ActionBase, AaveHelper {
     using TokenUtils for address;
 

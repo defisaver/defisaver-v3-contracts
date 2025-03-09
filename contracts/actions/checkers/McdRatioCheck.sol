@@ -5,9 +5,9 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { McdRatioHelper } from "../mcd/helpers/McdRatioHelper.sol";
 
-/// @title Checks if ratio is in target range
+/// @title Action to check the ratio of the Maker position after strategy execution.
 contract McdRatioCheck is ActionBase, McdRatioHelper {
-    /// @dev 2% offset acceptable
+    /// @notice 2% offset acceptable
     uint256 internal constant RATIO_OFFSET = 20000000000000000;
 
     enum RatioState {
@@ -15,12 +15,17 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
         SHOULD_BE_HIGHER
     }
 
+    /// @param ratioState State of the ratio (SHOULD_BE_LOWER or SHOULD_BE_HIGHER)
+    /// @param checkTarget Whether to check if the ratio is in the target range.
+    /// @param ratioTarget Target ratio.
+    /// @param vaultId Vault ID.
+    /// @param startRatioIndex Index in returnValues where ratio before actions is stored   
     struct Params {
         RatioState ratioState;
         bool checkTarget;
         uint256 ratioTarget;
         uint256 vaultId;
-        uint256 startRatioIndex; // index in returnValues where ratio before actions is stored
+        uint256 startRatioIndex;
     }
 
     error RatioOutsideTargetRange(uint256, uint256);

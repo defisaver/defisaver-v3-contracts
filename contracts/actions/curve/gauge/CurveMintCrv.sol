@@ -5,12 +5,15 @@ import { ActionBase } from "../../ActionBase.sol";
 import { CurveHelper } from "../helpers/CurveHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Action that mints Crv tokens based on up to 8 gauges
 contract CurveMintCrv is ActionBase, CurveHelper {
     using TokenUtils for address;
     
+    /// @param gaugeAddrs Array of up to 8 gauge addresses determining Crv issuance 
+    /// @param receiver Address that will receive the Crv issuance
     struct Params {
-        address[8] gaugeAddrs;  // array of gauges determining Crv issuance
-        address receiver;       // address that will receive the Crv issuance
+        address[8] gaugeAddrs;
+        address receiver;
     }
 
     function executeAction(
@@ -39,7 +42,6 @@ contract CurveMintCrv is ActionBase, CurveHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @notice Mints Crv tokens based on up to 8 gauges
     function _curveMintCrv(Params memory _params) internal returns (uint256 minted, bytes memory logData) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
 

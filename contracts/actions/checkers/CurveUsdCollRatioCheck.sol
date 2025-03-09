@@ -6,9 +6,10 @@ import { ActionBase } from "../ActionBase.sol";
 import { CurveUsdHelper } from "../../actions/curveusd/helpers/CurveUsdHelper.sol";
 import { TransientStorage } from "../../utils/TransientStorage.sol";
 
+/// @title Action to check the collateral ratio of the Curve USD position after strategy execution.
 contract CurveUsdCollRatioCheck is ActionBase, CurveUsdHelper {
 
-    /// @dev 5% offset acceptable
+    /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
@@ -20,6 +21,9 @@ contract CurveUsdCollRatioCheck is ActionBase, CurveUsdHelper {
         IN_REPAY
     }
 
+    /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
+    /// @param targetRatio Target ratio.
+    /// @param controllerAddress CurveUsd Controller address.
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;

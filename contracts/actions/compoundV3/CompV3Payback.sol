@@ -6,10 +6,14 @@ import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
 import { IComet } from "../../interfaces/compoundV3/IComet.sol";
 
-/// @title Payback a token a user borrowed from Compound
+/// @title Payback a token a user borrowed from Compound.
 contract CompV3Payback is ActionBase, CompV3Helper {
     using TokenUtils for address;
 
+    /// @param market Main Comet proxy contract that is different for each compound market
+    /// @param amount Amount of tokens to be paid back
+    /// @param from Address where we are pulling the underlying tokens from
+    /// @param onBehalf Repay on behalf of which address (if 0x0 defaults to user's wallet)
     struct Params {
         address market;
         uint256 amount;
@@ -50,8 +54,7 @@ contract CompV3Payback is ActionBase, CompV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Payback a borrowed token from the CompoundV3 protocol
-    /// @dev Amount type(uint).max will take the whole borrow amount
+    /// @notice Amount type(uint).max will take the whole borrow amount.
     /// @param _market Main Comet proxy contract that is different for each compound market
     /// @param _amount Amount of the base token to be repaid
     /// @param _from Address where we are pulling the underlying tokens from

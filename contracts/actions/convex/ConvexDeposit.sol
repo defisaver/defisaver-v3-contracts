@@ -7,14 +7,15 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ConvexHelper } from "./helpers/ConvexHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
 
+/// @title Action that either deposits(wraps) Curve LP into convex, stakes wrapped LP, or does both.
 contract ConvexDeposit is ConvexHelper, ActionBase {
     using TokenUtils for address;
 
-    /// @param from address from which to pull wrapped LP tokens if option is STAKE,
-    /// otherwise LP tokens are pulled
-    /// @param to address that will receive wrapped LP tokens if option is WRAP,
-    /// otherwise it is the address for which to stake
+    /// @param from address from which to pull wrapped LP tokens if option is STAKE, otherwise LP tokens are pulled
+    /// @param to address that will receive wrapped LP tokens if option is WRAP, otherwise it is the address for which to stake
     /// @param poolId curve pool id according to Convex Booster contract
+    /// @param amount amount amount of tokens
+    /// @param option DepositOption enum (WRAP, STAKE, WRAP_AND_STAKE)
     struct Params {
         address from;
         address to;
@@ -54,7 +55,6 @@ contract ConvexDeposit is ConvexHelper, ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @notice Action that either deposits(wraps) Curve LP into convex, stakes wrapped LP, or does both
     function _deposit(Params memory _params) internal returns (uint256 transientAmount, bytes memory logData) {
         IBooster.PoolInfo memory poolInfo = IBooster(BOOSTER_ADDR).poolInfo(_params.poolId);
 

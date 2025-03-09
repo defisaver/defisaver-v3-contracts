@@ -10,13 +10,21 @@ import { IUniswapV3NonfungiblePositionManager } from "../../../interfaces/uniswa
 /// @title Mints NFT that represents a position in uni v3
 contract UniMintV3 is ActionBase, UniV3Helper{
     using TokenUtils for address;
-    
+
+    /// @param token0 Address of the first token
+    /// @param token1 Address of the second token
+    /// @param fee Fee of the pool
+    /// @param tickLower Lower tick of the position
+    /// @param tickUpper Upper tick of the position
+    /// @param amount0Desired Amount of the first token to add
+    /// @param amount1Desired Amount of the second token to add
+    /// @param amount0Min Minimum amount of the first token to add
+    /// @param amount1Min Minimum amount of the second token to add
+    /// @param recipient Address to send the NFT to
+    /// @param deadline Deadline of the transaction
+    /// @param from Address to pull the tokens from
     struct Params {
         address token0;
-        address token1;
-        uint24 fee;
-        int24 tickLower;
-        int24 tickUpper;
         uint256 amount0Desired;
         uint256 amount1Desired;
         uint256 amount0Min;
@@ -58,27 +66,27 @@ contract UniMintV3 is ActionBase, UniV3Helper{
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _uniCreatePosition(Params memory _uniData) internal returns (uint256 tokenId, bytes memory logData){
-            // fetch tokens from address;
-            uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);        
-            uint amount1Pulled = _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
+        // fetch tokens from address;
+        uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);        
+        uint amount1Pulled = _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
 
-            // approve positionManager so it can pull tokens
-            _uniData.token0.approveToken(address(positionManager), amount0Pulled);
-            _uniData.token1.approveToken(address(positionManager), amount1Pulled);
+        // approve positionManager so it can pull tokens
+        _uniData.token0.approveToken(address(positionManager), amount0Pulled);
+        _uniData.token1.approveToken(address(positionManager), amount1Pulled);
 
-            _uniData.amount0Desired = amount0Pulled;
-            _uniData.amount1Desired = amount1Pulled;
+        _uniData.amount0Desired = amount0Pulled;
+        _uniData.amount1Desired = amount1Pulled;
 
-            uint128 liquidity;
-            uint256 amount0;
-            uint256 amount1;
-            (tokenId, liquidity, amount0, amount1) = _uniMint(_uniData);
+        uint128 liquidity;
+        uint256 amount0;
+        uint256 amount1;
+        (tokenId, liquidity, amount0, amount1) = _uniMint(_uniData);
 
-            //send leftovers
-            _uniData.token0.withdrawTokens(_uniData.from, _uniData.amount0Desired - amount0);
-            _uniData.token1.withdrawTokens(_uniData.from, _uniData.amount1Desired - amount1);
-            
-            logData = abi.encode(_uniData, tokenId, liquidity, amount0, amount1);
+        //send leftovers
+        _uniData.token0.withdrawTokens(_uniData.from, _uniData.amount0Desired - amount0);
+        _uniData.token1.withdrawTokens(_uniData.from, _uniData.amount1Desired - amount1);
+        
+        logData = abi.encode(_uniData, tokenId, liquidity, amount0, amount1);
     }
 
     /// @dev mints new NFT that represents a position with selected parameters

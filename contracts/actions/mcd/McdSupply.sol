@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { IManager } from "../../interfaces/mcd/IManager.sol";
-import { IJoin } from "../../interfaces/mcd/IJoin.sol";
-import { ICropper } from "../../interfaces/mcd/ICropper.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { Permission } from "../../auth/Permission.sol";
+import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { ICdpRegistry } from "../../interfaces/mcd/ICdpRegistry.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
@@ -14,6 +14,11 @@ import { McdHelper } from "./helpers/McdHelper.sol";
 contract McdSupply is ActionBase, McdHelper {
     using TokenUtils for address;
 
+    /// @param vaultId Id of the vault
+    /// @param amount Amount of tokens to supply
+    /// @param joinAddr Join address of the maker collateral
+    /// @param from Address where to pull the collateral from
+    /// @param mcdManager The manager address we are using [mcd, b.protocol]
     struct Params {
         uint256 vaultId;
         uint256 amount;
@@ -56,7 +61,6 @@ contract McdSupply is ActionBase, McdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Supplies collateral to the vault
     /// @param _vaultId Id of the vault
     /// @param _amount Amount of tokens to supply
     /// @param _joinAddr Join address of the maker collateral

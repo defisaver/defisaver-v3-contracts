@@ -6,6 +6,7 @@ import { ICurve3PoolZap } from "../../../interfaces/curve/ICurve3PoolZap.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
+/// @title Action that withdraws tokens from a Curve pool
 contract CurveWithdraw is ActionBase, CurveHelper {
     using TokenUtils for address;
 
@@ -14,13 +15,19 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     error CurveWithdrawPoolReverted();
     error CurveWithdrawSlippageHit(uint256 coinIndex, uint256 expected, uint256 received);
 
+    /// @param from Address where to pull tokens from
+    /// @param to Address that will receive the withdrawn tokens
+    /// @param depositTarget Address of the pool contract or zap deposit contract from which to withdraw
+    /// @param burnAmount Amount of LP tokens to burn for withdrawal
+    /// @param flags Flags for the withdrawal
+    /// @param amounts Amount of each token to withdraw
     struct Params {
-        address from;     // address where the LP tokens are pulled from
-        address to;   // address that will receive withdrawn tokens
-        address depositTarget;       // pool contract or zap deposit contract from which to withdraw
-        uint256 burnAmount; // amount of LP tokens to burn for withdrawal
+        address from;
+        address to;
+        address depositTarget;
+        uint256 burnAmount;
         uint8 flags;
-        uint256[] amounts;   // amount of each token to withdraw
+        uint256[] amounts;
     }
 
     function executeAction(

@@ -6,6 +6,7 @@ import { AdminAuth } from "../auth/AdminAuth.sol";
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { ICrvUsdController, ILLAMMA } from "../interfaces/curveusd/ICurveUsd.sol";
 
+/// @title Trigger that triggers when the borrow rate of a CurveUsd market is over or under a certain rate.
 contract CurveUsdBorrowRateTrigger is ITrigger, AdminAuth {
  
     enum TargetRateState { OVER, UNDER }
@@ -19,7 +20,6 @@ contract CurveUsdBorrowRateTrigger is ITrigger, AdminAuth {
         uint8 state;
     }
     
-    /// @dev checks current borrow rate for CurveUsd market and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData)
         public
         view

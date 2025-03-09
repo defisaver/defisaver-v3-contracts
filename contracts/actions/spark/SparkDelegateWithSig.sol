@@ -8,6 +8,14 @@ import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
 /// @title Delegate credit for someone to borrow on user's wallet behalf with his signature
 contract SparkDelegateWithSig is ActionBase {
 
+    /// @param debtToken Address of the debt token
+    /// @param delegator Address of the delegator
+    /// @param delegatee Address of the delegatee
+    /// @param value Amount of tokens to delegate
+    /// @param deadline Deadline of the signature
+    /// @param v ECDSA v value
+    /// @param r ECDSA r value
+    /// @param s ECDSA s value
     struct Params {
         address debtToken;
         address delegator;

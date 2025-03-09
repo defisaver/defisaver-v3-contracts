@@ -10,6 +10,12 @@ import { ILendingPoolV2 } from "../../interfaces/aaveV2/ILendingPoolV2.sol";
 contract AaveBorrow is ActionBase, AaveHelper {
     using TokenUtils for address;
 
+    /// @param market Aave Market address.
+    /// @param tokenAddr Token address.
+    /// @param amount Amount of tokens to borrow.
+    /// @param rateMode Rate mode.
+    /// @param to Address to send the borrowed tokens to.
+    /// @param onBehalf Address to send the borrowed tokens on behalf of. Defaults to the user's wallet.
     struct Params {
         address market;
         address tokenAddr;

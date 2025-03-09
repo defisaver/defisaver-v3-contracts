@@ -7,7 +7,7 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { IsDAI } from "../../interfaces/spark/IsDAI.sol";
 import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
 
-/// @title Action that deposits dai into sDai
+/// @title Action that deposits dai into sDai.
 contract SDaiWrap is ActionBase, SparkHelper, UtilHelper {
     using TokenUtils for address;
 

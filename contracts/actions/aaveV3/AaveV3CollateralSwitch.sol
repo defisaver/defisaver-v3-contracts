@@ -7,9 +7,15 @@ import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 
-/// @title Switch if you'll use tokens for collateral on aave for a market
+/// @title Switch action if user wants to use tokens for collateral on aaveV3 market
 contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
     using TokenUtils for address;
+
+    /// @param arrayLength Length of the array.
+    /// @param useDefaultMarket Whether to use the default market.
+    /// @param assetIds Asset ids.
+    /// @param useAsCollateral Whether to use the tokens as collateral.
+    /// @param market Aave Market address.
     struct Params {
         uint8 arrayLength;
         bool useDefaultMarket;

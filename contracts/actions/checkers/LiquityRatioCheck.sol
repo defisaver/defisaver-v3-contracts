@@ -6,6 +6,7 @@ import { ActionBase } from "../ActionBase.sol";
 import { LiquityRatioHelper } from "../liquity/helpers/LiquityRatioHelper.sol";
 import { TransientStorage } from "../../utils/TransientStorage.sol";
 
+/// @title Action to check the ratio of the Liquity position after strategy execution.
 contract LiquityRatioCheck is ActionBase, LiquityRatioHelper {
 
     /// @dev 5% offset acceptable
@@ -20,6 +21,8 @@ contract LiquityRatioCheck is ActionBase, LiquityRatioHelper {
         IN_REPAY
     }
 
+    /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
+    /// @param targetRatio Target ratio.
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;

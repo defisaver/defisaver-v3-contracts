@@ -6,9 +6,12 @@ import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
 import { IComet } from "../../interfaces/compoundV3/IComet.sol";
 
-/// @title Allow or disallow manager
+/// @title Allow or disallow manager for Compound V3. Manager will be able to perform actions on behalf of the user.
 contract CompV3Allow is ActionBase, CompV3Helper {
 
+    /// @param market Main Comet proxy contract that is different for each compound market
+    /// @param manager Address of the manager
+    /// @param isAllowed True for allow, false for disallow
     struct Params {
         address market;
         address manager;
@@ -47,7 +50,6 @@ contract CompV3Allow is ActionBase, CompV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User allows or disallows manager
     /// @param _market Main Comet proxy contract that is different for each compound market
     /// @param _manager Address of manager
     /// @param _isAllowed True for allow, false for disallow
@@ -65,5 +67,4 @@ contract CompV3Allow is ActionBase, CompV3Helper {
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
-
 }

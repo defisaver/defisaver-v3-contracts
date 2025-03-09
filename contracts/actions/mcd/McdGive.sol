@@ -8,12 +8,15 @@ import { IManager } from "../../interfaces/mcd/IManager.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
 
-/// @title Give a vault to a different address
+/// @title Gives the vault ownership to a different address
 contract McdGive is ActionBase, McdHelper{
 
     //Can't send vault to 0x0
     error NoBurnVaultError();
 
+    /// @param vaultId Id of the vault
+    /// @param newOwner Address of the new owner
+    /// @param mcdManager Manager address
     struct Params {
         uint256 vaultId;
         address newOwner;
@@ -52,7 +55,6 @@ contract McdGive is ActionBase, McdHelper{
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Gives the vault ownership to a different address
     /// @param _vaultId The id of the vault
     /// @param _newOwner The address of the new owner
     /// @param _mcdManager Manager address

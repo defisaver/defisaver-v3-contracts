@@ -7,7 +7,7 @@ import { IYVault } from "../../interfaces/yearn/IYVault.sol";
 import { YearnHelper } from "./helpers/YearnHelper.sol";
 
 /// @title Supplies tokens to Yearn vault
-/// @dev tokens need to be approved for user's wallet to pull them (token address)
+/// @notice tokens need to be approved for user's wallet to pull them (token address)
 contract YearnSupply is ActionBase, YearnHelper {
     using TokenUtils for address;
 

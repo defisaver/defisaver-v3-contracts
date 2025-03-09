@@ -9,6 +9,8 @@ import { Authorization, Signature } from "../../interfaces/morpho-blue/IMorphoBl
 /// @title Allow or disallow an address to manage MorphoBlue position on user's wallet
 contract MorphoBlueSetAuthWithSig is ActionBase, MorphoBlueHelper {
     
+    /// @param authorization Authorization object
+    /// @param signature Signature object
     struct Params {
         Authorization authorization;
         Signature signature;

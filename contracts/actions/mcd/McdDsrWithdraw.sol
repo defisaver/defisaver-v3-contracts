@@ -8,12 +8,15 @@ import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
+/// @title Action for withdrawing DAI from Maker DSR
 contract McdDsrWithdraw is McdHelper, ActionBase {
     using TokenUtils for address;
 
+    /// @param amount Amount of DAI to withdraw from DSR
+    /// @param to Address that will receive the withdrawn DAI
     struct Params {
-        uint256 amount; // amount of DAI to withdraw from DSR
-        address to; // address that will receive withdrawn DAI
+        uint256 amount;
+        address to;
     }
 
     /// @inheritdoc ActionBase
@@ -49,7 +52,6 @@ contract McdDsrWithdraw is McdHelper, ActionBase {
         return (x * RAY + y - 1) / y;
     }
 
-    /// @notice Withdraws DAI from Maker DSR
     function _withdraw(Params memory _params) internal returns (uint256 withdrawn, bytes memory logData) {
         IPot pot = IPot(POT_ADDR);
 
