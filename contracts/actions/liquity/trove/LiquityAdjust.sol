@@ -13,14 +13,23 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
     enum CollChange { SUPPLY, WITHDRAW }
     enum DebtChange { PAYBACK, BORROW }
 
+    /// @param maxFeePercentage Highest borrowing fee to accept, ranges between 0.5 and 5%
+    /// @param collAmount Amount of ETH to supply/withdraw
+    /// @param lusdAmount Amount of LUSD tokens to borrow/payback
+    /// @param collChange Whether to supply or withdraw collateral
+    /// @param debtChange Whether to borrow or payback debt
+    /// @param from Address where to pull the tokens from
+    /// @param to Address that will receive the tokens
+    /// @param upperHint Upper hint for finding a Trove in linked list
+    /// @param lowerHint Lower hint for finding a Trove in linked list
     struct Params {
-        uint256 maxFeePercentage;   // Highest borrowing fee to accept, ranges between 0.5 and 5%
-        uint256 collAmount;         // Amount of ETH to supply/withdraw
-        uint256 lusdAmount;         // Amount of LUSD tokens to borrow/payback
-        CollChange collChange;      // Whether to supply or withdraw collateral
-        DebtChange debtChange;      // Whether to borrow or payback debt
-        address from;               // Address where to pull the tokens from
-        address to;                 // Address that will receive the tokens
+        uint256 maxFeePercentage;   
+        uint256 collAmount;         
+        uint256 lusdAmount;         
+        CollChange collChange;
+        DebtChange debtChange;       
+        address from;               
+        address to;          
         address upperHint;
         address lowerHint;
     }

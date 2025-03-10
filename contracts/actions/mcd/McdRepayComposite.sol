@@ -111,7 +111,6 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         logger.logActionDirectEvent("McdRepayComposite", logData);
     }
 
-    /// @notice Executes repay logic
     function _repay(RepayParams memory _repayParams) internal returns (bytes memory logData, uint256 paybackAmount) {
         if (_repayParams.exchangeData.destAddr != DAI_ADDR) {
             revert WrongAsset(_repayParams.exchangeData.destAddr);

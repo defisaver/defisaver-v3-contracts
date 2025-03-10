@@ -5,12 +5,15 @@ import { ActionBase } from "../ActionBase.sol";
 import { CurveHelper } from "./helpers/CurveHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
+/// @title Action that claims 3Crv rewards from Fee Distributor
 contract CurveClaimFees is ActionBase, CurveHelper {
     using TokenUtils for address;
 
+    /// @param claimFor Address for which to claim fees 
+    /// @param receiver Address that will receive the tokens
     struct Params {
-        address claimFor;   // Address for which to claim fees
-        address receiver;   // Address that will receive the tokens
+        address claimFor;
+        address receiver;
     }
 
     function executeAction(
@@ -40,8 +43,7 @@ contract CurveClaimFees is ActionBase, CurveHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @notice Claims 3Crv rewards from Fee Distributor
-    /// @dev if _claimFor != _receiver the _claimFor address needs to approve the user's wallet to pull 3Crv token
+    /// @notice if _claimFor != _receiver the _claimFor address needs to approve the user's wallet to pull 3Crv token
     function _curveClaimFees(Params memory _params) internal returns (uint256 claimed, bytes memory logData) {
         claimed = FeeDistributor.claim(_params.claimFor);
 

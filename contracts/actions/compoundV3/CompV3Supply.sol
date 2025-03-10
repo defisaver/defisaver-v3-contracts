@@ -7,7 +7,7 @@ import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
 import { IComet } from "../../interfaces/compoundV3/IComet.sol";
 
-/// @title Supply a token to CompoundV3
+/// @title Supply a token to CompoundV3.
 contract CompV3Supply is ActionBase, CompV3Helper {
     using TokenUtils for address;
 
@@ -64,7 +64,6 @@ contract CompV3Supply is ActionBase, CompV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Supplies a token to the CompoundV3 protocol
     /// @dev If supply is baseToken it must not borrow balance or the action will revert
     /// @dev If onBehalf == address(0) we default to user's wallet address
     /// @param _params Supply input struct documented above

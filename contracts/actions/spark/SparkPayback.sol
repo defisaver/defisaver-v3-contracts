@@ -12,6 +12,13 @@ import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 contract SparkPayback is ActionBase, SparkHelper {
     using TokenUtils for address;
 
+    /// @param amount Amount of tokens to payback
+    /// @param from Address to pull the payback tokens from
+    /// @param rateMode Type of borrow debt [Stable: 1, Variable: 2]
+    /// @param assetId The id of the token to be repaid
+    /// @param useDefaultMarket Whether to use the default market
+    /// @param useOnBehalf Whether to payback on behalf of another address
+    /// @param market Address of the market to payback from
     struct Params {
         uint256 amount;
         address from;

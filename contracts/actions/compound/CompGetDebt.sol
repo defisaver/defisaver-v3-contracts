@@ -6,10 +6,12 @@ import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ICToken } from "../../interfaces/compound/ICToken.sol";
 
-/// @title Action that gets debt amount for a single asset on Compound for debtor
+/// @title Action that gets debt amount for a single asset on Compound for debtor.
 contract CompGetDebt is ActionBase {
     using TokenUtils for address;
 
+    /// @param cTokenAddr Address of the cToken token to get the debt for
+    /// @param debtorAddr Address of the debtor
     struct Params {
         address cTokenAddr;
         address debtorAddr;

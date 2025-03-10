@@ -11,6 +11,9 @@ import { CompHelper } from "./helpers/CompHelper.sol";
 contract CompBorrow is ActionBase, CompHelper {
     using TokenUtils for address;
 
+    /// @param cTokenAddr Address of the cToken token to borrow
+    /// @param amount Amount of tokens to be borrowed
+    /// @param to The address that will receive the borrowed tokens
     struct Params {
         address cTokenAddr;
         uint256 amount;

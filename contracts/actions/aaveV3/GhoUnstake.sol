@@ -7,6 +7,7 @@ import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
+/// @title Action to unstake stkGHO tokens.
 contract GhoUnstake is ActionBase, AaveV3Helper {
 
     using TokenUtils for address;

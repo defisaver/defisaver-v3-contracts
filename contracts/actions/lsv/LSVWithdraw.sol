@@ -69,8 +69,8 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @dev LSV Withdraw expects users to have withdrawn tokens to the user's wallet, from which we'll pull the performance fee
-    /// @dev ProfitTracker will return realisedProfit amount, from which we will calculate fee
+    /// @notice LSV Withdraw expects users to have withdrawn tokens to the user's wallet, from which we'll pull the performance fee
+    /// @notice ProfitTracker will return realisedProfit amount, from which we will calculate fee
     function _lsvWithdraw(Params memory _inputData) internal returns (uint256 remainingAmount, bytes memory logData) {
         uint256 amountWithdrawnInETH = getAmountInETHFromLST(_inputData.token, _inputData.amount);
 

@@ -7,6 +7,8 @@ import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
 import { CurveUsdSwapper } from "./CurveUsdSwapper.sol";
 import { ICrvUsdController } from "../../../interfaces/curveusd/ICurveUsd.sol";
 
+/// @title Liquidates a curveusd position with a given percentage of collateral
+/// @notice This action uses internal swapper to liquidate the position
 contract CurveUsdSelfLiquidateWithColl is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 

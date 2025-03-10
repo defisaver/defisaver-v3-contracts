@@ -6,9 +6,10 @@ import { ActionBase } from "../ActionBase.sol";
 import { AaveV3RatioHelper } from "../aaveV3/helpers/AaveV3RatioHelper.sol";
 import { TransientStorage } from "../../utils/TransientStorage.sol";
 
+/// @title Action to check the ratio of the Aave V3 position after strategy execution.
 contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
 
-    /// @dev 5% offset acceptable
+    /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
@@ -20,6 +21,8 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
         IN_REPAY
     }
 
+    /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
+    /// @param targetRatio Target ratio.
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;

@@ -6,12 +6,17 @@ import { LiquityHelper } from "../helpers/LiquityHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
+/// @title Action for withdrawing collateral from Liquity Trove
 contract LiquityWithdraw is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param collAmount Amount of WETH tokens to withdraw
+    /// @param to Address that will receive the tokens
+    /// @param upperHint Upper hint for finding a Trove in linked list
+    /// @param lowerHint Lower hint for finding a Trove in linked list
     struct Params {
-        uint256 collAmount; // Amount of WETH tokens to withdraw
-        address to;         // Address that will receive the tokens
+        uint256 collAmount; 
+        address to;         
         address upperHint;
         address lowerHint;
     }

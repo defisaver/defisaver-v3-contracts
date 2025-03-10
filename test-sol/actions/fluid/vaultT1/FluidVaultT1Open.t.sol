@@ -142,7 +142,7 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
                     break;
                 }
             }
-            assertNotEq(createdNft, 0);
+            assertFalse(createdNft == 0);
 
             uint256 senderSupplyTokenBalanceAfter = balanceOf(constants.supplyToken, sender);
             uint256 senderBorrowTokenBalanceAfter = isNativeBorrow 

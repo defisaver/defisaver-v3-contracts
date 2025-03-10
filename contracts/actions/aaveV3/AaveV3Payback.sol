@@ -11,6 +11,14 @@ import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 contract AaveV3Payback is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param amount Amount of tokens to be paid back.
+    /// @param from Address to send the payback tokens from.
+    /// @param rateMode Rate mode.
+    /// @param assetId Asset id.
+    /// @param useDefaultMarket Whether to use the default market.
+    /// @param useOnBehalf Whether to use on behalf.
+    /// @param market Aave Market address.
+    /// @param onBehalf Address to send the payback tokens on behalf of. Defaults to the user's wallet.
     struct Params {
         uint256 amount;
         address from;
@@ -91,7 +99,7 @@ contract AaveV3Payback is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User paybacks tokens to the Aave protocol
+    /// @notice User paybacks tokens to the Aave protocol.
     /// @dev User needs to approve its wallet to pull the _tokenAddr tokens
     /// @param _market Address provider for specific market
     /// @param _assetId The id of the underlying asset to be repaid

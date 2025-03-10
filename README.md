@@ -28,6 +28,11 @@ To run only core tests:
 ```sh
 forge test --mc TestCore
 ```
+To run coverage on core:
+```sh
+bash run-core-coverage.sh
+```
+
 
 ### Hardhat tests
 

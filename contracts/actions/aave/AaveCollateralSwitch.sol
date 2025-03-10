@@ -6,9 +6,13 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveHelper } from "./helpers/AaveHelper.sol";
 
-/// @title Switch if you'll use tokens for collateral on aave for a market
+/// @title Switch action if user wants to use tokens for collateral on aave market
 contract AaveCollateralSwitch is ActionBase, AaveHelper {
     using TokenUtils for address;
+
+    /// @param market Aave Market address.
+    /// @param tokens Tokens to switch as collateral.
+    /// @param useAsCollateral Whether to use the tokens as collateral.
     struct Params {
         address market;
         address[] tokens;

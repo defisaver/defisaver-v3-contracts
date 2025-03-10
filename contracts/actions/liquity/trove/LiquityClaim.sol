@@ -6,9 +6,11 @@ import { LiquityHelper } from "../helpers/LiquityHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
+/// @title Action for claiming collateral from Liquity
 contract LiquityClaim is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param to Address that will receive the collateral
     struct Params {
         address to;
     }

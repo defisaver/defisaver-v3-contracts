@@ -62,7 +62,7 @@ contract CBChickenOut is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @dev If the user can withdraw full lusdAmount, set minLUSD == bond.lusdAmount to be gas optimal
+    /// @notice If the user can withdraw full lusdAmount, set minLUSD == bond.lusdAmount to be gas optimal
     function _cbChickenOut(Params memory _params) internal returns (uint256, bytes memory) {
         require(_params.to != address(0), "Don't send to 0x0");
 

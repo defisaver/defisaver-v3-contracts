@@ -7,9 +7,10 @@ import { SparkRatioHelper } from "../spark/helpers/SparkRatioHelper.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { TransientStorage } from "../../utils/TransientStorage.sol";
 
+/// @title Action to check the ratio of the Spark position after strategy execution.
 contract SparkRatioCheck is ActionBase, SparkRatioHelper {
 
-    /// @dev 5% offset acceptable
+    /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
@@ -21,6 +22,8 @@ contract SparkRatioCheck is ActionBase, SparkRatioHelper {
         IN_REPAY
     }
 
+    /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
+    /// @param targetRatio Target ratio.    
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;

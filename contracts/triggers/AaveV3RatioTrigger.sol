@@ -8,6 +8,7 @@ import { ITrigger } from "../interfaces/ITrigger.sol";
 import { TransientStorage } from "../utils/TransientStorage.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
+/// @title Trigger that triggers when the ratio of a user's position in aaveV3 market is over or under a certain ratio
 contract AaveV3RatioTrigger is ITrigger, AdminAuth, AaveV3RatioHelper, TriggerHelper {
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);

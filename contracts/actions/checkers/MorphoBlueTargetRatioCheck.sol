@@ -6,10 +6,11 @@ import { MorphoBlueHelper } from "../../actions/morpho-blue/helpers/MorphoBlueHe
 import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
 import { ActionBase } from "../ActionBase.sol";
 
-/// @title Check if the current ratio for morpho position is within a certain range of the target ratio
+/// @title Action to check the ratio of the Morpho Blue position after strategy execution.
+/// @notice This action only checks for current ratio, without comparing it to the start ratio.
 contract MorphoBlueTargetRatioCheck is ActionBase, MorphoBlueHelper {
 
-    /// @dev 5% offset acceptable
+    /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
     error BadAfterRatio(uint256 currentRatio, uint256 targetRatio);

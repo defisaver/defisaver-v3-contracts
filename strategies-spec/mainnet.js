@@ -9,29 +9,6 @@ const {
     placeHolderAddr,
 } = require('../test/utils/utils');
 
-const createUniV3RangeOrderStrategy = () => {
-    const rangeOrderStrategy = new dfs.Strategy('UniV3RangeOrderStrategy');
-    rangeOrderStrategy.addSubSlot('&tokenId', 'uint256');
-    rangeOrderStrategy.addSubSlot('&recipient', 'address');
-
-    const univ3TickTrigger = new dfs.triggers.UniV3CurrentTickTrigger('0', '0');
-    rangeOrderStrategy.addTrigger(univ3TickTrigger);
-
-    const withdrawAction = new dfs.actions.uniswapV3.UniswapV3WithdrawAction(
-        '&tokenId',
-        '%liquidityAmount',
-        '%amount0Min',
-        '%amount1Min',
-        '%deadline',
-        '&recipient',
-        '%amount0Max',
-        '%amount1Max',
-        '%nftOwner',
-    );
-    rangeOrderStrategy.addAction(withdrawAction);
-    return rangeOrderStrategy.encodeForDsProxyCall();
-};
-
 const createRepayStrategy = () => {
     const repayStrategy = new dfs.Strategy('McdRepayStrategy');
 
@@ -6098,7 +6075,6 @@ const createLiquityV2PaybackFromSPStrategy = () => {
 };
 
 module.exports = {
-    createUniV3RangeOrderStrategy,
     createRepayStrategy,
     createFLRepayStrategy,
     createYearnRepayStrategy,

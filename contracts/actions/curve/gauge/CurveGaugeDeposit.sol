@@ -7,15 +7,21 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
 import { ILiquidityGauge } from "../../../interfaces/curve/ILiquidityGauge.sol";
 
+/// @title Action that deposits LP tokens into a Liquidity Gauge.
 contract CurveGaugeDeposit is ActionBase, CurveHelper {
     using TokenUtils for address;
 
+    /// @param gaugeAddr Address of the gauge to deposit into
+    /// @param lpToken Address of the LP token to deposit
+    /// @param sender Address where the LP tokens are pulled from
+    /// @param onBehalfOf Address of the deposit beneficiary
+    /// @param amount Amount of LP tokens to deposit
     struct Params {
-        address gaugeAddr;  // gauge to deposit into
-        address lpToken;    // LP token address, needed for approval
-        address sender;     // address where the LP tokens are pulled from
-        address onBehalfOf; // address of the deposit beneficiary
-        uint256 amount;     // amount of LP tokens to deposit
+        address gaugeAddr;
+        address lpToken;
+        address sender;
+        address onBehalfOf;
+        uint256 amount;
     }
 
     function executeAction(
@@ -46,8 +52,7 @@ contract CurveGaugeDeposit is ActionBase, CurveHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @notice Deposits LP tokens into pool Liquidity Gauge
-    /// @dev if _params.receiver != address(this) the receiver must call set_approve_deposit on gauge
+    /// @notice if _params.receiver != address(this) the receiver must call set_approve_deposit on gauge
     function _curveGaugeDeposit(Params memory _params) internal returns (uint256, bytes memory) {
         require(_params.onBehalfOf != address(0), "cant deposit on behalf of 0x0");
         

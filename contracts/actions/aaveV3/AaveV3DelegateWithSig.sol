@@ -8,6 +8,14 @@ import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
 /// @title Delegate credit for someone to borrow on user's wallet behalf with his signature
 contract AaveV3DelegateWithSig is ActionBase {
 
+    /// @param debtToken Address of the debt token.
+    /// @param delegator Address of the user that is delegating the credit.
+    /// @param delegatee Address of the user that will be able to borrow on behalf of the delegator.
+    /// @param value Value of the credit to be delegated.
+    /// @param deadline Deadline of the signature.
+    /// @param v signature part V.
+    /// @param r signature part R.
+    /// @param s signature part S.
     struct Params {
         address debtToken;
         address delegator;
