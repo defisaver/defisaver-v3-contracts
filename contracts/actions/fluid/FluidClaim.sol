@@ -14,18 +14,20 @@ contract FluidClaim is ActionBase, FluidHelper {
     using TokenUtils for address;
 
     /// @param to Address to send the claimed tokens to.
-    /// @param recipient Address of the user who received the reward (Obtained from API).
     /// @param cumulativeAmount Total cumulative amount of tokens to claim (Obtained from API).
-    /// @param positionId The ID of the position. For earn positions, this will be fToken address (Obtained from API).
+    /// @param positionId The ID of the position. For earn positions, this will be fToken address padded with zeros (Obtained from API).
+    /// @param positionType The type of the position (Obtained from API).
     /// @param cycle The cycle of the rewards program (Obtained from API).
     /// @param merkleProof The Merkle proof to claim the rewards (Obtained from API).
+    /// @param metadata Additional metadata for the claim. (Obtained from API).
     struct Params {
         address to;
-        address recipient;
         uint256 cumulativeAmount;
         bytes32 positionId;
+        uint8 positionType;
         uint256 cycle;
         bytes32[] merkleProof;
+        bytes metadata;
     }   
 
     /// @inheritdoc ActionBase
@@ -38,9 +40,9 @@ contract FluidClaim is ActionBase, FluidHelper {
         Params memory params = parseInputs(_callData);
 
         params.to = _parseParamAddr(params.to, _paramMapping[0], _subData, _returnValues);
-        params.recipient = _parseParamAddr(params.recipient, _paramMapping[1], _subData, _returnValues);
-        params.cumulativeAmount = _parseParamUint(params.cumulativeAmount, _paramMapping[2], _subData, _returnValues);
-        params.positionId = _parseParamABytes32(params.positionId, _paramMapping[3], _subData, _returnValues);
+        params.cumulativeAmount = _parseParamUint(params.cumulativeAmount, _paramMapping[1], _subData, _returnValues);
+        params.positionId = _parseParamABytes32(params.positionId, _paramMapping[2], _subData, _returnValues);
+        params.positionType = uint8(_parseParamUint(params.positionType, _paramMapping[3], _subData, _returnValues));
         params.cycle = _parseParamUint(params.cycle, _paramMapping[4], _subData, _returnValues);
 
         (uint256 amount, bytes memory logData) = _claim(params);
@@ -69,11 +71,13 @@ contract FluidClaim is ActionBase, FluidHelper {
         uint256 rewardTokenBalanceBefore = rewardToken.getBalance(address(this));
 
         IFluidMerkleDistributor(FLUID_MERKLE_DISTRIBUTOR).claim(
-            _params.recipient,
+            address(this), /* recipient_ */
             _params.cumulativeAmount,
+            _params.positionType,
             _params.positionId,
             _params.cycle,
-            _params.merkleProof
+            _params.merkleProof,
+            _params.metadata
         );
 
         uint256 claimed = rewardToken.getBalance(address(this)) - rewardTokenBalanceBefore;

@@ -3849,6 +3849,29 @@ const fluidT1VaultOpen = async (
     const tx = await executeAction('FluidVaultT1Open', functionData, proxy);
     return tx;
 };
+const fluidClaim = async (
+    proxy,
+    to,
+    cumulativeAmount,
+    positionId,
+    positionType,
+    cycle,
+    merkleProof,
+    metadata,
+) => {
+    const action = new dfs.actions.fluid.FluidClaimAction(
+        to,
+        cumulativeAmount,
+        positionId,
+        positionType,
+        cycle,
+        merkleProof,
+        metadata,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const tx = await executeAction('FluidClaim', functionData, proxy);
+    return tx;
+};
 
 module.exports = {
     executeAction,
@@ -4078,6 +4101,7 @@ module.exports = {
     liquityV2Open,
 
     fluidT1VaultOpen,
+    fluidClaim,
 
     kingClaim,
 };
