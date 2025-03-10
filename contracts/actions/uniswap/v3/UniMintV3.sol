@@ -25,6 +25,10 @@ contract UniMintV3 is ActionBase, UniV3Helper{
     /// @param from Address to pull the tokens from
     struct Params {
         address token0;
+        address token1;
+        uint24 fee;
+        int24 tickLower;
+        int24 tickUpper;
         uint256 amount0Desired;
         uint256 amount1Desired;
         uint256 amount0Min;

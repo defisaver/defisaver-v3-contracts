@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { AdminAuth } from "../../auth/AdminAuth.sol";
-import { Permission } from "../../auth/Permission.sol";
-import { SubStorage } from "../../core/strategy/SubStorage.sol";
+import { IManager } from "../../interfaces/mcd/IManager.sol";
+import { IJoin } from "../../interfaces/mcd/IJoin.sol";
+import { ICropper } from "../../interfaces/mcd/ICropper.sol";
 import { ICdpRegistry } from "../../interfaces/mcd/ICdpRegistry.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
