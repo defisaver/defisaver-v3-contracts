@@ -10,6 +10,13 @@ import { ILendingPoolV2 } from "../../interfaces/aaveV2/ILendingPoolV2.sol";
 /// @title Payback a token a user borrowed from an Aave market
 contract AavePayback is ActionBase, AaveHelper {
     using TokenUtils for address;
+
+    /// @param market Aave Market address.
+    /// @param tokenAddr Token address.
+    /// @param amount Amount of tokens to pay back.
+    /// @param rateMode Rate mode.
+    /// @param from Address to send the payback tokens from.
+    /// @param onBehalf Address to send the payback tokens on behalf of. Defaults to the user's wallet.
     struct Params {
         address market;
         address tokenAddr;

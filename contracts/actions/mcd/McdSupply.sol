@@ -14,6 +14,11 @@ import { McdHelper } from "./helpers/McdHelper.sol";
 contract McdSupply is ActionBase, McdHelper {
     using TokenUtils for address;
 
+    /// @param vaultId Id of the vault
+    /// @param amount Amount of tokens to supply
+    /// @param joinAddr Join address of the maker collateral
+    /// @param from Address where to pull the collateral from
+    /// @param mcdManager The manager address we are using [mcd, b.protocol]
     struct Params {
         uint256 vaultId;
         uint256 amount;
@@ -56,7 +61,6 @@ contract McdSupply is ActionBase, McdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Supplies collateral to the vault
     /// @param _vaultId Id of the vault
     /// @param _amount Amount of tokens to supply
     /// @param _joinAddr Join address of the maker collateral

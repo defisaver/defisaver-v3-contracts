@@ -43,14 +43,14 @@ contract BaseTest is Config {
         _initConfigIfNeeded();
 
         uint256 blockNumber = getBlockNumberForTestIfExist(testName);
-        string memory mainnerRpc = vm.envString("ETHEREUM_NODE");
-        uint256 mainnetFork = vm.createFork(mainnerRpc, blockNumber);
+        string memory mainnetRpc = vm.envString("ETHEREUM_NODE");
+        uint256 mainnetFork = vm.createFork(mainnetRpc, blockNumber);
         vm.selectFork(mainnetFork);
     }
 
     function forkMainnetLatest() internal {
-        string memory mainnerRpc = vm.envString("ETHEREUM_NODE");
-        uint256 mainnetFork = vm.createFork(mainnerRpc);
+        string memory mainnetRpc = vm.envString("ETHEREUM_NODE");
+        uint256 mainnetFork = vm.createFork(mainnetRpc);
         vm.selectFork(mainnetFork);
     }
     
@@ -62,7 +62,7 @@ contract BaseTest is Config {
 
     function forkTenderly() internal {
         string memory tenderlyForkId = vm.envString("FORK_ID");
-        string memory base = "https://rpc.tenderly.co/fork/";
+        string memory base = "https://virtual.mainnet.rpc.tenderly.co/";
         string memory forkUrl = string(abi.encodePacked(base, tenderlyForkId));
         uint256 tenderlyFork = vm.createFork(forkUrl);
         vm.selectFork(tenderlyFork);

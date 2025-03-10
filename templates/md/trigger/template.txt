@@ -1,0 +1,7 @@
+// TODO place your triggers signatures here and run `node ./cmd/generate-cli genTriggersDocs [optional -o path]`
+
+NOTE: If you already added triggers to defisaver/sdk, you can run:
+`node ./cmd/generate-cli genSdkSignatures {sdkRepoPath e.g ../defisaver-sdk}`
+This will give you all the signatures definitions from where you copy the ones you need.
+
+-----------------------------------------------------------------------------------------------------

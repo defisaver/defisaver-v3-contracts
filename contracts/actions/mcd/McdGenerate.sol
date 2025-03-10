@@ -19,6 +19,10 @@ contract McdGenerate is ActionBase, McdHelper {
 
     ISpotter public constant spotter = ISpotter(SPOTTER_ADDRESS);
 
+    /// @param vaultId Id of the vault
+    /// @param amount Amount of dai to be generated
+    /// @param to Address which will receive the dai
+    /// @param mcdManager The manager address we are using [mcd, b.protocol]
     struct Params {
         uint256 vaultId;
         uint256 amount;
@@ -59,7 +63,6 @@ contract McdGenerate is ActionBase, McdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Generates dai from a specified vault
     /// @param _vaultId Id of the vault
     /// @param _amount Amount of dai to be generated
     /// @param _to Address which will receive the dai

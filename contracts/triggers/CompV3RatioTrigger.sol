@@ -26,7 +26,7 @@ contract CompV3RatioTrigger is ITrigger, AdminAuth, CompV3RatioHelper, TriggerHe
         uint8 state;
     }
     
-    /// @dev checks current safety ratio of a CompoundV3 position and triggers if it's in a correct state
+    /// @notice Checks current safety ratio of a CompoundV3 position and triggers if it's in a correct state.
     function isTriggered(bytes memory, bytes memory _subData)
         public
         override

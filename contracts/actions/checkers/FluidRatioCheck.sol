@@ -6,10 +6,10 @@ import { ActionBase } from "../ActionBase.sol";
 import { FluidRatioHelper } from "../fluid/helpers/FluidRatioHelper.sol";
 import { TransientStorage } from "../../utils/TransientStorage.sol";
 
-/// @title FluidRatioCheck - Checks ratio for fluid position and reverts if faulty
+/// @title Action to check the ratio of the Fluid position after strategy execution.
 contract FluidRatioCheck is ActionBase, FluidRatioHelper {
 
-    /// @dev 5% offset acceptable
+    /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
@@ -21,6 +21,9 @@ contract FluidRatioCheck is ActionBase, FluidRatioHelper {
         IN_REPAY
     }
 
+    /// @param nftId NFT ID representing the position.
+    /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
+    /// @param targetRatio Target ratio.
     struct Params {
         uint256 nftId;
         RatioState ratioState;

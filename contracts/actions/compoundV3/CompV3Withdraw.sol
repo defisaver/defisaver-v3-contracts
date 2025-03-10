@@ -6,7 +6,7 @@ import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
 import { IComet } from "../../interfaces/compoundV3/IComet.sol";
 
-/// @title Withdraw a token from CompoundV3
+/// @title Withdraw a token from CompoundV3.
 contract CompV3Withdraw is ActionBase, CompV3Helper {
 
     /// @param market Main Comet proxy contract that is different for each compound market
@@ -60,8 +60,7 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Withdraws a token amount from compound
-    /// @dev Send type(uint).max withdraws the whole balance of _from addr
+    /// @notice Sending type(uint).max withdraws the whole balance of _from addr
     /// @dev If to == address(0) the action will revert
     /// @dev If onBehalf == address(0) the action will default to user's wallet
     /// @dev If onBehalf is not the user's wallet, the onBehalf address needs to allow the user's wallet

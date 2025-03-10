@@ -1,4 +1,4 @@
-const { resetForkToBlock } = require('../../utils');
+const { resetForkToBlock } = require('../../utils/utils');
 const { curveUsdBoostStrategyTest } = require('./curveusd-tests');
 
 describe('CurveUsd Boost Strategy test', function () {

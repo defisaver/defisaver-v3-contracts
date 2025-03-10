@@ -47,7 +47,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("FluidVaultT1Adjust");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

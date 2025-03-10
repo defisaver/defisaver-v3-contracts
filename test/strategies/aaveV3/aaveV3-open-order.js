@@ -19,43 +19,33 @@ const {
     getContractFromRegistry,
     formatExchangeObj,
     openStrategyAndBundleStorage,
-    getNetwork,
     balanceOf,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     addBotCaller,
     createStrategy,
     createBundle,
-} = require('../../utils-strategies');
+} = require('../utils/utils-strategies');
 
 const {
     aaveV3Supply,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 const { topUp } = require('../../../scripts/utils/fork');
-const { subAaveV3OpenOrder } = require('../../strategy-subs');
-const { callAaveV3OpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromDebtStrategy } = require('../../strategy-calls');
-const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromDebtStrategy } = require('../../strategies');
-const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromDebtL2Strategy } = require('../../l2-strategies');
+const { subAaveV3OpenOrder } = require('../utils/strategy-subs');
+const { callAaveV3OpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromDebtStrategy } = require('../utils/strategy-calls');
+const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromDebtStrategy } = require('../../../strategies-spec/mainnet');
+const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromDebtL2Strategy } = require('../../../strategies-spec/l2');
 
 const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const openStrategy = getNetwork() === 'mainnet' ? createAaveV3OpenOrderFromCollStrategy() : createAaveV3OpenOrderFromCollL2Strategy();
-    const flOpenStrategy = getNetwork() === 'mainnet' ? createAaveV3FLOpenOrderFromCollStrategy() : createAaveV3FLOpenOrderFromCollL2Strategy();
-    const aaveV3OpenOrderFromCollStrategyId = await createStrategy(
-        proxy,
-        ...openStrategy,
-        false,
-    );
-    const aaveV3FLOpenOrderFromCollStrategyId = await createStrategy(
-        proxy,
-        ...flOpenStrategy,
-        false,
-    );
+    const openStrategy = network === 'mainnet' ? createAaveV3OpenOrderFromCollStrategy() : createAaveV3OpenOrderFromCollL2Strategy();
+    const flOpenStrategy = network === 'mainnet' ? createAaveV3FLOpenOrderFromCollStrategy() : createAaveV3FLOpenOrderFromCollL2Strategy();
+    const aaveV3OpenOrderFromCollStrategyId = await createStrategy(...openStrategy, false);
+    const aaveV3FLOpenOrderFromCollStrategyId = await createStrategy(...flOpenStrategy, false);
     const aaveV3OpenOrderFromCollBundleId = await createBundle(
-        proxy,
         [aaveV3OpenOrderFromCollStrategyId, aaveV3FLOpenOrderFromCollStrategyId],
     );
     return aaveV3OpenOrderFromCollBundleId;
@@ -64,20 +54,14 @@ const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
 const deployOpenOrderFromDebtStrategy = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const openStrategy = getNetwork() === 'mainnet' ? createAaveV3FLOpenOrderFromDebtStrategy() : createAaveV3FLOpenOrderFromDebtL2Strategy();
-    const aaveV3FLOpenOrderFromDebtStrategyId = await createStrategy(
-        proxy,
-        ...openStrategy,
-        false,
-    );
+    const openStrategy = network === 'mainnet' ? createAaveV3FLOpenOrderFromDebtStrategy() : createAaveV3FLOpenOrderFromDebtL2Strategy();
+    const aaveV3FLOpenOrderFromDebtStrategyId = await createStrategy(...openStrategy, false);
     return aaveV3FLOpenOrderFromDebtStrategyId;
 };
 
 const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
     describe('AaveV3-Open-Order-Strategy-Test', function () {
         this.timeout(1200000);
-
-        const REGISTRY_ADDR = addrs[network].REGISTRY_ADDR;
 
         let snapshotId;
         let senderAcc;
@@ -101,12 +85,12 @@ const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
 
         const setUpContracts = async () => {
             if (network === 'mainnet') {
-                strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
+                strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[network].STRATEGY_EXECUTOR_ADDR);
             } else {
-                strategyExecutor = await hre.ethers.getContractAt('StrategyExecutorL2', addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
+                strategyExecutor = await hre.ethers.getContractAt('StrategyExecutorL2', addrs[network].STRATEGY_EXECUTOR_ADDR);
             }
             strategyExecutor = strategyExecutor.connect(botAcc);
-            flAction = await getContractFromRegistry('FLAction', REGISTRY_ADDR, false, isFork);
+            flAction = await getContractFromRegistry('FLAction', isFork);
         };
 
         const deployStrategies = async () => {
@@ -130,7 +114,7 @@ const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
             await setUpCallers();
             await setUpContracts();
             await deployStrategies();
-            await addBotCaller(botAcc.address, REGISTRY_ADDR, isFork);
+            await addBotCaller(botAcc.address, isFork);
         });
         beforeEach(async () => { snapshotId = await takeSnapshot(); });
         afterEach(async () => { await revertToSnapshot(snapshotId); });

@@ -6,15 +6,17 @@ import { ActionBase } from "../ActionBase.sol";
 import { LiquityRatioHelper } from "../liquity/helpers/LiquityRatioHelper.sol";
 import { TransientStorage } from "../../utils/TransientStorage.sol";
 
+/// @title Action to check if ratio of the Liquity position after strategy execution is greater than the target ratio.
 contract LiquityRatioIncreaseCheck is ActionBase, LiquityRatioHelper {
 
-    /// @dev 5% offset acceptable
+    /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
     error BadAfterRatio(uint256 startRatio, uint256 currRatio);
 
+    /// @param targetRatioIncrease Target ratio increase.
     struct Params {
         uint256 targetRatioIncrease;
     }

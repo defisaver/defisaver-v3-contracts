@@ -1,0 +1,113 @@
+USAGE:
+For solidity contracts generation:  node ./cmd/generate-cli.js genProtocolSol -t ./templates/solSdk/protocol/curveusd-example.txt
+For sdk actions generation:         node ./cmd/generate-cli.js genProtocolSdk -t ./templates/solSdk/protocol/curveusd-example.txt   
+
+/*---------------------------START OF TEMPLATE---------------------------*/
+
+PROTOCOL_NAME = "CurveUsd2";
+
+ACTION_NAME = "CurveUsd2Adjust";
+
+/// @param controllerAddress Address of the curveusd market controller
+/// @param from Address from which to pull collateral asset, will default to user's wallet
+/// @param to Address which will receive borrowed crvUSD
+/// @param supplyAmount Amount of collateral asset to supply (uint.max supported)
+/// @param borrowAmount Amount of debt asset to borrow (uint.max not supported)
+struct Params {
+    address controllerAddress; // p
+    address from; // p
+    address to; // p
+    uint256 supplyAmount; // p
+    uint256 borrowAmount; // p
+}
+
+ACTION_NAME = "CurveUsd2Borrow";
+
+/// @param controllerAddress Address of the curveusd market controller
+/// @param to Address that will receive the borrowed crvUSD, will default to user's wallet
+/// @param debtAmount Amount of crvUSD to borrow (does not support uint.max)
+struct Params {
+    address controllerAddress; // p
+    address to; // p
+    uint256 debtAmount; // p
+}
+
+ACTION_NAME = "CurveUsd2Create";
+
+/// @param controllerAddress Address of the curveusd market controller
+/// @param from Address from which to pull collateral asset, will default to user's wallet
+/// @param to Address that will receive the borrowed crvUSD, will default to user's wallet
+/// @param collateralAmount Amount of collateral asset to supply
+/// @param debtAmount Amount of crvUSD to borrow (does not support uint.max)
+/// @param nBands Number of bands in which the collateral will be supplied
+struct Params {
+    address controllerAddress; // p
+    address from; // p
+    address to; // p
+    uint256 collateralAmount; // p
+    uint256 debtAmount; // p
+    uint256 nBands; // p
+}
+
+ACTION_NAME = "CurveUsd2GetDebt";
+
+/// @param controllerAddress Address of the curveusd market controller
+/// @param debtor Address which owns the curveusd position
+struct Params {
+    address controllerAddress; // p
+    address debtor; // p
+}
+
+ACTION_NAME = "CurveUsd2Payback";
+
+/// @param controllerAddress Address of the curveusd market controller
+/// @param from Address from which to pull crvUSD, will default to user's wallet
+/// @param onBehalfOf Address for which we are paying back debt, will default to user's wallet
+/// @param to Address that will receive the crvUSD and collateral asset if close, will default to user's wallet
+/// @param paybackAmount Amount of crvUSD to payback
+/// @param maxActiveBand Don't allow active band to be higher than this (to prevent front-running the repay)
+struct Params {
+    address controllerAddress; // p
+    address from; // p
+    address onBehalfOf; // p
+    address to; // p
+    uint256 paybackAmount; // p
+    int256 maxActiveBand; // p
+}
+
+ACTION_NAME = "CurveUsd2SelfLiquidate";
+
+/// @param controllerAddress Address of the curveusd market controller
+/// @param minCrvUsdExpected Minimum amount of crvUsd as collateral for the user to have
+/// @param from Address from which to pull crvUSD if needed
+/// @param to Address that will receive the crvUSD and collateral asset
+struct Params {
+    address controllerAddress; // p
+    uint256 minCrvUsdExpected; // p
+    address from; // p
+    address to; // p
+}
+
+ACTION_NAME = "CurveUsd2Supply";
+
+/// @param controllerAddress Address of the curveusd market controller
+/// @param from Address from which to pull collateral asset, will default to user's wallet
+/// @param onBehalfOf Address for which we are supplying, will default to user's wallet
+/// @param collateralAmount Amount of collateral asset to supply
+struct Params {
+    address controllerAddress; // p
+    address from; // p
+    address onBehalfOf; // p
+    uint256 collateralAmount; // p
+}
+
+ACTION_NAME = "CurveUsd2Withdraw";
+
+/// @param controllerAddress Address of the curveusd market controller
+/// @param to Address that will receive the withdrawn collateral, will default to user's wallet
+/// @param collateralAmount Amount of collateral to withdraw
+struct Params {
+    address controllerAddress; // p
+    address to; // p
+    uint256 collateralAmount; // p
+}

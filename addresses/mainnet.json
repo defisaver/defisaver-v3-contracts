@@ -1606,6 +1606,17 @@
         "history": []
     },
     {
+        "name": "MorphoBlueClaim",
+        "address": "0xBB562a790AD7773D54A423bD2A10E4073cb98142",
+        "id": "0x07f9b8e2",
+        "path": "contracts/actions/morpho-blue/MorphoBlueClaim",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FLMorphoBlue",
         "address": "0x6206C96EAc5EAC546861438A9f953B6BEa50EBAB",
         "id": "0x025e64d8",
@@ -2064,14 +2075,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x3f9f232187b95476947c999ff8e6c65a90be686a",
+        "address": "0xB5C48BE5a6Ed26F0B95397c50d6b52CFcC0e43Bb",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.7",
+        "version": "1.0.8",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x3f9f232187b95476947c999ff8e6c65a90be686a",
             "0x23ef4a553fc2af2784a5bf8ce4345d1f0a355a15",
             "0x3789ae0ea3bc9a4641ed0c5fd90b51e5ed4a3551",
             "0xb49b5f783381408eBda3C3b4C5f34142B4B289EC",
@@ -3612,14 +3624,15 @@
     },
     {
         "name": "LSVView",
-        "address": "0xF3da52d6e45A967cB6835112B2A0BC34347952e6",
+        "address": "0x8eb872563368b2a8ff6d9a4842f923067f08497a",
         "id": "0x373e1531",
         "path": "contracts/views/LSVView.sol",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xF3da52d6e45A967cB6835112B2A0BC34347952e6",
             "0x096fd98653681dcf07687d2c21beb67807e0c8e6",
             "0x2bf0643b4d7e3e63d0a859048af980fb3333b478",
             "0xECE15C12d8dCDb88c70fAfF38E8dAE4aC4ee69Ce",
@@ -4125,7 +4138,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Open",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4136,7 +4149,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Supply",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4147,7 +4160,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4158,7 +4171,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Borrow",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4169,7 +4182,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4180,7 +4193,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4191,7 +4204,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidRatioTrigger",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4202,7 +4215,7 @@
         "path": "contracts/actions/fluid/vaultT1/FluidRatioCheck",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4287,5 +4300,49 @@
         "name": "MCDSaverTaker",
         "address": "0x99DDE0B130833Ce0a6D9EFcFE330327aCf38006E",
         "path": "old_contracts"
-    }
+    },
+{
+    "name": "BalancerV2Supply",
+    "address": "0xE48123018Db5e9075841C61EA702cEca51621191",
+    "id": "0x443f994c",
+    "path": "/BalancerV2Supply.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+},
+{
+    "name": "BalancerV2Withdraw",
+    "address": "0xbED38692438b90AF738F8A7A3142C217DE8fB069",
+    "id": "0x54f465c5",
+    "path": "/BalancerV2Withdraw.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+},
+{
+    "name": "BalancerV2Claim",
+    "address": "0xEac7c5bEFaA6E17f1A2e86947eEd6419c74A7C03",
+    "id": "0xde8dbbc2",
+    "path": "/BalancerV2Claim.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+},
+{
+    "name": "MorphoAaveV2RatioCheck",
+    "address": "0x904C30Dad119cfF4527d1E4E2aFaF79ac6c05e10",
+    "id": "0xb22cb584",
+    "path": "contracts/actions/checkers/MorphoAaveV2RatioCheck.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+}
 ]

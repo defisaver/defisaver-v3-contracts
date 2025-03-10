@@ -77,7 +77,6 @@ contract McdPayback is ActionBase, McdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Paybacks the debt for a specified vault
     function _mcdPayback(Params memory _inputData) internal returns (bytes memory logData) {
         IManager mcdManager = IManager(_inputData.mcdManager);
 

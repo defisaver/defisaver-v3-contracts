@@ -9,7 +9,8 @@ import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
 import { ICrvUsdController } from "../../../../interfaces/curveusd/ICurveUsd.sol";
 import { CurveUsdSwapperTransient } from "./CurveUsdSwapperTransient.sol";
 
-/// @title CurveUsdRepayTransient
+/// @title Repays a curveusd position with a given amount of collateral
+/// @notice This action uses internal swapper with transient storage to repay debt
 contract CurveUsdRepayTransient is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 

@@ -7,6 +7,14 @@ import { ActionBase } from "../ActionBase.sol";
 /// @title Helper action to invoke a permit action signed by a user
 contract PermitToken is ActionBase {
 
+    /// @param tokenAddr Address of the token to permit
+    /// @param owner Address of the owner
+    /// @param spender Address of the spender
+    /// @param value Amount of tokens to permit
+    /// @param deadline Deadline of the permit
+    /// @param v ECDSA signature v
+    /// @param r ECDSA signature r
+    /// @param s ECDSA signature s
     struct Params {
         address tokenAddr;
         address owner;
@@ -52,7 +60,7 @@ contract PermitToken is ActionBase {
     function _permitToken(Params memory _params) internal {
         uint256 startingNonce = IERC20Permit(_params.tokenAddr).nonces(_params.owner);
         IERC20Permit(_params.tokenAddr).permit(_params.owner, _params.spender, _params.value, _params.deadline, _params.v, _params.r, _params.s);
-        ///@dev Every successful call to permit increases owners nonce by one. 
+        /// @notice Every successful call to permit increases owners nonce by one. 
         require (IERC20Permit(_params.tokenAddr).nonces(_params.owner) == startingNonce + 1);
     }
 

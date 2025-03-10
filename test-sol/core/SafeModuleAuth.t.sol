@@ -12,8 +12,7 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
-import { Const } from "../Const.sol";
-import { TokenAddresses } from "../TokenAddresses.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
     
@@ -40,6 +39,8 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
         wallet = new SmartWallet(bob);
         safeWalletAddr = wallet.createSafe();
 
+        SafeModuleAuth newCut = new SafeModuleAuth();
+        vm.etch(MODULE_AUTH_ADDR, address(newCut).code);
         cut = SafeModuleAuth(MODULE_AUTH_ADDR);
 
         safeModulePermissionAddr = address(new SafeModulePermission());
@@ -64,7 +65,7 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
     }
 
     function test_should_fail_to_call_execute_when_paused() public {
-        prank(Const.ADMIN_ACC);
+        prank(Addresses.ADMIN_ACC);
         cut.setPaused(true);
 
         prank(strategyExecutorAddr);
@@ -116,7 +117,7 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
 
         // create recipe
         bytes[] memory actionsCalldata = new bytes[](1);
-        actionsCalldata[0] = flActionEncode(TokenAddresses.WETH_ADDR, 1000, FLSource.BALANCER);
+        actionsCalldata[0] = flActionEncode(Addresses.WETH_ADDR, 1000, FLSource.BALANCER);
 
         bytes4[] memory ids = new bytes4[](1);
         ids[0] = bytes4(keccak256("FLAction")); 

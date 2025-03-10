@@ -12,6 +12,11 @@ import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 contract SparkWithdraw is ActionBase, SparkHelper {
     using TokenUtils for address;
 
+    /// @param assetId The id of the token to be withdrawn
+    /// @param useDefaultMarket Whether to use the default market
+    /// @param amount Amount of tokens to be withdrawn
+    /// @param to Address to send the withdrawn tokens to
+    /// @param market Address of the market to withdraw from
     struct Params {
         uint16 assetId;
         bool useDefaultMarket;

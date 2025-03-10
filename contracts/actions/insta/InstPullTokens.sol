@@ -5,10 +5,14 @@ pragma solidity =0.8.24;
 import { ActionBase } from "./../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
-// @title Action for withdrawing tokens from DSA
+/// @title Action for withdrawing tokens from DSA
 contract InstPullTokens is ActionBase {
     using TokenUtils for address;
     
+    /// @param dsaAddress address of the DSA
+    /// @param tokens array of addresses of the tokens to be withdrawn
+    /// @param amounts array of amounts of the tokens to be withdrawn
+    /// @param to address of the recipient
     struct Params {
         address dsaAddress;
         address[] tokens;

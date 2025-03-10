@@ -334,14 +334,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xe2171e5503558ee8723e69807f9f1eb654943a3e",
+        "address": "0xD313cdea0F3e759d8Aa0130F768895BDBd371b1d",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.7",
+        "version": "1.0.8",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0xe2171e5503558ee8723e69807f9f1eb654943a3e",
           "0xf56a2a8fa68d2e608ed7060be55e96e008dcc3ca",
           "0xF83052a8d9ec5c705B4D7A1C252A6C24A692e91C",
           "0x5075c6a7251485CC3FcbB4Ba59d6E6EF26a69d45",
@@ -1144,5 +1145,16 @@
       "changeTime": "86400",
       "registryIds": [],
       "history": []
-    }
+    },
+{
+    "name": "CompV3RatioTrigger",
+    "address": "0x321639cc7492D97294ADA6B6Ad867d93673316D4",
+    "id": "0x506812d0",
+    "path": "contracts/triggers/CompV3RatioTrigger.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+}
 ]

@@ -8,7 +8,7 @@ import { EtherFiHelper } from "../../../contracts/actions/etherfi/helpers/EtherF
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-import { TokenAddresses } from "../../TokenAddresses.sol";
+import {Addresses } from "../../utils/Addresses.sol";
 
 contract TestEtherFiStake is BaseTest, ActionsUtils, EtherFiHelper {
 
@@ -28,7 +28,7 @@ contract TestEtherFiStake is BaseTest, ActionsUtils, EtherFiHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("EtherFiStake");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -78,8 +78,8 @@ contract TestEtherFiStake is BaseTest, ActionsUtils, EtherFiHelper {
         uint256 _amount,
         bool _shouldWrap
     ) internal {
-        give(TokenAddresses.WETH_ADDR, sender, _amount);
-        approveAsSender(sender, TokenAddresses.WETH_ADDR, walletAddr, _amount);
+        give(Addresses.WETH_ADDR, sender, _amount);
+        approveAsSender(sender, Addresses.WETH_ADDR, walletAddr, _amount);
 
         bytes memory executeActionCallData = executeActionCalldata(
             etherFiStakeEncode(
@@ -91,13 +91,13 @@ contract TestEtherFiStake is BaseTest, ActionsUtils, EtherFiHelper {
             _isDirect
         );
 
-        uint256 senderWethBalanceBefore = balanceOf(TokenAddresses.WETH_ADDR, sender);
+        uint256 senderWethBalanceBefore = balanceOf(Addresses.WETH_ADDR, sender);
         uint256 senderEethBalanceBefore = balanceOf(EETH_ADDR, sender);
         uint256 senderWeEthBalanceBefore = balanceOf(WEETH_ADDR, sender);
 
         wallet.execute(address(cut), executeActionCallData, 0);
 
-        uint256 senderWethBalanceAfter = balanceOf(TokenAddresses.WETH_ADDR, sender);
+        uint256 senderWethBalanceAfter = balanceOf(Addresses.WETH_ADDR, sender);
         uint256 senderEethBalanceAfter = balanceOf(EETH_ADDR, sender);
         uint256 senderWeEthBalanceAfter = balanceOf(WEETH_ADDR, sender);
 

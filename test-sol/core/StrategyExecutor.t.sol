@@ -17,8 +17,7 @@ import {BaseTest} from '../utils/BaseTest.sol';
 import {RegistryUtils} from '../utils/RegistryUtils.sol';
 import {ActionsUtils} from '../utils/ActionsUtils.sol';
 import {SmartWallet} from '../utils/SmartWallet.sol';
-import {Const} from '../Const.sol';
-import {TokenAddresses} from '../TokenAddresses.sol';
+import {Addresses} from '../utils/Addresses.sol';
 import {StrategyBuilder} from '../utils/StrategyBuilder.sol';
 
 contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
@@ -86,7 +85,7 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
     function test_should_fail_to_call_execute_when_sub_data_hash_mismatch() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_dummy_strategy(
             DummySubData({
-                token: TokenAddresses.WETH_ADDR,
+                token: Addresses.WETH_ADDR,
                 amount: 1,
                 maxGasPrice: type(uint256).max
             })
@@ -112,7 +111,7 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
     function test_should_fail_to_call_execute_when_sub_is_not_enabled() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_dummy_strategy(
             DummySubData({
-                token: TokenAddresses.WETH_ADDR,
+                token: Addresses.WETH_ADDR,
                 amount: 1,
                 maxGasPrice: type(uint256).max
             })
@@ -126,46 +125,21 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
         cut.executeStrategy(subId, 0, new bytes[](0), new bytes[](0), sub);
     }
 
-    function test_should_call_strategy() public {
-        DummySubData memory subData = DummySubData({
-            token: TokenAddresses.WETH_ADDR,
-            amount: 1 ether,
-            maxGasPrice: type(uint256).max
-        });
+    function test_should_call_strategy_for_safe_wallet() public {
+        _callStrategyBaseTest();
+    }
 
-        (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_dummy_strategy(subData);
-
-        _add_bot_caller();
-
-        give(subData.token, sender, subData.amount * 2);
-        approveAsSender(sender, subData.token, walletAddr, subData.amount);
-
-        bytes[] memory actionsCalldata = new bytes[](1);
-        actionsCalldata[0] = pullTokenEncode(subData.token, sender, subData.amount);
-
-        bytes[] memory triggerCalldata = new bytes[](1);
-        triggerCalldata[0] = abi.encode(GasPriceTrigger.SubParams({maxGasPrice: subData.maxGasPrice}));
-
-        uint256 strategyIndex = 0;
-
-        uint256 senderBalanceBefore = balanceOf(subData.token, sender);
-
-        cut.executeStrategy(
-            subId,
-            strategyIndex,
-            triggerCalldata,
-            actionsCalldata,
-            sub
-        );
-
-        uint256 senderBalanceAfter = balanceOf(subData.token, sender);
-
-        assertEq(senderBalanceAfter, senderBalanceBefore - subData.amount);
+    function test_should_call_strategy_for_ds_proxy_wallet() public {
+        wallet = new SmartWallet(alice);
+        walletAddr = wallet.createDSProxy();
+        sender = wallet.owner();
+        
+        _callStrategyBaseTest();
     }
 
     function test_should_fail_to_execute_strategy_for_inactive_triggers() public {
         DummySubData memory subData = DummySubData({
-            token: TokenAddresses.WETH_ADDR,
+            token: Addresses.WETH_ADDR,
             amount: 1,
             maxGasPrice: 0
         });
@@ -203,6 +177,44 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
+    function _callStrategyBaseTest() internal {
+        DummySubData memory subData = DummySubData({
+            token: Addresses.WETH_ADDR,
+            amount: 1 ether,
+            maxGasPrice: type(uint256).max
+        });
+
+        (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_dummy_strategy(subData);
+
+        _add_bot_caller();
+
+        give(subData.token, sender, subData.amount * 2);
+        approveAsSender(sender, subData.token, walletAddr, subData.amount);
+
+        bytes[] memory actionsCalldata = new bytes[](1);
+        actionsCalldata[0] = pullTokenEncode(subData.token, sender, subData.amount);
+
+        bytes[] memory triggerCalldata = new bytes[](1);
+        triggerCalldata[0] = abi.encode(GasPriceTrigger.SubParams({maxGasPrice: subData.maxGasPrice}));
+
+        uint256 strategyIndex = 0;
+
+        uint256 senderBalanceBefore = balanceOf(subData.token, sender);
+
+        cut.executeStrategy(
+            subId,
+            strategyIndex,
+            triggerCalldata,
+            actionsCalldata,
+            sub
+        );
+
+        uint256 senderBalanceAfter = balanceOf(subData.token, sender);
+
+        assertEq(senderBalanceAfter, senderBalanceBefore - subData.amount);
+    }
+
+
     function _add_placeholder_strategy() internal returns (uint256) {
         StrategyBuilder strategy = new StrategyBuilder('dummyStrategy', true);
         strategy.addSubMapping('&token');
@@ -256,7 +268,7 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
     }
 
     function _add_bot_caller() internal {
-        prank(Const.OWNER_ACC);
+        prank(Addresses.OWNER_ACC);
         BotAuth(botAuthAddr).addCaller(address(this));
     }
 }

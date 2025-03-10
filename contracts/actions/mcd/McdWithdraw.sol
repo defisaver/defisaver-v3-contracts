@@ -13,6 +13,12 @@ import { McdHelper } from "./helpers/McdHelper.sol";
 /// @title Withdraws collateral from a Maker vault
 contract McdWithdraw is ActionBase, McdHelper {
     using TokenUtils for address;
+
+    /// @param vaultId Id of the vault
+    /// @param amount Amount of collateral to withdraw
+    /// @param joinAddr Join address of the maker collateral
+    /// @param to Address where to send the collateral we withdrew
+    /// @param mcdManager The manager address we are using [mcd, b.protocol]
     struct Params {
         uint256 vaultId;
         uint256 amount;
@@ -56,7 +62,6 @@ contract McdWithdraw is ActionBase, McdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Withdraws collateral from the vault
     /// @param _vaultId Id of the vault
     /// @param _amount Amount of collateral to withdraw
     /// @param _joinAddr Join address of the maker collateral

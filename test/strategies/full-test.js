@@ -1,4 +1,4 @@
-const { resetForkToBlock } = require('../utils');
+const { resetForkToBlock } = require('../utils/utils');
 const { compoundStrategiesTest } = require('./compound/compound-tests');
 const { liquityStrategiesTest } = require('./liquity/liquity-tests');
 const { mcdStrategiesTest } = require('./mcd/mcd-tests');

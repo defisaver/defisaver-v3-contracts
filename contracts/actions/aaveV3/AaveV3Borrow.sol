@@ -10,6 +10,14 @@ import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 contract AaveV3Borrow is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param amount Amount of tokens to borrow.
+    /// @param to Address to send the borrowed tokens to.
+    /// @param rateMode Rate mode.
+    /// @param assetId Asset id.
+    /// @param useDefaultMarket Whether to use the default market.
+    /// @param useOnBehalf Whether to use on behalf.
+    /// @param market Aave Market address.
+    /// @param onBehalf Address to send the borrowed tokens on behalf of. Defaults to the user's wallet.
     struct Params {
         uint256 amount;
         address to;

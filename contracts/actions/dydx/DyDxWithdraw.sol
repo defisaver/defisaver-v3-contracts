@@ -11,6 +11,9 @@ import { Account, Actions, Types } from "../../interfaces/dydx/ISoloMargin.sol";
 contract DyDxWithdraw is ActionBase, DyDxHelper {
     using TokenUtils for address;
 
+    /// @param tokenAddr Address of the token to be withdrawn
+    /// @param amount Amount of tokens to be withdrawn -> send type(uint).max for whole amount
+    /// @param to Where the withdrawn tokens will be sent
     struct Params {
         address tokenAddr;
         uint256 amount;

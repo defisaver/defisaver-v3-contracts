@@ -10,6 +10,8 @@ contract RemoveTokenApproval is ActionBase {
 
     using SafeERC20 for IERC20;
 
+    /// @param tokenAddr Address of the token to remove approval from
+    /// @param spender Address of the spender
     struct Params {
         address tokenAddr;
         address spender;

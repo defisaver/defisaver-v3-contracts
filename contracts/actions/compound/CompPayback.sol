@@ -6,10 +6,14 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompHelper } from "./helpers/CompHelper.sol";
 
-/// @title Payback a token a user borrowed from Compound
+/// @title Payback a token a user borrowed from Compound.
 contract CompPayback is ActionBase, CompHelper {
     using TokenUtils for address;
 
+    /// @param cTokenAddr Address of the cToken token to payback
+    /// @param amount Amount of tokens to be paid back
+    /// @param from Address where we are pulling the underlying tokens from
+    /// @param onBehalf Repay on behalf of which address (if 0x0 defaults to user's wallet)
     struct Params {
         address cTokenAddr;
         uint256 amount;
@@ -51,7 +55,7 @@ contract CompPayback is ActionBase, CompHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Payback a borrowed token from the Compound protocol
+    /// @notice Payback a borrowed token from the Compound protocol.
     /// @dev Amount type(uint).max will take the whole borrow amount
     /// @param _cTokenAddr Address of the cToken we are paying back
     /// @param _amount Amount of the underlying token

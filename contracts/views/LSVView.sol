@@ -33,6 +33,7 @@ struct Position {
     uint256 debt;
 }
 
+// TODO: On next deployment (assuming Aave v3.3.0 is live at that point), use 'getReserveAToken' and 'getReserveVariableDebtToken' directly on Pool, instead of fetching reserveData
 contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Helper, CompV3Helper, SparkHelper, MorphoBlueHelper, LSVUtilHelper {
     enum Protocol {
         AAVE_V3,
@@ -93,6 +94,8 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
         users[0] = _user;
 
         positions = _getPositions(_collTokens, users);
+
+        proxies = new address[](positions.length);
 
         for (uint256 i = 0; i < positions.length; i++) {
             proxies[i] = positions[i].proxy;

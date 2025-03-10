@@ -18,6 +18,12 @@ contract SparkDelegateCredit is ActionBase, SparkHelper {
     
     error NonExistantRateMode();
 
+    /// @param amount Amount of tokens to delegate
+    /// @param delegatee Address of the delegatee
+    /// @param assetId The id of the token to be delegated
+    /// @param rateMode Type of borrow debt [Stable: 1, Variable: 2]
+    /// @param useDefaultMarket Whether to use the default market
+    /// @param market Address of the market to delegate credit for
     struct Params {
         uint256 amount;
         address delegatee;
