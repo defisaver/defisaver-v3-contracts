@@ -1463,7 +1463,11 @@ const isProxySafe = (proxy) => proxy.functions.nonce !== undefined;
 const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => {
     let receipt;
     if (isProxySafe(proxy)) {
-        console.log('proxy signer address');
+        // If signer is not set, try setting it with _address
+        if (!proxy.signer.address) {
+            // eslint-disable-next-line no-underscore-dangle
+            proxy.signer.address = proxy.signer._address;
+        }
         receipt = await executeSafeTx(
             proxy.signer.address,
             proxy,
@@ -1595,6 +1599,7 @@ module.exports = {
     isNetworkFork,
     setCode,
     expectError,
+    toBytes32,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
