@@ -20,19 +20,15 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
     /// @param vault The address of the Fluid DEX vault.
     /// @param to Address to send the withdrawn assets to.
     /// @param nftId The NFT ID of the position.
-    /// @param withdrawAction Withdraw action type.
-    /// @param withdrawAmount Amount of collateral to withdraw. Used if withdraw action is LIQUIDITY.
-    /// @param withdrawVariableData Variable data for withdraw action. Used if withdraw action is VARIABLE_DEX.
-    /// @param withdrawExactData Exact data for withdraw action. Used if withdraw action is EXACT_DEX.
+    /// @param withdrawAmount Amount of collateral to withdraw. Used if vault is T3.
+    /// @param withdrawVariableData Variable data for withdraw action. Used if vault is T2 or T4.
     /// @param wrapWithdrawnEth Whether to wrap the withdrawn ETH into WETH if one of the withdrawn assets is ETH.
     struct Params {
         address vault;
         address to;
         uint256 nftId;
-        FluidDexModel.ActionType withdrawAction;
         uint256 withdrawAmount;
         FluidDexModel.WithdrawVariableData withdrawVariableData;
-        FluidDexModel.WithdrawExactData withdrawExactData;
         bool wrapWithdrawnEth;
     }
 
@@ -49,15 +45,35 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.nftId = _parseParamUint(params.nftId, _paramMapping[2], _subData, _returnValues);
 
-        params.withdrawAction = FluidDexModel.ActionType(_parseParamUint(uint8(params.withdrawAction), _paramMapping[3], _subData, _returnValues));
-        params.withdrawAmount = _parseParamUint(params.withdrawAmount, _paramMapping[4], _subData, _returnValues);
-        params.withdrawVariableData.collAmount0 = _parseParamUint(params.withdrawVariableData.collAmount0, _paramMapping[5], _subData, _returnValues);
-        params.withdrawVariableData.collAmount1 = _parseParamUint(params.withdrawVariableData.collAmount1, _paramMapping[6], _subData, _returnValues);
-        params.withdrawVariableData.maxCollShares = _parseParamUint(params.withdrawVariableData.maxCollShares, _paramMapping[7], _subData, _returnValues);
-        params.withdrawExactData.perfectCollShares = _parseParamUint(params.withdrawExactData.perfectCollShares, _paramMapping[8], _subData, _returnValues);
-        params.withdrawExactData.minCollAmount0 = _parseParamUint(params.withdrawExactData.minCollAmount0, _paramMapping[9], _subData, _returnValues);
-        params.withdrawExactData.minCollAmount1 = _parseParamUint(params.withdrawExactData.minCollAmount1, _paramMapping[10], _subData, _returnValues);
-        params.wrapWithdrawnEth = _parseParamUint(params.wrapWithdrawnEth ? 1 : 0, _paramMapping[11], _subData, _returnValues) == 1;
+        params.withdrawAmount = _parseParamUint(
+            params.withdrawAmount,
+            _paramMapping[3],
+            _subData,
+            _returnValues
+        );
+        params.withdrawVariableData.collAmount0 = _parseParamUint(
+            params.withdrawVariableData.collAmount0,
+            _paramMapping[4],
+            _subData,
+            _returnValues
+        );
+        params.withdrawVariableData.collAmount1 = _parseParamUint(
+            params.withdrawVariableData.collAmount1,
+            _paramMapping[5],
+            _subData,
+            _returnValues
+        );
+        params.withdrawVariableData.maxCollShares = _parseParamUint(
+            params.withdrawVariableData.maxCollShares,
+            _paramMapping[6],
+            _subData,
+            _returnValues
+        );
+        params.wrapWithdrawnEth = _parseParamUint(
+            params.wrapWithdrawnEth ? 1 : 0,
+            _paramMapping[7],
+            _subData, _returnValues
+        ) == 1;
 
         (uint256 withdrawnAmountOrBurnedShares, bytes memory logData) = _withdraw(params);
         emit ActionEvent("FluidDexWithdraw", logData);
@@ -83,7 +99,7 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
         IFluidVault.ConstantViews memory constants = IFluidVault(_params.vault).constantsView();
         constants.vaultType.requireDexVault();
 
-        if (_params.withdrawAction == FluidDexModel.ActionType.LIQUIDITY) {
+        if (constants.vaultType.isT3Vault()) {
             uint256 withdrawAmount = FluidWithdrawLiquidityLogic.withdraw(
                 FluidLiquidityModel.WithdrawData({
                     vault: _params.vault,
@@ -98,19 +114,17 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
             return (withdrawAmount, abi.encode(_params));
         }
 
-        FluidDexModel.WithdrawDexData memory dexData = FluidDexModel.WithdrawDexData({
-            vault: _params.vault,
-            vaultType: constants.vaultType,
-            nftId: _params.nftId,
-            to: _params.to,
-            variableData: _params.withdrawVariableData,
-            exactData: _params.withdrawExactData,
-            wrapWithdrawnEth: _params.wrapWithdrawnEth
-        });
-
-        uint256 collSharesBurned = _params.withdrawAction == FluidDexModel.ActionType.VARIABLE_DEX
-            ? FluidWithdrawDexLogic.withdrawVariable(dexData, constants.supplyToken)
-            : FluidWithdrawDexLogic.withdrawExact(dexData, constants.supplyToken);
+        uint256 collSharesBurned = FluidWithdrawDexLogic.withdrawVariable(
+            FluidDexModel.WithdrawDexData({
+                vault: _params.vault,
+                vaultType: constants.vaultType,
+                nftId: _params.nftId,
+                to: _params.to,
+                variableData: _params.withdrawVariableData,
+                wrapWithdrawnEth: _params.wrapWithdrawnEth
+            }),
+            constants.supplyToken
+        );
 
         return (collSharesBurned, abi.encode(_params));
     }

@@ -13,18 +13,22 @@ import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
+/// @title Payback debt on Fluid DEX vault (T2, T3, T4)
 contract FluidDexPayback is ActionBase, FluidHelper {
     using TokenUtils for address;
     using FluidVaultTypes for uint256;
 
+    /// @param vault The address of the Fluid DEX vault.
+    /// @param from Address to pull the debt tokens from.
+    /// @param nftId The NFT ID of the position.
+    /// @param paybackAmount The amount of debt to payback. Used if vault is T2.
+    /// @param paybackVariableData Variable data for payback action. Used if vault is T3 or T4.
     struct Params {
         address vault;
         address from;
         uint256 nftId;
-        FluidDexModel.ActionType paybackAction;
         uint256 paybackAmount;
         FluidDexModel.PaybackVariableData paybackVariableData;
-        FluidDexModel.PaybackExactData paybackExactData;
     }
 
     /// @inheritdoc ActionBase
@@ -40,14 +44,30 @@ contract FluidDexPayback is ActionBase, FluidHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.nftId = _parseParamUint(params.nftId, _paramMapping[2], _subData, _returnValues);
 
-        params.paybackAction = FluidDexModel.ActionType(_parseParamUint(uint8(params.paybackAction), _paramMapping[3], _subData, _returnValues));
-        params.paybackAmount = _parseParamUint(params.paybackAmount, _paramMapping[4], _subData, _returnValues);
-        params.paybackVariableData.debtAmount0 = _parseParamUint(params.paybackVariableData.debtAmount0, _paramMapping[5], _subData, _returnValues);
-        params.paybackVariableData.debtAmount1 = _parseParamUint(params.paybackVariableData.debtAmount1, _paramMapping[6], _subData, _returnValues);
-        params.paybackVariableData.maxDebtShares = _parseParamUint(params.paybackVariableData.maxDebtShares, _paramMapping[7], _subData, _returnValues);
-        params.paybackExactData.perfectDebtShares = _parseParamUint(params.paybackExactData.perfectDebtShares, _paramMapping[8], _subData, _returnValues);
-        params.paybackExactData.maxDebtAmount0 = _parseParamUint(params.paybackExactData.maxDebtAmount0, _paramMapping[9], _subData, _returnValues);
-        params.paybackExactData.maxDebtAmount1 = _parseParamUint(params.paybackExactData.maxDebtAmount1, _paramMapping[10], _subData, _returnValues);
+        params.paybackAmount = _parseParamUint(
+            params.paybackAmount,
+            _paramMapping[3],
+            _subData,
+            _returnValues
+        );
+        params.paybackVariableData.debtAmount0 = _parseParamUint(
+            params.paybackVariableData.debtAmount0,
+            _paramMapping[4],
+            _subData,
+            _returnValues
+        );
+        params.paybackVariableData.debtAmount1 = _parseParamUint(
+            params.paybackVariableData.debtAmount1,
+            _paramMapping[5],
+            _subData,
+            _returnValues
+        );
+        params.paybackVariableData.maxDebtShares = _parseParamUint(
+            params.paybackVariableData.maxDebtShares,
+            _paramMapping[6],
+            _subData,
+            _returnValues
+        );
 
         (uint256 paybackAmountOrBurnedShares, bytes memory logData) = _payback(params);
         emit ActionEvent("FluidDexPayback", logData);
@@ -76,7 +96,7 @@ contract FluidDexPayback is ActionBase, FluidHelper {
         (IFluidVaultResolver.UserPosition memory userPosition, ) = 
                 IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_params.nftId);
 
-        if (_params.paybackAction == FluidDexModel.ActionType.LIQUIDITY) {
+        if (constants.vaultType.isT2Vault()) {
             uint256 paybackAmount = FluidPaybackLiquidityLogic.payback(
                 FluidLiquidityModel.PaybackData({
                     vault: _params.vault,
@@ -91,19 +111,17 @@ contract FluidDexPayback is ActionBase, FluidHelper {
             return (paybackAmount, abi.encode(_params));
         }
 
-        FluidDexModel.PaybackDexData memory dexData = FluidDexModel.PaybackDexData({
-            vault: _params.vault,
-            vaultType: constants.vaultType,
-            nftId: _params.nftId,
-            from: _params.from,
-            variableData: _params.paybackVariableData,
-            exactData: _params.paybackExactData,
-            position: userPosition
-        });
-
-        uint256 burnedShares = _params.paybackAction == FluidDexModel.ActionType.VARIABLE_DEX
-            ? FluidPaybackDexLogic.paybackVariable(dexData, constants.borrowToken)
-            : FluidPaybackDexLogic.paybackExact(dexData, constants.borrowToken);
+        uint256 burnedShares = FluidPaybackDexLogic.paybackVariable(
+            FluidDexModel.PaybackDexData({
+                vault: _params.vault,
+                vaultType: constants.vaultType,
+                nftId: _params.nftId,
+                from: _params.from,
+                variableData: _params.paybackVariableData,
+                position: userPosition
+            }),
+            constants.borrowToken
+        );
 
         return (burnedShares, abi.encode(_params));
     }

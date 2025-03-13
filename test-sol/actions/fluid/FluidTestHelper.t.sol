@@ -8,8 +8,6 @@ import { IFluidVaultT2 } from "../../../contracts/interfaces/fluid/vaults/IFluid
 
 contract FluidTestHelper is FluidHelper {
 
-    address internal constant FLUID_DEX_RESOLVER = 0x7af0C11F5c787632e567e6418D74e5832d8FFd4c;
-
     function getT1Vaults() internal pure returns (IFluidVaultT1[] memory vaults) {
         vaults = new IFluidVaultT1[](8);
         vaults[0] = IFluidVaultT1(0x1982CC7b1570C2503282d0A0B41F69b3B28fdcc3); // id:14 - wstETH/USDC
