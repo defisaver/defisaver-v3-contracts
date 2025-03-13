@@ -3,25 +3,77 @@
 pragma solidity =0.8.24;
 
 import { IFluidVaultResolver } from "../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import { IFluidDexResolver } from "../interfaces/fluid/resolvers/IFluidDexResolver.sol";
 import { IFluidLendingResolver } from "../interfaces/fluid/resolvers/IFluidLendingResolver.sol";
 import { FluidRatioHelper } from "../../contracts/actions/fluid/helpers/FluidRatioHelper.sol";
+import { FluidVaultTypes } from "../../contracts/actions/fluid/helpers/FluidVaultTypes.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 
 /// @title FluidView - aggregate various information about Fluid vaults and users
 contract FluidView is FluidRatioHelper {
+    using FluidVaultTypes for uint256;
 
+    /// @notice User position data
     struct UserPosition {
-        uint256 nftId;
-        address owner;
-        bool isLiquidated;
-        bool isSupplyPosition;
-        uint256 supply;
-        uint256 borrow;
-        uint256 ratio;
-        int256 tick;
-        uint256 tickId;
+        uint256 nftId; // unique id of the position
+        address owner; // owner of the position
+        bool isLiquidated; // true if the position is liquidated
+        bool isSupplyPosition; // true if the position is a supply position, means no debt.
+        uint256 supply; // amount of supply tokens. For smart collateral vaults, this will be the amount of coll shares.
+        uint256 borrow; // amount of borrow tokens. For smart debt vaults, this will be the amount of debt shares.
+        uint256 ratio; // ratio of the position in 1e18
+        int256 tick; // in which tick the position is. Used to calculate the ratio and borrow amount.
+        uint256 tickId; // tick id of the position
     }
 
+    /// @notice Data for the supply dex pool used in T2 and T4 vaults
+    struct DexSupplyData {
+       address dexPool; // address of the dex pool
+        uint256 dexId;   // id of the dex pool
+        uint256 fee;     // fee of the dex pool
+        uint256 lastStoredPrice; // last stored price of the dex pool
+        uint256 centerPrice; // center price of the dex pool
+        uint256 token0Utilization; // token0 utilization
+        uint256 token1Utilization; // token1 utilization
+        // ONLY FOR SUPPLY
+        uint256 totalSupplyShares; // total supply shares, in 1e18
+        uint256 maxSupplyShares; // max supply shares, in 1e18
+        uint256 token0Supplied; // token0 supplied, in token0 decimals
+        uint256 token1Supplied; // token1 supplied, in token1 decimals
+        uint256 sharesWithdrawable; // shares withdrawable, in 1e18
+        uint256 token0Withdrawable; // token0 withdrawable, in token0 decimals
+        uint256 token1Withdrawable; // token1 withdrawable, in token1 decimals
+        uint256 token0PerSupplyShare; // token0 amount per 1e18 supply shares
+        uint256 token1PerSupplyShare; // token1 amount per 1e18 supply shares
+        uint256 token0SupplyRate; // token0 supply rate. E.g 320 = 3.2% APR
+        uint256 token1SupplyRate; // token1 supply rate. E.g 320 = 3.2% APR
+    }
+
+    /// @notice Data for the borrow dex pool used in T3 and T4 vaults
+    struct DexBorrowData {
+        address dexPool; // address of the dex pool
+        uint256 dexId;   // id of the dex pool
+        uint256 fee;     // fee of the dex pool
+        uint256 lastStoredPrice; // last stored price of the dex pool
+        uint256 centerPrice; // center price of the dex pool
+        uint256 token0Utilization; // token0 utilization
+        uint256 token1Utilization; // token1 utilization
+        // ONLY FOR BORROW
+        uint256 totalBorrowShares; // total borrow shares, in 1e18
+        uint256 maxBorrowShares; // max borrow shares, in 1e18
+        uint256 token0Borrowed; // token0 borrowed, in token0 decimals
+        uint256 token1Borrowed; // token1 borrowed, in token1 decimals
+        uint256 sharesBorrowable; // shares borrowable in 1e18
+        uint256 token0Borrowable; // token0 borrowable in token0 decimals
+        uint256 token1Borrowable; // token1 borrowable in token1 decimals
+        uint256 token0PerBorrowShare; // token0 amount per 1e18 borrow shares
+        uint256 token1PerBorrowShare; // token1 amount per 1e18 borrow shares
+        uint256 token0BorrowRate; // token0 borrow rate. E.g 320 = 3.2% APR
+        uint256 token1BorrowRate; // token1 borrow rate. E.g 320 = 3.2% APR
+    }
+
+    /// @notice Full vault data including dex data.
+    /// @dev This data is obtained by combining calls to FluidVaultResolver and FluidDexResolver.
     struct VaultData {
         address vault; // address of the vault
         uint256 vaultId; // unique id of the vault
@@ -41,16 +93,16 @@ contract FluidView is FluidRatioHelper {
         uint16 liquidationMaxLimit;  // LML is the threshold above which 100% of your position gets liquidated instantly
         uint16 withdrawalGap; // Safety non-withdrawable amount to guarantee liquidations. E.g 500 = 5%
         uint16 liquidationPenalty; // e.g 100 = 1%, 500 = 5%
-        uint16 borrowFee;
+        uint16 borrowFee; // if there is any additional fee for borrowing.
         address oracle; // address of the oracle
-        uint256 oraclePriceOperate;
-        uint256 oraclePriceLiquidate;
-        uint256 vaultSupplyExchangePrice;
-        uint256 vaultBorrowExchangePrice;
-        int256 supplyRateVault;
-        int256 borrowRateVault;
-        int256 rewardsOrFeeRateSupply;
-        int256 rewardsOrFeeRateBorrow;
+        uint256 oraclePriceOperate; // price of the oracle (Called during operations)
+        uint256 oraclePriceLiquidate; // price of the oracle (If liquidation requires different price)
+        uint256 vaultSupplyExchangePrice; // vault supply exchange price.
+        uint256 vaultBorrowExchangePrice; // vault borrow exchange price.
+        int256 supplyRateVault; // supply rate of the vault
+        int256 borrowRateVault; // borrow rate of the vault
+        int256 rewardsOrFeeRateSupply; // rewards or fee rate for supply
+        int256 rewardsOrFeeRateBorrow; // rewards or fee rate for borrow
         uint256 totalPositions; // Total positions in the vault
         uint256 totalSupplyVault; // Total supplied assets to the vault
         uint256 totalBorrowVault; // Total borrowed assets from the vault
@@ -69,32 +121,37 @@ contract FluidView is FluidRatioHelper {
         uint256 borrowExpandDuration; // The time for which the limits expand at the given rate (in seconds)
         uint256 baseBorrowLimit; // The minimum limit for a vault's borrow. The further expansion happens on this base
         uint256 minimumBorrowing; // The minimum amount that can be borrowed from the vault
+        DexSupplyData dexSupplyData; // Dex pool supply data. Used only for T2 and T4 vaults
+        DexBorrowData dexBorrowData; // Dex pool borrow data. Used only for T3 and T4 vaults
     }
-    
+
+    /// @notice Helper struct to group nftId, vaultId and vault address
     struct NftWithVault {
-        uint256 nftId;
-        uint256 vaultId;
-        address vaultAddr;
+        uint256 nftId; // unique id of the position
+        uint256 vaultId; // unique id of the vault
+        address vaultAddr; // address of the vault
     }
 
+    /// @notice User earn position data
     struct UserEarnPosition {
-        uint256 fTokenShares;
-        uint256 underlyingAssets;
-        uint256 underlyingBalance;
-        uint256 allowance;
+        uint256 fTokenShares; // amount of fToken shares
+        uint256 underlyingAssets; // amount of underlying assets
+        uint256 underlyingBalance; // amount of underlying assets in the user's wallet
+        uint256 allowance; // amount of allowance for the user to spend
     }
 
+    /// @notice FToken data for a specific fToken address used for 'earn' positions
     struct FTokenData {
-        address tokenAddress;
-        bool isNativeUnderlying;
-        string name;
-        string symbol;
-        uint256 decimals;
-        address asset;
-        uint256 totalAssets;
-        uint256 totalSupply;
-        uint256 convertToShares;
-        uint256 convertToAssets;
+        address tokenAddress; // address of the fToken
+        bool isNativeUnderlying; // true if the underlying asset is native to the chain
+        string name; // name of the fToken
+        string symbol; // symbol of the fToken
+        uint256 decimals; // decimals of the fToken
+        address asset; // address of the underlying asset
+        uint256 totalAssets; // total amount of underlying assets
+        uint256 totalSupply; // total amount of fToken shares
+        uint256 convertToShares; // convert amount of underlying assets to fToken shares
+        uint256 convertToAssets; // convert amount of fToken shares to underlying assets
         uint256 rewardsRate; // additional yield from rewards, if active
         uint256 supplyRate; // yield at Liquidity
         uint256 withdrawable; // actual currently withdrawable amount (supply - withdrawal Limit) & considering balance
@@ -103,9 +160,10 @@ contract FluidView is FluidRatioHelper {
         uint256 expandDuration; // withdrawal limit expand duration in seconds
     }
 
-    /// @notice Get all user positions with vault data
+    /// @notice Get all user positions with vault data.
+    /// @dev This should be called with static call.
     function getUserPositions(address _user) 
-        external view returns (UserPosition[] memory positions, VaultData[] memory vaults) 
+        external returns (UserPosition[] memory positions, VaultData[] memory vaults) 
     {
         uint256[] memory nftIds = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionsNftIdOfUser(_user);
 
@@ -141,8 +199,9 @@ contract FluidView is FluidRatioHelper {
         }
     }
 
-    /// @notice Get position data with vault data for a specific nftId
-    function getPositionByNftId(uint256 _nftId) public view returns (UserPosition memory position, VaultData memory vault) {
+    /// @notice Get position data with vault and dex data for a specific nftId
+    /// @dev This should be called with static call.
+    function getPositionByNftId(uint256 _nftId) public returns (UserPosition memory position, VaultData memory vault) {
         (
             IFluidVaultResolver.UserPosition memory userPosition,
             IFluidVaultResolver.VaultEntireData memory vaultData
@@ -163,8 +222,9 @@ contract FluidView is FluidRatioHelper {
         vault = getVaultData(vaultData.vault);
     }
 
-    /// @notice Get vault data for a specific vault address
-    function getVaultData(address _vault) public view returns (VaultData memory vaultData) {
+    /// @notice Get vault data for a specific vault address. This also includes dex data.
+    /// @dev This should be called with static call.
+    function getVaultData(address _vault) public returns (VaultData memory vaultData) {
         IFluidVaultResolver.VaultEntireData memory data = 
             IFluidVaultResolver(FLUID_VAULT_RESOLVER).getVaultEntireData(_vault);
 
@@ -172,6 +232,9 @@ contract FluidView is FluidRatioHelper {
         address supplyToken1 = data.constantVariables.supplyToken.token1;
         address borrowToken0 = data.constantVariables.borrowToken.token0;
         address borrowToken1 = data.constantVariables.borrowToken.token1;
+
+        DexSupplyData memory dexSupplyData;
+        DexBorrowData memory dexBorrowData;
 
         vaultData = VaultData({
             vault: _vault,
@@ -228,7 +291,93 @@ contract FluidView is FluidRatioHelper {
             borrowExpandDuration: data.liquidityUserBorrowData.expandDuration,
             baseBorrowLimit: data.liquidityUserBorrowData.baseBorrowLimit,
 
-            minimumBorrowing: data.limitsAndAvailability.minimumBorrowing
+            minimumBorrowing: data.limitsAndAvailability.minimumBorrowing,
+
+            dexSupplyData: dexSupplyData,
+            dexBorrowData: dexBorrowData
+        });
+
+        // smart coll
+        if (vaultData.vaultType.isT2Vault()) {
+            IFluidDexResolver.DexEntireData memory dexData =
+                IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(data.constantVariables.supply);
+            vaultData.dexSupplyData = _fillDexSupplyData(dexData, vaultData.withdrawable);
+        }
+
+        // smart debt
+        if (vaultData.vaultType.isT3Vault()) {
+            IFluidDexResolver.DexEntireData memory dexData =
+                IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(data.constantVariables.borrow);
+            vaultData.dexBorrowData = _fillDexBorrowData(dexData, vaultData.borrowable);
+        }
+
+        // smart coll and smart debt
+        if (vaultData.vaultType.isT4Vault()) {
+            IFluidDexResolver.DexEntireData memory dexData =
+                IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(data.constantVariables.supply);
+            vaultData.dexSupplyData = _fillDexSupplyData(dexData, vaultData.withdrawable);
+
+            // if it's a same dex, no need to fetch again
+            if (data.constantVariables.borrow == data.constantVariables.supply) {
+                vaultData.dexBorrowData = _fillDexBorrowData(dexData, vaultData.borrowable);
+            } else {
+                dexData = IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(data.constantVariables.borrow);
+                vaultData.dexBorrowData = _fillDexBorrowData(dexData, vaultData.borrowable);
+            }
+        }
+    }
+
+    /// @notice Helper function to adapt dex data to DexSupplyData
+    function _fillDexSupplyData(
+        IFluidDexResolver.DexEntireData memory dexData,
+        uint256 _sharesWithdrawable
+    ) internal pure returns (DexSupplyData memory dexSupplyData) {
+        dexSupplyData = DexSupplyData({
+            dexPool: dexData.dex,
+            dexId: dexData.constantViews.dexId,
+            fee: dexData.configs.fee,
+            lastStoredPrice: dexData.dexState.lastStoredPrice,
+            centerPrice: dexData.dexState.centerPrice,
+            token0Utilization: dexData.limitsAndAvailability.liquidityTokenData0.lastStoredUtilization,
+            token1Utilization: dexData.limitsAndAvailability.liquidityTokenData1.lastStoredUtilization,
+            totalSupplyShares: dexData.dexState.totalSupplyShares,
+            maxSupplyShares: dexData.configs.maxSupplyShares,
+            token0Supplied: dexData.dexState.totalSupplyShares * dexData.dexState.token0PerSupplyShare / 1e18,
+            token1Supplied: dexData.dexState.totalSupplyShares * dexData.dexState.token1PerSupplyShare / 1e18,
+            sharesWithdrawable: _sharesWithdrawable,
+            token0Withdrawable: _sharesWithdrawable * dexData.dexState.token0PerSupplyShare / 1e18,
+            token1Withdrawable: _sharesWithdrawable * dexData.dexState.token1PerSupplyShare / 1e18,
+            token0PerSupplyShare: dexData.dexState.token0PerSupplyShare,
+            token1PerSupplyShare: dexData.dexState.token1PerSupplyShare,
+            token0SupplyRate: dexData.limitsAndAvailability.liquidityTokenData0.supplyRate,
+            token1SupplyRate: dexData.limitsAndAvailability.liquidityTokenData1.supplyRate
+        });
+    }
+
+    /// @notice Helper function to adapt dex data to DexBorrowData
+    function _fillDexBorrowData(
+        IFluidDexResolver.DexEntireData memory dexData,
+        uint256 _sharesBorrowable
+    ) internal pure returns (DexBorrowData memory dexBorrowData) {
+        dexBorrowData = DexBorrowData({
+            dexPool: dexData.dex,
+            dexId: dexData.constantViews.dexId,
+            fee: dexData.configs.fee,
+            lastStoredPrice: dexData.dexState.lastStoredPrice,
+            centerPrice: dexData.dexState.centerPrice,
+            token0Utilization: dexData.limitsAndAvailability.liquidityTokenData0.lastStoredUtilization,
+            token1Utilization: dexData.limitsAndAvailability.liquidityTokenData1.lastStoredUtilization,
+            totalBorrowShares: dexData.dexState.totalBorrowShares,
+            maxBorrowShares: dexData.configs.maxBorrowShares,
+            token0Borrowed: dexData.dexState.totalBorrowShares * dexData.dexState.token0PerBorrowShare / 1e18,
+            token1Borrowed: dexData.dexState.totalBorrowShares * dexData.dexState.token1PerBorrowShare / 1e18,
+            sharesBorrowable: _sharesBorrowable,
+            token0Borrowable: _sharesBorrowable * dexData.dexState.token0PerBorrowShare / 1e18,
+            token1Borrowable: _sharesBorrowable * dexData.dexState.token1PerBorrowShare / 1e18,
+            token0PerBorrowShare: dexData.dexState.token0PerBorrowShare,
+            token1PerBorrowShare: dexData.dexState.token1PerBorrowShare,
+            token0BorrowRate: dexData.limitsAndAvailability.liquidityTokenData0.borrowRate,
+            token1BorrowRate: dexData.limitsAndAvailability.liquidityTokenData1.borrowRate
         });
     }
 
