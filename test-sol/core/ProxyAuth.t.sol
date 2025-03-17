@@ -11,8 +11,7 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { RegistryUtils } from "../utils/RegistryUtils.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
-import { Const } from "../Const.sol";
-import { TokenAddresses } from "../TokenAddresses.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
     
@@ -39,6 +38,8 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
         wallet = new SmartWallet(bob);
         dsProxyAddr = wallet.createDSProxy();
 
+        ProxyAuth newCut = new ProxyAuth();
+        vm.etch(PROXY_AUTH_ADDR, address(newCut).code);
         cut = ProxyAuth(PROXY_AUTH_ADDR);
 
         dsProxyPermissionAddr = address(new DSProxyPermission());

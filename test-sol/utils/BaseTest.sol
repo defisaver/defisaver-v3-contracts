@@ -43,14 +43,14 @@ contract BaseTest is Config {
         _initConfigIfNeeded();
 
         uint256 blockNumber = getBlockNumberForTestIfExist(testName);
-        string memory mainnerRpc = vm.envString("ETHEREUM_NODE");
-        uint256 mainnetFork = vm.createFork(mainnerRpc, blockNumber);
+        string memory mainnetRpc = vm.envString("ETHEREUM_NODE");
+        uint256 mainnetFork = vm.createFork(mainnetRpc, blockNumber);
         vm.selectFork(mainnetFork);
     }
 
     function forkMainnetLatest() internal {
-        string memory mainnerRpc = vm.envString("ETHEREUM_NODE");
-        uint256 mainnetFork = vm.createFork(mainnerRpc);
+        string memory mainnetRpc = vm.envString("ETHEREUM_NODE");
+        uint256 mainnetFork = vm.createFork(mainnetRpc);
         vm.selectFork(mainnetFork);
     }
     

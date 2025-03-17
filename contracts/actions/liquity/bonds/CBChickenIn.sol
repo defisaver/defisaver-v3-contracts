@@ -6,7 +6,7 @@ import { LiquityHelper } from "../helpers/LiquityHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
-/// @title Chickens in a bond and gets back bLUSD
+/// @title Chickens in a bond and gets back bLUSD.
 contract CBChickenIn is ActionBase, LiquityHelper {
     using TokenUtils for address;
 

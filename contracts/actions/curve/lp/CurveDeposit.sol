@@ -6,6 +6,7 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ICurve3PoolZap } from "../../../interfaces/curve/ICurve3PoolZap.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
+/// @title Action that deposits tokens into a Curve pool
 contract CurveDeposit is ActionBase, CurveHelper {
     using TokenUtils for address;
 
@@ -14,13 +15,19 @@ contract CurveDeposit is ActionBase, CurveHelper {
     error CurveDepositPoolReverted();
     error CurveDepositSlippageHit(uint256 expected, uint256 received);
 
+    /// @param from Address where to pull tokens from
+    /// @param to Address that will receive the LP tokens
+    /// @param depositTargetOrPool Address of the pool contract or zap deposit contract in which to deposit
+    /// @param minMintAmount Minimum amount of LP tokens to accept
+    /// @param flags Flags for the deposit
+    /// @param amounts Amount of each token to deposit
     struct Params {
-        address from;         // address where to pull tokens from
-        address to;       // address that will receive the LP tokens
-        address depositTargetOrPool;  // pool contract or zap deposit contract in which to deposit
-        uint256 minMintAmount;  // minimum amount of LP tokens to accept
+        address from;
+        address to;
+        address depositTargetOrPool;
+        uint256 minMintAmount;
         uint8 flags;
-        uint256[] amounts;      // amount of each token to deposit
+        uint256[] amounts;
     }
 
     function executeAction(
@@ -59,7 +66,6 @@ contract CurveDeposit is ActionBase, CurveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Deposits tokens into liquidity pool
     function _curveDeposit(Params memory _params) internal returns (uint256 received, bytes memory logData) {
         if (_params.to == address(0)) revert CurveDepositZeroRecipient();
         (
@@ -104,7 +110,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
         logData = abi.encode(_params, received);
     }
 
-    /// @notice Constructs payload for external contract call
+    /// @dev Constructs payload for external contract call
     function _constructPayload(uint256[] memory _amounts, uint256 _minMintAmount, bool _explicitUnderlying) internal pure returns (bytes memory payload) {
         bytes memory sig;
         bytes4 selector;

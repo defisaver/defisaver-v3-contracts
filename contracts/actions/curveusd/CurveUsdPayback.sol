@@ -8,7 +8,7 @@ import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
 
 /// @title Action that pays back crvUSD to a curveusd position
 /// @dev paybackAmount must be non-zero
-/// @dev if paybackAmount >= debt will repay whole debt and close the position, transferring collateral
+/// @notice if paybackAmount >= debt will repay whole debt and close the position, transferring collateral
 contract CurveUsdPayback is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 

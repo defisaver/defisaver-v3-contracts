@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import { UserWallet } from "../UserWallet.sol";
-import { Const } from "../../Const.sol";
+import { Addresses } from "../../utils/Addresses.sol";
 import { IComet } from "../../../contracts/interfaces/compoundV3/IComet.sol";
 import { CompV3SubProxy } from "../../../contracts/actions/compoundV3/CompV3SubProxy.sol";
 
@@ -21,8 +21,8 @@ contract CompUserUtils is UserWallet {
         bool _isEOA
     ) public returns (CompV3SubProxy.CompV3SubData memory params) {
         params = CompV3SubProxy.CompV3SubData({
-            market: Const.COMET_USDC,
-            baseToken: Const.USDC_ADDR,
+            market: Addresses.COMET_USDC,
+            baseToken: Addresses.USDC_ADDR,
             minRatio: _minRatio,
             maxRatio: _maxRatio,
             targetRatioBoost: _targetRatioBoost,

@@ -6,10 +6,15 @@ import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
 import { IComet } from "../../interfaces/compoundV3/IComet.sol";
 
-/// @title Transfer amount of specified collateral to another wallet
+/// @title Transfer amount of specified collateral to another wallet.
 contract CompV3Transfer is ActionBase, CompV3Helper {
     using TokenUtils for address;
 
+    /// @param market Main Comet proxy contract that is different for each compound market
+    /// @param from Address of the sender
+    /// @param to Address of the receiver
+    /// @param tokenAddr Address of the token to be transferred
+    /// @param amount Amount of tokens to be transferred
     struct Params {
         address market;
         address from;
@@ -53,8 +58,8 @@ contract CompV3Transfer is ActionBase, CompV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Transfer amount of supplied assets from one address to another
-    /// @dev Amount type(uint).max will transfer the whole amount of supplied assets
+    /// @notice Transfer amount of supplied assets from one address to another.
+    /// @notice Amount type(uint).max will transfer the whole amount of supplied assets.
     /// @param _market Main Comet proxy contract that is different for each compound market
     /// @param _from The address of an account that is the sender of the asset in the transaction
     /// @param _to The address of an account that is the receiver in the transaction

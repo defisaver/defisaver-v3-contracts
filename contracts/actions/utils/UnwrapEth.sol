@@ -9,6 +9,8 @@ import { ActionBase } from "../ActionBase.sol";
 contract UnwrapEth is ActionBase {
     using TokenUtils for address;
 
+    /// @param amount Amount of Weth to unwrap
+    /// @param to Address where to send the unwrapped Eth
     struct Params {
         uint256 amount;
         address to;
@@ -53,7 +55,7 @@ contract UnwrapEth is ActionBase {
 
         TokenUtils.withdrawWeth(_amount);
 
-        // if _to == user's wallet, it will stay on user's wallet
+        /// @notice If _to == user's wallet, it will stay on user's wallet.
         TokenUtils.ETH_ADDR.withdrawTokens(_to, _amount);
 
         return _amount;

@@ -10,13 +10,16 @@ import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
 /// @title Trigger contract that verifies if the current price of token is outside of given range
 contract ClosePriceTrigger is  ITrigger, AdminAuth, TriggerHelper, TokenPriceHelper {
 
+    /// @param tokenAddr address of the token
+    /// @param lowerPrice lower price of the token
+    /// @param upperPrice upper price of the token
     struct SubParams {
         address tokenAddr;
         uint256 lowerPrice;
         uint256 upperPrice;
     }
 
-    /// @dev checks chainlink oracle for current price and triggers if it's outside lower-upper price range
+    /// @notice Checks chainlink oracle for current price and triggers if it's outside lower-upper price range
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {   
         SubParams memory triggerSubData = parseSubInputs(_subData);
 

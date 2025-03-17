@@ -9,6 +9,9 @@ contract SendToken is ActionBase {
 
     using TokenUtils for address;
 
+    /// @param tokenAddr Address of the token to send
+    /// @param to Address of the recipient
+    /// @param amount Amount of tokens to send
     struct Params {
         address tokenAddr;
         address to;
@@ -50,7 +53,7 @@ contract SendToken is ActionBase {
     
 
     /// @notice Sends a token to the specified addr, works with Eth also
-    /// @dev If amount is type(uint).max it will send whole user's wallet balance
+    /// @notice If amount is type(uint).max it will send whole user's wallet balance
     /// @param _tokenAddr Address of token, use 0xEeee... for eth
     /// @param _to Where the tokens are sent
     /// @param _amount Amount of tokens, can be type(uint).max

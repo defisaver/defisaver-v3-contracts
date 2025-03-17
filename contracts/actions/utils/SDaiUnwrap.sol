@@ -8,7 +8,7 @@ import { IsDAI } from "../../interfaces/spark/IsDAI.sol";
 import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
 
 
-/// @title Action that redeems sDai for dai
+/// @title Action that redeems sDai for dai.
 contract SDaiUnwrap is ActionBase, SparkHelper, UtilHelper {
     using TokenUtils for address;
 

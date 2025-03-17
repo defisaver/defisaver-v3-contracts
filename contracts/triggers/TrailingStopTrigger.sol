@@ -13,12 +13,16 @@ import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
 contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, TokenPriceHelper {
     using TokenUtils for address;
 
+    /// @param tokenAddr address of the token
+    /// @param percentage percentage of the price that represents the triggerable point
+    /// @param startRoundId start round id of the token
     struct SubParams {
         address tokenAddr;
         uint256 percentage;
         uint80 startRoundId;
     }
 
+    /// @param maxRoundId max round id of the token
     struct CallParams {
         uint80 maxRoundId;
     }

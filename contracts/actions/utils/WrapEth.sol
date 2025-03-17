@@ -7,6 +7,8 @@ import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to wrap Ether to WETH9
 contract WrapEth is ActionBase {
+
+    /// @param amount Amount of ether to wrap
     struct Params {
         uint256 amount;
     }
@@ -40,7 +42,8 @@ contract WrapEth is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Wraps native Eth to WETH9 token
-    /// @param _amount Amount of ether to wrap, if type(uint256).max wraps whole balance
+    /// @notice If amount is type(uint256).max wraps whole balance.
+    /// @param _amount Amount of ether to wrap
     function _wrapEth(uint256 _amount) internal returns (uint256) {
         if (_amount == type(uint256).max) {
             _amount = address(this).balance;

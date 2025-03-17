@@ -7,9 +7,13 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompHelper } from "./helpers/CompHelper.sol";
 
-/// @title Withdraw a token from Compound
+/// @title Withdraw a token from Compound.
 contract CompWithdraw is ActionBase, CompHelper {
     using TokenUtils for address;
+
+    /// @param cTokenAddr Address of the cToken token to withdraw
+    /// @param amount Amount of tokens to be withdrawn
+    /// @param to Address that will receive the withdrawn tokens
     struct Params {
         address cTokenAddr;
         uint256 amount;

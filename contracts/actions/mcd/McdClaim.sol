@@ -58,8 +58,7 @@ contract McdClaim is ActionBase, McdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @dev The call will revert if the _joinAddr is not CropJoin compatible
-    /// @notice Claims bonus tokens from CropJoin collateral
+    /// @notice The call will revert if the _joinAddr is not CropJoin compatible
     /// @param _vaultId Id of the vault
     /// @param _joinAddr Join address of the maker collateral
     /// @param _to Address where to send the bonus tokens we withdrew

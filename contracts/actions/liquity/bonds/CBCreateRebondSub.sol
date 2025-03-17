@@ -8,7 +8,7 @@ import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { Permission } from "../../../auth/Permission.sol";
 import { CBHelper } from "../../../actions/liquity/helpers/CBHelper.sol";
 
-/// @title Special action to subscribe to CB Rebond strategy
+/// @title Special action to subscribe to CB Rebond strategy.
 contract CBCreateRebondSub is ActionBase, CBHelper, Permission {
     
     /// @param bondId Id of the chicken bond NFT we want to sub

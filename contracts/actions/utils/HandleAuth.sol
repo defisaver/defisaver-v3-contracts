@@ -9,8 +9,9 @@ import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 /// @title Action to enable/disable smart wallet authorization
 contract HandleAuth is ActionBase, Permission {
 
+    /// @param enableAuth Whether to enable or disable authorization
     struct Params {
-        bool enableAuth; // if true it'll enable authorization, if false it'll disable authorization
+        bool enableAuth;
     }
 
     /// @inheritdoc ActionBase

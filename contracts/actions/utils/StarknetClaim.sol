@@ -6,6 +6,9 @@ import { IStarknet } from "../../interfaces/IStarknet.sol";
 
 /// @title Action that helps Smart wallets claim Starknet tokens
 contract StarknetClaim is ActionBase {
+
+    /// @param payload Array of payloads
+    /// @param gasPrice Gas price
     struct Params {
         uint256[] payload;
         uint256 gasPrice;

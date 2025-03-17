@@ -9,8 +9,8 @@ const {
     redeploy,
     fetchAmountinUSDPrice,
     addrs,
-} = require('../../utils');
-const { supplyCompV3, borrowCompV3 } = require('../../actions');
+} = require('../../utils/utils');
+const { supplyCompV3, borrowCompV3 } = require('../../utils/actions');
 
 const network = hre.network.config.name;
 const chainId = chainIds[network];

@@ -7,10 +7,14 @@ import { ITrigger } from "../interfaces/ITrigger.sol";
 import { TransientStorage } from "../utils/TransientStorage.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
+/// @title Trigger that triggers when the price of a token is over or under a limit price.
 contract OffchainPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
 
     enum OrderType { TAKE_PROFIT, STOP_LOSS }
 
+    /// @param limitPrice limit price that represents the triggerable point
+    /// @param goodUntilTimestamp timestamp until which the trigger is valid
+    /// @param orderType type of the order (TAKE_PROFIT or STOP_LOSS)
     struct SubParams {
         uint256 limitPrice;
         uint256 goodUntilTimestamp;

@@ -12,6 +12,9 @@ import { ISAFEEngine } from "../../interfaces/reflexer/ISAFEEngine.sol";
 contract ReflexerPayback is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
+    /// @param safeId Id of the safe
+    /// @param amount Amount of rai to be paid back
+    /// @param from Address which will send the rai
     struct Params {
         uint256 safeId;
         uint256 amount;
@@ -51,7 +54,6 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Paybacks the debt for a specified safe
     /// @param _safeId Id of the safe
     /// @param _amount Amount of rai to be paid back
     /// @param _from Where the rai is pulled from
@@ -82,7 +84,7 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
         return (_amount, logData);
     }
 
-    /// @notice Gets repaid delta debt generated (rate adjusted debt)
+    /// @dev Gets repaid delta debt generated (rate adjusted debt)
     /// @param coin uint amount
     /// @param safe uint - safeId
     /// @param collateralType bytes32
@@ -109,7 +111,7 @@ contract ReflexerPayback is ActionBase, ReflexerHelper {
             : -toPositiveInt(generatedDebt);
     }
 
-    /// @notice Gets the whole debt of the Safe
+    /// @dev Gets the whole debt of the Safe
     /// @param _usr Address of the Rai holder
     /// @param _urn Urn of the Safe
     /// @param _collType CollType of the Safe

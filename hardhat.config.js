@@ -7,6 +7,7 @@ require('hardhat-gas-reporter');
 require('hardhat-log-remover');
 require('hardhat-tracer');
 require('@tenderly/hardhat-tenderly');
+require('solidity-coverage');
 
 const Dec = require('decimal.js');
 const dfs = require('@defisaver/sdk');
@@ -34,7 +35,7 @@ const testNetworks = Object.fromEntries([...Array(MAX_NODE_COUNT).keys()].map((c
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-    defaultNetwork: 'fork',
+    defaultNetwork: 'hardhat',
     lightTesting: true,
     isWalletSafe: true,
     gasReporter: {
@@ -165,15 +166,6 @@ module.exports = {
                         runs: 1000,
                     },
                     evmVersion: 'cancun',
-                },
-            },
-            {
-                version: '0.8.10',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 1000,
-                    },
                 },
             },
         ],

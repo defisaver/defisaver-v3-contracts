@@ -1,4 +1,4 @@
-const { resetForkToBlock } = require('../utils');
+const { resetForkToBlock } = require('../utils/utils');
 const { coreFullTest } = require('./core-tests');
 
 describe('Core full test', () => {

@@ -6,9 +6,10 @@ import { ActionBase } from "../ActionBase.sol";
 import { MorphoAaveV2Helper } from "../../actions/morpho/aaveV2/helpers/MorphoAaveV2Helper.sol";
 import { TransientStorage } from "../../utils/TransientStorage.sol";
 
+/// @title Action to check the ratio of the Morpho Aave V2 position after strategy execution.
 contract MorphoAaveV2RatioCheck is ActionBase, MorphoAaveV2Helper {
 
-    /// @dev 5% offset acceptable
+    /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
@@ -20,6 +21,9 @@ contract MorphoAaveV2RatioCheck is ActionBase, MorphoAaveV2Helper {
         IN_REPAY
     }
 
+    /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
+    /// @param targetRatio Target ratio.
+    /// @param user User address.
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;

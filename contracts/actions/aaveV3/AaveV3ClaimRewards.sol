@@ -11,6 +11,11 @@ import { IRewardsController } from "../../interfaces/aaveV3/IRewardsController.s
 contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param assetsLength Length of assets.
+    /// @param amount Amount of rewards to claim.
+    /// @param to Address that will be receiving the rewards.
+    /// @param reward Reward address.
+    /// @param assets Assets to claim rewards from.
     struct Params {
         uint8 assetsLength;
         uint256 amount;

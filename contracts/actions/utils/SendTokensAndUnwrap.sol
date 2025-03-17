@@ -55,8 +55,8 @@ contract SendTokensAndUnwrap is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Sends tokens to the specified addresses, works with Eth also
-    /// @dev If token is weth address, it will unwrap by default
-    /// @dev If amount is type(uint).max it will send whole users' wallet balance
+    /// @notice If token is weth address, it will unwrap by default
+    /// @notice If amount is type(uint).max it will send whole users' wallet balance
     function _sendTokens(Params memory _inputData, uint256 arrayLength) internal {
         for (uint256 i = 0; i < arrayLength; ++i) {
             if (_inputData.amounts[i] == type(uint256).max) {

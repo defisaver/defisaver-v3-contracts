@@ -7,9 +7,14 @@ import { ActionBase } from "../ActionBase.sol";
 import { CompHelper } from "./helpers/CompHelper.sol";
 import { ICToken } from "../../interfaces/compound/ICToken.sol"; 
 
-/// @title Supply a token to Compound
+/// @title Supply a token to Compound.
 contract CompSupply is ActionBase, CompHelper {
     using TokenUtils for address;
+
+    /// @param cTokenAddr Address of the cToken token to supply
+    /// @param amount Amount of tokens to be supplied
+    /// @param from Address where we are pulling the underlying tokens from
+    /// @param enableAsColl If the supply asset should be collateral
     struct Params {
         address cTokenAddr;
         uint256 amount;
@@ -51,8 +56,7 @@ contract CompSupply is ActionBase, CompHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Supplies a token to the Compound protocol
-    /// @dev If amount == type(uint256).max we are getting the whole balance of the user's wallet
+    /// @notice If amount == type(uint256).max we are getting the whole balance of the user's wallet
     /// @param _cTokenAddr Address of the cToken we'll get when supplying
     /// @param _amount Amount of the underlying token we are supplying
     /// @param _from Address where we are pulling the underlying tokens from

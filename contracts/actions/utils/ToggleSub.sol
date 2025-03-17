@@ -6,9 +6,12 @@ import { ActionBase } from "../ActionBase.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { Permission } from "../../auth/Permission.sol";
 
-/// @title ToggleSub - Sets the state of the sub to active or deactivated
-/// @dev User can only disable/enable his own subscriptions
-contract ToggleSub is ActionBase, Permission{
+/// @title ToggleSub - Sets the state of the sub to active or deactivated.
+/// @notice User can only disable/enable his own subscriptions.
+contract ToggleSub is ActionBase, Permission {
+
+    /// @param subId ID of the subscription to toggle
+    /// @param active Whether to activate or deactivate the subscription
     struct Params {
         uint256 subId;
         bool active;
@@ -25,7 +28,7 @@ contract ToggleSub is ActionBase, Permission{
 
         updateSubData(inputData);
 
-        return(bytes32(inputData.subId));
+        return (bytes32(inputData.subId));
     }
 
     function executeActionDirect(bytes memory _callData) public override payable {
@@ -43,7 +46,7 @@ contract ToggleSub is ActionBase, Permission{
 
     function updateSubData(Params memory _inputData) internal {
         if (_inputData.active) {
-             /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+             /// @notice This gives permission to dsproxy or safe to our auth contract to be able to execute the strategy.
             giveWalletPermission(isDSProxy(address(this)));
             SubStorage(SUB_STORAGE_ADDR).activateSub(_inputData.subId);
         } else {

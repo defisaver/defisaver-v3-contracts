@@ -9,7 +9,7 @@ import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
-/// @dev This action is only needed in the case a user has no deposit but still has remaining stashed Coll gains.
+/// @title This action is only needed in the case a user has no deposit but still has remaining stashed Coll gains.
 contract LiquityV2SPClaimColl is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 

@@ -9,7 +9,7 @@ const {
     createMorphoBlueBoostStrategy,
     createMorphoBlueFLDebtBoostStrategy,
     createMorphoBlueFLCollBoostStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 const {
     openStrategyAndBundleStorage,
     redeploy, getProxy,
@@ -17,12 +17,12 @@ const {
     setBalance, approve, revertToSnapshot,
     Float2BN, getAddrFromRegistry,
     balanceOf, nullAddress, formatMockExchangeObj, setNewExchangeWrapper,
-} = require('../../utils');
-const { createStrategy, createBundle, addBotCaller } = require('../../utils-strategies');
+} = require('../../utils/utils');
+const { createStrategy, createBundle, addBotCaller } = require('../utils/utils-strategies');
 const {
     morphoBlueBorrow, morphoBlueSupplyCollateral,
-} = require('../../actions');
-const { subMorphoBlueBoostBundle, subMorphoBlueRepayBundle } = require('../../strategy-subs');
+} = require('../../utils/actions');
+const { subMorphoBlueBoostBundle, subMorphoBlueRepayBundle } = require('../utils/strategy-subs');
 const {
     callMorphoBlueBoostStrategy,
     callMorphoBlueFLCollBoostStrategy,
@@ -30,19 +30,18 @@ const {
     callMorphoBlueFLCollRepayStrategy,
     callMorphoBlueFLDebtRepayStrategy,
     callMorphoBlueRepayStrategy,
-} = require('../../strategy-calls');
-const { getMarkets, supplyToMarket, MORPHO_BLUE_ADDRESS } = require('../../morpho-blue/utils');
+} = require('../utils/strategy-calls');
+const { getMarkets, supplyToMarket, MORPHO_BLUE_ADDRESS } = require('../../utils/morpho-blue');
 
 const createRepayBundle = async (proxy, isFork) => {
     const repayStrategy = createMorphoBlueRepayStrategy();
     const flCollRepayStrategy = createMorphoBlueFLCollRepayStrategy();
     const flDebtRepayStrategy = createMorphoBlueFLDebtRepayStrategy();
     await openStrategyAndBundleStorage(isFork);
-    const strategyIdFirst = await createStrategy(proxy, ...repayStrategy, true);
-    const strategyIdSecond = await createStrategy(proxy, ...flCollRepayStrategy, true);
-    const strategyIdThird = await createStrategy(proxy, ...flDebtRepayStrategy, true);
+    const strategyIdFirst = await createStrategy(...repayStrategy, true);
+    const strategyIdSecond = await createStrategy(...flCollRepayStrategy, true);
+    const strategyIdThird = await createStrategy(...flDebtRepayStrategy, true);
     return createBundle(
-        proxy,
         [strategyIdFirst, strategyIdSecond, strategyIdThird],
     );
 };
@@ -51,11 +50,10 @@ const createBoostBundle = async (proxy, isFork) => {
     const flDebtBoostStrategy = createMorphoBlueFLDebtBoostStrategy();
     const fLCollBoostStrategy = createMorphoBlueFLCollBoostStrategy();
     await openStrategyAndBundleStorage(isFork);
-    const strategyIdFirst = await createStrategy(proxy, ...boostStrategy, true);
-    const strategyIdSecond = await createStrategy(proxy, ...flDebtBoostStrategy, true);
-    const strategyIdThird = await createStrategy(proxy, ...fLCollBoostStrategy, true);
+    const strategyIdFirst = await createStrategy(...boostStrategy, true);
+    const strategyIdSecond = await createStrategy(...flDebtBoostStrategy, true);
+    const strategyIdThird = await createStrategy(...fLCollBoostStrategy, true);
     return createBundle(
-        proxy,
         [strategyIdFirst, strategyIdSecond, strategyIdThird],
     );
 };

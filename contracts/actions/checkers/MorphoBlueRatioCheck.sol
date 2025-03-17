@@ -7,9 +7,10 @@ import { MorphoBlueHelper } from "../../actions/morpho-blue/helpers/MorphoBlueHe
 import { TransientStorage } from "../../utils/TransientStorage.sol";
 import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
 
+/// @title Action to check the ratio of the Morpho Blue position after strategy execution.
 contract MorphoBlueRatioCheck is ActionBase, MorphoBlueHelper {
 
-    /// @dev 5% offset acceptable
+    /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
@@ -21,6 +22,10 @@ contract MorphoBlueRatioCheck is ActionBase, MorphoBlueHelper {
         IN_REPAY
     }
 
+    /// @param marketParams Market parameters.
+    /// @param user User address.
+    /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
+    /// @param targetRatio Target ratio.
     struct Params {
         MarketParams marketParams;
         address user;

@@ -6,10 +6,19 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { UniV2Helper } from "./helpers/UniV2Helper.sol";
 
-/// @title Supplies liquidity to uniswap
+/// @title Supplies liquidity to uniswapV2
 contract UniSupply is ActionBase, UniV2Helper {
     using TokenUtils for address;
 
+    /// @param tokenA Address of the first token
+    /// @param tokenB Address of the second token
+    /// @param from Address to pull the tokens from
+    /// @param to Address to send the liquidity tokens to
+    /// @param amountADesired Amount of the first token to add
+    /// @param amountBDesired Amount of the second token to add
+    /// @param amountAMin Minimum amount of the first token to add
+    /// @param amountBMin Minimum amount of the second token to add
+    /// @param deadline Deadline of the transaction
     struct UniSupplyData {
         address tokenA;
         address tokenB;

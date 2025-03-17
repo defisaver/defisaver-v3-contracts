@@ -10,6 +10,11 @@ import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 /// @title Swaps user's wallet positions borrow rate mode between stable and variable.
 contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
     using TokenUtils for address;
+    
+    /// @param rateMode Type of borrow debt [Stable: 1, Variable: 2]
+    /// @param assetId The id of the token to be swapped
+    /// @param useDefaultMarket Whether to use the default market
+    /// @param market Address of the market to swap borrow rate mode for
     struct Params {
         uint256 rateMode;
         uint16 assetId;

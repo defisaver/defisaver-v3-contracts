@@ -11,7 +11,7 @@ import { IERC20 } from "../interfaces/IERC20.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
 /// @notice This uses the Morpho oracle, which returns the price of the collateral token in terms of the loan token.
-/// @dev The trigger expects the price input to be scaled by 1e8
+/// @notice The trigger expects the price input to be scaled by 1e8.
 contract MorphoBluePriceTrigger is ITrigger, AdminAuth, MorphoBlueHelper {
 
     uint256 internal constant TRIGGER_PRICE_SCALE = 1e8;

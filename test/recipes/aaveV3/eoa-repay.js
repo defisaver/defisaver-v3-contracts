@@ -9,8 +9,8 @@ const {
     setNewExchangeWrapper,
     formatMockExchangeObj,
     chainIds,
-} = require('../../utils');
-const { executeAction } = require('../../actions');
+} = require('../../utils/utils');
+const { executeAction } = require('../../utils/actions');
 
 describe('Aave-EOA-Repay', function () {
     const network = hre.network.config.name;

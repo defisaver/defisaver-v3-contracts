@@ -9,6 +9,9 @@ contract SendTokenAndUnwrap is ActionBase {
 
     using TokenUtils for address;
 
+    /// @param tokenAddr Address of the token to send
+    /// @param to Address of the recipient
+    /// @param amount Amount of tokens to send
     struct Params {
         address tokenAddr;
         address to;
@@ -49,9 +52,9 @@ contract SendTokenAndUnwrap is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
 
-    /// @notice Sends a token to the specified addr, works with Eth also
-    /// @dev If amount is type(uint).max it will send whole users' wallet balance
-    /// @dev If weth address is set it will unwrap by default
+    /// @notice Sends a token to the specified addr, works with Eth also.
+    /// @notice If amount is type(uint).max it will send whole users' wallet balance.
+    /// @notice If weth address is set it will unwrap by default.
     /// @param _tokenAddr Address of token, use 0xEeee... for eth
     /// @param _to Where the tokens are sent
     /// @param _amount Amount of tokens, can be type(uint).max

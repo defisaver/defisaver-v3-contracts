@@ -13,55 +13,55 @@ const {
     getAddrFromRegistry,
     fetchAmountinUSDPrice,
     chainIds,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     addBotCaller,
     createStrategy,
     createBundle,
-} = require('../../utils-strategies');
+} = require('../utils/utils-strategies');
 
 const {
     createCompV3RepayL2Strategy,
     createCompV3FLRepayL2Strategy,
     createCompV3BoostL2Strategy,
     createCompV3FLBoostL2Strategy,
-} = require('../../l2-strategies');
+} = require('../../../strategies-spec/l2');
 
 const {
     callCompV3RepayL2Strategy,
     callCompV3FLRepayL2Strategy,
     callCompV3BoostL2Strategy,
     callCompV3FLBoostL2Strategy,
-} = require('../../l2-strategy-calls');
+} = require('../utils/l2-strategy-calls');
 
 const {
     subToCompV3L2AutomationStrategy,
-} = require('../../l2-strategy-subs');
+} = require('../utils/l2-strategy-subs');
 
 const {
     borrowCompV3, supplyCompV3,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 const STRATEGY_EXECUTOR_L2_ADDR = '0x9652f91B10045Cd2a36ca8D87df4A800eD2AF05D';
 
-const deployBundles = async (proxy) => {
+const deployBundles = async () => {
     await openStrategyAndBundleStorage();
     const compV3RepayStrategyEncoded = createCompV3RepayL2Strategy();
     const compV3FLRepayStrategyEncoded = createCompV3FLRepayL2Strategy();
 
-    const repayStrategyId1 = await createStrategy(proxy, ...compV3RepayStrategyEncoded, true);
-    const repayStrategyId2 = await createStrategy(proxy, ...compV3FLRepayStrategyEncoded, true);
+    const repayStrategyId1 = await createStrategy(...compV3RepayStrategyEncoded, true);
+    const repayStrategyId2 = await createStrategy(...compV3FLRepayStrategyEncoded, true);
 
-    const repayBundleId = await createBundle(proxy, [repayStrategyId1, repayStrategyId2]);
+    const repayBundleId = await createBundle([repayStrategyId1, repayStrategyId2]);
 
     const compV3BoostStrategyEncoded = createCompV3BoostL2Strategy();
     const compV3FLBoostStrategyEncoded = createCompV3FLBoostL2Strategy();
 
-    const boostStrategyId1 = await createStrategy(proxy, ...compV3BoostStrategyEncoded, true);
-    const boostStrategyId2 = await createStrategy(proxy, ...compV3FLBoostStrategyEncoded, true);
+    const boostStrategyId1 = await createStrategy(...compV3BoostStrategyEncoded, true);
+    const boostStrategyId2 = await createStrategy(...compV3FLBoostStrategyEncoded, true);
 
-    const boostBundleId = await createBundle(proxy, [boostStrategyId1, boostStrategyId2]);
+    const boostBundleId = await createBundle([boostStrategyId1, boostStrategyId2]);
 
     return { repayBundleId, boostBundleId };
 };
@@ -168,8 +168,8 @@ describe('CompV3 L2 automation tests', function () {
 
         strategyExecutorL2 = await hre.ethers.getContractAt('StrategyExecutorL2', STRATEGY_EXECUTOR_L2_ADDR);
 
-        const { repayBundleId, boostBundleId } = await deployBundles(proxy);
-        await redeploy('CompV3SubProxyL2', addrs[network].REGISTRY_ADDR, false, repayBundleId, boostBundleId);
+        const { repayBundleId, boostBundleId } = await deployBundles();
+        await redeploy('CompV3SubProxyL2', false, repayBundleId, boostBundleId);
     });
 
     beforeEach(async () => {

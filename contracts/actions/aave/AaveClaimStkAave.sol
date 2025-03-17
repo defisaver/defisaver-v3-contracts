@@ -5,12 +5,16 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { AaveHelper } from "./helpers/AaveHelper.sol";
 
+/// @title Action to claim stkAave rewards
 contract AaveClaimStkAave is ActionBase, AaveHelper {
 
+    /// @param assets Assets to claim rewards from.
+    /// @param amount Amount of rewards to claim.
+    /// @param to Address that will be receiving the rewards.
     struct Params {
         address[] assets;
-        uint256 amount;     // Amount of rewards to claim
-        address to;         // Address that will be receiving the rewards
+        uint256 amount;
+        address to;
     }
 
     /// @inheritdoc ActionBase

@@ -11,6 +11,12 @@ import { ILendingPoolV2 } from "../../interfaces/aaveV2/ILendingPoolV2.sol";
 contract AaveSupply is ActionBase, AaveHelper {
     using TokenUtils for address;
 
+    /// @param market Aave Market address.
+    /// @param tokenAddr Token address.
+    /// @param amount Amount of tokens to supply.
+    /// @param from Address to send the supply tokens from.
+    /// @param onBehalf Address to send the supply tokens on behalf of. Defaults to the user's wallet.
+    /// @param enableAsColl Whether to enable the token as collateral.
     struct Params {
         address market;
         address tokenAddr;
@@ -55,14 +61,14 @@ contract AaveSupply is ActionBase, AaveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User deposits tokens to the Aave protocol
-    /// @dev User needs to approve its wallet to pull the _tokenAddr tokens
-    /// @param _market Address provider for specific market
-    /// @param _tokenAddr The address of the token to be deposited
-    /// @param _amount Amount of tokens to be deposited
-    /// @param _from Where are we pulling the supply tokens amount from
-    /// @param _onBehalf For what user we are supplying the tokens, defaults to user's wallet
-    /// @param _enableAsColl If the supply asset should be collateral
+    /// @notice User deposits tokens to the Aave protocol.
+    /// @notice User needs to approve its wallet to pull the _tokenAddr tokens.
+    /// @param _market Address provider for specific market.
+    /// @param _tokenAddr The address of the token to be deposited.
+    /// @param _amount Amount of tokens to be deposited.
+    /// @param _from Where are we pulling the supply tokens amount from.
+    /// @param _onBehalf For what user we are supplying the tokens, defaults to user's wallet.
+    /// @param _enableAsColl If the supply asset should be collateral.
     function _supply(
         address _market,
         address _tokenAddr,
