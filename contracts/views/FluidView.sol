@@ -2,6 +2,8 @@
 
 pragma solidity =0.8.24;
 
+import { IDexSmartCollOracle } from "../interfaces/fluid/oracles/IDexSmartCollOracle.sol";
+import { IDexSmartDebtOracle } from "../interfaces/fluid/oracles/IDexSmartDebtOracle.sol";
 import { IFluidVaultResolver } from "../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
 import { IFluidDexResolver } from "../interfaces/fluid/resolvers/IFluidDexResolver.sol";
 import { IFluidLendingResolver } from "../interfaces/fluid/resolvers/IFluidLendingResolver.sol";
@@ -47,6 +49,8 @@ contract FluidView is FluidRatioHelper {
         uint256 token1PerSupplyShare; // token1 amount per 1e18 supply shares
         uint256 token0SupplyRate; // token0 supply rate. E.g 320 = 3.2% APR
         uint256 token1SupplyRate; // token1 supply rate. E.g 320 = 3.2% APR
+        address quoteToken; // quote token used in dex oracle. Either token0 or token1
+        uint256 quoteTokensPerShare; // quote tokens per 1e18 shares (all reserves are converted to quote token).
     }
 
     /// @notice Data for the borrow dex pool used in T3 and T4 vaults
@@ -70,6 +74,8 @@ contract FluidView is FluidRatioHelper {
         uint256 token1PerBorrowShare; // token1 amount per 1e18 borrow shares
         uint256 token0BorrowRate; // token0 borrow rate. E.g 320 = 3.2% APR
         uint256 token1BorrowRate; // token1 borrow rate. E.g 320 = 3.2% APR
+        address quoteToken; // quote token used in dex oracle. Either token0 or token1
+        uint256 quoteTokensPerShare; // quote tokens per 1e18 shares (all reserves are converted to quote token).
     }
 
     /// @notice Full vault data including dex data.
@@ -301,84 +307,153 @@ contract FluidView is FluidRatioHelper {
         if (vaultData.vaultType.isT2Vault()) {
             IFluidDexResolver.DexEntireData memory dexData =
                 IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(data.constantVariables.supply);
-            vaultData.dexSupplyData = _fillDexSupplyData(dexData, vaultData.withdrawable);
+            vaultData.dexSupplyData = _fillDexSupplyData(dexData, vaultData.oracle, vaultData.withdrawable);
         }
 
         // smart debt
         if (vaultData.vaultType.isT3Vault()) {
             IFluidDexResolver.DexEntireData memory dexData =
                 IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(data.constantVariables.borrow);
-            vaultData.dexBorrowData = _fillDexBorrowData(dexData, vaultData.borrowable);
+            vaultData.dexBorrowData = _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable);
         }
 
         // smart coll and smart debt
         if (vaultData.vaultType.isT4Vault()) {
             IFluidDexResolver.DexEntireData memory dexData =
                 IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(data.constantVariables.supply);
-            vaultData.dexSupplyData = _fillDexSupplyData(dexData, vaultData.withdrawable);
+
+            vaultData.dexSupplyData = _fillDexSupplyData(
+                dexData,
+                _getSmartCollateralDexOracle(vaultData.oracle),
+                vaultData.withdrawable
+            );
 
             // if it's a same dex, no need to fetch again
             if (data.constantVariables.borrow == data.constantVariables.supply) {
-                vaultData.dexBorrowData = _fillDexBorrowData(dexData, vaultData.borrowable);
+                vaultData.dexBorrowData = _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable);
             } else {
                 dexData = IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(data.constantVariables.borrow);
-                vaultData.dexBorrowData = _fillDexBorrowData(dexData, vaultData.borrowable);
+                vaultData.dexBorrowData = _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable);
             }
+
+            // In the case of T4 vaults, quoteTokensPerShare is actually returned as shareTokensPerQuote, so we invert it here.
+            vaultData.dexBorrowData.quoteTokensPerShare = 1e54 / vaultData.dexBorrowData.quoteTokensPerShare;
+        }
+    }
+
+    /// @notice Helper function used for T4 vaults to determine which oracle has to be used for smart collateral DEX.
+    function _getSmartCollateralDexOracle(address _vaultOracle) internal view returns (address smartCollOracle) {
+        /// @dev Some T4 vaults use main oracles that contain both dexSmartDebtSharesRates and dexSmartCollSharesRates.
+        /// But some use only the debt oracle as main and link the collateral oracle with a call to getDexColDebtOracleData.
+        try IDexSmartCollOracle(_vaultOracle).dexSmartColSharesRates() returns (
+            uint256, uint256
+        ) {
+            return _vaultOracle;
+        } catch {
+            (smartCollOracle, ) = IDexSmartDebtOracle(_vaultOracle).getDexColDebtOracleData();
         }
     }
 
     /// @notice Helper function to adapt dex data to DexSupplyData
     function _fillDexSupplyData(
-        IFluidDexResolver.DexEntireData memory dexData,
+        IFluidDexResolver.DexEntireData memory _dexData,
+        address _oracle,
         uint256 _sharesWithdrawable
-    ) internal pure returns (DexSupplyData memory dexSupplyData) {
+    ) internal view returns (DexSupplyData memory dexSupplyData) {
+        address quoteToken = _isQuoteInToken0ForSmartCollOracle(_oracle)
+            ? _dexData.constantViews.token0
+            : _dexData.constantViews.token1;
+
+        (uint256 quoteTokensPerShare, ) = IDexSmartCollOracle(_oracle).dexSmartColSharesRates();
+
         dexSupplyData = DexSupplyData({
-            dexPool: dexData.dex,
-            dexId: dexData.constantViews.dexId,
-            fee: dexData.configs.fee,
-            lastStoredPrice: dexData.dexState.lastStoredPrice,
-            centerPrice: dexData.dexState.centerPrice,
-            token0Utilization: dexData.limitsAndAvailability.liquidityTokenData0.lastStoredUtilization,
-            token1Utilization: dexData.limitsAndAvailability.liquidityTokenData1.lastStoredUtilization,
-            totalSupplyShares: dexData.dexState.totalSupplyShares,
-            maxSupplyShares: dexData.configs.maxSupplyShares,
-            token0Supplied: dexData.dexState.totalSupplyShares * dexData.dexState.token0PerSupplyShare / 1e18,
-            token1Supplied: dexData.dexState.totalSupplyShares * dexData.dexState.token1PerSupplyShare / 1e18,
+            dexPool: _dexData.dex,
+            dexId: _dexData.constantViews.dexId,
+            fee: _dexData.configs.fee,
+            lastStoredPrice: _dexData.dexState.lastStoredPrice,
+            centerPrice: _dexData.dexState.centerPrice,
+            token0Utilization: _dexData.limitsAndAvailability.liquidityTokenData0.lastStoredUtilization,
+            token1Utilization: _dexData.limitsAndAvailability.liquidityTokenData1.lastStoredUtilization,
+            totalSupplyShares: _dexData.dexState.totalSupplyShares,
+            maxSupplyShares: _dexData.configs.maxSupplyShares,
+            token0Supplied: _dexData.dexState.totalSupplyShares * _dexData.dexState.token0PerSupplyShare / 1e18,
+            token1Supplied: _dexData.dexState.totalSupplyShares * _dexData.dexState.token1PerSupplyShare / 1e18,
             sharesWithdrawable: _sharesWithdrawable,
-            token0Withdrawable: _sharesWithdrawable * dexData.dexState.token0PerSupplyShare / 1e18,
-            token1Withdrawable: _sharesWithdrawable * dexData.dexState.token1PerSupplyShare / 1e18,
-            token0PerSupplyShare: dexData.dexState.token0PerSupplyShare,
-            token1PerSupplyShare: dexData.dexState.token1PerSupplyShare,
-            token0SupplyRate: dexData.limitsAndAvailability.liquidityTokenData0.supplyRate,
-            token1SupplyRate: dexData.limitsAndAvailability.liquidityTokenData1.supplyRate
+            token0Withdrawable: _sharesWithdrawable * _dexData.dexState.token0PerSupplyShare / 1e18,
+            token1Withdrawable: _sharesWithdrawable * _dexData.dexState.token1PerSupplyShare / 1e18,
+            token0PerSupplyShare: _dexData.dexState.token0PerSupplyShare,
+            token1PerSupplyShare: _dexData.dexState.token1PerSupplyShare,
+            token0SupplyRate: _dexData.limitsAndAvailability.liquidityTokenData0.supplyRate,
+            token1SupplyRate: _dexData.limitsAndAvailability.liquidityTokenData1.supplyRate,
+            quoteToken: quoteToken,
+            quoteTokensPerShare: quoteTokensPerShare
         });
     }
 
     /// @notice Helper function to adapt dex data to DexBorrowData
     function _fillDexBorrowData(
-        IFluidDexResolver.DexEntireData memory dexData,
+        IFluidDexResolver.DexEntireData memory _dexData,
+        address _oracle,
         uint256 _sharesBorrowable
-    ) internal pure returns (DexBorrowData memory dexBorrowData) {
+    ) internal view returns (DexBorrowData memory dexBorrowData) {
+        address quoteToken = _isQuoteInToken0ForSmartDebtOracle(_oracle)
+            ? _dexData.constantViews.token0
+            : _dexData.constantViews.token1;
+
+        (uint256 quoteTokensPerShare, ) = IDexSmartDebtOracle(_oracle).dexSmartDebtSharesRates();
+
         dexBorrowData = DexBorrowData({
-            dexPool: dexData.dex,
-            dexId: dexData.constantViews.dexId,
-            fee: dexData.configs.fee,
-            lastStoredPrice: dexData.dexState.lastStoredPrice,
-            centerPrice: dexData.dexState.centerPrice,
-            token0Utilization: dexData.limitsAndAvailability.liquidityTokenData0.lastStoredUtilization,
-            token1Utilization: dexData.limitsAndAvailability.liquidityTokenData1.lastStoredUtilization,
-            totalBorrowShares: dexData.dexState.totalBorrowShares,
-            maxBorrowShares: dexData.configs.maxBorrowShares,
-            token0Borrowed: dexData.dexState.totalBorrowShares * dexData.dexState.token0PerBorrowShare / 1e18,
-            token1Borrowed: dexData.dexState.totalBorrowShares * dexData.dexState.token1PerBorrowShare / 1e18,
+            dexPool: _dexData.dex,
+            dexId: _dexData.constantViews.dexId,
+            fee: _dexData.configs.fee,
+            lastStoredPrice: _dexData.dexState.lastStoredPrice,
+            centerPrice: _dexData.dexState.centerPrice,
+            token0Utilization: _dexData.limitsAndAvailability.liquidityTokenData0.lastStoredUtilization,
+            token1Utilization: _dexData.limitsAndAvailability.liquidityTokenData1.lastStoredUtilization,
+            totalBorrowShares: _dexData.dexState.totalBorrowShares,
+            maxBorrowShares: _dexData.configs.maxBorrowShares,
+            token0Borrowed: _dexData.dexState.totalBorrowShares * _dexData.dexState.token0PerBorrowShare / 1e18,
+            token1Borrowed: _dexData.dexState.totalBorrowShares * _dexData.dexState.token1PerBorrowShare / 1e18,
             sharesBorrowable: _sharesBorrowable,
-            token0Borrowable: _sharesBorrowable * dexData.dexState.token0PerBorrowShare / 1e18,
-            token1Borrowable: _sharesBorrowable * dexData.dexState.token1PerBorrowShare / 1e18,
-            token0PerBorrowShare: dexData.dexState.token0PerBorrowShare,
-            token1PerBorrowShare: dexData.dexState.token1PerBorrowShare,
-            token0BorrowRate: dexData.limitsAndAvailability.liquidityTokenData0.borrowRate,
-            token1BorrowRate: dexData.limitsAndAvailability.liquidityTokenData1.borrowRate
+            token0Borrowable: _sharesBorrowable * _dexData.dexState.token0PerBorrowShare / 1e18,
+            token1Borrowable: _sharesBorrowable * _dexData.dexState.token1PerBorrowShare / 1e18,
+            token0PerBorrowShare: _dexData.dexState.token0PerBorrowShare,
+            token1PerBorrowShare: _dexData.dexState.token1PerBorrowShare,
+            token0BorrowRate: _dexData.limitsAndAvailability.liquidityTokenData0.borrowRate,
+            token1BorrowRate: _dexData.limitsAndAvailability.liquidityTokenData1.borrowRate,
+            quoteToken: quoteToken,
+            quoteTokensPerShare: quoteTokensPerShare
         });
+    }
+
+    /// @notice Helper function to get information whether the quote token is token0 or token1 in smart collateral dex oracle
+    function _isQuoteInToken0ForSmartCollOracle(
+        address _oracle
+    ) internal view returns (bool quoteInToken0) {
+        // Try to call the newer function signature first
+        try IDexSmartCollOracle(_oracle).dexOracleData() returns (
+            address, bool _quoteInToken0, address, uint256, uint256
+        ) {
+            return _quoteInToken0;
+        } catch {
+            // If the newer function fails, try the older function signature
+            (,,,,,,,,, quoteInToken0) = IDexSmartCollOracle(_oracle).dexSmartColOracleData();
+        }
+    }
+
+    /// @notice Helper function to get information whether the quote token is token0 or token1 in smart debt dex oracle
+    function _isQuoteInToken0ForSmartDebtOracle(
+        address _oracle
+    ) internal view returns (bool quoteInToken0) {
+        // Try to call the newer function signature first
+        try IDexSmartDebtOracle(_oracle).dexOracleData() returns (
+            address, bool _quoteInToken0, address, uint256, uint256
+        ) {
+            return _quoteInToken0;
+        } catch {
+            // If the newer function fails, try the older function signature
+            (,,,,,,,,, quoteInToken0) = IDexSmartDebtOracle(_oracle).dexSmartDebtOracleData();
+        }
     }
 
     /*//////////////////////////////////////////////////////////////
