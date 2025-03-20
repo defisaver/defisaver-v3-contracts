@@ -4,17 +4,25 @@ pragma solidity =0.8.24;
 
 import { IDexSmartCollOracle } from "../interfaces/fluid/oracles/IDexSmartCollOracle.sol";
 import { IDexSmartDebtOracle } from "../interfaces/fluid/oracles/IDexSmartDebtOracle.sol";
+import { IFluidVault } from "../interfaces/fluid/vaults/IFluidVault.sol";
 import { IFluidVaultResolver } from "../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
 import { IFluidDexResolver } from "../interfaces/fluid/resolvers/IFluidDexResolver.sol";
 import { IFluidLendingResolver } from "../interfaces/fluid/resolvers/IFluidLendingResolver.sol";
 import { FluidRatioHelper } from "../../contracts/actions/fluid/helpers/FluidRatioHelper.sol";
 import { FluidVaultTypes } from "../../contracts/actions/fluid/helpers/FluidVaultTypes.sol";
+import { FluidDexModel } from "../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 
 /// @title FluidView - aggregate various information about Fluid vaults and users
 contract FluidView is FluidRatioHelper {
     using FluidVaultTypes for uint256;
 
+
+    /**
+     *
+     *                         DATA SPECIFICATION
+     *
+     */
     /// @notice User position data
     struct UserPosition {
         uint256 nftId; // unique id of the position
@@ -166,6 +174,11 @@ contract FluidView is FluidRatioHelper {
         uint256 expandDuration; // withdrawal limit expand duration in seconds
     }
 
+    /**
+     *
+     *                         EXTERNAL FUNCTIONS
+     *
+     */
     /// @notice Get all user positions with vault data.
     /// @dev This should be called with static call.
     function getUserPositions(address _user) 
@@ -341,6 +354,144 @@ contract FluidView is FluidRatioHelper {
         }
     }
 
+    /// @notice Get current share rates for supply and borrow dex inside the vault
+    /// @dev This should be called with static call.
+    /// @dev Function will revert for T1 vaults and is expected to be called only for dex vaults
+    /// @param _vault Address of the vault
+    /// @return token0PerSupplyShare - filed for T2 and T4 vaults
+    /// @return token1PerSupplyShare - filed for T2 and T4 vaults
+    /// @return token0PerBorrowShare - filed for T3 and T4 vaults
+    /// @return token1PerBorrowShare - filed fro T3 and T4 vaults
+    function getDexShareRates(
+        address _vault
+    ) external returns (
+        uint256 token0PerSupplyShare,
+        uint256 token1PerSupplyShare,
+        uint256 token0PerBorrowShare,
+        uint256 token1PerBorrowShare
+    ) {
+        // Reverts for T1 vaults
+        IFluidVault.ConstantViews memory vaultData = IFluidVault(_vault).constantsView();
+
+        if (vaultData.vaultType.isT2Vault()) {
+            IFluidDexResolver.DexState memory dexData = IFluidDexResolver(FLUID_DEX_RESOLVER).getDexState(vaultData.supply);
+            token0PerSupplyShare = dexData.token0PerSupplyShare;
+            token1PerSupplyShare = dexData.token1PerSupplyShare;
+        }
+
+        if (vaultData.vaultType.isT3Vault()) {
+            IFluidDexResolver.DexState memory dexData = IFluidDexResolver(FLUID_DEX_RESOLVER).getDexState(vaultData.borrow);
+            token0PerBorrowShare = dexData.token0PerBorrowShare;
+            token1PerBorrowShare = dexData.token1PerBorrowShare;
+        }
+
+        if (vaultData.vaultType.isT4Vault()) {
+            IFluidDexResolver.DexState memory dexData = IFluidDexResolver(FLUID_DEX_RESOLVER).getDexState(vaultData.supply);
+            token0PerSupplyShare = dexData.token0PerSupplyShare;
+            token1PerSupplyShare = dexData.token1PerSupplyShare;
+
+            if (vaultData.borrow == vaultData.supply) {
+                token0PerBorrowShare = dexData.token0PerBorrowShare;
+                token1PerBorrowShare = dexData.token1PerBorrowShare;
+            } else {
+                dexData = IFluidDexResolver(FLUID_DEX_RESOLVER).getDexState(vaultData.borrow);
+                token0PerBorrowShare = dexData.token0PerBorrowShare;
+                token1PerBorrowShare = dexData.token1PerBorrowShare;
+            }
+        }
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                        FLUID EARN - F TOKENs UTILS
+    //////////////////////////////////////////////////////////////*/
+    /// @notice Get all fTokens addresses
+    function getAllFTokens() external view returns (address[] memory) {
+        return IFluidLendingResolver(FLUID_LENDING_RESOLVER).getAllFTokens();
+    }
+
+    /// @notice Get fToken data for a specific fToken address
+    function getFTokenData(address _fToken) public view returns (FTokenData memory fTokenData) {
+        
+        IFluidLendingResolver.FTokenDetails memory details;
+
+        // Fluid Lending Resolver checks if the fToken's underlying asset supports EIP-2612.
+        // For WETH, this triggers the fallback function, which attempts a deposit.
+        // This panics because of write protection and consumes all gas, leaving only 1/64th for the caller (EIP-150).
+        // To lower the gas cost, we cap the gas limit at 9M, ensuring ~140k gas remains for fetching fWETH details
+        // and enough gas is left for further operations within the same block.
+        // For arbitrum, we don't need to cap as WETH will have EIP-2612 support.
+        if (_fToken == F_WETH_TOKEN_ADDR && block.chainid != 42161) {
+            details = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getFTokenDetails{ gas: 9_000_000 }(_fToken);
+        } else {
+            details = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getFTokenDetails(_fToken);
+        }
+        
+        fTokenData = _filterFTokenData(details);
+    }
+
+    /// @notice Get fToken data for all fTokens
+    function getAllFTokensData() public view returns (FTokenData[] memory) {
+        address[] memory fTokens = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getAllFTokens();
+        FTokenData[] memory fTokenData = new FTokenData[](fTokens.length);
+
+        for (uint256 i = 0; i < fTokens.length; i++) {
+            fTokenData[i] = getFTokenData(fTokens[i]);
+        } 
+
+        return fTokenData;
+    }
+
+    /// @notice Get user position for a specific fToken address
+    function getUserEarnPosition(address _fToken, address _user) public view returns (UserEarnPosition memory) {
+        IFluidLendingResolver.UserPosition memory data = 
+            IFluidLendingResolver(FLUID_LENDING_RESOLVER).getUserPosition(_fToken, _user);
+
+        return UserEarnPosition({
+            fTokenShares: data.fTokenShares,
+            underlyingAssets: data.underlyingAssets,
+            underlyingBalance: data.underlyingBalance,
+            allowance: data.allowance
+        });
+    }
+
+    /// @notice Get user position for a specific fToken address
+    function getUserEarnPositionWithFToken(
+        address _fToken,
+        address _user
+    ) public view returns (UserEarnPosition memory userPosition, FTokenData memory fTokenData) {
+        IFluidLendingResolver.UserPosition memory userData = 
+            IFluidLendingResolver(FLUID_LENDING_RESOLVER).getUserPosition(_fToken, _user);
+
+        userPosition = UserEarnPosition({
+            fTokenShares: userData.fTokenShares,
+            underlyingAssets: userData.underlyingAssets,
+            underlyingBalance: userData.underlyingBalance,
+            allowance: userData.allowance
+        });
+
+        fTokenData = getFTokenData(_fToken);
+    }
+
+    /// @notice Get user positions for all fTokens
+    function getAllUserEarnPositionsWithFTokens(address _user)
+        external
+        view
+        returns (UserEarnPosition[] memory userPositions, FTokenData[] memory fTokensData)
+    {
+        fTokensData = getAllFTokensData();
+
+        userPositions = new UserEarnPosition[](fTokensData.length);
+
+        for (uint256 i = 0; i < fTokensData.length; i++) {
+            userPositions[i] = getUserEarnPosition(fTokensData[i].tokenAddress, _user);
+        }
+    }
+
+    /**
+     *
+     *                         INTERNAL FUNCTIONS
+     *
+     */
     /// @notice Helper function used for T4 vaults to determine which oracle has to be used for smart collateral DEX.
     function _getSmartCollateralDexOracle(address _vaultOracle) internal view returns (address smartCollOracle) {
         /// @dev Some T4 vaults use main oracles that contain both dexSmartDebtSharesRates and dexSmartCollSharesRates.
@@ -453,92 +604,6 @@ contract FluidView is FluidRatioHelper {
         } catch {
             // If the newer function fails, try the older function signature
             (,,,,,,,,, quoteInToken0) = IDexSmartDebtOracle(_oracle).dexSmartDebtOracleData();
-        }
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                        FLUID EARN - F TOKENs UTILS
-    //////////////////////////////////////////////////////////////*/
-    /// @notice Get all fTokens addresses
-    function getAllFTokens() external view returns (address[] memory) {
-        return IFluidLendingResolver(FLUID_LENDING_RESOLVER).getAllFTokens();
-    }
-
-    /// @notice Get fToken data for a specific fToken address
-    function getFTokenData(address _fToken) public view returns (FTokenData memory fTokenData) {
-        
-        IFluidLendingResolver.FTokenDetails memory details;
-
-        // Fluid Lending Resolver checks if the fToken's underlying asset supports EIP-2612.
-        // For WETH, this triggers the fallback function, which attempts a deposit.
-        // This panics because of write protection and consumes all gas, leaving only 1/64th for the caller (EIP-150).
-        // To lower the gas cost, we cap the gas limit at 9M, ensuring ~140k gas remains for fetching fWETH details
-        // and enough gas is left for further operations within the same block.
-        // For arbitrum, we don't need to cap as WETH will have EIP-2612 support.
-        if (_fToken == F_WETH_TOKEN_ADDR && block.chainid != 42161) {
-            details = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getFTokenDetails{ gas: 9_000_000 }(_fToken);
-        } else {
-            details = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getFTokenDetails(_fToken);
-        }
-        
-        fTokenData = _filterFTokenData(details);
-    }
-
-    /// @notice Get fToken data for all fTokens
-    function getAllFTokensData() public view returns (FTokenData[] memory) {
-        address[] memory fTokens = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getAllFTokens();
-        FTokenData[] memory fTokenData = new FTokenData[](fTokens.length);
-
-        for (uint256 i = 0; i < fTokens.length; i++) {
-            fTokenData[i] = getFTokenData(fTokens[i]);
-        } 
-
-        return fTokenData;
-    }
-
-    /// @notice Get user position for a specific fToken address
-    function getUserEarnPosition(address _fToken, address _user) public view returns (UserEarnPosition memory) {
-        IFluidLendingResolver.UserPosition memory data = 
-            IFluidLendingResolver(FLUID_LENDING_RESOLVER).getUserPosition(_fToken, _user);
-
-        return UserEarnPosition({
-            fTokenShares: data.fTokenShares,
-            underlyingAssets: data.underlyingAssets,
-            underlyingBalance: data.underlyingBalance,
-            allowance: data.allowance
-        });
-    }
-
-    /// @notice Get user position for a specific fToken address
-    function getUserEarnPositionWithFToken(
-        address _fToken,
-        address _user
-    ) public view returns (UserEarnPosition memory userPosition, FTokenData memory fTokenData) {
-        IFluidLendingResolver.UserPosition memory userData = 
-            IFluidLendingResolver(FLUID_LENDING_RESOLVER).getUserPosition(_fToken, _user);
-
-        userPosition = UserEarnPosition({
-            fTokenShares: userData.fTokenShares,
-            underlyingAssets: userData.underlyingAssets,
-            underlyingBalance: userData.underlyingBalance,
-            allowance: userData.allowance
-        });
-
-        fTokenData = getFTokenData(_fToken);
-    }
-
-    /// @notice Get user positions for all fTokens
-    function getAllUserEarnPositionsWithFTokens(address _user)
-        external
-        view
-        returns (UserEarnPosition[] memory userPositions, FTokenData[] memory fTokensData)
-    {
-        fTokensData = getAllFTokensData();
-
-        userPositions = new UserEarnPosition[](fTokensData.length);
-
-        for (uint256 i = 0; i < fTokensData.length; i++) {
-            userPositions[i] = getUserEarnPosition(fTokensData[i].tokenAddress, _user);
         }
     }
 

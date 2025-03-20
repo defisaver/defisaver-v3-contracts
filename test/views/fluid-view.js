@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+const { expect } = require('chai');
 const { network, redeploy } = require('../utils/utils');
 
 const TEST_DATA = {
@@ -54,106 +55,94 @@ const fluidViewTest = async () => {
         before(async () => {
             viewContract = await redeploy('FluidView', false);
         });
-        // it('... should call getUserPositions', async () => {
-        //     const userPositions = await viewContract.callStatic.getUserPositions(TEST_DATA[network].BORROW_USER);
-        //     console.log(userPositions);
-        // });
-        // it('... should call getUserNftIds', async () => {
-        //     const userNftIds = await viewContract.getUserNftIds(TEST_DATA[network].BORROW_USER);
-        //     console.log(userNftIds);
-        // });
-        // it('... should call getUserNftIdsWithVaultIds', async () => {
-        //     const userNftIdsWithVaultIds = await viewContract.getUserNftIdsWithVaultIds(TEST_DATA[network].BORROW_USER);
-        //     console.log(userNftIdsWithVaultIds);
-        // });
-        // it('... should call getPositionByNftId', async () => {
-        //     const positionByNftId = await viewContract.callStatic.getPositionByNftId(TEST_DATA[network].NFT_ID);
-        //     console.log(positionByNftId);
-        // });
-        // it('... should call getVaultData', async () => {
-        //     const vaultData = await viewContract.callStatic.getVaultData(TEST_DATA[network].VAULT_ADDR);
-        //     console.log(vaultData);
-        // });
-        // it('... should call getAllFTokens', async () => {
-        //     const fTokens = await viewContract.getAllFTokens();
-        //     console.log(fTokens);
-        // });
-        // it('... should call getFTokenData', async () => {
-        //     const fTokenData = await viewContract.getFTokenData(TEST_DATA[network].F_USDC_ADDR);
-        //     console.log(fTokenData);
-        // });
-        // it('... should call getAllFTokensData', async () => {
-        //     const allFTokensData = await viewContract.getAllFTokensData();
-        //     console.log(allFTokensData);
-        // });
-        // it('... should call getUserEarnPosition', async () => {
-        //     const userEarnPosition = await viewContract.getUserEarnPosition(TEST_DATA[network].F_USDC_ADDR, TEST_DATA[network].EARN_USER);
-        //     console.log(userEarnPosition);
-        // });
-        // it('... should call getUserEarnPositionWithFToken', async () => {
-        //     const userEarnPositionWithFToken = await viewContract.getUserEarnPositionWithFToken(TEST_DATA[network].F_USDC_ADDR, TEST_DATA[network].EARN_USER);
-        //     console.log(userEarnPositionWithFToken);
-        // });
-        // it('... should call getAllUserEarnPositionsWithFTokens', async () => {
-        //     const allUserPositionsWithFTokens = await viewContract.getAllUserEarnPositionsWithFTokens(TEST_DATA[network].EARN_USER);
-        //     console.log(allUserPositionsWithFTokens);
-        // });
-        // it('... should call getVaultData for smart coll vault', async () => {
-        //     if (isZeroAddress(TEST_DATA[network].SMART_COLL_VAULT)) return;
-        //     const vaultData = await viewContract.callStatic.getVaultData(TEST_DATA[network].SMART_COLL_VAULT);
-        //     console.log(vaultData);
-        // });
-        // it('... should call getVaultData for smart debt vault', async () => {
-        //     if (isZeroAddress(TEST_DATA[network].SMART_DEBT_VAULT)) return;
-        //     const vaultData = await viewContract.callStatic.getVaultData(TEST_DATA[network].SMART_DEBT_VAULT);
-        //     console.log(vaultData);
-        // });
-        // it('... should call getVaultData for smart coll and debt vault', async () => {
-        //     if (isZeroAddress(TEST_DATA[network].SMART_COLL_DEBT_VAULT)) return;
-        //     const vaultData = await viewContract.callStatic.getVaultData(TEST_DATA[network].SMART_COLL_DEBT_VAULT);
-        //     console.log(vaultData);
-        // });
-        // it('... should call getVaultData for smart coll user', async () => {
-        //     if (isZeroAddress(TEST_DATA[network].SMART_COLL_USER)) return;
-        //     const vaultData = await viewContract.callStatic.getUserPositions(TEST_DATA[network].SMART_COLL_USER);
-        //     console.log(vaultData);
-        // });
-        // it('... should call getVaultData for smart debt user', async () => {
-        //     if (isZeroAddress(TEST_DATA[network].SMART_DEBT_USER)) return;
-        //     const vaultData = await viewContract.callStatic.getUserPositions(TEST_DATA[network].SMART_DEBT_USER);
-        //     console.log(vaultData);
-        // });
-        // it('... should call getVaultData for smart coll and debt user', async () => {
-        //     if (isZeroAddress(TEST_DATA[network].SMART_COLL_DEBT_USER)) return;
-        //     const vaultData = await viewContract.callStatic.getUserPositions(TEST_DATA[network].SMART_COLL_DEBT_USER);
-        //     console.log(vaultData);
-        // });
-
-        // ////////////////////// T2 //////////////////////////////////
-
-        // it('...', async () => {
-        //     let vaultData = await viewContract.callStatic.getVaultData('0x4e564A29c1FC18ed9b66e5754A37fCa0C8a980ff');
-        //     vaultData = await viewContract.callStatic.getVaultData('0xf7FA55D14C71241e3c970E30C509Ff58b5f5D557');
-        //     vaultData = await viewContract.callStatic.getVaultData('0xb4a15526d427f4d20b0dAdaF3baB4177C85A699A');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x9A64E3EB9c2F917CBAdDe75Ad23bb402257acf2E');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x153a0D021AeD5d20D9E59e8B9ecC9E3e9276f6C3');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x7503b58Bb29937e7E2980f70D3FD021B7ebeA6d0');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x989a44CB4dBb7eBe20e0aBf3C1E1d727BF90F881');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x43d1cA906c72f09D96291B4913D7255E241F428d');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x96B2A29823d475468eE6f15e07878adf79E8199b');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x3E11B9aEb9C7dBbda4DD41477223Cc2f3f24b9d7');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x221E35b5655A1eEB3C42c4DeFc39648531f6C9CF');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x01F0D07fdE184614216e76782c6b7dF663F5375e');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x59fa2F51F5c8fFfceB538180EC47A869eC3DBd4a');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x47b6e2c8a0cB072198f17ccC6C7634dCc7126c3E');
-        //     vaultData = await viewContract.callStatic.getVaultData('0xe210d8ded13Abe836a10E8Aa956dd424658d0034');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x528CF7DBBff878e02e48E83De5097F8071af768D');
-        //     vaultData = await viewContract.callStatic.getVaultData('0xDCe03288F9A109150f314ED0Ca9b59a690300d9d');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x20b32C597633f12B44CFAFe0ab27408028CA0f6A');
-        //     vaultData = await viewContract.callStatic.getVaultData('0x469D8c7990b9072EEF05d6349224621a71176213');
-        //     vaultData = await viewContract.callStatic.getVaultData('0xB170B94BeFe21098966aa9905Da6a2F569463A21');
-        //     vaultData = await viewContract.callStatic.getVaultData('0xaEac94D417BF8d8bb3A44507100Ab8c0D3b12cA1');
-        // });
+        it('... should call getUserPositions', async () => {
+            const userPositions = await viewContract.callStatic.getUserPositions(TEST_DATA[network].BORROW_USER);
+            console.log(userPositions);
+        });
+        it('... should call getUserNftIds', async () => {
+            const userNftIds = await viewContract.getUserNftIds(TEST_DATA[network].BORROW_USER);
+            console.log(userNftIds);
+        });
+        it('... should call getUserNftIdsWithVaultIds', async () => {
+            const userNftIdsWithVaultIds = await viewContract.getUserNftIdsWithVaultIds(TEST_DATA[network].BORROW_USER);
+            console.log(userNftIdsWithVaultIds);
+        });
+        it('... should call getPositionByNftId', async () => {
+            const positionByNftId = await viewContract.callStatic.getPositionByNftId(TEST_DATA[network].NFT_ID);
+            console.log(positionByNftId);
+        });
+        it('... should call getVaultData', async () => {
+            const vaultData = await viewContract.callStatic.getVaultData(TEST_DATA[network].VAULT_ADDR);
+            console.log(vaultData);
+        });
+        it('... should call getAllFTokens', async () => {
+            const fTokens = await viewContract.getAllFTokens();
+            console.log(fTokens);
+        });
+        it('... should call getFTokenData', async () => {
+            const fTokenData = await viewContract.getFTokenData(TEST_DATA[network].F_USDC_ADDR);
+            console.log(fTokenData);
+        });
+        it('... should call getAllFTokensData', async () => {
+            const allFTokensData = await viewContract.getAllFTokensData();
+            console.log(allFTokensData);
+        });
+        it('... should call getUserEarnPosition', async () => {
+            const userEarnPosition = await viewContract.getUserEarnPosition(TEST_DATA[network].F_USDC_ADDR, TEST_DATA[network].EARN_USER);
+            console.log(userEarnPosition);
+        });
+        it('... should call getUserEarnPositionWithFToken', async () => {
+            const userEarnPositionWithFToken = await viewContract.getUserEarnPositionWithFToken(TEST_DATA[network].F_USDC_ADDR, TEST_DATA[network].EARN_USER);
+            console.log(userEarnPositionWithFToken);
+        });
+        it('... should call getAllUserEarnPositionsWithFTokens', async () => {
+            const allUserPositionsWithFTokens = await viewContract.getAllUserEarnPositionsWithFTokens(TEST_DATA[network].EARN_USER);
+            console.log(allUserPositionsWithFTokens);
+        });
+        it('... should call getVaultData for smart coll vault', async () => {
+            if (isZeroAddress(TEST_DATA[network].SMART_COLL_VAULT)) return;
+            const vaultData = await viewContract.callStatic.getVaultData(TEST_DATA[network].SMART_COLL_VAULT);
+            console.log(vaultData);
+        });
+        it('... should call getVaultData for smart debt vault', async () => {
+            if (isZeroAddress(TEST_DATA[network].SMART_DEBT_VAULT)) return;
+            const vaultData = await viewContract.callStatic.getVaultData(TEST_DATA[network].SMART_DEBT_VAULT);
+            console.log(vaultData);
+        });
+        it('... should call getVaultData for smart coll and debt vault', async () => {
+            if (isZeroAddress(TEST_DATA[network].SMART_COLL_DEBT_VAULT)) return;
+            const vaultData = await viewContract.callStatic.getVaultData(TEST_DATA[network].SMART_COLL_DEBT_VAULT);
+            console.log(vaultData);
+        });
+        it('... should call getVaultData for smart coll user', async () => {
+            if (isZeroAddress(TEST_DATA[network].SMART_COLL_USER)) return;
+            const vaultData = await viewContract.callStatic.getUserPositions(TEST_DATA[network].SMART_COLL_USER);
+            console.log(vaultData);
+        });
+        it('... should call getVaultData for smart debt user', async () => {
+            if (isZeroAddress(TEST_DATA[network].SMART_DEBT_USER)) return;
+            const vaultData = await viewContract.callStatic.getUserPositions(TEST_DATA[network].SMART_DEBT_USER);
+            console.log(vaultData);
+        });
+        it('... should call getVaultData for smart coll and debt user', async () => {
+            if (isZeroAddress(TEST_DATA[network].SMART_COLL_DEBT_USER)) return;
+            const vaultData = await viewContract.callStatic.getUserPositions(TEST_DATA[network].SMART_COLL_DEBT_USER);
+            console.log(vaultData);
+        });
+        it('... get dex shares rates', async () => {
+            if (!isZeroAddress(TEST_DATA[network].SMART_COLL_VAULT)) {
+                const smartCollVaultRates = await viewContract.callStatic.getDexShareRates(TEST_DATA[network].SMART_COLL_VAULT);
+                console.log(smartCollVaultRates);
+            }
+            if (!isZeroAddress(TEST_DATA[network].SMART_DEBT_VAULT)) {
+                const smartDebtVaultRates = await viewContract.callStatic.getDexShareRates(TEST_DATA[network].SMART_DEBT_VAULT);
+                console.log(smartDebtVaultRates);
+            }
+            if (!isZeroAddress(TEST_DATA[network].SMART_COLL_DEBT_VAULT)) {
+                const smartCollDebtVaultRates = await viewContract.callStatic.getDexShareRates(TEST_DATA[network].SMART_COLL_DEBT_VAULT);
+                console.log(smartCollDebtVaultRates);
+            }
+        });
     });
 };
 
