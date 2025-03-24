@@ -38,7 +38,7 @@ contract FluidView is FluidRatioHelper {
 
     /// @notice Data for the supply dex pool used in T2 and T4 vaults
     struct DexSupplyData {
-       address dexPool; // address of the dex pool
+        address dexPool; // address of the dex pool
         uint256 dexId;   // id of the dex pool
         uint256 fee;     // fee of the dex pool
         uint256 lastStoredPrice; // last stored price of the dex pool

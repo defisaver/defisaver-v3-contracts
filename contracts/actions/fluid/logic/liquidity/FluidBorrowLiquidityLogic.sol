@@ -24,6 +24,8 @@ library FluidBorrowLiquidityLogic {
     ) internal returns (uint256) {
         _data.vaultType.requireLiquidityDebt();
 
+        if (_data.amount == 0) return 0;
+
         bool shouldWrapBorrowedEth = _data.wrapBorrowedEth && _data.borrowToken == TokenUtils.ETH_ADDR;
 
         address sendTokensTo = shouldWrapBorrowedEth ? address(this) : _data.to;
