@@ -401,6 +401,78 @@ contract FluidView is FluidRatioHelper {
         }
     }
 
+    /// @notice Estimate variable dex deposit for T2 and T4 vaults
+    /// @dev This should be called with static call.
+    function estimateDeposit(
+        address _vault,
+        uint256 _token0Amount,
+        uint256 _token1Amount,
+        uint256 _minSharesAmount
+    ) external payable returns (uint256 shares) {
+        IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
+
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateDeposit(
+            constants.supply,
+            _token0Amount,
+            _token1Amount,
+            _minSharesAmount
+        );
+    }
+
+    /// @notice Estimate variable dex withdraw for T2 and T4 vaults
+    /// @dev This should be called with static call.
+    function estimateWithdraw(
+        address _vault,
+        uint256 _token0Amount,
+        uint256 _token1Amount,
+        uint256 _maxSharesAmount
+    ) external returns (uint256 shares) {
+        IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
+
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateWithdraw(
+            constants.supply,
+            _token0Amount,
+            _token1Amount,
+            _maxSharesAmount
+        );
+    }
+
+    /// @notice Estimate variable dex borrow for T3 and T4 vaults
+    /// @dev This should be called with static call.
+    function estimateBorrow(
+        address _vault,
+        uint256 _token0Amount,
+        uint256 _token1Amount,
+        uint256 _maxSharesAmount
+    ) external returns (uint256 shares) {
+        IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
+
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateBorrow(  
+            constants.borrow,
+            _token0Amount,
+            _token1Amount,
+            _maxSharesAmount
+        );
+    }
+
+    /// @notice Estimate variable dex payback for T3 and T4 vaults
+    /// @dev This should be called with static call.
+    function estimatePayback(
+        address _vault,
+        uint256 _token0Amount,
+        uint256 _token1Amount,
+        uint256 _minSharesAmount
+    ) external returns (uint256 shares) {
+        IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
+
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimatePayback(
+            constants.borrow,
+            _token0Amount,
+            _token1Amount,
+            _minSharesAmount
+        );
+    }
+
     /*//////////////////////////////////////////////////////////////
                         FLUID EARN - F TOKENs UTILS
     //////////////////////////////////////////////////////////////*/
