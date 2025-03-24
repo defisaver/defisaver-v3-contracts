@@ -4,18 +4,13 @@ pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
-import { IFluidVaultFactory } from "../../../../contracts/interfaces/fluid/IFluidVaultFactory.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
-import { FluidTestHelper } from "../FluidTestHelper.t.sol";
-
+import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
-import { BaseTest } from "../../../utils/BaseTest.sol";
-import { ActionsUtils } from "../../../utils/ActionsUtils.sol";
 import { Vm } from "forge-std/Vm.sol";
-import { console } from "forge-std/console.sol";
 
-contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
+contract TestFluidVaultT1Open is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -57,6 +52,7 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
         bool wrapBorrowedEth = false;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
+
     function test_should_open_position_direct_action() public {
         bool isDirect = true;
         bool takeMaxUint256 = false;
@@ -65,6 +61,7 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
         bool wrapBorrowedEth = false;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
+
     function test_should_open_position_with_maxUint256() public {
         bool isDirect = false;
         bool takeMaxUint256 = true;
@@ -73,6 +70,7 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
         bool wrapBorrowedEth = false;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
+
     function test_should_open_only_supply_position() public {
         bool isDirect = false;
         bool takeMaxUint256 = false;
@@ -81,6 +79,7 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
         bool wrapBorrowedEth = false;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
+
     function test_should_open_position_with_borrow_eth_wrap() public {
         bool isDirect = false;
         bool takeMaxUint256 = false;
@@ -89,6 +88,7 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
         bool wrapBorrowedEth = true;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
+
     function _baseTest(
         bool isDirect,
         bool takeMaxUint256,
@@ -130,18 +130,9 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
                 : balanceOf(constants.borrowToken, sender);
 
             vm.recordLogs();
-
             wallet.execute(address(cut), executeActionCallData, 0);
-
             Vm.Log[] memory logs = vm.getRecordedLogs();
-
-            uint256 createdNft;
-            for (uint256 j = 0; j < logs.length; ++j) {
-                if (logs[j].topics[0] == IFluidVaultFactory.NewPositionMinted.selector) {
-                    createdNft = uint256(logs[j].topics[3]);
-                    break;
-                }
-            }
+            uint256 createdNft = getNftIdFromLogs(logs);
             assertFalse(createdNft == 0);
 
             uint256 senderSupplyTokenBalanceAfter = balanceOf(constants.supplyToken, sender);
@@ -154,8 +145,7 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
             assertEq(senderSupplyTokenBalanceAfter, senderSupplyTokenBalanceBefore - supplyAmount);
             assertEq(senderBorrowTokenBalanceAfter, senderBorrowTokenBalanceBefore + borrowAmount);
 
-            (IFluidVaultResolver.UserPosition memory userPosition, ) = 
-                IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(createdNft);
+            IFluidVaultResolver.UserPosition memory userPosition = fetchPositionByNftId(createdNft);
 
             assertEq(userPosition.owner, walletAddr);
             assertEq(userPosition.isLiquidated, false);
@@ -169,19 +159,19 @@ contract TestFluidVaultT1Open is BaseTest, FluidTestHelper, ActionsUtils {
         uint256 supplyAmount,
         uint256 borrowAmount,
         IFluidVaultResolver.UserPosition memory userPosition
-    ) internal view {
-        console.log("supplyAmount", supplyAmount);
-        console.log("borrowAmount", borrowAmount);
-        console.log("owner", userPosition.owner);
-        console.log("isLiquidated", userPosition.isLiquidated);
-        console.log("isSupplyPosition", userPosition.isSupplyPosition);
-        console.log("tick", uint256(userPosition.tick));
-        console.log("tickId", userPosition.tickId);
-        console.log("beforeSupply", userPosition.beforeSupply);
-        console.log("beforeBorrow", userPosition.beforeBorrow);
-        console.log("beforeDustBorrow", userPosition.beforeDustBorrow);
-        console.log("supply", userPosition.supply);
-        console.log("borrow", userPosition.borrow);
-        console.log("dustBorrow", userPosition.dustBorrow);
+    ) internal {
+        emit log_named_uint("supplyAmount", supplyAmount);
+        emit log_named_uint("borrowAmount", borrowAmount);
+        emit log_named_address("owner", userPosition.owner);
+        emit log_named_uint("isLiquidated", uint256(userPosition.isLiquidated ? 1 : 0));
+        emit log_named_uint("isSupplyPosition", uint256(userPosition.isSupplyPosition ? 1 : 0));
+        emit log_named_int("tick", userPosition.tick);
+        emit log_named_uint("tickId", userPosition.tickId);
+        emit log_named_uint("beforeSupply", userPosition.beforeSupply);
+        emit log_named_uint("beforeBorrow", userPosition.beforeBorrow);
+        emit log_named_uint("beforeDustBorrow", userPosition.beforeDustBorrow);
+        emit log_named_uint("supply", userPosition.supply);
+        emit log_named_uint("borrow", userPosition.borrow);
+        emit log_named_uint("dustBorrow", userPosition.dustBorrow);
     }
 }

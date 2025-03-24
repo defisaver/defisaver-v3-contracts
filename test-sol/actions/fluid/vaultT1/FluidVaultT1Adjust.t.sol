@@ -4,15 +4,13 @@ pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
-import { IFluidVaultFactory } from "../../../../contracts/interfaces/fluid/IFluidVaultFactory.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import { FluidVaultT1Adjust } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Adjust.sol";
 import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
-import { FluidExecuteActions } from "../../../utils/executeActions/FluidExecuteActions.sol";
+import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { Vm } from "forge-std/Vm.sol";
 
-contract TestFluidVaultT1Adjust is FluidExecuteActions {
+contract TestFluidVaultT1Adjust is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -78,6 +76,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_max_supply() public {
         _baseTest(
             TestConfig({
@@ -94,6 +93,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_just_borrow() public {
         _baseTest(
             TestConfig({
@@ -110,6 +110,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+    
     function test_should_just_borrow_while_send_wrapped_eth() public {
         _baseTest(
             TestConfig({
@@ -126,6 +127,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_just_withdraw() public {
         _baseTest(
             TestConfig({
@@ -142,6 +144,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_just_withdraw_while_send_wrapped_eth() public {
         _baseTest(
             TestConfig({
@@ -158,6 +161,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+    
     function test_should_max_withdraw() public {
         _baseTest(
             TestConfig({
@@ -174,6 +178,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_max_withdraw_while_send_wrapped_eth() public {
         _baseTest(
             TestConfig({
@@ -190,6 +195,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_just_payback() public {
         _baseTest(
             TestConfig({
@@ -206,6 +212,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_max_payback() public {
         _baseTest(
             TestConfig({
@@ -222,6 +229,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_supply_borrow() public {
         _baseTest(
             TestConfig({
@@ -238,6 +246,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_supply_borrow_while_send_wrapped_eth() public {
         _baseTest(
             TestConfig({
@@ -254,6 +263,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_supply_payback() public {
         _baseTest(
             TestConfig({
@@ -270,6 +280,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_withdraw_borrow() public {
         _baseTest(
             TestConfig({
@@ -286,6 +297,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_withdraw_payback() public {
         _baseTest(
             TestConfig({
@@ -302,6 +314,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_withdraw_payback_while_send_wrapped_eth() public {
         _baseTest(
             TestConfig({
@@ -318,6 +331,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_max_supply_max_payback() public {
         _baseTest(
             TestConfig({
@@ -334,6 +348,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_max_withdraw_max_payback() public {
         _baseTest(
             TestConfig({
@@ -350,6 +365,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             })
         );
     }
+
     function test_should_max_withdraw_max_payback_while_send_wrapped_eth() public {
         _baseTest(
             TestConfig({
@@ -431,8 +447,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
 
             vars.isNativeSupply = constants.supplyToken == TokenUtils.ETH_ADDR;
             vars.isNativeBorrow = constants.borrowToken == TokenUtils.ETH_ADDR;
-
-            (vars.userPositionBefore, ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(vars.nftId);
+            vars.userPositionBefore = fetchPositionByNftId(vars.nftId);
             
             // .--------- SUPPLY ----------.
             if (_config.supplyActionType == FluidVaultT1Adjust.CollActionType.SUPPLY && _config.supplyAmountUsd > 0) {
@@ -503,8 +518,7 @@ contract TestFluidVaultT1Adjust is FluidExecuteActions {
             vars.walletBorrowTokenBalanceAfter = balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, walletAddr);
             vars.walletWethTokenBalanceAfter = balanceOf(TokenUtils.WETH_ADDR, walletAddr);
             vars.walletEthTokenBalanceAfter = address(walletAddr).balance;
-
-            (vars.userPositionAfter, ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(vars.nftId);
+            vars.userPositionAfter = fetchPositionByNftId(vars.nftId);
 
             // .--------- ASSERTIONS ----------.
             // make sure no dust is left on wallet

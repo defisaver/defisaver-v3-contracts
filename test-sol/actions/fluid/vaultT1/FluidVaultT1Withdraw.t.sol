@@ -4,15 +4,13 @@ pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
-import { IFluidVaultFactory } from "../../../../contracts/interfaces/fluid/IFluidVaultFactory.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import { FluidVaultT1Withdraw } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw.sol";
 import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
-import { FluidExecuteActions } from "../../../utils/executeActions/FluidExecuteActions.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { console } from "forge-std/console.sol";
+import { FluidTestBase } from "../FluidTestBase.t.sol";
 
-contract TestFluidVaultT1Withdraw is FluidExecuteActions {
+contract TestFluidVaultT1Withdraw is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -57,6 +55,7 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
         bool wrapWithdrawnEth = false;
         _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD, wrapWithdrawnEth);
     }
+
     function test_should_withdraw_direct_action() public {
         bool isDirect = true;
         bool takeMaxUint256 = false;
@@ -65,6 +64,7 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
         bool wrapWithdrawnEth = false;
         _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD, wrapWithdrawnEth);
     }
+
     function test_should_max_withdraw() public {
         bool isDirect = false;
         bool takeMaxUint256 = true;
@@ -73,6 +73,7 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
         bool wrapWithdrawnEth = false;
         _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD, wrapWithdrawnEth);
     }
+
     function test_should_max_withdraw_with_wrapping() public {
         bool isDirect = false;
         bool takeMaxUint256 = true;
@@ -81,6 +82,7 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
         bool wrapWithdrawnEth = true;
         _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD, wrapWithdrawnEth);
     }
+
     function test_should_withdraw_part_with_wrapping() public {
         bool isDirect = false;
         bool takeMaxUint256 = false;
@@ -89,6 +91,7 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
         bool wrapWithdrawnEth = true;
         _baseTest(isDirect, takeMaxUint256, initialSupplyAmountUSD, withdrawAmountUSD, wrapWithdrawnEth);
     }
+    
     function _baseTest(
         bool _isDirect,
         bool _takeMaxUint256,
@@ -124,8 +127,7 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
                 _isDirect
             );
 
-            (IFluidVaultResolver.UserPosition memory userPositionBefore, ) = 
-                IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);
+            IFluidVaultResolver.UserPosition memory userPositionBefore = fetchPositionByNftId(nftId);
 
             uint256 senderSupplyTokenBalanceBefore = isNativeWithdraw 
                 ? (
@@ -147,8 +149,7 @@ contract TestFluidVaultT1Withdraw is FluidExecuteActions {
                 ? address(walletAddr).balance 
                 : balanceOf(constants.supplyToken, walletAddr);
 
-            (IFluidVaultResolver.UserPosition memory userPositionAfter, ) = 
-                IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);
+            IFluidVaultResolver.UserPosition memory userPositionAfter = fetchPositionByNftId(nftId);
 
             assertEq(walletSupplyTokenBalanceAfter, walletSupplyTokenBalanceBefore);
             if (_takeMaxUint256) {

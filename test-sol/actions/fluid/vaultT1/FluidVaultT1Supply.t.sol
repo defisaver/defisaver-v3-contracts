@@ -4,16 +4,13 @@ pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
-import { IFluidVaultFactory } from "../../../../contracts/interfaces/fluid/IFluidVaultFactory.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import { FluidVaultT1Supply } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Supply.sol";
 import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
-
-import { FluidExecuteActions } from "../../../utils/executeActions/FluidExecuteActions.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { console } from "forge-std/console.sol";
+import { FluidTestBase } from "../FluidTestBase.t.sol";
 
-contract TestFluidVaultT1Supply is FluidExecuteActions {
+contract TestFluidVaultT1Supply is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -56,18 +53,21 @@ contract TestFluidVaultT1Supply is FluidExecuteActions {
         uint256 collateralAmountInUSD = 30000;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD);
     }
+
     function test_should_supply_direct_action() public {
         bool isDirect = true;
         bool takeMaxUint256 = false;
         uint256 collateralAmountInUSD = 30000;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD);
     }
+
     function test_should_supply_with_maxUint256() public {
         bool isDirect = false;
         bool takeMaxUint256 = true;
         uint256 collateralAmountInUSD = 30000;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD);
     }
+    
     function _baseTest(
         bool _isDirect,
         bool _takeMaxUint256,
@@ -104,8 +104,7 @@ contract TestFluidVaultT1Supply is FluidExecuteActions {
                 _isDirect
             );
 
-            (IFluidVaultResolver.UserPosition memory userPositionBefore, ) = 
-                IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);
+            IFluidVaultResolver.UserPosition memory userPositionBefore = fetchPositionByNftId(nftId);
 
             uint256 senderSupplyTokenBalanceBefore = balanceOf(constants.supplyToken, sender);
             uint256 walletSupplyTokenBalanceBefore = balanceOf(constants.supplyToken, walletAddr);
@@ -116,13 +115,12 @@ contract TestFluidVaultT1Supply is FluidExecuteActions {
             assertEq(walletSupplyTokenBalanceAfter, walletSupplyTokenBalanceBefore);
             assertEq(senderSupplyTokenBalanceAfter, senderSupplyTokenBalanceBefore - supplyAmount);
 
-            (IFluidVaultResolver.UserPosition memory userPositionAfter, ) = 
-                IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);
+            IFluidVaultResolver.UserPosition memory userPositionAfter = fetchPositionByNftId(nftId);
 
-            console.log("supplyAmount: ", supplyAmount);
-            console.log("diff1:", userPositionAfter.supply - userPositionBefore.supply);
-            console.log("userPositionBefore.supply", userPositionBefore.supply);
-            console.log("userPositionAfter.supply", userPositionAfter.supply);
+            emit log_named_uint("supplyAmount", supplyAmount);
+            emit log_named_uint("diff1", userPositionAfter.supply - userPositionBefore.supply);
+            emit log_named_uint("userPositionBefore.supply", userPositionBefore.supply);
+            emit log_named_uint("userPositionAfter.supply", userPositionAfter.supply);
         }
     }
 }

@@ -4,16 +4,14 @@ pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT1.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
-import { IFluidVaultFactory } from "../../../../contracts/interfaces/fluid/IFluidVaultFactory.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import { FluidVaultT1Payback } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Payback.sol";
 import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
-import { FluidExecuteActions } from "../../../utils/executeActions/FluidExecuteActions.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { Vm } from "forge-std/Vm.sol";
-import { console } from "forge-std/console.sol";
+import { FluidTestBase } from "../FluidTestBase.t.sol";
 
-contract TestFluidVaultT1Payback is FluidExecuteActions {
+contract TestFluidVaultT1Payback is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -64,6 +62,7 @@ contract TestFluidVaultT1Payback is FluidExecuteActions {
             paybackAmountUSD
         );
     }
+
     function test_should_payback_action_direct() public {
         bool isDirect = true;
         bool isMaxPayback = false;
@@ -78,6 +77,7 @@ contract TestFluidVaultT1Payback is FluidExecuteActions {
             paybackAmountUSD
         );
     }
+
     function test_should_payback_with_different_amounts() public {
         bool isDirect = false;
         bool isMaxPayback = false;
@@ -102,6 +102,7 @@ contract TestFluidVaultT1Payback is FluidExecuteActions {
             );
         }
     }
+    
     function test_should_max_payback() public {
         bool isDirect = false;
         bool isMaxPayback = true;
@@ -154,8 +155,7 @@ contract TestFluidVaultT1Payback is FluidExecuteActions {
             bool isNativePayback = constants.borrowToken == TokenUtils.ETH_ADDR;
             constants.borrowToken = isNativePayback ? TokenUtils.WETH_ADDR : constants.borrowToken;
 
-            (IFluidVaultResolver.UserPosition memory userPositionBefore, ) = 
-                IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);
+            IFluidVaultResolver.UserPosition memory userPositionBefore = fetchPositionByNftId(nftId);
 
             uint256 paybackAmount = _isMaxPayback
                 ? userPositionBefore.borrow * 1001 / 1000 // add 0.1% buffer
@@ -193,8 +193,7 @@ contract TestFluidVaultT1Payback is FluidExecuteActions {
                 ? address(walletAddr).balance
                 : balanceOf(constants.borrowToken, walletAddr);
 
-            (IFluidVaultResolver.UserPosition memory userPositionAfter, ) = 
-                IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(nftId);
+            IFluidVaultResolver.UserPosition memory userPositionAfter = fetchPositionByNftId(nftId);
 
             // make sure no dust is left on wallet
             assertEq(vars.walletBorrowTokenBalanceAfter, vars.walletBorrowTokenBalanceBefore);
