@@ -1176,7 +1176,8 @@ contract ActionsUtils {
         uint256 _nftId,
         uint256 _withdrawAmount,
         FluidDexModel.WithdrawVariableData memory _withdrawVariableData,
-        bool _wrapWithdrawnEth
+        bool _wrapWithdrawnEth,
+        uint256 _minCollToWithdraw
     ) public pure returns (bytes memory params) {
         params = abi.encode(    
             FluidDexWithdraw.Params({
@@ -1185,7 +1186,8 @@ contract ActionsUtils {
                 nftId: _nftId,
                 withdrawAmount: _withdrawAmount,
                 withdrawVariableData: _withdrawVariableData,
-                wrapWithdrawnEth: _wrapWithdrawnEth
+                wrapWithdrawnEth: _wrapWithdrawnEth,
+                minCollToWithdraw: _minCollToWithdraw
             })
         );
     }

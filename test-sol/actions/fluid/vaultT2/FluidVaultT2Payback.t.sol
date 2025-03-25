@@ -3,21 +3,23 @@
 pragma solidity =0.8.24;
 
 import { IFluidVault } from "../../../../contracts/interfaces/fluid/vaults/IFluidVault.sol";
-import { IFluidVaultT1 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT1.sol";
+import { IFluidVaultT2 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT2.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
-import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
-import { FluidVaultT1Payback } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Payback.sol";
+import { FluidDexPayback } from "../../../../contracts/actions/fluid/dex/FluidDexPayback.sol";
+import { FluidView } from "../../../../contracts/views/FluidView.sol";
+import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
+import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
+import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { Vm } from "forge-std/Vm.sol";
-import { FluidTestBase } from "../FluidTestBase.t.sol";
 
-contract TestFluidVaultT1Payback is FluidTestBase {
+contract TestFluidVaultT2Payback is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
-    FluidVaultT1Payback cut;
+    FluidDexPayback cut;
 
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
@@ -26,24 +28,24 @@ contract TestFluidVaultT1Payback is FluidTestBase {
     SmartWallet wallet;
     address sender;
     address walletAddr;
-    IFluidVaultT1[] vaults;
+    IFluidVaultT2[] vaults;
 
-    FluidVaultT1Open openContract;
+    FluidDexOpen openContract;
 
     /*//////////////////////////////////////////////////////////////////////////
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidVaultT1Payback");
+        forkMainnetLatest();
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
 
-        cut = new FluidVaultT1Payback();
-        openContract = new FluidVaultT1Open();
+        cut = new FluidDexPayback();
+        openContract = new FluidDexOpen();
 
-        vaults = getT1Vaults();
+        vaults = getT2Vaults();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -144,55 +146,63 @@ contract TestFluidVaultT1Payback is FluidTestBase {
         uint256 _paybackAmountUSD
     ) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
-            uint256 nftId = executeFluidVaultT1Open(
+
+            uint256 nftId = executeFluidVaultT2Open(
                 address(vaults[i]),
-                _initialSupplyAmountUSD,
-                _initialBorrowAmountUSD,
+                _initialSupplyAmountUSD, /* initial coll amount 0 in usd */
+                0, /* initial coll amount 1 in usd */
+                _initialBorrowAmountUSD, /* initial borrow amount in usd */
                 wallet,
                 address(openContract)
             );
 
-            IFluidVaultT1.ConstantViews memory constants = vaults[i].constantsView();
-            bool isNativePayback = constants.borrowToken == TokenUtils.ETH_ADDR;
-            constants.borrowToken = isNativePayback ? TokenUtils.WETH_ADDR : constants.borrowToken;
+            if (nftId == 0) {
+                emit log_named_address("Skipping test: Could't open fluid position for vault:", address(vaults[i]));
+                continue;
+            }
+
+            IFluidVaultT2.ConstantViews memory constants = vaults[i].constantsView();
+            bool isNativePayback = constants.borrowToken.token0 == TokenUtils.ETH_ADDR;
+            constants.borrowToken.token0 = isNativePayback ? TokenUtils.WETH_ADDR : constants.borrowToken.token0;
 
             IFluidVaultResolver.UserPosition memory userPositionBefore = fetchPositionByNftId(nftId);
 
             uint256 paybackAmount = _isMaxPayback
                 ? userPositionBefore.borrow * 1001 / 1000 // add 0.1% buffer
-                : amountInUSDPrice(constants.borrowToken, _paybackAmountUSD);
+                : amountInUSDPrice(constants.borrowToken.token0, _paybackAmountUSD);
 
-            give(constants.borrowToken, sender, paybackAmount);
-            approveAsSender(sender, constants.borrowToken, walletAddr, 0); // To handle Tether
-            approveAsSender(sender, constants.borrowToken, walletAddr, paybackAmount);
+            give(constants.borrowToken.token0, sender, paybackAmount);
+            approveAsSender(sender, constants.borrowToken.token0, walletAddr, 0); // To handle Tether
+            approveAsSender(sender, constants.borrowToken.token0, walletAddr, paybackAmount);
 
             bytes memory executeActionCallData = executeActionCalldata(
-                fluidVaultT1PaybackEncode(
+                fluidDexPaybackEncode(
                     address(vaults[i]),
+                    sender,
                     nftId,
                     paybackAmount,
-                    sender
+                    FluidDexModel.PaybackVariableData(0, 0, 0) /* used for T3 and T4 vaults */
                 ),
                 _isDirect
             );
 
             TempLocalVars memory vars;
 
-            vars.senderBorrowTokenBalanceBefore = balanceOf(constants.borrowToken, sender);
+            vars.senderBorrowTokenBalanceBefore = balanceOf(constants.borrowToken.token0, sender);
             vars.senderEthBalanceBefore = address(sender).balance;
             vars.walletBorrowTokenBalanceBefore = isNativePayback
                 ? address(walletAddr).balance
-                : balanceOf(constants.borrowToken, walletAddr);
+                : balanceOf(constants.borrowToken.token0, walletAddr);
 
             vm.recordLogs();
             wallet.execute(address(cut), executeActionCallData, 0);
             Vm.Log[] memory logs = vm.getRecordedLogs();
 
-            vars.senderBorrowTokenBalanceAfter = balanceOf(constants.borrowToken, sender);
+            vars.senderBorrowTokenBalanceAfter = balanceOf(constants.borrowToken.token0, sender);
             vars.senderEthBalanceAfter = address(sender).balance;
             vars.walletBorrowTokenBalanceAfter = isNativePayback
                 ? address(walletAddr).balance
-                : balanceOf(constants.borrowToken, walletAddr);
+                : balanceOf(constants.borrowToken.token0, walletAddr);
 
             IFluidVaultResolver.UserPosition memory userPositionAfter = fetchPositionByNftId(nftId);
 

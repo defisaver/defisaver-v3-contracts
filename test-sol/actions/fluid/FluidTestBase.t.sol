@@ -69,6 +69,21 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         shares = shares * 100 / 101;
     }
 
+    function estimateWithdrawShares(
+        address _dexPool,
+        uint256 _tokenAmount0,
+        uint256 _tokenAmount1
+    ) internal returns (uint256 shares) {
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateWithdraw(
+            _dexPool,
+            _tokenAmount0,
+            _tokenAmount1,
+            type(uint256).max /* maxCollShares */
+        );
+        // Slightly increase shares (simulate slippage). This means we allow this amount of shares to be burned.
+        shares = shares * 101 / 100;
+    }
+
     function supplyLimitReached(
         FluidView.DexSupplyData memory _dexSupplyData,
         uint256 _newShares
