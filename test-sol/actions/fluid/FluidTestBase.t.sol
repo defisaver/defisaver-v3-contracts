@@ -41,6 +41,13 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         vaults[2] = IFluidVaultT2(0x7503b58Bb29937e7E2980f70D3FD021B7ebeA6d0); // id:92 - sUSDe-USDT/USDT
     }
 
+    function getT3Vaults() internal pure returns (IFluidVaultT3[] memory vaults) {
+        vaults = new IFluidVaultT3[](3);
+        vaults[0] = IFluidVaultT3(0x3E11B9aEb9C7dBbda4DD41477223Cc2f3f24b9d7); // id:45 - ETH/USDC-USDT
+        vaults[1] = IFluidVaultT3(0x221E35b5655A1eEB3C42c4DeFc39648531f6C9CF); // id:46 - wstETH/USDC-USDT
+        vaults[2] = IFluidVaultT3(0x47b6e2c8a0cB072198f17ccC6C7634dCc7126c3E); // id:49 - cbBTC/USDC-USDT
+    }
+
     function fetchPositionByNftId(uint256 _nftId) internal view returns (IFluidVaultResolver.UserPosition memory position) {
         (position, ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
     }
@@ -81,6 +88,23 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
             type(uint256).max /* maxCollShares */
         );
         // Slightly increase shares (simulate slippage). This means we allow this amount of shares to be burned.
+        shares = shares * 101 / 100;
+    }
+
+    function estimateBorrowShares(
+        address _dexPool,
+        uint256 _tokenAmount0,
+        uint256 _tokenAmount1
+    ) internal returns (uint256 shares) {
+        if (_tokenAmount0 == 0 && _tokenAmount1 == 0) return shares;
+
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateBorrow(
+            _dexPool,
+            _tokenAmount0,
+            _tokenAmount1,
+            type(uint256).max /* maxDebtShares */
+        );
+        // Slightly increase shares (simulate slippage). This means we allow this amount of shares to be minted.
         shares = shares * 101 / 100;
     }
 
@@ -195,6 +219,68 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
                 true /* wrapBorrowedEth */
             ),
             true /* isDirect */
+        );
+
+        vm.recordLogs();
+        _wallet.execute(_openContract, executeActionCallData, 0);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        nftId = getNftIdFromLogs(logs);
+    }
+
+    function executeFluidVaultT3Open(
+        address _vault,
+        uint256 _collAmountInUSD,
+        uint256 _borrowAmount0InUSD,
+        uint256 _borrowAmount1InUSD,
+        SmartWallet _wallet,
+        address _openContract
+    ) internal returns (uint256 nftId) {
+        FluidView fluidView = new FluidView();
+        FluidView.VaultData memory vaultData = fluidView.getVaultData(address(_vault));
+    
+        uint256 collAmount;
+        {
+            bool isNativeSupply = vaultData.supplyToken0 == TokenUtils.ETH_ADDR;
+            vaultData.supplyToken0 = isNativeSupply ? TokenUtils.WETH_ADDR : vaultData.supplyToken0;
+            collAmount = amountInUSDPrice(vaultData.supplyToken0, _collAmountInUSD);
+            give(vaultData.supplyToken0, _wallet.owner(), collAmount);
+            _wallet.ownerApprove(vaultData.supplyToken0, collAmount);
+        }
+
+        uint256 borrowAmount0;
+        {
+            bool isNativeBorrow0 = vaultData.borrowToken0 == TokenUtils.ETH_ADDR;
+            borrowAmount0 = _borrowAmount0InUSD != 0
+                ? amountInUSDPrice(isNativeBorrow0 ? TokenUtils.WETH_ADDR : vaultData.borrowToken0, _borrowAmount0InUSD)
+                : 0;
+        }
+
+        uint256 borrowAmount1;
+        {
+            bool isNativeBorrow1 = vaultData.borrowToken1 == TokenUtils.ETH_ADDR;
+            borrowAmount1 = _borrowAmount1InUSD != 0
+                ? amountInUSDPrice(isNativeBorrow1 ? TokenUtils.WETH_ADDR : vaultData.borrowToken1, _borrowAmount1InUSD)
+                : 0;
+        }
+
+        uint256 estimatedDebtShares = estimateBorrowShares(
+            vaultData.dexSupplyData.dexPool,
+            borrowAmount0,
+            borrowAmount1
+        );
+
+        bytes memory executeActionCallData = executeActionCalldata(
+            fluidDexOpenEncode(
+                _vault,
+                _wallet.owner(),
+                _wallet.owner(),
+                collAmount,
+                FluidDexModel.SupplyVariableData(0, 0, 0), /* only used for T2 and T4  vaults */
+                0, /* borrowAmount */
+                FluidDexModel.BorrowVariableData(borrowAmount0, borrowAmount1, estimatedDebtShares),
+                true /* wrapBorrowedEth */
+            ),
+            true
         );
 
         vm.recordLogs();
