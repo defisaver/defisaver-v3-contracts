@@ -45,7 +45,7 @@ library FluidBorrowDexLogic {
                 0, /* newCol_ */
                 _data.variableData.debtAmount0.signed256(),
                 _data.variableData.debtAmount1.signed256(),
-                _data.variableData.minDebtShares.signed256(),
+                _data.variableData.maxDebtShares.signed256(),
                 sendTokensTo
             )
             : IFluidVaultT4(_data.vault).operate(
@@ -55,7 +55,7 @@ library FluidBorrowDexLogic {
                 0, /* colSharesMinMax_ */
                 _data.variableData.debtAmount0.signed256(),
                 _data.variableData.debtAmount1.signed256(),
-                _data.variableData.minDebtShares.signed256(),
+                _data.variableData.maxDebtShares.signed256(),
                 sendTokensTo
             );
 

@@ -46,7 +46,7 @@ library FluidPaybackDexLogic {
                 0, /* newCol_ */
                 -vars.amount0.signed256(),
                 -vars.amount1.signed256(),
-                -_data.variableData.maxDebtShares.signed256(),
+                -_data.variableData.minDebtShares.signed256(),
                 address(0) /* to */
             )
             : IFluidVaultT4(_data.vault).operate(
@@ -56,7 +56,7 @@ library FluidPaybackDexLogic {
                 0, /* colSharesMinMax_ */
                 -vars.amount0.signed256(),
                 -vars.amount1.signed256(),
-                -_data.variableData.maxDebtShares.signed256(),
+                -_data.variableData.minDebtShares.signed256(),
                 address(0) /* to_ */
             );
 

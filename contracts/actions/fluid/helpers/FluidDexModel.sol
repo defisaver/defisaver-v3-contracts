@@ -27,20 +27,20 @@ library FluidDexModel {
 
     /// @param debtAmount0 Amount of debt token 0 to borrow.
     /// @param debtAmount1 Amount of debt token 1 to borrow.
-    /// @param minDebtShares Min amount of debt shares to mint.
+    /// @param maxDebtShares Max amount of debt shares to mint.
     struct BorrowVariableData {
         uint256 debtAmount0;
         uint256 debtAmount1;
-        uint256 minDebtShares;
+        uint256 maxDebtShares;
     }
 
     /// @param debtAmount0 Amount of debt token 0 to payback.
     /// @param debtAmount1 Amount of debt token 1 to payback.
-    /// @param maxDebtShares Max amount of debt shares to burn.
+    /// @param minDebtShares Min amount of debt shares to burn.
     struct PaybackVariableData {
         uint256 debtAmount0;
         uint256 debtAmount1;
-        uint256 maxDebtShares;
+        uint256 minDebtShares;
     }
 
     /// @notice Data struct for supplying liquidity to a Fluid DEX

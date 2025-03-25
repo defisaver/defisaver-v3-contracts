@@ -62,8 +62,8 @@ contract FluidDexPayback is ActionBase, FluidHelper {
             _subData,
             _returnValues
         );
-        params.paybackVariableData.maxDebtShares = _parseParamUint(
-            params.paybackVariableData.maxDebtShares,
+        params.paybackVariableData.minDebtShares = _parseParamUint(
+            params.paybackVariableData.minDebtShares,
             _paramMapping[6],
             _subData,
             _returnValues

@@ -96,8 +96,8 @@ contract FluidDexOpen is ActionBase, FluidHelper {
             _subData,
             _returnValues
         );
-        params.borrowVariableData.minDebtShares = _parseParamUint(
-            params.borrowVariableData.minDebtShares,
+        params.borrowVariableData.maxDebtShares = _parseParamUint(
+            params.borrowVariableData.maxDebtShares,
             _paramMapping[10],
             _subData,
             _returnValues
