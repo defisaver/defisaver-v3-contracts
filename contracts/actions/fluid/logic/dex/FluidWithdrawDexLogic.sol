@@ -21,11 +21,13 @@ library FluidWithdrawDexLogic {
     /// @notice Withdraws tokens from a Fluid DEX using variable amount of shares.
     /// @param _data Withdraw data
     /// @param _tokens Tokens data
-    /// @return collSharesBurned Amount of collateral shares burned.
+    /// @return sharesBurnedOrTokenWithdrawn Supports two cases:
+    ///         - For max withdrawal: Return the exact amount of full withdrawn tokens (either token0 or token1)
+    ///         - For partial withdrawal: Return the amount of collateral shares burned.
     function withdrawVariable(
         FluidDexModel.WithdrawDexData memory _data,
         IFluidVault.Tokens memory _tokens
-    ) internal returns (uint256 collSharesBurned) {
+    ) internal returns (uint256 sharesBurnedOrTokenWithdrawn) {
         _data.vaultType.requireSmartCollateral();
 
         (bool sendColl0AsWrapped, bool sendColl1AsWrapped) = FluidDexTokensUtils.shouldSendTokensAsWrapped(
@@ -37,6 +39,82 @@ library FluidWithdrawDexLogic {
 
         address sendTokensTo = (sendColl0AsWrapped || sendColl1AsWrapped) ? address(this) : _data.to;
 
+        // 1st CASE: Full withdrawal in coll token 0.
+        if (_data.variableData.collAmount0 == type(uint256).max) {
+            // type(int256).min will trigger max withdrawal inside the vault
+            (, int256[] memory retVals) = _data.vaultType.isT2Vault()
+                ? IFluidVaultT2(_data.vault).operatePerfect(
+                    _data.nftId,
+                    type(int256).min, /* perfectColShares_ */
+                    -_data.minCollToWithdraw.signed256(),
+                    0, /* colToken1MinMax_ */
+                    0, /* newDebt_ */
+                    sendTokensTo
+                )
+                : IFluidVaultT4(_data.vault).operatePerfect(
+                    _data.nftId,
+                    type(int256).min, /* perfectColShares_ */
+                    -_data.minCollToWithdraw.signed256(),
+                    0, /* colToken1MinMax_ */
+                    0, /* perfectDebtShares_ */
+                    0, /* debtToken0MinMax_ */
+                    0, /* debtToken1MinMax_ */
+                    sendTokensTo
+                );
+
+            uint256 token0Withdrawn = uint256(-retVals[1]);
+
+            // If coll token0 should be wrapped, re-send it to the recipient
+            FluidDexTokensUtils.sendTokens(
+                _tokens,
+                _data.to,
+                token0Withdrawn,
+                0, /* token1Withdrawn */
+                sendColl0AsWrapped,
+                false /* sendToken1AsWrapped */
+            );
+
+            return token0Withdrawn;
+        }
+
+        // 2nd CASE: Full withdrawal in coll token 1.
+        if (_data.variableData.collAmount1 == type(uint256).max) {
+            (, int256[] memory retVals) = _data.vaultType.isT2Vault()
+                ? IFluidVaultT2(_data.vault).operatePerfect(
+                    _data.nftId,
+                    type(int256).min, /* perfectColShares_ */
+                    0, /* colToken0MinMax_ */
+                    -_data.minCollToWithdraw.signed256(),
+                    0, /* newDebt_ */
+                    sendTokensTo
+                )
+                : IFluidVaultT4(_data.vault).operatePerfect(
+                    _data.nftId,
+                    type(int256).min, /* perfectColShares_ */
+                    0, /* colToken0MinMax_ */
+                    -_data.minCollToWithdraw.signed256(),
+                    0, /* perfectDebtShares_ */
+                    0, /* debtToken0MinMax_ */
+                    0, /* debtToken1MinMax_ */
+                    sendTokensTo
+                );
+
+            uint256 token1Withdrawn = uint256(-retVals[2]);
+
+            // If coll token1 should be wrapped, re-send it to the recipient
+            FluidDexTokensUtils.sendTokens(
+                _tokens,
+                _data.to,
+                0,
+                token1Withdrawn,
+                false,
+                sendColl1AsWrapped
+            );
+
+            return token1Withdrawn;
+        }
+
+        // 3rd CASE: Handle partial withdrawal in either one or both collateral tokens.
         ( , int256 exactCollSharesBurned , ) = _data.vaultType.isT2Vault()
             ? IFluidVaultT2(_data.vault).operate(
                 _data.nftId,
@@ -57,7 +135,7 @@ library FluidWithdrawDexLogic {
                 sendTokensTo
             );
 
-        collSharesBurned = uint256(-exactCollSharesBurned);
+        sharesBurnedOrTokenWithdrawn = uint256(-exactCollSharesBurned);
 
         // If one of tokens should be wrapped, re-send them to the recipient
         FluidDexTokensUtils.sendTokens(

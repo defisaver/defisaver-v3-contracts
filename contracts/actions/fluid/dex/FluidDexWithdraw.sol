@@ -23,6 +23,8 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
     /// @param withdrawAmount Amount of collateral to withdraw. Used if vault is T3.
     /// @param withdrawVariableData Variable data for withdraw action. Used if vault is T2 or T4.
     /// @param wrapWithdrawnEth Whether to wrap the withdrawn ETH into WETH if one of the withdrawn assets is ETH.
+    /// @param minCollToWithdraw Minimum amount of collateral to withdraw. Only used for max withdrawal -
+    ///                          variableData.collAmount0 or variableData.collAmount1 is type(uint256).max
     struct Params {
         address vault;
         address to;
@@ -30,6 +32,7 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
         uint256 withdrawAmount;
         FluidDexModel.WithdrawVariableData withdrawVariableData;
         bool wrapWithdrawnEth;
+        uint256 minCollToWithdraw;
     }
 
     /// @inheritdoc ActionBase
@@ -74,10 +77,16 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
             _paramMapping[7],
             _subData, _returnValues
         ) == 1;
+        params.minCollToWithdraw = _parseParamUint(
+            params.minCollToWithdraw,
+            _paramMapping[8],
+            _subData,
+            _returnValues
+        );
 
-        (uint256 withdrawnAmountOrBurnedShares, bytes memory logData) = _withdraw(params);
+        (uint256 sharesBurnedOrTokenWithdrawn, bytes memory logData) = _withdraw(params);
         emit ActionEvent("FluidDexWithdraw", logData);
-        return bytes32(withdrawnAmountOrBurnedShares);
+        return bytes32(sharesBurnedOrTokenWithdrawn);
     }
 
     /// @inheritdoc ActionBase
@@ -114,19 +123,20 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
             return (withdrawAmount, abi.encode(_params));
         }
 
-        uint256 collSharesBurned = FluidWithdrawDexLogic.withdrawVariable(
+        uint256 sharesBurnedOrTokenWithdrawn = FluidWithdrawDexLogic.withdrawVariable(
             FluidDexModel.WithdrawDexData({
                 vault: _params.vault,
                 vaultType: constants.vaultType,
                 nftId: _params.nftId,
                 to: _params.to,
                 variableData: _params.withdrawVariableData,
-                wrapWithdrawnEth: _params.wrapWithdrawnEth
+                wrapWithdrawnEth: _params.wrapWithdrawnEth,
+                minCollToWithdraw: _params.minCollToWithdraw
             }),
             constants.supplyToken
         );
 
-        return (collSharesBurned, abi.encode(_params));
+        return (sharesBurnedOrTokenWithdrawn, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

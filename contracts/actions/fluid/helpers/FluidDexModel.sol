@@ -64,6 +64,8 @@ library FluidDexModel {
     /// @param to Address to send the tokens to
     /// @param variableData Data for withdrawing liquidity with variable amounts
     /// @param wrapWithdrawnEth Whether to wrap withdrawn ETH into WETH
+    /// @param minCollToWithdraw Minimum amount of collateral to withdraw. Only used for max withdrawal -
+    ///                          variableData.collAmount0 or variableData.collAmount1 is type(uint256).max
     struct WithdrawDexData {
         address vault;
         uint256 vaultType;
@@ -71,6 +73,7 @@ library FluidDexModel {
         address to;
         WithdrawVariableData variableData;
         bool wrapWithdrawnEth;
+        uint256 minCollToWithdraw;
     }
 
     /// @notice Data struct for borrowing tokens from a Fluid DEX
