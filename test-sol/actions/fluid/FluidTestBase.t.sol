@@ -66,14 +66,18 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         uint256 _tokenAmount0,
         uint256 _tokenAmount1
     ) internal returns (uint256 shares) {
-        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateDeposit(
+        try IFluidDexResolver(FLUID_DEX_RESOLVER).estimateDeposit(  
             _dexPool,
             _tokenAmount0,
             _tokenAmount1,
             1 /* minCollShares */
-        );
-        // Slightly reduce shares (simulate slippage). This means we expect at least this amount of shares.
-        shares = shares * 100 / 101;
+        ) returns (uint256 _shares) {
+            // Slightly reduce shares (simulate slippage). This means we expect at least this amount of shares.
+            shares = _shares * 100 / 101;
+        } catch {
+            // Return 0 on error. This is likely because the deposit limit has been reached.
+            shares = 0;
+        }
     }
 
     function estimateWithdrawShares(
@@ -98,14 +102,33 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
     ) internal returns (uint256 shares) {
         if (_tokenAmount0 == 0 && _tokenAmount1 == 0) return shares;
 
-        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateBorrow(
+        try IFluidDexResolver(FLUID_DEX_RESOLVER).estimateBorrow(
             _dexPool,
             _tokenAmount0,
             _tokenAmount1,
             type(uint256).max /* maxDebtShares */
+        ) returns (uint256 _shares) {
+            // Slightly increase shares (simulate slippage). This means we allow this amount of shares to be minted.
+            shares = _shares * 101 / 100;
+        } catch {
+            // Return 0 on error. This is likely because the borrow limit has been reached.
+            shares = 0;
+        }
+    }
+
+    function estimatePaybackShares(
+        address _dexPool,
+        uint256 _tokenAmount0,
+        uint256 _tokenAmount1
+    ) internal returns (uint256 shares) {
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimatePayback(
+            _dexPool,
+            _tokenAmount0,
+            _tokenAmount1,
+            0 /* minSharesAmt_ */
         );
-        // Slightly increase shares (simulate slippage). This means we allow this amount of shares to be minted.
-        shares = shares * 101 / 100;
+        // Slightly reduce shares (simulate slippage). This means we expect at least this amount of shares to be burned.
+        shares = shares * 100 / 101;
     }
 
     function supplyLimitReached(
@@ -115,8 +138,19 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         return _dexSupplyData.maxSupplyShares  < _dexSupplyData.totalSupplyShares + _newShares;
     }
 
+    function borrowLimitReached(
+        FluidView.DexBorrowData memory _dexBorrowData,
+        uint256 _newShares
+    ) internal pure returns (bool) {
+        return _dexBorrowData.maxBorrowShares < _dexBorrowData.totalBorrowShares + _newShares;
+    }
+
     function logSupplyLimitReached(address _vault) internal {
         emit log_named_address("Skipping test, smart collateral vault supply limit reached", _vault);
+    }
+
+    function logBorrowLimitReached(address _vault) internal {
+        emit log_named_address("Skipping test, smart debt vault borrow limit reached", _vault);
     }
 
     function giveAndApproveToken(
