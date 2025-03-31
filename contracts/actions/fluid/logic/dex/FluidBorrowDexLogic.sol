@@ -28,8 +28,6 @@ library FluidBorrowDexLogic {
     ) internal returns (uint256 borrowShares) {
         _data.vaultType.requireSmartDebt();
 
-        if (_data.variableData.debtAmount0 == 0 && _data.variableData.debtAmount1 == 0) return 0;
-
         (bool sendDebt0AsWrapped, bool sendDebt1AsWrapped) = FluidDexTokensUtils.shouldSendTokensAsWrapped(
             _tokens,
             _data.wrapBorrowedEth,

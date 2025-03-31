@@ -177,8 +177,8 @@ contract FluidDexOpen is ActionBase, FluidHelper {
         IFluidVault.ConstantViews memory _constants,
         uint256 _nftId
     ) internal {
-        _constants.vaultType.isT2Vault()
-            ? FluidBorrowLiquidityLogic.borrow(
+        if (_constants.vaultType.isT2Vault() && _params.borrowAmount > 0) {
+            FluidBorrowLiquidityLogic.borrow(
                 FluidLiquidityModel.BorrowData({
                     vault: _params.vault,
                     vaultType: _constants.vaultType,
@@ -188,8 +188,9 @@ contract FluidDexOpen is ActionBase, FluidHelper {
                     to: _params.to,
                     wrapBorrowedEth: _params.wrapBorrowedEth
                 })
-            )
-            : FluidBorrowDexLogic.borrowVariable(
+            );
+        } else if (_params.borrowVariableData.debtAmount0 > 0 || _params.borrowVariableData.debtAmount1 > 0) {
+            FluidBorrowDexLogic.borrowVariable(
                 FluidDexModel.BorrowDexData({
                     vault: _params.vault,
                     vaultType: _constants.vaultType,
@@ -200,6 +201,7 @@ contract FluidDexOpen is ActionBase, FluidHelper {
                 }),
                 _constants.borrowToken
             );
+        }
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
