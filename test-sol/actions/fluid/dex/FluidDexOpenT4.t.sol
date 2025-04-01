@@ -11,7 +11,7 @@ import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { Vm } from "forge-std/Vm.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
-contract TestFluidVaultT4Open is FluidTestBase {
+contract TestFluidDexOpenT4 is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -25,7 +25,7 @@ contract TestFluidVaultT4Open is FluidTestBase {
     SmartWallet wallet;
     address sender;
     address walletAddr;
-    IFluidVaultT4[] vaults;
+    address[] vaults;
     FluidView fluidView;
 
     struct TestConfig {
@@ -81,7 +81,7 @@ contract TestFluidVaultT4Open is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("FluidDexOpen");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -250,7 +250,7 @@ contract TestFluidVaultT4Open is FluidTestBase {
         TestConfig memory _config        
     ) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
-            FluidView.VaultData memory vaultData = fluidView.getVaultData(address(vaults[i]));
+            FluidView.VaultData memory vaultData = fluidView.getVaultData(vaults[i]);
             LocalVars memory vars;
 
             // ------------- HANDLE COLLATERAL SETUP -------------
@@ -276,7 +276,7 @@ contract TestFluidVaultT4Open is FluidTestBase {
 
                 // Validate supply limit
                 if (supplyLimitReached(vaultData.dexSupplyData, vars.collShares)) {
-                    logSupplyLimitReached(address(vaults[i]));
+                    logSupplyLimitReached(vaults[i]);
                     continue;
                 }
             }
@@ -309,7 +309,7 @@ contract TestFluidVaultT4Open is FluidTestBase {
 
                 // Validate borrow limit
                 if (borrowLimitReached(vaultData.dexBorrowData, vars.debtShares)) {
-                    logBorrowLimitReached(address(vaults[i]));
+                    logBorrowLimitReached(vaults[i]);
                     continue;
                 }
             }
@@ -317,7 +317,7 @@ contract TestFluidVaultT4Open is FluidTestBase {
             // ------------- ENCODE CALL DATA -------------
             vars.executeActionCallData = executeActionCalldata(
                 fluidDexOpenEncode(
-                    address(vaults[i]),
+                    vaults[i],
                     sender, /* from */
                     sender, /* to */
                     0, /* supplyAmount - Only used for T3 vaults */
@@ -374,7 +374,7 @@ contract TestFluidVaultT4Open is FluidTestBase {
         TestConfig memory _config,
         LocalVars memory _vars,
         FluidView.VaultData memory _vaultData
-    ) internal {
+    ) internal view {
         _vars.senderCollToken0BalanceBefore = balanceOf(_vaultData.supplyToken0, sender);
         _vars.senderCollToken1BalanceBefore = balanceOf(_vaultData.supplyToken1, sender);
         _vars.senderBorrowToken0BalanceBefore = _vars.isNativeBorrow0 
@@ -399,7 +399,7 @@ contract TestFluidVaultT4Open is FluidTestBase {
         TestConfig memory _config,
         LocalVars memory _vars,
         FluidView.VaultData memory _vaultData
-    ) internal {
+    ) internal view {
         _vars.senderCollToken0BalanceAfter = balanceOf(_vaultData.supplyToken0, sender);
         _vars.senderCollToken1BalanceAfter = balanceOf(_vaultData.supplyToken1, sender);
         _vars.senderBorrowToken0BalanceAfter = _vars.isNativeBorrow0 

@@ -11,7 +11,7 @@ import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { Vm } from "forge-std/Vm.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
-contract TestFluidVaultT3Open is FluidTestBase {
+contract TestFluidDexOpenT3 is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -25,7 +25,7 @@ contract TestFluidVaultT3Open is FluidTestBase {
     SmartWallet wallet;
     address sender;
     address walletAddr;
-    IFluidVaultT3[] vaults;
+    address[] vaults;
     FluidView fluidView;
 
     struct TestConfig {
@@ -72,7 +72,7 @@ contract TestFluidVaultT3Open is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("FluidDexOpen");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -182,7 +182,7 @@ contract TestFluidVaultT3Open is FluidTestBase {
         TestConfig memory _config        
     ) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
-            FluidView.VaultData memory vaultData = fluidView.getVaultData(address(vaults[i]));
+            FluidView.VaultData memory vaultData = fluidView.getVaultData(vaults[i]);
             LocalVars memory vars;
 
             // Handle collateral setup for T3 open
@@ -218,14 +218,14 @@ contract TestFluidVaultT3Open is FluidTestBase {
 
             // Validate borrow limit
             if (borrowLimitReached(vaultData.dexBorrowData, vars.debtShares)) {
-                logBorrowLimitReached(address(vaults[i]));
+                logBorrowLimitReached(vaults[i]);
                 continue;
             }
 
             // Encode call data
             vars.executeActionCallData = executeActionCalldata(
                 fluidDexOpenEncode(
-                    address(vaults[i]),
+                    vaults[i],
                     sender, /* from */
                     sender, /* to */
                     _config.takeMaxUint256CollAmount ? type(uint256).max : vars.collAmount,

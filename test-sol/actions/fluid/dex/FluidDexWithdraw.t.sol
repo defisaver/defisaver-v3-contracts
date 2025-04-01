@@ -3,6 +3,7 @@
 pragma solidity =0.8.24;
 
 import { IFluidVaultT2 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT2.sol";
+import { IFluidVaultT4 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT4.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidView } from "../../../../contracts/views/FluidView.sol";
 import { FluidDexWithdraw } from "../../../../contracts/actions/fluid/dex/FluidDexWithdraw.sol";
@@ -12,7 +13,7 @@ import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
-contract TestFluidVaultT2Withdraw is FluidTestBase {
+contract TestFluidDexWithdraw is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -26,9 +27,14 @@ contract TestFluidVaultT2Withdraw is FluidTestBase {
     SmartWallet wallet;
     address sender;
     address walletAddr;
-    IFluidVaultT2[] vaults;
+
+    address[] t2Vaults;
+    address[] t4Vaults;
+
     FluidView fluidView;
     FluidDexOpen fluidDexOpen;
+
+    bool[] t2VaultsSelected;
 
     struct TestConfig {
         uint256 initialSupplyToken0AmountUSD;
@@ -76,7 +82,7 @@ contract TestFluidVaultT2Withdraw is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidVaultT2Withdraw");
+        forkMainnetLatest();
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -84,169 +90,213 @@ contract TestFluidVaultT2Withdraw is FluidTestBase {
 
         cut = new FluidDexWithdraw();
 
-        vaults = getT2Vaults();
+        t2Vaults = getT2Vaults();
+        t4Vaults = getT4Vaults();
         fluidView = new FluidView();
         fluidDexOpen = new FluidDexOpen();
+
+        t2VaultsSelected = new bool[](2);
+        t2VaultsSelected[0] = true;
+        t2VaultsSelected[1] = false;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     ////////////////////////////////////////////////////////////////////////*/
-    // function test_should_partial_withdrawal_coll_0() public {
-    //     _baseTest(
-    //         TestConfig({
-    //             initialSupplyToken0AmountUSD: 50000,
-    //             initialSupplyToken1AmountUSD: 0,
-    //             withdrawToken0AmountInUSD: 30000,
-    //             withdrawToken1AmountInUSD: 0,
-    //             takeMaxUint256CollAmount0: false,
-    //             takeMaxUint256CollAmount1: false,
-    //             isDirect: false,
-    //             wrapWithdrawnEth: false
-    //         })
-    //     );
-    // }
-
-    // function test_should_partial_withdrawal_coll_1() public {
-    //     _baseTest(
-    //         TestConfig({
-    //             initialSupplyToken0AmountUSD: 0,
-    //             initialSupplyToken1AmountUSD: 50000,
-    //             withdrawToken0AmountInUSD: 0,
-    //             withdrawToken1AmountInUSD: 30000,
-    //             takeMaxUint256CollAmount0: false,
-    //             takeMaxUint256CollAmount1: false,
-    //             isDirect: false,
-    //             wrapWithdrawnEth: false
-    //         })
-    //     );
-    // }
-
-    // function test_should_partial_withdrawal_both_coll() public {
-    //     _baseTest(
-    //         TestConfig({
-    //             initialSupplyToken0AmountUSD: 50000,
-    //             initialSupplyToken1AmountUSD: 50000,
-    //             withdrawToken0AmountInUSD: 30000,
-    //             withdrawToken1AmountInUSD: 20000,
-    //             takeMaxUint256CollAmount0: false,
-    //             takeMaxUint256CollAmount1: false,
-    //             isDirect: false,
-    //             wrapWithdrawnEth: false
-    //         })
-    //     );
-    // }
-
-    // function test_should_partial_withdrawal_both_coll_with_wrap() public {
-    //     _baseTest(
-    //         TestConfig({
-    //             initialSupplyToken0AmountUSD: 50000,
-    //             initialSupplyToken1AmountUSD: 50000,
-    //             withdrawToken0AmountInUSD: 11000,
-    //             withdrawToken1AmountInUSD: 5000,
-    //             takeMaxUint256CollAmount0: false,
-    //             takeMaxUint256CollAmount1: false,
-    //             isDirect: false,
-    //             wrapWithdrawnEth: true
-    //         })
-    //     );
-    // }
-
-    // function test_should_withdraw_action_direct() public {
-    //     _baseTest(
-    //         TestConfig({
-    //             initialSupplyToken0AmountUSD: 50000,
-    //             initialSupplyToken1AmountUSD: 50000,
-    //             withdrawToken0AmountInUSD: 30000,
-    //             withdrawToken1AmountInUSD: 0,
-    //             takeMaxUint256CollAmount0: false,
-    //             takeMaxUint256CollAmount1: false,
-    //             isDirect: true,
-    //             wrapWithdrawnEth: false
-    //         })
-    //     );
-    // }
-
-    function test_should_withdraw_coll_0_maxUint256() public {
-        _baseTest(
-            TestConfig({
-                initialSupplyToken0AmountUSD: 30000,
-                initialSupplyToken1AmountUSD: 0,
-                withdrawToken0AmountInUSD: 30000,
-                withdrawToken1AmountInUSD: 0,
-                takeMaxUint256CollAmount0: true,
-                takeMaxUint256CollAmount1: false,
-                isDirect: false,
-                wrapWithdrawnEth: false
-            })
-        );
+    function test_should_partial_withdrawal_coll_0() public {
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialSupplyToken0AmountUSD: 50000,
+                    initialSupplyToken1AmountUSD: 0,
+                    withdrawToken0AmountInUSD: 30000,
+                    withdrawToken1AmountInUSD: 0,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false,
+                    wrapWithdrawnEth: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
     }
 
-    // function test_should_withdraw_coll_0_maxUint256_with_wrap() public {
-    //     _baseTest(
-    //         TestConfig({
-    //             initialSupplyToken0AmountUSD: 30000,
-    //             initialSupplyToken1AmountUSD: 0,
-    //             withdrawToken0AmountInUSD: 30000,
-    //             withdrawToken1AmountInUSD: 0,
-    //             takeMaxUint256CollAmount0: true,
-    //             takeMaxUint256CollAmount1: false,
-    //             isDirect: false,
-    //             wrapWithdrawnEth: true
-    //         })
-    //     );
-    // }
+    function test_should_partial_withdrawal_coll_1() public {
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialSupplyToken0AmountUSD: 0,
+                    initialSupplyToken1AmountUSD: 50000,
+                    withdrawToken0AmountInUSD: 0,
+                    withdrawToken1AmountInUSD: 30000,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false,
+                    wrapWithdrawnEth: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
+    }
 
-    // function test_should_withdraw_coll_1_maxUint256() public {
-    //     _baseTest(
-    //         TestConfig({
-    //             initialSupplyToken0AmountUSD: 0,
-    //             initialSupplyToken1AmountUSD: 50000,
-    //             withdrawToken0AmountInUSD: 0,
-    //             withdrawToken1AmountInUSD: 50000,
-    //             takeMaxUint256CollAmount0: false,
-    //             takeMaxUint256CollAmount1: true,
-    //             isDirect: false,
-    //             wrapWithdrawnEth: false
-    //         })
-    //     );
-    // }
+    function test_should_partial_withdrawal_both_coll() public {
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialSupplyToken0AmountUSD: 50000,
+                    initialSupplyToken1AmountUSD: 50000,
+                    withdrawToken0AmountInUSD: 30000,
+                    withdrawToken1AmountInUSD: 20000,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false,
+                    wrapWithdrawnEth: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
+    }
 
-    // function test_should_withdraw_coll_1_maxUint256_with_wrap() public {
-    //     _baseTest(
-    //         TestConfig({
-    //             initialSupplyToken0AmountUSD: 0,
-    //             initialSupplyToken1AmountUSD: 50000,
-    //             withdrawToken0AmountInUSD: 0,
-    //             withdrawToken1AmountInUSD: 50000,
-    //             takeMaxUint256CollAmount0: false,
-    //             takeMaxUint256CollAmount1: true,
-    //             isDirect: false,
-    //             wrapWithdrawnEth: true
-    //         })
-    //     );
-    // }
+    function test_should_partial_withdrawal_both_coll_with_wrap() public {
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialSupplyToken0AmountUSD: 50000,
+                    initialSupplyToken1AmountUSD: 50000,
+                    withdrawToken0AmountInUSD: 11000,
+                    withdrawToken1AmountInUSD: 5000,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false,
+                    wrapWithdrawnEth: true
+                }),
+                t2VaultsSelected[i]
+            );
+        }
+    }
+
+    function test_should_withdraw_action_direct() public {
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialSupplyToken0AmountUSD: 50000,
+                    initialSupplyToken1AmountUSD: 50000,
+                    withdrawToken0AmountInUSD: 30000,
+                    withdrawToken1AmountInUSD: 0,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: true,
+                    wrapWithdrawnEth: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
+    }
+
+    function test_should_withdraw_coll_0_maxUint256() public {
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialSupplyToken0AmountUSD: 30000,
+                    initialSupplyToken1AmountUSD: 0,
+                    withdrawToken0AmountInUSD: 30000,
+                    withdrawToken1AmountInUSD: 0,
+                    takeMaxUint256CollAmount0: true,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false,
+                    wrapWithdrawnEth: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
+    }
+
+    function test_should_withdraw_coll_0_maxUint256_with_wrap() public {
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialSupplyToken0AmountUSD: 30000,
+                    initialSupplyToken1AmountUSD: 0,
+                    withdrawToken0AmountInUSD: 30000,
+                    withdrawToken1AmountInUSD: 0,
+                    takeMaxUint256CollAmount0: true,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false,
+                    wrapWithdrawnEth: true
+                }),
+                t2VaultsSelected[i]
+            );
+        }
+    }
+
+    function test_should_withdraw_coll_1_maxUint256() public {
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialSupplyToken0AmountUSD: 0,
+                    initialSupplyToken1AmountUSD: 50000,
+                    withdrawToken0AmountInUSD: 0,
+                    withdrawToken1AmountInUSD: 50000,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: true,
+                    isDirect: false,
+                    wrapWithdrawnEth: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
+    }
+
+    function test_should_withdraw_coll_1_maxUint256_with_wrap() public {
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialSupplyToken0AmountUSD: 0,
+                    initialSupplyToken1AmountUSD: 50000,
+                    withdrawToken0AmountInUSD: 0,
+                    withdrawToken1AmountInUSD: 50000,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: true,
+                    isDirect: false,
+                    wrapWithdrawnEth: true
+                }),
+                t2VaultsSelected[i]
+            );
+        }
+    }
 
     function _baseTest(
-        TestConfig memory _config        
+        TestConfig memory _config,
+        bool _t2VaultsSelected
     ) internal {
-        for (uint256 i = 0; i < vaults.length; ++i) {
+        address[] memory vaults = _t2VaultsSelected ? t2Vaults : t4Vaults;
 
-            uint256 nftId = executeFluidVaultT2Open(
-                address(vaults[i]),
-                _config.initialSupplyToken0AmountUSD,
-                _config.initialSupplyToken1AmountUSD,
-                0, /* initial borrow amount in usd */
-                wallet,
-                address(fluidDexOpen)
-            );
+        for (uint256 i = 0; i < vaults.length; ++i) {
+            uint256 nftId = _t2VaultsSelected ? 
+                executeFluidVaultT2Open(
+                    vaults[i],
+                    _config.initialSupplyToken0AmountUSD,
+                    _config.initialSupplyToken1AmountUSD,
+                    0, /* initial borrow amount in usd */
+                    wallet,
+                    address(fluidDexOpen)
+                ) : 
+                executeFluidVaultT4Open(
+                    vaults[i],
+                    _config.initialSupplyToken0AmountUSD,
+                    _config.initialSupplyToken1AmountUSD,
+                    0, /* initial borrow amount 0 in usd */
+                    0, /* initial borrow amount 1 in usd */
+                    wallet,
+                    address(fluidDexOpen)
+                );
 
             if (nftId == 0) {
-                emit log_named_address("Skipping test: Could't open fluid position for vault:", address(vaults[i]));
+                logSkipTestBecauseOfOpen(vaults[i]);
                 continue;
             }
 
-            FluidView.VaultData memory vaultData = fluidView.getVaultData(address(vaults[i]));
+            FluidView.VaultData memory vaultData = fluidView.getVaultData(vaults[i]);
             LocalVars memory vars;
 
             vars.isToken0Native = vaultData.supplyToken0 == TokenUtils.ETH_ADDR;
@@ -285,7 +335,7 @@ contract TestFluidVaultT2Withdraw is FluidTestBase {
 
             vars.executeActionCallData = executeActionCalldata(
                 fluidDexWithdrawEncode(
-                    address(vaults[i]),
+                    vaults[i],
                     sender,
                     nftId,
                     0, /* withdrawAmount */

@@ -3,6 +3,7 @@
 pragma solidity =0.8.24;
 
 import { IFluidVaultT2 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT2.sol";
+import { IFluidVaultT4 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT4.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidView } from "../../../../contracts/views/FluidView.sol";
 import { FluidDexSupply } from "../../../../contracts/actions/fluid/dex/FluidDexSupply.sol";
@@ -12,7 +13,7 @@ import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
-contract TestFluidVaultT2Supply is FluidTestBase {
+contract TestFluidDexSupply is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -26,9 +27,14 @@ contract TestFluidVaultT2Supply is FluidTestBase {
     SmartWallet wallet;
     address sender;
     address walletAddr;
-    IFluidVaultT2[] vaults;
+
+    address[] t2Vaults;
+    address[] t4Vaults;
+
     FluidView fluidView;
     FluidDexOpen fluidDexOpen;
+
+    bool[] t2VaultsSelected;
 
     struct TestConfig {
         uint256 collAmount0InUSD;
@@ -67,7 +73,7 @@ contract TestFluidVaultT2Supply is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("FluidDexSupply");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -75,114 +81,154 @@ contract TestFluidVaultT2Supply is FluidTestBase {
 
         cut = new FluidDexSupply();
 
-        vaults = getT2Vaults();
+        t2Vaults = getT2Vaults();
+        t4Vaults = getT4Vaults();
+
         fluidView = new FluidView();
         fluidDexOpen = new FluidDexOpen();
+
+        t2VaultsSelected = new bool[](2);
+        t2VaultsSelected[0] = true;
+        t2VaultsSelected[1] = false;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     ////////////////////////////////////////////////////////////////////////*/
     function test_should_supply_variable_position_with_coll_0() public {
-        _baseTest(
-            TestConfig({
-                collAmount0InUSD: 30000,
-                collAmount1InUSD: 0,
-                takeMaxUint256CollAmount0: false,
-                takeMaxUint256CollAmount1: false,
-                isDirect: false
-            })
-        );
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    collAmount0InUSD: 30000,
+                    collAmount1InUSD: 0,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
     }
 
     function test_should_supply_variable_position_with_coll_1() public {
-        _baseTest(
-            TestConfig({
-                collAmount0InUSD: 0,
-                collAmount1InUSD: 30000,
-                takeMaxUint256CollAmount0: false,
-                takeMaxUint256CollAmount1: false,
-                isDirect: false
-            })
-        );
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    collAmount0InUSD: 0,
+                    collAmount1InUSD: 30000,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
     }
 
     function test_should_supply_variable_position_with_both_coll() public {
-        _baseTest(
-            TestConfig({
-                collAmount0InUSD: 30000,
-                collAmount1InUSD: 20000,
-                takeMaxUint256CollAmount0: false,
-                takeMaxUint256CollAmount1: false,
-                isDirect: false
-            })
-        );
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    collAmount0InUSD: 30000,
+                    collAmount1InUSD: 20000,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
     }
 
     function test_should_supply_variable_position_only_supply() public {
-        _baseTest(
-            TestConfig({
-                collAmount0InUSD: 11000,
-                collAmount1InUSD: 5000,
-                takeMaxUint256CollAmount0: false,
-                takeMaxUint256CollAmount1: false,
-                isDirect: false
-            })
-        );
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    collAmount0InUSD: 11000,
+                    collAmount1InUSD: 5000,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
     }
 
     function test_should_supply_variable_position_action_direct() public {
-        _baseTest(
-            TestConfig({
-                collAmount0InUSD: 30000,
-                collAmount1InUSD: 0,
-                takeMaxUint256CollAmount0: false,
-                takeMaxUint256CollAmount1: false,
-                isDirect: true
-            })
-        );
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    collAmount0InUSD: 30000,
+                    collAmount1InUSD: 0,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: true
+                }),
+                t2VaultsSelected[i]
+            );
+        }
     }
 
     function test_should_open_variable_position_with_coll_0_maxUint256() public {
-        _baseTest(
-            TestConfig({
-                collAmount0InUSD: 30000,
-                collAmount1InUSD: 0,
-                takeMaxUint256CollAmount0: true,
-                takeMaxUint256CollAmount1: false,
-                isDirect: false
-            })
-        );
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    collAmount0InUSD: 30000,
+                    collAmount1InUSD: 0,
+                    takeMaxUint256CollAmount0: true,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
     }
 
     function test_should_open_variable_position_with_coll_1_maxUint256() public {
-        _baseTest(
-            TestConfig({
-                collAmount0InUSD: 30000,
-                collAmount1InUSD: 25000,
-                takeMaxUint256CollAmount0: false,
-                takeMaxUint256CollAmount1: true,
-                isDirect: false
-            })
-        );
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    collAmount0InUSD: 30000,
+                    collAmount1InUSD: 25000,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: true,
+                    isDirect: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
     }
 
     function _baseTest(
-        TestConfig memory _config        
+        TestConfig memory _config,
+        bool _t2VaultsSelected
     ) internal {
+        address[] memory vaults = _t2VaultsSelected ? t2Vaults : t4Vaults;
+
         for (uint256 i = 0; i < vaults.length; ++i) {
 
-            uint256 nftId = executeFluidVaultT2Open(
-                address(vaults[i]),
-                20000, /* initial coll amount 0 in usd */
-                10000, /* initial coll amount 1 in usd */
-                5000, /* initial borrow amount in usd */
-                wallet,
-                address(fluidDexOpen)
-            );
+            uint256 nftId = _t2VaultsSelected ? 
+                executeFluidVaultT2Open(
+                    vaults[i],
+                    20000, /* initial coll amount 0 in usd */
+                    10000, /* initial coll amount 1 in usd */
+                    0, /* initial borrow amount in usd */
+                    wallet,
+                    address(fluidDexOpen)
+                ) : 
+                executeFluidVaultT4Open(
+                    vaults[i],
+                    20000, /* initial coll amount 0 in usd */
+                    10000, /* initial coll amount 1 in usd */
+                    0, /* initial borrow amount 0 in usd */
+                    0, /* initial borrow amount 1 in usd */
+                    wallet,
+                    address(fluidDexOpen)
+                );
 
             if (nftId == 0) {
-                emit log_named_address("Skipping test: Could't open fluid position for vault:", address(vaults[i]));
+                logSkipTestBecauseOfOpen(vaults[i]);
                 continue;
             }
 

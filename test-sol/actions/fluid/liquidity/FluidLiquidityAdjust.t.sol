@@ -10,7 +10,7 @@ import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 
-contract TestFluidVaultT1Adjust is FluidTestBase {
+contract TestFluidLiquidityAdjust is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -24,7 +24,7 @@ contract TestFluidVaultT1Adjust is FluidTestBase {
     SmartWallet wallet;
     address sender;
     address walletAddr;
-    IFluidVaultT1[] vaults;
+    address[] vaults;
 
     FluidVaultT1Open openContract;
 
@@ -45,7 +45,7 @@ contract TestFluidVaultT1Adjust is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidVaultT1Adjust");
+        forkMainnet("FluidAdjustLiquidity");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -434,11 +434,11 @@ contract TestFluidVaultT1Adjust is FluidTestBase {
         TestConfig memory _config
     ) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
-            IFluidVaultT1.ConstantViews memory constants = vaults[i].constantsView();
+            IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(vaults[i]).constantsView();
             TempLocalVars memory vars;
 
             vars.nftId = executeFluidVaultT1Open(
-                address(vaults[i]),
+                vaults[i],
                 _config.openSupplyAmountUsd,
                 _config.openBorrowAmountUsd,
                 wallet,
@@ -495,7 +495,7 @@ contract TestFluidVaultT1Adjust is FluidTestBase {
             // .--------- EXECUTE ACTION ----------.
             bytes memory executeActionCallData = executeActionCalldata(
                 fluidVaultT1AdjustEncode(
-                    address(vaults[i]),
+                    vaults[i],
                     vars.nftId,
                     _config.isMaxSupplyAmount ? type(uint256).max : vars.supplyTokenAmount,
                     _config.isMaxBorrowAmount ? type(uint256).max : vars.borrowTokenAmount,

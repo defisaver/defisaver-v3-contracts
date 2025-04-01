@@ -3,6 +3,7 @@
 pragma solidity =0.8.24;
 
 import { IFluidVaultT3 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT3.sol";
+import { IFluidVaultT4 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT4.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidView } from "../../../../contracts/views/FluidView.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
@@ -12,7 +13,7 @@ import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 
-contract TestFluidVaultT3Borrow is FluidTestBase {
+contract TestFluidDexBorrow is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -26,8 +27,13 @@ contract TestFluidVaultT3Borrow is FluidTestBase {
     SmartWallet wallet;
     address sender;
     address walletAddr;
-    IFluidVaultT3[] vaults;
+
+    address[] t3Vaults;
+    address[] t4Vaults;
+    
     FluidDexOpen openContract;
+
+    bool[] t3VaultsSelected;
 
     struct TestConfig {
         bool isDirect;
@@ -64,7 +70,7 @@ contract TestFluidVaultT3Borrow is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidVaultT3Borrow");
+        forkMainnet("FluidDexBorrow");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -73,88 +79,123 @@ contract TestFluidVaultT3Borrow is FluidTestBase {
         cut = new FluidDexBorrow();
         openContract = new FluidDexOpen();
 
-        vaults = getT3Vaults();
+        t3Vaults = getT3Vaults();
+        t4Vaults = getT4Vaults();
+
+        t3VaultsSelected = new bool[](2);
+        t3VaultsSelected[0] = true;
+        t3VaultsSelected[1] = false;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     ////////////////////////////////////////////////////////////////////////*/
     function test_should_borrow_token_0() public {
-        _baseTest(
-            TestConfig({
-                isDirect: false,
-                wrapBorrowedEth: false,
-                borrowAmount0InUSD: 30000,
-                borrowAmount1InUSD: 0
-            })
-        );
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    isDirect: false,
+                    wrapBorrowedEth: false,
+                    borrowAmount0InUSD: 30000,
+                    borrowAmount1InUSD: 0
+                }),
+                t3VaultsSelected[i]
+            );
+        }
     }
 
     function test_should_borrow_token_1() public {
-        _baseTest(
-            TestConfig({
-                isDirect: false,
-                wrapBorrowedEth: false,
-                borrowAmount0InUSD: 0,
-                borrowAmount1InUSD: 30000
-            })
-        );
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    isDirect: false,
+                    wrapBorrowedEth: false,
+                    borrowAmount0InUSD: 0,
+                    borrowAmount1InUSD: 30000
+                }),
+                t3VaultsSelected[i]
+            );
+        }
     }
+
     function test_should_borrow_both_tokens() public {
-        _baseTest(
-            TestConfig({
-                isDirect: false,
-                wrapBorrowedEth: false,
-                borrowAmount0InUSD: 30000,
-                borrowAmount1InUSD: 30000
-            })
-        );
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    isDirect: false,
+                    wrapBorrowedEth: false,
+                    borrowAmount0InUSD: 30000,
+                    borrowAmount1InUSD: 30000
+                }),
+                t3VaultsSelected[i]
+            );
+        }
     }
+
     function test_should_borrow_with_eth_wrap() public {
-        _baseTest(
-            TestConfig({
-                isDirect: false,
-                wrapBorrowedEth: true,
-                borrowAmount0InUSD: 30000,
-                borrowAmount1InUSD: 0
-            })
-        );
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    isDirect: false,
+                    wrapBorrowedEth: true,
+                    borrowAmount0InUSD: 30000,
+                    borrowAmount1InUSD: 0
+                }),
+                t3VaultsSelected[i]
+            );
+        }
     }
 
     function test_should_borrow_action_direct() public {
-        _baseTest(
-            TestConfig({
-                isDirect: true,
-                wrapBorrowedEth: false,
-                borrowAmount0InUSD: 30000,
-                borrowAmount1InUSD: 0
-            })
-        );
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    isDirect: true,
+                    wrapBorrowedEth: false,
+                    borrowAmount0InUSD: 30000,
+                    borrowAmount1InUSD: 0
+                }),
+                t3VaultsSelected[i]
+            );
+        }
     }
 
     function _baseTest(
-        TestConfig memory config
+        TestConfig memory config,
+        bool _t3VaultsSelected
     ) internal {
+        address[] memory vaults = _t3VaultsSelected ? t3Vaults : t4Vaults;
+
         for (uint256 i = 0; i < vaults.length; ++i) {
-            uint256 nftId = executeFluidVaultT3Open(
-                address(vaults[i]),
-                200000, /* initial supply amount in usd */
-                0, /* _borrowAmount0InUSD */
-                0, /* _borrowAmount1InUSD */
-                wallet,
-                address(openContract)
-            );
+            uint256 nftId = _t3VaultsSelected ? 
+                executeFluidVaultT3Open(
+                    vaults[i],
+                    200000, /* initial supply amount in usd */
+                    0, /* _borrowAmount0InUSD */
+                    0, /* _borrowAmount1InUSD */
+                    wallet,
+                    address(openContract)
+                ) : 
+                executeFluidVaultT4Open(
+                    vaults[i],
+                    200000, /* initial supply amount in usd */
+                    0, /* initial supply amount 1 in usd */
+                    0, /* borrowAmount0InUSD */
+                    0, /* borrowAmount1InUSD */
+                    wallet,
+                    address(openContract)
+                );
 
             if (nftId == 0) {
-                emit log_named_address("Skipping test: Could't open fluid position for vault:", address(vaults[i]));
+                logSkipTestBecauseOfOpen(vaults[i]);
                 continue;
             }
 
-            IFluidVaultT3.ConstantViews memory constants = vaults[i].constantsView();
+            IFluidVaultT3.ConstantViews memory constants = IFluidVaultT3(vaults[i]).constantsView();
             LocalVars memory vars;
             
             FluidView fluidView = new FluidView();
-            FluidView.VaultData memory vaultData = fluidView.getVaultData(address(vaults[i]));
+            FluidView.VaultData memory vaultData = fluidView.getVaultData(vaults[i]);
 
             // -------------------- Handle borrow token 0. ---------------------
             vars.isNativeBorrow0 = constants.borrowToken.token0 == TokenUtils.ETH_ADDR;
@@ -178,17 +219,17 @@ contract TestFluidVaultT3Borrow is FluidTestBase {
             vars.shares = estimateBorrowShares(vaultData.dexBorrowData.dexPool, vars.borrowAmount0, vars.borrowAmount1);
 
             if (borrowLimitReached(vaultData.dexBorrowData, vars.shares)) {
-                logBorrowLimitReached(address(vaults[i]));
+                logBorrowLimitReached(vaults[i]);
                 continue;
             }
 
             // -------------------- Encode call data. --------------------
             vars.executeActionCallData = executeActionCalldata(
                 fluidDexBorrowEncode(
-                    address(vaults[i]),
+                    vaults[i],
                     sender,
                     nftId,
-                    0, // borrowAmount (not used for T3 vaults)
+                    0, // borrowAmount (not used for T3 or T4 vaults)
                     FluidDexModel.BorrowVariableData(vars.borrowAmount0, vars.borrowAmount1, vars.shares),
                     config.wrapBorrowedEth
                 ),

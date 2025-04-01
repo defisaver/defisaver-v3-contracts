@@ -10,7 +10,7 @@ import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { Vm } from "forge-std/Vm.sol";
 
-contract TestFluidVaultT1Open is FluidTestBase {
+contract TestFluidLiquidityOpen is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -24,13 +24,13 @@ contract TestFluidVaultT1Open is FluidTestBase {
     SmartWallet wallet;
     address sender;
     address walletAddr;
-    IFluidVaultT1[] vaults;
+    address[] vaults;
 
     /*//////////////////////////////////////////////////////////////////////////
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidVaultT1Open");
+        forkMainnet("FluidOpenLiquidity");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -97,7 +97,7 @@ contract TestFluidVaultT1Open is FluidTestBase {
         bool wrapBorrowedEth
     ) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
-            IFluidVaultT1.ConstantViews memory constants = vaults[i].constantsView();
+            IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(vaults[i]).constantsView();
             bool isNativeSupply = constants.supplyToken == TokenUtils.ETH_ADDR;
             bool isNativeBorrow = constants.borrowToken == TokenUtils.ETH_ADDR;
 
@@ -112,7 +112,7 @@ contract TestFluidVaultT1Open is FluidTestBase {
 
             bytes memory executeActionCallData = executeActionCalldata(
                 fluidVaultT1OpenEncode(
-                    address(vaults[i]),
+                    vaults[i],
                     takeMaxUint256 ? type(uint256).max : supplyAmount,
                     borrowAmount,
                     sender,

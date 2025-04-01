@@ -4,6 +4,7 @@ pragma solidity =0.8.24;
 
 import { IFluidVault } from "../../../../contracts/interfaces/fluid/vaults/IFluidVault.sol";
 import { IFluidVaultT3 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT3.sol";
+import { IFluidVaultT4 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT4.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidDexPayback } from "../../../../contracts/actions/fluid/dex/FluidDexPayback.sol";
 import { FluidView } from "../../../../contracts/views/FluidView.sol";
@@ -14,7 +15,7 @@ import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { Vm } from "forge-std/Vm.sol";
 
-contract TestFluidVaultT3Payback is FluidTestBase {
+contract TestFluidDexPayback is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -28,9 +29,14 @@ contract TestFluidVaultT3Payback is FluidTestBase {
     SmartWallet wallet;
     address sender;
     address walletAddr;
-    IFluidVaultT3[] vaults;
+
+    address[] t3Vaults;
+    address[] t4Vaults;
+
     FluidDexOpen openContract;
     FluidView fluidView;
+
+    bool[] t3VaultsSelected;
 
     struct TestConfig {
         uint256 initialBorrowToken0AmountUSD;
@@ -75,7 +81,7 @@ contract TestFluidVaultT3Payback is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("FluidVaultT3Payback");
+        forkMainnet("FluidDexPayback");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -84,7 +90,13 @@ contract TestFluidVaultT3Payback is FluidTestBase {
         cut = new FluidDexPayback();
         openContract = new FluidDexOpen();
         fluidView = new FluidView();
-        vaults = getT3Vaults();
+
+        t3Vaults = getT3Vaults();
+        t4Vaults = getT4Vaults();
+
+        t3VaultsSelected = new bool[](2);
+        t3VaultsSelected[0] = true;
+        t3VaultsSelected[1] = false;
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -92,112 +104,142 @@ contract TestFluidVaultT3Payback is FluidTestBase {
     ////////////////////////////////////////////////////////////////////////*/
 
     function test_partial_payback_in_token_0() public {
-        _baseTest(
-            TestConfig({
-                initialBorrowToken0AmountUSD: 100000,
-                initialBorrowToken1AmountUSD: 0,
-                paybackToken0AmountUSD: 30000,
-                paybackToken1AmountUSD: 0,
-                maxPaybackToken0: false,
-                maxPaybackToken1: false,
-                isDirect: false
-            })
-        );
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialBorrowToken0AmountUSD: 100000,
+                    initialBorrowToken1AmountUSD: 0,
+                    paybackToken0AmountUSD: 30000,
+                    paybackToken1AmountUSD: 0,
+                    maxPaybackToken0: false,
+                    maxPaybackToken1: false,
+                    isDirect: false
+                }),
+                t3VaultsSelected[i]
+            );
+        }
     }
 
     function test_partial_payback_in_token_1() public {
-        _baseTest(
-            TestConfig({
-                initialBorrowToken0AmountUSD: 0,
-                initialBorrowToken1AmountUSD: 50000,
-                paybackToken0AmountUSD: 0,
-                paybackToken1AmountUSD: 30000,
-                maxPaybackToken0: false,
-                maxPaybackToken1: false,
-                isDirect: false
-            })
-        );
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialBorrowToken0AmountUSD: 0,
+                    initialBorrowToken1AmountUSD: 50000,
+                    paybackToken0AmountUSD: 0,
+                    paybackToken1AmountUSD: 30000,
+                    maxPaybackToken0: false,
+                    maxPaybackToken1: false,
+                    isDirect: false
+                }),
+                t3VaultsSelected[i]
+            );
+        }
     }
 
     function test_partial_payback_in_both_tokens() public {
-        _baseTest(
-            TestConfig({
-                initialBorrowToken0AmountUSD: 40000,
-                initialBorrowToken1AmountUSD: 50000,
-                paybackToken0AmountUSD: 30000,
-                paybackToken1AmountUSD: 30000,
-                maxPaybackToken0: false,
-                maxPaybackToken1: false,
-                isDirect: false
-            })
-        );
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialBorrowToken0AmountUSD: 40000,
+                    initialBorrowToken1AmountUSD: 50000,
+                    paybackToken0AmountUSD: 30000,
+                    paybackToken1AmountUSD: 30000,
+                    maxPaybackToken0: false,
+                    maxPaybackToken1: false,
+                    isDirect: false
+                }),
+                t3VaultsSelected[i]
+            );
+        }
     }
 
     function test_payback_action_direct() public {
-        _baseTest(
-            TestConfig({
-                initialBorrowToken0AmountUSD: 35000,
-                initialBorrowToken1AmountUSD: 0,
-                paybackToken0AmountUSD: 30000,
-                paybackToken1AmountUSD: 0,
-                maxPaybackToken0: false,
-                maxPaybackToken1: false,
-                isDirect: true
-            })
-        );
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialBorrowToken0AmountUSD: 35000,
+                    initialBorrowToken1AmountUSD: 0,
+                    paybackToken0AmountUSD: 30000,
+                    paybackToken1AmountUSD: 0,
+                    maxPaybackToken0: false,
+                    maxPaybackToken1: false,
+                    isDirect: true
+                }),
+                t3VaultsSelected[i]
+            );
+        }
     }
 
     function test_max_payback_in_token_0() public {
-        _baseTest(
-            TestConfig({
-                initialBorrowToken0AmountUSD: 35000,
-                initialBorrowToken1AmountUSD: 0,
-                paybackToken0AmountUSD: 450000, // make sure user always has enough debt to pull
-                paybackToken1AmountUSD: 0,
-                maxPaybackToken0: true,
-                maxPaybackToken1: false,
-                isDirect: false
-            })
-        );
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialBorrowToken0AmountUSD: 35000,
+                    initialBorrowToken1AmountUSD: 0,
+                    paybackToken0AmountUSD: 450000, // make sure user always has enough debt to pull
+                    paybackToken1AmountUSD: 0,
+                    maxPaybackToken0: true,
+                    maxPaybackToken1: false,
+                    isDirect: false
+                }),
+                t3VaultsSelected[i]
+            );
+        }
     }
 
     function test_max_payback_in_token_1() public {
-        _baseTest(
-            TestConfig({
-                initialBorrowToken0AmountUSD: 10000,
-                initialBorrowToken1AmountUSD: 35000,
-                paybackToken0AmountUSD: 0,
-                paybackToken1AmountUSD: 55000, // make sure user always has enough debt to pull
-                maxPaybackToken0: false,
-                maxPaybackToken1: true,
-                isDirect: false
-            })
-        );
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialBorrowToken0AmountUSD: 10000,
+                    initialBorrowToken1AmountUSD: 35000,
+                    paybackToken0AmountUSD: 0,
+                    paybackToken1AmountUSD: 55000, // make sure user always has enough debt to pull
+                    maxPaybackToken0: false,
+                    maxPaybackToken1: true,
+                    isDirect: false
+                }),
+                t3VaultsSelected[i]
+            );
+        }
     }
 
     function _baseTest(
-        TestConfig memory _config
+        TestConfig memory _config,
+        bool _t3VaultsSelected
     ) internal {
         uint256 initialSupplyAmountUSD = 
             (_config.initialBorrowToken0AmountUSD + _config.initialBorrowToken1AmountUSD) * 3;
 
-        for (uint256 i = 0; i < vaults.length; ++i) {
+        address[] memory vaults = _t3VaultsSelected ? t3Vaults : t4Vaults;
 
-            uint256 nftId = executeFluidVaultT3Open(
-                address(vaults[i]),
-                initialSupplyAmountUSD,
-                _config.initialBorrowToken0AmountUSD,
-                _config.initialBorrowToken1AmountUSD,
-                wallet,
-                address(openContract)
-            );
+        for (uint256 i = 0; i < vaults.length; ++i) {
+            uint256 nftId = _t3VaultsSelected ? 
+                executeFluidVaultT3Open(
+                    vaults[i],
+                    initialSupplyAmountUSD,
+                    _config.initialBorrowToken0AmountUSD,
+                    _config.initialBorrowToken1AmountUSD,
+                    wallet,
+                    address(openContract)
+                ) : 
+                executeFluidVaultT4Open(
+                    vaults[i],
+                    initialSupplyAmountUSD,
+                    0, /* initial supply amount 1 in usd */
+                    _config.initialBorrowToken0AmountUSD,
+                    _config.initialBorrowToken1AmountUSD,
+                    wallet,
+                    address(openContract)
+                );
 
             if (nftId == 0) {
-                emit log_named_address("Skipping test: Could't open fluid position for vault:", address(vaults[i]));
+                logSkipTestBecauseOfOpen(vaults[i]);
                 continue;
             }
 
-            FluidView.VaultData memory vaultData = fluidView.getVaultData(address(vaults[i]));
+            FluidView.VaultData memory vaultData = fluidView.getVaultData(vaults[i]);
             LocalVars memory vars;
 
             (vaultData.borrowToken0, vars.paybackAmount0) = giveAndApproveToken(
@@ -238,7 +280,7 @@ contract TestFluidVaultT3Payback is FluidTestBase {
             
             vars.executeActionCallData = executeActionCalldata(
                 fluidDexPaybackEncode(
-                    address(vaults[i]),
+                    vaults[i],
                     sender,
                     nftId,
                     0, /* paybackAmount - Only used for T1-T2 vaults*/

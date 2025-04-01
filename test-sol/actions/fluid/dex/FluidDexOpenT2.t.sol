@@ -11,7 +11,7 @@ import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { Vm } from "forge-std/Vm.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
-contract TestFluidVaultT2Open is FluidTestBase {
+contract TestFluidDexOpenT2 is FluidTestBase {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -25,7 +25,7 @@ contract TestFluidVaultT2Open is FluidTestBase {
     SmartWallet wallet;
     address sender;
     address walletAddr;
-    IFluidVaultT2[] vaults;
+    address[] vaults;
     FluidView fluidView;
 
     struct TestConfig {
@@ -77,7 +77,7 @@ contract TestFluidVaultT2Open is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("FluidDexOpen");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -208,7 +208,7 @@ contract TestFluidVaultT2Open is FluidTestBase {
         TestConfig memory _config        
     ) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
-            FluidView.VaultData memory vaultData = fluidView.getVaultData(address(vaults[i]));
+            FluidView.VaultData memory vaultData = fluidView.getVaultData(vaults[i]);
             LocalVars memory vars;
 
             // Handle collateral 0 setup for variable open.
@@ -226,7 +226,7 @@ contract TestFluidVaultT2Open is FluidTestBase {
 
             // Validate shares supply limit.
             if (supplyLimitReached(vaultData.dexSupplyData, vars.shares)) {
-                logSupplyLimitReached(address(vaults[i]));
+                logSupplyLimitReached(vaults[i]);
                 continue;
             }
 
@@ -247,7 +247,7 @@ contract TestFluidVaultT2Open is FluidTestBase {
 
             vars.executeActionCallData = executeActionCalldata(
                 fluidDexOpenEncode(
-                    address(vaults[i]),
+                    vaults[i],
                     sender, /* from */
                     sender, /* to */
                     0, /* supplyAmount - Only used for T1 vaults */
@@ -300,7 +300,7 @@ contract TestFluidVaultT2Open is FluidTestBase {
                 : balanceOf(vaultData.borrowToken0, walletAddr);
             vars.walletEthBalanceAfter = address(walletAddr).balance;
 
-            (vars.token0PerShareAfter, vars.token1PerShareAfter, , ) = fluidView.getDexShareRates(address(vaults[i]));
+            (vars.token0PerShareAfter, vars.token1PerShareAfter, , ) = fluidView.getDexShareRates(vaults[i]);
 
             (vars.userPositionAfter, ) = fluidView.getPositionByNftId(vars.createdNft);
 
@@ -312,8 +312,8 @@ contract TestFluidVaultT2Open is FluidTestBase {
             assertEq(vars.walletEthBalanceAfter, vars.walletEthBalanceBefore);
 
             assertTrue(vars.createdNft != 0);
-            assertEq(vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore + vars.borrowAmount);
 
+            assertEq(vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore + vars.borrowAmount);
             assertEq(vars.senderCollToken0BalanceAfter, vars.senderCollToken0BalanceBefore - vars.collAmount0);
             assertEq(vars.senderCollToken1BalanceAfter, vars.senderCollToken1BalanceBefore - vars.collAmount1);    
             
