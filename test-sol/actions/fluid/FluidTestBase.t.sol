@@ -48,6 +48,13 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         vaults[2] = IFluidVaultT3(0x47b6e2c8a0cB072198f17ccC6C7634dCc7126c3E); // id:49 - cbBTC/USDC-USDT
     }
 
+    function getT4Vaults() internal pure returns (IFluidVaultT4[] memory vaults) {
+        vaults = new IFluidVaultT4[](3);
+        vaults[0] = IFluidVaultT4(0x528CF7DBBff878e02e48E83De5097F8071af768D); // id:44 - wstETH-ETH/wstETH-ETH
+        vaults[1] = IFluidVaultT4(0xB170B94BeFe21098966aa9905Da6a2F569463A21); // id:98 - sUSDe-USDT/USDC-USDT
+        vaults[2] = IFluidVaultT4(0xaEac94D417BF8d8bb3A44507100Ab8c0D3b12cA1); // id:99 - USDe-USDT/USDC-USDT
+    }
+
     function fetchPositionByNftId(uint256 _nftId) internal view returns (IFluidVaultResolver.UserPosition memory position) {
         (position, ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
     }
@@ -336,6 +343,98 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
                 collAmount,
                 FluidDexModel.SupplyVariableData(0, 0, 0), /* only used for T2 and T4  vaults */
                 0, /* borrowAmount */
+                FluidDexModel.BorrowVariableData(borrowAmount0, borrowAmount1, estimatedDebtShares),
+                true /* wrapBorrowedEth */
+            ),
+            true
+        );
+
+        vm.recordLogs();
+        _wallet.execute(_openContract, executeActionCallData, 0);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        nftId = getNftIdFromLogs(logs);
+    }
+
+    function executeFluidVaultT4Open(
+        address _vault,
+        uint256 _collAmount0InUSD,
+        uint256 _collAmount1InUSD,
+        uint256 _borrowAmount0InUSD,
+        uint256 _borrowAmount1InUSD,
+        SmartWallet _wallet,
+        address _openContract
+    ) internal returns (uint256 nftId) {
+        FluidView fluidView = new FluidView();
+        FluidView.VaultData memory vaultData = fluidView.getVaultData(address(_vault));
+    
+        // Handle collateral 0
+        uint256 collAmount0;
+        {
+            bool isNativeSupply0 = vaultData.supplyToken0 == TokenUtils.ETH_ADDR;
+            vaultData.supplyToken0 = isNativeSupply0 ? TokenUtils.WETH_ADDR : vaultData.supplyToken0;
+            collAmount0 = amountInUSDPrice(vaultData.supplyToken0, _collAmount0InUSD);
+            give(vaultData.supplyToken0, _wallet.owner(), collAmount0);
+            _wallet.ownerApprove(vaultData.supplyToken0, collAmount0);
+        }
+
+        // Handle collateral 1
+        uint256 collAmount1;
+        {
+            bool isNativeSupply1 = vaultData.supplyToken1 == TokenUtils.ETH_ADDR;
+            vaultData.supplyToken1 = isNativeSupply1 ? TokenUtils.WETH_ADDR : vaultData.supplyToken1;
+            collAmount1 = amountInUSDPrice(vaultData.supplyToken1, _collAmount1InUSD);
+            give(vaultData.supplyToken1, _wallet.owner(), collAmount1);
+            _wallet.ownerApprove(vaultData.supplyToken1, collAmount1);
+        }
+
+        // Estimate collateral shares
+        uint256 estimatedCollShares = estimateDepositShares(
+            vaultData.dexSupplyData.dexPool,
+            collAmount0,
+            collAmount1
+        );
+
+        if (supplyLimitReached(vaultData.dexSupplyData, estimatedCollShares)) {
+            return 0;
+        }
+
+        // Handle borrow token 0
+        uint256 borrowAmount0;
+        {
+            bool isNativeBorrow0 = vaultData.borrowToken0 == TokenUtils.ETH_ADDR;
+            borrowAmount0 = _borrowAmount0InUSD != 0
+                ? amountInUSDPrice(isNativeBorrow0 ? TokenUtils.WETH_ADDR : vaultData.borrowToken0, _borrowAmount0InUSD)
+                : 0;
+        }
+
+        // Handle borrow token 1
+        uint256 borrowAmount1;
+        {
+            bool isNativeBorrow1 = vaultData.borrowToken1 == TokenUtils.ETH_ADDR;
+            borrowAmount1 = _borrowAmount1InUSD != 0
+                ? amountInUSDPrice(isNativeBorrow1 ? TokenUtils.WETH_ADDR : vaultData.borrowToken1, _borrowAmount1InUSD)
+                : 0;
+        }
+
+        // Estimate debt shares
+        uint256 estimatedDebtShares = estimateBorrowShares(
+            vaultData.dexBorrowData.dexPool,
+            borrowAmount0,
+            borrowAmount1
+        );
+
+        if (borrowLimitReached(vaultData.dexBorrowData, estimatedDebtShares)) {
+            return 0;
+        }
+
+        bytes memory executeActionCallData = executeActionCalldata(
+            fluidDexOpenEncode(
+                _vault,
+                _wallet.owner(),
+                _wallet.owner(),
+                0, /* supplyAmount - Only used for T3 vaults */
+                FluidDexModel.SupplyVariableData(collAmount0, collAmount1, estimatedCollShares),
+                0, /* borrowAmount - Only used for T1 and T2 vaults */
                 FluidDexModel.BorrowVariableData(borrowAmount0, borrowAmount1, estimatedDebtShares),
                 true /* wrapBorrowedEth */
             ),
