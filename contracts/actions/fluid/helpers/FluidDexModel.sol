@@ -18,11 +18,17 @@ library FluidDexModel {
 
     /// @param collAmount0 Amount of collateral 0 to withdraw.
     /// @param collAmount1 Amount of collateral 1 to withdraw.
-    /// @param maxCollShares Max amount of collateral shares to burn.
+    /// @param maxCollShares Max amount of collateral shares to burn. Can be empty for max withdrawal (see minCollToWithdraw)
+    /// @param minCollToWithdraw Minimum amount of collateral to withdraw in one token. Only used for max withdrawal, when:
+    /// 1. variableData.collAmount0 == type(uint256).max -> all collateral will be withdrawn in coll token0.
+    ///    Any existing amount of token1 will be converted to token0 on fluid.
+    /// 2. variableData.collAmount1 == type(uint256).max -> all collateral will be withdrawn in coll token1.
+    ///    Any existing amount of token0 will be converted to token1 on fluid.
     struct WithdrawVariableData {
         uint256 collAmount0;
         uint256 collAmount1;
         uint256 maxCollShares;
+        uint256 minCollToWithdraw;
     }
 
     /// @param debtAmount0 Amount of debt token 0 to borrow.
@@ -36,11 +42,17 @@ library FluidDexModel {
 
     /// @param debtAmount0 Amount of debt token 0 to payback.
     /// @param debtAmount1 Amount of debt token 1 to payback.
-    /// @param minDebtShares Min amount of debt shares to burn.
+    /// @param minDebtShares Min amount of debt shares to burn. Can be empty for max payback (see maxAmountToPull)
+    /// @param maxAmountToPull Maximum amount of debt token to pull from the user. Only used for max payback when:
+    /// 1. variableData.debtAmount0 == type(uint256).max -> all debt will be paid back in debt token0.
+    ///    Any existing amount of debt token1 will be converted to debt token0 on fluid.
+    /// 2. variableData.debtAmount1 == type(uint256).max -> all debt will be paid back in debt token1.
+    ///    Any existing amount of debt token0 will be converted to debt token1 on fluid.
     struct PaybackVariableData {
         uint256 debtAmount0;
         uint256 debtAmount1;
         uint256 minDebtShares;
+        uint256 maxAmountToPull;
     }
 
     /// @notice Data struct for supplying liquidity to a Fluid DEX
@@ -64,16 +76,13 @@ library FluidDexModel {
     /// @param to Address to send the tokens to
     /// @param variableData Data for withdrawing liquidity with variable amounts
     /// @param wrapWithdrawnEth Whether to wrap withdrawn ETH into WETH
-    /// @param minCollToWithdraw Minimum amount of collateral to withdraw. Only used for max withdrawal -
-    ///                          variableData.collAmount0 or variableData.collAmount1 is type(uint256).max
     struct WithdrawDexData {
         address vault;
         uint256 vaultType;
         uint256 nftId;
         address to;
-        WithdrawVariableData variableData;
+        WithdrawVariableData withdrawVariableData;
         bool wrapWithdrawnEth;
-        uint256 minCollToWithdraw;
     }
 
     /// @notice Data struct for borrowing tokens from a Fluid DEX

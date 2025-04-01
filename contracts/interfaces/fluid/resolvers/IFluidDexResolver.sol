@@ -195,6 +195,19 @@ interface IFluidDexResolver {
         uint maxSharesAmt_
     ) external returns (uint shares_);
 
+    /// @dev Estimate withdrawal of a perfect amount of collateral liquidity in one token
+    /// @param dex_ The address of the DEX contract
+    /// @param shares_ The number of shares to withdraw
+    /// @param minToken0_ The minimum amount of token0 the user is willing to accept
+    /// @param minToken1_ The minimum amount of token1 the user is willing to accept
+    /// @return withdrawAmt_ Estimated amount of tokens to be withdrawn
+    function estimateWithdrawPerfectInOneToken(
+        address dex_,
+        uint shares_,
+        uint minToken0_,
+        uint minToken1_
+    ) external returns (uint withdrawAmt_);
+
     /// @dev Estimate borrowing of tokens
     /// @param dex_ The address of the DEX contract
     /// @param token0Amt_ Amount of token0 to borrow
@@ -220,4 +233,17 @@ interface IFluidDexResolver {
         uint token1Amt_,
         uint minSharesAmt_
     ) external payable returns (uint shares_);
+
+    /// @dev Estimate paying back of a perfect amount of borrowed tokens in one token
+    /// @param dex_ The address of the DEX contract
+    /// @param shares_ The number of shares to pay back
+    /// @param maxToken0_ Maximum amount of token0 to pay back
+    /// @param maxToken1_ Maximum amount of token1 to pay back
+    /// @return paybackAmt_ Estimated amount of tokens to be paid back
+    function estimatePaybackPerfectInOneToken(
+        address dex_,
+        uint shares_,
+        uint maxToken0_,
+        uint maxToken1_
+    ) external payable returns (uint paybackAmt_);
 }

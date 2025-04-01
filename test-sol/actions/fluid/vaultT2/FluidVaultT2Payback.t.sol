@@ -181,7 +181,7 @@ contract TestFluidVaultT2Payback is FluidTestBase {
                     sender,
                     nftId,
                     paybackAmount,
-                    FluidDexModel.PaybackVariableData(0, 0, 0) /* used for T3 and T4 vaults */
+                    FluidDexModel.PaybackVariableData(0, 0, 0, 0) /* used for T3 and T4 vaults */
                 ),
                 _isDirect
             );

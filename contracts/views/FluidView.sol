@@ -473,6 +473,52 @@ contract FluidView is FluidRatioHelper {
         );
     }
 
+    /// @notice Estimate how much collateral is worth in terms of one token for a given nft of dex position.
+    /// @notice This function can be used to estimate max collateral withdrawal in one token.
+    /// @dev This should be called with static call.
+    function estimateDexPositionCollateralInOneToken(
+        uint256 _nftId,
+        bool _inToken0
+    ) external returns (uint256 collateral) {
+        (
+            IFluidVaultResolver.UserPosition memory userPosition,
+            IFluidVaultResolver.VaultEntireData memory vaultData
+        ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
+
+        uint256 minToken0AmountToAccept = _inToken0 ? 1 : 0;
+        uint256 minToken1AmountToAccept = _inToken0 ? 0 : 1;
+
+        collateral = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateWithdrawPerfectInOneToken(
+            vaultData.constantVariables.supply,
+            userPosition.supply,
+            minToken0AmountToAccept,
+            minToken1AmountToAccept
+        );
+    }
+
+    /// @notice Estimate how much debt is worth in terms of one token for a given nft of dex position.
+    /// @notice This function can be used to estimate max debt payback in one token.
+    /// @dev This should be called with static call.
+    function estimateDexPositionDebtInOneToken(
+        uint256 _nftId,
+        bool _inToken0
+    ) external returns (uint256 debt) {
+        (
+            IFluidVaultResolver.UserPosition memory userPosition,
+            IFluidVaultResolver.VaultEntireData memory vaultData
+        ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
+
+        uint256 maximumAmountOfToken0ToPayback = _inToken0 ? type(uint256).max : 0;
+        uint256 maximumAmountOfToken1ToPayback = _inToken0 ? 0 : type(uint256).max;
+
+        debt = IFluidDexResolver(FLUID_DEX_RESOLVER).estimatePaybackPerfectInOneToken(
+            vaultData.constantVariables.borrow,
+            userPosition.borrow,
+            maximumAmountOfToken0ToPayback,
+            maximumAmountOfToken1ToPayback
+        );
+    }
+
     /*//////////////////////////////////////////////////////////////
                         FLUID EARN - F TOKENs UTILS
     //////////////////////////////////////////////////////////////*/

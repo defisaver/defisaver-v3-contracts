@@ -23,8 +23,6 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
     /// @param withdrawAmount Amount of collateral to withdraw. Used if vault is T3.
     /// @param withdrawVariableData Variable data for withdraw action. Used if vault is T2 or T4.
     /// @param wrapWithdrawnEth Whether to wrap the withdrawn ETH into WETH if one of the withdrawn assets is ETH.
-    /// @param minCollToWithdraw Minimum amount of collateral to withdraw. Only used for max withdrawal -
-    ///                          variableData.collAmount0 or variableData.collAmount1 is type(uint256).max
     struct Params {
         address vault;
         address to;
@@ -32,7 +30,6 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
         uint256 withdrawAmount;
         FluidDexModel.WithdrawVariableData withdrawVariableData;
         bool wrapWithdrawnEth;
-        uint256 minCollToWithdraw;
     }
 
     /// @inheritdoc ActionBase
@@ -72,17 +69,17 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
             _subData,
             _returnValues
         );
-        params.wrapWithdrawnEth = _parseParamUint(
-            params.wrapWithdrawnEth ? 1 : 0,
+        params.withdrawVariableData.minCollToWithdraw = _parseParamUint(
+            params.withdrawVariableData.minCollToWithdraw,
             _paramMapping[7],
-            _subData, _returnValues
-        ) == 1;
-        params.minCollToWithdraw = _parseParamUint(
-            params.minCollToWithdraw,
-            _paramMapping[8],
             _subData,
             _returnValues
         );
+        params.wrapWithdrawnEth = _parseParamUint(
+            params.wrapWithdrawnEth ? 1 : 0,
+            _paramMapping[8],
+            _subData, _returnValues
+        ) == 1;
 
         (uint256 sharesBurnedOrTokenWithdrawn, bytes memory logData) = _withdraw(params);
         emit ActionEvent("FluidDexWithdraw", logData);
@@ -129,9 +126,8 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
                 vaultType: constants.vaultType,
                 nftId: _params.nftId,
                 to: _params.to,
-                variableData: _params.withdrawVariableData,
-                wrapWithdrawnEth: _params.wrapWithdrawnEth,
-                minCollToWithdraw: _params.minCollToWithdraw
+                withdrawVariableData: _params.withdrawVariableData,
+                wrapWithdrawnEth: _params.wrapWithdrawnEth
             }),
             constants.supplyToken
         );

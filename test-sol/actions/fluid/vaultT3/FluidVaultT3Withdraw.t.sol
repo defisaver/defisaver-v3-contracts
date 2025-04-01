@@ -128,9 +128,8 @@ contract TestFluidVaultT3Withdraw is FluidTestBase {
                     sender,
                     nftId,
                     withdrawAmount,
-                    FluidDexModel.WithdrawVariableData(0, 0, 0),
-                    _wrapWithdrawnEth,
-                    0 /* _minCollToWithdraw - only used for T2 and T4 vaults max withdrawal */
+                    FluidDexModel.WithdrawVariableData(0, 0, 0, 0),
+                    _wrapWithdrawnEth
                 ),
                 _isDirect
             );

@@ -2,7 +2,10 @@
     "isSmartWalletSafe" : true,
     "blockNumber" : 21973355,
     "INSERT_TEST_FILE_HERE": { "blockNumber": 19268904},
+    "FluidVaultT2Withdraw": { "blockNumber": 22016219 },
     "FluidVaultT3Borrow": { "blockNumber": 22016219 },
+    "FluidVaultT3Payback": { "blockNumber": 22016219 },
+    "FluidVaultT3Open": { "blockNumber": 22016219 },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [

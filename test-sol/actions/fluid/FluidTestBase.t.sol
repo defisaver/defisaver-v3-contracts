@@ -95,6 +95,16 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         shares = shares * 101 / 100;
     }
 
+    function estimateDexPositionCollateralInOneToken(
+        uint256 _nftId,
+        bool _inToken0,
+        FluidView _fluidView
+    ) internal returns (uint256 collateral) {
+        collateral = _fluidView.estimateDexPositionCollateralInOneToken(_nftId, _inToken0);
+        // On max withdrawal allow to withdraw slightly less than estimated.
+        collateral = collateral * 100 / 105;
+    }
+
     function estimateBorrowShares(
         address _dexPool,
         uint256 _tokenAmount0,
@@ -131,6 +141,16 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         shares = shares * 100 / 101;
     }
 
+    function estimateDexPositionDebtInOneToken(
+        uint256 _nftId,
+        bool _inToken0,
+        FluidView _fluidView
+    ) internal returns (uint256 debt) {
+        debt = _fluidView.estimateDexPositionDebtInOneToken(_nftId, _inToken0);
+        // Slightly increase debt to make sure there is enough for full payback.
+        debt = debt * 105 / 100 + 10;
+    }
+
     function supplyLimitReached(
         FluidView.DexSupplyData memory _dexSupplyData,
         uint256 _newShares
@@ -163,6 +183,7 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         if (_amountInUSD > 0) {
             amount = amountInUSDPrice(token, _amountInUSD);
             give(token, _from, amount);
+            approveAsSender(_from, token, _to, 0); // remove any approval before
             approveAsSender(_from, token, _to, amount);
         }
     }
@@ -298,10 +319,14 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         }
 
         uint256 estimatedDebtShares = estimateBorrowShares(
-            vaultData.dexSupplyData.dexPool,
+            vaultData.dexBorrowData.dexPool,
             borrowAmount0,
             borrowAmount1
         );
+
+        if (borrowLimitReached(vaultData.dexBorrowData, estimatedDebtShares)) {
+            return 0;
+        }
 
         bytes memory executeActionCallData = executeActionCalldata(
             fluidDexOpenEncode(

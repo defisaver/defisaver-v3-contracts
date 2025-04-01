@@ -68,6 +68,12 @@ contract FluidDexPayback is ActionBase, FluidHelper {
             _subData,
             _returnValues
         );
+        params.paybackVariableData.maxAmountToPull = _parseParamUint(
+            params.paybackVariableData.maxAmountToPull,
+            _paramMapping[7],
+            _subData,
+            _returnValues
+        );
 
         (uint256 paybackAmountOrBurnedShares, bytes memory logData) = _payback(params);
         emit ActionEvent("FluidDexPayback", logData);
