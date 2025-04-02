@@ -5,13 +5,14 @@ pragma solidity =0.8.24;
 import { IFluidVaultResolver } from "../../../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidHelper } from "./FluidHelper.sol";
 
-/// @title Helper methods for Fluid ratio calc.
+/// @title Helper contract for Fluid ratio calculations.
 contract FluidRatioHelper is FluidHelper {
     uint256 internal constant PRICE_SCALER = 1e27;
     uint256 internal constant WAD = 1e18;
 
     /// @notice Gets ratio for a fluid position
     /// @param _nftId nft id of the fluid position
+    /// @return ratio Ratio of the position
     function getRatio(uint256 _nftId) public view returns (uint256 ratio) {
         (
             IFluidVaultResolver.UserPosition memory userPosition,

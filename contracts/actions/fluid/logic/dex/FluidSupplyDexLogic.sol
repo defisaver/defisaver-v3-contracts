@@ -37,9 +37,7 @@ library FluidSupplyDexLogic  {
             _data.variableData.collAmount1
         );
 
-        uint256 msgValue = vars.isToken0Native
-            ? vars.amount0
-            : (vars.isToken1Native ? vars.amount1 : 0);
+        uint256 msgValue = vars.isToken0Native ? vars.amount0 : (vars.isToken1Native ? vars.amount1 : 0);
 
         int256 exactCollSharesMinted;
 
@@ -52,7 +50,7 @@ library FluidSupplyDexLogic  {
                 0, /* debtAmount */
                 address(0) /* to */
             )
-            : IFluidVaultT4(_data.vault).operate{ value: msgValue}(
+            : IFluidVaultT4(_data.vault).operate{ value: msgValue }(
                 _data.nftId,
                 vars.amount0.signed256(),
                 vars.amount1.signed256(),

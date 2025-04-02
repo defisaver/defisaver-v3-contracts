@@ -24,8 +24,8 @@ contract FluidDexOpen is ActionBase, FluidHelper {
     /// @param to Address to send the borrowed assets to.
     /// @param supplyAmount Amount of collateral to deposit. Used if vault is T3.
     /// @param supplyVariableData Variable data for supply action. Used if vault is T2 or T4.
-    /// @param borrowAmount Amount of debt to borrow. Used if vault is T2.
-    /// @param borrowVariableData Variable data for borrow action. Used if vault is T3 or T4.
+    /// @param borrowAmount Amount of debt to borrow. Can be empty. Used if vault is T2.
+    /// @param borrowVariableData Variable data for borrow action. Can be empty. Used if vault is T3 or T4.
     /// @param wrapBorrowedEth Whether to wrap the borrowed ETH into WETH if one of the borrowed assets is ETH.
     struct Params {
         address vault;

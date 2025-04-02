@@ -22,8 +22,8 @@ library FluidPaybackDexLogic {
     /// @param _data Payback data
     /// @param _tokens Tokens data
     /// @return burnedSharesOrFullDebtAmount Supports two cases:
-    ///         - For max payback: Return the exact amount of full payback tokens (either token0 or token1)
     ///         - For partial payback: Return the amount of debt shares burned.
+    ///         - For max payback: Return the exact amount of full payback tokens (either token0 or token1)
     function paybackVariable(
         FluidDexModel.PaybackDexData memory _data,
         IFluidVault.Tokens memory _tokens

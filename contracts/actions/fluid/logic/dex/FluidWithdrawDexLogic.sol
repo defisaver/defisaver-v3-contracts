@@ -22,8 +22,8 @@ library FluidWithdrawDexLogic {
     /// @param _data Withdraw data
     /// @param _tokens Tokens data
     /// @return sharesBurnedOrTokenWithdrawn Supports two cases:
-    ///         - For max withdrawal: Return the exact amount of full withdrawn tokens (either token0 or token1)
     ///         - For partial withdrawal: Return the amount of collateral shares burned.
+    ///         - For max withdrawal: Return the exact amount of full withdrawn tokens (either token0 or token1)
     function withdrawVariable(
         FluidDexModel.WithdrawDexData memory _data,
         IFluidVault.Tokens memory _tokens
@@ -33,14 +33,14 @@ library FluidWithdrawDexLogic {
         (bool sendColl0AsWrapped, bool sendColl1AsWrapped) = FluidDexTokensUtils.shouldSendTokensAsWrapped(
             _tokens,
             _data.wrapWithdrawnEth,
-            _data.withdrawVariableData.collAmount0,
-            _data.withdrawVariableData.collAmount1
+            _data.variableData.collAmount0,
+            _data.variableData.collAmount1
         );
 
         address sendTokensTo = (sendColl0AsWrapped || sendColl1AsWrapped) ? address(this) : _data.to;
 
         // 1st CASE: Full withdrawal in coll token 0.
-        if (_data.withdrawVariableData.collAmount0 == type(uint256).max) {
+        if (_data.variableData.collAmount0 == type(uint256).max) {
             return _maxWithdrawalInToken0(
                 _data,
                 _tokens,
@@ -50,7 +50,7 @@ library FluidWithdrawDexLogic {
         }
 
         // 2nd CASE: Full withdrawal in coll token 1.
-        if (_data.withdrawVariableData.collAmount1 == type(uint256).max) {
+        if (_data.variableData.collAmount1 == type(uint256).max) {
             return _maxWithdrawalInToken1(
                 _data,
                 _tokens,
@@ -82,7 +82,7 @@ library FluidWithdrawDexLogic {
             ? IFluidVaultT2(_data.vault).operatePerfect(
                 _data.nftId,
                 type(int256).min, /* perfectColShares_ */
-                -_data.withdrawVariableData.minCollToWithdraw.signed256(),
+                -_data.variableData.minCollToWithdraw.signed256(),
                 0, /* colToken1MinMax_ */
                 0, /* newDebt_ */
                 _sendTokensTo
@@ -90,7 +90,7 @@ library FluidWithdrawDexLogic {
             : IFluidVaultT4(_data.vault).operatePerfect(
                 _data.nftId,
                 type(int256).min, /* perfectColShares_ */
-                -_data.withdrawVariableData.minCollToWithdraw.signed256(),
+                -_data.variableData.minCollToWithdraw.signed256(),
                 0, /* colToken1MinMax_ */
                 0, /* perfectDebtShares_ */
                 0, /* debtToken0MinMax_ */
@@ -98,6 +98,7 @@ library FluidWithdrawDexLogic {
                 _sendTokensTo
             );
 
+        // See IFluidVaultT2:operatePerfect and IFluidVaultT4:operatePerfect for return values indexing.
         exactToken0Withdrawn = uint256(-retVals[1]);
 
         // If coll token0 should be wrapped, re-send it to the recipient
@@ -119,12 +120,13 @@ library FluidWithdrawDexLogic {
         address _sendTokensTo,
         bool _sendColl1AsWrapped
     ) internal returns (uint256 exactToken1Withdrawn) {
+        // type(int256).min will trigger max withdrawal inside the vault
         (, int256[] memory retVals) = _data.vaultType.isT2Vault()
             ? IFluidVaultT2(_data.vault).operatePerfect(
                 _data.nftId,
                 type(int256).min, /* perfectColShares_ */
                 0, /* colToken0MinMax_ */
-                -_data.withdrawVariableData.minCollToWithdraw.signed256(),
+                -_data.variableData.minCollToWithdraw.signed256(),
                 0, /* newDebt_ */
                 _sendTokensTo
             )
@@ -132,13 +134,14 @@ library FluidWithdrawDexLogic {
                 _data.nftId,
                 type(int256).min, /* perfectColShares_ */
                 0, /* colToken0MinMax_ */
-                -_data.withdrawVariableData.minCollToWithdraw.signed256(),
+                -_data.variableData.minCollToWithdraw.signed256(),
                 0, /* perfectDebtShares_ */
                 0, /* debtToken0MinMax_ */
                 0, /* debtToken1MinMax_ */
                 _sendTokensTo
             );
 
+        // See IFluidVaultT2:operatePerfect and IFluidVaultT4:operatePerfect for return values indexing.
         exactToken1Withdrawn = uint256(-retVals[2]);
 
         // If coll token1 should be wrapped, re-send it to the recipient
@@ -164,17 +167,17 @@ library FluidWithdrawDexLogic {
         ( , int256 exactCollSharesBurned , ) = _data.vaultType.isT2Vault()
             ? IFluidVaultT2(_data.vault).operate(
                 _data.nftId,
-                -_data.withdrawVariableData.collAmount0.signed256(),
-                -_data.withdrawVariableData.collAmount1.signed256(),
-                -_data.withdrawVariableData.maxCollShares.signed256(),
+                -_data.variableData.collAmount0.signed256(),
+                -_data.variableData.collAmount1.signed256(),
+                -_data.variableData.maxCollShares.signed256(),
                 0, /* newDebt_ */
                 _sendTokensTo
             )
             : IFluidVaultT4(_data.vault).operate(
                 _data.nftId,
-                -_data.withdrawVariableData.collAmount0.signed256(),
-                -_data.withdrawVariableData.collAmount1.signed256(),
-                -_data.withdrawVariableData.maxCollShares.signed256(),
+                -_data.variableData.collAmount0.signed256(),
+                -_data.variableData.collAmount1.signed256(),
+                -_data.variableData.maxCollShares.signed256(),
                 0, /* newDebtToken0_ */
                 0, /* newDebtToken1_ */
                 0, /* debtSharesMinMax_ */
@@ -187,8 +190,8 @@ library FluidWithdrawDexLogic {
         FluidDexTokensUtils.sendTokens(
             _tokens,
             _data.to,
-            _data.withdrawVariableData.collAmount0,
-            _data.withdrawVariableData.collAmount1,
+            _data.variableData.collAmount0,
+            _data.variableData.collAmount1,
             _sendColl0AsWrapped,
             _sendColl1AsWrapped
         );

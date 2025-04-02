@@ -126,7 +126,7 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
                 vaultType: constants.vaultType,
                 nftId: _params.nftId,
                 to: _params.to,
-                withdrawVariableData: _params.withdrawVariableData,
+                variableData: _params.withdrawVariableData,
                 wrapWithdrawnEth: _params.wrapWithdrawnEth
             }),
             constants.supplyToken

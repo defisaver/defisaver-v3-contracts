@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-/// @title Helper library defining vault types inside the Fluid protocol
+/// @title Helper library defining vault types inside the Fluid protocol.
 library FluidVaultTypes {
 
     error InvalidVaultType(uint256 vaultType);
@@ -37,7 +37,11 @@ library FluidVaultTypes {
     }
 
     function requireDexVault(uint256 _vaultType) internal pure {
-        if (_vaultType == T1_VAULT_TYPE) {
+        if (
+            _vaultType != T2_VAULT_TYPE &&
+            _vaultType != T3_VAULT_TYPE &&
+            _vaultType != T4_VAULT_TYPE
+        ) {
             revert InvalidVaultType(_vaultType);
         }
     }

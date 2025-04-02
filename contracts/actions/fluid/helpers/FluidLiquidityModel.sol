@@ -15,7 +15,7 @@ library FluidLiquidityModel {
     /// @param amount Amount of tokens to supply
     /// @param from Address to pull the tokens from
     /// Fields used only when opening a new position, where we also need to know the debt amount.
-    /// Used only to save gas, as this way we don't need separate calls for supply and borrow.
+    /// Used only to save gas, so that we don't need separate calls for supply and borrow.
     /// @param debtAmount Amount of debt to be generated
     /// @param debtTo Address to send the debt to
     struct SupplyData {

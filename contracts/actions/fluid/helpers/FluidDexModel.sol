@@ -81,7 +81,7 @@ library FluidDexModel {
         uint256 vaultType;
         uint256 nftId;
         address to;
-        WithdrawVariableData withdrawVariableData;
+        WithdrawVariableData variableData;
         bool wrapWithdrawnEth;
     }
 

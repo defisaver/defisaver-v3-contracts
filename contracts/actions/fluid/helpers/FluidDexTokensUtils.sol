@@ -9,7 +9,7 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 library FluidDexTokensUtils {
     using TokenUtils for address;
 
-    /// @notice Helper struct to hold data about pulled tokens
+    /// @notice Helper struct to hold data for pulled tokens
     /// @param amount0 Amount of token0 pulled
     /// @param amount1 Amount of token1 pulled
     /// @param isToken0Native Whether token0 is native or not
@@ -21,8 +21,8 @@ library FluidDexTokensUtils {
         bool isToken1Native;
     }
 
-    /// @notice Sends tokens to the recipient and wraps them if needed
-    /// @dev If no tokens should be wrapped, the function won't have any effect
+    /// @notice Sends tokens to the recipient and wraps them if needed.
+    /// @dev If no tokens should be wrapped, the function won't have any effect.
     /// @param _tokens Fluid vault tokens
     /// @param _to Address to send the tokens to
     /// @param _amount0 Amount of token0 to send
@@ -50,7 +50,7 @@ library FluidDexTokensUtils {
         }
     }
 
-    /// @notice Checks if tokens should be sent as wrapped. Used by withdraw and borrow actions
+    /// @notice Checks if tokens should be sent as wrapped. Used by withdraw and borrow actions.
     /// @param _tokens Fluid vault tokens
     /// @param _shouldWrap Whether tokens should be wrapped
     /// @param _amount0 Amount of token0 to send

@@ -40,8 +40,8 @@ library FluidSupplyLiquidityLogic {
             ? IFluidVaultT1(_data.vault).operate{ value: msgValue }(
                 _data.nftId,
                 _data.amount.signed256(),
-                _data.debtAmount.signed256(), // used during opening of new position
-                _data.debtTo // used during opening of new position
+                _data.debtAmount.signed256(), // used during opening of new position. See FluidVaultT1Open
+                _data.debtTo // used during opening of new position. See FluidVaultT1Open
             )
             : IFluidVaultT3(_data.vault).operate{ value: msgValue }(
                 _data.nftId,
