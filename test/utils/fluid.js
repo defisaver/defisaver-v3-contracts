@@ -1,6 +1,14 @@
+const { getAssetInfoByAddress, getAssetInfo } = require('@defisaver/tokens');
+const hre = require('hardhat');
 const {
     openStrategyAndBundleStorage,
     network,
+    getContractFromRegistry,
+    chainIds,
+    fetchAmountInUSDPrice,
+    setBalance,
+    ETH_ADDR,
+    approve,
 } = require('./utils');
 const {
     createFluidT1RepayStrategy,
@@ -15,6 +23,7 @@ const {
     createFluidT1FLRepayL2Strategy,
     createFluidT1FLBoostL2Strategy,
 } = require('../../strategies-spec/l2');
+const { fluidDexOpen } = require('./actions');
 
 const t1Vaults = {
     mainnet: [
@@ -70,7 +79,26 @@ const t1Vaults = {
     ],
 };
 
-const getFluidVaultT1TestPairs = async () => t1Vaults[network];
+const t4Vaults = {
+    mainnet: [
+        {
+            vault: '0x469D8c7990b9072EEF05d6349224621a71176213',
+            collSymbol0: 'USDC',
+            collSymbol1: 'ETH',
+            debtSymbol0: 'USDC',
+            debtSymbol1: 'ETH',
+        },
+    ],
+};
+
+const MIN_DEPOSIT_SHARES_TO_MINT = 1;
+const MAX_DEPOSIT_SHARES_TO_BURN = hre.ethers.constants.MaxInt256;
+const MIN_COLLATERAL_TO_WITHDRAW = 1;
+const MIN_DEBT_SHARES_TO_BURN = 1;
+const MAX_DEBT_SHARES_TO_MINT = hre.ethers.constants.MaxInt256;
+
+const getFluidVaultT1TestPairs = () => t1Vaults[network];
+const getFluidVaultT4TestPairs = () => t4Vaults[network];
 
 const deployFluidT1RepayBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
@@ -92,8 +120,113 @@ const deployFluidT1BoostBundle = async (proxy, isFork) => {
     return bundleId;
 };
 
+const supplyLimitReached = (dexSupplyData, newShares) => (
+    dexSupplyData.maxSupplyShares.lt(dexSupplyData.totalSupplyShares.add(newShares))
+);
+
+const borrowLimitReached = (dexBorrowData, newShares) => (
+    dexBorrowData.maxBorrowShares.lt(dexBorrowData.totalBorrowShares.add(newShares))
+);
+
+const openFluidT4Vault = async (
+    proxy,
+    senderAcc,
+    vault,
+    collAmount0InUSD,
+    collAmount1InUSD,
+    borrowAmount0InUSD,
+    borrowAmount1InUSD,
+    isFork,
+) => {
+    const fluidView = await getContractFromRegistry('FluidView', isFork);
+    const vaultData = await fluidView.callStatic.getVaultData(vault);
+
+    const weth = getAssetInfo('WETH', chainIds[network]);
+
+    const collAsset0 = getAssetInfoByAddress(
+        vaultData.supplyToken0 === ETH_ADDR ? weth.address : vaultData.supplyToken0,
+        chainIds[network],
+    );
+    const collAsset1 = getAssetInfoByAddress(
+        vaultData.supplyToken1 === ETH_ADDR ? weth.address : vaultData.supplyToken1,
+        chainIds[network],
+    );
+    const borrowAsset0 = getAssetInfoByAddress(
+        vaultData.borrowToken0 === ETH_ADDR ? weth.address : vaultData.borrowToken0,
+        chainIds[network],
+    );
+    const borrowAsset1 = getAssetInfoByAddress(
+        vaultData.borrowToken1 === ETH_ADDR ? weth.address : vaultData.borrowToken1,
+        chainIds[network],
+    );
+
+    // Handle collateral 0
+    let collAmount0 = 0;
+    if (collAmount0InUSD > 0) {
+        collAmount0 = await fetchAmountInUSDPrice(collAsset0.symbol, collAmount0InUSD);
+        await setBalance(collAsset0.address, senderAcc.address, collAmount0);
+        await approve(collAsset0.address, proxy.address, senderAcc);
+    }
+
+    // Handle collateral 1
+    let collAmount1 = 0;
+    if (collAmount1InUSD > 0) {
+        collAmount1 = await fetchAmountInUSDPrice(collAsset1.symbol, collAmount1InUSD);
+        await setBalance(collAsset1.address, senderAcc.address, collAmount1);
+        await approve(collAsset1.address, proxy.address, senderAcc);
+    }
+
+    // Check if supply limit is reached
+    if (supplyLimitReached(vaultData.dexSupplyData, 1)) {
+        return 0;
+    }
+
+    // Handle borrow token 0
+    let borrowAmount0 = 0;
+    if (borrowAmount0InUSD > 0) {
+        borrowAmount0 = await fetchAmountInUSDPrice(borrowAsset0.symbol, borrowAmount0InUSD);
+    }
+
+    // Handle borrow token 1
+    let borrowAmount1 = 0;
+    if (borrowAmount1InUSD > 0) {
+        borrowAmount1 = await fetchAmountInUSDPrice(borrowAsset1.symbol, borrowAmount1InUSD);
+    }
+
+    // Check if borrow limit is reached
+    if (borrowAmount0 !== 0 || borrowAmount1 !== 0) {
+        if (borrowLimitReached(vaultData.dexBorrowData, 1)) {
+            return 0;
+        }
+    }
+
+    // Execute action
+    await fluidDexOpen(
+        proxy,
+        vault,
+        senderAcc.address,
+        senderAcc.address,
+        0,
+        [collAmount0, collAmount1, MIN_DEPOSIT_SHARES_TO_MINT],
+        0,
+        [borrowAmount0, borrowAmount1, MAX_DEBT_SHARES_TO_MINT],
+        true,
+    );
+
+    const nftIds = await fluidView.getUserNftIds(proxy.address);
+
+    return nftIds[nftIds.length - 1];
+};
+
 module.exports = {
     deployFluidT1RepayBundle,
     deployFluidT1BoostBundle,
+    openFluidT4Vault,
     getFluidVaultT1TestPairs,
+    getFluidVaultT4TestPairs,
+    MIN_DEPOSIT_SHARES_TO_MINT,
+    MAX_DEPOSIT_SHARES_TO_BURN,
+    MIN_DEBT_SHARES_TO_BURN,
+    MAX_DEBT_SHARES_TO_MINT,
+    MIN_COLLATERAL_TO_WITHDRAW,
 };

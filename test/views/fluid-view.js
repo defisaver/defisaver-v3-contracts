@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-const { expect } = require('chai');
 const { network, redeploy } = require('../utils/utils');
 
 const TEST_DATA = {
