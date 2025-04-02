@@ -157,6 +157,42 @@ contract TestFluidDexWithdraw is FluidTestBase {
         }
     }
 
+    function test_should_partial_withdrawal_coll_0_more_than_initial_supply() public {
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialSupplyToken0AmountUSD: 50000,
+                    initialSupplyToken1AmountUSD: 50000,
+                    withdrawToken0AmountInUSD: 80000,
+                    withdrawToken1AmountInUSD: 0,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false,
+                    wrapWithdrawnEth: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
+    }
+
+    function test_should_partial_withdrawal_coll_1_more_than_initial_supply() public {
+        for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialSupplyToken0AmountUSD: 50000,
+                    initialSupplyToken1AmountUSD: 50000,
+                    withdrawToken0AmountInUSD: 0,
+                    withdrawToken1AmountInUSD: 75000,
+                    takeMaxUint256CollAmount0: false,
+                    takeMaxUint256CollAmount1: false,
+                    isDirect: false,
+                    wrapWithdrawnEth: false
+                }),
+                t2VaultsSelected[i]
+            );
+        }
+    }
+
     function test_should_partial_withdrawal_both_coll_with_wrap() public {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(

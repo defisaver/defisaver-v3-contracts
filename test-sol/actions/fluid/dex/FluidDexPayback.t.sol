@@ -137,6 +137,40 @@ contract TestFluidDexPayback is FluidTestBase {
         }
     }
 
+    function test_partial_payback_in_token_0_more_than_initial_borrow() public {
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialBorrowToken0AmountUSD: 20000,
+                    initialBorrowToken1AmountUSD: 50000,
+                    paybackToken0AmountUSD: 60000,
+                    paybackToken1AmountUSD: 0,
+                    maxPaybackToken0: false,
+                    maxPaybackToken1: false,
+                    isDirect: false
+                }),
+                t3VaultsSelected[i]
+            );
+        }
+    }
+
+    function test_partial_payback_in_token_1_more_than_initial_borrow() public {
+        for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
+            _baseTest(
+                TestConfig({
+                    initialBorrowToken0AmountUSD: 20000,
+                    initialBorrowToken1AmountUSD: 50000,
+                    paybackToken0AmountUSD: 0,
+                    paybackToken1AmountUSD: 60000,
+                    maxPaybackToken0: false,
+                    maxPaybackToken1: false,
+                    isDirect: false
+                }),
+                t3VaultsSelected[i]
+            );
+        }
+    }
+
     function test_partial_payback_in_both_tokens() public {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
