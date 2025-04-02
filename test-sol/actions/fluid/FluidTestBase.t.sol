@@ -135,7 +135,14 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         bool _inToken0,
         FluidView _fluidView
     ) internal returns (uint256 collateral) {
-        collateral = _fluidView.estimateDexPositionCollateralInOneToken(_nftId, _inToken0);
+        uint256 minToken0AmountToAccept = _inToken0 ? 1 : 0;
+        uint256 minToken1AmountToAccept = _inToken0 ? 0 : 1;
+
+        collateral = _fluidView.estimateDexPositionCollateralInOneToken(
+            _nftId,
+            minToken0AmountToAccept,
+            minToken1AmountToAccept
+        );
 
         emit log_named_uint("estimated collateral", collateral);
 
@@ -184,7 +191,15 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         bool _inToken0,
         FluidView _fluidView
     ) internal returns (uint256 debt) {
-        debt = _fluidView.estimateDexPositionDebtInOneToken(_nftId, _inToken0);
+        uint256 maxToken0AmountToPayback = _inToken0 ? type(uint256).max : 0;
+        uint256 maxToken1AmountToPayback = _inToken0 ? 0 : type(uint256).max;
+
+        debt = _fluidView.estimateDexPositionDebtInOneToken(
+            _nftId,
+            maxToken0AmountToPayback,
+            maxToken1AmountToPayback
+        );
+        
         // Slightly increase debt to make sure there is enough for full payback.
         debt = debt * 105 / 100 + 10;
     }

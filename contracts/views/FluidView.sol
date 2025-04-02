@@ -39,8 +39,8 @@ contract FluidView is FluidRatioHelper {
     /// @notice Data for the supply dex pool used in T2 and T4 vaults
     struct DexSupplyData {
         address dexPool; // address of the dex pool
-        uint256 dexId;   // id of the dex pool
-        uint256 fee;     // fee of the dex pool
+        uint256 dexId; // id of the dex pool
+        uint256 fee; // fee of the dex pool
         uint256 lastStoredPrice; // last stored price of the dex pool
         uint256 centerPrice; // center price of the dex pool
         uint256 token0Utilization; // token0 utilization
@@ -64,8 +64,8 @@ contract FluidView is FluidRatioHelper {
     /// @notice Data for the borrow dex pool used in T3 and T4 vaults
     struct DexBorrowData {
         address dexPool; // address of the dex pool
-        uint256 dexId;   // id of the dex pool
-        uint256 fee;     // fee of the dex pool
+        uint256 dexId; // id of the dex pool
+        uint256 fee; // fee of the dex pool
         uint256 lastStoredPrice; // last stored price of the dex pool
         uint256 centerPrice; // center price of the dex pool
         uint256 token0Utilization; // token0 utilization
@@ -401,8 +401,15 @@ contract FluidView is FluidRatioHelper {
         }
     }
 
-    /// @notice Estimate variable dex deposit for T2 and T4 vaults
+    /// @notice Estimate how much shares will be received for a variable dex deposit for T2 and T4 vaults
     /// @dev This should be called with static call.
+    /// @param _vault Address of the vault
+    /// @param _token0Amount Amount of token0 to deposit
+    /// @param _token1Amount Amount of token1 to deposit
+    /// @param _minSharesAmount Minimum amount of shares to receive
+    ///         This value can be set to low value like 1 to just check for minted shares.
+    ///         However, it can also be used to check if transaction will revert when sending this amount of shares (Slippage check)
+    /// @return shares Amount of shares received
     function estimateDeposit(
         address _vault,
         uint256 _token0Amount,
@@ -419,8 +426,15 @@ contract FluidView is FluidRatioHelper {
         );
     }
 
-    /// @notice Estimate variable dex withdraw for T2 and T4 vaults
+    /// @notice Estimate how much deposit shares will be burned for a variable dex withdraw for T2 and T4 vaults
     /// @dev This should be called with static call.
+    /// @param _vault Address of the vault
+    /// @param _token0Amount Amount of token0 to withdraw
+    /// @param _token1Amount Amount of token1 to withdraw
+    /// @param _maxSharesAmount Maximum amount of shares to withdraw
+    ///        This value can be set to high value like type(uint256).max to just check for burned shares.
+    ///        However, it can also be used to check if transaction will revert when sending this amount of shares (Slippage check)
+    /// @return shares Amount of shares burned
     function estimateWithdraw(
         address _vault,
         uint256 _token0Amount,
@@ -437,8 +451,15 @@ contract FluidView is FluidRatioHelper {
         );
     }
 
-    /// @notice Estimate variable dex borrow for T3 and T4 vaults
+    /// @notice Estimate how much debt shares will be received for a variable dex borrow for T3 and T4 vaults
     /// @dev This should be called with static call.
+    /// @param _vault Address of the vault
+    /// @param _token0Amount Amount of token0 to borrow
+    /// @param _token1Amount Amount of token1 to borrow
+    /// @param _maxSharesAmount Maximum amount of shares to borrow
+    ///        This value can be set to high value like type(uint256).max to just check for minted shares.
+    ///        However, it can also be used to check if transaction will revert when sending this amount of shares (Slippage check)
+    /// @return shares Amount of shares received
     function estimateBorrow(
         address _vault,
         uint256 _token0Amount,
@@ -455,8 +476,15 @@ contract FluidView is FluidRatioHelper {
         );
     }
 
-    /// @notice Estimate variable dex payback for T3 and T4 vaults
+    /// @notice Estimate how much debt shares will be burned for a variable dex payback for T3 and T4 vaults
     /// @dev This should be called with static call.
+    /// @param _vault Address of the vault
+    /// @param _token0Amount Amount of token0 to payback
+    /// @param _token1Amount Amount of token1 to payback
+    /// @param _minSharesAmount Minimum amount of shares to payback
+    ///         This value can be set to low value like 1 to just check for burned shares.
+    ///         However, it can also be used to check if transaction will revert when sending this amount of shares (Slippage check)
+    /// @return shares Amount of shares burned
     function estimatePayback(
         address _vault,
         uint256 _token0Amount,
@@ -476,46 +504,80 @@ contract FluidView is FluidRatioHelper {
     /// @notice Estimate how much collateral is worth in terms of one token for a given nft of dex position.
     /// @notice This function can be used to estimate max collateral withdrawal in one token.
     /// @dev This should be called with static call.
+    /// @dev Only first non zero value will be used, and other will be capped to 0.
+    /// @param _nftId Nft id of the dex position
+    /// @param _minToken0AmountToAccept Minimum amount of token0 to accept. If 0, withdrawal is calculated in token1.
+    ///         This value can be set to low value like 1 to just check for withdrawable collateral.
+    /// @param _minToken1AmountToAccept Minimum amount of token1 to accept. If 0, withdrawal is calculated in token0.
+    ///         This value can be set to low value like 1 to just check for withdrawable collateral.
+    /// @return collateral Amount of collateral in one token
     function estimateDexPositionCollateralInOneToken(
         uint256 _nftId,
-        bool _inToken0
+        uint256 _minToken0AmountToAccept,
+        uint256 _minToken1AmountToAccept
     ) external returns (uint256 collateral) {
+        require(_minToken0AmountToAccept > 0 || _minToken1AmountToAccept > 0);
+
+        // Make sure only one token is specified
+        if (_minToken0AmountToAccept > 0) {
+            _minToken1AmountToAccept = 0;
+        }
+
+        // Make sure only one token is specified
+        if (_minToken1AmountToAccept > 0) {
+            _minToken0AmountToAccept = 0;
+        }
+
         (
             IFluidVaultResolver.UserPosition memory userPosition,
             IFluidVaultResolver.VaultEntireData memory vaultData
         ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
 
-        uint256 minToken0AmountToAccept = _inToken0 ? 1 : 0;
-        uint256 minToken1AmountToAccept = _inToken0 ? 0 : 1;
-
         collateral = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateWithdrawPerfectInOneToken(
             vaultData.constantVariables.supply,
             userPosition.supply,
-            minToken0AmountToAccept,
-            minToken1AmountToAccept
+            _minToken0AmountToAccept,
+            _minToken1AmountToAccept
         );
     }
 
     /// @notice Estimate how much debt is worth in terms of one token for a given nft of dex position.
     /// @notice This function can be used to estimate max debt payback in one token.
     /// @dev This should be called with static call.
+    /// @dev Only first non zero value will be used, and other will be capped to 0.
+    /// @param _nftId Nft id of the dex position
+    /// @param _maxToken0AmountToPayback Maximum amount of token0 to payback. If 0, payback is calculated in token1.
+    ///         This value can be set to high value like type(uint256).max to just check for full debt payback.
+    /// @param _maxToken1AmountToPayback Maximum amount of token1 to payback. If 0, payback is calculated in token0.
+    ///         This value can be set to high value like type(uint256).max to just check for full debt payback.
+    /// @return debt Amount of debt in one token
     function estimateDexPositionDebtInOneToken(
         uint256 _nftId,
-        bool _inToken0
+        uint256 _maxToken0AmountToPayback,
+        uint256 _maxToken1AmountToPayback
     ) external returns (uint256 debt) {
+        require(_maxToken0AmountToPayback > 0 || _maxToken1AmountToPayback > 0);
+
+        // Make sure only one token is specified
+        if (_maxToken0AmountToPayback > 0) {
+            _maxToken1AmountToPayback = 0;
+        }
+
+        // Make sure only one token is specified
+        if (_maxToken1AmountToPayback > 0) {
+            _maxToken0AmountToPayback = 0;
+        }
+
         (
             IFluidVaultResolver.UserPosition memory userPosition,
             IFluidVaultResolver.VaultEntireData memory vaultData
         ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
 
-        uint256 maximumAmountOfToken0ToPayback = _inToken0 ? type(uint256).max : 0;
-        uint256 maximumAmountOfToken1ToPayback = _inToken0 ? 0 : type(uint256).max;
-
         debt = IFluidDexResolver(FLUID_DEX_RESOLVER).estimatePaybackPerfectInOneToken(
             vaultData.constantVariables.borrow,
             userPosition.borrow,
-            maximumAmountOfToken0ToPayback,
-            maximumAmountOfToken1ToPayback
+            _maxToken0AmountToPayback,
+            _maxToken1AmountToPayback
         );
     }
 
