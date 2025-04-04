@@ -1445,5 +1445,16 @@
     "changeTime": "86400",
     "registryIds": [],
     "history": []
+},
+{
+  "name": "MerklClaim",
+  "address": "0xdab7b1865efa8d1f8fe1602dea9285b4a599c45c",
+  "id": "0x79b06cc7",
+  "path": "contracts/actions/merkl/MerklClaim.sol",
+  "version": "1.0.0",
+  "inRegistry": true,
+  "changeTime": "0",
+  "registryIds": [],
+  "history": []
 }
 ]
