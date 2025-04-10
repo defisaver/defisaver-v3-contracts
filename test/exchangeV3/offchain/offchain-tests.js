@@ -19,6 +19,7 @@ const {
     takeSnapshot,
     revertToSnapshot,
     network,
+    addToRegistry,
 } = require('../../utils/utils');
 
 const { executeAction } = require('../../utils/actions');
@@ -55,7 +56,7 @@ const kyberTest = async () => {
         let snapshot;
 
         before(async () => {
-            await redeploy('KyberInputScalingHelperL2');
+            await addToRegistry('KyberInputScalingHelper', '0x2f577A41BeC1BE1152AeEA12e73b7391d15f655D');
             await redeploy('DFSSell');
             await redeploy('RecipeExecutor');
             await redeploy('PullToken');

@@ -151,14 +151,15 @@
     },
     {
       "name": "KyberAggregatorWrapper",
-      "address": "0xd94BeaAC0d40fDe0F85D2172DC568E9CfC4C389E",
+      "address": "0x7B1EcaEAD78a2D3B1672892B9AE5527Dea8a40e4",
       "id": "0x1abf4ed0",
       "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
       "history": [
+        "0xd94BeaAC0d40fDe0F85D2172DC568E9CfC4C389E",
         "0xF83127C2967D50e47323fDb1cc3920E856ee4Fbc",
         "0x9512e7da2014562FFD28401De2566d7ed256C8e3",
         "0x2d8a9b579c32e916d5a6ec69c307ec14037b8371",
@@ -1156,5 +1157,16 @@
     "changeTime": "86400",
     "registryIds": [],
     "history": []
+},
+{
+  "name": "MerklClaim",
+  "address": "0xa7574a72D93D236040648b1dc80ddA3E7A4de40F",
+  "id": "0x79b06cc7",
+  "path": "contracts/actions/merkl/MerklClaim.sol",
+  "version": "1.0.0",
+  "inRegistry": true,
+  "changeTime": "0",
+  "registryIds": [],
+  "history": []
 }
 ]

@@ -747,14 +747,15 @@
       },
       {
         "name": "KyberAggregatorWrapper",
-        "address": "0xAB72cBe0472378190a2aB3071235aE5C1eE76aA3",
+        "address": "0x23ADd7e414d803C2a35334933212661634B27a5a",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
-        "version": "1.0.2",
+        "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0xAB72cBe0472378190a2aB3071235aE5C1eE76aA3",
           "0x52A327855a1F523C6aEf42684cc97139970182c7",
           "0xae56474aBe3C271579b513b6668864e39f65Ae15"
         ]
