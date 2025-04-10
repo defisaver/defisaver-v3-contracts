@@ -59,6 +59,8 @@ contract FluidView is FluidRatioHelper {
         uint256 token1SupplyRate; // token1 supply rate. E.g 320 = 3.2% APR
         address quoteToken; // quote token used in dex oracle. Either token0 or token1
         uint256 quoteTokensPerShare; // quote tokens per 1e18 shares (all reserves are converted to quote token).
+        uint256 supplyToken0Reserves; // supply token0 reserves inside dex
+        uint256 supplyToken1Reserves; // supply token1 reserves inside dex
     }
 
     /// @notice Data for the borrow dex pool used in T3 and T4 vaults
@@ -84,6 +86,8 @@ contract FluidView is FluidRatioHelper {
         uint256 token1BorrowRate; // token1 borrow rate. E.g 320 = 3.2% APR
         address quoteToken; // quote token used in dex oracle. Either token0 or token1
         uint256 quoteTokensPerShare; // quote tokens per 1e18 shares (all reserves are converted to quote token).
+        uint256 borrowToken0Reserves; // borrow token0 reserves inside dex
+        uint256 borrowToken1Reserves; // borrow token1 reserves inside dex
     }
 
     /// @notice Full vault data including dex data.
@@ -432,7 +436,7 @@ contract FluidView is FluidRatioHelper {
     /// @param _token0Amount Amount of token0 to withdraw
     /// @param _token1Amount Amount of token1 to withdraw
     /// @param _maxSharesAmount Maximum amount of shares to withdraw
-    ///        This value can be set to high value like type(uint256).max to just check for burned shares.
+    ///        This value can be set to high value like type(int256).max to just check for burned shares.
     ///        However, it can also be used to check if transaction will revert when sending this amount of shares (Slippage check)
     /// @return shares Amount of shares burned
     function estimateWithdraw(
@@ -457,7 +461,7 @@ contract FluidView is FluidRatioHelper {
     /// @param _token0Amount Amount of token0 to borrow
     /// @param _token1Amount Amount of token1 to borrow
     /// @param _maxSharesAmount Maximum amount of shares to borrow
-    ///        This value can be set to high value like type(uint256).max to just check for minted shares.
+    ///        This value can be set to high value like type(int256).max to just check for minted shares.
     ///        However, it can also be used to check if transaction will revert when sending this amount of shares (Slippage check)
     /// @return shares Amount of shares received
     function estimateBorrow(
@@ -547,9 +551,9 @@ contract FluidView is FluidRatioHelper {
     /// @dev Only first non zero value will be used, and other will be capped to 0.
     /// @param _nftId Nft id of the dex position
     /// @param _maxToken0AmountToPayback Maximum amount of token0 to payback. If 0, payback is calculated in token1.
-    ///         This value can be set to high value like type(uint256).max to just check for full debt payback.
+    ///         This value can be set to high value like type(int256).max to just check for full debt payback.
     /// @param _maxToken1AmountToPayback Maximum amount of token1 to payback. If 0, payback is calculated in token0.
-    ///         This value can be set to high value like type(uint256).max to just check for full debt payback.
+    ///         This value can be set to high value like type(int256).max to just check for full debt payback.
     /// @return debt Amount of debt in one token
     function estimateDexPositionDebtInOneToken(
         uint256 _nftId,
@@ -717,7 +721,9 @@ contract FluidView is FluidRatioHelper {
             token0SupplyRate: _dexData.limitsAndAvailability.liquidityTokenData0.supplyRate,
             token1SupplyRate: _dexData.limitsAndAvailability.liquidityTokenData1.supplyRate,
             quoteToken: quoteToken,
-            quoteTokensPerShare: quoteTokensPerShare
+            quoteTokensPerShare: quoteTokensPerShare,
+            supplyToken0Reserves: _dexData.colReserves.token0RealReserves,
+            supplyToken1Reserves: _dexData.colReserves.token1RealReserves
         });
     }
 
@@ -753,7 +759,9 @@ contract FluidView is FluidRatioHelper {
             token0BorrowRate: _dexData.limitsAndAvailability.liquidityTokenData0.borrowRate,
             token1BorrowRate: _dexData.limitsAndAvailability.liquidityTokenData1.borrowRate,
             quoteToken: quoteToken,
-            quoteTokensPerShare: quoteTokensPerShare
+            quoteTokensPerShare: quoteTokensPerShare,
+            borrowToken0Reserves: _dexData.debtReserves.token0RealReserves,
+            borrowToken1Reserves: _dexData.debtReserves.token1RealReserves
         });
     }
 
