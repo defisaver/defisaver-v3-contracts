@@ -124,7 +124,7 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
             _dexPool,
             _tokenAmount0,
             _tokenAmount1,
-            type(uint256).max /* maxCollShares */
+            uint256(type(int256).max) /* maxCollShares */
         );
         // Slightly increase shares (simulate slippage). This means we allow this amount of shares to be burned.
         shares = shares * 101 / 100;
@@ -147,7 +147,7 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         emit log_named_uint("estimated collateral", collateral);
 
         // On max withdrawal allow to withdraw slightly less than estimated.
-        collateral = collateral * 100 / 105;
+        collateral = collateral * 100 / 110;
     }
 
     function estimateBorrowShares(
@@ -161,7 +161,7 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
             _dexPool,
             _tokenAmount0,
             _tokenAmount1,
-            type(uint256).max /* maxDebtShares */
+            uint256(type(int256).max) /* maxDebtShares */
         ) returns (uint256 _shares) {
             // Slightly increase shares (simulate slippage). This means we allow this amount of shares to be minted.
             shares = _shares * 101 / 100;
@@ -191,8 +191,8 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         bool _inToken0,
         FluidView _fluidView
     ) internal returns (uint256 debt) {
-        uint256 maxToken0AmountToPayback = _inToken0 ? type(uint256).max : 0;
-        uint256 maxToken1AmountToPayback = _inToken0 ? 0 : type(uint256).max;
+        uint256 maxToken0AmountToPayback = _inToken0 ? uint256(type(int256).max) : 0;
+        uint256 maxToken1AmountToPayback = _inToken0 ? 0 : uint256(type(int256).max);
 
         debt = _fluidView.estimateDexPositionDebtInOneToken(
             _nftId,

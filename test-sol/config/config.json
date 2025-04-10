@@ -1,12 +1,7 @@
 {
     "isSmartWalletSafe" : true,
-    "blockNumber" : 21973355,
-    "INSERT_TEST_FILE_HERE": { "blockNumber": 19268904},
-    "FluidDexOpen": { "blockNumber": 22016219 },
-    "FluidDexSupply": { "blockNumber": 22016219 },
-    "FluidDexWithdraw": { "blockNumber": 22016219 },
-    "FluidDexBorrow": { "blockNumber": 22016219 },
-    "FluidDexPayback": { "blockNumber": 22016219 },
+    "blockNumber" : 22238839,
+    "AaveV3ATokenPayback": { "blockNumber": 21973355 },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [

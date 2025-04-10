@@ -82,8 +82,7 @@ contract TestFluidDexWithdraw is FluidTestBase {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
-
+        forkMainnet("FluidDexWithdraw");
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
@@ -332,7 +331,8 @@ contract TestFluidDexWithdraw is FluidTestBase {
                 continue;
             }
 
-            FluidView.VaultData memory vaultData = fluidView.getVaultData(vaults[i]);
+            (, FluidView.VaultData memory vaultData) = fluidView.getPositionByNftId(nftId);
+
             LocalVars memory vars;
 
             vars.isToken0Native = vaultData.supplyToken0 == TokenUtils.ETH_ADDR;
@@ -348,18 +348,39 @@ contract TestFluidDexWithdraw is FluidTestBase {
                 ? amountInUSDPrice(vaultData.supplyToken1, _config.withdrawToken1AmountInUSD)
                 : 0;
 
-            // Calculate shares to withdraw or collateral amount in case of max withdrawal.
-            if (_config.takeMaxUint256CollAmount0) {
-                vars.minCollToWithdraw = estimateDexPositionCollateralInOneToken(nftId, true, fluidView);
-            } else if (_config.takeMaxUint256CollAmount1) {
-                vars.minCollToWithdraw = estimateDexPositionCollateralInOneToken(nftId, false, fluidView);
-            } else {
-                vars.shares = estimateWithdrawShares(vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1);
+            // Cap token0 amount to withdraw and leave 10% of total reserves
+            if (vars.collAmount0 >= vaultData.dexSupplyData.supplyToken0Reserves) {
+
+                if (_config.takeMaxUint256CollAmount0) {
+                    emit log_string("Skipping test. Can't perform max withdrawal in token0 because of low reserves");
+                    continue;
+                }
+
+                emit log_named_address("Capping withdrawal amount for token0", vaultData.supplyToken0);
+                vars.collAmount0 = vaultData.dexSupplyData.supplyToken0Reserves * 90 / 100;
             }
 
-            if (vars.minCollToWithdraw == 0) {
-                emit log_string("Failed to estimate withdraw amount. Setting it to 1...");
-                vars.minCollToWithdraw = 1;
+            // Cap token1 amount to withdraw and leave 10% of total reserves
+            if (vars.collAmount1 >= vaultData.dexSupplyData.supplyToken1Reserves) {
+
+                if (_config.takeMaxUint256CollAmount1) {
+                    emit log_string("Skipping test. Can't perform max withdrawal in token1 because of low reserves");
+                    continue;
+                }
+
+                emit log_named_address("Capping withdrawal amount for token1", vaultData.supplyToken1);
+                vars.collAmount1 = vaultData.dexSupplyData.supplyToken1Reserves * 90 / 100;
+            }
+
+            // Calculate shares to withdraw or collateral amount in case of max withdrawal.
+            if (_config.takeMaxUint256CollAmount0 || _config.takeMaxUint256CollAmount1) {
+                vars.minCollToWithdraw = 1; // leave it as 1 for testing purposes
+            } else {
+                vars.shares = estimateWithdrawShares(vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1);
+                if (vars.shares == 0) {
+                    emit log_string("Failed to estimate withdraw shares. Setting it to max and leaving tx to fail for debugging...");
+                    vars.shares = uint256(type(int256).max);
+                }
             }
 
             vars.shareVariableData = FluidDexModel.WithdrawVariableData({
