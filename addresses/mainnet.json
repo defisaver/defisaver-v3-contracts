@@ -4221,14 +4221,16 @@
     },
     {
         "name": "FluidView",
-        "address": "0xf8e3bbf7c95057be1fD5E741a9ADb73E956dC724",
+        "address": "0xeEa800B16C51449322e48afA70FCeA948Dc58B10",
         "id": "0xae75a797",
-        "path": "contracts/actions/fluid/vaultT1/FluidView",
-        "version": "1.0.0",
+        "path": "contracts/views/FluidView.sol",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xf8e3bbf7c95057be1fD5E741a9ADb73E956dC724"
+        ]
     },
     {
         "name": "FluidClaim",
