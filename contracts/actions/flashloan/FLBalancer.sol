@@ -1,22 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { ActionBase } from "../ActionBase.sol";
 
+import { IRecipeExecutor } from "../../interfaces/core/IRecipeExecutor.sol";
 import { IFlashLoanRecipient } from "../../interfaces/balancer/IFlashLoanRecipient.sol";
 import { IFlashLoans } from "../../interfaces/balancer/IFlashLoans.sol";
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
 import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
+
+import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
-
 import { FLHelper } from "./helpers/FLHelper.sol";
 
 contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashLoanBase, FLHelper {
     using TokenUtils for address;
-
-    bytes32 public constant CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
     function executeAction(
         bytes memory _callData,
@@ -66,7 +64,12 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashL
         bytes memory _userData
     ) external override nonReentrant {
         require(msg.sender == VAULT_ADDR, "Untrusted lender");
-        (Recipe memory currRecipe, address wallet) = abi.decode(_userData, (Recipe, address));
+        
+        (
+            IRecipeExecutor.Recipe memory currRecipe,
+            address wallet,
+            bool isEip7702RecipeExecutor
+        ) = abi.decode(_userData, (IRecipeExecutor.Recipe, address, bool));
 
         uint256[] memory balancesBefore = new uint256[](_tokens.length);
         for (uint256 i = 0; i < _tokens.length; i++) {
@@ -74,7 +77,13 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashL
             balancesBefore[i] = _tokens[i].getBalance(address(this));
         }
 
-        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, (_amounts[0] + _feeAmounts[0]));
+        _executeRecipe(
+            wallet,
+            isDSProxy(wallet),
+            isEip7702RecipeExecutor,
+            currRecipe,
+            (_amounts[0] + _feeAmounts[0])
+        );
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i] + _feeAmounts[i];

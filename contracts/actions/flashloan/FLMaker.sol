@@ -1,18 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { ActionBase } from "../ActionBase.sol";
-import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
+import { IRecipeExecutor } from "../../interfaces/core/IRecipeExecutor.sol";
+import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
+import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
 import { IERC3156FlashBorrower } from "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
 import { IERC3156FlashLender } from "../../interfaces/flashloan/IERC3156FlashLender.sol";
 
-import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
-import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
-import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
-
+import { ActionBase } from "../ActionBase.sol";
+import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
-
 import { FLHelper } from "./helpers/FLHelper.sol";
 
 contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLoanBase, FLHelper {
@@ -73,17 +70,29 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
         require(msg.sender == address(DSS_FLASH_ADDR), "Untrusted lender");
         require(_initiator == address(this), "Untrusted loan initiator");
 
-        (Recipe memory currRecipe, address wallet) = abi.decode(_data, (Recipe, address));
+        (
+            IRecipeExecutor.Recipe memory currRecipe,
+            address wallet,
+            bool isEip7702RecipeExecutor
+        ) = abi.decode(_data, (IRecipeExecutor.Recipe, address, bool));
+
         _token.withdrawTokens(wallet, _amount);
         uint256 balanceBefore = _token.getBalance(address(this));
 
         uint256 paybackAmount = _amount + _fee;
 
-        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, paybackAmount);
+        _executeRecipe(
+            wallet,
+            isDSProxy(wallet),
+            isEip7702RecipeExecutor,
+            currRecipe,
+            paybackAmount
+        );
 
         require(_token.getBalance(address(this)) == paybackAmount + balanceBefore, "Wrong payback amount");
 
         _token.approveToken(DSS_FLASH_ADDR, paybackAmount);
+
         return CALLBACK_SUCCESS;
     }
 

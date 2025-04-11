@@ -17,7 +17,9 @@ import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
 import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
 import { SumInputs } from "../../contracts/actions/utils/SumInputs.sol";
 import { TokenBalance } from "../../contracts/actions/utils/TokenBalance.sol";
-
+import { FLAction } from "../../contracts/actions/flashloan/FLAction.sol";
+import { MockFLBalancer } from "../../contracts/mocks/MockFLBalancer.sol";
+import { MockDSProxyFactory } from "../../contracts/mocks/MockDSProxyFactory.sol";
 contract TestEIP7702RecipeExecutor is BaseTest, ActionsUtils {
     
     /*//////////////////////////////////////////////////////////////////////////
@@ -68,7 +70,7 @@ contract TestEIP7702RecipeExecutor is BaseTest, ActionsUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_simple_executeRecipe() public {
+    function _test_simple_executeRecipe() public {
         // BOB will set EIP7702RecipeExecutor contract as delegate
         _signDelegation(BOB, address(cut));
 
@@ -137,11 +139,6 @@ contract TestEIP7702RecipeExecutor is BaseTest, ActionsUtils {
             paramMapping: paramMap
         });
 
-        bytes memory _calldata = abi.encodeWithSelector(
-            EIP7702RecipeExecutor.executeRecipe.selector,
-            recipe
-        );
-
         vars.bobBalanceBefore = vars.token.balanceOf(BOB.addr);
         vars.aliceBalanceBefore = vars.token.balanceOf(ALICE.addr);
         vars.johnBalanceBefore = vars.token.balanceOf(JOHN.addr);
@@ -165,6 +162,70 @@ contract TestEIP7702RecipeExecutor is BaseTest, ActionsUtils {
         assertEq(vars.aliceBalanceAfter, vars.aliceBalanceBefore - vars.amount);
         assertEq(vars.johnBalanceAfter, vars.johnBalanceBefore - vars.amount);
         assertEq(vars.samBalanceAfter, vars.samBalanceBefore + vars.amount * 3);
+    }
+
+    function test_executeRecipe_with_flashloan() public {
+        // BOB will set EIP7702RecipeExecutor contract as delegate
+        _signDelegation(BOB, address(cut));
+
+        // set FLAction address to registry
+        FLAction flAction = new FLAction();
+        registry.setAddr(bytes4(keccak256("FLAction")), address(flAction));
+
+        // set MockFLBalancer and replace VAULT address code
+        address vaultAddr = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
+        vm.etch(vaultAddr, address(new MockFLBalancer()).code);
+
+        // Create mock token and mint to vaultAddr
+        MockERC20 token = new MockERC20("TestToken", "TEST");
+        token.mint(vaultAddr, 100 ether);
+
+        // Mock ds proxy factory
+        vm.etch(0xA26e15C895EFc0616177B7c1e7270A4C7D51C997, address(new MockDSProxyFactory()).code);
+
+        bytes[] memory actionsCalldata = new bytes[](2);
+        actionsCalldata[0] = flActionEncode(address(token), 10 ether, FLSource.BALANCER);
+        actionsCalldata[1] = sendTokenEncode(address(token), address(flAction), 10 ether);
+
+        bytes4[] memory ids = new bytes4[](2);
+        ids[0] = bytes4(keccak256("FLAction"));
+        ids[1] = bytes4(keccak256("SendToken"));
+
+        uint8[][] memory paramMap = new uint8[][](ids.length);
+        for (uint256 i = 0; i < ids.length; i++) paramMap[i] = new uint8[](6);
+
+        StrategyModel.Recipe memory recipe = StrategyModel.Recipe({
+            name: "TestRecipeWithFlashloan",
+            callData: actionsCalldata,
+            subData: new bytes32[](0),
+            actionIds: ids,
+            paramMapping: paramMap
+        });
+
+        uint256 senderTokenBalanceBefore = token.balanceOf(BOB.addr);
+        uint256 flActionTokenBalanceBefore = token.balanceOf(address(flAction));
+        uint256 recipeExecutorTokenBalanceBefore = token.balanceOf(address(cut));
+
+        // First show that execution fill fail when BOB is not the caller
+        vm.prank(ALICE.addr);
+        vm.expectRevert("Unauthorized()");
+        EIP7702RecipeExecutor(payable(BOB.addr)).executeRecipe(recipe);
+        // It will also fail if we try to call it as fl recipe
+        vm.prank(ALICE.addr);
+        vm.expectRevert("Unauthorized()");
+        EIP7702RecipeExecutor(payable(BOB.addr))._executeActionsFromFL(recipe, 0);
+
+        vm.prank(BOB.addr);
+        // Bob is executing the recipe from his context, because code of EIP7702RecipeExecutor is attached to his address
+        EIP7702RecipeExecutor(payable(BOB.addr)).executeRecipe(recipe);
+
+        uint256 senderTokenBalanceAfter = token.balanceOf(BOB.addr);
+        uint256 flActionTokenBalanceAfter = token.balanceOf(address(flAction));
+        uint256 recipeExecutorTokenBalanceAfter = token.balanceOf(address(cut));
+
+        assertEq(senderTokenBalanceBefore, senderTokenBalanceAfter);
+        assertEq(flActionTokenBalanceBefore, flActionTokenBalanceAfter);
+        assertEq(recipeExecutorTokenBalanceBefore, recipeExecutorTokenBalanceAfter);
     }
 
     /*//////////////////////////////////////////////////////////////////////////

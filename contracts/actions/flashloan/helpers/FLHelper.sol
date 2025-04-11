@@ -4,45 +4,61 @@ pragma solidity =0.8.24;
 
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
 import { FLFeeFaucet } from "../../../utils/FLFeeFaucet.sol";
-import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { ISafe } from "../../../interfaces/safe/ISafe.sol";
 import { IDSProxy } from "../../../interfaces/IDSProxy.sol";
+import { IRecipeExecutor } from "../../../interfaces/core/IRecipeExecutor.sol";
 
-
-contract FLHelper is MainnetFLAddresses, StrategyModel {
+contract FLHelper is MainnetFLAddresses {
     uint16 internal constant AAVE_REFERRAL_CODE = 64;
     uint16 internal constant SPARK_REFERRAL_CODE = 0;
 
     FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
 
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR =
-        bytes4(
-            keccak256(
-                "_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"
-            )
-        );
-
     // Revert if execution fails when using safe wallet
     error SafeExecutionError();
 
-    function _executeRecipe(address _wallet, bool _isDSProxy, Recipe memory _currRecipe, uint256 _paybackAmount) internal {
-        if (_isDSProxy) {
-            IDSProxy(_wallet).execute{value: address(this).balance}(
-                RECIPE_EXECUTOR_ADDR,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
-            );
-        } else {
-            bool success = ISafe(_wallet).execTransactionFromModule(
-                RECIPE_EXECUTOR_ADDR,
-                address(this).balance,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
-                ISafe.Operation.DelegateCall
+    function _executeRecipe(
+        address _wallet,
+        bool _isDSProxy,
+        bool _isEip7702RecipeExecutor,
+        IRecipeExecutor.Recipe memory _currRecipe,
+        uint256 _paybackAmount
+    ) internal {
+        // 1st Case - _wallet is EOA with EIP-7702 RecipeExecutor attached code
+        if (_isEip7702RecipeExecutor) {
+            IRecipeExecutor(_wallet)._executeActionsFromFL(
+                _currRecipe,
+                bytes32(_paybackAmount)
             );
 
-            if (!success) {
-                revert SafeExecutionError();
-             }
+            return;
+        }
+
+        bytes memory encodedCall = abi.encodeCall(
+            IRecipeExecutor._executeActionsFromFL,
+            (_currRecipe, bytes32(_paybackAmount))
+        );
+
+        // 2nd Case - _wallet is DSProxy smart wallet
+        if (_isDSProxy) {
+            IDSProxy(_wallet).execute{ value: address(this).balance }(
+                RECIPE_EXECUTOR_ADDR,
+                encodedCall
+            );
+
+            return;
+        }
+
+        // 3rd Case - _wallet is Safe smart wallet
+        bool success = ISafe(_wallet).execTransactionFromModule(
+            RECIPE_EXECUTOR_ADDR,
+            address(this).balance,
+            encodedCall,
+            ISafe.Operation.DelegateCall
+        );
+
+        if (!success) {
+            revert SafeExecutionError();
         }
     }
 }

@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { ActionBase } from "../ActionBase.sol";
+
+
+import { IRecipeExecutor } from "../../interfaces/core/IRecipeExecutor.sol";
 import { IDSProxy } from "../../interfaces/IDSProxy.sol";
 import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
 import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
+import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
+
+import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
 import { FLHelper } from "./helpers/FLHelper.sol";
-import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
-import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
 import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
 
 /// @title Action that gets and receives a FL from Aave V3 and does not return funds but opens debt position on Aave V3
@@ -122,14 +126,24 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
             revert SameCallerError();
         }
 
-        (Recipe memory currRecipe, address wallet) = abi.decode(_params, (Recipe, address));
+        (
+            IRecipeExecutor.Recipe memory currRecipe,
+            address wallet,
+            bool isEip7702RecipeExecutor
+        ) = abi.decode(_params, (IRecipeExecutor.Recipe, address, bool));
 
         // Send FL amounts to user wallet
         for (uint256 i = 0; i < _assets.length; ++i) {
             _assets[i].withdrawTokens(wallet, _amounts[i]);
         }
 
-        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, _amounts[0]);
+        _executeRecipe(
+            wallet,
+            isDSProxy(wallet),
+            isEip7702RecipeExecutor,
+            currRecipe,
+            _amounts[0]
+        );
 
         return true;
     }

@@ -369,12 +369,15 @@ contract RecipeExecutor is
         isDSProxy ? giveProxyPermission(_flActionAddr) : enableModule(_flActionAddr);
 
         // encode data for FL
-        bytes memory recipeData = abi.encode(_currRecipe, address(this));
         IFlashLoanBase.FlashLoanParams memory params = abi.decode(
             _currRecipe.callData[0],
             (IFlashLoanBase.FlashLoanParams)
         );
-        params.recipeData = recipeData;
+        params.recipeData = abi.encode(
+            _currRecipe,
+            address(this), // wallet
+            false // isEip7702RecipeExecutor
+        );
         _currRecipe.callData[0] = abi.encode(params);
 
         /// @dev FL action is called directly so that we can check who the msg.sender of FL is

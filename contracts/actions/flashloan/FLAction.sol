@@ -5,7 +5,7 @@ import { ActionBase } from "../ActionBase.sol";
 import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { FLHelper } from "./helpers/FLHelper.sol";
-
+import { IRecipeExecutor } from "../../interfaces/core/IRecipeExecutor.sol";
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
 import { IERC3156FlashLender } from "../../interfaces/flashloan/IERC3156FlashLender.sol";
 import { IERC3156FlashBorrower } from "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
@@ -248,15 +248,27 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
             revert UntrustedInitiator();
         }
 
-        (Recipe memory currRecipe, address wallet) = abi.decode(_params, (Recipe, address));
+        (
+            IRecipeExecutor.Recipe memory currRecipe,
+            address wallet,
+            bool isEip7702RecipeExecutor
+        ) = abi.decode(_params, (IRecipeExecutor.Recipe, address, bool));
+
         uint256[] memory balancesBefore = new uint256[](_assets.length);
+
         // Send FL amounts to user wallet
         for (uint256 i = 0; i < _assets.length; ++i) {
             _assets[i].withdrawTokens(wallet, _amounts[i]);
             balancesBefore[i] = _assets[i].getBalance(address(this));
         }
 
-        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, _amounts[0] + _fees[0]);
+        _executeRecipe(
+            wallet,
+            isDSProxy(wallet),
+            isEip7702RecipeExecutor,
+            currRecipe,
+            _amounts[0] + _fees[0]
+        );
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
@@ -289,7 +301,11 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         if (msg.sender != VAULT_ADDR) {
             revert UntrustedLender();
         }
-        (Recipe memory currRecipe, address wallet) = abi.decode(_userData, (Recipe, address));
+        (
+            IRecipeExecutor.Recipe memory currRecipe,
+            address wallet,
+            bool isEip7702RecipeExecutor
+        ) = abi.decode(_userData, (IRecipeExecutor.Recipe, address, bool));
 
         uint256[] memory balancesBefore = new uint256[](_tokens.length);
         for (uint256 i = 0; i < _tokens.length; i++) {
@@ -297,7 +313,13 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
             balancesBefore[i] = _tokens[i].getBalance(address(this));
         }
 
-        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, _amounts[0] + _feeAmounts[0]);
+        _executeRecipe(
+            wallet,
+            isDSProxy(wallet),
+            isEip7702RecipeExecutor,
+            currRecipe,
+            _amounts[0] + _feeAmounts[0]
+        );
         
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i] + (_feeAmounts[i]);
@@ -326,13 +348,24 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
             revert UntrustedInitiator();
         }
 
-        (Recipe memory currRecipe, address wallet) = abi.decode(_data, (Recipe, address));
+        (
+            IRecipeExecutor.Recipe memory currRecipe,
+            address wallet,
+            bool isEip7702RecipeExecutor
+        ) = abi.decode(_data, (IRecipeExecutor.Recipe, address, bool));
+
         _token.withdrawTokens(wallet, _amount);
         uint256 balanceBefore = _token.getBalance(address(this));
 
         uint256 paybackAmount = _amount +_fee;
 
-        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, paybackAmount);
+        _executeRecipe(
+            wallet,
+            isDSProxy(wallet),
+            isEip7702RecipeExecutor,
+            currRecipe,
+            paybackAmount
+        );
 
         if (_token.getBalance(address(this)) != paybackAmount + balanceBefore) {
             revert WrongPaybackAmountError();
@@ -359,12 +392,22 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
             if (msg.sender != realPool) revert UntrustedLender();
         }
 
-        (Recipe memory currRecipe, address wallet) = abi.decode(params.recipeData, (Recipe, address));
+        (
+            IRecipeExecutor.Recipe memory currRecipe,
+            address wallet,
+            bool isEip7702RecipeExecutor
+        ) = abi.decode(params.recipeData, (IRecipeExecutor.Recipe, address, bool));
 
         params.tokens[0].withdrawTokens(wallet, params.amounts[0]);
         params.tokens[1].withdrawTokens(wallet, params.amounts[1]);
 
-        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, params.amounts[0]);
+        _executeRecipe(
+            wallet,
+            isDSProxy(wallet),
+            isEip7702RecipeExecutor,
+            currRecipe,
+            params.amounts[0]
+        );
 
         uint256 expectedBalance0 = params.modes[0] + params.amounts[0] + _fee0;
         uint256 expectedBalance1 = params.modes[1] + params.amounts[1] + _fee1;
@@ -395,14 +438,26 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         if (msg.sender != MORPHO_BLUE_ADDR) {
             revert UntrustedLender();
         }
+
         (bytes memory taskData, address token) = abi.decode(data, (bytes, address));
-        (Recipe memory currRecipe, address wallet) = abi.decode(taskData, (Recipe, address));
+
+        (
+            IRecipeExecutor.Recipe memory currRecipe,
+            address wallet,
+            bool isEip7702RecipeExecutor
+        ) = abi.decode(taskData, (IRecipeExecutor.Recipe, address, bool));
 
         token.withdrawTokens(wallet, assets);
 
         uint256 balanceBefore = token.getBalance(address(this));
 
-        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, assets);
+        _executeRecipe(
+            wallet,
+            isDSProxy(wallet),
+            isEip7702RecipeExecutor,
+            currRecipe,
+            assets
+        );
 
         if (token.getBalance(address(this)) != assets + balanceBefore) {
             revert WrongPaybackAmountError();
