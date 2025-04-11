@@ -9,6 +9,7 @@ import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { IDFSLogger } from "../interfaces/core/IDFSLogger.sol";
 import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
 
+import { ECDSA } from "../utils/ECDSA.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { Receiver } from "../utils/Receiver.sol";
@@ -68,6 +69,25 @@ contract EIP7702RecipeExecutor is Receiver, ReentrancyGuardTransient, StrategyMo
         // skips the first actions as it was the fl action
         for (uint256 i = 1; i < _currRecipe.actionIds.length; ++i) {
             returnValues[i] = _executeAction(_currRecipe, i, returnValues);
+        }
+    }
+
+    /// @dev Function taken from https://github.com/Vectorized/bebe/blob/main/src/BasicEOABatchExecutor.sol
+    /// @dev Validates the signature with ERC1271 return.
+    /// This enables the EOA to still verify regular ECDSA signatures if the contract
+    /// checks that it has code and calls this function instead of `ecrecover`.
+    function isValidSignature(bytes32 hash, bytes calldata signature)
+        public
+        view
+        virtual
+        returns (bytes4 result)
+    {
+        bool success = ECDSA.recoverCalldata(hash, signature) == address(this);
+        /// @solidity memory-safe-assembly
+        assembly {
+            // `success ? bytes4(keccak256("isValidSignature(bytes32,bytes)")) : 0xffffffff`.
+            // We use `0xffffffff` for invalid, in convention with the reference implementation.
+            result := shl(224, or(0x1626ba7e, sub(0, iszero(success))))
         }
     }
 

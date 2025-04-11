@@ -70,7 +70,7 @@ contract TestEIP7702RecipeExecutor is BaseTest, ActionsUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function _test_simple_executeRecipe() public {
+    function test_simple_executeRecipe() public {
         // BOB will set EIP7702RecipeExecutor contract as delegate
         _signDelegation(BOB, address(cut));
 
