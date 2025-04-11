@@ -23,6 +23,7 @@ import { AaveV3ATokenPayback } from "../../contracts/actions/aaveV3/AaveV3AToken
 import { SumInputs } from "../../contracts/actions/utils/SumInputs.sol";
 import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
 import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
+import { TokenBalance } from "../../contracts/actions/utils/TokenBalance.sol";
 import { LiquityV2Open } from "../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2Close } from "../../contracts/actions/liquityV2/trove/LiquityV2Close.sol";
 import { LiquityV2Supply } from "../../contracts/actions/liquityV2/trove/LiquityV2Supply.sol";
@@ -516,6 +517,13 @@ contract ActionsUtils {
                 amount: _amount
             })
         );
+    }
+
+    function tokenBalanceEncode(
+        address _tokenAddr,
+        address _holderAddr
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(TokenBalance.Params({ tokenAddr: _tokenAddr, holderAddr: _holderAddr }));
     }
 
     function eulerV2SupplyEncode(
