@@ -15,7 +15,6 @@ import { Receiver } from "../utils/Receiver.sol";
 import { ReentrancyGuardTransient } from "../utils/ReentrancyGuardTransient.sol";
 
 /// @title Minimal prototype version of Recipe Executor with EIP-7702 support
-/// @notice Only supports executing recipes without FL actions through EOA account.
 /// @dev UNAUDITED CODE, DO NOT USE IN PRODUCTION.
 contract EIP7702RecipeExecutor is Receiver, ReentrancyGuardTransient, StrategyModel {
 
@@ -24,6 +23,7 @@ contract EIP7702RecipeExecutor is Receiver, ReentrancyGuardTransient, StrategyMo
 
     error ZeroAddress();
     error Unauthorized();
+    error InvalidFLContract();
 
     constructor(address _registry, address _logger) {
         REGISTRY_ADDR = _registry;
@@ -141,7 +141,7 @@ contract EIP7702RecipeExecutor is Receiver, ReentrancyGuardTransient, StrategyMo
     function _requireThatMsgSenderIsValidFLContract(bytes4 _actionId) internal view {
         address actionAddr = IDFSRegistry(REGISTRY_ADDR).getAddr(_actionId);
         if (actionAddr == address(0) || !isFL(actionAddr) || actionAddr != msg.sender) {
-            revert Unauthorized();
+            revert InvalidFLContract();
         }
     }
 
