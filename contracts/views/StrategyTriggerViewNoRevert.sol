@@ -12,12 +12,6 @@ import { CheckWalletType } from "../utils/CheckWalletType.sol";
 contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletType {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    uint256[] public immutable specialCaseStrategyIds;
-
-    constructor(uint256[] _specialCaseStrategyIds) {
-        specialCaseStrategyIds = _specialCaseStrategyIds;
-    }
-
     enum TriggerStatus {
         FALSE,
         TRUE,
@@ -106,20 +100,13 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
             }
         }
 
-        if (isSpecialCaseStrategy(strategyId)) {
-            return verifyRequiredAmount(0x0, _sub.subData);
-        }
+//        if (isSpecialCaseStrategy(strategyId)) {
+//            return verifyRequiredAmount(0x0, _sub.subData);
+//        }
 
         return TriggerStatus.TRUE;
     }
 
-    function isSpecialCaseStrategy(
-        uint256 memory _strategyId
-    ) public internal returns (bool) {
-        for (uint256 i = 0; i < specialCaseStrategyIds.length; i++) {
-            if (_strategyId == specialCaseStrategyIds[i]) {
-                return true;
-            }
         }
 
         return false;
