@@ -114,7 +114,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
 
     function isSpecialCaseStrategy(
         uint256 memory _strategyId
-    ) public returns (bool) {
+    ) public internal returns (bool) {
         for (uint256 i = 0; i < specialCaseStrategyIds.length; i++) {
             if (_strategyId == specialCaseStrategyIds[i]) {
                 return true;
@@ -127,7 +127,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
     function verifyRequiredAmount(
         address memory _subbedWallet,
         bytes32[] memory _subData
-    ) public returns (TriggerStatus)  {
+    ) public internal returns (TriggerStatus)  {
         address memory sellTokenAddr = _subData[0];
         uint256 memory desiredAmount = _subData[2];
 
