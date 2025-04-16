@@ -68,7 +68,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     function checkTriggers(
         StrategySub memory _sub,
         bytes[] calldata _triggerCallData,
-        address memory subWallet
+        address subWallet
     ) public returns (TriggerStatus) {
         Strategy memory strategy;
 
@@ -103,23 +103,23 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
             }
         }
 
-        if (isDCAStrategy(strategyId) || isLimitOrderStrategy(strategyId)) {
-            return verifyRequiredAmount(fetchOwnersOrWallet(subWallet, _sub.subData));
+        if (isDCAStrategy(_sub.strategyOrBundleId) || isLimitOrderStrategy(_sub.strategyOrBundleId)) {
+            return verifyRequiredAmount(fetchOwnersOrWallet(subWallet), _sub.subData);
         }
 
         return TriggerStatus.TRUE;
     }
 
-    function fetchOwnersOrWallet() internal view returns (address) {
-        if (isDSProxy(address(this)))
-            return DSProxy(payable(address(this))).owner();
+    function fetchOwnersOrWallet(address _subWallet) internal view returns (address) {
+        if (isDSProxy(_subWallet))
+            return DSProxy(payable(_subWallet)).owner();
 
         // if not DSProxy, we assume we are in context of Safe
-        address[] memory owners = ISafe(address(this)).getOwners();
-        return owners.length == 1 ? owners[0] : address(this);
+        address[] memory owners = ISafe(_subWallet).getOwners();
+        return owners.length == 1 ? owners[0] : _subWallet;
     }
 
-    function isLimitOrderStrategy(uint256 _strategyID) public pure internal returns (bool) {
+    function isLimitOrderStrategy(uint256 _strategyID) view internal returns (bool) {
         if (block.chainid == 1 && _strategyID == 51) {
            return true;
         }
@@ -131,7 +131,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
         return false;
     }
 
-    function isDCAStrategy(uint256 _strategyID) public pure internal returns (bool) {
+    function isDCAStrategy(uint256 _strategyID) view internal returns (bool) {
         if (block.chainid == 1 && _strategyID == 46) {
             return true;
         }
@@ -144,13 +144,13 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     }
 
     function verifyRequiredAmount(
-        address memory _subbedWallet,
+        address _subbedWallet,
         bytes32[] memory _subData
-    ) public internal returns (TriggerStatus)  {
-        address memory sellTokenAddr = _subData[0];
-        uint256 memory desiredAmount = _subData[2];
+    ) internal returns (TriggerStatus)  {
+        address sellTokenAddr = address(uint160(uint256(_subData[0])));
+        uint256 desiredAmount = uint256(_subData[2]);
 
-        uint256 memory currentUserBalance = TokenUtils.getBalance(sellTokenAddr, _subbedWallet);
+        uint256 currentUserBalance = TokenUtils.getBalance(sellTokenAddr, _subbedWallet);
         if (currentUserBalance < desiredAmount) {
             return TriggerStatus.FALSE;
         } else {
