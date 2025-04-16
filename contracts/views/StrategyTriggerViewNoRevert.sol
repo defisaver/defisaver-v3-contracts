@@ -7,8 +7,9 @@ import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
+import { CheckWalletType } from "../utils/CheckWalletType.sol";
 
-contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
+contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletType {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     uint256[] public immutable specialCaseStrategyIds;
