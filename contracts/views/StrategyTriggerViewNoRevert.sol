@@ -107,6 +107,25 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
         return TriggerStatus.TRUE;
     }
 
+    function isLimitOrderStrategy(uint256 _strategyID) public pure internal returns (bool) {
+        if (block.chainid == 1 && _strategyID == 51) {
+           return true;
+        }
+
+        if ((block.chainid == 42161 || block.chainid == 10 || block.chainid == 8453) && _strategyID == 9) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function isDCAStrategy(uint256 _strategyID) public pure internal returns (bool) {
+        if (block.chainid == 1 && _strategyID == 46) {
+            return true;
+        }
+
+        if ((block.chainid == 42161 || block.chainid == 10 || block.chainid == 8453) && _strategyID == 8) {
+            return true;
         }
 
         return false;
