@@ -11,7 +11,12 @@ import { TokenUtils } from "../utils/TokenUtils.sol";
 contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    uint256[] public constant specialCaseStrategyIds = [1, 5, 9];
+    uint256[] public immutable specialCaseStrategyIds;
+
+    constructor(uint256[] _specialCaseStrategyIds) {
+        specialCaseStrategyIds = _specialCaseStrategyIds;
+    }
+
     enum TriggerStatus {
         FALSE,
         TRUE,
