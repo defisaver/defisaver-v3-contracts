@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
-import { StrategyModel } from "../core/strategy/StrategyModel.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
+
 import { BundleStorage } from "../core/strategy/BundleStorage.sol";
-import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { CoreHelper } from "../core/helpers/CoreHelper.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
 import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { DSProxy } from "../DS/DSProxy.sol";
+import { CoreHelper } from "../core/helpers/CoreHelper.sol";
+import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { StrategyModel } from "../core/strategy/StrategyModel.sol";
+import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
 
 contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletType {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
@@ -105,6 +108,15 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
 //        }
 
         return TriggerStatus.TRUE;
+    }
+
+    function fetchOwnersOrWallet() internal view returns (address) {
+        if (isDSProxy(address(this)))
+            return DSProxy(payable(address(this))).owner();
+
+        // if not DSProxy, we assume we are in context of Safe
+        address[] memory owners = ISafe(address(this)).getOwners();
+        return owners.length == 1 ? owners[0] : address(this);
     }
 
     function isLimitOrderStrategy(uint256 _strategyID) public pure internal returns (bool) {
