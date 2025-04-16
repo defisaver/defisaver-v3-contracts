@@ -6,10 +6,12 @@ import { BundleStorage } from "../core/strategy/BundleStorage.sol";
 import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
 
 contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
+    uint256[] public constant specialCaseStrategyIds = [1, 5, 9];
     enum TriggerStatus {
         FALSE,
         TRUE,
@@ -36,6 +38,36 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
         } catch {
             return TriggerStatus.REVERT;
         }
+    }
+
+    function verifyRequiredAmount(
+        uint256 memory _strategyId,
+        address memory _subbedWallet,
+        bytes32[] memory _subData
+    ) public returns (TriggerStatus)  {
+        bool memory isSpecialCaseStrategy = false;
+        for (uint256 i = 0; i < specialCaseStrategyIds.length; i++) {
+            if (_strategyId == specialCaseStrategyIds[i]) {
+                isSpecialCaseStrategy = true;
+                break;
+            }
+        }
+
+        if (isSpecialCaseStrategy) {
+            address memory sellTokenAddr = _subData[0];
+            uint256 memory desiredAmount = _subData[2];
+
+            uint256 memory currentUserBalance = TokenUtils.getBalance(sellTokenAddr, _subbedWallet);
+            if (currentUserBalance < desiredAmount) {
+                return TriggerStatus.FALSE;
+            } else {
+                return TriggerStatus.TRUE;
+            }
+        } else {
+            return TriggerStatus.TRUE;
+        }
+
+       return TriggerStatus.REVERT;
     }
 
     function checkSingleTriggerLowLevel(
