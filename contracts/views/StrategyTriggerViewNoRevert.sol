@@ -69,7 +69,8 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
 
     function checkTriggers(
         StrategySub memory _sub,
-        bytes[] calldata _triggerCallData
+        bytes[] calldata _triggerCallData,
+        address memory subWallet
     ) public returns (TriggerStatus) {
         Strategy memory strategy;
 
@@ -104,32 +105,36 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
             }
         }
 
+        if (isSpecialCaseStrategy(strategyId)) {
+            return verifyRequiredAmount(0x0, _sub.subData);
+        }
+
         return TriggerStatus.TRUE;
     }
     
-    function verifyRequiredAmount(
-        uint256 memory _strategyId,
-        address memory _subbedWallet,
-        bytes32[] memory _subData
-    ) public returns (TriggerStatus)  {
-        bool memory isSpecialCaseStrategy = false;
+
+    function isSpecialCaseStrategy(
+        uint256 memory _strategyId
+    ) public returns (bool) {
         for (uint256 i = 0; i < specialCaseStrategyIds.length; i++) {
             if (_strategyId == specialCaseStrategyIds[i]) {
-                isSpecialCaseStrategy = true;
-                break;
+                return true;
             }
         }
 
-        if (isSpecialCaseStrategy) {
-            address memory sellTokenAddr = _subData[0];
-            uint256 memory desiredAmount = _subData[2];
+        return false;
+    }
 
-            uint256 memory currentUserBalance = TokenUtils.getBalance(sellTokenAddr, _subbedWallet);
-            if (currentUserBalance < desiredAmount) {
-                return TriggerStatus.FALSE;
-            } else {
-                return TriggerStatus.TRUE;
-            }
+    function verifyRequiredAmount(
+        address memory _subbedWallet,
+        bytes32[] memory _subData
+    ) public returns (TriggerStatus)  {
+        address memory sellTokenAddr = _subData[0];
+        uint256 memory desiredAmount = _subData[2];
+
+        uint256 memory currentUserBalance = TokenUtils.getBalance(sellTokenAddr, _subbedWallet);
+        if (currentUserBalance < desiredAmount) {
+            return TriggerStatus.FALSE;
         } else {
             return TriggerStatus.TRUE;
         }
