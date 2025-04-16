@@ -103,9 +103,9 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
             }
         }
 
-//        if (isSpecialCaseStrategy(strategyId)) {
-//            return verifyRequiredAmount(0x0, _sub.subData);
-//        }
+        if (isDCAStrategy(strategyId) || isLimitOrderStrategy(strategyId)) {
+            return verifyRequiredAmount(fetchOwnersOrWallet(subWallet, _sub.subData));
+        }
 
         return TriggerStatus.TRUE;
     }
