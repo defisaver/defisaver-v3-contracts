@@ -95,7 +95,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
         for (uint256 i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
             try
-                ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i])
+            ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i])
             returns (bool isTriggered) {
                 if (!isTriggered) {
                     return TriggerStatus.FALSE;
@@ -111,7 +111,6 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
 
         return TriggerStatus.TRUE;
     }
-    
 
     function isSpecialCaseStrategy(
         uint256 memory _strategyId
