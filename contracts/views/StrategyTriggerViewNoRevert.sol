@@ -40,36 +40,6 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
         }
     }
 
-    function verifyRequiredAmount(
-        uint256 memory _strategyId,
-        address memory _subbedWallet,
-        bytes32[] memory _subData
-    ) public returns (TriggerStatus)  {
-        bool memory isSpecialCaseStrategy = false;
-        for (uint256 i = 0; i < specialCaseStrategyIds.length; i++) {
-            if (_strategyId == specialCaseStrategyIds[i]) {
-                isSpecialCaseStrategy = true;
-                break;
-            }
-        }
-
-        if (isSpecialCaseStrategy) {
-            address memory sellTokenAddr = _subData[0];
-            uint256 memory desiredAmount = _subData[2];
-
-            uint256 memory currentUserBalance = TokenUtils.getBalance(sellTokenAddr, _subbedWallet);
-            if (currentUserBalance < desiredAmount) {
-                return TriggerStatus.FALSE;
-            } else {
-                return TriggerStatus.TRUE;
-            }
-        } else {
-            return TriggerStatus.TRUE;
-        }
-
-       return TriggerStatus.REVERT;
-    }
-
     function checkSingleTriggerLowLevel(
         bytes4 triggerId,
         bytes memory txData
@@ -131,4 +101,35 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
 
         return TriggerStatus.TRUE;
     }
+    
+    function verifyRequiredAmount(
+        uint256 memory _strategyId,
+        address memory _subbedWallet,
+        bytes32[] memory _subData
+    ) public returns (TriggerStatus)  {
+        bool memory isSpecialCaseStrategy = false;
+        for (uint256 i = 0; i < specialCaseStrategyIds.length; i++) {
+            if (_strategyId == specialCaseStrategyIds[i]) {
+                isSpecialCaseStrategy = true;
+                break;
+            }
+        }
+
+        if (isSpecialCaseStrategy) {
+            address memory sellTokenAddr = _subData[0];
+            uint256 memory desiredAmount = _subData[2];
+
+            uint256 memory currentUserBalance = TokenUtils.getBalance(sellTokenAddr, _subbedWallet);
+            if (currentUserBalance < desiredAmount) {
+                return TriggerStatus.FALSE;
+            } else {
+                return TriggerStatus.TRUE;
+            }
+        } else {
+            return TriggerStatus.TRUE;
+        }
+
+        return TriggerStatus.REVERT;
+    }
+
 }
