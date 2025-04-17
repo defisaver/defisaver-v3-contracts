@@ -15,6 +15,8 @@ import { TokenUtils } from "../utils/TokenUtils.sol";
 contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletType {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
+    using TokenUtils for address;
+
     enum TriggerStatus {
         FALSE,
         TRUE,
@@ -93,7 +95,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
         for (uint256 i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
             try
-            ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i])
+                ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i])
             returns (bool isTriggered) {
                 if (!isTriggered) {
                     return TriggerStatus.FALSE;
@@ -146,18 +148,16 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     function verifyRequiredAmount(
         address _subbedWallet,
         bytes32[] memory _subData
-    ) internal returns (TriggerStatus)  {
+    ) view internal returns (TriggerStatus)  {
         address sellTokenAddr = address(uint160(uint256(_subData[0])));
         uint256 desiredAmount = uint256(_subData[2]);
 
-        uint256 currentUserBalance = TokenUtils.getBalance(sellTokenAddr, _subbedWallet);
+        uint256 currentUserBalance = sellTokenAddr.getBalance(_subbedWallet);
         if (currentUserBalance < desiredAmount) {
             return TriggerStatus.FALSE;
         } else {
             return TriggerStatus.TRUE;
         }
-
-        return TriggerStatus.REVERT;
     }
 
 }
