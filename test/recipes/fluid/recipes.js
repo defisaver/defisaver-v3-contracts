@@ -44,9 +44,8 @@ describe('Fluid-Dex-T4-Recipes', function () {
     let isFork;
     let snapshot;
 
+    // fork block : 22182967
     before(async () => {
-        await resetForkToBlock(22182967);
-
         isFork = isNetworkFork();
         senderAcc = (await hre.ethers.getSigners())[0];
 
@@ -119,11 +118,10 @@ describe('Fluid-Dex-T4-Recipes', function () {
             console.log('Created Fluid T4 vault with ID:', nftId.toString());
             console.log('Ratio before boost:', ratioBefore.toString());
 
-            const borrowAction = new dfs.actions.fluid.FluidDexBorrowAction(
+            const borrowAction = new dfs.actions.fluid.FluidDexSmartDebtBorrowAction(
                 vault,
                 proxy.address,
                 nftId,
-                0,
                 [boostAmount, 0, MAX_DEBT_SHARES_TO_MINT],
                 true,
             );
@@ -137,11 +135,10 @@ describe('Fluid-Dex-T4-Recipes', function () {
                 proxy.address,
                 proxy.address,
             );
-            const supplyAction = new dfs.actions.fluid.FluidDexSupplyAction(
+            const supplyAction = new dfs.actions.fluid.FluidDexSmartCollSupplyAction(
                 vault,
                 proxy.address,
                 nftId,
-                0,
                 ['$2', 0, MIN_DEPOSIT_SHARES_TO_MINT],
             );
             const boostRecipe = new dfs.Recipe('BoostRecipe', [
@@ -207,18 +204,16 @@ describe('Fluid-Dex-T4-Recipes', function () {
                 proxy.address,
                 proxy.address,
             );
-            const supplyAction = new dfs.actions.fluid.FluidDexSupplyAction(
+            const supplyAction = new dfs.actions.fluid.FluidDexSmartCollSupplyAction(
                 vault,
                 proxy.address,
                 nftId,
-                0,
                 ['$2', 0, MIN_DEPOSIT_SHARES_TO_MINT],
             );
-            const borrowAction = new dfs.actions.fluid.FluidDexBorrowAction(
+            const borrowAction = new dfs.actions.fluid.FluidDexSmartDebtBorrowAction(
                 vault,
                 flActionContract.address,
                 nftId,
-                0,
                 [boostAmount, 0, MAX_DEBT_SHARES_TO_MINT],
                 true,
             );
@@ -268,11 +263,10 @@ describe('Fluid-Dex-T4-Recipes', function () {
             console.log('Created Fluid T4 vault with ID:', nftId.toString());
             console.log('Ratio before repay:', ratioBefore.toString());
 
-            const withdrawAction = new dfs.actions.fluid.FluidDexWithdrawAction(
+            const withdrawAction = new dfs.actions.fluid.FluidDexSmartCollWithdrawAction(
                 vault,
                 proxy.address,
                 nftId,
-                0,
                 [repayAmount, 0, MAX_DEPOSIT_SHARES_TO_BURN, 0],
                 true,
             );
@@ -286,11 +280,10 @@ describe('Fluid-Dex-T4-Recipes', function () {
                 proxy.address,
                 proxy.address,
             );
-            const paybackAction = new dfs.actions.fluid.FluidDexPaybackAction(
+            const paybackAction = new dfs.actions.fluid.FluidDexSmartDebtPaybackAction(
                 vault,
                 proxy.address,
                 nftId,
-                0,
                 ['$2', 0, MIN_DEBT_SHARES_TO_BURN, 0],
             );
             const repayRecipe = new dfs.Recipe('RepayRecipe', [
@@ -356,18 +349,16 @@ describe('Fluid-Dex-T4-Recipes', function () {
                 proxy.address,
                 proxy.address,
             );
-            const paybackAction = new dfs.actions.fluid.FluidDexPaybackAction(
+            const paybackAction = new dfs.actions.fluid.FluidDexSmartDebtPaybackAction(
                 vault,
                 proxy.address,
                 nftId,
-                0,
                 ['$2', 0, MIN_DEBT_SHARES_TO_BURN, 0],
             );
-            const withdrawAction = new dfs.actions.fluid.FluidDexWithdrawAction(
+            const withdrawAction = new dfs.actions.fluid.FluidDexSmartCollWithdrawAction(
                 vault,
                 flActionContract.address,
                 nftId,
-                0,
                 [repayAmount, 0, MAX_DEPOSIT_SHARES_TO_BURN, 0],
                 true,
             );
@@ -434,11 +425,10 @@ describe('Fluid-Dex-T4-Recipes', function () {
                     [fullEstimatedDebtAmount],
                 ),
             );
-            const paybackAction = new dfs.actions.fluid.FluidDexPaybackAction(
+            const paybackAction = new dfs.actions.fluid.FluidDexSmartDebtPaybackAction(
                 vault,
                 proxy.address,
                 nftId,
-                0,
                 [
                     hre.ethers.constants.MaxUint256, // max payback in debt token 0
                     0, // debt amount 1 to payback
@@ -447,11 +437,10 @@ describe('Fluid-Dex-T4-Recipes', function () {
                 ],
                 true,
             );
-            const withdrawAction = new dfs.actions.fluid.FluidDexWithdrawAction(
+            const withdrawAction = new dfs.actions.fluid.FluidDexSmartCollWithdrawAction(
                 vault,
                 proxy.address,
                 nftId,
-                0,
                 [
                     hre.ethers.constants.MaxUint256, // max withdrawal in coll token 0
                     0, // coll amount 1 to withdraw
