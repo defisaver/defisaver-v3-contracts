@@ -931,6 +931,7 @@ const formatMockExchangeObjUsdFeed = async (
     destTokenInfo,
     srcAmount,
     wrapperContract,
+    amountUsedWhenSrcAmountIsPiped = 0,
 ) => {
     const tokenHelper = await getTokenHelperContract();
     const srcTokenPriceInUSD = await tokenHelper.getPriceInUSD(srcTokenInfo.addresses[chainIds[network]]);
@@ -942,7 +943,9 @@ const formatMockExchangeObjUsdFeed = async (
     const destScale = ten.pow(destTokenInfo.decimals);
     const srcScale = ten.pow(srcTokenInfo.decimals);
 
-    const destTokenAmountBN = srcAmount
+    const srcAmountIsPiped = srcAmount.toString()[0] === '$';
+
+    const destTokenAmountBN = (srcAmountIsPiped ? amountUsedWhenSrcAmountIsPiped : srcAmount)
         .mul(srcTokenPriceInUsdBN)
         .mul(destScale)
         .div(destTokenPriceInUsdBN)

@@ -3849,6 +3849,31 @@ const fluidT1VaultOpen = async (
     const tx = await executeAction('FluidVaultT1Open', functionData, proxy);
     return tx;
 };
+const fluidDexOpen = async (
+    proxy,
+    vault,
+    from,
+    to,
+    supplyAmount,
+    supplyVariableData,
+    borrowAmount,
+    borrowVariableData,
+    wrapBorrowedEth,
+) => {
+    const action = new dfs.actions.fluid.FluidDexOpenAction(
+        vault,
+        from,
+        to,
+        supplyAmount,
+        supplyVariableData,
+        borrowAmount,
+        borrowVariableData,
+        wrapBorrowedEth,
+    );
+    const functionData = action.encodeForDsProxyCall()[1];
+    const tx = await executeAction('FluidDexOpen', functionData, proxy);
+    return tx;
+};
 const fluidClaim = async (
     proxy,
     to,
@@ -4101,6 +4126,7 @@ module.exports = {
     liquityV2Open,
 
     fluidT1VaultOpen,
+    fluidDexOpen,
     fluidClaim,
 
     kingClaim,
