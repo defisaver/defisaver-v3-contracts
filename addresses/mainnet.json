@@ -429,14 +429,16 @@
     },
     {
         "name": "StrategyTriggerViewNoRevert",
-        "address": "0x9B75882AAf599d198F56Fa19560c98b94B104DcE",
+        "address": "0xe3d31D3e005B55e72B7c3ECE4E0e2a5Aee2B8C63",
         "id": "0x37a21cb5",
         "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x9B75882AAf599d198F56Fa19560c98b94B104DcE"
+        ]
     },
     {
         "name": "YearnView",

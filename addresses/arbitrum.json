@@ -333,14 +333,16 @@
     },
     {
       "name": "StrategyTriggerViewNoRevert",
-      "address": "0x6583C8d4e8A4984780E76cF042540eb10C4b5c05",
+      "address": "0x90f167964c0B265E2Ac9b9A4BCc230b0E163ce18",
       "id": "0x37a21cb5",
       "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
-      "history": []
+      "history": [
+        "0x6583C8d4e8A4984780E76cF042540eb10C4b5c05"
+      ]
     },
     {
         "name": "AaveV3View",

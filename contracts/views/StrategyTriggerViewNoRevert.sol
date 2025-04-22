@@ -148,7 +148,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     function verifyRequiredAmount(
         address _subbedWallet,
         bytes32[] memory _subData
-    ) view internal returns (TriggerStatus)  {
+    ) internal view returns (TriggerStatus)  {
         address sellTokenAddr = address(uint160(uint256(_subData[0])));
         uint256 desiredAmount = uint256(_subData[2]);
 
