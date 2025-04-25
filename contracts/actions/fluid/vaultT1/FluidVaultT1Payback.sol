@@ -71,10 +71,10 @@ contract FluidVaultT1Payback is ActionBase, FluidHelper {
             maxPayback = true;
             // The exact full payback amount is dynamically calculated inside the vault and can surpass the recorded debt.
             // To account for this, we need to pull slightly more than the recorded debt.
-            // We will increase the amount by 0.001% and add an extra fixed margin of 5 units.
+            // We will increase the amount by 0.01% and add an extra fixed margin of 5 units.
             // Note that even though an amount higher than the recorded debt is categorized as max payback,
             // the user must still have sufficient tokens and allowance to cover this extra amount.
-            _params.amount = userPosition.borrow * 100001 / 100000 + 5;
+            _params.amount = userPosition.borrow * 10001 / 10000 + 5;
             // If we pull more than necessary, we will take a snapshot and refund any dust amount.
             borrowTokenBalanceBefore = isEthPayback
                 ? address(this).balance
