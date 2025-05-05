@@ -1362,25 +1362,29 @@
   },
   {
       "name": "FluidVaultT1Payback",
-      "address": "0x9Fc3FD0E181bD48e2D254dd071809527dED37e95",
+      "address": "0x226c871E0a27B12065c9128b8e7440b054b59155",
       "id": "0x101b4845",
       "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": [
+        "0x9Fc3FD0E181bD48e2D254dd071809527dED37e95"
+      ]
   },
   {
       "name": "FluidVaultT1Adjust",
-      "address": "0x00d45Aa82b487E633EF0D9fD9940cc786E9dcc14",
+      "address": "0xF8374Aa0F6d9D28790f90745f0360b5C945DEA20",
       "id": "0xce25def6",
       "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "86400",
       "registryIds": [],
-      "history": []
+      "history": [
+        "0x00d45Aa82b487E633EF0D9fD9940cc786E9dcc14"
+      ]
   },
   {
       "name": "FluidRatioTrigger",
