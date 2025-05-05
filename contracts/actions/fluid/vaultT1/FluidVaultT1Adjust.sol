@@ -263,7 +263,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
         if (_params.debtAmount > userPosition.borrow) {
             snapshot.maxPayback = true;
             // See comments in FluidVaultT1Payback.sol
-            _params.debtAmount = userPosition.borrow * 100001 / 100000 + 5;
+            _params.debtAmount = userPosition.borrow * 10001 / 10000 + 5;
             snapshot.borrowTokenBalanceBefore = _borrowToken == TokenUtils.ETH_ADDR
                 ? address(this).balance
                 : _borrowToken.getBalance(address(this));
