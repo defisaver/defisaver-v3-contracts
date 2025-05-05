@@ -57,6 +57,7 @@ import { FluidVaultT1Withdraw } from "../../contracts/actions/fluid/vaultT1/Flui
 import { FluidVaultT1Borrow } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Borrow.sol";
 import { FluidVaultT1Payback } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Payback.sol";
 import { FluidVaultT1Adjust } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Adjust.sol";
+import { PendleTokenUnwrap } from "../../contracts/actions/pendle/PendleTokenUnwrap.sol";
 
 contract ActionsUtils {
 
@@ -1080,6 +1081,26 @@ contract ActionsUtils {
                 sendWrappedEth: _sendWrappedEth,
                 collAction: _collAction,
                 debtAction: _debtAction
+            })
+        );
+    }
+
+    function pendleTokenUnwrapEncode(
+        address _market,
+        address _underlyingToken,
+        address _from,
+        address _to,
+        uint256 _ptAmount,
+        uint256 _minAmountOut
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            PendleTokenUnwrap.Params({
+                market: _market,
+                underlyingToken: _underlyingToken,
+                from: _from,
+                to: _to,
+                ptAmount: _ptAmount,
+                minAmountOut: _minAmountOut
             })
         );
     }
