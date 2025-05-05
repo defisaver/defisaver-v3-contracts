@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
 import { BundleStorage } from "../core/strategy/BundleStorage.sol";
 import { CheckWalletType } from "../utils/CheckWalletType.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
 import { DSProxy } from "../DS/DSProxy.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
@@ -70,7 +71,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     function checkTriggers(
         StrategySub memory _sub,
         bytes[] calldata _triggerCallData,
-        address subWallet
+        address smartWallet
     ) public returns (TriggerStatus) {
         Strategy memory strategy;
 
@@ -106,19 +107,10 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
         }
 
         if (isDCAStrategy(_sub.strategyOrBundleId) || isLimitOrderStrategy(_sub.strategyOrBundleId)) {
-            return verifyRequiredAmount(fetchOwnersOrWallet(subWallet), _sub.subData);
+            return verifyRequiredAmountAndAllowance(smartWallet, _sub.subData);
         }
 
         return TriggerStatus.TRUE;
-    }
-
-    function fetchOwnersOrWallet(address _subWallet) internal view returns (address) {
-        if (isDSProxy(_subWallet))
-            return DSProxy(payable(_subWallet)).owner();
-
-        // if not DSProxy, we assume we are in context of Safe
-        address[] memory owners = ISafe(_subWallet).getOwners();
-        return owners.length == 1 ? owners[0] : _subWallet;
     }
 
     function isLimitOrderStrategy(uint256 _strategyID) view internal returns (bool) {
@@ -145,19 +137,35 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
         return false;
     }
 
-    function verifyRequiredAmount(
-        address _subbedWallet,
+    function verifyRequiredAmountAndAllowance(
+        address _smartWallet,
         bytes32[] memory _subData
     ) internal view returns (TriggerStatus)  {
         address sellTokenAddr = address(uint160(uint256(_subData[0])));
         uint256 desiredAmount = uint256(_subData[2]);
 
-        uint256 currentUserBalance = sellTokenAddr.getBalance(_subbedWallet);
-        if (currentUserBalance < desiredAmount) {
-            return TriggerStatus.FALSE;
-        } else {
-            return TriggerStatus.TRUE;
+        (address ownerOrWallet, bool isOwner) = fetchOwnerOrWallet(_smartWallet);
+        bool hasEnoughBalance = sellTokenAddr.getBalance(ownerOrWallet) >= desiredAmount;
+
+        if (isOwner) {
+            uint256 currentUserAllowance = IERC20(sellTokenAddr).allowance(ownerOrWallet, _smartWallet);
+            bool hasEnoughAllowance = currentUserAllowance >= desiredAmount;
+            return (hasEnoughBalance && hasEnoughAllowance) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
         }
+
+        return hasEnoughBalance ? TriggerStatus.TRUE : TriggerStatus.FALSE;
     }
 
+     function fetchOwnerOrWallet(
+        address _subWallet
+    ) internal view returns (address ownerOrWallet, bool isOwner) {
+        if (isDSProxy(_subWallet)) {
+            ownerOrWallet = DSProxy(payable(_subWallet)).owner();
+            isOwner = true;
+            return (ownerOrWallet, isOwner);
+        }
+        // if not DSProxy, we assume we are in context of Safe
+        address[] memory owners = ISafe(_subWallet).getOwners();
+        return owners.length == 1 ? (owners[0], true) : (_subWallet, false);
+    }
 }
