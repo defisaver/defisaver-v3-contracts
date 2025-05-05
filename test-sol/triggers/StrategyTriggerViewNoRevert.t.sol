@@ -32,6 +32,10 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
         assertTrue(isLimitOrderStrategy(51), "on mainnet, limit order should be 51");
     }
 
+    function test_isDCAStrategy() public {
+        assertTrue(isDCAStrategy(46), "on mainnet, dca should be 46");
+    }
+
     function test_verifyRequiredAmountAndAllowance() public {
         address token = Addresses.USDC_ADDR;
         uint256 amount = uint256(5000);
