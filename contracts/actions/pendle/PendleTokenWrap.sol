@@ -4,7 +4,6 @@ pragma solidity =0.8.24;
 
 import { IPendleRouter } from "../../interfaces/pendle/IPendleRouter.sol";
 import { IPendleMarket } from "../../interfaces/pendle/IPendleMarket.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
 
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
@@ -13,7 +12,7 @@ import { PendleHelper } from "./helpers/PendleHelper.sol";
 contract PendleTokenWrap is ActionBase, PendleHelper {
     using TokenUtils for address;
 
-    error PendleSlippageHitError(uint256 amountReceived, uint256 minAmountExpected);
+    error PendleSlippageHitError(uint256 ptReceived, uint256 minPtExpected);
 
     struct Params {
         address market;
@@ -86,7 +85,7 @@ contract PendleTokenWrap is ActionBase, PendleHelper {
         });
 
         // Take a snapshot before the swap.
-        uint256 ptAmountBefore = IERC20(ptToken).balanceOf(address(this));
+        uint256 ptAmountBefore = ptToken.getBalance(address(this));
 
         // Perform the swap.
         IPendleRouter(PENDLE_ROUTER).swapExactTokenForPt(
@@ -99,12 +98,15 @@ contract PendleTokenWrap is ActionBase, PendleHelper {
         );
 
         // Take a snapshot after the swap.
-        uint256 ptAmountReceived = IERC20(ptToken).balanceOf(address(this)) - ptAmountBefore;
+        uint256 ptAmountReceived = ptToken.getBalance(address(this)) - ptAmountBefore;
 
         // This will already be checked by the router but we add additional sanity check here.
         if (ptAmountReceived < _params.minPtOut) {
             revert PendleSlippageHitError(ptAmountReceived, _params.minPtOut);
         }
+
+        // Send received tokens to the user.
+        ptToken.withdrawTokens(_params.to, ptAmountReceived);
 
         return (ptAmountReceived, abi.encode(_params));
     }

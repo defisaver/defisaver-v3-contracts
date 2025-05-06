@@ -3,19 +3,19 @@
 pragma solidity =0.8.24;
 
 import { IPendleMarket } from "../../../contracts/interfaces/pendle/IPendleMarket.sol";
-import { PendleTokenUnwrap } from "contracts/actions/pendle/PendleTokenUnwrap.sol";
+import { PendleTokenWrap } from "contracts/actions/pendle/PendleTokenWrap.sol";
 import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
 
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 
-contract TestPendleTokenUnwrap is BaseTest, ActionsUtils {
+contract TestPendleTokenWrap is BaseTest, ActionsUtils {
     
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
-    PendleTokenUnwrap cut;
+    PendleTokenWrap cut;
 
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
@@ -27,7 +27,7 @@ contract TestPendleTokenUnwrap is BaseTest, ActionsUtils {
     struct TestConfig {
         address market;
         address underlyingToken;
-        uint256 ptAmount;
+        uint256 underlyingAmount;
         bool isDirect;
     }
 
@@ -42,13 +42,13 @@ contract TestPendleTokenUnwrap is BaseTest, ActionsUtils {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("PendleTokenUnwrap");
+        forkMainnet("PendleTokenWrap");
         
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
 
-        cut = new PendleTokenUnwrap();
+        cut = new PendleTokenWrap();
 
         // PT eUSDE 29May2025
         markets.push(PendleMarketInfo({
@@ -60,12 +60,6 @@ contract TestPendleTokenUnwrap is BaseTest, ActionsUtils {
         markets.push(PendleMarketInfo({
             market: 0xB162B764044697cf03617C2EFbcB1f42e31E4766,
             underlyingToken: 0x9D39A5DE30e57443BfF2A8307A4256c8797A3497
-        }));
-
-        // PT Aave Ethereum USDC 26Jun2025
-        markets.push(PendleMarketInfo({
-            market: 0x8539B41CA14148d1F7400d399723827a80579414,
-            underlyingToken: 0x98C23E9d8f34FEFb1B7BD6a91B7FF122F4e16F5c
         }));
 
         // PT Level USD 29May2025
@@ -84,25 +78,25 @@ contract TestPendleTokenUnwrap is BaseTest, ActionsUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_pendle_unwrap() public {
+    function test_pendle_wrap() public {
         for (uint256 i = 0; i < markets.length; i++) {
             uint256 underlyingDecimals = IERC20(markets[i].underlyingToken).decimals();
             _baseTest(TestConfig({
                 market: markets[i].market,
                 underlyingToken: markets[i].underlyingToken,
-                ptAmount: 10 * 10 ** underlyingDecimals,
+                underlyingAmount: 432913 * 10 ** underlyingDecimals,
                 isDirect: false
             }));
         }
     }
 
-    function test_pendle_unwrap_action_direct() public {
+    function test_pendle_wrap_action_direct() public {
         for (uint256 i = 0; i < markets.length; i++) {
             uint256 underlyingDecimals = IERC20(markets[i].underlyingToken).decimals();
             _baseTest(TestConfig({
                 market: markets[i].market,
                 underlyingToken: markets[i].underlyingToken,
-                ptAmount: 100 * 10 ** underlyingDecimals,
+                underlyingAmount: 100000 * 10 ** underlyingDecimals,
                 isDirect: true
             }));
         }
@@ -113,17 +107,17 @@ contract TestPendleTokenUnwrap is BaseTest, ActionsUtils {
     ) internal {
         (, address ptToken, ) = IPendleMarket(_config.market).readTokens();
 
-        give(ptToken, sender, _config.ptAmount);
-        approveAsSender(sender, ptToken, walletAddr, _config.ptAmount);
+        give(_config.underlyingToken, sender, _config.underlyingAmount);
+        approveAsSender(sender, _config.underlyingToken, walletAddr, _config.underlyingAmount);
 
         bytes memory callData = executeActionCalldata(
-            pendleTokenUnwrapEncode(
+            pendleTokenWrapEncode(
                 _config.market,
                 _config.underlyingToken,
                 sender,
                 sender,
-                _config.ptAmount,
-                1 /* minAmountOut */
+                _config.underlyingAmount,
+                1 /* minPtOut */
             ),
             _config.isDirect
         );
@@ -131,12 +125,12 @@ contract TestPendleTokenUnwrap is BaseTest, ActionsUtils {
         uint256 ptTokenBalanceBefore = balanceOf(ptToken, sender);
         uint256 underlyingTokenBalanceBefore = balanceOf(_config.underlyingToken, sender);
 
-        wallet.execute(address(cut), callData, 0);
+        wallet.logExecute(address(cut), callData, 0);
 
         uint256 ptTokenBalanceAfter = balanceOf(ptToken, sender);
         uint256 underlyingTokenBalanceAfter = balanceOf(_config.underlyingToken, sender);
 
-        assertEq(ptTokenBalanceAfter, ptTokenBalanceBefore - _config.ptAmount);
-        assertGt(underlyingTokenBalanceAfter, underlyingTokenBalanceBefore);
+        assertEq(underlyingTokenBalanceAfter, underlyingTokenBalanceBefore - _config.underlyingAmount);
+        assertGt(ptTokenBalanceAfter, ptTokenBalanceBefore);
     }
 }
