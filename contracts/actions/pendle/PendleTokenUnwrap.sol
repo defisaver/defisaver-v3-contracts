@@ -20,8 +20,6 @@ contract PendleTokenUnwrap is ActionBase  {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
-    uint256 public constant BPS = 10000;
-
     /// @param market The address of the Pendle market
     /// @param underlyingToken The address of the underlying token
     /// @param from The address from where the PT tokens will be pulled
