@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-expressions */
+/* eslint-disable camelcase */
 /* eslint-disable max-len */
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
@@ -20,6 +22,8 @@ const {
     revertToSnapshot,
     network,
     addToRegistry,
+    DAI_ADDR,
+    resetForkToBlock,
 } = require('../../utils/utils');
 
 const { executeAction } = require('../../utils/actions');
@@ -695,11 +699,201 @@ const odosTest = async () => {
     });
 };
 
+const pendleRouterTest = async () => {
+    describe('Dfs-Sell-via-Pendle-Router', function () {
+        this.timeout(400000);
+
+        const testSwaps = [
+            {
+                sellToken: DAI_ADDR,
+                buyToken: '0x50d2c7992b802eef16c04feadab310f31866a545', // PT_MAY25_eUSDe
+                pendleMarket: '0x85667e484a32d884010cf16427d90049ccf46e97',
+            },
+            {
+                buyToken: DAI_ADDR,
+                sellToken: '0x50d2c7992b802eef16c04feadab310f31866a545', // PT_MAY25_eUSDe
+                pendleMarket: '0x85667e484a32d884010cf16427d90049ccf46e97',
+            },
+            {
+                sellToken: DAI_ADDR,
+                buyToken: '0xb7de5dfcb74d25c2f21841fbd6230355c50d9308', // PT_MAY25_sUSDe
+                pendleMarket: '0xb162b764044697cf03617c2efbcb1f42e31e4766',
+            },
+            {
+                buyToken: DAI_ADDR,
+                sellToken: '0xb7de5dfcb74d25c2f21841fbd6230355c50d9308', // PT_MAY25_sUSDe
+                pendleMarket: '0xb162b764044697cf03617c2efbcb1f42e31e4766',
+            },
+        ];
+
+        const PENDLE_ROUTER = '0x888888888889758F76e7103c6CbF23ABbF58F946';
+
+        let senderAcc;
+        let pendleWrapper;
+        let proxy;
+        let snapshot;
+
+        const validateNoTokensLeftOnProxy = async (sellToken, buyToken) => {
+            const proxySellTokenBalance = await balanceOf(sellToken, proxy.address);
+            const proxyBuyTokenBalance = await balanceOf(buyToken, proxy.address);
+
+            expect(proxySellTokenBalance).to.be.eq(0);
+            expect(proxyBuyTokenBalance).to.be.eq(0);
+        };
+
+        // @dev This test uses live API response and latest state. Keep in mind that swap won't be available after PT maturity.
+        // Date: 2025-05-07 Block: 22431905
+        before(async () => {
+            await redeploy('DFSSellNoFee');
+            await redeploy('PullToken');
+            await redeploy('RecipeExecutor');
+            pendleWrapper = await redeploy('PendleWrapper');
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+            await setNewExchangeWrapper(senderAcc, pendleWrapper.address);
+            await addToExchangeAggregatorRegistry(senderAcc, PENDLE_ROUTER);
+        });
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        for (let i = 0; i < testSwaps.length; ++i) {
+            const testSwap = testSwaps[i];
+            const sellAsset = testSwap.sellToken;
+            const buyAsset = testSwap.buyToken;
+            const chainId = 1;
+            const slippage = 0.05;
+            const enableAggregator = true;
+            const tokenIn = sellAsset;
+            const tokenOut = buyAsset;
+            const amountIn = hre.ethers.utils.parseUnits('1', 18);
+            const router = PENDLE_ROUTER;
+            const allowanceTarget = PENDLE_ROUTER;
+            const price = 1; // just for testing, anything bigger than 0 triggers offchain if
+            const protocolFee = 0;
+            it(`... should try to sell ${testSwap.sellToken} for ${testSwap.buyToken} with offchain calldata (Pendle) action direct`, async () => {
+                const pendleMarketContract = await hre.ethers.getContractAt('IPendleMarket', testSwap.pendleMarket);
+                const isExpired = await pendleMarketContract.isExpired();
+                if (isExpired) {
+                    console.log('Pendle market is expired. Skipping test...');
+                    expect(true).to.be.true;
+                    return;
+                }
+
+                const receiver = pendleWrapper.address;
+                await setBalance(sellAsset, senderAcc.address, amountIn);
+                await approve(sellAsset, proxy.address);
+
+                const options = {
+                    method: 'GET',
+                    baseURL: `https://api-v2.pendle.finance/core/v1/sdk/${chainId}/`,
+                    url: `markets/${testSwap.pendleMarket}/swap?receiver=${receiver}&slippage=${slippage}&enableAggregator=${enableAggregator}&tokenIn=${tokenIn}&tokenOut=${tokenOut}&amountIn=${amountIn}`,
+                };
+                const res = await axios(options);
+
+                const exchangeObject = formatExchangeObjForOffchain(
+                    sellAsset,
+                    buyAsset,
+                    amountIn,
+                    pendleWrapper.address,
+                    router,
+                    allowanceTarget,
+                    price,
+                    protocolFee,
+                    res.data.tx.data, /* calldata */
+                );
+
+                const sellActionNoFee = new dfs.actions.basic.SellNoFeeAction(
+                    exchangeObject,
+                    senderAcc.address,
+                    senderAcc.address,
+                );
+
+                const functionData = sellActionNoFee.encodeForDsProxyCall()[1];
+
+                const buyBalanceBefore = await balanceOf(buyAsset, senderAcc.address);
+                const sellBalanceBefore = await balanceOf(sellAsset, senderAcc.address);
+
+                await executeAction('DFSSellNoFee', functionData, proxy);
+
+                const sellBalanceAfter = await balanceOf(sellAsset, senderAcc.address);
+                const buyBalanceAfter = await balanceOf(buyAsset, senderAcc.address);
+
+                expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+                expect(sellBalanceAfter).is.eq(sellBalanceBefore.sub(amountIn));
+                await validateNoTokensLeftOnProxy(sellAsset, buyAsset);
+            });
+            it(`... should try to sell ${testSwap.sellToken} for ${testSwap.buyToken} with offchain calldata (Pendle) in a recipe`, async () => {
+                const pendleMarketContract = await hre.ethers.getContractAt('IPendleMarket', testSwap.pendleMarket);
+                const isExpired = await pendleMarketContract.isExpired();
+                if (isExpired) {
+                    console.log('Pendle market is expired. Skipping test...');
+                    expect(true).to.be.true;
+                    return;
+                }
+
+                const receiver = pendleWrapper.address;
+                await setBalance(sellAsset, senderAcc.address, amountIn);
+                await approve(sellAsset, proxy.address);
+
+                const options = {
+                    method: 'GET',
+                    baseURL: `https://api-v2.pendle.finance/core/v1/sdk/${chainId}/`,
+                    url: `markets/${testSwap.pendleMarket}/swap?receiver=${receiver}&slippage=${slippage}&enableAggregator=${enableAggregator}&tokenIn=${tokenIn}&tokenOut=${tokenOut}&amountIn=${amountIn}`,
+                };
+                const res = await axios(options);
+
+                const exchangeObject = formatExchangeObjForOffchain(
+                    sellAsset,
+                    buyAsset,
+                    amountIn,
+                    pendleWrapper.address,
+                    router,
+                    allowanceTarget,
+                    price,
+                    protocolFee,
+                    res.data.tx.data, /* calldata */
+                );
+
+                const sellRecipe = new dfs.Recipe('SellRecipeNoFee', [
+                    new dfs.actions.basic.PullTokenAction(sellAsset, senderAcc.address, amountIn),
+                    new dfs.actions.basic.SellNoFeeAction(
+                        exchangeObject,
+                        proxy.address,
+                        senderAcc.address,
+                    ),
+                ]);
+
+                const functionData = sellRecipe.encodeForDsProxyCall()[1];
+
+                const buyBalanceBefore = await balanceOf(buyAsset, senderAcc.address);
+                const sellBalanceBefore = await balanceOf(sellAsset, senderAcc.address);
+
+                await executeAction('RecipeExecutor', functionData, proxy);
+
+                const sellBalanceAfter = await balanceOf(sellAsset, senderAcc.address);
+                const buyBalanceAfter = await balanceOf(buyAsset, senderAcc.address);
+
+                expect(buyBalanceBefore).is.lt(buyBalanceAfter);
+                expect(sellBalanceAfter).is.eq(sellBalanceBefore.sub(amountIn));
+                await validateNoTokensLeftOnProxy(sellAsset, buyAsset);
+            });
+        }
+    });
+};
+
 const offchainExchangeFullTest = async () => {
     await paraswapTest();
     await oneInchTest();
     await kyberTest();
     await zeroxTest();
+    await odosTest();
+    await pendleRouterTest();
 };
 
 module.exports = {
@@ -709,4 +903,5 @@ module.exports = {
     oneInchTest,
     zeroxTest,
     odosTest,
+    pendleRouterTest,
 };
