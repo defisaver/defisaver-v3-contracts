@@ -16,4 +16,6 @@ interface IPendleMarket {
     ) external returns (uint256 netSyIn, uint256 netSyFee);
 
     function readTokens() external view returns (address SY, address PT, address YT);
+
+    function isExpired() external view returns (bool);
 }
