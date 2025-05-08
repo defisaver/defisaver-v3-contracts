@@ -75,19 +75,16 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     ) public returns (TriggerStatus) {
         Strategy memory strategy;
 
-        {
-            // to handle stack too deep
-            uint256 strategyId = _sub.strategyOrBundleId;
+        uint256 strategyId = _sub.strategyOrBundleId;
 
-            if (_sub.isBundle) {
-                strategyId = BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(
-                    _sub.strategyOrBundleId,
-                    0
-                );
-            }
-
-            strategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
+        if (_sub.isBundle) {
+            strategyId = BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(
+                _sub.strategyOrBundleId,
+                0
+            );
         }
+
+        strategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
 
         bytes4[] memory triggerIds = strategy.triggerIds;
 
@@ -106,7 +103,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
             }
         }
 
-        if (isDCAStrategy(_sub.strategyOrBundleId) || isLimitOrderStrategy(_sub.strategyOrBundleId)) {
+        if (isDCAStrategy(strategyId) || isLimitOrderStrategy(strategyId)) {
             return verifyRequiredAmountAndAllowance(smartWallet, _sub.subData);
         }
 
