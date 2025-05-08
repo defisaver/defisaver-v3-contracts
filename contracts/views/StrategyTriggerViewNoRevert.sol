@@ -1,14 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
-import { StrategyModel } from "../core/strategy/StrategyModel.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
-import { BundleStorage } from "../core/strategy/BundleStorage.sol";
-import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 
-contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
+import { IERC20 } from "../interfaces/IERC20.sol";
+import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { BundleStorage } from "../core/strategy/BundleStorage.sol";
+import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { DSProxy } from "../DS/DSProxy.sol";
+import { CoreHelper } from "../core/helpers/CoreHelper.sol";
+import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { StrategyModel } from "../core/strategy/StrategyModel.sol";
+import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
+
+contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletType {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+
+    using TokenUtils for address;
 
     enum TriggerStatus {
         FALSE,
@@ -62,23 +70,21 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
 
     function checkTriggers(
         StrategySub memory _sub,
-        bytes[] calldata _triggerCallData
+        bytes[] calldata _triggerCallData,
+        address smartWallet
     ) public returns (TriggerStatus) {
         Strategy memory strategy;
 
-        {
-            // to handle stack too deep
-            uint256 strategyId = _sub.strategyOrBundleId;
+        uint256 strategyId = _sub.strategyOrBundleId;
 
-            if (_sub.isBundle) {
-                strategyId = BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(
-                    _sub.strategyOrBundleId,
-                    0
-                );
-            }
-
-            strategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
+        if (_sub.isBundle) {
+            strategyId = BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(
+                _sub.strategyOrBundleId,
+                0
+            );
         }
+
+        strategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
 
         bytes4[] memory triggerIds = strategy.triggerIds;
 
@@ -97,6 +103,64 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper {
             }
         }
 
+        if (isDCAStrategy(strategyId) || isLimitOrderStrategy(strategyId)) {
+            return verifyRequiredAmountAndAllowance(smartWallet, _sub.subData);
+        }
+
         return TriggerStatus.TRUE;
+    }
+
+    function isLimitOrderStrategy(uint256 _strategyID) view internal returns (bool) {
+        if (block.chainid == 1 && _strategyID == 51) {
+           return true;
+        }
+
+        if ((block.chainid == 42161 || block.chainid == 10 || block.chainid == 8453) && _strategyID == 9) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function isDCAStrategy(uint256 _strategyID) view internal returns (bool) {
+        if (block.chainid == 1 && _strategyID == 46) {
+            return true;
+        }
+
+        if ((block.chainid == 42161 || block.chainid == 10 || block.chainid == 8453) && _strategyID == 8) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function verifyRequiredAmountAndAllowance(
+        address _smartWallet,
+        bytes32[] memory _subData
+    ) internal view returns (TriggerStatus)  {
+        address sellTokenAddr = address(uint160(uint256(_subData[0])));
+        uint256 desiredAmount = uint256(_subData[2]);
+
+        address tokenHolder = fetchTokenHolder(_smartWallet);
+        bool hasEnoughBalance = sellTokenAddr.getBalance(tokenHolder) >= desiredAmount;
+
+        if (tokenHolder != _smartWallet) {
+            uint256 currentAllowance = IERC20(sellTokenAddr).allowance(tokenHolder, _smartWallet);
+            bool hasEnoughAllowance = currentAllowance >= desiredAmount;
+            return (hasEnoughBalance && hasEnoughAllowance) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
+        }
+
+        return hasEnoughBalance ? TriggerStatus.TRUE : TriggerStatus.FALSE;
+    }
+
+     function fetchTokenHolder(
+        address _subWallet
+    ) internal view returns (address) {
+        if (isDSProxy(_subWallet)) {
+            return DSProxy(payable(_subWallet)).owner();
+        }
+        // if not DSProxy, we assume we are in context of Safe
+        address[] memory owners = ISafe(_subWallet).getOwners();
+        return owners.length == 1 ? owners[0] : _subWallet;
     }
 }
