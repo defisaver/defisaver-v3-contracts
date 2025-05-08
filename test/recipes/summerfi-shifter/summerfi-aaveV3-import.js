@@ -11,16 +11,15 @@ const {
     nullAddress,
     MAX_UINT,
     addrs,
-    getNetwork,
     getProxy,
     getContractFromRegistry,
     redeploy,
     getGasUsed,
     network,
     getOwnerAddr,
-} = require('../../utils');
-const { VARIABLE_RATE, getAaveReserveData } = require('../../utils-aave');
-const { executeAction } = require('../../actions');
+} = require('../../utils/utils');
+const { VARIABLE_RATE, getAaveReserveData } = require('../../utils/aave');
+const { executeAction } = require('../../utils/actions');
 const { topUp } = require('../../../scripts/utils/fork');
 
 const createAaveV3ImportRecipe = ({
@@ -92,7 +91,7 @@ const createAaveV3ImportRecipe = ({
 };
 
 const getPositionInfo = async (user, aaveV3View) => {
-    const market = addrs[getNetwork()].AAVE_MARKET;
+    const market = addrs[network].AAVE_MARKET;
     const pool = await ethers.getContractAt('IPoolAddressesProvider', market).then((c) => ethers.getContractAt('IPoolV3', c.getPool()));
     const {
         eMode: emodeCategoryId,
@@ -198,11 +197,11 @@ describe('Summerfi-AaveV3-Import', function () {
         sfProxy = await ethers.getContractAt('IDSProxy', sfProxyAddress);
         sfProxy = sfProxy.connect(userAcc);
 
-        aaveV3View = await getContractFromRegistry('AaveV3View', addrs[network].REGISTRY_ADDR, false, isFork);
-        const flContract = await getContractFromRegistry('FLAction', addrs[network].REGISTRY_ADDR, false, isFork);
+        aaveV3View = await getContractFromRegistry('AaveV3View', isFork);
+        const flContract = await getContractFromRegistry('FLAction', isFork);
         flAddress = flContract.address;
 
-        await redeploy('SFApproveTokens', addrs[network].REGISTRY_ADDR, false, isFork);
+        await redeploy('SFApproveTokens', isFork);
         wallet = await getProxy(userAddress, hre.config.isWalletSafe);
         wallet = wallet.connect(userAcc);
 
