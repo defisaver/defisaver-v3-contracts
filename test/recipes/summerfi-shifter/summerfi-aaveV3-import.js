@@ -17,6 +17,7 @@ const {
     getGasUsed,
     network,
     getOwnerAddr,
+    sendEther,
 } = require('../../utils/utils');
 const { VARIABLE_RATE, getAaveReserveData } = require('../../utils/aave');
 const { executeAction } = require('../../utils/actions');
@@ -193,6 +194,12 @@ describe('Summerfi-AaveV3-Import', function () {
             await topUp(userAcc.address);
             await topUp(getOwnerAddr());
         }
+
+        // send some eth to userAcc
+        const zeroAddress = hre.ethers.constants.AddressZero;
+        const zeroAcc = await hre.ethers.provider.getSigner(zeroAddress);
+        await impersonateAccount(zeroAddress);
+        await sendEther(zeroAcc, userAcc.address, '5');
 
         sfProxy = await ethers.getContractAt('IDSProxy', sfProxyAddress);
         sfProxy = sfProxy.connect(userAcc);
