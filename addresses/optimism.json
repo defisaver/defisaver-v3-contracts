@@ -324,14 +324,15 @@
     },
     {
       "name": "StrategyTriggerViewNoRevert",
-      "address": "0x0348bc9c79779f4195971B3348Fc0c32C91e19e9",
+      "address": "0xbFe9e11963228D82C71F974D0Ff8648569687841",
       "id": "0x37a21cb5",
       "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
       "history": [
+        "0x0348bc9c79779f4195971B3348Fc0c32C91e19e9",
         "0x05a235fE5b0343c9d0B77E1AE59A9198328A7b37",
         "0x817Bc725a96d73Cf73a4e20bd2Fa8e358Ed387D8"
       ]
