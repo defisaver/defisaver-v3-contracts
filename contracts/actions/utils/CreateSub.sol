@@ -30,7 +30,7 @@ contract CreateSub is ActionBase, Permission {
 
         uint256 subId = createSub(inputData);
 
-        return(bytes32(subId));
+        return (bytes32(subId));
     }
 
     function executeActionDirect(bytes memory _callData) public override payable {

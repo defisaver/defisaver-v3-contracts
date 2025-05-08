@@ -6,6 +6,7 @@ import { AdminAuth } from "../auth/AdminAuth.sol";
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { ICrvUsdController, ILLAMMA } from "../interfaces/curveusd/ICurveUsd.sol";
 
+/// @title Trigger that triggers when a user is in, or %percentage away from soft liquidation
 contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
     /// @param market - CurveUsd market
     /// @param user - Address of the position owner
@@ -16,8 +17,8 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
         uint256 percentage;
     }
 
-    /// @dev checks if user is in, or %percentage away from soft liquidation
-    /// @dev if the user is fully soft liquidated "percentage" is ignored and returns false
+    /// @notice Checks if user is in, or %percentage away from soft liquidation
+    /// @notice If the user is fully soft liquidated "percentage" is ignored and returns false
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
         uint256 percentage = calcPercentage(triggerSubData.market, triggerSubData.user);

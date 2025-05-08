@@ -8,6 +8,8 @@ import { MorphoBlueHelper } from "./helpers/MorphoBlueHelper.sol";
 /// @title Allow or disallow an address to manage MorphoBlue position on user's wallet
 contract MorphoBlueSetAuth is ActionBase, MorphoBlueHelper {
     
+    /// @param manager Address of the manager
+    /// @param newIsAuthorized Whether the manager is allowed to manage the position
     struct Params {
         address manager;
         bool newIsAuthorized;

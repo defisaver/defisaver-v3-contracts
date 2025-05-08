@@ -6,13 +6,19 @@ import { LiquityHelper } from "../helpers/LiquityHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
+/// @title Action for borrowing LUSD tokens from Liquity
 contract LiquityBorrow is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param maxFeePercentage Highest borrowing fee to accept, ranges between 0.5 and 5%
+    /// @param lusdAmount Amount of LUSD tokens to borrow
+    /// @param to Address that will receive the tokens
+    /// @param upperHint Upper hint for finding a Trove in linked list
+    /// @param lowerHint Lower hint for finding a Trove in linked list
     struct Params {
-        uint256 maxFeePercentage;   // Highest borrowing fee to accept, ranges between 0.5 and 5%
-        uint256 lusdAmount;         // Amount of LUSD tokens to borrow
-        address to;                 // Address that will receive the tokens
+        uint256 maxFeePercentage;   
+        uint256 lusdAmount;         
+        address to;                 
         address upperHint;
         address lowerHint;
     }

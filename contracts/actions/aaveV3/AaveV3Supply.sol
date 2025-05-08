@@ -12,6 +12,14 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
     /// @dev enableAsColl - left for backwards compatibility, it's not used in this action
+    /// @param amount Amount of tokens to supply.
+    /// @param from Address to send the supply tokens from.
+    /// @param assetId Asset id.
+    /// @param enableAsColl Whether to enable as collateral.
+    /// @param useDefaultMarket Whether to use the default market.
+    /// @param useOnBehalf Whether to use on behalf.
+    /// @param market Aave Market address.
+    /// @param onBehalf Address to send the supply tokens on behalf of. Defaults to the user's wallet.
     struct Params {
         uint256 amount;
         address from;
@@ -88,8 +96,8 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User deposits tokens to the Aave protocol
-    /// @dev User needs to approve its wallet to pull the tokens being supplied
+    /// @notice User deposits tokens to the Aave protocol.
+    /// @notice User needs to approve its wallet to pull the tokens being supplied
     /// @param _market Address provider for specific market
     /// @param _amount Amount of tokens to be deposited
     /// @param _from Where are we pulling the supply tokens amount from

@@ -34,14 +34,15 @@
     },
     {
         "name": "SubProxy",
-        "address": "0x2edB8eb14e29F3CF0bd50958b4664C9EB1583Ec9",
+        "address": "0x740bc65044589fB67A6b62F604Cd58d9122d2D2e",
         "id": "0x15c87229",
         "path": "contracts/core/strategy/SubProxy.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x2edB8eb14e29F3CF0bd50958b4664C9EB1583Ec9",
           "0x275A8f98dBA07Ad6380D3ea3F36B665DD6E02F25"
         ]
     },
@@ -61,14 +62,15 @@
     },
     {
         "name": "AaveV3SubProxy",
-        "address": "0x967b6dFd1485C30521F8311e39E60B9c4D4b6Dbf",
+        "address": "0xEcB617e9Cd0dBeD745F6a3C20Af7DEd6308Ac177",
         "id": "0x9275abae",
         "path": "contracts/actions/aaveV3/AaveV3SubProxy.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0x967b6dFd1485C30521F8311e39E60B9c4D4b6Dbf",
           "0x29a172f04CF9C6a79EdF4dD2744F2d260b8b8FE4",
           "0x7524C98ECF884e4EC62347c34f5BaefD7D067C84"
         ]
@@ -140,6 +142,17 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+      "name": "HandleAuth",
+      "address": "0xbfcab1339e1a56a0a836cbca6457eaf71f148fcb",
+      "id": "0xd951fa77",
+      "path": "contracts/actions/utils/HandleAuth.sol",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
     },
     {
         "name": "ApproveToken",
@@ -247,14 +260,15 @@
     },
     {
       "name": "KyberAggregatorWrapper",
-      "address": "0x08a110FD330F62A92F23e1C504c9c4e9b43eeBB6",
+      "address": "0x662c838c99526498f6a0632963bb8e561519b15a",
       "id": "0x1abf4ed0",
       "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
       "history": [
+        "0x08a110FD330F62A92F23e1C504c9c4e9b43eeBB6",
         "0xe8ec0f8c046817c3a7255aec40b48b7e54dd98fc",
         "0x7a77e9C66867da4eEf0feb9eA1759Ff9e51e7D4f",
         "0x0df2d6691aee2486a3d1cc42e844c7f780f3ff1f",
@@ -330,14 +344,17 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x6c297a8c9b3cab08852c822b4d3fc2ba6e6ea6b5",
+        "address": "0xE3A5551A10c12a1599302ba0b4cbb4E4Ed27eeDE",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.6",
+        "version": "1.0.8",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0xca5e3a823a9c1d0b248122243136017ff9a43541",
+          "0x94A36080FaE0e22977aA4928d3D5C733Be744DF1",
+          "0x6c297a8c9b3cab08852c822b4d3fc2ba6e6ea6b5",
           "0x0f2320895940b81Af0cC53624570AB372d9D73F9",
           "0x2596e41933136E87C04b56f632CEcA2cdCCC2Cc6",
           "0x401E66549DF354a21B3CC95e3F548Df6854d6DEE",
@@ -876,14 +893,14 @@
     },
     {
       "name": "ToggleSub",
-      "address": "0x71015226EADFd4aC887fB56556F64338e352439b",
+      "address": "0x2eabbab99759c2ab6e9e309d42ee07d3bc7c38fe",
       "id": "0xd6499530",
       "path": "contracts/actions/utils/ToggleSub.sol",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
-      "history": []
+      "history": ["0x71015226EADFd4aC887fB56556F64338e352439b"]
     },
     {
       "name": "UniCollectV3",
@@ -1041,14 +1058,15 @@
     },
     {
       "name": "CompV3SubProxyL2",
-      "address": "0x398129ee7b6B5F62F896998E036Ebb3032451f03",
+      "address": "0x066D87386475D24a70bE2712A14f22b10Ac449a3",
       "id": "0x49b12183",
       "path": "contracts/actions/compoundV3/CompV3SubProxyL2.sol",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "inRegistry": true,
       "changeTime": 0,
       "registryIds": [],
       "history": [
+        "0x398129ee7b6B5F62F896998E036Ebb3032451f03",
         "0x2F368325C53656BBEE6BDE1C04a39eEd717F1E43"
       ]
     },
@@ -1064,15 +1082,15 @@
     "history": ["0x3A07Bb9eb0d71bf03295a84655d82b00A1450CD6"]
     },
     {
-      "name": "BotRefillsL2",
-      "address": "0x3BDbB73501F11350c36E66F2ACB3ab36c776E002",
-      "id": "0x96f884f7",
-      "path": "contracts/utils/BotRefillsL2.sol",
-      "version": "1.0.0",
+      "name": "BotRefills",
+      "address": "0x31711677A0A61835a6545DBD8ca109906256Ab62",
+      "id": "0x4fac91e4",
+      "path": "contracts/utils/BotRefills.sol",
+      "version": "1.0.1",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
-      "history": []
+      "history": ["0x3BDbB73501F11350c36E66F2ACB3ab36c776E002"]
     },
     {
       "name": "FLBalancer",
@@ -1284,5 +1302,163 @@
       "changeTime": 0,
       "registryIds": [],
       "history": []
-    }
+    },
+    {
+      "name": "AaveV3OpenRatioCheck",
+      "address": "0x770e015485d4720398B08Ff226DB4ef29896b5B8",
+      "id": "0x72b17abf",
+      "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+    },
+    {
+      "name": "FluidVaultT1Open",
+      "address": "0x1947Ce90ACCf0E243CcF85140fCceC2EfAeeA193",
+      "id": "0x35b25e65",
+      "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Open",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidVaultT1Supply",
+      "address": "0xBCF0Dc5bb2C4434AD07369207904F5900d391b0B",
+      "id": "0xaf5b03c0",
+      "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Supply",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidVaultT1Withdraw",
+      "address": "0xc13d93227d97197e5F1751d0a3e80c1080A5fa2B",
+      "id": "0xf304b35f",
+      "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidVaultT1Borrow",
+      "address": "0x499da89aD564F5D6C828259ce55F53Fa288e7Be7",
+      "id": "0x237b3650",
+      "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Borrow",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidVaultT1Payback",
+      "address": "0x226c871E0a27B12065c9128b8e7440b054b59155",
+      "id": "0x101b4845",
+      "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": [
+        "0x9Fc3FD0E181bD48e2D254dd071809527dED37e95"
+      ]
+  },
+  {
+      "name": "FluidVaultT1Adjust",
+      "address": "0xF8374Aa0F6d9D28790f90745f0360b5C945DEA20",
+      "id": "0xce25def6",
+      "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
+      "version": "1.0.1",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": [
+        "0x00d45Aa82b487E633EF0D9fD9940cc786E9dcc14"
+      ]
+  },
+  {
+      "name": "FluidRatioTrigger",
+      "address": "0x6f60dAB4F55ddb5DA1E05e4E78F7774407f112Ab",
+      "id": "0x6de6c127",
+      "path": "contracts/actions/fluid/vaultT1/FluidRatioTrigger",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidRatioCheck",
+      "address": "0x108b22a1808EA5527b396bbE3B956e136cb47E46",
+      "id": "0xac7a850e",
+      "path": "contracts/actions/fluid/vaultT1/FluidRatioCheck",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidView",
+      "address": "0x2d51BB6Ac5c1eC8DD6432e1FF980fC864B626e01",
+      "id": "0xae75a797",
+      "path": "contracts/actions/fluid/vaultT1/FluidView",
+      "version": "1.0.0",
+      "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+{
+    "name": "CreateSub",
+    "address": "0xbFD17a0a844b75976585a382a5BcCaFC9EAd731f",
+    "id": "0xf41e543f",
+    "path": "contracts/actions/utils/CreateSub.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+},
+{
+    "name": "TransferNFT",
+    "address": "0xf73B14cF4bC10509446FC4111407A721f8A81F7d",
+    "id": "0xa3443678",
+    "path": "contracts/actions/utils/TransferNFT.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+},
+{
+    "name": "UpdateSub",
+    "address": "0x3511f444362F8cBd185DbF21C9488D16c1306461",
+    "id": "0xa985d903",
+    "path": "contracts/actions/utils/UpdateSub.sol",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "86400",
+    "registryIds": [],
+    "history": []
+},
+{
+  "name": "MerklClaim",
+  "address": "0xdab7b1865efa8d1f8fe1602dea9285b4a599c45c",
+  "id": "0x79b06cc7",
+  "path": "contracts/actions/merkl/MerklClaim.sol",
+  "version": "1.0.0",
+  "inRegistry": true,
+  "changeTime": "0",
+  "registryIds": [],
+  "history": []
+}
 ]

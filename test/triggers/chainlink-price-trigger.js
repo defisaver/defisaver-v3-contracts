@@ -1,6 +1,6 @@
 const {
     redeploy, DAI_ADDR, WETH_ADDRESS, ETH_ADDR, STETH_ADDRESS, WSTETH_ADDRESS,
-} = require('../utils');
+} = require('../utils/utils');
 
 const BITCOIN_ADDR = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
 const names = ['DAI', 'WETH', 'ETH', 'BTC', 'STETH', 'WSTETH'];

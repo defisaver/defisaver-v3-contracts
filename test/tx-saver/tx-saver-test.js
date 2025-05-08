@@ -23,12 +23,12 @@ const {
     formatExchangeObj,
     chainIds,
     network,
-} = require('../utils');
+} = require('../utils/utils');
 const {
     predictSafeAddress,
     SAFE_MASTER_COPY_VERSIONS,
     deploySafe,
-} = require('../utils-safe');
+} = require('../utils/safe');
 const { topUp } = require('../../scripts/utils/fork');
 const {
     addBotCallerForTxSaver,
@@ -39,8 +39,8 @@ const {
     calculateExpectedFeeTaken,
     llamaLendLevCreateEncodedData,
 } = require('./utils-tx-saver');
-const { executeAction } = require('../actions');
-const { getControllers } = require('../llamalend/utils');
+const { executeAction } = require('../utils/actions');
+const { getControllers } = require('../utils/llamalend');
 
 describe('TxSaver tests', function () {
     this.timeout(80000);
@@ -107,12 +107,12 @@ describe('TxSaver tests', function () {
     };
 
     const redeployContracts = async () => {
-        await redeploy('BotAuthForTxSaver', addrs[network].REGISTRY_ADDR, false, isFork);
-        await redeploy('RecipeExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
-        await redeploy('DFSSell', addrs[network].REGISTRY_ADDR, false, isFork);
+        await redeploy('BotAuthForTxSaver', isFork);
+        await redeploy('RecipeExecutor', isFork);
+        await redeploy('DFSSell', isFork);
 
-        recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor', addrs[network].REGISTRY_ADDR);
-        txSaverExecutor = await redeploy('TxSaverExecutor', addrs[network].REGISTRY_ADDR, false, isFork);
+        recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
+        txSaverExecutor = await redeploy('TxSaverExecutor', isFork);
 
         const tokenPriceHelperFactory = await hre.ethers.getContractFactory(
             chainIds[network] === 1 ? 'TokenPriceHelper' : 'TokenPriceHelperL2',
@@ -123,9 +123,9 @@ describe('TxSaver tests', function () {
 
     const redeployForLlamaLend = async () => {
         // for testing LlamaLendSwapper with TxSaver
-        await redeploy('LlamaLendLevCreate', addrs[network].REGISTRY_ADDR, false, isFork);
-        await redeploy('LlamaLendSwapper', addrs[network].REGISTRY_ADDR, false, isFork);
-        const mockWrapper = await redeploy('MockExchangeWrapper', addrs[network].REGISTRY_ADDR, false, isFork);
+        await redeploy('LlamaLendLevCreate', isFork);
+        await redeploy('LlamaLendSwapper', isFork);
+        const mockWrapper = await redeploy('MockExchangeWrapper', isFork);
         await setNewExchangeWrapper(senderAcc, mockWrapper.address, isFork);
     };
 
@@ -273,7 +273,7 @@ describe('TxSaver tests', function () {
         const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
         const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
 
-        await executeAction('RecipeExecutor', functionData, safeWallet, addrs[network].REGISTRY_ADDR);
+        await executeAction('RecipeExecutor', functionData, safeWallet);
 
         const eoaFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, senderAcc.address);
         const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);

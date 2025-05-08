@@ -8,10 +8,10 @@ const {
     revertToSnapshot,
     redeploy,
     fetchAmountinUSDPrice,
-} = require('../../utils');
+} = require('../../utils/utils');
 const {
     supplyComp, borrowComp, paybackComp, withdrawComp,
-} = require('../../actions');
+} = require('../../utils/actions');
 
 const COMPTROLLER_ADDR = '0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B';
 const cTokens = {

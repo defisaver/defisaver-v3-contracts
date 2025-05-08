@@ -7,14 +7,19 @@ import { CurveHelper } from "../helpers/CurveHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
+/// @title Action that deposits tokens into the Curve steth pool
 contract CurveStethPoolDeposit is ActionBase, CurveHelper {
     using TokenUtils for address;
 
+    /// @param from Address where to pull tokens from   
+    /// @param to Address that will receive the LP tokens
+    /// @param amounts Amount of each token to deposit
+    /// @param minMintAmount Minimum amount of LP tokens to accept
     struct Params {
-        address from;           // address where to pull tokens from
-        address to;             // address that will receive the LP tokens
-        uint256[2] amounts;     // amount of each token to deposit
-        uint256 minMintAmount;  // minimum amount of LP tokens to accept
+        address from;
+        address to;
+        uint256[2] amounts;
+        uint256 minMintAmount;
     }
 
     function executeAction(
@@ -51,7 +56,6 @@ contract CurveStethPoolDeposit is ActionBase, CurveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Deposits tokens into curve steth pool
     function _curveDeposit(Params memory _params) internal returns (uint256 receivedLp, bytes memory logData) {
         require(_params.to != address(0), "to cant be 0x0");
 

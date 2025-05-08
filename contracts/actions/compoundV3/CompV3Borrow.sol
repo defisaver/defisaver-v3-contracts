@@ -6,13 +6,13 @@ import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
 import { IComet } from "../../interfaces/compoundV3/IComet.sol";
 
-/// @title Borrow base token from CompoundV3
+/// @title Borrow base token from CompoundV3.
 contract CompV3Borrow is ActionBase, CompV3Helper {
 
     /// @param market Main Comet proxy contract that is different for each compound market
     /// @param amount Amount of tokens to be borrowed
     /// @param to The address we are sending the borrowed tokens to
-    /// @param onBehalf The address from where we are borrowing the tokens from
+    /// @param onBehalf The address from where we are borrowing the tokens from. Defaults to the user's wallet.
     struct Params {
         address market;
         uint256 amount;
@@ -57,7 +57,6 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User borrows tokens from the Compound protocol
     /// @dev If _to == address(0) the action will revert
     /// @dev If onBehalf == address(0) it will default to user's wallet
     /// @dev If onBehalf is not the user's wallet, the onBehalf address needs to allow the the user's wallet

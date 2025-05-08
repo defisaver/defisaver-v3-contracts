@@ -12,6 +12,12 @@ import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
 contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param amount Amount of tokens to be paid back.
+    /// @param from Address to send the payback tokens from.
+    /// @param rateMode Rate mode.
+    /// @param assetId Asset id.
+    /// @param useDefaultMarket Whether to use the default market.
+    /// @param market Aave Market address.
     struct Params {
         uint256 amount;
         address from;
@@ -77,8 +83,7 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
-    /// @dev User needs to approve its wallet to pull aTokens
+    /// @notice User needs to approve its wallet to pull aTokens
     /// @param _market Address provider for specific market
     /// @param _assetId The id of the underlying asset to be repaid
     /// @param _amount Amount of tokens to be paid back (uint.max for full debt)

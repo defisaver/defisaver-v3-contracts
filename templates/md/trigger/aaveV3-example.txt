@@ -1,0 +1,19 @@
+USAGE:
+1. Copy below actions definitions and place them inside template.txt (templates/md/trigger/template.txt)
+2. Run: node ./cmd/generate-cli genTriggersDocs 
+
+-------------------------------------------------------------------------------------
+
+const aaveV3QuotePriceTrigger = new dfs.triggers.AaveV3QuotePriceTrigger(
+    baseTokenAddr,
+    quoteTokenAddr,
+    price,
+    state
+);
+
+const aaveV3RatioTrigger = new dfs.triggers.AaveV3RatioTrigger(
+    user,
+    market,
+    ratio,
+    state
+);

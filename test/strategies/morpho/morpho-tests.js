@@ -4,20 +4,20 @@ const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { morphoAaveV2Supply, morphoAaveV2Borrow } = require('../../actions');
+const { morphoAaveV2Supply, morphoAaveV2Borrow } = require('../../utils/actions');
 const {
     createMorphoAaveV2BoostStrategy,
     createMorphoAaveV2RepayStrategy,
     createMorphoAaveV2FLBoostStrategy,
     createMorphoAaveV2FLRepayStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 const {
     callMorphoAaveV2BoostStrategy,
     callMorphoAaveV2RepayStrategy,
     callMorphoAaveV2FLBoostStrategy,
     callMorphoAaveV2FLRepayStrategy,
-} = require('../../strategy-calls');
-const { subMorphoAaveV2AutomationStrategy } = require('../../strategy-subs');
+} = require('../utils/strategy-calls');
+const { subMorphoAaveV2AutomationStrategy } = require('../utils/strategy-subs');
 const {
     getContractFromRegistry,
     setNetwork,
@@ -33,8 +33,8 @@ const {
     revertToSnapshot,
     redeployCore,
     redeploy,
-} = require('../../utils');
-const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
+} = require('../../utils/utils');
+const { createStrategy, addBotCaller, createBundle } = require('../utils/utils-strategies');
 
 const cAsset = getAssetInfo('WETH');
 const dAsset = getAssetInfo('DAI');
@@ -105,11 +105,11 @@ const morphoAaveV2BoostTest = () => describe('Morpho-AaveV2-Boost-Strategy', fun
         const strategyData = createMorphoAaveV2BoostStrategy();
         const flStrategyData = createMorphoAaveV2FLBoostStrategy();
 
-        const strategyId = await createStrategy(undefined, ...strategyData, true);
-        const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
-        bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
+        const strategyId = await createStrategy(...strategyData, true);
+        const flStrategyId = await createStrategy(...flStrategyData, true);
+        bundleId = await createBundle([strategyId, flStrategyId]);
 
-        await redeploy('MorphoAaveV2SubProxy', undefined, undefined, undefined, '0', bundleId);
+        await redeploy('MorphoAaveV2SubProxy', '0', bundleId);
         triggerRatio = 220;
         const minRatio = 100;
         const targetRepay = 200;
@@ -246,11 +246,11 @@ const morphoAaveV2RepayTest = () => describe('Morpho-AaveV2-Repay-Strategy', fun
         const strategyData = createMorphoAaveV2RepayStrategy();
         const flStrategyData = createMorphoAaveV2FLRepayStrategy();
 
-        const strategyId = await createStrategy(undefined, ...strategyData, true);
-        const flStrategyId = await createStrategy(undefined, ...flStrategyData, true);
-        const bundleId = await createBundle(proxy, [strategyId, flStrategyId]);
+        const strategyId = await createStrategy(...strategyData, true);
+        const flStrategyId = await createStrategy(...flStrategyData, true);
+        const bundleId = await createBundle([strategyId, flStrategyId]);
 
-        await redeploy('MorphoAaveV2SubProxy', undefined, undefined, undefined, bundleId, '0');
+        await redeploy('MorphoAaveV2SubProxy', bundleId, '0');
         triggerRatio = 280;
         const targetRatio = 300;
 

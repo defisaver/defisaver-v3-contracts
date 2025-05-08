@@ -10,6 +10,12 @@ import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 /// @title Switch if you'll use tokens for collateral on spark for a market
 contract SparkCollateralSwitch is ActionBase, SparkHelper {
     using TokenUtils for address;
+    
+    /// @param arrayLength Length of the assetIds and useAsCollateral arrays
+    /// @param useDefaultMarket Whether to use the default market
+    /// @param assetIds Array of asset ids
+    /// @param useAsCollateral Array of booleans indicating if the asset should be used as collateral
+    /// @param market Address of the market to switch collateral for
     struct Params {
         uint8 arrayLength;
         bool useDefaultMarket;

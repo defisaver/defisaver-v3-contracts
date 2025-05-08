@@ -27,6 +27,12 @@ contract BaseTest is Config {
         vm.stopPrank();
     }
 
+    modifier revertToSnapshot() {
+        uint256 snapshotId = vm.snapshot();
+        _;
+        vm.revertTo(snapshotId);
+    }
+
     function setUp() public virtual {
         vm.label(address(bob), "Bob");
         vm.label(address(alice), "Alice");
@@ -37,15 +43,29 @@ contract BaseTest is Config {
         _initConfigIfNeeded();
 
         uint256 blockNumber = getBlockNumberForTestIfExist(testName);
-        string memory mainnerRpc = vm.envString("ETHEREUM_NODE");
-        uint256 mainnetFork = vm.createFork(mainnerRpc, blockNumber);
+        string memory mainnetRpc = vm.envString("ETHEREUM_NODE");
+        uint256 mainnetFork = vm.createFork(mainnetRpc, blockNumber);
         vm.selectFork(mainnetFork);
     }
 
     function forkMainnetLatest() internal {
-        string memory mainnerRpc = vm.envString("ETHEREUM_NODE");
-        uint256 mainnetFork = vm.createFork(mainnerRpc);
+        string memory mainnetRpc = vm.envString("ETHEREUM_NODE");
+        uint256 mainnetFork = vm.createFork(mainnetRpc);
         vm.selectFork(mainnetFork);
+    }
+    
+    function forkLocalAnvil() internal {
+        string memory anvilRpc = "http://localhost:8545";
+        uint256 anvilFork = vm.createFork(anvilRpc);
+        vm.selectFork(anvilFork);
+    }
+
+    function forkTenderly() internal {
+        string memory tenderlyForkId = vm.envString("FORK_ID");
+        string memory base = "https://virtual.mainnet.rpc.tenderly.co/";
+        string memory forkUrl = string(abi.encodePacked(base, tenderlyForkId));
+        uint256 tenderlyFork = vm.createFork(forkUrl);
+        vm.selectFork(tenderlyFork);
     }
 
     function approve(address _token, address _to, uint256 _amount) internal {

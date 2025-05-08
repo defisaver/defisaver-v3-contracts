@@ -1,16 +1,16 @@
 /* eslint-disable import/no-extraneous-dependencies */
 require('dotenv-safe').config();
 require('@nomiclabs/hardhat-waffle');
-require('@nomiclabs/hardhat-etherscan');
-const tdly = require('@tenderly/hardhat-tenderly');
+require('@nomicfoundation/hardhat-verify');
 require('@nomiclabs/hardhat-ethers');
-// require("hardhat-gas-reporter");
+require('hardhat-gas-reporter');
 require('hardhat-log-remover');
+require('hardhat-tracer');
+require('@tenderly/hardhat-tenderly');
+require('solidity-coverage');
 
 const Dec = require('decimal.js');
 const dfs = require('@defisaver/sdk');
-
-tdly.setup({ automaticVerifications: false });
 
 dfs.configure({
     testingMode: true,
@@ -35,10 +35,13 @@ const testNetworks = Object.fromEntries([...Array(MAX_NODE_COUNT).keys()].map((c
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-    saveOnTenderly: false,
-    defaultNetwork: 'fork',
+    defaultNetwork: 'hardhat',
     lightTesting: true,
     isWalletSafe: true,
+    gasReporter: {
+        currency: 'EUR',
+        enabled: false,
+    },
     networks: {
         ...testNetworks,
         local: {
@@ -70,12 +73,18 @@ module.exports = {
             name: 'base',
             chainId: 8453,
         },
+        anvil: {
+            name: 'mainnet',
+            isAnvil: true,
+            url: 'http://127.0.0.1:8545',
+            chainId: 1,
+        },
         fork: {
-            url: `https://rpc.tenderly.co/fork/${process.env.FORK_ID}`,
+            url: `https://virtual.mainnet.rpc.tenderly.co/${process.env.FORK_ID}`,
             timeout: 1000000,
             type: 'tenderly',
             name: 'mainnet',
-            hardfork: "cancun",
+            hardfork: 'cancun',
             chainId: 1,
         },
         hardhat: {
@@ -157,15 +166,6 @@ module.exports = {
                         runs: 1000,
                     },
                     evmVersion: 'cancun',
-                },
-            },
-            {
-                version: '0.8.10',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 1000,
-                    },
                 },
             },
         ],

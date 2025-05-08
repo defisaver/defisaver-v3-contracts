@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
 import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
-import { KyberInputScalingHelper } from "../../utils/exchange/KyberInputScalingHelper.sol";
+import { IKyberScaleHelper } from "../../interfaces/exchange/IKyberScaleHelper.sol";
 import { DFSRegistry } from "../../core/DFSRegistry.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
@@ -25,13 +25,18 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
     function takeOrder(
         ExchangeData memory _exData
     ) override public payable returns (bool success, uint256) {
+        address scalingHelperAddr = registry.getAddr(SCALING_HELPER_ID);
+        (bool isScalingSuccess, bytes memory scaledCalldata) = IKyberScaleHelper(scalingHelperAddr).getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);
+        
+        if (!isScalingSuccess){
+            // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
+            sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
+            return (false, 0);
+        }
+        uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
+
         /// @dev safeApprove is modified to always first set approval to 0, then to exact amount
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
-
-        address scalingHelperAddr = registry.getAddr(SCALING_HELPER_ID);
-        bytes memory scaledCalldata = KyberInputScalingHelper(scalingHelperAddr).getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);
-        
-        uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
 
         /// @dev the amount of tokens received is checked in DFSExchangeCore
         /// @dev Exchange wrapper contracts should not be used on their own

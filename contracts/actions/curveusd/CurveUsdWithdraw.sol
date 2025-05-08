@@ -8,7 +8,7 @@ import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
 
 /// @title Action that withdraws collateral from user's wallet curveusd position
 /// @dev collateralAmount must be non-zero
-/// @dev if collateralAmount == uintMax will withdraw as much as the debt will allow
+/// @notice if collateralAmount == uintMax will withdraw as much as the debt will allow
 contract CurveUsdWithdraw is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 

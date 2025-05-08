@@ -13,24 +13,24 @@ const {
     redeployCore,
     timeTravel,
     getAddrFromRegistry,
-    getNetwork,
     sendEther,
     getOwnerAddr,
     setBalance,
     addrs,
     chainIds,
     setNewExchangeWrapper,
-} = require('../../utils');
+    network,
+} = require('../../utils/utils');
 
-const { callDcaStrategy } = require('../../strategy-calls');
-const { subDcaStrategy } = require('../../strategy-subs');
-const { createLimitOrderL2Strategy } = require('../../l2-strategies');
+const { callDcaStrategy } = require('../utils/strategy-calls');
+const { subDcaStrategy } = require('../utils/strategy-subs');
+const { createLimitOrderL2Strategy } = require('../../../strategies-spec/l2');
 
-const { createStrategy, addBotCaller, getUpdatedStrategySub } = require('../../utils-strategies');
+const { createStrategy, addBotCaller, getUpdatedStrategySub } = require('../utils/utils-strategies');
 
-const { callLimitOrderStrategy } = require('../../strategy-calls');
-const { subLimitOrderStrategy } = require('../../strategy-subs');
-const { createLimitOrderStrategy } = require('../../strategies');
+const { callLimitOrderStrategy } = require('../utils/strategy-calls');
+const { subLimitOrderStrategy } = require('../utils/strategy-subs');
+const { createLimitOrderStrategy } = require('../../../strategies-spec/mainnet');
 
 const DAY = 1 * 24 * 60 * 60;
 const TWO_DAYS = 2 * 24 * 60 * 60;
@@ -66,7 +66,6 @@ const limitOrderStrategyTest = async () => {
         let currPrice;
         let minPrice;
         let uniV3Wrapper;
-        let network;
         let strategyId;
         let sellAmountWei;
         let tokenAddrSell;
@@ -78,8 +77,6 @@ const limitOrderStrategyTest = async () => {
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
-
-            network = getNetwork();
 
             set('network', chainIds[network]);
 
@@ -102,9 +99,9 @@ const limitOrderStrategyTest = async () => {
             const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
             await openStrategyAndBundleStorage();
 
-            strategyId = await createStrategy(proxy, ...strategyData, false);
+            strategyId = await createStrategy(...strategyData, false);
 
-            await redeploy('LimitOrderSubProxy', addrs[getNetwork()].REGISTRY_ADDR, false, false, strategyId);
+            await redeploy('LimitOrderSubProxy', false, strategyId);
         });
 
         for (let i = 0; i < tokenPairs.length; i++) {
@@ -141,7 +138,6 @@ const limitOrderStrategyTest = async () => {
                     targetPrice,
                     goodUntilDuration,
                     automationSdk.enums.OrderType.TAKE_PROFIT,
-                    addrs[getNetwork()].REGISTRY_ADDR,
                 ));
             });
 
@@ -224,7 +220,6 @@ const limitOrderStrategyTest = async () => {
                     targetPrice,
                     goodUntilDuration,
                     automationSdk.enums.OrderType.STOP_LOSS,
-                    addrs[getNetwork()].REGISTRY_ADDR,
                 ));
             });
 
@@ -293,7 +288,6 @@ const dcaStrategyTest = async () => {
         let subStorage;
         let lastTimestamp;
         let subStorageAddr;
-        let network;
         let tokenAddrSell;
         let tokenAddrBuy;
         let sellAmountWei;
@@ -301,8 +295,6 @@ const dcaStrategyTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
-
-            network = getNetwork();
 
             set('network', chainIds[network]);
 

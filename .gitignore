@@ -126,3 +126,7 @@ deployments/
 /.idea/
 
 lib/
+
+yarn.lock
+
+gen/

@@ -3,12 +3,13 @@
 pragma solidity =0.8.24;
 
 import { BaseTest } from "./BaseTest.sol";
-import { Const } from "../Const.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterface.sol";
 import { DSProxy } from "../../contracts/DS/DSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { console } from "forge-std/console.sol";
 
 contract SmartWallet is BaseTest {
 
@@ -39,7 +40,7 @@ contract SmartWallet is BaseTest {
     }
 
     function createDSProxy() public ownerAsSender() returns(address payable) {
-        walletAddr = payable(address(DSProxyFactoryInterface(Const.DS_PROXY_FACTORY).build()));
+        walletAddr = payable(address(DSProxyFactoryInterface(Addresses.DS_PROXY_FACTORY).build()));
         isSafe = false;
         return walletAddr;
     }
@@ -63,8 +64,8 @@ contract SmartWallet is BaseTest {
             payable(address(0))
         );
 
-        walletAddr = payable(ISafeProxyFactory(Const.SAFE_PROXY_FACTORY).createProxyWithNonce(
-            Const.SAFE_SINGLETON,
+        walletAddr = payable(ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY).createProxyWithNonce(
+            Addresses.SAFE_SINGLETON,
             setupData,
             saltNonce
         ));
@@ -100,6 +101,18 @@ contract SmartWallet is BaseTest {
         } else {
             DSProxy(walletAddr).execute(_target, _calldata);
         }
+    }
+
+    function logExecute(
+        address _target,
+        bytes memory _calldata,
+        uint256 _value
+    ) public {
+        uint256 startGas = gasleft();
+        execute(_target, _calldata, _value);
+        uint256 gasUsed = startGas - gasleft();
+        console.log("--------- EXECUTING TX FROM WALLET ----------");
+        console.log("GAS USED: ", gasUsed);
     }
 
     function ownerApprove(address _token, uint256 _amount) public ownerAsSender() {
