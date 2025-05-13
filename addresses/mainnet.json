@@ -4248,14 +4248,14 @@
     },
     {
         "name": "KingClaim",
-        "address": "0x483816678e2348bf87f88b0f4eb6a923017de0d6",
+        "address": "0xd4C4D1Ef0e79389173EBc247972F355c6f2FEC76",
         "id": "0xb5997e1a",
         "path": "contracts/actions/utils/KingClaim.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": "0",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x483816678e2348bf87f88b0f4eb6a923017de0d6"]
     },
     {
         "name": "CompoundMonitorProxy",
