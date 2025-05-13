@@ -292,6 +292,17 @@
         "history": []
     },
     {
+        "name": "PendleWrapper",
+        "address": "0x69090F4B82D05cE64b261e3DA46B7AE7629407C2",
+        "id": "0x42cdd62e",
+        "path": "contracts/exchangeV3/offchainWrappersV3/PendleWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveWrapperV3",
         "address": "0xF5E8C498b6697F0704F0C50448714C5E328b33E2",
         "id": "0xb856c9af",
@@ -429,14 +440,18 @@
     },
     {
         "name": "StrategyTriggerViewNoRevert",
-        "address": "0x9B75882AAf599d198F56Fa19560c98b94B104DcE",
+        "address": "0x395079428c66C1AB0144057366c7493C92326860",
         "id": "0x37a21cb5",
         "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
-        "version": "1.0.0",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x40F282Eb32995A1763619dd4200d19e79BC61CE8",
+            "0xe3d31D3e005B55e72B7c3ECE4E0e2a5Aee2B8C63",
+            "0x9B75882AAf599d198F56Fa19560c98b94B104DcE"
+        ]
     },
     {
         "name": "YearnView",
@@ -1104,6 +1119,17 @@
             "0x1abDDCae131ce200e66140d9fBd0C37F7a40e642",
             "0xB744474Bdd7226736ACa4Ba87593e32d8315e5c9"
         ]
+    },
+    {
+        "name": "DFSSellNoFee",
+        "address": "0x3845C89c861eBb0a0c856CEBB064Ee93678bdE8E",
+        "id": "0xebf16d4a",
+        "path": "contracts/actions/exchange/DFSSellNoFee.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "LimitSell",
@@ -4250,14 +4276,14 @@
     },
     {
         "name": "KingClaim",
-        "address": "0x483816678e2348bf87f88b0f4eb6a923017de0d6",
+        "address": "0xd4C4D1Ef0e79389173EBc247972F355c6f2FEC76",
         "id": "0xb5997e1a",
         "path": "contracts/actions/utils/KingClaim.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": "0",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x483816678e2348bf87f88b0f4eb6a923017de0d6"]
     },
     {
         "name": "CompoundMonitorProxy",
