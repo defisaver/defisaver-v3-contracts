@@ -56,8 +56,10 @@ contract KingClaim is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
     function _claim(Params memory params) internal {
+        uint256 startingBalance = KING_TOKEN.getBalance(address(this));
         IEtherFiClaim(KING_CLAIM_CONTRACT).claim(address(this), params.amount, params.merkleRoot, params.merkleProof);
-        KING_TOKEN.withdrawTokens(params.to, params.amount);
+        uint256 claimedAmount = KING_TOKEN.getBalance(address(this)) - startingBalance;
+        KING_TOKEN.withdrawTokens(params.to, claimedAmount);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
