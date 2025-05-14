@@ -37,6 +37,7 @@ contract LiquityV2View is LiquityV2Helper {
         uint256 CCR;
         uint256 MCR;
         uint256 SCR;
+        uint256 BCR;
         uint256 LIQUIDATION_PENALTY_SP;
         uint256 LIQUIDATION_PENALTY_REDISTRIBUTION;
         uint256 entireSystemColl;
@@ -229,6 +230,7 @@ contract LiquityV2View is LiquityV2Helper {
             market: _market,
             CCR: registry.CCR(),
             MCR: registry.MCR(),
+            BCR: registry.BCR(),
             SCR: registry.SCR(),
             LIQUIDATION_PENALTY_SP: registry.LIQUIDATION_PENALTY_SP(),
             LIQUIDATION_PENALTY_REDISTRIBUTION: registry.LIQUIDATION_PENALTY_REDISTRIBUTION(),
