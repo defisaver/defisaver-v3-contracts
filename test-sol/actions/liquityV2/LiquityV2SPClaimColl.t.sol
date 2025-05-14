@@ -29,7 +29,7 @@ contract TestLiquityV2SPClaimColl is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("LiquityV2SPClaimColl");
+        forkTenderly();
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
