@@ -208,7 +208,7 @@ contract LiquityV2View is LiquityV2Helper {
         troves = new ExistingTrove[](numTroves);
 
         for (uint256 i = _startIndex; i < _endIndex; ++i) {
-            uint256 troveId = uint256(keccak256(abi.encode(_user, i)));
+            uint256 troveId = uint256(keccak256(abi.encode(_user, _user, i)));
             ITroveManager.Status status = troveManager.getTroveStatus(troveId);
             if (status == ITroveManager.Status.active || status == ITroveManager.Status.zombie) {
                 troves[i - _startIndex] = ExistingTrove({ 
