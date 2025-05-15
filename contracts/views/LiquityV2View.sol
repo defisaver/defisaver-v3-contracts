@@ -211,13 +211,25 @@ contract LiquityV2View is LiquityV2Helper {
         for (uint256 i = _startIndex; i < _endIndex; ++i) {
             uint256 troveId = uint256(keccak256(abi.encode(_user, _user, i)));
             ITroveManager.Status status = troveManager.getTroveStatus(troveId);
-            if (status == ITroveManager.Status.active || status == ITroveManager.Status.zombie) {
-                troves[i - _startIndex] = ExistingTrove({ 
-                    troveId: troveId,
-                    ownedByUser: troveNFT.ownerOf(troveId) == _user 
-                });
-            } else if (nextFreeTroveIndex == -1) {
+
+            // Only nonExistent troves can be used as free trove index
+            if (status == ITroveManager.Status.nonExistent && nextFreeTroveIndex == -1) {
                 nextFreeTroveIndex = int256(i);
+            } else {
+                // Active or zombie troves are owned by the user
+                if (status == ITroveManager.Status.active || status == ITroveManager.Status.zombie) {
+                    troves[i - _startIndex] = ExistingTrove({ 
+                        troveId: troveId,
+                        ownedByUser: troveNFT.ownerOf(troveId) == _user 
+                    });
+                }
+                // Closed troves are not owned by the user but can't be reused
+                else {
+                    troves[i - _startIndex] = ExistingTrove({ 
+                        troveId: troveId,
+                        ownedByUser: false
+                    });
+                }
             }
         }
     }
