@@ -358,24 +358,15 @@ contract LiquityV2View is LiquityV2Helper {
     }
 
     function getMultipleSortedTroves(address _market, int256 _startIdx, uint256 _count)
-        external view returns (IMultiTroveGetter.CombinedTroveData[] memory) 
+        external view returns (IMultiTroveGetter.CombinedTroveData[] memory troves) 
     {
         uint256 collIndex = _getCollIndexFromMarket(_market);
-        ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
-
-        IMultiTroveGetter.CombinedTroveData[] memory troves = 
-            IMultiTroveGetter(MULTI_TROVE_GETTER_ADDR).getMultipleSortedTroves(collIndex, _startIdx, _count);
-
-        for (uint256 i = 0; i < troves.length; i++) {
-            ITroveManager.LatestTroveData memory latestTroveData = troveManager.getLatestTroveData(troves[i].id);
-
-            troves[i].debt = latestTroveData.entireDebt;
-            troves[i].coll = latestTroveData.entireColl;
-            troves[i].annualInterestRate = latestTroveData.annualInterestRate;
-            troves[i].lastInterestRateAdjTime = latestTroveData.lastInterestRateAdjTime;
-        }
-
-        return troves;
+        
+        troves = IMultiTroveGetter(MULTI_TROVE_GETTER_ADDR).getMultipleSortedTroves(
+            collIndex,
+            _startIdx,
+            _count
+        );
     }
 
     function getBatchManagerInfo(address _market, address _manager)
