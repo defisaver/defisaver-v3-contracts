@@ -6,6 +6,7 @@ interface IAddressesRegistry {
     function CCR() external view returns (uint256);
     function SCR() external view returns (uint256);
     function MCR() external view returns (uint256);
+    function BCR() external view returns (uint256);
     function LIQUIDATION_PENALTY_SP() external view returns (uint256);
     function LIQUIDATION_PENALTY_REDISTRIBUTION() external view returns (uint256);
     function WETH() external view returns (address);

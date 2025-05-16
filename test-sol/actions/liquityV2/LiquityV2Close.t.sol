@@ -37,7 +37,7 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("LiquityV2Close");
+        forkTenderly();
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

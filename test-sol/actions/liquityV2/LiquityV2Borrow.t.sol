@@ -36,7 +36,7 @@ contract TestLiquityV2Borrow is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("LiquityV2Borrow");
+        forkTenderly();
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
