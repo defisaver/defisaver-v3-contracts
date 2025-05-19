@@ -3935,6 +3935,28 @@
         "history": []
     },
     {
+        "name": "LiquityV2CloseLegacy",
+        "address": "0xBD97F8fCfdb03ca29F0C9baCA7Cb09c5A51E4adE",
+        "id": "0xed131269",
+        "path": "contracts/actions/liquityV2/trove/LiquityV2Close.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityV2PaybackLegacy",
+        "address": "0x902cebdbF9ed3EC434C2246CDace1c825F0d5110",
+        "id": "0x0d563ba0",
+        "path": "contracts/actions/liquityV2/trove/LiquityV2Payback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "LiquityV2Open",
         "address": "0x32491148a6DE3c4D7F8E025721146960373eC5C9",
         "id": "0x2dfc4d0b",
@@ -3952,13 +3974,11 @@
         "address": "0x4854d11A534224D7bc43455a7084687450020e03",
         "id": "0x3dcf3785",
         "path": "contracts/actions/liquityV2/trove/LiquityV2Close.sol",
-        "version": "1.0.1",
+        "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xBD97F8fCfdb03ca29F0C9baCA7Cb09c5A51E4adE"
-        ]
+        "history": []
     },
     {
         "name": "LiquityV2Supply",
@@ -4000,13 +4020,11 @@
         "address": "0x902cebdbF9ed3EC434C2246CDace1c825F0d5110",
         "id": "0x1141b0a3",
         "path": "contracts/actions/liquityV2/trove/LiquityV2Payback.sol",
-        "version": "1.0.1",
+        "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x2B51c21a1af1316Af89f0493b2FF5C5D34D4626f"
-        ]
+        "history": []
     },
     {
         "name": "LiquityV2Claim",
