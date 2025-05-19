@@ -12,16 +12,12 @@ import { Sqrt } from "../../../contracts/utils/math/Sqrt.sol";
 contract LiquityV2TestHelper is LiquityV2Helper {
     using Sqrt for uint256;
 
-    address internal constant WETH_MARKET = 0x20F7C9ad66983F6523a0881d0f82406541417526;
-    address internal constant WSTETH_MARKET = 0x8d733F7ea7c23Cbea7C613B6eBd845d46d3aAc54;
-    address internal constant RETH_MARKET = 0x6106046F031a22713697e04C08B330dDaf3e8789;
-
     // @dev ordered by collateral index. Ith market will have Ith collateral index in CollateralRegistry
     function getMarkets() internal pure returns (IAddressesRegistry[] memory markets) {
         markets = new IAddressesRegistry[](3);
-        markets[0] = IAddressesRegistry(WETH_MARKET);
-        markets[1] = IAddressesRegistry(WSTETH_MARKET);
-        markets[2] = IAddressesRegistry(RETH_MARKET);
+        markets[0] = IAddressesRegistry(WETH_MARKET_ADDR);
+        markets[1] = IAddressesRegistry(WSTETH_MARKET_ADDR);
+        markets[2] = IAddressesRegistry(RETH_MARKET_ADDR);
     }
 
     function getInsertPosition(
