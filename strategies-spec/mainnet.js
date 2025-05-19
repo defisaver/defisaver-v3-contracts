@@ -4939,7 +4939,7 @@ const createMorphoBlueFLBoostOnTargetPriceStrategy = () => {
 const createLiquityV2RepayStrategy = () => {
     const liquityV2RepayStrategy = new dfs.Strategy('LiquityV2RepayStrategy');
     liquityV2RepayStrategy.addSubSlot('&market', 'address');
-    liquityV2RepayStrategy.addSubSlot('&troveId', 'address');
+    liquityV2RepayStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2RepayStrategy.addSubSlot('&collToken', 'address');
     liquityV2RepayStrategy.addSubSlot('&boldToken', 'address');
     liquityV2RepayStrategy.addSubSlot('&ratioState', 'uint256');
@@ -4997,7 +4997,7 @@ const createLiquityV2RepayStrategy = () => {
 const createLiquityV2FLRepayStrategy = () => {
     const liquityV2FLRepayStrategy = new dfs.Strategy('LiquityV2FLRepayStrategy');
     liquityV2FLRepayStrategy.addSubSlot('&market', 'address');
-    liquityV2FLRepayStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLRepayStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2FLRepayStrategy.addSubSlot('&collToken', 'address');
     liquityV2FLRepayStrategy.addSubSlot('&boldToken', 'address');
     liquityV2FLRepayStrategy.addSubSlot('&ratioState', 'uint256');
@@ -5062,7 +5062,7 @@ const createLiquityV2FLRepayStrategy = () => {
 const createLiquityV2BoostStrategy = () => {
     const liquityV2BoostStrategy = new dfs.Strategy('LiquityV2BoostStrategy');
     liquityV2BoostStrategy.addSubSlot('&market', 'address');
-    liquityV2BoostStrategy.addSubSlot('&troveId', 'address');
+    liquityV2BoostStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2BoostStrategy.addSubSlot('&collToken', 'address');
     liquityV2BoostStrategy.addSubSlot('&boldToken', 'address');
     liquityV2BoostStrategy.addSubSlot('&ratioState', 'uint256');
@@ -5122,7 +5122,7 @@ const createLiquityV2BoostStrategy = () => {
 const createLiquityV2FLBoostStrategy = () => {
     const liquityV2FLBoostStrategy = new dfs.Strategy('LiquityV2FLBoostStrategy');
     liquityV2FLBoostStrategy.addSubSlot('&market', 'address');
-    liquityV2FLBoostStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLBoostStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2FLBoostStrategy.addSubSlot('&collToken', 'address');
     liquityV2FLBoostStrategy.addSubSlot('&boldToken', 'address');
     liquityV2FLBoostStrategy.addSubSlot('&ratioState', 'uint256');
@@ -5187,7 +5187,7 @@ const createLiquityV2FLBoostStrategy = () => {
 const createLiquityV2FLBoostWithCollStrategy = () => {
     const liquityV2FLBoostWithCollStrategy = new dfs.Strategy('LiquityV2FLBoostWithCollStrategy');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&market', 'address');
-    liquityV2FLBoostWithCollStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLBoostWithCollStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&collToken', 'address');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&boldToken', 'address');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&ratioState', 'uint256');
@@ -5268,7 +5268,7 @@ const createLiquityV2CloseToCollStrategy = () => {
     const liquityV2CloseToCollStrategy = new dfs.Strategy('LiquityV2CloseToCollStrategy');
 
     liquityV2CloseToCollStrategy.addSubSlot('&market', 'address');
-    liquityV2CloseToCollStrategy.addSubSlot('&troveId', 'address');
+    liquityV2CloseToCollStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2CloseToCollStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2CloseToCollStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2CloseToCollStrategy.addSubSlot('&wethToken', 'uint256');
@@ -5336,7 +5336,7 @@ const createLiquityV2FLCloseToCollStrategy = () => {
     const liquityV2FLCloseToCollStrategy = new dfs.Strategy('LiquityV2FLCloseToCollStrategy');
 
     liquityV2FLCloseToCollStrategy.addSubSlot('&market', 'address');
-    liquityV2FLCloseToCollStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLCloseToCollStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2FLCloseToCollStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2FLCloseToCollStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2FLCloseToCollStrategy.addSubSlot('&wethToken', 'uint256');
@@ -5411,7 +5411,7 @@ const createLiquityV2FLCloseToDebtStrategy = () => {
     const liquityV2FLCloseToDebtStrategy = new dfs.Strategy('LiquityV2FLCloseToDebtStrategy');
 
     liquityV2FLCloseToDebtStrategy.addSubSlot('&market', 'address');
-    liquityV2FLCloseToDebtStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLCloseToDebtStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2FLCloseToDebtStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2FLCloseToDebtStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2FLCloseToDebtStrategy.addSubSlot('&wethToken', 'uint256');
@@ -5541,7 +5541,7 @@ const createLiquityV2BoostOnPriceStrategy = () => {
 const createLiquityV2FLBoostOnPriceStrategy = () => {
     const liquityV2FLBoostStrategy = new dfs.Strategy('LiquityV2FLBoostOnPriceStrategy');
     liquityV2FLBoostStrategy.addSubSlot('&market', 'address');
-    liquityV2FLBoostStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLBoostStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2FLBoostStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2FLBoostStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2FLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
@@ -5601,7 +5601,7 @@ const createLiquityV2FLBoostOnPriceStrategy = () => {
 const createLiquityV2FLBoostWithCollOnPriceStrategy = () => {
     const liquityV2FLBoostWithCollStrategy = new dfs.Strategy('LiquityV2FLBoostWithCollOnPriceStrategy');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&market', 'address');
-    liquityV2FLBoostWithCollStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLBoostWithCollStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2FLBoostWithCollStrategy.addSubSlot('&targetRatio', 'uint256');
@@ -5728,7 +5728,7 @@ const createLiquityV2RepayOnPriceStrategy = () => {
 const createLiquityV2FLRepayOnPriceStrategy = () => {
     const liquityV2FLRepayStrategy = new dfs.Strategy('LiquityV2FLRepayOnPriceStrategy');
     liquityV2FLRepayStrategy.addSubSlot('&market', 'address');
-    liquityV2FLRepayStrategy.addSubSlot('&troveId', 'address');
+    liquityV2FLRepayStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2FLRepayStrategy.addSubSlot('&collToken', 'uint256');
     liquityV2FLRepayStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2FLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
@@ -6025,7 +6025,7 @@ const createFluidT1FLBoostStrategy = () => {
 const createLiquityV2PaybackFromSPStrategy = () => {
     const liquityV2PaybackFromSPStrategy = new dfs.Strategy('LiquityV2PaybackFromSPStrategy');
     liquityV2PaybackFromSPStrategy.addSubSlot('&market', 'address');
-    liquityV2PaybackFromSPStrategy.addSubSlot('&troveId', 'address');
+    liquityV2PaybackFromSPStrategy.addSubSlot('&troveId', 'uint256');
     liquityV2PaybackFromSPStrategy.addSubSlot('&boldToken', 'uint256');
     liquityV2PaybackFromSPStrategy.addSubSlot('&targetRatio', 'uint256');
     liquityV2PaybackFromSPStrategy.addSubSlot('&ratioState', 'uint256');
