@@ -4,10 +4,6 @@ pragma solidity =0.8.24;
 
 interface IFluidVaultT1 {
 
-    /// @notice emitted when an operate() method is executed that changes collateral (`colAmt_`) / debt (debtAmt_`)
-    /// amount for a `user_` position with `nftId_`. Receiver of any funds is the address `to_`.
-    event LogOperate(address user_, uint256 nftId_, int256 colAmt_, int256 debtAmt_, address to_);
-
     struct ConstantViews {
         address liquidity;
         address factory;
