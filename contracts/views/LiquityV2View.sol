@@ -37,6 +37,7 @@ contract LiquityV2View is LiquityV2Helper {
         uint256 CCR;
         uint256 MCR;
         uint256 SCR;
+        uint256 BCR;
         uint256 LIQUIDATION_PENALTY_SP;
         uint256 LIQUIDATION_PENALTY_REDISTRIBUTION;
         uint256 entireSystemColl;
@@ -208,15 +209,27 @@ contract LiquityV2View is LiquityV2Helper {
         troves = new ExistingTrove[](numTroves);
 
         for (uint256 i = _startIndex; i < _endIndex; ++i) {
-            uint256 troveId = uint256(keccak256(abi.encode(_user, i)));
+            uint256 troveId = uint256(keccak256(abi.encode(_user, _user, i)));
             ITroveManager.Status status = troveManager.getTroveStatus(troveId);
-            if (status == ITroveManager.Status.active || status == ITroveManager.Status.zombie) {
-                troves[i - _startIndex] = ExistingTrove({ 
-                    troveId: troveId,
-                    ownedByUser: troveNFT.ownerOf(troveId) == _user 
-                });
-            } else if (nextFreeTroveIndex == -1) {
+
+            // Only nonExistent troves can be used as free trove index
+            if (status == ITroveManager.Status.nonExistent && nextFreeTroveIndex == -1) {
                 nextFreeTroveIndex = int256(i);
+            } else {
+                // Active or zombie troves are owned by the user
+                if (status == ITroveManager.Status.active || status == ITroveManager.Status.zombie) {
+                    troves[i - _startIndex] = ExistingTrove({ 
+                        troveId: troveId,
+                        ownedByUser: troveNFT.ownerOf(troveId) == _user 
+                    });
+                }
+                // Closed troves are not owned by the user but can't be reused
+                else {
+                    troves[i - _startIndex] = ExistingTrove({ 
+                        troveId: troveId,
+                        ownedByUser: false
+                    });
+                }
             }
         }
     }
@@ -229,11 +242,12 @@ contract LiquityV2View is LiquityV2Helper {
             market: _market,
             CCR: registry.CCR(),
             MCR: registry.MCR(),
+            BCR: registry.BCR(),
             SCR: registry.SCR(),
             LIQUIDATION_PENALTY_SP: registry.LIQUIDATION_PENALTY_SP(),
             LIQUIDATION_PENALTY_REDISTRIBUTION: registry.LIQUIDATION_PENALTY_REDISTRIBUTION(),
-            entireSystemColl: IBorrowerOperations(borrowerOperations).getEntireSystemColl(),
-            entireSystemDebt: IBorrowerOperations(borrowerOperations).getEntireSystemDebt(),
+            entireSystemColl: IBorrowerOperations(borrowerOperations).getEntireBranchColl(),
+            entireSystemDebt: IBorrowerOperations(borrowerOperations).getEntireBranchDebt(),
             collToken: registry.collToken(),
             troveNFT: registry.troveNFT(),
             borrowerOperations: borrowerOperations,
@@ -344,24 +358,15 @@ contract LiquityV2View is LiquityV2Helper {
     }
 
     function getMultipleSortedTroves(address _market, int256 _startIdx, uint256 _count)
-        external view returns (IMultiTroveGetter.CombinedTroveData[] memory) 
+        external view returns (IMultiTroveGetter.CombinedTroveData[] memory troves) 
     {
         uint256 collIndex = _getCollIndexFromMarket(_market);
-        ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
-
-        IMultiTroveGetter.CombinedTroveData[] memory troves = 
-            IMultiTroveGetter(MULTI_TROVE_GETTER_ADDR).getMultipleSortedTroves(collIndex, _startIdx, _count);
-
-        for (uint256 i = 0; i < troves.length; i++) {
-            ITroveManager.LatestTroveData memory latestTroveData = troveManager.getLatestTroveData(troves[i].id);
-
-            troves[i].debt = latestTroveData.entireDebt;
-            troves[i].coll = latestTroveData.entireColl;
-            troves[i].annualInterestRate = latestTroveData.annualInterestRate;
-            troves[i].lastInterestRateAdjTime = latestTroveData.lastInterestRateAdjTime;
-        }
-
-        return troves;
+        
+        troves = IMultiTroveGetter(MULTI_TROVE_GETTER_ADDR).getMultipleSortedTroves(
+            collIndex,
+            _startIdx,
+            _count
+        );
     }
 
     function getBatchManagerInfo(address _market, address _manager)
