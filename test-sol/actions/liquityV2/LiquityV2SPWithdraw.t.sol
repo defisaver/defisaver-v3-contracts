@@ -55,7 +55,7 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("LiquityV2SPWithdraw");
+        forkMainnetLatest();
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -99,6 +99,12 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions {
 
             TestSPWithdrawLocalParams memory vars;
 
+            // Max withdrawal has to leave at least MIN_BOLD_IN_SP in Stability Pool
+            // So we create additional deposit for alice to make sure original sender can perform max withdrawal
+            if (_isMaxUint256Withdraw) {
+                _aliceDeposit(markets[i], vars);
+            }
+
             _spDeposit(markets[i], vars);
 
             _spWithdraw(
@@ -134,6 +140,31 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions {
         );
 
         wallet.execute(address(spDepositContract), _vars.executeActionCallData, 0);
+    }
+
+    function _aliceDeposit(IAddressesRegistry _market, TestSPWithdrawLocalParams memory _vars) internal {
+        vm.warp(block.timestamp + 1);
+        SmartWallet aliceWallet = new SmartWallet(alice);
+
+        _vars.collToken = _market.collToken();
+        _vars.depositAmount = amountInUSDPriceMock(BOLD, 10000, 1e8);
+
+        give(BOLD, aliceWallet.owner(), _vars.depositAmount);
+        approveAsSender(aliceWallet.owner(), BOLD, aliceWallet.walletAddr(), _vars.depositAmount);
+
+        _vars.executeActionCallData = executeActionCalldata(
+            liquityV2SPDepositEncode(
+                address(_market),
+                aliceWallet.owner(),
+                aliceWallet.owner(),
+                aliceWallet.owner(),
+                _vars.depositAmount,
+                false /* shouldClaim */
+            ),
+            true /* isDirect */
+        );
+
+        aliceWallet.execute(address(spDepositContract), _vars.executeActionCallData, 0);
     }
     
     function _spWithdraw(

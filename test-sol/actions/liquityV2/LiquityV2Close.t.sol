@@ -37,7 +37,7 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("LiquityV2Close");
+        forkMainnetLatest();
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -48,7 +48,7 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
         openContract = new LiquityV2Open();
 
         markets = new IAddressesRegistry[](1);
-        markets[0] = IAddressesRegistry(WETH_MARKET);
+        markets[0] = IAddressesRegistry(WETH_MARKET_ADDR);
         BOLD = markets[0].boldToken();
         WETH = markets[0].collToken();
 

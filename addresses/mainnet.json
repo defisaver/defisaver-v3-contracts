@@ -2771,14 +2771,15 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0xb29c4a8ad8fb58b04512a0c479278ad53ad9b5aa",
+        "address": "0x9Af76465F95A6a8232859333149Fcea48fadFBBB",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xb29c4a8ad8fb58b04512a0c479278ad53ad9b5aa",
             "0xfaE5e10014Dc90A85ABdE21E0fa85CcB78521aB5",
             "0x558A8B92EE6a2B724afDEd319b61Ac55B7259826",
             "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
@@ -3934,10 +3935,10 @@
         "history": []
     },
     {
-        "name": "LiquityV2Open",
-        "address": "0x6CEdC0317A9236CdFD800e6a6F41074f01d8229F",
-        "id": "0x2dfc4d0b",
-        "path": "contracts/actions/liquityV2/trove/LiquityV2Open.sol",
+        "name": "LiquityV2CloseLegacy",
+        "address": "0xBD97F8fCfdb03ca29F0C9baCA7Cb09c5A51E4adE",
+        "id": "0xed131269",
+        "path": "contracts/actions/liquityV2/trove/LiquityV2Close.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -3945,8 +3946,32 @@
         "history": []
     },
     {
+        "name": "LiquityV2PaybackLegacy",
+        "address": "0x902cebdbF9ed3EC434C2246CDace1c825F0d5110",
+        "id": "0x0d563ba0",
+        "path": "contracts/actions/liquityV2/trove/LiquityV2Payback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityV2Open",
+        "address": "0x32491148a6DE3c4D7F8E025721146960373eC5C9",
+        "id": "0x2dfc4d0b",
+        "path": "contracts/actions/liquityV2/trove/LiquityV2Open.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x6CEdC0317A9236CdFD800e6a6F41074f01d8229F"
+        ]
+    },
+    {
         "name": "LiquityV2Close",
-        "address": "0xBD97F8fCfdb03ca29F0C9baCA7Cb09c5A51E4adE",
+        "address": "0x4854d11A534224D7bc43455a7084687450020e03",
         "id": "0x3dcf3785",
         "path": "contracts/actions/liquityV2/trove/LiquityV2Close.sol",
         "version": "1.0.0",
@@ -3979,18 +4004,20 @@
     },
     {
         "name": "LiquityV2Borrow",
-        "address": "0x092afc8AB25C6d5A2cE8CeAc4801fd8B1eFa5759",
+        "address": "0x9198D8bCe49c3E2819653ce350C82Cd009D3E49E",
         "id": "0x78b6a3ae",
         "path": "contracts/actions/liquityV2/trove/LiquityV2Borrow.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x092afc8AB25C6d5A2cE8CeAc4801fd8B1eFa5759"
+        ]
     },
     {
         "name": "LiquityV2Payback",
-        "address": "0x2B51c21a1af1316Af89f0493b2FF5C5D34D4626f",
+        "address": "0x902cebdbF9ed3EC434C2246CDace1c825F0d5110",
         "id": "0x1141b0a3",
         "path": "contracts/actions/liquityV2/trove/LiquityV2Payback.sol",
         "version": "1.0.0",
@@ -4012,25 +4039,29 @@
     },
     {
         "name": "LiquityV2Adjust",
-        "address": "0x6063CaD05DBf1c15f643C0F483bc5ce749501d3C",
+        "address": "0x3BbC88f3b75cB898395C9b5AE8D9c2a26744993b",
         "id": "0x18151d04",
         "path": "contracts/actions/liquityV2/trove/LiquityV2Adjust.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x6063CaD05DBf1c15f643C0F483bc5ce749501d3C"
+        ]
     },
     {
         "name": "LiquityV2AdjustZombieTrove",
-        "address": "0xDaB6aA000B0EBAa653A2715cb3847976bf614272",
+        "address": "0x45F5CEe8f89AdBCe4f5B20f38a49402b152ba99e",
         "id": "0x7ae5cb1e",
         "path": "contracts/actions/liquityV2/trove/LiquityV2AdjustZombieTrove.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xDaB6aA000B0EBAa653A2715cb3847976bf614272"
+        ]
     },
     {
         "name": "LiquityV2AdjustInterestRate",
@@ -4045,25 +4076,29 @@
     },
     {
         "name": "LiquityV2SPDeposit",
-        "address": "0x1556711572a53c89912AE185f3a6Dba9FF365Bf3",
+        "address": "0x73FF552646A7D93764Ff8D1F9e7662c422E715ef",
         "id": "0x042eb099",
         "path": "contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x1556711572a53c89912AE185f3a6Dba9FF365Bf3"
+        ]
     },
     {
         "name": "LiquityV2SPWithdraw",
-        "address": "0x237eaB8D7f9bBeaF8D27dB9797EB835e4062B8C2",
+        "address": "0x8E8a4213745Ed68b3fce9d1500f563d885D02FDf",
         "id": "0x1eea7fdb",
         "path": "contracts/actions/liquityV2/stabilityPool/LiquityV2SPWithdraw.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x237eaB8D7f9bBeaF8D27dB9797EB835e4062B8C2"
+        ]
     },
     {
         "name": "LiquityV2SPClaimColl",
@@ -4078,14 +4113,15 @@
     },
     {
         "name": "LiquityV2View",
-        "address": "0x111b737CF5233734cE16A6Ee2599aE862fB04485",
+        "address": "0xF1f3D940392ddAD78A5e2dE1b595aB529f63c365",
         "id": "0xe993f355",
         "path": "contracts/views/LiquityV2View.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
         "history": [
+            "0x111b737CF5233734cE16A6Ee2599aE862fB04485",
             "0x8ABc5D6850DF33D621c30ae487bab843deb9CB63",
             "0x60128705250fDf19F1e18b197D1436B30eDa3899",
             "0xb1CCB64689F03cC7fd066a2095A285471c8A8554",
