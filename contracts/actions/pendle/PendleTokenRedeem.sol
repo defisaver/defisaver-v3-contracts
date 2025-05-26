@@ -52,9 +52,9 @@ contract PendleTokenRedeem is ActionBase {
         params.ptAmount = _parseParamUint(params.ptAmount, _paramMapping[4], _subData, _returnValues);
         params.minAmountOut = _parseParamUint(params.minAmountOut, _paramMapping[5], _subData, _returnValues);
 
-        (uint256 returnValue, bytes memory logData) = _redeem(params);
+        (uint256 underlyingAmount, bytes memory logData) = _redeem(params);
         emit ActionEvent("PendleTokenRedeem", logData);
-        return bytes32(returnValue);
+        return bytes32(underlyingAmount);
     }
 
     /// @inheritdoc ActionBase
