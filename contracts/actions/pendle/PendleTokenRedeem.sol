@@ -20,6 +20,7 @@ contract PendleTokenRedeem is ActionBase {
     using SafeERC20 for IERC20;
 
     error MarketNotExpired();
+    error ZeroAddressReceiver();
 
     /// @param market The address of the Pendle market
     /// @param underlyingToken The address of the underlying token
@@ -73,6 +74,8 @@ contract PendleTokenRedeem is ActionBase {
                             ACTION LOGIC
     //////////////////////////////////////////////////////////////*/
     function _redeem(Params memory _params) internal returns (uint256, bytes memory) {
+        if (_params.to == address(0)) revert ZeroAddressReceiver();
+
         (address syToken, address ptToken, address ytToken) = IPendleMarket(_params.market).readTokens();
 
         // only redeem if the market has expired
