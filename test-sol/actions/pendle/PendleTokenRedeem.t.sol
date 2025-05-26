@@ -43,11 +43,10 @@ contract TestPendleTokenRedeem is BaseTest, ActionsUtils {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        // set specific block
         forkMainnetLatest();
 
-        vm.warp(block.timestamp + 4 days);
-        
+        vm.warp(1748476800);
+
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
@@ -76,7 +75,7 @@ contract TestPendleTokenRedeem is BaseTest, ActionsUtils {
             _baseTest(TestConfig({
                 market: markets[i].market,
                 underlyingToken: markets[i].underlyingToken,
-                ptAmount: 100 * 10 ** underlyingDecimals,
+                ptAmount: 1043240 * 10 ** underlyingDecimals,
                 isDirect: false
             }));
         }
@@ -88,7 +87,7 @@ contract TestPendleTokenRedeem is BaseTest, ActionsUtils {
             _baseTest(TestConfig({
                 market: markets[i].market,
                 underlyingToken: markets[i].underlyingToken,
-                ptAmount: 10 * 10 ** underlyingDecimals,
+                ptAmount: 40521300 * 10 ** underlyingDecimals,
                 isDirect: true
             }));
         }
