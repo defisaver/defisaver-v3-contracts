@@ -1412,14 +1412,16 @@
   },
   {
       "name": "FluidView",
-      "address": "0x2d51BB6Ac5c1eC8DD6432e1FF980fC864B626e01",
+      "address": "0xf9e6d5568887ac8eC6fA33B7eefD2A176A958e71",
       "id": "0xae75a797",
       "path": "contracts/actions/fluid/vaultT1/FluidView",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "inRegistry": false,
       "changeTime": "0",
       "registryIds": [],
-      "history": []
+      "history": [
+        "0x2d51BB6Ac5c1eC8DD6432e1FF980fC864B626e01"
+      ]
   },
 {
     "name": "CreateSub",
