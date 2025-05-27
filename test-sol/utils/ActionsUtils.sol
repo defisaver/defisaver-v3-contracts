@@ -57,6 +57,12 @@ import { FluidVaultT1Withdraw } from "../../contracts/actions/fluid/vaultT1/Flui
 import { FluidVaultT1Borrow } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Borrow.sol";
 import { FluidVaultT1Payback } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Payback.sol";
 import { FluidVaultT1Adjust } from "../../contracts/actions/fluid/vaultT1/FluidVaultT1Adjust.sol";
+import { FluidDexModel } from "../../contracts/actions/fluid/helpers/FluidDexModel.sol";
+import { FluidDexOpen } from "../../contracts/actions/fluid/dex/FluidDexOpen.sol";
+import { FluidDexSupply } from "../../contracts/actions/fluid/dex/FluidDexSupply.sol";
+import { FluidDexBorrow } from "../../contracts/actions/fluid/dex/FluidDexBorrow.sol";
+import { FluidDexPayback } from "../../contracts/actions/fluid/dex/FluidDexPayback.sol";
+import { FluidDexWithdraw } from "../../contracts/actions/fluid/dex/FluidDexWithdraw.sol";
 
 contract ActionsUtils {
 
@@ -1084,4 +1090,103 @@ contract ActionsUtils {
         );
     }
 
+    function fluidDexOpenEncode(
+        address _vault,
+        address _from,
+        address _to,
+        uint256 _supplyAmount,
+        FluidDexModel.SupplyVariableData memory _supplyVariableData,
+        uint256 _borrowAmount,
+        FluidDexModel.BorrowVariableData memory _borrowVariableData,
+        bool _wrapBorrowedEth
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            FluidDexOpen.Params({
+                vault: _vault,
+                from: _from,
+                to: _to,
+                supplyAmount: _supplyAmount,
+                supplyVariableData: _supplyVariableData,
+                borrowAmount: _borrowAmount,
+                borrowVariableData: _borrowVariableData,
+                wrapBorrowedEth: _wrapBorrowedEth
+            })
+        );
+    }
+
+    function fluidDexSupplyEncode(
+        address _vault,
+        address _from,
+        uint256 _nftId,
+        uint256 _supplyAmount,
+        FluidDexModel.SupplyVariableData memory _supplyVariableData
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            FluidDexSupply.Params({
+                vault: _vault,
+                from: _from,
+                nftId: _nftId,
+                supplyAmount: _supplyAmount,
+                supplyVariableData: _supplyVariableData
+            })
+        );
+    }
+
+    function fluidDexBorrowEncode(
+        address _vault,
+        address _to,
+        uint256 _nftId,
+        uint256 _borrowAmount,
+        FluidDexModel.BorrowVariableData memory _borrowVariableData,
+        bool _wrapBorrowedEth
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            FluidDexBorrow.Params({
+                vault: _vault,
+                to: _to,
+                nftId: _nftId,          
+                borrowAmount: _borrowAmount,
+                borrowVariableData: _borrowVariableData,
+                wrapBorrowedEth: _wrapBorrowedEth
+            })
+        );
+    }
+
+    function fluidDexPaybackEncode(
+        address _vault,
+        address _from,
+        uint256 _nftId,
+        uint256 _paybackAmount,
+        FluidDexModel.PaybackVariableData memory _paybackVariableData
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            FluidDexPayback.Params({
+                vault: _vault,
+                from: _from,
+                nftId: _nftId,
+                paybackAmount: _paybackAmount,
+                paybackVariableData: _paybackVariableData
+            })
+        );
+    }
+
+    function fluidDexWithdrawEncode(
+        address _vault,
+        address _to,
+        uint256 _nftId,
+        uint256 _withdrawAmount,
+        FluidDexModel.WithdrawVariableData memory _withdrawVariableData,
+        bool _wrapWithdrawnEth
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(    
+            FluidDexWithdraw.Params({
+                vault: _vault,
+                to: _to,
+                nftId: _nftId,
+                withdrawAmount: _withdrawAmount,
+                withdrawVariableData: _withdrawVariableData,
+                wrapWithdrawnEth: _wrapWithdrawnEth
+            })
+        );
+    }
 }

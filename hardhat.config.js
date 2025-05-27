@@ -5,7 +5,7 @@ require('@nomicfoundation/hardhat-verify');
 require('@nomiclabs/hardhat-ethers');
 require('hardhat-gas-reporter');
 require('hardhat-log-remover');
-require('hardhat-tracer');
+// require('hardhat-tracer');
 require('@tenderly/hardhat-tenderly');
 require('solidity-coverage');
 

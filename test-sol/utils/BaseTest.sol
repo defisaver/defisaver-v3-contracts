@@ -10,7 +10,7 @@ import { Config } from "../config/Config.sol";
 
 /// @notice Base test - root contract for all tests
 contract BaseTest is Config {
-    
+
     // EOA USERS
     address internal constant bob = address(0xbb);
     address internal constant alice = address(0xaa);

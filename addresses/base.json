@@ -1384,14 +1384,16 @@
   },
   {
       "name": "FluidView",
-      "address": "0x5835CaDbA8843CD6d6d55782908351E9c74221aD",
+      "address": "0x6cd4D6af4F292817eA2A2311F099dF26cd015028",
       "id": "0xae75a797",
-      "path": "contracts/actions/fluid/vaultT1/FluidView",
-      "version": "1.0.0",
+      "path": "contracts/views/FluidView",
+      "version": "1.0.1",
       "inRegistry": false,
       "changeTime": "0",
       "registryIds": [],
-      "history": []
+      "history": [
+        "0x5835CaDbA8843CD6d6d55782908351E9c74221aD"
+      ]
   },
 {
     "name": "TokenizedVaultAdapter",

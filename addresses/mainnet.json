@@ -4288,14 +4288,17 @@
     },
     {
         "name": "FluidView",
-        "address": "0xf8e3bbf7c95057be1fD5E741a9ADb73E956dC724",
+        "address": "0xc8df052bD7A8d76a34c09e758Dff3c6298C0115c",
         "id": "0xae75a797",
-        "path": "contracts/actions/fluid/vaultT1/FluidView",
-        "version": "1.0.0",
+        "path": "contracts/views/FluidView.sol",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xeEa800B16C51449322e48afA70FCeA948Dc58B10",
+            "0xf8e3bbf7c95057be1fD5E741a9ADb73E956dC724"
+        ]
     },
     {
         "name": "FluidClaim",
@@ -4305,6 +4308,61 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexOpen",
+        "address": "0x071e1369E1c9030Aa1a089bDE2F72797a14FE3b3",
+        "id": "0x7d4e6bb2",
+        "path": "contracts/actions/fluid/dex/FluidDexOpen",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexSupply",
+        "address": "0xB3BE39850d8939Cceb4Fc49c415c428548FA9f9C",
+        "id": "0x3cf3e466",
+        "path": "contracts/actions/fluid/dex/FluidDexSupply",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexWithdraw",
+        "address": "0x14d5bb8E96fbf7C1f9A8E3EFD0eF5fe6832ff3cd",
+        "id": "0x4f1673fd",
+        "path": "contracts/actions/fluid/dex/FluidDexWithdraw",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexBorrow",
+        "address": "0x3fa8EF6DA8f5b2BaAee77493a3A3dA68a7Aa75f3",
+        "id": "0x81fb1de1",
+        "path": "contracts/actions/fluid/dex/FluidDexBorrow",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexPayback",
+        "address": "0xD733BD32F4AAEe92a983E2021B85ca5d31236FA0",
+        "id": "0x1de2c822",
+        "path": "contracts/actions/fluid/dex/FluidDexPayback",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     },
