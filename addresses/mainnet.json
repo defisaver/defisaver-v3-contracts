@@ -4320,6 +4320,17 @@
         "history": ["0x483816678e2348bf87f88b0f4eb6a923017de0d6"]
     },
     {
+        "name": "PendleTokenRedeem",
+        "address": "0x94682544aCC5f4D82ECB1ab97998baa0e428EA0f",
+        "id": "0x3de77432",
+        "path": "contracts/actions/pendle/PendleTokenRedeem.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"
