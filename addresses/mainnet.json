@@ -4336,7 +4336,7 @@
     {
         "name": "FluidDexWithdraw",
         "address": "0x14d5bb8E96fbf7C1f9A8E3EFD0eF5fe6832ff3cd",
-        "id": "0x6782bd80",
+        "id": "0x4f1673fd",
         "path": "contracts/actions/fluid/dex/FluidDexWithdraw",
         "version": "1.0.0",
         "inRegistry": true,
