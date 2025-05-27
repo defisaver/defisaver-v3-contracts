@@ -1414,7 +1414,7 @@
       "name": "FluidView",
       "address": "0xf9e6d5568887ac8eC6fA33B7eefD2A176A958e71",
       "id": "0xae75a797",
-      "path": "contracts/actions/fluid/vaultT1/FluidView",
+      "path": "contracts/views/FluidView",
       "version": "1.0.1",
       "inRegistry": false,
       "changeTime": "0",
