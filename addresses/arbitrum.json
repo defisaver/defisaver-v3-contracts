@@ -324,7 +324,7 @@
         "name": "StrategyTriggerView",
         "address": "0xae3F50BA1804301b1aA39e75CD94142eF77d8fF8",
         "id": "0x5e0ef18c",
-        "path": "contracts/views/StrategyTriggerView.sol",
+        "path": "contracts/views/strategy/StrategyTriggerView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
