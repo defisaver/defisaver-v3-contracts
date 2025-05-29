@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { BundleStorage } from "../core/strategy/BundleStorage.sol";
-import { CheckWalletType } from "../utils/CheckWalletType.sol";
-import { DSProxy } from "../DS/DSProxy.sol";
-import { CoreHelper } from "../core/helpers/CoreHelper.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
-import { StrategyModel } from "../core/strategy/StrategyModel.sol";
-import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
+import { IERC20 } from "../../interfaces/IERC20.sol";
+import { ISafe } from "../../interfaces/safe/ISafe.sol";
+import { ITrigger } from "../../interfaces/ITrigger.sol";
+import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
+import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { DSProxy } from "../../DS/DSProxy.sol";
+import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
+import { DFSRegistry } from "../../core/DFSRegistry.sol";
+import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
+import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletType {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);

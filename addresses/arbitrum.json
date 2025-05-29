@@ -335,7 +335,7 @@
       "name": "StrategyTriggerViewNoRevert",
       "address": "0x966e357706C31B8b56E89Da68A487646fD16cF10",
       "id": "0x37a21cb5",
-      "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
+      "path": "contracts/views/strategy/StrategyTriggerViewNoRevert.sol",
       "version": "1.0.3",
       "inRegistry": false,
       "changeTime": 0,
