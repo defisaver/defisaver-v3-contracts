@@ -45,8 +45,6 @@ contract TestPendleTokenRedeem is BaseTest, ActionsUtils {
     function setUp() public override {
         forkMainnetLatest();
 
-        vm.warp(1748476800);
-
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
