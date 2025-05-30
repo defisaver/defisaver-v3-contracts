@@ -21,6 +21,10 @@ import {Addresses} from '../utils/Addresses.sol';
 import {StrategyBuilder} from '../utils/StrategyBuilder.sol';
 
 contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
+
+    // TODO: placeholder for now. Fix this tests to use the address from registry
+    address RECIPE_EXECUTOR_ADDR = 0x5029336642814bC51a42bA80BF83a6322110035D;
+
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
