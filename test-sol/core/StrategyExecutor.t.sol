@@ -22,9 +22,6 @@ import {StrategyBuilder} from '../utils/StrategyBuilder.sol';
 
 contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
 
-    // TODO: placeholder for now. Fix this tests to use the address from registry
-    address RECIPE_EXECUTOR_ADDR = 0x5029336642814bC51a42bA80BF83a6322110035D;
-
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -61,7 +58,6 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
         cut = new StrategyExecutor();
         subStorage = SubStorage(SUB_STORAGE_ADDR);
 
-        vm.etch(RECIPE_EXECUTOR_ADDR, address(new RecipeExecutor()).code);
         vm.etch(MODULE_AUTH_ADDR, address(new SafeModuleAuth()).code);
         vm.etch(PROXY_AUTH_ADDR, address(new ProxyAuth()).code);
 
@@ -73,6 +69,7 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
         redeploy('GasPriceTrigger', address(new GasPriceTrigger()));
         redeploy('SubProxy', subProxyAddr);
         redeploy('BotAuth', botAuthAddr);
+        redeploy("RecipeExecutor", address(new RecipeExecutor()));
     }
 
     /*//////////////////////////////////////////////////////////////////////////

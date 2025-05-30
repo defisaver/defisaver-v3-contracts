@@ -16,9 +16,6 @@ import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
 
-    // TODO: placeholder for now. Fix this tests to use the address from registry
-    address RECIPE_EXECUTOR_ADDR = 0x5029336642814bC51a42bA80BF83a6322110035D;
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -32,6 +29,7 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
     
     address strategyExecutorAddr;
     address safeModulePermissionAddr;
+    address recipeExecutorAddr;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -50,7 +48,8 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
         strategyExecutorAddr = address(new StrategyExecutor());
         redeploy("StrategyExecutorID", strategyExecutorAddr);
 
-        vm.etch(RECIPE_EXECUTOR_ADDR, address(new RecipeExecutor()).code);
+        recipeExecutorAddr = address(new RecipeExecutor());
+        redeploy("RecipeExecutor", recipeExecutorAddr);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -64,7 +63,7 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
                 strategyExecutorAddr
             )
         );
-        cut.callExecute(safeWalletAddr, RECIPE_EXECUTOR_ADDR, bytes("0x"));
+        cut.callExecute(safeWalletAddr, recipeExecutorAddr, bytes("0x"));
     }
 
     function test_should_fail_to_call_execute_when_paused() public {
@@ -73,13 +72,13 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
 
         prank(strategyExecutorAddr);
         vm.expectRevert(abi.encodeWithSelector(Pausable.ContractPaused.selector));
-        cut.callExecute(safeWalletAddr, RECIPE_EXECUTOR_ADDR, bytes("0x"));
+        cut.callExecute(safeWalletAddr, recipeExecutorAddr, bytes("0x"));
     }
 
     function test_should_fail_to_execute_safe_tx_when_no_auth_is_given() public {
         prank(strategyExecutorAddr);
         vm.expectRevert();
-        cut.callExecute(safeWalletAddr, RECIPE_EXECUTOR_ADDR, bytes("0x"));
+        cut.callExecute(safeWalletAddr, recipeExecutorAddr, bytes("0x"));
     }
 
     function test_should_execute_safe_tx() public {
@@ -110,7 +109,7 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
 
         // execute safe tx
         prank(strategyExecutorAddr);
-        cut.callExecute(safeWalletAddr, RECIPE_EXECUTOR_ADDR, recipeExecutorCalldata);
+        cut.callExecute(safeWalletAddr, recipeExecutorAddr, recipeExecutorCalldata);
     }
 
     function test_should_revert_when_safe_tx_execution_fails() public {
@@ -140,6 +139,6 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
         /// @dev we expect revert because we are using recipe with flAction without returning funds
         prank(strategyExecutorAddr);
         vm.expectRevert(abi.encodeWithSelector(SafeModuleAuth.SafeExecutionError.selector));
-        cut.callExecute(safeWalletAddr, RECIPE_EXECUTOR_ADDR, recipeExecutorCalldata);
+        cut.callExecute(safeWalletAddr, recipeExecutorAddr, recipeExecutorCalldata);
     }
 }
