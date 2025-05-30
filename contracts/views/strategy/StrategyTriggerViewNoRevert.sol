@@ -155,7 +155,6 @@ contract StrategyTriggerViewNoRevert is
             return _verifySparkMinDebtPosition(smartWallet);
         }
 
-
         return TriggerStatus.TRUE;
     }
 
@@ -197,6 +196,7 @@ contract StrategyTriggerViewNoRevert is
     function _verifyAaveV3MinDebtPosition(
         address _smartWallet
     ) internal view returns (TriggerStatus) {
+        /// @dev AaveV3 automation only supports Core market at the moment (Default market)
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
         (, uint256 totalDebtETH ,,,,) = lendingPool.getUserAccountData(_smartWallet);
         return _hasEnoughMinDebtInUSD(totalDebtETH) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
@@ -205,6 +205,7 @@ contract StrategyTriggerViewNoRevert is
     function _verifySparkMinDebtPosition(
         address _smartWallet
     ) internal view returns (TriggerStatus) {
+        /// @dev Spark automation is only deployed on Mainnet, so we can hardcode the market address
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_SPARK_MARKET_MAINNET).getPool());
         (, uint256 totalDebtETH ,,,,) = lendingPool.getUserAccountData(_smartWallet);
         return _hasEnoughMinDebtInUSD(totalDebtETH) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
