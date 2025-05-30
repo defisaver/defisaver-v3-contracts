@@ -910,12 +910,11 @@
         "address": "0x2ee96cf53ae5fbd5309284704f978d0ca66cb963",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.4",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
-            "0x5029336642814bC51a42bA80BF83a6322110035D",
             "0x5029336642814bC51a42bA80BF83a6322110035D",
             "0xe822d76c2632FC52f3eaa686bDA9Cea3212579D8",
             "0x1D6DEdb49AF91A11B5C5F34954FD3E8cC4f03A86"
