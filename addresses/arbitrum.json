@@ -333,14 +333,18 @@
     },
     {
       "name": "StrategyTriggerViewNoRevert",
-      "address": "0x6583C8d4e8A4984780E76cF042540eb10C4b5c05",
+      "address": "0x966e357706C31B8b56E89Da68A487646fD16cF10",
       "id": "0x37a21cb5",
       "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
-      "version": "1.0.0",
+      "version": "1.0.3",
       "inRegistry": false,
       "changeTime": 0,
       "registryIds": [],
-      "history": []
+      "history": [
+        "0xea74835820fEBdF7bE8837Fa4D0Cd9CC34054f4F",
+        "0x90f167964c0B265E2Ac9b9A4BCc230b0E163ce18",
+        "0x6583C8d4e8A4984780E76cF042540eb10C4b5c05"
+      ]
     },
     {
         "name": "AaveV3View",
@@ -1408,11 +1412,68 @@
   },
   {
       "name": "FluidView",
-      "address": "0x2d51BB6Ac5c1eC8DD6432e1FF980fC864B626e01",
+      "address": "0xf9e6d5568887ac8eC6fA33B7eefD2A176A958e71",
       "id": "0xae75a797",
-      "path": "contracts/actions/fluid/vaultT1/FluidView",
-      "version": "1.0.0",
+      "path": "contracts/views/FluidView",
+      "version": "1.0.1",
       "inRegistry": false,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": [
+        "0x2d51BB6Ac5c1eC8DD6432e1FF980fC864B626e01"
+      ]
+  },
+  {
+    "name": "FluidDexOpen",
+    "address": "0xA456f13d358B8B93bE6778be3244111E267C0AaC",
+    "id": "0x7d4e6bb2",
+    "path": "contracts/actions/fluid/dex/FluidDexOpen",
+    "version": "1.0.0",
+    "inRegistry": true,
+    "changeTime": "0",
+    "registryIds": [],
+    "history": []
+  },
+  {
+      "name": "FluidDexSupply",
+      "address": "0x3E49c4f914E01e5612719a7B4965e4FAfb324762",
+      "id": "0x3cf3e466",
+      "path": "contracts/actions/fluid/dex/FluidDexSupply",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidDexWithdraw",
+      "address": "0x076D5434793798b153298bF70b014f5E6145aB2E",
+      "id": "0x4f1673fd",
+      "path": "contracts/actions/fluid/dex/FluidDexWithdraw",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidDexBorrow",
+      "address": "0x8626b70CDf64e557fDdcFbcb783833Dc314d95F4",
+      "id": "0x81fb1de1",
+      "path": "contracts/actions/fluid/dex/FluidDexBorrow",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "FluidDexPayback",
+      "address": "0xA9B46Da016F22cf9F8841A30881bB88E2Ad5CA94",
+      "id": "0x1de2c822",
+      "path": "contracts/actions/fluid/dex/FluidDexPayback",
+      "version": "1.0.0",
+      "inRegistry": true,
       "changeTime": "0",
       "registryIds": [],
       "history": []
