@@ -37,4 +37,6 @@ contract BaseFLAddresses {
 
     address internal constant CURVEUSD_FLASH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant CURVEUSD_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+    address internal constant DFS_REGISTRY_ADDR = 0x347FB634271F666353F23A3362f3935D96F97476;
 }

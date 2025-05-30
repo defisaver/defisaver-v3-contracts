@@ -7,13 +7,14 @@ import { FLFeeFaucet } from "../../../utils/FLFeeFaucet.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { ISafe } from "../../../interfaces/safe/ISafe.sol";
 import { IDSProxy } from "../../../interfaces/IDSProxy.sol";
-
+import { DFSRegistry } from "../../../core/DFSRegistry.sol";
 
 contract FLHelper is MainnetFLAddresses, StrategyModel {
     uint16 internal constant AAVE_REFERRAL_CODE = 64;
     uint16 internal constant SPARK_REFERRAL_CODE = 0;
 
     FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
+    DFSRegistry public constant dfsRegistry = DFSRegistry(DFS_REGISTRY_ADDR);
 
     /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR =
@@ -23,18 +24,20 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
             )
         );
 
+    bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
+
     // Revert if execution fails when using safe wallet
     error SafeExecutionError();
 
     function _executeRecipe(address _wallet, bool _isDSProxy, Recipe memory _currRecipe, uint256 _paybackAmount) internal {
         if (_isDSProxy) {
             IDSProxy(_wallet).execute{value: address(this).balance}(
-                RECIPE_EXECUTOR_ADDR,
+                dfsRegistry.getAddr(RECIPE_EXECUTOR_ID),
                 abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
             );
         } else {
             bool success = ISafe(_wallet).execTransactionFromModule(
-                RECIPE_EXECUTOR_ADDR,
+                dfsRegistry.getAddr(RECIPE_EXECUTOR_ID),
                 address(this).balance,
                 abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
                 ISafe.Operation.DelegateCall
