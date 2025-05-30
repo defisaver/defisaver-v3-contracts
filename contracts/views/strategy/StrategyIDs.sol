@@ -37,11 +37,43 @@ library StrategyIDs {
             return true;
         }
 
+        if (
+            (block.chainid == 42161 || block.chainid == 10 || block.chainid == 8453) &&
+            (_strategyID == 0 || _strategyID == 1)
+        ) {
+            return true;
+        }
+
         return false;
     }
 
     function isAaveV3BoostStrategy(uint256 _strategyID) internal view returns (bool) {
         if (block.chainid == 1 && (_strategyID == 36 || _strategyID == 37)) {
+            return true;
+        }
+
+        if (
+            (block.chainid == 42161 || block.chainid == 10 || block.chainid == 8453) &&
+            (_strategyID == 2 || _strategyID == 3)
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function isAaveV3CloseStrategy(uint256 _strategyID) internal view returns (bool) {
+        if (
+            block.chainid == 1 &&
+            (_strategyID == 71 || _strategyID == 72 || _strategyID == 73 || _strategyID == 74)
+        ) {
+            return true;
+        }
+
+        if (
+            (block.chainid == 42161 || block.chainid == 10 || block.chainid == 8453) &&
+            (_strategyID == 4 || _strategyID == 5 || _strategyID == 6 || _strategyID == 7)
+        ) {
             return true;
         }
 
@@ -62,26 +94,6 @@ library StrategyIDs {
 
     function isSparkBoostStrategy(uint256 _strategyID) internal view returns (bool) {
         if (block.chainid == 1 && (_strategyID == 59 || _strategyID == 60)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    function isAaveV2LeverageManagementStrategy(uint256 _strategyID) internal view returns (bool) {
-        return isAaveV2RepayStrategy(_strategyID) || isAaveV2BoostStrategy(_strategyID);
-    }
-
-    function isAaveV2RepayStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1 && (_strategyID == 65 || _strategyID == 66)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    function isAaveV2BoostStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1 && (_strategyID == 67 || _strategyID == 68)) {
             return true;
         }
 
