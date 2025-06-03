@@ -13,16 +13,23 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 /// @notice This action will always pull aTokens for non GHO staking and wrap them into waTokens for staking.
 contract UmbrellaStake is ActionBase, AaveV3Helper  {
     using TokenUtils for address;
+
+    error UmbrellaStakeSlippageHit(
+        uint256 minSharesOut,
+        uint256 sharesReceived
+    );
  
     /// @param stkToken The umbrella stake token.
     /// @param from The address from which the aToken or GHO will be pulled.
     /// @param to The address to which the stkToken will be transferred
     /// @param amount The amount of aToken or GHO to be staked.
+    /// @param minSharesOut The minimum amount of stkToken shares to receive.
     struct Params {
         address stkToken;
         address from;
         address to;
         uint256 amount;
+        uint256 minSharesOut;
     }
 
     /// @inheritdoc ActionBase
@@ -38,6 +45,7 @@ contract UmbrellaStake is ActionBase, AaveV3Helper  {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
+        params.minSharesOut = _parseParamUint(params.minSharesOut, _paramMapping[4], _subData, _returnValues);
 
         (uint256 stkTokenShares, bytes memory logData) = _stake(params);
         emit ActionEvent("UmbrellaStake", logData);
@@ -84,6 +92,10 @@ contract UmbrellaStake is ActionBase, AaveV3Helper  {
             _params.amount,
             _params.to
         );
+
+        if (shares < _params.minSharesOut) {
+            revert UmbrellaStakeSlippageHit(_params.minSharesOut, shares);    
+        }
 
         return (shares, abi.encode(_params, shares));
     }
