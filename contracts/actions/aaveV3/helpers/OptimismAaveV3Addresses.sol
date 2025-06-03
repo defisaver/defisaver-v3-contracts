@@ -8,4 +8,5 @@ contract OptimismAaveV3Addresses {
     address internal constant AAVE_ORACLE_V3 = 0xD81eb3728a631871a7eBBaD631b5f424909f0c77;
     address internal constant STAKED_GHO_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant AAVE_GOV_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant GHO_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 }
