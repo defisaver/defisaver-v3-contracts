@@ -8,6 +8,9 @@ import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 /// @title Action to unstake stkGHO tokens.
+/// @notice After AaveV3 Umbrella upgrade, cooldown period is set to 0.
+/// @notice For legacy reasons, unstaking will still require 2 calls to GhoUnstake.
+/// @notice One to start cooldown() with amount set to 0 and one to redeem() with amount set to the desired amount in the same block.
 contract GhoUnstake is ActionBase, AaveV3Helper {
 
     using TokenUtils for address;
