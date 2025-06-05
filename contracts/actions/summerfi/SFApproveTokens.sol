@@ -13,7 +13,6 @@ import { SFHelper } from "./helpers/SFHelper.sol";
 /// @dev User wallet that calls this action needs to be permitted by Summer.fi proxy through AccountGuard
 contract SFApproveTokens is ActionBase, SFHelper {
     string constant SF_OPERATION_NAME = "AAVEV3PaybackWithdraw";
-    bytes32 constant SF_OPERATION_HASH = keccak256(bytes(SF_OPERATION_NAME));
     bytes32 constant SF_SET_APPROVAL_HASH = keccak256("SetApproval_3");
     uint256 constant SF_NUM_OF_OPERATION_ACTIONS = 9;
     uint256 constant OPERATION_SET_APPROVAL_INDEX = 1;
