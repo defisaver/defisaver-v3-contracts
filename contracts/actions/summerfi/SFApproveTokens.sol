@@ -7,12 +7,11 @@ import { IDSProxy } from "../../interfaces/IDSProxy.sol";
 import { IExecutable } from "../../interfaces/summerfi/IExecutable.sol";
 import { IOperationsRegistry } from "../../interfaces/summerfi/IOperationsRegistry.sol";
 import { IOperationExecutor, Call } from "../../interfaces/summerfi/IOperationExecutor.sol";
+import { SFHelper } from "./helpers/SFHelper.sol";
 
 /// @title Approve tokens through Summer.fi proxy
 /// @dev User wallet that calls this action needs to be permitted by Summer.fi proxy through AccountGuard
-contract SFApproveTokens is ActionBase {
-    address constant SF_OPERATION_EXECUTOR = 0xcA71C36D26f515AD0cce1D806B231CBC1185CdfC;
-    address constant SF_OPERATIONS_REGISTRY = 0x563d2689fE89c78259dD7F694146BB93f6388A55;
+contract SFApproveTokens is ActionBase, SFHelper {
     string constant SF_OPERATION_NAME = "AAVEV3PaybackWithdraw";
     bytes32 constant SF_OPERATION_HASH = keccak256(bytes(SF_OPERATION_NAME));
     bytes32 constant SF_SET_APPROVAL_HASH = keccak256("SetApproval_3");
