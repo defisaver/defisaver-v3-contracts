@@ -203,12 +203,24 @@ const approveContractChangeCall = async (idOrName, options) => {
     };
 };
 
+const registryDeploymentBlocks = {
+    mainnet: 14171278,
+    arbitrum: 12302244,
+    base: 3654462,
+    optimism: 8515878,
+};
+
 const compareRegistryWithJson = async (options) => {
     const registry = await setRegistry(options);
 
+    // Get the network name
+    const network = options.network.length === 0 ? 'mainnet' : options.network;
+
+    const startingBlock = registryDeploymentBlocks[network];
+
     // fetch newContract events
     const filter = registry.filters.AddNewContract();
-    const events = await registry.queryFilter(filter);
+    const events = await registry.queryFilter(filter, startingBlock);
 
     // Get all registered contracts from on-chain events
     let registeredContracts = [];
@@ -221,9 +233,6 @@ const compareRegistryWithJson = async (options) => {
     registeredContracts = registeredContracts.filter((contract, index, self) => (
         index === self.findIndex((c) => c.id === contract.id)
     ));
-
-    // Get the network name
-    const network = options.network.length === 0 ? 'mainnet' : options.network;
 
     // Read the JSON file for the network
     const jsonPath = join(__dirname, '..', 'addresses', `${network}.json`);
