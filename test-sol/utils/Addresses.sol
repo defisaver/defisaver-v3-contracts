@@ -25,6 +25,9 @@ library Addresses {
     address public constant LUSD_ADDR = 0x5f98805A4E8be255a32880FDeC7F6728C6568bA0;
     address public constant LINK_ADDR = 0x514910771AF9Ca656af840dff83E8264EcF986CA;
     address public constant AAVE_ADDR = 0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9;
+    address public constant USDE_ADDR = 0x4c9EDD5852cd905f086C759E8383e09bff1E68B3;
+    address public constant EUSDE_ADDR = 0x90D2af7d622ca3141efA4d8f1F24d86E5974Cc8F;
+    address public constant SUSDE_ADDR = 0x9D39A5DE30e57443BfF2A8307A4256c8797A3497;
     // EULER V2
     address public constant E_WETH_2 = 0xD8b27CF359b7D15710a5BE299AF6e7Bf904984C2;
     address public constant E_WSTETH_2 = 0xbC4B4AC47582c3E38Ce5940B80Da65401F4628f1;

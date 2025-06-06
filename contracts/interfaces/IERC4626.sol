@@ -15,6 +15,7 @@ interface IERC4626 is IERC20 {
     function previewRedeem(uint256 _shares) external view returns (uint256 assets);
 
     function convertToAssets(uint256 _shares) external view returns (uint256 assets);
+    function convertToShares(uint256 _assets) external view returns (uint256 shares);
 
     function totalAssets() external view returns (uint256);
 
