@@ -22,7 +22,7 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("UmbrellaStake");
         
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

@@ -30,7 +30,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("UmbrellaUnstake");
         
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -86,9 +86,11 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
                 _isDirect
             );
 
+            address waTokenOrGHO = IERC4626(stkTokens[i]).asset();
+
             Snapshot memory snapshotBefore = takeSnapshot(
                 stkTokens[i],
-                IERC4626(stkTokens[i]).asset(),
+                waTokenOrGHO,
                 _getSupplyToken(stkTokens[i])
             );
             
@@ -96,7 +98,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
             
             Snapshot memory snapshotAfter = takeSnapshot(
                 stkTokens[i],
-                IERC4626(stkTokens[i]).asset(),
+                waTokenOrGHO,
                 _getSupplyToken(stkTokens[i])
             );
             
@@ -104,7 +106,8 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
                 snapshotBefore,
                 snapshotAfter,
                 unstakeAmount,
-                _isMaxAmount
+                _isMaxAmount,
+                waTokenOrGHO
             );
         }
     }
@@ -179,13 +182,20 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
         Snapshot memory _snapshotBefore,
         Snapshot memory _snapshotAfter,
         uint256 _unstakeAmount,
-        bool _isMaxAmount
+        bool _isMaxAmount,
+        address _waTokenOrGHO
     ) internal {
-        assertEq(_snapshotAfter.walletWaTokenBalance, 0);
-        assertEq(_snapshotAfter.walletSupplyTokenBalance, 0);
-        assertEq(_snapshotAfter.senderWaTokenBalance, 0);
-        assertEq(_snapshotAfter.senderStkTokenBalance, 0);
-        assertGt(_snapshotAfter.senderSupplyTokenBalance, _snapshotBefore.senderSupplyTokenBalance + _unstakeAmount);
+        assertEq(_snapshotAfter.walletWaTokenBalance, 0, "walletWaTokenBalance should be 0");
+        assertEq(_snapshotAfter.walletSupplyTokenBalance, 0, "walletSupplyTokenBalance should be 0");
+        if (_waTokenOrGHO != Addresses.GHO_TOKEN) {
+            assertEq(_snapshotAfter.senderWaTokenBalance, 0, "senderWaTokenBalance should be 0");
+        }
+        assertEq(_snapshotAfter.senderStkTokenBalance, 0, "senderStkTokenBalance should be 0");
+        assertGe(
+            _snapshotAfter.senderSupplyTokenBalance,
+            _snapshotBefore.senderSupplyTokenBalance + _unstakeAmount,
+            "senderSupplyTokenBalance should be greater than before"
+        );
 
         if (_isMaxAmount) {
             assertEq(_snapshotAfter.walletStkTokenBalance, 0);

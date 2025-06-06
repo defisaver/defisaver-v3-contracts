@@ -36,11 +36,11 @@ contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
     }
 
     function getStkTokens() public view returns (address[] memory) {
-        address[] memory tokens = new address[](1);
+        address[] memory tokens = new address[](4);
         tokens[0] = Addresses.STK_WETH_TOKEN;
-        // tokens[1] = Addresses.STK_USDC_TOKEN;
-        // tokens[2] = Addresses.STK_USDT_TOKEN;
-        // tokens[3] = Addresses.STK_GHO_TOKEN;
+        tokens[1] = Addresses.STK_USDC_TOKEN;
+        tokens[2] = Addresses.STK_USDT_TOKEN;
+        tokens[3] = Addresses.STK_GHO_TOKEN;
         return tokens;
     }
 
