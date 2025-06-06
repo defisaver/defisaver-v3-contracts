@@ -70,23 +70,26 @@ contract UmbrellaStake is ActionBase, AaveV3Helper  {
     function _stake(Params memory _params) internal returns (uint256, bytes memory) {
         address waTokenOrGHO = IERC4626(_params.stkToken).asset();
 
+        // If no from address is provided, use user's wallet address
+        if (_params.from == address(0)) {
+            _params.from = address(this);
+        }
+
+        // If no to address is provided, use user's wallet address
+        if (_params.to == address(0)) {
+            _params.to = address(this);
+        }
+
         if (waTokenOrGHO == GHO_TOKEN) {
             _params.amount = GHO_TOKEN.pullTokensIfNeeded(_params.from, _params.amount);
-            GHO_TOKEN.approveToken(_params.stkToken, _params.amount);
         } else {
             // For non GHO staking, we always pull aTokens and wrap them into waTokens before staking
             address aToken = IStaticATokenV2(waTokenOrGHO).aToken();
             _params.amount = aToken.pullTokensIfNeeded(_params.from, _params.amount);
-
-            // Wrap aTokens to waTokens
-            aToken.approveToken(waTokenOrGHO, _params.amount);
-            _params.amount = IStaticATokenV2(waTokenOrGHO).depositATokens(
-                _params.amount,
-                address(this) /* receiver */
-            );
-
-            waTokenOrGHO.approveToken(_params.stkToken, _params.amount);
+            _params.amount = _wrapATokens(aToken, waTokenOrGHO, _params.amount);
         }
+
+        waTokenOrGHO.approveToken(_params.stkToken, _params.amount);
 
         uint256 shares = IERC4626StakeToken(_params.stkToken).deposit(
             _params.amount,
@@ -98,6 +101,26 @@ contract UmbrellaStake is ActionBase, AaveV3Helper  {
         }
 
         return (shares, abi.encode(_params, shares));
+    }
+
+    /// @notice Wraps aTokens into waTokens.
+    /// @param _aToken The aToken to wrap.
+    /// @param _waToken The wrapped aToken.
+    /// @param _amount The amount of aTokens to wrap.
+    /// @return The amount of waTokens received.
+    function _wrapATokens(
+        address _aToken,
+        address _waToken,
+        uint256 _amount
+    ) internal returns (uint256) {
+        _aToken.approveToken(_waToken, _amount);
+
+        uint256 waTokenAmount = IStaticATokenV2(_waToken).depositATokens(
+            _amount,
+            address(this) /* receiver */
+        );
+
+        return waTokenAmount;
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

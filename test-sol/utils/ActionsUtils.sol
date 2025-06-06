@@ -63,6 +63,8 @@ import { FluidDexSupply } from "../../contracts/actions/fluid/dex/FluidDexSupply
 import { FluidDexBorrow } from "../../contracts/actions/fluid/dex/FluidDexBorrow.sol";
 import { FluidDexPayback } from "../../contracts/actions/fluid/dex/FluidDexPayback.sol";
 import { FluidDexWithdraw } from "../../contracts/actions/fluid/dex/FluidDexWithdraw.sol";
+import { UmbrellaStake } from "../../contracts/actions/aaveV3/umbrella/UmbrellaStake.sol";
+import { UmbrellaUnstake } from "../../contracts/actions/aaveV3/umbrella/UmbrellaUnstake.sol";
 
 contract ActionsUtils {
 
@@ -1186,6 +1188,40 @@ contract ActionsUtils {
                 withdrawAmount: _withdrawAmount,
                 withdrawVariableData: _withdrawVariableData,
                 wrapWithdrawnEth: _wrapWithdrawnEth
+            })
+        );
+    }
+
+    function umbrellaStakeEncode(
+        address _stkToken,
+        address _from,
+        address _to,
+        uint256 _amount,
+        uint256 _minSharesOut
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            UmbrellaStake.Params({
+                stkToken: _stkToken,
+                from: _from,
+                to: _to,
+                amount: _amount,
+                minSharesOut: _minSharesOut
+            })
+        );
+    }
+
+    function umbrellaUnstakeEncode(
+        address _stkToken,
+        address _to,
+        uint256 _amount,
+        uint256 _minOutOrMaxBurn
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            UmbrellaUnstake.Params({
+                stkToken: _stkToken,
+                to: _to,
+                amount: _amount,
+                minOutOrMaxBurn: _minOutOrMaxBurn
             })
         );
     }

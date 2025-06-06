@@ -28,7 +28,7 @@ interface IStaticATokenV2 {
     **/
     function depositATokens(uint256 assets, address receiver) external returns (uint256);
 
-        /**
+    /**
     * @notice Universal deposit method for proving aToken or underlying liquidity with permit
     * @param assets The amount of aTokens or underlying to deposit
     * @param receiver The address that will receive the static aTokens
