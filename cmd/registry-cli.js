@@ -406,6 +406,29 @@ const checkChangeTimeMismatches = async (options) => {
         console.log('\nAll entries have matching changeTime values.');
     }
 
+    // Check for actions not in registry
+    const actionsNotInRegistry = jsonData.filter((jsonContract) => !jsonContract.inRegistry && jsonContract.path.startsWith('contracts/actions'));
+
+    if (actionsNotInRegistry.length > 0) {
+        console.log('\nACTIONS NOT IN REGISTRY:');
+        actionsNotInRegistry.forEach((action) => {
+            const registryEntry = registeredContracts.find((c) => c.id === action.id);
+            if (!registryEntry) {
+                console.log(`\nID: ${action.id}`);
+                console.log(`Name: ${action.name}`);
+                console.log(`Path: ${action.path}`);
+                console.log('Status: Not in registry');
+            } else {
+                console.log(`\nID: ${action.id}`);
+                console.log(`Name: ${action.name}`);
+                console.log(`Path: ${action.path}`);
+                console.log('Status: Incorrect inRegistry flag in JSON');
+            }
+        });
+    } else {
+        console.log('\nNo actions found that are not in registry.');
+    }
+
     process.exit(0);
 };
 
