@@ -116,10 +116,8 @@ contract SFApproveTokens is ActionBase, SFHelper {
 
             _sfExecute(params.sfProxy, calls);
 
-            uint256 actual = IERC20(tokenAddr).allowance(params.sfProxy, params.spender);
-            if (actual < allowance && allowance != type(uint256).max) {
-                revert SFApproveFailed(params.spender, params.sfProxy);
-            }
+            // Sanity check. Verify that the approval is actually set after execution through the summer.fi proxy
+            _verifyThatApprovalIsSet(tokenAddr, params.sfProxy, params.spender, allowance);
         }
 
         logData = abi.encode(params);
@@ -129,6 +127,18 @@ contract SFApproveTokens is ActionBase, SFHelper {
         address actionStoredInRegistry = IServiceRegistry(SF_SERVICE_REGISTRY).getServiceAddress(SF_SET_APPROVAL_HASH);
         if (actionStoredInRegistry != SF_SET_APPROVAL_ADDRESS) {
             revert InvalidSetApprovalActionInRegistry(SF_SET_APPROVAL_ADDRESS, actionStoredInRegistry);
+        }
+    }
+
+    function _verifyThatApprovalIsSet(
+        address tokenAddr,
+        address owner,
+        address spender,
+        uint256 expectedAllowance
+    ) internal {
+        uint256 allowanceSet = IERC20(tokenAddr).allowance(owner, spender);
+        if (allowanceSet < expectedAllowance) {
+            revert SFApproveFailed(spender, owner);
         }
     }
 
