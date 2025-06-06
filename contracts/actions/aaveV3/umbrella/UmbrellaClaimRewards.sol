@@ -5,11 +5,9 @@ pragma solidity =0.8.24;
 import { IUmbrellaRewardsController } from "../../../interfaces/aaveV3/IUmbrellaRewardsController.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { AaveV3Helper } from "../helpers/AaveV3Helper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
 /// @title UmbrellaClaimRewards - Claim rewards from staking in Umbrella staking system
 contract UmbrellaClaimRewards is ActionBase, AaveV3Helper  {
-    using TokenUtils for address;
 
     /// @param asset The asset to claim rewards from
     /// @param to The address to send the rewards to
