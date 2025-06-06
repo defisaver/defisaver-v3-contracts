@@ -1478,48 +1478,59 @@
       "registryIds": [],
       "history": []
   },
-{
-    "name": "CreateSub",
-    "address": "0xbFD17a0a844b75976585a382a5BcCaFC9EAd731f",
-    "id": "0xf41e543f",
-    "path": "contracts/actions/utils/CreateSub.sol",
-    "version": "1.0.0",
-    "inRegistry": true,
-    "changeTime": "86400",
-    "registryIds": [],
-    "history": []
-},
-{
-    "name": "TransferNFT",
-    "address": "0xf73B14cF4bC10509446FC4111407A721f8A81F7d",
-    "id": "0xa3443678",
-    "path": "contracts/actions/utils/TransferNFT.sol",
-    "version": "1.0.0",
-    "inRegistry": true,
-    "changeTime": "86400",
-    "registryIds": [],
-    "history": []
-},
-{
-    "name": "UpdateSub",
-    "address": "0x3511f444362F8cBd185DbF21C9488D16c1306461",
-    "id": "0xa985d903",
-    "path": "contracts/actions/utils/UpdateSub.sol",
-    "version": "1.0.0",
-    "inRegistry": true,
-    "changeTime": "86400",
-    "registryIds": [],
-    "history": []
-},
-{
-  "name": "MerklClaim",
-  "address": "0xdab7b1865efa8d1f8fe1602dea9285b4a599c45c",
-  "id": "0x79b06cc7",
-  "path": "contracts/actions/merkl/MerklClaim.sol",
-  "version": "1.0.0",
-  "inRegistry": true,
-  "changeTime": "0",
-  "registryIds": [],
-  "history": []
-}
+  {
+      "name": "CreateSub",
+      "address": "0xbFD17a0a844b75976585a382a5BcCaFC9EAd731f",
+      "id": "0xf41e543f",
+      "path": "contracts/actions/utils/CreateSub.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "TransferNFT",
+      "address": "0xf73B14cF4bC10509446FC4111407A721f8A81F7d",
+      "id": "0xa3443678",
+      "path": "contracts/actions/utils/TransferNFT.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "UpdateSub",
+      "address": "0x3511f444362F8cBd185DbF21C9488D16c1306461",
+      "id": "0xa985d903",
+      "path": "contracts/actions/utils/UpdateSub.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "MerklClaim",
+      "address": "0xdab7b1865efa8d1f8fe1602dea9285b4a599c45c",
+      "id": "0x79b06cc7",
+      "path": "contracts/actions/merkl/MerklClaim.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "0",
+      "registryIds": [],
+      "history": []
+  },
+  {
+      "name": "SFApproveTokens",
+      "address": "0x98101bDBFaA3f8efa4A14a5A6a2f9A20D514a5D5",
+      "id": "0x869398d6",
+      "path": "contracts/actions/summerfi/SFApproveTokens.sol",
+      "version": "1.0.0",
+      "inRegistry": true,
+      "changeTime": "86400",
+      "registryIds": [],
+      "history": []
+  }
 ]
