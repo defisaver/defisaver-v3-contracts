@@ -5,6 +5,7 @@ import { ActionBase } from "../ActionBase.sol";
 import { IERC20 } from "../../interfaces/IERC20.sol";
 import { IDSProxy } from "../../interfaces/IDSProxy.sol";
 import { IExecutable } from "../../interfaces/summerfi/IExecutable.sol";
+import { IServiceRegistry } from "../../interfaces/summerfi/IServiceRegistry.sol";
 import { IOperationsRegistry } from "../../interfaces/summerfi/IOperationsRegistry.sol";
 import { IOperationExecutor, Call } from "../../interfaces/summerfi/IOperationExecutor.sol";
 import { SFHelper } from "./helpers/SFHelper.sol";
@@ -22,6 +23,9 @@ contract SFApproveTokens is ActionBase, SFHelper {
 
     /// @notice Tokens and allowances arrays should match in length
     error InvalidArrayLength();
+
+    /// @notice Error thrown if the set approval action from registry is not the exact version we expect
+    error InvalidSetApprovalActionInRegistry(address expected, address actual);
 
     /// @param sfProxy  Summer.fi proxy address
     /// @param spender  User's wallet  address
@@ -79,6 +83,8 @@ contract SFApproveTokens is ActionBase, SFHelper {
             params.spender = address(this);
         }
 
+        _requireExactVersionOfSetApprovalActionInRegistry();
+
         (bytes32[] memory targets, ) = IOperationsRegistry(SF_OPERATIONS_REGISTRY).getOperation(
             SF_OPERATION_NAME
         );
@@ -117,6 +123,13 @@ contract SFApproveTokens is ActionBase, SFHelper {
         }
 
         logData = abi.encode(params);
+    }
+
+    function _requireExactVersionOfSetApprovalActionInRegistry() internal {
+        address actionStoredInRegistry = IServiceRegistry(SF_SERVICE_REGISTRY).getServiceAddress(SF_SET_APPROVAL_HASH);
+        if (actionStoredInRegistry != SF_SET_APPROVAL_ADDRESS) {
+            revert InvalidSetApprovalActionInRegistry(SF_SET_APPROVAL_ADDRESS, actionStoredInRegistry);
+        }
     }
 
     function _sfExecute(address sfProxy, Call[] memory calls) internal returns (bytes32) {
