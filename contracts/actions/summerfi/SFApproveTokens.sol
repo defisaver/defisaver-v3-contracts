@@ -123,7 +123,7 @@ contract SFApproveTokens is ActionBase, SFHelper {
         logData = abi.encode(params);
     }
 
-    function _requireExactVersionOfSetApprovalActionInRegistry() internal {
+    function _requireExactVersionOfSetApprovalActionInRegistry() internal view {
         address actionStoredInRegistry = IServiceRegistry(SF_SERVICE_REGISTRY).getServiceAddress(SF_SET_APPROVAL_HASH);
         if (actionStoredInRegistry != SF_SET_APPROVAL_ADDRESS) {
             revert InvalidSetApprovalActionInRegistry(SF_SET_APPROVAL_ADDRESS, actionStoredInRegistry);
@@ -135,7 +135,7 @@ contract SFApproveTokens is ActionBase, SFHelper {
         address owner,
         address spender,
         uint256 expectedAllowance
-    ) internal {
+    ) internal view {
         uint256 allowanceSet = IERC20(tokenAddr).allowance(owner, spender);
         if (allowanceSet < expectedAllowance) {
             revert SFApproveFailed(spender, owner);
