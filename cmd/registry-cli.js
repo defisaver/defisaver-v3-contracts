@@ -394,6 +394,25 @@ const checkChangeTimeMismatches = async (options) => {
         }
     });
 
+    // Filter changeTimeMismatches by doing actual on-chain check
+    if (changeTimeMismatches.length > 0) {
+        const verificationPromises = changeTimeMismatches.map(async (mismatch) => {
+            try {
+                const entryData = await registry.entries(mismatch.id);
+                const waitPeriod = entryData.waitPeriod || entryData[1];
+                if (waitPeriod.toString() === '0') return mismatch;
+                return null;
+            } catch (error) {
+                console.log(`Error checking on-chain data for ID ${mismatch.id}: ${error.message}`);
+                return mismatch;
+            }
+        });
+        const verificationResults = await Promise.all(verificationPromises);
+        const verifiedMismatches = verificationResults.filter((result) => result !== null);
+        changeTimeMismatches.length = 0;
+        changeTimeMismatches.push(...verifiedMismatches);
+    }
+
     if (changeTimeMismatches.length > 0) {
         console.log('\nEntries with changeTime mismatches:');
         changeTimeMismatches.forEach((mismatch) => {
@@ -404,29 +423,6 @@ const checkChangeTimeMismatches = async (options) => {
         });
     } else {
         console.log('\nAll entries have matching changeTime values.');
-    }
-
-    // Check for actions not in registry
-    const actionsNotInRegistry = jsonData.filter((jsonContract) => !jsonContract.inRegistry && jsonContract.path.startsWith('contracts/actions'));
-
-    if (actionsNotInRegistry.length > 0) {
-        console.log('\nACTIONS NOT IN REGISTRY:');
-        actionsNotInRegistry.forEach((action) => {
-            const registryEntry = registeredContracts.find((c) => c.id === action.id);
-            if (!registryEntry) {
-                console.log(`\nID: ${action.id}`);
-                console.log(`Name: ${action.name}`);
-                console.log(`Path: ${action.path}`);
-                console.log('Status: Not in registry');
-            } else {
-                console.log(`\nID: ${action.id}`);
-                console.log(`Name: ${action.name}`);
-                console.log(`Path: ${action.path}`);
-                console.log('Status: Incorrect inRegistry flag in JSON');
-            }
-        });
-    } else {
-        console.log('\nNo actions found that are not in registry.');
     }
 
     process.exit(0);
