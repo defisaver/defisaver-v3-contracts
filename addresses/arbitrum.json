@@ -1345,58 +1345,67 @@
     },
     {
         "name": "FluidVaultT1Open",
-        "address": "0x1947Ce90ACCf0E243CcF85140fCceC2EfAeeA193",
+        "address": "0x5ecEB092Fd6AfdD314FfbE276302697c1f51a463",
         "id": "0x35b25e65",
         "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Open",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "FluidVaultT1Supply",
-        "address": "0xBCF0Dc5bb2C4434AD07369207904F5900d391b0B",
-        "id": "0xaf5b03c0",
-        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Supply",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "FluidVaultT1Withdraw",
-        "address": "0xc13d93227d97197e5F1751d0a3e80c1080A5fa2B",
-        "id": "0xf304b35f",
-        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "FluidVaultT1Borrow",
-        "address": "0x499da89aD564F5D6C828259ce55F53Fa288e7Be7",
-        "id": "0x237b3650",
-        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Borrow",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "FluidVaultT1Payback",
-        "address": "0x226c871E0a27B12065c9128b8e7440b054b59155",
-        "id": "0x101b4845",
-        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x1947Ce90ACCf0E243CcF85140fCceC2EfAeeA193"
+        ]
+    },
+    {
+        "name": "FluidVaultT1Supply",
+        "address": "0xA7388AA09A8E886D95735a270BFaE68f3A6E7388",
+        "id": "0xaf5b03c0",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Supply",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0xBCF0Dc5bb2C4434AD07369207904F5900d391b0B"
+        ]
+    },
+    {
+        "name": "FluidVaultT1Withdraw",
+        "address": "0x130A5A60bc91649b1a31847BC3310C8bd259c48F",
+        "id": "0xf304b35f",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0xc13d93227d97197e5F1751d0a3e80c1080A5fa2B"
+        ]
+    },
+    {
+        "name": "FluidVaultT1Borrow",
+        "address": "0x4AD7121ed7233861118312529522bD4E00c55feE",
+        "id": "0x237b3650",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Borrow",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x499da89aD564F5D6C828259ce55F53Fa288e7Be7"
+        ]
+    },
+    {
+        "name": "FluidVaultT1Payback",
+        "address": "0xb1d9a049E9bbC212DdDfE9D6F37d268B1cf2b4B6",
+        "id": "0x101b4845",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
+        "version": "1.0.2",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x226c871E0a27B12065c9128b8e7440b054b59155",
             "0x9Fc3FD0E181bD48e2D254dd071809527dED37e95"
         ]
     },
@@ -1415,25 +1424,29 @@
     },
     {
         "name": "FluidRatioTrigger",
-        "address": "0x6f60dAB4F55ddb5DA1E05e4E78F7774407f112Ab",
+        "address": "0xDc3178A32e34638170c48Af88329D8cc1B3A91e0",
         "id": "0x6de6c127",
         "path": "contracts/actions/fluid/vaultT1/FluidRatioTrigger",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x6f60dAB4F55ddb5DA1E05e4E78F7774407f112Ab"
+        ]
     },
     {
         "name": "FluidRatioCheck",
-        "address": "0x108b22a1808EA5527b396bbE3B956e136cb47E46",
+        "address": "0x093eEc78D6b90111C69D99cE0661B5c03Af762FC",
         "id": "0xac7a850e",
         "path": "contracts/actions/fluid/vaultT1/FluidRatioCheck",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x108b22a1808EA5527b396bbE3B956e136cb47E46"
+        ]
     },
     {
         "name": "FluidView",
