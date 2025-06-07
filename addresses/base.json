@@ -50,7 +50,7 @@
         "path": "/StrategyExecutorID.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "86400",
+        "changeTime": "604800",
         "registryIds": [],
         "history": [
             "0x49658E0CF3883c338397C7257619B280dF581057"
@@ -63,7 +63,7 @@
         "path": "contracts/core/strategy/StrategyExecutor.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "86400",
+        "changeTime": "604800",
         "registryIds": [],
         "history": [
             "0x49658E0CF3883c338397C7257619B280dF581057"

@@ -820,7 +820,7 @@
         "id": "0x0c1dc439",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "86400",
+        "changeTime": "604800",
         "registryIds": [],
         "history": [
             "0x9652f91B10045Cd2a36ca8D87df4A800eD2AF05D"
