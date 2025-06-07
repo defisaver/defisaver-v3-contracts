@@ -72,7 +72,7 @@ const createStrategy = async (strategyName, triggerIds, actionIds, paramMapping,
     return strategyId;
 };
 
-const createBundle = async (proxy, strategyIds) => {
+const createBundle = async (strategyIds) => {
     const storageAddr = await getAddrFromRegistry('BundleStorage');
     const storage = await hre.ethers.getContractAt('BundleStorage', storageAddr);
 
