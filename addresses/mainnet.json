@@ -3797,8 +3797,8 @@
         "id": "0xe1c6999c",
         "path": "contracts/actions/aaveV3/GhoUnstake.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -3808,8 +3808,8 @@
         "id": "0x17ca00ae",
         "path": "contracts/actions/aaveV3/GhoClaimAAVE.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
