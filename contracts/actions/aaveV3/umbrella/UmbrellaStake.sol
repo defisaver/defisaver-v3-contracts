@@ -9,8 +9,8 @@ import { ActionBase } from "../../ActionBase.sol";
 import { AaveV3Helper } from "../helpers/AaveV3Helper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
-/// @title UmbrellaStake - Stake aTokens or GHO tokens using Umbrella Stake Token
-/// @notice This action will always pull aTokens for non GHO staking and wrap them into waTokens for staking.
+/// @title UmbrellaStake - Stake aTokens/underlying or GHO tokens using Umbrella Stake Token
+/// @notice This action will always pull aTokens or underlying for non GHO staking and wrap them into waTokens for staking.
 contract UmbrellaStake is ActionBase, AaveV3Helper  {
     using TokenUtils for address;
 
@@ -22,13 +22,15 @@ contract UmbrellaStake is ActionBase, AaveV3Helper  {
     /// @param stkToken The umbrella stake token.
     /// @param from The address from which the aToken or GHO will be pulled.
     /// @param to The address to which the stkToken will be transferred
-    /// @param amount The amount of aToken or GHO to be staked.
+    /// @param amount The amount of aToken/underlying or GHO to be staked.
+    /// @param useATokens Whether to use aTokens or underlying for staking (e.g. aUSDC or USDC).
     /// @param minSharesOut The minimum amount of stkToken shares to receive.
     struct Params {
         address stkToken;
         address from;
         address to;
         uint256 amount;
+        bool useATokens;
         uint256 minSharesOut;
     }
 
@@ -45,7 +47,8 @@ contract UmbrellaStake is ActionBase, AaveV3Helper  {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-        params.minSharesOut = _parseParamUint(params.minSharesOut, _paramMapping[4], _subData, _returnValues);
+        params.useATokens = _parseParamUint(params.useATokens ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
+        params.minSharesOut = _parseParamUint(params.minSharesOut, _paramMapping[5], _subData, _returnValues);
 
         (uint256 stkTokenShares, bytes memory logData) = _stake(params);
         emit ActionEvent("UmbrellaStake", logData);
@@ -83,10 +86,16 @@ contract UmbrellaStake is ActionBase, AaveV3Helper  {
         if (waTokenOrGHO == GHO_TOKEN) {
             _params.amount = GHO_TOKEN.pullTokensIfNeeded(_params.from, _params.amount);
         } else {
-            // For non GHO staking, we always pull aTokens and wrap them into waTokens before staking
-            address aToken = IStaticATokenV2(waTokenOrGHO).aToken();
-            _params.amount = aToken.pullTokensIfNeeded(_params.from, _params.amount);
-            _params.amount = _wrapATokens(aToken, waTokenOrGHO, _params.amount);
+            // For non GHO staking, we always pull aTokens or underlying and wrap them into waTokens before staking
+            if (_params.useATokens) {
+                address aToken = IStaticATokenV2(waTokenOrGHO).aToken();
+                _params.amount = aToken.pullTokensIfNeeded(_params.from, _params.amount);
+                _params.amount = _wrapATokensToWaTokens(aToken, waTokenOrGHO, _params.amount);
+            } else {
+                address underlying = IERC4626(waTokenOrGHO).asset();
+                _params.amount = underlying.pullTokensIfNeeded(_params.from, _params.amount);
+                _params.amount = _wrapUnderlyingToWaTokens(underlying, waTokenOrGHO, _params.amount);
+            }
         }
 
         waTokenOrGHO.approveToken(_params.stkToken, _params.amount);
@@ -108,7 +117,7 @@ contract UmbrellaStake is ActionBase, AaveV3Helper  {
     /// @param _waToken The wrapped aToken.
     /// @param _amount The amount of aTokens to wrap.
     /// @return The amount of waTokens received.
-    function _wrapATokens(
+    function _wrapATokensToWaTokens(
         address _aToken,
         address _waToken,
         uint256 _amount
@@ -116,6 +125,26 @@ contract UmbrellaStake is ActionBase, AaveV3Helper  {
         _aToken.approveToken(_waToken, _amount);
 
         uint256 waTokenAmount = IStaticATokenV2(_waToken).depositATokens(
+            _amount,
+            address(this) /* receiver */
+        );
+
+        return waTokenAmount;
+    }
+
+    /// @notice Wraps underlying asset into waTokens.
+    /// @param _underlying The underlying asset to wrap.
+    /// @param _waToken The wrapped aToken.
+    /// @param _amount The amount of underlying asset to wrap.
+    /// @return The amount of waTokens received.
+    function _wrapUnderlyingToWaTokens(
+        address _underlying,
+        address _waToken,
+        uint256 _amount
+    ) internal returns (uint256) {
+        _underlying.approveToken(_waToken, _amount);
+
+        uint256 waTokenAmount = IERC4626(_waToken).deposit(
             _amount,
             address(this) /* receiver */
         );

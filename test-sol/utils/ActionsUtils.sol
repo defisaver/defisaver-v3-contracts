@@ -1218,6 +1218,7 @@ contract ActionsUtils {
         address _from,
         address _to,
         uint256 _amount,
+        bool _useATokens,
         uint256 _minSharesOut
     ) public pure returns (bytes memory params) {
         params = abi.encode(
@@ -1226,6 +1227,7 @@ contract ActionsUtils {
                 from: _from,
                 to: _to,
                 amount: _amount,
+                useATokens: _useATokens,
                 minSharesOut: _minSharesOut
             })
         );

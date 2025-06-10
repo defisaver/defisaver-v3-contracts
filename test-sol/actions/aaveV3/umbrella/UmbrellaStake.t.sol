@@ -38,16 +38,25 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
     //////////////////////////////////////////////////////////////////////////*/
     function test_stake() public {
         bool isDirect = false;
-        _baseTest(isDirect);
+        bool useATokens = true;
+        _baseTest(isDirect, useATokens);
     }
 
     function test_stake_action_direct() public {
         bool isDirect = true;
-        _baseTest(isDirect);
+        bool useATokens = true;
+        _baseTest(isDirect, useATokens);
+    }
+
+    function test_stake_with_underlying() public {
+        bool isDirect = false;
+        bool useATokens = false;
+        _baseTest(isDirect, useATokens);
     }
 
     function _baseTest(
-        bool _isDirect
+        bool _isDirect,
+        bool _useATokens
     ) internal {
         for (uint256 i = 0; i < stkTokens.length; ++i) {
             uint256 amount = 1000 * 10 ** IERC20(stkTokens[i]).decimals();
@@ -55,10 +64,13 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
             address waTokenOrGHO = IERC4626(stkTokens[i]).asset();
             address supplyToken = waTokenOrGHO;
 
-            if (supplyToken != Addresses.GHO_TOKEN) {
+            if (supplyToken == Addresses.GHO_TOKEN) {
+                give(supplyToken, sender, amount);
+            } else if (_useATokens) {
                 supplyToken = IStaticATokenV2(supplyToken).aToken();
                 giveATokens(supplyToken, amount);
             } else {
+                supplyToken = IERC4626(supplyToken).asset();
                 give(supplyToken, sender, amount);
             }
 
@@ -72,6 +84,7 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
                     sender,
                     sender,
                     amount,
+                    _useATokens,
                     minSharesOut
                 ),
                 _isDirect

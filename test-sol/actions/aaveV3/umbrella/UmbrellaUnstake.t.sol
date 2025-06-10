@@ -145,6 +145,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
                 sender,
                 walletAddr, // keep stake on the wallet so we can call unstake later
                 _amount,
+                true, /* useATokens */
                 1 /* minSharesOut */
             ),
             _isDirect
