@@ -16,21 +16,19 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
     using TokenUtils for address;
 
     error UmbrellaUnstakeSlippageHit(
-        uint256 minOutOrMaxBurn,
-        uint256 actualOutOrBurned
+        uint256 minAmountOut,
+        uint256 actualAmountOut
     );
  
     /// @param stkToken The umbrella stake token.
     /// @param to The address to which the aToken or GHO will be transferred
-    /// @param amount The amount of aToken or GHO to be unstaked (max.uint to redeem whole balance, 0 to start cooldown period)
-    /// @param minOutOrMaxBurn Two cases:
-    ///                        1. For max redeem, it's the minimum amount of aTokens or GHO to be received
-    ///                        2. For partial redeem, it's the max amount of stkToken shares to burn
+    /// @param stkAmount The amount of stkToken shares to burn (max.uint to redeem whole balance, 0 to start cooldown period)
+    /// @param minAmountOut The minimum amount of aToken or GHO to be received
     struct Params {
         address stkToken;
         address to;
-        uint256 amount;
-        uint256 minOutOrMaxBurn;
+        uint256 stkAmount;
+        uint256 minAmountOut;
     }
 
     /// @inheritdoc ActionBase
@@ -44,8 +42,8 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
 
         params.stkToken = _parseParamAddr(params.stkToken, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
-        params.minOutOrMaxBurn = _parseParamUint(params.minOutOrMaxBurn, _paramMapping[3], _subData, _returnValues);
+        params.stkAmount = _parseParamUint(params.stkAmount, _paramMapping[2], _subData, _returnValues);
+        params.minAmountOut = _parseParamUint(params.minAmountOut, _paramMapping[3], _subData, _returnValues);
 
         (uint256 redeemedAmount, bytes memory logData) = _unstake(params);
         emit ActionEvent("UmbrellaUnstake", logData);
@@ -68,25 +66,40 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
                             ACTION LOGIC
     //////////////////////////////////////////////////////////////*/
     function _unstake(Params memory _params) internal returns (uint256, bytes memory) {
-        if (_shouldStartCooldown(_params.amount)) {
+        if (_shouldStartCooldown(_params.stkAmount)) {
             IERC4626StakeToken(_params.stkToken).cooldown();
             return (0, abi.encode(_params, 0));
         }
 
-        (uint256 amountUnstaked, bool isFullRedeem) = _unstakeWaTokensOrGHO(
-            _params.stkToken,
-            _params.amount,
-            _params.minOutOrMaxBurn
+        uint256 stkSharesToBurn = (_params.stkAmount == type(uint256).max)
+            ? _params.stkToken.getBalance(address(this))
+            : _params.stkAmount;
+
+        uint256 amountUnstaked = IERC4626StakeToken(_params.stkToken).redeem(
+            stkSharesToBurn,
+            address(this), /* receiver */
+            address(this) /* owner */
         );
 
-        amountUnstaked = _sendUnstakedTokens(
-            _params.stkToken,
-            _params.to,
-            amountUnstaked
-        );
+        address waTokenOrGHO = IERC4626(_params.stkToken).asset();
+        bool isGHOStaking = waTokenOrGHO == GHO_TOKEN;
 
-        if (isFullRedeem && amountUnstaked < _params.minOutOrMaxBurn) {
-            revert UmbrellaUnstakeSlippageHit(_params.minOutOrMaxBurn, amountUnstaked);
+        if (!isGHOStaking) {
+            amountUnstaked = IStaticATokenV2(waTokenOrGHO).redeemATokens(
+                amountUnstaked,
+                address(this), /* receiver */
+                address(this) /* owner */
+            );
+        }
+
+        if (amountUnstaked < _params.minAmountOut) {
+            revert UmbrellaUnstakeSlippageHit(_params.minAmountOut, amountUnstaked);
+        }
+
+        if (isGHOStaking) {
+            GHO_TOKEN.withdrawTokens(_params.to, amountUnstaked);
+        } else {
+            IStaticATokenV2(waTokenOrGHO).aToken().withdrawTokens(_params.to, amountUnstaked);
         }
 
         return (amountUnstaked, abi.encode(_params, amountUnstaked));
@@ -94,59 +107,6 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
 
     function _shouldStartCooldown(uint256 _amount) internal returns (bool) {
         return _amount == 0;
-    }
-
-    function _unstakeWaTokensOrGHO(
-        address _stkToken,
-        uint256 _amountToUnstake,
-        uint256 _minOutOrMaxBurn
-    ) internal returns (uint256 amountUnstaked, bool isFullRedeem) {
-        if (_amountToUnstake == type(uint256).max) {
-            amountUnstaked = IERC4626StakeToken(_stkToken).redeem(
-                _stkToken.getBalance(address(this)),
-                address(this), /* receiver */
-                address(this) /* owner */
-            );
-
-            isFullRedeem = true;
-            return (amountUnstaked, isFullRedeem);
-        }
-
-        uint256 sharesBurned = IERC4626StakeToken(_stkToken).withdraw(
-            _amountToUnstake,
-            address(this), /* receiver */
-            address(this) /* owner */
-        );
-
-        if (sharesBurned > _minOutOrMaxBurn) {
-            revert UmbrellaUnstakeSlippageHit(_minOutOrMaxBurn, sharesBurned);
-        }
-
-        amountUnstaked = _amountToUnstake;
-        isFullRedeem = false;
-    }
-
-    function _sendUnstakedTokens(
-        address _stkToken,
-        address _to,
-        uint256 _amountUnstaked
-    ) internal returns (uint256 amountUnstaked) {
-        address waTokenOrGHO = IERC4626(_stkToken).asset();
-
-        if (waTokenOrGHO == GHO_TOKEN) {
-            GHO_TOKEN.withdrawTokens(_to, _amountUnstaked);
-            return _amountUnstaked;
-        }
-
-        uint256 aTokenAmount = IStaticATokenV2(waTokenOrGHO).redeemATokens(
-            _amountUnstaked,
-            address(this), /* receiver */
-            address(this) /* owner */
-        );
-
-        IStaticATokenV2(waTokenOrGHO).aToken().withdrawTokens(_to, aTokenAmount);
-        
-        return aTokenAmount;
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

@@ -1213,15 +1213,15 @@ contract ActionsUtils {
     function umbrellaUnstakeEncode(
         address _stkToken,
         address _to,
-        uint256 _amount,
-        uint256 _minOutOrMaxBurn
+        uint256 _stkAmount,
+        uint256 _minAmountOut
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             UmbrellaUnstake.Params({
                 stkToken: _stkToken,
                 to: _to,
-                amount: _amount,
-                minOutOrMaxBurn: _minOutOrMaxBurn
+                stkAmount: _stkAmount,
+                minAmountOut: _minAmountOut
             })
         );
     }

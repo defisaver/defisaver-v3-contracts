@@ -71,17 +71,16 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
             _startCooldown(stkTokens[i]);
             _passCooldownPeriod();
 
-            uint256 unstakeAmount = _isMaxAmount ? amount : amount / 2;
-            uint256 minOutOrMaxBurn = _isMaxAmount
-                ? _getMinWithdraw(stkTokens[i])
-                : _getMaxBurnShares(stkTokens[i], unstakeAmount);
+            uint256 totalStkShares = IERC4626(stkTokens[i]).balanceOf(walletAddr);
+            uint256 unstakeAmount = _isMaxAmount ? totalStkShares : totalStkShares / 2;
+            uint256 minAmountOut = _getMinAmountOut(stkTokens[i], unstakeAmount);
             
             bytes memory unstakeCallData = executeActionCalldata(
                 umbrellaUnstakeEncode(
                     stkTokens[i],
                     sender,
                     _isMaxAmount ? type(uint256).max : unstakeAmount,
-                    minOutOrMaxBurn
+                    minAmountOut
                 ),
                 _isDirect
             );
@@ -162,14 +161,9 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
         return IStaticATokenV2(waTokenOrGHO).aToken();
     }
 
-    function _getMaxBurnShares(address _stkToken, uint256 _amount) internal view returns (uint256) {
-        return IERC4626(_stkToken).previewWithdraw(_amount) * 1001 / 1000; // 0.1% slippage tolerance
-    }
-
-    function _getMinWithdraw(address _stkToken) internal view returns (uint256) {
+    function _getMinAmountOut(address _stkToken, uint256 _shares) internal view returns (uint256) {
         address waTokenOrGHO = IERC4626(_stkToken).asset();
-        uint256 senderShares = IERC4626(_stkToken).balanceOf(sender);
-        uint256 minWithdraw = IERC4626(_stkToken).previewRedeem(senderShares);
+        uint256 minWithdraw = IERC4626(_stkToken).previewRedeem(_shares);
 
         if (waTokenOrGHO != Addresses.GHO_TOKEN) {
             minWithdraw = IERC4626(waTokenOrGHO).previewRedeem(minWithdraw);
@@ -194,7 +188,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
         assertGe(
             _snapshotAfter.senderSupplyTokenBalance,
             _snapshotBefore.senderSupplyTokenBalance + _unstakeAmount,
-            "senderSupplyTokenBalance should be greater than before"
+            "senderSupplyTokenBalance should be greater or equal than before"
         );
 
         if (_isMaxAmount) {
