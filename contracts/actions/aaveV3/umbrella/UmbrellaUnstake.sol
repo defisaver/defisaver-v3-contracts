@@ -105,7 +105,7 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
         return (amountUnstaked, abi.encode(_params, amountUnstaked));
     }
 
-    function _shouldStartCooldown(uint256 _amount) internal returns (bool) {
+    function _shouldStartCooldown(uint256 _amount) internal pure returns (bool) {
         return _amount == 0;
     }
 
