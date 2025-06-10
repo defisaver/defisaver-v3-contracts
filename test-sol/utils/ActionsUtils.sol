@@ -1237,6 +1237,7 @@ contract ActionsUtils {
         address _stkToken,
         address _to,
         uint256 _stkAmount,
+        bool _useATokens,
         uint256 _minAmountOut
     ) public pure returns (bytes memory params) {
         params = abi.encode(
@@ -1244,6 +1245,7 @@ contract ActionsUtils {
                 stkToken: _stkToken,
                 to: _to,
                 stkAmount: _stkAmount,
+                useATokens: _useATokens,
                 minAmountOut: _minAmountOut
             })
         );

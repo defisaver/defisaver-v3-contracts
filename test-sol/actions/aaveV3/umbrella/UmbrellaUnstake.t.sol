@@ -48,22 +48,43 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
     function test_unstake_partial() public {
         bool isDirect = false;
         bool isMaxAmount = false;
-        _baseTest(isDirect, isMaxAmount);
+        bool useATokens = true;
+        _baseTest(isDirect, isMaxAmount, useATokens);
+    }
+
+    function test_unstake_partial_to_underlying() public {
+        bool isDirect = false;
+        bool isMaxAmount = false;
+        bool useATokens = false;
+        _baseTest(isDirect, isMaxAmount, useATokens);
     }
 
     function test_unstake_action_direct() public {
         bool isDirect = true;
         bool isMaxAmount = false;
-        _baseTest(isDirect, isMaxAmount);
+        bool useATokens = true;
+        _baseTest(isDirect, isMaxAmount, useATokens);
     }
 
     function test_unstake_max_amount() public {
         bool isDirect = false;
         bool isMaxAmount = true;
-        _baseTest(isDirect, isMaxAmount);
+        bool useATokens = true;
+        _baseTest(isDirect, isMaxAmount, useATokens);
     }
 
-    function _baseTest(bool _isDirect, bool _isMaxAmount) internal {
+    function test_unstake_max_amount_to_underlying() public {
+        bool isDirect = false;
+        bool isMaxAmount = true;
+        bool useATokens = false;
+        _baseTest(isDirect, isMaxAmount, useATokens);
+    }
+
+    function _baseTest(
+        bool _isDirect,
+        bool _isMaxAmount,
+        bool _useATokens
+    ) internal {
         for (uint256 i = 0; i < stkTokens.length; ++i) {
             uint256 amount = 1000 * 10 ** IERC20(stkTokens[i]).decimals();
             
@@ -80,6 +101,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
                     stkTokens[i],
                     sender,
                     _isMaxAmount ? type(uint256).max : unstakeAmount,
+                    _useATokens,
                     minAmountOut
                 ),
                 _isDirect
@@ -90,7 +112,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
             Snapshot memory snapshotBefore = takeSnapshot(
                 stkTokens[i],
                 waTokenOrGHO,
-                _getSupplyToken(stkTokens[i])
+                _getSupplyToken(stkTokens[i], _useATokens)
             );
             
             wallet.execute(address(cut), unstakeCallData, 0);
@@ -98,7 +120,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
             Snapshot memory snapshotAfter = takeSnapshot(
                 stkTokens[i],
                 waTokenOrGHO,
-                _getSupplyToken(stkTokens[i])
+                _getSupplyToken(stkTokens[i], _useATokens)
             );
             
             _assertSnapshot(
@@ -117,6 +139,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
                 _stkToken,
                 sender,
                 0,
+                false,
                 0
             ),
             true
@@ -129,7 +152,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
     }
 
     function _stake(address _stkToken, uint256 _amount, bool _isDirect) internal {
-        address supplyToken = _getSupplyToken(_stkToken);
+        address supplyToken = _getSupplyToken(_stkToken, true);
 
         if (supplyToken != Addresses.GHO_TOKEN) {
             giveATokens(supplyToken, _amount);
@@ -154,12 +177,15 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
         wallet.execute(address(stakeAction), stakeCallData, 0);
     }
 
-    function _getSupplyToken(address _stkToken) internal view returns (address) {
+    function _getSupplyToken(address _stkToken, bool _useATokens) internal view returns (address) {
         address waTokenOrGHO = IERC4626(_stkToken).asset();
         if (waTokenOrGHO == Addresses.GHO_TOKEN) {
             return waTokenOrGHO;
         }
-        return IStaticATokenV2(waTokenOrGHO).aToken();
+        if (_useATokens) {
+            return IStaticATokenV2(waTokenOrGHO).aToken();
+        }
+        return IERC4626(waTokenOrGHO).asset();
     }
 
     function _getMinAmountOut(address _stkToken, uint256 _shares) internal view returns (uint256) {

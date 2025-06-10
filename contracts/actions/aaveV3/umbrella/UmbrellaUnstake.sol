@@ -9,8 +9,8 @@ import { ActionBase } from "../../ActionBase.sol";
 import { AaveV3Helper } from "../helpers/AaveV3Helper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
-/// @title UmbrellaUnstake - Unstake aTokens or GHO tokens using Umbrella Stake Token
-/// @notice This action will always unwrap waTokens to aTokens after unstaking.
+/// @title UmbrellaUnstake - Unstake aTokens/underlying or GHO tokens using Umbrella Stake Token
+/// @notice This action will always unwrap waTokens to aTokens/underlying after unstaking.
 /// @notice Passing zero as amount will start cooldown period.
 contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
     using TokenUtils for address;
@@ -21,13 +21,15 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
     );
  
     /// @param stkToken The umbrella stake token.
-    /// @param to The address to which the aToken or GHO will be transferred
+    /// @param to The address to which the aToken/underlying or GHO will be transferred
     /// @param stkAmount The amount of stkToken shares to burn (max.uint to redeem whole balance, 0 to start cooldown period)
-    /// @param minAmountOut The minimum amount of aToken or GHO to be received
+    /// @param useATokens Whether to unwrap waTokens to aTokens or underlying (e.g. aUSDC or USDC).
+    /// @param minAmountOut The minimum amount of aToken/underlying or GHO to be received
     struct Params {
         address stkToken;
         address to;
         uint256 stkAmount;
+        bool useATokens;
         uint256 minAmountOut;
     }
 
@@ -43,7 +45,8 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
         params.stkToken = _parseParamAddr(params.stkToken, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.stkAmount = _parseParamUint(params.stkAmount, _paramMapping[2], _subData, _returnValues);
-        params.minAmountOut = _parseParamUint(params.minAmountOut, _paramMapping[3], _subData, _returnValues);
+        params.useATokens = _parseParamUint(params.useATokens ? 1 : 0, _paramMapping[3], _subData, _returnValues) == 1;
+        params.minAmountOut = _parseParamUint(params.minAmountOut, _paramMapping[4], _subData, _returnValues);
 
         (uint256 redeemedAmount, bytes memory logData) = _unstake(params);
         emit ActionEvent("UmbrellaUnstake", logData);
@@ -85,11 +88,19 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
         bool isGHOStaking = waTokenOrGHO == GHO_TOKEN;
 
         if (!isGHOStaking) {
-            amountUnstaked = IStaticATokenV2(waTokenOrGHO).redeemATokens(
-                amountUnstaked,
-                address(this), /* receiver */
-                address(this) /* owner */
-            );
+            if (_params.useATokens) {
+                amountUnstaked = IStaticATokenV2(waTokenOrGHO).redeemATokens(
+                    amountUnstaked,
+                    address(this), /* receiver */
+                    address(this) /* owner */
+                );
+            } else {
+                amountUnstaked = IERC4626(waTokenOrGHO).redeem(
+                    amountUnstaked,
+                    address(this), /* receiver */
+                    address(this) /* owner */
+                );
+            }
         }
 
         if (amountUnstaked < _params.minAmountOut) {
@@ -99,7 +110,11 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
         if (isGHOStaking) {
             GHO_TOKEN.withdrawTokens(_params.to, amountUnstaked);
         } else {
-            IStaticATokenV2(waTokenOrGHO).aToken().withdrawTokens(_params.to, amountUnstaked);
+            if (_params.useATokens) {
+                IStaticATokenV2(waTokenOrGHO).aToken().withdrawTokens(_params.to, amountUnstaked);
+            } else {
+                IERC4626(waTokenOrGHO).asset().withdrawTokens(_params.to, amountUnstaked);
+            }
         }
 
         return (amountUnstaked, abi.encode(_params, amountUnstaked));
