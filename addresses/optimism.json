@@ -315,7 +315,7 @@
         "name": "StrategyTriggerView",
         "address": "0xa45692Ea3476EE295Ea1C01b4566Ea73DB9bEf1d",
         "id": "0x5e0ef18c",
-        "path": "contracts/views/StrategyTriggerView.sol",
+        "path": "contracts/views/strategy/StrategyTriggerView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -324,14 +324,15 @@
     },
     {
         "name": "StrategyTriggerViewNoRevert",
-        "address": "0xbFe9e11963228D82C71F974D0Ff8648569687841",
+        "address": "0xE8Ca11025fC373fb7a42e92eD374f1B8EE2B6F2a",
         "id": "0x37a21cb5",
-        "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
-        "version": "1.0.3",
+        "path": "contracts/views/strategy/StrategyTriggerViewNoRevert.sol",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xbFe9e11963228D82C71F974D0Ff8648569687841",
             "0x0348bc9c79779f4195971B3348Fc0c32C91e19e9",
             "0x05a235fE5b0343c9d0B77E1AE59A9198328A7b37",
             "0x817Bc725a96d73Cf73a4e20bd2Fa8e358Ed387D8"
