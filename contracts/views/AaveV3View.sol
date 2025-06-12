@@ -2,21 +2,27 @@
 
 pragma solidity =0.8.24;
 
-import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
-import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
 import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
 import { IPriceOracleSentinel } from "../interfaces/aaveV3/IPriceOracleSentinel.sol";
-import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
 import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
 import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
 import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
 import { IReserveInterestRateStrategy } from "../interfaces/aaveV3/IReserveInterestRateStrategy.sol";
 import { IScaledBalanceToken } from "../interfaces/aave/IScaledBalanceToken.sol";
+import { IUmbrella } from "../interfaces/aaveV3/IUmbrella.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
+import { IERC4626 } from "../interfaces/IERC4626.sol";
+import { IERC4626StakeToken } from "../interfaces/aaveV3/IERC4626StakeToken.sol";
+import { IUmbrellaRewardsController } from "../interfaces/aaveV3/IUmbrellaRewardsController.sol";
+
+import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
 import { WadRayMath } from "../utils/math/WadRayMath.sol";
 import { MathUtils } from "../utils/math/MathUtils.sol";
+import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
+import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { TokenUtils } from "../utils/TokenUtils.sol";
 
+/// @title Helper contract to aggregate data from AaveV3 protocol
 contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     uint256 internal constant LIQUIDATION_BONUS_MASK =         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFF; // prettier-ignore
     uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -46,6 +52,12 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     using TokenUtils for address;
     using WadRayMath for uint256;
 
+     /**
+     *
+     *                         DATA SPECIFICATION
+     *
+     */
+    /// @notice User loan data
     struct LoanData {
         address user;
         uint128 ratio;
@@ -64,6 +76,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         string label;
     }
 
+    /// @notice User token data
     struct UserToken {
         address token;
         uint256 balance;
@@ -73,6 +86,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         bool enabledAsCollateral;
     }
 
+    /// @notice Token info basic data
     struct TokenInfo {
         address aTokenAddress;
         address underlyingTokenAddress;
@@ -80,6 +94,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint256 price;
     }
 
+    /// @notice Token info full data
     struct TokenInfoFull {
         address aTokenAddress; //pool.config
         address underlyingTokenAddress; //pool.config
@@ -119,23 +134,39 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     }
 
     /// @notice Params for supply and borrow rate estimation
-    /// @param reserveAddress Address of the reserve
-    /// @param liquidityAdded Amount of liquidity added (supply/repay)
-    /// @param liquidityTaken Amount of liquidity taken (borrow/withdraw)
-    /// @param isDebtAsset isDebtAsset if operation is borrow/payback
     struct LiquidityChangeParams {
-        address reserveAddress;
-        uint256 liquidityAdded;
-        uint256 liquidityTaken;
-        bool isDebtAsset;
+        address reserveAddress; // address of the reserve
+        uint256 liquidityAdded; // amount of liquidity added (supply/repay)
+        uint256 liquidityTaken; // amount of liquidity taken (borrow/withdraw)
+        bool isDebtAsset; // isDebtAsset if operation is borrow/payback
     }
 
+    /// @notice Helper struct for supply and borrow rate estimation
     struct EstimatedRates {
         address reserveAddress;
         uint256 supplyRate;
         uint256 variableBorrowRate;
     }
 
+    /// @notice Umbrella staking data
+    struct UmbrellaStkData {
+        uint256 totalShares; // total shares of the stk token
+        uint256 cooldownPeriod; // cooldown period of the stk token
+        uint256 unstakeWindow; // unstake window of the stk token
+        uint256 stkTokenToWaTokenRate; // rate of stk token to wa token
+        uint256 waTokenToATokenRate; // rate of waToken to aToken. 1e18 for GHO
+        uint256[] rewardsEmissionRates; // emission rates of the rewards
+    }
+
+    /**
+     *
+     *                         PUBLIC/EXTERNAL FUNCTIONS
+     *
+     */
+    /// @notice Fetches the health factor of a user
+    /// @param _market Address of LendingPoolAddressesProvider for specific market
+    /// @param _user Address of the user
+    /// @return healthFactor Health factor of the user
     function getHealthFactor(address _market, address _user)
         public
         view
@@ -195,6 +226,11 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         }
     }
 
+    /// @notice Fetches the balances of a user for a list of tokens
+    /// @param _market Address of LendingPoolAddressesProvider for specific market
+    /// @param _user Address of the user
+    /// @param _tokens Array of token addresses
+    /// @return userTokens Array of user token data
     function getTokenBalances(
         address _market,
         address _user,
@@ -243,6 +279,10 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         }
     }
 
+    /// @notice Fetches the full information about a token
+    /// @param _market Address of LendingPoolAddressesProvider for specific market
+    /// @param _tokenAddr Address of the token
+    /// @return _tokenInfo Full information about the token
     function getTokenInfoFull(address _market, address _tokenAddr)
         public
         view
@@ -306,6 +346,9 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         }
     }
 
+    /// @notice Fetches all the e-mode categories
+    /// @param _market Address of LendingPoolAddressesProvider for specific market
+    /// @return emodesData Array of e-mode categories
     function getAllEmodes(address _market) public view returns (DataTypes.EModeCategoryNew[] memory emodesData){
         emodesData = new DataTypes.EModeCategoryNew[](256);
         IPoolV3 lendingPool = getLendingPool(_market);
@@ -316,6 +359,10 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         }
     }
 
+    /// @notice Fetches the e-mode data for a specific e-mode category
+    /// @param _lendingPool Address of the lending pool
+    /// @param _id ID of the e-mode category
+    /// @return emodeData E-mode data for the specific category
     function getEmodeData(IPoolV3 _lendingPool, uint8 _id) public view returns (DataTypes.EModeCategoryNew memory emodeData){
         DataTypes.CollateralConfig memory config = _lendingPool.getEModeCategoryCollateralConfig(_id);
             emodeData = DataTypes.EModeCategoryNew({
@@ -399,10 +446,16 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         }
     }
 
+    /// @notice Fetches the ltv of a reserve
+    /// @param self The reserve configuration
+    /// @return ltv The ltv of the reserve
     function getLtv(DataTypes.ReserveConfigurationMap memory self) public pure returns (uint256) {
         return self.data & ~LTV_MASK;
     }
 
+    /// @notice Fetches the reserve factor of a reserve
+    /// @param self The reserve configuration
+    /// @return reserveFactor The reserve factor of the reserve
     function getReserveFactor(DataTypes.ReserveConfigurationMap memory self)
         internal
         pure
@@ -411,34 +464,10 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         return (self.data & ~RESERVE_FACTOR_MASK) >> RESERVE_FACTOR_START_BIT_POSITION;
     }
 
-    function isUsingAsCollateral(DataTypes.UserConfigurationMap memory self, uint256 reserveIndex)
-        internal
-        pure
-        returns (bool)
-    {
-        unchecked {
-            return (self.data >> ((reserveIndex << 1) + 1)) & 1 != 0;
-        }
-    }
-
-    function getLiquidationThreshold(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (uint256)
-    {
-        return
-            (self.data & ~LIQUIDATION_THRESHOLD_MASK) >> LIQUIDATION_THRESHOLD_START_BIT_POSITION;
-    }
-
-    function getLiquidationBonus(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (uint256)
-    {
-        return
-            (self.data & ~LIQUIDATION_BONUS_MASK) >> LIQUIDATION_BONUS_START_BIT_POSITION;
-    }
-
+    /// @notice Fetches the price of a token
+    /// @param _market Address of LendingPoolAddressesProvider for specific market
+    /// @param _tokenAddr Address of the token
+    /// @return price The price of the token
     function getAssetPrice(address _market, address _tokenAddr)
         public
         view
@@ -448,98 +477,27 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         price = IAaveV3Oracle(priceOracleAddress).getAssetPrice(_tokenAddr);
     }
 
-    function getBorrowCap(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (uint256)
-    {
-        return (self.data & ~BORROW_CAP_MASK) >> BORROW_CAP_START_BIT_POSITION;
-    }
-
-    function getSupplyCap(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (uint256)
-    {
-        return (self.data & ~SUPPLY_CAP_MASK) >> SUPPLY_CAP_START_BIT_POSITION;
-    }
-
-    function getBorrowingEnabled(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (bool)
-    {
-        return (self.data & ~BORROWING_MASK) != 0;
-    }
-
-    function getBorrowableInIsolation(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (bool)
-    {
-        return (self.data & ~BORROWABLE_IN_ISOLATION_MASK) != 0;
-    }
-
-    /**
-    * @notice Gets the debt ceiling for the asset if the asset is in isolation mode
-    * @param self The reserve configuration
-    * @return The debt ceiling (0 = isolation mode disabled)
-    **/
-    function getDebtCeiling(DataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (uint256)
-    {
-        return (self.data & ~DEBT_CEILING_MASK) >> DEBT_CEILING_START_BIT_POSITION;
-    }
-
-    function isSiloedForBorrowing(address _market, address _tokenAddr) internal view returns (bool){
-        IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
-        return dataProvider.getSiloedBorrowing(_tokenAddr);
-    }
-
+    /// @notice Fetches the e-mode collateral factor for a specific e-mode category
+    /// @param emodeCategory ID of the e-mode category
+    /// @param lendingPool Address of the lending pool
+    /// @return eModeCollateralFactor The e-mode collateral factor for the specific category
     function getEModeCollateralFactor(uint256 emodeCategory, IPoolV3 lendingPool) public view returns (uint16){
         DataTypes.EModeCategoryLegacy memory categoryData = lendingPool.getEModeCategoryData(uint8(emodeCategory));
         return categoryData.ltv;
     }
 
-    function getFlashLoanEnabled(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
-        return (self.data & ~FLASHLOAN_ENABLED_MASK) != 0;
-    }
-
-    /**
-     * @notice Gets the configuration flags of the reserve
-     * @param self The reserve configuration
-     * @return The state flag representing active
-     * @return The state flag representing frozen
-     * @return The state flag representing borrowing enabled
-     * @return The state flag representing paused
-     */
-    function getFlags(
-        DataTypes.ReserveConfigurationMap memory self
-    ) internal pure returns (bool, bool, bool, bool) {
-        uint256 dataLocal = self.data;
-
-        return (
-        (dataLocal & ~ACTIVE_MASK) != 0,
-        (dataLocal & ~FROZEN_MASK) != 0,
-        (dataLocal & ~BORROWING_MASK) != 0,
-        (dataLocal & ~PAUSED_MASK) != 0
-        );
-    }
-
-    function isReserveUsingVirtualAccounting(
-        DataTypes.ReserveConfigurationMap memory self
-    ) internal pure returns (bool) {
-        uint256 dataLocal = self.data;
-        return (dataLocal & ~VIRTUAL_ACC_ACTIVE) != 0;
-    }
-
+    /// @notice Checks if borrow is allowed for a market
+    /// @param _market Address of LendingPoolAddressesProvider for specific market
+    /// @return isBorrowAllowed True if borrow is allowed
     function isBorrowAllowed(address _market) public view returns (bool) {
         address priceOracleSentinelAddress = IPoolAddressesProvider(_market).getPriceOracleSentinel();
         return (priceOracleSentinelAddress == address(0) || IPriceOracleSentinel(priceOracleSentinelAddress).isBorrowAllowed());
     }
 
+    /// @notice Fetches the apy after values estimation
+    /// @param _market Address of LendingPoolAddressesProvider for specific market
+    /// @param _reserveParams Array of liquidity change parameters
+    /// @return estimatedRates Array of estimated rates
     function getApyAfterValuesEstimation(address _market, LiquidityChangeParams[] memory _reserveParams) 
         public view returns (EstimatedRates[] memory) 
     {
@@ -586,6 +544,193 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         return estimatedRates;
     }
 
+    /// @notice Fetches the additional umbrella staking data
+    /// @param _umbrella Address of the umbrella
+    /// @return retVal Array of UmbrellaStkData
+    function getAdditionalUmbrellaStakingData(address _umbrella) external view returns (UmbrellaStkData[] memory retVal) {
+        address[] memory stkTokens = IUmbrella(_umbrella).getStkTokens();
+
+        UmbrellaStkData[] memory retVal = new UmbrellaStkData[](stkTokens.length);
+        for (uint256 i = 0; i < stkTokens.length; ++i) {
+            retVal[i] = _fetchStkTokenData(stkTokens[i]);
+        }
+
+        return retVal;
+    }
+
+    /**
+     *
+     *                         INTERNAL FUNCTIONS
+     *
+     */
+    /// @notice Fetches the additional stk token data
+    /// @param _stkToken Address of the stk token
+    /// @return retVal UmbrellaStkData
+    function _fetchStkTokenData(address _stkToken) internal view returns (UmbrellaStkData memory retVal) {
+        retVal.totalShares = IERC20(_stkToken).totalSupply();
+        retVal.cooldownPeriod = IERC4626StakeToken(_stkToken).getCooldown();
+        retVal.unstakeWindow = IERC4626StakeToken(_stkToken).getUnstakeWindow();
+
+        uint256 baseUnit = 10 ** IERC20(_stkToken).decimals();
+        retVal.stkTokenToWaTokenRate = IERC4626(_stkToken).convertToAssets(baseUnit);
+
+        address waToken = IERC4626(_stkToken).asset();
+        retVal.waTokenToATokenRate = (waToken != GHO_TOKEN) ? IERC4626(waToken).convertToAssets(baseUnit) : baseUnit;
+
+        IUmbrellaRewardsController rewardsController = IUmbrellaRewardsController(UMBRELLA_REWARDS_CONTROLLER_ADDRESS);
+
+        address[] memory rewards = rewardsController.getAllRewards(_stkToken);
+
+        uint256[] memory rewardsEmissionRates = new uint256[](rewards.length);
+        for (uint256 i = 0; i < rewards.length; ++i) {
+            rewardsEmissionRates[i] = rewardsController.calculateCurrentEmission(
+                _stkToken,
+                rewards[i]
+            );
+        }
+
+        retVal.rewardsEmissionRates = rewardsEmissionRates;
+    }
+
+    /// @notice Checks if a reserve is used as collateral
+    /// @param self The user configuration
+    /// @param reserveIndex Index of the reserve
+    /// @return isUsingAsCollateral True if the reserve is used as collateral
+    function isUsingAsCollateral(DataTypes.UserConfigurationMap memory self, uint256 reserveIndex)
+        internal
+        pure
+        returns (bool)
+    {
+        unchecked {
+            return (self.data >> ((reserveIndex << 1) + 1)) & 1 != 0;
+        }
+    }
+
+    /// @notice Fetches the liquidation threshold of a reserve
+    /// @param self The reserve configuration
+    /// @return liquidationThreshold The liquidation threshold of the reserve
+    function getLiquidationThreshold(DataTypes.ReserveConfigurationMap memory self)
+        internal
+        pure
+        returns (uint256)
+    {
+        return
+            (self.data & ~LIQUIDATION_THRESHOLD_MASK) >> LIQUIDATION_THRESHOLD_START_BIT_POSITION;
+    }
+
+    /// @notice Fetches the liquidation bonus of a reserve
+    /// @param self The reserve configuration
+    /// @return liquidationBonus The liquidation bonus of the reserve
+    function getLiquidationBonus(DataTypes.ReserveConfigurationMap memory self)
+        internal
+        pure
+        returns (uint256)
+    {
+        return
+            (self.data & ~LIQUIDATION_BONUS_MASK) >> LIQUIDATION_BONUS_START_BIT_POSITION;
+    }
+
+    /// @notice Fetches the borrow cap of a reserve
+    /// @param self The reserve configuration
+    /// @return borrowCap The borrow cap of the reserve
+    function getBorrowCap(DataTypes.ReserveConfigurationMap memory self)
+        internal
+        pure
+        returns (uint256)
+    {
+        return (self.data & ~BORROW_CAP_MASK) >> BORROW_CAP_START_BIT_POSITION;
+    }
+
+    /// @notice Fetches the supply cap of a reserve
+    /// @param self The reserve configuration
+    /// @return supplyCap The supply cap of the reserve
+    function getSupplyCap(DataTypes.ReserveConfigurationMap memory self)
+        internal
+        pure
+        returns (uint256)
+    {
+        return (self.data & ~SUPPLY_CAP_MASK) >> SUPPLY_CAP_START_BIT_POSITION;
+    }
+
+    /// @notice Fetches if borrowing is enabled for a reserve
+    /// @param self The reserve configuration
+    /// @return borrowingEnabled True if borrowing is enabled
+    function getBorrowingEnabled(DataTypes.ReserveConfigurationMap memory self)
+        internal
+        pure
+        returns (bool)
+    {
+        return (self.data & ~BORROWING_MASK) != 0;
+    }
+
+    /// @notice Fetches if borrowing is enabled for a reserve in isolation mode
+    /// @param self The reserve configuration
+    /// @return borrowableInIsolation True if borrowing is enabled in isolation mode
+    function getBorrowableInIsolation(DataTypes.ReserveConfigurationMap memory self)
+        internal
+        pure
+        returns (bool)
+    {
+        return (self.data & ~BORROWABLE_IN_ISOLATION_MASK) != 0;
+    }
+
+    /**
+    * @notice Gets the debt ceiling for the asset if the asset is in isolation mode
+    * @param self The reserve configuration
+    * @return The debt ceiling (0 = isolation mode disabled)
+    **/
+    function getDebtCeiling(DataTypes.ReserveConfigurationMap memory self)
+        internal
+        pure
+        returns (uint256)
+    {
+        return (self.data & ~DEBT_CEILING_MASK) >> DEBT_CEILING_START_BIT_POSITION;
+    }
+
+    /// @notice Checks if a reserve is siloed for borrowing
+    /// @param _market Address of LendingPoolAddressesProvider for specific market
+    /// @param _tokenAddr Address of the token
+    /// @return isSiloedForBorrowing True if the reserve is siloed for borrowing
+    function isSiloedForBorrowing(address _market, address _tokenAddr) internal view returns (bool){
+        IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
+        return dataProvider.getSiloedBorrowing(_tokenAddr);
+    }
+
+    /// @notice Fetches if flash loans are enabled for a reserve
+    function getFlashLoanEnabled(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
+        return (self.data & ~FLASHLOAN_ENABLED_MASK) != 0;
+    }
+
+    /**
+     * @notice Gets the configuration flags of the reserve
+     * @param self The reserve configuration
+     * @return The state flag representing active
+     * @return The state flag representing frozen
+     * @return The state flag representing borrowing enabled
+     * @return The state flag representing paused
+     */
+    function getFlags(
+        DataTypes.ReserveConfigurationMap memory self
+    ) internal pure returns (bool, bool, bool, bool) {
+        uint256 dataLocal = self.data;
+
+        return (
+        (dataLocal & ~ACTIVE_MASK) != 0,
+        (dataLocal & ~FROZEN_MASK) != 0,
+        (dataLocal & ~BORROWING_MASK) != 0,
+        (dataLocal & ~PAUSED_MASK) != 0
+        );
+    }
+
+    /// @notice Checks if a reserve is using virtual accounting
+    function isReserveUsingVirtualAccounting(
+        DataTypes.ReserveConfigurationMap memory self
+    ) internal pure returns (bool) {
+        uint256 dataLocal = self.data;
+        return (dataLocal & ~VIRTUAL_ACC_ACTIVE) != 0;
+    }
+
+    /// @notice Fetches the next variable borrow index
     function _getNextVariableBorrowIndex(DataTypes.ReserveData memory _reserve) internal view returns (uint128 variableBorrowIndex) {
         uint256 scaledVariableDebt = IScaledBalanceToken(_reserve.variableDebtTokenAddress).scaledTotalSupply();
         variableBorrowIndex = _reserve.variableBorrowIndex;
@@ -596,6 +741,5 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             );
             variableBorrowIndex = uint128(cumulatedVariableBorrowInterest.rayMul(variableBorrowIndex));
         }
-    }   
-
+    }
 }
