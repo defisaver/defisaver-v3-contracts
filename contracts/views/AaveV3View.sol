@@ -14,6 +14,7 @@ import { IERC20 } from "../interfaces/IERC20.sol";
 import { IERC4626 } from "../interfaces/IERC4626.sol";
 import { IERC4626StakeToken } from "../interfaces/aaveV3/IERC4626StakeToken.sol";
 import { IUmbrellaRewardsController } from "../interfaces/aaveV3/IUmbrellaRewardsController.sol";
+import { IStaticATokenV2 } from "../interfaces/aaveV3/IStaticATokenV2.sol";
 
 import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
 import { WadRayMath } from "../utils/math/WadRayMath.sol";
@@ -151,6 +152,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     /// @notice Umbrella staking data
     struct UmbrellaStkData {
         uint256 totalShares; // total shares of the stk token
+        address stkUnderlyingToken; // underlying token of the stk token. GHO or waToken
+        address aToken; // if stkUnderlyingToken is waToken, this will be the underlying aToken
         uint256 cooldownPeriod; // cooldown period of the stk token
         uint256 unstakeWindow; // unstake window of the stk token
         uint256 stkTokenToWaTokenRate; // rate of stk token to wa token
@@ -549,13 +552,10 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     /// @return retVal Array of UmbrellaStkData
     function getAdditionalUmbrellaStakingData(address _umbrella) external view returns (UmbrellaStkData[] memory retVal) {
         address[] memory stkTokens = IUmbrella(_umbrella).getStkTokens();
-
-        UmbrellaStkData[] memory retVal = new UmbrellaStkData[](stkTokens.length);
+        retVal = new UmbrellaStkData[](stkTokens.length);
         for (uint256 i = 0; i < stkTokens.length; ++i) {
             retVal[i] = _fetchStkTokenData(stkTokens[i]);
         }
-
-        return retVal;
     }
 
     /**
@@ -570,6 +570,11 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         retVal.totalShares = IERC20(_stkToken).totalSupply();
         retVal.cooldownPeriod = IERC4626StakeToken(_stkToken).getCooldown();
         retVal.unstakeWindow = IERC4626StakeToken(_stkToken).getUnstakeWindow();
+        retVal.stkUnderlyingToken = IERC4626(_stkToken).asset();
+        
+        if (retVal.stkUnderlyingToken != GHO_TOKEN) {
+            retVal.aToken = IStaticATokenV2(retVal.stkUnderlyingToken).aToken();
+        }
 
         uint256 baseUnit = 10 ** IERC20(_stkToken).decimals();
         retVal.stkTokenToWaTokenRate = IERC4626(_stkToken).convertToAssets(baseUnit);
