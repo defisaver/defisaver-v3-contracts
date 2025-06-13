@@ -151,6 +151,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
 
     /// @notice Umbrella staking data
     struct UmbrellaStkData {
+        address stkToken; // address of the stk token
         uint256 totalShares; // total shares of the stk token
         address stkUnderlyingToken; // underlying token of the stk token. GHO or waToken
         address aToken; // if stkUnderlyingToken is waToken, this will be the underlying aToken
@@ -567,6 +568,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     /// @param _stkToken Address of the stk token
     /// @return retVal UmbrellaStkData
     function _fetchStkTokenData(address _stkToken) internal view returns (UmbrellaStkData memory retVal) {
+        retVal.stkToken = _stkToken;
         retVal.totalShares = IERC20(_stkToken).totalSupply();
         retVal.cooldownPeriod = IERC4626StakeToken(_stkToken).getCooldown();
         retVal.unstakeWindow = IERC4626StakeToken(_stkToken).getUnstakeWindow();
