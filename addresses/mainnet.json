@@ -1794,6 +1794,17 @@
         "history": ["0x9e1d7AAA55D83D36d55BF11cAe4d922aF52B6eF0"]
     },
     {
+        "name": "SparkSPKClaim",
+        "address": "0xBc2DD203cDBE5D48c8A24F9e22fA4b3912f446E7",
+        "id": "0x0c7abfae",
+        "path": "contracts/actions/spark/SparkSPKClaim.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AaveV3DelegateWithSig",
         "address": "0x9253E22Ce4f0AeE541301CF8cC29843f9083a1F4",
         "id": "0x641f5b73",

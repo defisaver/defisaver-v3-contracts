@@ -7,7 +7,7 @@ describe('Spark-SPK-Claim', function () {
     before(async () => {
         await redeploy('SparkSPKClaim');
     });
-    it('... should run full spark withdraw test', async () => {
+    it('... should run full spark SPK claim test', async () => {
         await sparkClaimSPKTest();
     });
 });
