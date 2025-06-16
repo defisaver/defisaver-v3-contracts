@@ -58,10 +58,6 @@ contract SparkSPKClaim is ActionBase {
     }
 
     function _claim(Params memory _params) internal returns (uint256 claimedAmount,bytes memory logData) {
-        // If we're trying to send the SPK token to a different address than SW we need to check that tokens will be received by SW first
-        if (_params.account != address(this) && _params.account != _params.to ){
-            revert SparkClaimInvalidAccount();
-        }
         claimedAmount = ISparkRewards(_params.rewardContract).claim(
             _params.epoch,
             _params.account,
