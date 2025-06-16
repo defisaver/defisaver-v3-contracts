@@ -9,8 +9,6 @@ import { ISparkRewards } from "../../interfaces/spark/ISparkRewards.sol";
 contract SparkSPKClaim is ActionBase {
     using TokenUtils for address;
 
-    error SparkClaimInvalidAccount();
-
     /// @param rewardContract Address of the Spark Rewards contract
     /// @param to Address to send the SPK token to
     /// @param epoch The epoch number for which to claim rewards
