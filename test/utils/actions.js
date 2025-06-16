@@ -2626,6 +2626,18 @@ const sparkDelegateCredit = async (
     return receipt;
 };
 
+const sparkSPKClaim = async (
+    rewardContract, to, epoch, account, token, cumulativeAmount, expectedMerkleRoot, merkleProof, proxy,
+) => {
+    const sparkSPKClaimAction = new dfs.actions.spark.SparkSPKClaimAction(
+        rewardContract, to, epoch, account, token, cumulativeAmount, expectedMerkleRoot, merkleProof,
+    );
+    const functionData = sparkSPKClaimAction.encodeForDsProxyCall()[1];
+    const receipt = await executeAction('SparkSPKClaim', functionData, proxy);
+
+    return receipt;
+};
+
 const sDaiWrap = async (
     proxy, daiAmount, from, to,
 ) => {
@@ -4038,6 +4050,7 @@ module.exports = {
     sDaiWrap,
     sDaiUnwrap,
     sparkDelegateCredit,
+    sparkSPKClaim,
 
     convexDeposit,
     convexWithdraw,

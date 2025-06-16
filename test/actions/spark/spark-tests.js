@@ -9,6 +9,8 @@ const {
     takeSnapshot, revertToSnapshot, addrs, approve, impersonateAccount,
     Float2BN, getAddrFromRegistry,
     network,
+    sendEther,
+    stopImpersonatingAccount,
 } = require('../../utils/utils');
 
 const sparkMarket = addrs[network].SPARK_MARKET;
@@ -20,6 +22,7 @@ const {
     sparkSetEMode, sparkSwitchCollateral, sparkSwitchCollateralCallDataOptimised,
     sparkSpTokenPaybackCalldataOptimised, sparkSpTokenPayback,
     sparkBorrowCalldataOptimised, sparkClaimRewards, sDaiWrap, sDaiUnwrap, sparkDelegateCredit,
+    sparkSPKClaim,
 } = require('../../utils/actions');
 
 const sparkSupplyTest = async () => {
@@ -1143,6 +1146,129 @@ const sparkDelegateCreditTest = async () => {
     });
 };
 
+const sparkClaimSPKTest = async () => {
+    describe('Spark-SPK-Claim', function () {
+        this.timeout(150000);
+        let proxy;
+        let SPK_TOKEN_ADDRESS;
+        let owner;
+        let sparkOwner;
+        before(async () => {
+            owner = '0x6C9C6Ea3Bc1d243017F5c7c2203343d958D3D7aE';
+            sparkOwner = '0x6fe588fdcc6a34207485cc6e47673f59ccedf92b';
+            await sendEther((await hre.ethers.getSigners())[0], owner, '10');
+            await sendEther((await hre.ethers.getSigners())[0], sparkOwner, '10');
+            proxy = await hre.ethers.getContractAt('ISafe', '0xa1695b38d463c7d53809c5f1899840b5ad02879e');
+            SPK_TOKEN_ADDRESS = '0xc20059e0317de91738d13af027dfc4a50781b066';
+
+            // Can be deleted later
+            await impersonateAccount(sparkOwner);
+            let spkToken = await hre.ethers.getContractAt('IERC20', SPK_TOKEN_ADDRESS);
+            spkToken = spkToken.connect(await hre.ethers.provider.getSigner(sparkOwner));
+            await spkToken.approve('0xCBA0C0a2a0B6Bb11233ec4EA85C5bFfea33e724d', hre.ethers.constants.MaxUint256);
+            await spkToken.approve('0x7ac96180C4d6b2A328D3a19ac059D0E7Fc3C6d41', hre.ethers.constants.MaxUint256);
+            await stopImpersonatingAccount(sparkOwner);
+        });
+        it('... should claim SPK tokens from Ignition Rewards', async () => {
+            const rewardsContractAddress = '0xCBA0C0a2a0B6Bb11233ec4EA85C5bFfea33e724d';
+            const root = '0x200133a6af5486f9c3ae64366f19a65b0d8524ed57d2645254dfc90fb3299d73';
+            // needs to set root at rewards contract from 0x6fe588fdcc6a34207485cc6e47673f59ccedf92b
+            // can be deleted later
+            let rewardsContract = await hre.ethers.getContractAt('ISparkRewards', rewardsContractAddress);
+            rewardsContract = rewardsContract.connect(
+                await hre.ethers.provider.getSigner(sparkOwner),
+            );
+            await impersonateAccount(sparkOwner);
+            await rewardsContract.setMerkleRoot(root);
+            await stopImpersonatingAccount(sparkOwner);
+
+            const epoch = 1;
+            const amount = '5400000000000000000000';
+            const proof = [
+                '0xdcff939a31319f5fe26d36daa3f82b17dd271cd239ca38cb165313284d3eba35',
+                '0x3061aeab57006d12aef6b532b372c82adc586d5f881cb6f4f53c0206781614ed',
+                '0x96069db5ef65b69c3fd21489e99c92e4f7890d83849013a49bb9fc5fc6a2fc60',
+                '0x26b6cdd562f48ce7efc502418915176d537a59be0bd748587acbb3e2a0385e91',
+                '0x9090205a4998121ddaa0b30431d4a98feca4b8ad4a02c166912beb3779eb9c19',
+                '0x5030a8e39b301bb961ffa2c65b42d7e664e114cc93096cb5cc62f201d7a7318a',
+                '0x8e993533865c83fd6f64d852fec034257f4beec5ca1224cf534e1c8264bd2466',
+                '0xfe1ee916d6fb6d16a544e4a0888d28b03340d5aad8c6e4d17055682aab245be7',
+                '0x2f0569e35deaddd76eb8a9f0596fa40a0ed7f34c8ac5615657ee1ab0453dda5d',
+                '0x94490776b528bf6dd18b5ad566f272fd33f27b08c6a055803d9272a597cd20af',
+                '0x6573c1b93dcd64387590f2f57f7086fd3bf7bbba76dbfaaa47cbef9b8ee40fca',
+                '0xca4c8b7887198b5f2ac03880655405f8ddd704783ec7d7ce559b6883fdcfd975',
+                '0x161d5ae893608aba59035d7531e84f92c94026a3016be401d30ab5c6c2dd34fe',
+                '0xfa708ab8972a4b60c2d0eada3cdd782849386ef6aca918e5f0edb0cd1e157fdb',
+                '0x08146e9e13a234a0b58c3f10e5c62fe700b1d1e39c4167f5449d52f4d41c3a95',
+            ];
+
+            await impersonateAccount(owner);
+            const ownerAcc = await hre.ethers.provider.getSigner(owner);
+            const impersonatedSW = proxy.connect(ownerAcc);
+
+            const eoaBalanceBefore = await balanceOf(SPK_TOKEN_ADDRESS, owner);
+            const smartWalletBalanceBefore = await balanceOf(SPK_TOKEN_ADDRESS, proxy.address);
+            await sparkSPKClaim(
+                rewardsContractAddress, owner, epoch, proxy.address,
+                SPK_TOKEN_ADDRESS, amount, root, proof, impersonatedSW,
+            );
+            const eoaBalanceAfter = await balanceOf(SPK_TOKEN_ADDRESS, owner);
+            const smartWalletBalanceAfter = await balanceOf(SPK_TOKEN_ADDRESS, proxy.address);
+            expect(smartWalletBalanceAfter).to.be.eq(smartWalletBalanceBefore);
+            expect(eoaBalanceAfter.sub(eoaBalanceBefore))
+                .to.be.eq(hre.ethers.utils.parseUnits(amount, 0));
+        });
+        it('... should claim SPK tokens from PLF Rewards', async () => {
+            const rewardsContractAddress = '0x7ac96180C4d6b2A328D3a19ac059D0E7Fc3C6d41';
+            const root = '0xf9b628043057186b867f8309d65b8eaa9bf79c8491ef1d3b407eddaab3be15c9';
+            // needs to set root at rewards contract from 0x6fe588fdcc6a34207485cc6e47673f59ccedf92b
+            // can be deleted later
+            let rewardsContract = await hre.ethers.getContractAt('ISparkRewards', rewardsContractAddress);
+            rewardsContract = rewardsContract.connect(
+                await hre.ethers.provider.getSigner(sparkOwner),
+            );
+            await impersonateAccount(sparkOwner);
+            await rewardsContract.setMerkleRoot(root);
+            await stopImpersonatingAccount(sparkOwner);
+
+            const epoch = 1;
+            const amount = '11991543419766236000000';
+            const proof = [
+                '0x11a73e81fa5bba9c349da805a0099fb690e0b5835ad5246cae71d6493a8dc7c4',
+                '0xbe77760b18423fe22a9946ee16d47004c74987e77958df5014a14768f1a1917d',
+                '0x11cc3732d8c123cf4b60dcaaa296032845d0e708f4b3730d305f7ec3a9881c0b',
+                '0xcd52511c037f9f90eca7adebb6913c18b775d4806256f8823094643d0cc0ebd1',
+                '0xf52aff566fdf456ed5af1ec3168cfcde99a1e7cfe933e6a7bea453de2a32a930',
+                '0x33f343e3a6b5fc084d6a32931dbfb6c558ea4eabc91b0bf7df9c29a306c2a604',
+                '0x5cfc592241589541313ed84b3e9926fc2844dc53294b0acdd15df172456024b5',
+                '0xa63646580dcfbb7618ffbe0ca73e7f930733f4861be2537903426f63f0536d55',
+                '0x562cb9e377665a415e150f7e93da1946fdeba6a68b88fb24a2c78195df944cee',
+                '0x85231cfc97928bbea5d1c47bd783ab579f880ea078f8d7f7873dcd4c1c5c1054',
+                '0x6f5f6e5481ac7e0c1ae0ade01b33325199d949e43c48bd5fb0b97f526a7864a9',
+                '0xc0af85e094e882ee8639a741751adef04d27447de8bad39c3c2c69f989a3671f',
+                '0x32700f18d1adba3282273162fa300a2c85ba580fddd10f3401500e3cb95927b1',
+                '0x4e26698f1aefb739a359060ab117b694297f15b80ed31c928863d569d9884e64',
+                '0x69d513ad3f500dd8649f027b43a36e6438b2cc2983b7dda1564252cd8c353ad0',
+            ];
+            await impersonateAccount(owner);
+            const ownerAcc = await hre.ethers.provider.getSigner(owner);
+            const impersonatedSW = proxy.connect(ownerAcc);
+
+            const eoaBalanceBefore = await balanceOf(SPK_TOKEN_ADDRESS, owner);
+            const smartWalletBalanceBefore = await balanceOf(SPK_TOKEN_ADDRESS, proxy.address);
+            await sparkSPKClaim(
+                rewardsContractAddress, owner, epoch, proxy.address,
+                SPK_TOKEN_ADDRESS, amount, root, proof, impersonatedSW,
+            );
+            const eoaBalanceAfter = await balanceOf(SPK_TOKEN_ADDRESS, owner);
+            const smartWalletBalanceAfter = await balanceOf(SPK_TOKEN_ADDRESS, proxy.address);
+            expect(smartWalletBalanceAfter).to.be.eq(smartWalletBalanceBefore);
+            expect(eoaBalanceAfter.sub(eoaBalanceBefore))
+                .to.be.eq(hre.ethers.utils.parseUnits(amount, 0));
+        });
+    });
+};
+
 const sparkDeployContracts = async () => {
     await redeploy('SparkSupply');
     await redeploy('SparkBorrow');
@@ -1156,6 +1282,7 @@ const sparkDeployContracts = async () => {
 
     await redeploy('SDaiWrap');
     await redeploy('SDaiUnwrap');
+    await redeploy('SparkSPKClaim');
 };
 
 const sparkFullTest = async () => {
@@ -1173,6 +1300,7 @@ const sparkFullTest = async () => {
     await sparkCollSwitchTest();
     await sparkSpTokenPaybackTest();
     await sparkDelegateCreditTest();
+    await sparkClaimSPKTest();
 };
 module.exports = {
     sparkFullTest,
@@ -1188,4 +1316,5 @@ module.exports = {
     sDaiWrapTest,
     sDaiUnwrapTest,
     sparkDelegateCreditTest,
+    sparkClaimSPKTest,
 };
