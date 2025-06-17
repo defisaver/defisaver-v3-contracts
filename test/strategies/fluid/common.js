@@ -110,7 +110,7 @@ class BaseFluidT1StrategyTest {
     }
 
     async getRatio(nftId) {
-        const positionData = await this.contracts.view.getPositionByNftId(nftId);
+        const positionData = await this.contracts.view.callStatic.getPositionByNftId(nftId);
         return positionData.position.ratio;
     }
 }
