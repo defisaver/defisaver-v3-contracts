@@ -1173,5 +1173,16 @@
   "changeTime": "0",
   "registryIds": [],
   "history": []
+},
+{
+  "name": "SFApproveTokens",
+  "address": "0xcc63B281b29a4c7f33aF780e9B480A15eb676e81",
+  "id": "0x869398d6",
+  "path": "contracts/actions/summerfi/SFApproveTokens.sol",
+  "version": "1.0.0",
+  "inRegistry": true,
+  "changeTime": "86400",
+  "registryIds": [],
+  "history": []
 }
 ]
