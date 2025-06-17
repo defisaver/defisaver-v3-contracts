@@ -80,5 +80,20 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "@curvefi/api": "=2.52.1",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
+    "@uniswap/sdk-core": "^3.1.1",
+    "@uniswap/smart-order-router": "^3.5.0",
+    "body-parser": "^1.20.2",
+    "coingecko-api": "^1.0.10",
+    "commander": "^8.3.0",
+    "cors": "^2.8.5",
+    "decimal.js": "^10.3.1",
+    "envfile": "^6.17.0",
+    "express": "^4.19.2",
+    "hardhat-ethers": "^1.0.1",
+    "yarn": "^1.22.10"
   }
 }
