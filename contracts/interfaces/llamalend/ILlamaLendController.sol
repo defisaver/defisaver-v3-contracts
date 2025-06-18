@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 interface ILlamaLendController {
     function create_loan(uint256 _collateralAmount, uint256 _debtAmount, uint256 _nBands) external payable;

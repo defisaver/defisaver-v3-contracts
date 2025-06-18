@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { McdRatioHelper } from "./helpers/McdRatioHelper.sol";
 import { ActionBase } from "../ActionBase.sol";

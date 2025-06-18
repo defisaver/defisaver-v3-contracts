@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 interface ILLAMMA {
     function active_band_with_skip() external view returns (int256);

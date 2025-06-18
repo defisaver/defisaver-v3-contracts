@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { LiquityHelper } from "../actions/liquity/helpers/LiquityHelper.sol";
 import { IChickenBondManager } from "../interfaces/liquity/IChickenBondManager.sol";

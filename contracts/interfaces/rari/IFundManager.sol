@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 interface IFundManager {
     function depositTo(address to, string memory currencyCode, uint256 amount) external;

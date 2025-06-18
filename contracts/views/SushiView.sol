@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { IUniswapV2Pair } from "../interfaces/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../interfaces/uniswap/IUniswapV2Factory.sol";

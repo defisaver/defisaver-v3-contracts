@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { IPendleMarket } from "../../../contracts/interfaces/pendle/IPendleMarket.sol";
 import { PendleTokenRedeem } from "contracts/actions/pendle/PendleTokenRedeem.sol";

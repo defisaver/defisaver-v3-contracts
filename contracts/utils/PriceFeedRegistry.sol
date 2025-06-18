@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { IAggregatorV3 } from "../interfaces/chainlink/IAggregatorV3.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";

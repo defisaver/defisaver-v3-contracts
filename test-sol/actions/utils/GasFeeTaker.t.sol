@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { ILendingPoolAddressesProviderV2 } from "../../../contracts/interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import { IPriceOracleGetterAave } from "../../../contracts/interfaces/aaveV2/IPriceOracleGetterAave.sol";

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { ILiquidityPool } from "../../../contracts/interfaces/etherFi/ILiquidityPool.sol";
 import { IWeEth } from "../../../contracts/interfaces/etherFi/IWeEth.sol";

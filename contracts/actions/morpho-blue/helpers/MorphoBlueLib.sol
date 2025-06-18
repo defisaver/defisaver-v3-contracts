@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import {Id, MarketParams, Market, IMorphoBlue} from "../../../interfaces/morpho-blue/IMorphoBlue.sol";
 import {IIrm} from "../../../interfaces/morpho-blue/IIrm.sol";

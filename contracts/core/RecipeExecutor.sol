@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 /**
 * @title Entry point into executing recipes/checking triggers directly and as part of a strategy

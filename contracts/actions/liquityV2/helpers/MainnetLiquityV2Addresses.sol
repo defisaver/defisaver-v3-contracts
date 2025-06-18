@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 contract MainnetLiquityV2Addresses {
     address internal constant BOLD_ADDR = 0x6440f144b7e50D6a8439336510312d2F54beB01D;

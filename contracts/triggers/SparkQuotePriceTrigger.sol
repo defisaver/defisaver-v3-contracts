@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";

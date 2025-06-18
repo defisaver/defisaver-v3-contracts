@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { CompV3Helper } from "../actions/compoundV3/helpers/CompV3Helper.sol";
 import { CompV3PortedFunctions } from "../utils/CompV3PortedFunctions.sol";

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 interface ITroveNFT {
     function mint(address _owner, uint256 _troveId) external;

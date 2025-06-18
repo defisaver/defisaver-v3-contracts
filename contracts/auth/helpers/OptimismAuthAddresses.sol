@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 contract OptimismAuthAddresses {
     address internal constant ADMIN_VAULT_ADDR = 0x136b1bEAfff362530F98f10E3D8C38f3a3F3d38C;

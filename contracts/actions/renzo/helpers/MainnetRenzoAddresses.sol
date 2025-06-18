@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 contract MainnetRenzoAddresses {
     address public constant RENZO_MANAGER = 0x74a09653A083691711cF8215a6ab074BB4e99ef5;

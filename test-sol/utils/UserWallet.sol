@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterface.sol";
 import { DSProxy } from "../../contracts/DS/DSProxy.sol";

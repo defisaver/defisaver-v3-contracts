@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 contract ArbitrumCoreAddresses {
     address internal constant REGISTRY_ADDR = 0xBF1CaC12DB60819Bfa71A328282ecbc1D40443aA;

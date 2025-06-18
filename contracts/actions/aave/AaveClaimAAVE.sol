@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { IStkAave } from "../../interfaces/aave/IStkAave.sol";
 import { ActionBase } from "../ActionBase.sol";

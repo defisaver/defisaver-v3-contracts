@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { CurveHelper } from "../actions/curve/helpers/CurveHelper.sol";
 import { ICurveFactory, ICurveFactoryLP, ICurveFactoryPool, IGaugeController } from "../interfaces/curve/ICurveFactory.sol";

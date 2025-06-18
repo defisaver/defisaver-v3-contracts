@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 interface IAggregationExecutor {
   function callBytes(bytes calldata data) external payable; // 0xd9c45357

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import {ICrvUsdController, ILLAMMA, ICrvUsdControllerFactory, ICurveUsdSwapper} from "../../../interfaces/curveusd/ICurveUsd.sol";
 import { IAddressProvider } from "../../../interfaces/curve/IAddressProvider.sol";

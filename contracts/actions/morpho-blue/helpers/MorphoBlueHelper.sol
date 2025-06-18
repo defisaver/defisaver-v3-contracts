@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { MainnetMorphoBlueAddresses } from "./MainnetMorphoBlueAddresses.sol";
 import { IMorphoBlue, MarketParams, Id, Market, MorphoBluePosition } from "../../../interfaces/morpho-blue/IMorphoBlue.sol";

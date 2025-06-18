@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { RenzoStake } from "../../../contracts/actions/renzo/RenzoStake.sol";
 import { RenzoHelper } from "../../../contracts/actions/renzo/helpers/RenzoHelper.sol";

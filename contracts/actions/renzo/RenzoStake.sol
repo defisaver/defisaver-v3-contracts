@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { IRestakeManager } from "../../interfaces/renzo/IRestakeManager.sol";
 import { IRenzoOracle } from "../../interfaces/renzo/IRenzoOracle.sol";

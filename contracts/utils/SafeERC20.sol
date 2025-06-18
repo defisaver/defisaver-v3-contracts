@@ -3,7 +3,7 @@
 // changes made - renamed forceApprove to safeApprove
 // changes made - removed safePermit, safeIncreaseAllowance, safeDecreaseAllowance functions
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { IERC20 } from "../interfaces/IERC20.sol";
 import { Address } from "./Address.sol";

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol";

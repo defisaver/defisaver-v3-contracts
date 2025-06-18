@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 contract ArbitrumUtilAddresses {
     address internal refillCaller = 0xcbA094ae1B2B363886CC7f428206dB1b116834A2;

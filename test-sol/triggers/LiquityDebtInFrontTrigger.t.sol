@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { LiquityDebtInFrontTrigger } from "../../contracts/triggers/LiquityDebtInFrontTrigger.sol";
 import { LiquityHelper } from "../../contracts/actions/liquity/helpers/LiquityHelper.sol";

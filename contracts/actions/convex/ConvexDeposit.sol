@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { IBooster } from "../../interfaces/convex/IBooster.sol";
 import { IBRewardPool } from "../../interfaces/convex/IBRewardPool.sol";

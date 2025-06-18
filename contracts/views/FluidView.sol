@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { IDexSmartCollOracle } from "../interfaces/fluid/oracles/IDexSmartCollOracle.sol";
 import { IDexSmartDebtOracle } from "../interfaces/fluid/oracles/IDexSmartDebtOracle.sol";

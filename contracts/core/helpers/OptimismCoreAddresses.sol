@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 contract OptimismCoreAddresses {
     address internal constant REGISTRY_ADDR = 0xAf707Ee480204Ed6e2640B53cE86F680D28Afcbd;

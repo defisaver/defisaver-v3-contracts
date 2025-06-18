@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { EtherFiStake } from "../../../contracts/actions/etherfi/EtherFiStake.sol";
 import { EtherFiHelper } from "../../../contracts/actions/etherfi/helpers/EtherFiHelper.sol";

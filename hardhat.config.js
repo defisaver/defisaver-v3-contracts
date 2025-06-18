@@ -168,6 +168,16 @@ module.exports = {
                     evmVersion: 'cancun',
                 },
             },
+            {
+                version: '0.8.27',
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 1000,
+                    },
+                    evmVersion: 'cancun',
+                },
+            },
         ],
 
     },

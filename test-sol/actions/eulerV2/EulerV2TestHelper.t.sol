@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { EulerV2Helper } from "../../../contracts/actions/eulerV2/helpers/EulerV2Helper.sol";
 import { IPerspective } from "../../../contracts/interfaces/eulerV2/IPerspective.sol";

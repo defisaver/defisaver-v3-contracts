@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 abstract contract IDSProxy {
     // function execute(bytes memory _code, bytes memory _data)

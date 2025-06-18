@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { BundleStorage } from "../../contracts/core/strategy/BundleStorage.sol";
 import { StrategyStorage } from "../../contracts/core/strategy/StrategyStorage.sol";

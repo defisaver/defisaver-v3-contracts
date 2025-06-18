@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 abstract contract ILendingPool {
     function flashLoan( address payable _receiver, address _reserve, uint _amount, bytes calldata _params) external virtual;

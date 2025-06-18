@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { IExchangeV3 } from "../../interfaces/exchange/IExchangeV3.sol";
 import { IUniswapRouter } from "../../interfaces/exchange/IUniswapRouter.sol";

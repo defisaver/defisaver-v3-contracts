@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { IEVC } from "../../../contracts/interfaces/eulerV2/IEVC.sol";
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";

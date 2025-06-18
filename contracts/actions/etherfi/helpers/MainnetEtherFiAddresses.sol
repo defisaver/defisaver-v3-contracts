@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 contract MainnetEtherFiAddresses {
     address public constant EETH_ADDR = 0x35fA164735182de50811E8e2E824cFb9B6118ac2;

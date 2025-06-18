@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 import { LSVProxyRegistry } from "../utils/LSVProxyRegistry.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
 import { DFSProxyRegistry } from "../utils/DFSProxyRegistry.sol";

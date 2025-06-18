@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 abstract contract ICometExt {
     function allow(address manager, bool isAllowed) virtual external;

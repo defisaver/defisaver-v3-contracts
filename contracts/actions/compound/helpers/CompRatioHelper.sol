@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { DSMath } from "../../../DS/DSMath.sol";
 import { ICompoundOracle } from "../../../interfaces/compound/ICompoundOracle.sol";

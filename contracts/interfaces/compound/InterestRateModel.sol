@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 /**
   * @title Compound's InterestRateModel Interface

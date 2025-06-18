@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { ActionBase } from "../../ActionBase.sol";
 import { MorphoAaveV3Helper } from "./helpers/MorphoAaveV3Helper.sol";

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 interface IMkrSkyConverter {
     function skyToMkr(address usr, uint256 skyAmt) external;

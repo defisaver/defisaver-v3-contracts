@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 contract MainnetMorphoAaveV2Addresses {
     address public constant MORPHO_TOKEN_ADDR = 0x9994E35Db50125E0DF82e4c2dde62496CE330999;

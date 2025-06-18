@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 interface ICurveStethPool {
     function add_liquidity(uint256[2] memory, uint256) external payable returns (uint256);

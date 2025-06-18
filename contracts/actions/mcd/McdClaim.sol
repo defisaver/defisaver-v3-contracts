@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 import { ICropJoin } from "../../interfaces/mcd/ICropJoin.sol";
 import { ICropper } from "../../interfaces/mcd/ICropper.sol";

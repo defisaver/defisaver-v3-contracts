@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity =0.8.24;
+pragma solidity =0.8.27;
 
 contract ArbitrumActionsUtilAddresses {
     address internal constant DFS_REG_CONTROLLER_ADDR = 0x6F6DaE1bCB60F67B2Cb939dBE565e8fD03F6F002;
