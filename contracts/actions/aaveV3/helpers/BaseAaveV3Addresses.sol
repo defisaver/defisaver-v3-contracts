@@ -8,4 +8,6 @@ contract BaseAaveV3Addresses {
     address internal constant AAVE_ORACLE_V3 = 0x2Cc0Fc26eD4563A5ce5e8bdcfe1A2878676Ae156;
     address internal constant STAKED_GHO_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant AAVE_GOV_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant GHO_TOKEN = 0x6Bb7a212910682DCFdbd5BCBb3e28FB4E8da10Ee;
+    address internal constant UMBRELLA_REWARDS_CONTROLLER_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 }

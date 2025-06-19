@@ -8,6 +8,7 @@ import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 /// @title Action to claim AAVE rewards from stkGHO token
+/// @notice After AaveV3 Umbrella upgrade, stkGHO token is no longer eligible for AAVE rewards so this action will only be used for old rewards.
 contract GhoClaimAAVE is ActionBase, AaveV3Helper {
 
     using TokenUtils for address;

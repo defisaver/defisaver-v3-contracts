@@ -1495,4 +1495,84 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
+    describe('Umbrella', () => {
+        const stkToken = '0xaAFD07D53A7365D3e9fb6F3a3B09EC19676B73Ce';
+        const amount = 10000;
+        const useATokens = true;
+        const minSharesOut = 10000;
+
+        let foundryContract;
+
+        before(async () => {
+            foundryContract = await getFoundryEncodingContract();
+        });
+
+        it('Test umbrellaStakeEncode', async () => {
+            const [from, to] = await hre.ethers.getSigners();
+            const UmbrellaStake = await hre.ethers.getContractFactory('UmbrellaStake');
+            const sdkEncoded = (
+                new sdk.actions.umbrella.UmbrellaStakeAction(
+                    stkToken,
+                    from.address,
+                    to.address,
+                    amount,
+                    useATokens,
+                    minSharesOut,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = UmbrellaStake.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.umbrellaStakeEncode(
+                    stkToken,
+                    from.address,
+                    to.address,
+                    amount,
+                    useATokens,
+                    minSharesOut,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+        it('Test umbrellaUnstakeEncode', async () => {
+            const [to] = await hre.ethers.getSigners();
+            const UmbrellaUnstake = await hre.ethers.getContractFactory('UmbrellaUnstake');
+            const sdkEncoded = (
+                new sdk.actions.umbrella.UmbrellaFinalizeUnstakeAction(
+                    stkToken,
+                    to.address,
+                    amount,
+                    useATokens,
+                    minSharesOut,
+                )
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = UmbrellaUnstake.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.umbrellaUnstakeEncode(
+                    stkToken,
+                    to.address,
+                    amount,
+                    useATokens,
+                    minSharesOut,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+        it('Test umbrellaStartCooldownEncode', async () => {
+            const UmbrellaUnstake = await hre.ethers.getContractFactory('UmbrellaUnstake');
+            const sdkEncoded = (
+                new sdk.actions.umbrella.UmbrellaStartUnstakeAction(stkToken)
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = UmbrellaUnstake.interface.encodeFunctionData('executeActionDirect', [
+                await foundryContract.umbrellaUnstakeEncode(
+                    stkToken,
+                    hre.ethers.constants.AddressZero,
+                    0,
+                    false,
+                    0,
+                ),
+            ]);
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+    });
 });
