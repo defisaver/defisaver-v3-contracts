@@ -160,6 +160,9 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint256 stkTokenToWaTokenRate; // rate of stk token to wa token
         uint256 waTokenToATokenRate; // rate of waToken to aToken. 1e18 for GHO
         uint256[] rewardsEmissionRates; // emission rates of the rewards
+        uint256 userCooldownAmount; // amount of shares available to redeem
+        uint256 userEndOfCooldown; // timestamp after which funds will be unlocked for withdrawal
+        uint256 userWithdrawalWindow; // period of time to withdraw funds after end of cooldown
     }
 
     /**
@@ -548,14 +551,18 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         return estimatedRates;
     }
 
-    /// @notice Fetches the additional umbrella staking data
+    /// @notice Fetches the additional umbrella staking data and user snapshot data if needed
     /// @param _umbrella Address of the umbrella
+    /// @param _user Address of the user (Optional)
     /// @return retVal Array of UmbrellaStkData
-    function getAdditionalUmbrellaStakingData(address _umbrella) external view returns (UmbrellaStkData[] memory retVal) {
+    function getAdditionalUmbrellaStakingData(
+        address _umbrella,
+        address _user
+    ) external view returns (UmbrellaStkData[] memory retVal) {
         address[] memory stkTokens = IUmbrella(_umbrella).getStkTokens();
         retVal = new UmbrellaStkData[](stkTokens.length);
         for (uint256 i = 0; i < stkTokens.length; ++i) {
-            retVal[i] = _fetchStkTokenData(stkTokens[i]);
+            retVal[i] = _fetchStkTokenData(stkTokens[i], _user);
         }
     }
 
@@ -564,10 +571,14 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
      *                         INTERNAL FUNCTIONS
      *
      */
-    /// @notice Fetches the additional stk token data
+    /// @notice Fetches the additional stk token data and user snapshot data if needed
     /// @param _stkToken Address of the stk token
+    /// @param _user Address of the user (Optional)
     /// @return retVal UmbrellaStkData
-    function _fetchStkTokenData(address _stkToken) internal view returns (UmbrellaStkData memory retVal) {
+    function _fetchStkTokenData(
+        address _stkToken,
+        address _user
+    ) internal view returns (UmbrellaStkData memory retVal) {
         retVal.stkToken = _stkToken;
         retVal.totalShares = IERC20(_stkToken).totalSupply();
         retVal.cooldownPeriod = IERC4626StakeToken(_stkToken).getCooldown();
@@ -597,6 +608,14 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         }
 
         retVal.rewardsEmissionRates = rewardsEmissionRates;
+
+        if (_user != address(0)) {
+            IERC4626StakeToken.CooldownSnapshot memory cooldownSnapshot = 
+                IERC4626StakeToken(_stkToken).getStakerCooldown(_user);
+            retVal.userCooldownAmount = cooldownSnapshot.amount;
+            retVal.userEndOfCooldown = cooldownSnapshot.endOfCooldown;
+            retVal.userWithdrawalWindow = cooldownSnapshot.withdrawalWindow;
+        }
     }
 
     /// @notice Checks if a reserve is used as collateral
