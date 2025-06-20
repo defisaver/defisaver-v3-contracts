@@ -26,11 +26,11 @@ library DataTypes {
     address stableDebtTokenAddress;
     //variableDebtToken address
     address variableDebtTokenAddress;
-    //address of the interest rate strategy
+    // DEPRECATED on v3.4.0, should use the `RESERVE_INTEREST_RATE_STRATEGY` variable from the Pool contract
     address interestRateStrategyAddress;
     //the current treasury balance, scaled
     uint128 accruedToTreasury;
-    //the outstanding unbacked aTokens minted through the bridging feature
+    // DEPRECATED on v3.4.0
     uint128 unbacked;
     //the outstanding debt borrowed against this asset in isolation mode
     uint128 isolationModeTotalDebt;
@@ -44,18 +44,19 @@ library DataTypes {
     //bit 56: reserve is active
     //bit 57: reserve is frozen
     //bit 58: borrowing is enabled
-    //bit 59: stable rate borrowing enabled
+    //bit 59: DEPRECATED: stable rate borrowing enabled
     //bit 60: asset is paused
     //bit 61: borrowing in isolation mode is enabled
-    //bit 62-63: reserved
+    //bit 62: siloed borrowing enabled
+    //bit 63: flashloaning enabled
     //bit 64-79: reserve factor
-    //bit 80-115 borrow cap in whole tokens, borrowCap == 0 => no cap
-    //bit 116-151 supply cap in whole tokens, supplyCap == 0 => no cap
-    //bit 152-167 liquidation protocol fee
-    //bit 168-175 eMode category
-    //bit 176-211 unbacked mint cap in whole tokens, unbackedMintCap == 0 => minting disabled
-    //bit 212-251 debt ceiling for isolation mode with (ReserveConfiguration::DEBT_CEILING_DECIMALS) decimals
-    //bit 252: virtual accounting is enabled for the reserve
+    //bit 80-115: borrow cap in whole tokens, borrowCap == 0 => no cap
+    //bit 116-151: supply cap in whole tokens, supplyCap == 0 => no cap
+    //bit 152-167: liquidation protocol fee
+    //bit 168-175: DEPRECATED: eMode category
+    //bit 176-211: DEPRECATED: unbacked mint cap
+    //bit 212-251: debt ceiling for isolation mode with (ReserveConfiguration::DEBT_CEILING_DECIMALS) decimals
+    //bit 252: DEPRECATED: virtual accounting is enabled for the reserve
     //bit 253-255 unused
 
     uint256 data;
@@ -68,16 +69,6 @@ library DataTypes {
      * asset is borrowed by the user.
      */
     uint256 data;
-  }
-
-  struct EModeCategory {
-    // each eMode category has a custom ltv and liquidation threshold
-    uint16 ltv;
-    uint16 liquidationThreshold;
-    uint16 liquidationBonus;
-    // each eMode category may or may not have a custom oracle to override the individual assets price oracles
-    address priceSource;
-    string label;
   }
 
   // DEPRECATED: kept for backwards compatibility, might be removed in a future version
@@ -135,6 +126,7 @@ library DataTypes {
     uint256 totalDebt;
     uint256 reserveFactor;
     address reserve;
+    // @notice DEPRECATED in 3.4, but kept for backwards compatibility
     bool usingVirtualBalance;
     uint256 virtualUnderlyingBalance;
   }
