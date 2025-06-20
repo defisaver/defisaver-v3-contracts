@@ -35,11 +35,11 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
 
         before(async () => {
             [senderAcc] = await hre.ethers.getSigners();
-            wallet = await getProxy(senderAcc.address);
             if (isFork) {
                 await topUp(senderAcc.address);
                 await topUp(getOwnerAddr());
             }
+            wallet = await getProxy(senderAcc.address);
             aaveV3ViewContract = await redeploy('AaveV3View', isFork);
         });
         beforeEach(async () => {
