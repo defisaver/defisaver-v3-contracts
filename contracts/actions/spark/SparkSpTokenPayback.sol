@@ -6,7 +6,6 @@ import { IWETH } from "../../interfaces/IWETH.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { IAToken } from "../../interfaces/aave/IAToken.sol";
 import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
 
