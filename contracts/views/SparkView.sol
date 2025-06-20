@@ -2,23 +2,21 @@
 
 pragma solidity =0.8.24;
 
-import { SparkHelper } from "../actions/spark/helpers/SparkHelper.sol";
-import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
-import { SparkDataTypes } from "../interfaces/spark/SparkDataTypes.sol";
-import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
-import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
-import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
-
-import { WadRayMath } from "../utils/math/WadRayMath.sol";
-import { MathUtils } from "../utils/math/MathUtils.sol";
+import { ISparkPool } from "../interfaces/spark/ISparkPool.sol";
+import { ISparkPoolAddressesProvider } from "../interfaces/spark/ISparkPoolAddressesProvider.sol";
+import { ISparkProtocolDataProvider } from "../interfaces/spark/ISparkProtocolDataProvider.sol";
+import { ISparkV3Oracle } from "../interfaces/spark/ISparkV3Oracle.sol";
 import { ISparkScaledBalanceToken } from "../interfaces/spark/ISparkScaledBalanceToken.sol";
 import { ISparkStableDebtToken } from "../interfaces/spark/ISparkStableDebtToken.sol";
 import { ISparkReserveInterestRateStrategy } from "../interfaces/spark/ISparkReserveInterestRateStrategy.sol";
+import { SparkDataTypes } from "../interfaces/spark/SparkDataTypes.sol";
+import { SparkHelper } from "../actions/spark/helpers/SparkHelper.sol";
+import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol";
 
+import { TokenUtils } from "../utils/TokenUtils.sol";
+import { WadRayMath } from "../utils/math/WadRayMath.sol";
+import { MathUtils } from "../utils/math/MathUtils.sol";
 
 contract SparkView is SparkHelper, SparkRatioHelper {
     uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -108,7 +106,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         bool borrowingEnabled; //pool.config
         bool stableBorrowRateEnabled; //pool.config
         bool isolationModeBorrowingEnabled; //pool.config
-        bool isSiloedForBorrowing; //AaveProtocolDataProvider.getSiloedBorrowing
+        bool isSiloedForBorrowing; //ISparkProtocolDataProvider.getSiloedBorrowing
         uint256 eModeCollateralFactor; //pool.getEModeCategoryData.ltv
         bool isFlashLoanEnabled;
         // emode category data
@@ -145,7 +143,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         view
         returns (uint256 healthFactor)
     {
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
 
         (, , , , , healthFactor) = lendingPool.getUserAccountData(_user);
     }
@@ -159,8 +157,8 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         view
         returns (uint256[] memory prices)
     {
-        address priceOracleAddress = IPoolAddressesProvider(_market).getPriceOracle();
-        prices = IAaveV3Oracle(priceOracleAddress).getAssetsPrices(_tokens);
+        address priceOracleAddress = ISparkPoolAddressesProvider(_market).getPriceOracle();
+        prices = ISparkV3Oracle(priceOracleAddress).getAssetsPrices(_tokens);
     }
 
     /// @notice Calculated the ratio of coll/debt for an spark user
@@ -188,11 +186,11 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         view
         returns (uint256[] memory collFactors)
     {
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
         collFactors = new uint256[](_tokens.length);
 
         for (uint256 i = 0; i < _tokens.length; ++i) {
-            DataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(
+            SparkDataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(
                 _tokens[i]
             );
             collFactors[i] = getReserveFactor(config);
@@ -204,16 +202,16 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         address _user,
         address[] memory _tokens
     ) public view returns (UserToken[] memory userTokens) {
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
         userTokens = new UserToken[](_tokens.length);
 
         for (uint256 i = 0; i < _tokens.length; i++) {
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_tokens[i]);
+            SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_tokens[i]);
             userTokens[i].balance = reserveData.aTokenAddress.getBalance(_user);
             userTokens[i].borrowsStable = reserveData.stableDebtTokenAddress.getBalance(_user);
             userTokens[i].borrowsVariable = reserveData.variableDebtTokenAddress.getBalance(_user);
             userTokens[i].stableBorrowRate = reserveData.currentStableBorrowRate;
-            DataTypes.UserConfigurationMap memory map = lendingPool.getUserConfiguration(_user);
+            SparkDataTypes.UserConfigurationMap memory map = lendingPool.getUserConfiguration(_user);
             userTokens[i].enabledAsCollateral = isUsingAsCollateral(map, reserveData.id);
         }
     }
@@ -227,20 +225,20 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         view
         returns (TokenInfo[] memory tokens)
     {
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
         tokens = new TokenInfo[](_tokenAddresses.length);
 
         for (uint256 i = 0; i < _tokenAddresses.length; i++) {
-            DataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(
+            SparkDataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(
                 _tokenAddresses[i]
             );
             uint256 collFactor = config.data & ~LTV_MASK;
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
+            SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
                 _tokenAddresses[i]
             );
             address aTokenAddr = reserveData.aTokenAddress;
-            address priceOracleAddress = IPoolAddressesProvider(_market).getPriceOracle();
-            uint256 price = IAaveV3Oracle(priceOracleAddress).getAssetPrice(_tokenAddresses[i]);
+            address priceOracleAddress = ISparkPoolAddressesProvider(_market).getPriceOracle();
+            uint256 price = ISparkV3Oracle(priceOracleAddress).getAssetPrice(_tokenAddresses[i]);
             tokens[i] = TokenInfo({
                 aTokenAddress: aTokenAddr,
                 underlyingTokenAddress: _tokenAddresses[i],
@@ -255,10 +253,10 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         view
         returns (TokenInfoFull memory _tokenInfo)
     {
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
 
-        DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_tokenAddr);
-        DataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(_tokenAddr);
+        SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_tokenAddr);
+        SparkDataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(_tokenAddr);
 
         uint256 totalVariableBorrow = IERC20(reserveData.variableDebtTokenAddress).totalSupply();
         uint256 totalStableBorrow = IERC20(reserveData.stableDebtTokenAddress).totalSupply();
@@ -266,7 +264,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         (bool isActive, bool isFrozen, , , bool isPaused) = getFlags(config);
 
         uint256 eMode = getEModeCategory(config);
-        DataTypes.EModeCategoryLegacy memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
+        SparkDataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
 
         _tokenInfo = TokenInfoFull({
             aTokenAddress: reserveData.aTokenAddress,
@@ -323,11 +321,11 @@ contract SparkView is SparkHelper, SparkRatioHelper {
     /// @param _user Address of the user
     /// @return data LoanData information
     function getLoanData(address _market, address _user) public view returns (LoanData memory data) {
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
         address[] memory reserveList = lendingPool.getReservesList();
         uint256 eMode = lendingPool.getUserEMode(_user);
         
-        DataTypes.EModeCategoryLegacy memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
+        SparkDataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(eMode));
         
         data = LoanData({
             eMode: eMode,
@@ -352,7 +350,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         for (uint256 i = 0; i < reserveList.length; i++) {
             address reserve = reserveList[i];
             uint256 price = getAssetPrice(_market, reserve);
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(reserve);
+            SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(reserve);
             {
                 uint256 aTokenBalance = reserveData.aTokenAddress.getBalance(_user);
                 if (aTokenBalance > 0) {
@@ -400,11 +398,11 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         }
     }
 
-    function getLtv(DataTypes.ReserveConfigurationMap memory self) public pure returns (uint256) {
+    function getLtv(SparkDataTypes.ReserveConfigurationMap memory self) public pure returns (uint256) {
         return self.data & ~LTV_MASK;
     }
 
-    function getReserveFactor(DataTypes.ReserveConfigurationMap memory self)
+    function getReserveFactor(SparkDataTypes.ReserveConfigurationMap memory self)
         internal
         pure
         returns (uint256)
@@ -412,7 +410,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         return (self.data & ~RESERVE_FACTOR_MASK) >> RESERVE_FACTOR_START_BIT_POSITION;
     }
 
-    function isUsingAsCollateral(DataTypes.UserConfigurationMap memory self, uint256 reserveIndex)
+    function isUsingAsCollateral(SparkDataTypes.UserConfigurationMap memory self, uint256 reserveIndex)
         internal
         pure
         returns (bool)
@@ -422,7 +420,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         }
     }
 
-    function getLiquidationThreshold(DataTypes.ReserveConfigurationMap memory self)
+    function getLiquidationThreshold(SparkDataTypes.ReserveConfigurationMap memory self)
         internal
         pure
         returns (uint256)
@@ -436,11 +434,11 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         view
         returns (uint256 price)
     {
-        address priceOracleAddress = IPoolAddressesProvider(_market).getPriceOracle();
-        price = IAaveV3Oracle(priceOracleAddress).getAssetPrice(_tokenAddr);
+        address priceOracleAddress = ISparkPoolAddressesProvider(_market).getPriceOracle();
+        price = ISparkV3Oracle(priceOracleAddress).getAssetPrice(_tokenAddr);
     }
 
-    function getBorrowCap(DataTypes.ReserveConfigurationMap memory self)
+    function getBorrowCap(SparkDataTypes.ReserveConfigurationMap memory self)
         internal
         pure
         returns (uint256)
@@ -448,7 +446,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         return (self.data & ~BORROW_CAP_MASK) >> BORROW_CAP_START_BIT_POSITION;
     }
 
-    function getSupplyCap(DataTypes.ReserveConfigurationMap memory self)
+    function getSupplyCap(SparkDataTypes.ReserveConfigurationMap memory self)
         internal
         pure
         returns (uint256)
@@ -456,7 +454,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         return (self.data & ~SUPPLY_CAP_MASK) >> SUPPLY_CAP_START_BIT_POSITION;
     }
 
-    function getEModeCategory(DataTypes.ReserveConfigurationMap memory self)
+    function getEModeCategory(SparkDataTypes.ReserveConfigurationMap memory self)
         internal
         pure
         returns (uint256)
@@ -464,7 +462,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         return (self.data & ~EMODE_CATEGORY_MASK) >> EMODE_CATEGORY_START_BIT_POSITION;
     }
 
-    function getBorrowingEnabled(DataTypes.ReserveConfigurationMap memory self)
+    function getBorrowingEnabled(SparkDataTypes.ReserveConfigurationMap memory self)
         internal
         pure
         returns (bool)
@@ -472,7 +470,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         return (self.data & ~BORROWING_MASK) != 0;
     }
 
-    function getStableRateBorrowingEnabled(DataTypes.ReserveConfigurationMap memory self)
+    function getStableRateBorrowingEnabled(SparkDataTypes.ReserveConfigurationMap memory self)
         internal
         pure
         returns (bool)
@@ -480,7 +478,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         return (self.data & ~STABLE_BORROWING_MASK) != 0;
     }
 
-    function getBorrowableInIsolation(DataTypes.ReserveConfigurationMap memory self)
+    function getBorrowableInIsolation(SparkDataTypes.ReserveConfigurationMap memory self)
         internal
         pure
         returns (bool)
@@ -498,7 +496,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
      * @return The state flag representing paused
      */
     function getFlags(
-        DataTypes.ReserveConfigurationMap memory self
+        SparkDataTypes.ReserveConfigurationMap memory self
     ) internal pure returns (bool, bool, bool, bool, bool) {
         uint256 dataLocal = self.data;
 
@@ -516,7 +514,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
     * @param self The reserve configuration
     * @return The debt ceiling (0 = isolation mode disabled)
     **/
-    function getDebtCeiling(DataTypes.ReserveConfigurationMap memory self)
+    function getDebtCeiling(SparkDataTypes.ReserveConfigurationMap memory self)
         internal
         pure
         returns (uint256)
@@ -525,26 +523,26 @@ contract SparkView is SparkHelper, SparkRatioHelper {
     }
 
     function isSiloedForBorrowing(address _market, address _tokenAddr) internal view returns (bool){
-        IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
+        ISparkProtocolDataProvider dataProvider = getSparkDataProvider(_market);
         return dataProvider.getSiloedBorrowing(_tokenAddr);
     }
 
-    function getEModeCollateralFactor(uint256 emodeCategory, IPoolV3 lendingPool) public view returns (uint16){
-        DataTypes.EModeCategoryLegacy memory categoryData = lendingPool.getEModeCategoryData(uint8(emodeCategory));
+    function getEModeCollateralFactor(uint256 emodeCategory, ISparkPool lendingPool) public view returns (uint16){
+        SparkDataTypes.EModeCategory memory categoryData = lendingPool.getEModeCategoryData(uint8(emodeCategory));
         return categoryData.ltv;
     }
 
-    function getFlashLoanEnabled(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
+    function getFlashLoanEnabled(SparkDataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
         return (self.data & ~FLASHLOAN_ENABLED_MASK) != 0;
     }
 
     function getApyAfterValuesEstimation(address _market, LiquidityChangeParams[] memory _reserveParams) 
         public view returns (EstimatedRates[] memory) 
     {
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
         EstimatedRates[] memory estimatedRates = new EstimatedRates[](_reserveParams.length);
         for (uint256 i = 0; i < _reserveParams.length; ++i) {
-            DataTypes.ReserveData memory reserve = lendingPool.getReserveData(_reserveParams[i].reserveAddress);
+            SparkDataTypes.ReserveData memory reserve = lendingPool.getReserveData(_reserveParams[i].reserveAddress);
 
             EstimatedRates memory estimatedRate;
             estimatedRate.reserveAddress = _reserveParams[i].reserveAddress;
@@ -588,7 +586,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         return estimatedRates;
     }
 
-    function _getNextVariableBorrowIndex(DataTypes.ReserveData memory _reserve) internal view returns (uint128 variableBorrowIndex) {
+    function _getNextVariableBorrowIndex(SparkDataTypes.ReserveData memory _reserve) internal view returns (uint128 variableBorrowIndex) {
         uint256 scaledVariableDebt = ISparkScaledBalanceToken(_reserve.variableDebtTokenAddress).scaledTotalSupply();
         variableBorrowIndex = _reserve.variableBorrowIndex;
         if (scaledVariableDebt > 0) {
@@ -599,5 +597,4 @@ contract SparkView is SparkHelper, SparkRatioHelper {
             variableBorrowIndex = uint128(cumulatedVariableBorrowInterest.rayMul(variableBorrowIndex));
         }
     }   
-
 }

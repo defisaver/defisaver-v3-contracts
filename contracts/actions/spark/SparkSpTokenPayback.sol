@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { IWETH } from "../../interfaces/IWETH.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
-import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
+import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
+import { SparkDataTypes } from "../../interfaces/spark/SparkDataTypes.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Allows user to repay with spTokens of the underlying debt asset eg. Pay DAI debt using spDAI tokens.
 contract SparkSpTokenPayback is ActionBase, SparkHelper {
@@ -98,14 +98,14 @@ contract SparkSpTokenPayback is ActionBase, SparkHelper {
         uint256 _rateMode,
         address _from
     ) internal returns (uint256, bytes memory) {
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
 
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
 
-        uint256 maxDebt = getWholeDebt(_market, tokenAddr, _rateMode, address(this));
+        uint256 maxDebt = getSparkWholeDebt(_market, tokenAddr, _rateMode, address(this));
         _amount = _amount > maxDebt ? maxDebt : _amount;
 
-        DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
+        SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
         address spTokenAddr = reserveData.aTokenAddress;
 
         _amount = spTokenAddr.pullTokensIfNeeded(_from, _amount);
@@ -129,7 +129,7 @@ contract SparkSpTokenPayback is ActionBase, SparkHelper {
         encodedInput = bytes.concat(encodedInput, bytes20(_params.from));
         encodedInput = bytes.concat(encodedInput, bytes1(_params.rateMode));
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -140,7 +140,7 @@ contract SparkSpTokenPayback is ActionBase, SparkHelper {
         params.from = address(bytes20(_encodedInput[32:52]));
         params.rateMode = uint8(bytes1(_encodedInput[52:53]));
         params.assetId = uint16(bytes2(_encodedInput[53:55]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[55:56]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[55:56]));
         if (params.useDefaultMarket) {
             params.market = DEFAULT_SPARK_MARKET;
         } else {

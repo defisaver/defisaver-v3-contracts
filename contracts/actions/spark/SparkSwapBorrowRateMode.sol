@@ -5,7 +5,8 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Swaps user's wallet positions borrow rate mode between stable and variable.
 contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
@@ -64,7 +65,7 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
         internal
         returns (uint256, bytes memory)
     {
-        IPoolV3 lendingPool = getLendingPool(_inputData.market);
+        ISparkPool lendingPool = getSparkLendingPool(_inputData.market);
         address tokenAddr = lendingPool.getReserveAddressById(_inputData.assetId);
         lendingPool.swapBorrowRateMode(tokenAddr, _inputData.rateMode);
         bytes memory logData = abi.encode(_inputData);
@@ -82,7 +83,7 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
         encodedInput = bytes.concat(encodedInput, bytes32(_params.rateMode));
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -91,7 +92,7 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
     function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
         params.rateMode = uint256(bytes32(_encodedInput[0:32]));
         params.assetId = uint16(bytes2(_encodedInput[32:34]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[34:35]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[34:35]));
 
         if (params.useDefaultMarket) {
             params.market = DEFAULT_SPARK_MARKET;
