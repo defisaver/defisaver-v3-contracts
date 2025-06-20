@@ -26,14 +26,6 @@ contract SparkHelper is MainnetSparkAddresses {
             );
     }
 
-    function boolToBytes(bool x) internal pure returns (bytes1 r) {
-       return x ? bytes1(0x01) : bytes1(0x00);
-    }
-
-    function bytesToBool(bytes1 x) internal pure returns (bool r) {
-        return x != bytes1(0x00);
-    }
-    
     function getSparkWholeDebt(address _market, address _tokenAddr, uint256 _borrowType, address _debtOwner) internal view returns (uint256 debt) {
         uint256 STABLE_ID = 1;
         uint256 VARIABLE_ID = 2;
