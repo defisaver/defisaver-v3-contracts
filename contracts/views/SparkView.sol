@@ -16,7 +16,7 @@ import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDat
 import { WadRayMath } from "../utils/math/WadRayMath.sol";
 import { MathUtils } from "../utils/math/MathUtils.sol";
 import { ISparkScaledBalanceToken } from "../interfaces/spark/ISparkScaledBalanceToken.sol";
-import { IStableDebtToken } from "../interfaces/aave/IStableDebtToken.sol";
+import { ISparkStableDebtToken } from "../interfaces/spark/ISparkStableDebtToken.sol";
 import { ISparkReserveInterestRateStrategy } from "../interfaces/spark/ISparkReserveInterestRateStrategy.sol";
 
 
@@ -549,7 +549,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
             EstimatedRates memory estimatedRate;
             estimatedRate.reserveAddress = _reserveParams[i].reserveAddress;
             
-            (uint256 currTotalStableDebt, uint256 currAvgStableBorrowRate) = IStableDebtToken(reserve.stableDebtTokenAddress)
+            (uint256 currTotalStableDebt, uint256 currAvgStableBorrowRate) = ISparkStableDebtToken(reserve.stableDebtTokenAddress)
                 .getTotalSupplyAndAvgRate();
             
             uint256 nextVariableBorrowIndex = _getNextVariableBorrowIndex(reserve);
