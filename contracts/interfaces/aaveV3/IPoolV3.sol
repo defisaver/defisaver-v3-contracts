@@ -798,4 +798,10 @@ interface IPoolV3 {
    * @return The reserve virtual underlying balance
    */
   function getVirtualUnderlyingBalance(address asset) external view returns (uint128);
+
+  /**
+   * @notice Returns the ReserveInterestRateStrategy connected to all the reserves
+   * @return The address of the ReserveInterestRateStrategy contract
+   */
+  function RESERVE_INTEREST_RATE_STRATEGY() external view returns (address);
 }

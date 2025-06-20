@@ -512,7 +512,6 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         EstimatedRates[] memory estimatedRates = new EstimatedRates[](_reserveParams.length);
         for (uint256 i = 0; i < _reserveParams.length; ++i) {
             address asset = _reserveParams[i].reserveAddress;
-            DataTypes.ReserveConfigurationMap memory config = lendingPool.getConfiguration(asset);
             DataTypes.ReserveData memory reserve = lendingPool.getReserveData(asset);
             
             uint256 totalVarDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress)
@@ -527,16 +526,16 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             }
 
             (uint256 estimatedSupplyRate, uint256 estimatedVariableBorrowRate) = IReserveInterestRateStrategy(
-                reserve.interestRateStrategyAddress
+                lendingPool.RESERVE_INTEREST_RATE_STRATEGY()
             ).calculateInterestRates(
                 DataTypes.CalculateInterestRatesParams({
-                    unbacked: reserve.unbacked + lendingPool.getReserveDeficit(asset),
+                    unbacked: lendingPool.getReserveDeficit(asset),
                     liquidityAdded: _reserveParams[i].liquidityAdded,
                     liquidityTaken: _reserveParams[i].liquidityTaken,
                     totalDebt: totalVarDebt,
                     reserveFactor: getReserveFactor(reserve.configuration),
                     reserve: asset,
-                    usingVirtualBalance: isReserveUsingVirtualAccounting(config),
+                    usingVirtualBalance: true,
                     virtualUnderlyingBalance: lendingPool.getVirtualUnderlyingBalance(asset)
                 })
             );
@@ -746,14 +745,6 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         (dataLocal & ~BORROWING_MASK) != 0,
         (dataLocal & ~PAUSED_MASK) != 0
         );
-    }
-
-    /// @notice Checks if a reserve is using virtual accounting
-    function isReserveUsingVirtualAccounting(
-        DataTypes.ReserveConfigurationMap memory self
-    ) internal pure returns (bool) {
-        uint256 dataLocal = self.data;
-        return (dataLocal & ~VIRTUAL_ACC_ACTIVE) != 0;
     }
 
     /// @notice Fetches the next variable borrow index
