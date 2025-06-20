@@ -15,7 +15,7 @@ import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDat
 
 import { WadRayMath } from "../utils/math/WadRayMath.sol";
 import { MathUtils } from "../utils/math/MathUtils.sol";
-import { IScaledBalanceToken } from "../interfaces/aave/IScaledBalanceToken.sol";
+import { ISparkScaledBalanceToken } from "../interfaces/spark/ISparkScaledBalanceToken.sol";
 import { IStableDebtToken } from "../interfaces/aave/IStableDebtToken.sol";
 import { ISparkReserveInterestRateStrategy } from "../interfaces/spark/ISparkReserveInterestRateStrategy.sol";
 
@@ -553,7 +553,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
                 .getTotalSupplyAndAvgRate();
             
             uint256 nextVariableBorrowIndex = _getNextVariableBorrowIndex(reserve);
-            uint256 variableDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply();
+            uint256 variableDebt = ISparkScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply();
             
 
             uint256 totalVarDebt = variableDebt.rayMul(nextVariableBorrowIndex);
@@ -589,7 +589,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
     }
 
     function _getNextVariableBorrowIndex(DataTypes.ReserveData memory _reserve) internal view returns (uint128 variableBorrowIndex) {
-        uint256 scaledVariableDebt = IScaledBalanceToken(_reserve.variableDebtTokenAddress).scaledTotalSupply();
+        uint256 scaledVariableDebt = ISparkScaledBalanceToken(_reserve.variableDebtTokenAddress).scaledTotalSupply();
         variableBorrowIndex = _reserve.variableBorrowIndex;
         if (scaledVariableDebt > 0) {
             uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
