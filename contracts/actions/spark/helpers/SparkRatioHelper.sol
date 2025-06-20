@@ -3,12 +3,12 @@ pragma solidity =0.8.24;
 
 import { DSMath } from "../../../DS/DSMath.sol";
 import { MainnetSparkAddresses } from "./MainnetSparkAddresses.sol";
-import { IPoolV3 } from "../../../interfaces/aaveV3/IPoolV3.sol";
-import { IPoolAddressesProvider } from "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
+import { ISparkPool } from "../../../interfaces/spark/ISparkPool.sol";
+import { ISparkPoolAddressesProvider } from "../../../interfaces/spark/ISparkPoolAddressesProvider.sol";
 
 contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
    function getSafetyRatio(address _market, address _user) public view returns (uint256) {
-        IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(_market).getPool());
+        ISparkPool lendingPool = ISparkPool(ISparkPoolAddressesProvider(_market).getPool());
         (, uint256 totalDebtETH, uint256 availableBorrowsETH, , , ) = lendingPool
             .getUserAccountData(_user);
         if (totalDebtETH == 0) return uint256(0);

@@ -7,13 +7,13 @@ import { IFluidVaultT3 } from "../../../../interfaces/fluid/vaults/IFluidVaultT3
 import { FluidLiquidityModel } from "../../helpers/FluidLiquidityModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
 import { TokenUtils } from "../../../../utils/TokenUtils.sol";
-import { DFSMath } from "../../../../utils/math/DFSMath.sol";
+import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidSupplyLiquidityLogic - Implements the supply of tokens to Fluid liquidity layer
 /// @dev Used only for vaults with liquidity collateral (T1 and T3)
 library FluidSupplyLiquidityLogic {
     using TokenUtils for address;
-    using DFSMath for uint256;
+    using DFSLib for uint256;
     using FluidVaultTypes for uint256;
 
     /// @notice Supplies tokens to a Fluid liquidity layer

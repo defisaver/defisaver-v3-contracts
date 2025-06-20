@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
+import { ISparkRewardsController } from "../../interfaces/spark/ISparkRewardsController.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { IRewardsController } from "../../interfaces/aaveV3/IRewardsController.sol";
 
 /// @title Claims single reward type specified by reward for the list of assets. Rewards are received by to address.
 contract SparkClaimRewards is ActionBase, SparkHelper {
@@ -70,7 +70,7 @@ contract SparkClaimRewards is ActionBase, SparkHelper {
     {
         require(_params.assetsLength == _params.assets.length);
 
-        IRewardsController rewardsController = IRewardsController(SPARK_REWARDS_CONTROLLER_ADDRESS);
+        ISparkRewardsController rewardsController = ISparkRewardsController(SPARK_REWARDS_CONTROLLER_ADDRESS);
 
         amountReceived = rewardsController.claimRewards(_params.assets, _params.amount, _params.to, _params.reward);
 

@@ -1,26 +1,36 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity =0.8.24;
+
+// GENERAL IMPORTS
 import { LSVProxyRegistry } from "../utils/LSVProxyRegistry.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
 import { DFSProxyRegistry } from "../utils/DFSProxyRegistry.sol";
-
 import { ActionsUtilHelper } from "../actions/utils/helpers/ActionsUtilHelper.sol";
-import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
-import { MorphoAaveV3Helper } from "../actions/morpho/aaveV3/helpers/MorphoAaveV3Helper.sol";
-import { CompV3Helper } from "../actions/compoundV3/helpers/CompV3Helper.sol";
-import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
 import { UtilHelper } from "../utils/helpers/UtilHelper.sol";
 import { LSVUtilHelper } from "../actions/lsv/helpers/LSVUtilHelper.sol";
 import { LSVProfitTracker } from "../utils/LSVProfitTracker.sol";
-import { SparkHelper } from "../actions/spark/helpers/SparkHelper.sol";
-import { IL2PoolV3 } from "../interfaces/aaveV3/IL2PoolV3.sol";
-import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
+
+// AAVE V3 IMPORTS
+import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
 import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
-import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
 import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
+
+// SPARK IMPORTS
+import { SparkHelper } from "../actions/spark/helpers/SparkHelper.sol";
+import { ISparkPool } from "../interfaces/spark/ISparkPool.sol";
+import { SparkDataTypes } from "../interfaces/spark/SparkDataTypes.sol";
+
+// MORPHO OPTIMIZER IMPORTS
 import { IMorphoAaveV3 } from "../interfaces/morpho/IMorphoAaveV3.sol";
+import { MorphoAaveV3Helper } from "../actions/morpho/aaveV3/helpers/MorphoAaveV3Helper.sol";
+
+// COMPOUND V3 IMPORTS
 import { IComet } from "../interfaces/compoundV3/IComet.sol";
+import { CompV3Helper } from "../actions/compoundV3/helpers/CompV3Helper.sol";
+
+// MORPHO BLUE IMPORTS
+import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
 import { MarketParams, Id } from "../interfaces/morpho-blue/IMorphoBlue.sol";
 import { MarketParamsLib, MorphoLib, MorphoBalancesLib } from "../actions/morpho-blue/helpers/MorphoBlueLib.sol";
 
@@ -34,7 +44,16 @@ struct Position {
 }
 
 // TODO: On next deployment (assuming Aave v3.3.0 is live at that point), use 'getReserveAToken' and 'getReserveVariableDebtToken' directly on Pool, instead of fetching reserveData
-contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Helper, CompV3Helper, SparkHelper, MorphoBlueHelper, LSVUtilHelper {
+contract LSVView is
+    ActionsUtilHelper,
+    UtilHelper,
+    AaveV3Helper,
+    MorphoAaveV3Helper,
+    CompV3Helper,
+    SparkHelper,
+    MorphoBlueHelper,
+    LSVUtilHelper
+{
     enum Protocol {
         AAVE_V3,
         MORPHO_AAVE_V3,
@@ -264,12 +283,12 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
         uint256 _counter
     ) internal view returns (uint256 counter) {
         counter = _counter;
-        IPoolV3 lendingPool = getLendingPool(DEFAULT_SPARK_MARKET);
-        DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
+        ISparkPool lendingPool = getSparkLendingPool(DEFAULT_SPARK_MARKET);
+        SparkDataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
             TokenUtils.WETH_ADDR
         );
         for (uint256 j = 0; j < _collTokens.length; j++) {
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
+            SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
                 _collTokens[j]
             );
             if (reserveData.aTokenAddress != address(0)) {
@@ -408,13 +427,13 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
         address _user,
         address[] memory _collTokens
     ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) {
-        IPoolV3 lendingPool = getLendingPool(DEFAULT_SPARK_MARKET);
-        DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
+        ISparkPool lendingPool = getSparkLendingPool(DEFAULT_SPARK_MARKET);
+        SparkDataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
             TokenUtils.WETH_ADDR
         );
         uint256 ethDebtAmount = wethReserveData.variableDebtTokenAddress.getBalance(_user);
         for (uint256 j = 0; j < _collTokens.length; j++) {
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
+            SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
                 _collTokens[j]
             );
             if (reserveData.aTokenAddress != address(0)) {
@@ -548,41 +567,5 @@ contract LSVView is ActionsUtilHelper, UtilHelper, AaveV3Helper, MorphoAaveV3Hel
             irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
             lltv: 860000000000000000
         });
-    }
-
-    /// @notice Returns the lending pool contract of the specified market
-    function getLendingPool(address _market) override(AaveV3Helper, SparkHelper) internal view returns (IL2PoolV3) {
-        return IL2PoolV3(IPoolAddressesProvider(_market).getPool());
-    }
-
-    /// @notice Fetch the data provider for the specified market
-    function getDataProvider(address _market) override(AaveV3Helper, SparkHelper) internal view returns (IAaveProtocolDataProvider) {
-        return
-            IAaveProtocolDataProvider(
-                IPoolAddressesProvider(_market).getPoolDataProvider()
-            );
-    }
-
-    function boolToBytes(bool x) override(AaveV3Helper, SparkHelper) internal pure returns (bytes1 r) {
-       return x ? bytes1(0x01) : bytes1(0x00);
-    }
-
-    function bytesToBool(bytes1 x) override(AaveV3Helper, SparkHelper) internal pure returns (bool r) {
-        return x != bytes1(0x00);
-    }
-    
-    function getWholeDebt(address _market, address _tokenAddr, uint256 _borrowType, address _debtOwner) override(AaveV3Helper, SparkHelper) internal view returns (uint256 debt) {
-        uint256 STABLE_ID = 1;
-        uint256 VARIABLE_ID = 2;
-
-        IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
-        (, uint256 borrowsStable, uint256 borrowsVariable, , , , , , ) =
-            dataProvider.getUserReserveData(_tokenAddr, _debtOwner);
-
-        if (_borrowType == STABLE_ID) {
-            debt = borrowsStable;
-        } else if (_borrowType == VARIABLE_ID) {
-            debt = borrowsVariable;
-        }
     }
 }

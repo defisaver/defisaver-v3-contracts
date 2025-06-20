@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
+import { ISparkDebtToken } from "../../interfaces/spark/ISparkDebtToken.sol";
 
 /// @title Delegate credit for someone to borrow on user's wallet behalf with his signature
 contract SparkDelegateWithSig is ActionBase {
@@ -64,7 +64,7 @@ contract SparkDelegateWithSig is ActionBase {
         internal
         returns (bytes memory logData)
     {
-        IDebtToken(_params.debtToken).delegationWithSig(
+        ISparkDebtToken(_params.debtToken).delegationWithSig(
             _params.delegator, 
             _params.delegatee,
             _params.value,
@@ -72,7 +72,7 @@ contract SparkDelegateWithSig is ActionBase {
             _params.v, 
             _params.r, 
             _params.s
-            );
+        );
         logData = abi.encode(_params);
     }
 

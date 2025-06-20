@@ -5,7 +5,6 @@ import { IMorphoAaveV3 } from "../../../interfaces/morpho/IMorphoAaveV3.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { MorphoAaveV3Helper } from "./helpers/MorphoAaveV3Helper.sol";
-import { IMorphoAaveV3 } from "../../../interfaces/morpho/IMorphoAaveV3.sol";
 
 /// @title Supply a token to Morpho AaveV3
 contract MorphoAaveV3Supply is ActionBase, MorphoAaveV3Helper {

@@ -6,6 +6,7 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Set positions eMode on Aave v3
 contract AaveV3SetEMode is ActionBase, AaveV3Helper {
@@ -80,7 +81,7 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
     function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
         encodedInput = bytes.concat(encodedInput, bytes1(_params.categoryId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -88,7 +89,7 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
 
     function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
         params.categoryId = uint8(bytes1(_encodedInput[0:1]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[1:2]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[1:2]));
         if (params.useDefaultMarket) {
             params.market = DEFAULT_AAVE_MARKET;
         } else {

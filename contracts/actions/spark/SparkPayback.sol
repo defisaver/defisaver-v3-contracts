@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IWETH } from "../../interfaces/IWETH.sol";
+import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Payback a token a user borrowed from an Spark market
 contract SparkPayback is ActionBase, SparkHelper {
@@ -119,10 +119,10 @@ contract SparkPayback is ActionBase, SparkHelper {
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
 
-        uint256 maxDebt = getWholeDebt(_market, tokenAddr, _rateMode, _onBehalf);
+        uint256 maxDebt = getSparkWholeDebt(_market, tokenAddr, _rateMode, _onBehalf);
         _amount = _amount > maxDebt ? maxDebt : _amount;
 
         tokenAddr.pullTokensIfNeeded(_from, _amount);
@@ -154,8 +154,8 @@ contract SparkPayback is ActionBase, SparkHelper {
         encodedInput = bytes.concat(encodedInput, bytes20(_params.from));
         encodedInput = bytes.concat(encodedInput, bytes1(_params.rateMode));
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useOnBehalf));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useOnBehalf));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -169,8 +169,8 @@ contract SparkPayback is ActionBase, SparkHelper {
         params.from = address(bytes20(_encodedInput[32:52]));
         params.rateMode = uint8(bytes1(_encodedInput[52:53]));
         params.assetId = uint16(bytes2(_encodedInput[53:55]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[55:56]));
-        params.useOnBehalf = bytesToBool(bytes1(_encodedInput[56:57]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[55:56]));
+        params.useOnBehalf = DFSLib.bytesToBool(bytes1(_encodedInput[56:57]));
         uint256 mark = 57;
 
         if (params.useDefaultMarket) {
