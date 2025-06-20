@@ -14,12 +14,12 @@ contract SparkHelper is MainnetSparkAddresses {
     
     
     /// @notice Returns the lending pool contract of the specified market
-    function getLendingPool(address _market) internal view returns (ISparkL2Pool) {
+    function getSparkLendingPool(address _market) internal view returns (ISparkL2Pool) {
         return ISparkL2Pool(ISparkPoolAddressesProvider(_market).getPool());
     }
 
     /// @notice Fetch the data provider for the specified market
-    function getDataProvider(address _market) internal view returns (ISparkProtocolDataProvider) {
+    function getSparkDataProvider(address _market) internal view returns (ISparkProtocolDataProvider) {
         return
             ISparkProtocolDataProvider(
                 ISparkPoolAddressesProvider(_market).getPoolDataProvider()
@@ -34,11 +34,11 @@ contract SparkHelper is MainnetSparkAddresses {
         return x != bytes1(0x00);
     }
     
-    function getWholeDebt(address _market, address _tokenAddr, uint256 _borrowType, address _debtOwner) internal view returns (uint256 debt) {
+    function getSparkWholeDebt(address _market, address _tokenAddr, uint256 _borrowType, address _debtOwner) internal view returns (uint256 debt) {
         uint256 STABLE_ID = 1;
         uint256 VARIABLE_ID = 2;
         
-        ISparkProtocolDataProvider dataProvider = getDataProvider(_market);
+        ISparkProtocolDataProvider dataProvider = getSparkDataProvider(_market);
         (, uint256 borrowsStable, uint256 borrowsVariable, , , , , , ) =
             dataProvider.getUserReserveData(_tokenAddr, _debtOwner);
 
