@@ -180,6 +180,14 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                     console.log('----');
                     console.log('STATE AFTER');
                     console.log(stateAfter);
+
+                    // rate is scaled by 1e27. We want first 7 digits to be the same
+                    const precision = hre.ethers.BigNumber.from(10).pow(27 - 7);
+
+                    expect(estimatedStateAfter.collAssetSupplyRate).to.be.closeTo(stateAfter.collAssetSupplyRate, precision);
+                    expect(estimatedStateAfter.collAssetVariableBorrowRate).to.be.closeTo(stateAfter.collAssetVariableBorrowRate, precision);
+                    expect(estimatedStateAfter.debtAssetSupplyRate).to.be.closeTo(stateAfter.debtAssetSupplyRate, precision);
+                    expect(estimatedStateAfter.debtAssetVariableBorrowRate).to.be.closeTo(stateAfter.debtAssetVariableBorrowRate, precision);
                 });
             }
         }

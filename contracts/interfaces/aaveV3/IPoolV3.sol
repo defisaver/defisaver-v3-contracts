@@ -237,20 +237,6 @@ interface IPoolV3 {
     returns (DataTypes.UserConfigurationMap memory);
 
   /**
-   * @notice Returns the normalized income normalized income of the reserve
-   * @param asset The address of the underlying asset of the reserve
-   * @return The reserve's normalized income
-   */
-  function getReserveNormalizedIncome(address asset) external view returns (uint256);
-
-  /**
-   * @notice Returns the normalized variable debt per unit of asset
-   * @param asset The address of the underlying asset of the reserve
-   * @return The reserve normalized variable debt
-   */
-  function getReserveNormalizedVariableDebt(address asset) external view returns (uint256);
-
-  /**
    * @notice Returns the state and configuration of the reserve
    * @param asset The address of the underlying asset of the reserve
    * @return The state and configuration data of the reserve
@@ -380,4 +366,10 @@ interface IPoolV3 {
    * @return The reserve virtual underlying balance
    */
   function getVirtualUnderlyingBalance(address asset) external view returns (uint128);
+
+  /**
+   * @notice Returns the ReserveInterestRateStrategy connected to all the reserves
+   * @return The address of the ReserveInterestRateStrategy contract
+   */
+  function RESERVE_INTEREST_RATE_STRATEGY() external view returns (address);
 }
