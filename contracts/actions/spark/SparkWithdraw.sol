@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IWETH } from "../../interfaces/IWETH.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Withdraw a token from an Spark market
 contract SparkWithdraw is ActionBase, SparkHelper {
@@ -91,7 +91,7 @@ contract SparkWithdraw is ActionBase, SparkHelper {
         uint256 _amount,
         address _to
     ) internal returns (uint256, bytes memory) {
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
 
         uint256 tokenBefore;
@@ -123,7 +123,7 @@ contract SparkWithdraw is ActionBase, SparkHelper {
     function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         encodedInput = bytes.concat(encodedInput, bytes32(_params.amount));
         encodedInput = bytes.concat(encodedInput, bytes20(_params.to));
         if (!_params.useDefaultMarket) {
@@ -133,7 +133,7 @@ contract SparkWithdraw is ActionBase, SparkHelper {
 
     function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
         params.assetId = uint16(bytes2(_encodedInput[0:2]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[2:3]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[2:3]));
         params.amount = uint256(bytes32(_encodedInput[3:35]));
         params.to = address(bytes20(_encodedInput[35:55]));
         if (params.useDefaultMarket) {

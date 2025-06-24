@@ -6,6 +6,7 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Supply a token to an Aave market
 contract AaveV3Supply is ActionBase, AaveV3Helper {
@@ -156,9 +157,9 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
         encodedInput = bytes.concat(encodedInput, bytes32(_params.amount));
         encodedInput = bytes.concat(encodedInput, bytes20(_params.from));
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.enableAsColl));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useOnBehalf));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.enableAsColl));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useOnBehalf));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -171,9 +172,9 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
         params.amount = uint256(bytes32(_encodedInput[0:32]));
         params.from = address(bytes20(_encodedInput[32:52]));
         params.assetId = uint16(bytes2(_encodedInput[52:54]));
-        params.enableAsColl = bytesToBool(bytes1(_encodedInput[54:55]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[55:56]));
-        params.useOnBehalf = bytesToBool(bytes1(_encodedInput[56:57]));
+        params.enableAsColl = DFSLib.bytesToBool(bytes1(_encodedInput[54:55]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[55:56]));
+        params.useOnBehalf = DFSLib.bytesToBool(bytes1(_encodedInput[56:57]));
         uint256 mark = 57;
 
         if (params.useDefaultMarket) {

@@ -9,13 +9,13 @@ import { FluidDexModel } from "../../helpers/FluidDexModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
 import { FluidDexTokensUtils } from "../../helpers/FluidDexTokensUtils.sol";
 import { TokenUtils } from "../../../../utils/TokenUtils.sol";
-import { DFSMath } from "../../../../utils/math/DFSMath.sol";
+import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidSupplyDexLogic - Implements the supplying of tokens to Fluid DEX
 /// @dev Used only for vaults with smart collateral (T2 and T4)
 library FluidSupplyDexLogic  {
     using TokenUtils for address;
-    using DFSMath for uint256;
+    using DFSLib for uint256;
     using FluidVaultTypes for uint256;
 
     /// @notice Supplies tokens to a Fluid DEX using variable amount of shares.
