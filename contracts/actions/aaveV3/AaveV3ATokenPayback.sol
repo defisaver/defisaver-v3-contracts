@@ -7,6 +7,7 @@ import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
 contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
@@ -127,7 +128,7 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
         encodedInput = bytes.concat(encodedInput, bytes20(_params.from));
         encodedInput = bytes.concat(encodedInput, bytes1(_params.rateMode));
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -138,7 +139,7 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
         params.from = address(bytes20(_encodedInput[32:52]));
         params.rateMode = uint8(bytes1(_encodedInput[52:53]));
         params.assetId = uint16(bytes2(_encodedInput[53:55]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[55:56]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[55:56]));
         if (params.useDefaultMarket) {
             params.market = DEFAULT_AAVE_MARKET;
         } else {

@@ -2,12 +2,6 @@
 pragma solidity =0.8.24;
 
 interface IStaticATokenV2 {
-    struct SignatureParams {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
-
     /**
     * @notice Burns `shares` of static aToken, with receiver receiving the corresponding amount of aToken
     * @param shares The shares to withdraw, in static balance of StaticAToken
@@ -27,22 +21,6 @@ interface IStaticATokenV2 {
     * @return uint256 The amount of StaticAToken minted, static balance
     **/
     function depositATokens(uint256 assets, address receiver) external returns (uint256);
-
-    /**
-    * @notice Universal deposit method for proving aToken or underlying liquidity with permit
-    * @param assets The amount of aTokens or underlying to deposit
-    * @param receiver The address that will receive the static aTokens
-    * @param deadline Must be a timestamp in the future
-    * @param sig A `secp256k1` signature params from `msgSender()`
-    * @return uint256 The amount of StaticAToken minted, static balance
-    **/
-    function depositWithPermit(
-        uint256 assets,
-        address receiver,
-        uint256 deadline,
-        SignatureParams memory sig,
-        bool depositToAave
-    ) external returns (uint256);
 
     /**
     * @notice The aToken used inside the 4626 vault.

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity =0.8.24;
 
-interface IRewardsController {
+interface ISparkRewardsController {
   /**
    * @dev Claims reward for a user to the desired address, on all the assets of the pool, accumulating the pending rewards
    * @param assets List of assets to check eligible distributions before claiming rewards
