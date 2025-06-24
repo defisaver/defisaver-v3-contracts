@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { MainnetSparkAddresses } from "./MainnetSparkAddresses.sol";
 
-import { ISparkL2Pool } from "../../../interfaces/spark/ISparkL2Pool.sol";
+import { ISparkPool } from "../../../interfaces/spark/ISparkPool.sol";
 import { ISparkProtocolDataProvider } from "../../../interfaces/spark/ISparkProtocolDataProvider.sol";
 import { ISparkPoolAddressesProvider } from "../../../interfaces/spark/ISparkPoolAddressesProvider.sol";
 
@@ -14,8 +14,8 @@ contract SparkHelper is MainnetSparkAddresses {
     
     
     /// @notice Returns the lending pool contract of the specified market
-    function getSparkLendingPool(address _market) internal view returns (ISparkL2Pool) {
-        return ISparkL2Pool(ISparkPoolAddressesProvider(_market).getPool());
+    function getSparkLendingPool(address _market) internal view returns (ISparkPool) {
+        return ISparkPool(ISparkPoolAddressesProvider(_market).getPool());
     }
 
     /// @notice Fetch the data provider for the specified market
