@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+const { execSync } = require('child_process');
 
 const {
     flatten,
@@ -9,10 +10,6 @@ const {
     encryptPrivateKey,
     changeNetworkNameForAddresses,
 } = require('./hardhat-tasks-functions');
-
-const {
-    createFork, topUp,
-} = require('./utils/fork');
 
 task('fladepver', 'Deploys and verifies contract on etherscan')
     .addOptionalPositionalParam('contractName', 'The name of the contract to flatten, deploy and verify')
@@ -50,16 +47,15 @@ task('encryptPrivateKey', 'Encrypt private key')
         encryptPrivateKey();
     });
 
-task('create-fork', 'Starts a new mainnet fork')
-    .setAction(async () => {
-        const forkId = await createFork();
-
-        console.log(`Fork id: ${forkId}\nRpc url https://rpc.tenderly.co/fork/${forkId}`);
-    });
-
-task('gib-fork-money', 'Gives specified account 100 Eth on fork')
-    .addOptionalPositionalParam('account', 'Account you want to add Eth to')
+task('deployOnFork', 'Deploys contracts on an existing fork')
+    .addVariadicPositionalParam('contractNames', 'The names of the contracts to deploy', [], types.string)
     .setAction(async (args) => {
-        await topUp(args.account);
-        console.log(`Acc: ${args.account} credited with 100 Eth`);
+        const contractNames = args.contractNames.join(' ');
+        const cmd = `CONTRACTS="${contractNames}" npx hardhat run ./scripts/utils/deploy-on-fork.js --network fork`;
+        try {
+            execSync(cmd, { stdio: 'inherit', shell: true });
+        } catch (error) {
+            console.error(`Command failed: ${error}`);
+            process.exit(1);
+        }
     });

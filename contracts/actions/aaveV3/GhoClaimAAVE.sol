@@ -7,13 +7,16 @@ import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
+/// @title Action to claim AAVE rewards from stkGHO token
 contract GhoClaimAAVE is ActionBase, AaveV3Helper {
 
     using TokenUtils for address;
 
+    /// @param amount Amount of AAVE token to claim (uintMax is supported)  
+    /// @param to Address that will be receiving the rewards
     struct Params {
-        uint256 amount;     // Amount of AAVE token to claim (uintMax is supported)
-        address to;         // Address that will be receiving the rewards
+        uint256 amount;
+        address to;
     }
 
     /// @inheritdoc ActionBase
@@ -47,7 +50,7 @@ contract GhoClaimAAVE is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Claims AAVE reward from stkGHO token
+    /// @notice Claims AAVE reward from stkGHO token.
     function _ghoClaimAAVE(Params memory _params) internal returns (uint256 claimedAmount, bytes memory logData) {
         uint256 startingBalance = AAVE_GOV_TOKEN.getBalance(_params.to);
         IStkAave(STAKED_GHO_TOKEN).claimRewards(_params.to, _params.amount);

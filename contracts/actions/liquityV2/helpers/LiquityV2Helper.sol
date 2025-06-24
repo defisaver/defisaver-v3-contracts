@@ -11,4 +11,9 @@ contract LiquityV2Helper is MainnetLiquityV2Addresses {
 
     // Minimum amount of net Bold debt a trove must have
     uint256 constant MIN_DEBT = 2000e18;
+
+    // collateral indexes for different branches (markets)
+    uint256 constant WETH_COLL_INDEX = 0;
+    uint256 constant WSTETH_COLL_INDEX = 1;
+    uint256 constant RETH_COLL_INDEX = 2;
 }

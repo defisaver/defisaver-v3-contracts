@@ -98,6 +98,6 @@ contract LiquityV2ExecuteActions is ExecuteActionsBase, LiquityV2TestHelper {
 
         _wallet.execute(address(_openContract), vars.openCalldata, 0);
 
-        troveId = uint256(keccak256(abi.encode(_wallet.walletAddr(), _nonce)));
+        troveId = uint256(keccak256(abi.encode(_wallet.walletAddr(), _wallet.walletAddr(), _nonce)));
     }
 }

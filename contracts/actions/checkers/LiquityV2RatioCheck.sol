@@ -6,10 +6,10 @@ import { ActionBase } from "../ActionBase.sol";
 import { LiquityV2RatioHelper } from "../liquityV2/helpers/LiquityV2RatioHelper.sol";
 import { TransientStorage } from "../../utils/TransientStorage.sol";
 
-/// @title LiquityV2RatioCheck - Checks liquity ratio for trove and reverts if faulty
+/// @title Action to check the ratio of the Liquity V2 position after strategy execution.
 contract LiquityV2RatioCheck is ActionBase, LiquityV2RatioHelper {
 
-    /// @dev 5% offset acceptable
+    /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
@@ -21,6 +21,10 @@ contract LiquityV2RatioCheck is ActionBase, LiquityV2RatioHelper {
         IN_REPAY
     }
 
+    /// @param market Market address.
+    /// @param troveId Trove ID.
+    /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
+    /// @param targetRatio Target ratio.
     struct Params {
         address market;
         uint256 troveId;

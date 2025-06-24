@@ -4,22 +4,22 @@ const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
-const { supplyComp, borrowComp } = require('../../actions');
+const { supplyComp, borrowComp } = require('../../utils/actions');
 const {
     createCompV2BoostStrategy,
     createCompV2RepayStrategy,
     createCompFLV2BoostStrategy,
     createCompFLV2RepayStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 
 const {
     callCompV2BoostStrategy,
     callCompV2RepayStrategy,
     callCompFLV2BoostStrategy,
     callCompFLV2RepayStrategy,
-} = require('../../strategy-calls');
+} = require('../utils/strategy-calls');
 
-const { subCompV2AutomationStrategy } = require('../../strategy-subs');
+const { subCompV2AutomationStrategy } = require('../utils/strategy-subs');
 const {
     getContractFromRegistry,
     setNetwork,
@@ -30,13 +30,12 @@ const {
     approve,
     setBalance,
     redeploy,
-    REGISTRY_ADDR,
     WETH_ADDRESS,
     redeployCore,
-} = require('../../utils');
-const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
+} = require('../../utils/utils');
+const { createStrategy, addBotCaller, createBundle } = require('../utils/utils-strategies');
 
-const createBundleAndStrategy = async (proxy) => {
+const createBundleAndStrategy = async () => {
     const repayCompStrategyEncoded = createCompV2RepayStrategy();
     const repayFLCompStrategyEncoded = createCompFLV2RepayStrategy();
 
@@ -45,22 +44,20 @@ const createBundleAndStrategy = async (proxy) => {
 
     await openStrategyAndBundleStorage(false);
 
-    const repayId1 = await createStrategy(proxy, ...repayCompStrategyEncoded, true);
-    const repayId2 = await createStrategy(proxy, ...repayFLCompStrategyEncoded, true);
+    const repayId1 = await createStrategy(...repayCompStrategyEncoded, true);
+    const repayId2 = await createStrategy(...repayFLCompStrategyEncoded, true);
 
-    const boostId1 = await createStrategy(proxy, ...boostCompStrategyEncoded, true);
-    const boostId2 = await createStrategy(proxy, ...boostFLCompStrategyEncoded, true);
+    const boostId1 = await createStrategy(...boostCompStrategyEncoded, true);
+    const boostId2 = await createStrategy(...boostFLCompStrategyEncoded, true);
 
     const repayBundleId = await createBundle(
-        proxy,
         [repayId1, repayId2],
     );
 
     const boostBundleId = await createBundle(
-        proxy,
         [boostId1, boostId2],
     );
-    await redeploy('CompSubProxy', REGISTRY_ADDR, false, false, repayBundleId, boostBundleId);
+    await redeploy('CompSubProxy', false, repayBundleId, boostBundleId);
     return { repayBundleId, boostBundleId };
 };
 
@@ -114,7 +111,7 @@ const compV2BoostTest = () => describe('Comp-Boost-Strategy', function () {
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
         await addBotCaller(botAcc.address);
 
-        await createBundleAndStrategy(proxy);
+        await createBundleAndStrategy();
     });
 
     for (let i = 0; i < testPairs.length; i++) {
@@ -255,7 +252,7 @@ const compV2RepayTest = () => describe('Comp-Repay-Strategy', function () {
         await setNewExchangeWrapper(senderAcc, exchangeWrapper);
         await addBotCaller(botAcc.address);
 
-        await createBundleAndStrategy(proxy);
+        await createBundleAndStrategy();
     });
 
     for (let i = 0; i < testPairs.length; i++) {

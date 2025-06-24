@@ -32,13 +32,13 @@ const {
     setContractAt,
     getAddrFromRegistry,
     UNISWAP_WRAPPER,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { createStrategy, addBotCaller, createBundle } = require('../../utils-strategies');
+const { createStrategy, addBotCaller, createBundle } = require('../utils/utils-strategies');
 
 const {
     getRatio, getHints, LiquityActionIds, getTroveInfo,
-} = require('../../utils-liquity');
+} = require('../../utils/liquity');
 
 const {
     callLiquityBoostStrategy,
@@ -52,7 +52,7 @@ const {
     callLiquityDsrPaybackStrategy,
     callLiquityDsrSupplyStrategy,
     callLiquityDebtInFrontRepayStrategy,
-} = require('../../strategy-calls');
+} = require('../utils/strategy-calls');
 
 const {
     subLiquityCloseToCollStrategy,
@@ -63,7 +63,7 @@ const {
     subLiquityDsrPaybackStrategy,
     subLiquityDsrSupplyStrategy,
     subLiquityDebtInFrontRepayStrategy,
-} = require('../../strategy-subs');
+} = require('../utils/strategy-subs');
 
 const {
     createLiquityBoostStrategy,
@@ -74,11 +74,11 @@ const {
     createLiquityPaybackChickenInStrategy,
     createLiquityPaybackChickenOutStrategy,
     createLiquityFLBoostWithCollStrategy,
-} = require('../../strategies');
+} = require('../../../strategies-spec/mainnet');
 
-const { RATIO_STATE_OVER } = require('../../triggers');
+const { RATIO_STATE_OVER } = require('../utils/triggers');
 
-const { liquityOpen, createChickenBond, mcdDsrDeposit } = require('../../actions');
+const { liquityOpen, createChickenBond, mcdDsrDeposit } = require('../../utils/actions');
 
 const BLOCKS_PER_6H = 1662;
 
@@ -159,17 +159,17 @@ const liquityBoostStrategyTest = async () => {
 
             await openStrategyAndBundleStorage();
 
-            const strategyId1 = await createStrategy(proxy, ...liquityBoostStrategy, true);
-            const strategyId2 = await createStrategy(proxy, ...liquityFLBoostStrategy, true);
+            const strategyId1 = await createStrategy(...liquityBoostStrategy, true);
+            const strategyId2 = await createStrategy(...liquityFLBoostStrategy, true);
             // eslint-disable-next-line max-len
-            const strategyId3 = await createStrategy(proxy, ...LiquityFLBoostWithCollStrategy, true);
+            const strategyId3 = await createStrategy(...LiquityFLBoostWithCollStrategy, true);
 
-            const bundleId = await createBundle(proxy, [strategyId1, strategyId2, strategyId3]);
+            const bundleId = await createBundle([strategyId1, strategyId2, strategyId3]);
 
             const ratioOver = MAX_RATIO;
             const targetRatio = TARGET_BOOST;
 
-            await redeploy('LiquitySubProxy', undefined, undefined, undefined, '0', bundleId);
+            await redeploy('LiquitySubProxy', false, '0', bundleId);
             ({ boostSubId: subId, boostSub: strategySub } = await subLiquityAutomationStrategy(
                 proxy,
                 0,
@@ -301,15 +301,15 @@ const liquityRepayStrategyTest = async () => {
 
             await openStrategyAndBundleStorage();
 
-            const strategyId1 = await createStrategy(proxy, ...liquityRepayStrategy, true);
-            const strategyId2 = await createStrategy(proxy, ...liquityFLRepayStrategy, true);
+            const strategyId1 = await createStrategy(...liquityRepayStrategy, true);
+            const strategyId2 = await createStrategy(...liquityFLRepayStrategy, true);
 
-            const bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+            const bundleId = await createBundle([strategyId1, strategyId2]);
 
             const ratioUnder = MIN_RATIO;
             const targetRatio = TARGET_REPAY;
 
-            await getContractFromRegistry('LiquitySubProxy', undefined, undefined, undefined, bundleId, '0');
+            await getContractFromRegistry('LiquitySubProxy', false, bundleId, '0');
             ({ repaySubId: subId, repaySub: strategySub } = await subLiquityAutomationStrategy(
                 proxy,
                 ratioUnder,
@@ -385,7 +385,7 @@ const liquityCBPaybackTest = async () => {
         const lusdDebt = '10000';
         const lusdDebtHalf = (lusdDebt / 2).toString();
         const troveAmount = Float2BN(fetchAmountinUSDPrice('WETH', '20000'));
-        const forkedBlock = 16035000; // doing this to optimize hints fetching
+        // const forkedBlock = 16035000; // doing this to optimize hints fetching
 
         before(async () => {
             await ethers.provider.getBlockNumber()
@@ -461,10 +461,10 @@ const liquityCBPaybackTest = async () => {
             const liqInStrategyEncoded = createLiquityPaybackChickenInStrategy();
             const liqOutFLStrategyEncoded = createLiquityPaybackChickenOutStrategy();
 
-            const strategyId1 = await createStrategy(proxy, ...liqInStrategyEncoded, false);
-            const strategyId2 = await createStrategy(proxy, ...liqOutFLStrategyEncoded, false);
+            const strategyId1 = await createStrategy(...liqInStrategyEncoded, false);
+            const strategyId2 = await createStrategy(...liqOutFLStrategyEncoded, false);
 
-            bundleId = await createBundle(proxy, [strategyId1, strategyId2]);
+            bundleId = await createBundle([strategyId1, strategyId2]);
             console.log(`Bundle Id is ${bundleId} and should be 7`);
         });
 
@@ -731,7 +731,7 @@ const liquityCloseToCollStrategyTest = async () => {
 
             await openStrategyAndBundleStorage();
 
-            const strategyId = await createStrategy(proxy, ...liquityCloseToCollStrategy, false);
+            const strategyId = await createStrategy(...liquityCloseToCollStrategy, false);
 
             const percentage = 10;
 
@@ -1049,7 +1049,6 @@ const liquityDebtInFrontRepayStrategyTest = async () => {
         let liquityView;
         let strategySub;
         let currDebtInFront;
-        let snapshotId;
 
         before(async () => {
             await resetForkToBlock(18275000);
@@ -1107,7 +1106,7 @@ const liquityDebtInFrontRepayStrategyTest = async () => {
                 proxy, debtInFront, targetRatioIncrease,
             ));
 
-            snapshotId = await takeSnapshot();
+            await takeSnapshot();
         });
 
         it('... should trigger a Liquity debt in front Repay strategy', async () => {

@@ -6,9 +6,10 @@ import { ActionBase } from "../ActionBase.sol";
 import { CompV3RatioHelper } from "../compoundV3/helpers/CompV3RatioHelper.sol";
 import { TransientStorage } from "../../utils/TransientStorage.sol";
 
+/// @title Action to check the ratio of the Compound V3 position after strategy execution.
 contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
 
-    /// @dev 5% offset acceptable
+    /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
@@ -20,6 +21,10 @@ contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
         IN_REPAY
     }
 
+    /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
+    /// @param targetRatio Target ratio.
+    /// @param market Market address.
+    /// @param user User address.   
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;

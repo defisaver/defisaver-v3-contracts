@@ -7,6 +7,7 @@ import { MorphoAaveV2Helper } from "../actions/morpho/aaveV2/helpers/MorphoAaveV
 import { TransientStorage } from "../utils/TransientStorage.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
+/// @title Trigger that triggers when the ratio of a user's position in a Morpho AaveV2 market is over or under a certain ratio.
 contract MorphoAaveV2RatioTrigger is ITrigger, MorphoAaveV2Helper, TriggerHelper {
 
     enum RatioState { OVER, UNDER }

@@ -18,6 +18,12 @@ contract AaveV3DelegateCredit is ActionBase, AaveV3Helper {
     
     error NonExistantRateMode();
 
+    /// @param amount Amount of tokens to delegate.
+    /// @param delegatee Address to delegate the credit to.
+    /// @param assetId Asset id.
+    /// @param rateMode Rate mode.
+    /// @param useDefaultMarket Whether to use the default market.
+    /// @param market Aave Market address.
     struct Params {
         uint256 amount;
         address delegatee;

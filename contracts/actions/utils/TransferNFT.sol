@@ -4,9 +4,13 @@ pragma solidity =0.8.24;
 import { IERC721 } from "../../interfaces/IERC721.sol";
 import { ActionBase } from "../ActionBase.sol";
 
-/// @title Helper action to transfer a NFT token to the specified address
+/// @title Helper action to transfer a NFT token to the specified address.
 contract TransferNFT is ActionBase {
 
+    /// @param nftAddr Address of the NFT contract
+    /// @param from Address of the sender
+    /// @param to Address of the recipient
+    /// @param nftId ID of the NFT to transfer
     struct Params {
         address nftAddr;
         address from;
@@ -48,7 +52,7 @@ contract TransferNFT is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
-    /// @dev The user's wallet must have approve if _from != user's wallet
+    /// @notice The user's wallet must have approve if _from != user's wallet.
     /// @param _nftAddr Address of the ERC721 contract
     /// @param _from Where from we are pulling the nft (defaults to user's wallet)
     /// @param _to Address where we are transferring the nft

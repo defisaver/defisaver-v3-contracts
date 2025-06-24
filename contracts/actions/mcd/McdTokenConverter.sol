@@ -12,6 +12,10 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 contract McdTokenConverter is ActionBase, McdHelper {
     using TokenUtils for address;
 
+    /// @param tokenAddr Address of the token to convert
+    /// @param from Address where to pull the tokens from
+    /// @param to Address that will receive the converted tokens
+    /// @param amount Amount of tokens to convert
     struct Params {
         address tokenAddr;
         address from;

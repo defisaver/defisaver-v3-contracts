@@ -292,6 +292,17 @@
         "history": []
     },
     {
+        "name": "PendleWrapper",
+        "address": "0x69090F4B82D05cE64b261e3DA46B7AE7629407C2",
+        "id": "0x42cdd62e",
+        "path": "contracts/exchangeV3/offchainWrappersV3/PendleWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveWrapperV3",
         "address": "0xF5E8C498b6697F0704F0C50448714C5E328b33E2",
         "id": "0xb856c9af",
@@ -344,14 +355,15 @@
     },
     {
         "name": "KyberAggregatorWrapper",
-        "address": "0x8B1a87076077EDe7932d44d8462518Ca6FEb5c98",
+        "address": "0xb4790b9567af88fab6398f8cd21f4460e076c408",
         "id": "0x1abf4ed0",
         "path": "contracts/exchangeV3/offchainWrappersV3/KyberAggregatorWrapper.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x8B1a87076077EDe7932d44d8462518Ca6FEb5c98",
             "0x1e474f3E48e0b2378f4B9f58A076C3F3E316E5FC",
             "0xcafb38fb65056cc753dbf5433cde70b6b28a8458",
             "0xf36cC3f17e336450a8646F57c419835c81Db7F95",
@@ -419,7 +431,7 @@
         "name": "StrategyTriggerView",
         "address": "0x7e048c89D7e6adA900AE53daBA742e6CCCFC54f6",
         "id": "0x5e0ef18c",
-        "path": "contracts/views/StrategyTriggerView.sol",
+        "path": "contracts/views/strategy/StrategyTriggerView.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -428,14 +440,19 @@
     },
     {
         "name": "StrategyTriggerViewNoRevert",
-        "address": "0x9B75882AAf599d198F56Fa19560c98b94B104DcE",
+        "address": "0xEEfc5edc8dEDeeD92834469F2da3e2D415731137",
         "id": "0x37a21cb5",
-        "path": "contracts/views/StrategyTriggerViewNoRevert.sol",
-        "version": "1.0.0",
+        "path": "contracts/views/strategy/StrategyTriggerViewNoRevert.sol",
+        "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x395079428c66C1AB0144057366c7493C92326860",
+            "0x40F282Eb32995A1763619dd4200d19e79BC61CE8",
+            "0xe3d31D3e005B55e72B7c3ECE4E0e2a5Aee2B8C63",
+            "0x9B75882AAf599d198F56Fa19560c98b94B104DcE"
+        ]
     },
     {
         "name": "YearnView",
@@ -1105,6 +1122,17 @@
         ]
     },
     {
+        "name": "DFSSellNoFee",
+        "address": "0x3845C89c861eBb0a0c856CEBB064Ee93678bdE8E",
+        "id": "0xebf16d4a",
+        "path": "contracts/actions/exchange/DFSSellNoFee.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "LimitSell",
         "address": "0x0ed287DB2d0cd0A9Dd1e3391b2D3199370f7B129",
         "id": "0x8c712c04",
@@ -1606,6 +1634,17 @@
         "history": []
     },
     {
+        "name": "MorphoBlueClaim",
+        "address": "0xBB562a790AD7773D54A423bD2A10E4073cb98142",
+        "id": "0x07f9b8e2",
+        "path": "contracts/actions/morpho-blue/MorphoBlueClaim",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "FLMorphoBlue",
         "address": "0x6206C96EAc5EAC546861438A9f953B6BEa50EBAB",
         "id": "0x025e64d8",
@@ -1753,6 +1792,17 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": ["0x9e1d7AAA55D83D36d55BF11cAe4d922aF52B6eF0"]
+    },
+    {
+        "name": "SparkSPKClaim",
+        "address": "0xBc2DD203cDBE5D48c8A24F9e22fA4b3912f446E7",
+        "id": "0x0c7abfae",
+        "path": "contracts/actions/spark/SparkSPKClaim.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
     },
     {
         "name": "AaveV3DelegateWithSig",
@@ -2064,14 +2114,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x3f9f232187b95476947c999ff8e6c65a90be686a",
+        "address": "0xB5C48BE5a6Ed26F0B95397c50d6b52CFcC0e43Bb",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.7",
+        "version": "1.0.8",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x3f9f232187b95476947c999ff8e6c65a90be686a",
             "0x23ef4a553fc2af2784a5bf8ce4345d1f0a355a15",
             "0x3789ae0ea3bc9a4641ed0c5fd90b51e5ed4a3551",
             "0xb49b5f783381408eBda3C3b4C5f34142B4B289EC",
@@ -2732,14 +2783,15 @@
     },
     {
         "name": "GasFeeTaker",
-        "address": "0xb29c4a8ad8fb58b04512a0c479278ad53ad9b5aa",
+        "address": "0x9Af76465F95A6a8232859333149Fcea48fadFBBB",
         "id": "0x4571b8b3",
         "path": "contracts/actions/fee/GasFeeTaker.sol",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xb29c4a8ad8fb58b04512a0c479278ad53ad9b5aa",
             "0xfaE5e10014Dc90A85ABdE21E0fa85CcB78521aB5",
             "0x558A8B92EE6a2B724afDEd319b61Ac55B7259826",
             "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b",
@@ -2754,7 +2806,7 @@
         "id": "0xdcb15eef",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "86400",
+        "changeTime": "604800",
         "registryIds": [{ "name": "StrategyExecutorID", "id": "0x0c1dc439" }],
         "history": []
     },
@@ -3612,14 +3664,15 @@
     },
     {
         "name": "LSVView",
-        "address": "0xF3da52d6e45A967cB6835112B2A0BC34347952e6",
+        "address": "0x8eb872563368b2a8ff6d9a4842f923067f08497a",
         "id": "0x373e1531",
         "path": "contracts/views/LSVView.sol",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xF3da52d6e45A967cB6835112B2A0BC34347952e6",
             "0x096fd98653681dcf07687d2c21beb67807e0c8e6",
             "0x2bf0643b4d7e3e63d0a859048af980fb3333b478",
             "0xECE15C12d8dCDb88c70fAfF38E8dAE4aC4ee69Ce",
@@ -3756,8 +3809,8 @@
         "id": "0xe1c6999c",
         "path": "contracts/actions/aaveV3/GhoUnstake.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -3767,8 +3820,8 @@
         "id": "0x17ca00ae",
         "path": "contracts/actions/aaveV3/GhoClaimAAVE.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": 86400,
         "registryIds": [],
         "history": []
     },
@@ -3894,10 +3947,10 @@
         "history": []
     },
     {
-        "name": "LiquityV2Open",
-        "address": "0x6CEdC0317A9236CdFD800e6a6F41074f01d8229F",
-        "id": "0x2dfc4d0b",
-        "path": "contracts/actions/liquityV2/trove/LiquityV2Open.sol",
+        "name": "LiquityV2CloseLegacy",
+        "address": "0xBD97F8fCfdb03ca29F0C9baCA7Cb09c5A51E4adE",
+        "id": "0xed131269",
+        "path": "contracts/actions/liquityV2/trove/LiquityV2Close.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
@@ -3905,8 +3958,32 @@
         "history": []
     },
     {
+        "name": "LiquityV2PaybackLegacy",
+        "address": "0x902cebdbF9ed3EC434C2246CDace1c825F0d5110",
+        "id": "0x0d563ba0",
+        "path": "contracts/actions/liquityV2/trove/LiquityV2Payback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityV2Open",
+        "address": "0x32491148a6DE3c4D7F8E025721146960373eC5C9",
+        "id": "0x2dfc4d0b",
+        "path": "contracts/actions/liquityV2/trove/LiquityV2Open.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x6CEdC0317A9236CdFD800e6a6F41074f01d8229F"
+        ]
+    },
+    {
         "name": "LiquityV2Close",
-        "address": "0xBD97F8fCfdb03ca29F0C9baCA7Cb09c5A51E4adE",
+        "address": "0x4854d11A534224D7bc43455a7084687450020e03",
         "id": "0x3dcf3785",
         "path": "contracts/actions/liquityV2/trove/LiquityV2Close.sol",
         "version": "1.0.0",
@@ -3939,18 +4016,20 @@
     },
     {
         "name": "LiquityV2Borrow",
-        "address": "0x092afc8AB25C6d5A2cE8CeAc4801fd8B1eFa5759",
+        "address": "0x9198D8bCe49c3E2819653ce350C82Cd009D3E49E",
         "id": "0x78b6a3ae",
         "path": "contracts/actions/liquityV2/trove/LiquityV2Borrow.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x092afc8AB25C6d5A2cE8CeAc4801fd8B1eFa5759"
+        ]
     },
     {
         "name": "LiquityV2Payback",
-        "address": "0x2B51c21a1af1316Af89f0493b2FF5C5D34D4626f",
+        "address": "0x902cebdbF9ed3EC434C2246CDace1c825F0d5110",
         "id": "0x1141b0a3",
         "path": "contracts/actions/liquityV2/trove/LiquityV2Payback.sol",
         "version": "1.0.0",
@@ -3972,25 +4051,29 @@
     },
     {
         "name": "LiquityV2Adjust",
-        "address": "0x6063CaD05DBf1c15f643C0F483bc5ce749501d3C",
+        "address": "0x3BbC88f3b75cB898395C9b5AE8D9c2a26744993b",
         "id": "0x18151d04",
         "path": "contracts/actions/liquityV2/trove/LiquityV2Adjust.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x6063CaD05DBf1c15f643C0F483bc5ce749501d3C"
+        ]
     },
     {
         "name": "LiquityV2AdjustZombieTrove",
-        "address": "0xDaB6aA000B0EBAa653A2715cb3847976bf614272",
+        "address": "0x45F5CEe8f89AdBCe4f5B20f38a49402b152ba99e",
         "id": "0x7ae5cb1e",
         "path": "contracts/actions/liquityV2/trove/LiquityV2AdjustZombieTrove.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xDaB6aA000B0EBAa653A2715cb3847976bf614272"
+        ]
     },
     {
         "name": "LiquityV2AdjustInterestRate",
@@ -4005,25 +4088,29 @@
     },
     {
         "name": "LiquityV2SPDeposit",
-        "address": "0x1556711572a53c89912AE185f3a6Dba9FF365Bf3",
+        "address": "0x73FF552646A7D93764Ff8D1F9e7662c422E715ef",
         "id": "0x042eb099",
         "path": "contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x1556711572a53c89912AE185f3a6Dba9FF365Bf3"
+        ]
     },
     {
         "name": "LiquityV2SPWithdraw",
-        "address": "0x237eaB8D7f9bBeaF8D27dB9797EB835e4062B8C2",
+        "address": "0x8E8a4213745Ed68b3fce9d1500f563d885D02FDf",
         "id": "0x1eea7fdb",
         "path": "contracts/actions/liquityV2/stabilityPool/LiquityV2SPWithdraw.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x237eaB8D7f9bBeaF8D27dB9797EB835e4062B8C2"
+        ]
     },
     {
         "name": "LiquityV2SPClaimColl",
@@ -4038,14 +4125,20 @@
     },
     {
         "name": "LiquityV2View",
-        "address": "0xb1CCB64689F03cC7fd066a2095A285471c8A8554",
+        "address": "0xF1f3D940392ddAD78A5e2dE1b595aB529f63c365",
         "id": "0xe993f355",
         "path": "contracts/views/LiquityV2View.sol",
-        "version": "1.0.0",
+        "version": "1.0.5",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0x9C43F5ED37042Fd4bA7f98aa734026c6C7Fb1Db0"]
+        "history": [
+            "0x111b737CF5233734cE16A6Ee2599aE862fB04485",
+            "0x8ABc5D6850DF33D621c30ae487bab843deb9CB63",
+            "0x60128705250fDf19F1e18b197D1436B30eDa3899",
+            "0xb1CCB64689F03cC7fd066a2095A285471c8A8554",
+            "0x9C43F5ED37042Fd4bA7f98aa734026c6C7Fb1Db0"
+        ]
     },
     {
         "name": "LiquityV2RatioTrigger",
@@ -4114,6 +4207,213 @@
         "history": []
     },
     {
+        "name": "FluidVaultT1Open",
+        "address": "0x48a3cBc7cF4E8e5CB8A09b79b9c7FcE8256E0bb3",
+        "id": "0x35b25e65",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Open",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x372404335C05C2493Ff156Ef60cC0B286f6f2971"
+        ]
+    },
+    {
+        "name": "FluidVaultT1Supply",
+        "address": "0x7844869E49D4ce4c12cc708889bdA21daeb0DD48",
+        "id": "0xaf5b03c0",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Supply",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x0c6100209D8A0bb14CC7d18e45dA1bd1E7a3a187"
+        ]
+    },
+    {
+        "name": "FluidVaultT1Withdraw",
+        "address": "0x453fEe0d4C6fb9c3f52549b1b2555E315D8aB720",
+        "id": "0xf304b35f",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x5673b9ab4A035C5C7474C344664Be91DaFafa17E"
+        ]
+    },
+    {
+        "name": "FluidVaultT1Borrow",
+        "address": "0x09a374e900626a018A9287f27Fbe1562FD6Bd1f9",
+        "id": "0x237b3650",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Borrow",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x36AF0cE762a016e8b4a80c70Af406DFcBc1FCbD4"
+        ]
+    },
+    {
+        "name": "FluidVaultT1Payback",
+        "address": "0xA81bb6ce68a01d2d6CEC1631c7712e3CCd41275C",
+        "id": "0x101b4845",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback",
+        "version": "1.0.2",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0xa7A4B84D38CD33F9901922687db24B8aE14f2455",
+            "0x13b021b52989e257537b4C0ee6Ef12E77AFD4652"
+        ]
+    },
+    {
+        "name": "FluidVaultT1Adjust",
+        "address": "0x8f1443c9F24843D14fa6b302A55C59468ED7D28B",
+        "id": "0xce25def6",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x792D40CAE821905A2B57522BF8a77347e7BB0c0a"
+        ]
+    },
+    {
+        "name": "FluidRatioTrigger",
+        "address": "0x38Fa397D14167DEdFd5c8Cbc361d90e5EB96676d",
+        "id": "0x6de6c127",
+        "path": "contracts/actions/fluid/vaultT1/FluidRatioTrigger",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x42EC8D99a10f213D5B891331659C65a93eaF8feC"
+        ]
+    },
+    {
+        "name": "FluidRatioCheck",
+        "address": "0xE37f1922e16B022991A244E36Eb196772298E8Ea",
+        "id": "0xac7a850e",
+        "path": "contracts/actions/fluid/vaultT1/FluidRatioCheck",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x82392FAa69528BbFE3610a5914534A6E1505e680"
+        ]
+    },
+    {
+        "name": "FluidView",
+        "address": "0xc8df052bD7A8d76a34c09e758Dff3c6298C0115c",
+        "id": "0xae75a797",
+        "path": "contracts/views/FluidView.sol",
+        "version": "1.0.2",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": [
+            "0xeEa800B16C51449322e48afA70FCeA948Dc58B10",
+            "0xf8e3bbf7c95057be1fD5E741a9ADb73E956dC724"
+        ]
+    },
+    {
+        "name": "FluidClaim",
+        "address": "0x0bC0aeF7702C204DEF308994C84D8fBce676dB47",
+        "id": "0x6782bd80",
+        "path": "contracts/actions/fluid/FluidClaim",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexOpen",
+        "address": "0x071e1369E1c9030Aa1a089bDE2F72797a14FE3b3",
+        "id": "0x7d4e6bb2",
+        "path": "contracts/actions/fluid/dex/FluidDexOpen",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexSupply",
+        "address": "0xB3BE39850d8939Cceb4Fc49c415c428548FA9f9C",
+        "id": "0x3cf3e466",
+        "path": "contracts/actions/fluid/dex/FluidDexSupply",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexWithdraw",
+        "address": "0x14d5bb8E96fbf7C1f9A8E3EFD0eF5fe6832ff3cd",
+        "id": "0x4f1673fd",
+        "path": "contracts/actions/fluid/dex/FluidDexWithdraw",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexBorrow",
+        "address": "0x3fa8EF6DA8f5b2BaAee77493a3A3dA68a7Aa75f3",
+        "id": "0x81fb1de1",
+        "path": "contracts/actions/fluid/dex/FluidDexBorrow",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexPayback",
+        "address": "0xD733BD32F4AAEe92a983E2021B85ca5d31236FA0",
+        "id": "0x1de2c822",
+        "path": "contracts/actions/fluid/dex/FluidDexPayback",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "KingClaim",
+        "address": "0xd4C4D1Ef0e79389173EBc247972F355c6f2FEC76",
+        "id": "0xb5997e1a",
+        "path": "contracts/actions/utils/KingClaim.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": ["0x483816678e2348bf87f88b0f4eb6a923017de0d6"]
+    },
+    {
+        "name": "PendleTokenRedeem",
+        "address": "0x94682544aCC5f4D82ECB1ab97998baa0e428EA0f",
+        "id": "0x3de77432",
+        "path": "contracts/actions/pendle/PendleTokenRedeem.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"
@@ -4172,5 +4472,60 @@
         "name": "MCDSaverTaker",
         "address": "0x99DDE0B130833Ce0a6D9EFcFE330327aCf38006E",
         "path": "old_contracts"
+    },
+    {
+        "name": "BalancerV2Supply",
+        "address": "0xE48123018Db5e9075841C61EA702cEca51621191",
+        "id": "0x443f994c",
+        "path": "/BalancerV2Supply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "BalancerV2Withdraw",
+        "address": "0xbED38692438b90AF738F8A7A3142C217DE8fB069",
+        "id": "0x54f465c5",
+        "path": "/BalancerV2Withdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "BalancerV2Claim",
+        "address": "0xEac7c5bEFaA6E17f1A2e86947eEd6419c74A7C03",
+        "id": "0xde8dbbc2",
+        "path": "/BalancerV2Claim.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoAaveV2RatioCheck",
+        "address": "0x904C30Dad119cfF4527d1E4E2aFaF79ac6c05e10",
+        "id": "0xb22cb584",
+        "path": "contracts/actions/checkers/MorphoAaveV2RatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SFApproveTokens",
+        "address": "0x0aC29D44eeC8e8f3b010c2e8FC960957db0c8298",
+        "id": "0x869398d6",
+        "path": "contracts/actions/summerfi/SFApproveTokens.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]

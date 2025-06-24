@@ -65,8 +65,8 @@ contract FetchBondId is ActionBase, CBHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @dev depending on sourceType passed from users subData fetch BondId and return it
-    /// @notice _params.cbRebondBondId is sent externally so we can hash the sub object and compare it with what's stored in onchain storage
-    /// @notice if sourceType is SUB, we deactivate the rebond strategy
+    /// @notice _params.cbRebondBondId is sent externally so we can hash the sub object and compare it with what's stored in onchain storage.
+    /// @notice If sourceType is SUB, we deactivate the rebond strategy.
     function getBondId(Params memory _params) internal returns (uint256) {
         if (SourceType(_params.sourceType) == SourceType.BOND){
             return _params.paybackSourceId;

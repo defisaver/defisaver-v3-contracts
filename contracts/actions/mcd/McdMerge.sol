@@ -6,9 +6,12 @@ import { IManager } from "../../interfaces/mcd/IManager.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
 
-/// @title Merge two vaults that are of the same type
+/// @title Merge two vaults that are of the same type, first into second
 contract McdMerge is ActionBase, McdHelper {
 
+    /// @param srcVaultId Id of the source vault
+    /// @param destVaultId Id of the destination vault
+    /// @param mcdManager Manager address
     struct Params {
         uint256 srcVaultId;
         uint256 destVaultId;
@@ -47,7 +50,6 @@ contract McdMerge is ActionBase, McdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Merges two vaults, first into second
     /// @dev Will not work if not the exact same ilk
     /// @param _srcVaultId Vault we are merging
     /// @param _destVaultId Destination vault

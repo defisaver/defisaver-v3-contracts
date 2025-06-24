@@ -7,10 +7,14 @@ import { ActionBase } from "../ActionBase.sol";
 import { CompHelper } from "./helpers/CompHelper.sol";
 import { IComptroller } from "../../interfaces/compound/IComptroller.sol";
 
-/// @title Claims Comp reward for the specified user
+/// @title Claims Comp reward for the specified user.
 contract CompClaim is ActionBase, CompHelper {
     using TokenUtils for address;
 
+    /// @param cTokensSupply Array of cTokens which the user supplied and has earned rewards
+    /// @param cTokensBorrow Array of cTokens which the user borrowed and has earned rewards
+    /// @param from The address that is claiming the rewards
+    /// @param to The address that will receive the rewards
     struct Params {
         address[] cTokensSupply;
         address[] cTokensBorrow;
@@ -50,7 +54,7 @@ contract CompClaim is ActionBase, CompHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Claims comp for _from address and for specified cTokens
+    /// @notice Claims comp for _from address and for specified cTokens.
     /// @dev if _from != user's wallet, the receiver will always be the _from and not the _to addr
     /// @param _cTokensSupply Array of cTokens which _from supplied and has earned rewards
     /// @param _cTokensBorrow Array of cTokens which _from supplied and has earned rewards

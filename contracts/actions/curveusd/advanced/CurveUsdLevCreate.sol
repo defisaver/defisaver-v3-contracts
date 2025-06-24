@@ -6,7 +6,8 @@ import { ActionBase } from "../../ActionBase.sol";
 import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
 import { ICrvUsdController } from "../../../interfaces/curveusd/ICurveUsd.sol";
 
-/// @title CurveUsdLevCreate 
+/// @title Creates a new curveusd leveraged position with a given amount of collateral and debt
+/// @notice This action uses internal swapper to create a loan
 contract CurveUsdLevCreate is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 

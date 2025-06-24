@@ -5,14 +5,18 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { LiquityV2RatioHelper } from "../liquityV2/helpers/LiquityV2RatioHelper.sol";
 
-/// @title LiquityV2TargetRatioCheck - Checks liquity target ratio for trove and reverts if faulty
+/// @title Action to check the ratio of the LiquityV2 position after strategy execution.
+/// @notice This action only checks for current ratio, without comparing it to the start ratio.
 contract LiquityV2TargetRatioCheck is ActionBase, LiquityV2RatioHelper {
 
-    /// @dev 5% offset acceptable
+    /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
     error BadAfterRatio(uint256 currentRatio, uint256 targetRatio);
 
+    /// @param market Market address.
+    /// @param troveId Trove ID.
+    /// @param targetRatio Target ratio.
     struct Params {
         address market;
         uint256 troveId;

@@ -8,7 +8,7 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 
 /// @title Withdraws stuck rai from a Reflexer safe
-/// @dev Only owner of the safe can withdraw funds
+/// @notice Only owner of the safe can withdraw funds
 contract ReflexerWithdrawStuckFunds is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 

@@ -6,11 +6,13 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ConvexHelper } from "./helpers/ConvexHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
 
+/// @title Action that claims Convex rewards.
 contract ConvexClaim is ConvexHelper, ActionBase {
     using TokenUtils for address;
 
     /// @param from address for which to claim rewards
     /// @param to address that will receive the rewards
+    /// @param rewardContract Address of the reward contract
     struct Params {
         address from;
         address to;
@@ -46,7 +48,6 @@ contract ConvexClaim is ConvexHelper, ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @notice Action that claims Convex rewards 
     function _claim(Params memory _params) internal returns (uint256 crvEarned, bytes memory logData) {
         Reward[] memory rewards = _earnedRewards(_params.from, _params.rewardContract);
         IBRewardPool(_params.rewardContract).getReward(_params.from, true);

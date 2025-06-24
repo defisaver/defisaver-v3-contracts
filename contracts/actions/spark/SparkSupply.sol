@@ -12,6 +12,13 @@ contract SparkSupply is ActionBase, SparkHelper {
     using TokenUtils for address;
 
     /// @dev enableAsColl - left for backwards compatibility, it's not used in this action
+    /// @param amount Amount of tokens to supply
+    /// @param from Address to pull the supply tokens from
+    /// @param assetId The id of the token to be supplied
+    /// @param enableAsColl Whether to enable the asset as collateral
+    /// @param useDefaultMarket Whether to use the default market
+    /// @param useOnBehalf Whether to supply on behalf of another address
+    /// @param market Address of the market to supply to
     struct Params {
         uint256 amount;
         address from;

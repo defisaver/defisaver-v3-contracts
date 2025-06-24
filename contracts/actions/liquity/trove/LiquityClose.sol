@@ -5,9 +5,12 @@ import { LiquityHelper } from "../helpers/LiquityHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
+/// @title Action for closing a liquity trove
 contract LiquityClose is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param from Address where to pull the LUSD tokens from
+    /// @param to Address that will receive the collateral
     struct Params {
         address from;
         address to;
@@ -45,7 +48,6 @@ contract LiquityClose is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Closes the trove
     /// @param _from Address where to pull the LUSD tokens from
     /// @param _to Address that will receive the collateral
     function _liquityClose(address _from, address _to) internal returns (uint256 coll, bytes memory logData) {

@@ -7,7 +7,7 @@ import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol
 import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 
-import { TokenAddresses } from "../../TokenAddresses.sol";
+import {Addresses } from "../../utils/Addresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3PositionCreator } from "../../utils/positions/AaveV3PositionCreator.sol";
 

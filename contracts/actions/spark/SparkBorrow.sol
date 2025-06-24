@@ -9,7 +9,15 @@ import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 /// @title Borrow a token from Spark market
 contract SparkBorrow is ActionBase, SparkHelper {
     using TokenUtils for address;
-
+    
+    /// @param amount Amount of tokens to borrow
+    /// @param to Address to send the borrowed tokens to
+    /// @param rateMode Type of borrow debt [Stable: 1, Variable: 2]
+    /// @param assetId The id of the token to be borrowed
+    /// @param useDefaultMarket Whether to use the default market
+    /// @param useOnBehalf Whether to borrow on behalf of another address
+    /// @param market Address of the market to borrow from
+    /// @param onBehalf Address to borrow on behalf of
     struct Params {
         uint256 amount;
         address to;

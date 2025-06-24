@@ -11,6 +11,10 @@ import { IBasicTokenAdapters } from "../../interfaces/reflexer/IBasicTokenAdapte
 contract ReflexerWithdraw is ActionBase, ReflexerHelper {
     using TokenUtils for address;
 
+    /// @param safeId Id of the safe
+    /// @param amount Amount of collateral to withdraw
+    /// @param adapterAddr Adapter address of the reflexer collateral
+    /// @param to Address where to send the collateral we withdrew
     struct Params {
         uint256 safeId;
         uint256 amount;

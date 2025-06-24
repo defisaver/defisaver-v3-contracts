@@ -7,8 +7,13 @@ import { CompV3Helper } from "./helpers/CompV3Helper.sol";
 import { ICometRewards } from "../../interfaces/compoundV3/ICometRewards.sol";
 import { IERC20 } from "../../interfaces/IERC20.sol";
 
-/// @title Claims Comp reward for the specified user
+/// @title Claims Comp reward for the specified user.
 contract CompV3Claim is ActionBase, CompV3Helper {
+
+    /// @param market Main Comet proxy contract that is different for each compound market
+    /// @param onBehalf The owner to claim for, defaults to user's wallet
+    /// @param to The address to receive the rewards
+    /// @param shouldAccrue If true, the protocol will account for the rewards owed to the account as of the current block before transferring
     struct Params {
         address market;
         address onBehalf;
@@ -60,7 +65,7 @@ contract CompV3Claim is ActionBase, CompV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Claim rewards of token type from a comet instance to a target address
+    /// @notice Claim rewards of token type from a comet instance to a target address.
     /// @param _market Main Comet proxy contract that is different for each compound market
     /// @param _onBehalf The owner to claim for, defaults to user's wallet
     /// @param _to The address to receive the rewards

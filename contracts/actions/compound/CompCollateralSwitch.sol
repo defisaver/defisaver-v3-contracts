@@ -6,10 +6,12 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompHelper } from "./helpers/CompHelper.sol";
 
-/// @title Switch if you'll use tokens for collateral on compound
+/// @title Switch action to switch if user will use tokens for collateral on compound
 contract CompCollateralSwitch is ActionBase, CompHelper {
     using TokenUtils for address;
 
+    /// @param cTokens Array of cTokens addresses
+    /// @param useAsCollateral Array of booleans to indicate if the cToken should be used as collateral
     struct Params {
         address[] cTokens;
         bool[] useAsCollateral;

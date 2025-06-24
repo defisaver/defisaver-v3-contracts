@@ -6,8 +6,11 @@ import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to pull a token from the specified address
 contract PullToken is ActionBase {
-    
     using TokenUtils for address;
+
+    /// @param tokenAddr Address of the token to pull
+    /// @param from Address of the sender
+    /// @param amount Amount of tokens to pull
     struct Params {
         address tokenAddr;
         address from;
@@ -48,8 +51,8 @@ contract PullToken is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
     
 
-    /// @notice Pulls a token from the specified addr, doesn't work with ETH
-    /// @dev If amount is type(uint).max it will send whole user's wallet balance
+    /// @notice Pulls a token from the specified addr, doesn't work with raw ETH.
+    /// @notice If amount is type(uint).max it will send whole user's wallet balance.
     /// @param _tokenAddr Address of token
     /// @param _from From where the tokens are pulled
     /// @param _amount Amount of tokens, can be type(uint).max

@@ -53,7 +53,7 @@ contract CBCreate is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @dev If amount == max.uint it will pull whole balance of .from
+    /// @notice If amount == max.uint it will pull whole balance of .from
     function _cbCreateBond(Params memory _params) internal returns (uint256, bytes memory) {
         _params.amount = LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.amount);
 

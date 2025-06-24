@@ -19,24 +19,23 @@ const {
     getContractFromRegistry,
     formatExchangeObj,
     openStrategyAndBundleStorage,
-    getNetwork,
     redeploy,
     approve,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     addBotCaller,
     createStrategy,
     createBundle,
-} = require('../../utils-strategies');
+} = require('../utils/utils-strategies');
 
 const { topUp } = require('../../../scripts/utils/fork');
-const { subMorphoBlueLeverageManagementOnPrice } = require('../../strategy-subs');
-const { createMorphoBlueBoostOnTargetPriceStrategy, createMorphoBlueFLBoostOnTargetPriceStrategy } = require('../../strategies');
-const { createMorphoBlueBoostOnTargetPriceL2Strategy, createMorphoBlueFLBoostOnTargetPriceL2Strategy } = require('../../l2-strategies');
-const { morphoBlueSupplyCollateral, morphoBlueBorrow } = require('../../actions');
-const { callMorphoBlueBoostOnTargetPriceStrategy, callMorphoBlueFLBoostOnTargetPriceStrategy } = require('../../strategy-calls');
-const { MORPHO_BLUE_ADDRESS } = require('../../morpho-blue/utils');
+const { subMorphoBlueLeverageManagementOnPrice } = require('../utils/strategy-subs');
+const { createMorphoBlueBoostOnTargetPriceStrategy, createMorphoBlueFLBoostOnTargetPriceStrategy } = require('../../../strategies-spec/mainnet');
+const { createMorphoBlueBoostOnTargetPriceL2Strategy, createMorphoBlueFLBoostOnTargetPriceL2Strategy } = require('../../../strategies-spec/l2');
+const { morphoBlueSupplyCollateral, morphoBlueBorrow } = require('../../utils/actions');
+const { callMorphoBlueBoostOnTargetPriceStrategy, callMorphoBlueFLBoostOnTargetPriceStrategy } = require('../utils/strategy-calls');
+const { MORPHO_BLUE_ADDRESS } = require('../../utils/morpho-blue');
 
 /* //////////////////////////////////////////////////////////////
                            CONSTANTS
@@ -108,15 +107,15 @@ const TARGET_RATIO = 175;
 
 const deployBoostOnPriceBundle = async (isFork) => {
     await openStrategyAndBundleStorage(isFork);
-    const boostOnPriceStrategy = getNetwork() === 'mainnet'
+    const boostOnPriceStrategy = network === 'mainnet'
         ? createMorphoBlueBoostOnTargetPriceStrategy()
         : createMorphoBlueBoostOnTargetPriceL2Strategy();
-    const flBoostOnPriceStrategy = getNetwork() === 'mainnet'
+    const flBoostOnPriceStrategy = network === 'mainnet'
         ? createMorphoBlueFLBoostOnTargetPriceStrategy()
         : createMorphoBlueFLBoostOnTargetPriceL2Strategy();
-    const boostOnPriceStrategyId = await createStrategy(undefined, ...boostOnPriceStrategy, false);
-    const flBoostOnPriceStrategyId = await createStrategy(undefined, ...flBoostOnPriceStrategy, false);
-    const boostOnPriceBundleId = await createBundle(undefined, [boostOnPriceStrategyId, flBoostOnPriceStrategyId]);
+    const boostOnPriceStrategyId = await createStrategy(...boostOnPriceStrategy, false);
+    const flBoostOnPriceStrategyId = await createStrategy(...flBoostOnPriceStrategy, false);
+    const boostOnPriceBundleId = await createBundle([boostOnPriceStrategyId, flBoostOnPriceStrategyId]);
     return boostOnPriceBundleId;
 };
 const formatMarketParams = (marketParams) => [
@@ -189,7 +188,6 @@ const formatExchangeObjForMarket = (marketParams, amount) => formatExchangeObj(
 const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
     describe('Morpho Boost On Price Strategy Test', function () {
         this.timeout(1200000);
-        const REGISTRY_ADDR = addrs[network].REGISTRY_ADDR;
         let snapshotId;
         let senderAcc;
         let proxy;
@@ -219,18 +217,18 @@ const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
 
             // setup contracts
             const strategyContractName = network === 'mainnet' ? 'StrategyExecutor' : 'StrategyExecutorL2';
-            strategyExecutor = await hre.ethers.getContractAt(strategyContractName, addrs[getNetwork()].STRATEGY_EXECUTOR_ADDR);
+            strategyExecutor = await hre.ethers.getContractAt(strategyContractName, addrs[network].STRATEGY_EXECUTOR_ADDR);
             strategyExecutor = strategyExecutor.connect(botAcc);
-            flAction = await getContractFromRegistry('FLAction', REGISTRY_ADDR, false, isFork);
-            view = await hre.ethers.getContractAt('MorphoBlueHelper', addrs[getNetwork()].MORPHO_BLUE_VIEW);
-            await redeploy('MorphoBluePriceTrigger', REGISTRY_ADDR, false, isFork);
-            await redeploy('MorphoBlueTargetRatioCheck', REGISTRY_ADDR, false, isFork);
+            flAction = await getContractFromRegistry('FLAction', isFork);
+            view = await hre.ethers.getContractAt('MorphoBlueHelper', addrs[network].MORPHO_BLUE_VIEW);
+            await redeploy('MorphoBluePriceTrigger', isFork);
+            await redeploy('MorphoBlueTargetRatioCheck', isFork);
 
             // deploy bundle
             boostOnPriceBundleId = await deployBoostOnPriceBundle(isFork);
 
             // add bot caller
-            await addBotCaller(botAcc.address, REGISTRY_ADDR, isFork);
+            await addBotCaller(botAcc.address, isFork);
         });
         beforeEach(async () => { snapshotId = await takeSnapshot(); });
         afterEach(async () => { await revertToSnapshot(snapshotId); });
