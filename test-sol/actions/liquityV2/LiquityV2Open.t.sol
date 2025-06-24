@@ -137,7 +137,9 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
         for (uint i = 0; i < markets.length; i++) {
 
             if (_config.interestRateManager != address(0)) {
-                _registerBatchManager(markets[i], _config.interestRateManager);
+                vm.startPrank(_config.interestRateManager);
+                registerBatchManager(markets[i]);
+                vm.stopPrank();
             }
 
             IAddressesRegistry market = markets[i];
@@ -255,25 +257,5 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
 
         ITroveNFT troveNft = ITroveNFT(IAddressesRegistry(_params.market).troveNFT());
         assertEq(troveNft.ownerOf(troveId), walletAddr);
-    }
-
-    function _registerBatchManager(IAddressesRegistry _market, address _batchManager) internal {
-        IBorrowerOperations borrowerOperations = IBorrowerOperations(_market.borrowerOperations());
-        
-        uint128 minInterestRate = 1e18 / 100; // 1%
-        uint128 maxInterestRate = 1e18 / 4; // 25%
-        uint128 currentInterestRate = 1e18 / 10; // 10%
-        uint128 fee = 1e18 / 100; // 1%
-        uint128 minInterestRateChangePeriod = 7 days;
-
-        vm.prank(_batchManager);
-        borrowerOperations.registerBatchManager(
-            minInterestRate,
-            maxInterestRate,
-            currentInterestRate,
-            fee,
-            minInterestRateChangePeriod
-        );
-        vm.stopPrank();
     }
 }
