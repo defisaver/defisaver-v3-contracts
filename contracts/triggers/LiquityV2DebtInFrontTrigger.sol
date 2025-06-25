@@ -2,24 +2,34 @@
 
 pragma solidity =0.8.24;
 
-import {AdminAuth} from "../auth/AdminAuth.sol";
 import {ITrigger} from "../interfaces/ITrigger.sol";
-import {TriggerHelper} from "./helpers/TriggerHelper.sol";
 import {IAddressesRegistry} from "../interfaces/liquityV2/IAddressesRegistry.sol";
 import {ITroveManager} from "../interfaces/liquityV2/ITroveManager.sol";
 import {IBorrowerOperations} from "../interfaces/liquityV2/IBorrowerOperations.sol";
 import {ISortedTroves} from "../interfaces/liquityV2/ISortedTroves.sol";
 import {IStabilityPool} from "../interfaces/liquityV2/IStabilityPool.sol";
 
-// TODO update comment
-/// @title Trigger contract that calculates the debt in front of a trove taking all the branches into account
-contract LiquityV2DebtInFrontTrigger is ITrigger, AdminAuth, TriggerHelper {
-    address internal constant ETH_MARKET = 0x38e1F07b954cFaB7239D7acab49997FBaAD96476;
-    address internal constant WST_ETH_MARKET = 0x2D4ef56cb626E9a4C90c156018BA9CE269573c61;
-    address internal constant RETH_MARKET = 0x3b48169809DD827F22C9e0F2d71ff12Ea7A94a2F;
+import {LiquityV2Helper} from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
+import {TriggerHelper} from "./helpers/TriggerHelper.sol";
+import {AdminAuth} from "../auth/AdminAuth.sol";
 
-    /// @param market address of the market where the trove is
+/// @title Trigger contract that triggers if calculated debt in front of a trove is below a certain threshold
+/// @notice This trigger takes all the branches into account
+contract LiquityV2DebtInFrontTrigger is
+    ITrigger,
+    AdminAuth,
+    TriggerHelper,
+    LiquityV2Helper
+{
+    /// @notice Error thrown when an invalid market address is provided
+    error InvalidMarketAddress();
+
+    /// @notice Maximum number of iterations to get the debt in front for a current trove branch
+    uint256 internal constant MAX_ITERATIONS = 1000;
+
+    /// @param market address of the market
     /// @param troveId id of the trove
+    /// @param debtInFrontMin minimum debt in front, below which the trigger will be triggered
     struct SubParams {
         address market;
         uint256 troveId;
@@ -32,97 +42,33 @@ contract LiquityV2DebtInFrontTrigger is ITrigger, AdminAuth, TriggerHelper {
 
         uint256 debtInFront = getDebtInFront(triggerSubData.market, triggerSubData.troveId);
 
-        return debtInFront >= triggerSubData.debtInFrontMin;
+        return debtInFront < triggerSubData.debtInFrontMin;
     }
 
-    function getDebtInFront(address _market, uint256 _trove) public view returns (uint256) {
-        (uint256 ethTotalDebt, uint256 ethUnbackedBold) = getUnbackedDebt(ETH_MARKET);
-        (uint256 wstEthTotalDebt, uint256 wstEthUnbackedBold) = getUnbackedDebt(WST_ETH_MARKET);
-        (uint256 rEthTotalDebt, uint256 rEthUnbackedBold) = getUnbackedDebt(RETH_MARKET);
-
-        uint256 totalUnbackedDebt = ethUnbackedBold + wstEthUnbackedBold + rEthUnbackedBold;
-
-        uint256 branchDebtInFront = getDebtInFrontOnTrovesBranch(_market, _trove, 0, 1000);
-
-        uint256 totalDebtInFront = branchDebtInFront;
-        if (_market == ETH_MARKET) {
-            totalDebtInFront += getRedeemAmount(
-                wstEthTotalDebt,
-                branchDebtInFront,
-                wstEthUnbackedBold,
-                ethUnbackedBold
-            );
-            totalDebtInFront += getRedeemAmount(
-                rEthTotalDebt,
-                branchDebtInFront,
-                rEthUnbackedBold,
-                ethUnbackedBold
-            );
-        } else if (_market == WST_ETH_MARKET) {
-            totalDebtInFront += getRedeemAmount(
-                ethTotalDebt,
-                branchDebtInFront,
-                ethUnbackedBold,
-                wstEthUnbackedBold
-            );
-            totalDebtInFront += getRedeemAmount(
-                rEthTotalDebt,
-                branchDebtInFront,
-                rEthUnbackedBold,
-                wstEthUnbackedBold
-            );
-        } else if (_market == RETH_MARKET) {
-            totalDebtInFront += getRedeemAmount(
-                ethTotalDebt,
-                branchDebtInFront,
-                ethUnbackedBold,
-                rEthUnbackedBold
-            );
-            totalDebtInFront += getRedeemAmount(
-                wstEthTotalDebt,
-                branchDebtInFront,
-                wstEthUnbackedBold,
-                rEthUnbackedBold
-            );
-        } else {
-            // TODO return 0 or revert?
-            return 0;
-        }
-
-        return totalDebtInFront;
-    }
-
-    function getDebtInFrontOnTrovesBranch(
+    function getDebtInFront(
         address _market,
-        uint256 _troveId,
-        uint256 _acc,
-        uint256 _iterations
-    ) public view returns (uint256 debt) {
-        ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
-        ISortedTroves sortedTroves = ISortedTroves(IAddressesRegistry(_market).sortedTroves());
+        uint256 _trove
+    ) public view returns (uint256) {
+        (uint256 ethTotalDebt, uint256 ethUnbackedDebt) = _getUnbackedDebt(WETH_MARKET_ADDR);
+        (uint256 wstEthTotalDebt, uint256 wstEthUnbackedDebt) = _getUnbackedDebt(WSTETH_MARKET_ADDR);
+        (uint256 rEthTotalDebt, uint256 rEthUnbackedDebt) = _getUnbackedDebt(RETH_MARKET_ADDR);
 
-        uint256 next = _troveId;
-        debt = _acc;
-        for (uint256 i = 0; i < _iterations; ++i) {
-            next = sortedTroves.getNext(next);
-            if (next == 0) return debt;
-            debt += _getDebtInFrontOnTrovesBranch(troveManager, next);
-        }
-    }
+        uint256 totalUnbackedDebt = ethUnbackedDebt + wstEthUnbackedDebt + rEthUnbackedDebt;
+        uint256 branchDebtInFront = _getDebtInFrontForCurrentBranch(_market, _trove);
 
-    function getRedeemAmount(
-        uint256 totalBorrowOnBranch,
-        uint256 debtInFrontOnBranch,
-        uint256 unbackedBoldOnBranch,
-        uint256 selectedMarketUnbackedData
-    ) public pure returns (uint256) {
-        uint256 totalDebtInFront = (debtInFrontOnBranch * unbackedBoldOnBranch) /
-            selectedMarketUnbackedData;
-        if (totalBorrowOnBranch < totalDebtInFront) {
-            return totalBorrowOnBranch;
-        } else {
-            return totalDebtInFront;
-        }
+        // Equation:
+        // ---------
+        // totalDebtInFront * branchRedeemPercentage = branchDebtInFront
+        // totalDebtInFront * (unbackedDebtOnBranch / totalUnbackedDebt) = branchDebtInFront
+        // totalDebtInFront = branchDebtInFront * totalUnbackedDebt / unbackedDebtOnBranch
+        // ---------
+        uint256 numerator = branchDebtInFront * totalUnbackedDebt;
+
+        if (_market == WETH_MARKET_ADDR)   return numerator / ethUnbackedDebt;
+        if (_market == WSTETH_MARKET_ADDR) return numerator / wstEthUnbackedDebt;
+        if (_market == RETH_MARKET_ADDR)   return numerator / rEthUnbackedDebt;
+
+        revert InvalidMarketAddress();
     }
 
     function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
@@ -135,22 +81,42 @@ contract LiquityV2DebtInFrontTrigger is ITrigger, AdminAuth, TriggerHelper {
         return false;
     }
 
-    function getUnbackedDebt(
+    /*//////////////////////////////////////////////////////////////
+                            INTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+    /// @notice Gets the unbacked debt for a branch
+    function _getUnbackedDebt(
         address _market
-    ) internal view returns (uint256 systemDebt, uint256 unbackedBold) {
+    ) internal view returns (uint256 branchDebt, uint256 unbackedBold) {
         IAddressesRegistry registry = IAddressesRegistry(_market);
-        systemDebt = IBorrowerOperations(registry.borrowerOperations()).getEntireSystemDebt();
+        branchDebt = IBorrowerOperations(registry.borrowerOperations()).getEntireBranchDebt();
         uint256 boldDeposits = IStabilityPool(registry.stabilityPool()).getTotalBoldDeposits();
-        unbackedBold = systemDebt - boldDeposits;
+
+        unbackedBold = branchDebt > boldDeposits ? branchDebt - boldDeposits : 0;
     }
 
-    function _getDebtInFrontOnTrovesBranch(
+    /// @notice Gets the debt in front for a current trove branch
+    function _getDebtInFrontForCurrentBranch(
+        address _market,
+        uint256 _troveId
+    ) public view returns (uint256 debt) {
+        ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
+        ISortedTroves sortedTroves = ISortedTroves(IAddressesRegistry(_market).sortedTroves());
+
+        uint256 next = _troveId;
+        for (uint256 i = 0; i < MAX_ITERATIONS; ++i) {
+            next = sortedTroves.getNext(next);
+            if (next == 0) return debt;
+            debt += _getTroveDebt(troveManager, next);
+        }
+    }
+
+    /// @notice Gets the latest total debt of a trove
+    function _getTroveDebt(
         ITroveManager _troveManager,
         uint256 _troveId
     ) internal view returns (uint256 debt) {
-        ITroveManager.LatestTroveData memory latestTroveData = _troveManager.getLatestTroveData(
-            _troveId
-        );
+        ITroveManager.LatestTroveData memory latestTroveData = _troveManager.getLatestTroveData(_troveId);
         debt = latestTroveData.entireDebt;
     }
 }
