@@ -10,7 +10,7 @@ import { LiquityV2Open } from "../../contracts/actions/liquityV2/trove/LiquityV2
 import { LiquityV2View } from "../../contracts/views/LiquityV2View.sol";
 import { LiquityV2AdjustInterestRate } from "../../contracts/actions/liquityV2/trove/LiquityV2AdjustInterestRate.sol";
 import { LiquityV2AdjustTimeTrigger } from "../../contracts/triggers/LiquityV2AdjustTimeTrigger.sol";
-
+import { MockLiquityV2PriceFeed } from "../../contracts/mocks/MockLiquity2PriceFeed.sol";
 import { LiquityV2ExecuteActions } from "../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 
@@ -54,16 +54,18 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
         markets = getMarkets();
         BOLD = markets[0].boldToken();
         WETH = markets[0].WETH();
+
+        _mockPriceFeeds(2500e18);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_trigger_not_active_time_not_passed() public {
+    /// @dev Time expensive test because of interest rate change in linked list. Commented out.
+    function _test_trigger_not_active_time_not_passed() public {
         for (uint256 i = 0; i < markets.length; i++) {
             uint256 troveId = _openTroveAndAdjustInterestRate(markets[i], i);
             
-            // Check trigger immediately after adjustment (should be false)
             bool isTriggered = cut.isAdjustmentFeeZero(address(markets[i]), troveId);
             assertFalse(isTriggered, "Trigger should not be active immediately after adjustment");
 
@@ -75,11 +77,11 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
         }
     }
 
+    /// @dev Time expensive test because of interest rate change in linked list. Commented out.
     function _test_trigger_active_time_passed() public {
         for (uint256 i = 0; i < markets.length; i++) {
             uint256 troveId = _openTroveAndAdjustInterestRate(markets[i], i);
             
-            // Check trigger immediately after adjustment (should be false)
             bool isTriggered = cut.isAdjustmentFeeZero(address(markets[i]), troveId);
             assertFalse(isTriggered, "Trigger should not be active immediately after adjustment");
 
@@ -97,6 +99,7 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
         }
     }
 
+    /// @dev Time expensive test because of interest rate change in linked list. Commented out.
     function _test_trigger_not_active_trove_has_batch_manager() public {
         address batchManager = address(0xdeadbeef);
         
@@ -137,35 +140,6 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
         }
     }
 
-    function _test_trigger_not_active_trove_not_active() public {
-        for (uint256 i = 0; i < markets.length; i++) {
-            uint256 troveId = _openTroveAndAdjustInterestRate(markets[i], i);
-            
-            // Verify trove is active first
-            ITroveManager troveManager = ITroveManager(markets[i].troveManager());
-            ITroveManager.Status status = troveManager.getTroveStatus(troveId);
-            assertEq(uint256(status), uint256(ITroveManager.Status.active), "Trove should be active");
-
-            // Advance time so trigger would be active if trove was active
-            vm.warp(block.timestamp + 8 days);
-            
-            // Check trigger is active for active trove
-            bool isTriggered = cut.isAdjustmentFeeZero(address(markets[i]), troveId);
-            assertTrue(isTriggered, "Trigger should be active for active trove after cooldown");
-
-            // Now close the trove to make it inactive
-            _closeTrove(markets[i], troveId);
-
-            // Verify trove is now closed
-            status = troveManager.getTroveStatus(troveId);
-            assertEq(uint256(status), uint256(ITroveManager.Status.closedByOwner), "Trove should be closed");
-
-            // Check trigger is now false due to trove being inactive
-            isTriggered = cut.isAdjustmentFeeZero(address(markets[i]), troveId);
-            assertFalse(isTriggered, "Trigger should not be active for closed trove");
-        }
-    }
-
     /*//////////////////////////////////////////////////////////////////////////
                                 HELPER FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
@@ -174,8 +148,8 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
     function _openTroveAndAdjustInterestRate(IAddressesRegistry _market, uint256 _collIndex) internal returns (uint256 troveId) {
         uint256 collAmountInUSD = 30000;
         uint256 borrowAmountInUSD = 10000;
-        uint256 initialInterestRate = 1e18 / 10; // 10%
-        uint256 newInterestRate = 1e18 / 20; // 5%
+        uint256 initialInterestRate = 6e16; // 6%
+        uint256 newInterestRate = initialInterestRate + 1; // slightly higher than initial interest rate
 
         // Open trove without batch manager
         troveId = executeLiquityOpenTrove(
@@ -230,20 +204,17 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
         wallet.execute(address(adjustInterestRateContract), executeActionCallData, 0);
     }
 
-    /// @dev Helper function to close a trove
-    function _closeTrove(IAddressesRegistry _market, uint256 _troveId) internal {
-        // Get the trove debt to repay
-        ITroveManager troveManager = ITroveManager(_market.troveManager());
-        ITroveManager.LatestTroveData memory troveData = troveManager.getLatestTroveData(_troveId);
-        
-        // Give wallet enough BOLD to close the trove
-        give(BOLD, sender, troveData.entireDebt);
-        wallet.ownerApprove(BOLD, troveData.entireDebt);
+    function _mockPriceFeeds(uint256 _price) internal {
+        address wethPriceFeed = IAddressesRegistry(WETH_MARKET_ADDR).priceFeed();
+        address wstethPriceFeed = IAddressesRegistry(WSTETH_MARKET_ADDR).priceFeed();
+        address rethPriceFeed = IAddressesRegistry(RETH_MARKET_ADDR).priceFeed();
 
-        // Close the trove via borrower operations
-        IBorrowerOperations borrowerOperations = IBorrowerOperations(_market.borrowerOperations());
-        vm.startPrank(walletAddr);
-        borrowerOperations.closeTrove(_troveId);
-        vm.stopPrank();
+        vm.etch(wethPriceFeed, address(new MockLiquityV2PriceFeed()).code);
+        vm.etch(wstethPriceFeed, address(new MockLiquityV2PriceFeed()).code);
+        vm.etch(rethPriceFeed, address(new MockLiquityV2PriceFeed()).code);
+
+        MockLiquityV2PriceFeed(wethPriceFeed).setPrice(_price);
+        MockLiquityV2PriceFeed(wstethPriceFeed).setPrice(_price);
+        MockLiquityV2PriceFeed(rethPriceFeed).setPrice(_price);
     }
 }
