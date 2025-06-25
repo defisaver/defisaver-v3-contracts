@@ -4527,5 +4527,16 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "LiquityV2AdjustTimeTrigger",
+        "address": "0xDAC16ee91E5407214B75FB1871AaDf356010a939",
+        "id": "0x91d52698",
+        "path": "contracts/triggers/LiquityV2AdjustTimeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
     }
 ]
