@@ -8,12 +8,15 @@ import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
+/// @title Action for depositing DAI into Maker DSR
 contract McdDsrDeposit is McdHelper, ActionBase {
     using TokenUtils for address;
 
+    /// @param amount Amount of DAI to deposit into DSR
+    /// @param from Address from which the DAI will be pulled
     struct Params {
-        uint256 amount; // amount of DAI to deposit into DSR
-        address from; // address from which the DAI will be pulled
+        uint256 amount;
+        address from;
     }
 
     /// @inheritdoc ActionBase
@@ -45,7 +48,6 @@ contract McdDsrDeposit is McdHelper, ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @notice Deposits DAI into Maker DSR
     function _deposit(Params memory _params) internal returns (uint256 deposited, bytes memory logData) {
         IPot pot = IPot(POT_ADDR);
 

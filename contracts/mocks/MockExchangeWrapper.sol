@@ -13,15 +13,13 @@ contract MockExchangeWrapper is DSMath, IExchangeV3, AdminAuth {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
-    address internal immutable _this = address(this);
-
-    /// @notice Sells _srcAmount of tokens on Curve
+    /// @notice Takes srcAmount of source tokens and returns dest tokens to the caller at the provided rate.
     /// @param _srcAddr From token
     /// @param _srcAmount From amount
     /// @param _additionalData Route and swap params
     /// @return uint256 amount of tokens received from selling
     function sell(address _srcAddr, address _destAddr, uint256 _srcAmount, bytes calldata _additionalData) external override returns (uint) {    
-        IERC20(_srcAddr).transfer(_this, _srcAmount);
+        IERC20(_srcAddr).transfer(address(this), _srcAmount);
 
         (uint256 rate) = abi.decode(_additionalData, (uint256));
         uint256 amountOut = wmul(rate, _srcAmount);

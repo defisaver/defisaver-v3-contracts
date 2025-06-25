@@ -5,9 +5,12 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
+/// @title TokenBalance - Returns the balance of a token for a given address.
 contract TokenBalance is ActionBase {
     using TokenUtils for address;
 
+    /// @param tokenAddr Address of the token
+    /// @param holderAddr Address of the holder
     struct Params {
         address tokenAddr;
         address holderAddr;

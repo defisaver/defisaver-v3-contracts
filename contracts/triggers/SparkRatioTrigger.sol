@@ -8,7 +8,7 @@ import { ITrigger } from "../interfaces/ITrigger.sol";
 import { TransientStorage } from "../utils/TransientStorage.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
-
+/// @title Trigger that triggers when the ratio of a user's position in a Spark market is over or under a certain ratio.
 contract SparkRatioTrigger is ITrigger, AdminAuth, SparkRatioHelper, TriggerHelper {
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);

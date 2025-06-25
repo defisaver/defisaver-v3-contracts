@@ -5,13 +5,17 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3RatioHelper } from "../aaveV3/helpers/AaveV3RatioHelper.sol";
 
+/// @title Action to check the ratio of the Aave V3 position after strategy execution.
+/// @notice This action only checks for current ratio, without comparing it to the start ratio.
 contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
 
-    /// @dev 5% offset acceptable
+    /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
     error BadAfterRatio(uint256 currentRatio, uint256 targetRatio);
 
+    /// @param targetRatio Target ratio.
+    /// @param market Market address.
     struct Params {
         uint256 targetRatio;
         address market;

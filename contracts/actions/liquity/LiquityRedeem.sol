@@ -6,9 +6,19 @@ import { LiquityHelper } from "./helpers/LiquityHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 
+/// @title Action for redeeming Trove in Liquity
 contract LiquityRedeem is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
+    /// @param lusdAmount Amount of LUSD tokens to redeem
+    /// @param from Address where to pull the tokens from
+    /// @param to Address that will receive the tokens
+    /// @param firstRedemptionHint First hint for finding a redemption
+    /// @param upperPartialRedemptionHint Upper hint for finding a redemption
+    /// @param lowerPartialRedemptionHint Lower hint for finding a redemption
+    /// @param partialRedemptionHintNICR Partial redemption hint NICR
+    /// @param maxIterations Maximum number of iterations
+    /// @param maxFeePercentage Maximum fee percentage
     struct Params {
         uint256 lusdAmount;
         address from;

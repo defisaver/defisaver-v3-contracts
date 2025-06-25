@@ -11,6 +11,9 @@ import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 contract AaveV3SetEMode is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param categoryId eMode category id (0 - 255).
+    /// @param useDefaultMarket Whether to use the default market.
+    /// @param market Aave Market address.
     struct Params {
         uint8 categoryId;
         bool useDefaultMarket;

@@ -6,9 +6,12 @@ require('dotenv-safe').config();
 
 const ethers = require('ethers');
 const { program } = require('commander');
+const { readFileSync, existsSync, writeFileSync } = require('fs');
+const { join } = require('path');
+const { createInterface } = require('readline');
 
-const { addrs } = require('../test/utils');
-const { getNameId, generateIds } = require('../test/utils');
+const { addrs } = require('../test/utils/utils');
+const { getNameId, generateIds } = require('../test/utils/utils');
 
 const registryAbi = require('../artifacts/contracts/core/DFSRegistry.sol/DFSRegistry.json').abi;
 
@@ -200,6 +203,231 @@ const approveContractChangeCall = async (idOrName, options) => {
     };
 };
 
+const registryDeploymentBlocks = {
+    mainnet: 14171278,
+    arbitrum: 12302244,
+    base: 3654462,
+    optimism: 8515878,
+};
+
+const compareRegistryWithJson = async (options) => {
+    const registry = await setRegistry(options);
+
+    // Get the network name
+    const network = options.network.length === 0 ? 'mainnet' : options.network;
+
+    const startingBlock = registryDeploymentBlocks[network];
+
+    // fetch newContract events
+    const filter = registry.filters.AddNewContract();
+    const events = await registry.queryFilter(filter, startingBlock);
+
+    // Get all registered contracts from on-chain events
+    let registeredContracts = [];
+    events.forEach(async (e) => {
+        const entry = parseAddNewContractEvent(e);
+        registeredContracts.push(entry);
+    });
+
+    // Remove duplicates by id
+    registeredContracts = registeredContracts.filter((contract, index, self) => (
+        index === self.findIndex((c) => c.id === contract.id)
+    ));
+
+    // Read the JSON file for the network
+    const jsonPath = join(__dirname, '..', 'addresses', `${network}.json`);
+    if (!existsSync(jsonPath)) {
+        console.log(`No JSON file found for network ${network}`);
+        return;
+    }
+
+    const fileContent = readFileSync(jsonPath, 'utf8');
+    const jsonData = JSON.parse(fileContent);
+
+    // Get the mapping of all contract IDs to their file info
+    const idsMap = generateIds();
+
+    // Find contracts that are in registry but not in JSON
+    const missingContracts = [];
+    const addressMatchContracts = [];
+    registeredContracts.forEach((contract) => {
+        const jsonContract = jsonData.find((c) => c.id === contract.id);
+        const hasMatchingAddr = (c) => c.address.toLowerCase() === contract.addr.toLowerCase();
+        const addrInHistory = (c) => c.history && c.history.some((addr) => (
+            addr.toLowerCase() === contract.addr.toLowerCase()
+        ));
+        const addressExists = jsonData.some((c) => hasMatchingAddr(c) || addrInHistory(c));
+
+        if (!jsonContract) {
+            // The contract info is directly stored in idsMap[id]
+            const contractInfo = idsMap[contract.id];
+            const entry = {
+                name: contractInfo ? contractInfo.fileName : 'Unknown',
+                address: contract.addr,
+                id: contract.id,
+                path: contractInfo ? contractInfo.filePath : '',
+                version: '1.0.0',
+                inRegistry: true,
+                changeTime: contract.waitTime.toString(),
+                registryIds: [],
+                history: [],
+            };
+
+            if (addressExists) {
+                // Find where this address exists
+                const existingEntry = jsonData.find((c) => (
+                    hasMatchingAddr(c) || addrInHistory(c)
+                ));
+                addressMatchContracts.push({
+                    newEntry: entry,
+                    existingEntry: {
+                        name: existingEntry.name,
+                        address: existingEntry.address,
+                        id: existingEntry.id,
+                    },
+                });
+            } else {
+                missingContracts.push(entry);
+            }
+        }
+    });
+
+    if (missingContracts.length === 0 && addressMatchContracts.length === 0) {
+        console.log('All registry contracts are properly documented in JSON file');
+        return;
+    }
+
+    if (addressMatchContracts.length > 0) {
+        console.log('\nWARNING: Found contracts with same address but different IDs/names:');
+        addressMatchContracts.forEach((match) => {
+            console.log('\nRegistry entry:');
+            console.log(JSON.stringify(match.newEntry, null, 2));
+            console.log('Matches existing JSON entry:');
+            console.log(JSON.stringify(match.existingEntry, null, 2));
+        });
+    }
+
+    if (missingContracts.length > 0) {
+        console.log('\nContracts that exist on-chain but missing from JSON:');
+        console.log(JSON.stringify(missingContracts, null, 2));
+
+        // Ask for confirmation before updating the file
+        const rl = createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+
+        const answer = await new Promise((resolve) => {
+            rl.question('\nDo you want to update the JSON file with these entries? (y/N): ', resolve);
+        });
+        rl.close();
+
+        if (answer.toLowerCase() === 'y') {
+            // Find the last closing bracket in the file
+            const lastBracketIndex = fileContent.lastIndexOf(']');
+            if (lastBracketIndex === -1) {
+                console.log('Error: Invalid JSON file format');
+                return;
+            }
+
+            // Insert the new entries before the last bracket
+            const newContent = fileContent.slice(0, lastBracketIndex).trimEnd();
+            const entriesString = missingContracts
+                .map((entry) => JSON.stringify(entry, null, 4))
+                .join(',\n');
+
+            const updatedContent = `${newContent},\n${entriesString}\n]`;
+
+            // Write back to file
+            writeFileSync(jsonPath, updatedContent);
+            console.log(`\nUpdated ${jsonPath} with ${missingContracts.length} new entries`);
+        }
+    }
+};
+
+const checkChangeTimeMismatches = async (options) => {
+    const registry = await setRegistry(options);
+
+    // Get the network name
+    const network = options.network.length === 0 ? 'mainnet' : options.network;
+
+    const startingBlock = registryDeploymentBlocks[network];
+
+    // fetch newContract events
+    const filter = registry.filters.AddNewContract();
+    const events = await registry.queryFilter(filter, startingBlock);
+
+    // Get all registered contracts from on-chain events
+    let registeredContracts = [];
+    events.forEach(async (e) => {
+        const entry = parseAddNewContractEvent(e);
+        registeredContracts.push(entry);
+    });
+
+    // Remove duplicates by id
+    registeredContracts = registeredContracts.filter((contract, index, self) => (
+        index === self.findIndex((c) => c.id === contract.id)
+    ));
+
+    // Read the JSON file for the network
+    const jsonPath = join(__dirname, '..', 'addresses', `${network}.json`);
+    if (!existsSync(jsonPath)) {
+        console.log(`No JSON file found for network ${network}`);
+        return;
+    }
+
+    const fileContent = readFileSync(jsonPath, 'utf8');
+    const jsonData = JSON.parse(fileContent);
+
+    const changeTimeMismatches = [];
+    jsonData.forEach((jsonContract) => {
+        if (jsonContract.inRegistry) {
+            const registryEntry = registeredContracts.find((c) => c.id === jsonContract.id);
+            if (registryEntry && registryEntry.waitTime.toString() !== jsonContract.changeTime) {
+                changeTimeMismatches.push({
+                    id: jsonContract.id,
+                    name: jsonContract.name,
+                    jsonChangeTime: jsonContract.changeTime,
+                    registryChangeTime: registryEntry.waitTime.toString(),
+                });
+            }
+        }
+    });
+
+    // Filter changeTimeMismatches by doing actual on-chain check
+    if (changeTimeMismatches.length > 0) {
+        const verificationPromises = changeTimeMismatches.map(async (mismatch) => {
+            try {
+                const entryData = await registry.entries(mismatch.id);
+                const waitPeriod = entryData.waitPeriod || entryData[1];
+                if (waitPeriod.toString() === '0') return mismatch;
+                return null;
+            } catch (error) {
+                console.log(`Error checking on-chain data for ID ${mismatch.id}: ${error.message}`);
+                return mismatch;
+            }
+        });
+        const verificationResults = await Promise.all(verificationPromises);
+        const verifiedMismatches = verificationResults.filter((result) => result !== null);
+        changeTimeMismatches.length = 0;
+        changeTimeMismatches.push(...verifiedMismatches);
+    }
+
+    if (changeTimeMismatches.length > 0) {
+        console.log('\nEntries with changeTime mismatches:');
+        changeTimeMismatches.forEach((mismatch) => {
+            console.log(`\nID: ${mismatch.id}`);
+            console.log(`Name: ${mismatch.name}`);
+            console.log(`JSON changeTime: ${mismatch.jsonChangeTime}`);
+            console.log(`Registry changeTime: ${mismatch.registryChangeTime}`);
+        });
+    } else {
+        console.log('\nAll entries have matching changeTime values.');
+    }
+
+    process.exit(0);
+};
+
 (async () => {
     program
         .command('dump')
@@ -207,6 +435,15 @@ const approveContractChangeCall = async (idOrName, options) => {
         .description('Returns all the correctly registered contracts in the registry')
         .action(async (options) => {
             await fetchAllContractsInRegistry(options);
+            process.exit(0);
+        });
+
+    program
+        .command('check-missing-contracts')
+        .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
+        .description('Checks for contracts that are in registry but missing from JSON files')
+        .action(async (options) => {
+            await compareRegistryWithJson(options);
             process.exit(0);
         });
 
@@ -278,6 +515,15 @@ const approveContractChangeCall = async (idOrName, options) => {
             const txData = await approveContractChangeCall(idOrName, options);
 
             console.log(txData);
+            process.exit(0);
+        });
+
+    program
+        .command('check-change-time')
+        .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
+        .description('Checks for changeTime mismatches between JSON and registry')
+        .action(async (options) => {
+            await checkChangeTimeMismatches(options);
             process.exit(0);
         });
 

@@ -1,4 +1,4 @@
-const { getEulerV2TestPairs } = require('../../eulerV2/utils');
+const { getEulerV2TestPairs } = require('../../utils/eulerV2');
 const { aaveV2ApyAfterValuesTest } = require('./test-aaveV2-apy');
 const { aaveV3ApyAfterValuesTest } = require('./test-aaveV3-apy');
 const { compV2ApyAfterValuesTest } = require('./test-compV2-apy');

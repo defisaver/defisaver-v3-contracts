@@ -6,10 +6,18 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { UniV2Helper } from "./helpers/UniV2Helper.sol";
 
-/// @title Supplies liquidity to uniswap
+/// @title Withdraws liquidity from uniswap V2
 contract UniWithdraw is ActionBase, UniV2Helper {
     using TokenUtils for address;
 
+    /// @param tokenA Address of the first token
+    /// @param tokenB Address of the second token
+    /// @param liquidity Amount of liquidity to withdraw
+    /// @param to Address to send the withdrawn tokens to
+    /// @param from Address to pull the tokens from
+    /// @param amountAMin Minimum amount of the first token to withdraw
+    /// @param amountBMin Minimum amount of the second token to withdraw
+    /// @param deadline Deadline of the transaction
     struct UniWithdrawData {
         address tokenA;
         address tokenB;

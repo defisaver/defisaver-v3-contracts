@@ -7,10 +7,14 @@ import { ActionBase } from "../ActionBase.sol";
 import { GasFeeHelper } from "./helpers/GasFeeHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
-/// @title Helper action to send a token to the specified address
+/// @title Helper action to take gas fee from the user's wallet and send it to the fee recipient.
 contract GasFeeTaker is ActionBase, GasFeeHelper {
     using TokenUtils for address;
 
+    /// @param gasUsed Gas used by the transaction
+    /// @param feeToken Address of the token to send
+    /// @param availableAmount Amount of tokens available to send
+    /// @param dfsFeeDivider Divider for the DFS fee
     struct GasFeeTakerParams {
         uint256 gasUsed;
         address feeToken;
@@ -52,7 +56,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         }
 
         if (_inputData.dfsFeeDivider != 0) {
-            /// @dev If divider is lower the fee is greater, should be max 5 bps
+            /// @notice If divider is lower the fee is greater, should be max 5 bps
             if (_inputData.dfsFeeDivider < MAX_DFS_FEE) {
                 _inputData.dfsFeeDivider = MAX_DFS_FEE;
             }

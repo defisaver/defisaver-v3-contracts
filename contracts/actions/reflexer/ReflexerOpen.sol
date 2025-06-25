@@ -9,6 +9,7 @@ import { IBasicTokenAdapters } from "../../interfaces/reflexer/IBasicTokenAdapte
 /// @title Open a new Reflexer safe
 contract ReflexerOpen is ActionBase, ReflexerHelper {
 
+    /// @param adapterAddr Address of the adapter
     struct Params {
         address adapterAddr;
     }
@@ -43,7 +44,6 @@ contract ReflexerOpen is ActionBase, ReflexerHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Opens up an empty safe
     /// @param _adapterAddr Adapter address of the Reflexer collateral
     function _reflexerOpen(address _adapterAddr) internal returns (uint256 safeId, bytes memory logData) {
         bytes32 collType = IBasicTokenAdapters(_adapterAddr).collateralType();

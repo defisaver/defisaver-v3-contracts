@@ -9,6 +9,9 @@ contract ApproveToken is ActionBase {
 
     using TokenUtils for address;
 
+    /// @param tokenAddr Address of token to approve
+    /// @param spender Address of the spender
+    /// @param amount Amount of tokens to approve
     struct Params {
         address tokenAddr;
         address spender;

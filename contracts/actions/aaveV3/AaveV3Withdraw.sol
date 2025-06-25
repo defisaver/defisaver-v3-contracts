@@ -11,6 +11,12 @@ import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
+    /// @param assetId Asset id.
+    /// @param useDefaultMarket Whether to use the default market.
+    /// @param amount Amount of tokens to withdraw.
+    /// @param to Address to send the withdrawn tokens to.
+    /// @param market Aave Market address.
+
     struct Params {
         uint16 assetId;
         bool useDefaultMarket;
@@ -74,10 +80,11 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice User withdraws tokens from the Aave protocol
+    /// @notice User withdraws tokens from the Aave protocol.
+    /// @notice Send type(uint).max to withdraw whole amount.
     /// @param _market Address provider for specific market
     /// @param _assetId The id of the token to be deposited
-    /// @param _amount Amount of tokens to be withdrawn -> send type(uint).max for whole amount
+    /// @param _amount Amount of tokens to be withdrawn
     /// @param _to Where the withdrawn tokens will be sent
     function _withdraw(
         address _market,

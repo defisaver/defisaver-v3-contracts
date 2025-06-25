@@ -12,6 +12,10 @@ import { ILendingPoolV2 } from "../../interfaces/aaveV2/ILendingPoolV2.sol";
 contract AaveWithdraw is ActionBase, AaveHelper {
     using TokenUtils for address;
 
+    /// @param market Aave Market address.
+    /// @param tokenAddr Token address.
+    /// @param amount Amount of tokens to withdraw.
+    /// @param to Address to send the withdrawn tokens to.
     struct Params {
         address market;
         address tokenAddr;

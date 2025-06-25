@@ -29,6 +29,11 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Check
 
     address public constant AAVE_MARKET = 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5;
 
+    /// @param minRatio Minimum ratio.
+    /// @param maxRatio Maximum ratio.
+    /// @param targetRatioBoost Target ratio for boost.
+    /// @param targetRatioRepay Target ratio for repay.
+    /// @param boostEnabled Whether boost is enabled.
     struct AaveSubData {
         uint128 minRatio;
         uint128 maxRatio;

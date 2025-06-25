@@ -11,6 +11,11 @@ import { IRewardsController } from "../../interfaces/aaveV3/IRewardsController.s
 contract SparkClaimRewards is ActionBase, SparkHelper {
     using TokenUtils for address;
 
+    /// @param assetsLength Length of the assets array
+    /// @param amount Amount of tokens to claim
+    /// @param to Address to send the claimed tokens to
+    /// @param reward Address of the reward token
+    /// @param assets Array of asset addresses
     struct Params {
         uint8 assetsLength;
         uint256 amount;

@@ -12,7 +12,7 @@ import {BaseTest} from '../utils/BaseTest.sol';
 import {RegistryUtils} from '../utils/RegistryUtils.sol';
 import {ActionsUtils} from '../utils/ActionsUtils.sol';
 import {SmartWallet} from '../utils/SmartWallet.sol';
-import {TokenAddresses} from '../TokenAddresses.sol';
+import {Addresses} from '../utils/Addresses.sol';
 
 /// @dev Recipe execution from strategy is already tested in StrategyExecutor tests
 /// @dev Here, we just test direct recipe execution with and without flash loan
@@ -55,7 +55,7 @@ contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, BaseTest {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_execute_recipe_without_flashloan() public {
-        address tokenAddr = TokenAddresses.WETH_ADDR;
+        address tokenAddr = Addresses.WETH_ADDR;
         uint256 amount = 1 ether;
 
         bytes[] memory actionsCalldata = new bytes[](2);
@@ -88,7 +88,7 @@ contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, BaseTest {
     }
 
     function test_should_execute_recipe_with_flashloan() public {
-        address tokenAddr = TokenAddresses.WETH_ADDR;
+        address tokenAddr = Addresses.WETH_ADDR;
         uint256 amount = 1 ether;
 
         bytes[] memory actionsCalldata = new bytes[](2);

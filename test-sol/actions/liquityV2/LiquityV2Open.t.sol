@@ -15,6 +15,7 @@ import { LiquityV2TestHelper } from "./LiquityV2TestHelper.t.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
+import { console2 } from "forge-std/console2.sol";
 
 contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
 
@@ -118,7 +119,6 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
             })
         );
     }
-
     function test_should_fail_to_open_trove_with_maxUint256_pull() public {
         _baseTest(
             TestConfig({
@@ -145,8 +145,7 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
             IHintHelpers hintHelpers = IHintHelpers(market.hintHelpers());
 
             uint256 interestRate = _config.interestRateManager != address(0)
-                ? ITroveManager(market.troveManager())
-                    .getLatestBatchData(_config.interestRateManager).annualInterestRate
+                ? uint256(1e18 / 10)
                 : _config.annualInterestRate;
 
             (uint256 upperHint, uint256 lowerHint) = getInsertPosition(
@@ -243,7 +242,7 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
             assertEq(senderWethBalanceBefore - senderWethBalanceAfter, ETH_GAS_COMPENSATION);
         }
 
-        uint256 troveId = uint256(keccak256(abi.encode(walletAddr, 0)));
+        uint256 troveId = uint256(keccak256(abi.encode(walletAddr, walletAddr, 0)));
 
         LiquityV2View.TroveData memory troveData = liquityV2View.getTroveInfo(_params.market, troveId);
 

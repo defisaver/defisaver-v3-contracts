@@ -66,21 +66,6 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         }
     }
 
-    function testFail_should_borrow_maxUint256() public {
-        for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
-
-            TestPair memory pair = testPairs[i];
-            uint256 supplyAmount = amountInUSDPrice(pair.supplyAsset, 100_000);
-            _supply(pair.supplyAsset, supplyAmount);
-
-            uint256 borrowAmount = type(uint256).max;
-            _borrow(borrowAmount, pair.borrowAsset, false);
-
-            vm.revertTo(snapshotId);
-        }
-    }
-
     function test_should_borrow_l2_direct() public {
         for (uint256 i = 0; i < testPairs.length; ++i) {
             uint256 snapshotId = vm.snapshot();

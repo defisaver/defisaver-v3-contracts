@@ -15,9 +15,9 @@ const {
     setNewExchangeWrapper,
     setBalance,
     fetchAmountinUSDPrice,
-} = require('../../utils');
+} = require('../../utils/utils');
 
-const { executeAction } = require('../../actions');
+const { executeAction } = require('../../utils/actions');
 
 describe('CompV3 Create test', function () {
     this.timeout(80000);

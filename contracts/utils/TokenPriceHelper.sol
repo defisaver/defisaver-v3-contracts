@@ -13,6 +13,9 @@ import { IAggregatorV3 } from "../interfaces/chainlink/IAggregatorV3.sol";
 
 /// @title TokenPriceHelper Fetches prices from chainlink/aave and formats tokens properly
 contract TokenPriceHelper is DSMath, UtilHelper {
+
+    address internal constant BOLD_ADDR = 0x6440f144b7e50D6a8439336510312d2F54beB01D;
+
     IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
     /// @dev Helper function that returns chainlink price data
@@ -115,7 +118,7 @@ contract TokenPriceHelper is DSMath, UtilHelper {
 
     /// @dev If there's no USD price feed can fallback to ETH price feed, if there's no USD or ETH price feed return 0
     function getChainlinkPriceInUSD(address _inputTokenAddr, bool _useFallback) public view returns (int256 chainlinkPriceInUSD) {
-        if (_inputTokenAddr == 0xb01dd87B29d187F3E3a4Bf6cdAebfb97F3D9aB98) return 100000000;
+        if (_inputTokenAddr == BOLD_ADDR) return 100000000;
         try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.USD) returns (uint80, int256 answer, uint256, uint256, uint80){
             chainlinkPriceInUSD = answer;
         } catch {

@@ -7,6 +7,7 @@ import { CurveHelper } from "../helpers/CurveHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
+/// @title Action that withdraws tokens from the Curve steth pool
 contract CurveStethPoolWithdraw is ActionBase, CurveHelper {
     using TokenUtils for address;
 
@@ -16,11 +17,16 @@ contract CurveStethPoolWithdraw is ActionBase, CurveHelper {
         LP
     }
 
+    /// @param from Address where to pull lp tokens from
+    /// @param to Address that will receive the withdrawn tokens
+    /// @param amounts Amount of each token to withdraw
+    /// @param maxBurnAmount Max amount of LP tokens to burn
+    /// @param returnValue Type of token to return (WETH, STETH, LP)
     struct Params {
-        address from;           // address where to pull lp tokens from
-        address to;             // address that will receive withdrawn tokens
-        uint256[2] amounts;     // amount of each token to withdraw
-        uint256 maxBurnAmount;  // max amount of LP tokens to burn
+        address from;
+        address to;
+        uint256[2] amounts;
+        uint256 maxBurnAmount;
         ReturnValue returnValue;
     }
 
@@ -58,7 +64,6 @@ contract CurveStethPoolWithdraw is ActionBase, CurveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    /// @notice Withdraws tokens from curve steth pool
     function _curveWithdraw(Params memory _params) internal returns (uint256 burnedLp, bytes memory logData) {
         require(_params.to != address(0), "to cant be 0x0");
 

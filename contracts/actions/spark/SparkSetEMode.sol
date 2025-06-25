@@ -11,6 +11,9 @@ import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 contract SparkSetEMode is ActionBase, SparkHelper {
     using TokenUtils for address;
 
+    /// @param categoryId eMode category id (0 - 255)
+    /// @param useDefaultMarket Whether to use the default market
+    /// @param market Address of the market to set the eMode for
     struct Params {
         uint8 categoryId;
         bool useDefaultMarket;

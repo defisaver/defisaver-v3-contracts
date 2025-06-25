@@ -7,14 +7,19 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
 import { ILiquidityGauge } from "../../../interfaces/curve/ILiquidityGauge.sol";
 
+/// @title Action that withdraws LP tokens from a Liquidity Gauge.
 contract CurveGaugeWithdraw is ActionBase, CurveHelper {
     using TokenUtils for address;
 
+    /// @param gaugeAddr Address of the gauge to withdraw from
+    /// @param lpToken Address of the LP token to withdraw
+    /// @param receiver Address that will receive the withdrawn tokens
+    /// @param amount Amount of LP tokens to withdraw
     struct Params {
-        address gaugeAddr;  // gauge to withdraw from
-        address lpToken;    // LP token address, needed for withdrawal
-        address receiver;   // address that will receive withdrawn tokens
-        uint256 amount;     // amount of LP tokens to withdraw
+        address gaugeAddr;
+        address lpToken;
+        address receiver;
+        uint256 amount;
     }
 
     function executeAction(
@@ -44,8 +49,7 @@ contract CurveGaugeWithdraw is ActionBase, CurveHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @notice Withdraws LP tokens from Liquidity Gauge
-       function _curveGaugeWithdraw(Params memory _params) internal returns (uint256, bytes memory) {
+    function _curveGaugeWithdraw(Params memory _params) internal returns (uint256, bytes memory) {
         require(_params.receiver != address(0), "receiver cant be 0x0");
         
         if (_params.amount == type(uint256).max) {

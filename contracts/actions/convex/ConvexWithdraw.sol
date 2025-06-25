@@ -7,6 +7,7 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ConvexHelper } from "./helpers/ConvexHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
 
+/// @title Action that either withdraws(unwraps) Curve LP from convex, unstakes wrapped LP, or does both.
 contract ConvexWithdraw is ConvexHelper, ActionBase {
     using TokenUtils for address;
 
@@ -14,6 +15,9 @@ contract ConvexWithdraw is ConvexHelper, ActionBase {
     /// otherwise it is ignored and address(this) is used
     /// @param to address to which to withdraw wrapped LP tokens if option is UNSTAKE,
     /// otherwise LP tokens are withdrawn
+    /// @param poolId curve pool id according to Convex Booster contract
+    /// @param amount amount amount of tokens
+    /// @param option WithdrawOption enum (UNWRAP, UNSTAKE, UNSTAKE_AND_UNWRAP)
     struct Params {
         address from;
         address to;
@@ -53,7 +57,6 @@ contract ConvexWithdraw is ConvexHelper, ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @notice Action that either withdraws(unwraps) Curve LP from convex, unstakes wrapped LP, or does both
     function _withdraw(Params memory _params) internal returns (uint256 transientAmount, bytes memory logData) {
         IBooster.PoolInfo memory poolInfo = IBooster(BOOSTER_ADDR).poolInfo(_params.poolId);
 

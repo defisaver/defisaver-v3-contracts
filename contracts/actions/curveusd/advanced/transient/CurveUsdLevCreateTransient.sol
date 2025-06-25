@@ -8,7 +8,8 @@ import { DFSExchangeData } from "../../../../exchangeV3/DFSExchangeData.sol";
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
 import { ICrvUsdController } from "../../../../interfaces/curveusd/ICurveUsd.sol";
 
-/// @title CurveUsdLevCreateTransient
+/// @title Creates a new curveusd leveraged position with a given amount of collateral and debt
+/// @notice This action uses internal swapper with transient storage to create a loan
 contract CurveUsdLevCreateTransient is ActionBase, CurveUsdHelper {
     using TokenUtils for address;
 

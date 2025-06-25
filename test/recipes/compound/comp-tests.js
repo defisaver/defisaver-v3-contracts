@@ -18,16 +18,16 @@ const {
     setNewExchangeWrapper,
     setBalance,
     fetchAmountinUSDPrice,
-} = require('../../utils');
+} = require('../../utils/utils');
 
 const {
     supplyComp, executeAction,
-} = require('../../actions.js');
+} = require('../../utils/actions');
 
 const {
     getBorrowBalance,
     getSupplyBalance,
-} = require('../../utils-comp');
+} = require('../../utils/compound');
 
 const compBoostRecipeTest = async () => {
     describe('Compound: Boost', function () {

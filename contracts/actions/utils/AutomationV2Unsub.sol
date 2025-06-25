@@ -6,6 +6,8 @@ import { ActionBase } from "../ActionBase.sol";
 import { SubscriptionsMainnetAddresses } from "./helpers/SubscriptionsMainnetAddresses.sol";
 import { ISubscriptions } from "../../interfaces/ISubscriptions.sol";
 
+/// @title Unsubscribe from old automation v2.
+/// @notice This action is deprecated.
 contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
 
     enum Protocols {
@@ -14,6 +16,8 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
         AAVE
     }
 
+    /// @param cdpId ID of the cdp to unsubscribe from
+    /// @param protocol Protocol to unsubscribe from (MCD, COMPOUND, AAVE)
     struct Params {
         uint256 cdpId;
         Protocols protocol;

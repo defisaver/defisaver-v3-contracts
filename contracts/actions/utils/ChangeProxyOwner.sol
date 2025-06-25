@@ -9,6 +9,7 @@ import { DSAuth } from "../../DS/DSAuth.sol";
 /// @title Changes the owner of the DSProxy and updated the DFSRegistry
 contract ChangeProxyOwner is ActionBase {
 
+    /// @param newOwner Address of the new owner
     struct Params {
         address newOwner;
     }

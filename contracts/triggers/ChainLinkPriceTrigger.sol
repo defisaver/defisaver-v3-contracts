@@ -10,7 +10,7 @@ import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
 
 /// @title Trigger contract that verifies if current token price is over/under the price specified during subscription
-/// @notice If there's no chainlink oracle available for the token, price will be fetched from AaveV2, Spark and AaveV3 (in that order)
+/// @notice If there's no chainlink oracle available for the token, price will be fetched from AaveV2, Spark and AaveV3 (in that order).
 contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, TokenPriceHelper {
     using TokenUtils for address;
 
@@ -28,7 +28,7 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, To
         uint8 state;
     }
 
-    /// @dev checks chainlink oracle for current price and triggers if it's in a correct state
+    /// @notice Checks chainlink oracle for current price and triggers if it's in a correct state.
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 

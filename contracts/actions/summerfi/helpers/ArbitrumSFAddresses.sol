@@ -1,0 +1,10 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity =0.8.24;
+
+contract ArbitrumSFAddresses {
+    address constant SF_OPERATION_EXECUTOR = 0x90feAF7727A6CE75F518728d296877830FD39a49;
+    address constant SF_OPERATIONS_REGISTRY = 0x392ACeBea829373A3eFDc0dA80a16003106d8f6E;
+    address constant SF_SERVICE_REGISTRY = 0xf22F17B1D2354B4F4F52e4d164e4eB5e1f0A6Ba6;
+    address constant SF_SET_APPROVAL_ADDRESS = 0xAC0B1652388Ea425884e6b60e2eD30155f43D50b;
+}
