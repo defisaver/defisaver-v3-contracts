@@ -77,7 +77,7 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
         address _delegatee,
         uint16 _assetId,
         uint8 _rateMode
-    ) public {
+    ) public view {
         AaveV3DelegateCredit.Params memory params = AaveV3DelegateCredit.Params({
             amount: _amount,
             delegatee: _delegatee,
@@ -95,7 +95,7 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
         uint16 _assetId,
         uint8 _rateMode,
         address _market
-    ) public {
+    ) public view {
         AaveV3DelegateCredit.Params memory params = AaveV3DelegateCredit.Params({
             amount: _amount,
             delegatee: _delegatee,
@@ -110,7 +110,7 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _assertParams(AaveV3DelegateCredit.Params memory _params) private {
+    function _assertParams(AaveV3DelegateCredit.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3DelegateCredit.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
 

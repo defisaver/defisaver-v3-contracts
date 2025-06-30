@@ -91,7 +91,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         uint16 _assetId,
         uint256 _amount,
         address _to
-    ) public {
+    ) public view {
         AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
             assetId: _assetId,
             useDefaultMarket: true,
@@ -107,7 +107,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         uint256 _amount,
         address _to,
         address _market
-    ) public {
+    ) public view {
         AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
             assetId: _assetId,
             useDefaultMarket: false,
@@ -121,7 +121,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _assertParams(AaveV3Withdraw.Params memory _params) private {
+    function _assertParams(AaveV3Withdraw.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3Withdraw.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
         

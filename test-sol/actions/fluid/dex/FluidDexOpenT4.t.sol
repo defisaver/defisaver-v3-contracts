@@ -422,7 +422,7 @@ contract TestFluidDexOpenT4 is FluidTestBase {
 
     function _assertNoDustLeftOnWallet(
         LocalVars memory _vars
-    ) internal {
+    ) internal pure {
         assertEq(_vars.walletCollToken0BalanceAfter, _vars.walletCollToken0BalanceBefore);
         assertEq(_vars.walletCollToken1BalanceAfter, _vars.walletCollToken1BalanceBefore);
         assertEq(_vars.walletBorrowToken0BalanceAfter, _vars.walletBorrowToken0BalanceBefore);
@@ -434,7 +434,7 @@ contract TestFluidDexOpenT4 is FluidTestBase {
         LocalVars memory _vars,
         FluidView.VaultData memory _vaultData,
         bool _wrapBorrowedEth
-    ) internal {
+    ) internal pure {
         if (_vars.collAmount0 == 0) return;
 
         int256 tokenDelta = -int256(_vars.collAmount0);
@@ -466,7 +466,7 @@ contract TestFluidDexOpenT4 is FluidTestBase {
         LocalVars memory _vars,
         FluidView.VaultData memory _vaultData,
         bool _wrapBorrowedEth
-    ) internal {
+    ) internal pure {
         if (_vars.collAmount1 == 0) return;
         
         int256 tokenDelta = -int256(_vars.collAmount1);
@@ -498,7 +498,7 @@ contract TestFluidDexOpenT4 is FluidTestBase {
         LocalVars memory _vars,
         FluidView.VaultData memory _vaultData,
         bool _wrapBorrowedEth
-    ) internal {
+    ) internal pure {
         if (_vars.borrowAmount0 == 0) return;
         
         if (
@@ -513,7 +513,7 @@ contract TestFluidDexOpenT4 is FluidTestBase {
         LocalVars memory _vars,
         FluidView.VaultData memory _vaultData,
         bool _wrapBorrowedEth
-    ) internal {
+    ) internal pure {
         if (_vars.borrowAmount1 == 0) return;
         
         if (
