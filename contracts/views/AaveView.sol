@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { WadRayMath } from "../utils/math/WadRayMath.sol";
 import { MathUtils } from "../utils/math/MathUtils.sol";
-import { IStableDebtToken } from "../interfaces/aave/IStableDebtToken.sol";
+import { IStableDebtToken } from "../interfaces/aaveV2/IStableDebtToken.sol";
 import { IScaledBalanceToken } from "../interfaces/aave/IScaledBalanceToken.sol";
 import { IReserveInterestRateStrategyV2 } from "../interfaces/aaveV2/IReserveInterestRateStrategyV2.sol";
 import { DSMath } from "../DS/DSMath.sol";

@@ -2,6 +2,8 @@
     "isSmartWalletSafe" : true,
     "blockNumber" : 22238839,
     "AaveV3ATokenPayback": { "blockNumber": 21973355 },
+    "UmbrellaStake": { "blockNumber": 22644898 },
+    "UmbrellaUnstake": { "blockNumber": 22644898 },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [

@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Borrow a token from Spark market
 contract SparkBorrow is ActionBase, SparkHelper {
@@ -113,7 +114,7 @@ contract SparkBorrow is ActionBase, SparkHelper {
         address _to,
         address _onBehalf
     ) internal returns (uint256, bytes memory) {
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
 
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
         // defaults to onBehalf of user's wallet
@@ -143,8 +144,8 @@ contract SparkBorrow is ActionBase, SparkHelper {
         encodedInput = bytes.concat(encodedInput, bytes20(_params.to));
         encodedInput = bytes.concat(encodedInput, bytes1(_params.rateMode));
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useOnBehalf));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useOnBehalf));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -158,8 +159,8 @@ contract SparkBorrow is ActionBase, SparkHelper {
         params.to = address(bytes20(_encodedInput[32:52]));
         params.rateMode = uint8(bytes1(_encodedInput[52:53]));
         params.assetId = uint16(bytes2(_encodedInput[53:55]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[55:56]));
-        params.useOnBehalf = bytesToBool(bytes1(_encodedInput[56:57]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[55:56]));
+        params.useOnBehalf = DFSLib.bytesToBool(bytes1(_encodedInput[56:57]));
         uint256 mark = 57;
 
         if (params.useDefaultMarket) {
