@@ -263,7 +263,7 @@ const kyberTest = async () => {
                 const buyAssetInfo = getAssetInfo(trade.buyToken, chainId);
 
                 const buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
-                const amount = hre.ethers.utils.parseUnits('100', sellAssetInfo.decimals);
+                const amount = hre.ethers.utils.parseUnits('1', sellAssetInfo.decimals);
 
                 await setBalance(sellAssetInfo.address, senderAcc.address, amount);
                 await approve(sellAssetInfo.address, proxy.address);
@@ -334,7 +334,7 @@ const kyberTest = async () => {
                 const buyAssetInfo = getAssetInfo(trade.buyToken, chainId);
 
                 const buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
-                const amount = hre.ethers.utils.parseUnits('100', sellAssetInfo.decimals);
+                const amount = hre.ethers.utils.parseUnits('1', sellAssetInfo.decimals);
 
                 await setBalance(sellAssetInfo.address, senderAcc.address, amount);
                 await approve(sellAssetInfo.address, proxy.address);
@@ -438,7 +438,7 @@ const paraswapTest = async () => {
             buyAssetInfo = getAssetInfo('USDC');
 
             buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
-            amount = hre.ethers.utils.parseUnits('100', 18);
+            amount = hre.ethers.utils.parseUnits('1', 18);
             await setBalance(sellAssetInfo.address, senderAcc.address, amount);
             await approve(sellAssetInfo.address, proxy.address);
 
@@ -578,7 +578,7 @@ const oneInchTest = async () => {
             buyAssetInfo = getAssetInfo('USDC', chainId);
 
             buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
-            amount = hre.ethers.utils.parseUnits('100', 18);
+            amount = hre.ethers.utils.parseUnits('1', 18);
             await setBalance(sellAssetInfo.address, senderAcc.address, amount);
             await approve(sellAssetInfo.address, proxy.address);
             const options = {
@@ -800,7 +800,7 @@ const odosTest = async () => {
             buyAssetInfo = getAssetInfo('USDC', chainId);
 
             buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
-            amount = hre.ethers.utils.parseUnits('100', 18);
+            amount = hre.ethers.utils.parseUnits('1', 18);
             await setBalance(sellAssetInfo.address, senderAcc.address, amount);
             await approve(sellAssetInfo.address, proxy.address);
             const odosQuoteBody = {
@@ -992,7 +992,7 @@ const pendleRouterTest = async () => {
             const enableAggregator = true;
             const tokenIn = sellAsset;
             const tokenOut = buyAsset;
-            const amountIn = hre.ethers.utils.parseUnits('100', 18);
+            const amountIn = hre.ethers.utils.parseUnits('1', 18);
             const router = PENDLE_ROUTER;
             const allowanceTarget = PENDLE_ROUTER;
             const price = 1; // just for testing, anything bigger than 0 triggers offchain if
