@@ -37,7 +37,7 @@ contract LiquityV2DebtInFrontTrigger is
     }
 
     /// @dev checks if the adjust time has passed
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 debtInFront = getDebtInFront(triggerSubData.market, triggerSubData.troveId);
@@ -49,9 +49,9 @@ contract LiquityV2DebtInFrontTrigger is
         address _market,
         uint256 _trove
     ) public view returns (uint256) {
-        (uint256 ethTotalDebt, uint256 ethUnbackedDebt) = _getUnbackedDebt(WETH_MARKET_ADDR);
-        (uint256 wstEthTotalDebt, uint256 wstEthUnbackedDebt) = _getUnbackedDebt(WSTETH_MARKET_ADDR);
-        (uint256 rEthTotalDebt, uint256 rEthUnbackedDebt) = _getUnbackedDebt(RETH_MARKET_ADDR);
+        uint256 ethUnbackedDebt = _getUnbackedDebt(WETH_MARKET_ADDR);
+        uint256 wstEthUnbackedDebt = _getUnbackedDebt(WSTETH_MARKET_ADDR);
+        uint256 rEthUnbackedDebt = _getUnbackedDebt(RETH_MARKET_ADDR);
 
         uint256 totalUnbackedDebt = ethUnbackedDebt + wstEthUnbackedDebt + rEthUnbackedDebt;
         uint256 branchDebtInFront = _getDebtInFrontForCurrentBranch(_market, _trove);
@@ -87,9 +87,9 @@ contract LiquityV2DebtInFrontTrigger is
     /// @notice Gets the unbacked debt for a branch
     function _getUnbackedDebt(
         address _market
-    ) internal view returns (uint256 branchDebt, uint256 unbackedBold) {
+    ) internal view returns (uint256 unbackedBold) {
         IAddressesRegistry registry = IAddressesRegistry(_market);
-        branchDebt = IBorrowerOperations(registry.borrowerOperations()).getEntireBranchDebt();
+        uint256 branchDebt = IBorrowerOperations(registry.borrowerOperations()).getEntireBranchDebt();
         uint256 boldDeposits = IStabilityPool(registry.stabilityPool()).getTotalBoldDeposits();
 
         unbackedBold = branchDebt > boldDeposits ? branchDebt - boldDeposits : 0;
