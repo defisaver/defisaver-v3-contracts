@@ -86,7 +86,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
         address _from,
         uint8 _rateMode,
         uint16 _assetId
-    ) public {
+    ) public view {
         AaveV3Payback.Params memory params = AaveV3Payback.Params({
             amount: _amount,
             from: _from,
@@ -106,7 +106,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
         uint8 _rateMode,
         uint16 _assetId,
         address _market
-    ) public {
+    ) public view {
         AaveV3Payback.Params memory params = AaveV3Payback.Params({
             amount: _amount,
             from: _from,
@@ -126,7 +126,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
         uint8 _rateMode,
         uint16 _assetId,
         address _onBehalf
-    ) public {
+    ) public view {
         AaveV3Payback.Params memory params = AaveV3Payback.Params({
             amount: _amount,
             from: _from,
@@ -147,7 +147,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
         uint16 _assetId,
         address _market,
         address _onBehalf
-    ) public {
+    ) public view {
         AaveV3Payback.Params memory params = AaveV3Payback.Params({
             amount: _amount,
             from: _from,
@@ -164,7 +164,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _assertParams(AaveV3Payback.Params memory _params) private {
+    function _assertParams(AaveV3Payback.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3Payback.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
         

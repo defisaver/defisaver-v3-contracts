@@ -54,7 +54,7 @@ contract TestCore_Pausable is Pausable, BaseTest {
         pausable.testModifier();
     }
 
-    function test_should_execute_call_when_contract_is_not_paused() public {
+    function test_should_execute_call_when_contract_is_not_paused() public view {
         assertTrue(pausable.testModifier());
     }
 }

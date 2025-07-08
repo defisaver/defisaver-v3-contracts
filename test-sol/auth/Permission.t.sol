@@ -76,7 +76,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
         safeWallet.execute(address(cut), givePermCalldata, 0);
     }
 
-    function _verifyProxyPermission() internal {
+    function _verifyProxyPermission() internal view {
         DSAuthority authority = DSAuthority(DSAuth(dsProxyAddr).authority());
         assertTrue(
             authority.canCall(
@@ -87,7 +87,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
         );
     }
 
-    function _verifySafePermission() internal {
+    function _verifySafePermission() internal view {
         assertTrue(ISafe(safeAddr).isModuleEnabled(MODULE_AUTH_ADDRESS));
     }
 } 

@@ -59,7 +59,7 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function testGetFeeForRegisteredTokens() public {
+    function testGetFeeForRegisteredTokens() public view {
         assertEq(cut.groupIds(Addresses.DAI_ADDR), uint256(Groups.STABLECOIN));
         assertEq(cut.groupIds(Addresses.USDC_ADDR), uint256(Groups.STABLECOIN));
         assertEq(
@@ -96,7 +96,7 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
         assertEq(cut.groupIds(Addresses.BANNED_TOKEN_ADDR), uint256(Groups.BANNED));
     }
 
-    function testGetFeeForStandardTokens() public {
+    function testGetFeeForStandardTokens() public view {
         assertEq(
             cut.getFeeForTokens(Addresses.YFI_ADDR, Addresses.ETH_ADDR),
             STANDARD_FEE_DIVIDER

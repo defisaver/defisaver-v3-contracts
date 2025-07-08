@@ -86,7 +86,7 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
         address _from,
         uint8 _rateMode,
         uint16 _assetId
-    ) public {
+    ) public view {
         AaveV3ATokenPayback.Params memory params = AaveV3ATokenPayback.Params({
             amount: _amount,
             from: _from,
@@ -104,7 +104,7 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
         uint8 _rateMode,
         uint16 _assetId,
         address _market
-    ) public {
+    ) public view {
         AaveV3ATokenPayback.Params memory params = AaveV3ATokenPayback.Params({
             amount: _amount,
             from: _from,
@@ -119,7 +119,7 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _assertParams(AaveV3ATokenPayback.Params memory _params) private {
+    function _assertParams(AaveV3ATokenPayback.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3ATokenPayback.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
         
