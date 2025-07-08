@@ -43,7 +43,7 @@ contract TestPendleTokenRedeem is BaseTest, ActionsUtils {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("PendleTokenRedeem");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -85,7 +85,7 @@ contract TestPendleTokenRedeem is BaseTest, ActionsUtils {
             _baseTest(TestConfig({
                 market: markets[i].market,
                 underlyingToken: markets[i].underlyingToken,
-                ptAmount: 40521300 * 10 ** underlyingDecimals,
+                ptAmount: 1043240 * 10 ** underlyingDecimals,
                 isDirect: true
             }));
         }
