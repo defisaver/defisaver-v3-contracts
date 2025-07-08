@@ -17,26 +17,22 @@ contract BebopWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
     /// @notice offchainData.callData should be this struct encoded
     struct BebopCalldata {
         bytes realCalldata;
-        uint256 sellTokenAmount;
-        uint256 partialFillOffset;
+        uint256 offset;
     }
 
     /// @notice Takes order from Bebop and returns bool indicating if it is successful
     /// @param _exData Exchange data
     function takeOrder(ExchangeData memory _exData) public payable override returns (bool success, uint256) {
         BebopCalldata memory bebopCalldata = abi.decode(_exData.offchainData.callData, (BebopCalldata));
-        bytes memory realCalldata = bebopCalldata.realCalldata;
 
-        if (bebopCalldata.sellTokenAmount != _exData.srcAmount) {
-            writeUint256(realCalldata, bebopCalldata.partialFillOffset, _exData.srcAmount);
-        }
+        writeUint256(bebopCalldata.realCalldata, bebopCalldata.offset, _exData.srcAmount);
 
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
         uint256 tokensBefore = _exData.destAddr.getBalance(address(this));
 
         /// @dev the amount of tokens received is checked in DFSExchangeCore
         /// @dev Exchange wrapper contracts should not be used on their own
-        (success,) = _exData.offchainData.exchangeAddr.call(realCalldata);
+        (success,) = _exData.offchainData.exchangeAddr.call(bebopCalldata.realCalldata);
 
         uint256 tokensSwapped = 0;
         if (success) {

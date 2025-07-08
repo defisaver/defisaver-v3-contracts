@@ -142,16 +142,15 @@ const bebopTest = async () => {
                         bebopWrapper,
                         chainId,
                     );
-
                     const allowanceTarget = priceObject.tx.to;
                     const price = 1; // just for testing, anything bigger than 0 triggers offchain if
                     const protocolFee = 0;
                     const callData = priceObject.tx.data;
 
-                    const partialFillOffset = (10 + priceObject.partialFillOffset * 64) / 2 - 1;
+                    const partialFillOffset = (10 + priceObject.partialFillOffset * 64) / 2 - 1; //  https://docs.bebop.xyz/bebop/bebop-api-pmm-rfq/rfq-api-endpoints/trade/self-execute-order#partial-fills
                     const specialCalldata = hre.ethers.utils.defaultAbiCoder.encode(
-                        ['(bytes,uint256,uint256)'],
-                        [[callData, amount, partialFillOffset]],
+                        ['(bytes,uint256)'],
+                        [[callData, partialFillOffset]],
                     );
 
                     exchangeObject = formatExchangeObjForOffchain(
