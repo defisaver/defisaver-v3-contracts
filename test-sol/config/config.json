@@ -3,6 +3,7 @@
     "blockNumber" : 22238839,
     "AaveV3ATokenPayback": { "blockNumber": 21973355 },
     "PendleTokenRedeem": { "blockNumber": 22875735 },
+    "StrategyTriggerViewNoRevert": { "blockNumber": 22595730 },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [
