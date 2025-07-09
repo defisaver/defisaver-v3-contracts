@@ -56,7 +56,7 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("LiquityV2SPWithdraw");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
