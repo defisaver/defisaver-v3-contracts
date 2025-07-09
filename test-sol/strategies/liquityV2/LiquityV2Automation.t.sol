@@ -22,12 +22,14 @@ import {LiquityV2RatioCheck} from "../../../contracts/actions/checkers/LiquityV2
 import {LiquityV2View} from "../../../contracts/views/LiquityV2View.sol";
 import {LiquityV2RatioTrigger} from "../../../contracts/triggers/LiquityV2RatioTrigger.sol";
 import {LiquityV2TestHelper} from "./../../actions/liquityV2/LiquityV2TestHelper.t.sol";
+import {LiquityV2ExecuteActions} from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
+import {LiquityV2Utils} from "../../utils/liquityV2/LiquityV2Utils.sol";
 
 import {SubProxy, StrategyModel} from "../../../contracts/core/strategy/SubProxy.sol";
 import {SubStorage} from "../../../contracts/core/strategy/SubStorage.sol";
 import {StrategyExecutor} from "../../../contracts/core/strategy/StrategyExecutor.sol";
 
-contract TestLiquityV2Automation is BaseTest, LiquityV2TestHelper, RegistryUtils, ActionsUtils {
+contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -68,7 +70,6 @@ contract TestLiquityV2Automation is BaseTest, LiquityV2TestHelper, RegistryUtils
         uint256 simulatedCollGain;
     }
 
-    //    TODO -> Remove this
     uint256 internal constant WITHDRAW_FROM_SP_GAS_COST = 950_000;
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -76,7 +77,7 @@ contract TestLiquityV2Automation is BaseTest, LiquityV2TestHelper, RegistryUtils
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         // fork
-        forkMainnetLatest();
+        forkMainnet("LiquityV2Automation");
 
         // basic setup
         wallet = new SmartWallet(bob);
@@ -125,7 +126,18 @@ contract TestLiquityV2Automation is BaseTest, LiquityV2TestHelper, RegistryUtils
                 borrowAmountInUSD: 150_000
             });
 
-            _openTrove(config);
+            troveId = executeLiquityOpenTrove(
+                markets[i],
+                address(0),
+                config.collateralAmountInUSD,
+                i,
+                config.borrowAmountInUSD,
+                config.annualInterestRate,
+                0,
+                wallet,
+                openTrove,
+                liquityV2View
+            );
 
             (uint256 beforeRatio,) = trigger.getRatio(address(config.market), troveId);
             assertLe(beforeRatio, config.triggerRatio, "TRIGGER MUST BE TRIGGERABLE");
@@ -139,7 +151,7 @@ contract TestLiquityV2Automation is BaseTest, LiquityV2TestHelper, RegistryUtils
     }
 
     /*//////////////////////////////////////////////////////////////////////////
-                            HELPERS FOR EXECUTING STRATEGY
+                            EXECUTE STRATEGY
     //////////////////////////////////////////////////////////////////////////*/
     function _executePaybackStrategy(IAddressesRegistry _market, uint256 _targetRatio) internal {
         (uint256 beforeRatio,) = trigger.getRatio(address(_market), troveId);
@@ -169,14 +181,7 @@ contract TestLiquityV2Automation is BaseTest, LiquityV2TestHelper, RegistryUtils
             executor.executeStrategy(subId, STRATEGY_OR_BUNDLE_ID, _triggerCallData, _actionsCallData, sub);
         }
 
-        console.log("==========================================================================================");
-        console.log("==========================================================================================");
-        console.log("==========================================================================================");
-        console.log("AFTER EXECUTING STRATEGY");
-        console.log("==========================================================================================");
-        console.log("==========================================================================================");
-        console.log("==========================================================================================");
-
+        // ! Checks ->
         (uint256 afterRatio,) = trigger.getRatio(address(_market), troveId);
         assertGt(afterRatio, beforeRatio);
         assertGe(afterRatio, _targetRatio);
@@ -241,13 +246,12 @@ contract TestLiquityV2Automation is BaseTest, LiquityV2TestHelper, RegistryUtils
     //////////////////////////////////////////////////////////////////////////*/
     function _spDeposit(IAddressesRegistry _market, uint256 _depositBOLDInSPAmount) internal {
         TestSPDeposit memory vars;
-
         vars.collToken = _market.collToken();
         vars.depositAmount = _depositBOLDInSPAmount;
         vars.stabilityPool = _market.stabilityPool();
         vars.simulatedCollGain = 100;
 
-        _simulateCollGain(vars);
+        _simulateCollGain(vars.stabilityPool, vars.simulatedCollGain, vars.collToken, walletAddr);
         giveTokenAndApproveAsSender(sender, BOLD_ADDR, walletAddr, vars.depositAmount);
 
         vars.executeActionCallData = executeActionCalldata(
@@ -260,99 +264,5 @@ contract TestLiquityV2Automation is BaseTest, LiquityV2TestHelper, RegistryUtils
         assertEq(vars.compoundedBOLD, vars.depositAmount);
         assertGe(vars.collGain, 100);
         assertGe(vars.boldGain, 0);
-    }
-
-    function _simulateCollGain(TestSPDeposit memory _vars) internal {
-        uint256 collBalanceStorageSlot = 3;
-        uint256 stashedCollMappingSlot = 9;
-        vm.store(_vars.stabilityPool, bytes32(collBalanceStorageSlot), bytes32(_vars.simulatedCollGain));
-        vm.store(
-            _vars.stabilityPool,
-            keccak256(abi.encode(walletAddr, stashedCollMappingSlot)),
-            bytes32(_vars.simulatedCollGain)
-        );
-        give(_vars.collToken, _vars.stabilityPool, _vars.simulatedCollGain * 2);
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                OPEN TROVE
-    //////////////////////////////////////////////////////////////////////////*/
-
-    function _openTrove(TestConfig memory _config) internal {
-        address collToken = _config.market.collToken();
-        IHintHelpers hintHelpers = IHintHelpers(_config.market.hintHelpers());
-        (uint256 upperHint, uint256 lowerHint) =
-            getInsertPosition(liquityV2View, _config.market, _config.marketIndex, _config.annualInterestRate);
-
-        uint256 collPriceWAD = IPriceFeed(_config.market.priceFeed()).lastGoodPrice();
-        uint256 collAmount = amountInUSDPriceMock(collToken, _config.collateralAmountInUSD, collPriceWAD / 1e10);
-        uint256 borrowAmount = amountInUSDPriceMock(BOLD_ADDR, _config.borrowAmountInUSD, 1e8);
-        uint256 predictMaxUpfrontFee =
-            hintHelpers.predictOpenTroveUpfrontFee(_config.marketIndex, borrowAmount, _config.annualInterestRate);
-
-        LiquityV2Open.Params memory params = LiquityV2Open.Params({
-            market: address(_config.market),
-            from: sender,
-            to: sender,
-            interestBatchManager: address(0),
-            ownerIndex: 0,
-            collAmount: collAmount,
-            boldAmount: borrowAmount,
-            upperHint: upperHint,
-            lowerHint: lowerHint,
-            annualInterestRate: _config.annualInterestRate,
-            maxUpfrontFee: predictMaxUpfrontFee
-        });
-
-        _openTroveLogic(params, collToken);
-    }
-
-    function _openTroveLogic(LiquityV2Open.Params memory _params, address _collToken) internal {
-        if (_collToken == WETH) {
-            giveTokenAndApproveAsSender(sender, WETH, walletAddr, _params.collAmount + ETH_GAS_COMPENSATION);
-        } else {
-            giveTokenAndApproveAsSender(sender, _collToken, walletAddr, _params.collAmount);
-            giveTokenAndApproveAsSender(sender, WETH, walletAddr, ETH_GAS_COMPENSATION);
-        }
-
-        bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2OpenEncode(
-                _params.market,
-                _params.from,
-                _params.to,
-                _params.interestBatchManager,
-                _params.ownerIndex,
-                _params.collAmount,
-                _params.boldAmount,
-                _params.upperHint,
-                _params.lowerHint,
-                _params.annualInterestRate,
-                _params.maxUpfrontFee
-            ),
-            true
-        );
-
-        uint256 senderWethBalanceBefore = balanceOf(WETH, sender);
-        uint256 senderCollBalanceBefore = balanceOf(_collToken, sender);
-
-        wallet.execute(address(openTrove), executeActionCallData, 0);
-
-        uint256 senderWethBalanceAfter = balanceOf(WETH, sender);
-        uint256 senderCollBalanceAfter = balanceOf(_collToken, sender);
-
-        if (_collToken == WETH) {
-            assertEq(senderWethBalanceBefore - senderWethBalanceAfter, _params.collAmount + ETH_GAS_COMPENSATION);
-        } else {
-            assertEq(senderCollBalanceBefore - senderCollBalanceAfter, _params.collAmount);
-            assertEq(senderWethBalanceBefore - senderWethBalanceAfter, ETH_GAS_COMPENSATION);
-        }
-
-        troveId = uint256(keccak256(abi.encode(walletAddr, walletAddr, 0)));
-        LiquityV2View.TroveData memory troveData = liquityV2View.getTroveInfo(_params.market, troveId);
-
-        assertEq(troveData.collAmount, _params.collAmount);
-        assertEq(troveData.annualInterestRate, _params.annualInterestRate);
-        assertEq(troveData.interestBatchManager, _params.interestBatchManager);
-        assertGe(troveData.debtAmount, _params.boldAmount);
     }
 }
