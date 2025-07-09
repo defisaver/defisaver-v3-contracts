@@ -37,11 +37,11 @@ contract TestCore_CheckWalletType is BaseTest {
         assertFalse(cut.isDSProxy(safeAddress));
     }
 
-    function test_should_return_false_for_zero_address() public {
+    function test_should_return_false_for_zero_address() public view {
         assertFalse(cut.isDSProxy(address(0)));
     }
 
-    function test_should_return_false_for_eoa_address() public {
+    function test_should_return_false_for_eoa_address() public view {
         assertFalse(cut.isDSProxy(bob));
     }
 }

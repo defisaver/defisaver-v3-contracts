@@ -2,12 +2,14 @@
 
 pragma solidity =0.8.24;
 
+import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
+import { ISparkDebtToken } from "../../interfaces/spark/ISparkDebtToken.sol";
+import { SparkDataTypes } from "../../interfaces/spark/SparkDataTypes.sol";
+import { SparkHelper } from "./helpers/SparkHelper.sol";
+
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
-import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Delegate credit for someone to borrow on user's wallet behalf
 contract SparkDelegateCredit is ActionBase, SparkHelper {
@@ -78,14 +80,14 @@ contract SparkDelegateCredit is ActionBase, SparkHelper {
         internal
         returns (bytes memory logData)
     {
-        IPoolV3 lendingPool = getLendingPool(_params.market);
+        ISparkPool lendingPool = getSparkLendingPool(_params.market);
         address tokenAddr = lendingPool.getReserveAddressById(_params.assetId);
-        DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
+        SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
 
         if (_params.rateMode == VARIABLE_ID){
-            IDebtToken(reserveData.variableDebtTokenAddress).approveDelegation(_params.delegatee, _params.amount);
+            ISparkDebtToken(reserveData.variableDebtTokenAddress).approveDelegation(_params.delegatee, _params.amount);
         } else if (_params.rateMode == STABLE_ID){
-            IDebtToken(reserveData.stableDebtTokenAddress).approveDelegation(_params.delegatee, _params.amount);
+            ISparkDebtToken(reserveData.stableDebtTokenAddress).approveDelegation(_params.delegatee, _params.amount);
         } else {
             revert NonExistantRateMode();
         }
@@ -105,7 +107,7 @@ contract SparkDelegateCredit is ActionBase, SparkHelper {
         encodedInput = bytes.concat(encodedInput, bytes20(_params.delegatee));
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
         encodedInput = bytes.concat(encodedInput, bytes1(_params.rateMode));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
         }
@@ -116,7 +118,7 @@ contract SparkDelegateCredit is ActionBase, SparkHelper {
         params.delegatee = address(bytes20(_encodedInput[32:52]));
         params.assetId = uint16(bytes2(_encodedInput[52:54]));
         params.rateMode = uint8(bytes1(_encodedInput[54:55]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[55:56]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[55:56]));
         if (params.useDefaultMarket) {
             params.market = DEFAULT_SPARK_MARKET;
         } else {
@@ -125,14 +127,14 @@ contract SparkDelegateCredit is ActionBase, SparkHelper {
     }
     
     function getCreditDelegation(address _market, uint16 _assetId, uint8 _rateMode, address _delegator, address _delegatee) public view returns (uint256 creditAvailable){
-        IPoolV3 lendingPool = getLendingPool(_market);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
-        DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
+        SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(tokenAddr);
 
         if (_rateMode == VARIABLE_ID){
-            return IDebtToken(reserveData.variableDebtTokenAddress).borrowAllowance(_delegator, _delegatee);
+            return ISparkDebtToken(reserveData.variableDebtTokenAddress).borrowAllowance(_delegator, _delegatee);
         } else if (_rateMode == STABLE_ID){
-            return IDebtToken(reserveData.stableDebtTokenAddress).borrowAllowance(_delegator, _delegatee);
+            return ISparkDebtToken(reserveData.stableDebtTokenAddress).borrowAllowance(_delegator, _delegatee);
         } else {
             revert NonExistantRateMode();
         }

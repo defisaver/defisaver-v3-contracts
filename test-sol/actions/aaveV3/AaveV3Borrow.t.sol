@@ -86,7 +86,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         address _to,
         uint8 _rateMode,
         uint16 _assetId
-    ) public {
+    ) public view {
         AaveV3Borrow.Params memory params = AaveV3Borrow.Params({
             amount: _amount,
             to: _to,
@@ -106,7 +106,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         uint8 _rateMode,
         uint16 _assetId,
         address _market
-    ) public {
+    ) public view {
         AaveV3Borrow.Params memory params = AaveV3Borrow.Params({
             amount: _amount,
             to: _to,
@@ -126,7 +126,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         uint8 _rateMode,
         uint16 _assetId,
         address _onBehalf
-    ) public {
+    ) public view {
         AaveV3Borrow.Params memory params = AaveV3Borrow.Params({
             amount: _amount,
             to: _to,
@@ -147,7 +147,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
         uint16 _assetId,
         address _market,
         address _onBehalf
-    ) public {
+    ) public view {
         AaveV3Borrow.Params memory params = AaveV3Borrow.Params({
             amount: _amount,
             to: _to,
@@ -164,7 +164,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _assertParams(AaveV3Borrow.Params memory _params) private {
+    function _assertParams(AaveV3Borrow.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3Borrow.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
         

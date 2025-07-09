@@ -18,6 +18,8 @@
     "LiquityV2Supply": { "blockNumber": 22519730 },
     "LiquityV2Withdraw": { "blockNumber": 22519730 },
     "LiquityV2Automation": { "blockNumber": 22539730 },
+    "UmbrellaStake": { "blockNumber": 22644898 },
+    "UmbrellaUnstake": { "blockNumber": 22644898 },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [

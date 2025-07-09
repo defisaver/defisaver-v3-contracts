@@ -36,7 +36,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_open_to_public_should_be_false_by_default() public {
+    function test_open_to_public_should_be_false_by_default() public view {
         bool openToPublic = cut.openToPublic();
         assertFalse(openToPublic);
     }
@@ -166,7 +166,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
     function _assertBundles(
         StrategyModel.StrategyBundle[] memory _fetchedBundles,
         uint256 _realSize
-    ) internal {
+    ) internal pure {
         for (uint256 i = 0; i < _realSize; ++i) {
             assertEq(_fetchedBundles[i].creator, Addresses.OWNER_ACC);
             assertEq(_fetchedBundles[i].strategyIds.length, 2);

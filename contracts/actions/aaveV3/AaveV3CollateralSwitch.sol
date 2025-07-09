@@ -6,6 +6,7 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Switch action if user wants to use tokens for collateral on aaveV3 market
 contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
@@ -87,10 +88,10 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
 
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
         encodedInput = bytes.concat(encodedInput, bytes1(_params.arrayLength));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         for (uint256 i = 0; i < _params.arrayLength; i++) {
             encodedInput = bytes.concat(encodedInput, bytes2(_params.assetIds[i]));
-            encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useAsCollateral[i]));
+            encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useAsCollateral[i]));
         }
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
@@ -99,12 +100,12 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
 
     function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
         params.arrayLength = uint8(bytes1(_encodedInput[0:1]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[1:2]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[1:2]));
         uint16[] memory assetIds = new uint16[](params.arrayLength);
         bool[] memory useAsCollateral = new bool[](params.arrayLength);
         for (uint256 i = 0; i < params.arrayLength; i++) {
             assetIds[i] = uint16(bytes2(_encodedInput[(2 + i * 3):(4 + i * 3)]));
-            useAsCollateral[i] = bytesToBool(bytes1(_encodedInput[(4 + i * 3):(5 + i * 3)]));
+            useAsCollateral[i] = DFSLib.bytesToBool(bytes1(_encodedInput[(4 + i * 3):(5 + i * 3)]));
         }
         params.assetIds = assetIds;
         params.useAsCollateral = useAsCollateral;
