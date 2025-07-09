@@ -2,6 +2,7 @@
     "isSmartWalletSafe" : true,
     "blockNumber" : 22238839,
     "AaveV3ATokenPayback": { "blockNumber": 21973355 },
+    "LiquityV2Automation": { "blockNumber": 22539730 },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [
