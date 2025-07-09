@@ -22,7 +22,7 @@ contract BaseTest is Config {
     TestPair[] testPairs;
 
     modifier executeAsSender(address _sender) {
-        vm.prank(_sender);
+        vm.startPrank(_sender);
         _;
         vm.stopPrank();
     }
@@ -73,6 +73,11 @@ contract BaseTest is Config {
     }
 
     function approveAsSender(address _sender, address _token, address _to, uint256 _amount) internal executeAsSender(_sender) {
+        IERC20(_token).safeApprove(_to, _amount);
+    }
+
+    function giveTokenAndApproveAsSender(address _sender, address _token, address _to, uint256 _amount) internal executeAsSender(_sender) {
+        give(_token, _sender, _amount);
         IERC20(_token).safeApprove(_to, _amount);
     }
 
