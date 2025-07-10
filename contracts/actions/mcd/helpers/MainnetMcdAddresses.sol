@@ -18,6 +18,6 @@ contract MainnetMcdAddresses {
     address internal constant SKY_ADDRESS = 0x56072C95FAA701256059aa122697B133aDEd9279;
     address internal constant USDS_ADDRESS = 0xdC035D45d973E3EC169d2276DDab16f1e407384F;
     
-    address internal constant MRK_SKY_CONVERTER = 0xBDcFCA946b6CDd965f99a839e4435Bcdc1bc470B;
+    address internal constant MRK_SKY_CONVERTER = 0xA1Ea1bA18E88C381C724a75F23a130420C403f9a;
     address internal constant DAI_USDS_CONVERTER = 0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A;
 }
