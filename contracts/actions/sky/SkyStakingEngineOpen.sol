@@ -6,19 +6,13 @@ import {ActionBase} from "../ActionBase.sol";
 import {TokenUtils} from "../../utils/TokenUtils.sol";
 import {ILockstakeEngine} from "../../interfaces/sky/ILockstakeEngine.sol";
 
-/// @title Unstake SKY tokens from previously staked position
-contract SkyStakingEngineUnstake is ActionBase {
+/// @title Open urn on LockstakeEngine
+contract SkyStakingEngineOpen is ActionBase {
     using TokenUtils for address;
 
     /// @param stakingContract address of the staking engine contract
-    /// @param index index of the urn
-    /// @param amount amount of stakingToken to unstake
-    /// @param to address to which to send stakingToken
     struct Params {
         address stakingContract;
-        uint256 index;
-        uint256 amount;
-        address to;
     }
 
     /// @inheritdoc ActionBase
@@ -32,20 +26,17 @@ contract SkyStakingEngineUnstake is ActionBase {
 
         inputData.stakingContract =
             _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
-        inputData.index = _parseParamUint(inputData.index, _paramMapping[1], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
-        inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 amountStaked, bytes memory logData) = _skyUnstakeFromStakingEngine(inputData);
-        emit ActionEvent("SkyStakingEngineUnstake", logData);
+        (uint256 amountStaked, bytes memory logData) = _skyOpenInStakingEngine(inputData);
+        emit ActionEvent("SkyStakingEngineOpen", logData);
         return bytes32(amountStaked);
     }
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        (, bytes memory logData) = _skyUnstakeFromStakingEngine(inputData);
-        logger.logActionDirectEvent("SkyStakingEngineUnstake", logData);
+        (, bytes memory logData) = _skyOpenInStakingEngine(inputData);
+        logger.logActionDirectEvent("SkyStakingEngineOpen", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -55,11 +46,10 @@ contract SkyStakingEngineUnstake is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _skyUnstakeFromStakingEngine(Params memory _inputData) internal returns (uint256, bytes memory logData) {
-        ILockstakeEngine(_inputData.stakingContract).free(
-            address(this), _inputData.index, _inputData.to, _inputData.amount
-        );
-        return (_inputData.amount, abi.encode(_inputData));
+    function _skyOpenInStakingEngine(Params memory _inputData) internal returns (uint256, bytes memory logData) {
+        uint256 index = ILockstakeEngine(_inputData.stakingContract).ownerUrnsCount(address(this));
+        ILockstakeEngine(_inputData.stakingContract).open(index);
+        return (index, abi.encode(_inputData));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {

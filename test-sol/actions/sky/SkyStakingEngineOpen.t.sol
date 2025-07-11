@@ -4,21 +4,21 @@ pragma solidity =0.8.24;
 
 import {BaseTest} from "../../utils/BaseTest.sol";
 import {SmartWallet} from "../../utils/SmartWallet.sol";
-import {SkyStakingEngine, SkyHelper} from "../../../contracts/actions/sky/SkyStakingEngine.sol";
+import {SkyStakingEngineOpen} from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
+import {SkyHelper} from "../../../contracts/actions/sky/helpers/SkyHelper.sol";
 
 import {ILockstakeEngine} from "../../../contracts/interfaces/sky/ILockstakeEngine.sol";
 import {IERC20} from "../../../contracts/interfaces/IERC20.sol";
 
 import {ActionsUtils} from "../../utils/ActionsUtils.sol";
-import {SkyExecuteActions} from "../../utils/executeActions/SkyExecuteActions.sol";
 
 import "forge-std/Test.sol";
 
-contract TestSkyStakingEngine is SkyExecuteActions, SkyHelper {
+contract TestSkyStakingEngineOpen is ActionsUtils, BaseTest, SkyHelper {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
-    SkyStakingEngine cut;
+    SkyStakingEngineOpen cut;
 
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
@@ -26,7 +26,8 @@ contract TestSkyStakingEngine is SkyExecuteActions, SkyHelper {
     SmartWallet wallet;
     address walletAddr;
     address sender;
-    uint256 constant AMOUNT = 1000e18;
+
+    event Open(address indexed owner, uint256 indexed index, address urn);
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -38,34 +39,42 @@ contract TestSkyStakingEngine is SkyExecuteActions, SkyHelper {
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
 
-        cut = new SkyStakingEngine();
+        cut = new SkyStakingEngineOpen();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_skyStakingEngineExecuteActionDirect() public {
-        // ! Give SKY to sender and approve wallet
-        give(SKY_ADDRESS, sender, AMOUNT);
-        approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
 
-        // ! Open URN
-        ILockstakeEngine lockStakeEngine = ILockstakeEngine(STAKING_ENGINE);
-        uint16 index = 0;
-        // TODO -> should this be sender or wallet ???
-        vm.prank(walletAddr);
-        address urnAddr = lockStakeEngine.open(index);
+    function test_skyStakingEngineOpen() public {
+        _baseTest(false);
+    }
 
-        // TODO -> EXPECT EMIT EVENT !!!!
-        _executeActionCalldata(STAKING_ENGINE, SKY_ADDRESS, AMOUNT, index, sender, cut, wallet);
-
-        // check sender and wallet balance before and after
-        // check if vat is greater now for AMOUNT
-        // check if check urn? Gotta find addr
-        // assertEq(AMOUNT, lockStakeEngine.);
+    function test_skyStakingEngineOpen_Direct() public {
+        _baseTest(true);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
+    function _baseTest(bool _isDirect) internal {
+        bytes memory executeActionCallData =
+            executeActionCalldata(skyStakingEngineOpenEncode(STAKING_ENGINE), _isDirect);
+        ILockstakeEngine stakingEngine = ILockstakeEngine(STAKING_ENGINE);
+
+        vm.expectEmit(true, true, false, false, address(STAKING_ENGINE));
+        emit Open(walletAddr, 0, address(0));
+        wallet.execute(address(cut), executeActionCallData, 0);
+        assertEq(1, stakingEngine.ownerUrnsCount(walletAddr));
+        assertTrue(stakingEngine.isUrnAuth(walletAddr, 0, walletAddr));
+
+        // ! executing for 2nd time to check if index is handled properly
+        vm.expectEmit(true, true, false, false, address(STAKING_ENGINE));
+        emit Open(address(walletAddr), 1, address(0));
+        wallet.execute(address(cut), executeActionCallData, 0);
+        // owns 2 urns
+        assertEq(2, stakingEngine.ownerUrnsCount(walletAddr));
+        // index 0 and index 1
+        assertTrue(stakingEngine.isUrnAuth(walletAddr, 1, walletAddr));
+    }
 }

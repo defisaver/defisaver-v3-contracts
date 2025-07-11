@@ -5,24 +5,22 @@ pragma solidity =0.8.24;
 import {ActionBase} from "../ActionBase.sol";
 import {TokenUtils} from "../../utils/TokenUtils.sol";
 import {SkyHelper} from "./helpers/SkyHelper.sol";
-import {IStakingRewards} from "../../interfaces/sky/IStakingRewards.sol";
 import {ILockstakeEngine} from "../../interfaces/sky/ILockstakeEngine.sol";
 
-// TODO -> remove USDS part
-/// @title Stake SKY token via SKY protocol for different rewards (currently only USDS supported)
-contract SkyStakingEngine is ActionBase, SkyHelper {
+/// @title Stake SKY token via SKY protocol for different rewards
+contract SkyStakingEngineStake is ActionBase, SkyHelper {
     using TokenUtils for address;
 
     /// @param stakingContract address of the staking engine contract
     /// @param stakingToken address of the token being staked
-    /// @param amount amount of stakingToken to stake
     /// @param index index of the urn
+    /// @param amount amount of stakingToken to stake
     /// @param from address from which to pull stakingToken
     struct Params {
         address stakingContract;
         address stakingToken;
-        uint256 amount;
         uint256 index;
+        uint256 amount;
         address from;
     }
 
@@ -38,12 +36,12 @@ contract SkyStakingEngine is ActionBase, SkyHelper {
         inputData.stakingContract =
             _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
         inputData.stakingToken = _parseParamAddr(inputData.stakingToken, _paramMapping[1], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
-        inputData.index = _parseParamUint(inputData.index, _paramMapping[3], _subData, _returnValues);
+        inputData.index = _parseParamUint(inputData.index, _paramMapping[2], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[3], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[4], _subData, _returnValues);
 
         (uint256 amountStaked, bytes memory logData) = _skyStakeInStakingEngine(inputData);
-        emit ActionEvent("SkyStakingEngine", logData);
+        emit ActionEvent("SkyStakingEngineStake", logData);
         return bytes32(amountStaked);
     }
 
@@ -51,7 +49,7 @@ contract SkyStakingEngine is ActionBase, SkyHelper {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
         (, bytes memory logData) = _skyStakeInStakingEngine(inputData);
-        logger.logActionDirectEvent("SkyStakingEngine", logData);
+        logger.logActionDirectEvent("SkyStakingEngineStake", logData);
     }
 
     /// @inheritdoc ActionBase
@@ -65,7 +63,11 @@ contract SkyStakingEngine is ActionBase, SkyHelper {
         _inputData.amount = _inputData.stakingToken.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         _inputData.stakingToken.approveToken(_inputData.stakingContract, _inputData.amount);
         ILockstakeEngine(_inputData.stakingContract).lock(
-            address(this), _inputData.index, _inputData.amount, SKY_REFERRAL_CODE
+            // ! Always locks for wallet address, not handling `hope()` case
+            address(this),
+            _inputData.index,
+            _inputData.amount,
+            SKY_REFERRAL_CODE
         );
         return (_inputData.amount, abi.encode(_inputData));
     }
