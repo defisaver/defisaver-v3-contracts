@@ -24,14 +24,16 @@ contract SkyExecuteActions is ExecuteActionsBase, SkyHelper {
         address _skyAddr,
         uint256 _index,
         uint256 _amount,
-        address _sender,
+        address _from,
+        address _farm,
         SkyStakingEngineOpen _open,
         SkyStakingEngineStake _cut,
         SmartWallet _wallet
     ) internal {
         executeSkyStakingEngineOpen(_stakingEngine, _open, _wallet);
 
-        bytes memory paramsCalldata = skyStakingEngineStakeEncode(_stakingEngine, _skyAddr, _index, _amount, _sender);
+        bytes memory paramsCalldata =
+            skyStakingEngineStakeEncode(_stakingEngine, _skyAddr, _index, _amount, _from, _farm);
         bytes memory _calldata =
             abi.encodeWithSelector(SkyStakingEngineStake.executeActionDirect.selector, paramsCalldata);
 

@@ -7,7 +7,7 @@ import {SmartWallet} from "../../utils/SmartWallet.sol";
 
 import {SkyStakingEngineOpen} from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
 import {SkyStakingEngineStake} from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
-import {SkyStakingEngineUnstake} from "../../../contracts/actions/sky/SkyStakingEngineUnstake.sol";
+import {SkyStakingEngineClaimRewards} from "../../../contracts/actions/sky/SkyStakingEngineClaimRewards.sol";
 
 import {ILockstakeEngine} from "../../../contracts/interfaces/sky/ILockstakeEngine.sol";
 import {IStakingRewards} from "../../../contracts/interfaces/sky/IStakingRewards.sol";
@@ -18,11 +18,11 @@ import {SkyExecuteActions} from "../../utils/executeActions/SkyExecuteActions.so
 
 import "forge-std/Test.sol";
 
-contract TestSkyStakingEngineUnstake is SkyExecuteActions {
+contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
-    SkyStakingEngineUnstake cut;
+    SkyStakingEngineClaimRewards cut;
 
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
@@ -32,12 +32,12 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
     address sender;
     uint256 constant AMOUNT = 1000e18;
     address constant USDS_FARM = 0x38E4254bD82ED5Ee97CD1C4278FAae748d998865;
+    address constant SPARK_FARM = 0x99cBC0e4E6427F6939536eD24d1275B95ff77404;
 
     SkyStakingEngineOpen open;
     SkyStakingEngineStake stake;
 
-    // TODO -> maybe move events into Interface ?
-    event Free(address indexed owner, uint256 indexed index, address to, uint256 wad, uint256 freed);
+    event GetReward(address indexed owner, uint256 indexed index, address indexed farm, address to, uint256 amt);
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -49,7 +49,7 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
 
-        cut = new SkyStakingEngineUnstake();
+        cut = new SkyStakingEngineClaimRewards();
         open = new SkyStakingEngineOpen();
         stake = new SkyStakingEngineStake();
     }
@@ -57,53 +57,43 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_skyStakingEngineUnstake_Direct() public {
-        _baseTest(true);
+    function test_skyStakingEngineStake_Direct_USDS_FARM() public {
+        _baseTest(true, USDS_FARM);
     }
 
-    function test_skyStakingEngineUnstake() public {
-        _baseTest(false);
+    function test_skyStakingEngineStake_USDS_FARM() public {
+        _baseTest(false, USDS_FARM);
+    }
+
+    function test_skyStakingEngineStake_Direct_SPARK_FARM() public {
+        _baseTest(true, SPARK_FARM);
+    }
+
+    function test_skyStakingEngineStake_SPARK_FARM() public {
+        _baseTest(false, SPARK_FARM);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function _baseTest(bool _isDirect) internal {
+    function _baseTest(bool _isDirect, address _farm) internal {
         // ! Give SKY to sender and approve wallet
         give(SKY_ADDRESS, sender, AMOUNT);
         approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
         uint256 index = 0;
 
-        // ! Stake
-        executeSkyStakingEngineStake(STAKING_ENGINE, SKY_ADDRESS, index, AMOUNT, sender, USDS_FARM, open, stake, wallet);
+        // ! Stake first
+        executeSkyStakingEngineStake(STAKING_ENGINE, SKY_ADDRESS, index, AMOUNT, sender, _farm, open, stake, wallet);
 
-        // ! Variables for checks
-        address urnAddr = ILockstakeEngine(STAKING_ENGINE).ownerUrns(walletAddr, index);
-        IERC20 skyToken = IERC20(SKY_ADDRESS);
-
-        uint256 balanceSenderBefore = skyToken.balanceOf(sender); // should have 0
-        uint256 balanceStakingEngineBefore = skyToken.balanceOf(STAKING_ENGINE);
-        uint256 balanceUrnStakedLSSkyInFarmBefore = IStakingRewards(USDS_FARM).balanceOf(urnAddr); // should have AMOUNT
-
-        // ! Execution logic
-        bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineUnstakeEncode(STAKING_ENGINE, index, AMOUNT, sender), _isDirect);
         skip(365 days);
-        vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
-        emit Free(walletAddr, index, sender, AMOUNT, AMOUNT);
+
+        // ! Execution logic of claiming rewards
+        bytes memory executeActionCallData =
+            executeActionCalldata(skyStakingEngineClaimRewardsEncode(STAKING_ENGINE, index, _farm, sender), _isDirect);
+        vm.expectEmit(true, true, true, false, address(STAKING_ENGINE));
+        emit GetReward(walletAddr, index, _farm, sender, 0);
         wallet.execute(address(cut), executeActionCallData, 0);
-
-        uint256 balanceSenderAfter = skyToken.balanceOf(sender);
-        uint256 balanceStakingEngineAfter = skyToken.balanceOf(STAKING_ENGINE);
-        uint256 balanceUrnStakedLSSkyInFarmAfter = IStakingRewards(USDS_FARM).balanceOf(urnAddr); // should have 0
-
-        // ! Checks
-        assertEq(balanceSenderBefore, balanceSenderAfter - AMOUNT); // 0 before unstake -> had all staked, 100 after unstake -> unstaked all
-        assertEq(balanceStakingEngineBefore, balanceStakingEngineAfter + AMOUNT);
-        assertEq(balanceUrnStakedLSSkyInFarmBefore, balanceUrnStakedLSSkyInFarmAfter + AMOUNT); // before unstaking, user staked LSSKY in Farm to earn rewards, after unstaking LSSKY he doesnt have that AMOUNT staked in farm
-
-        vm.prank(walletAddr);
-        ILockstakeEngine(STAKING_ENGINE).getReward(walletAddr, index, USDS_FARM, sender); // can get rewards after unstaked
+        // TODO -> add check if has more tokens than 0
     }
 }

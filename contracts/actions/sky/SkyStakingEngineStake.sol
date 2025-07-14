@@ -22,6 +22,7 @@ contract SkyStakingEngineStake is ActionBase, SkyHelper {
         uint256 index;
         uint256 amount;
         address from;
+        address farm;
     }
 
     /// @inheritdoc ActionBase
@@ -39,6 +40,7 @@ contract SkyStakingEngineStake is ActionBase, SkyHelper {
         inputData.index = _parseParamUint(inputData.index, _paramMapping[2], _subData, _returnValues);
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[3], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[4], _subData, _returnValues);
+        inputData.farm = _parseParamAddr(inputData.farm, _paramMapping[5], _subData, _returnValues);
 
         (uint256 amountStaked, bytes memory logData) = _skyStakeInStakingEngine(inputData);
         emit ActionEvent("SkyStakingEngineStake", logData);
@@ -69,6 +71,13 @@ contract SkyStakingEngineStake is ActionBase, SkyHelper {
             _inputData.amount,
             SKY_REFERRAL_CODE
         );
+
+        if (_inputData.farm != address(0)) {
+            ILockstakeEngine(_inputData.stakingContract).selectFarm(
+                address(this), _inputData.index, _inputData.farm, SKY_REFERRAL_CODE
+            );
+        }
+
         return (_inputData.amount, abi.encode(_inputData));
     }
 
