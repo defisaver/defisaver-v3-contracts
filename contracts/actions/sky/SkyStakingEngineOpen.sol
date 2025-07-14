@@ -6,7 +6,7 @@ import {ActionBase} from "../ActionBase.sol";
 import {TokenUtils} from "../../utils/TokenUtils.sol";
 import {ILockstakeEngine} from "../../interfaces/sky/ILockstakeEngine.sol";
 
-/// @title Open urn on LockstakeEngine
+/// @title Create position via LockstakeEngine
 contract SkyStakingEngineOpen is ActionBase {
     using TokenUtils for address;
 
@@ -27,9 +27,9 @@ contract SkyStakingEngineOpen is ActionBase {
         inputData.stakingContract =
             _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
 
-        (uint256 amountStaked, bytes memory logData) = _skyOpenInStakingEngine(inputData);
+        (uint256 index, bytes memory logData) = _skyOpenInStakingEngine(inputData);
         emit ActionEvent("SkyStakingEngineOpen", logData);
-        return bytes32(amountStaked);
+        return bytes32(index);
     }
 
     /// @inheritdoc ActionBase

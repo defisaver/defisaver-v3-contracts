@@ -16,6 +16,7 @@ contract SkyStakingEngineStake is ActionBase, SkyHelper {
     /// @param index index of the urn
     /// @param amount amount of stakingToken to stake
     /// @param from address from which to pull stakingToken
+    /// @param farm address of farm to get the rewards from
     struct Params {
         address stakingContract;
         address stakingToken;

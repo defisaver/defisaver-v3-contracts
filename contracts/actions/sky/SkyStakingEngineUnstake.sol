@@ -36,9 +36,9 @@ contract SkyStakingEngineUnstake is ActionBase {
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 amountStaked, bytes memory logData) = _skyUnstakeFromStakingEngine(inputData);
+        (uint256 amountUnstaked, bytes memory logData) = _skyUnstakeFromStakingEngine(inputData);
         emit ActionEvent("SkyStakingEngineUnstake", logData);
-        return bytes32(amountStaked);
+        return bytes32(amountUnstaked);
     }
 
     /// @inheritdoc ActionBase
