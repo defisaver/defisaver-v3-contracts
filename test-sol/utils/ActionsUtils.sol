@@ -36,6 +36,7 @@ import { LiquityV2AdjustInterestRate } from "../../contracts/actions/liquityV2/t
 import { LiquityV2SPDeposit } from "../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
 import { LiquityV2SPWithdraw } from "../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPWithdraw.sol";
 import { LiquityV2SPClaimColl } from "../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPClaimColl.sol";
+import { LiquityV2RatioCheck} from "../../contracts/actions/checkers/LiquityV2RatioCheck.sol";
 import { EulerV2Supply } from "../../contracts/actions/eulerV2/EulerV2Supply.sol";
 import { EulerV2Withdraw } from "../../contracts/actions/eulerV2/EulerV2Withdraw.sol";
 import { EulerV2Borrow } from "../../contracts/actions/eulerV2/EulerV2Borrow.sol";
@@ -949,6 +950,23 @@ contract ActionsUtils {
             LiquityV2Claim.Params({
                 market: _market,
                 to: _to
+            })
+        );
+    }
+
+
+    function liquityV2RatioCheckEncode(
+        address _market,
+        uint256 _troveId,
+        LiquityV2RatioCheck.RatioState _ratioState,
+        uint256 _targetRatio
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2RatioCheck.Params({
+                market: _market,
+                troveId: _troveId,
+                ratioState: _ratioState,
+                targetRatio: _targetRatio
             })
         );
     }

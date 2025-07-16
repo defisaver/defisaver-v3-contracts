@@ -68,7 +68,7 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker {
         console.log(aavePrice);
    }
 
-    function testPriceForNonTokenAddr() public {
+    function testPriceForNonTokenAddr() public view {
         uint256 price = cut.getPriceInUSD(aDAI);
 
         console.log(price);

@@ -1149,14 +1149,14 @@
     },
     {
         "name": "McdTokenConverter",
-        "address": "0x1ef664440dc7342253780472dad90d9a3258a71d",
+        "address": "0x8064B61A4DCc913C21Ca9bf7fF56314993d10849",
         "id": "0xdd5b6f15",
         "path": "contracts/actions/mcd/McdTokenConverter.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x1ef664440dc7342253780472dad90d9a3258a71d"]
     },
     {
         "name": "McdGenerate",

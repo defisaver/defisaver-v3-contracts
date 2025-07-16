@@ -81,7 +81,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
         _switchCollateral(true);
     }
 
-    function test_empty_encoding_decoding_inputs() public {
+    function test_empty_encoding_decoding_inputs() public view {
         AaveV3CollateralSwitch.Params memory params = AaveV3CollateralSwitch.Params({
             arrayLength: 0,
             useDefaultMarket: true,
@@ -95,7 +95,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
     function testFuzz_encode_decode_inputs_no_market(
         uint16[1] memory _assetIds,
         bool[1] memory _useAsCollateral
-    ) public {
+    ) public view {
         uint16[] memory assetIds = new uint16[](1);
         bool[] memory useAsCollateral = new bool[](1);
         assetIds[0] = _assetIds[0];
@@ -115,7 +115,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
         uint16[3] memory _assetIds,
         bool[3] memory _useAsCollateral,
         address _market
-    ) public {
+    ) public view {
         uint16[] memory assetIds = new uint16[](3);
         bool[] memory useAsCollateral = new bool[](3);
         for (uint256 i = 0; i < 3; i++) {
@@ -137,7 +137,7 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _assertParams(AaveV3CollateralSwitch.Params memory _params) private {
+    function _assertParams(AaveV3CollateralSwitch.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3CollateralSwitch.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
         
