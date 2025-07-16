@@ -1458,5 +1458,16 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    { 
+        "name": "ExecuteCall",
+        "address": "0x232c43c354dbebb75c1ed0d9a3fddde5d630e335",
+        "id": "0xd82327eb",
+        "path": "contracts/actions/utils/ExecuteCall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
     }
 ]
