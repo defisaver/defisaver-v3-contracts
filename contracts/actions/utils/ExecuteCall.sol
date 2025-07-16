@@ -4,6 +4,8 @@ pragma solidity =0.8.24;
 
 import {ActionBase} from "../ActionBase.sol";
 
+/// @title ExecuteCall
+/// @notice Executes a call to an address with a value and data, generalized for any call
 contract ExecuteCall is ActionBase {
 
     struct Params {
@@ -36,8 +38,11 @@ contract ExecuteCall is ActionBase {
     function actionType() public virtual override pure returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
-
     
+    /// @dev Execute a call to an address with a value and data, generalized for any call
+    /// @param _to The address to call
+    /// @param _value The value to send with the call
+    /// @param _data The data to send with the call
     function executeCall(address _to, uint256 _value, bytes memory _data) internal {
         (bool success,) = _to.call{value: _value}(_data);
         require(success);
