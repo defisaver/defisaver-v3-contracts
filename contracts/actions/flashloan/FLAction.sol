@@ -297,8 +297,6 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
             revert UntrustedLender();
         }
 
-        // TODO -> Should check initiator ???
-
         FlashLoanParams memory params = _userData;
 
         (Recipe memory currRecipe, address wallet) = abi.decode(params.recipeData, (Recipe, address));
