@@ -812,7 +812,7 @@ const balancerV3FLTest = async (flActionContract) => {
         let safe;
         let wallet;
         // commented out because not enough liquidity, with small numbers it is working properly
-        const FLASHLOAN_TOKENS = ['WETH' /*'wstETH','rETH', 'DAI'*/];
+        const FLASHLOAN_TOKENS = ['BOLD' /* 'WETH', 'wstETH', 'rETH', 'DAI'*/];
         const determineActiveWallet = (w) => {
             wallet = isWalletNameDsProxy(w) ? proxy : safe;
         };
@@ -833,8 +833,7 @@ const balancerV3FLTest = async (flActionContract) => {
                     // test if balance will brick fl action
                     await setBalance(assetInfo.address, flActionContract.address, Float2BN('1', 0));
 
-                    // TODO -> THIS WAS ERROR !!!!!
-                    const amount = fetchAmountinUSDPrice(tokenSymbol, '50000');
+                    const amount = fetchAmountinUSDPrice(tokenSymbol, '1000000');
 
                     const loanAmount = hre.ethers.utils.parseUnits(amount, assetInfo.decimals);
 
@@ -849,13 +848,13 @@ const balancerV3FLTest = async (flActionContract) => {
                             [],
                         ),
                     );
-                
+
                     const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
                         flAction,
                         new dfs.actions.basic.SendTokensAction(
                             [assetInfo.address],
                             [flActionContract.address],
-                            [hre.ethers.constants.MaxUint256]
+                            [hre.ethers.constants.MaxUint256],
                         ),
                     ]);
 

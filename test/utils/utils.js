@@ -543,7 +543,9 @@ const setBalance = async (tokenAddr, userAddr, value) => {
     );
 };
 
-let cachedTokenPrices = {};
+let cachedTokenPrices = {
+    BOLD: 0.999839,
+};
 const getLocalTokenPrice = (tokenSymbol) => {
     const cachedPrice = cachedTokenPrices[tokenSymbol];
     if (cachedPrice) return cachedPrice;
