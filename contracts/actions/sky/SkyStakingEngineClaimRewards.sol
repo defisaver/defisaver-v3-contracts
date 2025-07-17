@@ -3,14 +3,11 @@
 pragma solidity =0.8.24;
 
 import {ActionBase} from "../ActionBase.sol";
-import {TokenUtils} from "../../utils/TokenUtils.sol";
 import {SkyHelper} from "./helpers/SkyHelper.sol";
 import {ILockstakeEngine} from "../../interfaces/sky/ILockstakeEngine.sol";
 
 /// @title Claim rewards earned by staking SKY in Staking Engine
 contract SkyStakingEngineClaimRewards is ActionBase, SkyHelper {
-    using TokenUtils for address;
-
     /// @param stakingContract address of the staking engine contract
     /// @param index index of the urn
     /// @param farm address of farm to claim from

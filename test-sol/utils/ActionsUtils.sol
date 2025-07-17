@@ -70,6 +70,7 @@ import {SkyStakingEngineOpen} from "../../contracts/actions/sky/SkyStakingEngine
 import {SkyStakingEngineStake} from "../../contracts/actions/sky/SkyStakingEngineStake.sol";
 import {SkyStakingEngineUnstake} from "../../contracts/actions/sky/SkyStakingEngineUnstake.sol";
 import {SkyStakingEngineClaimRewards} from "../../contracts/actions/sky/SkyStakingEngineClaimRewards.sol";
+import {SkyStakingEngineSelectFarm} from "../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 
 contract ActionsUtils {
 
@@ -1265,20 +1266,16 @@ contract ActionsUtils {
 
     function skyStakingEngineStakeEncode(
         address _stakingContract,
-        address _stakingToken,
         uint256 _index,
         uint256 _amount,
-        address _from,
-        address _farm
+        address _from
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             SkyStakingEngineStake.Params({
                 stakingContract: _stakingContract,
-                stakingToken: _stakingToken,
                 index: _index,
                 amount: _amount,
-                from: _from,
-                farm: _farm
+                from: _from
             })
         );
     }
@@ -1311,6 +1308,20 @@ contract ActionsUtils {
                 index: _index,
                 farm: _farm,
                 to: _to
+            })
+        );
+    } 
+    
+    function skyStakingEngineSelectFarmEncode(
+        address _stakingContract,
+        uint256 _index,
+        address _farm
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SkyStakingEngineSelectFarm.Params({
+                stakingContract: _stakingContract,
+                index: _index,
+                farm: _farm
             })
         );
     }

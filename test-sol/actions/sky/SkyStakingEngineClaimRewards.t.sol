@@ -8,6 +8,7 @@ import {SmartWallet} from "../../utils/SmartWallet.sol";
 import {SkyStakingEngineOpen} from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
 import {SkyStakingEngineStake} from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
 import {SkyStakingEngineClaimRewards} from "../../../contracts/actions/sky/SkyStakingEngineClaimRewards.sol";
+import {SkyStakingEngineSelectFarm} from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 
 import {ILockstakeEngine} from "../../../contracts/interfaces/sky/ILockstakeEngine.sol";
 import {IStakingRewards} from "../../../contracts/interfaces/sky/IStakingRewards.sol";
@@ -15,8 +16,6 @@ import {IERC20} from "../../../contracts/interfaces/IERC20.sol";
 
 import {ActionsUtils} from "../../utils/ActionsUtils.sol";
 import {SkyExecuteActions} from "../../utils/executeActions/SkyExecuteActions.sol";
-
-import "forge-std/Test.sol";
 
 contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -36,8 +35,7 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
 
     SkyStakingEngineOpen open;
     SkyStakingEngineStake stake;
-
-    event GetReward(address indexed owner, uint256 indexed index, address indexed farm, address to, uint256 amt);
+    SkyStakingEngineSelectFarm selectFarm;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -52,48 +50,51 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
         cut = new SkyStakingEngineClaimRewards();
         open = new SkyStakingEngineOpen();
         stake = new SkyStakingEngineStake();
+        selectFarm = new SkyStakingEngineSelectFarm();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_skyStakingEngineStake_Direct_USDS_FARM() public {
-        _baseTest(true, USDS_FARM);
+    function test_skyStakingEngineClaimRewards_Direct_USDS_FARM() public {
+        _baseTest(true, USDS_FARM, USDS_ADDRESS);
     }
 
-    function test_skyStakingEngineStake_USDS_FARM() public {
-        _baseTest(false, USDS_FARM);
+    function test_skyStakingEngineClaimRewards_USDS_FARM() public {
+        _baseTest(false, USDS_FARM, USDS_ADDRESS);
     }
 
-    function test_skyStakingEngineStake_Direct_SPARK_FARM() public {
-        _baseTest(true, SPARK_FARM);
+    function test_skyStakingEngineClaimRewards_Direct_SPARK_FARM() public {
+        _baseTest(true, SPARK_FARM, SPARK_ADDRESS);
     }
 
-    function test_skyStakingEngineStake_SPARK_FARM() public {
-        _baseTest(false, SPARK_FARM);
+    function test_skyStakingEngineClaimRewards_SPARK_FARM() public {
+        _baseTest(false, SPARK_FARM, SPARK_ADDRESS);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function _baseTest(bool _isDirect, address _farm) internal {
-        // ! Give SKY to sender and approve wallet
+    function _baseTest(bool _isDirect, address _farm, address _rewardToken) internal {
+        //  Give SKY to sender and approve wallet
         give(SKY_ADDRESS, sender, AMOUNT);
         approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
         uint256 index = 0;
 
-        // ! Stake first
-        executeSkyStakingEngineStake(STAKING_ENGINE, SKY_ADDRESS, index, AMOUNT, sender, _farm, open, stake, wallet);
+        //  Stake first
+        executeSkyStakingEngineStake(STAKING_ENGINE, index, _farm, AMOUNT, sender, open, selectFarm, stake, wallet);
 
         skip(365 days);
 
-        // ! Execution logic of claiming rewards
+        //  Execution logic of claiming rewards
         bytes memory executeActionCallData =
             executeActionCalldata(skyStakingEngineClaimRewardsEncode(STAKING_ENGINE, index, _farm, sender), _isDirect);
         vm.expectEmit(true, true, true, false, address(STAKING_ENGINE));
-        emit GetReward(walletAddr, index, _farm, sender, 0);
+        emit ILockstakeEngine.GetReward(walletAddr, index, _farm, sender, 0);
         wallet.execute(address(cut), executeActionCallData, 0);
-        // TODO -> add check if has more tokens than 0
+
+        uint256 amount = IERC20(_rewardToken).balanceOf(sender);
+        assertGt(amount, 0);
     }
 }

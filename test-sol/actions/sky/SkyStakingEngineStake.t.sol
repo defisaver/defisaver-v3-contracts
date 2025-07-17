@@ -6,6 +6,7 @@ import {BaseTest} from "../../utils/BaseTest.sol";
 import {SmartWallet} from "../../utils/SmartWallet.sol";
 import {SkyStakingEngineStake} from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
 import {SkyStakingEngineOpen} from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
+import {SkyStakingEngineSelectFarm} from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 
 import {ILockstakeEngine} from "../../../contracts/interfaces/sky/ILockstakeEngine.sol";
 import {IStakingRewards} from "../../../contracts/interfaces/sky/IStakingRewards.sol";
@@ -13,8 +14,6 @@ import {IERC20} from "../../../contracts/interfaces/IERC20.sol";
 
 import {ActionsUtils} from "../../utils/ActionsUtils.sol";
 import {SkyExecuteActions} from "../../utils/executeActions/SkyExecuteActions.sol";
-
-import "forge-std/Test.sol";
 
 contract TestSkyStakingEngineStake is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
@@ -33,8 +32,7 @@ contract TestSkyStakingEngineStake is SkyExecuteActions {
     address constant SPARK_FARM = 0x99cBC0e4E6427F6939536eD24d1275B95ff77404;
 
     SkyStakingEngineOpen open;
-
-    event Lock(address indexed owner, uint256 indexed index, uint256 wad, uint16 ref);
+    SkyStakingEngineSelectFarm selectFarm;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -48,6 +46,7 @@ contract TestSkyStakingEngineStake is SkyExecuteActions {
 
         cut = new SkyStakingEngineStake();
         open = new SkyStakingEngineOpen();
+        selectFarm = new SkyStakingEngineSelectFarm();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -87,30 +86,29 @@ contract TestSkyStakingEngineStake is SkyExecuteActions {
         approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
         uint256 index = 0;
 
-        // ! Open urn
-        executeSkyStakingEngineOpen(STAKING_ENGINE, open, wallet);
+        // Open urn
+        executeSkyStakingEngineSelectFarm(STAKING_ENGINE, index, _farm, open, selectFarm, wallet);
 
-        // ! Variables for checks
+        // Variables for checks
         address urnAddr = ILockstakeEngine(STAKING_ENGINE).ownerUrns(walletAddr, index);
         uint256 balanceSenderBefore = IERC20(SKY_ADDRESS).balanceOf(sender);
         uint256 walletAllowanceBefore = IERC20(SKY_ADDRESS).allowance(sender, walletAddr);
         uint256 balanceStakingEngineBefore = IERC20(SKY_ADDRESS).balanceOf(STAKING_ENGINE);
-        // ! LSSky should be minted for Urn when executing `lock()` function, but it will be locked in FARM if farm is not address(0)
+        //  LSSky should be minted for Urn when executing `lock()` function, but it will be locked in FARM if farm is not address(0)
         uint256 balanceLSSkyUrnBefore = IERC20(LOCK_STAKE_SKY).balanceOf(urnAddr); // how much LSSky urn has
         uint256 balanceLSSkyFarmBefore;
         if (_farm != address(0)) balanceLSSkyFarmBefore = IStakingRewards(_farm).balanceOf(urnAddr); // how much LSSky urn has IN FARM
 
-        // ! Execution logic
-        bytes memory executeActionCallData = executeActionCalldata(
-            skyStakingEngineStakeEncode(STAKING_ENGINE, SKY_ADDRESS, index, AMOUNT, sender, _farm), _isDirect
-        );
+        // Execution logic
+        bytes memory executeActionCallData =
+            executeActionCalldata(skyStakingEngineStakeEncode(STAKING_ENGINE, index, AMOUNT, sender), _isDirect);
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
-        emit Lock(walletAddr, index, AMOUNT, SKY_REFERRAL_CODE);
+        emit ILockstakeEngine.Lock(walletAddr, index, AMOUNT, SKY_REFERRAL_CODE);
         wallet.execute(address(cut), executeActionCallData, 0);
 
         // stack too deep fix
         {
-            // ! After
+            // After
             uint256 balanceSenderAfter = IERC20(SKY_ADDRESS).balanceOf(sender);
             uint256 walletAllowanceAfter = IERC20(SKY_ADDRESS).allowance(sender, walletAddr);
             uint256 balanceStakingEngineAfter = IERC20(SKY_ADDRESS).balanceOf(STAKING_ENGINE);
@@ -118,7 +116,7 @@ contract TestSkyStakingEngineStake is SkyExecuteActions {
             uint256 balanceLSSkyFarmAfter;
             if (_farm != address(0)) balanceLSSkyFarmAfter = IStakingRewards(_farm).balanceOf(urnAddr);
 
-            // ! Checks
+            // Checks
             assertEq(balanceSenderBefore, balanceSenderAfter + AMOUNT);
             assertEq(walletAllowanceBefore, walletAllowanceAfter + AMOUNT);
             assertEq(balanceStakingEngineBefore, balanceStakingEngineAfter - AMOUNT);

@@ -8,11 +8,8 @@ import {SkyStakingEngineOpen} from "../../../contracts/actions/sky/SkyStakingEng
 import {SkyHelper} from "../../../contracts/actions/sky/helpers/SkyHelper.sol";
 
 import {ILockstakeEngine} from "../../../contracts/interfaces/sky/ILockstakeEngine.sol";
-import {IERC20} from "../../../contracts/interfaces/IERC20.sol";
 
 import {ActionsUtils} from "../../utils/ActionsUtils.sol";
-
-import "forge-std/Test.sol";
 
 contract TestSkyStakingEngineOpen is ActionsUtils, BaseTest, SkyHelper {
     /*//////////////////////////////////////////////////////////////////////////
@@ -26,8 +23,6 @@ contract TestSkyStakingEngineOpen is ActionsUtils, BaseTest, SkyHelper {
     SmartWallet wallet;
     address walletAddr;
     address sender;
-
-    event Open(address indexed owner, uint256 indexed index, address urn);
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -63,14 +58,14 @@ contract TestSkyStakingEngineOpen is ActionsUtils, BaseTest, SkyHelper {
         ILockstakeEngine stakingEngine = ILockstakeEngine(STAKING_ENGINE);
 
         vm.expectEmit(true, true, false, false, address(STAKING_ENGINE));
-        emit Open(walletAddr, 0, address(0));
+        emit ILockstakeEngine.Open(walletAddr, 0, address(0));
         wallet.execute(address(cut), executeActionCallData, 0);
         assertEq(1, stakingEngine.ownerUrnsCount(walletAddr));
         assertTrue(stakingEngine.isUrnAuth(walletAddr, 0, walletAddr));
 
-        // ! executing for 2nd time to check if index is handled properly
+        //  executing for 2nd time to check if index is handled properly
         vm.expectEmit(true, true, false, false, address(STAKING_ENGINE));
-        emit Open(address(walletAddr), 1, address(0));
+        emit ILockstakeEngine.Open(address(walletAddr), 1, address(0));
         wallet.execute(address(cut), executeActionCallData, 0);
         // owns 2 urns
         assertEq(2, stakingEngine.ownerUrnsCount(walletAddr));

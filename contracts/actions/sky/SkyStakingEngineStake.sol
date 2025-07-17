@@ -12,18 +12,14 @@ contract SkyStakingEngineStake is ActionBase, SkyHelper {
     using TokenUtils for address;
 
     /// @param stakingContract address of the staking engine contract
-    /// @param stakingToken address of the token being staked
     /// @param index index of the urn
     /// @param amount amount of stakingToken to stake
     /// @param from address from which to pull stakingToken
-    /// @param farm address of farm to get the rewards from
     struct Params {
         address stakingContract;
-        address stakingToken;
         uint256 index;
         uint256 amount;
         address from;
-        address farm;
     }
 
     /// @inheritdoc ActionBase
@@ -37,11 +33,9 @@ contract SkyStakingEngineStake is ActionBase, SkyHelper {
 
         inputData.stakingContract =
             _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
-        inputData.stakingToken = _parseParamAddr(inputData.stakingToken, _paramMapping[1], _subData, _returnValues);
-        inputData.index = _parseParamUint(inputData.index, _paramMapping[2], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[3], _subData, _returnValues);
-        inputData.from = _parseParamAddr(inputData.from, _paramMapping[4], _subData, _returnValues);
-        inputData.farm = _parseParamAddr(inputData.farm, _paramMapping[5], _subData, _returnValues);
+        inputData.index = _parseParamUint(inputData.index, _paramMapping[1], _subData, _returnValues);
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
+        inputData.from = _parseParamAddr(inputData.from, _paramMapping[3], _subData, _returnValues);
 
         (uint256 amountStaked, bytes memory logData) = _skyStakeInStakingEngine(inputData);
         emit ActionEvent("SkyStakingEngineStake", logData);
@@ -63,21 +57,11 @@ contract SkyStakingEngineStake is ActionBase, SkyHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _skyStakeInStakingEngine(Params memory _inputData) internal returns (uint256, bytes memory logData) {
-        _inputData.amount = _inputData.stakingToken.pullTokensIfNeeded(_inputData.from, _inputData.amount);
-        _inputData.stakingToken.approveToken(_inputData.stakingContract, _inputData.amount);
+        _inputData.amount = SKY_ADDRESS.pullTokensIfNeeded(_inputData.from, _inputData.amount);
+        SKY_ADDRESS.approveToken(_inputData.stakingContract, _inputData.amount);
         ILockstakeEngine(_inputData.stakingContract).lock(
-            // ! Always locks for wallet address, not handling `hope()` case
-            address(this),
-            _inputData.index,
-            _inputData.amount,
-            SKY_REFERRAL_CODE
+            address(this), _inputData.index, _inputData.amount, SKY_REFERRAL_CODE
         );
-
-        if (_inputData.farm != address(0)) {
-            ILockstakeEngine(_inputData.stakingContract).selectFarm(
-                address(this), _inputData.index, _inputData.farm, SKY_REFERRAL_CODE
-            );
-        }
 
         return (_inputData.amount, abi.encode(_inputData));
     }

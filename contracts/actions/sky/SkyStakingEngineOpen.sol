@@ -3,13 +3,10 @@
 pragma solidity =0.8.24;
 
 import {ActionBase} from "../ActionBase.sol";
-import {TokenUtils} from "../../utils/TokenUtils.sol";
 import {ILockstakeEngine} from "../../interfaces/sky/ILockstakeEngine.sol";
 
 /// @title Create position via LockstakeEngine
 contract SkyStakingEngineOpen is ActionBase {
-    using TokenUtils for address;
-
     /// @param stakingContract address of the staking engine contract
     struct Params {
         address stakingContract;
