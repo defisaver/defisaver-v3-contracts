@@ -803,6 +803,70 @@ const flMorphoBlueTest = async (flActionContract) => {
     });
 };
 
+const balancerV3FLTest = async (flActionContract) => {
+    describe('FL-BalancerV3', function () {
+        this.timeout(60000);
+
+        let senderAcc;
+        let proxy;
+        let safe;
+        let wallet;
+        // commented out because not enough liquidity, with small numbers it is working properly
+        const FLASHLOAN_TOKENS = ['BOLD' /* 'WETH', 'wstETH', 'rETH', 'DAI'*/];
+        const determineActiveWallet = (w) => {
+            wallet = isWalletNameDsProxy(w) ? proxy : safe;
+        };
+
+        before(async () => {
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address);
+            safe = await getProxy(senderAcc.address, true);
+        });
+        for (let i = 0; i < WALLETS.length; ++i) {
+            for (let j = 0; j < FLASHLOAN_TOKENS.length; ++j) {
+                const tokenSymbol = FLASHLOAN_TOKENS[j];
+
+                it(`... should get an ${tokenSymbol} Balancer V3 flash loan using ${WALLETS[i]}`, async () => {
+                    determineActiveWallet(WALLETS[i]);
+                    const assetInfo = getAssetInfo(tokenSymbol, chainIds[network]);
+
+                    // test if balance will brick fl action
+                    await setBalance(assetInfo.address, flActionContract.address, Float2BN('1', 0));
+
+                    const amount = fetchAmountinUSDPrice(tokenSymbol, '1000000');
+
+                    const loanAmount = hre.ethers.utils.parseUnits(amount, assetInfo.decimals);
+
+                    await approve(assetInfo.address, wallet.address);
+                    const flAction = new dfs.actions.flashloan.FLAction(
+                        new dfs.actions.flashloan.BalancerV3FlashLoanAction(
+                            [assetInfo.address],
+                            [loanAmount],
+                            [0],
+                            nullAddress,
+                            nullAddress,
+                            [],
+                        ),
+                    );
+
+                    const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
+                        flAction,
+                        new dfs.actions.basic.SendTokensAction(
+                            [assetInfo.address],
+                            [flActionContract.address],
+                            [hre.ethers.constants.MaxUint256],
+                        ),
+                    ]);
+
+                    const functionData = basicFLRecipe.encodeForDsProxyCall();
+                    await executeAction('RecipeExecutor', functionData[1], wallet);
+                });
+            }
+        }
+    });
+};
+
+
 describe('Generalised flashloan test', function () {
     this.timeout(60000);
     let flAction;
@@ -822,5 +886,6 @@ describe('Generalised flashloan test', function () {
         await balancerFLTest(flAction);
         await aaveV3FlTest(flAction);
         await curveUsdFLTest(flAction);
+        await balancerV3FLTest(flAction);
     });
 });
