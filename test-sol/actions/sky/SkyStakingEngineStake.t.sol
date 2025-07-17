@@ -86,7 +86,7 @@ contract TestSkyStakingEngineStake is SkyExecuteActions {
         approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
         uint256 index = 0;
 
-        // Open urn
+        // Open urn and select farm
         executeSkyStakingEngineSelectFarm(STAKING_ENGINE, index, _farm, open, selectFarm, wallet);
 
         // Variables for checks

@@ -11,6 +11,7 @@ interface ILockstakeEngine {
 
     // --- Events ---
     event Open(address indexed owner, uint256 indexed index, address urn);
+    event SelectFarm(address indexed owner, uint256 indexed index, address indexed farm, uint16 ref);
     event Lock(address indexed owner, uint256 indexed index, uint256 wad, uint16 ref);
     event Free(address indexed owner, uint256 indexed index, address to, uint256 wad, uint256 freed);
     event GetReward(address indexed owner, uint256 indexed index, address indexed farm, address to, uint256 amt);

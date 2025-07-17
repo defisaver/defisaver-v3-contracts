@@ -31,7 +31,7 @@ contract SkyStakingEngineSelectFarm is ActionBase, SkyHelper {
         inputData.index = _parseParamUint(inputData.index, _paramMapping[1], _subData, _returnValues);
         inputData.farm = _parseParamAddr(inputData.farm, _paramMapping[2], _subData, _returnValues);
 
-        (address farm, bytes memory logData) = _skyOpenInStakingEngine(inputData);
+        (address farm, bytes memory logData) = _skyStakingEngineSelectFarm(inputData);
         emit ActionEvent("SkyStakingEngineSelectFarm", logData);
         return bytes32(bytes20(farm));
     }
@@ -39,7 +39,7 @@ contract SkyStakingEngineSelectFarm is ActionBase, SkyHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        (, bytes memory logData) = _skyOpenInStakingEngine(inputData);
+        (, bytes memory logData) = _skyStakingEngineSelectFarm(inputData);
         logger.logActionDirectEvent("SkyStakingEngineSelectFarm", logData);
     }
 
@@ -50,7 +50,7 @@ contract SkyStakingEngineSelectFarm is ActionBase, SkyHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _skyOpenInStakingEngine(Params memory _inputData) internal returns (address, bytes memory logData) {
+    function _skyStakingEngineSelectFarm(Params memory _inputData) internal returns (address, bytes memory logData) {
         ILockstakeEngine(_inputData.stakingContract).selectFarm(
             address(this), _inputData.index, _inputData.farm, SKY_REFERRAL_CODE
         );
