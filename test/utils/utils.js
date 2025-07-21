@@ -74,6 +74,7 @@ const addrs = {
         REFILL_CALLER: '0x33fDb79aFB4456B604f376A45A546e7ae700e880',
         MORPHO_BLUE_VIEW: '0x10B621823D4f3E85fBDF759e252598e4e097C1fd',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0x814c8C7ceb1411B364c2940c4b9380e739e06686',
+        BOLD_ADDR: '0xb01dd87b29d187f3e3a4bf6cdaebfb97f3d9ab98',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -543,9 +544,7 @@ const setBalance = async (tokenAddr, userAddr, value) => {
     );
 };
 
-let cachedTokenPrices = {
-    BOLD: 0.999839,
-};
+let cachedTokenPrices = {};
 const getLocalTokenPrice = (tokenSymbol) => {
     const cachedPrice = cachedTokenPrices[tokenSymbol];
     if (cachedPrice) return cachedPrice;

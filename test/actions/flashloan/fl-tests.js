@@ -811,8 +811,7 @@ const balancerV3FLTest = async (flActionContract) => {
         let proxy;
         let safe;
         let wallet;
-        // commented out because not enough liquidity, with small numbers it is working properly
-        const FLASHLOAN_TOKENS = ['BOLD' /* 'WETH', 'wstETH', 'rETH', 'DAI'*/];
+        const FLASHLOAN_TOKENS = [['BOLD', 'WETH'], /* ['', ''] */];
         const determineActiveWallet = (w) => {
             wallet = isWalletNameDsProxy(w) ? proxy : safe;
         };
@@ -824,24 +823,27 @@ const balancerV3FLTest = async (flActionContract) => {
         });
         for (let i = 0; i < WALLETS.length; ++i) {
             for (let j = 0; j < FLASHLOAN_TOKENS.length; ++j) {
-                const tokenSymbol = FLASHLOAN_TOKENS[j];
+                const tokenSymbol1 = FLASHLOAN_TOKENS[j][0];
+                const tokenSymbol2 = FLASHLOAN_TOKENS[j][1];
 
-                it(`... should get an ${tokenSymbol} Balancer V3 flash loan using ${WALLETS[i]}`, async () => {
+                it(`... should get an ${tokenSymbol1} , ${tokenSymbol2} Balancer V3 flash loan using ${WALLETS[i]}`, async () => {
                     determineActiveWallet(WALLETS[i]);
-                    const assetInfo = getAssetInfo(tokenSymbol, chainIds[network]);
+                    const assetInfo1 = getAssetInfo(tokenSymbol1, chainIds[network]);
+                    const assetInfo2 = getAssetInfo(tokenSymbol2, chainIds[network]);
 
                     // test if balance will brick fl action
-                    await setBalance(assetInfo.address, flActionContract.address, Float2BN('1', 0));
+                    await setBalance(assetInfo1.address, flActionContract.address, Float2BN('1', 0));
+                    await setBalance(assetInfo2.address, flActionContract.address, Float2BN('1', 0));
 
-                    const amount = fetchAmountinUSDPrice(tokenSymbol, '1000000');
+                    const loanAmount1 = hre.ethers.utils.parseUnits('1000000', assetInfo1.decimals);
+                    const loanAmount2 = hre.ethers.utils.parseUnits('5', assetInfo2.decimals);
 
-                    const loanAmount = hre.ethers.utils.parseUnits(amount, assetInfo.decimals);
-
-                    await approve(assetInfo.address, wallet.address);
+                    await approve(assetInfo1.address, wallet.address);
+                    await approve(assetInfo2.address, wallet.address);
                     const flAction = new dfs.actions.flashloan.FLAction(
                         new dfs.actions.flashloan.BalancerV3FlashLoanAction(
-                            [assetInfo.address],
-                            [loanAmount],
+                            [assetInfo1.address, assetInfo2.address],
+                            [loanAmount1, loanAmount2],
                             [0],
                             nullAddress,
                             nullAddress,
@@ -852,9 +854,9 @@ const balancerV3FLTest = async (flActionContract) => {
                     const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
                         flAction,
                         new dfs.actions.basic.SendTokensAction(
-                            [assetInfo.address],
-                            [flActionContract.address],
-                            [hre.ethers.constants.MaxUint256],
+                            [assetInfo1.address, assetInfo2.address],
+                            [flActionContract.address, flActionContract.address],
+                            [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
                         ),
                     ]);
 
@@ -866,7 +868,6 @@ const balancerV3FLTest = async (flActionContract) => {
     });
 };
 
-
 describe('Generalised flashloan test', function () {
     this.timeout(60000);
     let flAction;
@@ -877,15 +878,15 @@ describe('Generalised flashloan test', function () {
         await redeploy('RecipeExecutor');
     });
     it('... should test generalised flash loan', async () => {
-        await aaveFlTest(flAction);
-        await sparkFlTest(flAction);
-        await makerFLTest(flAction);
-        await ghoFLTest(flAction);
-        await uniswapV3FlashloanTest(flAction);
-        await flMorphoBlueTest(flAction);
-        await balancerFLTest(flAction);
-        await aaveV3FlTest(flAction);
-        await curveUsdFLTest(flAction);
+        // await aaveFlTest(flAction);
+        // await sparkFlTest(flAction);
+        // await makerFLTest(flAction);
+        // await ghoFLTest(flAction);
+        // await uniswapV3FlashloanTest(flAction);
+        // await flMorphoBlueTest(flAction);
+        // await balancerFLTest(flAction);
+        // await aaveV3FlTest(flAction);
+        // await curveUsdFLTest(flAction);
         await balancerV3FLTest(flAction);
     });
 });

@@ -159,9 +159,9 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
     /// @notice Gets a FL from Balancer V3 and returns back the execution to the action address
     function _flBalancerV3(FlashLoanParams memory _flParams) internal {
-        IVaultMain(BALANCER_V3_VAULT_ADDR).unlock(abi.encodeWithSelector(this.receiveFlashLoanV3.selector, _flParams));
+        IVaultMain(BALANCER_V3_VAULT_ADDR).unlock(abi.encodeWithSelector(this.receiveFlashLoanBalancerV3.selector, _flParams));
 
-        emit ActionEvent("FLAction", abi.encode("BALANCER V3", _flParams));
+        emit ActionEvent("FLAction", abi.encode("BALANCER_V3", _flParams));
     }
 
     /// @notice Gets a GHO FL from Gho Flash Minter
@@ -292,34 +292,33 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
     /// @notice Balancer V3 FL callback function that formats and calls back RecipeExecutor
     /// FLSource == BALANCER_V3
-    function receiveFlashLoanV3(FlashLoanParams memory _userData) external nonReentrant {
+    function receiveFlashLoanBalancerV3(FlashLoanParams memory _userData) external nonReentrant {
         if (msg.sender != BALANCER_V3_VAULT_ADDR) {
             revert UntrustedLender();
         }
 
-        FlashLoanParams memory params = _userData;
 
-        (Recipe memory currRecipe, address wallet) = abi.decode(params.recipeData, (Recipe, address));
+        (Recipe memory currRecipe, address wallet) = abi.decode(_userData.recipeData, (Recipe, address));
 
-        uint256[] memory balancesBefore = new uint256[](params.tokens.length);
-        for (uint256 i = 0; i < params.tokens.length; i++) {
-            balancesBefore[i] = params.tokens[i].getBalance(address(this));
+        uint256[] memory balancesBefore = new uint256[](_userData.tokens.length);
+        for (uint256 i = 0; i < _userData.tokens.length; i++) {
+            balancesBefore[i] = _userData.tokens[i].getBalance(address(this));
             // Send token from the vault directly to the wallet
-            IVaultMain(BALANCER_V3_VAULT_ADDR).sendTo(IERC20(params.tokens[i]), wallet, params.amounts[i]);
+            IVaultMain(BALANCER_V3_VAULT_ADDR).sendTo(IERC20(_userData.tokens[i]), wallet, _userData.amounts[i]);
         }
 
-        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, params.amounts[0]);
+        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, _userData.amounts[0]);
 
-        for (uint256 i = 0; i < params.tokens.length; i++) {
-            uint256 paybackAmount = params.amounts[i];
+        for (uint256 i = 0; i < _userData.tokens.length; i++) {
+            uint256 paybackAmount = _userData.amounts[i];
 
-            if (params.tokens[i].getBalance(address(this)) != paybackAmount + balancesBefore[i]) {
+            if (_userData.tokens[i].getBalance(address(this)) != paybackAmount + balancesBefore[i]) {
                 revert WrongPaybackAmountError();
             }
             // Send tokens back to Balancer V3 Vault - repay the loan
-            params.tokens[i].withdrawTokens(address(BALANCER_V3_VAULT_ADDR), paybackAmount);
+            _userData.tokens[i].withdrawTokens(BALANCER_V3_VAULT_ADDR, paybackAmount);
             // Settle the repayment
-            IVaultMain(BALANCER_V3_VAULT_ADDR).settle(IERC20(params.tokens[i]), paybackAmount);
+            IVaultMain(BALANCER_V3_VAULT_ADDR).settle(IERC20(_userData.tokens[i]), paybackAmount);
         }
     }
 
