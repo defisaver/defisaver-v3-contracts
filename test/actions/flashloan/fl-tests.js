@@ -876,15 +876,15 @@ describe('Generalised flashloan test', function () {
         await redeploy('RecipeExecutor');
     });
     it('... should test generalised flash loan', async () => {
-        // await aaveFlTest(flAction);
-        // await sparkFlTest(flAction);
-        // await makerFLTest(flAction);
-        // await ghoFLTest(flAction);
-        // await uniswapV3FlashloanTest(flAction);
-        // await flMorphoBlueTest(flAction);
-        // await balancerFLTest(flAction);
-        // await aaveV3FlTest(flAction);
-        // await curveUsdFLTest(flAction);
+        await aaveFlTest(flAction);
+        await sparkFlTest(flAction);
+        await makerFLTest(flAction);
+        await ghoFLTest(flAction);
+        await uniswapV3FlashloanTest(flAction);
+        await flMorphoBlueTest(flAction);
+        await balancerFLTest(flAction);
+        await aaveV3FlTest(flAction);
+        await curveUsdFLTest(flAction);
         await balancerV3FLTest(flAction);
     });
 });
