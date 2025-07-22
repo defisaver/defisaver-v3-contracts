@@ -35,5 +35,5 @@ contract OptimismFLAddresses {
 
     address internal constant MORPHO_BLUE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    address internal constant RECIPE_EXECUTOR_ADDR = 0xA532771BD90dAf94b456A4acC9E9cbBdF1367572;
+    address internal constant DFS_REGISTRY_ADDR = 0xAf707Ee480204Ed6e2640B53cE86F680D28Afcbd;
 }
