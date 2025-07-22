@@ -811,7 +811,7 @@ const balancerV3FLTest = async (flActionContract) => {
         let proxy;
         let safe;
         let wallet;
-        const FLASHLOAN_TOKENS = [['BOLD', 'WETH'], /* ['', ''] */];
+        const FLASHLOAN_TOKENS = [['BOLD', 'WETH']];
         const determineActiveWallet = (w) => {
             wallet = isWalletNameDsProxy(w) ? proxy : safe;
         };

@@ -297,7 +297,6 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
             revert UntrustedLender();
         }
 
-
         (Recipe memory currRecipe, address wallet) = abi.decode(_userData.recipeData, (Recipe, address));
 
         uint256[] memory balancesBefore = new uint256[](_userData.tokens.length);
