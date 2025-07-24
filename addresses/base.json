@@ -758,6 +758,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0x4467CA9689a1611fcEd2DF7E36b061b232e6113B",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "KyberAggregatorWrapper",
         "address": "0x23ADd7e414d803C2a35334933212661634B27a5a",
         "id": "0x1abf4ed0",

@@ -232,6 +232,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0xCA2f82b0499a59115718b919e74Aa931CF43d84b",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "ParaswapWrapper",
         "address": "0x6a1Ebcb09D419Affe500B4feA13A89511aD23c1b",
         "id": "0x115fa27e",

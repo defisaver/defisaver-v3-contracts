@@ -303,6 +303,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0x2608919087226099B74C919480c2ed785415E832",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveWrapperV3",
         "address": "0xF5E8C498b6697F0704F0C50448714C5E328b33E2",
         "id": "0xb856c9af",
