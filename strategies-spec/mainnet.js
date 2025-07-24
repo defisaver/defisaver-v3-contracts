@@ -2426,7 +2426,7 @@ const createAaveV3FlRepayOnPriceStrategy = () => {
     aaveV3FlRepayOnPriceStrategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        ['&collAsset'],
+        ['%collAsset'],
         ['%loanAmount'],
         nullAddress,
         [],
