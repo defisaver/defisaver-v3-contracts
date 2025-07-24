@@ -41,6 +41,10 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
         params.market = _parseParamAddr(params.market, _paramMapping[4], _subData, _returnValues);
 
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
+
         (uint256 withdrawnAmount, bytes memory logData) = _withdraw(
             params.market,
             params.assetId,
