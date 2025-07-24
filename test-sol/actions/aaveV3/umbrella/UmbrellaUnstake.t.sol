@@ -205,7 +205,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
         uint256 _unstakeAmount,
         bool _isMaxAmount,
         address _waTokenOrGHO
-    ) internal {
+    ) internal pure {
         assertEq(_snapshotAfter.walletWaTokenBalance, 0, "walletWaTokenBalance should be 0");
         assertEq(_snapshotAfter.walletSupplyTokenBalance, 0, "walletSupplyTokenBalance should be 0");
         if (_waTokenOrGHO != Addresses.GHO_TOKEN) {
