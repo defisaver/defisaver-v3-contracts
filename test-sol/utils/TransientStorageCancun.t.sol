@@ -2,16 +2,16 @@
 
 pragma solidity =0.8.24;
 
-import {TransientStorage} from "../../contracts/utils/TransientStorage.sol";
+import {TransientStorageCancun} from "../../contracts/utils/TransientStorageCancun.sol";
 import "forge-std/Test.sol";
 
-contract TestTransientStorage is Test {
-    TransientStorage transientStorage;
+contract TestTransientStorageCancun is Test {
+    TransientStorageCancun transientStorage;
 
     bytes32 bytesToWrite = 0x5d41402abc4b2a76b9719d911017c59200000000000000000000000000000000;
 
     function setUp() public {
-        transientStorage = new TransientStorage();
+        transientStorage = new TransientStorageCancun();
     }
 
     function test_getsWrittenInTransient() public {
