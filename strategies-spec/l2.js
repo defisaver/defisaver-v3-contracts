@@ -1902,16 +1902,10 @@ const createCompV3BoostOnPriceL2StrategyTemplate = (name, isEOA) => {
         '&proxy',
         user,
     );
-    const compV3TargetRatioCheckAction = new dfs.actions.checkers.CompV3TargetRatioCheckAction(
-        '&targetRatio',
-        '&market',
-        user,
-    );
     compV3BoostOnPriceL2Strategy.addAction(compV3BorrowAction);
     compV3BoostOnPriceL2Strategy.addAction(sellAction);
     compV3BoostOnPriceL2Strategy.addAction(feeTakingAction);
     compV3BoostOnPriceL2Strategy.addAction(supplyAction);
-    compV3BoostOnPriceL2Strategy.addAction(compV3TargetRatioCheckAction);
 
     return compV3BoostOnPriceL2Strategy.encodeForDsProxyCall();
 };
@@ -1962,17 +1956,11 @@ const createCompV3FLBoostOnPriceL2StrategyTemplate = (name, isEOA) => {
         '%flAddress', // sent by backend
         user,
     );
-    const compV3TargetRatioCheckAction = new dfs.actions.checkers.CompV3TargetRatioCheckAction(
-        '&targetRatio',
-        '&market',
-        user,
-    );
     compV3FLBoostOnPriceL2Strategy.addAction(flAction);
     compV3FLBoostOnPriceL2Strategy.addAction(sellAction);
     compV3FLBoostOnPriceL2Strategy.addAction(feeTakingAction);
     compV3FLBoostOnPriceL2Strategy.addAction(supplyAction);
     compV3FLBoostOnPriceL2Strategy.addAction(compV3BorrowAction);
-    compV3FLBoostOnPriceL2Strategy.addAction(compV3TargetRatioCheckAction);
 
     return compV3FLBoostOnPriceL2Strategy.encodeForDsProxyCall();
 };
@@ -2019,16 +2007,10 @@ const createCompV3RepayOnPriceL2StrategyTemplate = (name, isEOA) => {
         user,
         '&baseToken',
     );
-    const compV3TargetRatioCheckAction = new dfs.actions.checkers.CompV3TargetRatioCheckAction(
-        '&targetRatio',
-        '&market',
-        user,
-    );
     compV3RepayOnPriceL2Strategy.addAction(compV3WithdrawAction);
     compV3RepayOnPriceL2Strategy.addAction(sellAction);
     compV3RepayOnPriceL2Strategy.addAction(feeTakingAction);
     compV3RepayOnPriceL2Strategy.addAction(compV3PaybackAction);
-    compV3RepayOnPriceL2Strategy.addAction(compV3TargetRatioCheckAction);
 
     return compV3RepayOnPriceL2Strategy.encodeForDsProxyCall();
 };
@@ -2080,17 +2062,11 @@ const createCompV3FLRepayOnPriceL2StrategyTemplate = (name, isEOA) => {
         '$1',
         user,
     );
-    const compV3TargetRatioCheckAction = new dfs.actions.checkers.CompV3TargetRatioCheckAction(
-        '&targetRatio',
-        '&market',
-        user,
-    );
     compV3FLRepayOnPriceL2Strategy.addAction(flAction);
     compV3FLRepayOnPriceL2Strategy.addAction(sellAction);
     compV3FLRepayOnPriceL2Strategy.addAction(feeTakingAction);
     compV3FLRepayOnPriceL2Strategy.addAction(compV3PaybackAction);
     compV3FLRepayOnPriceL2Strategy.addAction(compV3WithdrawAction);
-    compV3FLRepayOnPriceL2Strategy.addAction(compV3TargetRatioCheckAction);
 
     return compV3FLRepayOnPriceL2Strategy.encodeForDsProxyCall();
 };

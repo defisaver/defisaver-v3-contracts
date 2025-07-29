@@ -86,11 +86,9 @@ async function main() {
 
     const compV3PriceTrigger = await redeploy('CompV3PriceTrigger', true);
     const compV3PriceRangeTrigger = await redeploy('CompV3PriceRangeTrigger', true);
-    const compV3TargetRatioCheckAction = await redeploy('CompV3TargetRatioCheck', true);
 
     console.log('CompV3PriceTrigger:', compV3PriceTrigger.address);
     console.log('CompV3PriceRangeTrigger:', compV3PriceRangeTrigger.address);
-    console.log('CompV3TargetRatioCheckAction:', compV3TargetRatioCheckAction.address);
 
     const repayOnPriceBundleId = await deployCompV3RepayOnPriceBundle(false, isL2);
     const boostOnPriceBundleId = await deployCompV3BoostOnPriceBundle(false, isL2);

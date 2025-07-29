@@ -6172,16 +6172,10 @@ const callCompV3RepayOnPriceStrategy = async (
         placeHolderAddr,
         placeHolderAddr,
     );
-    const compV3TargetRatioCheckAction = new dfs.actions.checkers.CompV3TargetRatioCheckAction(
-        0,
-        placeHolderAddr,
-        placeHolderAddr,
-    );
     actionsCallData.push(compV3WithdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(compV3PaybackAction.encodeForRecipe()[0]);
-    actionsCallData.push(compV3TargetRatioCheckAction.encodeForRecipe()[0]);
     triggerCallData.push(abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [placeHolderAddr, placeHolderAddr, 0, 0]));
     const { callData, receipt } = await executeStrategy(
         isL2,
@@ -6227,17 +6221,11 @@ const callCompV3FLRepayOnPriceStrategy = async (
         0,
         placeHolderAddr,
     );
-    const compV3TargetRatioCheckAction = new dfs.actions.checkers.CompV3TargetRatioCheckAction(
-        0,
-        placeHolderAddr,
-        placeHolderAddr,
-    );
     actionsCallData.push(flAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(compV3PaybackAction.encodeForRecipe()[0]);
     actionsCallData.push(compV3WithdrawAction.encodeForRecipe()[0]);
-    actionsCallData.push(compV3TargetRatioCheckAction.encodeForRecipe()[0]);
     triggerCallData.push(abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [placeHolderAddr, placeHolderAddr, 0, 0]));
     const { callData, receipt } = await executeStrategy(
         isL2,
@@ -6282,16 +6270,10 @@ const callCompV3BoostOnPriceStrategy = async (
         placeHolderAddr,
         placeHolderAddr,
     );
-    const compV3TargetRatioCheckAction = new dfs.actions.checkers.CompV3TargetRatioCheckAction(
-        0,
-        placeHolderAddr,
-        placeHolderAddr,
-    );
     actionsCallData.push(compV3BorrowAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(compV3SupplyAction.encodeForRecipe()[0]);
-    actionsCallData.push(compV3TargetRatioCheckAction.encodeForRecipe()[0]);
     triggerCallData.push(abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [placeHolderAddr, placeHolderAddr, 0, 0]));
     const { callData, receipt } = await executeStrategy(
         isL2,
@@ -6337,17 +6319,11 @@ const callCompV3FLBoostOnPriceStrategy = async (
         flAddr,
         placeHolderAddr,
     );
-    const compV3TargetRatioCheckAction = new dfs.actions.checkers.CompV3TargetRatioCheckAction(
-        0,
-        placeHolderAddr,
-        placeHolderAddr,
-    );
     actionsCallData.push(flAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(compV3SupplyAction.encodeForRecipe()[0]);
     actionsCallData.push(compV3BorrowAction.encodeForRecipe()[0]);
-    actionsCallData.push(compV3TargetRatioCheckAction.encodeForRecipe()[0]);
     triggerCallData.push(abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [placeHolderAddr, placeHolderAddr, 0, 0]));
     const { callData, receipt } = await executeStrategy(
         isL2,
