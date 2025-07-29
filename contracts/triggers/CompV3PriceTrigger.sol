@@ -39,7 +39,7 @@ contract CompV3PriceTrigger is
         uint8 state;
     }
 
-    function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
         SubParams memory triggerData = parseSubInputs(_subData);
 
         // If user is provided, store the current ratio for the user.

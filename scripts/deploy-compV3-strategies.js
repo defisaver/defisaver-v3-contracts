@@ -3,7 +3,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const hre = require('hardhat');
 const { topUp } = require('./utils/fork');
-const { getOwnerAddr, redeploy, openStrategyAndBundleStorage } = require('../test/utils/utils');
+const { getOwnerAddr, redeploy, openStrategyAndBundleStorage, network } = require('../test/utils/utils');
 const {
     createCompV3BoostOnPriceStrategy,
     createCompV3FLBoostOnPriceStrategy,
@@ -62,27 +62,27 @@ const deployCompV3RepayOnPriceBundle = async (isEOA, isL2) => {
 };
 const deployCompV3CloseBundle = async (isEOA, isL2) => {
     await openStrategyAndBundleStorage(true);
-    const closeStrategy = isEOA
+    const flCloseToDebtStrategy = isEOA
         ? (isL2 ? createCompV3EOAFLCloseToDebtL2Strategy() : createCompV3EOAFLCloseToDebtStrategy())
         : (isL2 ? createCompV3FLCloseToDebtL2Strategy() : createCompV3FLCloseToDebtStrategy());
-    const flCloseStrategy = isEOA
+    const flCloseToCollStrategy = isEOA
         ? (isL2 ? createCompV3EOAFLCloseToCollL2Strategy() : createCompV3EOAFLCloseToCollStrategy())
         : (isL2 ? createCompV3FLCloseToCollL2Strategy() : createCompV3FLCloseToCollStrategy());
-    const closeStrategyId = await createStrategy(...closeStrategy, false);
-    const flCloseStrategyId = await createStrategy(...flCloseStrategy, false);
-    const bundleId = await createBundle([closeStrategyId, flCloseStrategyId]);
+    const flCloseToDebtStrategyId = await createStrategy(...flCloseToDebtStrategy, false);
+    const flCloseToCollStrategyId = await createStrategy(...flCloseToCollStrategy, false);
+    const bundleId = await createBundle([flCloseToDebtStrategyId, flCloseToCollStrategyId]);
     return bundleId;
 };
 async function main() {
     /* //////////////////////////////////////////////////////////////
                                 SETUP
     //////////////////////////////////////////////////////////// */
-    const isL2 = false;
+    const isL2 = network !== 'mainnet';
 
     const senderAcc = (await hre.ethers.getSigners())[0];
 
-    await topUp(senderAcc.address);
-    await topUp(getOwnerAddr());
+    await topUp(senderAcc.address, network);
+    await topUp(getOwnerAddr(), network);
 
     const compV3PriceTrigger = await redeploy('CompV3PriceTrigger', true);
     const compV3PriceRangeTrigger = await redeploy('CompV3PriceRangeTrigger', true);
