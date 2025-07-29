@@ -21,6 +21,8 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, CheckWalletTy
         bytes4(keccak256("executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))")); 
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
+    
+    bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// Caller must be authorized bot
     error BotNotApproved(address, uint256);
@@ -72,7 +74,6 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, CheckWalletTy
         return BotAuth(registry.getAddr(BOT_AUTH_ID)).isApproved(_subId, msg.sender);
     }
 
-
     /// @notice Calls auth contract which has the auth from the user wallet which will call RecipeExecutor
     /// @param _subId Strategy data we have in storage
     /// @param _actionsCallData All input data needed to execute actions
@@ -92,7 +93,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, CheckWalletTy
 
         IAuth(authAddr).callExecute{value: msg.value}(
             _userWallet,
-            RECIPE_EXECUTOR_ADDR,
+            registry.getAddr(RECIPE_EXECUTOR_ID),
             abi.encodeWithSelector(
                 EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR,
                 _subId,
