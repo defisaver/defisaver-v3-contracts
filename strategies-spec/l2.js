@@ -1861,6 +1861,7 @@ const createFluidT1FLBoostL2Strategy = () => {
 
     return fluidT1FLBoostStrategy.encodeForDsProxyCall();
 };
+
 const createCompV3BoostOnPriceL2StrategyTemplate = (name, isEOA) => {
     const user = isEOA ? '&eoa' : '&proxy';
     const compV3BoostOnPriceL2Strategy = new dfs.Strategy(name);
@@ -1868,6 +1869,7 @@ const createCompV3BoostOnPriceL2StrategyTemplate = (name, isEOA) => {
     compV3BoostOnPriceL2Strategy.addSubSlot('&collToken', 'address');
     compV3BoostOnPriceL2Strategy.addSubSlot('&baseToken', 'address');
     compV3BoostOnPriceL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    compV3BoostOnPriceL2Strategy.addSubSlot('&ratioState', 'uint8');
 
     const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, nullAddress, 0, 0);
     compV3BoostOnPriceL2Strategy.addTrigger(compV3PriceTrigger);
@@ -1902,10 +1904,17 @@ const createCompV3BoostOnPriceL2StrategyTemplate = (name, isEOA) => {
         '&proxy',
         user,
     );
+    const compV3RatioCheckAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&market',
+        user,
+    );
     compV3BoostOnPriceL2Strategy.addAction(compV3BorrowAction);
     compV3BoostOnPriceL2Strategy.addAction(sellAction);
     compV3BoostOnPriceL2Strategy.addAction(feeTakingAction);
     compV3BoostOnPriceL2Strategy.addAction(supplyAction);
+    compV3BoostOnPriceL2Strategy.addAction(compV3RatioCheckAction);
 
     return compV3BoostOnPriceL2Strategy.encodeForDsProxyCall();
 };
@@ -1916,6 +1925,7 @@ const createCompV3FLBoostOnPriceL2StrategyTemplate = (name, isEOA) => {
     compV3FLBoostOnPriceL2Strategy.addSubSlot('&collToken', 'address');
     compV3FLBoostOnPriceL2Strategy.addSubSlot('&baseToken', 'address');
     compV3FLBoostOnPriceL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    compV3FLBoostOnPriceL2Strategy.addSubSlot('&ratioState', 'uint8');
 
     const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, nullAddress, 0, 0);
     compV3FLBoostOnPriceL2Strategy.addTrigger(compV3PriceTrigger);
@@ -1956,11 +1966,18 @@ const createCompV3FLBoostOnPriceL2StrategyTemplate = (name, isEOA) => {
         '%flAddress', // sent by backend
         user,
     );
+    const compV3RatioCheckAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&market',
+        user,
+    );
     compV3FLBoostOnPriceL2Strategy.addAction(flAction);
     compV3FLBoostOnPriceL2Strategy.addAction(sellAction);
     compV3FLBoostOnPriceL2Strategy.addAction(feeTakingAction);
     compV3FLBoostOnPriceL2Strategy.addAction(supplyAction);
     compV3FLBoostOnPriceL2Strategy.addAction(compV3BorrowAction);
+    compV3FLBoostOnPriceL2Strategy.addAction(compV3RatioCheckAction);
 
     return compV3FLBoostOnPriceL2Strategy.encodeForDsProxyCall();
 };
@@ -1972,6 +1989,7 @@ const createCompV3RepayOnPriceL2StrategyTemplate = (name, isEOA) => {
     compV3RepayOnPriceL2Strategy.addSubSlot('&collToken', 'address');
     compV3RepayOnPriceL2Strategy.addSubSlot('&baseToken', 'address');
     compV3RepayOnPriceL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    compV3RepayOnPriceL2Strategy.addSubSlot('&ratioState', 'uint8');
 
     const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, nullAddress, 0, 0);
     compV3RepayOnPriceL2Strategy.addTrigger(compV3PriceTrigger);
@@ -2007,10 +2025,17 @@ const createCompV3RepayOnPriceL2StrategyTemplate = (name, isEOA) => {
         user,
         '&baseToken',
     );
+    const compV3RatioCheckAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&market',
+        user,
+    );
     compV3RepayOnPriceL2Strategy.addAction(compV3WithdrawAction);
     compV3RepayOnPriceL2Strategy.addAction(sellAction);
     compV3RepayOnPriceL2Strategy.addAction(feeTakingAction);
     compV3RepayOnPriceL2Strategy.addAction(compV3PaybackAction);
+    compV3RepayOnPriceL2Strategy.addAction(compV3RatioCheckAction);
 
     return compV3RepayOnPriceL2Strategy.encodeForDsProxyCall();
 };
@@ -2021,6 +2046,7 @@ const createCompV3FLRepayOnPriceL2StrategyTemplate = (name, isEOA) => {
     compV3FLRepayOnPriceL2Strategy.addSubSlot('&collToken', 'address');
     compV3FLRepayOnPriceL2Strategy.addSubSlot('&baseToken', 'address');
     compV3FLRepayOnPriceL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    compV3FLRepayOnPriceL2Strategy.addSubSlot('&ratioState', 'uint8');
 
     const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, nullAddress, 0, 0);
     compV3FLRepayOnPriceL2Strategy.addTrigger(compV3PriceTrigger);
@@ -2062,11 +2088,18 @@ const createCompV3FLRepayOnPriceL2StrategyTemplate = (name, isEOA) => {
         '$1',
         user,
     );
+    const compV3RatioCheckAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&market',
+        user,
+    );
     compV3FLRepayOnPriceL2Strategy.addAction(flAction);
     compV3FLRepayOnPriceL2Strategy.addAction(sellAction);
     compV3FLRepayOnPriceL2Strategy.addAction(feeTakingAction);
     compV3FLRepayOnPriceL2Strategy.addAction(compV3PaybackAction);
     compV3FLRepayOnPriceL2Strategy.addAction(compV3WithdrawAction);
+    compV3FLRepayOnPriceL2Strategy.addAction(compV3RatioCheckAction);
 
     return compV3FLRepayOnPriceL2Strategy.encodeForDsProxyCall();
 };
@@ -2148,7 +2181,6 @@ const createCompV3FLCloseToDebtL2StrategyTemplate = (name, isEOA) => {
 
     return compV3FLCloseToDebtL2Strategy.encodeForDsProxyCall();
 };
-
 const createCompV3FLCloseToCollL2StrategyTemplate = (name, isEOA) => {
     const user = isEOA ? '&eoa' : '&proxy';
     const compV3FLCloseToCollL2Strategy = new dfs.Strategy(name);
