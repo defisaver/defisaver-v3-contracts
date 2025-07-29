@@ -6082,7 +6082,7 @@ const createCompV3BoostOnPriceStrategyTemplate = (name, isEOA) => {
     compV3BoostOnPriceStrategy.addSubSlot('&baseToken', 'address');
     compV3BoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
 
-    const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, 0, 0);
+    const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, nullAddress, 0, 0);
     compV3BoostOnPriceStrategy.addTrigger(compV3PriceTrigger);
 
     const compV3BorrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(
@@ -6128,7 +6128,7 @@ const createCompV3FLBoostOnPriceStrategyTemplate = (name, isEOA) => {
     compV3FLBoostOnPriceStrategy.addSubSlot('&baseToken', 'address');
     compV3FLBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
 
-    const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, 0, 0);
+    const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, nullAddress, 0, 0);
     compV3FLBoostOnPriceStrategy.addTrigger(compV3PriceTrigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
@@ -6182,7 +6182,7 @@ const createCompV3RepayOnPriceStrategyTemplate = (name, isEOA) => {
     compV3RepayOnPriceStrategy.addSubSlot('&baseToken', 'address');
     compV3RepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
 
-    const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, 0, 0);
+    const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, nullAddress, 0, 0);
     compV3RepayOnPriceStrategy.addTrigger(compV3PriceTrigger);
 
     const compV3WithdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
@@ -6229,7 +6229,7 @@ const createCompV3FLRepayOnPriceStrategyTemplate = (name, isEOA) => {
     compV3FLRepayOnPriceStrategy.addSubSlot('&baseToken', 'address');
     compV3FLRepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
 
-    const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, 0, 0);
+    const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, nullAddress, 0, 0);
     compV3FLRepayOnPriceStrategy.addTrigger(compV3PriceTrigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(

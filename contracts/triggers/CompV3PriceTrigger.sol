@@ -4,12 +4,22 @@ pragma solidity =0.8.24;
 
 import { IComet } from "../interfaces/compoundV3/IComet.sol";
 import { ITrigger } from "../interfaces/ITrigger.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
+import { TransientStorage } from "../utils/TransientStorage.sol";
+import { CompV3RatioHelper } from "../actions/compoundV3/helpers/CompV3RatioHelper.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
 /// @notice This uses the CompoundV3 oracle, which returns the price of the collateral token in terms of the base (debt) token.
 /// @notice The trigger expects the price input to be scaled by 1e8.
-contract CompV3PriceTrigger is ITrigger, AdminAuth {
+/// @notice This trigger can also accept a optional user address to temporarily store the current ratio.
+contract CompV3PriceTrigger is
+    ITrigger,
+    AdminAuth,
+    CompV3RatioHelper,
+    TriggerHelper
+{
+    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
     enum PriceState {
         OVER,
@@ -18,17 +28,25 @@ contract CompV3PriceTrigger is ITrigger, AdminAuth {
 
     /// @param market address of the compoundV3 market
     /// @param collToken address of the collateral token from the market
+    /// @param user address of the user that will be used to store the current ratio for. [Optional]
     /// @param price price of the collateral token in terms of the base token that represents the triggerable point. 
     /// @param state represents if we want the current price to be higher or lower than price param
     struct SubParams {
         address market;
         address collToken;
+        address user;
         uint256 price;
         uint8 state;
     }
 
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerData = parseSubInputs(_subData);
+
+        // If user is provided, store the current ratio for the user.
+        if (triggerData.user != address(0)) {
+            uint256 currRatio = getSafetyRatio(triggerData.market, triggerData.user);
+            tempStorage.setBytes32("COMP_RATIO", bytes32(currRatio));
+        }
 
         address priceFeed = IComet(triggerData.market).getAssetInfoByAddress(triggerData.collToken).priceFeed;
 
