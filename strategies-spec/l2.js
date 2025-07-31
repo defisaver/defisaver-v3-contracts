@@ -2110,7 +2110,6 @@ const createCompV3FLCloseToDebtL2StrategyTemplate = (name, isEOA) => {
     compV3FLCloseToDebtL2Strategy.addSubSlot('&market', 'address');
     compV3FLCloseToDebtL2Strategy.addSubSlot('&collToken', 'address');
     compV3FLCloseToDebtL2Strategy.addSubSlot('&baseToken', 'address');
-    compV3FLCloseToDebtL2Strategy.addSubSlot('&targetRatio', 'uint256');
     // only used by backend to determine which action to call
     compV3FLCloseToDebtL2Strategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
 
@@ -2187,7 +2186,6 @@ const createCompV3FLCloseToCollL2StrategyTemplate = (name, isEOA) => {
     compV3FLCloseToCollL2Strategy.addSubSlot('&market', 'address');
     compV3FLCloseToCollL2Strategy.addSubSlot('&collToken', 'address');
     compV3FLCloseToCollL2Strategy.addSubSlot('&baseToken', 'address');
-    compV3FLCloseToCollL2Strategy.addSubSlot('&targetRatio', 'uint256');
     // only used by backend to determine which action to call
     compV3FLCloseToCollL2Strategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
 
