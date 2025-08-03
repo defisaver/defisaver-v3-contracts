@@ -136,6 +136,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0x57AE9cc546fd969916703A5bC11a1482957C5346",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "KyberInputScalingHelper",
         "address": "0x1E3b2371b3790bDc7C667d50aB077Dce7121391A",
         "id": "0x559d99f5",
