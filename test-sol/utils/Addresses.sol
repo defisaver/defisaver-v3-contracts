@@ -19,7 +19,6 @@ library Addresses {
     address public constant YFI_ADDR = 0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e;
     address public constant MKR_ADDR = 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2;
     address public constant OWNER_ADDR = 0xBc841B0dE0b93205e912CFBBd1D0c160A1ec6F00;
-    address public constant COMET_USDC = 0xc3d688B66703497DAA19211EEdff47f25384cdc3;
     address public constant UNI_V2_WRAPPER = 0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54;
     address public constant FEE_RECEIVER = 0x6467e807dB1E71B9Ef04E0E3aFb962E4B0900B2B;
     address public constant LUSD_ADDR = 0x5f98805A4E8be255a32880FDeC7F6728C6568bA0;
@@ -38,6 +37,19 @@ library Addresses {
     address public constant STK_USDC_TOKEN = 0x6bf183243FdD1e306ad2C4450BC7dcf6f0bf8Aa6;
     address public constant STK_USDT_TOKEN = 0xA484Ab92fe32B143AEE7019fC1502b1dAA522D31;
     address public constant STK_GHO_TOKEN = 0x4f827A63755855cDf3e8f3bcD20265C833f15033;
+    // Comp V3 comets
+    address public constant COMET_USDC = 0xc3d688B66703497DAA19211EEdff47f25384cdc3;
+    address public constant COMET_WETH = 0xA17581A9E3356d9A858b789D68B4d866e593aE94;
+    address public constant COMET_USDT = 0x3Afdc9BCA9213A35503b077a6072F3D0d5AB0840;
+    address public constant COMET_WSTETH = 0x3D0bb1ccaB520A66e607822fC55BC921738fAFE3;
+    address public constant COMET_USDS = 0x5D409e56D886231aDAf00c8775665AD0f9897b56;
+    address public constant COMET_USDCE_ARB = 0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA;
+    address public constant COMET_USDC_ARB = 0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf;
+    address public constant COMET_WETH_ARB = 0x6f7D514bbD4aFf3BcD1140B7344b32f063dEe486;
+    address public constant COMET_USDT_ARB = 0xd98Be00b5D27fc98112BdE293e487f8D4cA57d07;
+    address public constant COMET_USDC_BASE = 0xb125E6687d4313864e53df431d5425969c15Eb2F;
+    address public constant COMET_USDBC_BASE = 0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf;
+    address public constant COMET_WETH_BASE = 0x46e6b214b524310239732D51387075E0e70970bf;
 
     /*//////////////////////////////////////////////////////////////
                                 OTHER

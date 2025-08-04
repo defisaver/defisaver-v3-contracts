@@ -16,6 +16,11 @@ import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { StrategyIDs } from "./StrategyIDs.sol";
 import { AaveV3Helper } from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
+import { IComet } from "../../interfaces/compoundV3/IComet.sol";
+import { IFeedRegistry } from "../../interfaces/chainlink/IFeedRegistry.sol";
+import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
+import { Denominations } from "../../utils/Denominations.sol";
+import { StableCoinUtils } from "./StableCoinUtils.sol";
 
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
@@ -23,9 +28,13 @@ contract StrategyTriggerViewNoRevert is
     StrategyModel,
     CoreHelper,
     CheckWalletType,
-    AaveV3Helper
+    AaveV3Helper,
+    UtilHelper,
+    StableCoinUtils
 {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    // TODO -> This should prob be different for L2 chains
+    IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
     address internal constant DEFAULT_SPARK_MARKET_MAINNET = 0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
 
@@ -155,6 +164,11 @@ contract StrategyTriggerViewNoRevert is
             return _verifySparkMinDebtPosition(smartWallet);
         }
 
+        // check Comp V3 leverage management and close strategies for all chains
+        if (strategyId.isCompoundV3LeverageManagementStrategy() || strategyId.isCompoundV3CloseStrategy()) {
+            return _tryToVerifyCompV3MinDebtPosition(smartWallet, _sub.subData);
+        }
+
         return TriggerStatus.TRUE;
     }
 
@@ -193,9 +207,51 @@ contract StrategyTriggerViewNoRevert is
         return hasEnoughBalance ? TriggerStatus.TRUE : TriggerStatus.FALSE;
     }
 
-    function _verifyAaveV3MinDebtPosition(
-        address _smartWallet
-    ) internal view returns (TriggerStatus) {
+    function _tryToVerifyCompV3MinDebtPosition(address _smartWallet, bytes32[] memory _subData)
+        internal
+        view
+        returns (TriggerStatus)
+    {
+        //
+        try this._verifyCompV3MinDebtPosition(_smartWallet, _subData) returns (TriggerStatus status) {
+            return status;
+        } catch {
+            return TriggerStatus.REVERT;
+        }
+    }
+
+    function _verifyCompV3MinDebtPosition(address _smartWallet, bytes32[] memory _subData)
+        public
+        view
+        returns (TriggerStatus status)
+    {
+        IComet comet = IComet(address(uint160(uint256(_subData[0]))));
+
+        address baseToken = comet.baseToken();
+        // this line below will lose some precision for later check in totalDebtInUSD if decimals > 8
+        // might be better option to do it inside `IF` and later after try/catch
+        uint256 amountBorrowed = comet.borrowBalanceOf(_smartWallet) * 1e8 / 10 ** comet.decimals();
+        uint256 chainlinkPriceInUSD;
+
+        /// @dev We don't fetch price for stable coin, we assume it is always:  1 stable == 1 USD
+        if (isStableCoin(baseToken)) {
+            return _hasEnoughMinDebtInUSD(amountBorrowed) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
+        }
+
+        try feedRegistry.latestRoundData(baseToken, Denominations.USD) returns (
+            uint80, int256 answer, uint256, uint256, uint80
+        ) {
+            chainlinkPriceInUSD = uint256(answer);
+        } catch {
+            /// @dev If we can't fetch price, we won't revert, we will just return true
+            return TriggerStatus.TRUE;
+        }
+
+        uint256 totalDebtInUSD = chainlinkPriceInUSD * amountBorrowed / 1e8;
+        return _hasEnoughMinDebtInUSD(totalDebtInUSD) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
+    }
+
+    function _verifyAaveV3MinDebtPosition(address _smartWallet) internal view returns (TriggerStatus) {
         /// @dev AaveV3 automation only supports Core market at the moment (Default market)
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
         (, uint256 totalDebtUSD ,,,,) = lendingPool.getUserAccountData(_smartWallet);

@@ -7,6 +7,8 @@ import { Tokens } from "../utils/Tokens.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { StrategyTriggerViewNoRevert } from "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
+import { IComet } from "../../contracts/interfaces/compoundV3/IComet.sol";
+import { IERC20 } from "../../contracts/interfaces/IERC20.sol";
 
 contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRevert {
 
@@ -80,6 +82,7 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
         );
     }
 
+    // Aave 
     function test_verifyAaveV3LeverageManagementConditions() public view {
         //vm.warp(1748518160);
         address walletWithEnoughDebt = 0xaB5a28B6Ca2D1E12FE5AcC7341352d5032b74438;
@@ -95,6 +98,7 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
         );
     }
 
+    // Spark
     function test_verifySparkLeverageManagementConditions() public view {
         address walletWithEnoughDebt = 0xc0c790F61a1721B70F0D4b1Aa1133687Fa3fd900;
         assertEq(
@@ -106,6 +110,68 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
         assertEq(
             uint256(_verifySparkMinDebtPosition(walletWithNotEnoughDebt)),
             uint256(TriggerStatus.FALSE), "trigger status should be false"
+        );
+    }
+
+    // Compound V3
+    function test_verifyCompV3MinDebtPosition_badMarket() public {
+        address market = makeAddr("BAD MARKET");
+        bytes32[] memory subData = new bytes32[](1);
+        subData[0] = bytes32(uint256(uint160(market)));
+
+        address walletWithEnoughDebt = 0xa85d0aAe0cE0091e3DD78e0F5d5C39777f717D43;
+        assertEq(
+            uint256(_tryToVerifyCompV3MinDebtPosition(walletWithEnoughDebt, subData)),
+            uint256(TriggerStatus.REVERT),
+            "trigger status should be revert"
+        );
+
+        address walletWithNotEnoughDebt = 0xe384F9cba7e27Df646C3E636136E5af57EC359FC;
+        assertEq(
+            uint256(_tryToVerifyCompV3MinDebtPosition(walletWithNotEnoughDebt, subData)),
+            uint256(TriggerStatus.REVERT),
+            "trigger status should be revert"
+        );
+    }
+
+    function test_verifyCompV3MinDebtPosition_usdcMarket_mainnet() public {
+        _baseTest(Addresses.COMET_USDC, Addresses.WETH_ADDR, 100e18, 5000e6);
+    }
+
+    function test_verifyCompV3MinDebtPosition_usdtMarket_mainnet() public {
+        _baseTest(Addresses.COMET_USDT, Addresses.WETH_ADDR, 100e18, 5000e6);
+    }
+
+    function _baseTest(address _comet, address _depositToken, uint256 _amountToDeposit, uint256 _amountToBorrow)
+        internal
+    {
+        bytes32[] memory subData = new bytes32[](1);
+        subData[0] = bytes32(uint256(uint160(_comet)));
+
+        assertEq(
+            uint256(_tryToVerifyCompV3MinDebtPosition(sender, subData)),
+            uint256(TriggerStatus.FALSE),
+            "trigger status should be false"
+        );
+
+        // deal to sender
+        give(_depositToken, sender, _amountToDeposit);
+
+        // deposit as sender
+        vm.startPrank(sender);
+        IERC20(_depositToken).approve(_comet, _amountToDeposit);
+        IComet(_comet).supply(_depositToken, _amountToDeposit);
+
+        // borrow as sender
+        address borrowToken = IComet(_comet).baseToken();
+        IComet(_comet).withdraw(borrowToken, _amountToBorrow);
+
+        vm.stopPrank();
+
+        assertEq(
+            uint256(_tryToVerifyCompV3MinDebtPosition(sender, subData)),
+            uint256(TriggerStatus.TRUE),
+            "trigger status should be true"
         );
     }
 }
