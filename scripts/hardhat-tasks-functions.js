@@ -7,7 +7,6 @@ const axios = require('axios');
 const path = require('path');
 const readline = require('readline');
 const readlineSync = require('readline-sync');
-const { ethers } = require('ethers');
 const hardhatSettings = require('../hardhat.config');
 const { encrypt, decrypt } = require('./utils/crypto');
 
@@ -338,46 +337,6 @@ async function changeNetworkNameForAddresses(oldNetworkName, newNetworkName) {
     await execShellCommand('npx hardhat compile');
 }
 
-const L2S = ['arbitrum', 'optimism', 'base'];
-const ABI = ['function getFeed(address base, address quote) view returns (address)'];
-const RPC = {
-    arbitrum: 'https://arb1.arbitrum.io/rpc',
-    optimism: 'https://mainnet.optimism.io',
-    base: 'https://mainnet.base.org',
-};
-
-async function checkPriceFeedAddresses() {
-    for (let i = 0; i < L2S.length; i++) {
-        const l2 = L2S[i];
-        const registryFilePath = `addresses/${l2}.json`;
-        const priceFeedsFilePath = `addresses/priceFeeds/${l2}.json`;
-
-        const registryData = JSON.parse(fs.readFileSync(registryFilePath));
-        const priceFeeds = JSON.parse(fs.readFileSync(priceFeedsFilePath));
-
-        const registry = registryData.find(e => e.name === 'PriceFeedRegistry');
-        if (!registry) {
-            console.warn(`No PriceFeedRegistry found for ${l2}`);
-            // eslint-disable-next-line no-continue
-            continue;
-        }
-
-        const provider = new ethers.providers.JsonRpcProvider(RPC[l2]);
-        const contract = new ethers.Contract(registry.address, ABI, provider);
-
-        console.log(`\n--- ${l2.toUpperCase()} ---`);
-        for (let j = 0; j < priceFeeds.length; j++) {
-            const {
-                name, base, quote, feedAddress,
-            } = priceFeeds[j];
-            // eslint-disable-next-line no-await-in-loop
-            const onChainFeed = await contract.getFeed(base, quote);
-            const match = onChainFeed.toLowerCase() === feedAddress.toLowerCase();
-            console.log(`${name}: ${match ? '✅' : `❌ got ${onChainFeed}, expected ${feedAddress}`}`);
-        }
-    }
-}
-
 module.exports = {
     flatten,
     verifyContract,
@@ -388,5 +347,4 @@ module.exports = {
     encryptPrivateKey,
     changeNetworkNameForAddresses,
     execShellCommand,
-    checkPriceFeedAddresses,
 };
