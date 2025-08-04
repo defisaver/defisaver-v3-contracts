@@ -5,6 +5,7 @@ pragma solidity =0.8.24;
 import {BaseTest} from "../../utils/BaseTest.sol";
 import {SmartWallet} from "../../utils/SmartWallet.sol";
 import {SkyStakingEngineOpen} from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
+import {SkyStakingEngineStake} from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
 import {SkyStakingEngineSelectFarm} from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 
 import {ILockstakeEngine} from "../../../contracts/interfaces/sky/ILockstakeEngine.sol";
@@ -26,8 +27,10 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
     address sender;
     address constant USDS_FARM = 0x38E4254bD82ED5Ee97CD1C4278FAae748d998865;
     address constant SPARK_FARM = 0x99cBC0e4E6427F6939536eD24d1275B95ff77404;
+    uint256 constant AMOUNT = 1000e18;
 
     SkyStakingEngineOpen open;
+    SkyStakingEngineStake stake;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -68,6 +71,79 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
 
     function test_skyStakingEngineStake_NO_FARM() public {
         _baseTest(false, address(0));
+    }
+
+    function test_skyStakingEngineStake_Change_Farm_From_USDS_to_SPARK() public {
+        give(SKY_ADDRESS, sender, AMOUNT);
+        approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
+
+        // stake and select USDS farm
+        executeSkyStakingEngineStake(STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet);
+
+        bytes memory executeActionCallData =
+            executeActionCalldata(skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, SPARK_FARM), true);
+
+        vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
+        emit ILockstakeEngine.SelectFarm(walletAddr, 0, SPARK_FARM, SKY_REFERRAL_CODE);
+        wallet.execute(address(cut), executeActionCallData, 0);
+    }
+
+    function test_skyStakingEngineStake_Change_Farm_from_SPARK_to_USDS() public {
+        give(SKY_ADDRESS, sender, AMOUNT);
+        approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
+
+        // stake and select SPARK farm
+        executeSkyStakingEngineStake(STAKING_ENGINE, 0, SPARK_FARM, AMOUNT, sender, open, cut, stake, wallet);
+
+        bytes memory executeActionCallData =
+            executeActionCalldata(skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, USDS_FARM), true);
+
+        vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
+        emit ILockstakeEngine.SelectFarm(walletAddr, 0, USDS_FARM, SKY_REFERRAL_CODE);
+        wallet.execute(address(cut), executeActionCallData, 0);
+    }
+
+    function test_skyStakingEngineStake_Can_Remove_Farm_After_Selected() public {
+        give(SKY_ADDRESS, sender, AMOUNT);
+        approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
+
+        // stake and select USDS farm
+        executeSkyStakingEngineStake(STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet);
+
+        bytes memory executeActionCallData =
+            executeActionCalldata(skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, address(0)), true);
+
+        vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
+        emit ILockstakeEngine.SelectFarm(walletAddr, 0, address(0), SKY_REFERRAL_CODE);
+        wallet.execute(address(cut), executeActionCallData, 0);
+    }
+
+    function test_skyStakingEngineStake_RevertIf_Selects_The_Same_Farm() public {
+        give(SKY_ADDRESS, sender, AMOUNT);
+        approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
+
+        // stake and select USDS farm
+        executeSkyStakingEngineStake(STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet);
+
+        bytes memory executeActionCallData =
+            executeActionCalldata(skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, USDS_FARM), true);
+
+        vm.expectRevert(); // "LockstakeEngine/same-farm"
+        wallet.execute(address(cut), executeActionCallData, 0);
+    }
+
+    function test_skyStakingEngineStake_RevertIf_Selects_NonExisting_Farm() public {
+        give(SKY_ADDRESS, sender, AMOUNT);
+        approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
+
+        // stake and select USDS farm
+        executeSkyStakingEngineStake(STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet);
+
+        bytes memory executeActionCallData =
+            executeActionCalldata(skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, bob), true);
+
+        vm.expectRevert(); // "LockstakeEngine/farm-unsupported-or-deleted"
+        wallet.execute(address(cut), executeActionCallData, 0);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
