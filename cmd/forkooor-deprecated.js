@@ -156,7 +156,6 @@ const {
     subMcdTrailingCloseToCollStrategy,
     subMcdTrailingCloseToDaiStrategy,
     subLiquityTrailingCloseToCollStrategy,
-    subCompV3AutomationStrategy,
     subCbRebondStrategy,
     subLiquityCBPaybackStrategy,
     subLimitOrderStrategy,
@@ -172,8 +171,6 @@ const {
 } = require('../test/strategies/utils/strategy-subs');
 
 const { getTroveInfo, getDebtInFront } = require('../test/utils/liquity');
-
-const { createNewCompV3AutomationBundles } = require('../test/utils/compoundV3');
 
 const {
     createMcdTrigger,
@@ -2031,80 +2028,6 @@ const subSparkClose = async (
     ).then(({ subId }) => console.log(`subId: ${subId}`));
 };
 
-const subCompV3Automation = async (
-    minRatio,
-    maxRatio,
-    optimalRatioBoost,
-    optimalRatioRepay,
-    boostEnabled,
-    isEOA,
-    sender,
-) => {
-    let senderAcc = (await hre.ethers.getSigners())[0];
-
-    await topUp(senderAcc.address);
-
-    if (sender) {
-        senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
-        senderAcc.address = senderAcc._address;
-    }
-
-    await topUp(senderAcc.address);
-
-    let network = 'mainnet';
-
-    if (process.env.TEST_CHAIN_ID) {
-        network = process.env.TEST_CHAIN_ID;
-    }
-
-    configure({
-        chainId: chainIds[network],
-        testMode: true,
-    });
-
-    setNetwork(network);
-
-    let proxy = await getProxy(senderAcc.address);
-    proxy = sender ? proxy.connect(senderAcc) : proxy;
-
-    const bundleId = await getLatestBundleId();
-
-    console.log(`Latest bundle id: ${parseInt(bundleId, 10)}`);
-
-    // at the time of writing this script, latestBundleId is 25
-    const newBundlesAlreadyDeployed = parseInt(bundleId, 10) > 25;
-
-    if (!newBundlesAlreadyDeployed) {
-        await openStrategyAndBundleStorage(true);
-
-        const {
-            repayBundleId,
-            boostBundleId,
-            repayBundleEOAId,
-            boostBundleEOAId,
-        } = await createNewCompV3AutomationBundles();
-
-        // redeploy CompV3SubProxy with new bundles
-        await redeploy(
-            'CompV3SubProxy', true, repayBundleId, boostBundleId, repayBundleEOAId, boostBundleEOAId,
-        );
-    }
-
-    const subIds = await subCompV3AutomationStrategy(
-        proxy,
-        addrs[network].COMET_USDC_ADDR,
-        minRatio,
-        maxRatio,
-        optimalRatioBoost,
-        optimalRatioRepay,
-        boostEnabled,
-        isEOA === 'true',
-    );
-
-    console.log(`CompV3 position subbed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
-};
-
 const subLimitOrder = async (
     srcTokenLabel,
     destTokenLabel,
@@ -3373,35 +3296,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             );
             process.exit(0);
         });
-
-    program
-        .command(
-            'sub-compV3-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> <boostEnabled> <isEOA> [senderAddr]',
-        )
-        .description('Subscribes to compV3 automation can be both b/r')
-        .action(
-            async (
-                minRatio,
-                maxRatio,
-                optimalRatioBoost,
-                optimalRatioRepay,
-                boostEnabled,
-                isEOA,
-                senderAcc,
-            ) => {
-                // eslint-disable-next-line max-len
-                await subCompV3Automation(
-                    minRatio,
-                    maxRatio,
-                    optimalRatioBoost,
-                    optimalRatioRepay,
-                    boostEnabled,
-                    isEOA,
-                    senderAcc,
-                );
-                process.exit(0);
-            },
-        );
 
     program
         .command(

@@ -74,6 +74,7 @@ const addrs = {
         REFILL_CALLER: '0x33fDb79aFB4456B604f376A45A546e7ae700e880',
         MORPHO_BLUE_VIEW: '0x10B621823D4f3E85fBDF759e252598e4e097C1fd',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0x814c8C7ceb1411B364c2940c4b9380e739e06686',
+        COMP_V3_SUB_PROXY_ADDR: '0x2f62a2ec44ed48dd5f2d56b308558ac065e8b794',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -952,8 +953,6 @@ const formatMockExchangeObjUsdFeed = async (
         .div(srcScale)
         .mul(2);
 
-    console.log(destTokenAmountBN);
-
     await setBalance(
         destTokenInfo.addresses[chainIds[network]],
         wrapperContract.address,
@@ -1534,6 +1533,21 @@ const expectError = (errString, expectedErrSig) => {
     }
 };
 
+const getStrategyExecutorContract = async () => {
+    const strategyContractName = network === 'mainnet' ? 'StrategyExecutor' : 'StrategyExecutorL2';
+    const strategyExecutor = await hre.ethers.getContractAt(
+        strategyContractName, addrs[network].STRATEGY_EXECUTOR_ADDR,
+    );
+    return strategyExecutor;
+};
+
+const getAndSetMockExchangeWrapper = async (acc, newAddr, isFork = false) => {
+    const mockExchangeName = network === 'mainnet' ? 'MockExchangeWrapperUsdFeed' : 'MockExchangeWrapperUsdFeedL2';
+    const mockWrapper = await redeploy(mockExchangeName, isFork);
+    await setNewExchangeWrapper(acc, mockWrapper.address);
+    return mockWrapper;
+};
+
 module.exports = {
     addToExchangeAggregatorRegistry,
     getAddrFromRegistry,
@@ -1603,6 +1617,8 @@ module.exports = {
     setCode,
     expectError,
     toBytes32,
+    getStrategyExecutorContract,
+    getAndSetMockExchangeWrapper,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
