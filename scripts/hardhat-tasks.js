@@ -9,7 +9,6 @@ const {
     findPathByContractName,
     encryptPrivateKey,
     changeNetworkNameForAddresses,
-    checkPriceFeedAddresses,
 } = require('./hardhat-tasks-functions');
 
 task('fladepver', 'Deploys and verifies contract on etherscan')
@@ -61,7 +60,3 @@ task('deployOnFork', 'Deploys contracts on an existing fork')
         }
     });
 
-task('checkPriceFeedAddresses', 'Checks if price feed JSON addresses are same as we get from deployed contracts on L2s')
-    .setAction(async () => {
-        await checkPriceFeedAddresses();
-    });
