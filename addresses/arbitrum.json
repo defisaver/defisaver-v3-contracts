@@ -232,6 +232,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0xCA2f82b0499a59115718b919e74Aa931CF43d84b",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "ParaswapWrapper",
         "address": "0x6a1Ebcb09D419Affe500B4feA13A89511aD23c1b",
         "id": "0x115fa27e",
@@ -1570,6 +1581,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    { 
+        "name": "ExecuteCall",
+        "address": "0x15e98867e2df679445e4bb90f108ad2928d14397",
+        "id": "0xd82327eb",
+        "path": "contracts/actions/utils/ExecuteCall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     }
