@@ -16,6 +16,7 @@ const {
     getContractFromRegistry,
     isNetworkFork,
     redeploy,
+    sendEther,
 } = require('../../utils/utils');
 
 const {
@@ -56,6 +57,7 @@ const runRepayTests = () => {
         before(async () => {
             const isFork = isNetworkFork();
             senderAcc = (await hre.ethers.getSigners())[0];
+            await sendEther(senderAcc, addrs[network].OWNER_ACC, '10');
             botAcc = (await hre.ethers.getSigners())[1];
             proxy = await getProxy(senderAcc.address);
             await addBotCaller(botAcc.address, isFork);
@@ -139,8 +141,14 @@ const runRepayTests = () => {
                 subProxyContract.address,
             );
 
+            let subDataInStruct = subData;
+
+            if (network !== 'mainnet') {
+                subDataInStruct = await subProxyContract.parseSubData(subData);
+            }
+
             const strategySub = await subProxyContract.formatRepaySub(
-                subData,
+                subDataInStruct,
                 proxy.address,
                 senderAcc.address,
             );

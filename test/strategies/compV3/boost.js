@@ -16,6 +16,9 @@ const {
     getContractFromRegistry,
     isNetworkFork,
     redeploy,
+    balanceOf,
+    ETH_ADDR,
+    sendEther,
 } = require('../../utils/utils');
 
 const {
@@ -56,6 +59,7 @@ const runBoostTests = () => {
         before(async () => {
             const isFork = isNetworkFork();
             senderAcc = (await hre.ethers.getSigners())[0];
+            await sendEther(senderAcc, addrs[network].OWNER_ACC, '10');
             botAcc = (await hre.ethers.getSigners())[1];
             proxy = await getProxy(senderAcc.address);
             await addBotCaller(botAcc.address, isFork);
@@ -140,8 +144,14 @@ const runBoostTests = () => {
                 subProxyContract.address,
             );
 
+            let subDataInStruct = subData;
+
+            if (network !== 'mainnet') {
+                subDataInStruct = await subProxyContract.parseSubData(subData);
+            }
+
             const strategySub = await subProxyContract.formatBoostSub(
-                subData,
+                subDataInStruct,
                 proxy.address,
                 senderAcc.address,
             );
@@ -169,8 +179,6 @@ const runBoostTests = () => {
                     positionOwner,
                 );
             } else {
-                console.log('boostSubId', boostSubId);
-                console.log('strategySub', strategySub);
                 await callCompV3BoostStrategy(
                     strategyExecutor,
                     0,

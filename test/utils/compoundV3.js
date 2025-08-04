@@ -111,10 +111,10 @@ const COMP_V3_AUTOMATION_TEST_PAIRS = {
             collSymbol: 'WETH',
             debtSymbol: 'USDC',
         },
-        {
-            collSymbol: 'wBTC',
-            debtSymbol: 'WETH',
-        },
+        // {
+        //     collSymbol: 'wBTC',
+        //     debtSymbol: 'WETH',
+        // },
     ],
     8453: [
         {
@@ -234,9 +234,6 @@ const openCompV3ProxyPosition = async (
     const collAsset = getAssetInfo(collSymbol === 'ETH' ? 'WETH' : collSymbol, chainIds[network]);
     const collAmount = await fetchAmountInUSDPrice(collSymbol === 'ETH' ? 'WETH' : collSymbol, collAmountInUSD);
     const debtAmount = await fetchAmountInUSDPrice(marketSymbol === 'ETH' ? 'WETH' : marketSymbol, debtAmountInUSD);
-
-    console.log('collAmount', collAmount);
-    console.log('debtAmount', debtAmount);
 
     await setBalance(collAsset.address, eoaAddr, collAmount);
     await approve(collAsset.address, proxyAddr, eoaSigner);
