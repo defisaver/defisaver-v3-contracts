@@ -6512,7 +6512,7 @@ const callCompV3FLCloseToDebtStrategy = async (
     const flAction = new dfs.actions.flashloan.FLAction(new dfs.actions.flashloan.BalancerFlashLoanAction([debtToken], [flAmount]));
     const compV3PaybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
         placeHolderAddr,
-        0,
+        flAmount.toString(),
         placeHolderAddr,
         placeHolderAddr,
         placeHolderAddr,

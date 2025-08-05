@@ -38,7 +38,7 @@ const TARGET_RATIO = 145;
 const COLL_AMOUNT_IN_USD = '40000';
 const DEBT_AMOUNT_IN_USD = '25000';
 const REPAY_AMOUNT_IN_USD = '5000';
-const PRICE = 10000;
+const PRICE = 1_000_000; // only for testing purposes to make sure it is always triggered
 
 const runRepayOnPriceTests = () => {
     describe('CompV3 Repay On Price Strategies Tests', () => {

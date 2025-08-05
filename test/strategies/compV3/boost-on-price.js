@@ -38,7 +38,7 @@ const TARGET_RATIO = 175;
 const COLL_AMOUNT_IN_USD = '40000';
 const DEBT_AMOUNT_IN_USD = '15000';
 const BOOST_AMOUNT_IN_USD = '3000';
-const PRICE = 1000;
+const PRICE = 1; // only for testing purposes to make sure it is always triggered
 
 const runBoostOnPriceTests = () => {
     describe('CompV3 Boost On Price Strategies Tests', () => {
