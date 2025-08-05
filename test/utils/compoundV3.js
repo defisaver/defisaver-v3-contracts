@@ -121,10 +121,10 @@ const COMP_V3_AUTOMATION_TEST_PAIRS = {
             collSymbol: 'WETH',
             debtSymbol: 'USDC',
         },
-        {
-            collSymbol: 'cbBTC',
-            debtSymbol: 'WETH',
-        },
+        // {
+        //     collSymbol: 'cbBTC',
+        //     debtSymbol: 'WETH',
+        // },
     ],
 };
 

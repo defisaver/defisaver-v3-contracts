@@ -1,7 +1,11 @@
 const { runBoostTests } = require('./boost');
 const { runRepayTests } = require('./repay');
+const { runBoostOnPriceTests } = require('./boost-on-price');
+const { runRepayOnPriceTests } = require('./repay-on-price');
 
 describe('CompV3 Full Strategy Tests', () => {
     runBoostTests();
     runRepayTests();
+    runBoostOnPriceTests();
+    runRepayOnPriceTests();
 });
