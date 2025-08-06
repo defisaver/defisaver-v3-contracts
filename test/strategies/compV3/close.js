@@ -20,6 +20,7 @@ const {
     redeploy,
     sendEther,
     balanceOf,
+    addBalancerFlLiquidity,
 } = require('../../utils/utils');
 
 const {
@@ -120,6 +121,9 @@ const runCloseTests = () => {
                 stopLossType,
                 takeProfitType,
             );
+
+            await addBalancerFlLiquidity(debtAsset.address);
+            await addBalancerFlLiquidity(collAsset.address);
 
             if (closeToDebt) {
                 const sellAmount = await fetchAmountInUSDPrice(collAsset.symbol, COLL_AMOUNT_IN_USD);

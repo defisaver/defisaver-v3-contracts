@@ -97,34 +97,34 @@ const COMP_V3_AUTOMATION_TEST_PAIRS = {
             collSymbol: 'WETH',
             debtSymbol: 'USDC',
         },
-        // {
-        //     collSymbol: 'WETH',
-        //     debtSymbol: 'USDS',
-        // },
-        // {
-        //     collSymbol: 'WBTC',
-        //     debtSymbol: 'WETH',
-        // },
+        {
+            collSymbol: 'WETH',
+            debtSymbol: 'USDS',
+        },
+        {
+            collSymbol: 'WBTC',
+            debtSymbol: 'WETH',
+        },
     ],
     42161: [
         {
             collSymbol: 'WETH',
             debtSymbol: 'USDC',
         },
-        // {
-        //     collSymbol: 'wBTC',
-        //     debtSymbol: 'WETH',
-        // },
+        {
+            collSymbol: 'wBTC',
+            debtSymbol: 'WETH',
+        },
     ],
     8453: [
         {
             collSymbol: 'WETH',
             debtSymbol: 'USDC',
         },
-        // {
-        //     collSymbol: 'cbBTC',
-        //     debtSymbol: 'WETH',
-        // },
+        {
+            collSymbol: 'cbBTC',
+            debtSymbol: 'WETH',
+        },
     ],
 };
 

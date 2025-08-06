@@ -17,6 +17,7 @@ const {
     isNetworkFork,
     redeploy,
     sendEther,
+    addBalancerFlLiquidity,
 } = require('../../utils/utils');
 
 const {
@@ -164,6 +165,9 @@ const runBoostTests = () => {
             );
 
             if (isFLStrategy) {
+                await addBalancerFlLiquidity(debtAsset.address);
+                await addBalancerFlLiquidity(collAsset.address);
+
                 await callCompV3FLBoostStrategy(
                     strategyExecutor,
                     1,
@@ -209,12 +213,12 @@ const runBoostTests = () => {
                 const isFLStrategy = true;
                 await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
             });
-            it(`... should execute compV3 EOA FL boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+            it(`... should execute compV3 EOA boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = true;
                 const isFLStrategy = false;
                 await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
             });
-            it(`... should execute compV3 EOA boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+            it(`... should execute compV3 EOA FL boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = true;
                 const isFLStrategy = true;
                 await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);

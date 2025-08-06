@@ -1548,6 +1548,10 @@ const getAndSetMockExchangeWrapper = async (acc, newAddr, isFork = false) => {
     return mockWrapper;
 };
 
+const addBalancerFlLiquidity = async (tokenAddr) => {
+    await setBalance(tokenAddr, BALANCER_VAULT_ADDR, hre.ethers.utils.parseUnits('1000000000', 18));
+};
+
 module.exports = {
     addToExchangeAggregatorRegistry,
     getAddrFromRegistry,
@@ -1619,6 +1623,7 @@ module.exports = {
     toBytes32,
     getStrategyExecutorContract,
     getAndSetMockExchangeWrapper,
+    addBalancerFlLiquidity,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
