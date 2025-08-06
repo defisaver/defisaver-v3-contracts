@@ -7,6 +7,7 @@ contract OptimismActionsUtilAddresses {
     address internal constant SUB_STORAGE_ADDR = 0xb944291Ed31886b20030d0d4C47c7838d1d9eb97;
 
     address internal constant TRANSIENT_STORAGE = 0x491f0858Ef9e6987e260587322149Ac33D762e6e;
+    address internal constant TRANSIENT_STORAGE_CANCUN = 0x7c717bA104B5531A040D93F6AAc3D701C95BA9BC;
 
     address internal constant REGISTRY_ADDR = 0xAf707Ee480204Ed6e2640B53cE86F680D28Afcbd;
     address internal constant DFS_LOGGER_ADDR = 0xFc2f1355296ab7dd98a1260E3Ff5E906999d4Acb;

@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { IComet } from "../interfaces/compoundV3/IComet.sol";
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
+import { TransientStorageCancun } from "../utils/TransientStorageCancun.sol";
 import { CompV3RatioHelper } from "../actions/compoundV3/helpers/CompV3RatioHelper.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 
@@ -19,7 +19,7 @@ contract CompV3PriceTrigger is
     CompV3RatioHelper,
     TriggerHelper
 {
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
+    TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     enum PriceState {
         OVER,
