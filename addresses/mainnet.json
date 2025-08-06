@@ -738,6 +738,17 @@
         "history": []
     },
     {
+        "name": "TransientStorageCancun",
+        "address": "0x0304E27cccE28bAB4d78C6cb7AfD4cd01c87c1e4",
+        "id": "0x099eb80a",
+        "path": "contracts/utils/TransientStorageCancun.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveView",
         "address": "0x79fdec1d39f6282a92e5e087d10ba0b0cef89a84",
         "id": "0x7da42156",
