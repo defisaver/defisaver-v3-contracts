@@ -20,6 +20,10 @@ interface ILockstakeEngine {
     function ownerUrnsCount(address owner) external view returns (uint256);
     function ownerUrns(address owner, uint256 index) external view returns (address);
     function isUrnAuth(address owner, uint256 index, address usr) external view returns (bool);
+    function urnFarms(address urn) external view returns (address);
+    function vat() external view returns (address);
+    function ilk() external view returns (bytes32);
+    function jug() external view returns (address);
 
     // --- Write Functions (Urn Management) ---
     function open(uint256 index) external returns (address urn);

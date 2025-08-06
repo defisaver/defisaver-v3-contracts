@@ -30,8 +30,6 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
     address walletAddr;
     address sender;
     uint256 constant AMOUNT = 1000e18;
-    address constant USDS_FARM = 0x38E4254bD82ED5Ee97CD1C4278FAae748d998865;
-    address constant SPARK_FARM = 0x99cBC0e4E6427F6939536eD24d1275B95ff77404;
 
     SkyStakingEngineOpen open;
     SkyStakingEngineStake stake;
@@ -84,6 +82,7 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
 
         //  Stake first
         executeSkyStakingEngineStake(STAKING_ENGINE, index, _farm, AMOUNT, sender, open, selectFarm, stake, wallet);
+        uint256 amountBefore = IERC20(_rewardToken).balanceOf(sender);
 
         skip(365 days);
 
@@ -94,7 +93,7 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
         emit ILockstakeEngine.GetReward(walletAddr, index, _farm, sender, 0);
         wallet.execute(address(cut), executeActionCallData, 0);
 
-        uint256 amount = IERC20(_rewardToken).balanceOf(sender);
-        assertGt(amount, 0);
+        uint256 amountAfter = IERC20(_rewardToken).balanceOf(sender);
+        assertGt(amountAfter, amountBefore);
     }
 }

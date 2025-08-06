@@ -30,7 +30,6 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
     address walletAddr;
     address sender;
     uint256 constant AMOUNT = 1000e18;
-    address constant USDS_FARM = 0x38E4254bD82ED5Ee97CD1C4278FAae748d998865;
 
     SkyStakingEngineOpen open;
     SkyStakingEngineStake stake;
