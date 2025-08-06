@@ -8,9 +8,10 @@ import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 import { LiquityV2SPDeposit } from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
+import {LiquityV2Utils} from "../../utils/liquityV2/LiquityV2Utils.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
-contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions {
+contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -52,7 +53,7 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("LiquityV2SPDeposit");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -102,7 +103,7 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions {
         vars.depositAmount = amountInUSDPriceMock(BOLD, 10000, 1e8);
         vars.stabilityPool = _market.stabilityPool();
         vars.simulatedCollGain = 10000;
-        _simulateCollGain(vars);
+        _simulateCollGain(vars.stabilityPool, vars.simulatedCollGain, vars.collToken, walletAddr);
 
         give(BOLD, sender, vars.depositAmount);
         approveAsSender(sender, BOLD, walletAddr, vars.depositAmount);
@@ -161,13 +162,5 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions {
             assertEq(vars.collGainAfter, 0);
             assertEq(vars.boldGainAfter, 0);
         }
-    }
-
-    function _simulateCollGain(TestSPDepositLocalParams memory _vars) internal {
-        uint256 collBalanceStorageSlot = 3;
-        uint256 stashedCollMappingSlot = 9;
-        vm.store(_vars.stabilityPool, bytes32(collBalanceStorageSlot), bytes32(_vars.simulatedCollGain));
-        vm.store(_vars.stabilityPool, keccak256(abi.encode(walletAddr, stashedCollMappingSlot)), bytes32(_vars.simulatedCollGain));
-        give(_vars.collToken, _vars.stabilityPool, _vars.simulatedCollGain * 2);
     }
 }

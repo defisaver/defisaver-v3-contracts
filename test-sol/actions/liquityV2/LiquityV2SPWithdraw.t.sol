@@ -9,9 +9,10 @@ import { LiquityV2SPDeposit } from "../../../contracts/actions/liquityV2/stabili
 import { LiquityV2SPWithdraw } from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPWithdraw.sol";
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
+import {LiquityV2Utils} from "../../utils/liquityV2/LiquityV2Utils.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
-contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions {
+contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
 
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
@@ -55,7 +56,7 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("LiquityV2SPWithdraw");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -178,7 +179,7 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions {
 
         _vars.simulatedCollGain = 10000;
 
-        _simulateCollGain(_vars);
+        _simulateCollGain(_vars.stabilityPool, _vars.simulatedCollGain, _vars.collToken, walletAddr);
 
         _vars.senderCollBalanceBefore = balanceOf(_vars.collToken, sender);
         
@@ -225,13 +226,5 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions {
             assertEq(_vars.collGainAfter, 0);
             assertEq(_vars.boldGainAfter, 0);
         } 
-    }
-
-    function _simulateCollGain(TestSPWithdrawLocalParams memory _vars) internal {
-        uint256 collBalanceStorageSlot = 3;
-        uint256 stashedCollMappingSlot = 9;
-        vm.store(_vars.stabilityPool, bytes32(collBalanceStorageSlot), bytes32(_vars.simulatedCollGain));
-        vm.store(_vars.stabilityPool, keccak256(abi.encode(walletAddr, stashedCollMappingSlot)), bytes32(_vars.simulatedCollGain));
-        give(_vars.collToken, _vars.stabilityPool, _vars.simulatedCollGain * 2);
     }
 }
