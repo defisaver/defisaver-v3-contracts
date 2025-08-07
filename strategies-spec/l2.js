@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable import/no-extraneous-dependencies */
 
 const dfs = require('@defisaver/sdk');
@@ -1861,6 +1862,658 @@ const createFluidT1FLBoostL2Strategy = () => {
     return fluidT1FLBoostStrategy.encodeForDsProxyCall();
 };
 
+const createCompV3BoostOnPriceL2StrategyTemplate = (name, isEOA) => {
+    const user = isEOA ? '&eoa' : '&proxy';
+    const compV3BoostOnPriceL2Strategy = new dfs.Strategy(name);
+    compV3BoostOnPriceL2Strategy.addSubSlot('&market', 'address');
+    compV3BoostOnPriceL2Strategy.addSubSlot('&collToken', 'address');
+    compV3BoostOnPriceL2Strategy.addSubSlot('&baseToken', 'address');
+    compV3BoostOnPriceL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    compV3BoostOnPriceL2Strategy.addSubSlot('&ratioState', 'uint8');
+
+    const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, nullAddress, 0, 0);
+    compV3BoostOnPriceL2Strategy.addTrigger(compV3PriceTrigger);
+
+    const compV3BorrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(
+        '&market',
+        '%amount', // amount to borrow, sent by backend
+        '&proxy',
+        user,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&baseToken',
+            '&collToken',
+            '$1',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&collToken',
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+    const supplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
+        '&market',
+        '&collToken',
+        '$3',
+        '&proxy',
+        user,
+    );
+    const compV3RatioCheckAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&market',
+        user,
+    );
+    compV3BoostOnPriceL2Strategy.addAction(compV3BorrowAction);
+    compV3BoostOnPriceL2Strategy.addAction(sellAction);
+    compV3BoostOnPriceL2Strategy.addAction(feeTakingAction);
+    compV3BoostOnPriceL2Strategy.addAction(supplyAction);
+    compV3BoostOnPriceL2Strategy.addAction(compV3RatioCheckAction);
+
+    return compV3BoostOnPriceL2Strategy.encodeForDsProxyCall();
+};
+const createCompV3FLBoostOnPriceL2StrategyTemplate = (name, isEOA) => {
+    const user = isEOA ? '&eoa' : '&proxy';
+    const compV3FLBoostOnPriceL2Strategy = new dfs.Strategy(name);
+    compV3FLBoostOnPriceL2Strategy.addSubSlot('&market', 'address');
+    compV3FLBoostOnPriceL2Strategy.addSubSlot('&collToken', 'address');
+    compV3FLBoostOnPriceL2Strategy.addSubSlot('&baseToken', 'address');
+    compV3FLBoostOnPriceL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    compV3FLBoostOnPriceL2Strategy.addSubSlot('&ratioState', 'uint8');
+
+    const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, nullAddress, 0, 0);
+    compV3FLBoostOnPriceL2Strategy.addTrigger(compV3PriceTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%baseToken'], // sent by backend
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&baseToken',
+            '&collToken',
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&collToken',
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+    const supplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
+        '&market',
+        '&collToken',
+        '$3',
+        '&proxy',
+        user,
+    );
+    const compV3BorrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(
+        '&market',
+        '$1',
+        '%flAddress', // sent by backend
+        user,
+    );
+    const compV3RatioCheckAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&market',
+        user,
+    );
+    compV3FLBoostOnPriceL2Strategy.addAction(flAction);
+    compV3FLBoostOnPriceL2Strategy.addAction(sellAction);
+    compV3FLBoostOnPriceL2Strategy.addAction(feeTakingAction);
+    compV3FLBoostOnPriceL2Strategy.addAction(supplyAction);
+    compV3FLBoostOnPriceL2Strategy.addAction(compV3BorrowAction);
+    compV3FLBoostOnPriceL2Strategy.addAction(compV3RatioCheckAction);
+
+    return compV3FLBoostOnPriceL2Strategy.encodeForDsProxyCall();
+};
+
+const createCompV3RepayOnPriceL2StrategyTemplate = (name, isEOA) => {
+    const user = isEOA ? '&eoa' : '&proxy';
+    const compV3RepayOnPriceL2Strategy = new dfs.Strategy(name);
+    compV3RepayOnPriceL2Strategy.addSubSlot('&market', 'address');
+    compV3RepayOnPriceL2Strategy.addSubSlot('&collToken', 'address');
+    compV3RepayOnPriceL2Strategy.addSubSlot('&baseToken', 'address');
+    compV3RepayOnPriceL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    compV3RepayOnPriceL2Strategy.addSubSlot('&ratioState', 'uint8');
+
+    const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, nullAddress, 0, 0);
+    compV3RepayOnPriceL2Strategy.addTrigger(compV3PriceTrigger);
+
+    const compV3WithdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        '&market',
+        '&proxy',
+        '&collToken',
+        '%amount', // sent by backend
+        user,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collToken',
+            '&baseToken',
+            '$1',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&baseToken',
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+    const compV3PaybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        '&market',
+        '$3',
+        '&proxy',
+        user,
+        '&baseToken',
+    );
+    const compV3RatioCheckAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&market',
+        user,
+    );
+    compV3RepayOnPriceL2Strategy.addAction(compV3WithdrawAction);
+    compV3RepayOnPriceL2Strategy.addAction(sellAction);
+    compV3RepayOnPriceL2Strategy.addAction(feeTakingAction);
+    compV3RepayOnPriceL2Strategy.addAction(compV3PaybackAction);
+    compV3RepayOnPriceL2Strategy.addAction(compV3RatioCheckAction);
+
+    return compV3RepayOnPriceL2Strategy.encodeForDsProxyCall();
+};
+const createCompV3FLRepayOnPriceL2StrategyTemplate = (name, isEOA) => {
+    const user = isEOA ? '&eoa' : '&proxy';
+    const compV3FLRepayOnPriceL2Strategy = new dfs.Strategy(name);
+    compV3FLRepayOnPriceL2Strategy.addSubSlot('&market', 'address');
+    compV3FLRepayOnPriceL2Strategy.addSubSlot('&collToken', 'address');
+    compV3FLRepayOnPriceL2Strategy.addSubSlot('&baseToken', 'address');
+    compV3FLRepayOnPriceL2Strategy.addSubSlot('&targetRatio', 'uint256');
+    compV3FLRepayOnPriceL2Strategy.addSubSlot('&ratioState', 'uint8');
+
+    const compV3PriceTrigger = new dfs.triggers.CompV3PriceTrigger(nullAddress, nullAddress, nullAddress, 0, 0);
+    compV3FLRepayOnPriceL2Strategy.addTrigger(compV3PriceTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collToken'], // sent by backend
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collToken',
+            '&baseToken',
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&baseToken',
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+    const compV3PaybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        '&market',
+        '$3',
+        '&proxy',
+        user,
+        '&baseToken',
+    );
+    const compV3WithdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        '&market',
+        '%flAddress', // sent by backend
+        '&collToken',
+        '$1',
+        user,
+    );
+    const compV3RatioCheckAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState',
+        '&targetRatio',
+        '&market',
+        user,
+    );
+    compV3FLRepayOnPriceL2Strategy.addAction(flAction);
+    compV3FLRepayOnPriceL2Strategy.addAction(sellAction);
+    compV3FLRepayOnPriceL2Strategy.addAction(feeTakingAction);
+    compV3FLRepayOnPriceL2Strategy.addAction(compV3PaybackAction);
+    compV3FLRepayOnPriceL2Strategy.addAction(compV3WithdrawAction);
+    compV3FLRepayOnPriceL2Strategy.addAction(compV3RatioCheckAction);
+
+    return compV3FLRepayOnPriceL2Strategy.encodeForDsProxyCall();
+};
+
+const createCompV3FLCloseToDebtL2StrategyTemplate = (name, isEOA) => {
+    const user = isEOA ? '&eoa' : '&proxy';
+    const compV3FLCloseToDebtL2Strategy = new dfs.Strategy(name);
+    compV3FLCloseToDebtL2Strategy.addSubSlot('&market', 'address');
+    compV3FLCloseToDebtL2Strategy.addSubSlot('&collToken', 'address');
+    compV3FLCloseToDebtL2Strategy.addSubSlot('&baseToken', 'address');
+    // only used by backend to determine which action to call
+    compV3FLCloseToDebtL2Strategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
+
+    const compV3ClosePriceRangeTrigger = new dfs.triggers.CompV3PriceRangeTrigger(nullAddress, nullAddress, 0, 0);
+    compV3FLCloseToDebtL2Strategy.addTrigger(compV3ClosePriceRangeTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%baseToken'], // sent by backend
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        '&market',
+        '%flAmount', // sent by backend
+        '&proxy',
+        user,
+        '&baseToken',
+    );
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        '&market',
+        '&proxy',
+        '&collToken',
+        '%amount', // sent by backend. MaxUint256 for full balance withdraw
+        user,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collToken',
+            '&baseToken',
+            '$3',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&baseToken',
+        '$4',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+    // return:
+    // 1. Send baseToken flashloan amount to flAddress
+    // 2. Send all baseToken's left after the close and flRepayment to eoa
+    const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+        [
+            '&baseToken',
+            '&baseToken',
+        ],
+        [
+            '%flAddress', // sent by backend
+            '&eoa',
+        ],
+        [
+            '$1',
+            '%max(uint)', // sent by backend
+        ],
+    );
+
+    compV3FLCloseToDebtL2Strategy.addAction(flAction);
+    compV3FLCloseToDebtL2Strategy.addAction(paybackAction);
+    compV3FLCloseToDebtL2Strategy.addAction(withdrawAction);
+    compV3FLCloseToDebtL2Strategy.addAction(sellAction);
+    compV3FLCloseToDebtL2Strategy.addAction(feeTakingAction);
+    compV3FLCloseToDebtL2Strategy.addAction(sendTokensAction);
+
+    return compV3FLCloseToDebtL2Strategy.encodeForDsProxyCall();
+};
+const createCompV3FLCloseToCollL2StrategyTemplate = (name, isEOA) => {
+    const user = isEOA ? '&eoa' : '&proxy';
+    const compV3FLCloseToCollL2Strategy = new dfs.Strategy(name);
+    compV3FLCloseToCollL2Strategy.addSubSlot('&market', 'address');
+    compV3FLCloseToCollL2Strategy.addSubSlot('&collToken', 'address');
+    compV3FLCloseToCollL2Strategy.addSubSlot('&baseToken', 'address');
+    // only used by backend to determine which action to call
+    compV3FLCloseToCollL2Strategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8');
+
+    const compV3ClosePriceRangeTrigger = new dfs.triggers.CompV3PriceRangeTrigger(nullAddress, nullAddress, 0, 0);
+    compV3FLCloseToCollL2Strategy.addTrigger(compV3ClosePriceRangeTrigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collToken'], // sent by backend
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collToken',
+            '&baseToken',
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        '&market',
+        '$2',
+        '&proxy',
+        user,
+        '&baseToken',
+    );
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        '&market',
+        '&proxy',
+        '&collToken',
+        '%amount', // sent by backend. MaxUint256 for full balance withdraw
+        user,
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&collToken',
+        '$4',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+    // return:
+    // 1. Send collToken flashloan amount to flAddress
+    // 2. Send all collToken's left after the close and flRepayment to eoa
+    // 3. Send all baseToken's left after the close and flRepayment to eoa
+    const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+        [
+            '&collToken',
+            '&collToken',
+            '&baseToken',
+        ],
+        [
+            '%flAddress', // sent by backend
+            '&eoa',
+            '&eoa',
+        ],
+        [
+            '$1',
+            '%max(uint)', // sent by backend
+            '%max(uint)', // sent by backend
+        ],
+    );
+
+    compV3FLCloseToCollL2Strategy.addAction(flAction);
+    compV3FLCloseToCollL2Strategy.addAction(sellAction);
+    compV3FLCloseToCollL2Strategy.addAction(paybackAction);
+    compV3FLCloseToCollL2Strategy.addAction(withdrawAction);
+    compV3FLCloseToCollL2Strategy.addAction(feeTakingAction);
+    compV3FLCloseToCollL2Strategy.addAction(sendTokensAction);
+
+    return compV3FLCloseToCollL2Strategy.encodeForDsProxyCall();
+};
+
+const createCompV3BoostOnPriceL2Strategy = () => createCompV3BoostOnPriceL2StrategyTemplate('CompV3BoostOnPriceL2Strategy', false);
+const createCompV3FLBoostOnPriceL2Strategy = () => createCompV3FLBoostOnPriceL2StrategyTemplate('CompV3FLBoostOnPriceL2Strategy', false);
+const createCompV3RepayOnPriceL2Strategy = () => createCompV3RepayOnPriceL2StrategyTemplate('CompV3RepayOnPriceL2Strategy', false);
+const createCompV3FLRepayOnPriceL2Strategy = () => createCompV3FLRepayOnPriceL2StrategyTemplate('CompV3FLRepayOnPriceL2Strategy', false);
+const createCompV3FLCloseToDebtL2Strategy = () => createCompV3FLCloseToDebtL2StrategyTemplate('CompV3FLCloseToDebtL2Strategy', false);
+const createCompV3FLCloseToCollL2Strategy = () => createCompV3FLCloseToCollL2StrategyTemplate('CompV3FLCloseToCollL2Strategy', false);
+
+const createCompV3EOABoostOnPriceL2Strategy = () => createCompV3BoostOnPriceL2StrategyTemplate('CompV3EOABoostOnPriceL2Strategy', true);
+const createCompV3EOAFLBoostOnPriceL2Strategy = () => createCompV3FLBoostOnPriceL2StrategyTemplate('CompV3EOAFLBoostOnPriceL2Strategy', true);
+const createCompV3EOARepayOnPriceL2Strategy = () => createCompV3RepayOnPriceL2StrategyTemplate('CompV3EOARepayOnPriceL2Strategy', true);
+const createCompV3EOAFLRepayOnPriceL2Strategy = () => createCompV3FLRepayOnPriceL2StrategyTemplate('CompV3EOAFLRepayOnPriceL2Strategy', true);
+const createCompV3EOAFLCloseToDebtL2Strategy = () => createCompV3FLCloseToDebtL2StrategyTemplate('CompV3EOAFLCloseToDebtL2Strategy', true);
+const createCompV3EOAFLCloseToCollL2Strategy = () => createCompV3FLCloseToCollL2StrategyTemplate('CompV3EOAFLCloseToCollL2Strategy', true);
+
+const createCompV3EOARepayL2Strategy = () => {
+    const compV3RepayStrategy = new dfs.Strategy('CompV3EOARepayL2Strategy');
+
+    compV3RepayStrategy.addSubSlot('&market', 'address');
+    compV3RepayStrategy.addSubSlot('&baseToken', 'address');
+    compV3RepayStrategy.addSubSlot('&ratioState', 'uint256');
+    compV3RepayStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
+    compV3RepayStrategy.addTrigger(trigger);
+
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        '&market', // comet proxy addr of used market
+        '&proxy', // hardcoded
+        '%assetAddr', // variable token to withdraw
+        '%amount', // variable amount to withdraw
+        '&eoa', // hardcoded eoa onBehalf param
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '&baseToken', // baseToken hardcoded
+            '$1', //  hardcoded piped from fee taking
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&baseToken',
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+
+    const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        '&market', // hardcoded
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded (from)
+        '&eoa', // proxy hardcoded (onBehalf)
+        placeHolderAddr, // additional only needed for sdk for front
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState', '&targetRatio', '&market', '&eoa',
+    );
+
+    compV3RepayStrategy.addAction(withdrawAction);
+    compV3RepayStrategy.addAction(sellAction);
+    compV3RepayStrategy.addAction(feeTakingAction);
+    compV3RepayStrategy.addAction(paybackAction);
+    compV3RepayStrategy.addAction(checkerAction);
+
+    return compV3RepayStrategy.encodeForDsProxyCall();
+};
+const createCompV3EOAFlRepayL2Strategy = () => {
+    const compV3RepayStrategy = new dfs.Strategy('CompV3EOAFlRepayL2Strategy');
+
+    compV3RepayStrategy.addSubSlot('&market', 'address');
+    compV3RepayStrategy.addSubSlot('&baseToken', 'address');
+    compV3RepayStrategy.addSubSlot('&ratioState', 'uint256');
+    compV3RepayStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
+    compV3RepayStrategy.addTrigger(trigger);
+
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction(['%collAddr'], ['%repayAmount']);
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '%collAddr', // must stay variable
+            '&baseToken', // must stay variable
+            '%amount', // variable amount to sell
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '&baseToken',
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+
+    const paybackAction = new dfs.actions.compoundV3.CompoundV3PaybackAction(
+        '&market', // hardcoded
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded (from)
+        '&eoa', // user acc. hardcoded (onBehalf)
+        placeHolderAddr, // additional only needed for sdk for front
+    );
+
+    const withdrawAction = new dfs.actions.compoundV3.CompoundV3WithdrawAction(
+        '&market', // comet proxy addr of used market
+        '%flAddr', // hardcoded
+        '%assetAddr', // variable token to withdraw
+        '$1', // Fl amount
+        '&eoa', // hardcoded user acc. onBehalf
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState', '&targetRatio', '&market', '&eoa',
+    );
+
+    compV3RepayStrategy.addAction(flAction);
+    compV3RepayStrategy.addAction(sellAction);
+    compV3RepayStrategy.addAction(feeTakingAction);
+    compV3RepayStrategy.addAction(paybackAction);
+    compV3RepayStrategy.addAction(withdrawAction);
+    compV3RepayStrategy.addAction(checkerAction);
+
+    return compV3RepayStrategy.encodeForDsProxyCall();
+};
+const createCompV3EOABoostL2Strategy = () => {
+    const compV3BoostStrategy = new dfs.Strategy('CompV3EOABoostL2Strategy');
+
+    compV3BoostStrategy.addSubSlot('&market', 'address');
+    compV3BoostStrategy.addSubSlot('&baseToken', 'address');
+    compV3BoostStrategy.addSubSlot('&ratioState', 'uint256');
+    compV3BoostStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
+    compV3BoostStrategy.addTrigger(trigger);
+
+    const borrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(
+        '&market', // comet proxy addr of used market
+        '%amount', // variable amount to borrow
+        '&proxy', // hardcoded
+        '&eoa', // onBehalf hardcoded user
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&baseToken', // hardcoded base value
+            '%collToken', // must stay variable
+            '$1', //  hardcoded piped from fee taking
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '%collToken', // must stay variable
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+
+    const supplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
+        '&market', // hardcoded
+        '%collAsset', // variable coll token
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded (from)
+        '&eoa', // hardcoded onBehalf, supply to user
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState', '&targetRatio', '&market', '&eoa',
+    );
+
+    compV3BoostStrategy.addAction(borrowAction);
+    compV3BoostStrategy.addAction(sellAction);
+    compV3BoostStrategy.addAction(feeTakingAction);
+    compV3BoostStrategy.addAction(supplyAction);
+    compV3BoostStrategy.addAction(checkerAction);
+
+    return compV3BoostStrategy.encodeForDsProxyCall();
+};
+const createCompV3EOAFlBoostL2Strategy = () => {
+    const compV3BoostStrategy = new dfs.Strategy('CompV3EOAFlBoostL2Strategy');
+
+    compV3BoostStrategy.addSubSlot('&market', 'address');
+    compV3BoostStrategy.addSubSlot('&baseToken', 'address');
+    compV3BoostStrategy.addSubSlot('&ratioState', 'uint256');
+    compV3BoostStrategy.addSubSlot('&targetRatio', 'uint256');
+
+    const trigger = new dfs.triggers.CompV3RatioTrigger('0', '0', '0');
+    compV3BoostStrategy.addTrigger(trigger);
+
+    const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction(['%baseToken'], ['%boostAmount']);
+    const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&baseToken', // hardcoded base value
+            '%collToken', // must stay variable
+            '%amount', //  variable amount from Fl
+            '%exchangeWrapper', // can pick exchange wrapper
+        ),
+        '&proxy', // hardcoded
+        '&proxy', // hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeActionL2(
+        '%gasStart', // sent by backend
+        '%collToken', // must stay variable
+        '$2',
+        '%dfsFeeDivider', // maximum fee that can be taken on contract is 0.05% (dfsFeeDivider = 2000)
+        '%l1GasCostInEth', // send custom amount for Optimism
+    );
+
+    const supplyAction = new dfs.actions.compoundV3.CompoundV3SupplyAction(
+        '&market', // hardcoded
+        '%collAsset', // variable coll token
+        '$3', // amount hardcoded
+        '&proxy', // proxy hardcoded (from)
+        '&eoa', // hardcoded onBehalf
+    );
+
+    const borrowAction = new dfs.actions.compoundV3.CompoundV3BorrowAction(
+        '&market', // comet proxy addr of used market
+        '$1', //  FL output
+        '%flAddr', // variable flAddr
+        '&eoa', // hardcoded onBehalf
+    );
+
+    const checkerAction = new dfs.actions.checkers.CompoundV3RatioCheckAction(
+        '&ratioState', '&targetRatio', '&market', '&eoa',
+    );
+
+    compV3BoostStrategy.addAction(flAction);
+    compV3BoostStrategy.addAction(sellAction);
+    compV3BoostStrategy.addAction(feeTakingAction);
+    compV3BoostStrategy.addAction(supplyAction);
+    compV3BoostStrategy.addAction(borrowAction);
+    compV3BoostStrategy.addAction(checkerAction);
+
+    return compV3BoostStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createAaveV3RepayL2Strategy,
     createAaveFLV3RepayL2Strategy,
@@ -1894,4 +2547,20 @@ module.exports = {
     createFluidT1FLRepayL2Strategy,
     createFluidT1BoostL2Strategy,
     createFluidT1FLBoostL2Strategy,
+    createCompV3BoostOnPriceL2Strategy,
+    createCompV3FLBoostOnPriceL2Strategy,
+    createCompV3RepayOnPriceL2Strategy,
+    createCompV3FLRepayOnPriceL2Strategy,
+    createCompV3FLCloseToDebtL2Strategy,
+    createCompV3FLCloseToCollL2Strategy,
+    createCompV3EOABoostOnPriceL2Strategy,
+    createCompV3EOAFLBoostOnPriceL2Strategy,
+    createCompV3EOARepayOnPriceL2Strategy,
+    createCompV3EOAFLRepayOnPriceL2Strategy,
+    createCompV3EOAFLCloseToDebtL2Strategy,
+    createCompV3EOAFLCloseToCollL2Strategy,
+    createCompV3EOARepayL2Strategy,
+    createCompV3EOAFlRepayL2Strategy,
+    createCompV3EOABoostL2Strategy,
+    createCompV3EOAFlBoostL2Strategy,
 };

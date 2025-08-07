@@ -94,6 +94,7 @@ abstract contract IComet {
     function userBasic(address) virtual external view returns (UserBasic memory);
     function userCollateral(address, address) virtual external view returns (UserCollateral memory);
     function priceScale() virtual external pure returns (uint64);
+    function baseScale() virtual external pure returns (uint256);
     function factorScale() virtual external pure returns (uint64);
 
     function baseBorrowMin() virtual external pure returns (uint256);

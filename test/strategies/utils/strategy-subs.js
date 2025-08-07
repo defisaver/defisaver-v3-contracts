@@ -1,6 +1,9 @@
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-unused-vars */
 /* eslint-disable max-len */
 const hre = require('hardhat');
 const automationSdk = require('@defisaver/automation-sdk');
+const { getAssetInfo } = require('@defisaver/tokens');
 
 const {
     subToStrategy,
@@ -14,6 +17,7 @@ const {
     subToSparkProxy,
     updateSparkProxy,
     subToAaveV3Proxy,
+    getLatestSubId,
 } = require('./utils-strategies');
 
 const {
@@ -33,13 +37,18 @@ const {
     WBTC_ADDR,
     WETH_ADDRESS,
     LUSD_ADDR,
-    USDC_ADDR,
     BLUSD_ADDR,
     getContractFromRegistry,
     chainIds,
     BOLD_ADDR,
     network,
+    getAddrFromRegistry,
+    executeTxFromProxy,
+    getGasUsed,
+    calcGasToUSD,
+    AVG_GAS_PRICE,
 } = require('../../utils/utils');
+const { COMP_V3_MARKETS } = require('../../utils/compoundV3');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -234,43 +243,6 @@ const subReflexerRepayStrategy = async (proxy, safeId, ratioUnder, targetRatio, 
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
-};
-
-const subCompV3AutomationStrategy = async (
-    proxy,
-    market,
-    minRatio,
-    maxRatio,
-    optimalRatioBoost,
-    optimalRatioRepay,
-    boostEnabled,
-    isEOA,
-) => {
-    const subInput = automationSdk.strategySubService.compoundV3Encode.leverageManagement(
-        market,
-        USDC_ADDR,
-        minRatio,
-        maxRatio,
-        optimalRatioBoost,
-        optimalRatioRepay,
-        boostEnabled,
-        isEOA,
-    );
-
-    const subId = await subToCompV3Proxy(proxy, [subInput]);
-
-    let subId1 = '0';
-    let subId2 = '0';
-
-    if (boostEnabled) {
-        subId1 = (parseInt(subId, 10) - 1).toString();
-        subId2 = subId;
-    } else {
-        subId1 = subId;
-        subId2 = '0';
-    }
-
-    return { firstSub: subId1, secondSub: subId2 };
 };
 
 const subAaveV2AutomationStrategy = async (
@@ -927,6 +899,157 @@ const subFluidVaultT1BoostBundle = async (
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
+
+/**
+ * This function uses the CompV3SubProxy/CompV3SubProxyL2 instead of SubProxy for legacy reasons.
+ * This supports boost/repay bundles for proxy/eoa subscriptions for all networks.
+ */
+const subCompV3LeverageManagement = async (
+    proxy,
+    marketSymbol,
+    triggerRepayRatio,
+    triggerBoostRatio,
+    targetRatioBoost,
+    targetRatioRepay,
+    boostEnabled,
+    isEOA,
+    subProxyContractAddr,
+) => {
+    const marketAddr = COMP_V3_MARKETS[chainIds[network]][marketSymbol];
+    const debtAsset = getAssetInfo(marketSymbol === 'ETH' ? 'WETH' : marketSymbol, chainIds[network]);
+
+    const isL2 = network !== 'mainnet';
+
+    const encoder = isL2
+        ? automationSdk.strategySubService.compoundV3L2Encode
+        : automationSdk.strategySubService.compoundV3Encode;
+
+    const subInput = encoder.leverageManagement(
+        marketAddr,
+        debtAsset.address,
+        triggerRepayRatio,
+        triggerBoostRatio,
+        targetRatioBoost,
+        targetRatioRepay,
+        boostEnabled,
+        isEOA,
+    );
+
+    const subProxyName = isL2 ? 'CompV3SubProxyL2' : 'CompV3SubProxy';
+    const CompV3SubProxy = await hre.ethers.getContractFactory(subProxyName);
+    const functionData = CompV3SubProxy.interface.encodeFunctionData('subToCompV3Automation', [subInput]);
+
+    const receipt = await executeTxFromProxy(proxy, subProxyContractAddr, functionData);
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    console.log(`GasUsed subToCompV3Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const subId = await getLatestSubId();
+
+    let subId1 = '0';
+    let subId2 = '0';
+
+    if (boostEnabled) {
+        subId1 = (parseInt(subId, 10) - 1).toString();
+        subId2 = subId;
+    } else {
+        subId1 = subId;
+        subId2 = '0';
+    }
+
+    return { subData: subInput, repaySubId: subId1, boostSubId: subId2 };
+};
+
+const _subCompV3LeverageManagementOnPrice = async (
+    proxy,
+    eoaAddr,
+    bundleId,
+    marketSymbol,
+    collSymbol,
+    targetRatio,
+    price,
+    priceState,
+    isEOA,
+    ratioState,
+) => {
+    const marketAddr = COMP_V3_MARKETS[chainIds[network]][marketSymbol];
+
+    const collAsset = getAssetInfo(collSymbol === 'ETH' ? 'WETH' : collSymbol, chainIds[network]);
+    const debtAsset = getAssetInfo(marketSymbol === 'ETH' ? 'WETH' : marketSymbol, chainIds[network]);
+
+    const user = isEOA ? eoaAddr : proxy.address;
+
+    const strategySub = automationSdk.strategySubService.compoundV3Encode.leverageManagementOnPrice(
+        bundleId,
+        marketAddr,
+        collAsset.address,
+        debtAsset.address,
+        targetRatio,
+        price,
+        priceState,
+        ratioState,
+        user,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
+const subCompV3RepayOnPriceBundle = async (
+    proxy,
+    eoaAddr,
+    bundleId,
+    marketSymbol,
+    collSymbol,
+    targetRatio,
+    price,
+    priceState,
+    isEOA,
+) => _subCompV3LeverageManagementOnPrice(
+    proxy, eoaAddr, bundleId, marketSymbol, collSymbol, targetRatio, price, priceState, isEOA, automationSdk.enums.RatioState.UNDER,
+);
+
+const subCompV3BoostOnPriceBundle = async (
+    proxy,
+    eoaAddr,
+    bundleId,
+    marketSymbol,
+    collSymbol,
+    targetRatio,
+    price,
+    priceState,
+    isEOA,
+) => _subCompV3LeverageManagementOnPrice(
+    proxy, eoaAddr, bundleId, marketSymbol, collSymbol, targetRatio, price, priceState, isEOA, automationSdk.enums.RatioState.OVER,
+);
+
+const subCompV3CloseOnPriceBundle = async (
+    proxy,
+    bundleId,
+    marketSymbol,
+    collSymbol,
+    stopLossPrice,
+    takeProfitPrice,
+    stopLossType,
+    takeProfitType,
+) => {
+    const marketAddr = COMP_V3_MARKETS[chainIds[network]][marketSymbol];
+    const collAsset = getAssetInfo(collSymbol === 'ETH' ? 'WETH' : collSymbol, chainIds[network]);
+    const debtAsset = getAssetInfo(marketSymbol === 'ETH' ? 'WETH' : marketSymbol, chainIds[network]);
+    const strategySub = automationSdk.strategySubService.compoundV3Encode.closeOnPrice(
+        bundleId,
+        marketAddr,
+        collAsset.address,
+        debtAsset.address,
+        stopLossPrice,
+        stopLossType,
+        takeProfitPrice,
+        takeProfitType,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdCloseToCollStrategy,
@@ -941,7 +1064,6 @@ module.exports = {
     subLiquityCloseToCollStrategy,
     subLiquityTrailingCloseToCollStrategy,
     subMcdTrailingCloseToCollStrategy,
-    subCompV3AutomationStrategy,
     subCbRebondStrategy,
     subLiquityCBPaybackStrategy,
     subMorphoAaveV2AutomationStrategy,
@@ -968,4 +1090,8 @@ module.exports = {
     subMorphoBlueLeverageManagementOnPrice,
     subFluidVaultT1RepayBundle,
     subFluidVaultT1BoostBundle,
+    subCompV3LeverageManagement,
+    subCompV3RepayOnPriceBundle,
+    subCompV3BoostOnPriceBundle,
+    subCompV3CloseOnPriceBundle,
 };
