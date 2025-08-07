@@ -3841,6 +3841,17 @@
         "history": []
     },
     {
+        "name": "GhoStake",
+        "address": "0x6cfBFd04702f3b7d4fc52D457eDf91D6E4A081bb",
+        "id": "0x1904bda0",
+        "path": "contracts/actions/aaveV3/GhoStake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 86400,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "GhoClaimAAVE",
         "address": "0xA53060d822cB31AFd5B26D899130a14E8Efc5917",
         "id": "0x17ca00ae",

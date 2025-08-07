@@ -67,6 +67,7 @@ import { FluidDexPayback } from "../../contracts/actions/fluid/dex/FluidDexPayba
 import { FluidDexWithdraw } from "../../contracts/actions/fluid/dex/FluidDexWithdraw.sol";
 import { UmbrellaStake } from "../../contracts/actions/aaveV3/umbrella/UmbrellaStake.sol";
 import { UmbrellaUnstake } from "../../contracts/actions/aaveV3/umbrella/UmbrellaUnstake.sol";
+import { GhoStake } from "../../contracts/actions/aaveV3/GhoStake.sol";
 
 contract ActionsUtils {
 
@@ -1267,5 +1268,17 @@ contract ActionsUtils {
                 minAmountOut: _minAmountOut
             })
         );
+    }
+
+    function ghoStakeEncode(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(GhoStake.Params({
+            from: _from,
+            to: _to,
+            amount: _amount
+        }));
     }
 }
