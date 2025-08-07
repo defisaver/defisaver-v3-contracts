@@ -99,4 +99,77 @@ library StrategyIDs {
 
         return false;
     }
+
+
+    function isCompoundV3LeverageManagementStrategy(uint256 _strategyID) internal view returns (bool) {
+        return isCompoundV3RepayStrategy(_strategyID) || isCompoundV3BoostStrategy(_strategyID);
+    }
+
+    function isCompoundV3RepayStrategy(uint256 _strategyID) internal view returns (bool) {
+        if (block.chainid == 1) {
+            if (_strategyID == 15) return true;
+            if (_strategyID == 23) return true;
+            if (_strategyID == 82) return true;
+            if (_strategyID == 84) return true;
+            // TODO -> Should add checks for onPrice. Should add in Aave too?
+        }
+
+        // ! arbitrum & base 
+        if (block.chainid == 42161 || block.chainid == 8453) {
+            if (_strategyID == 10) return true;
+            if (_strategyID == 11) return true;
+            // TODO -> Should add checks for onPrice. Should add in Aave too?
+            
+        }
+
+        return false;
+    }
+
+  function isCompoundV3BoostStrategy(uint256 _strategyID) internal view returns (bool) {
+        if (block.chainid == 1) {
+            if (_strategyID == 19) return true;
+            // 20 je FL boost ? 
+            // 21 composite boost ?
+            // 22 FL composite boost ? 
+            // 27 eoa boost 
+            if (_strategyID == 27) return true;
+            // 28 eoa boost strategy
+            // 29, 30 composite boost
+            if (_strategyID == 83) return true;
+            if (_strategyID == 85) return true;
+            // TODO -> Should add checks for onPrice. Should add in Aave too?
+        }
+
+        // ! arbitrum & base
+        if (block.chainid == 42161 || block.chainid == 8453) {
+            if (_strategyID == 12) return true;
+            if (_strategyID == 13) return true;
+            // TODO -> Should add checks for onPrice. Should add in Aave too?
+        }
+
+        return false;
+    }
+
+
+    function isCompoundV3CloseStrategy(uint256 _strategyID) internal view returns (bool) {
+        if (block.chainid == 1) {
+            // TODO -> find IDs
+            // if (_strategyID == 19) return true;
+            // if (_strategyID == 27) return true;
+            // if (_strategyID == 83) return true;
+            // if (_strategyID == 85) return true;
+            // TODO -> Should add checks for onPrice. Should add in Aave too?
+        }
+
+        // ! arbitrum & base 
+        if (block.chainid == 42161 || block.chainid == 8453) {
+            // TODO -> Find IDs
+            // if (_strategyID == 12) return true;
+            // if (_strategyID == 13) return true;
+            // TODO -> Should add checks for onPrice. Should add in Aave too?
+        }
+        return false;
+    }
+
+
 }
