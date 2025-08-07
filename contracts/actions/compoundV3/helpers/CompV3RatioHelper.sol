@@ -33,9 +33,9 @@ contract CompV3RatioHelper is DSMath, MainnetCompV3Addresses {
             if (isInAsset(assetsIn, i)) {
                 uint256 tokenBalance = comet.collateralBalanceOf(_user, assets[i].asset);
                 if (tokenBalance != 0) {
-                    uint256 collUsdAmount = 
+                    uint256 collAmountInBaseToken = 
                         (tokenBalance * comet.getPrice(assets[i].priceFeed) * comet.baseScale()) / assets[i].scale / comet.priceScale();
-                    sumCollateral += collUsdAmount * assets[i].borrowCollateralFactor / 1e18;
+                    sumCollateral += collAmountInBaseToken * assets[i].borrowCollateralFactor / 1e18;
                 }
             }
         }

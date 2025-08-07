@@ -12,7 +12,7 @@ import { AdminAuth } from "../auth/AdminAuth.sol";
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
 /// @notice This uses the CompoundV3 oracle, which returns the price of the collateral token in terms of the base (debt) token.
 /// @notice The trigger expects the price input to be scaled by 1e8.
-/// @notice This trigger also uses the user address to temporarily store the current ratio.
+/// @notice This trigger also uses the user address to temporarily store the current ratio of user's position.
 contract CompV3PriceTrigger is
     ITrigger,
     AdminAuth,
