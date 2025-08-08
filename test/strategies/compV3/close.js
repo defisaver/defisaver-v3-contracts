@@ -69,8 +69,8 @@ const runCloseTests = () => {
             await redeploy('CompV3Payback', isFork);
             await redeploy('CompV3Withdraw', isFork);
 
-            proxyBundleId = await deployCompV3CloseBundle(false);
-            eoaBundleId = await deployCompV3CloseBundle(true);
+            proxyBundleId = await deployCompV3CloseBundle();
+            eoaBundleId = await deployCompV3CloseBundle();
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -120,6 +120,7 @@ const runCloseTests = () => {
                 takeProfitPrice,
                 stopLossType,
                 takeProfitType,
+                isEOA ? senderAcc.address : proxy.address,
             );
 
             await addBalancerFlLiquidity(debtAsset.address);

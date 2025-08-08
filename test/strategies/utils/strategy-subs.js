@@ -1032,6 +1032,7 @@ const subCompV3CloseOnPriceBundle = async (
     takeProfitPrice,
     stopLossType,
     takeProfitType,
+    user,
 ) => {
     const marketAddr = COMP_V3_MARKETS[chainIds[network]][marketSymbol];
     const collAsset = getAssetInfo(collSymbol === 'ETH' ? 'WETH' : collSymbol, chainIds[network]);
@@ -1045,6 +1046,7 @@ const subCompV3CloseOnPriceBundle = async (
         stopLossType,
         takeProfitPrice,
         takeProfitType,
+        user,
     );
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };

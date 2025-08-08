@@ -72,8 +72,8 @@ const runRepayOnPriceTests = () => {
             await redeploy('CompV3Withdraw', isFork);
             await redeploy('CompV3RatioCheck', isFork);
 
-            proxyBundleId = await deployCompV3RepayOnPriceBundle(false);
-            eoaBundleId = await deployCompV3RepayOnPriceBundle(true);
+            proxyBundleId = await deployCompV3RepayOnPriceBundle();
+            eoaBundleId = await deployCompV3RepayOnPriceBundle();
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
