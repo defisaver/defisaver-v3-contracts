@@ -12,9 +12,14 @@ import { ICometRewards } from "../interfaces/compoundV3/ICometRewards.sol";
 
 contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions {
 
+    address private constant wUSDM_PRICE_FEED = 0xe3a409eD15CD53aFdEFdd191ad945cEC528A2496;
+    uint256 private constant wUSDM_PRICE = 108238800;
+
     function cometGetPrice(IComet comet, address _priceFeed) public view returns (uint256) {
-        if (_priceFeed == address(0xe3a409eD15CD53aFdEFdd191ad945cEC528A2496)) {
-            return 108238800;
+        /// @dev This is a temporary fix for the wUSDM price feed. The recorded price is as of 8/8/2025.
+        /// We are okay with this price having a discrepancy with the actual price over time and it is here solely to avoid breaking other calls.
+        if (_priceFeed == wUSDM_PRICE_FEED) {
+            return wUSDM_PRICE;
         }
         return comet.getPrice(_priceFeed);
     }
