@@ -136,6 +136,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0x57AE9cc546fd969916703A5bC11a1482957C5346",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "KyberInputScalingHelper",
         "address": "0x1E3b2371b3790bDc7C667d50aB077Dce7121391A",
         "id": "0x559d99f5",
@@ -1210,6 +1221,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    { 
+        "name": "ExecuteCall",
+        "address": "0xfd5ac928aac40d490bcf1a83038d58aa90ea39a7",
+        "id": "0xd82327eb",
+        "path": "contracts/actions/utils/ExecuteCall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     }

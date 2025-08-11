@@ -12,6 +12,18 @@ import { ICometRewards } from "../interfaces/compoundV3/ICometRewards.sol";
 
 contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions {
 
+    address private constant wUSDM_PRICE_FEED = 0xe3a409eD15CD53aFdEFdd191ad945cEC528A2496;
+    uint256 private constant wUSDM_PRICE = 108238800;
+
+    function cometGetPrice(IComet comet, address _priceFeed) public view returns (uint256) {
+        /// @dev This is a temporary fix for the wUSDM price feed. The recorded price is as of 8/8/2025.
+        /// We are okay with this price having a discrepancy with the actual price over time and it is here solely to avoid breaking other calls.
+        if (_priceFeed == wUSDM_PRICE_FEED) {
+            return wUSDM_PRICE;
+        }
+        return comet.getPrice(_priceFeed);
+    }
+
     struct LoanData {
         address user;
         address[] collAddr;
@@ -112,7 +124,7 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
             data.collAmounts[i] = tokenBalance;
             if (tokenBalance != 0) {
                 data.collAddr[i] = asset;
-                uint value = tokenBalance * comet.getPrice(priceFeed) / assets[i].scale;
+                uint value = tokenBalance * cometGetPrice(comet, priceFeed) / assets[i].scale;
                 data.collAmounts[i] = tokenBalance;
                 data.collValue += value;
             }
@@ -120,9 +132,9 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
 
         address usdcPriceFeed = comet.baseTokenPriceFeed();
         data.borrowAmount = comet.borrowBalanceOf(_user);
-        data.borrowValue = comet.borrowBalanceOf(_user) * comet.getPrice(usdcPriceFeed) / comet.priceScale();
+        data.borrowValue = comet.borrowBalanceOf(_user) * cometGetPrice(comet, usdcPriceFeed) / comet.priceScale();
         data.depositAmount = comet.balanceOf(_user);
-        data.depositValue = comet.balanceOf(_user) * comet.getPrice(usdcPriceFeed) / comet.priceScale();
+        data.depositValue = comet.balanceOf(_user) * cometGetPrice(comet, usdcPriceFeed) / comet.priceScale();
 
         return data;
     }
@@ -140,7 +152,7 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
             borrowCollateralFactor: assetInfo.borrowCollateralFactor,
             liquidateCollateralFactor: assetInfo.liquidateCollateralFactor,
             liquidationFactor: assetInfo.liquidationFactor,
-            price: comet.getPrice(assetInfo.priceFeed),
+            price: cometGetPrice(comet, assetInfo.priceFeed),
             supplyCap: assetInfo.supplyCap
         });
     }
@@ -154,7 +166,7 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
 
         baseToken = BaseTokenInfoFull({
             tokenAddr: comet.baseToken(),
-            price: comet.getPrice(comet.baseTokenPriceFeed()),
+            price: cometGetPrice(comet, comet.baseTokenPriceFeed()),
             supplyIndex: basics.baseSupplyIndex,
             borrowIndex: basics.baseBorrowIndex,
             trackingSupplyIndex: basics.trackingSupplyIndex,
@@ -183,7 +195,7 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         IComet comet = IComet(_market);
         IComet.AssetInfo memory assetInfo = comet.getAssetInfoByAddress(_tokenAddr);
 
-        return comet.getPrice(assetInfo.priceFeed);
+        return cometGetPrice(comet, assetInfo.priceFeed);
     }
 
     function getGovernanceInfoFull(address _market) public view returns (GovernanceInfoFull memory govInfo) {

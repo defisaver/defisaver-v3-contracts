@@ -303,6 +303,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0x2608919087226099B74C919480c2ed785415E832",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveWrapperV3",
         "address": "0xF5E8C498b6697F0704F0C50448714C5E328b33E2",
         "id": "0xb856c9af",
@@ -779,14 +790,15 @@
     },
     {
         "name": "CompV3View",
-        "address": "0x566b1Bd61E4C164DC22f51883942655DaA7Ea297",
+        "address": "0x687bf45bb6279b47a104052b5036da008315f622",
         "id": "0x16be4292",
         "path": "contracts/views/CompV3View.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x566b1Bd61E4C164DC22f51883942655DaA7Ea297",
             "0xf522b1588688b9887623b9C666175684d284D363"
         ]
     },
@@ -3835,6 +3847,17 @@
         "history": []
     },
     {
+        "name": "GhoStake",
+        "address": "0x6cfBFd04702f3b7d4fc52D457eDf91D6E4A081bb",
+        "id": "0x1904bda0",
+        "path": "contracts/actions/aaveV3/GhoStake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 86400,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "GhoClaimAAVE",
         "address": "0xA53060d822cB31AFd5B26D899130a14E8Efc5917",
         "id": "0x17ca00ae",
@@ -4600,6 +4623,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    }
+    { 
+        "name": "ExecuteCall",
+        "address": "0x538eda025a8be6ff8fc1fe6050ba3aafb7620608",
+        "id": "0xd82327eb",
+        "path": "contracts/actions/utils/ExecuteCall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     }
