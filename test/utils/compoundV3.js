@@ -13,17 +13,11 @@ const {
     createCompV3RepayL2Strategy,
     createCompV3EOAFlRepayL2Strategy,
     createCompV3FLRepayL2Strategy,
-    createCompV3EOABoostOnPriceL2Strategy,
     createCompV3BoostOnPriceL2Strategy,
-    createCompV3EOAFLBoostOnPriceL2Strategy,
     createCompV3FLBoostOnPriceL2Strategy,
-    createCompV3EOARepayOnPriceL2Strategy,
     createCompV3RepayOnPriceL2Strategy,
-    createCompV3EOAFLRepayOnPriceL2Strategy,
     createCompV3FLRepayOnPriceL2Strategy,
-    createCompV3EOAFLCloseToDebtL2Strategy,
     createCompV3FLCloseToDebtL2Strategy,
-    createCompV3EOAFLCloseToCollL2Strategy,
     createCompV3FLCloseToCollL2Strategy,
 } = require('../../strategies-spec/l2');
 
@@ -36,17 +30,11 @@ const {
     createCompV3RepayStrategy,
     createCompV3EOAFlRepayStrategy,
     createCompV3FlRepayStrategy,
-    createCompV3EOABoostOnPriceStrategy,
     createCompV3BoostOnPriceStrategy,
-    createCompV3EOAFLBoostOnPriceStrategy,
     createCompV3FLBoostOnPriceStrategy,
-    createCompV3EOARepayOnPriceStrategy,
     createCompV3RepayOnPriceStrategy,
-    createCompV3EOAFLRepayOnPriceStrategy,
     createCompV3FLRepayOnPriceStrategy,
-    createCompV3EOAFLCloseToDebtStrategy,
     createCompV3FLCloseToDebtStrategy,
-    createCompV3EOAFLCloseToCollStrategy,
     createCompV3FLCloseToCollStrategy,
 } = require('../../strategies-spec/mainnet');
 
@@ -167,16 +155,12 @@ const deployCompV3RepayBundle = async (isEOA) => {
     return bundleId;
 };
 
-const deployCompV3BoostOnPriceBundle = async (isEOA) => {
+const deployCompV3BoostOnPriceBundle = async () => {
     const isL2 = network !== 'mainnet';
     const isFork = isNetworkFork();
     await openStrategyAndBundleStorage(isFork);
-    const boostOnPriceStrategy = isEOA
-        ? (isL2 ? createCompV3EOABoostOnPriceL2Strategy() : createCompV3EOABoostOnPriceStrategy())
-        : (isL2 ? createCompV3BoostOnPriceL2Strategy() : createCompV3BoostOnPriceStrategy());
-    const flBoostOnPriceStrategy = isEOA
-        ? (isL2 ? createCompV3EOAFLBoostOnPriceL2Strategy() : createCompV3EOAFLBoostOnPriceStrategy())
-        : (isL2 ? createCompV3FLBoostOnPriceL2Strategy() : createCompV3FLBoostOnPriceStrategy());
+    const boostOnPriceStrategy = isL2 ? createCompV3BoostOnPriceL2Strategy() : createCompV3BoostOnPriceStrategy();
+    const flBoostOnPriceStrategy = isL2 ? createCompV3FLBoostOnPriceL2Strategy() : createCompV3FLBoostOnPriceStrategy();
     const continuous = false;
     const boostOnPriceStrategyId = await createStrategy(...boostOnPriceStrategy, continuous);
     const flBoostOnPriceStrategyId = await createStrategy(...flBoostOnPriceStrategy, continuous);
@@ -184,16 +168,12 @@ const deployCompV3BoostOnPriceBundle = async (isEOA) => {
     return bundleId;
 };
 
-const deployCompV3RepayOnPriceBundle = async (isEOA) => {
+const deployCompV3RepayOnPriceBundle = async () => {
     const isL2 = network !== 'mainnet';
     const isFork = isNetworkFork();
     await openStrategyAndBundleStorage(isFork);
-    const repayOnPriceStrategy = isEOA
-        ? (isL2 ? createCompV3EOARepayOnPriceL2Strategy() : createCompV3EOARepayOnPriceStrategy())
-        : (isL2 ? createCompV3RepayOnPriceL2Strategy() : createCompV3RepayOnPriceStrategy());
-    const flRepayOnPriceStrategy = isEOA
-        ? (isL2 ? createCompV3EOAFLRepayOnPriceL2Strategy() : createCompV3EOAFLRepayOnPriceStrategy())
-        : (isL2 ? createCompV3FLRepayOnPriceL2Strategy() : createCompV3FLRepayOnPriceStrategy());
+    const repayOnPriceStrategy = isL2 ? createCompV3RepayOnPriceL2Strategy() : createCompV3RepayOnPriceStrategy();
+    const flRepayOnPriceStrategy = isL2 ? createCompV3FLRepayOnPriceL2Strategy() : createCompV3FLRepayOnPriceStrategy();
     const continuous = false;
     const repayOnPriceStrategyId = await createStrategy(...repayOnPriceStrategy, continuous);
     const flRepayOnPriceStrategyId = await createStrategy(...flRepayOnPriceStrategy, continuous);
@@ -201,16 +181,12 @@ const deployCompV3RepayOnPriceBundle = async (isEOA) => {
     return bundleId;
 };
 
-const deployCompV3CloseBundle = async (isEOA) => {
+const deployCompV3CloseBundle = async () => {
     const isL2 = network !== 'mainnet';
     const isFork = isNetworkFork();
     await openStrategyAndBundleStorage(isFork);
-    const flCloseToDebtStrategy = isEOA
-        ? (isL2 ? createCompV3EOAFLCloseToDebtL2Strategy() : createCompV3EOAFLCloseToDebtStrategy())
-        : (isL2 ? createCompV3FLCloseToDebtL2Strategy() : createCompV3FLCloseToDebtStrategy());
-    const flCloseToCollStrategy = isEOA
-        ? (isL2 ? createCompV3EOAFLCloseToCollL2Strategy() : createCompV3EOAFLCloseToCollStrategy())
-        : (isL2 ? createCompV3FLCloseToCollL2Strategy() : createCompV3FLCloseToCollStrategy());
+    const flCloseToDebtStrategy = isL2 ? createCompV3FLCloseToDebtL2Strategy() : createCompV3FLCloseToDebtStrategy();
+    const flCloseToCollStrategy = isL2 ? createCompV3FLCloseToCollL2Strategy() : createCompV3FLCloseToCollStrategy();
     const continuous = false;
     const flCloseToDebtStrategyId = await createStrategy(...flCloseToDebtStrategy, continuous);
     const flCloseToCollStrategyId = await createStrategy(...flCloseToCollStrategy, continuous);
