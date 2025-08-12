@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { CompV3RatioHelper } from "../compoundV3/helpers/CompV3RatioHelper.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { TransientStorageCancun } from "../../utils/TransientStorageCancun.sol";
 
 /// @title Action to check the ratio of the Compound V3 position after strategy execution.
 contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
@@ -12,7 +12,7 @@ contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
     /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
 
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
+    TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     error BadAfterRatio(uint256 startRatio, uint256 currRatio);
 

@@ -5744,5 +5744,314 @@
       ]
     ],
     "bundleId": 45
+  },
+  {
+    "name": "CompV3RepayOnPriceStrategy",
+    "id": 118,
+    "isContinuous": false,
+    "triggerIds": [
+      "CompV3PriceTrigger"
+    ],
+    "actionIds": [
+      "CompV3Withdraw",
+      "DFSSell",
+      "GasFeeTaker",
+      "CompV3Payback",
+      "CompV3RatioCheck"
+    ],
+    "paramMapping": [
+      [
+        "&1",
+        "&proxy",
+        "&2",
+        0,
+        "&6"
+      ],
+      [
+        "&2",
+        "&3",
+        "$1",
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&3",
+        "$2",
+        0
+      ],
+      [
+        "&1",
+        "$3",
+        "&proxy",
+        "&6"
+      ],
+      [
+        "&5",
+        "&4",
+        "&1",
+        "&6"
+      ]
+    ],
+    "bundleId": 49
+  },
+  {
+    "name": "CompV3FLRepayOnPriceStrategy",
+    "id": 119,
+    "isContinuous": false,
+    "triggerIds": [
+      "CompV3PriceTrigger"
+    ],
+    "actionIds": [
+      "FLAction",
+      "DFSSell",
+      "GasFeeTaker",
+      "CompV3Payback",
+      "CompV3Withdraw",
+      "CompV3RatioCheck"
+    ],
+    "paramMapping": [
+      [],
+      [
+        "&2",
+        "&3",
+        0,
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&3",
+        "$2",
+        0
+      ],
+      [
+        "&1",
+        "$3",
+        "&proxy",
+        "&6"
+      ],
+      [
+        "&1",
+        0,
+        "&2",
+        "$1",
+        "&6"
+      ],
+      [
+        "&5",
+        "&4",
+        "&1",
+        "&6"
+      ]
+    ],
+    "bundleId": 49
+  },
+  {
+    "name": "CompV3BoostOnPriceStrategy",
+    "id": 120,
+    "isContinuous": false,
+    "triggerIds": [
+      "CompV3PriceTrigger"
+    ],
+    "actionIds": [
+      "CompV3Borrow",
+      "DFSSell",
+      "GasFeeTaker",
+      "CompV3Supply",
+      "CompV3RatioCheck"
+    ],
+    "paramMapping": [
+      [
+        "&1",
+        0,
+        "&proxy",
+        "&6"
+      ],
+      [
+        "&3",
+        "&2",
+        "$1",
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&2",
+        "$2",
+        0
+      ],
+      [
+        "&1",
+        "&2",
+        "$3",
+        "&proxy",
+        "&6"
+      ],
+      [
+        "&5",
+        "&4",
+        "&1",
+        "&6"
+      ]
+    ],
+    "bundleId": 50
+  },
+  {
+    "name": "CompV3FLBoostOnPriceStrategy",
+    "id": 121,
+    "isContinuous": false,
+    "triggerIds": [
+      "CompV3PriceTrigger"
+    ],
+    "actionIds": [
+      "FLAction",
+      "DFSSell",
+      "GasFeeTaker",
+      "CompV3Supply",
+      "CompV3Borrow",
+      "CompV3RatioCheck"
+    ],
+    "paramMapping": [
+      [],
+      [
+        "&3",
+        "&2",
+        0,
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&2",
+        "$2",
+        0
+      ],
+      [
+        "&1",
+        "&2",
+        "$3",
+        "&proxy",
+        "&6"
+      ],
+      [
+        "&1",
+        "$1",
+        0,
+        "&6"
+      ],
+      [
+        "&5",
+        "&4",
+        "&1",
+        "&6"
+      ]
+    ],
+    "bundleId": 50
+  },
+  {
+    "name": "CompV3FLCloseToDebtStrategy",
+    "id": 122,
+    "isContinuous": false,
+    "triggerIds": [
+      "CompV3PriceRangeTrigger"
+    ],
+    "actionIds": [
+      "FLAction",
+      "CompV3Payback",
+      "CompV3Withdraw",
+      "DFSSell",
+      "GasFeeTaker",
+      "SendTokens"
+    ],
+    "paramMapping": [
+      [],
+      [
+        "&1",
+        0,
+        "&proxy",
+        "&5"
+      ],
+      [
+        "&1",
+        "&proxy",
+        "&2",
+        0,
+        "&5"
+      ],
+      [
+        "&2",
+        "&3",
+        "$3",
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&3",
+        "$4",
+        0
+      ],
+      [
+        "&3",
+        "&3",
+        0,
+        "&eoa",
+        "$1",
+        0
+      ]
+    ],
+    "bundleId": 51
+  },
+  {
+    "name": "CompV3FLCloseToCollStrategy",
+    "id": 123,
+    "isContinuous": false,
+    "triggerIds": [
+      "CompV3PriceRangeTrigger"
+    ],
+    "actionIds": [
+      "FLAction",
+      "DFSSell",
+      "CompV3Payback",
+      "CompV3Withdraw",
+      "GasFeeTaker",
+      "SendTokens"
+    ],
+    "paramMapping": [
+      [],
+      [
+        "&2",
+        "&3",
+        0,
+        "&proxy",
+        "&proxy"
+      ],
+      [
+        "&1",
+        "$2",
+        "&proxy",
+        "&5"
+      ],
+      [
+        "&1",
+        "&proxy",
+        "&2",
+        0,
+        "&5"
+      ],
+      [
+        "&2",
+        "$4",
+        0
+      ],
+      [
+        "&2",
+        "&2",
+        "&3",
+        0,
+        "&eoa",
+        "&eoa",
+        "$1",
+        0,
+        0
+      ]
+    ],
+    "bundleId": 51
   }
 ]
