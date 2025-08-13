@@ -439,6 +439,17 @@
         "history": []
     },
     {
+        "name": "TransientStorageCancun",
+        "address": "0x3d5133490db663c6f8F856DA56a8F8F3Dc02768c",
+        "id": "0x099eb80a",
+        "path": "contracts/utils/TransientStorageCancun.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AdminVault",
         "address": "0xd47D8D97cAd12A866900eEc6Cde1962529F25351",
         "id": "0xeb51cb26",

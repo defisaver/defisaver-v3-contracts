@@ -40,6 +40,10 @@ contract SparkWithdraw is ActionBase, SparkHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
         params.market = _parseParamAddr(params.market, _paramMapping[4], _subData, _returnValues);
 
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_SPARK_MARKET;
+        }
+
         (uint256 withdrawnAmount, bytes memory logData) = _withdraw(
             params.market,
             params.assetId,

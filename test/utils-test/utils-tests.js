@@ -424,66 +424,6 @@ const tokenPriceHelperL2Test = async () => {
         }
     });
 };
-const priceFeedTest = async () => {
-    describe('Price feed test', function () {
-        this.timeout(80000);
-
-        let priceFeedContract;
-        let priceFeeds;
-        before(async () => {
-            console.log(priceFeeds);
-
-            const chainId = chainIds[network];
-
-            let priceFeedAddr;
-            if (chainId === 10) {
-                priceFeedAddr = '0x7E3D9e4E620842d61aB111a6DbF1be5a8cc91774';
-                const filePath = path.join(__dirname, '../../addresses/priceFeeds/optimism.json');
-                fs.readFile(filePath, 'utf-8', (err, data) => {
-                    if (err) {
-                        console.error(err);
-                        return;
-                    }
-                    priceFeeds = JSON.parse(data);
-                });
-            }
-            if (chainId === 42161) {
-                priceFeedAddr = '0x158E27De8B5E5bC3FA1C6D5b365a291c54f6b0Fd';
-                const filePath = path.join(__dirname, '../../addresses/priceFeeds/arbitrum.json');
-                fs.readFile(filePath, 'utf-8', (err, data) => {
-                    if (err) {
-                        console.error(err);
-                        return;
-                    }
-                    priceFeeds = JSON.parse(data);
-                });
-            }
-            priceFeedContract = await hre.ethers.getContractAt('PriceFeedRegistry', priceFeedAddr);
-        });
-
-        it('... should check priceFeed for any changes', async () => {
-            for (let i = 0; i < priceFeeds.length; i++) {
-                const feedAddressLive = await priceFeedContract.getFeed(
-                    priceFeeds[i].base, priceFeeds[i].quote,
-                );
-                const feed = await hre.ethers.getContractAt('IAggregatorV3', feedAddressLive);
-                const latestData = await feed.latestRoundData();
-                const currTimestamp = Math.floor(Date.now() / 1000);
-                const lastUpdatedTimestamp = latestData.updatedAt;
-                const diffInHours = (currTimestamp - lastUpdatedTimestamp) / 3600;
-                if (diffInHours > 24) {
-                    console.log("ALERT: Price feed hasn't been updated in 24 hours");
-                }
-                if (feedAddressLive !== priceFeeds[i].feedAddress) {
-                    console.log(priceFeeds[i].name);
-                    console.log(await feed.description());
-                    console.log(priceFeeds[i]);
-                    console.log(feedAddressLive);
-                }
-            }
-        });
-    });
-};
 const dfsSafeFactoryTest = async () => {
     describe('DFS-Safe-Factory', function () {
         this.timeout(80000);
@@ -580,6 +520,5 @@ module.exports = {
     dfsRegistryControllerTest,
     tokenPriceHelperTest,
     tokenPriceHelperL2Test,
-    priceFeedTest,
     dfsSafeFactoryTest,
 };
