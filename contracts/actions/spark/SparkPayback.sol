@@ -53,6 +53,13 @@ contract SparkPayback is ActionBase, SparkHelper {
             _returnValues
         );
 
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_SPARK_MARKET;
+        }
+        if (!params.useOnBehalf) {
+            params.onBehalf = address(0);
+        }
+
         (uint256 paybackAmount, bytes memory logData) = _payback(
             params.market,
             params.assetId,

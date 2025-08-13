@@ -53,6 +53,13 @@ contract SparkSupply is ActionBase, SparkHelper {
             _returnValues
         );
 
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_SPARK_MARKET;
+        }
+        if (!params.useOnBehalf) {
+            params.onBehalf = address(0);
+        }
+
         (uint256 supplyAmount, bytes memory logData) = _supply(
             params.market,
             params.amount,

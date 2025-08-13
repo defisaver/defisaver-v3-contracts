@@ -59,3 +59,4 @@ task('deployOnFork', 'Deploys contracts on an existing fork')
             process.exit(1);
         }
     });
+

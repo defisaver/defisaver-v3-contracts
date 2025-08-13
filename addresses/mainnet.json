@@ -749,6 +749,17 @@
         "history": []
     },
     {
+        "name": "TransientStorageCancun",
+        "address": "0x0304E27cccE28bAB4d78C6cb7AfD4cd01c87c1e4",
+        "id": "0x099eb80a",
+        "path": "contracts/utils/TransientStorageCancun.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveView",
         "address": "0x79fdec1d39f6282a92e5e087d10ba0b0cef89a84",
         "id": "0x7da42156",
@@ -779,14 +790,15 @@
     },
     {
         "name": "CompV3View",
-        "address": "0x566b1Bd61E4C164DC22f51883942655DaA7Ea297",
+        "address": "0x687bf45bb6279b47a104052b5036da008315f622",
         "id": "0x16be4292",
         "path": "contracts/views/CompV3View.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x566b1Bd61E4C164DC22f51883942655DaA7Ea297",
             "0xf522b1588688b9887623b9C666175684d284D363"
         ]
     },
@@ -3823,6 +3835,17 @@
         "address": "0x3fD02e65B4fb12381946D03815Ff3FF8Ebe2fC63",
         "id": "0xe1c6999c",
         "path": "contracts/actions/aaveV3/GhoUnstake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 86400,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "GhoStake",
+        "address": "0x6cfBFd04702f3b7d4fc52D457eDf91D6E4A081bb",
+        "id": "0x1904bda0",
+        "path": "contracts/actions/aaveV3/GhoStake.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
