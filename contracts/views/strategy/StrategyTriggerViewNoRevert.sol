@@ -33,7 +33,6 @@ contract StrategyTriggerViewNoRevert is
     StableCoinUtils
 {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
-    // TODO -> This should prob be different for L2 chains
     IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
     address internal constant DEFAULT_SPARK_MARKET_MAINNET = 0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
@@ -212,7 +211,6 @@ contract StrategyTriggerViewNoRevert is
         view
         returns (TriggerStatus)
     {
-        //
         try this._verifyCompV3MinDebtPosition(_smartWallet, _subData) returns (TriggerStatus status) {
             return status;
         } catch {
@@ -228,13 +226,11 @@ contract StrategyTriggerViewNoRevert is
         IComet comet = IComet(address(uint160(uint256(_subData[0]))));
 
         address baseToken = comet.baseToken();
-        // this line below will lose some precision for later check in totalDebtInUSD if decimals > 8
-        // might be better option to do it inside `IF` and later after try/catch
-        uint256 amountBorrowed = comet.borrowBalanceOf(_smartWallet) * 1e8 / 10 ** comet.decimals();
         uint256 chainlinkPriceInUSD;
 
         /// @dev We don't fetch price for stable coin, we assume it is always:  1 stable == 1 USD
         if (isStableCoin(baseToken)) {
+            uint256 amountBorrowed = comet.borrowBalanceOf(_smartWallet) * 1e8 / 10 ** comet.decimals();
             return _hasEnoughMinDebtInUSD(amountBorrowed) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
         }
 
@@ -247,7 +243,7 @@ contract StrategyTriggerViewNoRevert is
             return TriggerStatus.TRUE;
         }
 
-        uint256 totalDebtInUSD = chainlinkPriceInUSD * amountBorrowed / 1e8;
+        uint256 totalDebtInUSD = chainlinkPriceInUSD * comet.borrowBalanceOf(_smartWallet) / 10 ** comet.decimals();
         return _hasEnoughMinDebtInUSD(totalDebtInUSD) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
     }
 
