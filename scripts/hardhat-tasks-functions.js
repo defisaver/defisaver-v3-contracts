@@ -228,7 +228,7 @@ async function verifyContract(contractAddress, contractName) {
     }
 
     const tx = await axios.post(url, params, config);
-    console.log(`Check how verification is going at ${demo} with API key ${apiKey} and receipt GUID ${tx.data.result}`);
+    console.log(`Check how verification is going at ${demo} with receipt GUID ${tx.data.result}`);
 }
 
 async function flatten(filePath) {
