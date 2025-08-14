@@ -234,6 +234,13 @@ contract StrategyTriggerViewNoRevert is
             return _hasEnoughMinDebtInUSD(amountBorrowed) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
         }
 
+        if (
+            keccak256(bytes(IERC20(baseToken).symbol())) ==
+            keccak256(bytes("WETH"))
+        ) {
+            baseToken = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+        }
+        
         try feedRegistry.latestRoundData(baseToken, Denominations.USD) returns (
             uint80, int256 answer, uint256, uint256, uint80
         ) {

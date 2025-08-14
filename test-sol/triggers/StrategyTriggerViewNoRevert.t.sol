@@ -142,6 +142,12 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
         _baseTest(Addresses.COMET_USDT, Addresses.WETH_ADDR, 100e18, 5000e6);
     }
 
+
+    function test_verifyCompV3MinDebtPosition_wethMarket_mainnet() public {
+        // ETH price was 2616 at the moment, so we need to borrow value of ~ 2 ether to have more than 5k of debt
+        _baseTest(Addresses.COMET_WETH, Addresses.WBTC_ADDR, 1e8, 2e18); 
+    }
+
     function _baseTest(address _comet, address _depositToken, uint256 _amountToDeposit, uint256 _amountToBorrow)
         internal
     {
