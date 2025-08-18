@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-contract StableCoinUtils {
+library StableCoinUtils {
     uint256 public constant MAINNET_CHAIN_ID = 1;
     uint256 public constant ARBITRUM_CHAIN_ID = 42161;
     uint256 public constant BASE_CHAIN_ID = 8453;

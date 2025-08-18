@@ -29,8 +29,7 @@ contract StrategyTriggerViewNoRevert is
     CoreHelper,
     CheckWalletType,
     AaveV3Helper,
-    UtilHelper,
-    StableCoinUtils
+    UtilHelper
 {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
     IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
@@ -42,6 +41,7 @@ contract StrategyTriggerViewNoRevert is
 
     using StrategyIDs for uint256;
     using TokenUtils for address;
+    using StableCoinUtils for address;
 
     enum TriggerStatus {
         FALSE,
@@ -229,17 +229,13 @@ contract StrategyTriggerViewNoRevert is
         uint256 chainlinkPriceInUSD;
 
         /// @dev We don't fetch price for stable coin, we assume it is always:  1 stable == 1 USD
-        if (isStableCoin(baseToken)) {
+        /// @dev We are okay with slight depegs, as this code is only used for total debt in USD estimation.
+        if (baseToken.isStableCoin()) {
             uint256 amountBorrowed = comet.borrowBalanceOf(_smartWallet) * 1e8 / 10 ** comet.decimals();
             return _hasEnoughMinDebtInUSD(amountBorrowed) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
         }
 
-        if (
-            keccak256(bytes(IERC20(baseToken).symbol())) ==
-            keccak256(bytes("WETH"))
-        ) {
-            baseToken = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-        }
+        if (baseToken == WETH_ADDR) baseToken = ETH_ADDR; 
         
         try feedRegistry.latestRoundData(baseToken, Denominations.USD) returns (
             uint80, int256 answer, uint256, uint256, uint80

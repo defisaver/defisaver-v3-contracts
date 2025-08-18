@@ -135,20 +135,19 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
     }
 
     function test_verifyCompV3MinDebtPosition_usdcMarket_mainnet() public {
-        _baseTest(Addresses.COMET_USDC, Addresses.WETH_ADDR, 100e18, 5000e6);
+        _compV3BaseTest(Addresses.COMET_USDC, Addresses.WETH_ADDR, 100e18, 5000e6);
     }
 
     function test_verifyCompV3MinDebtPosition_usdtMarket_mainnet() public {
-        _baseTest(Addresses.COMET_USDT, Addresses.WETH_ADDR, 100e18, 5000e6);
+        _compV3BaseTest(Addresses.COMET_USDT, Addresses.WETH_ADDR, 100e18, 5000e6);
     }
-
 
     function test_verifyCompV3MinDebtPosition_wethMarket_mainnet() public {
         // ETH price was 2616 at the moment, so we need to borrow value of ~ 2 ether to have more than 5k of debt
-        _baseTest(Addresses.COMET_WETH, Addresses.WBTC_ADDR, 1e8, 2e18); 
+        _compV3BaseTest(Addresses.COMET_WETH, Addresses.WBTC_ADDR, 1e8, 2e18); 
     }
 
-    function _baseTest(address _comet, address _depositToken, uint256 _amountToDeposit, uint256 _amountToBorrow)
+    function _compV3BaseTest(address _comet, address _depositToken, uint256 _amountToDeposit, uint256 _amountToBorrow)
         internal
     {
         bytes32[] memory subData = new bytes32[](1);
