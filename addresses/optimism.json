@@ -136,6 +136,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0x57AE9cc546fd969916703A5bC11a1482957C5346",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "KyberInputScalingHelper",
         "address": "0x1E3b2371b3790bDc7C667d50aB077Dce7121391A",
         "id": "0x559d99f5",
@@ -340,23 +351,24 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xD313cdea0F3e759d8Aa0130F768895BDBd371b1d",
+        "address": "0xb099119B6B713614a589D078b4655DFdB75BCef6",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.8",
+        "version": "1.0.11",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
-            "0xe2171e5503558ee8723e69807f9f1eb654943a3e",
-            "0xf56a2a8fa68d2e608ed7060be55e96e008dcc3ca",
-            "0xF83052a8d9ec5c705B4D7A1C252A6C24A692e91C",
-            "0x5075c6a7251485CC3FcbB4Ba59d6E6EF26a69d45",
-            "0xB6aF2C91E3eBB250615aaa33Bb955f7a7f21AD17",
-            "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
-            "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
-            "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc",
-            "0x1BD33a66791ef6278f6d88503F1e65bEbAED59da"
+          "0xD313cdea0F3e759d8Aa0130F768895BDBd371b1d",
+          "0xe2171e5503558ee8723e69807f9f1eb654943a3e",
+          "0xf56a2a8fa68d2e608ed7060be55e96e008dcc3ca",
+          "0xF83052a8d9ec5c705B4D7A1C252A6C24A692e91C",
+          "0x5075c6a7251485CC3FcbB4Ba59d6E6EF26a69d45",
+          "0xB6aF2C91E3eBB250615aaa33Bb955f7a7f21AD17",
+          "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
+          "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
+          "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc",
+          "0x1BD33a66791ef6278f6d88503F1e65bEbAED59da"
         ]
     },
     {
@@ -375,6 +387,17 @@
         "address": "0x491f0858Ef9e6987e260587322149Ac33D762e6e",
         "id": "0x69885459",
         "path": "contracts/utils/TransientStorage.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TransientStorageCancun",
+        "address": "0x7c717bA104B5531A040D93F6AAc3D701C95BA9BC",
+        "id": "0x099eb80a",
+        "path": "contracts/utils/TransientStorageCancun.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -1195,6 +1218,28 @@
         "address": "0xcc63B281b29a4c7f33aF780e9B480A15eb676e81",
         "id": "0x869398d6",
         "path": "contracts/actions/summerfi/SFApproveTokens.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    { 
+        "name": "ExecuteCall",
+        "address": "0xfd5ac928aac40d490bcf1a83038d58aa90ea39a7",
+        "id": "0xd82327eb",
+        "path": "contracts/actions/utils/ExecuteCall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CreateSub",
+        "address": "0x2daED8030BFC87B3d27c02E2f044B9CF4841Ff3e",
+        "id": "0xf41e543f",
+        "path": "contracts/actions/utils/CreateSub.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",

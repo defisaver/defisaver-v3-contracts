@@ -164,7 +164,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         uint256 _amount,
         address _from,
         uint16 _assetId
-    ) public {
+    ) public view {
         AaveV3Supply.Params memory params = AaveV3Supply.Params({
             amount: _amount,
             from: _from,
@@ -183,7 +183,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         address _from,
         uint16 _assetId,
         address _market
-    ) public {
+    ) public view {
         AaveV3Supply.Params memory params = AaveV3Supply.Params({
             amount: _amount,
             from: _from,
@@ -202,7 +202,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         address _from,
         uint16 _assetId,
         address _onBehalf
-    ) public {
+    ) public view {
         AaveV3Supply.Params memory params = AaveV3Supply.Params({
             amount: _amount,
             from: _from,
@@ -222,7 +222,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         uint16 _assetId,
         address _onBehalf,
         address _market
-    ) public {
+    ) public view {
         AaveV3Supply.Params memory params = AaveV3Supply.Params({
             amount: _amount,
             from: _from,
@@ -239,7 +239,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _assertParams(AaveV3Supply.Params memory _params) private {
+    function _assertParams(AaveV3Supply.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3Supply.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
         

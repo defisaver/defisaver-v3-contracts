@@ -27,7 +27,7 @@ contract TestCurveUsdBorrowRateTrigger is BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function testWstethRateSub() public {
+    function testWstethRateSub() public view {
         uint256 rate = cut.calcBorrowRate(WSTETH_MARKET);
 
         CurveUsdBorrowRateTrigger.SubParams memory subEqualOverFail = CurveUsdBorrowRateTrigger.SubParams(

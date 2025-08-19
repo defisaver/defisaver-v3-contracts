@@ -34,7 +34,7 @@ contract TestLiquityV2Claim is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("LiquityV2Claim");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

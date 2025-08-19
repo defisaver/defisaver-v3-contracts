@@ -33,7 +33,7 @@ contract TestCore_StrategyStorage is BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_open_to_public_should_be_false_by_default() public {
+    function test_open_to_public_should_be_false_by_default() public view {
         bool openToPublic = cut.openToPublic();
         assertFalse(openToPublic);
     }
@@ -128,7 +128,7 @@ contract TestCore_StrategyStorage is BaseTest {
         StrategyModel.Strategy[] memory _fetchedStrategies,
         uint256 _realSize,
         uint256 _offset
-    ) internal {
+    ) internal pure {
         for (uint256 i = 0; i < _realSize; ++i) {
             assertTrue(
                 Strings.equal(

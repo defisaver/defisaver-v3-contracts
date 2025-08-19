@@ -25,20 +25,20 @@ contract TestChainLinkPriceTrigger is BaseTest, TokenPriceHelper{
    /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
    //////////////////////////////////////////////////////////////////////////*/
-   function testEthPriceFetch() public {
+   function testEthPriceFetch() public view {
       uint256 price = getPriceInUSD(Addresses.ETH_ADDR);
       console.log(price);
       assertGt(price, 0);
     }
 
-   function testEthWethPriceFetch() public {
+   function testEthWethPriceFetch() public view {
       uint256 priceEth = getPriceInUSD(Addresses.ETH_ADDR);
       uint256 priceWEth = getPriceInUSD(Addresses.WETH_ADDR);
 
       assertEq(priceEth, priceWEth);
    }
 
-   function testWsteth() public {
+   function testWsteth() public view {
       uint256 priceWsteth = getPriceInUSD(Addresses.WSTETH_ADDR);
 
       assertGt(priceWsteth, 0);

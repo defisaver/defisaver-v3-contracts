@@ -6,6 +6,7 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Withdraw a token from an Aave market
 contract AaveV3Withdraw is ActionBase, AaveV3Helper {
@@ -39,6 +40,10 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
         params.market = _parseParamAddr(params.market, _paramMapping[4], _subData, _returnValues);
+
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_AAVE_MARKET;
+        }
 
         (uint256 withdrawnAmount, bytes memory logData) = _withdraw(
             params.market,
@@ -124,7 +129,7 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
         encodedInput = bytes.concat(encodedInput, bytes2(_params.assetId));
-        encodedInput = bytes.concat(encodedInput, boolToBytes(_params.useDefaultMarket));
+        encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         encodedInput = bytes.concat(encodedInput, bytes32(_params.amount));
         encodedInput = bytes.concat(encodedInput, bytes20(_params.to));
         if (!_params.useDefaultMarket) {
@@ -134,7 +139,7 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
 
     function decodeInputs(bytes calldata _encodedInput) public pure returns (Params memory params) {
         params.assetId = uint16(bytes2(_encodedInput[0:2]));
-        params.useDefaultMarket = bytesToBool(bytes1(_encodedInput[2:3]));
+        params.useDefaultMarket = DFSLib.bytesToBool(bytes1(_encodedInput[2:3]));
         params.amount = uint256(bytes32(_encodedInput[3:35]));
         params.to = address(bytes20(_encodedInput[35:55]));
         if (params.useDefaultMarket) {

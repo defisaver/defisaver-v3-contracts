@@ -69,7 +69,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
         _setEMode(ethCorrelatedCategoryId, isL2Direct);
     }
 
-    function testFuzz_encode_decode_inputs_no_market(uint8 _categoryId) public {
+    function testFuzz_encode_decode_inputs_no_market(uint8 _categoryId) public view {
         AaveV3SetEMode.Params memory params = AaveV3SetEMode.Params({
             categoryId: _categoryId,
             useDefaultMarket: true,
@@ -78,7 +78,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
         _assertParams(params);
     }
 
-    function testFuzz_encode_decode_inputs(uint8 _categoryId, address _market) public {
+    function testFuzz_encode_decode_inputs(uint8 _categoryId, address _market) public view {
         AaveV3SetEMode.Params memory params = AaveV3SetEMode.Params({
             categoryId: _categoryId,
             useDefaultMarket: false,
@@ -90,7 +90,7 @@ contract TestAaveV3SetEMode is AaveV3Helper, AaveV3ExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _assertParams(AaveV3SetEMode.Params memory _params) private {
+    function _assertParams(AaveV3SetEMode.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3SetEMode.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
 

@@ -3,9 +3,9 @@ pragma solidity =0.8.24;
 
 import { MainnetSparkAddresses } from "./MainnetSparkAddresses.sol";
 
-import { IL2PoolV3 } from "../../../interfaces/aaveV3/IL2PoolV3.sol";
-import { IAaveProtocolDataProvider } from "../../../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
-import { IPoolAddressesProvider } from "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
+import { ISparkPool } from "../../../interfaces/spark/ISparkPool.sol";
+import { ISparkProtocolDataProvider } from "../../../interfaces/spark/ISparkProtocolDataProvider.sol";
+import { ISparkPoolAddressesProvider } from "../../../interfaces/spark/ISparkPoolAddressesProvider.sol";
 
 /// @title Utility functions and data used in Spark actions
 contract SparkHelper is MainnetSparkAddresses {
@@ -14,31 +14,23 @@ contract SparkHelper is MainnetSparkAddresses {
     
     
     /// @notice Returns the lending pool contract of the specified market
-    function getLendingPool(address _market) internal virtual view returns (IL2PoolV3) {
-        return IL2PoolV3(IPoolAddressesProvider(_market).getPool());
+    function getSparkLendingPool(address _market) internal view returns (ISparkPool) {
+        return ISparkPool(ISparkPoolAddressesProvider(_market).getPool());
     }
 
     /// @notice Fetch the data provider for the specified market
-    function getDataProvider(address _market) internal virtual view returns (IAaveProtocolDataProvider) {
+    function getSparkDataProvider(address _market) internal view returns (ISparkProtocolDataProvider) {
         return
-            IAaveProtocolDataProvider(
-                IPoolAddressesProvider(_market).getPoolDataProvider()
+            ISparkProtocolDataProvider(
+                ISparkPoolAddressesProvider(_market).getPoolDataProvider()
             );
     }
 
-    function boolToBytes(bool x) internal virtual pure returns (bytes1 r) {
-       return x ? bytes1(0x01) : bytes1(0x00);
-    }
-
-    function bytesToBool(bytes1 x) internal virtual pure returns (bool r) {
-        return x != bytes1(0x00);
-    }
-    
-    function getWholeDebt(address _market, address _tokenAddr, uint _borrowType, address _debtOwner) internal virtual view returns (uint256 debt) {
+    function getSparkWholeDebt(address _market, address _tokenAddr, uint256 _borrowType, address _debtOwner) internal view returns (uint256 debt) {
         uint256 STABLE_ID = 1;
         uint256 VARIABLE_ID = 2;
         
-        IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
+        ISparkProtocolDataProvider dataProvider = getSparkDataProvider(_market);
         (, uint256 borrowsStable, uint256 borrowsVariable, , , , , , ) =
             dataProvider.getUserReserveData(_tokenAddr, _debtOwner);
 

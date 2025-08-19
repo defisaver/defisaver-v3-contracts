@@ -303,6 +303,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0x2608919087226099B74C919480c2ed785415E832",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveWrapperV3",
         "address": "0xF5E8C498b6697F0704F0C50448714C5E328b33E2",
         "id": "0xb856c9af",
@@ -738,6 +749,17 @@
         "history": []
     },
     {
+        "name": "TransientStorageCancun",
+        "address": "0x0304E27cccE28bAB4d78C6cb7AfD4cd01c87c1e4",
+        "id": "0x099eb80a",
+        "path": "contracts/utils/TransientStorageCancun.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveView",
         "address": "0x79fdec1d39f6282a92e5e087d10ba0b0cef89a84",
         "id": "0x7da42156",
@@ -768,14 +790,15 @@
     },
     {
         "name": "CompV3View",
-        "address": "0x566b1Bd61E4C164DC22f51883942655DaA7Ea297",
+        "address": "0x687bf45bb6279b47a104052b5036da008315f622",
         "id": "0x16be4292",
         "path": "contracts/views/CompV3View.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x566b1Bd61E4C164DC22f51883942655DaA7Ea297",
             "0xf522b1588688b9887623b9C666175684d284D363"
         ]
     },
@@ -1149,14 +1172,14 @@
     },
     {
         "name": "McdTokenConverter",
-        "address": "0x1ef664440dc7342253780472dad90d9a3258a71d",
+        "address": "0x8064B61A4DCc913C21Ca9bf7fF56314993d10849",
         "id": "0xdd5b6f15",
         "path": "contracts/actions/mcd/McdTokenConverter.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x1ef664440dc7342253780472dad90d9a3258a71d"]
     },
     {
         "name": "McdGenerate",
@@ -2114,14 +2137,18 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xB5C48BE5a6Ed26F0B95397c50d6b52CFcC0e43Bb",
+        "address": "0x5BAD7F432e22BcF1937C8361933c9C804179aEDf",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.8",
+        "version": "1.0.11",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x0CB0170F3413e54405F64d3C23BA3A1D8Bb96D99",
+            "0xFe3BfD9E4d102275AC223704B7c470759E5C883b",
+            "0xea6092C334Cc1Ed2a4154C2101D70d09B7Ad0b1E",
+            "0xB5C48BE5a6Ed26F0B95397c50d6b52CFcC0e43Bb",
             "0x3f9f232187b95476947c999ff8e6c65a90be686a",
             "0x23ef4a553fc2af2784a5bf8ce4345d1f0a355a15",
             "0x3789ae0ea3bc9a4641ed0c5fd90b51e5ed4a3551",
@@ -3815,6 +3842,17 @@
         "history": []
     },
     {
+        "name": "GhoStake",
+        "address": "0x6cfBFd04702f3b7d4fc52D457eDf91D6E4A081bb",
+        "id": "0x1904bda0",
+        "path": "contracts/actions/aaveV3/GhoStake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 86400,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "GhoClaimAAVE",
         "address": "0xA53060d822cB31AFd5B26D899130a14E8Efc5917",
         "id": "0x17ca00ae",
@@ -4414,6 +4452,39 @@
         "history": []
     },
     {
+        "name": "UmbrellaStake",
+        "address": "0x3Ce0791050C7cA507F90914Ddf9c357eC2973bbC",
+        "id": "0x1c4fe1da",
+        "path": "contracts/actions/aaveV3/UmbrellaStake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "UmbrellaUnstake",
+        "address": "0xc27634A1D6c5Ed151ebd963Ef35487000C28dc0b",
+        "id": "0x5ea3fadd",
+        "path": "contracts/actions/aaveV3/UmbrellaUnstake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "UmbrellaClaimRewards",
+        "address": "0xe2c92F323d5e6F088D6195e6a9156817587De5E2",
+        "id": "0x9160bac0",
+        "path": "contracts/actions/aaveV3/UmbrellaClaimRewards.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CompoundMonitorProxy",
         "address": "0xB1cF8DE8e791E4Ed1Bd86c03E2fc1f14389Cb10a",
         "path": "old_contracts"
@@ -4525,6 +4596,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    { 
+        "name": "ExecuteCall",
+        "address": "0x538eda025a8be6ff8fc1fe6050ba3aafb7620608",
+        "id": "0xd82327eb",
+        "path": "contracts/actions/utils/ExecuteCall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     },

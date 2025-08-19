@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-abstract contract IStkAave {
-  function cooldown() external virtual;
-  function redeem(address to, uint256 amount) external virtual;
-  function REWARD_TOKEN() external virtual view returns (address);
-  function stake(address onBehalfOf, uint256 amount) external virtual;
-  function claimRewards(address to, uint256 amount) external virtual;
-  function STAKED_TOKEN() external virtual view returns (address);
-} 
+interface IStkAave {
+    function cooldown() external;
+    function redeem(address to, uint256 amount) external;
+    function REWARD_TOKEN() external view returns (address);
+    function stake(address onBehalfOf, uint256 amount) external;
+    function claimRewards(address to, uint256 amount) external;
+    function STAKED_TOKEN() external view returns (address);
+}

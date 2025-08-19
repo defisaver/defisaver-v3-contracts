@@ -35,7 +35,7 @@ contract TestLiquityV2Payback is LiquityV2ExecuteActions {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("LiquityV2Payback");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

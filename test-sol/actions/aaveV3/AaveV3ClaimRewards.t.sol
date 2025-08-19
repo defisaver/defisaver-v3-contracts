@@ -55,7 +55,7 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, ActionsUtils, BaseTest {
         address _to,
         address _reward,
         address[2] memory _assets
-    ) public {
+    ) public view {
         address[] memory assets = new address[](2);
         assets[0] = _assets[0];
         assets[1] = _assets[1];
@@ -73,7 +73,7 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, ActionsUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _assertParams(AaveV3ClaimRewards.Params memory _params) private {
+    function _assertParams(AaveV3ClaimRewards.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3ClaimRewards.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
         

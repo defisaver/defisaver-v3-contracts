@@ -232,6 +232,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0xCA2f82b0499a59115718b919e74Aa931CF43d84b",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "ParaswapWrapper",
         "address": "0x6a1Ebcb09D419Affe500B4feA13A89511aD23c1b",
         "id": "0x115fa27e",
@@ -350,23 +361,24 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xE3A5551A10c12a1599302ba0b4cbb4E4Ed27eeDE",
+        "address": "0xBb0eBB7304290b90d78d1BEe3533E98C45BD6836",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.8",
+        "version": "1.0.11",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
-            "0xca5e3a823a9c1d0b248122243136017ff9a43541",
-            "0x94A36080FaE0e22977aA4928d3D5C733Be744DF1",
-            "0x6c297a8c9b3cab08852c822b4d3fc2ba6e6ea6b5",
-            "0x0f2320895940b81Af0cC53624570AB372d9D73F9",
-            "0x2596e41933136E87C04b56f632CEcA2cdCCC2Cc6",
-            "0x401E66549DF354a21B3CC95e3F548Df6854d6DEE",
-            "0x8EF42fF40e9a9dD3E1ae81e7947D4E89e6d9f968",
-            "0xA74a85407D5A940542915458616aC3cf3f404E3b",
-            "0x35a329dda803ecced333647d7e6c14bafb14fe8a"
+          "0xE3A5551A10c12a1599302ba0b4cbb4E4Ed27eeDE",
+          "0xca5e3a823a9c1d0b248122243136017ff9a43541",
+          "0x94A36080FaE0e22977aA4928d3D5C733Be744DF1",
+          "0x6c297a8c9b3cab08852c822b4d3fc2ba6e6ea6b5",
+          "0x0f2320895940b81Af0cC53624570AB372d9D73F9",
+          "0x2596e41933136E87C04b56f632CEcA2cdCCC2Cc6",
+          "0x401E66549DF354a21B3CC95e3F548Df6854d6DEE",
+          "0x8EF42fF40e9a9dD3E1ae81e7947D4E89e6d9f968",
+          "0xA74a85407D5A940542915458616aC3cf3f404E3b",
+          "0x35a329dda803ecced333647d7e6c14bafb14fe8a"
         ]
     },
     {
@@ -420,6 +432,17 @@
         "address": "0x48cdE7c1f67fF11A62F6b4272166AB60EFB48C1F",
         "id": "0x69885459",
         "path": "contracts/utils/TransientStorage.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TransientStorageCancun",
+        "address": "0x3d5133490db663c6f8F856DA56a8F8F3Dc02768c",
+        "id": "0x099eb80a",
+        "path": "contracts/utils/TransientStorageCancun.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -1569,6 +1592,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    { 
+        "name": "ExecuteCall",
+        "address": "0x15e98867e2df679445e4bb90f108ad2928d14397",
+        "id": "0xd82327eb",
+        "path": "contracts/actions/utils/ExecuteCall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     }

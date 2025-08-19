@@ -758,6 +758,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0x4467CA9689a1611fcEd2DF7E36b061b232e6113B",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "KyberAggregatorWrapper",
         "address": "0x23ADd7e414d803C2a35334933212661634B27a5a",
         "id": "0x1abf4ed0",
@@ -848,14 +859,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xf140B2904beb743C2f17e0b5f766074212a7e243",
+        "address": "0x5269913CE50409910FC5bE03CD768D3630D518F3",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.6",
+        "version": "1.0.11",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0xf140B2904beb743C2f17e0b5f766074212a7e243",
             "0x5410BBB107B490f7A5789CfdB3667D2AbdE9c0eC",
             "0x6962a609A10051A5309Fe8c4d3dAb15366C481d2",
             "0x1882BBB847425335CCe0b81eC10295674A982395",
@@ -890,6 +902,17 @@
         "address": "0x9D95de57631DD8Ac071892843DA67FEe52EA3962",
         "id": "0x69885459",
         "path": "contracts/utils/TransientStorage.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TransientStorageCancun",
+        "address": "0x1E44a7ec82432419D5876c4c737f966fdDf2dD5C",
+        "id": "0x099eb80a",
+        "path": "contracts/utils/TransientStorageCancun.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -1455,6 +1478,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    { 
+        "name": "ExecuteCall",
+        "address": "0x232c43c354dbebb75c1ed0d9a3fddde5d630e335",
+        "id": "0xd82327eb",
+        "path": "contracts/actions/utils/ExecuteCall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     }

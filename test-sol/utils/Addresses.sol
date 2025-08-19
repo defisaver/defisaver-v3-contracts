@@ -25,6 +25,7 @@ library Addresses {
     address public constant LUSD_ADDR = 0x5f98805A4E8be255a32880FDeC7F6728C6568bA0;
     address public constant LINK_ADDR = 0x514910771AF9Ca656af840dff83E8264EcF986CA;
     address public constant AAVE_ADDR = 0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9;
+    address public constant GHO_TOKEN = 0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f;
     address public constant USDE_ADDR = 0x4c9EDD5852cd905f086C759E8383e09bff1E68B3;
     address public constant EUSDE_ADDR = 0x90D2af7d622ca3141efA4d8f1F24d86E5974Cc8F;
     address public constant SUSDE_ADDR = 0x9D39A5DE30e57443BfF2A8307A4256c8797A3497;
@@ -32,6 +33,11 @@ library Addresses {
     address public constant E_WETH_2 = 0xD8b27CF359b7D15710a5BE299AF6e7Bf904984C2;
     address public constant E_WSTETH_2 = 0xbC4B4AC47582c3E38Ce5940B80Da65401F4628f1;
     address public constant E_USDC_2 = 0x797DD80692c3b2dAdabCe8e30C07fDE5307D48a9;
+    // AAVE V3 stake tokens - Umbrella
+    address public constant STK_WETH_TOKEN = 0xaAFD07D53A7365D3e9fb6F3a3B09EC19676B73Ce;
+    address public constant STK_USDC_TOKEN = 0x6bf183243FdD1e306ad2C4450BC7dcf6f0bf8Aa6;
+    address public constant STK_USDT_TOKEN = 0xA484Ab92fe32B143AEE7019fC1502b1dAA522D31;
+    address public constant STK_GHO_TOKEN = 0x4f827A63755855cDf3e8f3bcD20265C833f15033;
 
     /*//////////////////////////////////////////////////////////////
                                 OTHER
