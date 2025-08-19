@@ -4620,5 +4620,16 @@
         "changeTime": "0",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "LiquityV2DebtInFrontTrigger",
+        "address": "0x66557aE7da534B1d668405e3e90e12E207Bb6277",
+        "id": "0xda723e62",
+        "path": "contracts/triggers/LiquityV2DebtInFrontTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
     }
 ]
