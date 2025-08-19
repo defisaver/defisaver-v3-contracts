@@ -6,6 +6,8 @@ import { IPoolAddressesProvider } from "../../interfaces/aaveV3/IPoolAddressesPr
 import { IERC20 } from "../../interfaces/IERC20.sol";
 import { ISafe } from "../../interfaces/safe/ISafe.sol";
 import { ITrigger } from "../../interfaces/ITrigger.sol";
+import { IComet } from "../../interfaces/compoundV3/IComet.sol";
+import { IFeedRegistry } from "../../interfaces/chainlink/IFeedRegistry.sol";
 import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 import { DSProxy } from "../../DS/DSProxy.sol";
@@ -16,8 +18,6 @@ import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { StrategyIDs } from "./StrategyIDs.sol";
 import { AaveV3Helper } from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
-import { IComet } from "../../interfaces/compoundV3/IComet.sol";
-import { IFeedRegistry } from "../../interfaces/chainlink/IFeedRegistry.sol";
 import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
 import { Denominations } from "../../utils/Denominations.sol";
 import { StableCoinUtils } from "./StableCoinUtils.sol";
@@ -153,8 +153,8 @@ contract StrategyTriggerViewNoRevert is
             return _tryToVerifyRequiredAmountAndAllowance(smartWallet, _sub.subData);
         }
 
-        // check AaveV3 leverage management and close strategies for all chains
-        if (strategyId.isAaveV3LeverageManagementStrategy() || strategyId.isAaveV3CloseStrategy()) {
+        // check AaveV3 leverage management, on price strategies and close strategies for all chains
+        if (strategyId.isAaveV3LeverageManagementStrategy() || strategyId.isAaveV3OnPriceStrategy() || strategyId.isAaveV3CloseStrategy()) {
             return _verifyAaveV3MinDebtPosition(smartWallet);
         }
 
@@ -163,8 +163,8 @@ contract StrategyTriggerViewNoRevert is
             return _verifySparkMinDebtPosition(smartWallet);
         }
 
-        // check Comp V3 leverage management and close strategies for all chains
-        if (strategyId.isCompoundV3LeverageManagementStrategy() || strategyId.isCompoundV3CloseStrategy()) {
+        // check Comp V3 leverage management, on price strategies and close strategies for all chains
+        if (strategyId.isCompoundV3LeverageManagementStrategy() || strategyId.isCompoundV3OnPriceStrategy() || strategyId.isCompoundV3CloseStrategy()) {
             return _tryToVerifyCompV3MinDebtPosition(smartWallet, _sub.subData);
         }
 

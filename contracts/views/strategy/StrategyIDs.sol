@@ -28,12 +28,16 @@ library StrategyIDs {
         return false;
     }
 
-    // TODO -> ADD AAVE ON PRICE B/R !!!!
-    // TODO -> ADD AAVE EOA ???
-
+    // Aave V3
     function isAaveV3LeverageManagementStrategy(uint256 _strategyID) internal view returns (bool) {
-        return isAaveV3RepayStrategy(_strategyID) || isAaveV3BoostStrategy(_strategyID);
+        return isAaveV3RepayStrategy(_strategyID) || isAaveV3BoostStrategy(_strategyID) 
+            || isAaveV3RepayOnPriceStrategy(_strategyID) || isAaveV3BoostOnPriceStrategy(_strategyID);
     }
+
+    function isAaveV3OnPriceStrategy(uint256 _strategyID) internal view returns (bool) {
+        return isAaveV3RepayOnPriceStrategy(_strategyID) || isAaveV3BoostOnPriceStrategy(_strategyID);
+    }
+
 
     function isAaveV3RepayStrategy(uint256 _strategyID) internal view returns (bool) {
         if (block.chainid == 1 && (_strategyID == 34)) {
@@ -65,6 +69,51 @@ library StrategyIDs {
         return false;
     }
 
+    function isAaveV3RepayOnPriceStrategy(uint256 _strategyID) internal view returns (bool) {
+        if (block.chainid == 1 && _strategyID == 96) {
+            return true;
+        }
+        // arbitrum
+        if (block.chainid == 42161 && _strategyID == 16) {
+            return true;
+        }
+
+        // base
+        if (block.chainid == 8453 && _strategyID == 28) {
+            return true;
+        }
+
+        // optimism
+        if (block.chainid == 10 && _strategyID == 12) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function isAaveV3BoostOnPriceStrategy(uint256 _strategyID) internal view returns (bool) {
+         if (block.chainid == 1 && _strategyID == 94) {
+            return true;
+        }
+        // arbitrum
+        if (block.chainid == 42161 && _strategyID == 14) {
+            return true;
+        }
+
+        // base
+        if (block.chainid == 8453 && _strategyID == 26) {
+            return true;
+        }
+
+        // optimism
+        if (block.chainid == 10 && _strategyID == 10) {
+            return true;
+        }
+
+        return false;
+    }
+
+
     function isAaveV3CloseStrategy(uint256 _strategyID) internal view returns (bool) {
         if (
             block.chainid == 1 &&
@@ -83,6 +132,7 @@ library StrategyIDs {
         return false;
     }
 
+    // Spark
     function isSparkLeverageManagementStrategy(uint256 _strategyID) internal view returns (bool) {
         return isSparkRepayStrategy(_strategyID) || isSparkBoostStrategy(_strategyID);
     }
@@ -103,10 +153,14 @@ library StrategyIDs {
         return false;
     }
 
+    // Compound V3
     function isCompoundV3LeverageManagementStrategy(uint256 _strategyID) internal view returns (bool) {
         return isCompoundV3RepayStrategy(_strategyID) || isCompoundV3BoostStrategy(_strategyID) 
-            || isCompoundV3EOARepayStrategy(_strategyID) || isCompoundV3EOABoostStrategy(_strategyID)
-            || isCompoundV3RepayOnPriceStrategy(_strategyID) || isCompoundV3BoostOnPriceStrategy(_strategyID);
+            || isCompoundV3EOARepayStrategy(_strategyID) || isCompoundV3EOABoostStrategy(_strategyID);
+    }
+
+    function isCompoundV3OnPriceStrategy(uint256 _strategyID) internal view returns (bool) {
+        return isCompoundV3RepayOnPriceStrategy(_strategyID) || isCompoundV3BoostOnPriceStrategy(_strategyID);
     }
 
     function isCompoundV3RepayStrategy(uint256 _strategyID) internal view returns (bool) {
