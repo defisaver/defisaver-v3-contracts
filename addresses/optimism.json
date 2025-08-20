@@ -1134,14 +1134,15 @@
     },
     {
         "name": "CompV3View",
-        "address": "0x2c88d93Ec06F404C67CD3d2df29084FAfe2C8605",
+        "address": "0xd135293f1b0493fae154a8b9ba641dffa9fc7ea9",
         "id": "0x16be4292",
         "path": "contracts/views/CompV3View.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x2c88d93Ec06F404C67CD3d2df29084FAfe2C8605",
             "0x969d845618596787DBc64687Ee90b16931BBBCBC"
         ]
     },
