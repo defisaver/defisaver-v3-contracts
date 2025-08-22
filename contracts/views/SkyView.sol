@@ -2,15 +2,14 @@
 
 pragma solidity =0.8.24;
 
-import {SkyHelper} from "../../contracts/actions/sky/helpers/SkyHelper.sol";
 import {ILockstakeEngine} from "../../contracts/interfaces/sky/ILockstakeEngine.sol";
 import {IStakingRewards} from "../../contracts/interfaces/sky/IStakingRewards.sol";
 import {IVat} from "../../contracts/interfaces/sky/IVat.sol";
 import {IJug} from "../../contracts/interfaces/sky/IJug.sol";
 import {IERC20} from "../interfaces/IERC20.sol";
-import {DSMath} from "../DS/DSMath.sol";
+import {SkyHelper} from "../../contracts/actions/sky/helpers/SkyHelper.sol";
 
-contract SkyView is SkyHelper, DSMath {
+contract SkyView is SkyHelper {
     struct UrnInfo {
         address urnAddr;
         address selectedFarm;
@@ -23,7 +22,7 @@ contract SkyView is SkyHelper, DSMath {
     struct GeneralInfo {
         uint256 totalSkyStaked; // in 1e18
         uint256 debtCeiling; // in 1e45
-        uint256 borrowRateAnnual; // in 1e27
+        uint256 borrowRatePerSecond; // in 1e27
         uint256 totalSkyLockedInUSDSFarm;
         uint256 totalSkyLockedInSparkFarm;
     }
@@ -66,15 +65,14 @@ contract SkyView is SkyHelper, DSMath {
         ILockstakeEngine engine = ILockstakeEngine(STAKING_ENGINE);
         (,,, uint256 debtCeiling,) = IVat(engine.vat()).ilks(engine.ilk());
 
-        uint256 perSecond = IJug(engine.jug()).ilks(engine.ilk()).duty;
-        uint256 borrowRateAnnual = rpow(perSecond, 365 days) - RAY;
+        uint256 borrowRatePerSecond = IJug(engine.jug()).ilks(engine.ilk()).duty;
 
         uint256 totalSkyLockedInUSDSFarm = IERC20(LOCK_STAKE_SKY).balanceOf(USDS_FARM);
         uint256 totalSkyLockedInSparkFarm = IERC20(LOCK_STAKE_SKY).balanceOf(SPARK_FARM);
         return GeneralInfo({
             totalSkyStaked: totalSkyStaked,
             debtCeiling: debtCeiling,
-            borrowRateAnnual: borrowRateAnnual,
+            borrowRatePerSecond: borrowRatePerSecond,
             totalSkyLockedInUSDSFarm: totalSkyLockedInUSDSFarm,
             totalSkyLockedInSparkFarm: totalSkyLockedInSparkFarm
         });
