@@ -54,7 +54,7 @@ contract Config is Tokens {
     function getBlockNumberForTestIfExist(string memory _testName) public view returns (uint256) {
         string memory testBlockNumberKey = string(abi.encodePacked(".", _testName, ".blockNumber"));
 
-        if (vm.keyExists(configData.json, testBlockNumberKey)) {
+        if (vm.keyExistsJson(configData.json, testBlockNumberKey)) {
             return configData.json.readUint(testBlockNumberKey);
         }
         return getBlockNumber();
