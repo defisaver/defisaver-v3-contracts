@@ -29,12 +29,7 @@ library StrategyIDs {
 
     // Aave V3
     function isAaveV3LeverageManagementStrategy(uint256 _strategyID) internal view returns (bool) {
-        return isAaveV3RepayStrategy(_strategyID) || isAaveV3BoostStrategy(_strategyID)
-            || isAaveV3RepayOnPriceStrategy(_strategyID) || isAaveV3BoostOnPriceStrategy(_strategyID);
-    }
-
-    function isAaveV3OnPriceStrategy(uint256 _strategyID) internal view returns (bool) {
-        return isAaveV3RepayOnPriceStrategy(_strategyID) || isAaveV3BoostOnPriceStrategy(_strategyID);
+        return isAaveV3RepayStrategy(_strategyID) || isAaveV3BoostStrategy(_strategyID);
     }
 
     function isAaveV3RepayStrategy(uint256 _strategyID) internal view returns (bool) {
@@ -84,29 +79,6 @@ library StrategyIDs {
         return false;
     }
 
-    function isAaveV3BoostOnPriceStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1 && _strategyID == 94) {
-            return true;
-        }
-
-        // arbitrum
-        if (block.chainid == 42161 && _strategyID == 14) {
-            return true;
-        }
-
-        // base
-        if (block.chainid == 8453 && _strategyID == 26) {
-            return true;
-        }
-
-        // optimism
-        if (block.chainid == 10 && _strategyID == 10) {
-            return true;
-        }
-
-        return false;
-    }
-
     function isAaveV3CloseStrategy(uint256 _strategyID) internal view returns (bool) {
         if (block.chainid == 1 && (_strategyID == 71 || _strategyID == 73)) {
             return true;
@@ -145,12 +117,7 @@ library StrategyIDs {
 
     // Compound V3
     function isCompoundV3LeverageManagementStrategy(uint256 _strategyID) internal view returns (bool) {
-        return isCompoundV3RepayStrategy(_strategyID) || isCompoundV3BoostStrategy(_strategyID)
-            || isCompoundV3EOARepayStrategy(_strategyID) || isCompoundV3EOABoostStrategy(_strategyID);
-    }
-
-    function isCompoundV3OnPriceStrategy(uint256 _strategyID) internal view returns (bool) {
-        return isCompoundV3RepayOnPriceStrategy(_strategyID) || isCompoundV3BoostOnPriceStrategy(_strategyID);
+        return isCompoundV3RepayStrategy(_strategyID) || isCompoundV3BoostStrategy(_strategyID);
     }
 
     function isCompoundV3RepayStrategy(uint256 _strategyID) internal view returns (bool) {
@@ -232,27 +199,6 @@ library StrategyIDs {
         if (block.chainid == 8453) {
             // CompV3BoostL2
             if (_strategyID == 12) return true;
-        }
-
-        return false;
-    }
-
-    function isCompoundV3BoostOnPriceStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1) {
-            // CompV3BoostOnPriceStrategy
-            if (_strategyID == 120) return true;
-        }
-
-        // arbitrum
-        if (block.chainid == 42161) {
-            // CompV3BoostOnPriceL2Strategy
-            if (_strategyID == 24) return true;
-        }
-
-        // base
-        if (block.chainid == 8453) {
-            // CompV3BoostOnPriceL2Strategy
-            if (_strategyID == 38) return true;
         }
 
         return false;
