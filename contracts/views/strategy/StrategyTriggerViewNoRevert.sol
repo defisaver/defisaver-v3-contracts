@@ -135,7 +135,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
             return _tryToVerifyRequiredAmountAndAllowance(smartWallet, _sub.subData);
         }
 
-        // check AaveV3 leverage management, repay on price strategies and close strategies for all chains. We don't check for boost on price, as we wan't to always allow it
+        // check AaveV3 leverage management, repay on price strategies and close strategies for all chains. We don't check for boost on price (BoP), as we want to always allow it. If debt is 0, BoP will open a leveraged position on price.
         if (
             strategyId.isAaveV3LeverageManagementStrategy() || strategyId.isAaveV3RepayOnPriceStrategy()
                 || strategyId.isAaveV3CloseStrategy()
@@ -148,7 +148,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
             return _verifySparkMinDebtPosition(smartWallet);
         }
 
-        // check Comp V3 leverage management, repay on price strategies and close strategies for all chains. We don't check for boost on price, as we wan't to always allow it
+        // check Comp V3 leverage management, repay on price strategies and close strategies for all chains. We don't check for boost on price (BoP), as we want to always allow it. If debt is 0, BoP will open a leveraged position on price.
         if (
             strategyId.isCompoundV3LeverageManagementStrategy() || strategyId.isCompoundV3RepayOnPriceStrategy()
                 || strategyId.isCompoundV3CloseStrategy()
