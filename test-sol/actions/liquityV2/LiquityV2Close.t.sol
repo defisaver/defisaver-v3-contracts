@@ -13,7 +13,6 @@ import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2Exe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2Close is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -56,16 +55,7 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
         SmartWallet testWallet = new SmartWallet(alice);
         for (uint256 i = 0; i < markets.length; ++i) {
             executeLiquityOpenTrove(
-                markets[i],
-                address(0),
-                100000,
-                i,
-                10000,
-                1e18 / 10,
-                0,
-                testWallet,
-                openContract,
-                viewContract
+                markets[i], address(0), 100_000, i, 10_000, 1e18 / 10, 0, testWallet, openContract, viewContract
             );
         }
     }
@@ -92,8 +82,8 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
     }
 
     function _baseTest(bool _isDirect, address _interestBatchManager) public {
-        uint256 collAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
+        uint256 collAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
 
         for (uint256 i = 0; i < markets.length; i++) {
             if (_interestBatchManager != address(0)) {
@@ -101,7 +91,7 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
                 registerBatchManager(markets[i]);
                 vm.stopPrank();
             }
-            
+
             uint256 troveId = executeLiquityOpenTrove(
                 markets[i],
                 _interestBatchManager,
@@ -131,15 +121,8 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
         give(BOLD, sender, entireDebt);
         approveAsSender(sender, BOLD, walletAddr, entireDebt);
 
-        bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2CloseEncode(
-                address(_market),
-                sender,
-                sender,
-                _troveId
-            ),
-            _isDirect
-        );
+        bytes memory executeActionCallData =
+            executeActionCalldata(liquityV2CloseEncode(address(_market), sender, sender, _troveId), _isDirect);
 
         {
             uint256 senderBoldBalanceBefore = balanceOf(BOLD, sender);

@@ -5,7 +5,6 @@ import { AaveV3SubProxy } from "../../../contracts/actions/aaveV3/AaveV3SubProxy
 import { UserWallet } from "../UserWallet.sol";
 
 contract AaveV3UserUtils is UserWallet {
-
     function subToAutomationBundles(
         bool _isSafe,
         address _subProxy,
@@ -22,10 +21,7 @@ contract AaveV3UserUtils is UserWallet {
             boostEnabled: true
         });
 
-        bytes memory fnData = abi.encodeWithSignature(
-            "subToAaveAutomation(bytes)",
-            encodeSubData(params)
-        );
+        bytes memory fnData = abi.encodeWithSignature("subToAaveAutomation(bytes)", encodeSubData(params));
 
         executeWithWallet(_isSafe, _subProxy, fnData, 0);
     }

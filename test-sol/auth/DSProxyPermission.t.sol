@@ -10,7 +10,6 @@ import { SmartWallet } from "../utils/SmartWallet.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_DSProxyPermission is DSProxyPermission, BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/

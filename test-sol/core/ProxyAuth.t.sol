@@ -14,7 +14,6 @@ import { SmartWallet } from "../utils/SmartWallet.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -25,7 +24,7 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     SmartWallet wallet;
     address dsProxyAddr;
-    
+
     address strategyExecutorAddr;
     address dsProxyPermissionAddr;
 
@@ -54,11 +53,7 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_fail_to_call_execute_when_sender_is_not_executor() public {
         vm.expectRevert(
-            abi.encodeWithSelector(
-                ProxyAuth.SenderNotExecutorError.selector,
-                address(this),
-                strategyExecutorAddr
-            )
+            abi.encodeWithSelector(ProxyAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr)
         );
         cut.callExecute(dsProxyAddr, RECIPE_EXECUTOR_ADDR, bytes("0x"));
     }
@@ -71,9 +66,8 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
 
     function test_should_execute_tx() public {
         // first approve auth contract to call execute from dsProxy
-        bytes memory permissionCalldata = abi.encodeWithSelector(
-            DSProxyPermission.giveProxyPermission.selector, address(cut)
-        );
+        bytes memory permissionCalldata =
+            abi.encodeWithSelector(DSProxyPermission.giveProxyPermission.selector, address(cut));
         wallet.execute(dsProxyPermissionAddr, permissionCalldata, 0);
 
         // create recipe
@@ -81,7 +75,7 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
         actionsCalldata[0] = sumInputsEncode(1, 2);
 
         bytes4[] memory ids = new bytes4[](1);
-        ids[0] = bytes4(keccak256("SumInputs")); 
+        ids[0] = bytes4(keccak256("SumInputs"));
 
         uint8[][] memory paramsMap = new uint8[][](1);
         paramsMap[0] = new uint8[](2);

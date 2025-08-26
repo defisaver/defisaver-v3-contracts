@@ -2,11 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { BaseTest } from "./utils/BaseTest.sol";
-import { SmartWallet } from "./utils/SmartWallet.sol";
+import { BaseTest } from "test-sol/utils/BaseTest.sol";
+import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
 
 contract TestTemplate is BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -24,12 +23,12 @@ contract TestTemplate is BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnetLatest();
-        
+
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
 
-        // cut = new SomeContract();    
+        // cut = new SomeContract();
     }
 
     /*//////////////////////////////////////////////////////////////////////////

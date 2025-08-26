@@ -14,7 +14,6 @@ import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
 contract TestFluidDexWithdraw is FluidTestBase {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -51,28 +50,23 @@ contract TestFluidDexWithdraw is FluidTestBase {
         uint256 collAmount0;
         uint256 collAmount1;
         bytes executeActionCallData;
-
         bool isToken0Native;
         bool isToken1Native;
-
         uint256 senderCollToken0BalanceBefore;
         uint256 senderCollToken1BalanceBefore;
         uint256 senderEthBalanceBefore;
         uint256 senderCollToken0BalanceAfter;
         uint256 senderCollToken1BalanceAfter;
         uint256 senderEthBalanceAfter;
-
         uint256 walletCollToken0BalanceBefore;
         uint256 walletCollToken1BalanceBefore;
         uint256 walletEthBalanceBefore;
         uint256 walletCollToken0BalanceAfter;
         uint256 walletCollToken1BalanceAfter;
         uint256 walletEthBalanceAfter;
-
         FluidView.VaultData vaultData;
         IFluidVaultResolver.UserPosition userPositionBefore;
         IFluidVaultResolver.UserPosition userPositionAfter;
-
         FluidDexModel.WithdrawVariableData shareVariableData;
         uint256 shares;
         uint256 minCollToWithdraw;
@@ -106,9 +100,9 @@ contract TestFluidDexWithdraw is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialSupplyToken0AmountUSD: 50000,
+                    initialSupplyToken0AmountUSD: 50_000,
                     initialSupplyToken1AmountUSD: 0,
-                    withdrawToken0AmountInUSD: 30000,
+                    withdrawToken0AmountInUSD: 30_000,
                     withdrawToken1AmountInUSD: 0,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: false,
@@ -125,9 +119,9 @@ contract TestFluidDexWithdraw is FluidTestBase {
             _baseTest(
                 TestConfig({
                     initialSupplyToken0AmountUSD: 0,
-                    initialSupplyToken1AmountUSD: 50000,
+                    initialSupplyToken1AmountUSD: 50_000,
                     withdrawToken0AmountInUSD: 0,
-                    withdrawToken1AmountInUSD: 30000,
+                    withdrawToken1AmountInUSD: 30_000,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: false,
                     isDirect: false,
@@ -142,10 +136,10 @@ contract TestFluidDexWithdraw is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialSupplyToken0AmountUSD: 50000,
-                    initialSupplyToken1AmountUSD: 50000,
-                    withdrawToken0AmountInUSD: 30000,
-                    withdrawToken1AmountInUSD: 20000,
+                    initialSupplyToken0AmountUSD: 50_000,
+                    initialSupplyToken1AmountUSD: 50_000,
+                    withdrawToken0AmountInUSD: 30_000,
+                    withdrawToken1AmountInUSD: 20_000,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: false,
                     isDirect: false,
@@ -160,9 +154,9 @@ contract TestFluidDexWithdraw is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialSupplyToken0AmountUSD: 50000,
-                    initialSupplyToken1AmountUSD: 50000,
-                    withdrawToken0AmountInUSD: 80000,
+                    initialSupplyToken0AmountUSD: 50_000,
+                    initialSupplyToken1AmountUSD: 50_000,
+                    withdrawToken0AmountInUSD: 80_000,
                     withdrawToken1AmountInUSD: 0,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: false,
@@ -178,10 +172,10 @@ contract TestFluidDexWithdraw is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialSupplyToken0AmountUSD: 50000,
-                    initialSupplyToken1AmountUSD: 50000,
+                    initialSupplyToken0AmountUSD: 50_000,
+                    initialSupplyToken1AmountUSD: 50_000,
                     withdrawToken0AmountInUSD: 0,
-                    withdrawToken1AmountInUSD: 75000,
+                    withdrawToken1AmountInUSD: 75_000,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: false,
                     isDirect: false,
@@ -196,9 +190,9 @@ contract TestFluidDexWithdraw is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialSupplyToken0AmountUSD: 50000,
-                    initialSupplyToken1AmountUSD: 50000,
-                    withdrawToken0AmountInUSD: 11000,
+                    initialSupplyToken0AmountUSD: 50_000,
+                    initialSupplyToken1AmountUSD: 50_000,
+                    withdrawToken0AmountInUSD: 11_000,
                     withdrawToken1AmountInUSD: 5000,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: false,
@@ -214,9 +208,9 @@ contract TestFluidDexWithdraw is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialSupplyToken0AmountUSD: 50000,
-                    initialSupplyToken1AmountUSD: 50000,
-                    withdrawToken0AmountInUSD: 30000,
+                    initialSupplyToken0AmountUSD: 50_000,
+                    initialSupplyToken1AmountUSD: 50_000,
+                    withdrawToken0AmountInUSD: 30_000,
                     withdrawToken1AmountInUSD: 0,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: false,
@@ -232,9 +226,9 @@ contract TestFluidDexWithdraw is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialSupplyToken0AmountUSD: 30000,
+                    initialSupplyToken0AmountUSD: 30_000,
                     initialSupplyToken1AmountUSD: 0,
-                    withdrawToken0AmountInUSD: 30000,
+                    withdrawToken0AmountInUSD: 30_000,
                     withdrawToken1AmountInUSD: 0,
                     takeMaxUint256CollAmount0: true,
                     takeMaxUint256CollAmount1: false,
@@ -250,9 +244,9 @@ contract TestFluidDexWithdraw is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialSupplyToken0AmountUSD: 30000,
+                    initialSupplyToken0AmountUSD: 30_000,
                     initialSupplyToken1AmountUSD: 0,
-                    withdrawToken0AmountInUSD: 30000,
+                    withdrawToken0AmountInUSD: 30_000,
                     withdrawToken1AmountInUSD: 0,
                     takeMaxUint256CollAmount0: true,
                     takeMaxUint256CollAmount1: false,
@@ -269,9 +263,9 @@ contract TestFluidDexWithdraw is FluidTestBase {
             _baseTest(
                 TestConfig({
                     initialSupplyToken0AmountUSD: 0,
-                    initialSupplyToken1AmountUSD: 50000,
+                    initialSupplyToken1AmountUSD: 50_000,
                     withdrawToken0AmountInUSD: 0,
-                    withdrawToken1AmountInUSD: 50000,
+                    withdrawToken1AmountInUSD: 50_000,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: true,
                     isDirect: false,
@@ -287,9 +281,9 @@ contract TestFluidDexWithdraw is FluidTestBase {
             _baseTest(
                 TestConfig({
                     initialSupplyToken0AmountUSD: 0,
-                    initialSupplyToken1AmountUSD: 50000,
+                    initialSupplyToken1AmountUSD: 50_000,
                     withdrawToken0AmountInUSD: 0,
-                    withdrawToken1AmountInUSD: 50000,
+                    withdrawToken1AmountInUSD: 50_000,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: true,
                     isDirect: false,
@@ -300,23 +294,20 @@ contract TestFluidDexWithdraw is FluidTestBase {
         }
     }
 
-    function _baseTest(
-        TestConfig memory _config,
-        bool _t2VaultsSelected
-    ) internal {
+    function _baseTest(TestConfig memory _config, bool _t2VaultsSelected) internal {
         address[] memory vaults = _t2VaultsSelected ? t2Vaults : t4Vaults;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
-            uint256 nftId = _t2VaultsSelected ? 
-                executeFluidVaultT2Open(
+            uint256 nftId = _t2VaultsSelected
+                ? executeFluidVaultT2Open(
                     vaults[i],
                     _config.initialSupplyToken0AmountUSD,
                     _config.initialSupplyToken1AmountUSD,
                     0, /* initial borrow amount in usd */
                     wallet,
                     address(fluidDexOpen)
-                ) : 
-                executeFluidVaultT4Open(
+                )
+                : executeFluidVaultT4Open(
                     vaults[i],
                     _config.initialSupplyToken0AmountUSD,
                     _config.initialSupplyToken1AmountUSD,
@@ -340,7 +331,7 @@ contract TestFluidDexWithdraw is FluidTestBase {
             vaultData.supplyToken0 = vars.isToken0Native ? TokenUtils.WETH_ADDR : vaultData.supplyToken0;
             vaultData.supplyToken1 = vars.isToken1Native ? TokenUtils.WETH_ADDR : vaultData.supplyToken1;
 
-            vars.collAmount0 =  _config.withdrawToken0AmountInUSD != 0
+            vars.collAmount0 = _config.withdrawToken0AmountInUSD != 0
                 ? amountInUSDPrice(vaultData.supplyToken0, _config.withdrawToken0AmountInUSD)
                 : 0;
 
@@ -350,7 +341,6 @@ contract TestFluidDexWithdraw is FluidTestBase {
 
             // Cap token0 amount to withdraw and leave 10% of total reserves
             if (vars.collAmount0 >= vaultData.dexSupplyData.supplyToken0Reserves) {
-
                 if (_config.takeMaxUint256CollAmount0) {
                     emit log_string("Skipping test. Can't perform max withdrawal in token0 because of low reserves");
                     continue;
@@ -362,7 +352,6 @@ contract TestFluidDexWithdraw is FluidTestBase {
 
             // Cap token1 amount to withdraw and leave 10% of total reserves
             if (vars.collAmount1 >= vaultData.dexSupplyData.supplyToken1Reserves) {
-
                 if (_config.takeMaxUint256CollAmount1) {
                     emit log_string("Skipping test. Can't perform max withdrawal in token1 because of low reserves");
                     continue;
@@ -376,9 +365,12 @@ contract TestFluidDexWithdraw is FluidTestBase {
             if (_config.takeMaxUint256CollAmount0 || _config.takeMaxUint256CollAmount1) {
                 vars.minCollToWithdraw = 1; // leave it as 1 for testing purposes
             } else {
-                vars.shares = estimateWithdrawShares(vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1);
+                vars.shares =
+                    estimateWithdrawShares(vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1);
                 if (vars.shares == 0) {
-                    emit log_string("Failed to estimate withdraw shares. Setting it to max and leaving tx to fail for debugging...");
+                    emit log_string(
+                        "Failed to estimate withdraw shares. Setting it to max and leaving tx to fail for debugging..."
+                    );
                     vars.shares = uint256(type(int256).max);
                 }
             }
@@ -392,12 +384,7 @@ contract TestFluidDexWithdraw is FluidTestBase {
 
             vars.executeActionCallData = executeActionCalldata(
                 fluidDexWithdrawEncode(
-                    vaults[i],
-                    sender,
-                    nftId,
-                    0, /* withdrawAmount */
-                    vars.shareVariableData,
-                    _config.wrapWithdrawnEth
+                    vaults[i], sender, nftId, 0, /* withdrawAmount */ vars.shareVariableData, _config.wrapWithdrawnEth
                 ),
                 _config.isDirect
             );
@@ -413,7 +400,7 @@ contract TestFluidDexWithdraw is FluidTestBase {
 
             // Execute action.
             wallet.execute(address(cut), vars.executeActionCallData, 0);
-            
+
             // Take snapshot after action execution.
             vars.senderCollToken0BalanceAfter = balanceOf(vaultData.supplyToken0, sender);
             vars.senderCollToken1BalanceAfter = balanceOf(vaultData.supplyToken1, sender);
@@ -422,7 +409,7 @@ contract TestFluidDexWithdraw is FluidTestBase {
             vars.walletCollToken1BalanceAfter = balanceOf(vaultData.supplyToken1, walletAddr);
             vars.walletEthBalanceAfter = address(walletAddr).balance;
             vars.userPositionAfter = fetchPositionByNftId(nftId);
-            
+
             // Assertions.
             // Verify no dust left on wallet.
             assertEq(vars.walletCollToken0BalanceAfter, vars.walletCollToken0BalanceBefore);
@@ -444,7 +431,7 @@ contract TestFluidDexWithdraw is FluidTestBase {
                         vars.senderCollToken0BalanceBefore + vars.collAmount0,
                         1e15 // 0.1% diff tolerance
                     );
-                    assertEq(vars.senderCollToken1BalanceAfter, vars.senderCollToken1BalanceBefore);    
+                    assertEq(vars.senderCollToken1BalanceAfter, vars.senderCollToken1BalanceBefore);
                 }
             } else if (_config.takeMaxUint256CollAmount1) {
                 assertEq(vars.userPositionAfter.isLiquidated, false);

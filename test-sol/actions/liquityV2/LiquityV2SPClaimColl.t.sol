@@ -10,7 +10,6 @@ import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2Exe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2SPClaimColl is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -62,15 +61,13 @@ contract TestLiquityV2SPClaimColl is LiquityV2ExecuteActions {
     function _claim(IAddressesRegistry _market, bool _isDirect) internal {
         address collToken = _market.collToken();
         address stabilityPool = _market.stabilityPool();
-        
-        bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2SPClaimCollEncode(address(_market), sender),
-            _isDirect
-        );
+
+        bytes memory executeActionCallData =
+            executeActionCalldata(liquityV2SPClaimCollEncode(address(_market), sender), _isDirect);
 
         uint256 amountToClaim = 1000;
         _simulateClaimAmount(amountToClaim, stabilityPool, collToken);
-     
+
         uint256 senderCollBalanceBefore = balanceOf(collToken, sender);
         wallet.execute(address(cut), executeActionCallData, 0);
         uint256 senderCollBalanceAfter = balanceOf(collToken, sender);

@@ -18,7 +18,6 @@ import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -74,12 +73,13 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                 takeMaxUint256: false,
                 interestRateManager: address(0),
                 annualInterestRate: 1e18 / 100, // 1%
-                collateralAmountInUSD: 30000,
-                borrowAmountInUSD: 10000,
+                collateralAmountInUSD: 30_000,
+                borrowAmountInUSD: 10_000,
                 senderHasEnoughForCollAndGas: true
             })
         );
     }
+
     function test_should_open_trove_with_batch_manager() public {
         _baseTest(
             TestConfig({
@@ -87,12 +87,13 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                 takeMaxUint256: false,
                 interestRateManager: address(0xdeadbeef),
                 annualInterestRate: 0,
-                collateralAmountInUSD: 30000,
-                borrowAmountInUSD: 10000,
+                collateralAmountInUSD: 30_000,
+                borrowAmountInUSD: 10_000,
                 senderHasEnoughForCollAndGas: true
             })
         );
     }
+
     function test_should_open_trove_with_action_direct() public {
         _baseTest(
             TestConfig({
@@ -100,12 +101,13 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                 takeMaxUint256: false,
                 interestRateManager: address(0),
                 annualInterestRate: 1e18 / 100, // 1%
-                collateralAmountInUSD: 30000,
-                borrowAmountInUSD: 10000,
+                collateralAmountInUSD: 30_000,
+                borrowAmountInUSD: 10_000,
                 senderHasEnoughForCollAndGas: true
             })
         );
     }
+
     function test_should_open_trove_with_maxUint256_pull() public {
         _baseTest(
             TestConfig({
@@ -113,12 +115,13 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                 takeMaxUint256: true,
                 interestRateManager: address(0),
                 annualInterestRate: 1e18 / 100, // 1%
-                collateralAmountInUSD: 30000,
-                borrowAmountInUSD: 10000,
+                collateralAmountInUSD: 30_000,
+                borrowAmountInUSD: 10_000,
                 senderHasEnoughForCollAndGas: true
             })
         );
     }
+
     function test_should_fail_to_open_trove_with_maxUint256_pull() public {
         _baseTest(
             TestConfig({
@@ -126,16 +129,15 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                 takeMaxUint256: true,
                 interestRateManager: address(0),
                 annualInterestRate: 1e18 / 100, // 1%
-                collateralAmountInUSD: 30000,
-                borrowAmountInUSD: 10000,
+                collateralAmountInUSD: 30_000,
+                borrowAmountInUSD: 10_000,
                 senderHasEnoughForCollAndGas: false
             })
         );
     }
 
     function _baseTest(TestConfig memory _config) internal {
-        for (uint i = 0; i < markets.length; i++) {
-
+        for (uint256 i = 0; i < markets.length; i++) {
             if (_config.interestRateManager != address(0)) {
                 _registerBatchManager(markets[i], _config.interestRateManager);
             }
@@ -144,16 +146,10 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
             address collToken = market.collToken();
             IHintHelpers hintHelpers = IHintHelpers(market.hintHelpers());
 
-            uint256 interestRate = _config.interestRateManager != address(0)
-                ? uint256(1e18 / 10)
-                : _config.annualInterestRate;
+            uint256 interestRate =
+                _config.interestRateManager != address(0) ? uint256(1e18 / 10) : _config.annualInterestRate;
 
-            (uint256 upperHint, uint256 lowerHint) = getInsertPosition(
-                liquityV2View,
-                markets[i],
-                i,
-                interestRate
-            );
+            (uint256 upperHint, uint256 lowerHint) = getInsertPosition(liquityV2View, markets[i], i, interestRate);
 
             uint256 collPriceWAD = IPriceFeed(market.priceFeed()).lastGoodPrice();
             uint256 collAmount = amountInUSDPriceMock(collToken, _config.collateralAmountInUSD, collPriceWAD / 1e10);
@@ -167,7 +163,7 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
                 market: address(market),
                 from: sender,
                 to: sender,
-                interestBatchManager:  _config.interestRateManager,
+                interestBatchManager: _config.interestRateManager,
                 ownerIndex: 0,
                 collAmount: collAmount,
                 boldAmount: borrowAmount,
@@ -181,17 +177,12 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
         }
     }
 
-    function _open(
-        LiquityV2Open.Params memory _params,
-        TestConfig memory _config,
-        address _collToken
-    ) internal {
+    function _open(LiquityV2Open.Params memory _params, TestConfig memory _config, address _collToken) internal {
         if (_collToken == WETH) {
             if (_config.senderHasEnoughForCollAndGas) {
                 give(WETH, sender, _params.collAmount + ETH_GAS_COMPENSATION);
                 approveAsSender(sender, WETH, walletAddr, _params.collAmount + ETH_GAS_COMPENSATION);
-            }
-            else {
+            } else {
                 // not enough WETH for gas compensation. This should revert
                 give(WETH, sender, ETH_GAS_COMPENSATION - 1);
                 approveAsSender(sender, WETH, walletAddr, ETH_GAS_COMPENSATION - 1);
@@ -258,7 +249,7 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
 
     function _registerBatchManager(IAddressesRegistry _market, address _batchManager) internal {
         IBorrowerOperations borrowerOperations = IBorrowerOperations(_market.borrowerOperations());
-        
+
         uint128 minInterestRate = 1e18 / 100; // 1%
         uint128 maxInterestRate = 1e18 / 4; // 25%
         uint128 currentInterestRate = 1e18 / 10; // 10%
@@ -267,11 +258,7 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
 
         vm.prank(_batchManager);
         borrowerOperations.registerBatchManager(
-            minInterestRate,
-            maxInterestRate,
-            currentInterestRate,
-            fee,
-            minInterestRateChangePeriod
+            minInterestRate, maxInterestRate, currentInterestRate, fee, minInterestRateChangePeriod
         );
         vm.stopPrank();
     }

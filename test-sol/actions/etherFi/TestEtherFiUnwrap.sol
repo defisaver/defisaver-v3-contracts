@@ -11,10 +11,9 @@ import { EtherFiHelper } from "../../../contracts/actions/etherfi/helpers/EtherF
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-import {Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/Addresses.sol";
 
 contract TestEtherFiUnwrap is BaseTest, ActionsUtils, EtherFiHelper {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -31,7 +30,7 @@ contract TestEtherFiUnwrap is BaseTest, ActionsUtils, EtherFiHelper {
                                    SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnet("EtherFiUnwrap" );
+        forkMainnet("EtherFiUnwrap");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
@@ -46,7 +45,7 @@ contract TestEtherFiUnwrap is BaseTest, ActionsUtils, EtherFiHelper {
     function test_should_unwrap() public {
         bool isDirect = false;
         bool isMaxUint256 = false;
-        uint256 amount = 54543543554353455435334;
+        uint256 amount = 54_543_543_554_353_455_435_334;
         _baseTest(isDirect, isMaxUint256, amount);
     }
 
@@ -64,30 +63,17 @@ contract TestEtherFiUnwrap is BaseTest, ActionsUtils, EtherFiHelper {
         _baseTest(isDirect, isMaxUint256, amount);
     }
 
-    function _baseTest(
-        bool _isDirect,
-        bool _isMaxUint256,
-        uint256 _amount
-    ) internal {
-        _giveWeEthTokens(_amount*2);
+    function _baseTest(bool _isDirect, bool _isMaxUint256, uint256 _amount) internal {
+        _giveWeEthTokens(_amount * 2);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            etherFiUnwrapEncode(
-                _isMaxUint256 ? type(uint256).max : _amount,
-                sender,
-                sender),
-            _isDirect
+            etherFiUnwrapEncode(_isMaxUint256 ? type(uint256).max : _amount, sender, sender), _isDirect
         );
 
         uint256 senderEethBalanceBefore = balanceOf(EETH_ADDR, sender);
         uint256 senderWeEthBalanceBefore = balanceOf(WEETH_ADDR, sender);
 
-        approveAsSender(
-            sender,
-            WEETH_ADDR,
-            walletAddr,
-            _isMaxUint256 ? balanceOf(WEETH_ADDR, sender) : _amount
-        );
+        approveAsSender(sender, WEETH_ADDR, walletAddr, _isMaxUint256 ? balanceOf(WEETH_ADDR, sender) : _amount);
 
         wallet.execute(address(cut), executeActionCallData, 0);
 
@@ -105,7 +91,7 @@ contract TestEtherFiUnwrap is BaseTest, ActionsUtils, EtherFiHelper {
     function _giveWeEthTokens(uint256 _amount) internal {
         vm.deal(sender, _amount);
         vm.startPrank(sender);
-        ILiquidityPool(ETHER_FI_LIQUIDITY_POOL).deposit{value: _amount}();
+        ILiquidityPool(ETHER_FI_LIQUIDITY_POOL).deposit{ value: _amount }();
         vm.stopPrank();
         uint256 eEthBalance = balanceOf(EETH_ADDR, sender);
         approveAsSender(sender, EETH_ADDR, WEETH_ADDR, eEthBalance);

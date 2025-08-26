@@ -9,7 +9,6 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { console } from "forge-std/console.sol";
 
 contract TestCompV3RatioTrigger is BaseTest {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -22,7 +21,7 @@ contract TestCompV3RatioTrigger is BaseTest {
         forkMainnet("CompV3RatioTrigger");
         cut = new CompV3RatioTrigger();
     }
-    
+
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
@@ -34,7 +33,7 @@ contract TestCompV3RatioTrigger is BaseTest {
         robert.supply(false, Addresses.COMET_USDC, Addresses.WETH_ADDR, 1 ether);
         robert.borrow(false, Addresses.COMET_USDC, 1000e6);
 
-        uint ratio = cut.getSafetyRatio(Addresses.COMET_USDC, address(robert.proxyAddr()));
+        uint256 ratio = cut.getSafetyRatio(Addresses.COMET_USDC, address(robert.proxyAddr()));
 
         console.log(ratio);
     }

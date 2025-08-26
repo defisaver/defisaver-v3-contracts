@@ -12,7 +12,6 @@ import { Addresses } from "../../../utils/Addresses.sol";
 import { TestUmbrellaCommon } from "./UmbrellaCommon.t.sol";
 
 contract TestUmbrellaStake is TestUmbrellaCommon {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -23,7 +22,7 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("UmbrellaStake");
-        
+
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
@@ -54,10 +53,7 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
         _baseTest(isDirect, useATokens);
     }
 
-    function _baseTest(
-        bool _isDirect,
-        bool _useATokens
-    ) internal {
+    function _baseTest(bool _isDirect, bool _useATokens) internal {
         for (uint256 i = 0; i < stkTokens.length; ++i) {
             uint256 amount = 1000 * 10 ** IERC20(stkTokens[i]).decimals();
 
@@ -79,15 +75,7 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
             uint256 minSharesOut = getMinSharesOut(stkTokens[i], waTokenOrGHO, amount);
 
             bytes memory executeActionCallData = executeActionCalldata(
-                umbrellaStakeEncode(
-                    stkTokens[i],
-                    sender,
-                    sender,
-                    amount,
-                    _useATokens,
-                    minSharesOut
-                ),
-                _isDirect
+                umbrellaStakeEncode(stkTokens[i], sender, sender, amount, _useATokens, minSharesOut), _isDirect
             );
 
             Snapshot memory snapshotBefore = takeSnapshot(stkTokens[i], waTokenOrGHO, supplyToken);
@@ -98,11 +86,9 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
         }
     }
 
-    function _assertSnapshot(
-        Snapshot memory _snapshotBefore,
-        Snapshot memory _snapshotAfter,
-        uint256 _amount
-    ) internal {
+    function _assertSnapshot(Snapshot memory _snapshotBefore, Snapshot memory _snapshotAfter, uint256 _amount)
+        internal
+    {
         assertEq(_snapshotAfter.walletStkTokenBalance, 0);
         assertEq(_snapshotAfter.walletWaTokenBalance, 0);
         assertEq(_snapshotAfter.walletSupplyTokenBalance, 0);

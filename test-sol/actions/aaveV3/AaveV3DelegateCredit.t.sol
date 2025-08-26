@@ -8,12 +8,11 @@ import { IL2PoolV3 } from "../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
 import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 
 import { BaseTest } from "../../utils/BaseTest.sol";
-import {Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/Addresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 
 contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -33,7 +32,7 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
     function setUp() public override {
         forkMainnet("AaveV3DelegateCredit");
         initTestPairs("AaveV3");
-        
+
         wallet = new SmartWallet(bob);
         walletAddr = wallet.walletAddr();
         sender = wallet.owner();
@@ -47,7 +46,7 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_delegate_credit_amount() public {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 amount = 100000;
+            uint256 amount = 100_000;
             bool isL2Direct = false;
             address delegatee = alice;
             _delegateCredit(testPairs[i].supplyAsset, amount, delegatee, isL2Direct);
@@ -126,11 +125,7 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
         DataTypes.ReserveData memory tokenData = pool.getReserveData(_token);
 
         uint256 availableCreditDelegationForDelegateeBefore = cut.getCreditDelegation(
-            DEFAULT_AAVE_MARKET,
-            tokenData.id,
-            uint8(DataTypes.InterestRateMode.VARIABLE),
-            walletAddr,
-            _delegatee
+            DEFAULT_AAVE_MARKET, tokenData.id, uint8(DataTypes.InterestRateMode.VARIABLE), walletAddr, _delegatee
         );
 
         if (_isL2Direct) {
@@ -143,34 +138,20 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
                 market: DEFAULT_AAVE_MARKET
             });
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
-        }
-        else {
+        } else {
             bytes memory paramsCalldata = aaveV3DelegateCreditEncode(
-                _amount,
-                _delegatee,
-                tokenData.id,
-                uint8(DataTypes.InterestRateMode.VARIABLE),
-                true,
-                address(0)
+                _amount, _delegatee, tokenData.id, uint8(DataTypes.InterestRateMode.VARIABLE), true, address(0)
             );
 
             bytes memory _calldata = abi.encodeWithSelector(
-                AaveV3DelegateCredit.executeAction.selector,
-                paramsCalldata,
-                subData,
-                paramMapping,
-                returnValues
+                AaveV3DelegateCredit.executeAction.selector, paramsCalldata, subData, paramMapping, returnValues
             );
 
             wallet.execute(address(cut), _calldata, 0);
         }
 
         uint256 availableCreditDelegationForDelegateeAfter = cut.getCreditDelegation(
-            DEFAULT_AAVE_MARKET,
-            tokenData.id,
-            uint8(DataTypes.InterestRateMode.VARIABLE),
-            walletAddr,
-            _delegatee
+            DEFAULT_AAVE_MARKET, tokenData.id, uint8(DataTypes.InterestRateMode.VARIABLE), walletAddr, _delegatee
         );
 
         assertEq(availableCreditDelegationForDelegateeBefore, 0);
