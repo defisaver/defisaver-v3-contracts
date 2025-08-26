@@ -11,7 +11,7 @@ library Address {
     error InsufficientBalanceForCall(uint256 available, uint256 required);
     //call to non-contract
     error NonContractCall();
-    
+
     function isContract(address account) internal view returns (bool) {
         // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
         // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
@@ -27,13 +27,13 @@ library Address {
 
     function sendValue(address payable recipient, uint256 amount) internal {
         uint256 balance = address(this).balance;
-        if (balance < amount){
+        if (balance < amount) {
             revert InsufficientBalance(balance, amount);
         }
 
         // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
-        (bool success, ) = recipient.call{value: amount}("");
-        if (!(success)){
+        (bool success,) = recipient.call{ value: amount }("");
+        if (!(success)) {
             revert SendingValueFail();
         }
     }
@@ -42,48 +42,38 @@ library Address {
         return functionCall(target, data, "Address: low-level call failed");
     }
 
-    function functionCall(
-        address target,
-        bytes memory data,
-        string memory errorMessage
-    ) internal returns (bytes memory) {
+    function functionCall(address target, bytes memory data, string memory errorMessage)
+        internal
+        returns (bytes memory)
+    {
         return _functionCallWithValue(target, data, 0, errorMessage);
     }
 
-    function functionCallWithValue(
-        address target,
-        bytes memory data,
-        uint256 value
-    ) internal returns (bytes memory) {
-        return
-            functionCallWithValue(target, data, value, "Address: low-level call with value failed");
+    function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {
+        return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
     }
 
-    function functionCallWithValue(
-        address target,
-        bytes memory data,
-        uint256 value,
-        string memory errorMessage
-    ) internal returns (bytes memory) {
+    function functionCallWithValue(address target, bytes memory data, uint256 value, string memory errorMessage)
+        internal
+        returns (bytes memory)
+    {
         uint256 balance = address(this).balance;
-        if (balance < value){
+        if (balance < value) {
             revert InsufficientBalanceForCall(balance, value);
         }
         return _functionCallWithValue(target, data, value, errorMessage);
     }
 
-    function _functionCallWithValue(
-        address target,
-        bytes memory data,
-        uint256 weiValue,
-        string memory errorMessage
-    ) private returns (bytes memory) {
-        if (!(isContract(target))){
+    function _functionCallWithValue(address target, bytes memory data, uint256 weiValue, string memory errorMessage)
+        private
+        returns (bytes memory)
+    {
+        if (!(isContract(target))) {
             revert NonContractCall();
         }
 
         // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.call{value: weiValue}(data);
+        (bool success, bytes memory returndata) = target.call{ value: weiValue }(data);
         if (success) {
             return returndata;
         } else {

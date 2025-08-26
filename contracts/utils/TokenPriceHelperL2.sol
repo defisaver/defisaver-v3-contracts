@@ -25,9 +25,9 @@ contract TokenPriceHelperL2 is DSMath, UtilHelper {
 
         /// @dev Price staleness not checked, the risk has been deemed acceptable
         if (_roundId == 0) {
-            (, price, , updateTimestamp, ) = aggregator.latestRoundData();
+            (, price,, updateTimestamp,) = aggregator.latestRoundData();
         } else {
-            (, price, , updateTimestamp, ) = aggregator.getRoundData(_roundId);
+            (, price,, updateTimestamp,) = aggregator.getRoundData(_roundId);
         }
 
         return (uint256(price), updateTimestamp);
@@ -52,11 +52,10 @@ contract TokenPriceHelperL2 is DSMath, UtilHelper {
     /// @dev 3. Chainlink ETH feed
     /// @dev if no price found return 0
     function getPriceInUSD(address _inputTokenAddr) public view returns (uint256) {
-
         int256 price;
         price = int256(getAaveTokenPriceInUSD(_inputTokenAddr));
-        
-        if (price == 0){
+
+        if (price == 0) {
             price = getChainlinkPriceInUSD(_inputTokenAddr, true);
         }
         return uint256(price);
@@ -69,13 +68,12 @@ contract TokenPriceHelperL2 is DSMath, UtilHelper {
     /// @dev if no price found return 0
     /// @dev expect WBTC and WSTETH to have chainlink USD price
     function getPriceInETH(address _inputTokenAddr) public view returns (uint256) {
-
         uint256 aavePriceInETH = getAaveTokenPriceInETH(_inputTokenAddr);
         if (aavePriceInETH != 0) return aavePriceInETH;
 
         uint256 chainlinkPriceInUSD = uint256(getChainlinkPriceInUSD(_inputTokenAddr, false));
 
-        if (chainlinkPriceInUSD != 0){
+        if (chainlinkPriceInUSD != 0) {
             uint256 chainlinkETHPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
             uint256 priceInEth = wdiv(chainlinkPriceInUSD, chainlinkETHPriceInUSD);
             return priceInEth;
@@ -83,16 +81,22 @@ contract TokenPriceHelperL2 is DSMath, UtilHelper {
 
         uint256 chainlinkPriceInETH = uint256(getChainlinkPriceInETH(_inputTokenAddr));
         if (chainlinkPriceInETH != 0) return chainlinkPriceInETH;
-        
+
         return 0;
     }
 
     /// @dev If there's no USD price feed can fallback to ETH price feed, if there's no USD or ETH price feed return 0
-    function getChainlinkPriceInUSD(address _inputTokenAddr, bool _useFallback) public view returns (int256 chainlinkPriceInUSD) {
-        try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.USD) returns (uint80, int256 answer, uint256, uint256, uint80){
+    function getChainlinkPriceInUSD(address _inputTokenAddr, bool _useFallback)
+        public
+        view
+        returns (int256 chainlinkPriceInUSD)
+    {
+        try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.USD) returns (
+            uint80, int256 answer, uint256, uint256, uint80
+        ) {
             chainlinkPriceInUSD = answer;
         } catch {
-            if (_useFallback){
+            if (_useFallback) {
                 uint256 chainlinkPriceInETH = uint256(getChainlinkPriceInETH(_inputTokenAddr));
                 uint256 chainlinkETHPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
                 chainlinkPriceInUSD = int256(wmul(chainlinkPriceInETH, chainlinkETHPriceInUSD));
@@ -104,7 +108,9 @@ contract TokenPriceHelperL2 is DSMath, UtilHelper {
 
     /// @dev If there's no ETH price feed returns 0
     function getChainlinkPriceInETH(address _inputTokenAddr) public view returns (int256 chainlinkPriceInETH) {
-        try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.ETH) returns (uint80, int256 answer, uint256, uint256, uint80){
+        try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.ETH) returns (
+            uint80, int256 answer, uint256, uint256, uint80
+        ) {
             chainlinkPriceInETH = answer;
         } catch {
             chainlinkPriceInETH = 0;

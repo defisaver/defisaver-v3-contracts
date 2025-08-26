@@ -12,14 +12,11 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 /// @title UmbrellaUnstake - Unstake aTokens/underlying or GHO tokens using Umbrella Stake Token
 /// @notice This action will always unwrap waTokens to aTokens/underlying after unstaking.
 /// @notice Passing zero as amount will start cooldown period.
-contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
+contract UmbrellaUnstake is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
-    error UmbrellaUnstakeSlippageHit(
-        uint256 minAmountOut,
-        uint256 actualAmountOut
-    );
- 
+    error UmbrellaUnstakeSlippageHit(uint256 minAmountOut, uint256 actualAmountOut);
+
     /// @param stkToken The umbrella stake token.
     /// @param to The address to which the aToken/underlying or GHO will be transferred
     /// @param stkAmount The amount of stkToken shares to burn (max.uint to redeem whole balance, 0 to start cooldown period)
@@ -74,14 +71,11 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
             return (0, abi.encode(_params, 0));
         }
 
-        uint256 stkSharesToBurn = (_params.stkAmount == type(uint256).max)
-            ? _params.stkToken.getBalance(address(this))
-            : _params.stkAmount;
+        uint256 stkSharesToBurn =
+            (_params.stkAmount == type(uint256).max) ? _params.stkToken.getBalance(address(this)) : _params.stkAmount;
 
         uint256 amountUnstaked = IERC4626StakeToken(_params.stkToken).redeem(
-            stkSharesToBurn,
-            address(this), /* receiver */
-            address(this) /* owner */
+            stkSharesToBurn, address(this), /* receiver */ address(this) /* owner */
         );
 
         address waTokenOrGHO = IERC4626(_params.stkToken).asset();
@@ -90,15 +84,11 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
         if (!isGHOStaking) {
             if (_params.useATokens) {
                 amountUnstaked = IStaticATokenV2(waTokenOrGHO).redeemATokens(
-                    amountUnstaked,
-                    address(this), /* receiver */
-                    address(this) /* owner */
+                    amountUnstaked, address(this), /* receiver */ address(this) /* owner */
                 );
             } else {
                 amountUnstaked = IERC4626(waTokenOrGHO).redeem(
-                    amountUnstaked,
-                    address(this), /* receiver */
-                    address(this) /* owner */
+                    amountUnstaked, address(this), /* receiver */ address(this) /* owner */
                 );
             }
         }

@@ -19,9 +19,7 @@ library FluidBorrowLiquidityLogic {
     /// @notice Borrows tokens from a Fluid liquidity layer
     /// @param _data Borrow data
     /// @return Amount of tokens borrowed. Will be the same as the input amount
-    function borrow(
-        FluidLiquidityModel.BorrowData memory _data
-    ) internal returns (uint256) {
+    function borrow(FluidLiquidityModel.BorrowData memory _data) internal returns (uint256) {
         _data.vaultType.requireLiquidityDebt();
 
         bool shouldWrapBorrowedEth = _data.wrapBorrowedEth && _data.borrowToken == TokenUtils.ETH_ADDR;
@@ -29,12 +27,7 @@ library FluidBorrowLiquidityLogic {
         address sendTokensTo = shouldWrapBorrowedEth ? address(this) : _data.to;
 
         if (_data.vaultType.isT1Vault()) {
-            IFluidVaultT1(_data.vault).operate(
-                _data.nftId,
-                0, /* newColl_ */
-                _data.amount.signed256(),
-                sendTokensTo
-            );
+            IFluidVaultT1(_data.vault).operate(_data.nftId, 0, /* newColl_ */ _data.amount.signed256(), sendTokensTo);
         } else {
             IFluidVaultT2(_data.vault).operate(
                 _data.nftId,

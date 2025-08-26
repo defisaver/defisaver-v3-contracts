@@ -7,7 +7,6 @@ import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to wrap Ether to WETH9
 contract WrapEth is ActionBase {
-
     /// @param amount Amount of ether to wrap
     struct Params {
         uint256 amount;

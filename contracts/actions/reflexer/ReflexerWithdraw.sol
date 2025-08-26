@@ -36,7 +36,8 @@ contract ReflexerWithdraw is ActionBase, ReflexerHelper {
         inputData.adapterAddr = _parseParamAddr(inputData.adapterAddr, _paramMapping[2], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 withdrawnAmount, bytes memory logData) = _reflexerWithdraw(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.to);
+        (uint256 withdrawnAmount, bytes memory logData) =
+            _reflexerWithdraw(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.to);
         emit ActionEvent("ReflexerWithdraw", logData);
         return bytes32(withdrawnAmount);
     }
@@ -44,7 +45,8 @@ contract ReflexerWithdraw is ActionBase, ReflexerHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        (, bytes memory logData) = _reflexerWithdraw(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.to);
+        (, bytes memory logData) =
+            _reflexerWithdraw(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.to);
         logger.logActionDirectEvent("ReflexerWithdraw", logData);
     }
 
@@ -60,12 +62,10 @@ contract ReflexerWithdraw is ActionBase, ReflexerHelper {
     /// @param _amount Amount of collateral to withdraw
     /// @param _adapterAddr Adapter address of the reflexer collateral
     /// @param _to Address where to send the collateral we withdrew
-    function _reflexerWithdraw(
-        uint256 _safeId,
-        uint256 _amount,
-        address _adapterAddr,
-        address _to
-    ) internal returns (uint256, bytes memory) {
+    function _reflexerWithdraw(uint256 _safeId, uint256 _amount, address _adapterAddr, address _to)
+        internal
+        returns (uint256, bytes memory)
+    {
         // if amount type(uint).max _amount is whole collateral amount
         if (_amount == type(uint256).max) {
             _amount = getAllColl(_safeId);
@@ -88,20 +88,15 @@ contract ReflexerWithdraw is ActionBase, ReflexerHelper {
     /// @notice Returns all the collateral of the safe, formatted in the correct decimal
     /// @dev Will fail if token is over 18 decimals
     function getAllColl(uint256 _safeId) internal view returns (uint256 amount) {
-        (amount, ) = getSafeInfo(_safeId, safeManager.collateralTypes(_safeId));
+        (amount,) = getSafeInfo(_safeId, safeManager.collateralTypes(_safeId));
     }
 
     /// @notice Gets Safe info (collateral, debt)
     /// @param _safeId Id of the Safe
     /// @param _collType CollType of the Safe
-    function getSafeInfo(uint256 _safeId, bytes32 _collType)
-        public
-        view
-        returns (uint256, uint256)
-    {
-        (uint256 collateral, uint256 debt) =
-            safeEngine.safes(_collType, safeManager.safes(_safeId));
-        (, uint256 rate, , , , ) = safeEngine.collateralTypes(_collType);
+    function getSafeInfo(uint256 _safeId, bytes32 _collType) public view returns (uint256, uint256) {
+        (uint256 collateral, uint256 debt) = safeEngine.safes(_collType, safeManager.safes(_safeId));
+        (, uint256 rate,,,,) = safeEngine.collateralTypes(_collType);
 
         return (collateral, rmul(debt, rate));
     }

@@ -8,8 +8,9 @@ contract MockAaveV3Oracle {
 
     function addFeeds(address[] memory _tokens, address[] memory _feeds) public {
         require(_tokens.length == _feeds.length);
-        for (uint256 i = 0; i < _tokens.length; i++)
+        for (uint256 i = 0; i < _tokens.length; i++) {
             tokenFeeds[_tokens[i]] = _feeds[i];
+        }
     }
 
     function getSourceOfAsset(address asset) external view returns (address) {

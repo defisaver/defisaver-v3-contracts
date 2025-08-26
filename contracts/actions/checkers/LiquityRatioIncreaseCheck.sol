@@ -8,9 +8,8 @@ import { TransientStorage } from "../../utils/TransientStorage.sol";
 
 /// @title Action to check if ratio of the Liquity position after strategy execution is greater than the target ratio.
 contract LiquityRatioIncreaseCheck is ActionBase, LiquityRatioHelper {
-
     /// @notice 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
@@ -30,7 +29,8 @@ contract LiquityRatioIncreaseCheck is ActionBase, LiquityRatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 targetRatioIncrease = _parseParamUint(uint256(inputData.targetRatioIncrease), _paramMapping[0], _subData, _returnValues);
+        uint256 targetRatioIncrease =
+            _parseParamUint(uint256(inputData.targetRatioIncrease), _paramMapping[0], _subData, _returnValues);
 
         address troveOwner = address(this);
 
@@ -39,7 +39,7 @@ contract LiquityRatioIncreaseCheck is ActionBase, LiquityRatioHelper {
         uint256 targetRatio = currRatio + targetRatioIncrease;
 
         uint256 startRatio = uint256(tempStorage.getBytes32("LIQUITY_RATIO"));
-        
+
         // if repay ratio should be better off
         if (currRatio <= startRatio) {
             revert BadAfterRatio(startRatio, currRatio);
@@ -56,7 +56,7 @@ contract LiquityRatioIncreaseCheck is ActionBase, LiquityRatioHelper {
 
     /// @inheritdoc ActionBase
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
@@ -66,5 +66,4 @@ contract LiquityRatioIncreaseCheck is ActionBase, LiquityRatioHelper {
     function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
-
 }

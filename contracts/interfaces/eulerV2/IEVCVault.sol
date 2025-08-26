@@ -23,10 +23,10 @@ interface IEVCVault {
     /// @param collaterals The array of enabled collateral addresses to be considered for the account status check.
     /// @return magicValue Must return the bytes4 magic value 0xb168c58f (which is a selector of this function) when
     /// account status is valid, or revert otherwise.
-    function checkAccountStatus(
-        address account,
-        address[] calldata collaterals
-    ) external view returns (bytes4 magicValue);
+    function checkAccountStatus(address account, address[] calldata collaterals)
+        external
+        view
+        returns (bytes4 magicValue);
 
     /// @notice Checks the status of the vault.
     /// @dev This function must only deliberately revert if the vault status is invalid. If this function reverts due to

@@ -49,7 +49,7 @@ contract LiquityClaim is ActionBase, LiquityHelper {
     function _liquityClaim(address _to) internal returns (uint256 claimableColl, bytes memory logData) {
         claimableColl = CollSurplusPool.getCollateral(address(this));
 
-        BorrowerOperations.claimCollateral();   // Will revert if claimableColl == 0
+        BorrowerOperations.claimCollateral(); // Will revert if claimableColl == 0
 
         TokenUtils.depositWeth(claimableColl);
         TokenUtils.WETH_ADDR.withdrawTokens(_to, claimableColl);

@@ -61,7 +61,7 @@ contract CurveUsdSupply is ActionBase, CurveUsdHelper {
     function _curveUsdSupply(Params memory _params) internal returns (uint256, bytes memory) {
         /// @dev see ICrvUsdController natspec
         if (_params.collateralAmount == 0) revert ZeroAmountSupplied();
-        
+
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
@@ -74,10 +74,7 @@ contract CurveUsdSupply is ActionBase, CurveUsdHelper {
             ICrvUsdController(_params.controllerAddress).add_collateral(_params.collateralAmount, _params.onBehalfOf);
         }
 
-        return (
-            _params.collateralAmount,
-            abi.encode(_params)
-        );
+        return (_params.collateralAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

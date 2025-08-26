@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity =0.8.24;
 
-import {IPriceOracleGetter} from "./IPriceOracleGetter.sol";
+import { IPriceOracleGetter } from "./IPriceOracleGetter.sol";
 
 interface IAaveV3Oracle is IPriceOracleGetter {
     /**

@@ -46,14 +46,11 @@ contract ReflexerWithdrawStuckFunds is ActionBase, ReflexerHelper {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-   
+
     /// @notice Withdraws stuck funds from the safe
     /// @param _safeId Id of the safe
     /// @param _to Address where to send the withdrawn funds
-    function _withdrawStuckFunds(
-        uint256 _safeId,
-        address _to
-    ) internal returns (uint256, bytes memory) {
+    function _withdrawStuckFunds(uint256 _safeId, address _to) internal returns (uint256, bytes memory) {
         address safe = safeManager.safes(_safeId);
         uint256 radAmount = safeEngine.coinBalance(safe);
 

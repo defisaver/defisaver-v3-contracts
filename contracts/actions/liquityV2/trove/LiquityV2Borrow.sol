@@ -64,11 +64,7 @@ contract LiquityV2Borrow is ActionBase, LiquityV2Helper {
     function _borrow(Params memory _params) internal returns (uint256, bytes memory) {
         address borrowerOperations = IAddressesRegistry(_params.market).borrowerOperations();
 
-        IBorrowerOperations(borrowerOperations).withdrawBold(
-            _params.troveId,
-            _params.amount,
-            _params.maxUpfrontFee
-        );
+        IBorrowerOperations(borrowerOperations).withdrawBold(_params.troveId, _params.amount, _params.maxUpfrontFee);
 
         BOLD_ADDR.withdrawTokens(_params.to, _params.amount);
 

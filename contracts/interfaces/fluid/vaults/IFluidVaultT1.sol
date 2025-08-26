@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 interface IFluidVaultT1 {
-
     struct ConstantViews {
         address liquidity;
         address factory;
@@ -39,8 +38,8 @@ interface IFluidVaultT1 {
         returns (
             uint256, // nftId_
             int256, // final supply amount. if - then withdraw
-            int256 // final borrow amount. if - then payback
-        );
+            int256
+        ); // final borrow amount. if - then payback
 
     /// @notice returns all Vault constants
     function constantsView() external view returns (ConstantViews memory constantsView_);

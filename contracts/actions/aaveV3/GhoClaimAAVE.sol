@@ -10,10 +10,9 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 /// @title Action to claim AAVE rewards from stkGHO token
 /// @notice After AaveV3 Umbrella upgrade, stkGHO token is no longer eligible for AAVE rewards so this action will only be used for old rewards.
 contract GhoClaimAAVE is ActionBase, AaveV3Helper {
-
     using TokenUtils for address;
 
-    /// @param amount Amount of AAVE token to claim (uintMax is supported)  
+    /// @param amount Amount of AAVE token to claim (uintMax is supported)
     /// @param to Address that will be receiving the rewards
     struct Params {
         uint256 amount;
@@ -60,8 +59,7 @@ contract GhoClaimAAVE is ActionBase, AaveV3Helper {
         logData = abi.encode(_params, claimedAmount);
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (Params memory params)
-    {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
 }

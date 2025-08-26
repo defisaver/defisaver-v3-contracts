@@ -44,36 +44,15 @@ contract FluidDexPayback is ActionBase, FluidHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.nftId = _parseParamUint(params.nftId, _paramMapping[2], _subData, _returnValues);
 
-        params.paybackAmount = _parseParamUint(
-            params.paybackAmount,
-            _paramMapping[3],
-            _subData,
-            _returnValues
-        );
-        params.paybackVariableData.debtAmount0 = _parseParamUint(
-            params.paybackVariableData.debtAmount0,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        );
-        params.paybackVariableData.debtAmount1 = _parseParamUint(
-            params.paybackVariableData.debtAmount1,
-            _paramMapping[5],
-            _subData,
-            _returnValues
-        );
-        params.paybackVariableData.minDebtShares = _parseParamUint(
-            params.paybackVariableData.minDebtShares,
-            _paramMapping[6],
-            _subData,
-            _returnValues
-        );
-        params.paybackVariableData.maxAmountToPull = _parseParamUint(
-            params.paybackVariableData.maxAmountToPull,
-            _paramMapping[7],
-            _subData,
-            _returnValues
-        );
+        params.paybackAmount = _parseParamUint(params.paybackAmount, _paramMapping[3], _subData, _returnValues);
+        params.paybackVariableData.debtAmount0 =
+            _parseParamUint(params.paybackVariableData.debtAmount0, _paramMapping[4], _subData, _returnValues);
+        params.paybackVariableData.debtAmount1 =
+            _parseParamUint(params.paybackVariableData.debtAmount1, _paramMapping[5], _subData, _returnValues);
+        params.paybackVariableData.minDebtShares =
+            _parseParamUint(params.paybackVariableData.minDebtShares, _paramMapping[6], _subData, _returnValues);
+        params.paybackVariableData.maxAmountToPull =
+            _parseParamUint(params.paybackVariableData.maxAmountToPull, _paramMapping[7], _subData, _returnValues);
 
         (uint256 paybackAmountOrBurnedShares, bytes memory logData) = _payback(params);
         emit ActionEvent("FluidDexPayback", logData);
@@ -99,8 +78,8 @@ contract FluidDexPayback is ActionBase, FluidHelper {
         IFluidVault.ConstantViews memory constants = IFluidVault(_params.vault).constantsView();
         constants.vaultType.requireDexVault();
 
-        (IFluidVaultResolver.UserPosition memory userPosition, ) = 
-                IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_params.nftId);
+        (IFluidVaultResolver.UserPosition memory userPosition,) =
+            IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_params.nftId);
 
         if (constants.vaultType.isT2Vault()) {
             uint256 paybackAmount = FluidPaybackLiquidityLogic.payback(

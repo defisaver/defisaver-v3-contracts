@@ -8,9 +8,8 @@ import { TransientStorage } from "../../utils/TransientStorage.sol";
 
 /// @title Action to check the ratio of the Aave V2 position after strategy execution.
 contract AaveV2RatioCheck is ActionBase, AaveRatioHelper {
-
     /// @notice 5% offset acceptable.
-    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
@@ -43,7 +42,7 @@ contract AaveV2RatioCheck is ActionBase, AaveRatioHelper {
         uint256 currRatio = getSafetyRatio(DEFAULT_AAVE_V2_MARKET, address(this));
 
         uint256 startRatio = uint256(tempStorage.getBytes32("AAVE_V2_RATIO"));
-        
+
         // if we are doing repay
         if (RatioState(ratioState) == RatioState.IN_REPAY) {
             // if repay ratio should be better off
@@ -76,7 +75,7 @@ contract AaveV2RatioCheck is ActionBase, AaveRatioHelper {
 
     /// @inheritdoc ActionBase
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {

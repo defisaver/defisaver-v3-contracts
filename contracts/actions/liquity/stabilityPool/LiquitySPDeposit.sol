@@ -15,10 +15,10 @@ contract LiquitySPDeposit is ActionBase, LiquityHelper {
     /// @param wethTo Address that will receive ETH(wrapped) gains
     /// @param lqtyTo Address that will receive LQTY token gains
     struct Params {
-        uint256 lusdAmount; 
-        address from;       
-        address wethTo;     
-        address lqtyTo;     
+        uint256 lusdAmount;
+        address from;
+        address wethTo;
+        address lqtyTo;
     }
 
     /// @inheritdoc ActionBase

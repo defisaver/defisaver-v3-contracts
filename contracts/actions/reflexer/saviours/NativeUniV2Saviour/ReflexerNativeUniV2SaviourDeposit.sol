@@ -30,12 +30,7 @@ contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
         Params memory inputData = parseInputs(_callData);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[0], _subData, _returnValues);
         inputData.safeId = _parseParamUint(inputData.safeId, _paramMapping[1], _subData, _returnValues);
-        inputData.lpTokenAmount = _parseParamUint(
-            inputData.lpTokenAmount,
-            _paramMapping[2],
-            _subData,
-            _returnValues
-        );
+        inputData.lpTokenAmount = _parseParamUint(inputData.lpTokenAmount, _paramMapping[2], _subData, _returnValues);
 
         (uint256 amountDeposited, bytes memory logData) = _reflexerSaviourDeposit(inputData);
         emit ActionEvent("ReflexerNativeUniV2SaviourDeposit", logData);
@@ -59,25 +54,14 @@ contract ReflexerNativeUniV2SaviourDeposit is ActionBase, ReflexerHelper {
     function _reflexerSaviourDeposit(Params memory _inputData)
         internal
         returns (uint256 amountPulled, bytes memory logData)
-    {   
+    {
         safeManager.protectSAFE(
-            _inputData.safeId,
-            LIQUIDATION_ENGINE_ADDRESS,
-            NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS
+            _inputData.safeId, LIQUIDATION_ENGINE_ADDRESS, NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS
         );
 
-        amountPulled = UNIV2_RAI_WETH_ADDRESS.pullTokensIfNeeded(
-            _inputData.from,
-            _inputData.lpTokenAmount
-        );
-        UNIV2_RAI_WETH_ADDRESS.approveToken(
-            NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS,
-            amountPulled
-        );
-        ISAFESaviour(NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS).deposit(
-            _inputData.safeId,
-            amountPulled
-        );
+        amountPulled = UNIV2_RAI_WETH_ADDRESS.pullTokensIfNeeded(_inputData.from, _inputData.lpTokenAmount);
+        UNIV2_RAI_WETH_ADDRESS.approveToken(NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS, amountPulled);
+        ISAFESaviour(NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS).deposit(_inputData.safeId, amountPulled);
 
         logData = abi.encode(_inputData, amountPulled);
     }

@@ -11,10 +11,8 @@ import { DFSProxyRegistry } from "./DFSProxyRegistry.sol";
 import { AdminAuth } from "./../auth/AdminAuth.sol";
 import { UtilHelper } from "./helpers/UtilHelper.sol";
 
-
 /// @title User facing contract to manage new proxies (is owner of DFSProxyRegistry)
 contract DFSProxyRegistryController is AdminAuth, UtilHelper, DSProxyFactoryHelper {
-
     /// @dev List of prebuilt proxies the users can claim to save gas
     address[] public proxyPool;
 
@@ -64,9 +62,8 @@ contract DFSProxyRegistryController is AdminAuth, UtilHelper, DSProxyFactoryHelp
     }
 
     function getProxies(address _user) public view returns (address[] memory) {
-        (address mcdProxy, address[] memory additionalProxies) = DFSProxyRegistry(
-            DFS_PROXY_REGISTRY_ADDR
-        ).getAllProxies(_user);
+        (address mcdProxy, address[] memory additionalProxies) =
+            DFSProxyRegistry(DFS_PROXY_REGISTRY_ADDR).getAllProxies(_user);
 
         if (mcdProxy == address(0)) {
             return additionalProxies;

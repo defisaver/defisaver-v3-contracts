@@ -32,20 +32,10 @@ contract MorphoAaveV3Payback is ActionBase, MorphoAaveV3Helper {
         Params memory params = parseInputs(_callData);
 
         params.emodeId = _parseParamUint(params.emodeId, _paramMapping[0], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(
-            params.tokenAddr,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
+        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(
-            params.onBehalf,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        );
+        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
 
         (uint256 amount, bytes memory logData) = _repay(params);
         emit ActionEvent("MorphoAaveV3Payback", logData);
@@ -70,10 +60,7 @@ contract MorphoAaveV3Payback is ActionBase, MorphoAaveV3Helper {
             _params.onBehalf = address(this);
         }
 
-        uint256 totalDebt = IMorphoAaveV3(morphoAddress).borrowBalance(
-            _params.tokenAddr,
-            _params.onBehalf
-        );
+        uint256 totalDebt = IMorphoAaveV3(morphoAddress).borrowBalance(_params.tokenAddr, _params.onBehalf);
 
         // if amount bigger than max user debt, pull and repay just the max debt
         if (_params.amount > totalDebt) _params.amount = totalDebt;

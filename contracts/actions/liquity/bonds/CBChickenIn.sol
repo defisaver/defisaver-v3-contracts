@@ -26,12 +26,7 @@ contract CBChickenIn is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.bondID = _parseParamUint(
-            params.bondID,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
+        params.bondID = _parseParamUint(params.bondID, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
         (uint256 bLusdAmountReceived, bytes memory logData) = _cbChickenIn(params);

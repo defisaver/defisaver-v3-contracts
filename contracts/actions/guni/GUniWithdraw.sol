@@ -10,7 +10,7 @@ import { GUniHelper } from "./helpers/GUniHelper.sol";
 /// @title Action that removes liquidity from a G-UNI pool and burns G-UNI LP tokens
 contract GUniWithdraw is ActionBase, DSMath, GUniHelper {
     using TokenUtils for address;
-    
+
     /// @param pool address of G-UNI pool to remove liquidity from
     /// @param burnAmount The number of G-UNI tokens to burn
     /// @param amount0Min Minimum amount of token0 received after burn (slippage protection)
@@ -57,14 +57,16 @@ contract GUniWithdraw is ActionBase, DSMath, GUniHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function gUniWithdraw(Params memory _inputData) internal returns (uint128, bytes memory) {
-        require (_inputData.to != address(0x0), "Can not send to burn address");
+        require(_inputData.to != address(0x0), "Can not send to burn address");
 
         _inputData.burnAmount = _inputData.pool.pullTokensIfNeeded(_inputData.from, _inputData.burnAmount);
 
         _inputData.pool.approveToken(G_UNI_ROUTER_02_ADDRESS, _inputData.burnAmount);
 
-        (uint256 amount0, uint256 amount1, uint128 liquidityBurnt) = gUniRouter.removeLiquidity(_inputData.pool, _inputData.burnAmount, _inputData.amount0Min, _inputData.amount1Min, _inputData.to);
-        /// @dev amountToBurn will always be burnt, so no need to send back any leftovers 
+        (uint256 amount0, uint256 amount1, uint128 liquidityBurnt) = gUniRouter.removeLiquidity(
+            _inputData.pool, _inputData.burnAmount, _inputData.amount0Min, _inputData.amount1Min, _inputData.to
+        );
+        /// @dev amountToBurn will always be burnt, so no need to send back any leftovers
 
         bytes memory logData = abi.encode(_inputData, amount0, amount1, liquidityBurnt);
         return (liquidityBurnt, logData);

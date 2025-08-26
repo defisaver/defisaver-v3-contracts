@@ -8,7 +8,7 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 /// @title Action for withdrawing tokens from DSA
 contract InstPullTokens is ActionBase {
     using TokenUtils for address;
-    
+
     /// @param dsaAddress address of the DSA
     /// @param tokens array of addresses of the tokens to be withdrawn
     /// @param amounts array of amounts of the tokens to be withdrawn
@@ -21,12 +21,13 @@ contract InstPullTokens is ActionBase {
     }
 
     /// @inheritdoc ActionBase
-    function executeAction(
-        bytes memory _callData,
-        bytes32[] memory,
-        uint8[] memory,
-        bytes32[] memory
-    ) public payable virtual override returns (bytes32) {
+    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
+        public
+        payable
+        virtual
+        override
+        returns (bytes32)
+    {
         Params memory inputData = parseInputs(_callData);
 
         bytes memory logData = _pullTokens(inputData);
@@ -49,12 +50,12 @@ contract InstPullTokens is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _pullTokens(Params memory _inputData) internal returns (bytes memory logData) {
-        require (_inputData.to != address(0), "Receiver address can't be burn address");
+        require(_inputData.to != address(0), "Receiver address can't be burn address");
         bytes memory spellData = _createSpell(_inputData);
-        (bool success, ) = _inputData.dsaAddress.call(spellData);
+        (bool success,) = _inputData.dsaAddress.call(spellData);
 
         require(success, "Withdrawing tokens from DSA failed");
-    
+
         logData = abi.encode(_inputData);
     }
 
@@ -68,7 +69,7 @@ contract InstPullTokens is ActionBase {
         address _origin = address(this);
 
         // connects dsaAccount with BASIC connector and transfers all tokens
-        for (uint256 i = 0; i < numOfTokens; i++){
+        for (uint256 i = 0; i < numOfTokens; i++) {
             _targetNames[i] = "BASIC-A";
             _data[i] = abi.encodeWithSignature(
                 "withdraw(address,uint256,address,uint256,uint256)",

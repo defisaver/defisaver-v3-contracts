@@ -65,8 +65,7 @@ contract LiquityV2Close is ActionBase, LiquityV2Helper {
         address borrowerOperations = IAddressesRegistry(_params.market).borrowerOperations();
         address troveManager = IAddressesRegistry(_params.market).troveManager();
 
-        ITroveManager.LatestTroveData memory troveData = ITroveManager(troveManager)
-            .getLatestTroveData(_params.troveId);
+        ITroveManager.LatestTroveData memory troveData = ITroveManager(troveManager).getLatestTroveData(_params.troveId);
 
         BOLD_ADDR.pullTokensIfNeeded(_params.from, troveData.entireDebt);
 

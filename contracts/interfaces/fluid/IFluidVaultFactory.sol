@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 interface IFluidVaultFactory {
-
     /// @dev Emitted when a new token/position is minted by a vault.
     /// @param vault The address of the vault that minted the token.
     /// @param user The address of the user who received the minted token.

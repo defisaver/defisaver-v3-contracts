@@ -14,10 +14,9 @@ import { IERC20 } from "../../../interfaces/IERC20.sol";
 
 /// @title Chicken Bonds helper contract that fetches market price and optimal rebonding calculations
 contract CBHelper is DSMath, MainnetLiquityAddresses {
-
     using Sqrt for uint256;
 
-    uint64 public constant REBOND_STRATEGY_ID = 31; 
+    uint64 public constant REBOND_STRATEGY_ID = 31;
 
     struct CBInfo {
         uint256 chickenInAMMFee;
@@ -26,7 +25,7 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
         uint256 bLUSDSupply;
     }
 
-    IChickenBondManager constant public CBManager = IChickenBondManager(CB_MANAGER_ADDRESS);
+    IChickenBondManager public constant CBManager = IChickenBondManager(CB_MANAGER_ADDRESS);
 
     /// @notice Calculates bLUSD price in Curve pool based on the amount we are swapping
     function getBLusdPriceFromCurve(uint256 _amount) public view returns (uint256) {
@@ -44,11 +43,8 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
         swapParams[2] = [uint256(0), uint256(0), uint256(0)];
         swapParams[3] = [uint256(0), uint256(0), uint256(0)];
 
-        uint256 outputAmount = ISwaps(CURVE_REGISTRY_SWAP_ADDRESS).get_exchange_multiple_amount(
-            routes,
-            swapParams,
-            _amount
-        );
+        uint256 outputAmount =
+            ISwaps(CURVE_REGISTRY_SWAP_ADDRESS).get_exchange_multiple_amount(routes, swapParams, _amount);
 
         return wdiv(outputAmount, _amount);
     }
@@ -69,22 +65,15 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
         }
 
         uint256 res = wmul(
-            wdiv(
-                wmul(_bLUSDCap, optimalRebondTime),
-                (systemInfo.accrualParameter + optimalRebondTime)
-            ),
-            marketPrice * 10**18
+            wdiv(wmul(_bLUSDCap, optimalRebondTime), (systemInfo.accrualParameter + optimalRebondTime)),
+            marketPrice * 10 ** 18
         );
 
         return (res / 1e18, marketPrice);
     }
 
     /// @notice Internal function calculated optimal wait time for the user to accrue bLUSD
-    function _getOptimalRebondTime(CBInfo memory systemInfo, uint256 _marketPrice)
-        internal
-        pure
-        returns (uint256)
-    {
+    function _getOptimalRebondTime(CBInfo memory systemInfo, uint256 _marketPrice) internal pure returns (uint256) {
         uint256 marketPricePremium = _calcMarketPricePremium(systemInfo, _marketPrice);
 
         uint256 feeAmount = systemInfo.chickenInAMMFee * marketPricePremium;
@@ -97,10 +86,7 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
             return 0;
         }
 
-        uint256 res = wmul(
-            systemInfo.accrualParameter,
-            wmul((premiumSqrt + 1e18), wdiv(1e18, (premiumScaled - 1e18)))
-        );
+        uint256 res = wmul(systemInfo.accrualParameter, wmul((premiumSqrt + 1e18), wdiv(1e18, (premiumScaled - 1e18))));
 
         return res;
     }
@@ -125,7 +111,7 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
 
     /// @notice Returns info about cb system needed for the calculations
     function getCbInfo() public view returns (CBInfo memory systemInfo) {
-        (, uint256 totalReserveLUSD, ) = CBManager.getTreasury();
+        (, uint256 totalReserveLUSD,) = CBManager.getTreasury();
 
         systemInfo = CBInfo({
             totalReserveLUSD: totalReserveLUSD,
@@ -135,15 +121,19 @@ contract CBHelper is DSMath, MainnetLiquityAddresses {
         });
     }
 
-    function formatRebondSub(uint256 _newSubId, uint256 _bondID) public pure returns (StrategyModel.StrategySub memory rebondSub) {
+    function formatRebondSub(uint256 _newSubId, uint256 _bondID)
+        public
+        pure
+        returns (StrategyModel.StrategySub memory rebondSub)
+    {
         rebondSub.strategyOrBundleId = REBOND_STRATEGY_ID;
         rebondSub.isBundle = false;
 
         bytes memory triggerData = abi.encode(_bondID);
-        rebondSub.triggerData =  new bytes[](1);
+        rebondSub.triggerData = new bytes[](1);
         rebondSub.triggerData[0] = triggerData;
 
-        rebondSub.subData =  new bytes32[](4);
+        rebondSub.subData = new bytes32[](4);
         rebondSub.subData[0] = bytes32(_newSubId);
         rebondSub.subData[1] = bytes32(_bondID);
         rebondSub.subData[2] = bytes32(uint256(uint160(BLUSD_ADDRESS)));

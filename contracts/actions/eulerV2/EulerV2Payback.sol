@@ -79,16 +79,11 @@ contract EulerV2Payback is ActionBase, EulerV2Helper {
         _params.amount = IEVault(_params.vault).repay(_params.amount, _params.account);
 
         if (maxPayback) {
-            IEVC(EVC_ADDR).call(
-                _params.vault,
-                _params.account,
-                0,
-                abi.encodeCall(IRiskManager.disableController, ())
-            );
+            IEVC(EVC_ADDR).call(_params.vault, _params.account, 0, abi.encodeCall(IRiskManager.disableController, ()));
         }
 
         return (_params.amount, abi.encode(_params));
-    }   
+    }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));

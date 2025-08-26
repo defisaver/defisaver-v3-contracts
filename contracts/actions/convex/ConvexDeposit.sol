@@ -64,15 +64,13 @@ contract ConvexDeposit is ConvexHelper, ActionBase {
             IBooster(BOOSTER_ADDR).deposit(_params.poolId, _params.amount, false);
 
             poolInfo.token.withdrawTokens(_params.to, _params.amount);
-        } else
-        if (_params.option == DepositOption.STAKE) {
+        } else if (_params.option == DepositOption.STAKE) {
             _params.amount = poolInfo.token.pullTokensIfNeeded(_params.from, _params.amount);
             poolInfo.token.approveToken(poolInfo.crvRewards, _params.amount);
             IBRewardPool(poolInfo.crvRewards).stakeFor(_params.to, _params.amount);
-        } else
-        if (_params.option == DepositOption.WRAP_AND_STAKE) {
+        } else if (_params.option == DepositOption.WRAP_AND_STAKE) {
             bool stakeForProxy = _params.to == address(this);
-            
+
             _params.amount = poolInfo.lpToken.pullTokensIfNeeded(_params.from, _params.amount);
             poolInfo.lpToken.approveToken(BOOSTER_ADDR, _params.amount);
             IBooster(BOOSTER_ADDR).deposit(_params.poolId, _params.amount, stakeForProxy);

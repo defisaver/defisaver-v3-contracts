@@ -11,7 +11,6 @@ import { ActionsUtilHelper } from "../actions/utils/helpers/ActionsUtilHelper.so
 
 /// @title Checks Mcd registry and replaces the proxy addr if owner changed
 contract DFSProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
-
     IProxyRegistry public mcdRegistry = IProxyRegistry(MKR_PROXY_REGISTRY);
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
@@ -25,7 +24,7 @@ contract DFSProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
     function changeMcdOwner(address _user, address _proxy) public {
         address dfsProxyRegistryController = registry.getAddr(DFS_PROXY_REGISTRY_CONTROLLER_ID);
         require(msg.sender == dfsProxyRegistryController);
-        
+
         if (IDSProxy(_proxy).owner() == _user) {
             changedOwners[_user] = _proxy;
         }
@@ -52,7 +51,7 @@ contract DFSProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
             additionalProxies[_user].push(_proxy);
         }
     }
-			
+
     function getAllProxies(address _user) public view returns (address, address[] memory) {
         return (getMcdProxy(_user), additionalProxies[_user]);
     }
