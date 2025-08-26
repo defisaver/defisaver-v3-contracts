@@ -7,9 +7,6 @@ import { CompV3Borrow } from "../../../contracts/actions/compoundV3/CompV3Borrow
 
 contract CompUser is CompUserUtils {
 
-    //solhint-disable-next-line no-empty-blocks
-    constructor() CompUserUtils() {}
-
     function supply(
         bool _isSafe,
         address _market,

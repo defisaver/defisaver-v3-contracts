@@ -6,9 +6,6 @@ import { UserWallet } from "../UserWallet.sol";
 
 contract AaveV3UserUtils is UserWallet {
 
-    //solhint-disable-next-line no-empty-blocks
-    constructor() UserWallet() {}
-
     function subToAutomationBundles(
         bool _isSafe,
         address _subProxy,

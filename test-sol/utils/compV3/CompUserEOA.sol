@@ -9,7 +9,7 @@ contract CompUserEOA is CompUserUtils {
 
     IComet public comet;
 
-    constructor(address _comet) CompUserUtils() {
+    constructor(address _comet) {
         comet = IComet(_comet);
 
         // gib allow to wallets

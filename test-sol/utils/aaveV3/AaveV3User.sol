@@ -8,9 +8,6 @@ import { AaveV3UserUtils } from "./AaveV3UserUtils.sol";
 
 contract AaveV3User is AaveV3UserUtils {
 
-    //solhint-disable-next-line no-empty-blocks
-    constructor() AaveV3UserUtils() {}
-
     function supply(
         uint256 _amount,
         bool _isSafe,

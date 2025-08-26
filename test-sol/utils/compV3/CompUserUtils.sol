@@ -8,9 +8,6 @@ import { CompV3SubProxy } from "../../../contracts/actions/compoundV3/CompV3SubP
 
 contract CompUserUtils is UserWallet {
 
-    //solhint-disable-next-line no-empty-blocks
-    constructor() UserWallet() {}
-
     function subToAutomationBundles(
         bool _isSafe,
         address _subProxy,
