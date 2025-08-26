@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.24;
 
-import { Test } from "forge-std/Test.sol";
 
 import { IERC20 } from "../../contracts/interfaces/IERC20.sol";
 import { SafeERC20 } from "../../contracts/utils/SafeERC20.sol";
@@ -99,7 +98,7 @@ contract BaseTest is Config {
 
     function removeSelector(bytes memory _data) internal pure returns (bytes memory) {
         bytes memory result = new bytes(_data.length - 4);
-        for (uint i = 4; i < _data.length; i++) {
+        for (uint256 i = 4; i < _data.length; i++) {
             result[i - 4] = _data[i];
         }
         return result;

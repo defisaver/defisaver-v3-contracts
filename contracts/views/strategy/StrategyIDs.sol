@@ -33,7 +33,7 @@ library StrategyIDs {
     }
 
     function isAaveV3RepayStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1 && (_strategyID == 34)) {
+        if (block.chainid == 1 && _strategyID == 34) {
             return true;
         }
 
@@ -45,7 +45,7 @@ library StrategyIDs {
     }
 
     function isAaveV3BoostStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1 && (_strategyID == 36)) {
+        if (block.chainid == 1 && _strategyID == 36) {
             return true;
         }
 
@@ -100,7 +100,7 @@ library StrategyIDs {
     }
 
     function isSparkRepayStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1 && (_strategyID == 57)) {
+        if (block.chainid == 1 && _strategyID == 57) {
             return true;
         }
 
@@ -108,7 +108,7 @@ library StrategyIDs {
     }
 
     function isSparkBoostStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1 && (_strategyID == 59)) {
+        if (block.chainid == 1 && _strategyID == 59) {
             return true;
         }
 
@@ -121,125 +121,36 @@ library StrategyIDs {
     }
 
     function isCompoundV3RepayStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1) {
-            // CompV3Repay
-            if (_strategyID == 15) return true;
-        }
-
-        // arbitrum
-        if (block.chainid == 42161) {
-            // CompV3RepayL2
-            if (_strategyID == 10) return true;
-        }
-
-        // base
-        if (block.chainid == 8453) {
-            // CompV3RepayL2
-            if (_strategyID == 10) return true;
-        }
-
+        if (block.chainid == 1 && _strategyID == 15) return true;
+        // arbitrum & base
+        if ((block.chainid == 42161 || block.chainid == 8453) && _strategyID == 10) return true;
         return false;
     }
 
     function isCompoundV3RepayOnPriceStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1) {
-            // CompV3RepayOnPriceStrategy
-            if (_strategyID == 118) return true;
-        }
-
+        if (block.chainid == 1 && _strategyID == 118) return true;
         // arbitrum
-        if (block.chainid == 42161) {
-            // CompV3RepayOnPriceL2Strategy
-            if (_strategyID == 22) return true;
-        }
-
+        if (block.chainid == 42161 && _strategyID == 22) return true;
         // base
-        if (block.chainid == 8453) {
-            // CompV3RepayOnPriceL2Strategy
-            if (_strategyID == 36) return true;
-        }
-
-        return false;
-    }
-
-    function isCompoundV3EOARepayStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1) {
-            // CompV3EOARepayStrategy
-            if (_strategyID == 23) return true;
-        }
-
-        // arbitrum
-        if (block.chainid == 42161) {
-            // CompV3EOARepayL2Strategy
-            if (_strategyID == 28) return true;
-        }
-
-        // base
-        if (block.chainid == 8453) {
-            // CompV3EOARepayL2Strategy
-            if (_strategyID == 42) return true;
-        }
+        if (block.chainid == 8453 && _strategyID == 36) return true;
 
         return false;
     }
 
     function isCompoundV3BoostStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1) {
-            // CompV3Boost
-            if (_strategyID == 19) return true;
-        }
-
-        // arbitrum
-        if (block.chainid == 42161) {
-            // CompV3BoostL2
-            if (_strategyID == 12) return true;
-        }
-
-        // base
-        if (block.chainid == 8453) {
-            // CompV3BoostL2
-            if (_strategyID == 12) return true;
-        }
-
-        return false;
-    }
-
-    function isCompoundV3EOABoostStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1) {
-            // CompV3EOABoostStrategy
-            if (_strategyID == 27) return true;
-        }
-
-        // arbitrum
-        if (block.chainid == 42161) {
-            // CompV3EOABoostL2Strategy
-            if (_strategyID == 30) return true;
-        }
-
-        // base
-        if (block.chainid == 8453) {
-            // CompV3EOABoostL2Strategy
-            if (_strategyID == 44) return true;
-        }
+        if (block.chainid == 1 && _strategyID == 19) return true;
+        // arbitrum & base
+        if ((block.chainid == 42161 || block.chainid == 8453) && _strategyID == 12) return true;
 
         return false;
     }
 
     function isCompoundV3CloseStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1) {
-            // CompV3FLCloseToDebtStrategy
-            if (_strategyID == 122) return true;
-        }
-
+        if (block.chainid == 1 && _strategyID == 122) return true;
         // arbitrum
-        if (block.chainid == 42161) {
-            if (_strategyID == 26) return true;
-        }
-
+        if (block.chainid == 42161 && _strategyID == 26) return true;
         // base
-        if (block.chainid == 8453) {
-            if (_strategyID == 40) return true;
-        }
+        if (block.chainid == 8453 && _strategyID == 40) return true;
 
         return false;
     }
