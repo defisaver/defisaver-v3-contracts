@@ -11,6 +11,8 @@ contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
 
     /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    /// @notice 999% is highest ratio that we will check the 5% offset for
+    uint256 internal constant RATIO_LIMIT = 9990000000000000000;
 
     error BadAfterRatio(uint256 currentRatio, uint256 targetRatio);
 
@@ -35,8 +37,11 @@ contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
 
         uint256 currRatio = getRatio(market, address(this));
 
-        if (currRatio > (targetRatio + RATIO_OFFSET) || currRatio < (targetRatio - RATIO_OFFSET)) {
-            revert BadAfterRatio(currRatio, targetRatio);
+        /// @notice If `targetRatio` is 999% or more then skip `RATIO_OFFSET` check because it is very hard to be precise under 5%.
+        if (targetRatio < RATIO_LIMIT) {
+            if (currRatio > (targetRatio + RATIO_OFFSET) || currRatio < (targetRatio - RATIO_OFFSET)) {
+                revert BadAfterRatio(currRatio, targetRatio);
+            }
         }
 
         emit ActionEvent("AaveV3OpenRatioCheck", abi.encode(currRatio));
