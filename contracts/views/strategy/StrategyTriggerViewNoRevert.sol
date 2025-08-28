@@ -273,7 +273,7 @@ contract StrategyTriggerViewNoRevert is
         returns (TriggerStatus)
     {
         TriggerStatus hasMinDebt = _verifyAaveV3MinDebtPosition(_smartWallet);
-        if (hasMinDebt != TriggerStatus.TRUE) return hasMinDebt;
+        if (hasMinDebt != TriggerStatus.TRUE) return TriggerStatus.FALSE;
 
         uint256 targetRatio = uint256(_sub.subData[5]);
         address market = (address(uint160(uint256(_sub.subData[4]))));
