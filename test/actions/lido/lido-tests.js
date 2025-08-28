@@ -1,5 +1,5 @@
-const { expect } = require('chai');
-const hre = require('hardhat');
+const { expect } = require("chai");
+const hre = require("hardhat");
 
 const {
     getProxy,
@@ -10,24 +10,24 @@ const {
     depositToWeth,
     STETH_ADDRESS,
     WSTETH_ADDRESS,
-} = require('../../utils/utils');
+} = require("../../utils/utils");
 
-const { lidoStake, lidoWrap, lidoUnwrap } = require('../../utils/actions');
+const { lidoStake, lidoWrap, lidoUnwrap } = require("../../utils/actions");
 
 const lidoStakeTest = async () => {
-    describe('Lido WETH staking', function () {
+    describe("Lido WETH staking", function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
 
-        it('... stake 10 WETH to LIDO', async () => {
-            const amount = hre.ethers.utils.parseUnits('10', 18);
+        it("... stake 10 WETH to LIDO", async () => {
+            const amount = hre.ethers.utils.parseUnits("10", 18);
             await depositToWeth(amount);
             await approve(WETH_ADDRESS, proxy.address);
 
@@ -48,19 +48,19 @@ const lidoStakeTest = async () => {
 };
 
 const lidoWrapTest = async () => {
-    describe('Lido WStEth', function () {
+    describe("Lido WStEth", function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
 
-        it('... stake 10 WETH to LIDO and then wrap them', async () => {
-            const amount = hre.ethers.utils.parseUnits('10', 18);
+        it("... stake 10 WETH to LIDO and then wrap them", async () => {
+            const amount = hre.ethers.utils.parseUnits("10", 18);
             await depositToWeth(amount);
             await approve(WETH_ADDRESS, proxy.address);
 
@@ -89,8 +89,8 @@ const lidoWrapTest = async () => {
             console.log(`After wrapping received ${wStEthChange.toString()} WStEth`);
         }).timeout(50000);
 
-        it('... stake 10 WETH to LIDO and then wrap them, using Uint.max for wrapping input', async () => {
-            const amount = hre.ethers.utils.parseUnits('20', 18);
+        it("... stake 10 WETH to LIDO and then wrap them, using Uint.max for wrapping input", async () => {
+            const amount = hre.ethers.utils.parseUnits("20", 18);
             await depositToWeth(amount);
             await approve(WETH_ADDRESS, proxy.address);
 
@@ -112,7 +112,11 @@ const lidoWrapTest = async () => {
             await approve(STETH_ADDRESS, proxy.address);
             const wStEthBalanceBefore = await balanceOf(WSTETH_ADDRESS, senderAcc.address);
             await lidoWrap(
-                hre.ethers.constants.MaxUint256, senderAcc.address, senderAcc.address, false, proxy,
+                hre.ethers.constants.MaxUint256,
+                senderAcc.address,
+                senderAcc.address,
+                false,
+                proxy
             );
             const wStEthBalanceAfter = await balanceOf(WSTETH_ADDRESS, senderAcc.address);
 
@@ -121,8 +125,8 @@ const lidoWrapTest = async () => {
             console.log(`After wrapping received ${wStEthChange.toString()} WStEth`);
         }).timeout(50000);
 
-        it('... directly transform 10 WETH to WstEth', async () => {
-            const amount = hre.ethers.utils.parseUnits('10', 18);
+        it("... directly transform 10 WETH to WstEth", async () => {
+            const amount = hre.ethers.utils.parseUnits("10", 18);
             await depositToWeth(amount);
             await approve(WETH_ADDRESS, proxy.address);
 
@@ -144,19 +148,19 @@ const lidoWrapTest = async () => {
 };
 
 const lidoUnwrapTest = async () => {
-    describe('Lido WETH staking', function () {
+    describe("Lido WETH staking", function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
 
-        it('... directly transform 10 WETH to WstEth and then unwrap into StEth', async () => {
-            const amount = hre.ethers.utils.parseUnits('10', 18);
+        it("... directly transform 10 WETH to WstEth and then unwrap into StEth", async () => {
+            const amount = hre.ethers.utils.parseUnits("10", 18);
             await depositToWeth(amount);
             await approve(WETH_ADDRESS, proxy.address);
 
@@ -184,9 +188,9 @@ const lidoUnwrapTest = async () => {
     });
 };
 const lidoDeployContracts = async () => {
-    await redeploy('LidoStake');
-    await redeploy('LidoWrap');
-    await redeploy('LidoUnwrap');
+    await redeploy("LidoStake");
+    await redeploy("LidoWrap");
+    await redeploy("LidoUnwrap");
 };
 const lidoFullTest = async () => {
     await lidoDeployContracts();

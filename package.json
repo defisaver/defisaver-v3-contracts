@@ -15,7 +15,7 @@
         "lint:js": "eslint . --ext .js,.ts",
         "lint:js:fix": "eslint . --ext .js,.ts --fix",
         "format:lint:check": "npm run format:check && npm run lint:js",
-        "format:lint:fix": "npm run format:fix && lint:js:fix"
+        "format:lint:fix": "npm run format:fix && npm run lint:js:fix"
     },
     "repository": {
         "type": "git",
@@ -52,7 +52,7 @@
         "decimal.js": "^10.3.1",
         "dotenv-safe": "^8.2.0",
         "envfile": "^6.17.0",
-        "eslint": "^7.24.0",
+        "eslint": "^8.57.0",
         "eslint-config-airbnb-base": "^14.2.1",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-import": "^2.32.0",

@@ -1,7 +1,7 @@
-const { subProxyTest } = require('./core-tests');
+const { subProxyTest } = require("./core-tests");
 
-describe('Sub-Proxy', () => {
-    it('... should test subProxy', async () => {
+describe("Sub-Proxy", () => {
+    it("... should test subProxy", async () => {
         await subProxyTest();
     }).timeout(50000);
 });

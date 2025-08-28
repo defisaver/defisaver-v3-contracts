@@ -1,32 +1,39 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable max-len */
-require('dotenv-safe').config();
+require("dotenv-safe").config();
 
-const ethers = require('ethers');
-const fs = require('fs');
-const path = require('path');
-const { program } = require('commander');
+const ethers = require("ethers");
+const fs = require("fs");
+const path = require("path");
+const { program } = require("commander");
 
-const {
-    addrs,
-    generateIds,
-} = require('../test/utils/utils');
+const { addrs, generateIds } = require("../test/utils/utils");
 
-const strategyStorageAbi = require('../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').abi;
-const bundleStorageAbi = require('../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').abi;
+const strategyStorageAbi =
+    require("../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json").abi;
+const bundleStorageAbi =
+    require("../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json").abi;
 
-let network = 'mainnet';
+let network = "mainnet";
 
 const setStrategyAndBundleContracts = async (options) => {
-    network = options.network.length === 0 ? 'mainnet' : options.network;
+    network = options.network.length === 0 ? "mainnet" : options.network;
 
-    const nodeName = network !== 'mainnet' ? `${network.toUpperCase()}_NODE` : 'ETHEREUM_NODE';
+    const nodeName = network !== "mainnet" ? `${network.toUpperCase()}_NODE` : "ETHEREUM_NODE";
 
     const provider = new ethers.providers.WebSocketProvider(process.env[nodeName]);
 
-    const strategyStorage = new ethers.Contract(addrs[network].STRATEGY_STORAGE_ADDR, strategyStorageAbi, provider);
+    const strategyStorage = new ethers.Contract(
+        addrs[network].STRATEGY_STORAGE_ADDR,
+        strategyStorageAbi,
+        provider
+    );
 
-    const bundleStorage = new ethers.Contract(addrs[network].BUNDLE_STORAGE_ADDR, bundleStorageAbi, provider);
+    const bundleStorage = new ethers.Contract(
+        addrs[network].BUNDLE_STORAGE_ADDR,
+        bundleStorageAbi,
+        provider
+    );
 
     return { strategyStorage, bundleStorage };
 };
@@ -63,22 +70,26 @@ const getAllStrategies = async (options) => {
             name: strategy.name,
             id: index,
             isContinuous: strategy.continuous,
-            triggerIds: strategy.triggerIds.map((triggerId) => idsMap[triggerId]?.fileName?.toString()),
+            triggerIds: strategy.triggerIds.map((triggerId) =>
+                idsMap[triggerId]?.fileName?.toString()
+            ),
             actionIds: strategy.actionIds.map((actionId) => idsMap[actionId]?.fileName?.toString()),
-            paramMapping: strategy.paramMapping.map((param) => param.map((p) => {
-                if (p === 254) return '&proxy';
-                if (p === 255) return '&eoa';
+            paramMapping: strategy.paramMapping.map((param) =>
+                param.map((p) => {
+                    if (p === 254) return "&proxy";
+                    if (p === 255) return "&eoa";
 
-                if (p <= 127 && p > 0) {
-                    return `$${p}`;
-                }
+                    if (p <= 127 && p > 0) {
+                        return `$${p}`;
+                    }
 
-                if (p >= 128 && p <= 253) {
-                    return `&${p - 127}`;
-                }
+                    if (p >= 128 && p <= 253) {
+                        return `&${p - 127}`;
+                    }
 
-                return p;
-            })),
+                    return p;
+                })
+            ),
         };
 
         if (strategyInBundleMap[index] !== undefined) {
@@ -87,7 +98,7 @@ const getAllStrategies = async (options) => {
         return strategyInfo;
     });
 
-    const filePath = path.join(__dirname, '..', 'addresses', 'strategies', `${network}.json`);
+    const filePath = path.join(__dirname, "..", "addresses", "strategies", `${network}.json`);
 
     fs.writeFileSync(filePath, JSON.stringify(formattedStrategies, null, 2));
 
@@ -96,18 +107,20 @@ const getAllStrategies = async (options) => {
 
 (async () => {
     program
-        .command('get-strategy <id>')
-        .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
-        .description('Returns strategy data based on id')
+        .command("get-strategy <id>")
+        .option("-n, --network <network>", "Specify network we are calling (defaults to L1)", [])
+        .description("Returns strategy data based on id")
         .action(async (id, options) => {
             await getStrategy(id, options);
             process.exit(0);
         });
 
     program
-        .command('sync-strategies')
-        .option('-n, --network <network>', 'Specify network we are calling (defaults to L1)', [])
-        .description('Fetches all strategies from on-chain and writes to file in addresses/strategies/<network>.json')
+        .command("sync-strategies")
+        .option("-n, --network <network>", "Specify network we are calling (defaults to L1)", [])
+        .description(
+            "Fetches all strategies from on-chain and writes to file in addresses/strategies/<network>.json"
+        )
         .action(async (options) => {
             await getAllStrategies(options);
             process.exit(0);

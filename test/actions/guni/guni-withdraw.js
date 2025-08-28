@@ -1,18 +1,16 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require("../../utils/utils");
 
-const { guniWithdrawTest } = require('./guni-tests');
+const { guniWithdrawTest } = require("./guni-tests");
 
-describe('GUNI Withdraw', function () {
+describe("GUNI Withdraw", function () {
     this.timeout(80000);
 
     before(async () => {
-        await redeploy('GUniDeposit');
-        await redeploy('GUniWithdraw');
+        await redeploy("GUniDeposit");
+        await redeploy("GUniWithdraw");
     });
 
-    it('... Try to supply 10k dai and 10k USDT do G-UNI LP pool and then withdraw everything', async () => {
+    it("... Try to supply 10k dai and 10k USDT do G-UNI LP pool and then withdraw everything", async () => {
         await guniWithdrawTest();
     }).timeout(100000);
 });

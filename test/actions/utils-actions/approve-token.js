@@ -1,16 +1,14 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
-const { approveTokenTest } = require('./utils-actions-tests');
+const { redeploy } = require("../../utils/utils");
+const { approveTokenTest } = require("./utils-actions-tests");
 
-describe('Approve-Token', function () {
+describe("Approve-Token", function () {
     this.timeout(80000);
 
     before(async () => {
-        await redeploy('ApproveToken');
+        await redeploy("ApproveToken");
     });
 
-    it('... should test ApproveToken action', async () => {
+    it("... should test ApproveToken action", async () => {
         await approveTokenTest();
     });
 });

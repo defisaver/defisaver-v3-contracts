@@ -1,27 +1,36 @@
-const hre = require('hardhat');
-const { expect } = require('chai');
-const { getAssetInfoByAddress } = require('@defisaver/tokens');
+const hre = require("hardhat");
+const { expect } = require("chai");
+const { getAssetInfoByAddress } = require("@defisaver/tokens");
 const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy,
-    setBalance, approve, nullAddress, fetchAmountinUSDPrice,
-} = require('../../utils/utils');
-const { getMarkets, loanTokenSupplyAmountInUsd } = require('../../utils/morpho-blue');
-const { morphoBlueSupply } = require('../../utils/actions');
+    takeSnapshot,
+    revertToSnapshot,
+    getProxy,
+    redeploy,
+    setBalance,
+    approve,
+    nullAddress,
+    fetchAmountinUSDPrice,
+} = require("../../utils/utils");
+const { getMarkets, loanTokenSupplyAmountInUsd } = require("../../utils/morpho-blue");
+const { morphoBlueSupply } = require("../../utils/actions");
 
-describe('Morpho-Blue-Supply', function () {
+describe("Morpho-Blue-Supply", function () {
     this.timeout(80000);
 
     const markets = getMarkets();
     const supplyAmountInUsd = loanTokenSupplyAmountInUsd;
 
-    let senderAcc; let proxy; let snapshot; let view;
+    let senderAcc;
+    let proxy;
+    let snapshot;
+    let view;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
         snapshot = await takeSnapshot();
-        await redeploy('MorphoBlueSupply');
-        view = await (await hre.ethers.getContractFactory('MorphoBlueView')).deploy();
+        await redeploy("MorphoBlueSupply");
+        view = await (await hre.ethers.getContractFactory("MorphoBlueView")).deploy();
     });
     beforeEach(async () => {
         snapshot = await takeSnapshot();
@@ -35,14 +44,16 @@ describe('Morpho-Blue-Supply', function () {
         const collToken = getAssetInfoByAddress(marketParams[1]);
         it(`should supply ${supplyAmountInUsd}$ of ${loanToken.symbol} to MorphoBlue ${collToken.symbol}/${loanToken.symbol} market`, async () => {
             const supplyAmount = fetchAmountinUSDPrice(loanToken.symbol, supplyAmountInUsd);
-            const supplyAmountInWei = hre.ethers.utils.parseUnits(
-                supplyAmount, loanToken.decimals,
-            );
+            const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, loanToken.decimals);
 
             await setBalance(marketParams[0], senderAcc.address, supplyAmountInWei);
             await approve(marketParams[0], proxy.address, senderAcc);
             await morphoBlueSupply(
-                proxy, marketParams, supplyAmountInWei, senderAcc.address, nullAddress,
+                proxy,
+                marketParams,
+                supplyAmountInWei,
+                senderAcc.address,
+                nullAddress
             );
             const positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
             expect(supplyAmountInWei).to.be.closeTo(positionInfo.suppliedInAssets, 1);

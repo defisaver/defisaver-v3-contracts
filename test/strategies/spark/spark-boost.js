@@ -1,10 +1,10 @@
-const { sparkBoostStrategyTest } = require('./spark-tests');
-const config = require('../../../hardhat.config');
+const { sparkBoostStrategyTest } = require("./spark-tests");
+const config = require("../../../hardhat.config");
 
-describe('Spark booststrategy test', function () {
+describe("Spark booststrategy test", function () {
     this.timeout(80000);
 
-    it('... test Spark boost', async () => {
+    it("... test Spark boost", async () => {
         let numTestPairs = 3;
 
         if (config.lightTesting) numTestPairs = 1;

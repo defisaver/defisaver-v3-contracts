@@ -1,14 +1,12 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
-const { reflexerWithdrawStuckFundsTest } = require('./reflexer-tests');
+const { redeploy } = require("../../utils/utils");
+const { reflexerWithdrawStuckFundsTest } = require("./reflexer-tests");
 
-describe('Reflexer-Withdraw-Stuck-Funds', () => {
+describe("Reflexer-Withdraw-Stuck-Funds", () => {
     before(async () => {
-        await redeploy('ReflexerWithdrawStuckFunds');
+        await redeploy("ReflexerWithdrawStuckFunds");
     });
 
-    it('... should do a full Reflexer Withdraw stuck funds test', async () => {
+    it("... should do a full Reflexer Withdraw stuck funds test", async () => {
         await reflexerWithdrawStuckFundsTest();
     }).timeout(400000);
 });

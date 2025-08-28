@@ -1,9 +1,9 @@
-const { instCompDebtShiftTest } = require('./inst-recipes');
+const { instCompDebtShiftTest } = require("./inst-recipes");
 
-describe('Inst Aave Debt Shift test', function () {
+describe("Inst Aave Debt Shift test", function () {
     this.timeout(80000);
 
-    it('... test insta aave shifting a position with debt recipe', async () => {
+    it("... test insta aave shifting a position with debt recipe", async () => {
         await instCompDebtShiftTest();
     }).timeout(50000);
 });

@@ -1,22 +1,30 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-len */
-const hre = require('hardhat');
-const { expect } = require('chai');
-const automationSdk = require('@defisaver/automation-sdk');
-const { getAssetInfo } = require('@defisaver/tokens');
-const { getLiquityV2TestPairs, deployLiquityV2CloseBundle } = require('../../utils/liquityV2');
-const { BaseLiquityV2StrategyTest } = require('./common');
-const { subLiquityV2CloseBundle } = require('../utils/strategy-subs');
+const hre = require("hardhat");
+const { expect } = require("chai");
+const automationSdk = require("@defisaver/automation-sdk");
+const { getAssetInfo } = require("@defisaver/tokens");
+const { getLiquityV2TestPairs, deployLiquityV2CloseBundle } = require("../../utils/liquityV2");
+const { BaseLiquityV2StrategyTest } = require("./common");
+const { subLiquityV2CloseBundle } = require("../utils/strategy-subs");
 const {
-    formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
+    formatExchangeObjSdk,
+    BOLD_ADDR,
+    addrs,
+    network,
+    isNetworkFork,
     balanceOf,
     WETH_ADDRESS,
     ETH_ADDR,
     BALANCER_VAULT_ADDR,
     setBalance,
     fetchAmountInUSDPrice,
-} = require('../../utils/utils');
-const { callLiquityV2CloseToCollStrategy, callLiquityV2FLCloseToCollStrategy, callLiquityV2FLCloseToDebtStrategy } = require('../utils/strategy-calls');
+} = require("../../utils/utils");
+const {
+    callLiquityV2CloseToCollStrategy,
+    callLiquityV2FLCloseToCollStrategy,
+    callLiquityV2FLCloseToDebtStrategy,
+} = require("../utils/strategy-calls");
 
 class CloseTest extends BaseLiquityV2StrategyTest {
     async setUp() {
@@ -45,18 +53,18 @@ class CloseTest extends BaseLiquityV2StrategyTest {
     }
 
     async assertEoaBalances(collAsset, stateBefore, stateAfter) {
-        if (collAsset.symbol === 'WETH') {
+        if (collAsset.symbol === "WETH") {
             expect(stateAfter.eoaEthBalance).to.be.gt(
                 stateBefore.eoaEthBalance
-                    .add(hre.ethers.utils.parseEther('0.0375'))
-                    .add(stateBefore.troveInfo.collAmount.mul(8).div(10)),
+                    .add(hre.ethers.utils.parseEther("0.0375"))
+                    .add(stateBefore.troveInfo.collAmount.mul(8).div(10))
             );
         } else {
             expect(stateAfter.eoaEthBalance).to.be.eq(
-                stateBefore.eoaEthBalance.add(hre.ethers.utils.parseEther('0.0375')),
+                stateBefore.eoaEthBalance.add(hre.ethers.utils.parseEther("0.0375"))
             );
             expect(stateAfter.eoaCollBalance).to.be.gt(
-                stateBefore.eoaCollBalance.add(stateBefore.troveInfo.collAmount.mul(9).div(10)),
+                stateBefore.eoaCollBalance.add(stateBefore.troveInfo.collAmount.mul(9).div(10))
             );
         }
     }
@@ -82,7 +90,7 @@ class CloseTest extends BaseLiquityV2StrategyTest {
             stopLossType,
             takeProfitPrice,
             takeProfitType,
-            this.bundles.close,
+            this.bundles.close
         );
         return { subId, strategySub };
     }
@@ -90,15 +98,19 @@ class CloseTest extends BaseLiquityV2StrategyTest {
     runTests() {
         // eslint-disable-next-line no-unused-vars
         this.testPairs.forEach((pair, i) => {
-            it('... should call LiquityV2 close to collateral strategy', async () => {
+            it("... should call LiquityV2 close to collateral strategy", async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
 
-                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, '30000');
-                const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, "30000");
+                const boldAmount = hre.ethers.utils.parseUnits("15000", 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
-                console.log('troveId', troveId);
+                console.log("troveId", troveId);
 
-                const { subId, strategySub } = await this.subCloseBundle(pair.market, troveId, collAsset.address);
+                const { subId, strategySub } = await this.subCloseBundle(
+                    pair.market,
+                    troveId,
+                    collAsset.address
+                );
 
                 const stateBefore = {
                     troveInfo: await this.contracts.view.getTroveInfo(pair.market, troveId),
@@ -114,7 +126,7 @@ class CloseTest extends BaseLiquityV2StrategyTest {
                     withdrawCollAmount,
                     addrs[network].UNISWAP_V3_WRAPPER,
                     false,
-                    true,
+                    true
                 );
 
                 await callLiquityV2CloseToCollStrategy(
@@ -123,7 +135,7 @@ class CloseTest extends BaseLiquityV2StrategyTest {
                     subId,
                     strategySub,
                     exchangeObject,
-                    withdrawCollAmount,
+                    withdrawCollAmount
                 );
 
                 const stateAfter = {
@@ -134,15 +146,19 @@ class CloseTest extends BaseLiquityV2StrategyTest {
 
                 this.assert(collAsset, stateBefore, stateAfter);
             });
-            it('... should call LiquityV2 fl close to collateral strategy', async () => {
+            it("... should call LiquityV2 fl close to collateral strategy", async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
 
-                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, '30000');
-                const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, "30000");
+                const boldAmount = hre.ethers.utils.parseUnits("15000", 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
-                console.log('troveId', troveId);
+                console.log("troveId", troveId);
 
-                const { subId, strategySub } = await this.subCloseBundle(pair.market, troveId, collAsset.address);
+                const { subId, strategySub } = await this.subCloseBundle(
+                    pair.market,
+                    troveId,
+                    collAsset.address
+                );
 
                 const stateBefore = {
                     troveInfo: await this.contracts.view.getTroveInfo(pair.market, troveId),
@@ -158,7 +174,7 @@ class CloseTest extends BaseLiquityV2StrategyTest {
                     flCollAmount,
                     addrs[network].UNISWAP_V3_WRAPPER,
                     false,
-                    true,
+                    true
                 );
 
                 await callLiquityV2FLCloseToCollStrategy(
@@ -169,7 +185,7 @@ class CloseTest extends BaseLiquityV2StrategyTest {
                     exchangeObject,
                     flCollAmount,
                     this.contracts.flAction.address,
-                    collAsset.address,
+                    collAsset.address
                 );
 
                 const stateAfter = {
@@ -180,15 +196,19 @@ class CloseTest extends BaseLiquityV2StrategyTest {
 
                 this.assert(collAsset, stateBefore, stateAfter);
             });
-            it('... should call LiquityV2 fl close to debt strategy', async () => {
+            it("... should call LiquityV2 fl close to debt strategy", async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
 
-                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, '30000');
-                const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, "30000");
+                const boldAmount = hre.ethers.utils.parseUnits("15000", 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
-                console.log('troveId', troveId);
+                console.log("troveId", troveId);
 
-                const { subId, strategySub } = await this.subCloseBundle(pair.market, troveId, collAsset.address);
+                const { subId, strategySub } = await this.subCloseBundle(
+                    pair.market,
+                    troveId,
+                    collAsset.address
+                );
 
                 const stateBefore = {
                     troveInfo: await this.contracts.view.getTroveInfo(pair.market, troveId),
@@ -202,7 +222,7 @@ class CloseTest extends BaseLiquityV2StrategyTest {
                     stateBefore.troveInfo.collAmount,
                     addrs[network].UNISWAP_V3_WRAPPER,
                     false,
-                    true,
+                    true
                 );
 
                 const flBoldAmount = stateBefore.troveInfo.debtAmount.mul(10).div(8);
@@ -217,7 +237,7 @@ class CloseTest extends BaseLiquityV2StrategyTest {
                     strategySub,
                     exchangeObject,
                     flBoldAmount,
-                    this.contracts.flAction.address,
+                    this.contracts.flAction.address
                 );
 
                 const stateAfter = {
@@ -236,11 +256,17 @@ module.exports = async function runCloseTests() {
     const testPairs = await getLiquityV2TestPairs();
     const isFork = isNetworkFork();
     const closeTest = new CloseTest(testPairs, isFork);
-    describe('LiquityV2 Close Strategy Tests', function () {
+    describe("LiquityV2 Close Strategy Tests", function () {
         this.timeout(1200000);
-        before(async () => { await closeTest.setUp(); });
-        beforeEach(async () => { await closeTest.takeSnapshot(); });
-        afterEach(async () => { await closeTest.revertToSnapshot(); });
+        before(async () => {
+            await closeTest.setUp();
+        });
+        beforeEach(async () => {
+            await closeTest.takeSnapshot();
+        });
+        afterEach(async () => {
+            await closeTest.revertToSnapshot();
+        });
         closeTest.runTests();
     });
 };

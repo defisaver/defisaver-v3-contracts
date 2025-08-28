@@ -1,3 +1,3 @@
-const { morphoClaimTest } = require('./morpho-tests');
+const { morphoClaimTest } = require("./morpho-tests");
 
 morphoClaimTest();

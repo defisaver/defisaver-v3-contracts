@@ -1,16 +1,14 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
-const { transferNFTTest } = require('./utils-actions-tests');
+const { redeploy } = require("../../utils/utils");
+const { transferNFTTest } = require("./utils-actions-tests");
 
-describe('Transfer-Nft', function () {
+describe("Transfer-Nft", function () {
     this.timeout(80000);
 
     before(async () => {
-        await redeploy('TransferNFT');
+        await redeploy("TransferNFT");
     });
 
-    it('... should transfer a nft token from proxy wallet', async () => {
+    it("... should transfer a nft token from proxy wallet", async () => {
         await transferNFTTest();
     });
 });

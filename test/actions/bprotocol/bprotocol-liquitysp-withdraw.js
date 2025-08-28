@@ -1,3 +1,3 @@
-const { BprotocolLiquitySPWithdrawTest } = require('./bprotocol-tests');
+const { BprotocolLiquitySPWithdrawTest } = require("./bprotocol-tests");
 
 BprotocolLiquitySPWithdrawTest();

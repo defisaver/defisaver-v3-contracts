@@ -1,36 +1,55 @@
 /* eslint-disable no-await-in-loop */
-const hre = require('hardhat');
-const { expect } = require('chai');
-const dfs = require('@defisaver/sdk');
-const { getAssetInfoByAddress } = require('@defisaver/tokens');
+const hre = require("hardhat");
+const { expect } = require("chai");
+const dfs = require("@defisaver/sdk");
+const { getAssetInfoByAddress } = require("@defisaver/tokens");
 const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy,
-    setBalance, approve, nullAddress, fetchAmountinUSDPrice,
-    formatMockExchangeObj, setNewExchangeWrapper, getAddrFromRegistry,
-} = require('../../utils/utils');
+    takeSnapshot,
+    revertToSnapshot,
+    getProxy,
+    redeploy,
+    setBalance,
+    approve,
+    nullAddress,
+    fetchAmountinUSDPrice,
+    formatMockExchangeObj,
+    setNewExchangeWrapper,
+    getAddrFromRegistry,
+} = require("../../utils/utils");
 const {
-    getMarkets, collateralSupplyAmountInUsd, supplyToMarket, borrowAmountInUsd,
-} = require('../../utils/morpho-blue');
-const { morphoBlueSupplyCollateral, morphoBlueBorrow, executeAction } = require('../../utils/actions');
+    getMarkets,
+    collateralSupplyAmountInUsd,
+    supplyToMarket,
+    borrowAmountInUsd,
+} = require("../../utils/morpho-blue");
+const {
+    morphoBlueSupplyCollateral,
+    morphoBlueBorrow,
+    executeAction,
+} = require("../../utils/actions");
 
-describe('Morpho-Blue-Repay', function () {
+describe("Morpho-Blue-Repay", function () {
     this.timeout(80000);
 
     const markets = getMarkets();
 
-    let senderAcc; let proxy; let snapshot; let view; let mockWrapper;
+    let senderAcc;
+    let proxy;
+    let snapshot;
+    let view;
+    let mockWrapper;
     let supplyAmountInWei;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
         snapshot = await takeSnapshot();
-        await redeploy('MorphoBlueSupplyCollateral');
-        await redeploy('MorphoBlueBorrow');
-        await redeploy('MorphoBlueWithdrawCollateral');
-        await redeploy('MorphoBluePayback');
-        mockWrapper = await redeploy('MockExchangeWrapper');
-        view = await (await hre.ethers.getContractFactory('MorphoBlueView')).deploy();
+        await redeploy("MorphoBlueSupplyCollateral");
+        await redeploy("MorphoBlueBorrow");
+        await redeploy("MorphoBlueWithdrawCollateral");
+        await redeploy("MorphoBluePayback");
+        mockWrapper = await redeploy("MockExchangeWrapper");
+        view = await (await hre.ethers.getContractFactory("MorphoBlueView")).deploy();
         await setNewExchangeWrapper(senderAcc, mockWrapper.address);
 
         for (let i = 0; i < markets.length; i++) {
@@ -40,22 +59,27 @@ describe('Morpho-Blue-Repay', function () {
 
             await supplyToMarket(marketParams);
             const supplyAmount = fetchAmountinUSDPrice(
-                collToken.symbol, collateralSupplyAmountInUsd,
+                collToken.symbol,
+                collateralSupplyAmountInUsd
             );
-            supplyAmountInWei = hre.ethers.utils.parseUnits(
-                supplyAmount, collToken.decimals,
-            );
+            supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, collToken.decimals);
             await setBalance(collToken.address, senderAcc.address, supplyAmountInWei);
             await approve(collToken.address, proxy.address, senderAcc);
             await morphoBlueSupplyCollateral(
-                proxy, marketParams, supplyAmountInWei, senderAcc.address, nullAddress,
+                proxy,
+                marketParams,
+                supplyAmountInWei,
+                senderAcc.address,
+                nullAddress
             );
             const borrowAmount = fetchAmountinUSDPrice(loanToken.symbol, borrowAmountInUsd);
-            const borrowAmountInWei = hre.ethers.utils.parseUnits(
-                borrowAmount, loanToken.decimals,
-            );
+            const borrowAmountInWei = hre.ethers.utils.parseUnits(borrowAmount, loanToken.decimals);
             await morphoBlueBorrow(
-                proxy, marketParams, borrowAmountInWei, nullAddress, senderAcc.address,
+                proxy,
+                marketParams,
+                borrowAmountInWei,
+                nullAddress,
+                senderAcc.address
             );
         }
     });
@@ -80,16 +104,12 @@ describe('Morpho-Blue-Repay', function () {
                 marketParams[4],
                 repayAmount,
                 nullAddress,
-                proxy.address,
+                proxy.address
             );
             const sellAction = new dfs.actions.basic.SellAction(
-                await formatMockExchangeObj(
-                    collToken,
-                    loanToken,
-                    repayAmount,
-                ),
+                await formatMockExchangeObj(collToken, loanToken, repayAmount),
                 proxy.address,
-                proxy.address,
+                proxy.address
             );
             const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
                 marketParams[0],
@@ -97,18 +117,18 @@ describe('Morpho-Blue-Repay', function () {
                 marketParams[2],
                 marketParams[3],
                 marketParams[4],
-                '$2',
+                "$2",
                 proxy.address,
-                nullAddress,
+                nullAddress
             );
-            const repayRecipe = new dfs.Recipe('RepayRecipe', [
+            const repayRecipe = new dfs.Recipe("RepayRecipe", [
                 withdrawAction,
                 sellAction,
                 paybackAction,
             ]);
             const functionData = repayRecipe.encodeForDsProxyCall();
 
-            await executeAction('RecipeExecutor', functionData[1], proxy);
+            await executeAction("RecipeExecutor", functionData[1], proxy);
             const debtBefore = positionInfo.borrowedInAssets;
             const collBefore = positionInfo.collateral;
             positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
@@ -123,17 +143,13 @@ describe('Morpho-Blue-Repay', function () {
             const flashloanAction = new dfs.actions.flashloan.FLAction(
                 new dfs.actions.flashloan.BalancerFlashLoanAction(
                     [collToken.address],
-                    [repayAmount],
-                ),
+                    [repayAmount]
+                )
             );
             const sellAction = new dfs.actions.basic.SellAction(
-                await formatMockExchangeObj(
-                    collToken,
-                    loanToken,
-                    repayAmount,
-                ),
+                await formatMockExchangeObj(collToken, loanToken, repayAmount),
                 proxy.address,
-                proxy.address,
+                proxy.address
             );
             const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
                 marketParams[0],
@@ -141,22 +157,22 @@ describe('Morpho-Blue-Repay', function () {
                 marketParams[2],
                 marketParams[3],
                 marketParams[4],
-                '$2',
+                "$2",
                 proxy.address,
-                nullAddress,
+                nullAddress
             );
-            const flAddress = await getAddrFromRegistry('FLAction');
+            const flAddress = await getAddrFromRegistry("FLAction");
             const withdrawAction = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
                 marketParams[0],
                 marketParams[1],
                 marketParams[2],
                 marketParams[3],
                 marketParams[4],
-                '$1',
+                "$1",
                 nullAddress,
-                flAddress,
+                flAddress
             );
-            const repayRecipe = new dfs.Recipe('FLRepayRecipe', [
+            const repayRecipe = new dfs.Recipe("FLRepayRecipe", [
                 flashloanAction,
                 sellAction,
                 paybackAction,
@@ -164,7 +180,7 @@ describe('Morpho-Blue-Repay', function () {
             ]);
             const functionData = repayRecipe.encodeForDsProxyCall();
 
-            await executeAction('RecipeExecutor', functionData[1], proxy);
+            await executeAction("RecipeExecutor", functionData[1], proxy);
             const debtBefore = positionInfo.borrowedInAssets;
             const collBefore = positionInfo.collateral;
             positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);

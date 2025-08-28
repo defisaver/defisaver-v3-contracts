@@ -1,8 +1,10 @@
-const hre = require('hardhat');
-const { getAssetInfo } = require('@defisaver/tokens');
-const { topUp } = require('../../../scripts/utils/fork');
+const hre = require("hardhat");
+const { getAssetInfo } = require("@defisaver/tokens");
+const { topUp } = require("../../../scripts/utils/fork");
 const {
-    getProxy, addrs, getContractFromRegistry,
+    getProxy,
+    addrs,
+    getContractFromRegistry,
     getOwnerAddr,
     setBalance,
     BOLD_ADDR,
@@ -11,9 +13,9 @@ const {
     revertToSnapshot,
     redeploy,
     network,
-} = require('../../utils/utils');
-const { uniV3CreatePool, liquityV2Open } = require('../../utils/actions');
-const { addBotCaller } = require('../utils/utils-strategies');
+} = require("../../utils/utils");
+const { uniV3CreatePool, liquityV2Open } = require("../../utils/actions");
+const { addBotCaller } = require("../utils/utils-strategies");
 
 class BaseLiquityV2StrategyTest {
     constructor(testPairs, isFork) {
@@ -25,7 +27,7 @@ class BaseLiquityV2StrategyTest {
     }
 
     async baseSetUp() {
-        console.log('isFork', this.isFork);
+        console.log("isFork", this.isFork);
 
         await this.setUpCallers();
         await this.setUpContracts();
@@ -56,29 +58,32 @@ class BaseLiquityV2StrategyTest {
     }
 
     async setUpContracts() {
-        const strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[network].STRATEGY_EXECUTOR_ADDR);
+        const strategyExecutor = await hre.ethers.getContractAt(
+            "StrategyExecutor",
+            addrs[network].STRATEGY_EXECUTOR_ADDR
+        );
         this.contracts.strategyExecutor = strategyExecutor.connect(this.botAcc);
-        this.contracts.flAction = await getContractFromRegistry('FLAction', this.isFork);
-        this.contracts.view = await redeploy('LiquityV2View', this.isFork);
-        await redeploy('LiquityV2Open', this.isFork);
-        await redeploy('LiquityV2RatioCheck', this.isFork);
-        await redeploy('LiquityV2Borrow', this.isFork);
-        await redeploy('LiquityV2Supply', this.isFork);
-        await redeploy('LiquityV2RatioTrigger', this.isFork);
-        await redeploy('LiquityV2Adjust', this.isFork);
-        await redeploy('LiquityV2Withdraw', this.isFork);
-        await redeploy('LiquityV2Payback', this.isFork);
+        this.contracts.flAction = await getContractFromRegistry("FLAction", this.isFork);
+        this.contracts.view = await redeploy("LiquityV2View", this.isFork);
+        await redeploy("LiquityV2Open", this.isFork);
+        await redeploy("LiquityV2RatioCheck", this.isFork);
+        await redeploy("LiquityV2Borrow", this.isFork);
+        await redeploy("LiquityV2Supply", this.isFork);
+        await redeploy("LiquityV2RatioTrigger", this.isFork);
+        await redeploy("LiquityV2Adjust", this.isFork);
+        await redeploy("LiquityV2Withdraw", this.isFork);
+        await redeploy("LiquityV2Payback", this.isFork);
     }
 
     async addLiquidity() {
         const token0 = BOLD_ADDR;
         const token1 = DAI_ADDR;
-        const fee = '100';
+        const fee = "100";
         const lowerTick = -101;
         const upperTick = 99;
         const currentSqrtPriceX96 = BigInt(2) ** BigInt(96);
-        const token0Amount = hre.ethers.utils.parseUnits('1000000000', 18);
-        const token1Amount = hre.ethers.utils.parseUnits('1000000000', 18);
+        const token0Amount = hre.ethers.utils.parseUnits("1000000000", 18);
+        const token1Amount = hre.ethers.utils.parseUnits("1000000000", 18);
         await setBalance(token0, this.senderAcc.address, token0Amount);
         await setBalance(token1, this.senderAcc.address, token1Amount);
         await uniV3CreatePool(
@@ -88,17 +93,17 @@ class BaseLiquityV2StrategyTest {
             fee,
             lowerTick,
             upperTick,
-            '999999999999999983222784',
-            '990074318382128470949888',
+            "999999999999999983222784",
+            "990074318382128470949888",
             this.senderAcc.address,
             this.senderAcc.address,
-            currentSqrtPriceX96.toString(),
+            currentSqrtPriceX96.toString()
         );
     }
 
     async openTrove(testPair, collAmount, debtAmount) {
         const collAsset = getAssetInfo(testPair.supplyTokenSymbol);
-        const interestRate = hre.ethers.utils.parseUnits('1', 18);
+        const interestRate = hre.ethers.utils.parseUnits("1", 18);
         const ownerIndex = 0;
 
         await liquityV2Open(
@@ -113,12 +118,12 @@ class BaseLiquityV2StrategyTest {
             ownerIndex,
             this.senderAcc.address,
             this.senderAcc.address,
-            this.isFork,
+            this.isFork
         );
 
         const encodedData = hre.ethers.utils.defaultAbiCoder.encode(
-            ['address', 'uint256'],
-            [this.proxy.address, ownerIndex],
+            ["address", "uint256"],
+            [this.proxy.address, ownerIndex]
         );
         const troveId = hre.ethers.utils.keccak256(encodedData);
 

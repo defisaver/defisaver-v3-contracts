@@ -1,16 +1,14 @@
-const {
-    redeploy,
-} = require('../../../utils/utils');
-const { uniSupplyTest } = require('./uni-tests');
+const { redeploy } = require("../../../utils/utils");
+const { uniSupplyTest } = require("./uni-tests");
 
-describe('Uni-Supply', function () {
+describe("Uni-Supply", function () {
     this.timeout(80000);
 
     before(async () => {
-        await redeploy('UniSupply');
+        await redeploy("UniSupply");
     });
 
-    it('... should supply  to uniswap', async () => {
+    it("... should supply  to uniswap", async () => {
         await uniSupplyTest();
     });
 });

@@ -1,7 +1,7 @@
-const { bundleStorageTest } = require('./core-tests');
+const { bundleStorageTest } = require("./core-tests");
 
-describe('Bundle-Storage', () => {
-    it('... should test botAuth', async () => {
+describe("Bundle-Storage", () => {
+    it("... should test botAuth", async () => {
         await bundleStorageTest();
     }).timeout(50000);
 });

@@ -1,4 +1,4 @@
-const { morphoAaveV2BoostTest } = require('./morpho-tests');
+const { morphoAaveV2BoostTest } = require("./morpho-tests");
 
 (() => {
     morphoAaveV2BoostTest();

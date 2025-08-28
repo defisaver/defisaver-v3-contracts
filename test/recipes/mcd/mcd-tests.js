@@ -1,8 +1,8 @@
-const { expect } = require('chai');
-const hre = require('hardhat');
+const { expect } = require("chai");
+const hre = require("hardhat");
 
-const { getAssetInfo, ilks } = require('@defisaver/tokens');
-const dfs = require('@defisaver/sdk');
+const { getAssetInfo, ilks } = require("@defisaver/tokens");
+const dfs = require("@defisaver/sdk");
 
 const {
     getAddrFromRegistry,
@@ -20,7 +20,7 @@ const {
     approve,
     setBalance,
     UNISWAP_WRAPPER,
-} = require('../../utils/utils');
+} = require("../../utils/utils");
 
 const {
     fetchMakerAddresses,
@@ -29,22 +29,25 @@ const {
     MCD_MANAGER_ADDR,
     getVaultsForUser,
     canGenerateDebt,
-} = require('../../utils/mcd');
+} = require("../../utils/mcd");
 
 const BigNumber = hre.ethers.BigNumber;
 
-const SUPPLY_AMOUNT_IN_USD = '150000';
-const GENERATE_AMOUNT_IN_USD = '50000';
+const SUPPLY_AMOUNT_IN_USD = "150000";
+const GENERATE_AMOUNT_IN_USD = "50000";
 const {
-    openVaultForExactAmountInDecimals, gUniDeposit, openVault, executeAction,
-} = require('../../utils/actions');
+    openVaultForExactAmountInDecimals,
+    gUniDeposit,
+    openVault,
+    executeAction,
+} = require("../../utils/actions");
 
 const McdPaybackAction = dfs.actions.maker.MakerPaybackAction;
 const McdWithdrawAction = dfs.actions.maker.MakerWithdrawAction;
 const SellAction = dfs.actions.basic.SellAction;
 
 const mcdBoostTest = async () => {
-    describe('Mcd-Boost', function () {
+    describe("Mcd-Boost", function () {
         this.timeout(80000);
 
         let makerAddresses;
@@ -56,20 +59,20 @@ const mcdBoostTest = async () => {
         let uniWrapper;
 
         before(async () => {
-            await redeploy('McdOpen');
-            await redeploy('McdSupply');
-            await redeploy('RecipeExecutor');
-            await redeploy('McdGenerate');
-            await redeploy('FLDyDx');
-            await redeploy('FLAaveV2');
-            await redeploy('DFSSell');
-            await redeploy('GUniDeposit');
+            await redeploy("McdOpen");
+            await redeploy("McdSupply");
+            await redeploy("RecipeExecutor");
+            await redeploy("McdGenerate");
+            await redeploy("FLDyDx");
+            await redeploy("FLAaveV2");
+            await redeploy("DFSSell");
+            await redeploy("GUniDeposit");
 
-            uniWrapper = await redeploy('UniswapWrapperV3');
-            mcdView = await redeploy('McdView');
+            uniWrapper = await redeploy("UniswapWrapperV3");
+            mcdView = await redeploy("McdView");
 
             makerAddresses = await fetchMakerAddresses();
-            dydxFlAddr = await getAddrFromRegistry('FLDyDx');
+            dydxFlAddr = await getAddrFromRegistry("FLDyDx");
             // aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -84,11 +87,11 @@ const mcdBoostTest = async () => {
             const tokenData = getAssetInfo(ilkData.asset);
             let vaultId;
 
-            if (tokenData.symbol === 'ETH') {
+            if (tokenData.symbol === "ETH") {
                 tokenData.address = WETH_ADDRESS;
             }
 
-            let boostAmount = '100';
+            let boostAmount = "100";
 
             it(`... should call a boost ${boostAmount} on a ${ilkData.ilkLabel} vault`, async () => {
                 // create a vault
@@ -96,7 +99,7 @@ const mcdBoostTest = async () => {
                     proxy,
                     ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
-                    fetchAmountinUSDPrice('DAI', GENERATE_AMOUNT_IN_USD),
+                    fetchAmountinUSDPrice("DAI", GENERATE_AMOUNT_IN_USD)
                 );
 
                 boostAmount = hre.ethers.utils.parseUnits(boostAmount, 18);
@@ -106,7 +109,7 @@ const mcdBoostTest = async () => {
                 console.log(
                     `Ratio before:  ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${
                         tokenData.symbol
-                    }, debt: ${info.debt.toFixed(2)} Dai)`,
+                    }, debt: ${info.debt.toFixed(2)} Dai)`
                 );
 
                 const from = proxy.address;
@@ -118,24 +121,24 @@ const mcdBoostTest = async () => {
                     vaultId,
                     boostAmount.toString(),
                     to,
-                    MCD_MANAGER_ADDR,
+                    MCD_MANAGER_ADDR
                 );
 
                 const sellAction = new dfs.actions.basic.SellAction(
-                    formatExchangeObj(fromToken, collToken, '$1', uniWrapper.address),
+                    formatExchangeObj(fromToken, collToken, "$1", uniWrapper.address),
                     from,
-                    to,
+                    to
                 );
 
                 const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
                     vaultId,
-                    '$2',
+                    "$2",
                     joinAddr,
                     from,
-                    MCD_MANAGER_ADDR,
+                    MCD_MANAGER_ADDR
                 );
 
-                const boostRecipe = new dfs.Recipe('BoostRecipe', [
+                const boostRecipe = new dfs.Recipe("BoostRecipe", [
                     mcdGenerateAction,
                     sellAction,
                     mcdSupplyAction,
@@ -143,13 +146,13 @@ const mcdBoostTest = async () => {
 
                 const functionData = boostRecipe.encodeForDsProxyCall();
 
-                await executeAction('RecipeExecutor', functionData[1], proxy);
+                await executeAction("RecipeExecutor", functionData[1], proxy);
                 const ratioAfter = await getRatio(mcdView, vaultId);
                 const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
                 console.log(
                     `Ratio after: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${
                         tokenData.symbol
-                    }, debt: ${info2.debt.toFixed(2)} Dai)`,
+                    }, debt: ${info2.debt.toFixed(2)} Dai)`
                 );
 
                 expect(ratioAfter).to.be.lt(ratioBefore);
@@ -168,7 +171,7 @@ const mcdBoostTest = async () => {
                 //     (parseInt(MIN_VAULT_DAI_AMOUNT) + 200).toString()
                 // );
 
-                boostAmount = '200';
+                boostAmount = "200";
 
                 boostAmount = hre.ethers.utils.parseUnits(boostAmount, 18);
 
@@ -177,7 +180,7 @@ const mcdBoostTest = async () => {
                 console.log(
                     `Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${
                         tokenData.symbol
-                    }, debt: ${info.debt.toFixed(2)} Dai)`,
+                    }, debt: ${info.debt.toFixed(2)} Dai)`
                 );
 
                 const from = proxy.address;
@@ -189,7 +192,7 @@ const mcdBoostTest = async () => {
                     boostAmount,
                     fromToken,
                     nullAddress,
-                    [],
+                    []
                 );
 
                 // const flAaveV2Action = new dfs.actions.flashloan.AaveV2FlashLoanAction(
@@ -204,25 +207,25 @@ const mcdBoostTest = async () => {
                 const sellAction = new dfs.actions.basic.SellAction(
                     formatExchangeObj(fromToken, collToken, boostAmount, uniWrapper.address),
                     from,
-                    to,
+                    to
                 );
 
                 const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
                     vaultId,
-                    '$2',
+                    "$2",
                     joinAddr,
                     from,
-                    MCD_MANAGER_ADDR,
+                    MCD_MANAGER_ADDR
                 );
 
                 const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(
                     vaultId,
-                    '$1',
+                    "$1",
                     dydxFlAddr,
-                    MCD_MANAGER_ADDR,
+                    MCD_MANAGER_ADDR
                 );
 
-                const boostRecipe = new dfs.Recipe('FLBoostRecipe', [
+                const boostRecipe = new dfs.Recipe("FLBoostRecipe", [
                     dydxFLAction,
                     sellAction,
                     mcdSupplyAction,
@@ -231,14 +234,14 @@ const mcdBoostTest = async () => {
 
                 const functionData = boostRecipe.encodeForDsProxyCall();
 
-                await executeAction('RecipeExecutor', functionData[1], proxy);
+                await executeAction("RecipeExecutor", functionData[1], proxy);
 
                 const ratioAfter = await getRatio(mcdView, vaultId);
                 const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
                 console.log(
                     `Ratio before: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${
                         tokenData.symbol
-                    }, debt: ${info2.debt.toFixed(2)} Dai)`,
+                    }, debt: ${info2.debt.toFixed(2)} Dai)`
                 );
 
                 expect(ratioAfter).to.be.lt(ratioBefore);
@@ -247,12 +250,12 @@ const mcdBoostTest = async () => {
             });
         }
 
-        it('... should call a boost for GUNIV3DAIUSDC1-A vault', async () => {
-            const GUNIV3DAIUSDC = '0xabddafb225e10b90d798bb8a886238fb835e2053';
-            const joinAddr = '0xbFD445A97e7459b0eBb34cfbd3245750Dba4d7a4';
+        it("... should call a boost for GUNIV3DAIUSDC1-A vault", async () => {
+            const GUNIV3DAIUSDC = "0xabddafb225e10b90d798bb8a886238fb835e2053";
+            const joinAddr = "0xbFD445A97e7459b0eBb34cfbd3245750Dba4d7a4";
 
-            const daiAmount = hre.ethers.utils.parseUnits('20000', 18);
-            const usdtAmount = hre.ethers.utils.parseUnits('20000', 6);
+            const daiAmount = hre.ethers.utils.parseUnits("20000", 18);
+            const usdtAmount = hre.ethers.utils.parseUnits("20000", 6);
             await setBalance(DAI_ADDR, senderAcc.address, daiAmount);
             await setBalance(USDC_ADDR, senderAcc.address, usdtAmount);
 
@@ -265,7 +268,7 @@ const mcdBoostTest = async () => {
                 daiAmount,
                 usdtAmount,
                 senderAcc.address,
-                proxy,
+                proxy
             );
             const poolTokensBalanceAfter = await balanceOf(GUNIV3DAIUSDC, senderAcc.address);
 
@@ -277,18 +280,18 @@ const mcdBoostTest = async () => {
                 joinAddr,
                 { address: GUNIV3DAIUSDC, decimals: 18 },
                 poolTokensBalanceAfter.toString(),
-                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString(),
+                (parseInt(MIN_VAULT_DAI_AMOUNT, 10) + 200).toString()
             );
             const ratioBefore = await getRatio(mcdView, vaultId);
             const info = await getVaultInfo(
                 mcdView,
                 vaultId,
-                '0x47554e49563344414955534443312d4100000000000000000000000000000000',
+                "0x47554e49563344414955534443312d4100000000000000000000000000000000"
             );
             console.log(
                 `Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(
-                    2,
-                )} GUNIV3DAIUSDC1, debt: ${info.debt.toFixed(2)} Dai)`,
+                    2
+                )} GUNIV3DAIUSDC1, debt: ${info.debt.toFixed(2)} Dai)`
             );
 
             const from = proxy.address;
@@ -297,39 +300,39 @@ const mcdBoostTest = async () => {
 
             const mcdGenerateAction = new dfs.actions.maker.MakerGenerateAction(
                 vaultId,
-                hre.ethers.utils.parseUnits('1000', 18).toString(),
+                hre.ethers.utils.parseUnits("1000", 18).toString(),
                 to,
-                MCD_MANAGER_ADDR,
+                MCD_MANAGER_ADDR
             );
             const sellAction = new dfs.actions.basic.SellAction(
                 formatExchangeObj(
                     fromToken,
                     USDC_ADDR,
-                    hre.ethers.utils.parseUnits('500', 18).toString(),
-                    uniWrapper.address,
+                    hre.ethers.utils.parseUnits("500", 18).toString(),
+                    uniWrapper.address
                 ),
                 from,
-                to,
+                to
             );
             const gUniDepositAction = new dfs.actions.guni.GUniDeposit(
                 GUNIV3DAIUSDC,
                 DAI_ADDR,
                 USDC_ADDR,
-                hre.ethers.utils.parseUnits('500', 18).toString(),
-                '$2',
+                hre.ethers.utils.parseUnits("500", 18).toString(),
+                "$2",
                 0,
                 0,
                 from,
-                to,
+                to
             );
             const mcdSupplyAction = new dfs.actions.maker.MakerSupplyAction(
                 vaultId,
-                '$3',
+                "$3",
                 joinAddr,
                 from,
-                MCD_MANAGER_ADDR,
+                MCD_MANAGER_ADDR
             );
-            const boostRecipe = new dfs.Recipe('FLBoostRecipe', [
+            const boostRecipe = new dfs.Recipe("FLBoostRecipe", [
                 mcdGenerateAction,
                 sellAction,
                 gUniDepositAction,
@@ -338,18 +341,18 @@ const mcdBoostTest = async () => {
 
             const functionData = boostRecipe.encodeForDsProxyCall();
 
-            await executeAction('RecipeExecutor', functionData[1], proxy);
+            await executeAction("RecipeExecutor", functionData[1], proxy);
 
             const ratioAfter = await getRatio(mcdView, vaultId);
             const info2 = await getVaultInfo(
                 mcdView,
                 vaultId,
-                '0x47554e49563344414955534443312d4100000000000000000000000000000000',
+                "0x47554e49563344414955534443312d4100000000000000000000000000000000"
             );
             console.log(
                 `Ratio before: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(
-                    2,
-                )} GUNIV3DAIUSDC1, debt: ${info2.debt.toFixed(2)} Dai)`,
+                    2
+                )} GUNIV3DAIUSDC1, debt: ${info2.debt.toFixed(2)} Dai)`
             );
             expect(ratioAfter).to.be.lt(ratioBefore);
             expect(info2.coll).to.be.gt(info.coll);
@@ -358,7 +361,7 @@ const mcdBoostTest = async () => {
     });
 };
 const mcdCloseTest = async () => {
-    describe('Mcd-Close', function () {
+    describe("Mcd-Close", function () {
         this.timeout(80000);
 
         let makerAddresses;
@@ -369,17 +372,17 @@ const mcdCloseTest = async () => {
         // let mcdView;
 
         before(async () => {
-            await redeploy('RecipeExecutor');
-            await redeploy('FLDyDx');
-            await redeploy('DFSSell');
-            await redeploy('SendToken');
+            await redeploy("RecipeExecutor");
+            await redeploy("FLDyDx");
+            await redeploy("DFSSell");
+            await redeploy("SendToken");
 
             // mcdView = await redeploy('McdView');
 
             makerAddresses = await fetchMakerAddresses();
-            uniWrapper = await redeploy('UniswapWrapperV3');
+            uniWrapper = await redeploy("UniswapWrapperV3");
 
-            dydxFlAddr = await getAddrFromRegistry('FLDyDx');
+            dydxFlAddr = await getAddrFromRegistry("FLDyDx");
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
@@ -391,7 +394,7 @@ const mcdCloseTest = async () => {
             const ilkData = ilks[i];
             const tokenData = getAssetInfo(ilkData.asset);
 
-            if (tokenData.symbol === 'ETH') {
+            if (tokenData.symbol === "ETH") {
                 tokenData.address = WETH_ADDRESS;
             }
 
@@ -406,15 +409,10 @@ const mcdCloseTest = async () => {
                     return;
                 }
 
-                const vaultColl = fetchAmountinUSDPrice('WETH', SUPPLY_AMOUNT_IN_USD);
+                const vaultColl = fetchAmountinUSDPrice("WETH", SUPPLY_AMOUNT_IN_USD);
 
                 const amountDai = (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString();
-                const vaultId = await openVault(
-                    proxy,
-                    ilkData.ilkLabel,
-                    vaultColl,
-                    amountDai,
-                );
+                const vaultId = await openVault(proxy, ilkData.ilkLabel, vaultColl, amountDai);
 
                 const daiAddr = makerAddresses.MCD_DAI;
 
@@ -428,35 +426,35 @@ const mcdCloseTest = async () => {
                     tokenAddr,
                     daiAddr,
                     hre.ethers.utils.parseUnits(vaultColl, tokenData.decimals),
-                    uniWrapper.address,
+                    uniWrapper.address
                 );
 
-                const closeToDaiVaultRecipe = new dfs.Recipe('CloseToDaiVaultRecipe', [
+                const closeToDaiVaultRecipe = new dfs.Recipe("CloseToDaiVaultRecipe", [
                     new dfs.actions.flashloan.DyDxFlashLoanAction(
                         flAmount,
                         daiAddr,
                         nullAddress,
-                        [],
+                        []
                     ),
                     new dfs.actions.maker.MakerPaybackAction(
                         vaultId,
                         hre.ethers.constants.MaxUint256,
                         proxy.address,
-                        MCD_MANAGER_ADDR,
+                        MCD_MANAGER_ADDR
                     ),
                     new dfs.actions.maker.MakerWithdrawAction(
                         vaultId,
                         hre.ethers.constants.MaxUint256,
                         joinAddr,
                         proxy.address,
-                        MCD_MANAGER_ADDR,
+                        MCD_MANAGER_ADDR
                     ),
                     new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
                     new dfs.actions.basic.SendTokenAction(daiAddr, dydxFlAddr, flAmount),
                     new dfs.actions.basic.SendTokenAction(
                         daiAddr,
                         senderAcc.address,
-                        hre.ethers.constants.MaxUint256,
+                        hre.ethers.constants.MaxUint256
                     ), // return extra dai
                 ]);
 
@@ -465,7 +463,7 @@ const mcdCloseTest = async () => {
                 const daiBalanceBefore = await balanceOf(daiAddr, senderAcc.address);
                 console.log(`Dai balance before: ${daiBalanceBefore / 1e18}`);
 
-                await executeAction('RecipeExecutor', functionData[1], proxy);
+                await executeAction("RecipeExecutor", functionData[1], proxy);
 
                 const daiBalanceAfter = await balanceOf(daiAddr, senderAcc.address);
                 console.log(`Dai balance before: ${daiBalanceAfter / 1e18}`);
@@ -485,12 +483,7 @@ const mcdCloseTest = async () => {
                 const amountDai = (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString();
                 const amountColl = fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD);
 
-                const vaultId = await openVault(
-                    proxy,
-                    ilkData.ilkLabel,
-                    amountColl,
-                    amountDai,
-                );
+                const vaultId = await openVault(proxy, ilkData.ilkLabel, amountColl, amountDai);
 
                 // Vault debt + 1 dai to handle stability fee
                 let flAmount = (parseFloat(amountDai) + 1).toString();
@@ -503,34 +496,34 @@ const mcdCloseTest = async () => {
                     daiAddr,
                     hre.ethers.utils.parseUnits(amountColl, tokenData.decimals),
                     uniWrapper.address,
-                    flAmount,
+                    flAmount
                 );
 
-                const closeToCollVaultRecipe = new dfs.Recipe('CloseToCollVaultRecipe', [
+                const closeToCollVaultRecipe = new dfs.Recipe("CloseToCollVaultRecipe", [
                     new dfs.actions.flashloan.DyDxFlashLoanAction(
                         flAmount,
                         daiAddr,
                         nullAddress,
-                        [],
+                        []
                     ),
                     new dfs.actions.maker.MakerPaybackAction(
                         vaultId,
                         hre.ethers.constants.MaxUint256,
                         proxy.address,
-                        MCD_MANAGER_ADDR,
+                        MCD_MANAGER_ADDR
                     ),
                     new dfs.actions.maker.MakerWithdrawAction(
                         vaultId,
                         hre.ethers.constants.MaxUint256,
                         joinAddr,
                         proxy.address,
-                        MCD_MANAGER_ADDR,
+                        MCD_MANAGER_ADDR
                     ),
                     new dfs.actions.basic.BuyAction(exchangeOrder, proxy.address, dydxFlAddr),
                     new dfs.actions.basic.SendTokenAction(
                         tokenAddr,
                         senderAcc.address,
-                        hre.ethers.constants.MaxUint256,
+                        hre.ethers.constants.MaxUint256
                     ),
                 ]);
 
@@ -539,7 +532,7 @@ const mcdCloseTest = async () => {
                 const collBalanceBefore = await balanceOf(tokenAddr, senderAcc.address);
                 console.log(`Coll balance before: ${collBalanceBefore / 10 ** tokenData.decimals}`);
 
-                await executeAction('RecipeExecutor', functionData[1], proxy);
+                await executeAction("RecipeExecutor", functionData[1], proxy);
 
                 const collBalanceAfter = await balanceOf(tokenAddr, senderAcc.address);
                 console.log(`Coll balance after: ${collBalanceAfter / 10 ** tokenData.decimals}`);
@@ -550,7 +543,7 @@ const mcdCloseTest = async () => {
     });
 };
 const mcdCreateTest = async () => {
-    describe('Mcd-Create', function () {
+    describe("Mcd-Create", function () {
         this.timeout(80000);
 
         let makerAddresses;
@@ -562,20 +555,20 @@ const mcdCreateTest = async () => {
         let uniWrapper;
 
         before(async () => {
-            await redeploy('McdOpen');
-            await redeploy('McdSupply');
-            await redeploy('RecipeExecutor');
-            await redeploy('SumInputs');
-            await redeploy('McdGenerate');
-            await redeploy('FLDyDx');
-            await redeploy('FLAaveV2');
+            await redeploy("McdOpen");
+            await redeploy("McdSupply");
+            await redeploy("RecipeExecutor");
+            await redeploy("SumInputs");
+            await redeploy("McdGenerate");
+            await redeploy("FLDyDx");
+            await redeploy("FLAaveV2");
 
-            mcdView = await redeploy('McdView');
-            uniWrapper = await redeploy('UniswapWrapperV3');
+            mcdView = await redeploy("McdView");
+            uniWrapper = await redeploy("UniswapWrapperV3");
 
             makerAddresses = await fetchMakerAddresses();
 
-            dydxFlAddr = await getAddrFromRegistry('FLDyDx');
+            dydxFlAddr = await getAddrFromRegistry("FLDyDx");
             // aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
 
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -588,7 +581,7 @@ const mcdCreateTest = async () => {
             const ilkData = ilks[i];
             const tokenData = getAssetInfo(ilkData.asset);
 
-            if (tokenData.symbol === 'ETH') {
+            if (tokenData.symbol === "ETH") {
                 tokenData.address = WETH_ADDRESS;
             }
 
@@ -608,9 +601,9 @@ const mcdCreateTest = async () => {
                 const daiAmount = hre.ethers.utils.parseUnits(amount, 18);
                 const collAmount = BigNumber.from(
                     hre.ethers.utils.parseUnits(
-                        fetchAmountinUSDPrice('WETH', SUPPLY_AMOUNT_IN_USD),
-                        tokenData.decimals,
-                    ),
+                        fetchAmountinUSDPrice("WETH", SUPPLY_AMOUNT_IN_USD),
+                        tokenData.decimals
+                    )
                 );
 
                 const collAmountParsed = hre.ethers.utils.parseUnits(collAmount.toString(), 1);
@@ -618,26 +611,26 @@ const mcdCreateTest = async () => {
 
                 await approve(tokenAddr, proxy.address);
 
-                const createVaultRecipe = new dfs.Recipe('CreateVaultRecipe', [
+                const createVaultRecipe = new dfs.Recipe("CreateVaultRecipe", [
                     new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR),
                     new dfs.actions.maker.MakerSupplyAction(
-                        '$1',
+                        "$1",
                         collAmount,
                         joinAddr,
                         senderAcc.address,
-                        MCD_MANAGER_ADDR,
+                        MCD_MANAGER_ADDR
                     ),
                     new dfs.actions.maker.MakerGenerateAction(
-                        '$1',
+                        "$1",
                         daiAmount,
                         senderAcc.address,
-                        MCD_MANAGER_ADDR,
+                        MCD_MANAGER_ADDR
                     ),
                 ]);
 
                 const functionData = createVaultRecipe.encodeForDsProxyCall();
 
-                await executeAction('RecipeExecutor', functionData[1], proxy);
+                await executeAction("RecipeExecutor", functionData[1], proxy);
 
                 const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
                 const vaultId = vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
@@ -647,7 +640,7 @@ const mcdCreateTest = async () => {
                 console.log(
                     `Ratio: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${
                         tokenData.symbol
-                    }, debt: ${info2.debt.toFixed(2)} Dai)`,
+                    }, debt: ${info2.debt.toFixed(2)} Dai)`
                 );
 
                 expect(info2.debt).to.be.eq(parseInt(amount, 10));
@@ -668,9 +661,9 @@ const mcdCreateTest = async () => {
 
                 const collAmount = BigNumber.from(
                     hre.ethers.utils.parseUnits(
-                        fetchAmountinUSDPrice('WETH', SUPPLY_AMOUNT_IN_USD),
-                        tokenData.decimals,
-                    ),
+                        fetchAmountinUSDPrice("WETH", SUPPLY_AMOUNT_IN_USD),
+                        tokenData.decimals
+                    )
                 );
 
                 const collAmountParsed = hre.ethers.utils.parseUnits(collAmount.toString(), 1);
@@ -682,39 +675,39 @@ const mcdCreateTest = async () => {
                     daiAddr,
                     tokenAddr,
                     daiAmount,
-                    uniWrapper.address,
+                    uniWrapper.address
                 );
 
-                const createVaultRecipe = new dfs.Recipe('CreateVaultRecipe', [
+                const createVaultRecipe = new dfs.Recipe("CreateVaultRecipe", [
                     // eslint-disable-next-line max-len
                     // new dfs.actions.flashloan.AaveV2FlashLoanAction([daiAmount], [daiAddr], [0], nullAddress, nullAddress, []),
                     new dfs.actions.flashloan.DyDxFlashLoanAction(
                         daiAmount,
                         daiAddr,
                         nullAddress,
-                        [],
+                        []
                     ),
                     new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
                     new dfs.actions.maker.MakerOpenVaultAction(joinAddr, MCD_MANAGER_ADDR),
                     new dfs.actions.basic.PullTokenAction(tokenAddr, senderAcc.address, collAmount),
                     new dfs.actions.maker.MakerSupplyAction(
-                        '$3',
+                        "$3",
                         hre.ethers.constants.MaxUint256,
                         joinAddr,
                         proxy.address,
-                        MCD_MANAGER_ADDR,
+                        MCD_MANAGER_ADDR
                     ),
                     new dfs.actions.maker.MakerGenerateAction(
-                        '$3',
-                        '$1',
+                        "$3",
+                        "$1",
                         dydxFlAddr,
-                        MCD_MANAGER_ADDR,
+                        MCD_MANAGER_ADDR
                     ),
                 ]);
 
                 const functionData = createVaultRecipe.encodeForDsProxyCall();
 
-                await executeAction('RecipeExecutor', functionData[1], proxy);
+                await executeAction("RecipeExecutor", functionData[1], proxy);
 
                 const vaultsAfter = await getVaultsForUser(proxy.address, makerAddresses);
                 const vaultId = vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
@@ -724,7 +717,7 @@ const mcdCreateTest = async () => {
                 console.log(
                     `Ratio: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${
                         tokenData.symbol
-                    }, debt: ${info2.debt.toFixed(2)} Dai)`,
+                    }, debt: ${info2.debt.toFixed(2)} Dai)`
                 );
 
                 expect(info2.debt).to.be.gte(parseInt(amount, 10));
@@ -734,7 +727,7 @@ const mcdCreateTest = async () => {
 };
 
 const mcdRepayTest = async () => {
-    describe('Mcd-Repay', function () {
+    describe("Mcd-Repay", function () {
         this.timeout(80000);
 
         let makerAddresses;
@@ -746,14 +739,14 @@ const mcdRepayTest = async () => {
         let mcdView;
 
         before(async () => {
-            uniWrapper = await redeploy('UniswapWrapperV3');
-            mcdView = await redeploy('McdView');
+            uniWrapper = await redeploy("UniswapWrapperV3");
+            mcdView = await redeploy("McdView");
 
             // dydxFlAddr = await getAddrFromRegistry('FLDyDx');
 
             makerAddresses = await fetchMakerAddresses();
 
-            aaveV2FlAddr = await getAddrFromRegistry('FLAaveV2');
+            aaveV2FlAddr = await getAddrFromRegistry("FLAaveV2");
 
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
@@ -767,11 +760,11 @@ const mcdRepayTest = async () => {
             const tokenData = getAssetInfo(ilkData.asset);
             let vaultId;
 
-            if (tokenData.symbol === 'ETH') {
+            if (tokenData.symbol === "ETH") {
                 tokenData.address = WETH_ADDRESS;
             }
 
-            let repayAmount = fetchAmountinUSDPrice(tokenData.symbol, '100');
+            let repayAmount = fetchAmountinUSDPrice(tokenData.symbol, "100");
 
             it(`... should call a repay ${repayAmount} ${tokenData.symbol} on a ${ilkData.ilkLabel} vault`, async () => {
                 // create a vault
@@ -779,7 +772,7 @@ const mcdRepayTest = async () => {
                     proxy,
                     ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
-                    (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 400).toString(),
+                    (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 400).toString()
                 );
 
                 repayAmount = hre.ethers.utils.parseUnits(repayAmount, tokenData.decimals);
@@ -789,7 +782,7 @@ const mcdRepayTest = async () => {
                 console.log(
                     `Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${
                         tokenData.symbol
-                    }, debt: ${info.debt.toFixed(2)} Dai)`,
+                    }, debt: ${info.debt.toFixed(2)} Dai)`
                 );
 
                 const from = proxy.address;
@@ -802,23 +795,23 @@ const mcdRepayTest = async () => {
                     repayAmount,
                     joinAddr,
                     to,
-                    MCD_MANAGER_ADDR,
+                    MCD_MANAGER_ADDR
                 );
 
                 const sellAction = new dfs.actions.basic.SellAction(
-                    formatExchangeObj(collToken, fromToken, '$1', UNISWAP_WRAPPER),
+                    formatExchangeObj(collToken, fromToken, "$1", UNISWAP_WRAPPER),
                     from,
-                    to,
+                    to
                 );
 
                 const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
                     vaultId,
-                    '$2',
+                    "$2",
                     from,
-                    MCD_MANAGER_ADDR,
+                    MCD_MANAGER_ADDR
                 );
 
-                const repayRecipe = new dfs.Recipe('RepayRecipe', [
+                const repayRecipe = new dfs.Recipe("RepayRecipe", [
                     mcdWithdrawAction,
                     sellAction,
                     mcdPaybackAction,
@@ -826,14 +819,14 @@ const mcdRepayTest = async () => {
 
                 const functionData = repayRecipe.encodeForDsProxyCall();
 
-                await executeAction('RecipeExecutor', functionData[1], proxy);
+                await executeAction("RecipeExecutor", functionData[1], proxy);
 
                 const ratioAfter = await getRatio(mcdView, vaultId);
                 const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
                 console.log(
                     `Ratio before: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${
                         tokenData.symbol
-                    }, debt: ${info2.debt.toFixed(2)} Dai)`,
+                    }, debt: ${info2.debt.toFixed(2)} Dai)`
                 );
 
                 expect(ratioAfter).to.be.gt(ratioBefore);
@@ -847,17 +840,17 @@ const mcdRepayTest = async () => {
                     proxy,
                     ilkData.ilkLabel,
                     fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD),
-                    (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 500).toString(),
+                    (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 500).toString()
                 );
 
-                const flAmount = hre.ethers.utils.parseUnits('0.2', 18);
+                const flAmount = hre.ethers.utils.parseUnits("0.2", 18);
 
                 const ratioBefore = await getRatio(mcdView, vaultId);
                 const info = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
                 console.log(
                     `Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(2)} ${
                         tokenData.symbol
-                    }, debt: ${info.debt.toFixed(2)} Dai)`,
+                    }, debt: ${info.debt.toFixed(2)} Dai)`
                 );
 
                 const collToken = tokenData.address;
@@ -867,7 +860,7 @@ const mcdRepayTest = async () => {
                     collToken,
                     daiToken,
                     flAmount,
-                    UNISWAP_WRAPPER,
+                    UNISWAP_WRAPPER
                 );
 
                 const flAaveV2Action = new dfs.actions.flashloan.AaveV2FlashLoanAction(
@@ -876,26 +869,26 @@ const mcdRepayTest = async () => {
                     [0],
                     nullAddress,
                     nullAddress,
-                    [],
+                    []
                 );
 
-                const repayRecipe = new dfs.Recipe('FLRepayRecipe', [
+                const repayRecipe = new dfs.Recipe("FLRepayRecipe", [
                     flAaveV2Action, // new dydxFLAction(flAmount, collToken, nullAddress, []),
                     new SellAction(exchangeOrder, proxy.address, proxy.address),
-                    new McdPaybackAction(vaultId, '$2', proxy.address, MCD_MANAGER_ADDR),
-                    new McdWithdrawAction(vaultId, '$1', joinAddr, aaveV2FlAddr, MCD_MANAGER_ADDR),
+                    new McdPaybackAction(vaultId, "$2", proxy.address, MCD_MANAGER_ADDR),
+                    new McdWithdrawAction(vaultId, "$1", joinAddr, aaveV2FlAddr, MCD_MANAGER_ADDR),
                 ]);
 
                 const functionData = repayRecipe.encodeForDsProxyCall();
 
-                await executeAction('RecipeExecutor', functionData[1], proxy);
+                await executeAction("RecipeExecutor", functionData[1], proxy);
 
                 const ratioAfter = await getRatio(mcdView, vaultId);
                 const info2 = await getVaultInfo(mcdView, vaultId, ilkData.ilkBytes);
                 console.log(
                     `Ratio before: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(2)} ${
                         tokenData.symbol
-                    }, debt: ${info2.debt.toFixed(2)} Dai)`,
+                    }, debt: ${info2.debt.toFixed(2)} Dai)`
                 );
 
                 expect(ratioAfter).to.be.gt(ratioBefore);
@@ -904,12 +897,12 @@ const mcdRepayTest = async () => {
             });
         }
 
-        it('... should call a repay for GUNIV3DAIUSDC1-A vault', async () => {
-            const GUNIV3DAIUSDC = '0xabddafb225e10b90d798bb8a886238fb835e2053';
-            const joinAddr = '0xbFD445A97e7459b0eBb34cfbd3245750Dba4d7a4';
+        it("... should call a repay for GUNIV3DAIUSDC1-A vault", async () => {
+            const GUNIV3DAIUSDC = "0xabddafb225e10b90d798bb8a886238fb835e2053";
+            const joinAddr = "0xbFD445A97e7459b0eBb34cfbd3245750Dba4d7a4";
 
-            const daiAmount = hre.ethers.utils.parseUnits('28000', 18);
-            const usdtAmount = hre.ethers.utils.parseUnits('28000', 6);
+            const daiAmount = hre.ethers.utils.parseUnits("28000", 18);
+            const usdtAmount = hre.ethers.utils.parseUnits("28000", 6);
 
             await setBalance(DAI_ADDR, senderAcc.address, daiAmount);
             await setBalance(USDC_ADDR, senderAcc.address, usdtAmount);
@@ -923,7 +916,7 @@ const mcdRepayTest = async () => {
                 daiAmount,
                 usdtAmount,
                 senderAcc.address,
-                proxy,
+                proxy
             );
 
             const poolTokensBalanceAfter = await balanceOf(GUNIV3DAIUSDC, senderAcc.address);
@@ -936,19 +929,19 @@ const mcdRepayTest = async () => {
                 joinAddr,
                 { address: GUNIV3DAIUSDC, decimals: 18 },
                 poolTokensBalanceAfter,
-                (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString(),
+                (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString()
             );
 
             const ratioBefore = await getRatio(mcdView, vaultId);
             const info = await getVaultInfo(
                 mcdView,
                 vaultId,
-                '0x47554e49563344414955534443312d4100000000000000000000000000000000',
+                "0x47554e49563344414955534443312d4100000000000000000000000000000000"
             );
             console.log(
                 `Ratio before: ${ratioBefore.toFixed(2)}% (coll: ${info.coll.toFixed(
-                    2,
-                )} GUNIV3DAIUSDC1, debt: ${info.debt.toFixed(2)} Dai)`,
+                    2
+                )} GUNIV3DAIUSDC1, debt: ${info.debt.toFixed(2)} Dai)`
             );
 
             const proxyAddr = proxy.address;
@@ -963,36 +956,36 @@ const mcdRepayTest = async () => {
                 amountToWithdraw,
                 joinAddr,
                 proxyAddr,
-                MCD_MANAGER_ADDR,
+                MCD_MANAGER_ADDR
             );
             const guniBurnAction = new dfs.actions.guni.GUniWithdraw(
                 GUNIV3DAIUSDC,
-                '$1',
+                "$1",
                 0,
                 0,
                 proxyAddr,
-                proxyAddr,
+                proxyAddr
             );
             const usdcTokenBalanceAction = new dfs.actions.basic.TokenBalanceAction(
                 USDC_ADDR,
-                proxyAddr,
+                proxyAddr
             );
             const sellAction = new dfs.actions.basic.SellAction(
-                formatExchangeObj(USDC_ADDR, fromToken, '$3', uniWrapper.address),
+                formatExchangeObj(USDC_ADDR, fromToken, "$3", uniWrapper.address),
                 proxyAddr,
-                proxyAddr,
+                proxyAddr
             );
             const daiTokenBalanceAction = new dfs.actions.basic.TokenBalanceAction(
                 DAI_ADDR,
-                proxyAddr,
+                proxyAddr
             );
             const mcdPaybackAction = new dfs.actions.maker.MakerPaybackAction(
                 vaultId,
-                '$5',
+                "$5",
                 proxyAddr,
-                MCD_MANAGER_ADDR,
+                MCD_MANAGER_ADDR
             );
-            const repayRecipe = new dfs.Recipe('RepayRecipe', [
+            const repayRecipe = new dfs.Recipe("RepayRecipe", [
                 mcdWithdrawAction,
                 guniBurnAction,
                 usdcTokenBalanceAction,
@@ -1002,18 +995,18 @@ const mcdRepayTest = async () => {
             ]);
             const functionData = repayRecipe.encodeForDsProxyCall();
 
-            await executeAction('RecipeExecutor', functionData[1], proxy);
+            await executeAction("RecipeExecutor", functionData[1], proxy);
 
             const ratioAfter = await getRatio(mcdView, vaultId);
             const info2 = await getVaultInfo(
                 mcdView,
                 vaultId,
-                '0x47554e49563344414955534443312d4100000000000000000000000000000000',
+                "0x47554e49563344414955534443312d4100000000000000000000000000000000"
             );
             console.log(
                 `Ratio after: ${ratioAfter.toFixed(2)}% (coll: ${info2.coll.toFixed(
-                    2,
-                )} GUNIV3DAIUSDC1, debt: ${info2.debt.toFixed(2)} Dai)`,
+                    2
+                )} GUNIV3DAIUSDC1, debt: ${info2.debt.toFixed(2)} Dai)`
             );
             expect(ratioAfter).to.be.gt(ratioBefore);
             expect(info2.coll).to.be.lt(info.coll);

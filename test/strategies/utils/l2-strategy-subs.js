@@ -1,10 +1,6 @@
 /* eslint-disable max-len */
-const automationSdk = require('@defisaver/automation-sdk');
-const {
-    subToAaveV3Proxy,
-    updateAaveProxy,
-    subToStrategy,
-} = require('./utils-strategies');
+const automationSdk = require("@defisaver/automation-sdk");
+const { subToAaveV3Proxy, updateAaveProxy, subToStrategy } = require("./utils-strategies");
 
 const subAaveV3L2AutomationStrategy = async (
     proxy,
@@ -12,30 +8,30 @@ const subAaveV3L2AutomationStrategy = async (
     maxRatio,
     optimalRatioBoost,
     optimalRatioRepay,
-    boostEnabled,
+    boostEnabled
 ) => {
     const subInput = automationSdk.strategySubService.aaveV3Encode.leverageManagement(
         minRatio,
         maxRatio,
         optimalRatioBoost,
         optimalRatioRepay,
-        boostEnabled,
+        boostEnabled
     );
 
     const subId = await subToAaveV3Proxy(proxy, subInput);
 
-    let subId1 = '0';
-    let subId2 = '0';
+    let subId1 = "0";
+    let subId2 = "0";
 
     if (boostEnabled) {
         subId1 = (parseInt(subId, 10) - 1).toString();
         subId2 = subId;
     } else {
         subId1 = subId;
-        subId2 = '0';
+        subId2 = "0";
     }
 
-    console.log('Subs: ', subId, subId2);
+    console.log("Subs: ", subId, subId2);
 
     return { firstSub: subId1, secondSub: subId2 };
 };
@@ -48,25 +44,25 @@ const updateAaveV3L2AutomationStrategy = async (
     maxRatio,
     optimalRatioBoost,
     optimalRatioRepay,
-    boostEnabled,
+    boostEnabled
 ) => {
-    let subInput = '0x';
+    let subInput = "0x";
 
     const subId1Hex = (+subId1).toString(16);
     const subId2Hex = (+subId2).toString(16);
 
-    subInput = subInput.concat(subId1Hex.padStart(8, '0'));
-    subInput = subInput.concat(subId2Hex.padStart(8, '0'));
+    subInput = subInput.concat(subId1Hex.padStart(8, "0"));
+    subInput = subInput.concat(subId2Hex.padStart(8, "0"));
 
-    subInput = subInput.concat(minRatio.padStart(32, '0'));
-    subInput = subInput.concat(maxRatio.padStart(32, '0'));
-    subInput = subInput.concat(optimalRatioBoost.padStart(32, '0'));
-    subInput = subInput.concat(optimalRatioRepay.padStart(32, '0'));
-    subInput = subInput.concat(boostEnabled ? '01' : '00');
+    subInput = subInput.concat(minRatio.padStart(32, "0"));
+    subInput = subInput.concat(maxRatio.padStart(32, "0"));
+    subInput = subInput.concat(optimalRatioBoost.padStart(32, "0"));
+    subInput = subInput.concat(optimalRatioRepay.padStart(32, "0"));
+    subInput = subInput.concat(boostEnabled ? "01" : "00");
 
     const subId = await updateAaveProxy(proxy, subInput);
 
-    if (subId2 === '0' && boostEnabled === true) {
+    if (subId2 === "0" && boostEnabled === true) {
         // eslint-disable-next-line no-param-reassign
         subId2 = subId;
     }
@@ -84,13 +80,16 @@ const subAaveV3CloseBundle = async (
     _collAsset,
     _collAssetId,
     _debtAsset,
-    _debtAssetId,
+    _debtAssetId
 ) => {
     const triggerData = {
         baseTokenAddress: triggerBaseAsset,
         quoteTokenAddress: triggerQuoteAsset,
         price: targetPrice,
-        ratioState: (priceState === 1) ? automationSdk.enums.RatioState.UNDER : automationSdk.enums.RatioState.OVER,
+        ratioState:
+            priceState === 1
+                ? automationSdk.enums.RatioState.UNDER
+                : automationSdk.enums.RatioState.OVER,
     };
     const subData = {
         collAsset: _collAsset,
@@ -102,7 +101,7 @@ const subAaveV3CloseBundle = async (
         bundleId,
         true,
         triggerData,
-        subData,
+        subData
     );
 
     const subId = await subToStrategy(proxy, strategySub);

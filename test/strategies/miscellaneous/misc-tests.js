@@ -1,8 +1,8 @@
-const hre = require('hardhat');
-const { expect } = require('chai');
+const hre = require("hardhat");
+const { expect } = require("chai");
 
-const { getAssetInfo, set } = require('@defisaver/tokens');
-const automationSdk = require('@defisaver/automation-sdk');
+const { getAssetInfo, set } = require("@defisaver/tokens");
+const automationSdk = require("@defisaver/automation-sdk");
 
 const {
     getProxy,
@@ -20,17 +20,21 @@ const {
     chainIds,
     setNewExchangeWrapper,
     network,
-} = require('../../utils/utils');
+} = require("../../utils/utils");
 
-const { callDcaStrategy } = require('../utils/strategy-calls');
-const { subDcaStrategy } = require('../utils/strategy-subs');
-const { createLimitOrderL2Strategy } = require('../../../strategies-spec/l2');
+const { callDcaStrategy } = require("../utils/strategy-calls");
+const { subDcaStrategy } = require("../utils/strategy-subs");
+const { createLimitOrderL2Strategy } = require("../../../strategies-spec/l2");
 
-const { createStrategy, addBotCaller, getUpdatedStrategySub } = require('../utils/utils-strategies');
+const {
+    createStrategy,
+    addBotCaller,
+    getUpdatedStrategySub,
+} = require("../utils/utils-strategies");
 
-const { callLimitOrderStrategy } = require('../utils/strategy-calls');
-const { subLimitOrderStrategy } = require('../utils/strategy-subs');
-const { createLimitOrderStrategy } = require('../../../strategies-spec/mainnet');
+const { callLimitOrderStrategy } = require("../utils/strategy-calls");
+const { subLimitOrderStrategy } = require("../utils/strategy-subs");
+const { createLimitOrderStrategy } = require("../../../strategies-spec/mainnet");
 
 const DAY = 1 * 24 * 60 * 60;
 const TWO_DAYS = 2 * 24 * 60 * 60;
@@ -38,23 +42,38 @@ const TWO_DAYS = 2 * 24 * 60 * 60;
 const limitOrderStrategyTest = async () => {
     const tokenPairs = [
         {
-            srcTokenSymbol: 'WETH', destTokenSymbol: 'DAI', amount: '1', uniV3Fee: '3000',
+            srcTokenSymbol: "WETH",
+            destTokenSymbol: "DAI",
+            amount: "1",
+            uniV3Fee: "3000",
         },
         {
-            srcTokenSymbol: 'WETH', destTokenSymbol: 'USDC', amount: '2', uniV3Fee: '3000',
+            srcTokenSymbol: "WETH",
+            destTokenSymbol: "USDC",
+            amount: "2",
+            uniV3Fee: "3000",
         },
         {
-            srcTokenSymbol: 'DAI', destTokenSymbol: 'WETH', amount: '1000', uniV3Fee: '3000',
+            srcTokenSymbol: "DAI",
+            destTokenSymbol: "WETH",
+            amount: "1000",
+            uniV3Fee: "3000",
         },
         {
-            srcTokenSymbol: 'WBTC', destTokenSymbol: 'WETH', amount: '1', uniV3Fee: '3000',
+            srcTokenSymbol: "WBTC",
+            destTokenSymbol: "WETH",
+            amount: "1",
+            uniV3Fee: "3000",
         },
         {
-            srcTokenSymbol: 'USDC', destTokenSymbol: 'WBTC', amount: '3400', uniV3Fee: '3000',
+            srcTokenSymbol: "USDC",
+            destTokenSymbol: "WBTC",
+            amount: "3400",
+            uniV3Fee: "3000",
         },
     ];
 
-    describe('Limit-Order-Strategy', function () {
+    describe("Limit-Order-Strategy", function () {
         this.timeout(120000);
 
         let senderAcc;
@@ -78,38 +97,40 @@ const limitOrderStrategyTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
 
-            set('network', chainIds[network]);
+            set("network", chainIds[network]);
 
             // Send eth to owner acc, needed for l2s who don't hold eth
-            await sendEther(senderAcc, getOwnerAddr(), '1');
+            await sendEther(senderAcc, getOwnerAddr(), "1");
 
-            strategyExecutor = await redeployCore(network !== 'mainnet');
+            strategyExecutor = await redeployCore(network !== "mainnet");
 
             // eslint-disable-next-line no-unused-expressions
-            network === 'mainnet' ? (await redeploy('LimitSell')) : (await redeploy('LimitSellL2'));
-            await redeploy('OffchainPriceTrigger');
+            network === "mainnet" ? await redeploy("LimitSell") : await redeploy("LimitSellL2");
+            await redeploy("OffchainPriceTrigger");
 
-            uniV3Wrapper = await hre.ethers.getContractAt('UniswapWrapperV3', addrs[network].UNISWAP_V3_WRAPPER);
+            uniV3Wrapper = await hre.ethers.getContractAt(
+                "UniswapWrapperV3",
+                addrs[network].UNISWAP_V3_WRAPPER
+            );
 
             await setNewExchangeWrapper(senderAcc, addrs[network].UNISWAP_V3_WRAPPER);
 
             await addBotCaller(botAcc.address);
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
-            const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
+            const strategyData =
+                network === "mainnet" ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
             await openStrategyAndBundleStorage();
 
             strategyId = await createStrategy(...strategyData, false);
 
-            await redeploy('LimitOrderSubProxy', false, strategyId);
+            await redeploy("LimitOrderSubProxy", false, strategyId);
         });
 
         for (let i = 0; i < tokenPairs.length; i++) {
-            const {
-                srcTokenSymbol, destTokenSymbol, amount, uniV3Fee,
-            } = tokenPairs[i];
+            const { srcTokenSymbol, destTokenSymbol, amount, uniV3Fee } = tokenPairs[i];
 
-            it('... should make a new Limit order [Take profit] strategy', async () => {
+            it("... should make a new Limit order [Take profit] strategy", async () => {
                 const srcToken = getAssetInfo(srcTokenSymbol);
                 const destToken = getAssetInfo(destTokenSymbol);
 
@@ -118,15 +139,23 @@ const limitOrderStrategyTest = async () => {
 
                 sellAmountWei = hre.ethers.utils.parseUnits(amount, srcToken.decimals);
 
-                const path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [tokenAddrSell, uniV3Fee, tokenAddrBuy]);
+                const path = hre.ethers.utils.solidityPack(
+                    ["address", "uint24", "address"],
+                    [tokenAddrSell, uniV3Fee, tokenAddrBuy]
+                );
 
                 // eslint-disable-next-line max-len
-                currPrice = await uniV3Wrapper.getSellRate(tokenAddrSell, tokenAddrBuy, sellAmountWei, path);
+                currPrice = await uniV3Wrapper.getSellRate(
+                    tokenAddrSell,
+                    tokenAddrBuy,
+                    sellAmountWei,
+                    path
+                );
 
                 // Set target price to 10% below current price to trigger the strategy
-                const targetPrice = currPrice.sub(currPrice.div('10'));
+                const targetPrice = currPrice.sub(currPrice.div("10"));
 
-                minPrice = currPrice.sub(currPrice.div('200')); // 0.5% slippage in the minPrice
+                minPrice = currPrice.sub(currPrice.div("200")); // 0.5% slippage in the minPrice
 
                 await approve(tokenAddrSell, proxy.address);
 
@@ -137,16 +166,16 @@ const limitOrderStrategyTest = async () => {
                     sellAmountWei,
                     targetPrice,
                     goodUntilDuration,
-                    automationSdk.enums.OrderType.TAKE_PROFIT,
+                    automationSdk.enums.OrderType.TAKE_PROFIT
                 ));
             });
 
-            it('... should trigger a limit order [Take profit] strategy', async () => {
+            it("... should trigger a limit order [Take profit] strategy", async () => {
                 await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
 
                 let destAddrTransformed = tokenAddrBuy;
 
-                if (destTokenSymbol === 'WETH') {
+                if (destTokenSymbol === "WETH") {
                     destAddrTransformed = addrs[network].ETH_ADDR;
                 }
 
@@ -162,7 +191,7 @@ const limitOrderStrategyTest = async () => {
                     strategySub,
                     tokenAddrSell,
                     tokenAddrBuy,
-                    uniV3Fee,
+                    uniV3Fee
                 );
 
                 const buyBalanceAfter = await balanceOf(destAddrTransformed, senderAcc.address);
@@ -172,7 +201,7 @@ const limitOrderStrategyTest = async () => {
                 expect(sellBalanceBefore).to.be.gt(sellBalanceAfter);
             });
 
-            it('... should fail to trigger the same strategy again as its one time', async () => {
+            it("... should fail to trigger the same strategy again as its one time", async () => {
                 try {
                     await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
 
@@ -184,14 +213,14 @@ const limitOrderStrategyTest = async () => {
                         strategySub,
                         tokenAddrSell,
                         tokenAddrBuy,
-                        uniV3Fee,
+                        uniV3Fee
                     );
                 } catch (err) {
-                    expect(err.toString()).to.have.string('SubNotEnabled');
+                    expect(err.toString()).to.have.string("SubNotEnabled");
                 }
             });
 
-            it('... should make a new Limit order [Stop loss] strategy', async () => {
+            it("... should make a new Limit order [Stop loss] strategy", async () => {
                 const srcToken = getAssetInfo(srcTokenSymbol);
                 const destToken = getAssetInfo(destTokenSymbol);
 
@@ -200,15 +229,23 @@ const limitOrderStrategyTest = async () => {
 
                 sellAmountWei = hre.ethers.utils.parseUnits(amount, srcToken.decimals);
 
-                const path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [tokenAddrSell, uniV3Fee, tokenAddrBuy]);
+                const path = hre.ethers.utils.solidityPack(
+                    ["address", "uint24", "address"],
+                    [tokenAddrSell, uniV3Fee, tokenAddrBuy]
+                );
 
                 // eslint-disable-next-line max-len
-                currPrice = await uniV3Wrapper.getSellRate(tokenAddrSell, tokenAddrBuy, sellAmountWei, path);
+                currPrice = await uniV3Wrapper.getSellRate(
+                    tokenAddrSell,
+                    tokenAddrBuy,
+                    sellAmountWei,
+                    path
+                );
 
                 // Set target price to 10% above current price to trigger the strategy
-                const targetPrice = currPrice.add(currPrice.div('10'));
+                const targetPrice = currPrice.add(currPrice.div("10"));
 
-                minPrice = currPrice.sub(currPrice.div('200')); // 0.5% slippage in the minPrice
+                minPrice = currPrice.sub(currPrice.div("200")); // 0.5% slippage in the minPrice
 
                 await approve(tokenAddrSell, proxy.address);
 
@@ -219,16 +256,16 @@ const limitOrderStrategyTest = async () => {
                     sellAmountWei,
                     targetPrice,
                     goodUntilDuration,
-                    automationSdk.enums.OrderType.STOP_LOSS,
+                    automationSdk.enums.OrderType.STOP_LOSS
                 ));
             });
 
-            it('... should trigger a limit order [Stop loss] strategy', async () => {
+            it("... should trigger a limit order [Stop loss] strategy", async () => {
                 await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
 
                 let destAddrTransformed = tokenAddrBuy;
 
-                if (destTokenSymbol === 'WETH') {
+                if (destTokenSymbol === "WETH") {
                     destAddrTransformed = addrs[network].ETH_ADDR;
                 }
 
@@ -244,7 +281,7 @@ const limitOrderStrategyTest = async () => {
                     strategySub,
                     tokenAddrSell,
                     tokenAddrBuy,
-                    uniV3Fee,
+                    uniV3Fee
                 );
 
                 const buyBalanceAfter = await balanceOf(destAddrTransformed, senderAcc.address);
@@ -260,23 +297,38 @@ const limitOrderStrategyTest = async () => {
 const dcaStrategyTest = async () => {
     const tokenPairs = [
         {
-            srcTokenSymbol: 'WETH', destTokenSymbol: 'DAI', amount: '1', uniV3Fee: '3000',
+            srcTokenSymbol: "WETH",
+            destTokenSymbol: "DAI",
+            amount: "1",
+            uniV3Fee: "3000",
         },
         {
-            srcTokenSymbol: 'WETH', destTokenSymbol: 'USDC', amount: '2', uniV3Fee: '3000',
+            srcTokenSymbol: "WETH",
+            destTokenSymbol: "USDC",
+            amount: "2",
+            uniV3Fee: "3000",
         },
         {
-            srcTokenSymbol: 'DAI', destTokenSymbol: 'WETH', amount: '1000', uniV3Fee: '3000',
+            srcTokenSymbol: "DAI",
+            destTokenSymbol: "WETH",
+            amount: "1000",
+            uniV3Fee: "3000",
         },
         {
-            srcTokenSymbol: 'WBTC', destTokenSymbol: 'WETH', amount: '1', uniV3Fee: '3000',
+            srcTokenSymbol: "WBTC",
+            destTokenSymbol: "WETH",
+            amount: "1",
+            uniV3Fee: "3000",
         },
         {
-            srcTokenSymbol: 'USDC', destTokenSymbol: 'WBTC', amount: '3400', uniV3Fee: '3000',
+            srcTokenSymbol: "USDC",
+            destTokenSymbol: "WBTC",
+            amount: "3400",
+            uniV3Fee: "3000",
         },
     ];
 
-    describe('DCA Strategy', function () {
+    describe("DCA Strategy", function () {
         this.timeout(120000);
 
         let senderAcc;
@@ -296,20 +348,20 @@ const dcaStrategyTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
 
-            set('network', chainIds[network]);
+            set("network", chainIds[network]);
 
             // Send eth to owner acc, needed for l2s who don't hold eth
-            await sendEther(senderAcc, getOwnerAddr(), '1');
+            await sendEther(senderAcc, getOwnerAddr(), "1");
 
-            strategyExecutor = await redeployCore(network !== 'mainnet');
+            strategyExecutor = await redeployCore(network !== "mainnet");
 
-            await redeploy('GasFeeTaker');
-            await redeploy('DFSSell');
-            await redeploy('TimestampTrigger');
-            await redeploy('SendTokenAndUnwrap');
+            await redeploy("GasFeeTaker");
+            await redeploy("DFSSell");
+            await redeploy("TimestampTrigger");
+            await redeploy("SendTokenAndUnwrap");
 
-            subStorageAddr = getAddrFromRegistry('SubStorage');
-            subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+            subStorageAddr = getAddrFromRegistry("SubStorage");
+            subStorage = await hre.ethers.getContractAt("SubStorage", subStorageAddr);
 
             await addBotCaller(botAcc.address);
 
@@ -319,16 +371,14 @@ const dcaStrategyTest = async () => {
         });
 
         for (let i = 0; i < tokenPairs.length; i++) {
-            const {
-                srcTokenSymbol, destTokenSymbol, amount, uniV3Fee,
-            } = tokenPairs[i];
+            const { srcTokenSymbol, destTokenSymbol, amount, uniV3Fee } = tokenPairs[i];
 
             it(`... should make a new DCA Strategy for selling ${srcTokenSymbol} into ${destTokenSymbol}`, async () => {
                 const srcToken = getAssetInfo(srcTokenSymbol);
                 const destToken = getAssetInfo(destTokenSymbol);
 
                 const interval = TWO_DAYS;
-                const latestBlock = await hre.ethers.provider.getBlock('latest');
+                const latestBlock = await hre.ethers.provider.getBlock("latest");
 
                 lastTimestamp = latestBlock.timestamp + interval;
 
@@ -345,18 +395,18 @@ const dcaStrategyTest = async () => {
                     tokenAddrBuy,
                     sellAmountWei,
                     interval,
-                    lastTimestamp,
+                    lastTimestamp
                 ));
             });
 
-            it('... should trigger DCA strategy', async () => {
+            it("... should trigger DCA strategy", async () => {
                 await timeTravel(TWO_DAYS);
 
                 await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
 
                 let destAddrTransformed = tokenAddrBuy;
 
-                if (destTokenSymbol === 'WETH') {
+                if (destTokenSymbol === "WETH") {
                     destAddrTransformed = addrs[network].ETH_ADDR;
                 }
 
@@ -370,8 +420,7 @@ const dcaStrategyTest = async () => {
                     strategySub,
                     tokenAddrSell,
                     tokenAddrBuy,
-                    uniV3Fee,
-
+                    uniV3Fee
                 );
 
                 strategySub = await getUpdatedStrategySub(subStorage, subStorageAddr);
@@ -383,14 +432,14 @@ const dcaStrategyTest = async () => {
                 expect(sellBalanceBefore).to.be.gt(sellBalanceAfter);
             });
 
-            it('... should trigger DCA strategy again after 2 days', async () => {
+            it("... should trigger DCA strategy again after 2 days", async () => {
                 await timeTravel(TWO_DAYS);
 
                 await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
 
                 let destAddrTransformed = tokenAddrBuy;
 
-                if (destTokenSymbol === 'WETH') {
+                if (destTokenSymbol === "WETH") {
                     destAddrTransformed = addrs[network].ETH_ADDR;
                 }
 
@@ -404,7 +453,7 @@ const dcaStrategyTest = async () => {
                     strategySub,
                     tokenAddrSell,
                     tokenAddrBuy,
-                    uniV3Fee,
+                    uniV3Fee
                 );
 
                 strategySub = await getUpdatedStrategySub(subStorage, subStorageAddr);
@@ -416,7 +465,7 @@ const dcaStrategyTest = async () => {
                 expect(sellBalanceBefore).to.be.gt(sellBalanceAfter);
             });
 
-            it('... should fail to trigger DCA strategy again after 1 day', async () => {
+            it("... should fail to trigger DCA strategy again after 1 day", async () => {
                 await timeTravel(DAY);
                 await setBalance(tokenAddrSell, senderAcc.address, sellAmountWei);
 
@@ -428,7 +477,7 @@ const dcaStrategyTest = async () => {
                         strategySub,
                         tokenAddrSell,
                         tokenAddrBuy,
-                        uniV3Fee,
+                        uniV3Fee
                     );
                     expect(true).to.be.equal(false);
                 } catch (err) {

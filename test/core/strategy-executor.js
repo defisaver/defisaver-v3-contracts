@@ -1,8 +1,8 @@
-const { resetForkToBlock } = require('../utils/utils');
-const { strategyExecutorTest } = require('./core-tests');
+const { resetForkToBlock } = require("../utils/utils");
+const { strategyExecutorTest } = require("./core-tests");
 
-describe('Strategy-Executor', () => {
-    it('... should test strategyExecutor', async () => {
+describe("Strategy-Executor", () => {
+    it("... should test strategyExecutor", async () => {
         await resetForkToBlock();
 
         await strategyExecutorTest();

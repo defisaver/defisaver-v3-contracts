@@ -1,17 +1,15 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
-const { sendTokenTest } = require('./utils-actions-tests');
+const { redeploy } = require("../../utils/utils");
+const { sendTokenTest } = require("./utils-actions-tests");
 
-describe('Send-Token', function () {
+describe("Send-Token", function () {
     this.timeout(80000);
 
     before(async () => {
-        await redeploy('SendToken');
-        await redeploy('WrapEth');
+        await redeploy("SendToken");
+        await redeploy("WrapEth");
     });
 
-    it('... should send tokens direct action uint256.max', async () => {
+    it("... should send tokens direct action uint256.max", async () => {
         await sendTokenTest();
     });
 });

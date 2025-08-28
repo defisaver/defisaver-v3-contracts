@@ -1,30 +1,25 @@
-const { expect } = require('chai');
-const hre = require('hardhat');
+const { expect } = require("chai");
+const hre = require("hardhat");
 
-const { getAssetInfo } = require('@defisaver/tokens');
+const { getAssetInfo } = require("@defisaver/tokens");
 
-const {
-    getProxy,
-    redeploy,
-    balanceOf,
-    fetchAmountinUSDPrice,
-} = require('../../../utils/utils');
+const { getProxy, redeploy, balanceOf, fetchAmountinUSDPrice } = require("../../../utils/utils");
 
-const { getPair } = require('../../../utils/uniswap');
+const { getPair } = require("../../../utils/uniswap");
 
-const { uniSupply, uniWithdraw } = require('../../../utils/actions');
+const { uniSupply, uniWithdraw } = require("../../../utils/actions");
 
 const uniSupplyTest = async () => {
-    describe('Uni-Supply', function () {
+    describe("Uni-Supply", function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         const uniPairs = [
-            { tokenA: 'WETH', tokenB: 'DAI', amount: fetchAmountinUSDPrice('WETH', '3000') },
-            { tokenA: 'WETH', tokenB: 'WBTC', amount: fetchAmountinUSDPrice('WETH', '3000') },
-            { tokenA: 'DAI', tokenB: 'USDC', amount: fetchAmountinUSDPrice('DAI', '1000') },
+            { tokenA: "WETH", tokenB: "DAI", amount: fetchAmountinUSDPrice("WETH", "3000") },
+            { tokenA: "WETH", tokenB: "WBTC", amount: fetchAmountinUSDPrice("WETH", "3000") },
+            { tokenA: "DAI", tokenB: "USDC", amount: fetchAmountinUSDPrice("DAI", "1000") },
         ];
 
         before(async () => {
@@ -51,14 +46,17 @@ const uniSupplyTest = async () => {
                     tokenDataB.address,
                     uniPairs[i].amount,
                     from,
-                    to,
+                    to
                 );
 
                 const lpBalanceAfter = await balanceOf(pairData.pairAddr, senderAcc.address);
 
                 // TODO: check if we got the correct amount of lp tokens
 
-                expect(lpBalanceAfter).to.be.gt(lpBalanceBefore, 'Check if we got back the lp tokens');
+                expect(lpBalanceAfter).to.be.gt(
+                    lpBalanceBefore,
+                    "Check if we got back the lp tokens"
+                );
             });
         }
     });
@@ -67,16 +65,16 @@ const uniSupplyTest = async () => {
 const uniWithdrawTest = async () => {
     // TODO: test when amount == uint.max
     // TODO: test partial withdraw (not whole amount)
-    describe('Uni-Withdraw', function () {
+    describe("Uni-Withdraw", function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         const uniPairs = [
-            { tokenA: 'WETH', tokenB: 'DAI', amount: fetchAmountinUSDPrice('WETH', '3000') },
-            { tokenA: 'WETH', tokenB: 'WBTC', amount: fetchAmountinUSDPrice('WETH', '3000') },
-            { tokenA: 'DAI', tokenB: 'USDC', amount: fetchAmountinUSDPrice('DAI', '1000') },
+            { tokenA: "WETH", tokenB: "DAI", amount: fetchAmountinUSDPrice("WETH", "3000") },
+            { tokenA: "WETH", tokenB: "WBTC", amount: fetchAmountinUSDPrice("WETH", "3000") },
+            { tokenA: "DAI", tokenB: "USDC", amount: fetchAmountinUSDPrice("DAI", "1000") },
         ];
 
         before(async () => {
@@ -97,7 +95,7 @@ const uniWithdrawTest = async () => {
                 let liquidity = await balanceOf(pairData.pairAddr, senderAcc.address);
 
                 // if we don't have liq. we supply first
-                if (liquidity.eq('0')) {
+                if (liquidity.eq("0")) {
                     await uniSupply(
                         proxy,
                         tokenDataA.address,
@@ -105,7 +103,7 @@ const uniWithdrawTest = async () => {
                         tokenDataB.address,
                         uniPairs[i].amount,
                         from,
-                        to,
+                        to
                     );
                     liquidity = await balanceOf(pairData.pairAddr, senderAcc.address);
                 }
@@ -120,7 +118,7 @@ const uniWithdrawTest = async () => {
                     pairData.pairAddr,
                     liquidity,
                     to,
-                    from,
+                    from
                 );
 
                 const tokenABalanceAfter = await balanceOf(tokenDataA.address, senderAcc.address);
@@ -129,7 +127,7 @@ const uniWithdrawTest = async () => {
 
                 // TODO: check if we got exact token amount correct not just if bigger
 
-                expect(lpBalanceAfter).to.be.eq(0, 'Should withdraw all the lp tokens');
+                expect(lpBalanceAfter).to.be.eq(0, "Should withdraw all the lp tokens");
                 expect(tokenABalanceBefore).to.be.lt(tokenABalanceAfter);
                 expect(tokenBBalanceBefore).to.be.lt(tokenBBalanceAfter);
             });
@@ -138,8 +136,8 @@ const uniWithdrawTest = async () => {
 };
 
 const uniDeployContracts = async () => {
-    await redeploy('UniSupply');
-    await redeploy('UniWithdraw');
+    await redeploy("UniSupply");
+    await redeploy("UniWithdraw");
 };
 const uniFullTest = async () => {
     await uniDeployContracts();

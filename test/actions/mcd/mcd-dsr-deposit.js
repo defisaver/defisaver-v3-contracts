@@ -1,3 +1,3 @@
-const { mcdDsrDepositTest } = require('./mcd-tests');
+const { mcdDsrDepositTest } = require("./mcd-tests");
 
 (() => mcdDsrDepositTest())();

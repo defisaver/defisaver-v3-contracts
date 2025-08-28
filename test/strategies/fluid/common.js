@@ -1,6 +1,6 @@
-const hre = require('hardhat');
-const { configure } = require('@defisaver/sdk');
-const { topUp } = require('../../../scripts/utils/fork');
+const hre = require("hardhat");
+const { configure } = require("@defisaver/sdk");
+const { topUp } = require("../../../scripts/utils/fork");
 const {
     getProxy,
     addrs,
@@ -14,9 +14,9 @@ const {
     chainIds,
     setNewExchangeWrapper,
     network,
-} = require('../../utils/utils');
-const { addBotCaller } = require('../utils/utils-strategies');
-const { fluidT1VaultOpen } = require('../../utils/actions');
+} = require("../../utils/utils");
+const { addBotCaller } = require("../utils/utils-strategies");
+const { fluidT1VaultOpen } = require("../../utils/actions");
 
 class BaseFluidT1StrategyTest {
     constructor(testPairs, isFork) {
@@ -28,7 +28,7 @@ class BaseFluidT1StrategyTest {
     }
 
     async baseSetUp() {
-        console.log('isFork', this.isFork);
+        console.log("isFork", this.isFork);
 
         configure({
             chainId: chainIds[network],
@@ -63,25 +63,26 @@ class BaseFluidT1StrategyTest {
     }
 
     async setUpContracts() {
-        const strategyContractName = network === 'mainnet' ? 'StrategyExecutor' : 'StrategyExecutorL2';
+        const strategyContractName =
+            network === "mainnet" ? "StrategyExecutor" : "StrategyExecutorL2";
         const strategyExecutor = await hre.ethers.getContractAt(
-            strategyContractName, addrs[network].STRATEGY_EXECUTOR_ADDR,
+            strategyContractName,
+            addrs[network].STRATEGY_EXECUTOR_ADDR
         );
         this.contracts.strategyExecutor = strategyExecutor.connect(this.botAcc);
-        this.contracts.flAction = await getContractFromRegistry('FLAction', this.isFork);
-        this.contracts.view = await redeploy('FluidView', this.isFork);
-        await redeploy('FluidVaultT1Open', this.isFork);
-        await redeploy('FluidRatioCheck', this.isFork);
-        await redeploy('FluidVaultT1Borrow', this.isFork);
-        await redeploy('FluidVaultT1Supply', this.isFork);
-        await redeploy('FluidRatioTrigger', this.isFork);
-        await redeploy('FluidVaultT1Adjust', this.isFork);
-        await redeploy('FluidVaultT1Withdraw', this.isFork);
-        await redeploy('FluidVaultT1Payback', this.isFork);
-        const mockExchangeName = network === 'mainnet' ? 'MockExchangeWrapperUsdFeed' : 'MockExchangeWrapperUsdFeedL2';
-        this.contracts.mockWrapper = await redeploy(
-            mockExchangeName, this.isFork,
-        );
+        this.contracts.flAction = await getContractFromRegistry("FLAction", this.isFork);
+        this.contracts.view = await redeploy("FluidView", this.isFork);
+        await redeploy("FluidVaultT1Open", this.isFork);
+        await redeploy("FluidRatioCheck", this.isFork);
+        await redeploy("FluidVaultT1Borrow", this.isFork);
+        await redeploy("FluidVaultT1Supply", this.isFork);
+        await redeploy("FluidRatioTrigger", this.isFork);
+        await redeploy("FluidVaultT1Adjust", this.isFork);
+        await redeploy("FluidVaultT1Withdraw", this.isFork);
+        await redeploy("FluidVaultT1Payback", this.isFork);
+        const mockExchangeName =
+            network === "mainnet" ? "MockExchangeWrapperUsdFeed" : "MockExchangeWrapperUsdFeedL2";
+        this.contracts.mockWrapper = await redeploy(mockExchangeName, this.isFork);
         await setNewExchangeWrapper(this.senderAcc, this.contracts.mockWrapper.address);
     }
 
@@ -96,12 +97,12 @@ class BaseFluidT1StrategyTest {
             debtAmount,
             this.senderAcc.address,
             this.senderAcc.address,
-            true,
+            true
         );
 
         const fluidVaultT1Resolver = await hre.ethers.getContractAt(
-            'IFluidVaultResolver',
-            addrs[network].FLUID_VAULT_T1_RESOLVER_ADDR,
+            "IFluidVaultResolver",
+            addrs[network].FLUID_VAULT_T1_RESOLVER_ADDR
         );
 
         const nftIds = await fluidVaultT1Resolver.positionsNftIdOfUser(this.proxy.address);

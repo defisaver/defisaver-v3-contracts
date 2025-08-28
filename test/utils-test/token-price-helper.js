@@ -1,17 +1,15 @@
-const {
-    redeploy,
-} = require('../utils/utils');
-const { tokenPriceHelperTest } = require('./utils-tests');
+const { redeploy } = require("../utils/utils");
+const { tokenPriceHelperTest } = require("./utils-tests");
 
-describe('Token-Price-Helper', function () {
+describe("Token-Price-Helper", function () {
     this.timeout(80000);
 
     before(async () => {
         /// @dev don't run dfs-registry-controller before this
-        await redeploy('TokenPriceHelper');
+        await redeploy("TokenPriceHelper");
     });
 
-    it('... should test Token Price Helper contracts', async () => {
+    it("... should test Token Price Helper contracts", async () => {
         await tokenPriceHelperTest();
     });
 });

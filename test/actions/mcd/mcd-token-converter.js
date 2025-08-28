@@ -1,14 +1,12 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
-const { mcdTokenConverterTest } = require('./mcd-tests');
+const { redeploy } = require("../../utils/utils");
+const { mcdTokenConverterTest } = require("./mcd-tests");
 
-describe('Mcd-Convert-tokens', function () {
+describe("Mcd-Convert-tokens", function () {
     this.timeout(80000);
     before(async () => {
-        await redeploy('McdTokenConverter');
+        await redeploy("McdTokenConverter");
     });
-    it('... should test fully Mcd Token Converter action', async () => {
+    it("... should test fully Mcd Token Converter action", async () => {
         await mcdTokenConverterTest();
     });
 });

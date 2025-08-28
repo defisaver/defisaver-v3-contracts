@@ -1,24 +1,22 @@
-const hre = require('hardhat');
-const { expect } = require('chai');
-const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy,
-} = require('../../utils/utils');
-const {
-    MORPHO_BLUE_ADDRESS,
-} = require('../../utils/morpho-blue');
-const { morphoBlueSetAuthWithSig } = require('../../utils/actions');
-const { chainIds } = require('../../../scripts/utils/fork');
+const hre = require("hardhat");
+const { expect } = require("chai");
+const { takeSnapshot, revertToSnapshot, getProxy, redeploy } = require("../../utils/utils");
+const { MORPHO_BLUE_ADDRESS } = require("../../utils/morpho-blue");
+const { morphoBlueSetAuthWithSig } = require("../../utils/actions");
+const { chainIds } = require("../../../scripts/utils/fork");
 
-describe('Morpho-Blue-SetAuthWithSig', function () {
+describe("Morpho-Blue-SetAuthWithSig", function () {
     this.timeout(80000);
 
-    let senderAcc; let proxy; let snapshot;
+    let senderAcc;
+    let proxy;
+    let snapshot;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
         snapshot = await takeSnapshot();
-        await redeploy('MorphoBlueSetAuthWithSig');
+        await redeploy("MorphoBlueSetAuthWithSig");
     });
     beforeEach(async () => {
         snapshot = await takeSnapshot();
@@ -26,12 +24,12 @@ describe('Morpho-Blue-SetAuthWithSig', function () {
     afterEach(async () => {
         await revertToSnapshot(snapshot);
     });
-    it('should change auth setup with signature', async () => {
-        const morphoBlue = await hre.ethers.getContractAt('IMorphoBlue', MORPHO_BLUE_ADDRESS);
+    it("should change auth setup with signature", async () => {
+        const morphoBlue = await hre.ethers.getContractAt("IMorphoBlue", MORPHO_BLUE_ADDRESS);
         const nonce = await morphoBlue.nonce(senderAcc.address);
         const network = hre.network.config.name;
         const chainId = chainIds[network];
-        const deadline = '2015495230';
+        const deadline = "2015495230";
         const signature = hre.ethers.utils.splitSignature(
             // @dev - _signTypedData will be renamed to signTypedData in future ethers versions
             // eslint-disable-next-line no-underscore-dangle
@@ -43,24 +41,24 @@ describe('Morpho-Blue-SetAuthWithSig', function () {
                 {
                     Authorization: [
                         {
-                            name: 'authorizer',
-                            type: 'address',
+                            name: "authorizer",
+                            type: "address",
                         },
                         {
-                            name: 'authorized',
-                            type: 'address',
+                            name: "authorized",
+                            type: "address",
                         },
                         {
-                            name: 'isAuthorized',
-                            type: 'bool',
+                            name: "isAuthorized",
+                            type: "bool",
                         },
                         {
-                            name: 'nonce',
-                            type: 'uint256',
+                            name: "nonce",
+                            type: "uint256",
                         },
                         {
-                            name: 'deadline',
-                            type: 'uint256',
+                            name: "deadline",
+                            type: "uint256",
                         },
                     ],
                 },
@@ -70,8 +68,8 @@ describe('Morpho-Blue-SetAuthWithSig', function () {
                     isAuthorized: true,
                     nonce,
                     deadline,
-                },
-            ),
+                }
+            )
         );
         expect(await morphoBlue.isAuthorized(senderAcc.address, proxy.address)).to.be.eq(false);
         await morphoBlueSetAuthWithSig(
@@ -83,7 +81,7 @@ describe('Morpho-Blue-SetAuthWithSig', function () {
             deadline,
             signature.v,
             signature.r,
-            signature.s,
+            signature.s
         );
         expect(await morphoBlue.isAuthorized(senderAcc.address, proxy.address)).to.be.eq(true);
     });

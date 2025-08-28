@@ -107,9 +107,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0xD90Ebd5E551d7451FA289b033755e74588230063"
-        ]
+        "history": ["0xD90Ebd5E551d7451FA289b033755e74588230063"]
     },
     {
         "name": "OneInchWrapper",
@@ -120,9 +118,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x6aB5ee6758235a3aBf6F32578EC2Cb655f2A94a8"
-        ]
+        "history": ["0x6aB5ee6758235a3aBf6F32578EC2Cb655f2A94a8"]
     },
     {
         "name": "OdosWrapper",
@@ -210,9 +206,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0xeDac92a2cF88fF9178D461d152D5C7Cb85a2eF3B"
-        ]
+        "history": ["0xeDac92a2cF88fF9178D461d152D5C7Cb85a2eF3B"]
     },
     {
         "name": "DefisaverLogger",
@@ -274,9 +268,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0xa34452B833fCEfA71E1555d1f654e54eBFFD6022"
-        ]
+        "history": ["0xa34452B833fCEfA71E1555d1f654e54eBFFD6022"]
     },
     {
         "name": "DFSPrices",
@@ -359,16 +351,16 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
-          "0xD313cdea0F3e759d8Aa0130F768895BDBd371b1d",
-          "0xe2171e5503558ee8723e69807f9f1eb654943a3e",
-          "0xf56a2a8fa68d2e608ed7060be55e96e008dcc3ca",
-          "0xF83052a8d9ec5c705B4D7A1C252A6C24A692e91C",
-          "0x5075c6a7251485CC3FcbB4Ba59d6E6EF26a69d45",
-          "0xB6aF2C91E3eBB250615aaa33Bb955f7a7f21AD17",
-          "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
-          "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
-          "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc",
-          "0x1BD33a66791ef6278f6d88503F1e65bEbAED59da"
+            "0xD313cdea0F3e759d8Aa0130F768895BDBd371b1d",
+            "0xe2171e5503558ee8723e69807f9f1eb654943a3e",
+            "0xf56a2a8fa68d2e608ed7060be55e96e008dcc3ca",
+            "0xF83052a8d9ec5c705B4D7A1C252A6C24A692e91C",
+            "0x5075c6a7251485CC3FcbB4Ba59d6E6EF26a69d45",
+            "0xB6aF2C91E3eBB250615aaa33Bb955f7a7f21AD17",
+            "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
+            "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
+            "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc",
+            "0x1BD33a66791ef6278f6d88503F1e65bEbAED59da"
         ]
     },
     {
@@ -487,9 +479,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xdAd9f0aE49F8E769D45d8639e5F11CA1bCa23487"
-        ]
+        "history": ["0xdAd9f0aE49F8E769D45d8639e5F11CA1bCa23487"]
     },
     {
         "name": "ChangeProxyOwner",
@@ -560,9 +550,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x4d3F58460aE2bC71fFaeb33838BFA3b5610083Db"
-        ]
+        "history": ["0x4d3F58460aE2bC71fFaeb33838BFA3b5610083Db"]
     },
     {
         "name": "AaveV3CollateralSwitch",
@@ -584,9 +572,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x09DC201A6380882752bCdC7bC721D384f716A5a4"
-        ]
+        "history": ["0x09DC201A6380882752bCdC7bC721D384f716A5a4"]
     },
     {
         "name": "AaveV3SetEMode",
@@ -619,9 +605,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xD0130ecB810C6F8d58e60DC417357F6048Ea32e7"
-        ]
+        "history": ["0xD0130ecB810C6F8d58e60DC417357F6048Ea32e7"]
     },
     {
         "name": "AaveV3QuotePriceTrigger",
@@ -643,9 +627,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xE1d1c35f8c60001096964A0260b88F6B1c606b68"
-        ]
+        "history": ["0xE1d1c35f8c60001096964A0260b88F6B1c606b68"]
     },
     {
         "name": "FLAaveV3",
@@ -656,9 +638,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x352D4a1622f2DC34c738F542934372855f219F05"
-        ]
+        "history": ["0x352D4a1622f2DC34c738F542934372855f219F05"]
     },
     {
         "name": "FLAaveV3WithFee",
@@ -738,9 +718,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x7dba2b04c6efaE74D5076248666B86a9C551da5e"
-        ]
+        "history": ["0x7dba2b04c6efaE74D5076248666B86a9C551da5e"]
     },
     {
         "name": "ProxyAuth",
@@ -828,9 +806,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x392579E020a688068422A925c85f28bFD12a7EBB"
-        ]
+        "history": ["0x392579E020a688068422A925c85f28bFD12a7EBB"]
     },
     {
         "name": "SendTokenAndUnwrap",
@@ -841,9 +817,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x8000174366066923D554cb466e190258A6FF3b1f"
-        ]
+        "history": ["0x8000174366066923D554cb466e190258A6FF3b1f"]
     },
     {
         "name": "GasFeeTakerL2",
@@ -870,9 +844,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xB76e3f7694589D0f34ba43b17AD0D15350Ab5f85"
-        ]
+        "history": ["0xB76e3f7694589D0f34ba43b17AD0D15350Ab5f85"]
     },
     {
         "name": "AaveV3RatioCheck",
@@ -904,9 +876,7 @@
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": [
-            "0x988C5C24AE6348404196267e19962f36961CAc29"
-        ]
+        "history": ["0x988C5C24AE6348404196267e19962f36961CAc29"]
     },
     {
         "name": "UniCollectV3",
@@ -994,9 +964,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x3e0512Fac6Ad430eCE9b560861826d4e66D131F7"
-        ]
+        "history": ["0x3e0512Fac6Ad430eCE9b560861826d4e66D131F7"]
     },
     {
         "name": "TokenBalance",
@@ -1018,9 +986,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x38255CD752c56b5dF093Bc56f4411eeb5831d334"
-        ]
+        "history": ["0x38255CD752c56b5dF093Bc56f4411eeb5831d334"]
     },
     {
         "name": "FLBalancer",
@@ -1166,9 +1132,7 @@
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0xd18daaf5601c021B8f6D51829B68B6984A3Abb6A"
-        ]
+        "history": ["0xd18daaf5601c021B8f6D51829B68B6984A3Abb6A"]
     },
     {
         "name": "BotAuthForTxSaver",
@@ -1225,7 +1189,7 @@
         "registryIds": [],
         "history": []
     },
-    { 
+    {
         "name": "ExecuteCall",
         "address": "0xfd5ac928aac40d490bcf1a83038d58aa90ea39a7",
         "id": "0xd82327eb",

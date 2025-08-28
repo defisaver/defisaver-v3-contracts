@@ -1,16 +1,14 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
-const { changeOwnerTest } = require('./utils-actions-tests');
+const { redeploy } = require("../../utils/utils");
+const { changeOwnerTest } = require("./utils-actions-tests");
 
-describe('Change owner', function () {
+describe("Change owner", function () {
     this.timeout(80000);
 
     before(async () => {
-        await redeploy('ChangeProxyOwner');
+        await redeploy("ChangeProxyOwner");
     });
 
-    it('... should change owner back', async () => {
+    it("... should change owner back", async () => {
         await changeOwnerTest();
     });
 });

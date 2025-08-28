@@ -1,5 +1,5 @@
-const { expect } = require('chai');
-const hre = require('hardhat');
+const { expect } = require("chai");
+const hre = require("hardhat");
 
 const {
     getProxy,
@@ -10,26 +10,26 @@ const {
     USDT_ADDR,
     setBalance,
     ETH_ADDR,
-} = require('../../utils/utils');
+} = require("../../utils/utils");
 
-const { gUniDeposit, gUniWithdraw } = require('../../utils/actions');
+const { gUniDeposit, gUniWithdraw } = require("../../utils/actions");
 
 const guniDepositTest = async () => {
-    describe('GUNI deposit', function () {
+    describe("GUNI deposit", function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
 
-        it('... Try to supply 10k dai and 10k USDT do G-UNI LP pool', async () => {
-            const daiUSDTpoolAddress = '0xd58c89181360dd9166881fce2bc7c9baae2d5f31';
-            const daiAmount = hre.ethers.utils.parseUnits('10000', 18);
-            const usdtAmount = hre.ethers.utils.parseUnits('10000', 6);
+        it("... Try to supply 10k dai and 10k USDT do G-UNI LP pool", async () => {
+            const daiUSDTpoolAddress = "0xd58c89181360dd9166881fce2bc7c9baae2d5f31";
+            const daiAmount = hre.ethers.utils.parseUnits("10000", 18);
+            const usdtAmount = hre.ethers.utils.parseUnits("10000", 6);
             await setBalance(DAI_ADDR, senderAcc.address, daiAmount);
             await setBalance(USDT_ADDR, senderAcc.address, usdtAmount);
 
@@ -47,7 +47,7 @@ const guniDepositTest = async () => {
                 daiAmount,
                 usdtAmount,
                 senderAcc.address,
-                proxy,
+                proxy
             );
             const poolTokensBalanceAfter = await balanceOf(daiUSDTpoolAddress, senderAcc.address);
             const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
@@ -72,21 +72,21 @@ const guniDepositTest = async () => {
 };
 
 const guniWithdrawTest = async () => {
-    describe('GUNI Withdraw', function () {
+    describe("GUNI Withdraw", function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
 
-        it('... Try to supply 10k dai and 10k USDT do G-UNI LP pool and then withdraw everything', async () => {
-            const daiUSDTpoolAddress = '0xd58c89181360dd9166881fce2bc7c9baae2d5f31';
-            const daiAmount = hre.ethers.utils.parseUnits('10000', 18);
-            const usdtAmount = hre.ethers.utils.parseUnits('10000', 6);
+        it("... Try to supply 10k dai and 10k USDT do G-UNI LP pool and then withdraw everything", async () => {
+            const daiUSDTpoolAddress = "0xd58c89181360dd9166881fce2bc7c9baae2d5f31";
+            const daiAmount = hre.ethers.utils.parseUnits("10000", 18);
+            const usdtAmount = hre.ethers.utils.parseUnits("10000", 6);
             await setBalance(DAI_ADDR, senderAcc.address, daiAmount);
             await setBalance(USDT_ADDR, senderAcc.address, usdtAmount);
 
@@ -104,7 +104,7 @@ const guniWithdrawTest = async () => {
                 daiAmount,
                 usdtAmount,
                 senderAcc.address,
-                proxy,
+                proxy
             );
             const poolTokensBalanceAfter = await balanceOf(daiUSDTpoolAddress, senderAcc.address);
             const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
@@ -139,10 +139,10 @@ const guniWithdrawTest = async () => {
     });
 };
 const guniDeployContracts = async () => {
-    const balance = await balanceOf(ETH_ADDR, ((await hre.ethers.getSigners())[0]).address);
+    const balance = await balanceOf(ETH_ADDR, (await hre.ethers.getSigners())[0].address);
     console.log(balance.toString());
-    await redeploy('GUniDeposit');
-    await redeploy('GUniWithdraw');
+    await redeploy("GUniDeposit");
+    await redeploy("GUniWithdraw");
 };
 const guniFullTest = async () => {
     await guniDeployContracts();

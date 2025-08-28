@@ -1,19 +1,19 @@
-const ethers = require('ethers');
+const ethers = require("ethers");
 
-const fs = require('fs');
+const fs = require("fs");
 
-const { program } = require('commander');
+const { program } = require("commander");
 
-const L2S = ['arbitrum', 'optimism', 'base'];
-const ABI = ['function getFeed(address base, address quote) view returns (address)'];
+const L2S = ["arbitrum", "optimism", "base"];
+const ABI = ["function getFeed(address base, address quote) view returns (address)"];
 const AggregatorABI = [
-    'function latestRoundData() view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)',
+    "function latestRoundData() view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)",
 ];
 
 const RPC = {
-    arbitrum: 'https://arb1.arbitrum.io/rpc',
-    optimism: 'https://mainnet.optimism.io',
-    base: 'https://mainnet.base.org',
+    arbitrum: "https://arb1.arbitrum.io/rpc",
+    optimism: "https://mainnet.optimism.io",
+    base: "https://mainnet.base.org",
 };
 
 async function checkPriceFeedAddresses() {
@@ -26,7 +26,7 @@ async function checkPriceFeedAddresses() {
         const registryData = JSON.parse(fs.readFileSync(registryFilePath));
         const priceFeeds = JSON.parse(fs.readFileSync(priceFeedsFilePath));
 
-        const registry = registryData.find((e) => e.name === 'PriceFeedRegistry');
+        const registry = registryData.find((e) => e.name === "PriceFeedRegistry");
         if (!registry) {
             console.warn(`No PriceFeedRegistry found for ${l2}`);
             // eslint-disable-next-line no-continue
@@ -60,7 +60,7 @@ async function checkPriceFeedAddresses() {
 
             const match = onChainFeed.toLowerCase() === feedAddress.toLowerCase();
             console.log(
-                `${name}: ${match ? '✅' : `❌ got ${onChainFeed}, expected ${feedAddress}`}`,
+                `${name}: ${match ? "✅" : `❌ got ${onChainFeed}, expected ${feedAddress}`}`
             );
         }
     }
@@ -68,8 +68,8 @@ async function checkPriceFeedAddresses() {
 
 (async () => {
     program
-        .command('check-l2-price-feeds')
-        .description('Checks if L2 price feeds addresses are stale')
+        .command("check-l2-price-feeds")
+        .description("Checks if L2 price feeds addresses are stale")
         .action(async () => {
             await checkPriceFeedAddresses();
             process.exit(0);

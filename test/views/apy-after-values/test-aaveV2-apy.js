@@ -1,33 +1,28 @@
 /* eslint-disable max-len */
-const { expect } = require('chai');
-const hre = require('hardhat');
+const { expect } = require("chai");
+const hre = require("hardhat");
 
-const { getAssetInfo } = require('@defisaver/tokens');
+const { getAssetInfo } = require("@defisaver/tokens");
 
-const {
-    getAaveDataProvider,
-    VARIABLE_RATE,
-    getPriceOracle,
-} = require('../../utils/aave');
+const { getAaveDataProvider, VARIABLE_RATE, getPriceOracle } = require("../../utils/aave");
 
+const { supplyAave, borrowAave, paybackAave } = require("../../utils/actions");
 const {
-    supplyAave,
-    borrowAave,
-    paybackAave,
-} = require('../../utils/actions');
-const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy,
+    takeSnapshot,
+    revertToSnapshot,
+    getProxy,
+    redeploy,
     fetchAmountinUSDPrice,
     AAVE_MARKET,
     setBalance,
     approve,
-} = require('../../utils/utils');
+} = require("../../utils/utils");
 
-const collateralTokens = ['WBTC', 'WETH', 'DAI', 'USDC'];
-const debtTokens = ['DAI', 'USDT', 'WBTC', 'WETH', 'USDC'];
+const collateralTokens = ["WBTC", "WETH", "DAI", "USDC"];
+const debtTokens = ["DAI", "USDT", "WBTC", "WETH", "USDC"];
 
 const aaveV2ApyAfterValuesTest = async () => {
-    describe('Test Aave V2 apy after values', async () => {
+    describe("Test Aave V2 apy after values", async () => {
         let senderAcc;
         let wallet;
         let snapshotId;
@@ -38,7 +33,7 @@ const aaveV2ApyAfterValuesTest = async () => {
         before(async () => {
             [senderAcc] = await hre.ethers.getSigners();
             wallet = await getProxy(senderAcc.address);
-            aaveV2ViewContract = await redeploy('AaveView');
+            aaveV2ViewContract = await redeploy("AaveView");
             dataProvider = await getAaveDataProvider();
             priceOracle = await getPriceOracle();
         });
@@ -57,42 +52,52 @@ const aaveV2ApyAfterValuesTest = async () => {
                     continue;
                 }
                 it(`... should estimate supply and borrow rates for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]`, async () => {
-                    const supplyReserveConfiguration = await dataProvider
-                        .getReserveConfigurationData(collAsset.address);
-                    const borrowReserveConfiguration = await dataProvider
-                        .getReserveConfigurationData(debtAsset.address);
+                    const supplyReserveConfiguration =
+                        await dataProvider.getReserveConfigurationData(collAsset.address);
+                    const borrowReserveConfiguration =
+                        await dataProvider.getReserveConfigurationData(debtAsset.address);
 
-                    if (!supplyReserveConfiguration.isActive || supplyReserveConfiguration.isFrozen) {
-                        console.log(`skipping test case for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]. Collateral reserve is not active or it is frozen`);
+                    if (
+                        !supplyReserveConfiguration.isActive ||
+                        supplyReserveConfiguration.isFrozen
+                    ) {
+                        console.log(
+                            `skipping test case for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]. Collateral reserve is not active or it is frozen`
+                        );
                         // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }
-                    if (!borrowReserveConfiguration.borrowingEnabled || !borrowReserveConfiguration.isActive) {
-                        console.log(`skipping test case for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]. Borrow reserve is not active or borrowing is not enabled`);
+                    if (
+                        !borrowReserveConfiguration.borrowingEnabled ||
+                        !borrowReserveConfiguration.isActive
+                    ) {
+                        console.log(
+                            `skipping test case for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]. Borrow reserve is not active or borrowing is not enabled`
+                        );
                         // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }
                     const supplyAmount = hre.ethers.utils.parseUnits(
-                        fetchAmountinUSDPrice(collAsset.symbol, '1000000'),
-                        collAsset.decimals,
+                        fetchAmountinUSDPrice(collAsset.symbol, "1000000"),
+                        collAsset.decimals
                     );
                     const borrowAmount = hre.ethers.utils.parseUnits(
-                        fetchAmountinUSDPrice(debtAsset.symbol, '500000'),
-                        debtAsset.decimals,
+                        fetchAmountinUSDPrice(debtAsset.symbol, "500000"),
+                        debtAsset.decimals
                     );
                     const paybackAmount = borrowAmount.div(4);
 
                     const collTokenInfoFull = await aaveV2ViewContract.getTokenInfoFull(
                         dataProvider.address,
                         priceOracle,
-                        collAsset.address,
+                        collAsset.address
                     );
                     const borrowTokenInfoFull = await aaveV2ViewContract.getTokenInfoFull(
                         dataProvider.address,
                         priceOracle,
-                        debtAsset.address,
+                        debtAsset.address
                     );
                     const stateBefore = {
                         collAssetSupplyRate: collTokenInfoFull.supplyRate,
@@ -104,7 +109,7 @@ const aaveV2ApyAfterValuesTest = async () => {
                         {
                             reserveAddress: collAsset.address,
                             liquidityAdded: supplyAmount,
-                            liquidityTaken: '0',
+                            liquidityTaken: "0",
                             isDebtAsset: false,
                         },
                         {
@@ -116,7 +121,7 @@ const aaveV2ApyAfterValuesTest = async () => {
                     ];
                     const result = await aaveV2ViewContract.getApyAfterValuesEstimation(
                         AAVE_MARKET,
-                        params,
+                        params
                     );
 
                     const estimatedStateAfter = {
@@ -131,7 +136,7 @@ const aaveV2ApyAfterValuesTest = async () => {
                         AAVE_MARKET,
                         supplyAmount,
                         collAsset.address,
-                        senderAcc.address,
+                        senderAcc.address
                     );
                     await borrowAave(
                         wallet,
@@ -139,7 +144,7 @@ const aaveV2ApyAfterValuesTest = async () => {
                         debtAsset.address,
                         borrowAmount,
                         VARIABLE_RATE,
-                        senderAcc.address,
+                        senderAcc.address
                     );
                     await setBalance(debtAsset.address, senderAcc.address, paybackAmount);
                     await approve(debtAsset.address, wallet.address, senderAcc);
@@ -149,18 +154,18 @@ const aaveV2ApyAfterValuesTest = async () => {
                         debtAsset.address,
                         paybackAmount,
                         VARIABLE_RATE,
-                        senderAcc.address,
+                        senderAcc.address
                     );
 
                     const collTokenInfoFullAfter = await aaveV2ViewContract.getTokenInfoFull(
                         dataProvider.address,
                         priceOracle,
-                        collAsset.address,
+                        collAsset.address
                     );
                     const borrowTokenInfoFullAfter = await aaveV2ViewContract.getTokenInfoFull(
                         dataProvider.address,
                         priceOracle,
-                        debtAsset.address,
+                        debtAsset.address
                     );
                     const stateAfter = {
                         collAssetSupplyRate: collTokenInfoFullAfter.supplyRate,
@@ -168,11 +173,11 @@ const aaveV2ApyAfterValuesTest = async () => {
                         debtAssetSupplyRate: borrowTokenInfoFullAfter.supplyRate,
                         debtAssetVariableBorrowRate: borrowTokenInfoFullAfter.borrowRateVariable,
                     };
-                    console.log('=======================');
+                    console.log("=======================");
                     console.log(stateBefore);
-                    console.log('----');
+                    console.log("----");
                     console.log(estimatedStateAfter);
-                    console.log('----');
+                    console.log("----");
                     console.log(stateAfter);
                 });
             }
@@ -180,8 +185,8 @@ const aaveV2ApyAfterValuesTest = async () => {
     });
 };
 
-describe('AaveV2-apy-after-values', () => {
-    it('... should test AaveV2 APY after values', async () => {
+describe("AaveV2-apy-after-values", () => {
+    it("... should test AaveV2 APY after values", async () => {
         await aaveV2ApyAfterValuesTest();
     });
 });

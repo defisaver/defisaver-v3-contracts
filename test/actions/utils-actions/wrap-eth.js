@@ -1,19 +1,17 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require("../../utils/utils");
 
-const { wrapEthTest } = require('./utils-actions-tests');
+const { wrapEthTest } = require("./utils-actions-tests");
 
-describe('Wrap-Eth', function () {
+describe("Wrap-Eth", function () {
     this.timeout(80000);
 
     before(async () => {
-        await redeploy('WrapEth');
-        await redeploy('DFSSell');
-        await redeploy('UniswapWrapperV3');
-        await redeploy('RecipeExecutor');
+        await redeploy("WrapEth");
+        await redeploy("DFSSell");
+        await redeploy("UniswapWrapperV3");
+        await redeploy("RecipeExecutor");
     });
-    it('... should wrap native Eth to Weth direct action', async () => {
+    it("... should wrap native Eth to Weth direct action", async () => {
         await wrapEthTest();
     });
 });

@@ -1,7 +1,7 @@
 /* eslint-disable import/no-unresolved */
-const dfs = require('@defisaver/sdk');
-const hre = require('hardhat');
-const { getAddrFromRegistry } = require('./utils');
+const dfs = require("@defisaver/sdk");
+const hre = require("hardhat");
+const { getAddrFromRegistry } = require("./utils");
 
 const poolInfo = dfs.utils.convexUtils.poolInfo;
 
@@ -12,11 +12,11 @@ poolInfo.forEach((e, i) => {
 
 const getRewards = async (account, rewardContract) => {
     const convexView = await hre.ethers.getContractAt(
-        'ConvexView',
-        await getAddrFromRegistry('ConvexView'),
+        "ConvexView",
+        await getAddrFromRegistry("ConvexView")
     );
-    const rewards = await convexView['earnedRewards(address,address)'](account, rewardContract);
-    return rewards.filter((e) => e.token !== '0x0000000000000000000000000000000000000000');
+    const rewards = await convexView["earnedRewards(address,address)"](account, rewardContract);
+    return rewards.filter((e) => e.token !== "0x0000000000000000000000000000000000000000");
 };
 
 const DepositOptions = {

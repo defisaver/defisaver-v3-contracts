@@ -1,18 +1,17 @@
 /* eslint-disable max-len */
-const { expect } = require('chai');
-const hre = require('hardhat');
+const { expect } = require("chai");
+const hre = require("hardhat");
 
-const { getAssetInfo } = require('@defisaver/tokens');
+const { getAssetInfo } = require("@defisaver/tokens");
 
+const { aaveV3Supply, aaveV3Borrow, aaveV3Payback } = require("../../utils/actions");
+
+const { isAssetBorrowableV3, VARIABLE_RATE } = require("../../utils/aave");
 const {
-    aaveV3Supply,
-    aaveV3Borrow,
-    aaveV3Payback,
-} = require('../../utils/actions');
-
-const { isAssetBorrowableV3, VARIABLE_RATE } = require('../../utils/aave');
-const {
-    getProxy, redeploy, takeSnapshot, revertToSnapshot,
+    getProxy,
+    redeploy,
+    takeSnapshot,
+    revertToSnapshot,
     addrs,
     network,
     fetchAmountinUSDPrice,
@@ -20,14 +19,14 @@ const {
     approve,
     isNetworkFork,
     getOwnerAddr,
-} = require('../../utils/utils');
-const { topUp } = require('../../../scripts/utils/fork');
+} = require("../../utils/utils");
+const { topUp } = require("../../../scripts/utils/fork");
 
-const collateralTokens = ['WETH', 'wstETH', 'USDC', 'USDT', 'LINK'];
-const debtTokens = ['DAI', 'USDC', 'WETH', 'LINK'];
+const collateralTokens = ["WETH", "wstETH", "USDC", "USDT", "LINK"];
+const debtTokens = ["DAI", "USDC", "WETH", "LINK"];
 
 const aaveV3ApyAfterValuesTest = async (isFork) => {
-    describe('Test Aave V3 apy after values', async () => {
+    describe("Test Aave V3 apy after values", async () => {
         let senderAcc;
         let wallet;
         let snapshotId;
@@ -40,7 +39,7 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                 await topUp(getOwnerAddr());
             }
             wallet = await getProxy(senderAcc.address);
-            aaveV3ViewContract = await redeploy('AaveV3View', isFork);
+            aaveV3ViewContract = await redeploy("AaveV3View", isFork);
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -59,36 +58,37 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                 it(`... should estimate supply and borrow rates for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]`, async () => {
                     const collTokenInfoFull = await aaveV3ViewContract.getTokenInfoFull(
                         addrs[network].AAVE_MARKET,
-                        collAsset.address,
+                        collAsset.address
                     );
                     const borrowTokenInfoFull = await aaveV3ViewContract.getTokenInfoFull(
                         addrs[network].AAVE_MARKET,
-                        debtAsset.address,
+                        debtAsset.address
                     );
 
                     const isAssetBorrowable = await isAssetBorrowableV3(
-                        addrs[network].AAVE_V3_POOL_DATA_PROVIDER, debtAsset.address,
+                        addrs[network].AAVE_V3_POOL_DATA_PROVIDER,
+                        debtAsset.address
                     );
                     if (!isAssetBorrowable) {
-                        console.log('Borrow asset is paused, inactive or frozen. Skipping test');
+                        console.log("Borrow asset is paused, inactive or frozen. Skipping test");
                         // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }
                     if (!collTokenInfoFull.usageAsCollateralEnabled) {
-                        console.log('Collateral asset cant be used as collateral. Skipping test');
+                        console.log("Collateral asset cant be used as collateral. Skipping test");
                         // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }
 
                     const supplyAmount = hre.ethers.utils.parseUnits(
-                        fetchAmountinUSDPrice(collAsset.symbol, '1000000'),
-                        collAsset.decimals,
+                        fetchAmountinUSDPrice(collAsset.symbol, "1000000"),
+                        collAsset.decimals
                     );
                     let borrowAmount = hre.ethers.utils.parseUnits(
-                        fetchAmountinUSDPrice(debtAsset.symbol, '500000'),
-                        debtAsset.decimals,
+                        fetchAmountinUSDPrice(debtAsset.symbol, "500000"),
+                        debtAsset.decimals
                     );
                     if (borrowTokenInfoFull.availableLiquidity.lt(borrowAmount)) {
                         borrowAmount = borrowTokenInfoFull.availableLiquidity.div(2);
@@ -105,7 +105,7 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                         {
                             reserveAddress: collAsset.address,
                             liquidityAdded: supplyAmount,
-                            liquidityTaken: '0',
+                            liquidityTaken: "0",
                             isDebtAsset: false,
                         },
                         {
@@ -117,7 +117,7 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                     ];
                     const result = await aaveV3ViewContract.getApyAfterValuesEstimation(
                         addrs[network].AAVE_MARKET,
-                        params,
+                        params
                     );
 
                     const estimatedStateAfter = {
@@ -135,7 +135,7 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                         collAsset.address,
                         collTokenInfoFull.assetId,
                         senderAcc.address,
-                        senderAcc,
+                        senderAcc
                     );
                     await aaveV3Borrow(
                         wallet,
@@ -143,7 +143,7 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                         borrowAmount,
                         senderAcc.address,
                         VARIABLE_RATE,
-                        borrowTokenInfoFull.assetId,
+                        borrowTokenInfoFull.assetId
                     );
                     await setBalance(debtAsset.address, senderAcc.address, paybackAmount);
                     await approve(debtAsset.address, wallet.address, senderAcc);
@@ -154,16 +154,16 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                         senderAcc.address,
                         VARIABLE_RATE,
                         borrowTokenInfoFull.assetId,
-                        debtAsset.address,
+                        debtAsset.address
                     );
 
                     const collTokenInfoFullAfter = await aaveV3ViewContract.getTokenInfoFull(
                         addrs[network].AAVE_MARKET,
-                        collAsset.address,
+                        collAsset.address
                     );
                     const borrowTokenInfoFullAfter = await aaveV3ViewContract.getTokenInfoFull(
                         addrs[network].AAVE_MARKET,
-                        debtAsset.address,
+                        debtAsset.address
                     );
                     const stateAfter = {
                         collAssetSupplyRate: collTokenInfoFullAfter.supplyRate,
@@ -171,31 +171,43 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                         debtAssetSupplyRate: borrowTokenInfoFullAfter.supplyRate,
                         debtAssetVariableBorrowRate: borrowTokenInfoFullAfter.borrowRateVariable,
                     };
-                    console.log('=======================');
-                    console.log('STATE BEFORE');
+                    console.log("=======================");
+                    console.log("STATE BEFORE");
                     console.log(stateBefore);
-                    console.log('----');
-                    console.log('ESTIMATED STATE AFTER');
+                    console.log("----");
+                    console.log("ESTIMATED STATE AFTER");
                     console.log(estimatedStateAfter);
-                    console.log('----');
-                    console.log('STATE AFTER');
+                    console.log("----");
+                    console.log("STATE AFTER");
                     console.log(stateAfter);
 
                     // rate is scaled by 1e27. We want first 7 digits to be the same
                     const precision = hre.ethers.BigNumber.from(10).pow(27 - 7);
 
-                    expect(estimatedStateAfter.collAssetSupplyRate).to.be.closeTo(stateAfter.collAssetSupplyRate, precision);
-                    expect(estimatedStateAfter.collAssetVariableBorrowRate).to.be.closeTo(stateAfter.collAssetVariableBorrowRate, precision);
-                    expect(estimatedStateAfter.debtAssetSupplyRate).to.be.closeTo(stateAfter.debtAssetSupplyRate, precision);
-                    expect(estimatedStateAfter.debtAssetVariableBorrowRate).to.be.closeTo(stateAfter.debtAssetVariableBorrowRate, precision);
+                    expect(estimatedStateAfter.collAssetSupplyRate).to.be.closeTo(
+                        stateAfter.collAssetSupplyRate,
+                        precision
+                    );
+                    expect(estimatedStateAfter.collAssetVariableBorrowRate).to.be.closeTo(
+                        stateAfter.collAssetVariableBorrowRate,
+                        precision
+                    );
+                    expect(estimatedStateAfter.debtAssetSupplyRate).to.be.closeTo(
+                        stateAfter.debtAssetSupplyRate,
+                        precision
+                    );
+                    expect(estimatedStateAfter.debtAssetVariableBorrowRate).to.be.closeTo(
+                        stateAfter.debtAssetVariableBorrowRate,
+                        precision
+                    );
                 });
             }
         }
     });
 };
 
-describe('AaveV3-apy-after-values', () => {
-    it('... should test AaveV3 APY after values', async () => {
+describe("AaveV3-apy-after-values", () => {
+    it("... should test AaveV3 APY after values", async () => {
         const isFork = isNetworkFork();
         await aaveV3ApyAfterValuesTest(isFork);
     });

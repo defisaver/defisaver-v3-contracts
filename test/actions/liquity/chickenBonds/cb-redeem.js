@@ -1,14 +1,14 @@
-const { cbRedeemTest } = require('./chicken-bonds-tests');
-const { redeploy } = require('../../../utils/utils');
+const { cbRedeemTest } = require("./chicken-bonds-tests");
+const { redeploy } = require("../../../utils/utils");
 
-describe('CB-Redeem', () => {
+describe("CB-Redeem", () => {
     before(async () => {
-        await redeploy('CBCreate');
-        await redeploy('CBChickenIn');
-        await redeploy('CBRedeem');
+        await redeploy("CBCreate");
+        await redeploy("CBChickenIn");
+        await redeploy("CBRedeem");
     });
 
-    it('... should test redeeming of LUSD for bLUSD', async () => {
+    it("... should test redeeming of LUSD for bLUSD", async () => {
         await cbRedeemTest();
     });
 });

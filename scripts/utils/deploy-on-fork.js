@@ -1,9 +1,9 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable import/no-extraneous-dependencies */
 
-const hre = require('hardhat');
-const { redeploy, getOwnerAddr } = require('../../test/utils/utils');
-const { topUp } = require('./fork');
+const hre = require("hardhat");
+const { redeploy, getOwnerAddr } = require("../../test/utils/utils");
+const { topUp } = require("./fork");
 
 async function deployOnFork(contractNames) {
     const senderAcc = (await hre.ethers.getSigners())[0];
@@ -15,10 +15,10 @@ async function deployOnFork(contractNames) {
     }
 }
 
-const contractNames = process.env.CONTRACTS ? process.env.CONTRACTS.split(' ') : [];
+const contractNames = process.env.CONTRACTS ? process.env.CONTRACTS.split(" ") : [];
 
 if (contractNames.length === 0) {
-    console.error('Error: No contract names provided. Use CONTRACTS env variable.');
+    console.error("Error: No contract names provided. Use CONTRACTS env variable.");
     process.exit(1);
 }
 

@@ -1,8 +1,8 @@
-const { resetForkToBlock } = require('../../utils/utils');
-const { guniFullTest } = require('./guni-tests');
+const { resetForkToBlock } = require("../../utils/utils");
+const { guniFullTest } = require("./guni-tests");
 
-describe('GUni full test', () => {
-    it('... should do full Guni test', async () => {
+describe("GUni full test", () => {
+    it("... should do full Guni test", async () => {
         await resetForkToBlock();
         await guniFullTest();
     });

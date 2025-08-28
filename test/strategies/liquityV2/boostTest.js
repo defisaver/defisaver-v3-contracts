@@ -1,16 +1,28 @@
-const hre = require('hardhat');
-const { expect } = require('chai');
-const { getAssetInfo } = require('@defisaver/tokens');
-const { getLiquityV2TestPairs, deployLiquityV2BoostBundle, getLiquityV2AdjustBorrowMaxUpfrontFee } = require('../../utils/liquityV2');
-const { BaseLiquityV2StrategyTest } = require('./common');
-const { subLiquityV2BoostBundle } = require('../utils/strategy-subs');
+const hre = require("hardhat");
+const { expect } = require("chai");
+const { getAssetInfo } = require("@defisaver/tokens");
 const {
-    formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
+    getLiquityV2TestPairs,
+    deployLiquityV2BoostBundle,
+    getLiquityV2AdjustBorrowMaxUpfrontFee,
+} = require("../../utils/liquityV2");
+const { BaseLiquityV2StrategyTest } = require("./common");
+const { subLiquityV2BoostBundle } = require("../utils/strategy-subs");
+const {
+    formatExchangeObjSdk,
+    BOLD_ADDR,
+    addrs,
+    network,
+    isNetworkFork,
     setBalance,
     BALANCER_VAULT_ADDR,
     fetchAmountInUSDPrice,
-} = require('../../utils/utils');
-const { callLiquityV2BoostStrategy, callLiquityV2FLBoostWithCollStrategy, callLiquityV2FLBoostStrategy } = require('../utils/strategy-calls');
+} = require("../../utils/utils");
+const {
+    callLiquityV2BoostStrategy,
+    callLiquityV2FLBoostWithCollStrategy,
+    callLiquityV2FLBoostStrategy,
+} = require("../utils/strategy-calls");
 
 class BoostTest extends BaseLiquityV2StrategyTest {
     async setUp() {
@@ -21,11 +33,11 @@ class BoostTest extends BaseLiquityV2StrategyTest {
     runTests() {
         // eslint-disable-next-line no-unused-vars
         this.testPairs.forEach((pair, i) => {
-            it('... should call LiquityV2 boost strategy', async () => {
+            it("... should call LiquityV2 boost strategy", async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
 
-                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, '40000');
-                const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, "40000");
+                const boldAmount = hre.ethers.utils.parseUnits("15000", 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
 
                 const maxRatio = 200;
@@ -37,12 +49,12 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     collAsset.address,
                     maxRatio,
                     targetRatio,
-                    this.bundles.boost,
+                    this.bundles.boost
                 );
 
                 const troveInfoBefore = await this.contracts.view.getTroveInfo(
                     pair.market,
-                    troveId,
+                    troveId
                 );
                 const ratioBefore = troveInfoBefore.TCRatio;
 
@@ -54,14 +66,14 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     boostAmount,
                     addrs[network].UNISWAP_V3_WRAPPER,
                     true,
-                    false,
+                    false
                 );
 
                 const maxUpfrontFee = await getLiquityV2AdjustBorrowMaxUpfrontFee(
                     pair.market,
                     pair.collIndex,
                     troveId,
-                    boostAmount,
+                    boostAmount
                 );
 
                 await callLiquityV2BoostStrategy(
@@ -71,21 +83,21 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     strategySub,
                     exchangeObject,
                     boostAmount,
-                    maxUpfrontFee,
+                    maxUpfrontFee
                 );
 
                 const troveInfoAfter = await this.contracts.view.getTroveInfo(pair.market, troveId);
                 const ratioAfter = troveInfoAfter.TCRatio;
-                console.log('ratioAfter', ratioAfter.toString());
+                console.log("ratioAfter", ratioAfter.toString());
 
                 expect(ratioBefore).to.be.gt(ratioAfter);
             });
-            it('... should call LiquityV2 fl boost strategy', async () => {
+            it("... should call LiquityV2 fl boost strategy", async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
-                const supplyAmount = await fetchAmountInUSDPrice(collAsset.address, '40000');
-                const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.address, "40000");
+                const boldAmount = hre.ethers.utils.parseUnits("15000", 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
-                console.log('troveId', troveId);
+                console.log("troveId", troveId);
 
                 const maxRatio = 200;
                 const targetRatio = 150;
@@ -96,17 +108,17 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     collAsset.address,
                     maxRatio,
                     targetRatio,
-                    this.bundles.boost,
+                    this.bundles.boost
                 );
 
                 const troveInfoBefore = await this.contracts.view.getTroveInfo(
                     pair.market,
-                    troveId,
+                    troveId
                 );
                 const ratioBefore = troveInfoBefore.TCRatio;
-                console.log('ratioBefore', ratioBefore.toString());
+                console.log("ratioBefore", ratioBefore.toString());
 
-                const boldFlAmount = hre.ethers.utils.parseUnits('5000', 18);
+                const boldFlAmount = hre.ethers.utils.parseUnits("5000", 18);
 
                 const exchangeObject = await formatExchangeObjSdk(
                     BOLD_ADDR,
@@ -114,14 +126,14 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     boldFlAmount,
                     addrs[network].UNISWAP_V3_WRAPPER,
                     true,
-                    false,
+                    false
                 );
 
                 const maxUpfrontFee = await getLiquityV2AdjustBorrowMaxUpfrontFee(
                     pair.market,
                     pair.collIndex,
                     troveId,
-                    boldFlAmount,
+                    boldFlAmount
                 );
 
                 // add bold liquidity to balancer vault so we can use balancer flashloan
@@ -136,22 +148,22 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     boldFlAmount,
                     BOLD_ADDR,
                     maxUpfrontFee,
-                    this.contracts.flAction.address,
+                    this.contracts.flAction.address
                 );
 
                 const troveInfoAfter = await this.contracts.view.getTroveInfo(pair.market, troveId);
                 const ratioAfter = troveInfoAfter.TCRatio;
-                console.log('ratioAfter', ratioAfter.toString());
+                console.log("ratioAfter", ratioAfter.toString());
 
                 expect(ratioBefore).to.be.gt(ratioAfter);
             });
-            it('... should call LiquityV2 fl boost with collateral strategy', async () => {
+            it("... should call LiquityV2 fl boost with collateral strategy", async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
 
-                const supplyAmount = await fetchAmountInUSDPrice(collAsset.address, '40000');
-                const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.address, "40000");
+                const boldAmount = hre.ethers.utils.parseUnits("15000", 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
-                console.log('troveId', troveId);
+                console.log("troveId", troveId);
 
                 const maxRatio = 200;
                 const targetRatio = 150;
@@ -162,18 +174,18 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     collAsset.address,
                     maxRatio,
                     targetRatio,
-                    this.bundles.boost,
+                    this.bundles.boost
                 );
 
                 const troveInfoBefore = await this.contracts.view.getTroveInfo(
                     pair.market,
-                    troveId,
+                    troveId
                 );
                 const ratioBefore = troveInfoBefore.TCRatio;
-                console.log('ratioBefore', ratioBefore.toString());
+                console.log("ratioBefore", ratioBefore.toString());
 
-                const collFlAmount = await fetchAmountInUSDPrice(collAsset.address, '5000');
-                const boostBoldAmount = hre.ethers.utils.parseUnits('5000', 18);
+                const collFlAmount = await fetchAmountInUSDPrice(collAsset.address, "5000");
+                const boostBoldAmount = hre.ethers.utils.parseUnits("5000", 18);
 
                 const exchangeObject = await formatExchangeObjSdk(
                     BOLD_ADDR,
@@ -181,14 +193,14 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     boostBoldAmount,
                     addrs[network].UNISWAP_V3_WRAPPER,
                     true,
-                    false,
+                    false
                 );
 
                 const maxUpfrontFee = await getLiquityV2AdjustBorrowMaxUpfrontFee(
                     pair.market,
                     pair.collIndex,
                     troveId,
-                    boostBoldAmount,
+                    boostBoldAmount
                 );
 
                 await callLiquityV2FLBoostWithCollStrategy(
@@ -201,12 +213,12 @@ class BoostTest extends BaseLiquityV2StrategyTest {
                     boostBoldAmount,
                     collAsset.address,
                     maxUpfrontFee,
-                    this.contracts.flAction.address,
+                    this.contracts.flAction.address
                 );
 
                 const troveInfoAfter = await this.contracts.view.getTroveInfo(pair.market, troveId);
                 const ratioAfter = troveInfoAfter.TCRatio;
-                console.log('ratioAfter', ratioAfter.toString());
+                console.log("ratioAfter", ratioAfter.toString());
 
                 expect(ratioBefore).to.be.gt(ratioAfter);
             });
@@ -218,11 +230,17 @@ module.exports = async function runBoostTests() {
     const testPairs = await getLiquityV2TestPairs();
     const isFork = isNetworkFork();
     const boostTest = new BoostTest(testPairs, isFork);
-    describe('LiquityV2 Boost Strategy Tests', function () {
+    describe("LiquityV2 Boost Strategy Tests", function () {
         this.timeout(1200000);
-        before(async () => { await boostTest.setUp(); });
-        beforeEach(async () => { await boostTest.takeSnapshot(); });
-        afterEach(async () => { await boostTest.revertToSnapshot(); });
+        before(async () => {
+            await boostTest.setUp();
+        });
+        beforeEach(async () => {
+            await boostTest.takeSnapshot();
+        });
+        afterEach(async () => {
+            await boostTest.revertToSnapshot();
+        });
         boostTest.runTests();
     });
 };

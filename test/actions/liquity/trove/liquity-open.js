@@ -1,7 +1,7 @@
-const { liquityOpenTest } = require('../liquity-tests');
+const { liquityOpenTest } = require("../liquity-tests");
 
-describe('Liquity-Open', () => {
-    it('... should test opening a liquity trove', async () => {
+describe("Liquity-Open", () => {
+    it("... should test opening a liquity trove", async () => {
         await liquityOpenTest();
     });
 });

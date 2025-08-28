@@ -1,5 +1,5 @@
-const runRepayTests = require('./repayTest');
-const runBoostTests = require('./boostTest');
+const runRepayTests = require("./repayTest");
+const runBoostTests = require("./boostTest");
 
 (async () => {
     await runRepayTests();

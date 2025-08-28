@@ -1,7 +1,7 @@
-const { reflexerFullTest } = require('./reflexer-tests');
+const { reflexerFullTest } = require("./reflexer-tests");
 
-describe('Reflexer full test', () => {
-    it('... should do full Reflexer test', async () => {
+describe("Reflexer full test", () => {
+    it("... should do full Reflexer test", async () => {
         await reflexerFullTest();
     });
 });

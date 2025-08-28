@@ -1,10 +1,10 @@
 /* eslint-disable no-await-in-loop */
-const sdk = require('@defisaver/sdk');
-const { expect } = require('chai');
-const hre = require('hardhat');
-const { getAssetInfo, assets } = require('@defisaver/tokens');
-const path = require('path');
-const fs = require('fs');
+const sdk = require("@defisaver/sdk");
+const { expect } = require("chai");
+const hre = require("hardhat");
+const { getAssetInfo, assets } = require("@defisaver/tokens");
+const path = require("path");
+const fs = require("fs");
 
 const {
     redeploy,
@@ -28,34 +28,38 @@ const {
     setBalance,
     addrs,
     takeSnapshot,
-    revertToSnapshot, getContractFromRegistry, getOwnerAddr,
+    revertToSnapshot,
+    getContractFromRegistry,
+    getOwnerAddr,
     network,
-} = require('../utils/utils');
-const {
-    predictSafeAddress,
-    signSafeTx,
-    encodeSetupArgs,
-} = require('../utils/safe');
+} = require("../utils/utils");
+const { predictSafeAddress, signSafeTx, encodeSetupArgs } = require("../utils/safe");
 
 const botRefillTest = async () => {
-    describe('Bot-Refills', function () {
+    describe("Bot-Refills", function () {
         this.timeout(80000);
 
         let botRefillsContract;
         let feeRecipientContract;
         let feeReceiverAddr;
         let refillCaller;
-        const botAddr = '0x5aa40C7C8158D8E29CA480d7E05E5a32dD819332';
+        const botAddr = "0x5aa40C7C8158D8E29CA480d7E05E5a32dD819332";
 
         before(async () => {
-            botRefillsContract = await getContractFromRegistry('BotRefills');
-            feeRecipientContract = await hre.ethers.getContractAt('FeeRecipient', addrs[network].FEE_RECIPIENT_ADDR);
+            botRefillsContract = await getContractFromRegistry("BotRefills");
+            feeRecipientContract = await hre.ethers.getContractAt(
+                "FeeRecipient",
+                addrs[network].FEE_RECIPIENT_ADDR
+            );
             feeReceiverAddr = await feeRecipientContract.getFeeAddr();
             refillCaller = addrs[network].REFILL_CALLER;
 
             await impersonateAccount(feeReceiverAddr);
 
-            let wethContract = await hre.ethers.getContractAt('IERC20', addrs[network].WETH_ADDRESS);
+            let wethContract = await hre.ethers.getContractAt(
+                "IERC20",
+                addrs[network].WETH_ADDRESS
+            );
 
             let signer = await hre.ethers.provider.getSigner(feeReceiverAddr);
             wethContract = wethContract.connect(signer);
@@ -70,16 +74,16 @@ const botRefillTest = async () => {
             await stopImpersonatingAccount(getOwnerAddr());
         });
 
-        it('... should call refill with WETH', async () => {
+        it("... should call refill with WETH", async () => {
             const [deployer] = await hre.ethers.getSigners();
-            await sendEther(deployer, refillCaller, '10');
+            await sendEther(deployer, refillCaller, "10");
 
             await impersonateAccount(refillCaller);
             const signer = await hre.ethers.provider.getSigner(refillCaller);
             botRefillsContract = botRefillsContract.connect(signer);
 
             const ethBotAddrBalanceBefore = await balanceOf(ETH_ADDR, botAddr);
-            const ethRefillAmount = hre.ethers.utils.parseEther('4');
+            const ethRefillAmount = hre.ethers.utils.parseEther("4");
             const wethFeeAddrBalance = await balanceOf(WETH_ADDRESS, feeReceiverAddr);
 
             if (wethFeeAddrBalance.lt(ethRefillAmount)) {
@@ -98,32 +102,32 @@ const botRefillTest = async () => {
 };
 
 const feeReceiverTest = async () => {
-    describe('Fee-Receiver', function () {
+    describe("Fee-Receiver", function () {
         this.timeout(80000);
 
         let feeReceiver;
         let senderAcc;
 
-        const MULTISIG_ADDR = '0xA74e9791D7D66c6a14B2C571BdA0F2A1f6D64E06';
+        const MULTISIG_ADDR = "0xA74e9791D7D66c6a14B2C571BdA0F2A1f6D64E06";
 
         before(async () => {
             /// @dev don't run dfs-registry-controller before this
-            const feeReceiverAddr = await getAddrFromRegistry('FeeReceiver');
-            feeReceiver = await hre.ethers.getContractAt('FeeReceiver', feeReceiverAddr);
+            const feeReceiverAddr = await getAddrFromRegistry("FeeReceiver");
+            feeReceiver = await hre.ethers.getContractAt("FeeReceiver", feeReceiverAddr);
 
             senderAcc = (await hre.ethers.getSigners())[0];
 
             await impersonateAccount(MULTISIG_ADDR);
 
-            await sendEther(senderAcc, MULTISIG_ADDR, '0.5');
+            await sendEther(senderAcc, MULTISIG_ADDR, "0.5");
 
             const signer = await hre.ethers.provider.getSigner(MULTISIG_ADDR);
             feeReceiver = feeReceiver.connect(signer);
         });
 
-        it('... should be able to withdraw 1 Weth', async () => {
-            const wethAmount = hre.ethers.utils.parseUnits('3', 18);
-            const oneWeth = hre.ethers.utils.parseUnits('1', 18);
+        it("... should be able to withdraw 1 Weth", async () => {
+            const wethAmount = hre.ethers.utils.parseUnits("3", 18);
+            const oneWeth = hre.ethers.utils.parseUnits("1", 18);
 
             // deposit 3 weth to contract
             await depositToWeth(wethAmount);
@@ -140,7 +144,7 @@ const feeReceiverTest = async () => {
             expect(wethBalanceBefore.add(oneWeth)).to.be.eq(wethBalanceAfter);
         });
 
-        it('... should be able to withdraw whole weth balance', async () => {
+        it("... should be able to withdraw whole weth balance", async () => {
             const wethBalanceBefore = await balanceOf(WETH_ADDRESS, senderAcc.address);
             const contractWethBalance = await balanceOf(WETH_ADDRESS, feeReceiver.address);
 
@@ -153,9 +157,9 @@ const feeReceiverTest = async () => {
             expect(wethBalanceBefore.add(contractWethBalance)).to.be.eq(wethBalanceAfter);
         });
 
-        it('... should be able to withdraw 1 Eth', async () => {
-            const ethAmount = '3';
-            const oneEth = hre.ethers.utils.parseUnits('1', 18);
+        it("... should be able to withdraw 1 Eth", async () => {
+            const ethAmount = "3";
+            const oneEth = hre.ethers.utils.parseUnits("1", 18);
 
             // deposit 3 eth to contract
             await sendEther(senderAcc, feeReceiver.address, ethAmount);
@@ -171,7 +175,7 @@ const feeReceiverTest = async () => {
             expect(ethBalanceBefore.add(oneEth)).to.be.gt(ethBalanceAfter);
         });
 
-        it('... should be able to withdraw whole Eth balance', async () => {
+        it("... should be able to withdraw whole Eth balance", async () => {
             const contractEthBalance = await balanceOf(ETH_ADDR, feeReceiver.address);
             const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
 
@@ -184,11 +188,11 @@ const feeReceiverTest = async () => {
             expect(ethBalanceBefore.add(contractEthBalance)).to.be.eq(ethBalanceAfter);
         });
 
-        it('... should give approval from a contract to the address', async () => {
+        it("... should give approval from a contract to the address", async () => {
             const allowanceBefore = await getAllowance(
                 USDC_ADDR,
                 feeReceiver.address,
-                senderAcc.address,
+                senderAcc.address
             );
 
             await feeReceiver.approveAddress(USDC_ADDR, senderAcc.address, MAX_UINT);
@@ -196,18 +200,18 @@ const feeReceiverTest = async () => {
             const allowanceAfter = await getAllowance(
                 USDC_ADDR,
                 feeReceiver.address,
-                senderAcc.address,
+                senderAcc.address
             );
 
             expect(allowanceBefore).to.be.eq(0);
             expect(allowanceAfter).to.be.eq(MAX_UINT);
         });
 
-        it('... should remove approval from a contract to the address', async () => {
+        it("... should remove approval from a contract to the address", async () => {
             const allowanceBefore = await getAllowance(
                 USDC_ADDR,
                 feeReceiver.address,
-                senderAcc.address,
+                senderAcc.address
             );
 
             await feeReceiver.approveAddress(USDC_ADDR, senderAcc.address, 0);
@@ -215,24 +219,24 @@ const feeReceiverTest = async () => {
             const allowanceAfter = await getAllowance(
                 USDC_ADDR,
                 feeReceiver.address,
-                senderAcc.address,
+                senderAcc.address
             );
 
             expect(allowanceBefore).to.be.eq(MAX_UINT);
             expect(allowanceAfter).to.be.eq(0);
         });
 
-        it('... should fail to withdraw Weth as the caller is not admin', async () => {
+        it("... should fail to withdraw Weth as the caller is not admin", async () => {
             try {
                 feeReceiver = feeReceiver.connect(senderAcc);
 
                 await feeReceiver.withdrawToken(WETH_ADDRESS, senderAcc.address, 0);
             } catch (err) {
-                expect(err.toString()).to.have.string('Only Admin');
+                expect(err.toString()).to.have.string("Only Admin");
             }
         });
 
-        it('... should fail to withdraw Eth as the caller is not admin', async () => {
+        it("... should fail to withdraw Eth as the caller is not admin", async () => {
             try {
                 feeReceiver = feeReceiver.connect(senderAcc);
 
@@ -240,32 +244,36 @@ const feeReceiverTest = async () => {
 
                 await stopImpersonatingAccount(MULTISIG_ADDR);
             } catch (err) {
-                expect(err.toString()).to.have.string('Only Admin');
+                expect(err.toString()).to.have.string("Only Admin");
             }
         });
     });
 };
 const dfsRegistryControllerTest = async () => {
-    describe('DFS-Registry-Controller', function () {
+    describe("DFS-Registry-Controller", function () {
         this.timeout(80000);
 
-        let dfsRegController; let senderAcc;
+        let dfsRegController;
+        let senderAcc;
 
-        const ADMIN_VAULT = '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD';
+        const ADMIN_VAULT = "0xCCf3d848e08b94478Ed8f46fFead3008faF581fD";
 
         before(async () => {
-            dfsRegController = await hre.ethers.getContractAt('DFSProxyRegistryController', DFS_REG_CONTROLLER);
+            dfsRegController = await hre.ethers.getContractAt(
+                "DFSProxyRegistryController",
+                DFS_REG_CONTROLLER
+            );
 
             await impersonateAccount(ADMIN_ACC);
 
             const signer = await hre.ethers.provider.getSigner(ADMIN_ACC);
 
-            const adminVaultInstance = await hre.ethers.getContractFactory('AdminVault', signer);
+            const adminVaultInstance = await hre.ethers.getContractFactory("AdminVault", signer);
             const adminVault = await adminVaultInstance.attach(ADMIN_VAULT);
 
             adminVault.connect(signer);
 
-            console.log('dfsRegController: ', dfsRegController.address);
+            console.log("dfsRegController: ", dfsRegController.address);
 
             // change owner in registry to dfsRegController
             await adminVault.changeOwner(dfsRegController.address);
@@ -276,20 +284,20 @@ const dfsRegistryControllerTest = async () => {
             await getProxy(senderAcc.address);
         });
 
-        it('... should create an additional proxy for the user', async () => {
+        it("... should create an additional proxy for the user", async () => {
             const proxiesBefore = await dfsRegController.getProxies(senderAcc.address);
 
             let recipe = await dfsRegController.addNewProxy({ gasLimit: 900_000 });
 
             recipe = await recipe.wait();
 
-            console.log('Gas used: ', recipe.gasUsed.toString());
+            console.log("Gas used: ", recipe.gasUsed.toString());
 
             const proxiesAfter = await dfsRegController.getProxies(senderAcc.address);
 
             // check new proxy if owner is user
             const latestProxy = proxiesAfter[proxiesAfter.length - 1];
-            const dsProxy = await hre.ethers.getContractAt('IDSProxy', latestProxy);
+            const dsProxy = await hre.ethers.getContractAt("IDSProxy", latestProxy);
 
             const owner = await dsProxy.owner();
 
@@ -297,7 +305,7 @@ const dfsRegistryControllerTest = async () => {
             expect(proxiesBefore.length + 1).to.be.eq(proxiesAfter.length);
         });
 
-        it('... add to proxy pool and use that to assign new proxy', async () => {
+        it("... add to proxy pool and use that to assign new proxy", async () => {
             const proxiesBefore = await dfsRegController.getProxies(senderAcc.address);
 
             await dfsRegController.addToPool(1, { gasLimit: 5_000_000 });
@@ -308,13 +316,13 @@ const dfsRegistryControllerTest = async () => {
             recipe = await recipe.wait();
             recipe2 = await recipe2.wait();
 
-            console.log('Gas used with proxy pool: ', recipe.gasUsed.toString());
-            console.log('Gas used with proxy pool: ', recipe2.gasUsed.toString());
+            console.log("Gas used with proxy pool: ", recipe.gasUsed.toString());
+            console.log("Gas used with proxy pool: ", recipe2.gasUsed.toString());
 
             const proxiesAfter = await dfsRegController.getProxies(senderAcc.address);
 
             const latestProxy = proxiesAfter[proxiesAfter.length - 1];
-            const dsProxy = await hre.ethers.getContractAt('IDSProxy', latestProxy);
+            const dsProxy = await hre.ethers.getContractAt("IDSProxy", latestProxy);
 
             const owner = await dsProxy.owner();
 
@@ -325,23 +333,31 @@ const dfsRegistryControllerTest = async () => {
 };
 
 const tokenPriceHelperTest = async () => {
-    describe('Token-Price-Helper', function () {
+    describe("Token-Price-Helper", function () {
         this.timeout(80000);
 
-        let tokenPriceHelper; let tokenPriceHelperAddr; let tokenHelperOld;
+        let tokenPriceHelper;
+        let tokenPriceHelperAddr;
+        let tokenHelperOld;
         before(async () => {
-            tokenPriceHelperAddr = await getAddrFromRegistry('TokenPriceHelper');
-            tokenPriceHelper = await hre.ethers.getContractAt('TokenPriceHelper', tokenPriceHelperAddr);
-            tokenHelperOld = await hre.ethers.getContractAt('TokenPriceHelper', '0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b');
+            tokenPriceHelperAddr = await getAddrFromRegistry("TokenPriceHelper");
+            tokenPriceHelper = await hre.ethers.getContractAt(
+                "TokenPriceHelper",
+                tokenPriceHelperAddr
+            );
+            tokenHelperOld = await hre.ethers.getContractAt(
+                "TokenPriceHelper",
+                "0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b"
+            );
         });
 
         for (let i = 0; i < assets.length; i++) {
             it(`... should get USD and ETH price for ${assets[i].symbol} `, async () => {
-                if (assets[i].symbol === 'OP') return;
-                if (assets[i].symbol === 'SUSHI') return;
-                if (assets[i].symbol === 'USDC.e') return;
-                if (assets[i].symbol === 'ARB') return;
-                if (assets[i].symbol === 'GMX') return;
+                if (assets[i].symbol === "OP") return;
+                if (assets[i].symbol === "SUSHI") return;
+                if (assets[i].symbol === "USDC.e") return;
+                if (assets[i].symbol === "ARB") return;
+                if (assets[i].symbol === "GMX") return;
                 const assetInfo = getAssetInfo(assets[i].symbol);
                 const tokenAddr = assetInfo.address;
                 const priceInUSD = await tokenPriceHelper.getPriceInUSD(tokenAddr);
@@ -384,20 +400,24 @@ const tokenPriceHelperTest = async () => {
     });
 };
 const tokenPriceHelperL2Test = async () => {
-    describe('Token-Price-Helper-L2 (Using GasFeeTakerL2)', function () {
+    describe("Token-Price-Helper-L2 (Using GasFeeTakerL2)", function () {
         this.timeout(80000);
 
-        let tokenPriceHelper; let tokenPriceHelperAddr;
+        let tokenPriceHelper;
+        let tokenPriceHelperAddr;
         before(async () => {
-            tokenPriceHelperAddr = await getAddrFromRegistry('GasFeeTakerL2');
-            tokenPriceHelper = await hre.ethers.getContractAt('GasFeeTakerL2', tokenPriceHelperAddr);
+            tokenPriceHelperAddr = await getAddrFromRegistry("GasFeeTakerL2");
+            tokenPriceHelper = await hre.ethers.getContractAt(
+                "GasFeeTakerL2",
+                tokenPriceHelperAddr
+            );
         });
 
         for (let i = 0; i < assets.length; i++) {
             it(`... should get USD and ETH price for ${assets[i].symbol} `, async () => {
                 const chainId = chainIds[network];
-                if (assets[i].symbol === 'rETH') {
-                    assets[i].addresses[42161] = '0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8';
+                if (assets[i].symbol === "rETH") {
+                    assets[i].addresses[42161] = "0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8";
                 }
                 if (assets[i].addresses[chainId] === undefined) {
                     return;
@@ -407,7 +427,8 @@ const tokenPriceHelperL2Test = async () => {
                 const priceInUSD = await tokenPriceHelper.getPriceInUSD(address);
                 const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(address);
                 const chainlinkInUSD = await tokenPriceHelper.getChainlinkPriceInUSD(
-                    address, false,
+                    address,
+                    false
                 );
                 const priceInETH = await tokenPriceHelper.getPriceInETH(address);
                 const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(address);
@@ -425,12 +446,12 @@ const tokenPriceHelperL2Test = async () => {
     });
 };
 const dfsSafeFactoryTest = async () => {
-    describe('DFS-Safe-Factory', function () {
+    describe("DFS-Safe-Factory", function () {
         this.timeout(80000);
         let dfsSafeFactory;
         let snapshotId;
         before(async () => {
-            dfsSafeFactory = await redeploy('DFSSafeFactory');
+            dfsSafeFactory = await redeploy("DFSSafeFactory");
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -440,40 +461,47 @@ const dfsSafeFactoryTest = async () => {
             await revertToSnapshot(snapshotId);
         });
 
-        it('... should create a Safe and execute a transaction on it via signature', async () => {
+        it("... should create a Safe and execute a transaction on it via signature", async () => {
             const [signer] = await hre.ethers.getSigners();
             const setupArgs = [
                 [signer.address], // _owners - List of Safe owners.
                 1, // _threshold - Number of required confirmations for a Safe transaction.
                 nullAddress, // to - Contract address for optional delegate call.
-                '0x', // data - Data payload for optional delegate call.
+                "0x", // data - Data payload for optional delegate call.
                 nullAddress, // fallbackHandler - Handler for fallback calls to this contract.
                 nullAddress, // paymentToken - Token that should be used for the payment (0 is ETH)
                 0, // payment - Value that should be paid.
                 nullAddress, // paymentReceiver - Address that should receive the payment
             ];
 
-            const saltNonce = '0';
+            const saltNonce = "0";
             const safeFactory = await dfsSafeFactory.safeFactory();
-            const singletonAddr = '0xd9db270c1b5e3bd161e8c8503c55ceabee709552';
+            const singletonAddr = "0xd9db270c1b5e3bd161e8c8503c55ceabee709552";
             const predictedAddress = await predictSafeAddress(
                 singletonAddr,
                 setupArgs,
                 saltNonce,
-                safeFactory,
+                safeFactory
             );
 
-            await setBalance(addrs[network].WETH_ADDRESS, predictedAddress, hre.ethers.utils.parseUnits('10', 18));
-            const tokenBalanceAction = new sdk.actions.basic.TokenBalanceAction(
+            await setBalance(
                 addrs[network].WETH_ADDRESS,
                 predictedAddress,
+                hre.ethers.utils.parseUnits("10", 18)
             );
-            const recipe = new sdk.Recipe('Test Recipe',
-                [tokenBalanceAction,
-                    new sdk.actions.basic.SendTokenAction(
-                        addrs[network].WETH_ADDRESS, signer.address, '$1',
-                    )]);
-            const recipeExecutor = await getAddrFromRegistry('RecipeExecutor');
+            const tokenBalanceAction = new sdk.actions.basic.TokenBalanceAction(
+                addrs[network].WETH_ADDRESS,
+                predictedAddress
+            );
+            const recipe = new sdk.Recipe("Test Recipe", [
+                tokenBalanceAction,
+                new sdk.actions.basic.SendTokenAction(
+                    addrs[network].WETH_ADDRESS,
+                    signer.address,
+                    "$1"
+                ),
+            ]);
+            const recipeExecutor = await getAddrFromRegistry("RecipeExecutor");
             const safeTxParams = {
                 to: recipeExecutor,
                 value: 0,
@@ -490,23 +518,30 @@ const dfsSafeFactoryTest = async () => {
             const setupArgsEncoded = await encodeSetupArgs(setupArgs);
             await dfsSafeFactory.createSafeAndExecute(
                 [singletonAddr, setupArgsEncoded, saltNonce],
-                [safeTxParams.to, safeTxParams.value, safeTxParams.data, safeTxParams.operation,
-                    safeTxParams.safeTxGas, safeTxParams.baseGas, safeTxParams.gasPrice,
-                    safeTxParams.gasToken, safeTxParams.refundReceiver,
+                [
+                    safeTxParams.to,
+                    safeTxParams.value,
+                    safeTxParams.data,
+                    safeTxParams.operation,
+                    safeTxParams.safeTxGas,
+                    safeTxParams.baseGas,
+                    safeTxParams.gasPrice,
+                    safeTxParams.gasToken,
+                    safeTxParams.refundReceiver,
                     signature,
-                ],
+                ]
             );
             const eoaBalance = await balanceOf(addrs[network].WETH_ADDRESS, signer.address);
             const safeBalance = await balanceOf(addrs[network].WETH_ADDRESS, predictedAddress);
             expect(safeBalance).to.be.eq(0);
-            expect(eoaBalance).to.be.eq(hre.ethers.utils.parseUnits('10', 18));
+            expect(eoaBalance).to.be.eq(hre.ethers.utils.parseUnits("10", 18));
         });
     });
 };
 
 const deployUtilsTestsContracts = async () => {
-    await redeploy('BotRefills');
-    await redeploy('FeeReceiver');
+    await redeploy("BotRefills");
+    await redeploy("FeeReceiver");
 };
 const utilsTestsFullTest = async () => {
     await deployUtilsTestsContracts();

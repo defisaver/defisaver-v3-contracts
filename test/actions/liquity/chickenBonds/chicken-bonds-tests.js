@@ -1,5 +1,5 @@
-const { expect } = require('chai');
-const hre = require('hardhat');
+const { expect } = require("chai");
+const hre = require("hardhat");
 
 const {
     getProxy,
@@ -10,16 +10,19 @@ const {
     MAX_UINT,
     BLUSD_ADDR,
     timeTravel,
-} = require('../../../utils/utils');
+} = require("../../../utils/utils");
 
 const {
-    createChickenBond, chickenOut, chickenIn, chickenRedeem,
-} = require('../../../utils/actions');
+    createChickenBond,
+    chickenOut,
+    chickenIn,
+    chickenRedeem,
+} = require("../../../utils/actions");
 
 const FIFTEEN_DAYS = 1296000;
 
 const cbCreateTest = async () => {
-    describe('Create Chicken Bond test', function () {
+    describe("Create Chicken Bond test", function () {
         this.timeout(1000000);
 
         let senderAcc;
@@ -29,13 +32,13 @@ const cbCreateTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
 
-            chickenBondsView = await redeploy('ChickenBondsView');
+            chickenBondsView = await redeploy("ChickenBondsView");
 
             proxy = await getProxy(senderAcc.address);
         });
 
-        it('... should create a chicken bond', async () => {
-            const lusdAmount = hre.ethers.utils.parseUnits('1000', 18);
+        it("... should create a chicken bond", async () => {
+            const lusdAmount = hre.ethers.utils.parseUnits("1000", 18);
             await setBalance(LUSD_ADDR, senderAcc.address, lusdAmount);
 
             const numBondsBefore = (await chickenBondsView.getUsersBonds(proxy.address)).length;
@@ -50,8 +53,8 @@ const cbCreateTest = async () => {
             expect(numBondsBefore + 1).to.be.eq(bonds.length);
         });
 
-        it('... should create a chicken bond with max.uint amount', async () => {
-            const lusdAmount = hre.ethers.utils.parseUnits('850', 18);
+        it("... should create a chicken bond with max.uint amount", async () => {
+            const lusdAmount = hre.ethers.utils.parseUnits("850", 18);
 
             await setBalance(LUSD_ADDR, senderAcc.address, lusdAmount);
 
@@ -70,7 +73,7 @@ const cbCreateTest = async () => {
 };
 
 const cbChickenOutTest = async () => {
-    describe('Chicken out test', function () {
+    describe("Chicken out test", function () {
         this.timeout(1000000);
 
         let senderAcc;
@@ -83,11 +86,11 @@ const cbChickenOutTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAcc2 = (await hre.ethers.getSigners())[1];
-            chickenBondsView = await redeploy('ChickenBondsView');
+            chickenBondsView = await redeploy("ChickenBondsView");
 
             proxy = await getProxy(senderAcc.address);
 
-            lusdAmount = hre.ethers.utils.parseUnits('1000', 18);
+            lusdAmount = hre.ethers.utils.parseUnits("1000", 18);
             await setBalance(LUSD_ADDR, senderAcc.address, lusdAmount);
 
             await createChickenBond(proxy, lusdAmount, senderAcc.address);
@@ -96,7 +99,7 @@ const cbChickenOutTest = async () => {
             bondID = bonds[bonds.length - 1].bondID.toString();
         });
 
-        it('... should chicken out a bond', async () => {
+        it("... should chicken out a bond", async () => {
             const lusdBalanceBefore = await balanceOf(LUSD_ADDR, senderAcc.address);
 
             const bondInfo = await chickenBondsView.getBondFullInfo(bondID);
@@ -111,8 +114,8 @@ const cbChickenOutTest = async () => {
             expect(bond.status).to.be.eq(2);
         });
 
-        it('... should chicken out a bond and send to diff acc.', async () => {
-            lusdAmount = hre.ethers.utils.parseUnits('1000', 18);
+        it("... should chicken out a bond and send to diff acc.", async () => {
+            lusdAmount = hre.ethers.utils.parseUnits("1000", 18);
             await setBalance(LUSD_ADDR, senderAcc.address, lusdAmount);
 
             await createChickenBond(proxy, lusdAmount, senderAcc.address);
@@ -135,7 +138,7 @@ const cbChickenOutTest = async () => {
 };
 
 const cbChickenInTest = async () => {
-    describe('Chicken in test', function () {
+    describe("Chicken in test", function () {
         this.timeout(1000000);
 
         let senderAcc;
@@ -148,9 +151,9 @@ const cbChickenInTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
 
             proxy = await getProxy(senderAcc.address);
-            chickenBondsView = await redeploy('ChickenBondsView');
+            chickenBondsView = await redeploy("ChickenBondsView");
 
-            lusdAmount = hre.ethers.utils.parseUnits('1000', 18);
+            lusdAmount = hre.ethers.utils.parseUnits("1000", 18);
             await setBalance(LUSD_ADDR, senderAcc.address, lusdAmount);
 
             await createChickenBond(proxy, lusdAmount, senderAcc.address);
@@ -159,7 +162,7 @@ const cbChickenInTest = async () => {
             bondID = bonds[bonds.length - 1].bondID.toString();
         });
 
-        it('... should chicken in a bond', async () => {
+        it("... should chicken in a bond", async () => {
             const bLusdBalanceBefore = await balanceOf(BLUSD_ADDR, senderAcc.address);
 
             await timeTravel(FIFTEEN_DAYS);
@@ -176,7 +179,7 @@ const cbChickenInTest = async () => {
 
             expect(bLusdBalanceBefore.add(bondUpdated.accruedBLUSD) / 1e18).to.be.closeTo(
                 bLusdBalanceAfter / 1e18,
-                0.001,
+                0.001
             );
             expect(bond.status).to.be.eq(3);
         });
@@ -184,7 +187,7 @@ const cbChickenInTest = async () => {
 };
 
 const cbRedeemTest = async () => {
-    describe('Redeem bLUSD for LUSD', function () {
+    describe("Redeem bLUSD for LUSD", function () {
         this.timeout(1000000);
 
         let senderAcc;
@@ -198,9 +201,9 @@ const cbRedeemTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
 
             proxy = await getProxy(senderAcc.address);
-            chickenBondsView = await redeploy('ChickenBondsView');
+            chickenBondsView = await redeploy("ChickenBondsView");
 
-            lusdAmount = hre.ethers.utils.parseUnits('1000', 18);
+            lusdAmount = hre.ethers.utils.parseUnits("1000", 18);
             await setBalance(LUSD_ADDR, senderAcc.address, lusdAmount);
 
             await createChickenBond(proxy, lusdAmount, senderAcc.address);
@@ -208,7 +211,7 @@ const cbRedeemTest = async () => {
             const bonds = await chickenBondsView.getUsersBonds(proxy.address);
             bondID = bonds[bonds.length - 1].bondID.toString();
 
-            lusdAmount = hre.ethers.utils.parseUnits('1000000', 18);
+            lusdAmount = hre.ethers.utils.parseUnits("1000000", 18);
             await setBalance(LUSD_ADDR, senderAcc.address, lusdAmount);
 
             await createChickenBond(proxy, lusdAmount, senderAcc.address);
@@ -217,7 +220,7 @@ const cbRedeemTest = async () => {
             bondID2 = bonds2[bonds2.length - 1].bondID.toString();
         });
 
-        it('... should redeem LUSD for bLUSD', async () => {
+        it("... should redeem LUSD for bLUSD", async () => {
             await timeTravel(FIFTEEN_DAYS);
 
             await chickenIn(proxy, bondID, senderAcc.address);
@@ -230,10 +233,10 @@ const cbRedeemTest = async () => {
 
             await chickenRedeem(
                 proxy,
-                bLusdBalanceBefore.div('2'),
+                bLusdBalanceBefore.div("2"),
                 0,
                 senderAcc.address,
-                senderAcc.address,
+                senderAcc.address
             );
 
             const lusdBalanceAfter = await balanceOf(LUSD_ADDR, senderAcc.address);

@@ -1,22 +1,18 @@
-const {
-    aaveV2assetsDefaultMarket,
-} = require('../../utils/aave');
+const { aaveV2assetsDefaultMarket } = require("../../utils/aave");
 
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require("../../utils/utils");
 
-const { aaveBorrowTest } = require('./aave-tests');
+const { aaveBorrowTest } = require("./aave-tests");
 
-describe('Aave-Borrow', function () {
+describe("Aave-Borrow", function () {
     this.timeout(80000);
 
     before(async () => {
-        await redeploy('AaveSupply');
-        await redeploy('AaveBorrow');
-        await redeploy('AaveSupply');
+        await redeploy("AaveSupply");
+        await redeploy("AaveBorrow");
+        await redeploy("AaveSupply");
     });
-    it('... should run aave Borrow test', async () => {
+    it("... should run aave Borrow test", async () => {
         await aaveBorrowTest(aaveV2assetsDefaultMarket.length);
     });
 });

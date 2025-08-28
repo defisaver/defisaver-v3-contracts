@@ -1,20 +1,18 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
-const { reflexerSaviourTest } = require('./reflexer-tests');
+const { redeploy } = require("../../utils/utils");
+const { reflexerSaviourTest } = require("./reflexer-tests");
 
-describe('Reflexer-Saviour', () => {
+describe("Reflexer-Saviour", () => {
     before(async () => {
-        await redeploy('ReflexerOpen');
-        await redeploy('ReflexerSupply');
-        await redeploy('ReflexerWithdraw');
-        await redeploy('ReflexerGenerate');
-        await redeploy('ReflexerView');
-        await redeploy('ReflexerNativeUniV2SaviourDeposit');
-        await redeploy('ReflexerNativeUniV2SaviourWithdraw');
+        await redeploy("ReflexerOpen");
+        await redeploy("ReflexerSupply");
+        await redeploy("ReflexerWithdraw");
+        await redeploy("ReflexerGenerate");
+        await redeploy("ReflexerView");
+        await redeploy("ReflexerNativeUniV2SaviourDeposit");
+        await redeploy("ReflexerNativeUniV2SaviourWithdraw");
     });
 
-    it('... deposit LP tokens to reflexer saviour and then withdraw them', async () => {
+    it("... deposit LP tokens to reflexer saviour and then withdraw them", async () => {
         await reflexerSaviourTest();
     }).timeout(1000000);
 });

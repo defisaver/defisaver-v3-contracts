@@ -1,17 +1,17 @@
 /* eslint-disable max-len */
-const { expect } = require('chai');
-const { getAssetInfo } = require('@defisaver/tokens');
-const { subFluidVaultT1BoostBundle } = require('../utils/strategy-subs');
-const { callFluidT1FLBoostStrategy, callFluidT1BoostStrategy } = require('../utils/strategy-calls');
-const { getFluidVaultT1TestPairs, deployFluidT1BoostBundle } = require('../../utils/fluid');
-const { BaseFluidT1StrategyTest } = require('./common');
+const { expect } = require("chai");
+const { getAssetInfo } = require("@defisaver/tokens");
+const { subFluidVaultT1BoostBundle } = require("../utils/strategy-subs");
+const { callFluidT1FLBoostStrategy, callFluidT1BoostStrategy } = require("../utils/strategy-calls");
+const { getFluidVaultT1TestPairs, deployFluidT1BoostBundle } = require("../../utils/fluid");
+const { BaseFluidT1StrategyTest } = require("./common");
 const {
     network,
     isNetworkFork,
     fetchAmountInUSDPrice,
     chainIds,
     formatMockExchangeObjUsdFeed,
-} = require('../../utils/utils');
+} = require("../../utils/utils");
 
 class BoostTest extends BaseFluidT1StrategyTest {
     async setUp() {
@@ -22,10 +22,10 @@ class BoostTest extends BaseFluidT1StrategyTest {
     async openAndSubscribe(pair) {
         const collAsset = getAssetInfo(pair.collSymbol, chainIds[network]);
         const debtAsset = getAssetInfo(pair.debtSymbol, chainIds[network]);
-        const collAmount = await fetchAmountInUSDPrice(collAsset.symbol, '40000');
-        const debtAmount = await fetchAmountInUSDPrice(debtAsset.symbol, '15000');
+        const collAmount = await fetchAmountInUSDPrice(collAsset.symbol, "40000");
+        const debtAmount = await fetchAmountInUSDPrice(debtAsset.symbol, "15000");
         const nftId = await this.openVault(pair.vault, collAsset.address, collAmount, debtAmount);
-        console.log('Created Fluid T1 vault with ID:', nftId.toString());
+        console.log("Created Fluid T1 vault with ID:", nftId.toString());
 
         const maxRatio = 200;
         const targetRatio = 150;
@@ -35,11 +35,11 @@ class BoostTest extends BaseFluidT1StrategyTest {
             nftId,
             pair.vault,
             targetRatio,
-            maxRatio,
+            maxRatio
         );
 
         const ratioBefore = await this.getRatio(nftId);
-        console.log('Position ratio before:', ratioBefore.toString());
+        console.log("Position ratio before:", ratioBefore.toString());
 
         const boostAmount = debtAmount.div(4);
 
@@ -47,20 +47,33 @@ class BoostTest extends BaseFluidT1StrategyTest {
             debtAsset,
             collAsset,
             boostAmount,
-            this.contracts.mockWrapper,
+            this.contracts.mockWrapper
         );
 
         return {
-            collAsset, debtAsset, nftId, subId, strategySub, boostAmount, exchangeObject, ratioBefore,
+            collAsset,
+            debtAsset,
+            nftId,
+            subId,
+            strategySub,
+            boostAmount,
+            exchangeObject,
+            ratioBefore,
         };
     }
 
     runTests() {
         // eslint-disable-next-line no-unused-vars
         this.testPairs.forEach((pair, i) => {
-            it('... should call Fluid T1 regular boost strategy', async () => {
+            it("... should call Fluid T1 regular boost strategy", async () => {
                 const {
-                    collAsset, nftId, subId, strategySub, boostAmount, exchangeObject, ratioBefore,
+                    collAsset,
+                    nftId,
+                    subId,
+                    strategySub,
+                    boostAmount,
+                    exchangeObject,
+                    ratioBefore,
                 } = await this.openAndSubscribe(pair);
 
                 await callFluidT1BoostStrategy(
@@ -70,17 +83,24 @@ class BoostTest extends BaseFluidT1StrategyTest {
                     strategySub,
                     exchangeObject,
                     boostAmount,
-                    collAsset.address,
+                    collAsset.address
                 );
 
                 const ratioAfter = await this.getRatio(nftId);
-                console.log('Position ratio after:', ratioAfter.toString());
+                console.log("Position ratio after:", ratioAfter.toString());
 
                 expect(ratioAfter).to.be.lt(ratioBefore);
             });
-            it('... should call Fluid T1 FL boost strategy', async () => {
+            it("... should call Fluid T1 FL boost strategy", async () => {
                 const {
-                    collAsset, debtAsset, nftId, subId, strategySub, boostAmount, exchangeObject, ratioBefore,
+                    collAsset,
+                    debtAsset,
+                    nftId,
+                    subId,
+                    strategySub,
+                    boostAmount,
+                    exchangeObject,
+                    ratioBefore,
                 } = await this.openAndSubscribe(pair);
 
                 await callFluidT1FLBoostStrategy(
@@ -92,11 +112,11 @@ class BoostTest extends BaseFluidT1StrategyTest {
                     boostAmount,
                     collAsset.address,
                     debtAsset.address,
-                    this.contracts.flAction.address,
+                    this.contracts.flAction.address
                 );
 
                 const ratioAfter = await this.getRatio(nftId);
-                console.log('Position ratio after:', ratioAfter.toString());
+                console.log("Position ratio after:", ratioAfter.toString());
 
                 expect(ratioAfter).to.be.lt(ratioBefore);
             });
@@ -108,11 +128,17 @@ module.exports = async function runBoostTests() {
     const testPairs = await getFluidVaultT1TestPairs();
     const isFork = isNetworkFork();
     const boostTest = new BoostTest(testPairs, isFork);
-    describe('Fluid Vault T1 Boost Strategy Tests', function () {
+    describe("Fluid Vault T1 Boost Strategy Tests", function () {
         this.timeout(1200000);
-        before(async () => { await boostTest.setUp(); });
-        beforeEach(async () => { await boostTest.takeSnapshot(); });
-        afterEach(async () => { await boostTest.revertToSnapshot(); });
+        before(async () => {
+            await boostTest.setUp();
+        });
+        beforeEach(async () => {
+            await boostTest.takeSnapshot();
+        });
+        afterEach(async () => {
+            await boostTest.revertToSnapshot();
+        });
         boostTest.runTests();
     });
 };
