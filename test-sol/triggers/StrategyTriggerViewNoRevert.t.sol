@@ -104,6 +104,43 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
         );
     }
 
+    // AaveV3RepayOnPrice
+    function test_verifyAaveV3RepayOnPriceConditions() public {
+        //vm.warp(1748518160);
+        address walletWithEnoughDebt = 0x60F5d62E26A52B034DE02182689CC6200de7fD29;
+
+        bytes32[] memory subData = new bytes32[](7);
+        subData[0] = bytes32(uint256(uint160(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2))); // WETH
+        subData[1] = bytes32(0);
+        subData[2] = bytes32(uint256(uint160(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48))); // USDC
+        subData[3] = bytes32(uint256(3));
+        subData[4] = bytes32(uint256(uint160(0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e))); // Aave V3 Pool Addresses Provider
+        subData[5] = bytes32(uint256(0x056bc75e2d63100000)); // Target ratio (1e20)
+        subData[6] = bytes32(0);
+
+        // Initialize triggerData array properly
+        bytes[] memory triggerData = new bytes[](1);
+        triggerData[0] =
+            hex"000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000073404c96000000000000000000000000000000000000000000000000000000000000000001";
+
+        // Create StrategySub struct
+        StrategySub memory sub =
+            StrategySub({strategyOrBundleId: 37, isBundle: true, triggerData: triggerData, subData: subData});
+
+        assertEq(
+            uint256(this.checkTriggers(sub, triggerData, walletWithEnoughDebt)),
+            uint256(TriggerStatus.TRUE),
+            "trigger status should be true"
+        );
+
+        address walletWithNotEnoughDebt = 0x486c0bE444b63898Cca811654709f7D9e036Dc4E;
+        assertEq(
+            uint256(_verifyAaveV3MinDebtPosition(walletWithNotEnoughDebt)),
+            uint256(TriggerStatus.FALSE),
+            "trigger status should be false"
+        );
+    }
+
     // Spark
     function test_verifySparkLeverageManagementConditions() public view {
         address walletWithEnoughDebt = 0xc0c790F61a1721B70F0D4b1Aa1133687Fa3fd900;
