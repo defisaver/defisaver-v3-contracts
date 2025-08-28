@@ -79,6 +79,18 @@ library StrategyIDs {
         return false;
     }
 
+    function isAaveV3BoostOnPriceStrategy(uint256 _strategyID) internal view returns (bool) {
+        if (block.chainid == 1 && _strategyID == 94) return true;
+        // arbitrum
+        if (block.chainid == 42161 && _strategyID == 14) return true;
+        // base
+        if (block.chainid == 8453 && _strategyID == 26) return true;
+        // optimism
+        if (block.chainid == 10 && _strategyID == 10) return true;
+
+        return false;
+    }
+
     function isAaveV3CloseStrategy(uint256 _strategyID) internal view returns (bool) {
         if (block.chainid == 1 && (_strategyID == 71 || _strategyID == 73)) {
             return true;
@@ -141,6 +153,16 @@ library StrategyIDs {
         if (block.chainid == 1 && _strategyID == 19) return true;
         // arbitrum & base
         if ((block.chainid == 42161 || block.chainid == 8453) && _strategyID == 12) return true;
+
+        return false;
+    }
+
+    function isCompoundV3BoostOnPriceStrategy(uint256 _strategyID) internal view returns (bool) {
+        if (block.chainid == 1 && _strategyID == 120) return true;
+        // arbitrum
+        if (block.chainid == 42161 && _strategyID == 24) return true;
+        // base
+        if (block.chainid == 8453 && _strategyID == 38) return true;
 
         return false;
     }

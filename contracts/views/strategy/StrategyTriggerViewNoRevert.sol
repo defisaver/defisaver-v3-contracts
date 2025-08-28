@@ -150,8 +150,15 @@ contract StrategyTriggerViewNoRevert is
 
         // check for minDebt but also check if targetRatio is over startRatio
         if (strategyId.isAaveV3RepayOnPriceStrategy()) {
-            return _tryToVerifyAaveRepayOnPriceStrategy(_sub, smartWallet);
+            return _tryToVerifyAaveV3RepayOnPriceStrategy(_sub, smartWallet);
         }
+
+        // check only if targetRatio is under startRatio
+        if (strategyId.isAaveV3BoostOnPriceStrategy()) {
+            return _tryToVerifyAaveV3BoostOnPriceStrategy(_sub, smartWallet);
+        }
+
+        // TODO -> add compV3 strategies OnPrice check for target ratio
 
         // check Spark leverage management for only mainnet deployment
         if (block.chainid == 1 && strategyId.isSparkLeverageManagementStrategy()) {
@@ -255,7 +262,7 @@ contract StrategyTriggerViewNoRevert is
         return _hasEnoughMinDebtInUSD(totalDebtUSD) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
     }
 
-    function _tryToVerifyAaveRepayOnPriceStrategy(StrategySub memory _sub, address _smartWallet)
+    function _tryToVerifyAaveV3RepayOnPriceStrategy(StrategySub memory _sub, address _smartWallet)
         public
         view
         returns (TriggerStatus)
@@ -279,6 +286,29 @@ contract StrategyTriggerViewNoRevert is
         address market = (address(uint160(uint256(_sub.subData[4]))));
         uint256 startRatio = getRatio(market, _smartWallet);
         return targetRatio > startRatio ? TriggerStatus.TRUE : TriggerStatus.FALSE;
+    }
+
+    function _tryToVerifyAaveV3BoostOnPriceStrategy(StrategySub memory _sub, address _smartWallet)
+        public
+        view
+        returns (TriggerStatus)
+    {
+        try this._verifyAaveV3BoostOnPrice(_sub, _smartWallet) returns (TriggerStatus status) {
+            return status;
+        } catch {
+            return TriggerStatus.REVERT;
+        }
+    }
+
+    function _verifyAaveV3BoostOnPrice(StrategySub memory _sub, address _smartWallet)
+        public
+        view
+        returns (TriggerStatus)
+    {
+        uint256 targetRatio = uint256(_sub.subData[5]);
+        address market = (address(uint160(uint256(_sub.subData[4]))));
+        uint256 startRatio = getRatio(market, _smartWallet);
+        return targetRatio < startRatio ? TriggerStatus.TRUE : TriggerStatus.FALSE;
     }
 
     function _verifySparkMinDebtPosition(address _smartWallet) internal view returns (TriggerStatus) {
