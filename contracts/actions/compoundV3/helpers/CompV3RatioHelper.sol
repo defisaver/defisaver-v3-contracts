@@ -20,37 +20,27 @@ contract CompV3RatioHelper is DSMath, MainnetCompV3Addresses {
 
     /// @notice Calculated the ratio of debt / adjusted collateral
     /// @param _user Address of the user
-    function getSafetyRatio(address _market, address _user) public view returns (uint) {
+    function getSafetyRatio(address _market, address _user) public view returns (uint256) {
         IComet comet = IComet(_market);
         IComet.AssetInfo[] memory assets = getAssets(_market);
-
         uint16 assetsIn = comet.userBasic(_user).assetsIn;
 
-        address usdcPriceFeed = comet.baseTokenPriceFeed();
-        uint sumBorrow = comet.borrowBalanceOf(_user) * comet.getPrice(usdcPriceFeed) / comet.priceScale();
+        uint256 sumBorrow = comet.borrowBalanceOf(_user) * comet.getPrice(comet.baseTokenPriceFeed()) / comet.priceScale();
         if (sumBorrow == 0) return 0;
 
-        uint sumCollateral;
-        uint length = assets.length;
-        for (uint8 i; i < length; ++i) {
+        uint256 sumCollateral;
+        for (uint8 i; i < assets.length; ++i) {
             if (isInAsset(assetsIn, i)) {
-                address asset = assets[i].asset;
-                address priceFeed = assets[i].priceFeed; 
-
-                uint tokenBalance = comet.collateralBalanceOf(_user, asset);
-
+                uint256 tokenBalance = comet.collateralBalanceOf(_user, assets[i].asset);
                 if (tokenBalance != 0) {
-                    uint256 collUsdAmount = (tokenBalance * comet.getPrice(priceFeed)) / assets[i].scale;
-                    sumCollateral += collUsdAmount * assets[i].borrowCollateralFactor / 1e18;
+                    uint256 collAmountInBaseToken = 
+                        (tokenBalance * comet.getPrice(assets[i].priceFeed) * comet.baseScale()) / assets[i].scale / comet.priceScale();
+                    sumCollateral += collAmountInBaseToken * assets[i].borrowCollateralFactor / 1e18;
                 }
             }
         }
 
-        return div16Precision(sumCollateral, sumBorrow);
-    }
-
-    function div16Precision(uint256 x, uint256 y) internal pure returns (uint256 z) {
-        z = add(mul(x, 10**16), y / 2) / y;
+        return wdiv(sumCollateral, sumBorrow);
     }
 
     function isInAsset(uint16 assetsIn, uint8 assetOffset) internal pure returns (bool) {
