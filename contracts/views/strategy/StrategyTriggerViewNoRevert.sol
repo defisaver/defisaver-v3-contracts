@@ -18,13 +18,21 @@ import {StrategyStorage} from "../../core/strategy/StrategyStorage.sol";
 import {TokenUtils} from "../../utils/TokenUtils.sol";
 import {StrategyIDs} from "./StrategyIDs.sol";
 import {AaveV3Helper} from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
+import {AaveV3RatioHelper} from "../../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 import {UtilHelper} from "../../utils/helpers/UtilHelper.sol";
 import {Denominations} from "../../utils/Denominations.sol";
 import {StableCoinUtils} from "./StableCoinUtils.sol";
 
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
-contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletType, AaveV3Helper, UtilHelper {
+contract StrategyTriggerViewNoRevert is
+    StrategyModel,
+    CoreHelper,
+    CheckWalletType,
+    AaveV3Helper,
+    AaveV3RatioHelper,
+    UtilHelper
+{
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
     IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
@@ -135,12 +143,14 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
             return _tryToVerifyRequiredAmountAndAllowance(smartWallet, _sub.subData);
         }
 
-        // check AaveV3 leverage management, repay on price strategies and close strategies for all chains. We don't check for boost on price (BoP), as we want to always allow it. If debt is 0, BoP will open a leveraged position on price.
-        if (
-            strategyId.isAaveV3LeverageManagementStrategy() || strategyId.isAaveV3RepayOnPriceStrategy()
-                || strategyId.isAaveV3CloseStrategy()
-        ) {
+        // check AaveV3 leverage management and close strategies for all chains. We don't check for boost on price (BoP), as we want to always allow it. If debt is 0, BoP will open a leveraged position on price.
+        if (strategyId.isAaveV3LeverageManagementStrategy() || strategyId.isAaveV3CloseStrategy()) {
             return _verifyAaveV3MinDebtPosition(smartWallet);
+        }
+
+        // check for minDebt but also check if targetRatio is over startRatio
+        if (strategyId.isAaveV3RepayOnPriceStrategy()) {
+            return _tryToVerifyAaveRepayOnPriceStrategy(_sub, smartWallet);
         }
 
         // check Spark leverage management for only mainnet deployment
@@ -243,6 +253,32 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
         (, uint256 totalDebtUSD,,,,) = lendingPool.getUserAccountData(_smartWallet);
         return _hasEnoughMinDebtInUSD(totalDebtUSD) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
+    }
+
+    function _tryToVerifyAaveRepayOnPriceStrategy(StrategySub memory _sub, address _smartWallet)
+        public
+        view
+        returns (TriggerStatus)
+    {
+        try this._verifyAaveV3RepayOnPrice(_sub, _smartWallet) returns (TriggerStatus status) {
+            return status;
+        } catch {
+            return TriggerStatus.REVERT;
+        }
+    }
+
+    function _verifyAaveV3RepayOnPrice(StrategySub memory _sub, address _smartWallet)
+        public
+        view
+        returns (TriggerStatus)
+    {
+        TriggerStatus hasMinDebt = _verifyAaveV3MinDebtPosition(_smartWallet);
+        if (hasMinDebt != TriggerStatus.TRUE) return TriggerStatus.FALSE;
+
+        uint256 targetRatio = uint256(_sub.subData[5]);
+        address market = (address(uint160(uint256(_sub.subData[4]))));
+        uint256 startRatio = getRatio(market, _smartWallet);
+        return targetRatio > startRatio ? TriggerStatus.TRUE : TriggerStatus.FALSE;
     }
 
     function _verifySparkMinDebtPosition(address _smartWallet) internal view returns (TriggerStatus) {
