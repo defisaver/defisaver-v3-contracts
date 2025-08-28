@@ -8,7 +8,7 @@ const { configure } = require('@defisaver/sdk');
 const {
     assets,
     getAssetInfo,
-    utils: { compare },
+    compare,
 } = require('@defisaver/tokens');
 
 const {
