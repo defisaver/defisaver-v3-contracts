@@ -11,21 +11,19 @@ import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
 contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
-    /// @dev 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
-
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
 
-    constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
-        REPAY_BUNDLE_ID = _repayBundleId;
-        BOOST_BUNDLE_ID = _boostBundleId;
-    }
+    uint64 public immutable REPAY_BUNDLE_EOA_ID;
+    uint64 public immutable BOOST_BUNDLE_EOA_ID;
 
     enum RatioState {
         OVER,
         UNDER
     }
+
+    /// @dev 5% offset acceptable
+    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
 
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
@@ -38,6 +36,14 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         uint128 targetRatioBoost;
         uint128 targetRatioRepay;
         bool boostEnabled;
+        bool isEOA;
+    }
+
+    constructor(uint64 _repayBundleId, uint64 _boostBundleId, uint64 _repayBundleEoaId, uint64 _boostBundleEoaId) {
+        REPAY_BUNDLE_ID = _repayBundleId;
+        BOOST_BUNDLE_ID = _boostBundleId;
+        REPAY_BUNDLE_EOA_ID = _repayBundleEoaId;
+        BOOST_BUNDLE_EOA_ID = _boostBundleEoaId;
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
@@ -49,13 +55,13 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         giveWalletPermission(isDSProxy(address(this)));
 
         CompV3SubData memory subData = parseSubData(_encodedInput);
-        StrategySub memory repaySub = formatRepaySub(subData);
+        StrategySub memory repaySub = formatRepaySub(subData, address(this), msg.sender);
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
 
         if (subData.boostEnabled) {
             _validateSubData(subData);
 
-            StrategySub memory boostSub = formatBoostSub(subData);
+            StrategySub memory boostSub = formatBoostSub(subData, address(this), msg.sender);
             SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(boostSub);
         }
     }
@@ -71,14 +77,14 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         CompV3SubData memory subData = parseSubData(_encodedInput[8:]);
 
         // update repay as we must have a subId1, it's ok if it's the same data
-        StrategySub memory repaySub = formatRepaySub(subData);
+        StrategySub memory repaySub = formatRepaySub(subData, address(this), msg.sender);
         SubStorage(SUB_STORAGE_ADDR).updateSubData(subId1, repaySub);
         SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);
 
         if (subData.boostEnabled) {
             _validateSubData(subData);
 
-            StrategySub memory boostSub = formatBoostSub(subData);
+            StrategySub memory boostSub = formatBoostSub(subData, address(this), msg.sender);
 
             // if we don't have a boost bundleId, create one
             if (subId2 == 0) {
@@ -135,13 +141,19 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized compV3 sub
-    function formatRepaySub(CompV3SubData memory _subData) public view returns (StrategySub memory repaySub) {
-        repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
+    function formatRepaySub(CompV3SubData memory _subData, address _wallet, address _eoa)
+        public
+        view
+        returns (StrategySub memory repaySub)
+    {
+        repaySub.strategyOrBundleId = _subData.isEOA ? REPAY_BUNDLE_EOA_ID : REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
+
+        address user = _subData.isEOA ? _eoa : _wallet;
 
         // format data for ratio trigger if currRatio < minRatio = true
         bytes memory triggerData =
-            abi.encode(address(this), _subData.market, uint256(_subData.minRatio), uint8(RatioState.UNDER));
+            abi.encode(user, _subData.market, uint256(_subData.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData = new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -153,13 +165,18 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized compV3 sub
-    function formatBoostSub(CompV3SubData memory _subData) public view returns (StrategySub memory boostSub) {
-        boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
+    function formatBoostSub(CompV3SubData memory _subData, address _wallet, address _eoa)
+        public
+        view
+        returns (StrategySub memory boostSub)
+    {
+        boostSub.strategyOrBundleId = _subData.isEOA ? BOOST_BUNDLE_EOA_ID : BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
+        address user = _subData.isEOA ? _eoa : _wallet;
+
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData =
-            abi.encode(address(this), _subData.market, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData = abi.encode(user, _subData.market, uint256(_subData.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
@@ -178,6 +195,7 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         sub.targetRatioBoost = uint128(bytes16(_encodedInput[72:88]));
         sub.targetRatioRepay = uint128(bytes16(_encodedInput[88:104]));
         sub.boostEnabled = (bytes1(_encodedInput[104:105])) != bytes1(0x00); // compare to get bool
+        sub.isEOA = (bytes1(_encodedInput[105:106])) != bytes1(0x00); // compare to get bool
     }
 
     function parseSubIds(bytes calldata _encodedInput) public pure returns (uint32 subId1, uint32 subId2) {

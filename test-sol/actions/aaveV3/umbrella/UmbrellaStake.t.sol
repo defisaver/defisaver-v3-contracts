@@ -88,6 +88,7 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
 
     function _assertSnapshot(Snapshot memory _snapshotBefore, Snapshot memory _snapshotAfter, uint256 _amount)
         internal
+        pure
     {
         assertEq(_snapshotAfter.walletStkTokenBalance, 0);
         assertEq(_snapshotAfter.walletWaTokenBalance, 0);

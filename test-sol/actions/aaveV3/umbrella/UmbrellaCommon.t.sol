@@ -30,7 +30,7 @@ contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
         uint256 walletStkTokenBalance;
     }
 
-    function getStkTokens() public view returns (address[] memory) {
+    function getStkTokens() public pure returns (address[] memory) {
         address[] memory tokens = new address[](4);
         tokens[0] = Addresses.STK_WETH_TOKEN;
         tokens[1] = Addresses.STK_USDC_TOKEN;

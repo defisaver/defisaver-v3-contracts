@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
+import { TransientStorageCancun } from "../utils/TransientStorageCancun.sol";
 import { CompV3RatioHelper } from "../actions/compoundV3/helpers/CompV3RatioHelper.sol";
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
@@ -15,7 +15,7 @@ contract CompV3RatioTrigger is ITrigger, AdminAuth, CompV3RatioHelper, TriggerHe
         UNDER
     }
 
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
+    TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     /// @param user address of the user whose position we check
     /// @param _market Main Comet proxy contract that is different for each compound market
