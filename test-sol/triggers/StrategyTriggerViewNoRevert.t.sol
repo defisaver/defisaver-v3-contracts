@@ -133,9 +133,11 @@ contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRever
             "trigger status should be true"
         );
 
-        address walletWithNotEnoughDebt = 0x486c0bE444b63898Cca811654709f7D9e036Dc4E;
+        // Now set targetRatio very low so targetRatio <= startRatio and the trigger should be FALSE
+        sub.subData[5] = bytes32(uint256(11e17)); // 110%
+
         assertEq(
-            uint256(_verifyAaveV3MinDebtPosition(walletWithNotEnoughDebt)),
+            uint256(this.checkTriggers(sub, triggerData, walletWithEnoughDebt)),
             uint256(TriggerStatus.FALSE),
             "trigger status should be false"
         );
