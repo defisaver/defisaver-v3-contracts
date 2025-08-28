@@ -150,7 +150,7 @@ contract StrategyTriggerViewNoRevert is
 
         // check for minDebt but also check if targetRatio is over startRatio
         if (strategyId.isAaveV3RepayOnPriceStrategy()) {
-            return _verifyAaveV3RepayOnPrice(_sub, smartWallet);
+            return _tryToVerifyAaveRepayOnPriceStrategy(_sub, smartWallet);
         }
 
         // check Spark leverage management for only mainnet deployment
@@ -253,6 +253,18 @@ contract StrategyTriggerViewNoRevert is
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
         (, uint256 totalDebtUSD,,,,) = lendingPool.getUserAccountData(_smartWallet);
         return _hasEnoughMinDebtInUSD(totalDebtUSD) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
+    }
+
+    function _tryToVerifyAaveRepayOnPriceStrategy(StrategySub memory _sub, address _smartWallet)
+        public
+        view
+        returns (TriggerStatus)
+    {
+        try this._verifyAaveV3RepayOnPrice(_sub, _smartWallet) returns (TriggerStatus status) {
+            return status;
+        } catch {
+            return TriggerStatus.REVERT;
+        }
     }
 
     function _verifyAaveV3RepayOnPrice(StrategySub memory _sub, address _smartWallet)
