@@ -41,7 +41,8 @@ contract AaveBorrow is ActionBase, AaveHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[5], _subData, _returnValues);
 
-        (uint256 borrowAmount, bytes memory logData) = _borrow(params.market, params.tokenAddr, params.amount, params.rateMode, params.to, params.onBehalf);
+        (uint256 borrowAmount, bytes memory logData) =
+            _borrow(params.market, params.tokenAddr, params.amount, params.rateMode, params.to, params.onBehalf);
         emit ActionEvent("AaveBorrow", logData);
         return bytes32(borrowAmount);
     }
@@ -49,7 +50,8 @@ contract AaveBorrow is ActionBase, AaveHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _borrow(params.market, params.tokenAddr, params.amount, params.rateMode, params.to, params.onBehalf);
+        (, bytes memory logData) =
+            _borrow(params.market, params.tokenAddr, params.amount, params.rateMode, params.to, params.onBehalf);
         logger.logActionDirectEvent("AaveBorrow", logData);
     }
 
@@ -76,7 +78,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
         address _onBehalf
     ) internal returns (uint256, bytes memory) {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
-        
+
         // defaults to onBehalf of user's wallet
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
@@ -86,14 +88,7 @@ contract AaveBorrow is ActionBase, AaveHelper {
 
         _amount = _tokenAddr.withdrawTokens(_to, _amount);
 
-        bytes memory logData = abi.encode(
-            _market,
-            _tokenAddr,
-            _amount,
-            _rateMode,
-            _to,
-            _onBehalf
-        );
+        bytes memory logData = abi.encode(_market, _tokenAddr, _amount, _rateMode, _to, _onBehalf);
         return (_amount, logData);
     }
 

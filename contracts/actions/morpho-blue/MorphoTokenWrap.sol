@@ -52,10 +52,7 @@ contract MorphoTokenWrap is ActionBase, MorphoBlueHelper {
 
         LEGACY_MORPHO_TOKEN.approveToken(MORPHO_TOKEN_WRAPPER, _params.amount);
 
-        IMorphoTokenWrapper(MORPHO_TOKEN_WRAPPER).depositFor(
-            _params.to, 
-            _params.amount
-        );
+        IMorphoTokenWrapper(MORPHO_TOKEN_WRAPPER).depositFor(_params.to, _params.amount);
 
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);

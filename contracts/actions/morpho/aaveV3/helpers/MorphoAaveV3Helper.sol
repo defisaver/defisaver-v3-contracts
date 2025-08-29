@@ -8,7 +8,6 @@ import { IMorphoAaveV3 } from "../../../../interfaces/morpho/IMorphoAaveV3.sol";
 import { Types } from "../../../../interfaces/morpho/MorphoTypesAaveV3.sol";
 
 contract MorphoAaveV3Helper is MainnetMorphoAaveV3Addresses, DSMath {
-
     MorphoMarketStorage internal constant morphoMarketStorage = MorphoMarketStorage(MORPHO_MARKET_STORAGE);
 
     error InvalidEModeId(uint256 _emodeId);

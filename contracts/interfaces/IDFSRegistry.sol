@@ -3,14 +3,9 @@
 pragma solidity =0.8.24;
 
 abstract contract IDFSRegistry {
- 
     function getAddr(bytes4 _id) public view virtual returns (address);
 
-    function addNewContract(
-        bytes32 _id,
-        address _contractAddr,
-        uint256 _waitPeriod
-    ) public virtual;
+    function addNewContract(bytes32 _id, address _contractAddr, uint256 _waitPeriod) public virtual;
 
     function startContractChange(bytes32 _id, address _newContractAddr) public virtual;
 

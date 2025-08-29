@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 contract OptimismFLAddresses {
-
     address internal constant SOLO_MARGIN_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant DYDX_FL_FEE_FAUCET = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     // this will stop MAKER flashloans on Optimism

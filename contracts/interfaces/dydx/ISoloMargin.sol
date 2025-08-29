@@ -3,17 +3,22 @@
 pragma solidity =0.8.24;
 
 library Account {
-    enum Status {Normal, Liquid, Vapor}
+    enum Status {
+        Normal,
+        Liquid,
+        Vapor
+    }
+
     struct Info {
         address owner; // The address that owns the account
         uint256 number; // A nonce that allows a single address to control many accounts
     }
+
     struct AccountStorage {
         mapping(uint256 => Types.Par) balances; // Mapping from marketId to principal
         Status status;
     }
 }
-
 
 library Actions {
     enum ActionType {
@@ -26,11 +31,20 @@ library Actions {
         Liquidate, // liquidate an undercollateralized or expiring account
         Vaporize, // use excess tokens to zero-out a completely negative account
         Call // send arbitrary data to an address
+
     }
 
-    enum AccountLayout {OnePrimary, TwoPrimary, PrimaryAndSecondary}
+    enum AccountLayout {
+        OnePrimary,
+        TwoPrimary,
+        PrimaryAndSecondary
+    }
 
-    enum MarketLayout {ZeroMarkets, OneMarket, TwoMarkets}
+    enum MarketLayout {
+        ZeroMarkets,
+        OneMarket,
+        TwoMarkets
+    }
 
     struct ActionArgs {
         ActionType actionType;
@@ -115,13 +129,11 @@ library Actions {
     }
 }
 
-
 library Decimal {
     struct D256 {
         uint256 value;
     }
 }
-
 
 library Interest {
     struct Rate {
@@ -135,16 +147,15 @@ library Interest {
     }
 }
 
-
 library Monetary {
     struct Price {
         uint256 value;
     }
+
     struct Value {
         uint256 value;
     }
 }
-
 
 library Storage {
     // All information necessary for tracking a market
@@ -209,16 +220,17 @@ library Storage {
     }
 }
 
-
 library Types {
     enum AssetDenomination {
         Wei, // the amount is denominated in wei
         Par // the amount is denominated in par
+
     }
 
     enum AssetReference {
         Delta, // the amount is given as a delta from the current value
         Target // the amount is given as an exact number to end up at
+
     }
 
     struct AssetAmount {
@@ -244,107 +256,79 @@ library Types {
     }
 }
 
-
 abstract contract ISoloMargin {
     struct OperatorArg {
         address operator;
         bool trusted;
     }
 
-    function ownerSetSpreadPremium(
-        uint256 marketId,
-        Decimal.D256 memory spreadPremium
-    ) public virtual;
+    function ownerSetSpreadPremium(uint256 marketId, Decimal.D256 memory spreadPremium) public virtual;
 
-    function getIsGlobalOperator(address operator) public virtual view returns (bool);
+    function getIsGlobalOperator(address operator) public view virtual returns (bool);
 
-    function getMarketTokenAddress(uint256 marketId)
-        public virtual
-        view
-        returns (address);
+    function getMarketTokenAddress(uint256 marketId) public view virtual returns (address);
 
-    function ownerSetInterestSetter(uint256 marketId, address interestSetter)
-        public virtual;
+    function ownerSetInterestSetter(uint256 marketId, address interestSetter) public virtual;
 
     function getAccountValues(Account.Info memory account)
-        public virtual
+        public
         view
+        virtual
         returns (Monetary.Value memory, Monetary.Value memory);
 
-    function getMarketPriceOracle(uint256 marketId)
-        public virtual
-        view
-        returns (address);
+    function getMarketPriceOracle(uint256 marketId) public view virtual returns (address);
 
-    function getMarketInterestSetter(uint256 marketId)
-        public virtual
-        view
-        returns (address);
+    function getMarketInterestSetter(uint256 marketId) public view virtual returns (address);
 
-    function getMarketSpreadPremium(uint256 marketId)
-        public virtual
-        view
-        returns (Decimal.D256 memory);
+    function getMarketSpreadPremium(uint256 marketId) public view virtual returns (Decimal.D256 memory);
 
-    function getNumMarkets() public virtual view returns (uint256);
+    function getNumMarkets() public view virtual returns (uint256);
 
-    function ownerWithdrawUnsupportedTokens(address token, address recipient)
-        public virtual
-        returns (uint256);
+    function ownerWithdrawUnsupportedTokens(address token, address recipient) public virtual returns (uint256);
 
-    function ownerSetMinBorrowedValue(Monetary.Value memory minBorrowedValue)
-        public virtual;
+    function ownerSetMinBorrowedValue(Monetary.Value memory minBorrowedValue) public virtual;
 
     function ownerSetLiquidationSpread(Decimal.D256 memory spread) public virtual;
 
     function ownerSetEarningsRate(Decimal.D256 memory earningsRate) public virtual;
 
-    function getIsLocalOperator(address, address)
-        public virtual
-        view
-        returns (bool);
+    function getIsLocalOperator(address, address) public view virtual returns (bool);
 
     function getAccountPar(Account.Info memory account, uint256 marketId)
-        public virtual
+        public
         view
+        virtual
         returns (Types.Par memory);
 
-    function ownerSetMarginPremium(
-        uint256 marketId,
-        Decimal.D256 memory marginPremium
-    ) public virtual;
+    function ownerSetMarginPremium(uint256 marketId, Decimal.D256 memory marginPremium) public virtual;
 
-    function getMarginRatio() public virtual view returns (Decimal.D256 memory);
+    function getMarginRatio() public view virtual returns (Decimal.D256 memory);
 
-    function getMarketCurrentIndex(uint256 marketId)
-        public virtual
-        view
-        returns (Interest.Index memory);
+    function getMarketCurrentIndex(uint256 marketId) public view virtual returns (Interest.Index memory);
 
-    function getMarketIsClosing(uint256 marketId) public virtual view returns (bool);
+    function getMarketIsClosing(uint256 marketId) public view virtual returns (bool);
 
-    function getRiskParams() public virtual view returns (Storage.RiskParams memory);
+    function getRiskParams() public view virtual returns (Storage.RiskParams memory);
 
     function getAccountBalances(Account.Info memory account)
-        public virtual
+        public
         view
+        virtual
         returns (address[] memory, Types.Par[] memory, Types.Wei[] memory);
 
     function renounceOwnership() public virtual;
 
-    function getMinBorrowedValue() public virtual view returns (Monetary.Value memory);
+    function getMinBorrowedValue() public view virtual returns (Monetary.Value memory);
 
     function setOperators(OperatorArg[] memory args) public virtual;
 
-    function getMarketPrice(uint256 marketId) public virtual view returns (address);
+    function getMarketPrice(uint256 marketId) public view virtual returns (address);
 
-    function owner() public virtual view returns (address);
+    function owner() public view virtual returns (address);
 
-    function isOwner() public virtual view returns (bool);
+    function isOwner() public view virtual returns (bool);
 
-    function ownerWithdrawExcessTokens(uint256 marketId, address recipient)
-        public virtual
-        returns (uint256);
+    function ownerWithdrawExcessTokens(uint256 marketId, address recipient) public virtual returns (uint256);
 
     function ownerAddMarket(
         address token,
@@ -354,65 +338,45 @@ abstract contract ISoloMargin {
         Decimal.D256 memory spreadPremium
     ) public virtual;
 
-    function operate(
-        Account.Info[] memory accounts,
-        Actions.ActionArgs[] memory actions
-    ) public virtual;
+    function operate(Account.Info[] memory accounts, Actions.ActionArgs[] memory actions) public virtual;
 
     function getMarketWithInfo(uint256 marketId)
-        public virtual
+        public
         view
-        returns (
-            Storage.Market memory,
-            Interest.Index memory,
-            Monetary.Price memory,
-            Interest.Rate memory
-        );
+        virtual
+        returns (Storage.Market memory, Interest.Index memory, Monetary.Price memory, Interest.Rate memory);
 
     function ownerSetMarginRatio(Decimal.D256 memory ratio) public virtual;
 
-    function getLiquidationSpread() public virtual view returns (Decimal.D256 memory);
+    function getLiquidationSpread() public view virtual returns (Decimal.D256 memory);
 
     function getAccountWei(Account.Info memory account, uint256 marketId)
-        public virtual
+        public
         view
+        virtual
         returns (Types.Wei memory);
 
-    function getMarketTotalPar(uint256 marketId)
-        public virtual
+    function getMarketTotalPar(uint256 marketId) public view virtual returns (Types.TotalPar memory);
+
+    function getLiquidationSpreadForPair(uint256 heldMarketId, uint256 owedMarketId)
+        public
         view
-        returns (Types.TotalPar memory);
+        virtual
+        returns (Decimal.D256 memory);
 
-    function getLiquidationSpreadForPair(
-        uint256 heldMarketId,
-        uint256 owedMarketId
-    ) public virtual view returns (Decimal.D256 memory);
+    function getNumExcessTokens(uint256 marketId) public view virtual returns (Types.Wei memory);
 
-    function getNumExcessTokens(uint256 marketId)
-        public virtual
-        view
-        returns (Types.Wei memory);
+    function getMarketCachedIndex(uint256 marketId) public view virtual returns (Interest.Index memory);
 
-    function getMarketCachedIndex(uint256 marketId)
-        public virtual
-        view
-        returns (Interest.Index memory);
+    function getAccountStatus(Account.Info memory account) public view virtual returns (uint8);
 
-    function getAccountStatus(Account.Info memory account)
-        public virtual
-        view
-        returns (uint8);
-
-    function getEarningsRate() public virtual view returns (Decimal.D256 memory);
+    function getEarningsRate() public view virtual returns (Decimal.D256 memory);
 
     function ownerSetPriceOracle(uint256 marketId, address priceOracle) public virtual;
 
-    function getRiskLimits() public virtual view returns (Storage.RiskLimits memory);
+    function getRiskLimits() public view virtual returns (Storage.RiskLimits memory);
 
-    function getMarket(uint256 marketId)
-        public virtual
-        view
-        returns (Storage.Market memory);
+    function getMarket(uint256 marketId) public view virtual returns (Storage.Market memory);
 
     function ownerSetIsClosing(uint256 marketId, bool isClosing) public virtual;
 
@@ -421,17 +385,12 @@ abstract contract ISoloMargin {
     function transferOwnership(address newOwner) public virtual;
 
     function getAdjustedAccountValues(Account.Info memory account)
-        public virtual
+        public
         view
+        virtual
         returns (Monetary.Value memory, Monetary.Value memory);
 
-    function getMarketMarginPremium(uint256 marketId)
-        public virtual
-        view
-        returns (Decimal.D256 memory);
+    function getMarketMarginPremium(uint256 marketId) public view virtual returns (Decimal.D256 memory);
 
-    function getMarketInterestRate(uint256 marketId)
-        public virtual
-        view
-        returns (Interest.Rate memory);
+    function getMarketInterestRate(uint256 marketId) public view virtual returns (Interest.Rate memory);
 }

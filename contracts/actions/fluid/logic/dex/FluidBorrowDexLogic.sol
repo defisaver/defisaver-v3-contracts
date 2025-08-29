@@ -22,22 +22,19 @@ library FluidBorrowDexLogic {
     /// @param _data Borrow data
     /// @param _tokens Tokens data
     /// @return borrowShares Amount of debt shares minted.
-    function borrowVariable(
-        FluidDexModel.BorrowDexData memory _data,
-        IFluidVault.Tokens memory _tokens
-    ) internal returns (uint256 borrowShares) {
+    function borrowVariable(FluidDexModel.BorrowDexData memory _data, IFluidVault.Tokens memory _tokens)
+        internal
+        returns (uint256 borrowShares)
+    {
         _data.vaultType.requireSmartDebt();
 
         (bool sendDebt0AsWrapped, bool sendDebt1AsWrapped) = FluidDexTokensUtils.shouldSendTokensAsWrapped(
-            _tokens,
-            _data.wrapBorrowedEth,
-            _data.variableData.debtAmount0,
-            _data.variableData.debtAmount1
+            _tokens, _data.wrapBorrowedEth, _data.variableData.debtAmount0, _data.variableData.debtAmount1
         );
 
         address sendTokensTo = (sendDebt0AsWrapped || sendDebt1AsWrapped) ? address(this) : _data.to;
 
-        ( , , int256 exactDebtShares) = _data.vaultType.isT3Vault()
+        (,, int256 exactDebtShares) = _data.vaultType.isT3Vault()
             ? IFluidVaultT3(_data.vault).operate(
                 _data.nftId,
                 0, /* newCol_ */

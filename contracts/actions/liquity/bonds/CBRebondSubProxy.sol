@@ -12,13 +12,10 @@ import { CoreHelper } from "../../../core/helpers/CoreHelper.sol";
 
 /// @title SubProxy to inject subId during subscription for the cb rebond strategy
 contract CBRebondSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CBHelper, CheckWalletType {
-
     /// @notice Subscribes to an deployed cb rebond strategy
     /// @param _bondID Nft id of the chicken bond
-    function subToRebondStrategy(
-        uint256 _bondID
-    ) public {
-         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+    function subToRebondStrategy(uint256 _bondID) public {
+        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission(isDSProxy(address(this)));
 
         // returns .length which is the next id we are subscribing

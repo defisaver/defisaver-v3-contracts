@@ -12,7 +12,6 @@ import { ActionsUtils } from "../../../utils/ActionsUtils.sol";
 import { BaseTest } from "../../../utils/BaseTest.sol";
 
 contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
-
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
@@ -22,7 +21,6 @@ contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
     address aaveV3SupplyContractAddr;
     address[] stkTokens;
 
-    
     struct Snapshot {
         uint256 senderSupplyTokenBalance;
         uint256 senderWaTokenBalance;
@@ -41,11 +39,11 @@ contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
         return tokens;
     }
 
-    function takeSnapshot(
-        address _stkToken,
-        address _waTokenOrGHO,
-        address _supplyToken
-    ) public view returns (Snapshot memory snapshot) {
+    function takeSnapshot(address _stkToken, address _waTokenOrGHO, address _supplyToken)
+        public
+        view
+        returns (Snapshot memory snapshot)
+    {
         snapshot.senderSupplyTokenBalance = balanceOf(_supplyToken, sender);
         snapshot.senderStkTokenBalance = balanceOf(_stkToken, sender);
         snapshot.senderWaTokenBalance = balanceOf(_waTokenOrGHO, sender);
@@ -63,11 +61,11 @@ contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
         pool.supply(underlying, _amount, sender, AAVE_REFERRAL_CODE);
     }
 
-    function getMinSharesOut(
-        address _stkToken,
-        address _waTokenOrGHO,
-        uint256 _amount
-    ) public view returns (uint256 minSharesOut) {
+    function getMinSharesOut(address _stkToken, address _waTokenOrGHO, uint256 _amount)
+        public
+        view
+        returns (uint256 minSharesOut)
+    {
         if (_waTokenOrGHO != Addresses.GHO_TOKEN) {
             // we do aToken -> waToken -> stkToken so we need to calculate:
             // estimated waToken amount from aToken -> waToken conversion
@@ -79,5 +77,4 @@ contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
         }
         minSharesOut = minSharesOut * 999 / 1000;
     }
-
 }

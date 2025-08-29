@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.24;
 
-
 abstract contract IEtherFiClaim {
     function claim(
         address account,

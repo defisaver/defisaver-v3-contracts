@@ -1,14 +1,21 @@
-const hre = require('hardhat');
-const { expect } = require('chai');
-const { getAssetInfo } = require('@defisaver/tokens');
-const { deployLiquityV2RepayBundle, getLiquityV2TestPairs } = require('../../utils/liquityV2');
-const { BaseLiquityV2StrategyTest } = require('./common');
-const { subLiquityV2RepayBundle } = require('../utils/strategy-subs');
+const hre = require("hardhat");
+const { expect } = require("chai");
+const { getAssetInfo } = require("@defisaver/tokens");
+const { deployLiquityV2RepayBundle, getLiquityV2TestPairs } = require("../../utils/liquityV2");
+const { BaseLiquityV2StrategyTest } = require("./common");
+const { subLiquityV2RepayBundle } = require("../utils/strategy-subs");
 const {
-    formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
+    formatExchangeObjSdk,
+    BOLD_ADDR,
+    addrs,
+    network,
+    isNetworkFork,
     fetchAmountInUSDPrice,
-} = require('../../utils/utils');
-const { callLiquityV2RepayStrategy, callLiquityV2FLRepayStrategy } = require('../utils/strategy-calls');
+} = require("../../utils/utils");
+const {
+    callLiquityV2RepayStrategy,
+    callLiquityV2FLRepayStrategy,
+} = require("../utils/strategy-calls");
 
 class RepayTest extends BaseLiquityV2StrategyTest {
     async setUp() {
@@ -19,12 +26,12 @@ class RepayTest extends BaseLiquityV2StrategyTest {
     runTests() {
         // eslint-disable-next-line no-unused-vars
         this.testPairs.forEach((pair, i) => {
-            it('... should call LiquityV2 repay strategy', async () => {
+            it("... should call LiquityV2 repay strategy", async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
-                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, '30000');
-                const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, "30000");
+                const boldAmount = hre.ethers.utils.parseUnits("15000", 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
-                console.log('Trove ID created:', troveId.toString());
+                console.log("Trove ID created:", troveId.toString());
 
                 const minRatio = 250;
                 const targetRatio = 300;
@@ -35,15 +42,15 @@ class RepayTest extends BaseLiquityV2StrategyTest {
                     collAsset.address,
                     minRatio,
                     targetRatio,
-                    this.bundles.repay,
+                    this.bundles.repay
                 );
 
                 const troveInfoBefore = await this.contracts.view.getTroveInfo(
                     pair.market,
-                    troveId,
+                    troveId
                 );
                 const ratioBefore = troveInfoBefore.TCRatio;
-                console.log('Trove ratio before:', ratioBefore.toString());
+                console.log("Trove ratio before:", ratioBefore.toString());
 
                 const repayAmount = supplyAmount.div(8);
 
@@ -53,7 +60,7 @@ class RepayTest extends BaseLiquityV2StrategyTest {
                     repayAmount,
                     addrs[network].UNISWAP_V3_WRAPPER,
                     false,
-                    true,
+                    true
                 );
 
                 await callLiquityV2RepayStrategy(
@@ -62,24 +69,21 @@ class RepayTest extends BaseLiquityV2StrategyTest {
                     subId,
                     strategySub,
                     exchangeObject,
-                    repayAmount,
+                    repayAmount
                 );
 
-                const troveInfoAfter = await this.contracts.view.getTroveInfo(
-                    pair.market,
-                    troveId,
-                );
+                const troveInfoAfter = await this.contracts.view.getTroveInfo(pair.market, troveId);
                 const ratioAfter = troveInfoAfter.TCRatio;
-                console.log('Trove ratio after:', ratioAfter.toString());
+                console.log("Trove ratio after:", ratioAfter.toString());
 
                 expect(ratioAfter).to.be.gt(ratioBefore);
             });
-            it('... should call LiquityV2 FL repay strategy', async () => {
+            it("... should call LiquityV2 FL repay strategy", async () => {
                 const collAsset = getAssetInfo(pair.supplyTokenSymbol);
-                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, '30000');
-                const boldAmount = hre.ethers.utils.parseUnits('15000', 18);
+                const supplyAmount = await fetchAmountInUSDPrice(collAsset.symbol, "30000");
+                const boldAmount = hre.ethers.utils.parseUnits("15000", 18);
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
-                console.log('troveId', troveId);
+                console.log("troveId", troveId);
 
                 const minRatio = 250;
                 const targetRatio = 300;
@@ -90,15 +94,15 @@ class RepayTest extends BaseLiquityV2StrategyTest {
                     collAsset.address,
                     minRatio,
                     targetRatio,
-                    this.bundles.repay,
+                    this.bundles.repay
                 );
 
                 const troveInfoBefore = await this.contracts.view.getTroveInfo(
                     pair.market,
-                    troveId,
+                    troveId
                 );
                 const ratioBefore = troveInfoBefore.TCRatio;
-                console.log('ratioBefore', ratioBefore.toString());
+                console.log("ratioBefore", ratioBefore.toString());
 
                 const repayAmount = supplyAmount.div(8);
 
@@ -108,7 +112,7 @@ class RepayTest extends BaseLiquityV2StrategyTest {
                     repayAmount,
                     addrs[network].UNISWAP_V3_WRAPPER,
                     false,
-                    true,
+                    true
                 );
 
                 await callLiquityV2FLRepayStrategy(
@@ -119,15 +123,12 @@ class RepayTest extends BaseLiquityV2StrategyTest {
                     exchangeObject,
                     repayAmount,
                     collAsset.address,
-                    this.contracts.flAction.address,
+                    this.contracts.flAction.address
                 );
 
-                const troveInfoAfter = await this.contracts.view.getTroveInfo(
-                    pair.market,
-                    troveId,
-                );
+                const troveInfoAfter = await this.contracts.view.getTroveInfo(pair.market, troveId);
                 const ratioAfter = troveInfoAfter.TCRatio;
-                console.log('ratioAfter', ratioAfter.toString());
+                console.log("ratioAfter", ratioAfter.toString());
 
                 expect(ratioAfter).to.be.gt(ratioBefore);
             });
@@ -139,11 +140,17 @@ module.exports = async function runRepayTests() {
     const testPairs = await getLiquityV2TestPairs();
     const isFork = isNetworkFork();
     const repayTest = new RepayTest(testPairs, isFork);
-    describe('LiquityV2 Repay Strategy Tests', function () {
+    describe("LiquityV2 Repay Strategy Tests", function () {
         this.timeout(1200000);
-        before(async () => { await repayTest.setUp(); });
-        beforeEach(async () => { await repayTest.takeSnapshot(); });
-        afterEach(async () => { await repayTest.revertToSnapshot(); });
+        before(async () => {
+            await repayTest.setUp();
+        });
+        beforeEach(async () => {
+            await repayTest.takeSnapshot();
+        });
+        afterEach(async () => {
+            await repayTest.revertToSnapshot();
+        });
         repayTest.runTests();
     });
 };

@@ -3,7 +3,13 @@ pragma solidity =0.8.24;
 
 interface ILlamaLendController {
     function create_loan(uint256 _collateralAmount, uint256 _debtAmount, uint256 _nBands) external payable;
-    function create_loan_extended(uint256 _collateralAmount, uint256 _debtAmount, uint256 _nBands, address _callbacker, uint256[] memory _callbackArgs) external payable;
+    function create_loan_extended(
+        uint256 _collateralAmount,
+        uint256 _debtAmount,
+        uint256 _nBands,
+        address _callbacker,
+        uint256[] memory _callbackArgs
+    ) external payable;
 
     /// @dev all functions below: if _collateralAmount is 0 will just return
     function add_collateral(uint256 _collateralAmount) external payable;
@@ -15,7 +21,12 @@ interface ILlamaLendController {
 
     /// @dev all functions below: if _debtAmount is 0 will just return
     function borrow_more(uint256 _collateralAmount, uint256 _debtAmount) external payable;
-    function borrow_more_extended(uint256 _collateralAmount, uint256 _debt, address _callbacker, uint256[] memory _callbackArgs) external payable;
+    function borrow_more_extended(
+        uint256 _collateralAmount,
+        uint256 _debt,
+        address _callbacker,
+        uint256[] memory _callbackArgs
+    ) external payable;
 
     /// @dev if _debtAmount > debt will do full repay
     function repay(uint256 _debtAmount) external payable;
@@ -27,9 +38,21 @@ interface ILlamaLendController {
 
     function liquidate(address user, uint256 min_x) external;
     function liquidate(address user, uint256 min_x, bool _useEth) external;
-    function liquidate_extended(address user, uint256 min_x, uint256 frac, bool use_eth, address callbacker, uint256[] memory _callbackArgs) external;
-    function liquidate_extended(address user, uint256 min_x, uint256 frac, address callbacker, uint256[] memory _callbackArgs) external;
-
+    function liquidate_extended(
+        address user,
+        uint256 min_x,
+        uint256 frac,
+        bool use_eth,
+        address callbacker,
+        uint256[] memory _callbackArgs
+    ) external;
+    function liquidate_extended(
+        address user,
+        uint256 min_x,
+        uint256 frac,
+        address callbacker,
+        uint256[] memory _callbackArgs
+    ) external;
 
     /// GETTERS
     function amm() external view returns (address);

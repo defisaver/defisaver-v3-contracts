@@ -50,9 +50,8 @@ contract MorphoAaveV2Withdraw is ActionBase, MorphoAaveV2Helper {
         // needed because amount > collateral is safe
         uint256 tokensBefore = _params.tokenAddr.getBalance(_params.to);
 
-        (address aTokenAddress,,) = IAaveProtocolDataProviderV2(
-            DEFAULT_MARKET_DATA_PROVIDER
-        ).getReserveTokensAddresses(_params.tokenAddr);
+        (address aTokenAddress,,) =
+            IAaveProtocolDataProviderV2(DEFAULT_MARKET_DATA_PROVIDER).getReserveTokensAddresses(_params.tokenAddr);
 
         IMorpho(MORPHO_AAVEV2_ADDR).withdraw(aTokenAddress, _params.amount, _params.to);
 

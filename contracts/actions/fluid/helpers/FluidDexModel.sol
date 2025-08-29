@@ -6,7 +6,6 @@ import { IFluidVaultResolver } from "../../../interfaces/fluid/resolvers/IFluidV
 
 /// @title Helper library containing data structs used for interaction with Fluid DEX
 library FluidDexModel {
-
     /// @param collAmount0 Amount of collateral 0 to deposit.
     /// @param collAmount1 Amount of collateral 1 to deposit.
     /// @param minCollShares Min amount of collateral shares to mint.

@@ -71,8 +71,8 @@ contract UniSupply is ActionBase, UniV2Helper {
     /// @param _uniData All the required data to deposit to uni
     function _uniSupply(UniSupplyData memory _uniData) internal returns (uint256, bytes memory) {
         // fetch tokens from the address
-        uint amountAPulled = _uniData.tokenA.pullTokensIfNeeded(_uniData.from, _uniData.amountADesired);
-        uint amountBPulled = _uniData.tokenB.pullTokensIfNeeded(_uniData.from, _uniData.amountBDesired);
+        uint256 amountAPulled = _uniData.tokenA.pullTokensIfNeeded(_uniData.from, _uniData.amountADesired);
+        uint256 amountBPulled = _uniData.tokenB.pullTokensIfNeeded(_uniData.from, _uniData.amountBDesired);
 
         // approve router so it can pull tokens
         _uniData.tokenA.approveToken(address(router), amountAPulled);
@@ -94,11 +94,7 @@ contract UniSupply is ActionBase, UniV2Helper {
 
     function _addLiquidity(UniSupplyData memory _uniData)
         internal
-        returns (
-            uint256 amountA,
-            uint256 amountB,
-            uint256 liqAmount
-        )
+        returns (uint256 amountA, uint256 amountB, uint256 liqAmount)
     {
         (amountA, amountB, liqAmount) = router.addLiquidity(
             _uniData.tokenA,
@@ -112,11 +108,7 @@ contract UniSupply is ActionBase, UniV2Helper {
         );
     }
 
-    function parseInputs(bytes memory _callData)
-       public
-        pure
-        returns (UniSupplyData memory uniData)
-    {
+    function parseInputs(bytes memory _callData) public pure returns (UniSupplyData memory uniData) {
         uniData = abi.decode(_callData, (UniSupplyData));
     }
 }

@@ -9,7 +9,6 @@ import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol
 import { AaveV3Borrow } from "../../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 
 contract AaveV3ExecuteActions is ExecuteActionsBase {
-    
     function executeAaveV3Supply(
         AaveV3Supply.Params memory _params,
         address _supplyToken,
@@ -26,10 +25,7 @@ contract AaveV3ExecuteActions is ExecuteActionsBase {
             _params.market,
             _params.onBehalf
         );
-        bytes memory _calldata = abi.encodeWithSelector(
-            EXECUTE_ACTION_DIRECT_SELECTOR,
-            paramsCalldata
-        );
+        bytes memory _calldata = abi.encodeWithSelector(EXECUTE_ACTION_DIRECT_SELECTOR, paramsCalldata);
         address target = _useAddressFromDfsRegistry ? getAddr("AaveV3Supply") : _contractAddress;
 
         give(_supplyToken, _wallet.owner(), _params.amount);
@@ -53,10 +49,7 @@ contract AaveV3ExecuteActions is ExecuteActionsBase {
             _params.market,
             _params.onBehalf
         );
-        bytes memory _calldata = abi.encodeWithSelector(
-            EXECUTE_ACTION_DIRECT_SELECTOR,
-            paramsCalldata
-        );
+        bytes memory _calldata = abi.encodeWithSelector(EXECUTE_ACTION_DIRECT_SELECTOR, paramsCalldata);
         address target = _useAddressFromDfsRegistry ? getAddr("AaveV3Borrow") : _contractAddress;
 
         _wallet.execute(target, _calldata, 0);

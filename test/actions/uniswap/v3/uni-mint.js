@@ -1,15 +1,13 @@
-const {
-    redeploy,
-} = require('../../../utils/utils');
+const { redeploy } = require("../../../utils/utils");
 
-const { uniV3MintTest } = require('./univ3-tests');
+const { uniV3MintTest } = require("./univ3-tests");
 
-describe('Uni-Mint-V3', () => {
+describe("Uni-Mint-V3", () => {
     before(async () => {
-        await redeploy('UniMintV3');
+        await redeploy("UniMintV3");
     });
 
-    it('... should mint a position to uniswap V3', async () => {
+    it("... should mint a position to uniswap V3", async () => {
         await uniV3MintTest();
     }).timeout(50000);
 });

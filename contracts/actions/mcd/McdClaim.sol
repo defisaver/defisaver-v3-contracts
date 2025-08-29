@@ -62,11 +62,7 @@ contract McdClaim is ActionBase, McdHelper {
     /// @param _vaultId Id of the vault
     /// @param _joinAddr Join address of the maker collateral
     /// @param _to Address where to send the bonus tokens we withdrew
-    function _mcdClaim(
-        uint256 _vaultId,
-        address _joinAddr,
-        address _to
-    ) internal returns (uint256, bytes memory) {
+    function _mcdClaim(uint256 _vaultId, address _joinAddr, address _to) internal returns (uint256, bytes memory) {
         address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
         address bonusTokenAddr = address(ICropJoin(_joinAddr).bonus());
 
@@ -85,11 +81,7 @@ contract McdClaim is ActionBase, McdHelper {
         return (amount, logData);
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (Params memory inputData)
-    {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 }

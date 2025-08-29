@@ -74,19 +74,18 @@ contract CurveUsdSelfLiquidateWithColl is ActionBase, CurveUsdHelper {
 
         address curveUsdSwapper = registry.getAddr(CURVE_SWAPPER_ID);
 
-        uint256[] memory swapData =
-             _setupCurvePath(
-                curveUsdSwapper,
-                _params.additionalData,
-                _params.swapAmount,
-                _params.minAmount,
-                _params.gasUsed,
-                _params.dfsFeeDivider
-            );
-        
-        ICrvUsdController(_params.controllerAddress)
-            .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, false, curveUsdSwapper, swapData);
+        uint256[] memory swapData = _setupCurvePath(
+            curveUsdSwapper,
+            _params.additionalData,
+            _params.swapAmount,
+            _params.minAmount,
+            _params.gasUsed,
+            _params.dfsFeeDivider
+        );
 
+        ICrvUsdController(_params.controllerAddress).liquidate_extended(
+            address(this), _params.minCrvUsdExpected, _params.percentage, false, curveUsdSwapper, swapData
+        );
 
         // cleanup after the callback if any funds are left over
         CurveUsdSwapper(curveUsdSwapper).withdrawAll(_params.controllerAddress);
@@ -94,10 +93,7 @@ contract CurveUsdSelfLiquidateWithColl is ActionBase, CurveUsdHelper {
         // send funds to user
         _sendLeftoverFunds(_params.controllerAddress, _params.to);
 
-        return (
-            _params.percentage,
-            abi.encode(_params)
-        );
+        return (_params.percentage, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

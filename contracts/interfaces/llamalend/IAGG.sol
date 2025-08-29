@@ -8,5 +8,5 @@ interface IAGG {
     function rate0() external view returns (uint256);
     function target_debt_fraction() external view returns (uint256);
     function sigma() external view returns (int256);
-    function peg_keepers(uint256) external view returns (address); 
+    function peg_keepers(uint256) external view returns (address);
 }

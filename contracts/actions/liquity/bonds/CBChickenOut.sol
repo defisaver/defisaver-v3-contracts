@@ -29,18 +29,8 @@ contract CBChickenOut is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.bondID = _parseParamUint(
-            params.bondID,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
-        params.minLUSD = _parseParamUint(
-            params.minLUSD,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
+        params.bondID = _parseParamUint(params.bondID, _paramMapping[0], _subData, _returnValues);
+        params.minLUSD = _parseParamUint(params.minLUSD, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
         (uint256 lusdAmount, bytes memory logData) = _cbChickenOut(params);

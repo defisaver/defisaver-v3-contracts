@@ -6,7 +6,6 @@ import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to transfer a NFT token to the specified address.
 contract TransferNFT is ActionBase {
-
     /// @param nftAddr Address of the NFT contract
     /// @param from Address of the sender
     /// @param to Address of the recipient
@@ -24,7 +23,7 @@ contract TransferNFT is ActionBase {
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public virtual payable override returns (bytes32) {
+    ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
         inputData.nftAddr = _parseParamAddr(inputData.nftAddr, _paramMapping[0], _subData, _returnValues);
@@ -45,19 +44,18 @@ contract TransferNFT is ActionBase {
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
-    
+
     /// @notice The user's wallet must have approve if _from != user's wallet.
     /// @param _nftAddr Address of the ERC721 contract
     /// @param _from Where from we are pulling the nft (defaults to user's wallet)
     /// @param _to Address where we are transferring the nft
     /// @param _nftId TokenId we are transferring
-    function _transferNFT(address _nftAddr, address _from, address _to, uint _nftId) internal {
+    function _transferNFT(address _nftAddr, address _from, address _to, uint256 _nftId) internal {
         require(_to != address(0), "Can't burn nft");
 
         if (_from == address(0)) {

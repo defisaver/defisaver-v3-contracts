@@ -40,9 +40,11 @@ contract AaveSupply is ActionBase, AaveHelper {
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
-        params.enableAsColl = _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
+        params.enableAsColl =
+            _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
 
-        (uint256 supplyAmount, bytes memory logData) = _supply(params.market, params.tokenAddr, params.amount, params.from, params.onBehalf, params.enableAsColl);
+        (uint256 supplyAmount, bytes memory logData) =
+            _supply(params.market, params.tokenAddr, params.amount, params.from, params.onBehalf, params.enableAsColl);
         emit ActionEvent("AaveSupply", logData);
         return bytes32(supplyAmount);
     }
@@ -50,7 +52,8 @@ contract AaveSupply is ActionBase, AaveHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _supply(params.market, params.tokenAddr, params.amount, params.from, params.onBehalf, params.enableAsColl);
+        (, bytes memory logData) =
+            _supply(params.market, params.tokenAddr, params.amount, params.from, params.onBehalf, params.enableAsColl);
         logger.logActionDirectEvent("AaveSupply", logData);
     }
 
@@ -102,14 +105,7 @@ contract AaveSupply is ActionBase, AaveHelper {
             enableAsCollateral(_market, _tokenAddr, true);
         }
 
-        bytes memory logData = abi.encode(
-            _market,
-            _tokenAddr,
-            _amount,
-            _from,
-            _onBehalf,
-            _enableAsColl
-        );
+        bytes memory logData = abi.encode(_market, _tokenAddr, _amount, _from, _onBehalf, _enableAsColl);
         return (_amount, logData);
     }
 

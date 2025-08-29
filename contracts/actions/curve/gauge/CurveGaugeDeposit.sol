@@ -55,7 +55,7 @@ contract CurveGaugeDeposit is ActionBase, CurveHelper {
     /// @notice if _params.receiver != address(this) the receiver must call set_approve_deposit on gauge
     function _curveGaugeDeposit(Params memory _params) internal returns (uint256, bytes memory) {
         require(_params.onBehalfOf != address(0), "cant deposit on behalf of 0x0");
-        
+
         if (_params.amount == type(uint256).max) {
             _params.amount = _params.lpToken.getBalance(_params.sender);
         }

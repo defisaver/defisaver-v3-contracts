@@ -3,5 +3,5 @@
 pragma solidity =0.8.24;
 
 abstract contract IMedianOracle {
-    function read() external virtual view returns (uint256);
+    function read() external view virtual returns (uint256);
 }

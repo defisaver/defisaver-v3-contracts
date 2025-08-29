@@ -9,7 +9,6 @@ import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 
 /// @title Action to create a new subscription
 contract CreateSub is ActionBase, Permission {
-
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     struct Params {
         StrategyModel.StrategySub sub;
@@ -21,11 +20,12 @@ contract CreateSub is ActionBase, Permission {
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public virtual override payable returns (bytes32) {
+    ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        for (uint256 i = 0; i < inputData.sub.subData.length; i++){
-            inputData.sub.subData[i] = _parseParamABytes32(inputData.sub.subData[i], _paramMapping[i], _subData, _returnValues);
+        for (uint256 i = 0; i < inputData.sub.subData.length; i++) {
+            inputData.sub.subData[i] =
+                _parseParamABytes32(inputData.sub.subData[i], _paramMapping[i], _subData, _returnValues);
         }
 
         uint256 subId = createSub(inputData);
@@ -33,22 +33,22 @@ contract CreateSub is ActionBase, Permission {
         return (bytes32(subId));
     }
 
-    function executeActionDirect(bytes memory _callData) public override payable {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
         createSub(inputData);
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-   
+
     /// @notice Gives user's wallet permission if needed and registers a new sub
     function createSub(Params memory _inputData) internal returns (uint256 subId) {
-         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
+        /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission(isDSProxy(address(this)));
 
         subId = SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(_inputData.sub);

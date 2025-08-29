@@ -1,8 +1,8 @@
-const hre = require('hardhat');
-const { expect } = require('chai');
-const dfs = require('@defisaver/sdk');
+const hre = require("hardhat");
+const { expect } = require("chai");
+const dfs = require("@defisaver/sdk");
 
-const { getAssetInfo } = require('@defisaver/tokens');
+const { getAssetInfo } = require("@defisaver/tokens");
 const {
     takeSnapshot,
     revertToSnapshot,
@@ -10,15 +10,20 @@ const {
     redeploy,
     addrs,
     formatExchangeObj,
-    getOwnerAddr, getAddrFromRegistry,
+    getOwnerAddr,
+    getAddrFromRegistry,
     network,
-} = require('../../utils/utils');
-const { topUp } = require('../../../scripts/utils/fork');
-const { getEulerV2TestPairs, eulerV2CreatePosition, getAccountRatio } = require('../../utils/eulerV2');
-const { executeAction } = require('../../utils/actions');
+} = require("../../utils/utils");
+const { topUp } = require("../../../scripts/utils/fork");
+const {
+    getEulerV2TestPairs,
+    eulerV2CreatePosition,
+    getAccountRatio,
+} = require("../../utils/eulerV2");
+const { executeAction } = require("../../utils/actions");
 
 const eulerV2RepayTest = async (testPairs) => {
-    describe('EulerV2-Repay-Recipe', function () {
+    describe("EulerV2-Repay-Recipe", function () {
         this.timeout(100000);
         let isFork;
 
@@ -28,16 +33,16 @@ const eulerV2RepayTest = async (testPairs) => {
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
-            isFork = hre.network.name === 'fork';
+            isFork = hre.network.name === "fork";
             if (isFork) {
                 await topUp(senderAcc.address);
                 await topUp(getOwnerAddr());
             }
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-            await redeploy('EulerV2Supply', isFork);
-            await redeploy('EulerV2Borrow', isFork);
-            await redeploy('EulerV2Withdraw', isFork);
-            await redeploy('EulerV2Payback', isFork);
+            await redeploy("EulerV2Supply", isFork);
+            await redeploy("EulerV2Borrow", isFork);
+            await redeploy("EulerV2Withdraw", isFork);
+            await redeploy("EulerV2Payback", isFork);
         });
         beforeEach(async () => {
             snapshot = await takeSnapshot();
@@ -69,7 +74,7 @@ const eulerV2RepayTest = async (testPairs) => {
                     borrowVault,
                     borrowAmount,
                     senderAcc,
-                    proxy,
+                    proxy
                 );
 
                 const ratioBefore = await getAccountRatio(account, borrowVault);
@@ -80,34 +85,34 @@ const eulerV2RepayTest = async (testPairs) => {
                     supplyVault,
                     account,
                     proxy.address,
-                    repayAmount,
+                    repayAmount
                 );
                 const sellAction = new dfs.actions.basic.SellAction(
                     formatExchangeObj(
                         supplyToken,
                         borrowToken,
-                        '$1',
+                        "$1",
                         addrs[network].UNISWAP_V3_WRAPPER,
                         0,
-                        100,
+                        100
                     ),
                     proxy.address,
-                    proxy.address,
+                    proxy.address
                 );
                 const eulerV2PaybackAction = new dfs.actions.eulerV2.EulerV2PaybackAction(
                     borrowVault,
                     borrowToken,
                     account,
                     proxy.address,
-                    '$2',
+                    "$2"
                 );
-                const repayRecipe = new dfs.Recipe('EulerV2Repay', [
+                const repayRecipe = new dfs.Recipe("EulerV2Repay", [
                     eulerV2WithdrawAction,
                     sellAction,
                     eulerV2PaybackAction,
                 ]);
                 const functionData = repayRecipe.encodeForDsProxyCall();
-                await executeAction('RecipeExecutor', functionData[1], proxy);
+                await executeAction("RecipeExecutor", functionData[1], proxy);
 
                 const ratioAfter = await getAccountRatio(account, borrowVault);
 
@@ -116,7 +121,7 @@ const eulerV2RepayTest = async (testPairs) => {
 
             it(`should execute fl repay for EulerV2 position: ${supplyTokenSymbol} / ${borrowTokenSymbol}`, async () => {
                 const account = proxy.address;
-                const flAddress = await getAddrFromRegistry('FLAction');
+                const flAddress = await getAddrFromRegistry("FLAction");
 
                 // 1. first create position
                 await eulerV2CreatePosition(
@@ -126,7 +131,7 @@ const eulerV2RepayTest = async (testPairs) => {
                     borrowVault,
                     borrowAmount,
                     senderAcc,
-                    proxy,
+                    proxy
                 );
 
                 const ratioBefore = await getAccountRatio(account, borrowVault);
@@ -134,10 +139,7 @@ const eulerV2RepayTest = async (testPairs) => {
                 // 2. Then execute flashloan repay
                 const repayAmount = supplyAmount.div(10);
                 const flashLoanAction = new dfs.actions.flashloan.FLAction(
-                    new dfs.actions.flashloan.BalancerFlashLoanAction(
-                        [supplyToken],
-                        [repayAmount],
-                    ),
+                    new dfs.actions.flashloan.BalancerFlashLoanAction([supplyToken], [repayAmount])
                 );
                 const sellAction = new dfs.actions.basic.SellAction(
                     formatExchangeObj(
@@ -146,32 +148,32 @@ const eulerV2RepayTest = async (testPairs) => {
                         repayAmount,
                         addrs[network].UNISWAP_V3_WRAPPER,
                         0,
-                        100,
+                        100
                     ),
                     proxy.address,
-                    proxy.address,
+                    proxy.address
                 );
                 const eulerV2PaybackAction = new dfs.actions.eulerV2.EulerV2PaybackAction(
                     borrowVault,
                     borrowToken,
                     account,
                     proxy.address,
-                    '$2',
+                    "$2"
                 );
                 const eulerV2WithdrawAction = new dfs.actions.eulerV2.EulerV2WithdrawAction(
                     supplyVault,
                     account,
                     flAddress,
-                    repayAmount,
+                    repayAmount
                 );
-                const flRepayRecipe = new dfs.Recipe('EulerV2Repay', [
+                const flRepayRecipe = new dfs.Recipe("EulerV2Repay", [
                     flashLoanAction,
                     sellAction,
                     eulerV2PaybackAction,
                     eulerV2WithdrawAction,
                 ]);
                 const functionData = flRepayRecipe.encodeForDsProxyCall();
-                await executeAction('RecipeExecutor', functionData[1], proxy);
+                await executeAction("RecipeExecutor", functionData[1], proxy);
 
                 const ratioAfter = await getAccountRatio(account, borrowVault);
 
@@ -181,12 +183,12 @@ const eulerV2RepayTest = async (testPairs) => {
     });
 };
 
-describe('EulerV2-Repay-Recipe', function () {
+describe("EulerV2-Repay-Recipe", function () {
     this.timeout(80000);
 
-    it('...test EulerV2 repay', async () => {
-        const supplyAmountInUsd = '50000';
-        const borrowAmountInUsd = '25000';
+    it("...test EulerV2 repay", async () => {
+        const supplyAmountInUsd = "50000";
+        const borrowAmountInUsd = "25000";
         const testPairs = await getEulerV2TestPairs(supplyAmountInUsd, borrowAmountInUsd);
         await eulerV2RepayTest(testPairs);
     }).timeout(50000);

@@ -11,7 +11,7 @@ import { ActionBase } from "../../ActionBase.sol";
 contract CurveStethPoolDeposit is ActionBase, CurveHelper {
     using TokenUtils for address;
 
-    /// @param from Address where to pull tokens from   
+    /// @param from Address where to pull tokens from
     /// @param to Address that will receive the LP tokens
     /// @param amounts Amount of each token to deposit
     /// @param minMintAmount Minimum amount of LP tokens to accept
@@ -36,7 +36,7 @@ contract CurveStethPoolDeposit is ActionBase, CurveHelper {
         params.minMintAmount = _parseParamUint(params.minMintAmount, _paramMapping[4], _subData, _returnValues);
 
         (uint256 receivedLp, bytes memory logData) = _curveDeposit(params);
-                
+
         emit ActionEvent("CurveStethPoolDeposit", logData);
 
         return bytes32(receivedLp);
@@ -67,10 +67,10 @@ contract CurveStethPoolDeposit is ActionBase, CurveHelper {
             _params.amounts[1] = STETH_ADDR.pullTokensIfNeeded(_params.from, _params.amounts[1]);
             STETH_ADDR.approveToken(CURVE_STETH_POOL_ADDR, _params.amounts[1]);
         }
-    
-        receivedLp = ICurveStethPool(CURVE_STETH_POOL_ADDR).add_liquidity{
-            value: _params.amounts[0]
-        }(_params.amounts, _params.minMintAmount);
+
+        receivedLp = ICurveStethPool(CURVE_STETH_POOL_ADDR).add_liquidity{ value: _params.amounts[0] }(
+            _params.amounts, _params.minMintAmount
+        );
 
         STE_CRV_ADDR.withdrawTokens(_params.to, receivedLp);
 

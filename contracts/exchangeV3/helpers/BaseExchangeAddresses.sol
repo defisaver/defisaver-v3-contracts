@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 contract BaseExchangeAddresses {
-
     address internal constant FEE_RECIPIENT_ADDRESS = 0xEDFc68e2874B0AFc0963e18AE4D68522aEc7f97D;
     address internal constant DISCOUNT_ADDRESS = 0x6cA810e07a5a6320439C3BC87466BD2f1afc4dc8;
     address internal constant WRAPPER_EXCHANGE_REGISTRY = 0x586328A3F24E2c1A41D9A3a5B2Ed123A156dB82e;

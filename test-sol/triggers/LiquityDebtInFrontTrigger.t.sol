@@ -9,7 +9,6 @@ import { console } from "forge-std/console.sol";
 /// @dev Fetching lastTrove is really slow, so we ignore these tests by adding '_' as prefix to remove delay when running all tests
 /// @dev For running these two tests, just remove '_' from the function name
 contract TestLiquityDebtInFront is BaseTest, LiquityHelper {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -26,16 +25,14 @@ contract TestLiquityDebtInFront is BaseTest, LiquityHelper {
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function _testDebtInFrontTriggerForLargestTrove() public  view{
+    function _testDebtInFrontTriggerForLargestTrove() public view {
         console.log("Test debt in front trigger for largest trove. This can take a while...");
-        
+
         // fetch head of list, largest TCR
         address lastTrove = SortedTroves.getFirst();
 
-        bytes memory subData = abi.encode(LiquityDebtInFrontTrigger.SubParams({
-            troveOwner: lastTrove,
-            debtInFrontMin: 500_000 * 1e18
-        }));
+        bytes memory subData =
+            abi.encode(LiquityDebtInFrontTrigger.SubParams({ troveOwner: lastTrove, debtInFrontMin: 500_000 * 1e18 }));
 
         bool isTriggered = cut.isTriggered("", subData);
 
@@ -48,14 +45,12 @@ contract TestLiquityDebtInFront is BaseTest, LiquityHelper {
         // fetch head of list, largest TCR
         address lastTrove = SortedTroves.getFirst();
 
-        bytes memory subData = abi.encode(LiquityDebtInFrontTrigger.SubParams({
-            troveOwner: lastTrove,
-            debtInFrontMin: 500_000_000 * 1e18
-        }));
+        bytes memory subData = abi.encode(
+            LiquityDebtInFrontTrigger.SubParams({ troveOwner: lastTrove, debtInFrontMin: 500_000_000 * 1e18 })
+        );
 
         bool isTriggered = cut.isTriggered("", subData);
 
         assert(isTriggered == true);
     }
-
 }

@@ -7,7 +7,7 @@ interface IBRewardPool {
 
     function earned(address) external view returns (uint256);
     function balanceOf(address) external view returns (uint256);
-    
+
     function getReward(address, bool) external returns (bool);
     function stakeFor(address, uint256) external;
 

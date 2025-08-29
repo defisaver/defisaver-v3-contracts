@@ -67,17 +67,15 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
         if (_params.collAmount == 0) revert();
 
         address curveUsdSwapper = registry.getAddr(CURVE_SWAPPER_ID);
-        uint256[] memory swapData =
-             _setupCurvePath(
-                curveUsdSwapper,
-                _params.additionalData,
-                _params.collAmount,
-                _params.minAmount,
-                _params.gasUsed,
-                _params.dfsFeeDivider
+        uint256[] memory swapData = _setupCurvePath(
+            curveUsdSwapper,
+            _params.additionalData,
+            _params.collAmount,
+            _params.minAmount,
+            _params.gasUsed,
+            _params.dfsFeeDivider
         );
-        
-        
+
         ICrvUsdController(_params.controllerAddress).repay_extended(curveUsdSwapper, swapData);
 
         // cleanup after the callback if any funds are left over
@@ -86,10 +84,7 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
         // send funds to user
         _sendLeftoverFunds(_params.controllerAddress, _params.to);
 
-        return (
-            _params.collAmount,
-            abi.encode(_params)
-        );
+        return (_params.collAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

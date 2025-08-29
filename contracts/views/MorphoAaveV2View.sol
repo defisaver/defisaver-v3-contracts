@@ -8,10 +8,10 @@ import { IRewardsDistributor } from "../interfaces/morpho/IRewardsDistributor.so
 import { MorphoAaveV2Helper } from "../actions/morpho/aaveV2/helpers/MorphoAaveV2Helper.sol";
 import { AaveView } from "./AaveView.sol";
 import { MorphoTypes } from "../interfaces/morpho/MorphoTypes.sol";
-import { IERC20 } from "../interfaces/IERC20.sol"; 
+import { IERC20 } from "../interfaces/IERC20.sol";
 
 contract MorphoAaveV2View is MorphoAaveV2Helper {
-    address constant public AAVE_VIEW_ADDR = 0xEDf1087544a01596b70Da746F861B878F245B08f;
+    address public constant AAVE_VIEW_ADDR = 0xEDf1087544a01596b70Da746F861B878F245B08f;
 
     struct MarketInfo {
         address market; // aToken
@@ -50,14 +50,12 @@ contract MorphoAaveV2View is MorphoAaveV2Helper {
     function getMarketInfo(address _market) public view returns (MarketInfo memory) {
         address underlying = IAToken(_market).UNDERLYING_ASSET_ADDRESS();
 
-        (uint256 p2pSupplyAmount, uint256 poolSupplyAmount) = IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getTotalMarketSupply(_market);
-        (uint256 p2pBorrowAmount, uint256 poolBorrowAmount) = IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getTotalMarketBorrow(_market);
-        (
-            uint256 p2pSupplyRate,
-            uint256 p2pBorrowRate,
-            uint256 poolSupplyRate,
-            uint256 poolBorrowRate
-        ) = IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getRatesPerYear(_market);
+        (uint256 p2pSupplyAmount, uint256 poolSupplyAmount) =
+            IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getTotalMarketSupply(_market);
+        (uint256 p2pBorrowAmount, uint256 poolBorrowAmount) =
+            IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getTotalMarketBorrow(_market);
+        (uint256 p2pSupplyRate, uint256 p2pBorrowRate, uint256 poolSupplyRate, uint256 poolBorrowRate) =
+            IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getRatesPerYear(_market);
         uint256 reserveFactor = IMorpho(MORPHO_AAVEV2_ADDR).market(_market).reserveFactor;
 
         return MarketInfo({
@@ -77,10 +75,11 @@ contract MorphoAaveV2View is MorphoAaveV2Helper {
         });
     }
 
-    function getAllMarketsInfo() external view returns (
-        MarketInfo[] memory marketInfo,
-        AaveView.TokenInfoFull[] memory aaveTokenInfo
-    ) {
+    function getAllMarketsInfo()
+        external
+        view
+        returns (MarketInfo[] memory marketInfo, AaveView.TokenInfoFull[] memory aaveTokenInfo)
+    {
         address[] memory markets = IMorpho(MORPHO_AAVEV2_ADDR).getMarketsCreated();
         address[] memory underlyingTokens = new address[](markets.length);
         marketInfo = new MarketInfo[](markets.length);
@@ -94,25 +93,19 @@ contract MorphoAaveV2View is MorphoAaveV2Helper {
         aaveTokenInfo = AaveView(AAVE_VIEW_ADDR).getFullTokensInfo(addressesProvider, underlyingTokens);
     }
 
-    function getUserInfo(address _usr) external view returns (
-        UserInfo memory userInfo
-    ) {
+    function getUserInfo(address _usr) external view returns (UserInfo memory userInfo) {
         address[] memory markets = IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getEnteredMarkets(_usr);
         userInfo = UserInfo({
             userHealthFactor: IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getUserHealthFactor(_usr),
             morphoClaimed: IRewardsDistributor(REWARDS_DISTRIBUTOR_ADDR).claimed(_usr),
             userBalances: new UserBalance[](markets.length)
         });
-        
+
         for (uint256 i; i < markets.length; i++) {
-            (
-                uint256 supplyBalanceInP2P,
-                uint256 supplyBalanceOnPool,
-            ) =  IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentSupplyBalanceInOf(markets[i], _usr);
-            (
-                uint256 borrowBalanceInP2P,
-                uint256 borrowBalanceOnPool,
-            ) =  IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentBorrowBalanceInOf(markets[i], _usr);
+            (uint256 supplyBalanceInP2P, uint256 supplyBalanceOnPool,) =
+                IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentSupplyBalanceInOf(markets[i], _usr);
+            (uint256 borrowBalanceInP2P, uint256 borrowBalanceOnPool,) =
+                IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentBorrowBalanceInOf(markets[i], _usr);
 
             address underlying = IAToken(markets[i]).UNDERLYING_ASSET_ADDRESS();
             userInfo.userBalances[i] = UserBalance({

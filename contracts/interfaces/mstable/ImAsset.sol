@@ -35,12 +35,9 @@ struct BassetData {
 
 interface ImAsset {
     // Mint
-    function mint(
-        address _input,
-        uint256 _inputQuantity,
-        uint256 _minOutputQuantity,
-        address _recipient
-    ) external returns (uint256 mintOutput);
+    function mint(address _input, uint256 _inputQuantity, uint256 _minOutputQuantity, address _recipient)
+        external
+        returns (uint256 mintOutput);
 
     function mintMulti(
         address[] calldata _inputs,
@@ -49,10 +46,7 @@ interface ImAsset {
         address _recipient
     ) external returns (uint256 mintOutput);
 
-    function getMintOutput(address _input, uint256 _inputQuantity)
-        external
-        view
-        returns (uint256 mintOutput);
+    function getMintOutput(address _input, uint256 _inputQuantity) external view returns (uint256 mintOutput);
 
     function getMintMultiOutput(address[] calldata _inputs, uint256[] calldata _inputQuantities)
         external
@@ -68,25 +62,19 @@ interface ImAsset {
         address _recipient
     ) external returns (uint256 swapOutput);
 
-    function getSwapOutput(
-        address _input,
-        address _output,
-        uint256 _inputQuantity
-    ) external view returns (uint256 swapOutput);
+    function getSwapOutput(address _input, address _output, uint256 _inputQuantity)
+        external
+        view
+        returns (uint256 swapOutput);
 
     // Redemption
-    function redeem(
-        address _output,
-        uint256 _mAssetQuantity,
-        uint256 _minOutputQuantity,
-        address _recipient
-    ) external returns (uint256 outputQuantity);
+    function redeem(address _output, uint256 _mAssetQuantity, uint256 _minOutputQuantity, address _recipient)
+        external
+        returns (uint256 outputQuantity);
 
-    function redeemMasset(
-        uint256 _mAssetQuantity,
-        uint256[] calldata _minOutputQuantities,
-        address _recipient
-    ) external returns (uint256[] memory outputQuantities);
+    function redeemMasset(uint256 _mAssetQuantity, uint256[] calldata _minOutputQuantities, address _recipient)
+        external
+        returns (uint256[] memory outputQuantities);
 
     function redeemExactBassets(
         address[] calldata _outputs,
@@ -95,28 +83,19 @@ interface ImAsset {
         address _recipient
     ) external returns (uint256 mAssetRedeemed);
 
-    function getRedeemOutput(address _output, uint256 _mAssetQuantity)
+    function getRedeemOutput(address _output, uint256 _mAssetQuantity) external view returns (uint256 bAssetOutput);
+
+    function getRedeemExactBassetsOutput(address[] calldata _outputs, uint256[] calldata _outputQuantities)
         external
         view
-        returns (uint256 bAssetOutput);
-
-    function getRedeemExactBassetsOutput(
-        address[] calldata _outputs,
-        uint256[] calldata _outputQuantities
-    ) external view returns (uint256 mAssetAmount);
+        returns (uint256 mAssetAmount);
 
     // Views
     function getBasket() external view returns (bool, bool);
 
-    function getBasset(address _token)
-        external
-        view
-        returns (BassetPersonal memory personal, BassetData memory data);
+    function getBasset(address _token) external view returns (BassetPersonal memory personal, BassetData memory data);
 
-    function getBassets()
-        external
-        view
-        returns (BassetPersonal[] memory personal, BassetData[] memory data);
+    function getBassets() external view returns (BassetPersonal[] memory personal, BassetData[] memory data);
 
     function bAssetIndexes(address) external view returns (uint8);
 }

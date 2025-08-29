@@ -36,7 +36,8 @@ contract ReflexerSupply is ActionBase, ReflexerHelper {
         inputData.adapterAddr = _parseParamAddr(inputData.adapterAddr, _paramMapping[2], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 returnAmount, bytes memory logData) = _reflexerSupply(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.from);
+        (uint256 returnAmount, bytes memory logData) =
+            _reflexerSupply(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.from);
         emit ActionEvent("ReflexerSupply", logData);
         return bytes32(returnAmount);
     }
@@ -44,7 +45,8 @@ contract ReflexerSupply is ActionBase, ReflexerHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        (, bytes memory logData) = _reflexerSupply(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.from);
+        (, bytes memory logData) =
+            _reflexerSupply(inputData.safeId, inputData.amount, inputData.adapterAddr, inputData.from);
         logger.logActionDirectEvent("ReflexerSupply", logData);
     }
 
@@ -59,12 +61,10 @@ contract ReflexerSupply is ActionBase, ReflexerHelper {
     /// @param _amount Amount of tokens to supply
     /// @param _adapterAddr Adapter address of the reflexer collateral
     /// @param _from Address where to pull the collateral from
-    function _reflexerSupply(
-        uint256 _safeId,
-        uint256 _amount,
-        address _adapterAddr,
-        address _from
-    ) internal returns (uint256, bytes memory) {
+    function _reflexerSupply(uint256 _safeId, uint256 _amount, address _adapterAddr, address _from)
+        internal
+        returns (uint256, bytes memory)
+    {
         address tokenAddr = getTokenFromAdapter(_adapterAddr);
 
         // if amount type(uint).max, pull current _from  balance

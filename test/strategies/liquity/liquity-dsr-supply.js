@@ -1,3 +1,3 @@
-const { liquityDsrSupplyStrategyTest } = require('./liquity-tests');
+const { liquityDsrSupplyStrategyTest } = require("./liquity-tests");
 
 liquityDsrSupplyStrategyTest();

@@ -1,13 +1,13 @@
 /* eslint-disable import/no-dynamic-require */
-const { exec } = require('child_process');
-const { getFile } = require('./utils');
-const { DEPLOYMENTS_FOLDER_NAME } = require('./writer');
+const { exec } = require("child_process");
+const { getFile } = require("./utils");
+const { DEPLOYMENTS_FOLDER_NAME } = require("./writer");
 
 const networkName = process.argv[2];
 const contractName = process.argv[3];
 
 if (!contractName || !networkName) {
-    console.log('You need to provide network name and contract name respectively');
+    console.log("You need to provide network name and contract name respectively");
     process.exit(1);
 }
 
@@ -16,7 +16,7 @@ if (!contractName || !networkName) {
     // eslint-disable-next-line global-require
     const file = require(filename);
     const address = file.networks[networkName].address;
-    const args = file.networks[networkName].args.join(' ');
+    const args = file.networks[networkName].args.join(" ");
 
     const command = `npx hardhat verify --network ${networkName} ${address} ${args}`;
 

@@ -1,13 +1,13 @@
-const { cbChickenOutTest } = require('./chicken-bonds-tests');
-const { redeploy } = require('../../../utils/utils');
+const { cbChickenOutTest } = require("./chicken-bonds-tests");
+const { redeploy } = require("../../../utils/utils");
 
-describe('CB-Chicken-Out', () => {
+describe("CB-Chicken-Out", () => {
     before(async () => {
-        await redeploy('CBCreate');
-        await redeploy('CBChickenOut');
+        await redeploy("CBCreate");
+        await redeploy("CBChickenOut");
     });
 
-    it('... should test chicken out of a bond', async () => {
+    it("... should test chicken out of a bond", async () => {
         await cbChickenOutTest();
     });
 });

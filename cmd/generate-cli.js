@@ -3,27 +3,14 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-param-reassign */
 /* eslint-disable import/no-extraneous-dependencies */
-require('dotenv-safe').config();
+require("dotenv-safe").config();
 
-const { program } = require('commander');
-const { execSync } = require('child_process');
-const ts = require('typescript');
-const {
-    readFileSync,
-    writeFileSync,
-    existsSync,
-    statSync,
-    mkdirSync,
-    readdirSync,
-} = require('fs');
-const {
-    join,
-    basename,
-    relative,
-    sep,
-    dirname,
-} = require('path');
-const { getNameId } = require('../test/utils/utils');
+const { program } = require("commander");
+const { execSync } = require("child_process");
+const ts = require("typescript");
+const { readFileSync, writeFileSync, existsSync, statSync, mkdirSync, readdirSync } = require("fs");
+const { join, basename, relative, sep, dirname } = require("path");
+const { getNameId } = require("../test/utils/utils");
 
 /**
  __    __   _______  __      .______    _______ .______          _______.
@@ -59,7 +46,7 @@ const genSdkSignatures = (repoPath) => {
     }
 
     function getSdkClassName(sourceFile) {
-        let className = '';
+        let className = "";
         function visit(node) {
             if (ts.isClassDeclaration(node) && node.name) {
                 className = node.name.text;
@@ -71,27 +58,31 @@ const genSdkSignatures = (repoPath) => {
     }
 
     function processSdkFile(filePath, type) {
-        const sourceCode = readFileSync(filePath, 'utf-8');
+        const sourceCode = readFileSync(filePath, "utf-8");
         const sourceFile = ts.createSourceFile(
             basename(filePath),
             sourceCode,
             ts.ScriptTarget.Latest,
-            true,
+            true
         );
         const className = getSdkClassName(sourceFile);
         if (!className) return null;
         // For actions, check if it ends with 'Action'
         // For triggers, include all classes in the triggers directory
-        if ((type === 'actions' && !className.endsWith('Action'))
-            || (type === 'triggers' && className.endsWith('Action'))) {
+        if (
+            (type === "actions" && !className.endsWith("Action")) ||
+            (type === "triggers" && className.endsWith("Action"))
+        ) {
             return null;
         }
         const params = getSdkConstructorParams(sourceFile);
         const relativePath = relative(join(__dirname, `../src/${type}`), dirname(filePath));
-        const namespace = relativePath.split(sep).join('.');
-        let namespacePrefix = namespace ? `${namespace}.` : '';
-        namespacePrefix = namespacePrefix.split('.src.')[1];
-        return `const ${className.charAt(0).toLowerCase() + className.slice(1)} = new dfs.${namespacePrefix}${className}(\n    ${params.join(',\n    ')}\n);`;
+        const namespace = relativePath.split(sep).join(".");
+        let namespacePrefix = namespace ? `${namespace}.` : "";
+        namespacePrefix = namespacePrefix.split(".src.")[1];
+        return `const ${
+            className.charAt(0).toLowerCase() + className.slice(1)
+        } = new dfs.${namespacePrefix}${className}(\n    ${params.join(",\n    ")}\n);`;
     }
 
     function processSdkDirectory(dirPath, type, output = []) {
@@ -101,7 +92,7 @@ const genSdkSignatures = (repoPath) => {
             const stat = statSync(fullPath);
             if (stat.isDirectory()) {
                 processSdkDirectory(fullPath, type, output);
-            } else if (file.endsWith('.ts') && !file.endsWith('.d.ts')) {
+            } else if (file.endsWith(".ts") && !file.endsWith(".d.ts")) {
                 const signature = processSdkFile(fullPath, type);
                 if (signature) {
                     output.push(signature);
@@ -111,22 +102,22 @@ const genSdkSignatures = (repoPath) => {
         return output;
     }
 
-    signatures.push('// Actions');
-    signatures.push(...processSdkDirectory(actionsDir, 'actions'));
+    signatures.push("// Actions");
+    signatures.push(...processSdkDirectory(actionsDir, "actions"));
 
-    signatures.push('\n// Triggers');
-    signatures.push(...processSdkDirectory(triggersDir, 'triggers'));
+    signatures.push("\n// Triggers");
+    signatures.push(...processSdkDirectory(triggersDir, "triggers"));
 
-    const outputContent = signatures.join('\n\n');
+    const outputContent = signatures.join("\n\n");
 
-    const outputDir = join(__dirname, '../gen');
-    const outputFile = join(outputDir, 'sdkSignatures.txt');
+    const outputDir = join(__dirname, "../gen");
+    const outputFile = join(outputDir, "sdkSignatures.txt");
 
     if (!existsSync(outputDir)) {
         mkdirSync(outputDir, { recursive: true });
     }
 
-    writeFileSync(outputFile, outputContent, 'utf-8');
+    writeFileSync(outputFile, outputContent, "utf-8");
 
     // Log success message with full file path
     console.log(`SDK signatures successfully generated at: ${outputFile}`);
@@ -145,19 +136,24 @@ const parseStructAndEnumDefinitions = (content) => {
     let currentEnum = null;
     let commentBuffer = [];
 
-    content.split('\n').forEach((line) => {
+    content.split("\n").forEach((line) => {
         line = line.trim();
 
         // Collect comments
-        if (line.startsWith('///') || line.startsWith('//')) {
-            commentBuffer.push(line.replace(/^\/\/\/?/, '').trim());
+        if (line.startsWith("///") || line.startsWith("//")) {
+            commentBuffer.push(line.replace(/^\/\/\/?/, "").trim());
             return;
         }
 
         // Start of enum definition
-        if (line.startsWith('enum ')) {
+        if (line.startsWith("enum ")) {
             const enumName = line.match(/enum\s+(\w+)/)[1];
-            const values = line.split('{')[1].split('}')[0].trim().split(',').map((v) => v.trim());
+            const values = line
+                .split("{")[1]
+                .split("}")[0]
+                .trim()
+                .split(",")
+                .map((v) => v.trim());
             currentEnum = {
                 name: enumName,
                 values,
@@ -169,7 +165,7 @@ const parseStructAndEnumDefinitions = (content) => {
         }
 
         // Start of struct definition
-        if (line.startsWith('struct ')) {
+        if (line.startsWith("struct ")) {
             const structName = line.match(/struct\s+(\w+)/)[1];
             currentStruct = {
                 name: structName,
@@ -182,17 +178,20 @@ const parseStructAndEnumDefinitions = (content) => {
         }
 
         // End of struct
-        if (line === '}') {
+        if (line === "}") {
             currentStruct = null;
             commentBuffer = [];
             return;
         }
 
         // Field definition
-        if (currentStruct && (line.endsWith(';') || line.endsWith('// p'))) {
-            const isPiped = line.includes('// p');
+        if (currentStruct && (line.endsWith(";") || line.endsWith("// p"))) {
+            const isPiped = line.includes("// p");
             // Remove comments and semicolon
-            const cleanLine = line.replace(/\/\/.*$/, '').replace(';', '').trim();
+            const cleanLine = line
+                .replace(/\/\/.*$/, "")
+                .replace(";", "")
+                .trim();
             const [type, name] = cleanLine.split(/\s+/);
 
             currentStruct.fields.push({
@@ -217,22 +216,22 @@ const parseStructAndEnumDefinitions = (content) => {
 const parseProtocolTemplate = (content) => {
     const actions = [];
     let currentAction = null;
-    let protocolName = '';
+    let protocolName = "";
 
-    const lines = content.split('\n');
+    const lines = content.split("\n");
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
 
-        if (line.startsWith('PROTOCOL_NAME')) {
-            protocolName = line.split('=')[1].trim().replace(/[;"]/g, '');
-        } else if (line.startsWith('ACTION_NAME')) {
+        if (line.startsWith("PROTOCOL_NAME")) {
+            protocolName = line.split("=")[1].trim().replace(/[;"]/g, "");
+        } else if (line.startsWith("ACTION_NAME")) {
             if (currentAction) {
                 actions.push(currentAction);
             }
-            const actionName = line.split('=')[1].trim().replace(/[;"]/g, '');
+            const actionName = line.split("=")[1].trim().replace(/[;"]/g, "");
             currentAction = {
                 name: actionName,
-                content: '',
+                content: "",
                 lines: [],
             };
         } else if (currentAction) {
@@ -261,7 +260,7 @@ const parseProtocolTemplate = (content) => {
  * @returns The solidity code for the action
  */
 const generateSolidityActionContent = (templateContent, actionName) => {
-    function findPipedFields(structs, enums, structName, prefix = '') {
+    function findPipedFields(structs, enums, structName, prefix = "") {
         const pipedFields = [];
         const struct = structs[structName];
 
@@ -281,7 +280,7 @@ const generateSolidityActionContent = (templateContent, actionName) => {
                     structs,
                     enums,
                     field.type,
-                    prefix ? `${prefix}.${field.name}` : field.name,
+                    prefix ? `${prefix}.${field.name}` : field.name
                 );
                 pipedFields.push(...nestedPipedFields);
             }
@@ -294,18 +293,18 @@ const generateSolidityActionContent = (templateContent, actionName) => {
         if (isEnum) {
             return `        params.${path} = ${type}(_parseParamUint(uint8(params.${path}), _paramMapping[${index}], _subData, _returnValues));`;
         }
-        if (type === 'address') {
+        if (type === "address") {
             return `        params.${path} = _parseParamAddr(params.${path}, _paramMapping[${index}], _subData, _returnValues);`;
         }
-        if (type === 'bool') {
+        if (type === "bool") {
             return `        params.${path} = _parseParamUint(params.${path} ? 1 : 0, _paramMapping[${index}], _subData, _returnValues) == 1;`;
         }
-        if (type === 'int256') {
+        if (type === "int256") {
             return `        params.${path} = int256(_parseParamUint(uint256(params.${path}), _paramMapping[${index}], _subData, _returnValues));`;
         }
-        if (type.startsWith('uint')) {
-            const bits = type.replace('uint', '');
-            if (bits && bits !== '256') {
+        if (type.startsWith("uint")) {
+            const bits = type.replace("uint", "");
+            if (bits && bits !== "256") {
                 return `        params.${path} = ${type}(_parseParamUint(uint256(params.${path}), _paramMapping[${index}], _subData, _returnValues));`;
             }
             return `        params.${path} = _parseParamUint(params.${path}, _paramMapping[${index}], _subData, _returnValues);`;
@@ -316,37 +315,43 @@ const generateSolidityActionContent = (templateContent, actionName) => {
     const { structs, enums } = parseStructAndEnumDefinitions(templateContent);
 
     if (!structs.Params) {
-        throw new Error('Template must contain a Params struct');
+        throw new Error("Template must contain a Params struct");
     }
 
-    const pipedFields = findPipedFields(structs, enums, 'Params');
+    const pipedFields = findPipedFields(structs, enums, "Params");
 
     // Generate enum definitions
     const enumDefinitions = Object.entries(enums)
         .map(([name, enumDef]) => {
-            const enumComments = enumDef.comments.map((c) => `    /// ${c}`).join('\n');
-            return `${enumComments ? `\n${enumComments}\n` : ''}    enum ${name} { ${enumDef.values.join(', ')} }`;
+            const enumComments = enumDef.comments.map((c) => `    /// ${c}`).join("\n");
+            return `${
+                enumComments ? `\n${enumComments}\n` : ""
+            }    enum ${name} { ${enumDef.values.join(", ")} }`;
         })
-        .join('\n');
+        .join("\n");
 
     // Generate struct definitions
     const structDefinitions = Object.entries(structs)
         .map(([name, struct]) => {
-            const structComments = struct.comments.map((c) => `    /// ${c}`).join('\n');
-            const fields = struct.fields.map((field) => {
-                const comments = field.comments.map((c) => `        /// ${c}`).join('\n');
-                const fieldDef = `        ${field.type} ${field.name};`;
-                return comments ? `${comments}\n${fieldDef}` : fieldDef;
-            }).join('\n');
+            const structComments = struct.comments.map((c) => `    /// ${c}`).join("\n");
+            const fields = struct.fields
+                .map((field) => {
+                    const comments = field.comments.map((c) => `        /// ${c}`).join("\n");
+                    const fieldDef = `        ${field.type} ${field.name};`;
+                    return comments ? `${comments}\n${fieldDef}` : fieldDef;
+                })
+                .join("\n");
 
-            return `${structComments ? `\n${structComments}` : ''}
+            return `${structComments ? `\n${structComments}` : ""}
     struct ${name} {
 ${fields}
     }`;
         })
-        .join('\n');
+        .join("\n");
 
-    const parameterParsing = pipedFields.map((field, i) => generateParseCode(field.path, field.type, field.isEnum, i)).join('\n');
+    const parameterParsing = pipedFields
+        .map((field, i) => generateParseCode(field.path, field.type, field.isEnum, i))
+        .join("\n");
 
     const template = `// SPDX-License-Identifier: MIT
 
@@ -409,7 +414,7 @@ ${parameterParsing}
  * @param outputPath - The path to the output directory
  */
 const generateHelperFiles = (protocolName, outputPath) => {
-    const helperDir = join(outputPath, 'helpers');
+    const helperDir = join(outputPath, "helpers");
     const addressesContent = `// SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
@@ -444,7 +449,7 @@ const generateSingleSolidityActionFile = (templatePath, actionName, outputPath) 
         process.exit(1);
     }
 
-    const templateContent = readFileSync(templatePath, 'utf8');
+    const templateContent = readFileSync(templatePath, "utf8");
     const solidityCode = generateSolidityActionContent(templateContent, actionName);
 
     if (existsSync(outputPath) && statSync(outputPath).isDirectory()) {
@@ -471,7 +476,7 @@ const generateProtocolSolidityActionsFiles = (templatePath, outputPath) => {
         process.exit(1);
     }
 
-    const templateContent = readFileSync(templatePath, 'utf8');
+    const templateContent = readFileSync(templatePath, "utf8");
     const { protocolName, actions } = parseProtocolTemplate(templateContent);
 
     const protocolDir = join(outputPath, protocolName.toLowerCase());
@@ -482,24 +487,26 @@ const generateProtocolSolidityActionsFiles = (templatePath, outputPath) => {
     generateHelperFiles(protocolName, protocolDir);
 
     actions.forEach((action) => {
-        const actionContent = action.lines.join('\n');
+        const actionContent = action.lines.join("\n");
         const solidityCode = generateSolidityActionContent(actionContent, action.name);
 
         // Add TokenUtils import and usage, plus Helper import
-        const modifiedCode = solidityCode.replace(
-            'import { ActionBase } from "./ActionBase.sol";\n',
-            `import { ActionBase } from "./ActionBase.sol";\nimport { TokenUtils } from "../../utils/TokenUtils.sol";\nimport { ${protocolName}Helper } from "./helpers/${protocolName}Helper.sol";\n`,
-        ).replace(
-            `contract ${action.name} is ActionBase {`,
-            `contract ${action.name} is ActionBase, ${protocolName}Helper {\n    using TokenUtils for address;`,
-        );
+        const modifiedCode = solidityCode
+            .replace(
+                'import { ActionBase } from "./ActionBase.sol";\n',
+                `import { ActionBase } from "./ActionBase.sol";\nimport { TokenUtils } from "../../utils/TokenUtils.sol";\nimport { ${protocolName}Helper } from "./helpers/${protocolName}Helper.sol";\n`
+            )
+            .replace(
+                `contract ${action.name} is ActionBase {`,
+                `contract ${action.name} is ActionBase, ${protocolName}Helper {\n    using TokenUtils for address;`
+            );
 
         const outputFile = join(protocolDir, `${action.name}.sol`);
         writeFileSync(outputFile, modifiedCode);
         console.log(`Generated Solidity action at ${outputFile}`);
     });
 
-    console.log(`Generated helper files in ${join(protocolDir, 'helpers')}`);
+    console.log(`Generated helper files in ${join(protocolDir, "helpers")}`);
 };
 
 /**
@@ -519,55 +526,57 @@ const generateProtocolSolidityActionsFiles = (templatePath, outputPath) => {
  */
 const generateSdkActionContent = (templateContent, actionName) => {
     const SUPPORTED_SDK_TYPES = new Set([
-        'EthAddress',
-        'bytes32',
-        'bytes',
-        'uint256',
-        'uint160',
-        'uint128',
-        'uint80',
-        'uint64',
-        'uint32',
-        'uint24',
-        'uint16',
-        'uint8',
-        'int256',
-        'int24',
+        "EthAddress",
+        "bytes32",
+        "bytes",
+        "uint256",
+        "uint160",
+        "uint128",
+        "uint80",
+        "uint64",
+        "uint32",
+        "uint24",
+        "uint16",
+        "uint8",
+        "int256",
+        "int24",
     ]);
 
     function generateNestedTypeArray(field, structs) {
         const struct = structs[field.type];
         if (!struct) return `'${field.type}'`;
 
-        return `[${struct.fields.map((f) => {
-            if (structs[f.type]) {
-                return generateNestedTypeArray(f, structs);
-            }
-            return `'${f.type}'`;
-        }).join(', ')}]`;
+        return `[${struct.fields
+            .map((f) => {
+                if (structs[f.type]) {
+                    return generateNestedTypeArray(f, structs);
+                }
+                return `'${f.type}'`;
+            })
+            .join(", ")}]`;
     }
 
     function solToTsType(solType, enums, structs) {
-        if (structs && structs[solType]) return 'Array<any>';
-        if (enums && enums[solType]) return 'uint8';
-        if (solType === 'address') return 'EthAddress';
-        if (solType === 'bool') return 'boolean';
-        if (solType === 'bytes32') return 'bytes32';
-        if (solType === 'bytes') return 'bytes';
+        if (structs && structs[solType]) return "Array<any>";
+        if (enums && enums[solType]) return "uint8";
+        if (solType === "address") return "EthAddress";
+        if (solType === "bool") return "boolean";
+        if (solType === "bytes32") return "bytes32";
+        if (solType === "bytes") return "bytes";
         // Handle array types
-        if (solType.endsWith('[]')) {
+        if (solType.endsWith("[]")) {
             const baseType = solType.slice(0, -2);
             return `Array<${solToTsType(baseType, enums, structs)}>`;
         }
-        if (solType.startsWith('uint')) {
-            const bits = solType.replace('uint', '');
-            const type = `uint${bits || '256'}`;
-            return SUPPORTED_SDK_TYPES.has(type) ? type : 'string';
+        if (solType.startsWith("uint")) {
+            const bits = solType.replace("uint", "");
+            const type = `uint${bits || "256"}`;
+            return SUPPORTED_SDK_TYPES.has(type) ? type : "string";
         }
-        if (solType.startsWith('int')) {
-            const bits = solType.replace('int', '');
-            const type = `int${bits || '256'}`;
-            return SUPPORTED_SDK_TYPES.has(type) ? type : 'string';
+        if (solType.startsWith("int")) {
+            const bits = solType.replace("int", "");
+            const type = `int${bits || "256"}`;
+            return SUPPORTED_SDK_TYPES.has(type) ? type : "string";
         }
         return solType;
     }
@@ -586,7 +595,7 @@ const generateSdkActionContent = (templateContent, actionName) => {
     function generateConstructorParams(struct, enums, structs) {
         return struct.fields
             .map((field) => `    ${field.name}: ${solToTsType(field.type, enums, structs)}`)
-            .join(',\n');
+            .join(",\n");
     }
 
     function parseStructComments(comments) {
@@ -599,7 +608,7 @@ const generateSdkActionContent = (templateContent, actionName) => {
             if (paramMatch) {
                 // If we were building a previous field's comment, save it
                 if (currentField) {
-                    fieldComments[currentField] = currentComment.join(' ');
+                    fieldComments[currentField] = currentComment.join(" ");
                     currentComment = [];
                 }
                 currentField = paramMatch[1];
@@ -612,7 +621,7 @@ const generateSdkActionContent = (templateContent, actionName) => {
 
         // Save the last field's comment
         if (currentField) {
-            fieldComments[currentField] = currentComment.join(' ');
+            fieldComments[currentField] = currentComment.join(" ");
         }
 
         return fieldComments;
@@ -622,10 +631,10 @@ const generateSdkActionContent = (templateContent, actionName) => {
         const fieldComments = parseStructComments(struct.comments);
         return struct.fields
             .map((field) => {
-                const comment = fieldComments[field.name] || 'No description provided';
+                const comment = fieldComments[field.name] || "No description provided";
                 return `   * @param ${field.name} ${comment}`;
             })
-            .join('\n');
+            .join("\n");
     }
 
     function generateTypeArray(struct, enums, structs) {
@@ -633,22 +642,20 @@ const generateSdkActionContent = (templateContent, actionName) => {
             if (structs[field.type]) {
                 return generateNestedTypeArray(field, structs);
             }
-            return `'${enums && enums[field.type] ? 'uint8' : field.type}'`;
+            return `'${enums && enums[field.type] ? "uint8" : field.type}'`;
         });
 
-        if (types.some((t) => t.startsWith('['))) {
-            return `[\n        ${types.join(',\n        ')}\n      ]`;
+        if (types.some((t) => t.startsWith("["))) {
+            return `[\n        ${types.join(",\n        ")}\n      ]`;
         }
-        return `[${types.join(', ')}]`;
+        return `[${types.join(", ")}]`;
     }
 
     function generateArgsArray(struct) {
-        return struct.fields
-            .map((field) => field.name)
-            .join(', ');
+        return struct.fields.map((field) => field.name).join(", ");
     }
 
-    function findPipedFieldsInStruct(field, structs, prefix = '', index = '') {
+    function findPipedFieldsInStruct(field, structs, prefix = "", index = "") {
         const struct = structs[field.type];
         if (!struct) {
             return field.isPiped ? [`this.args${index}`] : [];
@@ -669,15 +676,13 @@ const generateSdkActionContent = (templateContent, actionName) => {
             return field.isPiped ? [`this.args[${i}]`] : [];
         });
 
-        return mappableArgs
-            .map((arg) => `      ${arg},`)
-            .join('\n');
+        return mappableArgs.map((arg) => `      ${arg},`).join("\n");
     }
 
     const { structs, enums } = parseStructAndEnumDefinitions(templateContent);
 
     if (!structs.Params) {
-        throw new Error('Template must contain a Params struct');
+        throw new Error("Template must contain a Params struct");
     }
 
     const requiredTypes = getRequiredTypes(structs.Params, enums, structs);
@@ -690,14 +695,16 @@ const generateSdkActionContent = (templateContent, actionName) => {
         return field.isPiped;
     });
 
-    const mappableArgsSection = hasPipedFields ? `
+    const mappableArgsSection = hasPipedFields
+        ? `
     this.mappableArgs = [
 ${generateMappableArgs(structs.Params, structs)}
-    ];` : '';
+    ];`
+        : "";
 
     const template = `import { Action } from '../../Action';
 import { getAddr } from '../../addresses';
-import { ${requiredTypes.join(', ')} } from '../../types';
+import { ${requiredTypes.join(", ")} } from '../../types';
 
 /**
  * ${actionName}Action -
@@ -736,7 +743,7 @@ const generateSingleSdkActionFile = (templatePath, actionName, outputPath) => {
         process.exit(1);
     }
 
-    const templateContent = readFileSync(templatePath, 'utf8');
+    const templateContent = readFileSync(templatePath, "utf8");
     const tsCode = generateSdkActionContent(templateContent, actionName);
 
     if (existsSync(outputPath) && statSync(outputPath).isDirectory()) {
@@ -763,7 +770,7 @@ const generateProtocolSdkActionsFiles = (templatePath, outputPath) => {
         process.exit(1);
     }
 
-    const templateContent = readFileSync(templatePath, 'utf8');
+    const templateContent = readFileSync(templatePath, "utf8");
     const { protocolName, actions } = parseProtocolTemplate(templateContent);
 
     // Create protocol directory
@@ -775,7 +782,7 @@ const generateProtocolSdkActionsFiles = (templatePath, outputPath) => {
     // Generate each action
     const actionNames = [];
     actions.forEach((action) => {
-        const actionContent = action.lines.join('\n');
+        const actionContent = action.lines.join("\n");
         const tsCode = generateSdkActionContent(actionContent, action.name);
         const outputFile = join(protocolDir, `${action.name}Action.ts`);
         writeFileSync(outputFile, tsCode);
@@ -784,10 +791,8 @@ const generateProtocolSdkActionsFiles = (templatePath, outputPath) => {
     });
 
     // Generate index.ts
-    const indexContent = actionNames
-        .map((name) => `export * from './${name}Action';`)
-        .join('\n');
-    writeFileSync(join(protocolDir, 'index.ts'), indexContent);
+    const indexContent = actionNames.map((name) => `export * from './${name}Action';`).join("\n");
+    writeFileSync(join(protocolDir, "index.ts"), indexContent);
     console.log(`Generated index.ts in ${protocolDir}`);
 };
 
@@ -810,12 +815,15 @@ const generateProtocolSdkActionsFiles = (templatePath, outputPath) => {
  */
 const findSdkActionSignatureFromTemplateFile = (actionName) => {
     try {
-        const signaturesPath = join(process.cwd(), 'templates/md/action/template.txt');
-        const signatures = readFileSync(signaturesPath, 'utf8');
+        const signaturesPath = join(process.cwd(), "templates/md/action/template.txt");
+        const signatures = readFileSync(signaturesPath, "utf8");
         // Convert action name to camelCase for matching
         const camelCaseName = actionName[0].toLowerCase() + actionName.slice(1);
         // Look for the signature block
-        const regex = new RegExp(`const ${camelCaseName}Action = new dfs\\.actions\\.[\\w.]+\\([\\s\\S]+?\\);`, 'g');
+        const regex = new RegExp(
+            `const ${camelCaseName}Action = new dfs\\.actions\\.[\\w.]+\\([\\s\\S]+?\\);`,
+            "g"
+        );
         const match = signatures.match(regex);
         if (match && match[0]) {
             return match[0];
@@ -834,24 +842,24 @@ const findSdkActionSignatureFromTemplateFile = (actionName) => {
  */
 const extractNatSpec = (content) => {
     const natspec = {
-        title: '',
+        title: "",
         notice: [], // Array to store multiple @notice comments
         dev: [], // Array to store multiple @dev comments
         other: {}, // Store other NatSpec tags
     };
 
-    const lines = content.split('\n');
+    const lines = content.split("\n");
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
-        if (line.startsWith('///')) {
+        if (line.startsWith("///")) {
             const match = line.match(/\/\/\/\s*@(\w+)\s+(.*)/);
             if (match) {
                 const [, tag, value] = match;
-                if (tag === 'title') {
+                if (tag === "title") {
                     natspec.title = value.trim();
-                } else if (tag === 'dev') {
+                } else if (tag === "dev") {
                     natspec.dev.push(value.trim());
-                } else if (tag === 'notice') {
+                } else if (tag === "notice") {
                     natspec.notice.push(value.trim());
                 } else {
                     natspec.other[tag] = value.trim();
@@ -870,8 +878,10 @@ const extractNatSpec = (content) => {
 const findContractFile = (contractName) => {
     try {
         // Use find command to locate the contract file
-        const result = execSync(`find contracts -type f -name "${contractName}.sol"`, { encoding: 'utf8' });
-        const files = result.trim().split('\n');
+        const result = execSync(`find contracts -type f -name "${contractName}.sol"`, {
+            encoding: "utf8",
+        });
+        const files = result.trim().split("\n");
         if (!files[0]) {
             throw new Error(`Contract ${contractName} not found`);
         }
@@ -930,23 +940,23 @@ No contract found
  * @param contractName - The name of the contract
  * @param outputPath - The path to the output directory
  */
-const generateActionMdFile = (contractName, outputPath = 'gen/md/actions') => {
+const generateActionMdFile = (contractName, outputPath = "gen/md/actions") => {
     function extractParamsWithComments(content) {
         const structMatch = content.match(/struct\s+Params\s*{([^}]+)}/s);
-        if (!structMatch) return '';
+        if (!structMatch) return "";
 
         // Find the position of struct Params
-        const structIndex = content.indexOf('struct Params');
-        if (structIndex === -1) return '';
+        const structIndex = content.indexOf("struct Params");
+        if (structIndex === -1) return "";
 
         // Look backwards from struct to find all @param comments
         const contentBeforeStruct = content.substring(0, structIndex);
-        const lines = contentBeforeStruct.split('\n').reverse();
+        const lines = contentBeforeStruct.split("\n").reverse();
 
         // Find all @param comments until we hit a non-comment line
         const paramComments = lines.reduce((comments, line) => {
             const trimmedLine = line.trim();
-            if (trimmedLine.startsWith('/// @param')) {
+            if (trimmedLine.startsWith("/// @param")) {
                 comments.unshift(trimmedLine);
             }
             return comments;
@@ -954,19 +964,22 @@ const generateActionMdFile = (contractName, outputPath = 'gen/md/actions') => {
 
         // Get the struct content and format it
         const structContent = structMatch[1].trim();
-        const params = structContent.split('\n')
+        const params = structContent
+            .split("\n")
             .map((line) => line.trim())
-            .filter((line) => line.endsWith(';'));
+            .filter((line) => line.endsWith(";"));
 
         // Format comments above struct and params inside
-        return `    ${paramComments.join('\n    ')}\n    struct Params {\n        ${params.join('\n        ')}\n    }`;
+        return `    ${paramComments.join("\n    ")}\n    struct Params {\n        ${params.join(
+            "\n        "
+        )}\n    }`;
     }
 
     function extractReturnValue(content) {
         const returnMatch = content.match(/return\s+[^;]+;/g);
-        if (!returnMatch) return 'unknown';
-        if (returnMatch[0].includes('return uint8(ActionType.')) {
-            return '';
+        if (!returnMatch) return "unknown";
+        if (returnMatch[0].includes("return uint8(ActionType.")) {
+            return "";
         }
         return returnMatch[0];
     }
@@ -982,9 +995,13 @@ const generateActionMdFile = (contractName, outputPath = 'gen/md/actions') => {
             lines.push(`logger.logActionDirectEvent("${logDirectMatch[1]}", logData);`);
         }
         if (lines.length) {
-            lines.push(`bytes memory logData = abi.encode(${contractName.endsWith('Check') ? 'currRatio' : 'params'});`);
+            lines.push(
+                `bytes memory logData = abi.encode(${
+                    contractName.endsWith("Check") ? "currRatio" : "params"
+                });`
+            );
             return `\`\`\`solidity
-${lines.join('\n')}
+${lines.join("\n")}
 \`\`\``;
         }
         return `\`\`\`solidity
@@ -997,11 +1014,11 @@ ${lines.join('\n')}
         process.exit(1);
     }
 
-    const content = readFileSync(contractPath, 'utf8');
+    const content = readFileSync(contractPath, "utf8");
     const natspec = extractNatSpec(content);
     const actionId = getNameId(contractName);
     const actionTypeMatch = content.match(/actionType\(\).*?return\s+uint8\(ActionType\.(\w+)\)/s);
-    const actionType = actionTypeMatch ? actionTypeMatch[1] : 'UNKNOWN';
+    const actionType = actionTypeMatch ? actionTypeMatch[1] : "UNKNOWN";
     const paramsStruct = extractParamsWithComments(content);
     const returnValue = extractReturnValue(content);
     const events = extractEvents(content, contractName);
@@ -1009,7 +1026,9 @@ ${lines.join('\n')}
     const sdkSignature = findSdkActionSignatureFromTemplateFile(contractName);
     let sdkSection = sdkSignature
         ? `\n${sdkSignature}`
-        : `\nconst ${contractName[0].toLowerCase()}${contractName.slice(1)}Action = new dfs.actions.${contractName}Action(\n    ...args\n);\n`;
+        : `\nconst ${contractName[0].toLowerCase()}${contractName.slice(
+              1
+          )}Action = new dfs.actions.${contractName}Action(\n    ...args\n);\n`;
 
     sdkSection = `\`\`\`ts${sdkSection}\n\`\`\``;
 
@@ -1020,9 +1039,9 @@ ${lines.join('\n')}
     const markdown = `# ${contractName}
 
 ## Description
-${natspec.title || 'No description available'}
+${natspec.title || "No description available"}
 
-${natspec.notice.length > 0 ? `> **Notes**\n>\n> ${natspec.notice.join('\n> ')}\n` : ''}
+${natspec.notice.length > 0 ? `> **Notes**\n>\n> ${natspec.notice.join("\n> ")}\n` : ""}
 
 ## Action ID
 \`${actionId}\`
@@ -1056,11 +1075,11 @@ ${events}
  * Generate multiple action markdown files.
  * @param outputPath - The path to the output directory
  */
-const generateMultipleActionsMdFiles = (outputPath = 'gen/md/actions') => {
+const generateMultipleActionsMdFiles = (outputPath = "gen/md/actions") => {
     function getAllActionNamesFromTemplate() {
         try {
-            const signaturesPath = join(process.cwd(), 'templates/md/action/template.txt');
-            const signatures = readFileSync(signaturesPath, 'utf8');
+            const signaturesPath = join(process.cwd(), "templates/md/action/template.txt");
+            const signatures = readFileSync(signaturesPath, "utf8");
             // Match all action declarations
             const actionRegex = /const\s+(\w+)Action\s*=/g;
             const matches = [...signatures.matchAll(actionRegex)];
@@ -1068,10 +1087,10 @@ const generateMultipleActionsMdFiles = (outputPath = 'gen/md/actions') => {
             return matches.map((match) => {
                 const actionName = match[1];
                 // Convert first character to uppercase
-                return actionName[0].toUpperCase() + actionName.slice(1).replace('Action', '');
+                return actionName[0].toUpperCase() + actionName.slice(1).replace("Action", "");
             });
         } catch (error) {
-            console.error('Could not read template file');
+            console.error("Could not read template file");
             return [];
         }
     }
@@ -1103,7 +1122,7 @@ const generateMultipleActionsMdFiles = (outputPath = 'gen/md/actions') => {
         }
     });
 
-    console.log('\nDocumentation generation complete:');
+    console.log("\nDocumentation generation complete:");
     console.log(`- Generated full documentation for ${generated} actions`);
     console.log(`- Generated empty documentation for ${empty} actions`);
     console.log(`- Total actions processed: ${actionNames.length}`);
@@ -1120,19 +1139,22 @@ const generateMultipleActionsMdFiles = (outputPath = 'gen/md/actions') => {
  */
 const findSdkTriggerSignaturesFromTemplateFile = (triggerName) => {
     try {
-        const signaturesPath = join(process.cwd(), 'templates/md/trigger/template.txt');
-        const signatures = readFileSync(signaturesPath, 'utf8');
+        const signaturesPath = join(process.cwd(), "templates/md/trigger/template.txt");
+        const signatures = readFileSync(signaturesPath, "utf8");
         // Convert trigger name to camelCase for matching
         const camelCaseName = triggerName[0].toLowerCase() + triggerName.slice(1);
         // Look for the signature block
-        const regex = new RegExp(`const ${camelCaseName} = new dfs\\.triggers\\.[\\w.]+\\([\\s\\S]+?\\);`, 'g');
+        const regex = new RegExp(
+            `const ${camelCaseName} = new dfs\\.triggers\\.[\\w.]+\\([\\s\\S]+?\\);`,
+            "g"
+        );
         const match = signatures.match(regex);
         if (match && match[0]) {
             return match[0];
         }
         return null;
     } catch (error) {
-        console.error('Could not find trigger signature from template');
+        console.error("Could not find trigger signature from template");
         return null;
     }
 };
@@ -1153,7 +1175,7 @@ No contract found for this trigger.
 
 ## SDK Action
 \`\`\`ts
-${findSdkTriggerSignaturesFromTemplateFile(triggerName) || 'No signature found'}
+${findSdkTriggerSignaturesFromTemplateFile(triggerName) || "No signature found"}
 \`\`\`
 
 ## Subscription Parameters
@@ -1178,52 +1200,53 @@ No contract found
  * @param triggerName - The name of the trigger
  * @param outputPath - The path to the output directory
  */
-const generateTriggerMdFile = (triggerName, outputPath = 'gen/md/triggers') => {
+const generateTriggerMdFile = (triggerName, outputPath = "gen/md/triggers") => {
     const contractPath = findContractFile(triggerName);
     if (!contractPath) {
         console.error(`Contract ${triggerName} not found`);
         process.exit(1);
     }
 
-    const content = readFileSync(contractPath, 'utf8');
+    const content = readFileSync(contractPath, "utf8");
     const natspec = extractNatSpec(content);
     const triggerId = getNameId(triggerName);
     const triggerSignature = findSdkTriggerSignaturesFromTemplateFile(triggerName);
     const isChangeableMatch = content.match(/isChangeable\(\).*?return\s+(true|false)/s);
-    const isChangeable = isChangeableMatch ? isChangeableMatch[1] : 'false';
+    const isChangeable = isChangeableMatch ? isChangeableMatch[1] : "false";
 
     const findStructWithComments = (sourceContent, structName) => {
         // Look for all comments and the struct definition
-        const pattern = new RegExp(`(?:(?:///[^\\n]*\\n)+\\s*)*struct\\s+${structName}\\s*{[^}]+}`, 'gs');
+        const pattern = new RegExp(
+            `(?:(?:///[^\\n]*\\n)+\\s*)*struct\\s+${structName}\\s*{[^}]+}`,
+            "gs"
+        );
         const match = sourceContent.match(pattern);
         if (!match) return null;
 
         const fullMatch = match[0];
-        const structStart = fullMatch.indexOf('struct');
+        const structStart = fullMatch.indexOf("struct");
         const commentsPart = fullMatch.substring(0, structStart);
 
         const comments = commentsPart
-            .split('\n')
-            .filter((line) => line.trim().startsWith('///'))
+            .split("\n")
+            .filter((line) => line.trim().startsWith("///"))
             .map((line) => line.trim());
 
         const structPart = fullMatch.substring(structStart);
-        const structLines = structPart.split('\n')
-            .map((line) => {
-                line = line.trim();
-                if (line.match(/^\w+\s+\w+;/)) {
-                    return `    ${line}`;
-                }
-                return line;
-            });
+        const structLines = structPart.split("\n").map((line) => {
+            line = line.trim();
+            if (line.match(/^\w+\s+\w+;/)) {
+                return `    ${line}`;
+            }
+            return line;
+        });
 
-        return [...comments, ...structLines]
-            .filter((line) => line.length > 0)
-            .join('\n');
+        return [...comments, ...structLines].filter((line) => line.length > 0).join("\n");
     };
 
-    const subParamsContent = findStructWithComments(content, 'SubParams') || 'No SubParams struct found';
-    const callParamsContent = findStructWithComments(content, 'CallParams') || 'None';
+    const subParamsContent =
+        findStructWithComments(content, "SubParams") || "No SubParams struct found";
+    const callParamsContent = findStructWithComments(content, "CallParams") || "None";
 
     if (!existsSync(outputPath)) {
         mkdirSync(outputPath, { recursive: true });
@@ -1232,16 +1255,21 @@ const generateTriggerMdFile = (triggerName, outputPath = 'gen/md/triggers') => {
     const markdown = `# ${triggerName}
 
 ## Description
-${natspec.title || 'No description available'}
+${natspec.title || "No description available"}
 
-${natspec.notice.length > 0 ? `> **Notes**\n>\n> ${natspec.notice.join('\n> ')}\n` : ''}
+${natspec.notice.length > 0 ? `> **Notes**\n>\n> ${natspec.notice.join("\n> ")}\n` : ""}
 
 ## Trigger ID
-\`${triggerId || 'Not Available'}\`
+\`${triggerId || "Not Available"}\`
 
 ## SDK Action
 \`\`\`ts
-${triggerSignature || `const ${triggerName[0].toLowerCase()}${triggerName.slice(1)} = new dfs.triggers.${triggerName}(\n    ...args\n);`}
+${
+    triggerSignature ||
+    `const ${triggerName[0].toLowerCase()}${triggerName.slice(
+        1
+    )} = new dfs.triggers.${triggerName}(\n    ...args\n);`
+}
 \`\`\`
 
 ## Subscription Parameters
@@ -1267,11 +1295,11 @@ ${callParamsContent}
  * Generate all trigger markdown files.
  * @param outputPath - The path to the output directory
  */
-const generateMultipleTriggersMdFiles = (outputPath = 'gen/md/triggers') => {
+const generateMultipleTriggersMdFiles = (outputPath = "gen/md/triggers") => {
     function getAllTriggerNamesFromTemplate() {
         try {
-            const signaturesPath = join(process.cwd(), 'templates/md/trigger/template.txt');
-            const signatures = readFileSync(signaturesPath, 'utf8');
+            const signaturesPath = join(process.cwd(), "templates/md/trigger/template.txt");
+            const signatures = readFileSync(signaturesPath, "utf8");
             // Match all trigger declarations
             const triggerRegex = /const\s+(\w+)\s*=/g;
             const matches = [...signatures.matchAll(triggerRegex)];
@@ -1282,7 +1310,7 @@ const generateMultipleTriggersMdFiles = (outputPath = 'gen/md/triggers') => {
                 return triggerName[0].toUpperCase() + triggerName.slice(1);
             });
         } catch (error) {
-            console.error('Could not read template.txt');
+            console.error("Could not read template.txt");
             return [];
         }
     }
@@ -1314,7 +1342,7 @@ const generateMultipleTriggersMdFiles = (outputPath = 'gen/md/triggers') => {
         }
     });
 
-    console.log('\nDocumentation generation complete:');
+    console.log("\nDocumentation generation complete:");
     console.log(`- Generated full documentation for ${generated} triggers`);
     console.log(`- Generated empty documentation for ${empty} triggers`);
     console.log(`- Total triggers processed: ${triggerNames.length}`);
@@ -1325,96 +1353,141 @@ const generateMultipleTriggersMdFiles = (outputPath = 'gen/md/triggers') => {
 ////////////////////////////////////////////////////////////// */
 (async () => {
     program
-        .command('genActionSol <contractName>')
-        .description('Generate a Solidity action file from a template')
-        .option('-t, --template <path>', 'Template file path (defaults to templates/solSdk/action/template.sol)')
-        .option('-o, --output <path>', 'Output path for the generated Solidity file (defaults to gen/sol/<actionName>.sol)')
+        .command("genActionSol <contractName>")
+        .description("Generate a Solidity action file from a template")
+        .option(
+            "-t, --template <path>",
+            "Template file path (defaults to templates/solSdk/action/template.sol)"
+        )
+        .option(
+            "-o, --output <path>",
+            "Output path for the generated Solidity file (defaults to gen/sol/<actionName>.sol)"
+        )
         .action((contractName, options) => {
-            const templatePath = options.template || join(process.cwd(), 'templates/solSdk/action/template.sol');
+            const templatePath =
+                options.template || join(process.cwd(), "templates/solSdk/action/template.sol");
             const outputPath = options.output || join(process.cwd(), `gen/sol/${contractName}.sol`);
             generateSingleSolidityActionFile(templatePath, contractName, outputPath);
             process.exit(0);
         });
 
     program
-        .command('genProtocolSol')
-        .description('Generate multiple Solidity action files from a protocol template')
-        .option('-t, --template <path>', 'Template file path (defaults to templates/solSdk/protocol/template.sol)')
-        .option('-o, --output <path>', 'Output directory for the generated files (defaults to gen/sol/)')
+        .command("genProtocolSol")
+        .description("Generate multiple Solidity action files from a protocol template")
+        .option(
+            "-t, --template <path>",
+            "Template file path (defaults to templates/solSdk/protocol/template.sol)"
+        )
+        .option(
+            "-o, --output <path>",
+            "Output directory for the generated files (defaults to gen/sol/)"
+        )
         .action((options) => {
-            const templatePath = options.template || join(process.cwd(), 'templates/solSdk/protocol/template.sol');
-            const outputPath = options.output || join(process.cwd(), 'gen/sol/');
+            const templatePath =
+                options.template || join(process.cwd(), "templates/solSdk/protocol/template.sol");
+            const outputPath = options.output || join(process.cwd(), "gen/sol/");
             generateProtocolSolidityActionsFiles(templatePath, outputPath);
             process.exit(0);
         });
 
     program
-        .command('genActionSdk <contractName>')
-        .description('Generate a TypeScript SDK action file from a template')
-        .option('-t, --template <path>', 'Template file path (defaults to templates/solSdk/action/template.sol)')
-        .option('-o, --output <path>', 'Output path for the generated TypeScript file (defaults to gen/sdk/<actionName>Action.ts)')
+        .command("genActionSdk <contractName>")
+        .description("Generate a TypeScript SDK action file from a template")
+        .option(
+            "-t, --template <path>",
+            "Template file path (defaults to templates/solSdk/action/template.sol)"
+        )
+        .option(
+            "-o, --output <path>",
+            "Output path for the generated TypeScript file (defaults to gen/sdk/<actionName>Action.ts)"
+        )
         .action((contractName, options) => {
-            const templatePath = options.template || join(process.cwd(), 'templates/solSdk/action/template.sol');
-            const outputPath = options.output || join(process.cwd(), `gen/sdk/${contractName}Action.ts`);
+            const templatePath =
+                options.template || join(process.cwd(), "templates/solSdk/action/template.sol");
+            const outputPath =
+                options.output || join(process.cwd(), `gen/sdk/${contractName}Action.ts`);
             generateSingleSdkActionFile(templatePath, contractName, outputPath);
             process.exit(0);
         });
 
     program
-        .command('genProtocolSdk')
-        .description('Generate TypeScript SDK action files from a protocol template')
-        .option('-t, --template <path>', 'Template file path (defaults to templates/solSdk/protocol/template.sol)')
-        .option('-o, --output <path>', 'Output directory for the generated files (defaults to gen/sdk)')
+        .command("genProtocolSdk")
+        .description("Generate TypeScript SDK action files from a protocol template")
+        .option(
+            "-t, --template <path>",
+            "Template file path (defaults to templates/solSdk/protocol/template.sol)"
+        )
+        .option(
+            "-o, --output <path>",
+            "Output directory for the generated files (defaults to gen/sdk)"
+        )
         .action((options) => {
-            const templatePath = options.template || join(process.cwd(), 'templates/solSdk/protocol/template.sol');
-            const outputPath = options.output || join(process.cwd(), 'gen/sdk');
+            const templatePath =
+                options.template || join(process.cwd(), "templates/solSdk/protocol/template.sol");
+            const outputPath = options.output || join(process.cwd(), "gen/sdk");
             generateProtocolSdkActionsFiles(templatePath, outputPath);
             process.exit(0);
         });
 
     program
-        .command('genActionDoc <contractName>')
-        .description('Generate documentation for a contract action')
-        .option('-o, --output <path>', 'Output directory for documentation (defaults to gen/md/actions)')
+        .command("genActionDoc <contractName>")
+        .description("Generate documentation for a contract action")
+        .option(
+            "-o, --output <path>",
+            "Output directory for documentation (defaults to gen/md/actions)"
+        )
         .action((contractName, options) => {
-            const outputPath = options.output || join(process.cwd(), 'gen/md/actions');
+            const outputPath = options.output || join(process.cwd(), "gen/md/actions");
             generateActionMdFile(contractName, outputPath);
             process.exit(0);
         });
 
     program
-        .command('genActionsDocs')
-        .description('Generate documentation for all actions sdk signatures found in templates/md/action/template.txt')
-        .option('-o, --output <path>', 'Output directory for documentation (defaults to gen/md/actions)')
+        .command("genActionsDocs")
+        .description(
+            "Generate documentation for all actions sdk signatures found in templates/md/action/template.txt"
+        )
+        .option(
+            "-o, --output <path>",
+            "Output directory for documentation (defaults to gen/md/actions)"
+        )
         .action((options) => {
-            const outputPath = options.output || join(process.cwd(), 'gen/md/actions');
+            const outputPath = options.output || join(process.cwd(), "gen/md/actions");
             generateMultipleActionsMdFiles(outputPath);
             process.exit(0);
         });
 
     program
-        .command('genTriggerDoc <triggerName>')
-        .description('Generate documentation from a trigger contract source file')
-        .option('-o, --output <path>', 'Output directory for documentation (defaults to gen/md/triggers)')
+        .command("genTriggerDoc <triggerName>")
+        .description("Generate documentation from a trigger contract source file")
+        .option(
+            "-o, --output <path>",
+            "Output directory for documentation (defaults to gen/md/triggers)"
+        )
         .action((triggerName, options) => {
-            const outputPath = options.output || join(process.cwd(), 'gen/md/triggers');
+            const outputPath = options.output || join(process.cwd(), "gen/md/triggers");
             generateTriggerMdFile(triggerName, outputPath);
             process.exit(0);
         });
 
     program
-        .command('genTriggersDocs')
-        .description('Generate documentation for all triggers found in templates/md/action/template.txt')
-        .option('-o, --output <path>', 'Output directory for documentation (defaults to gen/md/triggers)')
+        .command("genTriggersDocs")
+        .description(
+            "Generate documentation for all triggers found in templates/md/action/template.txt"
+        )
+        .option(
+            "-o, --output <path>",
+            "Output directory for documentation (defaults to gen/md/triggers)"
+        )
         .action((options) => {
-            const outputPath = options.output || join(process.cwd(), 'gen/md/triggers');
+            const outputPath = options.output || join(process.cwd(), "gen/md/triggers");
             generateMultipleTriggersMdFiles(outputPath);
             process.exit(0);
         });
 
     program
-        .command('genSdkSignatures <repoPath>')
-        .description('Fetches all sdk signatures for actions and triggers from the sdk repo')
+        .command("genSdkSignatures <repoPath>")
+        .description("Fetches all sdk signatures for actions and triggers from the sdk repo")
         .action(async (repoPath, options) => {
             genSdkSignatures(repoPath, options);
             process.exit(0);

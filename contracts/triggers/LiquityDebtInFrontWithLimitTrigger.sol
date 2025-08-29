@@ -9,10 +9,8 @@ import { LiquityRatioHelper } from "../actions/liquity/helpers/LiquityRatioHelpe
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { TransientStorage } from "../utils/TransientStorage.sol";
 
-
 /// @title Checks if total amount of debt in front of a specified trove is over a limit
 contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatioHelper, TriggerHelper, LiquityHelper {
-
     /// @notice Max number of troves to check is 250.
     uint256 internal constant MAX_ITERATIONS = 250;
 
@@ -32,7 +30,7 @@ contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatio
         address next = triggerSubData.troveOwner;
 
         (uint256 currRatio, bool isActive) = getRatio(triggerSubData.troveOwner);
-        
+
         if (isActive == false || currRatio == 0) return false;
 
         /// @dev Needed for LiquityRatioIncreaseCheck later
@@ -59,16 +57,14 @@ contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatio
             if (debtInFront > triggerSubData.debtInFrontMin) {
                 return false;
             }
-
         }
 
         return false;
     }
-    
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
+
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 

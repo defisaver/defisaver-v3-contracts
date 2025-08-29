@@ -9,15 +9,13 @@ import { FluidRatioHelper } from "../actions/fluid/helpers/FluidRatioHelper.sol"
 import { TransientStorage } from "../utils/TransientStorage.sol";
 
 /// @title Trigger contract that verifies if current fluid position ratio went over/under the subbed ratio
-contract FluidRatioTrigger is 
-    ITrigger,
-    AdminAuth,
-    FluidRatioHelper,
-    TriggerHelper
-{
+contract FluidRatioTrigger is ITrigger, AdminAuth, FluidRatioHelper, TriggerHelper {
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
-    enum RatioState { OVER, UNDER }
+    enum RatioState {
+        OVER,
+        UNDER
+    }
 
     /// @param nftId nft id of the fluid position
     /// @param ratio ratio that represents the triggerable point
@@ -27,21 +25,17 @@ contract FluidRatioTrigger is
         uint256 ratio;
         uint8 state;
     }
-    
+
     /// @dev checks current ratio of a fluid position and triggers if it's in a correct state
-    function isTriggered(bytes memory, bytes memory _subData)
-        public
-        override
-        returns (bool)
-    {   
+    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 currRatio = getRatio(triggerSubData.nftId);
-        
+
         if (currRatio == 0) return false;
 
         tempStorage.setBytes32("FLUID_RATIO", bytes32(currRatio));
-        
+
         if (RatioState(triggerSubData.state) == RatioState.OVER) {
             if (currRatio > triggerSubData.ratio) return true;
         }
@@ -57,8 +51,8 @@ contract FluidRatioTrigger is
         params = abi.decode(_subData, (SubParams));
     }
 
-    function changedSubData(bytes memory _subData) public pure override  returns (bytes memory) {}
-    
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
     function isChangeable() public pure override returns (bool) {
         return false;
     }

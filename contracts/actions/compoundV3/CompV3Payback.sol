@@ -35,7 +35,8 @@ contract CompV3Payback is ActionBase, CompV3Helper {
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _payback(params.market, params.amount, params.from, params.onBehalf);
+        (uint256 withdrawAmount, bytes memory logData) =
+            _payback(params.market, params.amount, params.from, params.onBehalf);
         emit ActionEvent("CompV3Payback", logData);
         return bytes32(withdrawAmount);
     }
@@ -59,15 +60,13 @@ contract CompV3Payback is ActionBase, CompV3Helper {
     /// @param _amount Amount of the base token to be repaid
     /// @param _from Address where we are pulling the underlying tokens from
     /// @param _onBehalf Repay on behalf of which address (if 0x0 defaults to user's wallet)
-    function _payback(
-        address _market,
-        uint256 _amount,
-        address _from,
-        address _onBehalf
-    ) internal returns (uint256, bytes memory) {
+    function _payback(address _market, uint256 _amount, address _from, address _onBehalf)
+        internal
+        returns (uint256, bytes memory)
+    {
         address tokenAddr = IComet(_market).baseToken();
 
-        // default to onBehalf of user's wallet 
+        // default to onBehalf of user's wallet
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
@@ -83,7 +82,7 @@ contract CompV3Payback is ActionBase, CompV3Helper {
 
         //repay debt
         IComet(_market).supplyTo(_onBehalf, tokenAddr, _amount);
-        
+
         bytes memory logData = abi.encode(_market, _amount, _from, _onBehalf);
         return (_amount, logData);
     }

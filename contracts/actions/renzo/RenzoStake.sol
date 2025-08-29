@@ -63,18 +63,16 @@ contract RenzoStake is ActionBase, RenzoHelper {
     // 3. Stakes it with Renzo
     // 4. Receives ezETH
     // 5. Sends tokens to target address
-    function _renzoStake(Params memory _inputData) 
-        internal returns (uint256 ezEthReceivedAmount, bytes memory logData) 
+    function _renzoStake(Params memory _inputData)
+        internal
+        returns (uint256 ezEthReceivedAmount, bytes memory logData)
     {
-        _inputData.amount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(
-            _inputData.from,
-            _inputData.amount
-        );
+        _inputData.amount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
 
         TokenUtils.withdrawWeth(_inputData.amount);
 
         uint256 ezEthBalanceBefore = EZETH_ADDR.getBalance(address(this));
-        IRestakeManager(RENZO_MANAGER).depositETH{value: _inputData.amount}();
+        IRestakeManager(RENZO_MANAGER).depositETH{ value: _inputData.amount }();
         uint256 ezEthBalanceAfter = EZETH_ADDR.getBalance(address(this));
 
         ezEthReceivedAmount = ezEthBalanceAfter - ezEthBalanceBefore;
@@ -88,14 +86,10 @@ contract RenzoStake is ActionBase, RenzoHelper {
     function ezEthPerEth() external view returns (uint256 ezEthRate) {
         IRestakeManager manager = IRestakeManager(RENZO_MANAGER);
         IRenzoOracle oracle = IRenzoOracle(manager.renzoOracle());
-        (, , uint256 totalTVL) = manager.calculateTVLs();
+        (,, uint256 totalTVL) = manager.calculateTVLs();
         uint256 ezEthTotalSupply = IERC20(EZETH_ADDR).totalSupply();
 
-        ezEthRate = oracle.calculateMintAmount(
-            totalTVL,
-            1 ether,
-            ezEthTotalSupply
-        );
+        ezEthRate = oracle.calculateMintAmount(totalTVL, 1 ether, ezEthTotalSupply);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {

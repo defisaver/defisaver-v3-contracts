@@ -9,8 +9,7 @@ import { McdHelper } from "./helpers/McdHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
 
 /// @title Gives the vault ownership to a different address
-contract McdGive is ActionBase, McdHelper{
-
+contract McdGive is ActionBase, McdHelper {
     //Can't send vault to 0x0
     error NoBurnVaultError();
 
@@ -58,13 +57,11 @@ contract McdGive is ActionBase, McdHelper{
     /// @param _vaultId The id of the vault
     /// @param _newOwner The address of the new owner
     /// @param _mcdManager Manager address
-    function _mcdGive(
-        uint256 _vaultId,
-        address _newOwner,
-        address _mcdManager
-    ) internal returns (address, bytes memory logData) {
- 
-        if (_newOwner == address(0)){
+    function _mcdGive(uint256 _vaultId, address _newOwner, address _mcdManager)
+        internal
+        returns (address, bytes memory logData)
+    {
+        if (_newOwner == address(0)) {
             revert NoBurnVaultError();
         }
 

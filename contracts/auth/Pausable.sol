@@ -8,7 +8,7 @@ abstract contract Pausable is AdminAuth {
 
     error ContractPaused();
 
-    modifier notPaused {
+    modifier notPaused() {
         if (isPaused) revert ContractPaused();
         _;
     }

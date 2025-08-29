@@ -1,35 +1,38 @@
 /* eslint-disable max-len */
 /* eslint-disable consistent-return */
 /* eslint-disable no-unused-vars */
-const hre = require('hardhat');
-const { nullAddress } = require('./utils');
+const hre = require("hardhat");
+const { nullAddress } = require("./utils");
 
-const SAFE_PROXY_FACTORY_ADDR = '0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67';
-const SAFE_SINGLETON_ADDR = '0x41675C099F32341bf84BFc5382aF534df5C7461a';
+const SAFE_PROXY_FACTORY_ADDR = "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67";
+const SAFE_SINGLETON_ADDR = "0x41675C099F32341bf84BFc5382aF534df5C7461a";
 const SAFE_CONSTANTS = {
-    SENTINEL_MODULE: '0x0000000000000000000000000000000000000001',
-    PROXY_CREATED_TOPIC_0: '0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235',
-    SAFE_SETUP_TOPIC_0: '0x141df868a6331af528e38c83b7aa03edc19be66e37ae67f9285bf4f8e3c6a1a8',
+    SENTINEL_MODULE: "0x0000000000000000000000000000000000000001",
+    PROXY_CREATED_TOPIC_0: "0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235",
+    SAFE_SETUP_TOPIC_0: "0x141df868a6331af528e38c83b7aa03edc19be66e37ae67f9285bf4f8e3c6a1a8",
 };
 const SAFE_MASTER_COPY_VERSIONS = {
     // V100: '0xb6029EA3B2c51D09a50B53CA8012FeEB05bDa35A',
     // V110: '0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F',
     // V120: '0x6851D6fDFAfD08c0295C392436245E5bc78B0185', // no SafeSetup event
-    V130: '0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552',
-    V130L2: '0x3E5c63644E683549055b9Be8653de26E0B4CD36E',
-    V141: '0x41675C099F32341bf84BFc5382aF534df5C7461a',
-    V141L2: '0x29fcB43b46531BcA003ddC8FCB67FFE91900C762',
+    V130: "0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
+    V130L2: "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
+    V141: "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+    V141L2: "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
 };
 
 const encodeSetupArgs = async (setupArgs) => {
-    const safeInterface = await hre.ethers.getContractAt('ISafe', SAFE_SINGLETON_ADDR);
-    return safeInterface.interface.encodeFunctionData('setup', setupArgs);
+    const safeInterface = await hre.ethers.getContractAt("ISafe", SAFE_SINGLETON_ADDR);
+    return safeInterface.interface.encodeFunctionData("setup", setupArgs);
 };
 
 const createSafe = async (senderAddress) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
-    const safeProxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', SAFE_PROXY_FACTORY_ADDR);
+    const safeProxyFactory = await hre.ethers.getContractAt(
+        "ISafeProxyFactory",
+        SAFE_PROXY_FACTORY_ADDR
+    );
 
     const saltNonce = Date.now();
     const setupData = [
@@ -43,21 +46,18 @@ const createSafe = async (senderAddress) => {
         hre.ethers.constants.AddressZero, // payment receiver
     ];
 
-    const safeInterface = await hre.ethers.getContractAt('ISafe', SAFE_SINGLETON_ADDR);
-    const functionData = safeInterface.interface.encodeFunctionData(
-        'setup',
-        setupData,
-    );
+    const safeInterface = await hre.ethers.getContractAt("ISafe", SAFE_SINGLETON_ADDR);
+    const functionData = safeInterface.interface.encodeFunctionData("setup", setupData);
 
     let receipt = await safeProxyFactory.createProxyWithNonce(
         SAFE_SINGLETON_ADDR,
         functionData,
-        saltNonce,
+        saltNonce
     );
     receipt = await receipt.wait();
 
     // fetch deployed safe addr
-    const safeAddr = abiCoder.decode(['address'], receipt.events.reverse()[0].topics[1]);
+    const safeAddr = abiCoder.decode(["address"], receipt.events.reverse()[0].topics[1]);
 
     return safeAddr[0];
 };
@@ -69,7 +69,7 @@ const executeSafeTx = async (
     targetAddr,
     calldata,
     callType = 1,
-    ethValue = 0,
+    ethValue = 0
 ) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -85,15 +85,18 @@ const executeSafeTx = async (
         0, // gasPrice
         hre.ethers.constants.AddressZero, // gasToken
         hre.ethers.constants.AddressZero, // refundReceiver
-        nonce, // nonce
+        nonce // nonce
     );
     console.log(`Tx hash of safe ${txHash}`);
 
     // encode r and s
-    let sig = abiCoder.encode(['address', 'bytes32'], [senderAddress, '0x0000000000000000000000000000000000000000000000000000000000000000']);
+    let sig = abiCoder.encode(
+        ["address", "bytes32"],
+        [senderAddress, "0x0000000000000000000000000000000000000000000000000000000000000000"]
+    );
 
     // add v = 1
-    sig += '01';
+    sig += "01";
 
     // call safe function
     const receipt = await safeInstance.execTransaction(
@@ -107,7 +110,7 @@ const executeSafeTx = async (
         hre.ethers.constants.AddressZero,
         hre.ethers.constants.AddressZero,
         sig,
-        { gasLimit: 8_000_000 },
+        { gasLimit: 8_000_000 }
     );
 
     return receipt;
@@ -117,22 +120,20 @@ const getSafeCreationArgs = async (safeAddress) => {
     const [setupEvent] = await hre.ethers.provider.getLogs({
         address: safeAddress,
         fromBlock: 0,
-        toBlock: 'latest',
+        toBlock: "latest",
         topics: [SAFE_CONSTANTS.SAFE_SETUP_TOPIC_0],
     });
     if (!setupEvent) return;
-    const [
-        owners,
-        threshold,
-        _,
-        fallbackHandler,
-    ] = hre.ethers.utils.defaultAbiCoder.decode(['address[]', 'uint256', 'address', 'address'], setupEvent.data);
+    const [owners, threshold, _, fallbackHandler] = hre.ethers.utils.defaultAbiCoder.decode(
+        ["address[]", "uint256", "address", "address"],
+        setupEvent.data
+    );
 
     const setupArgs = [
         owners, // _owners - List of Safe owners.
         threshold, // _threshold - Number of required confirmations for a Safe transaction.
         nullAddress, // to - Contract address for optional delegate call.
-        '0x', // data - Data payload for optional delegate call.
+        "0x", // data - Data payload for optional delegate call.
         fallbackHandler, // fallbackHandler - Handler for fallback calls to this contract.
         nullAddress, // paymentToken - Token that should be used for the payment (0 is ETH)
         0, // payment - Value that should be paid.
@@ -150,43 +151,43 @@ const getSafeCreationArgs = async (safeAddress) => {
     };
 };
 
-const predictSafeAddress = async (
-    masterCopyAddress,
-    setupArgs,
-    saltNonce,
-    safeFactory,
-) => {
+const predictSafeAddress = async (masterCopyAddress, setupArgs, saltNonce, safeFactory) => {
     const setupArgsEncoded = await encodeSetupArgs(setupArgs);
     let safeProxyFactory;
     if (!safeFactory) {
-        safeProxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', SAFE_PROXY_FACTORY_ADDR);
+        safeProxyFactory = await hre.ethers.getContractAt(
+            "ISafeProxyFactory",
+            SAFE_PROXY_FACTORY_ADDR
+        );
     } else {
-        safeProxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', safeFactory);
+        safeProxyFactory = await hre.ethers.getContractAt("ISafeProxyFactory", safeFactory);
     }
     const proxyCreationCode = await safeProxyFactory.proxyCreationCode(); // can cache
-    const salt = hre.ethers.utils.keccak256(hre.ethers.utils.solidityPack(['bytes', 'uint256'], [hre.ethers.utils.keccak256(setupArgsEncoded), saltNonce]));
+    const salt = hre.ethers.utils.keccak256(
+        hre.ethers.utils.solidityPack(
+            ["bytes", "uint256"],
+            [hre.ethers.utils.keccak256(setupArgsEncoded), saltNonce]
+        )
+    );
 
     return hre.ethers.utils.getCreate2Address(
         safeProxyFactory.address,
         salt,
         hre.ethers.utils.keccak256(
-            proxyCreationCode.concat(masterCopyAddress.slice(2).padStart(64, '0')),
-        ),
+            proxyCreationCode.concat(masterCopyAddress.slice(2).padStart(64, "0"))
+        )
     );
 };
 
-const deploySafe = async (
-    masterCopyAddress,
-    setupArgs,
-    saltNonce,
-) => {
+const deploySafe = async (masterCopyAddress, setupArgs, saltNonce) => {
     const setupArgsEncoded = await encodeSetupArgs(setupArgs);
-    const proxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', SAFE_PROXY_FACTORY_ADDR);
-    return proxyFactory.createProxyWithNonce(
-        masterCopyAddress,
-        setupArgsEncoded,
-        saltNonce,
-    ).then((e) => e.wait());
+    const proxyFactory = await hre.ethers.getContractAt(
+        "ISafeProxyFactory",
+        SAFE_PROXY_FACTORY_ADDR
+    );
+    return proxyFactory
+        .createProxyWithNonce(masterCopyAddress, setupArgsEncoded, saltNonce)
+        .then((e) => e.wait());
 };
 
 /**
@@ -199,16 +200,16 @@ const deploySafe = async (
 const signSafeTx = async (safeInstance, safeTx, signer, chainId = 1) => {
     const EIP712_SAFE_TX_TYPE = {
         SafeTx: [
-            { type: 'address', name: 'to' },
-            { type: 'uint256', name: 'value' },
-            { type: 'bytes', name: 'data' },
-            { type: 'uint8', name: 'operation' },
-            { type: 'uint256', name: 'safeTxGas' },
-            { type: 'uint256', name: 'baseGas' },
-            { type: 'uint256', name: 'gasPrice' },
-            { type: 'address', name: 'gasToken' },
-            { type: 'address', name: 'refundReceiver' },
-            { type: 'uint256', name: 'nonce' },
+            { type: "address", name: "to" },
+            { type: "uint256", name: "value" },
+            { type: "bytes", name: "data" },
+            { type: "uint8", name: "operation" },
+            { type: "uint256", name: "safeTxGas" },
+            { type: "uint256", name: "baseGas" },
+            { type: "uint256", name: "gasPrice" },
+            { type: "address", name: "gasToken" },
+            { type: "address", name: "refundReceiver" },
+            { type: "uint256", name: "nonce" },
         ],
     };
     const domain = {

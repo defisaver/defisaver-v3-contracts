@@ -58,17 +58,14 @@ contract CurveUsdBorrow is ActionBase, CurveUsdHelper {
     function _curveUsdBorrow(Params memory _params) internal returns (uint256, bytes memory) {
         /// @dev see ICrvUsdController natspec
         if (_params.debtAmount == 0) revert ZeroAmountBorrowed();
-        
+
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
         ICrvUsdController(_params.controllerAddress).borrow_more(0, _params.debtAmount);
 
         CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, _params.debtAmount);
 
-        return (
-            _params.debtAmount,
-            abi.encode(_params)
-        );
+        return (_params.debtAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

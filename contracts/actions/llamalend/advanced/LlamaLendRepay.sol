@@ -9,8 +9,8 @@ import { IBytesTransientStorage } from "../../../interfaces/IBytesTransientStora
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
 import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
 
-/// @title LlamaLendRepay 
-contract LlamaLendRepay is ActionBase, LlamaLendHelper{
+/// @title LlamaLendRepay
+contract LlamaLendRepay is ActionBase, LlamaLendHelper {
     using TokenUtils for address;
 
     /// @param controllerAddress Address of the llamalend market controller
@@ -38,7 +38,6 @@ contract LlamaLendRepay is ActionBase, LlamaLendHelper{
         params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
-
         (uint256 debtTokenReceived, bytes memory logData) = _repay(params);
         emit ActionEvent("LlamaLendRepay", logData);
         return bytes32(debtTokenReceived);
@@ -64,7 +63,7 @@ contract LlamaLendRepay is ActionBase, LlamaLendHelper{
         if (!isControllerValid(_params.controllerAddress, _params.controllerId)) revert InvalidLlamaLendController();
 
         address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
-       
+
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
         info[1] = _params.controllerId;
@@ -83,12 +82,10 @@ contract LlamaLendRepay is ActionBase, LlamaLendHelper{
 
         // if the amount received from swap is higher than debt there will be leftover debtToken
         // if we haven't sold 100% of coll from the position there will be leftover collToken
-        (, uint256 debtTokenReceived) = _sendLeftoverFunds(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
+        (, uint256 debtTokenReceived) =
+            _sendLeftoverFunds(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
 
-        return (
-            debtTokenReceived,
-            abi.encode(_params)
-        );
+        return (debtTokenReceived, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

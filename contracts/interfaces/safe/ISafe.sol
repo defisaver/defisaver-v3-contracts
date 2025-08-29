@@ -32,23 +32,16 @@ interface ISafe {
         bytes memory signatures
     ) external payable returns (bool success);
 
-    function execTransactionFromModule(
-        address to,
-        uint256 value,
-        bytes memory data,
-        Operation operation
-    ) external returns (bool success);
+    function execTransactionFromModule(address to, uint256 value, bytes memory data, Operation operation)
+        external
+        returns (bool success);
 
-    function checkSignatures(
-        bytes32 dataHash,
-        bytes memory data,
-        bytes memory signatures
-    ) external view;
+    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures) external view;
 
     function checkNSignatures(
         address executor,
         bytes32 dataHash,
-        bytes memory /* data */,
+        bytes memory, /* data */
         bytes memory signatures,
         uint256 requiredSignatures
     ) external view;
@@ -86,8 +79,8 @@ interface ISafe {
 
     function disableModule(address prevModule, address module) external;
 
-    function getModulesPaginated(
-        address start,
-        uint256 pageSize
-    ) external view returns (address[] memory array, address next);
+    function getModulesPaginated(address start, uint256 pageSize)
+        external
+        view
+        returns (address[] memory array, address next);
 }

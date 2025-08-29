@@ -14,9 +14,7 @@ interface ISavingsContractV2 {
 
     function depositSavings(uint256 _amount) external returns (uint256 creditsIssued); // V1 & V2
 
-    function depositSavings(uint256 _amount, address _beneficiary)
-        external
-        returns (uint256 creditsIssued); // V2
+    function depositSavings(uint256 _amount, address _beneficiary) external returns (uint256 creditsIssued); // V2
 
     function redeemCredits(uint256 _amount) external returns (uint256 underlyingReturned); // V2
 

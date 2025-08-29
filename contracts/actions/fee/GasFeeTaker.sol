@@ -32,7 +32,8 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
         GasFeeTakerParams memory inputData = parseInputsGasFeeTaker(_callData);
 
         inputData.feeToken = _parseParamAddr(inputData.feeToken, _paramMapping[0], _subData, _returnValues);
-        inputData.availableAmount = _parseParamUint(inputData.availableAmount, _paramMapping[1], _subData, _returnValues);
+        inputData.availableAmount =
+            _parseParamUint(inputData.availableAmount, _paramMapping[1], _subData, _returnValues);
         inputData.dfsFeeDivider = _parseParamUint(inputData.dfsFeeDivider, _paramMapping[2], _subData, _returnValues);
 
         /// @dev This means inputData.availableAmount is not being piped into
@@ -71,7 +72,7 @@ contract GasFeeTaker is ActionBase, GasFeeHelper {
 
     /// @inheritdoc ActionBase
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public payable virtual override {}
+    function executeActionDirect(bytes memory _callData) public payable virtual override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {

@@ -69,16 +69,14 @@ contract CurveStethPoolWithdraw is ActionBase, CurveHelper {
 
         STE_CRV_ADDR.pullTokensIfNeeded(_params.from, _params.maxBurnAmount);
 
-        burnedLp = ICurveStethPool(CURVE_STETH_POOL_ADDR).remove_liquidity_imbalance(
-            _params.amounts,
-            _params.maxBurnAmount
-        );
+        burnedLp =
+            ICurveStethPool(CURVE_STETH_POOL_ADDR).remove_liquidity_imbalance(_params.amounts, _params.maxBurnAmount);
 
         if (_params.amounts[0] != 0) {
             TokenUtils.depositWeth(_params.amounts[0]);
             TokenUtils.WETH_ADDR.withdrawTokens(_params.to, _params.amounts[0]);
         }
-        
+
         STETH_ADDR.withdrawTokens(_params.to, _params.amounts[1]);
         // return unburned lp tokens to from
         STE_CRV_ADDR.withdrawTokens(_params.from, _params.maxBurnAmount - (burnedLp));

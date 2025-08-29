@@ -1,9 +1,9 @@
-const { odosTest } = require('./offchain-tests');
+const { odosTest } = require("./offchain-tests");
 
-describe('Dfs-Sell', function () {
+describe("Dfs-Sell", function () {
     this.timeout(140000);
 
-    it('... should swap via Odos offchain aggregator using their API and OdosWrapper', async () => {
+    it("... should swap via Odos offchain aggregator using their API and OdosWrapper", async () => {
         await odosTest();
     });
 });

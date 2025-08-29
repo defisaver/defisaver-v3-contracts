@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import {IERC20} from "../IERC20.sol";
-import {IAggregationExecutor} from "./IAggregationExecutor.sol";
+import { IERC20 } from "../IERC20.sol";
+import { IAggregationExecutor } from "./IAggregationExecutor.sol";
 
 interface IMetaAggregationRouterV2 {
     struct SwapDescriptionV2 {
@@ -36,9 +36,7 @@ interface IMetaAggregationRouterV2 {
         bytes positiveSlippageData;
     }
 
-    function swap(
-        SwapExecutionParams calldata execution
-    ) external payable returns (uint256, uint256);
+    function swap(SwapExecutionParams calldata execution) external payable returns (uint256, uint256);
 
     function swapSimpleMode(
         IAggregationExecutor caller,

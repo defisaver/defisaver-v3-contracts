@@ -3,7 +3,6 @@
 pragma solidity 0.8.24;
 
 interface IFluidLiquidityResolverStructs {
-
     /// @notice struct to set borrow rate data for version 1
     struct RateDataV1Params {
         ///
@@ -114,5 +113,5 @@ interface IFluidLiquidityResolverStructs {
         uint256 borrowableUntilLimit; // borrowable amount until any borrow limit (incl. max utilization limit)
         uint256 borrowable; // actual currently borrowable amount (borrow limit - already borrowed) & considering balance, max utilization
         uint256 borrowLimitUtilization; // borrow limit for `maxUtilization`
-    }       
+    }
 }

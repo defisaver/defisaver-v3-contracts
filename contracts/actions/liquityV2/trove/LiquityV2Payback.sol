@@ -63,8 +63,7 @@ contract LiquityV2Payback is ActionBase, LiquityV2Helper {
         address troveManager = IAddressesRegistry(_params.market).troveManager();
         address borrowerOperations = IAddressesRegistry(_params.market).borrowerOperations();
 
-        uint256 entireDebt = ITroveManager(troveManager)
-            .getLatestTroveData(_params.troveId).entireDebt;
+        uint256 entireDebt = ITroveManager(troveManager).getLatestTroveData(_params.troveId).entireDebt;
 
         uint256 maxRepayment = entireDebt > MIN_DEBT ? entireDebt - MIN_DEBT : 0;
 
@@ -74,10 +73,7 @@ contract LiquityV2Payback is ActionBase, LiquityV2Helper {
 
         BOLD_ADDR.pullTokensIfNeeded(_params.from, _params.amount);
 
-        IBorrowerOperations(borrowerOperations).repayBold(
-            _params.troveId,
-            _params.amount
-        );
+        IBorrowerOperations(borrowerOperations).repayBold(_params.troveId, _params.amount);
 
         return (_params.amount, abi.encode(_params));
     }

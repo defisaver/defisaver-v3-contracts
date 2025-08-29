@@ -25,10 +25,7 @@ contract MultiDFSRegistrySetter is CoreHelper {
         address[] calldata _contractAddrs,
         uint256[] calldata _waitPeriods
     ) external onlyOwner {
-        require(
-            (_ids.length == _contractAddrs.length) && (_ids.length == _waitPeriods.length),
-            "Arr length not eq"
-        );
+        require((_ids.length == _contractAddrs.length) && (_ids.length == _waitPeriods.length), "Arr length not eq");
 
         for (uint256 i = 0; i < _ids.length; ++i) {
             DFSRegistry(REGISTRY_ADDR).addNewContract(_ids[i], _contractAddrs[i], _waitPeriods[i]);

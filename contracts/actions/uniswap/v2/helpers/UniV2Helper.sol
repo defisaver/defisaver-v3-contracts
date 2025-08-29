@@ -7,10 +7,7 @@ import { IUniswapV2Factory } from "../../../../interfaces/uniswap/IUniswapV2Fact
 import { IUniswapRouter } from "../../../../interfaces/exchange/IUniswapRouter.sol";
 
 contract UniV2Helper is MainnetUniV2Addresses {
-    IUniswapRouter public constant router =
-        IUniswapRouter(UNI_V2_ROUTER_ADDR);
+    IUniswapRouter public constant router = IUniswapRouter(UNI_V2_ROUTER_ADDR);
 
-    IUniswapV2Factory public constant factory =
-        IUniswapV2Factory(UNI_V2_FACTORY_ADDR);
-
+    IUniswapV2Factory public constant factory = IUniswapV2Factory(UNI_V2_FACTORY_ADDR);
 }

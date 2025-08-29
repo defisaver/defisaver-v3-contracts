@@ -6,6 +6,7 @@ struct Call {
     bytes data;
     bool skip;
 }
+
 interface IOperationExecutor {
     function executeOp(Call[] calldata, string calldata) external payable;
 }

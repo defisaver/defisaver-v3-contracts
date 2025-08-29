@@ -5,7 +5,6 @@ pragma solidity =0.8.24;
 import { IFluidVault } from "./IFluidVault.sol";
 
 interface IFluidVaultT4 is IFluidVault {
-
     /// @notice Performs operations on a vault position
     /// @dev This function allows users to modify their vault position by adjusting collateral and debt
     /// @param nftId_ The ID of the NFT representing the vault position
@@ -19,13 +18,13 @@ interface IFluidVaultT4 is IFluidVault {
     /// @return supplyAmt_ Final supply amount (negative if withdrawal occurred)
     /// @return borrowAmt_ Final borrow amount (negative if repayment occurred)
     function operate(
-        uint nftId_,
-        int newColToken0_,
-        int newColToken1_,
-        int colSharesMinMax_,
-        int newDebtToken0_,
-        int newDebtToken1_,
-        int debtSharesMinMax_,
+        uint256 nftId_,
+        int256 newColToken0_,
+        int256 newColToken1_,
+        int256 colSharesMinMax_,
+        int256 newDebtToken0_,
+        int256 newDebtToken1_,
+        int256 debtSharesMinMax_,
         address to_
     )
         external
@@ -33,8 +32,8 @@ interface IFluidVaultT4 is IFluidVault {
         returns (
             uint256, // nftId_
             int256, // final supply amount. if - then withdraw
-            int256 // final borrow amount. if - then payback
-        );
+            int256
+        ); // final borrow amount. if - then payback
 
     /// @notice Performs operations on a vault position with perfect collateral shares
     /// @dev This function allows users to modify their vault position by adjusting collateral and debt
@@ -55,13 +54,13 @@ interface IFluidVaultT4 is IFluidVault {
     ///              4 - token0 borrow or payback amount
     ///              5 - token1 borrow or payback amount
     function operatePerfect(
-        uint nftId_,
-        int perfectColShares_,
-        int colToken0MinMax_,
-        int colToken1MinMax_,
-        int perfectDebtShares_,
-        int debtToken0MinMax_,
-        int debtToken1MinMax_,
+        uint256 nftId_,
+        int256 perfectColShares_,
+        int256 colToken0MinMax_,
+        int256 colToken1MinMax_,
+        int256 perfectDebtShares_,
+        int256 debtToken0MinMax_,
+        int256 debtToken1MinMax_,
         address to_
     )
         external

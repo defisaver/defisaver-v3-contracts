@@ -39,12 +39,7 @@ contract LiquityV2SPWithdraw is ActionBase, LiquityV2Helper {
         params.boldTo = _parseParamAddr(params.boldTo, _paramMapping[1], _subData, _returnValues);
         params.collGainTo = _parseParamAddr(params.collGainTo, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-        params.doClaim = _parseParamUint(
-            params.doClaim ? 1 : 0,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        ) == 1;
+        params.doClaim = _parseParamUint(params.doClaim ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
 
         (uint256 withdrawnAmount, bytes memory logData) = _spWithdraw(params);
         emit ActionEvent("LiquityV2SPWithdraw", logData);
@@ -69,13 +64,10 @@ contract LiquityV2SPWithdraw is ActionBase, LiquityV2Helper {
     function _spWithdraw(Params memory _params) internal returns (uint256, bytes memory) {
         IStabilityPool pool = IStabilityPool(IAddressesRegistry(_params.market).stabilityPool());
 
-        uint256 boldGain = _params.doClaim
-            ? pool.getDepositorYieldGain(address(this))
-            : 0;
+        uint256 boldGain = _params.doClaim ? pool.getDepositorYieldGain(address(this)) : 0;
 
-        uint256 collGain = _params.doClaim
-            ? pool.getDepositorCollGain(address(this)) + pool.stashedColl(address(this))
-            : 0;
+        uint256 collGain =
+            _params.doClaim ? pool.getDepositorCollGain(address(this)) + pool.stashedColl(address(this)) : 0;
 
         uint256 compoundedBoldDeposit = pool.getCompoundedBoldDeposit(address(this));
         _params.amount = _params.amount > compoundedBoldDeposit ? compoundedBoldDeposit : _params.amount;

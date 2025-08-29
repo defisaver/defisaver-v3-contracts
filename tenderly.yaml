@@ -1,20 +1,20 @@
 account_id: ""
 exports:
-  firstnetwork:
-    project_slug: defisaver-v2/solidity-team-forks
-    rpc_address: 127.0.0.1:8545
-    protocol: ""
-    forked_network: Mainnet
-    chain_config:
-      homestead_block: 0
-      eip150_block: 0
-      eip150_hash: "0x0000000000000000000000000000000000000000000000000000000000000000"
-      eip155_block: 0
-      eip158_block: 0
-      byzantium_block: 0
-      constantinople_block: 0
-      petersburg_block: 0
-      istanbul_block: 0
-      berlin_block: 0
-      london_block: 0
+    firstnetwork:
+        project_slug: defisaver-v2/solidity-team-forks
+        rpc_address: 127.0.0.1:8545
+        protocol: ""
+        forked_network: Mainnet
+        chain_config:
+            homestead_block: 0
+            eip150_block: 0
+            eip150_hash: "0x0000000000000000000000000000000000000000000000000000000000000000"
+            eip155_block: 0
+            eip158_block: 0
+            byzantium_block: 0
+            constantinople_block: 0
+            petersburg_block: 0
+            istanbul_block: 0
+            berlin_block: 0
+            london_block: 0
 project_slug: ""

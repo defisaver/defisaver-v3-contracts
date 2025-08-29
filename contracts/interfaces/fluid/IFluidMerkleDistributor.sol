@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 interface IFluidMerkleDistributor {
-    
     function claim(
         address recipient_,
         uint256 cumulativeAmount_,
@@ -15,6 +14,6 @@ interface IFluidMerkleDistributor {
     ) external;
 
     function TOKEN() external view returns (address);
-    
+
     function claimed(address user, bytes32 positionId) external view returns (uint256);
 }

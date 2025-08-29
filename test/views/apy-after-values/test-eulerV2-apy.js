@@ -1,14 +1,14 @@
 /* eslint-disable max-len */
-const { getAssetInfo } = require('@defisaver/tokens');
-const { expect } = require('chai');
-const hre = require('hardhat');
+const { getAssetInfo } = require("@defisaver/tokens");
+const { expect } = require("chai");
+const hre = require("hardhat");
 
 const {
     eulerV2Supply,
     eulerV2Borrow,
     eulerV2Payback,
     eulerV2Withdraw,
-} = require('../../utils/actions');
+} = require("../../utils/actions");
 
 const {
     getProxy,
@@ -17,11 +17,11 @@ const {
     revertToSnapshot,
     setBalance,
     approve,
-} = require('../../utils/utils');
-const { getEulerV2TestPairs } = require('../../utils/eulerV2');
+} = require("../../utils/utils");
+const { getEulerV2TestPairs } = require("../../utils/eulerV2");
 
 const eulerV2ApyAfterValuesTest = async (testPairs) => {
-    describe('Test EulerV2 apy after values', async () => {
+    describe("Test EulerV2 apy after values", async () => {
         let senderAcc;
         let wallet;
         let snapshotId;
@@ -30,11 +30,11 @@ const eulerV2ApyAfterValuesTest = async (testPairs) => {
         before(async () => {
             [senderAcc] = await hre.ethers.getSigners();
             wallet = await getProxy(senderAcc.address, hre.config.isWalletSafe);
-            eulerV2ViewContract = await redeploy('EulerV2View');
-            await redeploy('EulerV2Supply');
-            await redeploy('EulerV2Borrow');
-            await redeploy('EulerV2Withdraw');
-            await redeploy('EulerV2Payback');
+            eulerV2ViewContract = await redeploy("EulerV2View");
+            await redeploy("EulerV2Supply");
+            await redeploy("EulerV2Borrow");
+            await redeploy("EulerV2Withdraw");
+            await redeploy("EulerV2Payback");
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -55,8 +55,8 @@ const eulerV2ApyAfterValuesTest = async (testPairs) => {
             const borrowAmount = testPairs[i].borrowAmount;
             it(`... should estimate borrow rate when opening position and doing repay after [coll: ${supplyTokenSymbol}, debt: ${borrowTokenSymbol}]`, async () => {
                 const repayAmount = borrowAmount.div(2);
-                const supplyVaultContract = await hre.ethers.getContractAt('IEVault', supplyVault);
-                const borrowVaultContract = await hre.ethers.getContractAt('IEVault', borrowVault);
+                const supplyVaultContract = await hre.ethers.getContractAt("IEVault", supplyVault);
+                const borrowVaultContract = await hre.ethers.getContractAt("IEVault", borrowVault);
 
                 // 1. Fetch borrow rates before creating position
                 // ----------------------------------------------
@@ -65,23 +65,12 @@ const eulerV2ApyAfterValuesTest = async (testPairs) => {
 
                 // 2. estimate borrow rates before creating position
                 // --------------------------------------------------
-                let estimatedBorrowRates = await eulerV2ViewContract.callStatic.getApyAfterValuesEstimation(
-                    [
-                        [
-                            supplyVault,
-                            false,
-                            supplyAmount,
-                            '0',
-                        ],
-                        [
-                            borrowVault,
-                            true,
-                            '0',
-                            borrowAmount,
-                        ],
-                    ],
-                );
-                console.log('Estimated borrow rates:', estimatedBorrowRates);
+                let estimatedBorrowRates =
+                    await eulerV2ViewContract.callStatic.getApyAfterValuesEstimation([
+                        [supplyVault, false, supplyAmount, "0"],
+                        [borrowVault, true, "0", borrowAmount],
+                    ]);
+                console.log("Estimated borrow rates:", estimatedBorrowRates);
 
                 // 3. create position
                 // -------------------
@@ -93,14 +82,14 @@ const eulerV2ApyAfterValuesTest = async (testPairs) => {
                     supplyToken,
                     wallet.address,
                     senderAcc.address,
-                    supplyAmount,
+                    supplyAmount
                 );
                 await eulerV2Borrow(
                     wallet,
                     borrowVault,
                     wallet.address,
                     senderAcc.address,
-                    borrowAmount,
+                    borrowAmount
                 );
 
                 // 4. Fetch borrow rates after creating position
@@ -110,12 +99,30 @@ const eulerV2ApyAfterValuesTest = async (testPairs) => {
 
                 // 5. Compare estimated and real borrow rates
                 // ------------------------------------------
-                console.log('Supply vault borrow rate before:', supplyVaultBorrowRateBefore.toString());
-                console.log('Borrow vault borrow rate before:', borrowVaultBorrowRateBefore.toString());
-                console.log('Estimated supply vault borrow rate:', estimatedBorrowRates[0].toString());
-                console.log('Estimated borrow vault borrow rate:', estimatedBorrowRates[1].toString());
-                console.log('Real supply vault borrow rate:', supplyVaultBorrowRateAfter.toString());
-                console.log('Real borrow vault borrow rate:', borrowVaultBorrowRateAfter.toString());
+                console.log(
+                    "Supply vault borrow rate before:",
+                    supplyVaultBorrowRateBefore.toString()
+                );
+                console.log(
+                    "Borrow vault borrow rate before:",
+                    borrowVaultBorrowRateBefore.toString()
+                );
+                console.log(
+                    "Estimated supply vault borrow rate:",
+                    estimatedBorrowRates[0].toString()
+                );
+                console.log(
+                    "Estimated borrow vault borrow rate:",
+                    estimatedBorrowRates[1].toString()
+                );
+                console.log(
+                    "Real supply vault borrow rate:",
+                    supplyVaultBorrowRateAfter.toString()
+                );
+                console.log(
+                    "Real borrow vault borrow rate:",
+                    borrowVaultBorrowRateAfter.toString()
+                );
 
                 expect(estimatedBorrowRates[0]).to.be.closeTo(supplyVaultBorrowRateAfter, 5e10);
                 expect(estimatedBorrowRates[1]).to.be.closeTo(borrowVaultBorrowRateAfter, 5e10);
@@ -126,16 +133,10 @@ const eulerV2ApyAfterValuesTest = async (testPairs) => {
 
                 // 8. estimate borrow rate before repay
                 // --------------------------------------------------
-                estimatedBorrowRates = await eulerV2ViewContract.callStatic.getApyAfterValuesEstimation(
-                    [
-                        [
-                            borrowVault,
-                            true,
-                            repayAmount,
-                            '0',
-                        ],
-                    ],
-                );
+                estimatedBorrowRates =
+                    await eulerV2ViewContract.callStatic.getApyAfterValuesEstimation([
+                        [borrowVault, true, repayAmount, "0"],
+                    ]);
 
                 // 9. Execute repay
                 // -------------------
@@ -147,7 +148,7 @@ const eulerV2ApyAfterValuesTest = async (testPairs) => {
                     borrowToken,
                     wallet.address,
                     senderAcc.address,
-                    repayAmount,
+                    repayAmount
                 );
 
                 // 10. Fetch borrow rate after repay
@@ -156,15 +157,24 @@ const eulerV2ApyAfterValuesTest = async (testPairs) => {
 
                 // 11. Compare estimated and real borrow rates after repay
                 // ------------------------------------------
-                console.log('Borrow vault borrow rate before repay:', borrowVaultBorrowRateBefore.toString());
-                console.log('Estimated borrow vault borrow rate after repay:', estimatedBorrowRates[0].toString());
-                console.log('Real borrow vault borrow rate after repay:', borrowVaultBorrowRateAfter.toString());
+                console.log(
+                    "Borrow vault borrow rate before repay:",
+                    borrowVaultBorrowRateBefore.toString()
+                );
+                console.log(
+                    "Estimated borrow vault borrow rate after repay:",
+                    estimatedBorrowRates[0].toString()
+                );
+                console.log(
+                    "Real borrow vault borrow rate after repay:",
+                    borrowVaultBorrowRateAfter.toString()
+                );
 
                 expect(estimatedBorrowRates[0]).to.be.closeTo(borrowVaultBorrowRateAfter, 5e10);
             });
             it(`... should estimate borrow rate when supplying and withdrawing ${borrowTokenSymbol}`, async () => {
                 const withdrawAmount = supplyAmount.div(2);
-                const supplyVaultContract = await hre.ethers.getContractAt('IEVault', supplyVault);
+                const supplyVaultContract = await hre.ethers.getContractAt("IEVault", supplyVault);
 
                 // 1. Fetch borrow rates before creating position
                 // ----------------------------------------------
@@ -172,17 +182,11 @@ const eulerV2ApyAfterValuesTest = async (testPairs) => {
 
                 // 2. estimate borrow rates before creating position
                 // --------------------------------------------------
-                const estimatedBorrowRates = await eulerV2ViewContract.callStatic.getApyAfterValuesEstimation(
-                    [
-                        [
-                            supplyVault,
-                            false,
-                            supplyAmount,
-                            withdrawAmount,
-                        ],
-                    ],
-                );
-                console.log('Estimated borrow rates:', estimatedBorrowRates);
+                const estimatedBorrowRates =
+                    await eulerV2ViewContract.callStatic.getApyAfterValuesEstimation([
+                        [supplyVault, false, supplyAmount, withdrawAmount],
+                    ]);
+                console.log("Estimated borrow rates:", estimatedBorrowRates);
 
                 // 3. Supply and withdraw
                 // -------------------
@@ -194,14 +198,14 @@ const eulerV2ApyAfterValuesTest = async (testPairs) => {
                     supplyToken,
                     wallet.address,
                     senderAcc.address,
-                    supplyAmount,
+                    supplyAmount
                 );
                 await eulerV2Withdraw(
                     wallet,
                     supplyVault,
                     wallet.address,
                     senderAcc.address,
-                    withdrawAmount,
+                    withdrawAmount
                 );
 
                 // 4. Fetch borrow rates after supplying and withdrawing
@@ -210,9 +214,18 @@ const eulerV2ApyAfterValuesTest = async (testPairs) => {
 
                 // 5. Compare estimated and real borrow rates
                 // ------------------------------------------
-                console.log('Supply vault borrow rate before:', supplyVaultBorrowRateBefore.toString());
-                console.log('Estimated supply vault borrow rate:', estimatedBorrowRates[0].toString());
-                console.log('Real supply vault borrow rate:', supplyVaultBorrowRateAfter.toString());
+                console.log(
+                    "Supply vault borrow rate before:",
+                    supplyVaultBorrowRateBefore.toString()
+                );
+                console.log(
+                    "Estimated supply vault borrow rate:",
+                    estimatedBorrowRates[0].toString()
+                );
+                console.log(
+                    "Real supply vault borrow rate:",
+                    supplyVaultBorrowRateAfter.toString()
+                );
 
                 expect(estimatedBorrowRates[0]).to.be.closeTo(supplyVaultBorrowRateAfter, 5e10);
             });
@@ -220,10 +233,10 @@ const eulerV2ApyAfterValuesTest = async (testPairs) => {
     });
 };
 
-describe('EulerV2-apy-after-values', () => {
-    it('... should test EulerV2 APY after values', async () => {
-        const supplyAmountInUsd = '50000';
-        const borrowAmountInUsd = '25000';
+describe("EulerV2-apy-after-values", () => {
+    it("... should test EulerV2 APY after values", async () => {
+        const supplyAmountInUsd = "50000";
+        const borrowAmountInUsd = "25000";
         const testPairs = await getEulerV2TestPairs(supplyAmountInUsd, borrowAmountInUsd);
         await eulerV2ApyAfterValuesTest(testPairs);
     });

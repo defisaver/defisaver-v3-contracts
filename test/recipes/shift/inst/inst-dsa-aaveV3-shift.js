@@ -1,10 +1,10 @@
 /* eslint-disable array-callback-return */
 /* eslint-disable no-param-reassign */
 /* eslint-disable max-len */
-const hre = require('hardhat');
-const { ethers } = require('hardhat');
-const { expect } = require('chai');
-const sdk = require('@defisaver/sdk');
+const hre = require("hardhat");
+const { ethers } = require("hardhat");
+const { expect } = require("chai");
+const sdk = require("@defisaver/sdk");
 
 const {
     impersonateAccount,
@@ -16,14 +16,14 @@ const {
     redeploy,
     network,
     getOwnerAddr,
-} = require('../../../utils/utils');
+} = require("../../../utils/utils");
 const {
     VARIABLE_RATE,
     getAaveV3PositionInfo,
     expectTwoAaveV3PositionsToBeEqual,
-} = require('../../../utils/aave');
-const { executeAction } = require('../../../utils/actions');
-const { topUp } = require('../../../../scripts/utils/fork');
+} = require("../../../utils/aave");
+const { executeAction } = require("../../../utils/actions");
+const { topUp } = require("../../../../scripts/utils/fork");
 
 const createAaveV3ImportRecipe = ({
     walletAddress,
@@ -41,28 +41,30 @@ const createAaveV3ImportRecipe = ({
 }) => {
     debtAmounts = debtAmounts.map((e) => e.mul(1_00_01).div(1_00_00));
     const actions = [
-        new sdk.actions.flashloan.FLAction(new sdk.actions.flashloan.BalancerFlashLoanAction(
-            debtTokenAddresses,
-            debtAmounts,
-        )),
+        new sdk.actions.flashloan.FLAction(
+            new sdk.actions.flashloan.BalancerFlashLoanAction(debtTokenAddresses, debtAmounts)
+        ),
 
-        ...debtAssetIds.map((debtAssetId, i) => new sdk.actions.aaveV3.AaveV3PaybackAction(
-            true,
-            nullAddress,
-            MAX_UINT,
-            walletAddress,
-            VARIABLE_RATE,
-            debtTokenAddresses[i],
-            debtAssetId,
-            true,
-            dsaProxyAddress,
-        )),
+        ...debtAssetIds.map(
+            (debtAssetId, i) =>
+                new sdk.actions.aaveV3.AaveV3PaybackAction(
+                    true,
+                    nullAddress,
+                    MAX_UINT,
+                    walletAddress,
+                    VARIABLE_RATE,
+                    debtTokenAddresses[i],
+                    debtAssetId,
+                    true,
+                    dsaProxyAddress
+                )
+        ),
 
         new sdk.actions.insta.InstPullTokensAction(
             dsaProxyAddress,
             collATokenAddresses,
             Array(collATokenAddresses.length).fill(MAX_UINT),
-            walletAddress,
+            walletAddress
         ),
 
         new sdk.actions.aaveV3.AaveV3CollateralSwitchAction(
@@ -70,30 +72,33 @@ const createAaveV3ImportRecipe = ({
             nullAddress,
             collAssetIds.length,
             collAssetIds,
-            useAsCollateralFlags,
+            useAsCollateralFlags
         ),
 
         new sdk.actions.aaveV3.AaveV3SetEModeAction(true, nullAddress, emodeCategoryId),
 
-        ...debtAssetIds.map((debtAssetId, i) => new sdk.actions.aaveV3.AaveV3BorrowAction(
-            true,
-            nullAddress,
-            debtAmounts[i],
-            flAddress,
-            VARIABLE_RATE,
-            debtAssetId,
-            false,
-        )),
+        ...debtAssetIds.map(
+            (debtAssetId, i) =>
+                new sdk.actions.aaveV3.AaveV3BorrowAction(
+                    true,
+                    nullAddress,
+                    debtAmounts[i],
+                    flAddress,
+                    VARIABLE_RATE,
+                    debtAssetId,
+                    false
+                )
+        ),
     ];
-    return new sdk.Recipe('InstDsaAaveV3Import', actions);
+    return new sdk.Recipe("InstDsaAaveV3Import", actions);
 };
 
-describe('DSA-AaveV3-Import', function () {
+describe("DSA-AaveV3-Import", function () {
     this.timeout(1_000_000);
 
-    const isFork = hre.network.name === 'fork';
-    const dsaAddress = '0x999CBD9Dc31A471aFEa801B0995D86aB3303Be8B';
-    const userAddress = '0xb94c575bFfDc7aB6EC97ad55A9007E2C924A8484';
+    const isFork = hre.network.name === "fork";
+    const dsaAddress = "0x999CBD9Dc31A471aFEa801B0995D86aB3303Be8B";
+    const userAddress = "0xb94c575bFfDc7aB6EC97ad55A9007E2C924A8484";
 
     let aaveV3View;
     let flAddress;
@@ -103,7 +108,7 @@ describe('DSA-AaveV3-Import', function () {
     let dsaPositionInfo;
 
     before(async () => {
-        console.log('isFork', isFork);
+        console.log("isFork", isFork);
 
         userAcc = await ethers.getSigner(userAddress);
 
@@ -112,33 +117,31 @@ describe('DSA-AaveV3-Import', function () {
             await topUp(getOwnerAddr());
         }
 
-        dsaProxy = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
+        dsaProxy = await hre.ethers.getContractAt("IInstaAccountV2", dsaAddress);
         dsaProxy = dsaProxy.connect(userAcc);
 
-        aaveV3View = await getContractFromRegistry('AaveV3View', isFork);
-        const flContract = await getContractFromRegistry('FLAction', isFork);
+        aaveV3View = await getContractFromRegistry("AaveV3View", isFork);
+        const flContract = await getContractFromRegistry("FLAction", isFork);
         flAddress = flContract.address;
 
-        await redeploy('InstPullTokens', isFork);
+        await redeploy("InstPullTokens", isFork);
         wallet = await getProxy(userAddress, hre.config.isWalletSafe);
         wallet = wallet.connect(userAcc);
 
         dsaPositionInfo = await getAaveV3PositionInfo(dsaAddress, aaveV3View);
-        console.log('DSA aaveV3 position before:', dsaPositionInfo);
+        console.log("DSA aaveV3 position before:", dsaPositionInfo);
 
         if (!isFork) {
             await impersonateAccount(userAcc.address);
         }
     });
 
-    it('... should execute AaveV3 migration from DSA to DFS smart wallet', async () => {
+    it("... should execute AaveV3 migration from DSA to DFS smart wallet", async () => {
         // approve smart wallet from DSA
-        const ABI = [
-            'function add(address)',
-        ];
+        const ABI = ["function add(address)"];
         const iface = new hre.ethers.utils.Interface(ABI);
-        const data = iface.encodeFunctionData('add', [wallet.address]);
-        await dsaProxy.cast(['AUTHORITY-A'], [data], userAddress);
+        const data = iface.encodeFunctionData("add", [wallet.address]);
+        await dsaProxy.cast(["AUTHORITY-A"], [data], userAddress);
 
         const recipe = createAaveV3ImportRecipe({
             walletAddress: wallet.address,
@@ -148,12 +151,14 @@ describe('DSA-AaveV3-Import', function () {
             ...dsaPositionInfo,
         });
 
-        await executeAction('RecipeExecutor', recipe.encodeForDsProxyCall()[1], wallet);
+        await executeAction("RecipeExecutor", recipe.encodeForDsProxyCall()[1], wallet);
 
         const dfsMigratedPosition = await getAaveV3PositionInfo(wallet.address, aaveV3View);
         expectTwoAaveV3PositionsToBeEqual(dsaPositionInfo, dfsMigratedPosition);
 
-        const currentDsaPositionRatios = await aaveV3View.getRatios(addrs[network].AAVE_MARKET, [dsaAddress]);
+        const currentDsaPositionRatios = await aaveV3View.getRatios(addrs[network].AAVE_MARKET, [
+            dsaAddress,
+        ]);
         expect(currentDsaPositionRatios[0]).to.be.eq(0);
     });
 });

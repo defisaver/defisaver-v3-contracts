@@ -7,7 +7,6 @@ import { TokenUtils } from "../utils/TokenUtils.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 
 contract DFSPricesView is ExchangeHelper {
-    
     error OutOfRangeSlicingError();
 
     /// @notice Returns the best estimated price from 2 exchanges
@@ -23,9 +22,8 @@ contract DFSPricesView is ExchangeHelper {
         address[] memory _wrappers,
         bytes[] memory _additionalData
     ) public returns (address, uint256) {
-
         uint256[] memory rates = new uint256[](_wrappers.length);
-        for (uint i=0; i<_wrappers.length; i++) {
+        for (uint256 i = 0; i < _wrappers.length; i++) {
             rates[i] = getExpectedRate(_wrappers[i], _srcToken, _destToken, _amount, _additionalData[i]);
         }
 
@@ -48,14 +46,11 @@ contract DFSPricesView is ExchangeHelper {
         bool success;
         bytes memory result;
 
-        (success, result) = _wrapper.call(abi.encodeWithSignature(
-            "getSellRate(address,address,uint256,bytes)",
-            _srcToken,
-            _destToken,
-            _amount,
-            _additionalData
-        ));
-
+        (success, result) = _wrapper.call(
+            abi.encodeWithSignature(
+                "getSellRate(address,address,uint256,bytes)", _srcToken, _destToken, _amount, _additionalData
+            )
+        );
 
         if (success) {
             return sliceUint(result, 0);
@@ -67,14 +62,15 @@ contract DFSPricesView is ExchangeHelper {
     /// @notice Finds the biggest rate between exchanges, needed for sell rate
     /// @param _wrappers Array of wrappers to compare
     /// @param _rates Array of rates to compare
-    function getBiggestRate(
-        address[] memory _wrappers,
-        uint256[] memory _rates
-    ) internal pure returns (address, uint) {
+    function getBiggestRate(address[] memory _wrappers, uint256[] memory _rates)
+        internal
+        pure
+        returns (address, uint256)
+    {
         uint256 maxIndex = 0;
 
         // starting from 0 in case there is only one rate in array
-        for (uint256 i=0; i<_rates.length; i++) {
+        for (uint256 i = 0; i < _rates.length; i++) {
             if (_rates[i] > _rates[maxIndex]) {
                 maxIndex = i;
             }
@@ -90,7 +86,7 @@ contract DFSPricesView is ExchangeHelper {
     }
 
     function sliceUint(bytes memory bs, uint256 start) internal pure returns (uint256) {
-        if (bs.length < start + 32){
+        if (bs.length < start + 32) {
             revert OutOfRangeSlicingError();
         }
 

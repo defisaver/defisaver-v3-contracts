@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 interface IDexSmartCollOracle {
-    
     /// @notice Returns number of quote tokens per 1e18 shares
     function dexSmartColSharesRates() external view returns (uint256 operate_, uint256 liquidate_);
 

@@ -13,7 +13,6 @@ import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2Exe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2Withdraw is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -74,18 +73,17 @@ contract TestLiquityV2Withdraw is LiquityV2ExecuteActions {
     }
 
     function _baseTest(bool _isDirect, address _interestBatchManager) public {
-        uint256 collAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
-        uint256 withdrawAmountInUSD = 10000;
+        uint256 collAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
+        uint256 withdrawAmountInUSD = 10_000;
 
         for (uint256 i = 0; i < markets.length; i++) {
-
             if (_interestBatchManager != address(0)) {
                 vm.startPrank(_interestBatchManager);
                 registerBatchManager(markets[i]);
                 vm.stopPrank();
             }
-            
+
             uint256 troveId = executeLiquityOpenTrove(
                 markets[i],
                 _interestBatchManager,
@@ -99,21 +97,13 @@ contract TestLiquityV2Withdraw is LiquityV2ExecuteActions {
                 viewContract
             );
 
-            _withdraw(
-                markets[i],
-                troveId,
-                _isDirect,
-                withdrawAmountInUSD
-            );
+            _withdraw(markets[i], troveId, _isDirect, withdrawAmountInUSD);
         }
     }
 
-    function _withdraw(
-        IAddressesRegistry _market,
-        uint256 _troveId,
-        bool _isDirect,
-        uint256 _withdrawAmountInUSD
-    ) internal {
+    function _withdraw(IAddressesRegistry _market, uint256 _troveId, bool _isDirect, uint256 _withdrawAmountInUSD)
+        internal
+    {
         uint256 collPriceWAD = IPriceFeed(_market.priceFeed()).lastGoodPrice();
         address collToken = _market.collToken();
         uint256 withdrawAmount = amountInUSDPriceMock(collToken, _withdrawAmountInUSD, collPriceWAD / 1e10);
@@ -123,13 +113,7 @@ contract TestLiquityV2Withdraw is LiquityV2ExecuteActions {
         uint256 entireColl = troveData.entireColl;
 
         bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2WithdrawEncode(
-                address(_market),
-                sender,
-                _troveId,
-                withdrawAmount
-            ),
-            _isDirect
+            liquityV2WithdrawEncode(address(_market), sender, _troveId, withdrawAmount), _isDirect
         );
 
         uint256 senderCollBalanceBefore = balanceOf(collToken, sender);

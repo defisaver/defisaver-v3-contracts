@@ -3,10 +3,9 @@
 pragma solidity =0.8.24;
 
 interface IDexSmartDebtOracle {
-    
     /// @notice Returns number of quote tokens per 1e18 shares
     function dexSmartDebtSharesRates() external view returns (uint256 operate_, uint256 liquidate_);
-    
+
     /// @dev Returns the configuration data of the DexSmartDebtOracle.
     ///
     /// @return dexPool_ The address of the Dex pool.

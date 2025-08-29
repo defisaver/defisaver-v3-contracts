@@ -10,7 +10,6 @@ import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
-
 /// @title Trigger contract that verifies if current MCD vault ratio is higher or lower than wanted
 contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, TriggerHelper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
@@ -27,7 +26,7 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
         NEXT_RATIO,
         BOTH_RATIOS
     }
-    
+
     /// @param nextPrice price that OSM returns as next price value
     /// @param ratioCheck returns if we want the trigger to look at the current asset price, nextPrice param or both
     struct CallParams {
@@ -44,20 +43,18 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
         uint8 state;
     }
 
-    function isTriggered(bytes memory _callData, bytes memory _subData)
-        public
-        view
-        override
-        returns (bool)
-    {
+    function isTriggered(bytes memory _callData, bytes memory _subData) public view override returns (bool) {
         CallParams memory triggerCallData = parseCallInputs(_callData);
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 checkedRatio;
         bool shouldTriggerCurr;
         bool shouldTriggerNext;
-    
-        if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.CURR_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
+
+        if (
+            RatioCheck(triggerCallData.ratioCheck) == RatioCheck.CURR_RATIO
+                || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS
+        ) {
             checkedRatio = getRatio(triggerSubData.vaultId, 0);
 
             // if cdp has 0 ratio don't trigger it
@@ -66,9 +63,12 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
             shouldTriggerCurr = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
         }
 
-        if (RatioCheck(triggerCallData.ratioCheck) == RatioCheck.NEXT_RATIO || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS){
+        if (
+            RatioCheck(triggerCallData.ratioCheck) == RatioCheck.NEXT_RATIO
+                || RatioCheck(triggerCallData.ratioCheck) == RatioCheck.BOTH_RATIOS
+        ) {
             checkedRatio = getRatio(triggerSubData.vaultId, triggerCallData.nextPrice);
-            
+
             // if cdp has 0 ratio don't trigger it
             if (checkedRatio == 0) return false;
 
@@ -82,8 +82,7 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
             /// @dev if we don't have access to the next price on-chain this returns true, if we do this compares the nextPrice param we sent
             if (
                 !IMCDPriceVerifier(MCD_PRICE_VERIFIER).verifyVaultNextPrice(
-                    triggerCallData.nextPrice,
-                    triggerSubData.vaultId
+                    triggerCallData.nextPrice, triggerSubData.vaultId
                 )
             ) {
                 revert WrongNextPrice(triggerCallData.nextPrice);
@@ -92,8 +91,8 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
 
         return shouldTriggerCurr || shouldTriggerNext;
     }
-    
-    function shouldTrigger(uint8 state, uint256 checkedRatio, uint256 subbedToRatio) internal pure returns (bool){
+
+    function shouldTrigger(uint8 state, uint256 checkedRatio, uint256 subbedToRatio) internal pure returns (bool) {
         if (RatioState(state) == RatioState.OVER) {
             if (checkedRatio > subbedToRatio) return true;
         }
@@ -104,17 +103,13 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
         return false;
     }
 
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
 
     function isChangeable() public pure override returns (bool) {
         return false;
     }
 
-    function parseCallInputs(bytes memory _callData)
-        internal
-        pure
-        returns (CallParams memory params)
-    {
+    function parseCallInputs(bytes memory _callData) internal pure returns (CallParams memory params) {
         params = abi.decode(_callData, (CallParams));
     }
 

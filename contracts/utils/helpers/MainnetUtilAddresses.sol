@@ -20,7 +20,7 @@ contract MainnetUtilAddresses {
     address internal constant WSTETH_ADDR = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
     address internal constant STETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
     address internal constant EETH_ADDR = 0x35fA164735182de50811E8e2E824cFb9B6118ac2;
-    address internal constant WEETH_ADDR = 0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee; 
+    address internal constant WEETH_ADDR = 0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee;
     address internal constant WBTC_ADDR = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
     address internal constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
@@ -40,5 +40,4 @@ contract MainnetUtilAddresses {
     address internal constant CHAINLINK_FEED_REGISTRY = 0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf;
 
     address internal constant TX_SAVER_FEE_RECIPIENT = 0x0eD7f3223266Ca1694F85C23aBe06E614Af3A479;
-
 }

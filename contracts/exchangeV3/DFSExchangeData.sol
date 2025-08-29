@@ -2,7 +2,6 @@
 pragma solidity =0.8.24;
 
 contract DFSExchangeData {
-
     struct OffchainData {
         address wrapper; // dfs wrapper address for the aggregator (must be in WrapperExchangeRegistry)
         address exchangeAddr; // exchange address we are calling to execute the order (must be in ExchangeAggregatorRegistry)

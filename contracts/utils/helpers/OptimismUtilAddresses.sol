@@ -10,7 +10,6 @@ contract OptimismUtilAddresses {
     address internal constant FEE_RECIPIENT = 0x5b12C2B979CB3aB89DD4813837873bC4Dd1930D0;
     address internal constant AAVE_MARKET = 0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb;
 
-
     address internal constant UNI_V3_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
     address internal constant UNI_V3_QUOTER = 0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6;
 
@@ -31,7 +30,7 @@ contract OptimismUtilAddresses {
     address internal constant AAVE_V3_MARKET = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
     address internal constant EETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address internal constant WEETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; 
+    address internal constant WEETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address internal constant ETHER_FI_LIQUIDITY_POOL = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 

@@ -10,7 +10,6 @@ import { ActionBase } from "../ActionBase.sol";
 
 /// @title Open a new Maker empty vault
 contract McdOpen is ActionBase, McdHelper {
-
     /// @param joinAddr Join address of the maker collateral
     /// @param mcdManager The manager address we are using
     struct Params {
@@ -51,7 +50,10 @@ contract McdOpen is ActionBase, McdHelper {
 
     /// @param _joinAddr Join address of the maker collateral
     /// @param _mcdManager The manager address we are using
-    function _mcdOpen(address _joinAddr, address _mcdManager) internal returns (uint256 vaultId, bytes memory logData) {
+    function _mcdOpen(address _joinAddr, address _mcdManager)
+        internal
+        returns (uint256 vaultId, bytes memory logData)
+    {
         bytes32 ilk = IJoin(_joinAddr).ilk();
 
         if (_mcdManager == CROPPER) {
@@ -59,9 +61,8 @@ contract McdOpen is ActionBase, McdHelper {
         } else {
             vaultId = IManager(_mcdManager).open(ilk, address(this));
         }
-                
-        logData = abi.encode(vaultId, _joinAddr, _mcdManager);
 
+        logData = abi.encode(vaultId, _joinAddr, _mcdManager);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

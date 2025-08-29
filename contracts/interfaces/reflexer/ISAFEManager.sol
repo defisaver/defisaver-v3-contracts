@@ -3,24 +3,23 @@
 pragma solidity =0.8.24;
 
 abstract contract ISAFEManager {
-
-    function lastSAFEID(address) virtual public view returns (uint);
-    function safeCan(address, uint, address) virtual public view returns (uint);
-    function collateralTypes(uint) virtual public view returns (bytes32);
-    function ownsSAFE(uint) virtual public view returns (address);
-    function safes(uint) virtual public view returns (address);
-    function safeEngine() virtual public view returns (address);
-    function openSAFE(bytes32, address) virtual public returns (uint);
-    function transferSAFEOwnership(uint, address) virtual public;
-    function allowSAFE(uint, address, uint) virtual public;
-    function handlerAllowed(address, uint) virtual public;
-    function modifySAFECollateralization(uint, int, int) virtual public;
-    function transferCollateral(uint, address, uint) virtual public;
-    function transferInternalCoins(uint, address, uint) virtual public;
-    function quitSystem(uint, address) virtual public;
-    function enterSystem(address, uint) virtual public;
-    function moveSAFE(uint, uint) virtual public;
-    function safeCount(address) virtual public view returns (uint);
-    function safei() virtual public view returns (uint);
-    function protectSAFE(uint, address, address) virtual public;
+    function lastSAFEID(address) public view virtual returns (uint256);
+    function safeCan(address, uint256, address) public view virtual returns (uint256);
+    function collateralTypes(uint256) public view virtual returns (bytes32);
+    function ownsSAFE(uint256) public view virtual returns (address);
+    function safes(uint256) public view virtual returns (address);
+    function safeEngine() public view virtual returns (address);
+    function openSAFE(bytes32, address) public virtual returns (uint256);
+    function transferSAFEOwnership(uint256, address) public virtual;
+    function allowSAFE(uint256, address, uint256) public virtual;
+    function handlerAllowed(address, uint256) public virtual;
+    function modifySAFECollateralization(uint256, int256, int256) public virtual;
+    function transferCollateral(uint256, address, uint256) public virtual;
+    function transferInternalCoins(uint256, address, uint256) public virtual;
+    function quitSystem(uint256, address) public virtual;
+    function enterSystem(address, uint256) public virtual;
+    function moveSAFE(uint256, uint256) public virtual;
+    function safeCount(address) public view virtual returns (uint256);
+    function safei() public view virtual returns (uint256);
+    function protectSAFE(uint256, address, address) public virtual;
 }

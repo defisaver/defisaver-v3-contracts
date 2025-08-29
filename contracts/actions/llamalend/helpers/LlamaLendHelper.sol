@@ -25,7 +25,11 @@ contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
         return (factory.controllers(_controllerId) == _controllerAddr);
     }
 
-    function getCollateralRatio(address _user, address _controllerAddr) public view returns (uint256 collRatio, bool isInSoftLiquidation) {
+    function getCollateralRatio(address _user, address _controllerAddr)
+        public
+        view
+        returns (uint256 collRatio, bool isInSoftLiquidation)
+    {
         // fetch users debt
         uint256 debt = ILlamaLendController(_controllerAddr).debt(_user);
         // no position can exist without debt
@@ -40,8 +44,9 @@ contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
         // calculate collAmount as WAD (18 decimals)
         address collToken = ILlamaLendController(_controllerAddr).collateral_token();
         uint256 assetDec = IERC20(collToken).decimals();
-        uint256 collAmountWAD = assetDec > 18 ? (collAmount / 10 ** (assetDec - 18)) : (collAmount * 10 ** (18 - assetDec));
-        
+        uint256 collAmountWAD =
+            assetDec > 18 ? (collAmount / 10 ** (assetDec - 18)) : (collAmount * 10 ** (18 - assetDec));
+
         collRatio = wdiv(wmul(collAmountWAD, oraclePrice) + debtAssetCollAmount, debt);
     }
 
@@ -58,20 +63,16 @@ contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
         _debtToken.withdrawTokens(_to, debtTokenReceived);
     }
 
-    function userMaxWithdraw(
-        address _controllerAddress,
-        address _user
-    ) public view returns (uint256 maxWithdraw) {
+    function userMaxWithdraw(address _controllerAddress, address _user) public view returns (uint256 maxWithdraw) {
         uint256[4] memory userState = ILlamaLendController(_controllerAddress).user_state(_user);
-        return
-            userState[0] -
-            ILlamaLendController(_controllerAddress).min_collateral(userState[2], userState[3]);
+        return userState[0] - ILlamaLendController(_controllerAddress).min_collateral(userState[2], userState[3]);
     }
 
-    function getCollAmountsFromAMM(
-        address _controllerAddress,
-        address _user
-    ) public view returns (uint256 debtAssetCollAmount, uint256 collAssetCollAmount) {
+    function getCollAmountsFromAMM(address _controllerAddress, address _user)
+        public
+        view
+        returns (uint256 debtAssetCollAmount, uint256 collAssetCollAmount)
+    {
         address llammaAddress = ILlamaLendController(_controllerAddress).amm();
         uint256[2] memory xy = ILLAMMA(llammaAddress).get_sum_xy(_user);
         debtAssetCollAmount = xy[0];

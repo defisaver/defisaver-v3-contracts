@@ -1,34 +1,34 @@
-const axios = require('axios');
-const hre = require('hardhat');
+const axios = require("axios");
+const hre = require("hardhat");
 
-const makerVersion = '1.9.9';
+const makerVersion = "1.9.9";
 
-const MCD_MANAGER_ADDR = '0x5ef30b9986345249bc32d8928B7ee64DE9435E39';
-const GET_CDPS_ADDR = '0x36a724Bd100c39f0Ea4D3A20F7097eE01A8Ff573';
-const CDP_REGISTRY = '0xBe0274664Ca7A68d6b5dF826FB3CcB7c620bADF3';
-const CROPPER_ADDR = '0x8377CD01a5834a6EaD3b7efb482f678f2092b77e';
-const LDO_ADDR = '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32';
+const MCD_MANAGER_ADDR = "0x5ef30b9986345249bc32d8928B7ee64DE9435E39";
+const GET_CDPS_ADDR = "0x36a724Bd100c39f0Ea4D3A20F7097eE01A8Ff573";
+const CDP_REGISTRY = "0xBe0274664Ca7A68d6b5dF826FB3CcB7c620bADF3";
+const CROPPER_ADDR = "0x8377CD01a5834a6EaD3b7efb482f678f2092b77e";
+const LDO_ADDR = "0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32";
 
 // TODO: fetch from sdk later
-const cropJoinIlks = [
-    '0x435256563145544853544554482d410000000000000000000000000000000000',
-];
+const cropJoinIlks = ["0x435256563145544853544554482d410000000000000000000000000000000000"];
 
 const cropData = {
-    ilk: '0x435256563145544853544554482d410000000000000000000000000000000000',
-    joinAddr: '0x82D8bfDB61404C796385f251654F6d7e92092b5D',
-    tokenAddr: '0x06325440D014e39736583c165C2963BA99fAf14E',
+    ilk: "0x435256563145544853544554482d410000000000000000000000000000000000",
+    joinAddr: "0x82D8bfDB61404C796385f251654F6d7e92092b5D",
+    tokenAddr: "0x06325440D014e39736583c165C2963BA99fAf14E",
 };
 
 const canGenerateDebt = async (ilkInfo) => {
-    const vat = await
-    hre.ethers.getContractAt('IVat', '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B');
+    const vat = await hre.ethers.getContractAt(
+        "IVat",
+        "0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B"
+    );
 
     const ilkData = await vat.ilks(ilkInfo.ilkBytes);
     const debtCeiling = Math.round(ilkData.line / 1e45);
     const debt = (ilkData.Art / 1e18) * (ilkData.rate / 1e27);
 
-    return debtCeiling > (debt + 40_0000);
+    return debtCeiling > debt + 40_0000;
 };
 
 const fetchMakerAddresses = async (version = makerVersion, params = {}) => {
@@ -40,8 +40,7 @@ const fetchMakerAddresses = async (version = makerVersion, params = {}) => {
 };
 
 const getVaultsForUser = async (user) => {
-    const GetCdps = await
-    hre.ethers.getContractAt('IGetCdps', GET_CDPS_ADDR);
+    const GetCdps = await hre.ethers.getContractAt("IGetCdps", GET_CDPS_ADDR);
 
     const vaults = await GetCdps.getCdpsAsc(MCD_MANAGER_ADDR, user);
 
@@ -49,17 +48,17 @@ const getVaultsForUser = async (user) => {
 };
 
 const getCropJoinVaultIds = async (user) => {
-    const cdpRegistry = await hre.ethers.getContractAt('ICdpRegistry', CDP_REGISTRY);
+    const cdpRegistry = await hre.ethers.getContractAt("ICdpRegistry", CDP_REGISTRY);
     const cropJoinPromises = cropJoinIlks.map((ilk) => cdpRegistry.cdps(ilk, user));
 
     let cropJoinVaults = await Promise.all(cropJoinPromises);
-    cropJoinVaults = cropJoinVaults.filter((id) => id.toString() !== '0');
+    cropJoinVaults = cropJoinVaults.filter((id) => id.toString() !== "0");
 
     return cropJoinVaults;
 };
 
 const getCropJoinVaultId = async (user, ilk) => {
-    const cdpRegistry = await hre.ethers.getContractAt('ICdpRegistry', CDP_REGISTRY);
+    const cdpRegistry = await hre.ethers.getContractAt("ICdpRegistry", CDP_REGISTRY);
     const id = await cdpRegistry.cdps(ilk, user);
 
     return id;
@@ -89,7 +88,7 @@ const getVaultInfo = async (mcdView, vaultId, ilk, mcdManager = MCD_MANAGER_ADDR
 
 const getNextEthPrice = async () => {
     try {
-        const pipAddr = '0x81FE72B5A8d1A857d176C3E7d5Bd2679A9B85763';
+        const pipAddr = "0x81FE72B5A8d1A857d176C3E7d5Bd2679A9B85763";
         const priceStorage = await hre.ethers.provider.getStorageAt(pipAddr, 4);
 
         const priceInBigNum = hre.ethers.BigNumber.from(`0x${priceStorage.slice(-32)}`);
@@ -102,7 +101,7 @@ const getNextEthPrice = async () => {
 };
 
 const castSpell = async (spellAddr) => {
-    const dssSpell = await hre.ethers.getContractAt('IDssSpell', spellAddr);
+    const dssSpell = await hre.ethers.getContractAt("IDssSpell", spellAddr);
 
     // is spell executed
     const done = await dssSpell.done();
@@ -111,20 +110,27 @@ const castSpell = async (spellAddr) => {
     // get execution timestamp
     const castTime = await dssSpell.nextCastTime();
 
-    await hre.network.provider.send('evm_setNextBlockTimestamp', [parseFloat(castTime.toString())]);
+    await hre.network.provider.send("evm_setNextBlockTimestamp", [parseFloat(castTime.toString())]);
 
     // cast spell
     await dssSpell.cast({ gasLimit: 3_000_000 });
 
-    const pip = await hre.ethers.getContractAt('IPipInterface', '0x70098F537EE8D0E00882585b7B02C45cd6AB3186');
+    const pip = await hre.ethers.getContractAt(
+        "IPipInterface",
+        "0x70098F537EE8D0E00882585b7B02C45cd6AB3186"
+    );
 
-    const HOUR_IN_MILISECONDS = (60 * 60 * 1000);
+    const HOUR_IN_MILISECONDS = 60 * 60 * 1000;
     await pip.poke({ gasLimit: 3_000_000 });
-    await hre.network.provider.send('evm_setNextBlockTimestamp', [parseFloat(castTime.toString()) + HOUR_IN_MILISECONDS]);
+    await hre.network.provider.send("evm_setNextBlockTimestamp", [
+        parseFloat(castTime.toString()) + HOUR_IN_MILISECONDS,
+    ]);
 
     await pip.poke({ gasLimit: 3_000_000 });
 
-    await hre.network.provider.send('evm_setNextBlockTimestamp', [parseFloat(castTime.toString()) + HOUR_IN_MILISECONDS * 2]);
+    await hre.network.provider.send("evm_setNextBlockTimestamp", [
+        parseFloat(castTime.toString()) + HOUR_IN_MILISECONDS * 2,
+    ]);
 
     await pip.poke({ gasLimit: 3_000_000 });
 };

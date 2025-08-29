@@ -10,7 +10,6 @@ import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Supply assets to Fluid Vault T1 (1_col:1_debt)
 contract FluidVaultT1Supply is ActionBase {
-
     /// @param vault The address of the Fluid Vault T1
     /// @param nftId ID of the NFT representing the position
     /// @param amount Amount to supply
@@ -20,7 +19,7 @@ contract FluidVaultT1Supply is ActionBase {
         uint256 nftId;
         uint256 amount;
         address from;
-    }   
+    }
 
     /// @inheritdoc ActionBase
     function executeAction(

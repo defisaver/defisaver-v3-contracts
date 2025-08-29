@@ -69,11 +69,7 @@ contract McdDsrDeposit is McdHelper, ActionBase {
         deposited = _params.amount;
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (Params memory inputData)
-    {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 }

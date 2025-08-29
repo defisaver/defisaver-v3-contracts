@@ -8,10 +8,9 @@ import { RenzoHelper } from "../../../contracts/actions/renzo/helpers/RenzoHelpe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-import {Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/Addresses.sol";
 
 contract TestRenzoStake is BaseTest, ActionsUtils, RenzoHelper {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -43,7 +42,7 @@ contract TestRenzoStake is BaseTest, ActionsUtils, RenzoHelper {
     function test_should_stake() public {
         bool isDirect = false;
         bool isMaxUint256 = false;
-        uint256 amount = 4325454352333;
+        uint256 amount = 4_325_454_352_333;
         _baseTest(isDirect, isMaxUint256, amount);
     }
 
@@ -61,21 +60,12 @@ contract TestRenzoStake is BaseTest, ActionsUtils, RenzoHelper {
         _baseTest(isDirect, isMaxUint256, amount);
     }
 
-    function _baseTest(
-        bool _isDirect,
-        bool _isMaxUint256,
-        uint256 _amount
-    ) internal {
+    function _baseTest(bool _isDirect, bool _isMaxUint256, uint256 _amount) internal {
         give(Addresses.WETH_ADDR, sender, _amount);
         approveAsSender(sender, Addresses.WETH_ADDR, walletAddr, _amount);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            renzoStakeEncode(
-                _isMaxUint256 ? type(uint256).max : _amount,
-                sender,
-                sender
-            ),
-            _isDirect
+            renzoStakeEncode(_isMaxUint256 ? type(uint256).max : _amount, sender, sender), _isDirect
         );
 
         uint256 senderWethBalanceBefore = balanceOf(Addresses.WETH_ADDR, sender);

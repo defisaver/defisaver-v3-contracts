@@ -56,16 +56,15 @@ library SparkDataTypes {
         //bit 176-211 unbacked mint cap in whole tokens, unbackedMintCap == 0 => minting disabled
         //bit 212-251 debt ceiling for isolation mode with (ReserveConfiguration::DEBT_CEILING_DECIMALS) decimals
         //bit 252-255 unused
-
         uint256 data;
     }
 
     struct UserConfigurationMap {
         /**
-        * @dev Bitmap of the users collaterals and borrows. It is divided in pairs of bits, one pair per asset.
-        * The first bit indicates if an asset is used as collateral by the user, the second whether an
-        * asset is borrowed by the user.
-        */
+         * @dev Bitmap of the users collaterals and borrows. It is divided in pairs of bits, one pair per asset.
+         * The first bit indicates if an asset is used as collateral by the user, the second whether an
+         * asset is borrowed by the user.
+         */
         uint256 data;
     }
 
@@ -79,7 +78,11 @@ library SparkDataTypes {
         string label;
     }
 
-    enum InterestRateMode {NONE, STABLE, VARIABLE}
+    enum InterestRateMode {
+        NONE,
+        STABLE,
+        VARIABLE
+    }
 
     struct CalculateInterestRatesParams {
         uint256 unbacked;

@@ -8,7 +8,6 @@ import { IComet } from "../../interfaces/compoundV3/IComet.sol";
 
 /// @title Allow or disallow manager for Compound V3. Manager will be able to perform actions on behalf of the user.
 contract CompV3Allow is ActionBase, CompV3Helper {
-
     /// @param market Main Comet proxy contract that is different for each compound market
     /// @param manager Address of the manager
     /// @param isAllowed True for allow, false for disallow
@@ -53,12 +52,8 @@ contract CompV3Allow is ActionBase, CompV3Helper {
     /// @param _market Main Comet proxy contract that is different for each compound market
     /// @param _manager Address of manager
     /// @param _isAllowed True for allow, false for disallow
-    function _allow(
-        address _market,
-        address _manager,
-        bool _isAllowed
-    ) internal returns (bool, bytes memory) {
-        IComet(_market).allow(_manager,_isAllowed);
+    function _allow(address _market, address _manager, bool _isAllowed) internal returns (bool, bytes memory) {
+        IComet(_market).allow(_manager, _isAllowed);
 
         bytes memory logData = abi.encode(_market, _manager, _isAllowed);
         return (_isAllowed, logData);

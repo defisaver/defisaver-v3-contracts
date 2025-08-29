@@ -35,7 +35,8 @@ contract CompClaim is ActionBase, CompHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
-        (uint256 compClaimed, bytes memory logData) = _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
+        (uint256 compClaimed, bytes memory logData) =
+            _claim(params.cTokensSupply, params.cTokensBorrow, params.from, params.to);
         emit ActionEvent("CompClaim", logData);
         return bytes32(compClaimed);
     }
@@ -60,12 +61,10 @@ contract CompClaim is ActionBase, CompHelper {
     /// @param _cTokensBorrow Array of cTokens which _from supplied and has earned rewards
     /// @param _from For which user we are claiming the tokens
     /// @param _to Where we are sending the Comp to (if _from is user's wallet)
-    function _claim(
-        address[] memory _cTokensSupply,
-        address[] memory _cTokensBorrow,
-        address _from,
-        address _to
-    ) internal returns (uint256 compClaimed, bytes memory logData) {
+    function _claim(address[] memory _cTokensSupply, address[] memory _cTokensBorrow, address _from, address _to)
+        internal
+        returns (uint256 compClaimed, bytes memory logData)
+    {
         address[] memory users = new address[](1);
         users[0] = _from;
 

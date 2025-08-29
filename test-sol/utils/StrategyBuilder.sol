@@ -63,7 +63,7 @@ contract StrategyBuilder is CheatCodes {
             isContinuos
         );
 
-        (bool success, ) = address(strategyStorage).call(subCallData);
+        (bool success,) = address(strategyStorage).call(subCallData);
         require(success);
 
         cheats.stopPrank();

@@ -1,3 +1,3 @@
-const { curveUsdSelfLiquidateTest } = require('./curveusd-tests');
+const { curveUsdSelfLiquidateTest } = require("./curveusd-tests");
 
 curveUsdSelfLiquidateTest();

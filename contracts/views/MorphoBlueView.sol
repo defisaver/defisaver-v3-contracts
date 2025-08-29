@@ -8,7 +8,6 @@ import { Id, MarketParams, Market, MorphoBluePosition } from "../interfaces/morp
 import { MarketParamsLib, MorphoLib, SharesMathLib } from "../actions/morpho-blue/helpers/MorphoBlueLib.sol";
 
 contract MorphoBlueView is MorphoBlueHelper {
-
     using SharesMathLib for uint256;
 
     struct MarketInfo {
@@ -37,7 +36,7 @@ contract MorphoBlueView is MorphoBlueHelper {
         uint256 liquidityRemoved;
     }
 
-    function getMarketInfo(MarketParams memory marketParams) public returns (MarketInfo memory) {    
+    function getMarketInfo(MarketParams memory marketParams) public returns (MarketInfo memory) {
         Id marketId = MarketParamsLib.id(marketParams);
         uint128 lastUpdate = MorphoLib.lastUpdate(morphoBlue, marketId);
         uint128 fee = MorphoLib.fee(morphoBlue, marketId);
@@ -56,14 +55,12 @@ contract MorphoBlueView is MorphoBlueHelper {
         });
     }
 
-    function getMarketInfoNotTuple(address loanToken, address collToken, address oracle, address irm, uint256 lltv) public returns (MarketInfo memory) {    
-        MarketParams memory marketParams = MarketParams({
-            loanToken: loanToken,
-            collateralToken: collToken,
-            oracle: oracle,
-            irm: irm,
-            lltv: lltv
-        });
+    function getMarketInfoNotTuple(address loanToken, address collToken, address oracle, address irm, uint256 lltv)
+        public
+        returns (MarketInfo memory)
+    {
+        MarketParams memory marketParams =
+            MarketParams({ loanToken: loanToken, collateralToken: collToken, oracle: oracle, irm: irm, lltv: lltv });
         Id marketId = MarketParamsLib.id(marketParams);
         uint128 lastUpdate = MorphoLib.lastUpdate(morphoBlue, marketId);
         uint128 fee = MorphoLib.fee(morphoBlue, marketId);
@@ -82,7 +79,7 @@ contract MorphoBlueView is MorphoBlueHelper {
         });
     }
 
-    function getMarketId(MarketParams memory marketParams) public pure returns (Id id){
+    function getMarketId(MarketParams memory marketParams) public pure returns (Id id) {
         id = MarketParamsLib.id(marketParams);
     }
 
@@ -93,17 +90,21 @@ contract MorphoBlueView is MorphoBlueHelper {
         Market memory market = morphoBlue.market(marketId);
         return PositionInfo({
             supplyShares: position.supplyShares,
-            suppliedInAssets: SharesMathLib.toAssetsDown(position.supplyShares, market.totalSupplyAssets, market.totalSupplyShares),
+            suppliedInAssets: SharesMathLib.toAssetsDown(
+                position.supplyShares, market.totalSupplyAssets, market.totalSupplyShares
+            ),
             borrowShares: position.borrowShares,
-            borrowedInAssets: SharesMathLib.toAssetsUp(position.borrowShares, market.totalBorrowAssets, market.totalBorrowShares),
+            borrowedInAssets: SharesMathLib.toAssetsUp(
+                position.borrowShares, market.totalBorrowAssets, market.totalBorrowShares
+            ),
             collateral: position.collateral
         });
     }
 
-    function getApyAfterValuesEstimation(
-        MarketParams memory _marketParams,
-        LiquidityChangeParams[] memory _params
-    ) public returns (uint256 borrowRate, Market memory market) {
+    function getApyAfterValuesEstimation(MarketParams memory _marketParams, LiquidityChangeParams[] memory _params)
+        public
+        returns (uint256 borrowRate, Market memory market)
+    {
         Id marketId = MarketParamsLib.id(_marketParams);
         morphoBlue.accrueInterest(_marketParams);
         market = morphoBlue.market(marketId);
@@ -117,36 +118,41 @@ contract MorphoBlueView is MorphoBlueHelper {
             if (params.isBorrowOperation) {
                 // when repaying
                 if (params.liquidityAdded > 0) {
-                    uint256 shares = params.liquidityAdded.toSharesDown(market.totalBorrowAssets, market.totalBorrowShares);
-                    market.totalBorrowShares = shares > market.totalBorrowShares ? 0 
-                        : market.totalBorrowShares - uint128(shares);
-                    market.totalBorrowAssets = params.liquidityAdded > market.totalBorrowAssets ? 0
+                    uint256 shares =
+                        params.liquidityAdded.toSharesDown(market.totalBorrowAssets, market.totalBorrowShares);
+                    market.totalBorrowShares =
+                        shares > market.totalBorrowShares ? 0 : market.totalBorrowShares - uint128(shares);
+                    market.totalBorrowAssets = params.liquidityAdded > market.totalBorrowAssets
+                        ? 0
                         : market.totalBorrowAssets - uint128(params.liquidityAdded);
                 }
                 // when borrowing
                 if (params.liquidityRemoved > 0) {
-                    uint256 shares = params.liquidityRemoved.toSharesUp(market.totalBorrowAssets, market.totalBorrowShares);
+                    uint256 shares =
+                        params.liquidityRemoved.toSharesUp(market.totalBorrowAssets, market.totalBorrowShares);
                     market.totalBorrowShares += uint128(shares);
                     market.totalBorrowAssets += uint128(params.liquidityRemoved);
                 }
             } else {
                 // when supplying
                 if (params.liquidityAdded > 0) {
-                    uint256 shares = params.liquidityAdded.toSharesDown(market.totalSupplyAssets, market.totalSupplyShares);
+                    uint256 shares =
+                        params.liquidityAdded.toSharesDown(market.totalSupplyAssets, market.totalSupplyShares);
                     market.totalSupplyShares += uint128(shares);
-                    market.totalSupplyAssets += uint128(params.liquidityAdded);    
+                    market.totalSupplyAssets += uint128(params.liquidityAdded);
                 }
                 // when withdrawing
                 if (params.liquidityRemoved > 0) {
-                    uint256 shares = params.liquidityRemoved.toSharesUp(market.totalSupplyAssets, market.totalSupplyShares);
-                    market.totalSupplyShares = shares > market.totalSupplyShares ? 0 
-                        : market.totalSupplyShares - uint128(shares);
-                    market.totalSupplyAssets = params.liquidityRemoved > market.totalSupplyAssets ? 0
+                    uint256 shares =
+                        params.liquidityRemoved.toSharesUp(market.totalSupplyAssets, market.totalSupplyShares);
+                    market.totalSupplyShares =
+                        shares > market.totalSupplyShares ? 0 : market.totalSupplyShares - uint128(shares);
+                    market.totalSupplyAssets = params.liquidityRemoved > market.totalSupplyAssets
+                        ? 0
                         : market.totalSupplyAssets - uint128(params.liquidityRemoved);
                 }
             }
         }
         borrowRate = IIrm(_marketParams.irm).borrowRateView(_marketParams, market);
     }
-
 }

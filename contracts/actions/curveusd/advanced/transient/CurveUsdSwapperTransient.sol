@@ -16,7 +16,6 @@ import { ReentrancyGuardTransient } from "../../../../utils/ReentrancyGuardTrans
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
 import { ICrvUsdController } from "../../../../interfaces/curveusd/ICurveUsd.sol";
 
-
 /// @title CurveUsdSwapperTransient Callback contract for CurveUsd extended actions with transient storage
 contract CurveUsdSwapperTransient is
     CurveUsdHelper,
@@ -47,13 +46,11 @@ contract CurveUsdSwapperTransient is
     /// @dev Called by curveusd controller after 'repay_extended' method
     /// @dev sends all collateral the user has to this contract, we swap a part or all of it
     /// @dev After swapping, position will be recreated on curveusd or closed fully
-    function callback_repay(
-        address _user,
-        uint256,
-        uint256,
-        uint256,
-        uint256[] memory info
-    ) external onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
+    function callback_repay(address _user, uint256, uint256, uint256, uint256[] memory info)
+        external
+        onlyValidCrvUsdController(msg.sender)
+        returns (CallbackData memory cb)
+    {
         uint256 gasUsed = info[0];
 
         ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
@@ -77,13 +74,11 @@ contract CurveUsdSwapperTransient is
 
     /// @dev Called by curveusd controller after 'create_loan_extended' and 'borrow_more_extended' methods
     /// @dev sends exData.srcAmount of curveUsd token to this contract for us to sell then pulls received coll token
-    function callback_deposit(
-        address _user,
-        uint256,
-        uint256,
-        uint256,
-        uint256[] memory info
-    ) external onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
+    function callback_deposit(address _user, uint256, uint256, uint256, uint256[] memory info)
+        external
+        onlyValidCrvUsdController(msg.sender)
+        returns (CallbackData memory cb)
+    {
         uint256 gasUsed = info[0];
 
         ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
@@ -97,13 +92,11 @@ contract CurveUsdSwapperTransient is
         IERC20(collToken).safeApprove(msg.sender, cb.collateral);
     }
 
-    function callback_liquidate(
-        address _user,
-        uint256,
-        uint256,
-        uint256,
-        uint256[] memory info
-    ) external onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
+    function callback_liquidate(address _user, uint256, uint256, uint256, uint256[] memory info)
+        external
+        onlyValidCrvUsdController(msg.sender)
+        returns (CallbackData memory cb)
+    {
         uint256 gasUsed = info[0];
         bool sellAllCollateral = info[1] == 1 ? true : false;
 
@@ -140,31 +133,21 @@ contract CurveUsdSwapperTransient is
         address _feeToken,
         uint256 _gasUsedForAutomation
     ) internal returns (uint256) {
-        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) = _sellWithTxSaverChoice(
-            _exData,
-            _user,
-            DFSRegistry(REGISTRY_ADDR)
-        );
+        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) =
+            _sellWithTxSaverChoice(_exData, _user, DFSRegistry(REGISTRY_ADDR));
 
         // can't take both automation fee and TxSaver fee
         if (_gasUsedForAutomation > 0 && !txSaverFeeTaken) {
-            receivedAmount -= _takeAutomationFee(
-                receivedAmount,
-                _feeToken,
-                _gasUsedForAutomation,
-                hasFee
-            );
+            receivedAmount -= _takeAutomationFee(receivedAmount, _feeToken, _gasUsedForAutomation, hasFee);
         }
 
         return receivedAmount;
     }
 
-    function _takeAutomationFee(
-        uint256 _destTokenAmount,
-        address _token,
-        uint256 _gasUsed,
-        bool hasFee
-    ) internal returns (uint256 feeAmount) {
+    function _takeAutomationFee(uint256 _destTokenAmount, address _token, uint256 _gasUsed, bool hasFee)
+        internal
+        returns (uint256 feeAmount)
+    {
         // we need to take the fee for tx cost as well, as it's in a strategy
         feeAmount += calcGasCost(_gasUsed, _token, 0);
 

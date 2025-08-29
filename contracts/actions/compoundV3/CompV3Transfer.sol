@@ -22,6 +22,7 @@ contract CompV3Transfer is ActionBase, CompV3Helper {
         address tokenAddr;
         uint256 amount;
     }
+
     error CompV3TransferError();
 
     /// @inheritdoc ActionBase
@@ -39,7 +40,8 @@ contract CompV3Transfer is ActionBase, CompV3Helper {
         params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[3], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _transfer(params.market, params.from, params.to, params.tokenAddr, params.amount);
+        (uint256 withdrawAmount, bytes memory logData) =
+            _transfer(params.market, params.from, params.to, params.tokenAddr, params.amount);
         emit ActionEvent("CompV3Transfer", logData);
         return bytes32(withdrawAmount);
     }
@@ -65,14 +67,11 @@ contract CompV3Transfer is ActionBase, CompV3Helper {
     /// @param _to The address of an account that is the receiver in the transaction
     /// @param _asset The ERC-20 address of the asset that is being sent in the transaction
     /// @param _amount Amount of the specified asset to be transferred
-    function _transfer(
-        address _market,
-        address _from,
-        address _to,
-        address _asset,
-        uint256 _amount
-    ) internal returns (uint256, bytes memory) {
-        if( _to == address(0)) { 
+    function _transfer(address _market, address _from, address _to, address _asset, uint256 _amount)
+        internal
+        returns (uint256, bytes memory)
+    {
+        if (_to == address(0)) {
             revert CompV3TransferError();
         }
 
@@ -81,7 +80,7 @@ contract CompV3Transfer is ActionBase, CompV3Helper {
         }
         // if _amount type(uint).max that means take out whole supplied balance
         if (_amount == type(uint256).max) {
-            if(_asset == IComet(_market).baseToken()) {
+            if (_asset == IComet(_market).baseToken()) {
                 _amount = IComet(_market).balanceOf(_from);
             } else {
                 _amount = IComet(_market).collateralBalanceOf(_from, _asset);

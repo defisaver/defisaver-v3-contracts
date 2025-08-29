@@ -8,7 +8,6 @@ import { IBasicTokenAdapters } from "../../interfaces/reflexer/IBasicTokenAdapte
 
 /// @title Open a new Reflexer safe
 contract ReflexerOpen is ActionBase, ReflexerHelper {
-
     /// @param adapterAddr Address of the adapter
     struct Params {
         address adapterAddr;

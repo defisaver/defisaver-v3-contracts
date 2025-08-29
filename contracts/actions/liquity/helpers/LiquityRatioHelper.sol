@@ -9,7 +9,6 @@ import { MainnetLiquityAddresses } from "./MainnetLiquityAddresses.sol";
 
 /// @title Helper methods for Liquity ratio calc.
 contract LiquityRatioHelper is DSMath, MainnetLiquityAddresses {
-
     /// @notice Gets Trove CR
     /// @param _troveOwner Address of the trove owner
     function getRatio(address _troveOwner) public returns (uint256 ratio, bool isActive) {

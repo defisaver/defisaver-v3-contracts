@@ -18,12 +18,13 @@ contract CompCollateralSwitch is ActionBase, CompHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeAction(
-        bytes memory _callData,
-        bytes32[] memory,
-        uint8[] memory,
-        bytes32[] memory
-    ) public payable virtual override returns (bytes32) {
+    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
+        public
+        payable
+        virtual
+        override
+        returns (bytes32)
+    {
         Params memory inputData = parseInputs(_callData);
         _switchAsCollateral(inputData);
         return bytes32(0);
@@ -44,10 +45,10 @@ contract CompCollateralSwitch is ActionBase, CompHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _switchAsCollateral(Params memory _inputData) internal {
-        for (uint256 i = 0; i < _inputData.cTokens.length; i++){
-            if (_inputData.useAsCollateral[i]){
+        for (uint256 i = 0; i < _inputData.cTokens.length; i++) {
+            if (_inputData.useAsCollateral[i]) {
                 enterMarket(_inputData.cTokens[i]);
-            }else{
+            } else {
                 exitMarket(_inputData.cTokens[i]);
             }
         }

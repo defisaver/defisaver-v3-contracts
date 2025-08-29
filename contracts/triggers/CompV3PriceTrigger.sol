@@ -13,12 +13,7 @@ import { AdminAuth } from "../auth/AdminAuth.sol";
 /// @notice This uses the CompoundV3 oracle, which returns the price of the collateral token in terms of the base (debt) token.
 /// @notice The trigger expects the price input to be scaled by 1e8.
 /// @notice This trigger also uses the user address to temporarily store the current ratio of user's position.
-contract CompV3PriceTrigger is
-    ITrigger,
-    AdminAuth,
-    CompV3RatioHelper,
-    TriggerHelper
-{
+contract CompV3PriceTrigger is ITrigger, AdminAuth, CompV3RatioHelper, TriggerHelper {
     TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     enum PriceState {
@@ -29,7 +24,7 @@ contract CompV3PriceTrigger is
     /// @param market address of the compoundV3 market
     /// @param collToken address of the collateral token from the market
     /// @param user address of the user that will be used to store the current ratio for.
-    /// @param price price of the collateral token in terms of the base token that represents the triggerable point. 
+    /// @param price price of the collateral token in terms of the base token that represents the triggerable point.
     /// @param state represents if we want the current price to be higher or lower than price param
     struct SubParams {
         address market;
@@ -62,9 +57,9 @@ contract CompV3PriceTrigger is
     }
 
     //solhint-disable-next-line no-empty-blocks
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
-    
-    function isChangeable() public pure override returns (bool) { 
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 

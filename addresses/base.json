@@ -52,9 +52,7 @@
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
-        "history": [
-            "0x49658E0CF3883c338397C7257619B280dF581057"
-        ]
+        "history": ["0x49658E0CF3883c338397C7257619B280dF581057"]
     },
     {
         "name": "StrategyExecutor",
@@ -65,9 +63,7 @@
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
-        "history": [
-            "0x49658E0CF3883c338397C7257619B280dF581057"
-        ]
+        "history": ["0x49658E0CF3883c338397C7257619B280dF581057"]
     },
     {
         "name": "DFSSell",
@@ -228,9 +224,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x1420f4977E7B71AFddccBFc6F6e1505CefdF99F0"
-        ]
+        "history": ["0x1420f4977E7B71AFddccBFc6F6e1505CefdF99F0"]
     },
     {
         "name": "SendTokenAndUnwrap",
@@ -241,9 +235,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xF32d5d8D81f2662A02955CE537537088DF29daf5"
-        ]
+        "history": ["0xF32d5d8D81f2662A02955CE537537088DF29daf5"]
     },
     {
         "name": "SendTokens",
@@ -254,9 +246,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x17B4ecd173b3Df2F5cB02c53Df8AA34e23Bcb92E"
-        ]
+        "history": ["0x17B4ecd173b3Df2F5cB02c53Df8AA34e23Bcb92E"]
     },
     {
         "name": "HandleAuth",
@@ -300,9 +290,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xAAbd4B0372240E319F9722c4Fd1e2FE0C8d422D2"
-        ]
+        "history": ["0xAAbd4B0372240E319F9722c4Fd1e2FE0C8d422D2"]
     },
     {
         "name": "FLAaveV3WithFee",
@@ -412,9 +400,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x741FcFC1D708CEA0d845Fd04de51022b6d00e060"
-        ]
+        "history": ["0x741FcFC1D708CEA0d845Fd04de51022b6d00e060"]
     },
     {
         "name": "AaveV3DelegateWithSig",
@@ -513,9 +499,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x7d84DCC2a1f547A8D267c85eed791fd3663562b8"
-        ]
+        "history": ["0x7d84DCC2a1f547A8D267c85eed791fd3663562b8"]
     },
     {
         "name": "AaveV3RatioCheck",
@@ -548,9 +532,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x74346bf868Dc9201922A7F7DD26917F7BF5F0f3b"
-        ]
+        "history": ["0x74346bf868Dc9201922A7F7DD26917F7BF5F0f3b"]
     },
     {
         "name": "CompV3Claim",
@@ -572,9 +554,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x73c627b48cb7c2b319E496fc55535Db6eD2c3445"
-        ]
+        "history": ["0x73c627b48cb7c2b319E496fc55535Db6eD2c3445"]
     },
     {
         "name": "CompV3Supply",
@@ -585,9 +565,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x94b63bf925C2Ab17F7df6914E110E969cC36A93e"
-        ]
+        "history": ["0x94b63bf925C2Ab17F7df6914E110E969cC36A93e"]
     },
     {
         "name": "CompV3View",
@@ -598,9 +576,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x22591183c0eb7B2Fe07F6F44fd360d1117D07b4f"
-        ]
+        "history": ["0x22591183c0eb7B2Fe07F6F44fd360d1117D07b4f"]
     },
     {
         "name": "CompV3Transfer",
@@ -622,9 +598,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x8543133c3827D29b67D2b012101f463c870C1790"
-        ]
+        "history": ["0x8543133c3827D29b67D2b012101f463c870C1790"]
     },
     {
         "name": "TokenBalance",
@@ -690,9 +664,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x4839d021A24820e57C31D386d430e2e82694F73B"
-        ]
+        "history": ["0x4839d021A24820e57C31D386d430e2e82694F73B"]
     },
     {
         "name": "FeeRecipient",
@@ -739,9 +711,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x13976feAeC930Cc51986605D6f479d97a3b90FA9"
-        ]
+        "history": ["0x13976feAeC930Cc51986605D6f479d97a3b90FA9"]
     },
     {
         "name": "OneInchWrapper",
@@ -752,9 +722,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x4E1946059Dc2426Ef3a9AE82fB30B7718a09B7E1"
-        ]
+        "history": ["0x4E1946059Dc2426Ef3a9AE82fB30B7718a09B7E1"]
     },
     {
         "name": "OdosWrapper",
@@ -816,9 +784,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x2D00bb171B91a86ebb9A7860875484bB90Cb7766"
-        ]
+        "history": ["0x2D00bb171B91a86ebb9A7860875484bB90Cb7766"]
     },
     {
         "name": "CurveWrapperV3",
@@ -877,7 +843,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
-          "0xf140B2904beb743C2f17e0b5f766074212a7e243",
+            "0xf140B2904beb743C2f17e0b5f766074212a7e243",
             "0x5410BBB107B490f7A5789CfdB3667D2AbdE9c0eC",
             "0x6962a609A10051A5309Fe8c4d3dAb15366C481d2",
             "0x1882BBB847425335CCe0b81eC10295674A982395",
@@ -1092,9 +1058,7 @@
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": [
-            "0xC1ff2500790150c4a1c77B9e702e9984A252b60c"
-        ]
+        "history": ["0xC1ff2500790150c4a1c77B9e702e9984A252b60c"]
     },
     {
         "name": "MorphoBlueRatioTrigger",
@@ -1138,9 +1102,7 @@
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": [
-            "0xdbcacf59c5063da8b15481f88e7d70e13c92f2a1"
-        ]
+        "history": ["0xdbcacf59c5063da8b15481f88e7d70e13c92f2a1"]
     },
     {
         "name": "TxSaverExecutor",
@@ -1151,9 +1113,7 @@
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0xe41DB81Eaa636E71A2f4E67D34236f341D5a1B7d"
-        ]
+        "history": ["0xe41DB81Eaa636E71A2f4E67D34236f341D5a1B7d"]
     },
     {
         "name": "BotAuthForTxSaver",
@@ -1175,9 +1135,7 @@
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": [
-            "0xbC36AE71e15865f4074B786d992F1105cdd8c196"
-        ]
+        "history": ["0xbC36AE71e15865f4074B786d992F1105cdd8c196"]
     },
     {
         "name": "StrategyTriggerView",
@@ -1248,9 +1206,7 @@
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": [
-            "0x8489B4e243Ba8062D3351439D560E6AF477867ab"
-        ]
+        "history": ["0x8489B4e243Ba8062D3351439D560E6AF477867ab"]
     },
     {
         "name": "LimitOrderSubProxy",
@@ -1352,9 +1308,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xCd4d5896AEAf97e738d3E7215ac01c2CF97474bc"
-        ]
+        "history": ["0xCd4d5896AEAf97e738d3E7215ac01c2CF97474bc"]
     },
     {
         "name": "FluidVaultT1Supply",
@@ -1365,9 +1319,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x028ACA45244d4897ff80ef65ed0b735Bb0D4B0A5"
-        ]
+        "history": ["0x028ACA45244d4897ff80ef65ed0b735Bb0D4B0A5"]
     },
     {
         "name": "FluidVaultT1Withdraw",
@@ -1378,9 +1330,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x26bE6a2EdE97aE826ed9DA8Fb79428037fe55cEB"
-        ]
+        "history": ["0x26bE6a2EdE97aE826ed9DA8Fb79428037fe55cEB"]
     },
     {
         "name": "FluidVaultT1Borrow",
@@ -1391,9 +1341,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x8dCBF436cC0971FE29886E58CE0CAeb36d43E91E"
-        ]
+        "history": ["0x8dCBF436cC0971FE29886E58CE0CAeb36d43E91E"]
     },
     {
         "name": "FluidVaultT1Payback",
@@ -1418,9 +1366,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x93bFBf44b87be48D46b25Fe0C7F549A79Ca05167"
-        ]
+        "history": ["0x93bFBf44b87be48D46b25Fe0C7F549A79Ca05167"]
     },
     {
         "name": "FluidRatioTrigger",
@@ -1431,9 +1377,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xc105d88118EC10f5BCBdF11E3897746De0De3C2f"
-        ]
+        "history": ["0xc105d88118EC10f5BCBdF11E3897746De0De3C2f"]
     },
     {
         "name": "FluidRatioCheck",
@@ -1444,9 +1388,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x676dfB55F94a22FA2C9569BC3eCBEb8074A36B06"
-        ]
+        "history": ["0x676dfB55F94a22FA2C9569BC3eCBEb8074A36B06"]
     },
     {
         "name": "FluidView",
@@ -1457,9 +1399,7 @@
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": [
-            "0x5835CaDbA8843CD6d6d55782908351E9c74221aD"
-        ]
+        "history": ["0x5835CaDbA8843CD6d6d55782908351E9c74221aD"]
     },
     {
         "name": "TokenizedVaultAdapter",
@@ -1516,7 +1456,7 @@
         "registryIds": [],
         "history": []
     },
-    { 
+    {
         "name": "ExecuteCall",
         "address": "0x232c43c354dbebb75c1ed0d9a3fddde5d630e335",
         "id": "0xd82327eb",

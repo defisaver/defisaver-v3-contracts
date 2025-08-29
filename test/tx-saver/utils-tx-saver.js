@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
-const hre = require('hardhat');
-const dfs = require('@defisaver/sdk');
-const { BigNumber } = require('ethers');
-const { getAssetInfo } = require('@defisaver/tokens');
+const hre = require("hardhat");
+const dfs = require("@defisaver/sdk");
+const { BigNumber } = require("ethers");
+const { getAssetInfo } = require("@defisaver/tokens");
 
 const {
     impersonateAccount,
@@ -18,9 +18,9 @@ const {
     fetchAmountinUSDPrice,
     chainIds,
     formatMockExchangeObj,
-} = require('../utils/utils');
-const { supplyToMarket } = require('../utils/llamalend');
-const { signSafeTx } = require('../utils/safe');
+} = require("../utils/utils");
+const { supplyToMarket } = require("../utils/llamalend");
+const { signSafeTx } = require("../utils/safe");
 
 const addBotCallerForTxSaver = async (botAddr, isFork = false) => {
     if (!isFork) {
@@ -28,9 +28,9 @@ const addBotCallerForTxSaver = async (botAddr, isFork = false) => {
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    const botAuthAddr = await getAddrFromRegistry('BotAuthForTxSaver');
+    const botAuthAddr = await getAddrFromRegistry("BotAuthForTxSaver");
 
-    const botAuthInstance = await hre.ethers.getContractFactory('BotAuthForTxSaver', signer);
+    const botAuthInstance = await hre.ethers.getContractFactory("BotAuthForTxSaver", signer);
     let botAuth = await botAuthInstance.attach(botAuthAddr);
 
     botAuth = botAuth.connect(signer);
@@ -44,38 +44,35 @@ const addBotCallerForTxSaver = async (botAddr, isFork = false) => {
 
 const emptyInjectedOrder = {
     wrapper: nullAddress,
-    wrapperData: hre.ethers.utils.arrayify('0x'), // Empty bytes
+    wrapperData: hre.ethers.utils.arrayify("0x"), // Empty bytes
     offchainData: {
         wrapper: nullAddress,
         exchangeAddr: nullAddress,
         allowanceTarget: nullAddress,
         price: 0,
         protocolFee: 0,
-        callData: hre.ethers.utils.arrayify('0x'), // Empty bytes
+        callData: hre.ethers.utils.arrayify("0x"), // Empty bytes
     },
 };
 
 const openAavePositionEncodedData = async (senderAcc, wallet, txSaverUserSignedData) => {
-    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
-    const poolAddress = await aaveMarketContract.getPool();
-    const aavePool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
-
-    const supplyAsset = getAssetInfo('WETH', chainIds[network]);
-    const supplyToken = supplyAsset.address;
-    const supplyAmount = fetchAmountinUSDPrice(
-        supplyAsset.symbol,
-        '50000',
+    const aaveMarketContract = await hre.ethers.getContractAt(
+        "IPoolAddressesProvider",
+        addrs[network].AAVE_MARKET
     );
+    const poolAddress = await aaveMarketContract.getPool();
+    const aavePool = await hre.ethers.getContractAt("IL2PoolV3", poolAddress);
+
+    const supplyAsset = getAssetInfo("WETH", chainIds[network]);
+    const supplyToken = supplyAsset.address;
+    const supplyAmount = fetchAmountinUSDPrice(supplyAsset.symbol, "50000");
     const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, supplyAsset.decimals);
     const supplyAssetReserveData = await aavePool.getReserveData(supplyToken);
     const supplyAssetId = supplyAssetReserveData.id;
 
-    const borrowAsset = getAssetInfo('USDC', chainIds[network]);
+    const borrowAsset = getAssetInfo("USDC", chainIds[network]);
     const borrowToken = borrowAsset.address;
-    const borrowAmount = fetchAmountinUSDPrice(
-        borrowAsset.symbol,
-        '20000',
-    );
+    const borrowAmount = fetchAmountinUSDPrice(borrowAsset.symbol, "20000");
     const borrowAmountInWei = hre.ethers.utils.parseUnits(borrowAmount, borrowAsset.decimals);
     const borrowAssetReserveData = await aavePool.getReserveData(borrowToken);
     const borrowAssetReserveDataId = borrowAssetReserveData.id;
@@ -92,7 +89,7 @@ const openAavePositionEncodedData = async (senderAcc, wallet, txSaverUserSignedD
         supplyAssetId,
         true,
         false,
-        nullAddress,
+        nullAddress
     );
 
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
@@ -103,10 +100,10 @@ const openAavePositionEncodedData = async (senderAcc, wallet, txSaverUserSignedD
         2,
         borrowAssetReserveDataId,
         false,
-        nullAddress,
+        nullAddress
     );
 
-    const recipe = new dfs.Recipe('AaveV3OpenRecipe-TxSaverTest', [supplyAction, borrowAction]);
+    const recipe = new dfs.Recipe("AaveV3OpenRecipe-TxSaverTest", [supplyAction, borrowAction]);
 
     return recipe.encodeForTxSaverCall(txSaverUserSignedData)[1];
 };
@@ -118,17 +115,13 @@ const dfsSellEncodedData = async (
     srcToken,
     destToken,
     sellAmount,
-    fee = 3000,
+    fee = 3000
 ) => {
     await setBalance(srcToken, senderAcc.address, BigNumber.from(sellAmount).mul(2));
     await approve(srcToken, wallet.address, senderAcc);
 
-    const recipe = new dfs.Recipe('SellRecipe-TxSaverTest', [
-        new dfs.actions.basic.PullTokenAction(
-            srcToken,
-            senderAcc.address,
-            sellAmount,
-        ),
+    const recipe = new dfs.Recipe("SellRecipe-TxSaverTest", [
+        new dfs.actions.basic.PullTokenAction(srcToken, senderAcc.address, sellAmount),
         new dfs.actions.basic.SellAction(
             formatExchangeObj(
                 srcToken,
@@ -136,10 +129,10 @@ const dfsSellEncodedData = async (
                 sellAmount,
                 addrs[network].UNISWAP_V3_WRAPPER,
                 0,
-                fee,
+                fee
             ),
             wallet.address,
-            senderAcc.address,
+            senderAcc.address
         ),
     ]);
     return recipe.encodeForTxSaverCall(txSaverSignedData)[1];
@@ -152,32 +145,20 @@ const llamaLendLevCreateEncodedData = async (
     controllerAddr,
     controllerId,
     collToken,
-    debToken,
+    debToken
 ) => {
     await supplyToMarket(controllerAddr, chainIds[network]);
-    const supplyAmount = fetchAmountinUSDPrice(
-        collToken.symbol, '50000',
-    );
-    const borrowAmount = fetchAmountinUSDPrice(
-        debToken.symbol, '60000',
-    );
-    if (supplyAmount === 'Infinity') return;
-    if (borrowAmount === 'Infinity') return;
-    const supplyAmountInWei = hre.ethers.utils.parseUnits(
-        supplyAmount, collToken.decimals,
-    );
-    const borrowAmountWei = hre.ethers.utils.parseUnits(
-        borrowAmount, debToken.decimals,
-    );
-    const exchangeData = await formatMockExchangeObj(
-        debToken,
-        collToken,
-        borrowAmountWei,
-    );
+    const supplyAmount = fetchAmountinUSDPrice(collToken.symbol, "50000");
+    const borrowAmount = fetchAmountinUSDPrice(debToken.symbol, "60000");
+    if (supplyAmount === "Infinity") return;
+    if (borrowAmount === "Infinity") return;
+    const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, collToken.decimals);
+    const borrowAmountWei = hre.ethers.utils.parseUnits(borrowAmount, debToken.decimals);
+    const exchangeData = await formatMockExchangeObj(debToken, collToken, borrowAmountWei);
     await setBalance(collToken.address, senderAcc.address, supplyAmountInWei);
     await approve(collToken.address, wallet.address, senderAcc);
 
-    const recipe = new dfs.Recipe('LlamaLendLevCreateRecipe-TxSaverTest', [
+    const recipe = new dfs.Recipe("LlamaLendLevCreateRecipe-TxSaverTest", [
         new dfs.actions.llamalend.LlamaLendLevCreateAction(
             controllerAddr,
             controllerId,
@@ -185,7 +166,7 @@ const llamaLendLevCreateEncodedData = async (
             supplyAmountInWei,
             10, // bands
             exchangeData,
-            0, // gas used
+            0 // gas used
         ),
     ]);
     // eslint-disable-next-line consistent-return
@@ -197,7 +178,7 @@ const signSafeTransaction = async (
     wallet,
     recipeExecutorAddr,
     functionData,
-    refundReceiver,
+    refundReceiver
 ) => {
     const safeTxParamsForSign = {
         to: recipeExecutorAddr,
@@ -220,18 +201,13 @@ const wdiv = (x, y) => {
     return x.mul(WAD).add(y.div(2)).div(y);
 };
 
-const calculateExpectedFeeTaken = async (
-    gasUsed,
-    tokenAsset,
-    tokenPriceInEth,
-    gasPrice,
-) => {
+const calculateExpectedFeeTaken = async (gasUsed, tokenAsset, tokenPriceInEth, gasPrice) => {
     const gasUsedBn = BigNumber.from(gasUsed);
     const gasPriceBn = BigNumber.from(gasPrice);
     const tokenPriceInEthBn = BigNumber.from(tokenPriceInEth);
     const txCost = gasUsedBn.mul(gasPriceBn);
 
-    if (tokenAsset.symbol === 'ETH' || tokenAsset.symbol === 'WETH') {
+    if (tokenAsset.symbol === "ETH" || tokenAsset.symbol === "WETH") {
         return txCost;
     }
     const x = wdiv(txCost, tokenPriceInEthBn);

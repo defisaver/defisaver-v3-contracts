@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
-const hre = require('hardhat');
-const { expect } = require('chai');
-const { getAssetInfo } = require('@defisaver/tokens');
+const hre = require("hardhat");
+const { expect } = require("chai");
+const { getAssetInfo } = require("@defisaver/tokens");
 const {
     getProxy,
     network,
@@ -18,11 +18,9 @@ const {
     redeploy,
     sendEther,
     addBalancerFlLiquidity,
-} = require('../../utils/utils');
+} = require("../../utils/utils");
 
-const {
-    addBotCaller,
-} = require('../utils/utils-strategies');
+const { addBotCaller } = require("../utils/utils-strategies");
 const {
     COMP_V3_AUTOMATION_TEST_PAIRS,
     openCompV3ProxyPosition,
@@ -31,21 +29,21 @@ const {
     addCompV3Manager,
     deployCompV3BoostBundle,
     deployCompV3RepayBundle,
-} = require('../../utils/compoundV3');
-const { subCompV3LeverageManagement } = require('../utils/strategy-subs');
-const { callCompV3FLRepayStrategy, callCompV3RepayStrategy } = require('../utils/strategy-calls');
+} = require("../../utils/compoundV3");
+const { subCompV3LeverageManagement } = require("../utils/strategy-subs");
+const { callCompV3FLRepayStrategy, callCompV3RepayStrategy } = require("../utils/strategy-calls");
 
 const TRIGGER_REPAY_RATIO = 180;
 const TRIGGER_BOOST_RATIO = 0;
 const TARGET_RATIO_BOOST = 0;
 const TARGET_RATIO_REPAY = 220;
-const COLL_AMOUNT_IN_USD = '40000';
-const DEBT_AMOUNT_IN_USD = '25000';
-const REPAY_AMOUNT_IN_USD = '3000';
+const COLL_AMOUNT_IN_USD = "40000";
+const DEBT_AMOUNT_IN_USD = "25000";
+const REPAY_AMOUNT_IN_USD = "3000";
 const BOOST_ENABLED = false;
 
 const runRepayTests = () => {
-    describe('CompV3 Repay Strategies Tests', () => {
+    describe("CompV3 Repay Strategies Tests", () => {
         let snapshotId;
         let senderAcc;
         let proxy;
@@ -58,22 +56,22 @@ const runRepayTests = () => {
         before(async () => {
             const isFork = isNetworkFork();
             senderAcc = (await hre.ethers.getSigners())[0];
-            await sendEther(senderAcc, addrs[network].OWNER_ACC, '10');
+            await sendEther(senderAcc, addrs[network].OWNER_ACC, "10");
             botAcc = (await hre.ethers.getSigners())[1];
             proxy = await getProxy(senderAcc.address);
             await addBotCaller(botAcc.address, isFork);
             strategyExecutor = (await getStrategyExecutorContract()).connect(botAcc);
             mockWrapper = await getAndSetMockExchangeWrapper(senderAcc);
-            const flContract = await getContractFromRegistry('FLAction', isFork);
+            const flContract = await getContractFromRegistry("FLAction", isFork);
             flAddr = flContract.address;
 
-            await redeploy('CompV3Borrow', isFork);
-            await redeploy('CompV3Payback', isFork);
-            await redeploy('CompV3Supply', isFork);
-            await redeploy('CompV3Withdraw', isFork);
-            await redeploy('CompV3RatioCheck', isFork);
+            await redeploy("CompV3Borrow", isFork);
+            await redeploy("CompV3Payback", isFork);
+            await redeploy("CompV3Supply", isFork);
+            await redeploy("CompV3Withdraw", isFork);
+            await redeploy("CompV3RatioCheck", isFork);
 
-            if (network !== 'mainnet') {
+            if (network !== "mainnet") {
                 /// @dev At the time of testing, regular repay and boost bundles are already live and deployed on L2s (arbitrum & base).
                 /// We only want to test new EOA bundles deployment. For that we need new CompV3SubProxyL2 contract with new bundle ids.
                 const existingRepayBundleId = 4;
@@ -81,16 +79,19 @@ const runRepayTests = () => {
                 const newEoaBoostBundleId = await deployCompV3BoostBundle(true);
                 const newEoaRepayBundleId = await deployCompV3RepayBundle(true);
                 subProxyContract = await redeploy(
-                    'CompV3SubProxyL2',
+                    "CompV3SubProxyL2",
                     isFork,
                     existingRepayBundleId,
                     existingBoostBundleId,
                     newEoaRepayBundleId,
-                    newEoaBoostBundleId,
+                    newEoaBoostBundleId
                 );
             } else {
                 /// @dev On mainnet, all bundles are already deployed, including EOA bundles, so here we just test the live state
-                subProxyContract = await hre.ethers.getContractAt('CompV3SubProxy', addrs.mainnet.COMP_V3_SUB_PROXY_ADDR);
+                subProxyContract = await hre.ethers.getContractAt(
+                    "CompV3SubProxy",
+                    addrs.mainnet.COMP_V3_SUB_PROXY_ADDR
+                );
             }
         });
         beforeEach(async () => {
@@ -100,12 +101,7 @@ const runRepayTests = () => {
             await revertToSnapshot(snapshotId);
         });
 
-        const baseTest = async (
-            collAsset,
-            debtAsset,
-            isEOA,
-            isFLStrategy,
-        ) => {
+        const baseTest = async (collAsset, debtAsset, isEOA, isFLStrategy) => {
             const positionOwner = isEOA ? senderAcc.address : proxy.address;
             if (isEOA) {
                 await addCompV3Manager(senderAcc.address, proxy.address, debtAsset.symbol);
@@ -114,7 +110,7 @@ const runRepayTests = () => {
                     debtAsset.symbol,
                     collAsset.symbol,
                     COLL_AMOUNT_IN_USD,
-                    DEBT_AMOUNT_IN_USD,
+                    DEBT_AMOUNT_IN_USD
                 );
             } else {
                 await openCompV3ProxyPosition(
@@ -123,12 +119,12 @@ const runRepayTests = () => {
                     debtAsset.symbol,
                     collAsset.symbol,
                     COLL_AMOUNT_IN_USD,
-                    DEBT_AMOUNT_IN_USD,
+                    DEBT_AMOUNT_IN_USD
                 );
             }
 
             const ratioBefore = await getCompV3PositionRatio(debtAsset.symbol, positionOwner);
-            console.log('ratioBefore', ratioBefore);
+            console.log("ratioBefore", ratioBefore);
 
             const { subData, repaySubId } = await subCompV3LeverageManagement(
                 proxy,
@@ -139,19 +135,19 @@ const runRepayTests = () => {
                 TARGET_RATIO_REPAY,
                 BOOST_ENABLED,
                 isEOA,
-                subProxyContract.address,
+                subProxyContract.address
             );
 
             let subDataInStruct = subData;
 
-            if (network !== 'mainnet') {
+            if (network !== "mainnet") {
                 subDataInStruct = await subProxyContract.parseSubData(subData);
             }
 
             const strategySub = await subProxyContract.formatRepaySub(
                 subDataInStruct,
                 proxy.address,
-                senderAcc.address,
+                senderAcc.address
             );
 
             const repayAmount = await fetchAmountInUSDPrice(collAsset.symbol, REPAY_AMOUNT_IN_USD);
@@ -160,7 +156,7 @@ const runRepayTests = () => {
                 collAsset,
                 debtAsset,
                 repayAmount,
-                mockWrapper,
+                mockWrapper
             );
 
             if (isFLStrategy) {
@@ -176,7 +172,7 @@ const runRepayTests = () => {
                     repayAmount,
                     flAddr,
                     collAsset.address,
-                    positionOwner,
+                    positionOwner
                 );
             } else {
                 await callCompV3RepayStrategy(
@@ -187,20 +183,26 @@ const runRepayTests = () => {
                     exchangeObject,
                     repayAmount,
                     collAsset.address,
-                    positionOwner,
+                    positionOwner
                 );
             }
 
             const ratioAfter = await getCompV3PositionRatio(debtAsset.symbol, positionOwner);
-            console.log('ratioAfter', ratioAfter);
+            console.log("ratioAfter", ratioAfter);
 
             expect(ratioAfter).to.be.gt(ratioBefore);
         };
 
         for (let i = 0; i < COMP_V3_AUTOMATION_TEST_PAIRS[chainIds[network]].length; ++i) {
             const pair = COMP_V3_AUTOMATION_TEST_PAIRS[chainIds[network]][i];
-            const collAsset = getAssetInfo(pair.collSymbol === 'ETH' ? 'WETH' : pair.collSymbol, chainIds[network]);
-            const debtAsset = getAssetInfo(pair.debtSymbol === 'ETH' ? 'WETH' : pair.debtSymbol, chainIds[network]);
+            const collAsset = getAssetInfo(
+                pair.collSymbol === "ETH" ? "WETH" : pair.collSymbol,
+                chainIds[network]
+            );
+            const debtAsset = getAssetInfo(
+                pair.debtSymbol === "ETH" ? "WETH" : pair.debtSymbol,
+                chainIds[network]
+            );
             it(`... should execute compV3 repay strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = false;
                 const isFLStrategy = false;

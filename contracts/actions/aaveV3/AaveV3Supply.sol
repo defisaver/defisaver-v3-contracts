@@ -44,15 +44,11 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.assetId = uint16(_parseParamUint(params.assetId, _paramMapping[2], _subData, _returnValues));
-        params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
+        params.useDefaultMarket =
+            _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
         params.useOnBehalf = _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
         params.market = _parseParamAddr(params.market, _paramMapping[6], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(
-            params.onBehalf,
-            _paramMapping[7],
-            _subData,
-            _returnValues
-        );
+        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[7], _subData, _returnValues);
 
         if (params.useDefaultMarket) {
             params.market = DEFAULT_AAVE_MARKET;
@@ -61,13 +57,8 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
             params.onBehalf = address(0);
         }
 
-        (uint256 supplyAmount, bytes memory logData) = _supply(
-            params.market,
-            params.amount,
-            params.from,
-            params.assetId,
-            params.onBehalf
-        );
+        (uint256 supplyAmount, bytes memory logData) =
+            _supply(params.market, params.amount, params.from, params.assetId, params.onBehalf);
         emit ActionEvent("AaveV3Supply", logData);
         return bytes32(supplyAmount);
     }
@@ -75,25 +66,13 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _supply(
-            params.market,
-            params.amount,
-            params.from,
-            params.assetId,
-            params.onBehalf
-        );
+        (, bytes memory logData) = _supply(params.market, params.amount, params.from, params.assetId, params.onBehalf);
         logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) = _supply(
-            params.market,
-            params.amount,
-            params.from,
-            params.assetId,
-            params.onBehalf
-        );
+        (, bytes memory logData) = _supply(params.market, params.amount, params.from, params.assetId, params.onBehalf);
         logger.logActionDirectEvent("AaveV3Supply", logData);
     }
 
@@ -111,13 +90,10 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
     /// @param _from Where are we pulling the supply tokens amount from
     /// @param _assetId The id of the token to be deposited
     /// @param _onBehalf For what user we are supplying the tokens, defaults to user's wallet
-    function _supply(
-        address _market,
-        uint256 _amount,
-        address _from,
-        uint16 _assetId,
-        address _onBehalf
-    ) internal returns (uint256, bytes memory) {
+    function _supply(address _market, uint256 _amount, address _from, uint16 _assetId, address _onBehalf)
+        internal
+        returns (uint256, bytes memory)
+    {
         IPoolV3 lendingPool = getLendingPool(_market);
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
 
@@ -139,13 +115,7 @@ contract AaveV3Supply is ActionBase, AaveV3Helper {
 
         lendingPool.supply(tokenAddr, _amount, _onBehalf, AAVE_REFERRAL_CODE);
 
-        bytes memory logData = abi.encode(
-            _market,
-            tokenAddr,
-            _amount,
-            _from,
-            _onBehalf
-        );
+        bytes memory logData = abi.encode(_market, tokenAddr, _amount, _from, _onBehalf);
         return (_amount, logData);
     }
 

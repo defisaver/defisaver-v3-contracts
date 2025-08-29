@@ -10,7 +10,6 @@ import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Borrow assets from Fluid Vault T1 (1_col:1_debt)
 contract FluidVaultT1Borrow is ActionBase {
-
     /// @param vault The address of the Fluid Vault T1
     /// @param nftId ID of the NFT representing the position
     /// @param amount Amount to borrow
@@ -37,12 +36,8 @@ contract FluidVaultT1Borrow is ActionBase {
         params.nftId = _parseParamUint(params.nftId, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
-        params.wrapBorrowedEth = _parseParamUint(
-            params.wrapBorrowedEth ? 1 : 0,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        ) == 1;
+        params.wrapBorrowedEth =
+            _parseParamUint(params.wrapBorrowedEth ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
 
         (uint256 amount, bytes memory logData) = _borrow(params);
         emit ActionEvent("FluidVaultT1Borrow", logData);

@@ -7,9 +7,5 @@ abstract contract IFLParamGetter {
         public
         view
         virtual
-        returns (
-            address[] memory tokens,
-            uint256[] memory amount,
-            uint256[] memory modes
-        );
+        returns (address[] memory tokens, uint256[] memory amount, uint256[] memory modes);
 }

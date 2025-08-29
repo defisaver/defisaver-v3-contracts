@@ -1,14 +1,20 @@
 /* eslint-disable no-await-in-loop */
-const { assets, getAssetInfo } = require('@defisaver/tokens');
-const { expect } = require('chai');
-const hre = require('hardhat');
+const { assets, getAssetInfo } = require("@defisaver/tokens");
+const { expect } = require("chai");
+const hre = require("hardhat");
 
 // eslint-disable-next-line max-len
-const compoundCollateralAssets = assets.filter((a) => a.compoundCollateral).map((a) => getAssetInfo(a.symbol));
+const compoundCollateralAssets = assets
+    .filter((a) => a.compoundCollateral)
+    .map((a) => getAssetInfo(a.symbol));
 
 const {
-    supplyComp, withdrawComp, borrowComp, paybackComp, claimComp,
-} = require('../../utils/actions');
+    supplyComp,
+    withdrawComp,
+    borrowComp,
+    paybackComp,
+    claimComp,
+} = require("../../utils/actions");
 const {
     fetchAmountinUSDPrice,
     balanceOf,
@@ -16,15 +22,15 @@ const {
     getProxy,
     WETH_ADDRESS,
     getAddrFromRegistry,
-} = require('../../utils/utils');
-const { getBorrowBalance, COMP_ADDR } = require('../../utils/compound');
+} = require("../../utils/utils");
+const { getBorrowBalance, COMP_ADDR } = require("../../utils/compound");
 
 const compSupplyTest = async (compTestLength) => {
-    describe('Comp-Supply', function () {
+    describe("Comp-Supply", function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -32,26 +38,26 @@ const compSupplyTest = async (compTestLength) => {
         });
         for (let i = 0; i < compTestLength; ++i) {
             const cTokenData = compoundCollateralAssets[i];
-            if (cTokenData.symbol === 'cWBTC Legacy') {
+            if (cTokenData.symbol === "cWBTC Legacy") {
                 // Jump over WBTC Legacy
                 // eslint-disable-next-line no-continue
                 continue;
             }
-            const fetchedAmountWithUSD = fetchAmountinUSDPrice(cTokenData.underlyingAsset, '10000');
+            const fetchedAmountWithUSD = fetchAmountinUSDPrice(cTokenData.underlyingAsset, "10000");
 
             it(`... should supply ${fetchedAmountWithUSD} ${cTokenData.underlyingAsset} to Compound`, async () => {
                 const assetInfo = getAssetInfo(cTokenData.underlyingAsset);
                 const cToken = cTokenData.address;
 
-                if (assetInfo.symbol === 'REP') return;
+                if (assetInfo.symbol === "REP") return;
 
-                if (assetInfo.symbol === 'ETH') {
+                if (assetInfo.symbol === "ETH") {
                     assetInfo.address = WETH_ADDRESS;
                 }
 
                 const amount = hre.ethers.utils.parseUnits(
                     fetchedAmountWithUSD,
-                    assetInfo.decimals,
+                    assetInfo.decimals
                 );
 
                 const balanceBefore = await balanceOf(cToken, proxy.address);
@@ -66,11 +72,11 @@ const compSupplyTest = async (compTestLength) => {
 };
 
 const compWithdrawTest = async (compTestLength) => {
-    describe('Comp-Withdraw', function () {
+    describe("Comp-Withdraw", function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -79,26 +85,26 @@ const compWithdrawTest = async (compTestLength) => {
 
         for (let i = 0; i < compTestLength; ++i) {
             const cTokenData = compoundCollateralAssets[i];
-            if (cTokenData.symbol === 'cWBTC Legacy') {
+            if (cTokenData.symbol === "cWBTC Legacy") {
                 // Jump over WBTC Legacy
                 // eslint-disable-next-line no-continue
                 continue;
             }
 
-            const fetchedAmountWithUSD = fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000');
+            const fetchedAmountWithUSD = fetchAmountinUSDPrice(cTokenData.underlyingAsset, "1000");
             it(`... should withdraw ${fetchedAmountWithUSD} ${cTokenData.underlyingAsset} from Compound`, async () => {
                 const assetInfo = getAssetInfo(cTokenData.underlyingAsset);
                 const cToken = cTokenData.address;
 
-                if (assetInfo.symbol === 'REP') return;
+                if (assetInfo.symbol === "REP") return;
 
-                if (assetInfo.symbol === 'ETH') {
+                if (assetInfo.symbol === "ETH") {
                     assetInfo.address = WETH_ADDRESS;
                 }
 
                 const amount = hre.ethers.utils.parseUnits(
                     fetchedAmountWithUSD,
-                    assetInfo.decimals,
+                    assetInfo.decimals
                 );
 
                 await supplyComp(proxy, cToken, assetInfo.address, amount, senderAcc.address);
@@ -116,11 +122,11 @@ const compWithdrawTest = async (compTestLength) => {
 };
 
 const compBorrowTest = async (compTestLength) => {
-    describe('Comp-Borrow', function () {
+    describe("Comp-Borrow", function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -129,34 +135,36 @@ const compBorrowTest = async (compTestLength) => {
 
         for (let i = 0; i < compTestLength; ++i) {
             const cTokenData = compoundCollateralAssets[i];
-            if (cTokenData.symbol === 'cWBTC Legacy') {
-            // Jump over WBTC Legacy
-            // eslint-disable-next-line no-continue
+            if (cTokenData.symbol === "cWBTC Legacy") {
+                // Jump over WBTC Legacy
+                // eslint-disable-next-line no-continue
                 continue;
             }
 
-            it(`... should borrow ${fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000')} ${cTokenData.underlyingAsset} from Compound`, async () => {
+            it(`... should borrow ${fetchAmountinUSDPrice(cTokenData.underlyingAsset, "1000")} ${
+                cTokenData.underlyingAsset
+            } from Compound`, async () => {
                 const assetInfo = getAssetInfo(cTokenData.underlyingAsset);
                 const cToken = cTokenData.address;
 
-                if (assetInfo.symbol === 'REP') return;
+                if (assetInfo.symbol === "REP") return;
 
                 // currently can't borrow any comp
                 // TODO: make the check dynamic
-                if (assetInfo.symbol === 'COMP') return;
+                if (assetInfo.symbol === "COMP") return;
 
-                if (assetInfo.symbol === 'ETH') {
+                if (assetInfo.symbol === "ETH") {
                     assetInfo.address = WETH_ADDRESS;
                 }
 
                 const supplyingAmount = hre.ethers.utils.parseUnits(
-                    fetchAmountinUSDPrice(cTokenData.underlyingAsset, '3000'),
-                    assetInfo.decimals,
+                    fetchAmountinUSDPrice(cTokenData.underlyingAsset, "3000"),
+                    assetInfo.decimals
                 );
 
                 const borrowingAmount = hre.ethers.utils.parseUnits(
-                    fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000'),
-                    assetInfo.decimals,
+                    fetchAmountinUSDPrice(cTokenData.underlyingAsset, "1000"),
+                    assetInfo.decimals
                 );
 
                 await supplyComp(
@@ -164,7 +172,7 @@ const compBorrowTest = async (compTestLength) => {
                     cToken,
                     assetInfo.address,
                     supplyingAmount,
-                    senderAcc.address,
+                    senderAcc.address
                 );
 
                 const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
@@ -180,50 +188,51 @@ const compBorrowTest = async (compTestLength) => {
 };
 
 const compPaybackTest = async (compTestLength) => {
-    describe('Comp-Payback', function () {
+    describe("Comp-Payback", function () {
         this.timeout(80000);
 
-        let senderAcc; let proxy; let
-            compView;
+        let senderAcc;
+        let proxy;
+        let compView;
 
         before(async () => {
-            const compViewAddr = await getAddrFromRegistry('CompView');
-            compView = await hre.ethers.getContractAt('CompView', compViewAddr);
+            const compViewAddr = await getAddrFromRegistry("CompView");
+            compView = await hre.ethers.getContractAt("CompView", compViewAddr);
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
 
         for (let i = 0; i < compTestLength; ++i) {
             const cTokenData = compoundCollateralAssets[i];
-            if (cTokenData.symbol === 'cWBTC Legacy') {
+            if (cTokenData.symbol === "cWBTC Legacy") {
                 // Jump over WBTC Legacy
                 // eslint-disable-next-line no-continue
                 continue;
             }
-            const fetchedAmountWithUSD = fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000');
+            const fetchedAmountWithUSD = fetchAmountinUSDPrice(cTokenData.underlyingAsset, "1000");
 
             it(`... should payback ${fetchedAmountWithUSD} ${cTokenData.underlyingAsset} from Compound`, async () => {
                 const assetInfo = getAssetInfo(cTokenData.underlyingAsset);
                 const cToken = cTokenData.address;
 
-                if (assetInfo.symbol === 'REP') return;
+                if (assetInfo.symbol === "REP") return;
 
-                if (assetInfo.symbol === 'ETH') {
+                if (assetInfo.symbol === "ETH") {
                     assetInfo.address = WETH_ADDRESS;
                 }
 
                 // currently can't borrow any comp
                 // TODO: make the check dynamic
-                if (assetInfo.symbol === 'COMP') return;
+                if (assetInfo.symbol === "COMP") return;
 
                 const supplyingAmount = hre.ethers.utils.parseUnits(
-                    fetchAmountinUSDPrice(cTokenData.underlyingAsset, '3000'),
-                    assetInfo.decimals,
+                    fetchAmountinUSDPrice(cTokenData.underlyingAsset, "3000"),
+                    assetInfo.decimals
                 );
 
                 const borrowingAmount = hre.ethers.utils.parseUnits(
-                    fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000'),
-                    assetInfo.decimals,
+                    fetchAmountinUSDPrice(cTokenData.underlyingAsset, "1000"),
+                    assetInfo.decimals
                 );
 
                 await supplyComp(
@@ -231,7 +240,7 @@ const compPaybackTest = async (compTestLength) => {
                     cToken,
                     assetInfo.address,
                     supplyingAmount,
-                    senderAcc.address,
+                    senderAcc.address
                 );
 
                 await borrowComp(proxy, cToken, borrowingAmount, senderAcc.address);
@@ -240,7 +249,11 @@ const compPaybackTest = async (compTestLength) => {
                 const borrowBalanceBefore = await getBorrowBalance(compView, proxy.address, cToken);
 
                 await paybackComp(
-                    proxy, cToken, assetInfo.address, borrowingAmount, senderAcc.address,
+                    proxy,
+                    cToken,
+                    assetInfo.address,
+                    borrowingAmount,
+                    senderAcc.address
                 );
 
                 const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
@@ -254,20 +267,21 @@ const compPaybackTest = async (compTestLength) => {
 };
 
 const compClaimTest = async () => {
-    describe('Comp-Claim', function () {
+    describe("Comp-Claim", function () {
         this.timeout(80000);
 
-        let senderAcc; let proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
         });
 
-        it('... claim comp tokens for proxy account', async () => {
-            const cEth = getAssetInfo('cETH');
+        it("... claim comp tokens for proxy account", async () => {
+            const cEth = getAssetInfo("cETH");
 
-            const amount = hre.ethers.utils.parseUnits('10', 18);
+            const amount = hre.ethers.utils.parseUnits("10", 18);
 
             await supplyComp(proxy, cEth.address, WETH_ADDRESS, amount, senderAcc.address);
 
@@ -292,12 +306,12 @@ const compClaimTest = async () => {
     });
 };
 const compoundDeployContracts = async () => {
-    await redeploy('CompWithdraw');
-    await redeploy('CompClaim');
-    await redeploy('CompPayback');
-    await redeploy('CompBorrow');
-    await redeploy('CompView');
-    await redeploy('CompSupply');
+    await redeploy("CompWithdraw");
+    await redeploy("CompClaim");
+    await redeploy("CompPayback");
+    await redeploy("CompBorrow");
+    await redeploy("CompView");
+    await redeploy("CompSupply");
 };
 
 const compoundFullTest = async (compTestLength) => {

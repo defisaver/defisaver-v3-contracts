@@ -24,49 +24,30 @@ library FluidWithdrawDexLogic {
     /// @return sharesBurnedOrTokenWithdrawn Supports two cases:
     ///         - For partial withdrawal: Return the amount of collateral shares burned.
     ///         - For max withdrawal: Return the exact amount of full withdrawn tokens (either token0 or token1)
-    function withdrawVariable(
-        FluidDexModel.WithdrawDexData memory _data,
-        IFluidVault.Tokens memory _tokens
-    ) internal returns (uint256 sharesBurnedOrTokenWithdrawn) {
+    function withdrawVariable(FluidDexModel.WithdrawDexData memory _data, IFluidVault.Tokens memory _tokens)
+        internal
+        returns (uint256 sharesBurnedOrTokenWithdrawn)
+    {
         _data.vaultType.requireSmartCollateral();
 
         (bool sendColl0AsWrapped, bool sendColl1AsWrapped) = FluidDexTokensUtils.shouldSendTokensAsWrapped(
-            _tokens,
-            _data.wrapWithdrawnEth,
-            _data.variableData.collAmount0,
-            _data.variableData.collAmount1
+            _tokens, _data.wrapWithdrawnEth, _data.variableData.collAmount0, _data.variableData.collAmount1
         );
 
         address sendTokensTo = (sendColl0AsWrapped || sendColl1AsWrapped) ? address(this) : _data.to;
 
         // 1st CASE: Full withdrawal in coll token 0.
         if (_data.variableData.collAmount0 == type(uint256).max) {
-            return _maxWithdrawalInToken0(
-                _data,
-                _tokens,
-                sendTokensTo,
-                sendColl0AsWrapped
-            );
+            return _maxWithdrawalInToken0(_data, _tokens, sendTokensTo, sendColl0AsWrapped);
         }
 
         // 2nd CASE: Full withdrawal in coll token 1.
         if (_data.variableData.collAmount1 == type(uint256).max) {
-            return _maxWithdrawalInToken1(
-                _data,
-                _tokens,
-                sendTokensTo,
-                sendColl1AsWrapped
-            );
+            return _maxWithdrawalInToken1(_data, _tokens, sendTokensTo, sendColl1AsWrapped);
         }
 
         // 3rd CASE: Handle partial withdrawal in either one or both collateral tokens.
-        return _partialWithdrawal(
-            _data,
-            _tokens,
-            sendTokensTo,
-            sendColl0AsWrapped,
-            sendColl1AsWrapped
-        );
+        return _partialWithdrawal(_data, _tokens, sendTokensTo, sendColl0AsWrapped, sendColl1AsWrapped);
     }
 
     /// @notice Helper function to handle max withdrawal in coll token 0.
@@ -164,7 +145,7 @@ library FluidWithdrawDexLogic {
         bool _sendColl0AsWrapped,
         bool _sendColl1AsWrapped
     ) internal returns (uint256 sharesBurnedOrTokenWithdrawn) {
-        ( , int256 exactCollSharesBurned , ) = _data.vaultType.isT2Vault()
+        (, int256 exactCollSharesBurned,) = _data.vaultType.isT2Vault()
             ? IFluidVaultT2(_data.vault).operate(
                 _data.nftId,
                 -_data.variableData.collAmount0.signed256(),

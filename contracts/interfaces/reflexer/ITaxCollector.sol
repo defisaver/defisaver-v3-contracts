@@ -8,7 +8,7 @@ abstract contract ITaxCollector {
         uint256 updateTime;
     }
 
-    mapping (bytes32 => CollateralType) public collateralTypes;
+    mapping(bytes32 => CollateralType) public collateralTypes;
 
-    function taxSingle(bytes32) public virtual returns (uint);
+    function taxSingle(bytes32) public virtual returns (uint256);
 }

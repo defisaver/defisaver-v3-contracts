@@ -5,8 +5,8 @@ pragma solidity =0.8.24;
 abstract contract IBasicTokenAdapters {
     bytes32 public collateralType;
 
-    function decimals() virtual public view returns (uint);
-    function collateral() virtual public view returns (address);
-    function join(address, uint) virtual public payable;
-    function exit(address, uint) virtual public;
+    function decimals() public view virtual returns (uint256);
+    function collateral() public view virtual returns (address);
+    function join(address, uint256) public payable virtual;
+    function exit(address, uint256) public virtual;
 }

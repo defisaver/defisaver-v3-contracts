@@ -8,15 +8,13 @@ import { DSAuth } from "../../DS/DSAuth.sol";
 
 /// @title Changes the owner of the DSProxy and updated the DFSRegistry
 contract ChangeProxyOwner is ActionBase {
-
     /// @param newOwner Address of the new owner
     struct Params {
         address newOwner;
     }
 
-    DFSProxyRegistryController constant dfsRegController =
-        DFSProxyRegistryController(DFS_REG_CONTROLLER_ADDR);
-    
+    DFSProxyRegistryController constant dfsRegController = DFSProxyRegistryController(DFS_REG_CONTROLLER_ADDR);
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -50,7 +48,7 @@ contract ChangeProxyOwner is ActionBase {
         require(_newOwner != address(0), "Owner is empty address");
 
         DSAuth(address(this)).setOwner(_newOwner);
-        
+
         dfsRegController.changeOwnerInDFSRegistry(_newOwner);
     }
 

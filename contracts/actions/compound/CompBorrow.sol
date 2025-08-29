@@ -19,6 +19,7 @@ contract CompBorrow is ActionBase, CompHelper {
         uint256 amount;
         address to;
     }
+
     error CompBorrowError();
 
     /// @inheritdoc ActionBase
@@ -57,16 +58,12 @@ contract CompBorrow is ActionBase, CompHelper {
     /// @param _cTokenAddr Address of the cToken we are borrowing
     /// @param _amount Amount of tokens to be borrowed
     /// @param _to The address we are sending the borrowed tokens to
-    function _borrow(
-        address _cTokenAddr,
-        uint256 _amount,
-        address _to
-    ) internal returns (uint256, bytes memory) {
+    function _borrow(address _cTokenAddr, uint256 _amount, address _to) internal returns (uint256, bytes memory) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
         // if the tokens are borrowed we need to enter the market
         enterMarket(_cTokenAddr);
 
-        if (ICToken(_cTokenAddr).borrow(_amount) != NO_ERROR){
+        if (ICToken(_cTokenAddr).borrow(_amount) != NO_ERROR) {
             revert CompBorrowError();
         }
 

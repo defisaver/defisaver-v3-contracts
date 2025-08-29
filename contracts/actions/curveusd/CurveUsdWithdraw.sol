@@ -59,16 +59,16 @@ contract CurveUsdWithdraw is ActionBase, CurveUsdHelper {
     function _curveUsdWithdraw(Params memory _params) internal returns (uint256, bytes memory) {
         /// @dev see ICrvUsdController natspec
         if (_params.collateralAmount == 0) revert ZeroAmountWithdraw();
- 
+
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
-        
+
         /// @dev figure out if we need this calculated on-chain
         if (_params.collateralAmount == type(uint256).max) {
             _params.collateralAmount = userMaxWithdraw(_params.controllerAddress, address(this));
         }
-        
+
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
-        if (collateralAsset != TokenUtils.WETH_ADDR){
+        if (collateralAsset != TokenUtils.WETH_ADDR) {
             ICrvUsdController(_params.controllerAddress).remove_collateral(_params.collateralAmount);
         } else {
             ICrvUsdController(_params.controllerAddress).remove_collateral(_params.collateralAmount, false);
@@ -76,10 +76,7 @@ contract CurveUsdWithdraw is ActionBase, CurveUsdHelper {
 
         collateralAsset.withdrawTokens(_params.to, _params.collateralAmount);
 
-        return (
-            _params.collateralAmount,
-            abi.encode(_params)
-        );
+        return (_params.collateralAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

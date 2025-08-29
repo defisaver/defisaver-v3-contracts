@@ -11,7 +11,7 @@ import { DFSLib } from "../../utils/DFSLib.sol";
 /// @title Swaps user's wallet positions borrow rate mode between stable and variable.
 contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
     using TokenUtils for address;
-    
+
     /// @param rateMode Type of borrow debt [Stable: 1, Variable: 2]
     /// @param assetId The id of the token to be swapped
     /// @param useDefaultMarket Whether to use the default market
@@ -61,10 +61,7 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _swapBorrowRate(Params memory _inputData)
-        internal
-        returns (uint256, bytes memory)
-    {
+    function _swapBorrowRate(Params memory _inputData) internal returns (uint256, bytes memory) {
         ISparkPool lendingPool = getSparkLendingPool(_inputData.market);
         address tokenAddr = lendingPool.getReserveAddressById(_inputData.assetId);
         lendingPool.swapBorrowRateMode(tokenAddr, _inputData.rateMode);

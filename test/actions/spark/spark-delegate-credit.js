@@ -1,13 +1,13 @@
-const { redeploy } = require('../../utils/utils');
-const { sparkDelegateCreditTest } = require('./spark-tests');
+const { redeploy } = require("../../utils/utils");
+const { sparkDelegateCreditTest } = require("./spark-tests");
 
-describe('Spark-Delegate-Credit', function () {
+describe("Spark-Delegate-Credit", function () {
     this.timeout(150000);
 
     before(async () => {
-        await redeploy('SparkDelegateCredit');
+        await redeploy("SparkDelegateCredit");
     });
-    it('... should run full spark delegate credit test', async () => {
+    it("... should run full spark delegate credit test", async () => {
         await sparkDelegateCreditTest();
     });
 });

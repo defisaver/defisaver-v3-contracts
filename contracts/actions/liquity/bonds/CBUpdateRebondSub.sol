@@ -9,7 +9,6 @@ import { CBHelper } from "../../../actions/liquity/helpers/CBHelper.sol";
 
 /// @title Special action to update rebond strategy data (Only use in that context)
 contract CBUpdateRebondSub is ActionBase, CBHelper {
-
     error ImpactTooHigh(uint256, uint256);
 
     /// @param subId Id of the sub we are changing (user must be owner)
@@ -25,36 +24,26 @@ contract CBUpdateRebondSub is ActionBase, CBHelper {
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public virtual override payable returns (bytes32) {
+    ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.subId = _parseParamUint(
-            params.subId,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
+        params.subId = _parseParamUint(params.subId, _paramMapping[0], _subData, _returnValues);
 
-        params.bondId = _parseParamUint(
-            params.bondId,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
+        params.bondId = _parseParamUint(params.bondId, _paramMapping[1], _subData, _returnValues);
 
         updateRebondSub(params, uint256(_subData[1]));
 
-        return(bytes32(params.subId));
+        return (bytes32(params.subId));
     }
 
-    function executeActionDirect(bytes memory _callData) public override payable {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
 
         updateRebondSub(params, 0);
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 

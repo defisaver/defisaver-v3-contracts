@@ -9,7 +9,6 @@ import { IPriceFeed } from "../../../interfaces/liquityV2/IPriceFeed.sol";
 
 /// @title Helper methods for LiquityV2 ratio calc.
 contract LiquityV2RatioHelper is DSMath {
-
     /// @notice Gets Trove CR
     /// @param _market Address of the market where the trove is
     /// @param _troveId id of the trove
@@ -26,8 +25,8 @@ contract LiquityV2RatioHelper is DSMath {
         uint256 debtAmount = troveData.entireDebt;
         uint256 collAmount = troveData.entireColl;
         /// @dev If oracle is down, lastGoodPrice will be returned and used here
-        (uint256 collPrice, ) = priceFeed.fetchPrice();
-        
+        (uint256 collPrice,) = priceFeed.fetchPrice();
+
         ratio = wdiv(wmul(collAmount, collPrice), debtAmount);
     }
 }

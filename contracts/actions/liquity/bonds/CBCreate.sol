@@ -26,12 +26,7 @@ contract CBCreate is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.amount = _parseParamUint(
-            params.amount,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
+        params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
 
         (uint256 bondId, bytes memory logData) = _cbCreateBond(params);

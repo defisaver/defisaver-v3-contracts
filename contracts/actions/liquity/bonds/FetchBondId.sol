@@ -9,11 +9,10 @@ import { CBHelper } from "../../../actions/liquity/helpers/CBHelper.sol";
 
 /// @title Special action to fetch BondId for the Liquity payback from CB strategy and to deactivate rebond strategy if bond from rebond strat was used
 contract FetchBondId is ActionBase, CBHelper {
-
     error WrongSourceType(SourceType);
     error SubDatHashMismatch(uint256, bytes32, bytes32);
 
-    enum SourceType{
+    enum SourceType {
         BOND,
         SUB
     }
@@ -33,32 +32,21 @@ contract FetchBondId is ActionBase, CBHelper {
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public virtual override payable returns (bytes32) {
+    ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.paybackSourceId = _parseParamUint(
-            params.paybackSourceId,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
-        params.sourceType = _parseParamUint(
-            params.sourceType,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
+        params.paybackSourceId = _parseParamUint(params.paybackSourceId, _paramMapping[0], _subData, _returnValues);
+        params.sourceType = _parseParamUint(params.sourceType, _paramMapping[1], _subData, _returnValues);
 
         uint256 bondId = getBondId(params);
 
-        return(bytes32(bondId));
+        return (bytes32(bondId));
     }
 
-    function executeActionDirect(bytes memory _callData) public override payable {
-    }
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
@@ -68,13 +56,15 @@ contract FetchBondId is ActionBase, CBHelper {
     /// @notice _params.cbRebondBondId is sent externally so we can hash the sub object and compare it with what's stored in onchain storage.
     /// @notice If sourceType is SUB, we deactivate the rebond strategy.
     function getBondId(Params memory _params) internal returns (uint256) {
-        if (SourceType(_params.sourceType) == SourceType.BOND){
+        if (SourceType(_params.sourceType) == SourceType.BOND) {
             return _params.paybackSourceId;
         }
 
         if (SourceType(_params.sourceType) == SourceType.SUB) {
-            StrategyModel.StoredSubData memory storedCBSubData = SubStorage(SUB_STORAGE_ADDR).getSub(_params.paybackSourceId);
-            StrategyModel.StrategySub memory rebondSub = formatRebondSub(_params.paybackSourceId, _params.cbRebondBondId);
+            StrategyModel.StoredSubData memory storedCBSubData =
+                SubStorage(SUB_STORAGE_ADDR).getSub(_params.paybackSourceId);
+            StrategyModel.StrategySub memory rebondSub =
+                formatRebondSub(_params.paybackSourceId, _params.cbRebondBondId);
             bytes32 cbSubDataHash = keccak256(abi.encode(rebondSub));
 
             // data sent from the caller must match the stored hash of the data

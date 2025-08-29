@@ -1,16 +1,16 @@
 /* eslint-disable global-require */
 // eslint-disable-next-line import/no-extraneous-dependencies
-require('dotenv-safe').config();
+require("dotenv-safe").config();
 
-const fs = require('fs');
-const { getFile, getCurrentDir } = require('./utils');
+const fs = require("fs");
+const { getFile, getCurrentDir } = require("./utils");
 
 const fsPromises = fs.promises;
 
-const DEPLOYMENTS_FOLDER_NAME = 'deployments';
+const DEPLOYMENTS_FOLDER_NAME = "deployments";
 
 const write = async (contractName, network, address, ...args) => {
-    const filename = (await getFile('./artifacts/', `${contractName}.json`))[0];
+    const filename = (await getFile("./artifacts/", `${contractName}.json`))[0];
     // eslint-disable-next-line import/no-dynamic-require
     const file = require(filename);
 
@@ -24,7 +24,7 @@ const write = async (contractName, network, address, ...args) => {
         newFile.networks[network] = {};
     }
 
-    if (network === 'mainnet') {
+    if (network === "mainnet") {
         newFile.networks[network].address = address;
         newFile.networks[network].args = args;
     }
@@ -32,10 +32,12 @@ const write = async (contractName, network, address, ...args) => {
     try {
         const currentDir = await getCurrentDir();
 
-        fsPromises.mkdir(`${currentDir}/${DEPLOYMENTS_FOLDER_NAME}`, { recursive: true }).catch(console.error);
+        fsPromises
+            .mkdir(`${currentDir}/${DEPLOYMENTS_FOLDER_NAME}`, { recursive: true })
+            .catch(console.error);
 
         const writeFilename = `${currentDir}/${DEPLOYMENTS_FOLDER_NAME}/${contractName}.json`;
-        await fsPromises.writeFile(writeFilename, JSON.stringify(newFile, null, '\t'));
+        await fsPromises.writeFile(writeFilename, JSON.stringify(newFile, null, "\t"));
 
         return;
     } catch (e) {

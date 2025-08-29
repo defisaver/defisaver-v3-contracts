@@ -64,24 +64,23 @@ interface IUmbrellaDataAggregator {
         uint256 userBalance;
     }
 
-    function getAllAggregatedData(
-        address _umbrella,
-        address _aaveOracle,
-        address _user
-    ) external view returns (
-        StakeTokenData[] memory,
-        TokenRouteData[] memory,
-        StakeTokenUserData[] memory,
-        TokenRouteBalances[] memory
-    );
-    
-    function getTokensAggregatedData(
-        address _umbrella,
-        address _aaveOracle
-    ) external view returns (StakeTokenData[] memory);
+    function getAllAggregatedData(address _umbrella, address _aaveOracle, address _user)
+        external
+        view
+        returns (
+            StakeTokenData[] memory,
+            TokenRouteData[] memory,
+            StakeTokenUserData[] memory,
+            TokenRouteBalances[] memory
+        );
 
-    function getUserAggregatedData(
-        address _umbrella,
-        address _user
-    ) external view returns (StakeTokenUserData[] memory);
+    function getTokensAggregatedData(address _umbrella, address _aaveOracle)
+        external
+        view
+        returns (StakeTokenData[] memory);
+
+    function getUserAggregatedData(address _umbrella, address _user)
+        external
+        view
+        returns (StakeTokenUserData[] memory);
 }

@@ -12,19 +12,15 @@ import { MainnetAaveAddresses } from "./MainnetAaveAddresses.sol";
 contract AaveHelper is MainnetAaveAddresses {
     uint16 public constant AAVE_REFERRAL_CODE = 64;
 
-    bytes32 public constant DATA_PROVIDER_ID =
-        0x0100000000000000000000000000000000000000000000000000000000000000;
-    
-    IAaveIncentivesController constant public AaveIncentivesController = IAaveIncentivesController(STAKED_CONTROLLER_ADDR);
+    bytes32 public constant DATA_PROVIDER_ID = 0x0100000000000000000000000000000000000000000000000000000000000000;
 
-    IStakedToken constant public StakedToken = IStakedToken(STAKED_TOKEN_ADDR);
+    IAaveIncentivesController public constant AaveIncentivesController =
+        IAaveIncentivesController(STAKED_CONTROLLER_ADDR);
+
+    IStakedToken public constant StakedToken = IStakedToken(STAKED_TOKEN_ADDR);
 
     /// @notice Enable/Disable a token as collateral for the specified Aave market
-    function enableAsCollateral(
-        address _market,
-        address _tokenAddr,
-        bool _useAsCollateral
-    ) public {
+    function enableAsCollateral(address _market, address _tokenAddr, bool _useAsCollateral) public {
         address lendingPool = ILendingPoolAddressesProviderV2(_market).getLendingPool();
 
         ILendingPoolV2(lendingPool).setUserUseReserveAsCollateral(_tokenAddr, _useAsCollateral);
@@ -32,10 +28,7 @@ contract AaveHelper is MainnetAaveAddresses {
 
     /// @notice Fetch the data provider for the specified market
     function getDataProvider(address _market) internal view returns (IAaveProtocolDataProviderV2) {
-        return
-            IAaveProtocolDataProviderV2(
-                ILendingPoolAddressesProviderV2(_market).getAddress(DATA_PROVIDER_ID)
-            );
+        return IAaveProtocolDataProviderV2(ILendingPoolAddressesProviderV2(_market).getAddress(DATA_PROVIDER_ID));
     }
 
     /// @notice Returns the lending pool contract of the specified market
@@ -43,18 +36,22 @@ contract AaveHelper is MainnetAaveAddresses {
         return ILendingPoolV2(ILendingPoolAddressesProviderV2(_market).getLendingPool());
     }
 
-    function getWholeDebt(address _market, address _tokenAddr, uint256 _borrowType, address _debtOwner) internal view returns (uint256 wholeDebt) {
+    function getWholeDebt(address _market, address _tokenAddr, uint256 _borrowType, address _debtOwner)
+        internal
+        view
+        returns (uint256 wholeDebt)
+    {
         uint256 STABLE_ID = 1;
         uint256 VARIABLE_ID = 2;
 
         IAaveProtocolDataProviderV2 dataProvider = getDataProvider(_market);
-        (, uint256 borrowsStable, uint256 borrowsVariable, , , , , , ) =
+        (, uint256 borrowsStable, uint256 borrowsVariable,,,,,,) =
             dataProvider.getUserReserveData(_tokenAddr, _debtOwner);
 
         if (_borrowType == STABLE_ID) {
             wholeDebt = borrowsStable;
         } else if (_borrowType == VARIABLE_ID) {
-            wholeDebt =  borrowsVariable;
+            wholeDebt = borrowsVariable;
         }
     }
 }

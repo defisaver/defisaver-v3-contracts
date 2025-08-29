@@ -8,9 +8,8 @@ import { LiquityV2RatioHelper } from "../liquityV2/helpers/LiquityV2RatioHelper.
 /// @title Action to check the ratio of the LiquityV2 position after strategy execution.
 /// @notice This action only checks for current ratio, without comparing it to the start ratio.
 contract LiquityV2TargetRatioCheck is ActionBase, LiquityV2RatioHelper {
-
     /// @notice 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
 
     error BadAfterRatio(uint256 currentRatio, uint256 targetRatio);
 
@@ -37,11 +36,8 @@ contract LiquityV2TargetRatioCheck is ActionBase, LiquityV2RatioHelper {
         params.targetRatio = _parseParamUint(params.targetRatio, _paramMapping[2], _subData, _returnValues);
 
         (uint256 currRatio,) = getRatio(params.market, params.troveId);
-        
-        if (
-            currRatio > (params.targetRatio + RATIO_OFFSET) ||
-            currRatio < (params.targetRatio - RATIO_OFFSET)
-        ) {
+
+        if (currRatio > (params.targetRatio + RATIO_OFFSET) || currRatio < (params.targetRatio - RATIO_OFFSET)) {
             revert BadAfterRatio(currRatio, params.targetRatio);
         }
 
@@ -51,7 +47,7 @@ contract LiquityV2TargetRatioCheck is ActionBase, LiquityV2RatioHelper {
 
     /// @inheritdoc ActionBase
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
@@ -61,5 +57,4 @@ contract LiquityV2TargetRatioCheck is ActionBase, LiquityV2RatioHelper {
     function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
-
 }

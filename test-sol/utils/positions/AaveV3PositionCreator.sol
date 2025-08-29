@@ -18,19 +18,15 @@ import { SmartWallet } from "../SmartWallet.sol";
 /// @notice Contract for creating position on AaveV3 with default values for some common parameters
 /// @dev If more complex setup is needed, use AaveV3ExecuteActions directly
 contract AaveV3PositionCreator is AaveV3ExecuteActions, AaveV3Helper, CommonPositionCreator {
-
     IL2PoolV3 pool;
     IAaveProtocolDataProvider dataProvider;
 
-    function setUp() public override virtual {
+    function setUp() public virtual override {
         pool = getLendingPool(DEFAULT_AAVE_MARKET);
         dataProvider = getDataProvider(DEFAULT_AAVE_MARKET);
     }
 
-    function createAaveV3Position(
-        PositionParams memory _params,
-        SmartWallet _wallet
-    ) public {
+    function createAaveV3Position(PositionParams memory _params, SmartWallet _wallet) public {
         DataTypes.ReserveData memory supplyData = pool.getReserveData(_params.collAddr);
         DataTypes.ReserveData memory borrowData = pool.getReserveData(_params.debtAddr);
 
@@ -54,8 +50,8 @@ contract AaveV3PositionCreator is AaveV3ExecuteActions, AaveV3Helper, CommonPosi
             market: address(0),
             onBehalf: address(0)
         });
-        
-        executeAaveV3Supply(supplyParams, _params.collAddr, _wallet, false, address(new AaveV3Supply()));        
+
+        executeAaveV3Supply(supplyParams, _params.collAddr, _wallet, false, address(new AaveV3Supply()));
         executeAaveV3Borrow(borrowParams, _wallet, false, address(new AaveV3Borrow()));
     }
 }

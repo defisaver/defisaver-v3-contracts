@@ -1,10 +1,10 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable guard-for-in */
-const { exec } = require('child_process');
-const events = require('events');
-const fs = require('fs');
-const { exit } = require('process');
+const { exec } = require("child_process");
+const events = require("events");
+const fs = require("fs");
+const { exit } = require("process");
 
 function getTestFiles(dir, files_) {
     // eslint-disable-next-line no-param-reassign
@@ -14,7 +14,7 @@ function getTestFiles(dir, files_) {
         const name = `${dir}/${files[i]}`;
         if (fs.statSync(name).isDirectory()) {
             getTestFiles(name, files_);
-        } else if (name.toString().includes('full-test.js')) {
+        } else if (name.toString().includes("full-test.js")) {
             files_.push(name);
         }
     }
@@ -36,21 +36,14 @@ class TestRunner extends events.EventEmitter {
         this.retries = 0;
         this.liveNodes = 0;
         this.startEpoch = 0;
-        this.on(
-            'NodeReady',
-            this.nodeReadyListener,
-        ).on(
-            'NodeClosed',
-            this.nodeClosedListener,
-        ).on(
-            'TestClosed',
-            this.testClosedListener,
-        );
+        this.on("NodeReady", this.nodeReadyListener)
+            .on("NodeClosed", this.nodeClosedListener)
+            .on("TestClosed", this.testClosedListener);
     }
 
     nodeReadyListener(nodeHandle, id) {
         if (this.pendingTests.length === 0) {
-            nodeHandle.kill('SIGTERM');
+            nodeHandle.kill("SIGTERM");
             return;
         }
         if (nodeHandle.exitCode === null && nodeHandle.killed === false) {
@@ -76,7 +69,7 @@ class TestRunner extends events.EventEmitter {
             // eslint-disable-next-line no-param-reassign
             test.time = Math.ceil((test.endTime - test.startTime) / 1000);
             this.passedTests.push(test);
-            this.emit('NodeReady', nodeHandle, id);
+            this.emit("NodeReady", nodeHandle, id);
             this.log(`${test.fileName} passed`);
             // github actions wont kill nodes properly. This is a backup finish check.
             if (this.passed === this.total) this.finish();
@@ -87,7 +80,7 @@ class TestRunner extends events.EventEmitter {
             // eslint-disable-next-line no-param-reassign
             test.retries--;
             this.pendingTests.push(test);
-            this.emit('NodeReady', nodeHandle, id);
+            this.emit("NodeReady", nodeHandle, id);
             this.log(`${test.fileName} retrying #${MAX_RETRIES - test.retries}`);
         } else {
             this.log(`${test.fileName} failed ${MAX_RETRIES} times, exiting(1)`);
@@ -96,10 +89,12 @@ class TestRunner extends events.EventEmitter {
     }
 
     run(nodeCount, testFileNames) {
-        this.pendingTests = testFileNames.map((e) => Object({
-            retries: MAX_RETRIES,
-            fileName: e,
-        }));
+        this.pendingTests = testFileNames.map((e) =>
+            Object({
+                retries: MAX_RETRIES,
+                fileName: e,
+            })
+        );
         this.total = this.pendingTests.length;
         this.startEpoch = Date.now();
 
@@ -117,13 +112,11 @@ class TestRunner extends events.EventEmitter {
 
     startNode(id) {
         this.liveNodes++;
-        const nodeHandle = exec(
-            `npx hardhat node --port ${8545 + id}`,
-        ).on(
-            'close',
-            (code, signal) => this.emit('NodeClosed', id, signal),
+        const nodeHandle = exec(`npx hardhat node --port ${8545 + id}`).on(
+            "close",
+            (code, signal) => this.emit("NodeClosed", id, signal)
         );
-        setTimeout(() => this.emit('NodeReady', nodeHandle, id), NODE_GRACE_TIME);
+        setTimeout(() => this.emit("NodeReady", nodeHandle, id), NODE_GRACE_TIME);
 
         return nodeHandle;
     }
@@ -141,17 +134,14 @@ class TestRunner extends events.EventEmitter {
                     console.log(error);
                     console.log(stdout);
                 }
-            },
-        ).on(
-            'close',
-            function () {
-                runner.emit('TestClosed', nodeHandle, this, test, id);
-            },
-        );
+            }
+        ).on("close", function () {
+            runner.emit("TestClosed", nodeHandle, this, test, id);
+        });
         return testHandle;
     }
 
-    log(msg = '') {
+    log(msg = "") {
         const tPlus = `[${Math.ceil((Date.now() - this.startEpoch) / 1000)}s]\t`;
         const status = `total: ${this.total} passed: ${this.passed} nodes: ${this.liveNodes} retries: ${this.retries} `;
         console.log(`${tPlus} ${msg} (${status})`);
@@ -160,7 +150,13 @@ class TestRunner extends events.EventEmitter {
     finish() {
         const comp = (a, b) => (a.fileName > b.fileName ? 1 : -1);
         this.passedTests.sort(comp).forEach((e) => console.log(e.output));
-        this.passedTests.sort((a, b) => b.time - a.time).forEach((e) => console.log(`${e.fileName.padEnd(32)}\tretries: ${MAX_RETRIES - e.retries}\ttime: ${e.time}`));
+        this.passedTests
+            .sort((a, b) => b.time - a.time)
+            .forEach((e) =>
+                console.log(
+                    `${e.fileName.padEnd(32)}\tretries: ${MAX_RETRIES - e.retries}\ttime: ${e.time}`
+                )
+            );
         console.log(`${this.passed}/${this.total} tests passed`);
         if (this.total !== this.passed) exit(1);
         exit(0);
@@ -168,10 +164,10 @@ class TestRunner extends events.EventEmitter {
 }
 
 (async function () {
-    const testFileNames = getTestFiles('test');
+    const testFileNames = getTestFiles("test");
     const runner = new TestRunner();
 
     let nodeCount = DEFAULT_NODE_COUNT;
     if (process.argv.length > 2) nodeCount = process.argv[2];
     runner.run(nodeCount, testFileNames);
-}());
+})();

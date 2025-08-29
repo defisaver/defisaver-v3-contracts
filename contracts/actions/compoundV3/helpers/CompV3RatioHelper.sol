@@ -7,12 +7,11 @@ import { IComet } from "../../../interfaces/compoundV3/IComet.sol";
 import { MainnetCompV3Addresses } from "./MainnetCompV3Addresses.sol";
 
 contract CompV3RatioHelper is DSMath, MainnetCompV3Addresses {
-
-    function getAssets(address _market) public view returns(IComet.AssetInfo[] memory assets){
+    function getAssets(address _market) public view returns (IComet.AssetInfo[] memory assets) {
         uint8 numAssets = IComet(_market).numAssets();
         assets = new IComet.AssetInfo[](numAssets);
 
-        for(uint8 i = 0; i < numAssets; i++){
+        for (uint8 i = 0; i < numAssets; i++) {
             assets[i] = IComet(_market).getAssetInfo(i);
         }
         return assets;
@@ -25,7 +24,8 @@ contract CompV3RatioHelper is DSMath, MainnetCompV3Addresses {
         IComet.AssetInfo[] memory assets = getAssets(_market);
         uint16 assetsIn = comet.userBasic(_user).assetsIn;
 
-        uint256 sumBorrow = comet.borrowBalanceOf(_user) * comet.getPrice(comet.baseTokenPriceFeed()) / comet.priceScale();
+        uint256 sumBorrow =
+            comet.borrowBalanceOf(_user) * comet.getPrice(comet.baseTokenPriceFeed()) / comet.priceScale();
         if (sumBorrow == 0) return 0;
 
         uint256 sumCollateral;
@@ -33,8 +33,9 @@ contract CompV3RatioHelper is DSMath, MainnetCompV3Addresses {
             if (isInAsset(assetsIn, i)) {
                 uint256 tokenBalance = comet.collateralBalanceOf(_user, assets[i].asset);
                 if (tokenBalance != 0) {
-                    uint256 collAmountInBaseToken = 
-                        (tokenBalance * comet.getPrice(assets[i].priceFeed) * comet.baseScale()) / assets[i].scale / comet.priceScale();
+                    uint256 collAmountInBaseToken = (
+                        tokenBalance * comet.getPrice(assets[i].priceFeed) * comet.baseScale()
+                    ) / assets[i].scale / comet.priceScale();
                     sumCollateral += collAmountInBaseToken * assets[i].borrowCollateralFactor / 1e18;
                 }
             }

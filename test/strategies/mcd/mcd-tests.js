@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
-const hre = require('hardhat');
-const { expect } = require('chai');
+const hre = require("hardhat");
+const { expect } = require("chai");
 
-const { ilks, getAssetInfo } = require('@defisaver/tokens');
-const automationSdk = require('@defisaver/automation-sdk');
+const { ilks, getAssetInfo } = require("@defisaver/tokens");
+const automationSdk = require("@defisaver/automation-sdk");
 
 const {
     getProxy,
@@ -28,7 +28,7 @@ const {
     revertToSnapshot,
     Float2BN,
     setNewExchangeWrapper,
-} = require('../../utils/utils');
+} = require("../../utils/utils");
 
 const {
     createBundle,
@@ -36,9 +36,9 @@ const {
     addBotCaller,
     setMCDPriceVerifier,
     subToMcdProxy,
-} = require('../utils/utils-strategies');
+} = require("../utils/utils-strategies");
 
-const { getRatio } = require('../../utils/mcd');
+const { getRatio } = require("../../utils/mcd");
 
 const {
     createYearnRepayStrategy,
@@ -47,7 +47,7 @@ const {
     createMcdFLBoostCompositeStrategy,
     createMcdRepayCompositeStrategy,
     createMcdFLRepayCompositeStrategy,
-} = require('../../../strategies-spec/mainnet');
+} = require("../../../strategies-spec/mainnet");
 
 const {
     callMcdRepayFromYearnStrategy,
@@ -58,7 +58,7 @@ const {
     callMcdFLRepayCompositeStrategy,
     callMcdRepayCompositeStrategy,
     callMcdCloseToDaiStrategy,
-} = require('../utils/strategy-calls');
+} = require("../utils/strategy-calls");
 
 const {
     subRepayFromSavingsStrategy,
@@ -66,14 +66,11 @@ const {
     subMcdCloseToCollStrategy,
     subMcdTrailingCloseToCollStrategy,
     subMcdTrailingCloseToDaiStrategy,
-} = require('../utils/strategy-subs');
+} = require("../utils/strategy-subs");
 
-const {
-    openVault,
-    yearnSupply,
-} = require('../../utils/actions');
+const { openVault, yearnSupply } = require("../../utils/actions");
 
-const { RATIO_STATE_OVER } = require('../utils/triggers');
+const { RATIO_STATE_OVER } = require("../utils/triggers");
 
 const createRepayBundle = async (proxy, isFork) => {
     const repayCompositeStrategyEncoded = createMcdRepayCompositeStrategy();
@@ -85,9 +82,7 @@ const createRepayBundle = async (proxy, isFork) => {
     // eslint-disable-next-line max-len
     const strategyId2 = await createStrategy(...flRepayCompositeStrategyEncoded, true);
 
-    return createBundle(
-        [strategyId1, strategyId2],
-    );
+    return createBundle([strategyId1, strategyId2]);
 };
 
 const createBoostBundle = async (proxy, isFork) => {
@@ -99,18 +94,16 @@ const createBoostBundle = async (proxy, isFork) => {
     const strategyId1 = await createStrategy(...boostCompositeStrategy, true);
     const strategyId2 = await createStrategy(...flBoostCompositeStrategy, true);
 
-    return createBundle(
-        [strategyId1, strategyId2],
-    );
+    return createBundle([strategyId1, strategyId2]);
 };
 
 const mcdBoostStrategyTest = async (numTests) => {
-    describe('Mcd-Boost-Strategy', function () {
+    describe("Mcd-Boost-Strategy", function () {
         this.timeout(320000);
 
-        const SUPPLY_AMOUNT_IN_USD = '100000';
-        const GENERATE_AMOUNT = fetchAmountinUSDPrice('DAI', '41000');
-        const BOOST_AMOUNT = fetchAmountinUSDPrice('DAI', '10000');
+        const SUPPLY_AMOUNT_IN_USD = "100000";
+        const GENERATE_AMOUNT = fetchAmountinUSDPrice("DAI", "41000");
+        const BOOST_AMOUNT = fetchAmountinUSDPrice("DAI", "10000");
 
         let senderAcc;
         let proxy;
@@ -126,40 +119,48 @@ const mcdBoostStrategyTest = async (numTests) => {
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
 
-            flActionAddr = (await redeploy('FLAction')).address;
+            flActionAddr = (await redeploy("FLAction")).address;
             strategyExecutor = await redeployCore();
-            mcdView = await redeploy('McdView');
-            await redeploy('MockExchangeWrapper').then(({ address }) => setNewExchangeWrapper(senderAcc, address));
-            await redeploy('McdRatio');
-            await redeploy('McdBoostComposite');
-            await redeploy('DFSSell');
+            mcdView = await redeploy("McdView");
+            await redeploy("MockExchangeWrapper").then(({ address }) =>
+                setNewExchangeWrapper(senderAcc, address)
+            );
+            await redeploy("McdRatio");
+            await redeploy("McdBoostComposite");
+            await redeploy("DFSSell");
 
             await addBotCaller(botAcc.address);
 
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         });
 
-        it('... should create boost and repay bundle', async () => {
+        it("... should create boost and repay bundle", async () => {
             const repayBundleId = await createRepayBundle(proxy);
             const boostBundleId = await createBoostBundle(proxy);
-            await redeploy('McdSubProxy', false, repayBundleId, boostBundleId);
+            await redeploy("McdSubProxy", false, repayBundleId, boostBundleId);
         });
 
-        const ilkSubset = ilks.reduce((acc, curr) => {
-            if ([
-                'ETH',
-                // 'WBTC',
-                // 'wstETH',
-            ].includes(curr.asset)) acc.push(curr);
-            return acc;
-        }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1)).slice(0, numTests);
+        const ilkSubset = ilks
+            .reduce((acc, curr) => {
+                if (
+                    [
+                        "ETH",
+                        // 'WBTC',
+                        // 'wstETH',
+                    ].includes(curr.asset)
+                )
+                    acc.push(curr);
+                return acc;
+            }, [])
+            .sort((a, b) => (a.ilkLabel < b.ilkLabel ? -1 : 1))
+            .slice(0, numTests);
 
         ilkSubset.forEach((ilkData) => {
             const joinAddr = ilkData.join;
             let tokenData = getAssetInfo(ilkData.asset);
 
-            if (tokenData.symbol === 'ETH') {
-                tokenData = getAssetInfo('WETH');
+            if (tokenData.symbol === "ETH") {
+                tokenData = getAssetInfo("WETH");
             }
 
             const boostAmount = Float2BN(BOOST_AMOUNT);
@@ -167,15 +168,15 @@ const mcdBoostStrategyTest = async (numTests) => {
             expect(openSupplyAmount).to.not.be.eq(0, `cant fetch price for ${tokenData.symbol}`);
 
             let snapshotId;
-            it('... should sub via mcdSubProxy', async () => {
+            it("... should sub via mcdSubProxy", async () => {
                 vaultId = await openVault(
                     proxy,
                     ilkData.ilkLabel,
                     openSupplyAmount,
-                    GENERATE_AMOUNT,
+                    GENERATE_AMOUNT
                 );
 
-                console.log('VaultId: ', vaultId);
+                console.log("VaultId: ", vaultId);
 
                 const ratioUnder = 180;
                 const ratioOver = 220;
@@ -189,12 +190,12 @@ const mcdBoostStrategyTest = async (numTests) => {
                     ratioOver.toString(),
                     targetRatioBoost.toString(),
                     targetRatioRepay.toString(),
-                    boostEnabled,
+                    boostEnabled
                 );
 
                 ({ boostSubId: subId, boostSub: strategySub } = await subToMcdProxy(
                     proxy,
-                    subData,
+                    subData
                 ));
 
                 snapshotId = await takeSnapshot();
@@ -207,12 +208,21 @@ const mcdBoostStrategyTest = async (numTests) => {
                 const ratioBefore = await getRatio(mcdView, vaultId);
 
                 // eslint-disable-next-line max-len
-                await callMcdBoostCompositeStrategy(botAcc, strategyExecutor, 0, subId, strategySub, joinAddr, tokenData, boostAmount);
+                await callMcdBoostCompositeStrategy(
+                    botAcc,
+                    strategyExecutor,
+                    0,
+                    subId,
+                    strategySub,
+                    joinAddr,
+                    tokenData,
+                    boostAmount
+                );
 
                 const ratioAfter = await getRatio(mcdView, vaultId);
 
                 console.log(
-                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`
                 );
 
                 expect(ratioBefore).to.be.gt(ratioAfter);
@@ -225,12 +235,22 @@ const mcdBoostStrategyTest = async (numTests) => {
                 const ratioBefore = await getRatio(mcdView, vaultId);
 
                 // eslint-disable-next-line max-len
-                await callMcdFLBoostCompositeStrategy(botAcc, strategyExecutor, 1, subId, strategySub, joinAddr, tokenData, boostAmount, flActionAddr);
+                await callMcdFLBoostCompositeStrategy(
+                    botAcc,
+                    strategyExecutor,
+                    1,
+                    subId,
+                    strategySub,
+                    joinAddr,
+                    tokenData,
+                    boostAmount,
+                    flActionAddr
+                );
 
                 const ratioAfter = await getRatio(mcdView, vaultId);
 
                 console.log(
-                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`
                 );
 
                 expect(ratioBefore).to.be.gt(ratioAfter);
@@ -240,12 +260,12 @@ const mcdBoostStrategyTest = async (numTests) => {
 };
 
 const mcdRepayStrategyTest = async (numTests) => {
-    describe('Mcd-Repay-Strategy', function () {
+    describe("Mcd-Repay-Strategy", function () {
         this.timeout(1200000);
 
-        const SUPPLY_AMOUNT_USD = '100000';
-        const GENERATE_AMOUNT = fetchAmountinUSDPrice('DAI', '50000');
-        const REPAY_AMOUNT_USD = '5000';
+        const SUPPLY_AMOUNT_USD = "100000";
+        const GENERATE_AMOUNT = fetchAmountinUSDPrice("DAI", "50000");
+        const REPAY_AMOUNT_USD = "5000";
 
         let senderAcc;
         let proxy;
@@ -263,13 +283,15 @@ const mcdRepayStrategyTest = async (numTests) => {
             botAcc = (await hre.ethers.getSigners())[1];
 
             strategyExecutor = await redeployCore();
-            mcdRatioTriggerAddr = (await redeploy('McdRatioTrigger')).address;
-            await redeploy('FLAction');
-            flActionAddr = await getAddrFromRegistry('FLAction');
-            mcdView = await redeploy('McdView');
-            await redeploy('MockExchangeWrapper').then(({ address }) => setNewExchangeWrapper(senderAcc, address));
-            await redeploy('McdRatio');
-            await redeploy('McdRepayComposite');
+            mcdRatioTriggerAddr = (await redeploy("McdRatioTrigger")).address;
+            await redeploy("FLAction");
+            flActionAddr = await getAddrFromRegistry("FLAction");
+            mcdView = await redeploy("McdView");
+            await redeploy("MockExchangeWrapper").then(({ address }) =>
+                setNewExchangeWrapper(senderAcc, address)
+            );
+            await redeploy("McdRatio");
+            await redeploy("McdRepayComposite");
 
             await addBotCaller(botAcc.address);
             await setMCDPriceVerifier(mcdRatioTriggerAddr);
@@ -277,43 +299,49 @@ const mcdRepayStrategyTest = async (numTests) => {
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         });
 
-        it('... should create a repay bundle', async () => {
+        it("... should create a repay bundle", async () => {
             const repayBundleId = await createRepayBundle(proxy);
-            await redeploy('McdSubProxy', false, repayBundleId, 0);
+            await redeploy("McdSubProxy", false, repayBundleId, 0);
         });
 
-        const ilkSubset = ilks.reduce((acc, curr) => {
-            if ([
-                'ETH',
-                // 'WBTC',
-                // 'wstETH',
-            ].includes(curr.asset)) acc.push(curr);
-            return acc;
-        }, []).sort((a, b) => (a.ilkLabel < b.ilkLabel ? (-1) : 1)).slice(0, numTests);
+        const ilkSubset = ilks
+            .reduce((acc, curr) => {
+                if (
+                    [
+                        "ETH",
+                        // 'WBTC',
+                        // 'wstETH',
+                    ].includes(curr.asset)
+                )
+                    acc.push(curr);
+                return acc;
+            }, [])
+            .sort((a, b) => (a.ilkLabel < b.ilkLabel ? -1 : 1))
+            .slice(0, numTests);
 
         ilkSubset.forEach((ilkData) => {
             const joinAddr = ilkData.join;
             let tokenData = getAssetInfo(ilkData.asset);
 
-            if (tokenData.symbol === 'ETH') {
-                tokenData = getAssetInfo('WETH');
+            if (tokenData.symbol === "ETH") {
+                tokenData = getAssetInfo("WETH");
             }
 
             const repayAmount = Float2BN(
                 fetchAmountinUSDPrice(tokenData.symbol, REPAY_AMOUNT_USD),
-                tokenData.decimals,
+                tokenData.decimals
             );
             const openSupplyAmount = fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_USD);
             let snapshotId;
-            it('... should sub via mcdSubProxy', async () => {
+            it("... should sub via mcdSubProxy", async () => {
                 vaultId = await openVault(
                     proxy,
                     ilkData.ilkLabel,
                     openSupplyAmount,
-                    GENERATE_AMOUNT,
+                    GENERATE_AMOUNT
                 );
 
-                console.log('Vault id: ', vaultId);
+                console.log("Vault id: ", vaultId);
 
                 const ratioUnder = 260;
                 const ratioOver = 0;
@@ -327,12 +355,12 @@ const mcdRepayStrategyTest = async (numTests) => {
                     ratioOver.toString(),
                     targetRatioBoost.toString(),
                     targetRatioRepay.toString(),
-                    boostEnabled,
+                    boostEnabled
                 );
 
                 ({ repaySubId: subId, repaySub: strategySub } = await subToMcdProxy(
                     proxy,
-                    subData,
+                    subData
                 ));
 
                 snapshotId = await takeSnapshot();
@@ -355,13 +383,13 @@ const mcdRepayStrategyTest = async (numTests) => {
                     strategySub,
                     joinAddr,
                     tokenData,
-                    repayAmount,
+                    repayAmount
                 );
 
                 const ratioAfter = await getRatio(mcdView, vaultId);
 
                 console.log(
-                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`
                 );
 
                 expect(ratioAfter).to.be.gt(ratioBefore);
@@ -381,13 +409,13 @@ const mcdRepayStrategyTest = async (numTests) => {
                     joinAddr,
                     tokenData,
                     repayAmount,
-                    flActionAddr,
+                    flActionAddr
                 );
 
                 const ratioAfter = await getRatio(mcdView, vaultId);
 
                 console.log(
-                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                    `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`
                 );
 
                 expect(ratioAfter).to.be.gt(ratioBefore);
@@ -397,7 +425,7 @@ const mcdRepayStrategyTest = async (numTests) => {
 };
 
 const mcdRepayFromYearnStrategyTest = async () => {
-    describe('Mcd-Repay-Yearn-Strategy', function () {
+    describe("Mcd-Repay-Yearn-Strategy", function () {
         this.timeout(1200000);
 
         let senderAcc;
@@ -416,21 +444,24 @@ const mcdRepayFromYearnStrategyTest = async () => {
             botAcc = (await hre.ethers.getSigners())[1];
             strategyExecutor = await redeployCore();
 
-            mcdRatioTriggerAddr = getAddrFromRegistry('McdRatioTrigger');
-            mcdView = await redeploy('McdView');
-            await redeploy('DFSSell');
+            mcdRatioTriggerAddr = getAddrFromRegistry("McdRatioTrigger");
+            mcdView = await redeploy("McdView");
+            await redeploy("DFSSell");
 
             await setNewExchangeWrapper(senderAcc, UNISWAP_WRAPPER);
 
             await addBotCaller(botAcc.address);
 
             await setMCDPriceVerifier(mcdRatioTriggerAddr);
-            yearnRegistry = await hre.ethers.getContractAt('IYearnRegistry', YEARN_REGISTRY_ADDRESS);
+            yearnRegistry = await hre.ethers.getContractAt(
+                "IYearnRegistry",
+                YEARN_REGISTRY_ADDRESS
+            );
 
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         });
 
-        it('... should sub the user to a repay bundle ', async () => {
+        it("... should sub the user to a repay bundle ", async () => {
             const repayStrategyEncoded = createYearnRepayStrategy();
             const flRepayStrategyEncoded = createYearnRepayStrategyWithExchange();
 
@@ -444,50 +475,42 @@ const mcdRepayFromYearnStrategyTest = async () => {
             // create vault
             vaultId = await openVault(
                 proxy,
-                'ETH-A',
-                fetchAmountinUSDPrice('WETH', '60000'),
-                fetchAmountinUSDPrice('DAI', '30000'),
+                "ETH-A",
+                fetchAmountinUSDPrice("WETH", "60000"),
+                fetchAmountinUSDPrice("DAI", "30000")
             );
 
-            console.log('Vault id: ', vaultId);
+            console.log("Vault id: ", vaultId);
 
             // Deposit money to yearn
-            const daiAmount = hre.ethers.utils.parseUnits('100000', 18);
+            const daiAmount = hre.ethers.utils.parseUnits("100000", 18);
 
             await setBalance(DAI_ADDR, senderAcc.address, daiAmount);
             await approve(DAI_ADDR, proxy.address);
 
-            await yearnSupply(
-                DAI_ADDR,
-                daiAmount,
-                senderAcc.address,
-                proxy.address,
-                proxy,
-            );
+            await yearnSupply(DAI_ADDR, daiAmount, senderAcc.address, proxy.address, proxy);
 
             // Deposit some weth in yearn
-            const wethAmount = hre.ethers.utils.parseUnits('10', 18);
+            const wethAmount = hre.ethers.utils.parseUnits("10", 18);
 
             await depositToWeth(wethAmount);
             await approve(WETH_ADDRESS, proxy.address);
 
-            await yearnSupply(
-                WETH_ADDRESS,
-                wethAmount,
-                senderAcc.address,
-                proxy.address,
-                proxy,
-            );
+            await yearnSupply(WETH_ADDRESS, wethAmount, senderAcc.address, proxy.address, proxy);
 
             const ratioUnder = 300;
             const targetRatio = 320;
 
             ({ subId, strategySub } = await subRepayFromSavingsStrategy(
-                proxy, bundleId, vaultId, ratioUnder, targetRatio,
+                proxy,
+                bundleId,
+                vaultId,
+                ratioUnder,
+                targetRatio
             ));
         });
 
-        it('... should trigger a maker repay strategy from yearn', async () => {
+        it("... should trigger a maker repay strategy from yearn", async () => {
             const yToken = await yearnRegistry.latestVault(DAI_ADDR);
 
             console.log(yToken);
@@ -497,22 +520,28 @@ const mcdRepayFromYearnStrategyTest = async () => {
             await approve(yToken, proxy.address);
 
             const ratioBefore = await getRatio(mcdView, vaultId);
-            const repayAmount = hre.ethers.utils.parseUnits('5000', 18);
+            const repayAmount = hre.ethers.utils.parseUnits("5000", 18);
 
             await callMcdRepayFromYearnStrategy(
-                botAcc, strategyExecutor, 0, subId, strategySub, yToken, repayAmount,
+                botAcc,
+                strategyExecutor,
+                0,
+                subId,
+                strategySub,
+                yToken,
+                repayAmount
             );
 
             const ratioAfter = await getRatio(mcdView, vaultId);
 
             console.log(
-                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`
             );
 
             expect(ratioAfter).to.be.gt(ratioBefore);
         });
 
-        it('... should trigger a maker repay strategy from yearn with exchange', async () => {
+        it("... should trigger a maker repay strategy from yearn with exchange", async () => {
             const yToken = await yearnRegistry.latestVault(WETH_ADDRESS);
             const yTokenBalanceBefore = await balanceOf(yToken, senderAcc.address);
             console.log(yTokenBalanceBefore.toString());
@@ -520,16 +549,22 @@ const mcdRepayFromYearnStrategyTest = async () => {
             await approve(yToken, proxy.address);
 
             const ratioBefore = await getRatio(mcdView, vaultId);
-            const repayAmount = hre.ethers.utils.parseUnits('1', 18);
+            const repayAmount = hre.ethers.utils.parseUnits("1", 18);
 
             await callMcdRepayFromYearnWithExchangeStrategy(
-                botAcc, strategyExecutor, 1, subId, strategySub, yToken, repayAmount,
+                botAcc,
+                strategyExecutor,
+                1,
+                subId,
+                strategySub,
+                yToken,
+                repayAmount
             );
 
             const ratioAfter = await getRatio(mcdView, vaultId);
 
             console.log(
-                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`,
+                `Ratio before ${ratioBefore.toString()} -> Ratio after: ${ratioAfter.toString()}`
             );
 
             expect(ratioAfter).to.be.gt(ratioBefore);
@@ -538,7 +573,7 @@ const mcdRepayFromYearnStrategyTest = async () => {
 };
 
 const mcdCloseToDaiStrategyTest = async () => {
-    describe('Mcd-Close-to-dai Strategy', function () {
+    describe("Mcd-Close-to-dai Strategy", function () {
         this.timeout(120000);
         const ethJoin = ilks[0].join;
         let senderAcc;
@@ -561,40 +596,35 @@ const mcdCloseToDaiStrategyTest = async () => {
 
             mockedPriceFeed = mockChainlinkPriceFeed();
 
-            await redeploy('SendToken');
-            await redeploy('McdRatioTrigger');
-            await redeploy('DFSSell');
-            await redeploy('McdView');
-            await redeploy('GasFeeTaker');
-            await redeploy('McdRatioCheck');
-            await redeploy('TrailingStopTrigger');
-            await redeploy('SubProxy');
+            await redeploy("SendToken");
+            await redeploy("McdRatioTrigger");
+            await redeploy("DFSSell");
+            await redeploy("McdView");
+            await redeploy("GasFeeTaker");
+            await redeploy("McdRatioCheck");
+            await redeploy("TrailingStopTrigger");
+            await redeploy("SubProxy");
 
-            const subStorageAddr = getAddrFromRegistry('SubStorage');
-            subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+            const subStorageAddr = getAddrFromRegistry("SubStorage");
+            subStorage = await hre.ethers.getContractAt("SubStorage", subStorageAddr);
 
             await setNewExchangeWrapper(senderAcc, UNISWAP_WRAPPER);
 
-            await redeploy('McdSupply');
-            await redeploy('McdWithdraw');
-            await redeploy('McdGenerate');
-            await redeploy('McdPayback');
-            await redeploy('McdOpen');
-            await redeploy('ChainLinkPriceTrigger');
+            await redeploy("McdSupply");
+            await redeploy("McdWithdraw");
+            await redeploy("McdGenerate");
+            await redeploy("McdPayback");
+            await redeploy("McdOpen");
+            await redeploy("ChainLinkPriceTrigger");
             await addBotCaller(botAcc.address);
-            flAddr = (await redeploy('FLAction')).address;
+            flAddr = (await redeploy("FLAction")).address;
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         });
 
-        it('... should make a new trailing stop that closes CDP to Dai', async () => {
-            const vaultColl = fetchAmountinUSDPrice('WETH', '40000');
-            const amountDai = fetchAmountinUSDPrice('DAI', '18000');
-            vaultId = await openVault(
-                proxy,
-                'ETH-A',
-                vaultColl,
-                amountDai,
-            );
+        it("... should make a new trailing stop that closes CDP to Dai", async () => {
+            const vaultColl = fetchAmountinUSDPrice("WETH", "40000");
+            const amountDai = fetchAmountinUSDPrice("DAI", "18000");
+            vaultId = await openVault(proxy, "ETH-A", vaultColl, amountDai);
             console.log(`VaultId: ${vaultId}`);
             console.log(`Vault collateral${vaultColl}`);
             console.log(`Vault debt${amountDai}`);
@@ -613,7 +643,7 @@ const mcdCloseToDaiStrategyTest = async () => {
                 proxy,
                 WETH_ADDRESS,
                 percentage,
-                roundId,
+                roundId
             ));
             console.log(subId);
             console.log(await subStorage.getSub(subId));
@@ -651,15 +681,10 @@ const mcdCloseToDaiStrategyTest = async () => {
         //     expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
         // });
 
-        it('... should make a new strategy that closes CDP when price hits a point, transfers ETH to DAI, repays debt, transfers all remaining DAI to user', async () => {
-            const vaultColl = fetchAmountinUSDPrice('WETH', '40000');
-            const amountDai = fetchAmountinUSDPrice('DAI', '18000');
-            vaultId = await openVault(
-                proxy,
-                'ETH-A',
-                vaultColl,
-                amountDai,
-            );
+        it("... should make a new strategy that closes CDP when price hits a point, transfers ETH to DAI, repays debt, transfers all remaining DAI to user", async () => {
+            const vaultColl = fetchAmountinUSDPrice("WETH", "40000");
+            const amountDai = fetchAmountinUSDPrice("DAI", "18000");
+            vaultId = await openVault(proxy, "ETH-A", vaultColl, amountDai);
             console.log(`VaultId: ${vaultId}`);
             console.log(`Vault collateral${vaultColl}`);
             console.log(`Vault debt${amountDai}`);
@@ -674,23 +699,30 @@ const mcdCloseToDaiStrategyTest = async () => {
                 proxy,
                 targetPrice,
                 WETH_ADDRESS,
-                RATIO_STATE_OVER,
+                RATIO_STATE_OVER
             ));
             console.log(subId);
             console.log(await subStorage.getSub(subId));
         });
 
-        it('... should trigger a mcd close strategy', async () => {
+        it("... should trigger a mcd close strategy", async () => {
             const daiBalanceBefore = await balanceOf(DAI_ADDR, senderAcc.address);
             console.log(`Dai before closing : ${daiBalanceBefore.toString()}`);
             await callMcdCloseToDaiStrategy(
-                proxy, botAcc, strategyExecutor, subId, strategySub, flAmount, ethJoin, flAddr,
+                proxy,
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                flAmount,
+                ethJoin,
+                flAddr
             );
             const daiBalanceAfter = await balanceOf(DAI_ADDR, senderAcc.address);
             console.log(`Dai after closing : ${daiBalanceAfter.toString()}`);
             expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
         });
-        it('... should fail to trigger the same strategy again as its one time', async () => {
+        it("... should fail to trigger the same strategy again as its one time", async () => {
             try {
                 await callMcdCloseToDaiStrategy(
                     proxy,
@@ -700,17 +732,17 @@ const mcdCloseToDaiStrategyTest = async () => {
                     strategySub,
                     flAmount,
                     ethJoin,
-                    flAddr,
+                    flAddr
                 );
             } catch (err) {
-                expect(err.toString()).to.have.string('SubNotEnabled');
+                expect(err.toString()).to.have.string("SubNotEnabled");
             }
         });
     });
 };
 
 const mcdCloseToCollStrategyTest = async () => {
-    describe('Mcd-Close Strategy to collateral', function () {
+    describe("Mcd-Close Strategy to collateral", function () {
         this.timeout(320000);
         const ethJoin = ilks[0].join;
         let senderAcc;
@@ -725,8 +757,8 @@ const mcdCloseToCollStrategyTest = async () => {
         let flAmount;
         let mockedPriceFeed;
 
-        const daiDebt = '18000';
-        const ethCollInDollars = '40000';
+        const daiDebt = "18000";
+        const ethCollInDollars = "40000";
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -736,37 +768,32 @@ const mcdCloseToCollStrategyTest = async () => {
 
             mockedPriceFeed = mockChainlinkPriceFeed();
 
-            await redeploy('SendToken');
-            await redeploy('SendTokenAndUnwrap');
-            await redeploy('DFSSell');
-            await redeploy('McdView');
-            await redeploy('GasFeeTaker');
+            await redeploy("SendToken");
+            await redeploy("SendTokenAndUnwrap");
+            await redeploy("DFSSell");
+            await redeploy("McdView");
+            await redeploy("GasFeeTaker");
 
-            const subStorageAddr = getAddrFromRegistry('SubStorage');
-            subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+            const subStorageAddr = getAddrFromRegistry("SubStorage");
+            subStorage = await hre.ethers.getContractAt("SubStorage", subStorageAddr);
 
-            await redeploy('McdSupply');
-            await redeploy('McdWithdraw');
-            await redeploy('McdGenerate');
-            await redeploy('McdPayback');
-            await redeploy('McdOpen');
-            await redeploy('ChainLinkPriceTrigger');
-            await redeploy('TrailingStopTrigger');
+            await redeploy("McdSupply");
+            await redeploy("McdWithdraw");
+            await redeploy("McdGenerate");
+            await redeploy("McdPayback");
+            await redeploy("McdOpen");
+            await redeploy("ChainLinkPriceTrigger");
+            await redeploy("TrailingStopTrigger");
 
             await addBotCaller(botAcc.address);
-            flAddr = (await redeploy('FLAction')).address;
+            flAddr = (await redeploy("FLAction")).address;
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         });
 
-        it('... should make a new strategy for trailing cdp close to coll', async () => {
-            const vaultColl = fetchAmountinUSDPrice('WETH', ethCollInDollars);
-            const amountDai = fetchAmountinUSDPrice('DAI', daiDebt);
-            vaultId = await openVault(
-                proxy,
-                'ETH-A',
-                vaultColl,
-                amountDai,
-            );
+        it("... should make a new strategy for trailing cdp close to coll", async () => {
+            const vaultColl = fetchAmountinUSDPrice("WETH", ethCollInDollars);
+            const amountDai = fetchAmountinUSDPrice("DAI", daiDebt);
+            vaultId = await openVault(proxy, "ETH-A", vaultColl, amountDai);
             console.log(`VaultId: ${vaultId}`);
             console.log(`Vault collateral${vaultColl}`);
             console.log(`Vault debt${amountDai}`);
@@ -785,7 +812,7 @@ const mcdCloseToCollStrategyTest = async () => {
                 proxy,
                 WETH_ADDRESS,
                 percentage,
-                roundId,
+                roundId
             ));
             console.log(subId);
             console.log(await subStorage.getSub(subId));
@@ -836,15 +863,10 @@ const mcdCloseToCollStrategyTest = async () => {
         //     expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
         // });
 
-        it('... should make a new strategy for cdp close to coll', async () => {
-            const vaultColl = fetchAmountinUSDPrice('WETH', ethCollInDollars);
-            const amountDai = fetchAmountinUSDPrice('DAI', daiDebt);
-            vaultId = await openVault(
-                proxy,
-                'ETH-A',
-                vaultColl,
-                amountDai,
-            );
+        it("... should make a new strategy for cdp close to coll", async () => {
+            const vaultColl = fetchAmountinUSDPrice("WETH", ethCollInDollars);
+            const amountDai = fetchAmountinUSDPrice("DAI", daiDebt);
+            vaultId = await openVault(proxy, "ETH-A", vaultColl, amountDai);
             console.log(`VaultId: ${vaultId}`);
             console.log(`Vault collateral${vaultColl}`);
             console.log(`Vault debt${amountDai}`);
@@ -859,14 +881,14 @@ const mcdCloseToCollStrategyTest = async () => {
                 proxy,
                 targetPrice,
                 WETH_ADDRESS,
-                RATIO_STATE_OVER,
+                RATIO_STATE_OVER
             ));
 
             console.log(subId);
             console.log(await subStorage.getSub(subId));
         });
 
-        it('... should trigger a mcd close strategy', async () => {
+        it("... should trigger a mcd close strategy", async () => {
             const ethBalanceBefore = await balanceOf(ETH_ADDR, senderAcc.address);
             console.log(`Eth before closing : ${ethBalanceBefore.toString() / 1e18}`);
 
@@ -875,7 +897,10 @@ const mcdCloseToCollStrategyTest = async () => {
 
             // enough eth to payback whole dai debt + 5% because of slippage
             const debtEstimate = (parseInt(daiDebt, 10) * 1.05).toString();
-            const sellAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', debtEstimate), '18');
+            const sellAmount = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice("WETH", debtEstimate),
+                "18"
+            );
 
             console.log(sellAmount);
 
@@ -888,7 +913,7 @@ const mcdCloseToCollStrategyTest = async () => {
                 flAmount,
                 sellAmount,
                 ethJoin,
-                flAddr,
+                flAddr
             );
 
             const ethBalanceAfter = await balanceOf(ETH_ADDR, senderAcc.address);
@@ -901,11 +926,14 @@ const mcdCloseToCollStrategyTest = async () => {
             expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
         });
 
-        it('... should fail to trigger the same strategy again as its one time', async () => {
+        it("... should fail to trigger the same strategy again as its one time", async () => {
             try {
                 // enough eth to payback whole dai debt + 5% because of slippage
                 const debtEstimate = (parseInt(daiDebt, 10) * 1.05).toString();
-                const sellAmount = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', debtEstimate), '18');
+                const sellAmount = hre.ethers.utils.parseUnits(
+                    fetchAmountinUSDPrice("WETH", debtEstimate),
+                    "18"
+                );
 
                 await callMcdCloseToCollStrategy(
                     proxy,
@@ -916,10 +944,10 @@ const mcdCloseToCollStrategyTest = async () => {
                     flAmount,
                     sellAmount,
                     ethJoin,
-                    flAddr,
+                    flAddr
                 );
             } catch (err) {
-                expect(err.toString()).to.have.string('SubNotEnabled');
+                expect(err.toString()).to.have.string("SubNotEnabled");
             }
         });
     });

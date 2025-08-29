@@ -8,8 +8,10 @@ import { ITrigger } from "../interfaces/ITrigger.sol";
 
 /// @title Trigger contract that verifies if the Reflexer position went over/under the subbed ratio
 contract ReflexerRatioTrigger is ITrigger, AdminAuth, ReflexerRatioHelper {
-
-    enum RatioState { OVER, UNDER }
+    enum RatioState {
+        OVER,
+        UNDER
+    }
 
     /// @param safeId Reflexer vault Id that we want to check
     /// @param ratio ratio that represents the triggerable point
@@ -20,11 +22,8 @@ contract ReflexerRatioTrigger is ITrigger, AdminAuth, ReflexerRatioHelper {
         uint8 state;
     }
     /// @dev checks current safety ratio of a Liquity position and triggers if it's in a correct state
-    function isTriggered(bytes memory, bytes memory _subData)
-        public
-        override
-        returns (bool)
-    {
+
+    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 currRatio = getRatio(triggerSubData.safeId);
@@ -39,16 +38,14 @@ contract ReflexerRatioTrigger is ITrigger, AdminAuth, ReflexerRatioHelper {
 
         return false;
     }
-   
-    function changedSubData(bytes memory _subData) public pure override  returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
+
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 
     function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
-
 }

@@ -67,10 +67,7 @@ contract LiquityV2Supply is ActionBase, LiquityV2Helper {
 
         collToken.approveToken(borrowerOperations, _params.amount);
 
-        IBorrowerOperations(borrowerOperations).addColl(
-            _params.troveId,
-            _params.amount
-        );
+        IBorrowerOperations(borrowerOperations).addColl(_params.troveId, _params.amount);
 
         return (_params.amount, abi.encode(_params));
     }

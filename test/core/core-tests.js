@@ -1,7 +1,7 @@
-const { expect } = require('chai');
-const hre = require('hardhat');
+const { expect } = require("chai");
+const hre = require("hardhat");
 
-const dfs = require('@defisaver/sdk');
+const dfs = require("@defisaver/sdk");
 
 const {
     impersonateAccount,
@@ -27,24 +27,24 @@ const {
     WALLETS,
     isWalletNameDsProxy,
     expectError,
-} = require('../utils/utils');
+} = require("../utils/utils");
 
-const { deployContract } = require('../../scripts/utils/deployer');
+const { deployContract } = require("../../scripts/utils/deployer");
 const {
     getLatestStrategyId,
     addBotCaller,
     subToStrategy,
     createStrategy,
     getSubHash,
-} = require('../strategies/utils/utils-strategies');
-const { executeSafeTx } = require('../utils/safe');
-const { CoreAddressesInjector } = require('../utils/addressInjector');
+} = require("../strategies/utils/utils-strategies");
+const { executeSafeTx } = require("../utils/safe");
+const { CoreAddressesInjector } = require("../utils/addressInjector");
 
 const THREE_HOURS = 3 * 60 * 60;
 const TWO_DAYS = 48 * 60 * 60;
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
-const pullAmount = '1000000000000';
+const pullAmount = "1000000000000";
 
 /**
  * Set StrategyExecutor to EOA for testing purposes so we can callExecute()
@@ -53,12 +53,12 @@ const impersonateStrategyExecutorAsEoa = async (senderAddr) => {
     await impersonateAccount(getOwnerAddr());
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
 
-    const registryInstance = await hre.ethers.getContractFactory('DFSRegistry', signer);
+    const registryInstance = await hre.ethers.getContractFactory("DFSRegistry", signer);
     let registry = await registryInstance.attach(REGISTRY_ADDR);
 
     registry = registry.connect(signer);
 
-    const id = getNameId('StrategyExecutorID');
+    const id = getNameId("StrategyExecutorID");
 
     await registry.startContractChange(id, senderAddr, { gasLimit: 2000000 });
 
@@ -74,24 +74,22 @@ const impersonateStrategyExecutorAsEoa = async (senderAddr) => {
 };
 
 const addPlaceholderStrategy = async (proxy, maxGasPrice) => {
-    const dummyStrategy = new dfs.Strategy('PullTokensStrategy');
+    const dummyStrategy = new dfs.Strategy("PullTokensStrategy");
 
-    dummyStrategy.addSubSlot('&amount', 'uint256');
+    dummyStrategy.addSubSlot("&amount", "uint256");
 
-    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-        WETH_ADDRESS, '&eoa', '&amount',
-    );
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(WETH_ADDRESS, "&eoa", "&amount");
 
-    dummyStrategy.addTrigger((new dfs.triggers.GasPriceTrigger(0)));
+    dummyStrategy.addTrigger(new dfs.triggers.GasPriceTrigger(0));
     dummyStrategy.addAction(pullTokenAction);
 
     const callData = dummyStrategy.encodeForDsProxyCall();
 
     const strategyId = await createStrategy(...callData, false);
 
-    const amountEncoded = abiCoder.encode(['uint256'], [pullAmount]);
+    const amountEncoded = abiCoder.encode(["uint256"], [pullAmount]);
 
-    const triggerData = abiCoder.encode(['uint256'], [maxGasPrice]);
+    const triggerData = abiCoder.encode(["uint256"], [maxGasPrice]);
     const strategySub = [strategyId, false, [triggerData], [amountEncoded]];
 
     const subId = await subToStrategy(proxy, strategySub);
@@ -100,77 +98,77 @@ const addPlaceholderStrategy = async (proxy, maxGasPrice) => {
 };
 
 const dfsRegistryTest = async () => {
-    describe('DFS-Registry', () => {
+    describe("DFS-Registry", () => {
         let registry;
         let senderAcc2;
         let owner;
         let registryByOwner;
 
-        const contractAddr1 = '0x00000000219ab540356cBB839Cbe05303d7705Fa';
-        const contractAddr2 = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-        const contractAddr3 = '0x71C8dc1d6315a48850E88530d18d3a97505d2065';
-        const contractAddr4 = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+        const contractAddr1 = "0x00000000219ab540356cBB839Cbe05303d7705Fa";
+        const contractAddr2 = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+        const contractAddr3 = "0x71C8dc1d6315a48850E88530d18d3a97505d2065";
+        const contractAddr4 = "0x71C7656EC7ab88b098defB751B7401B5f6d8976F";
 
-        const id1 = getNameId('Contract1');
-        const id2 = getNameId('Contract2');
-        const id3 = getNameId('Contract3');
-        const id4 = getNameId('Contract4');
+        const id1 = getNameId("Contract1");
+        const id2 = getNameId("Contract2");
+        const id3 = getNameId("Contract3");
+        const id4 = getNameId("Contract4");
 
         const gasLimit = { gasLimit: 200000 };
 
         before(async () => {
             senderAcc2 = (await hre.ethers.getSigners())[1];
-            registry = await deployContract('DFSRegistry');
+            registry = await deployContract("DFSRegistry");
 
             owner = await hre.ethers.provider.getSigner(OWNER_ACC);
 
             registryByOwner = registry.connect(owner);
         });
 
-        describe('Testing auth of the functions', async () => {
-            it('...should fail to registry if not owner', async () => {
+        describe("Testing auth of the functions", async () => {
+            it("...should fail to registry if not owner", async () => {
                 const registry2 = registry.connect(senderAcc2);
 
                 try {
                     await registry2.addNewContract(id1, contractAddr1, 0);
                 } catch (err) {
-                    expectError(err.toString(), 'SenderNotOwner()');
+                    expectError(err.toString(), "SenderNotOwner()");
                 }
             });
 
-            it('...should fail to start contact change if not owner', async () => {
+            it("...should fail to start contact change if not owner", async () => {
                 const registry2 = registry.connect(senderAcc2);
 
                 try {
                     await registry2.startContractChange(id1, contractAddr1);
                 } catch (err) {
-                    expectError(err.toString(), 'SenderNotOwner()');
+                    expectError(err.toString(), "SenderNotOwner()");
                 }
             });
 
-            it('...should fail to approve contact change if not owner', async () => {
+            it("...should fail to approve contact change if not owner", async () => {
                 const registry2 = registry.connect(senderAcc2);
 
                 try {
                     await registry2.approveContractChange(id1);
                 } catch (err) {
-                    expectError(err.toString(), 'SenderNotOwner()');
+                    expectError(err.toString(), "SenderNotOwner()");
                 }
             });
 
-            it('...should fail to cancel contact change if not owner', async () => {
+            it("...should fail to cancel contact change if not owner", async () => {
                 const registry2 = registry.connect(senderAcc2);
 
                 try {
                     await registry2.cancelContractChange(id1);
                 } catch (err) {
-                    expectError(err.toString(), 'SenderNotOwner()');
+                    expectError(err.toString(), "SenderNotOwner()");
                 }
             });
         });
 
-        describe('Testing registry with 0 wait time', async () => {
-            it('...should register a new contract with 0 wait time', async () => {
+        describe("Testing registry with 0 wait time", async () => {
+            it("...should register a new contract with 0 wait time", async () => {
                 await impersonateAccount(OWNER_ACC);
 
                 // eslint-disable-next-line no-shadow
@@ -181,7 +179,7 @@ const dfsRegistryTest = async () => {
                 expect(addr).to.be.eq(contractAddr1);
             });
 
-            it('...should initiate a change for 0 wait time entry', async () => {
+            it("...should initiate a change for 0 wait time entry", async () => {
                 await registryByOwner.startContractChange(id1, contractAddr1, gasLimit);
                 await registryByOwner.approveContractChange(id1, gasLimit);
 
@@ -189,43 +187,41 @@ const dfsRegistryTest = async () => {
                 expect(addr).to.be.eq(contractAddr1);
             });
 
-            it('...should fail to register same id twice', async () => {
+            it("...should fail to register same id twice", async () => {
                 try {
-                    await registryByOwner
-                        .addNewContract(id1, contractAddr2, 0, gasLimit);
+                    await registryByOwner.addNewContract(id1, contractAddr2, 0, gasLimit);
                     expect(true).to.be.eq(false);
                 } catch (err) {
-                    expectError(err.toString(), 'EntryAlreadyExistsError(bytes4)');
+                    expectError(err.toString(), "EntryAlreadyExistsError(bytes4)");
                 }
 
                 await stopImpersonatingAccount(OWNER_ACC);
             });
         });
 
-        describe('Testing approval after time has passed', async () => {
-            it('...should register a new contract with 3 hours wait time', async () => {
+        describe("Testing approval after time has passed", async () => {
+            it("...should register a new contract with 3 hours wait time", async () => {
                 await impersonateAccount(OWNER_ACC);
 
-                await registryByOwner
-                    .addNewContract(id2, contractAddr2, THREE_HOURS, gasLimit);
+                await registryByOwner.addNewContract(id2, contractAddr2, THREE_HOURS, gasLimit);
 
                 const addr = await registry.getAddr(id2);
                 expect(addr).to.be.eq(contractAddr2);
             });
 
-            it('...should fail to approve it, because not in change process', async () => {
+            it("...should fail to approve it, because not in change process", async () => {
                 try {
                     await registryByOwner.approveContractChange(id2, gasLimit);
                 } catch (err) {
-                    expectError(err.toString(), 'EntryNotInChangeError(bytes4)');
+                    expectError(err.toString(), "EntryNotInChangeError(bytes4)");
                 }
             });
 
-            it('...should initiate a change and approve after 3 hours', async () => {
+            it("...should initiate a change and approve after 3 hours", async () => {
                 await registryByOwner.startContractChange(id2, contractAddr3, gasLimit);
 
                 await hre.network.provider.request({
-                    method: 'evm_increaseTime',
+                    method: "evm_increaseTime",
                     params: [THREE_HOURS],
                     id: new Date().getTime(),
                 });
@@ -236,19 +232,18 @@ const dfsRegistryTest = async () => {
                 expect(addr).to.be.eq(contractAddr3);
             });
 
-            it('...should register a new contract with 2 days wait time', async () => {
-                await registryByOwner
-                    .addNewContract(id3, contractAddr3, TWO_DAYS, gasLimit);
+            it("...should register a new contract with 2 days wait time", async () => {
+                await registryByOwner.addNewContract(id3, contractAddr3, TWO_DAYS, gasLimit);
 
                 const addr = await registry.getAddr(id3);
                 expect(addr).to.be.eq(contractAddr3);
             });
 
-            it('...should fail to approve change after one day', async () => {
+            it("...should fail to approve change after one day", async () => {
                 await registryByOwner.startContractChange(id3, contractAddr2, gasLimit);
 
                 await hre.network.provider.request({
-                    method: 'evm_increaseTime',
+                    method: "evm_increaseTime",
                     params: [TWO_DAYS / 2],
                     id: new Date().getTime(),
                 });
@@ -257,11 +252,11 @@ const dfsRegistryTest = async () => {
                     await registryByOwner.approveContractChange(id3, gasLimit);
                     expect(true).to.be.eq(false);
                 } catch (err) {
-                    expectError(err.toString(), 'ChangeNotReadyError(uint256,uint256)');
+                    expectError(err.toString(), "ChangeNotReadyError(uint256,uint256)");
                 }
             });
 
-            it('...should cancel the contract change', async () => {
+            it("...should cancel the contract change", async () => {
                 await registryByOwner.cancelContractChange(id3, gasLimit);
 
                 const entry = await registryByOwner.entries(id3, gasLimit);
@@ -269,12 +264,16 @@ const dfsRegistryTest = async () => {
             });
         });
 
-        describe('Change vote period', async () => {
+        describe("Change vote period", async () => {
             let snapshotId;
-            beforeEach(async () => { snapshotId = await takeSnapshot(); });
-            afterEach(async () => { await revertToSnapshot(snapshotId); });
+            beforeEach(async () => {
+                snapshotId = await takeSnapshot();
+            });
+            afterEach(async () => {
+                await revertToSnapshot(snapshotId);
+            });
 
-            it('...should start a change in voting period and approve after 4 days', async () => {
+            it("...should start a change in voting period and approve after 4 days", async () => {
                 await impersonateAccount(OWNER_ACC);
                 await registryByOwner.addNewContract(id4, contractAddr4, 0, gasLimit);
 
@@ -282,7 +281,7 @@ const dfsRegistryTest = async () => {
                 await registryByOwner.startWaitPeriodChange(id4, newWaitPeriod, gasLimit);
 
                 await hre.network.provider.request({
-                    method: 'evm_increaseTime',
+                    method: "evm_increaseTime",
                     params: [newWaitPeriod],
                     id: new Date().getTime(),
                 });
@@ -295,7 +294,7 @@ const dfsRegistryTest = async () => {
                 await stopImpersonatingAccount(OWNER_ACC);
             });
 
-            it('...should fail to start a change in contract address, while wait period change', async () => {
+            it("...should fail to start a change in contract address, while wait period change", async () => {
                 await impersonateAccount(OWNER_ACC);
                 await registryByOwner.addNewContract(id4, contractAddr4, 0, gasLimit);
 
@@ -306,12 +305,12 @@ const dfsRegistryTest = async () => {
                     await registryByOwner.startContractChange(id4, contractAddr3, gasLimit);
                     expect(true).to.be.eq(false);
                 } catch (err) {
-                    expectError(err.toString(), 'AlreadyInWaitPeriodChangeError(bytes4)');
+                    expectError(err.toString(), "AlreadyInWaitPeriodChangeError(bytes4)");
                     await registryByOwner.cancelWaitPeriodChange(id4, gasLimit);
                 }
             });
 
-            it('...should fail to start a wait period change, while in contract change', async () => {
+            it("...should fail to start a wait period change, while in contract change", async () => {
                 await impersonateAccount(OWNER_ACC);
                 await registryByOwner.addNewContract(id4, contractAddr4, 0, gasLimit);
 
@@ -323,12 +322,12 @@ const dfsRegistryTest = async () => {
 
                     expect(true).to.be.eq(false);
                 } catch (err) {
-                    expectError(err.toString(), 'AlreadyInContractChangeError(bytes4)');
+                    expectError(err.toString(), "AlreadyInContractChangeError(bytes4)");
                     await registryByOwner.cancelContractChange(id4, gasLimit);
                 }
             });
 
-            it('...should fail to approve voting period change, because not enought time has passed', async () => {
+            it("...should fail to approve voting period change, because not enought time has passed", async () => {
                 await impersonateAccount(OWNER_ACC);
                 await registryByOwner.addNewContract(id4, contractAddr4, TWO_DAYS, gasLimit);
 
@@ -339,11 +338,11 @@ const dfsRegistryTest = async () => {
                     await registryByOwner.approveWaitPeriodChange(id4, gasLimit);
                     expect(true).to.be.eq(false);
                 } catch (err) {
-                    expectError(err.toString(), 'ChangeNotReadyError(uint256,uint256)');
+                    expectError(err.toString(), "ChangeNotReadyError(uint256,uint256)");
                 }
             });
 
-            it('...should start a new period change and cancel it', async () => {
+            it("...should start a new period change and cancel it", async () => {
                 await impersonateAccount(OWNER_ACC);
                 await registryByOwner.addNewContract(id4, contractAddr4, 0, gasLimit);
 
@@ -362,11 +361,15 @@ const dfsRegistryTest = async () => {
 };
 
 const botAuthTest = async () => {
-    describe('BotAuth', () => {
-        let botAuth; let owner; let senderAcc; let botAcc1; let botAcc2;
+    describe("BotAuth", () => {
+        let botAuth;
+        let owner;
+        let senderAcc;
+        let botAcc1;
+        let botAcc2;
 
         before(async () => {
-            botAuth = await redeploy('BotAuth');
+            botAuth = await redeploy("BotAuth");
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc1 = (await hre.ethers.getSigners())[1];
@@ -375,7 +378,7 @@ const botAuthTest = async () => {
             owner = await hre.ethers.provider.getSigner(OWNER_ACC);
         });
 
-        it('...should add a 2 new accounts to botAuth', async () => {
+        it("...should add a 2 new accounts to botAuth", async () => {
             await impersonateAccount(OWNER_ACC);
             botAuth = botAuth.connect(owner);
 
@@ -389,7 +392,7 @@ const botAuthTest = async () => {
             expect(bot2Approval).to.be.eq(true);
         });
 
-        it('...should remove auth from account', async () => {
+        it("...should remove auth from account", async () => {
             await botAuth.removeCaller(botAcc1.address);
 
             const bot1Approval = await botAuth.approvedCallers(botAcc1.address);
@@ -401,29 +404,29 @@ const botAuthTest = async () => {
             await stopImpersonatingAccount(OWNER_ACC);
         });
 
-        it('...should fail to add new acc. because sender not owner', async () => {
+        it("...should fail to add new acc. because sender not owner", async () => {
             try {
                 botAuth = botAuth.connect(senderAcc);
                 await botAuth.addCaller(botAcc1.address);
                 expect(true).to.be.equal(false);
             } catch (err) {
-                expectError(err.toString(), 'SenderNotOwner()');
+                expectError(err.toString(), "SenderNotOwner()");
             }
         });
 
-        it('...should fail to remove new acc. because sender not owner', async () => {
+        it("...should fail to remove new acc. because sender not owner", async () => {
             try {
                 await botAuth.removeCaller(botAcc1.address);
                 expect(true).to.be.equal(false);
             } catch (err) {
-                expectError(err.toString(), 'SenderNotOwner()');
+                expectError(err.toString(), "SenderNotOwner()");
             }
         });
     });
 };
 
 const bundleStorageTest = async () => {
-    describe('Bundle Storage', () => {
+    describe("Bundle Storage", () => {
         let bundleStorage;
         let strategyStorage;
         let owner;
@@ -433,40 +436,71 @@ const bundleStorageTest = async () => {
 
         before(async () => {
             await redeployCore();
-            const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
-            strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategyStorageAddr);
+            const strategyStorageAddr = await getAddrFromRegistry("StrategyStorage");
+            strategyStorage = await hre.ethers.getContractAt(
+                "StrategyStorage",
+                strategyStorageAddr
+            );
 
-            bundleStorage = await redeploy('BundleStorage');
+            bundleStorage = await redeploy("BundleStorage");
 
             senderAcc = (await hre.ethers.getSigners())[0];
 
             await openStrategyAndBundleStorage();
 
             // create some dummy strategies
-            await strategyStorage.createStrategy('TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
-            await strategyStorage.createStrategy('TestStrategy1', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
-            await strategyStorage.createStrategy('TestStrategy2', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
-            await strategyStorage.createStrategy('TestStrategy3', ['0x11223344', '0x66223344'], ['0x44556677'], [[0, 1, 2]], true);
-            await strategyStorage.createStrategy('TestStrategy4', ['0x11223344', '0x55223344'], ['0x44556677'], [[0, 1, 2]], true);
+            await strategyStorage.createStrategy(
+                "TestStrategy",
+                ["0x11223344"],
+                ["0x44556677"],
+                [[0, 1, 2]],
+                true
+            );
+            await strategyStorage.createStrategy(
+                "TestStrategy1",
+                ["0x11223344"],
+                ["0x44556677"],
+                [[0, 1, 2]],
+                true
+            );
+            await strategyStorage.createStrategy(
+                "TestStrategy2",
+                ["0x11223344"],
+                ["0x44556677"],
+                [[0, 1, 2]],
+                true
+            );
+            await strategyStorage.createStrategy(
+                "TestStrategy3",
+                ["0x11223344", "0x66223344"],
+                ["0x44556677"],
+                [[0, 1, 2]],
+                true
+            );
+            await strategyStorage.createStrategy(
+                "TestStrategy4",
+                ["0x11223344", "0x55223344"],
+                ["0x44556677"],
+                [[0, 1, 2]],
+                true
+            );
 
-            strategyCount = parseInt((await getLatestStrategyId()), 10);
+            strategyCount = parseInt(await getLatestStrategyId(), 10);
 
             owner = await hre.ethers.provider.getSigner(OWNER_ACC);
         });
 
-        it('...should registry a new bundle ', async () => {
-            await bundleStorage.connect(senderAcc).createBundle([
-                strategyCount - 4,
-                strategyCount - 3,
-                strategyCount - 2,
-            ]);
+        it("...should registry a new bundle ", async () => {
+            await bundleStorage
+                .connect(senderAcc)
+                .createBundle([strategyCount - 4, strategyCount - 3, strategyCount - 2]);
 
             const numBundles = await bundleStorage.getBundleCount();
 
             expect(numBundles).to.be.eq(1);
         });
 
-        it('...should switch open to public to false', async () => {
+        it("...should switch open to public to false", async () => {
             await impersonateAccount(OWNER_ACC);
 
             bundleStorageFromOwner = bundleStorage.connect(owner);
@@ -476,29 +510,27 @@ const bundleStorageTest = async () => {
             await stopImpersonatingAccount(OWNER_ACC);
         });
 
-        it('...should fail to change edit permission from non owner acc', async () => {
+        it("...should fail to change edit permission from non owner acc", async () => {
             try {
                 await bundleStorage.connect(senderAcc).changeEditPermission(false);
                 expect(true).to.be.eq(false);
             } catch (err) {
-                expectError(err.toString(), 'SenderNotOwner()');
+                expectError(err.toString(), "SenderNotOwner()");
             }
         });
 
-        it('...should fail to reg. a new bundle from non owner acc', async () => {
+        it("...should fail to reg. a new bundle from non owner acc", async () => {
             try {
-                await bundleStorage.connect(senderAcc).createBundle([
-                    strategyCount - 4,
-                    strategyCount - 3,
-                    strategyCount - 2,
-                ]);
+                await bundleStorage
+                    .connect(senderAcc)
+                    .createBundle([strategyCount - 4, strategyCount - 3, strategyCount - 2]);
                 expect(true).to.be.eq(false);
             } catch (err) {
-                expectError(err.toString(), 'NoAuthToCreateBundle(address,bool)');
+                expectError(err.toString(), "NoAuthToCreateBundle(address,bool)");
             }
         });
 
-        it('...should fail to registry a bundle because triggerIds are not the same', async () => {
+        it("...should fail to registry a bundle because triggerIds are not the same", async () => {
             try {
                 // set permission to open to test trigger validation
                 await openStrategyAndBundleStorage();
@@ -508,28 +540,24 @@ const bundleStorageTest = async () => {
                     .createBundle([strategyCount - 2, strategyCount - 1]);
                 expect(true).to.be.equal(false);
             } catch (err) {
-                expectError(err.toString(), 'DiffTriggersInBundle(uint64[])');
+                expectError(err.toString(), "DiffTriggersInBundle(uint64[])");
             }
         });
 
-        it('...should reg. bundles from owner acc', async () => {
+        it("...should reg. bundles from owner acc", async () => {
             await impersonateAccount(OWNER_ACC);
 
             const numBundlesBefore = await bundleStorageFromOwner.getBundleCount();
 
-            await bundleStorageFromOwner.connect(owner).createBundle([
-                strategyCount - 4,
-                strategyCount - 3,
-                strategyCount - 2,
-            ]);
-            await bundleStorageFromOwner.connect(owner).createBundle([
-                strategyCount - 2,
-                strategyCount - 3,
-            ]);
-            await bundleStorageFromOwner.connect(owner).createBundle([
-                strategyCount - 3,
-                strategyCount - 2,
-            ]);
+            await bundleStorageFromOwner
+                .connect(owner)
+                .createBundle([strategyCount - 4, strategyCount - 3, strategyCount - 2]);
+            await bundleStorageFromOwner
+                .connect(owner)
+                .createBundle([strategyCount - 2, strategyCount - 3]);
+            await bundleStorageFromOwner
+                .connect(owner)
+                .createBundle([strategyCount - 3, strategyCount - 2]);
 
             await stopImpersonatingAccount(OWNER_ACC);
 
@@ -540,28 +568,22 @@ const bundleStorageTest = async () => {
 
         // view testing
 
-        it('...should fetch a bundle by id', async () => {
+        it("...should fetch a bundle by id", async () => {
             const bundleData = await bundleStorage.getBundle(0);
 
             expect(bundleData.creator).to.be.eq(senderAcc.address);
             const ids = bundleData.strategyIds.map((id) => parseInt(id, 10));
 
-            expect(ids).to.be.eql([
-                strategyCount - 4,
-                strategyCount - 3,
-                strategyCount - 2]);
+            expect(ids).to.be.eql([strategyCount - 4, strategyCount - 3, strategyCount - 2]);
         });
 
-        it('...should fetch strategy id from a bundle', async () => {
-            const strategyId = await bundleStorage.getStrategyId(
-                2,
-                1,
-            );
+        it("...should fetch strategy id from a bundle", async () => {
+            const strategyId = await bundleStorage.getStrategyId(2, 1);
 
             expect(strategyId.toString()).to.be.eql((strategyCount - 3).toString());
         });
 
-        it('...should fetch getPaginatedBundles', async () => {
+        it("...should fetch getPaginatedBundles", async () => {
             const bundles1 = await bundleStorageFromOwner.getPaginatedBundles(0, 2);
 
             expect(bundles1[0].creator).to.be.eq(senderAcc.address);
@@ -576,12 +598,17 @@ const bundleStorageTest = async () => {
 };
 
 const proxyAuthTest = async () => {
-    describe('ProxyAuth', () => {
-        let proxyAuth; let proxy; let proxy2; let senderAcc; let dsProxyPermission; let sumInputs;
+    describe("ProxyAuth", () => {
+        let proxyAuth;
+        let proxy;
+        let proxy2;
+        let senderAcc;
+        let dsProxyPermission;
+        let sumInputs;
 
         before(async () => {
-            proxyAuth = await redeploy('ProxyAuth');
-            sumInputs = await redeploy('SumInputs');
+            proxyAuth = await redeploy("ProxyAuth");
+            sumInputs = await redeploy("SumInputs");
 
             senderAcc = (await hre.ethers.getSigners())[0];
             const senderAcc2 = (await hre.ethers.getSigners())[1];
@@ -590,20 +617,22 @@ const proxyAuthTest = async () => {
             proxy2 = await getProxy(senderAcc2.address);
 
             // give auth to ProxyAuth
-            dsProxyPermission = await redeploy('DSProxyPermission');
+            dsProxyPermission = await redeploy("DSProxyPermission");
 
             await impersonateStrategyExecutorAsEoa(senderAcc.address);
         });
 
-        it('...should callExecute when auth is given to proxyAuth and StrategyExecutor set', async () => {
+        it("...should callExecute when auth is given to proxyAuth and StrategyExecutor set", async () => {
             // give proxy permission to ProxyAuth
-            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
+            const DSProxyPermission = await hre.ethers.getContractFactory("DSProxyPermission");
             const functionData = DSProxyPermission.interface.encodeFunctionData(
-                'giveProxyPermission',
-                [proxyAuth.address],
+                "giveProxyPermission",
+                [proxyAuth.address]
             );
 
-            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, { gasLimit: 1500000 });
+            await proxy["execute(address,bytes)"](dsProxyPermission.address, functionData, {
+                gasLimit: 1500000,
+            });
 
             // test action
             const encodedCall = new dfs.actions.basic.SumInputsAction(1, 2).encodeForDsProxyCall();
@@ -618,10 +647,13 @@ const proxyAuthTest = async () => {
             }
         });
 
-        it('...should fail when ProxyAuth has no DSProxy.authority()', async () => {
+        it("...should fail when ProxyAuth has no DSProxy.authority()", async () => {
             try {
                 // eslint-disable-next-line max-len
-                const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2)).encodeForDsProxyCall();
+                const encodedCall = new dfs.actions.basic.SumInputsAction(
+                    1,
+                    2
+                ).encodeForDsProxyCall();
 
                 await proxyAuth
                     .connect(senderAcc)
@@ -633,26 +665,29 @@ const proxyAuthTest = async () => {
             }
         });
 
-        it('...should fail when StrategyExecutor is not the caller', async () => {
+        it("...should fail when StrategyExecutor is not the caller", async () => {
             try {
-                await redeploy('StrategyExecutor'); // set diff. address to be StrategyExecutor
+                await redeploy("StrategyExecutor"); // set diff. address to be StrategyExecutor
 
                 // eslint-disable-next-line max-len
-                const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2)).encodeForDsProxyCall();
+                const encodedCall = new dfs.actions.basic.SumInputsAction(
+                    1,
+                    2
+                ).encodeForDsProxyCall();
 
                 await proxyAuth
                     .connect(senderAcc)
                     .callExecute(proxy.address, sumInputs.address, encodedCall[1]);
                 expect(true).to.be.equal(false);
             } catch (err) {
-                expectError(err.toString(), 'SenderNotExecutorError(address,address)');
+                expectError(err.toString(), "SenderNotExecutorError(address,address)");
             }
         });
     });
 };
 
 const safeModuleAuthTest = async () => {
-    describe('SafeModuleAuth', () => {
+    describe("SafeModuleAuth", () => {
         let safeModuleAuth;
         let safeModulePermission;
         let senderAcc;
@@ -661,30 +696,34 @@ const safeModuleAuthTest = async () => {
         let snapshotId;
 
         before(async () => {
-            safeModuleAuth = await redeploy('SafeModuleAuth');
-            safeModulePermission = await redeploy('SafeModulePermission');
-            sumInputs = await redeploy('SumInputs');
+            safeModuleAuth = await redeploy("SafeModuleAuth");
+            safeModulePermission = await redeploy("SafeModulePermission");
+            sumInputs = await redeploy("SumInputs");
             senderAcc = (await hre.ethers.getSigners())[0];
             safe = await getProxy(senderAcc.address, true);
             await impersonateStrategyExecutorAsEoa(senderAcc.address);
         });
 
-        beforeEach(async () => { snapshotId = await takeSnapshot(); });
-        afterEach(async () => { await revertToSnapshot(snapshotId); });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
 
-        it('... should callExecute when auth is given to safeModuleAuth and StrategyExecutor is set', async () => {
+        it("... should callExecute when auth is given to safeModuleAuth and StrategyExecutor is set", async () => {
             // give safe module permission to SafeModuleAuth
-            const SafeModulePermission = await hre.ethers.getContractFactory('SafeModulePermission');
-            const functionData = SafeModulePermission.interface.encodeFunctionData(
-                'enableModule',
-                [safeModuleAuth.address],
-            );
+            const SafeModulePermission =
+                await hre.ethers.getContractFactory("SafeModulePermission");
+            const functionData = SafeModulePermission.interface.encodeFunctionData("enableModule", [
+                safeModuleAuth.address,
+            ]);
 
             await executeSafeTx(
                 senderAcc.address,
                 safe,
                 safeModulePermission.address,
-                functionData,
+                functionData
             );
 
             // test action
@@ -700,44 +739,41 @@ const safeModuleAuthTest = async () => {
             }
         });
 
-        it('... should fail when safeModuleAuth has no safe module permission', async () => {
-            const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2))
-                .encodeForDsProxyCall();
+        it("... should fail when safeModuleAuth has no safe module permission", async () => {
+            const encodedCall = new dfs.actions.basic.SumInputsAction(1, 2).encodeForDsProxyCall();
 
             await expect(
                 safeModuleAuth
                     .connect(senderAcc)
-                    .callExecute(safe.address, sumInputs.address, encodedCall[1]),
+                    .callExecute(safe.address, sumInputs.address, encodedCall[1])
             ).to.be.reverted;
         });
 
-        it('... should fail when StrategyExecutor is not the caller', async () => {
-            await redeploy('StrategyExecutor'); // set diff. address to be StrategyExecutor
+        it("... should fail when StrategyExecutor is not the caller", async () => {
+            await redeploy("StrategyExecutor"); // set diff. address to be StrategyExecutor
 
-            const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2))
-                .encodeForDsProxyCall();
+            const encodedCall = new dfs.actions.basic.SumInputsAction(1, 2).encodeForDsProxyCall();
 
             await expect(
                 safeModuleAuth
                     .connect(senderAcc)
-                    .callExecute(safe.address, sumInputs.address, encodedCall[1]),
+                    .callExecute(safe.address, sumInputs.address, encodedCall[1])
             ).to.be.reverted;
         });
 
-        it('... should fail when safeModuleAuth is paused', async () => {
-            const SafeModulePermission = await hre.ethers.getContractFactory('SafeModulePermission');
-            const functionData = SafeModulePermission.interface.encodeFunctionData(
-                'enableModule',
-                [safeModuleAuth.address],
-            );
+        it("... should fail when safeModuleAuth is paused", async () => {
+            const SafeModulePermission =
+                await hre.ethers.getContractFactory("SafeModulePermission");
+            const functionData = SafeModulePermission.interface.encodeFunctionData("enableModule", [
+                safeModuleAuth.address,
+            ]);
             await executeSafeTx(
                 senderAcc.address,
                 safe,
                 safeModulePermission.address,
-                functionData,
+                functionData
             );
-            const encodedCall = (new dfs.actions.basic.SumInputsAction(1, 2))
-                .encodeForDsProxyCall();
+            const encodedCall = new dfs.actions.basic.SumInputsAction(1, 2).encodeForDsProxyCall();
 
             await impersonateAccount(getAdminAddr());
             const adminAcc = await hre.ethers.provider.getSigner(getAdminAddr());
@@ -747,14 +783,14 @@ const safeModuleAuthTest = async () => {
             await expect(
                 safeModuleAuth
                     .connect(senderAcc)
-                    .callExecute(safe.address, sumInputs.address, encodedCall[1]),
+                    .callExecute(safe.address, sumInputs.address, encodedCall[1])
             ).to.be.reverted;
         });
     });
 };
 
 const recipeExecutorTest = async () => {
-    describe('RecipeExecutor', () => {
+    describe("RecipeExecutor", () => {
         const coreAddressesInjector = new CoreAddressesInjector();
         let snapshotId;
 
@@ -784,10 +820,13 @@ const recipeExecutorTest = async () => {
             functionData,
             targetAddr,
             ethValue = 0,
-            gl = 5000000,
+            gl = 5000000
         ) => {
             await (useDsProxy
-                ? wallet['execute(address,bytes)'](targetAddr, functionData, { gasLimit: gl, value: ethValue })
+                ? wallet["execute(address,bytes)"](targetAddr, functionData, {
+                      gasLimit: gl,
+                      value: ethValue,
+                  })
                 : executeSafeTx(senderAcc.address, wallet, targetAddr, functionData, 1, ethValue));
         };
 
@@ -803,46 +842,53 @@ const recipeExecutorTest = async () => {
 
         const giveAuthPermissionsToWallets = async () => {
             // give permission to ProxyAuth
-            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
+            const DSProxyPermission = await hre.ethers.getContractFactory("DSProxyPermission");
             const functionDataDsProxy = DSProxyPermission.interface.encodeFunctionData(
-                'giveProxyPermission',
-                [proxyAuth.address],
+                "giveProxyPermission",
+                [proxyAuth.address]
             );
-            await dsProxy['execute(address,bytes)'](dsProxyPermission.address, functionDataDsProxy, { gasLimit: 1500000 });
+            await dsProxy["execute(address,bytes)"](
+                dsProxyPermission.address,
+                functionDataDsProxy,
+                { gasLimit: 1500000 }
+            );
 
             // give permission to SafeModuleAuth
-            const SafeModulePermission = await hre.ethers.getContractFactory('SafeModulePermission');
+            const SafeModulePermission =
+                await hre.ethers.getContractFactory("SafeModulePermission");
             const functionDataSafe = SafeModulePermission.interface.encodeFunctionData(
-                'enableModule',
-                [safeModuleAuth.address],
+                "enableModule",
+                [safeModuleAuth.address]
             );
             await executeSafeTx(
                 senderAcc.address,
                 safe,
                 safeModulePermission.address,
-                functionDataSafe,
+                functionDataSafe
             );
         };
 
         before(async () => {
-            recipeExecutor = await redeploy('RecipeExecutor');
-            subProxy = await redeploy('SubProxy');
-            proxyAuth = await redeploy('ProxyAuth');
-            safeModuleAuth = await redeploy('SafeModuleAuth');
-            dsProxyPermission = await redeploy('DSProxyPermission');
-            safeModulePermission = await redeploy('SafeModulePermission');
+            recipeExecutor = await redeploy("RecipeExecutor");
+            subProxy = await redeploy("SubProxy");
+            proxyAuth = await redeploy("ProxyAuth");
+            safeModuleAuth = await redeploy("SafeModuleAuth");
+            dsProxyPermission = await redeploy("DSProxyPermission");
+            safeModulePermission = await redeploy("SafeModulePermission");
 
             await coreAddressesInjector.inject(
-                recipeExecutor.address, proxyAuth.address, safeModuleAuth.address,
+                recipeExecutor.address,
+                proxyAuth.address,
+                safeModuleAuth.address
             );
 
-            strategyExecutor = await redeploy('StrategyExecutor');
+            strategyExecutor = await redeploy("StrategyExecutor");
 
             // redeploy as those are used in recipes examples
-            const flActionContract = await redeploy('FLAction');
+            const flActionContract = await redeploy("FLAction");
             flAddr = flActionContract.address;
-            await redeploy('PullToken');
-            await redeploy('SendToken');
+            await redeploy("PullToken");
+            await redeploy("SendToken");
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
@@ -850,34 +896,38 @@ const recipeExecutorTest = async () => {
 
             dsProxy = await getProxy(senderAcc.address);
             safe = await getProxy(senderAcc.address, true);
-            maxGasPrice = '0';
+            maxGasPrice = "0";
 
             await openStrategyAndBundleStorage();
 
             const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-                WETH_ADDRESS, placeHolderAddr, 0,
+                WETH_ADDRESS,
+                placeHolderAddr,
+                0
             );
 
             actionData = pullTokenAction.encodeForRecipe()[0];
-            triggerData = abiCoder.encode(['uint256'], [0]);
+            triggerData = abiCoder.encode(["uint256"], [0]);
 
             await addBotCaller(botAcc.address);
             await giveAuthPermissionsToWallets();
-        })
+        });
 
         after(async () => {
             await coreAddressesInjector.rollBack();
         });
 
-        beforeEach(async () => { snapshotId = await takeSnapshot(); });
-        afterEach(async () => { await revertToSnapshot(snapshotId); });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
 
         for (let i = 0; i < WALLETS.length; i++) {
             it(`...should fail to execute recipe by strategy through ${WALLETS[i]} because the triggers check is not passing`, async () => {
                 setupWallet(WALLETS[i]);
-                const { strategySub, subId } = await addPlaceholderStrategy(
-                    wallet, maxGasPrice,
-                );
+                const { strategySub, subId } = await addPlaceholderStrategy(wallet, maxGasPrice);
                 try {
                     await strategyExecutorByBot.executeStrategy(
                         subId,
@@ -885,31 +935,31 @@ const recipeExecutorTest = async () => {
                         [triggerData],
                         [actionData],
                         strategySub,
-                        { gasLimit: 5000000 },
+                        { gasLimit: 5000000 }
                     );
                     expect(true).to.be.equal(false);
                 } catch (err) {
                     if (useDsProxy) {
-                        expect(err.toString()).to.have.string('reverted without a reason string');
+                        expect(err.toString()).to.have.string("reverted without a reason string");
                     } else {
-                        expectError(err.toString(), 'SafeExecutionError()');
+                        expectError(err.toString(), "SafeExecutionError()");
                     }
                 }
             });
 
             it(`...should execute recipe by strategy through ${WALLETS[i]}`, async () => {
                 setupWallet(WALLETS[i]);
-                const { strategyId, subId } = await addPlaceholderStrategy(
-                    wallet, maxGasPrice,
-                );
+                const { strategyId, subId } = await addPlaceholderStrategy(wallet, maxGasPrice);
                 // update sub data so trigger will pass
-                const amountEncoded = abiCoder.encode(['uint256'], [pullAmount]);
-                maxGasPrice = '1000000000000';
-                triggerData = abiCoder.encode(['uint256'], [maxGasPrice]);
+                const amountEncoded = abiCoder.encode(["uint256"], [pullAmount]);
+                maxGasPrice = "1000000000000";
+                triggerData = abiCoder.encode(["uint256"], [maxGasPrice]);
                 const strategySub = [strategyId, false, [triggerData], [amountEncoded]];
 
-                const functionData = subProxy.interface.encodeFunctionData('updateSubData',
-                    [subId, [strategyId, false, [triggerData], [amountEncoded]]]);
+                const functionData = subProxy.interface.encodeFunctionData("updateSubData", [
+                    subId,
+                    [strategyId, false, [triggerData], [amountEncoded]],
+                ]);
 
                 await executeTxThroughWallet(functionData, subProxy.address);
                 // deposit weth and give allowance to wallet for pull action
@@ -924,7 +974,7 @@ const recipeExecutorTest = async () => {
                     [triggerData],
                     [actionData],
                     strategySub,
-                    { gasLimit: 5000000 },
+                    { gasLimit: 5000000 }
                 );
 
                 const afterBalance = await balanceOf(WETH_ADDRESS, wallet.address);
@@ -938,19 +988,26 @@ const recipeExecutorTest = async () => {
                 await depositToWeth(pullAmount);
                 await approve(WETH_ADDRESS, wallet.address);
 
-                const dummyRecipe = new dfs.Recipe('DummyRecipe', [
+                const dummyRecipe = new dfs.Recipe("DummyRecipe", [
                     new dfs.actions.basic.PullTokenAction(
-                        WETH_ADDRESS, senderAcc.address, pullAmount,
+                        WETH_ADDRESS,
+                        senderAcc.address,
+                        pullAmount
                     ),
                     new dfs.actions.basic.SendTokenAction(
-                        WETH_ADDRESS, senderAcc.address, pullAmount,
+                        WETH_ADDRESS,
+                        senderAcc.address,
+                        pullAmount
                     ),
                 ]);
 
                 const functionData = dummyRecipe.encodeForDsProxyCall()[1];
 
                 await executeTxThroughWallet(
-                    functionData, recipeExecutor.address, pullAmount, 3000000,
+                    functionData,
+                    recipeExecutor.address,
+                    pullAmount,
+                    3000000
                 );
 
                 const afterBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
@@ -960,20 +1017,19 @@ const recipeExecutorTest = async () => {
             it(`...should execute basic recipe with FL through ${WALLETS[i]}`, async () => {
                 setupWallet(WALLETS[i]);
                 const beforeBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
-                const dummyRecipeWithFL = new dfs.Recipe('DummyRecipeWithFl', [
+                const dummyRecipeWithFL = new dfs.Recipe("DummyRecipeWithFl", [
                     new dfs.actions.flashloan.FLAction(
                         new dfs.actions.flashloan.BalancerFlashLoanAction(
-                            [WETH_ADDRESS], [pullAmount],
-                        ),
+                            [WETH_ADDRESS],
+                            [pullAmount]
+                        )
                     ),
                     new dfs.actions.basic.SendTokenAction(WETH_ADDRESS, flAddr, pullAmount),
                 ]);
 
                 const functionData = dummyRecipeWithFL.encodeForDsProxyCall()[1];
 
-                await executeTxThroughWallet(
-                    functionData, recipeExecutor.address, 0, 3000000,
-                );
+                await executeTxThroughWallet(functionData, recipeExecutor.address, 0, 3000000);
 
                 const afterBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
                 expect(beforeBalance).to.be.eq(afterBalance);
@@ -983,7 +1039,7 @@ const recipeExecutorTest = async () => {
 };
 
 const strategyExecutorTest = async () => {
-    describe('StrategyExecutor', () => {
+    describe("StrategyExecutor", () => {
         let proxy;
         let strategyExecutor;
         let senderAcc;
@@ -997,12 +1053,12 @@ const strategyExecutorTest = async () => {
         let subId;
 
         before(async () => {
-            subProxy = await redeploy('SubProxy');
-            strategyExecutor = await redeploy('StrategyExecutor');
+            subProxy = await redeploy("SubProxy");
+            strategyExecutor = await redeploy("StrategyExecutor");
 
-            await redeploy('SendToken');
-            await redeploy('WrapEth');
-            await redeploy('GasPriceTrigger');
+            await redeploy("SendToken");
+            await redeploy("WrapEth");
+            await redeploy("GasPriceTrigger");
 
             senderAcc = (await hre.ethers.getSigners())[0];
             botAcc = (await hre.ethers.getSigners())[1];
@@ -1011,41 +1067,40 @@ const strategyExecutorTest = async () => {
 
             proxy = await getProxy(senderAcc.address);
 
-            const maxGasPrice = '1000000000000';
+            const maxGasPrice = "1000000000000";
 
             await openStrategyAndBundleStorage();
 
             ({ strategySub, strategyId, subId } = await addPlaceholderStrategy(proxy, maxGasPrice));
 
             const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-                WETH_ADDRESS, placeHolderAddr, 0,
+                WETH_ADDRESS,
+                placeHolderAddr,
+                0
             );
 
             actionData = pullTokenAction.encodeForRecipe()[0];
-            triggerData = abiCoder.encode(['uint256'], [maxGasPrice]);
+            triggerData = abiCoder.encode(["uint256"], [maxGasPrice]);
         });
 
-        it('...should fail because caller is not auth bot', async () => {
+        it("...should fail because caller is not auth bot", async () => {
             try {
-                await strategyExecutor.connect(senderAcc).executeStrategy(
-                    subId,
-                    0,
-                    [triggerData],
-                    [actionData],
-                    strategySub,
-                    { gasLimit: 4_000_000 },
-                );
+                await strategyExecutor
+                    .connect(senderAcc)
+                    .executeStrategy(subId, 0, [triggerData], [actionData], strategySub, {
+                        gasLimit: 4_000_000,
+                    });
                 expect(true).to.be.equal(false);
             } catch (err) {
-                expectError(err.toString(), 'BotNotApproved(address,uint256)');
+                expectError(err.toString(), "BotNotApproved(address,uint256)");
             }
         });
 
-        it('...should fail because of wrong SubData hash', async () => {
+        it("...should fail because of wrong SubData hash", async () => {
             try {
                 await addBotCaller(botAcc.address);
 
-                const amountEncoded = abiCoder.encode(['uint256'], [pullAmount]);
+                const amountEncoded = abiCoder.encode(["uint256"], [pullAmount]);
                 // isBundle changed to true
                 const strategySubUpdated = [strategyId, true, [triggerData], [amountEncoded]];
 
@@ -1055,19 +1110,21 @@ const strategyExecutorTest = async () => {
                     [triggerData],
                     [actionData],
                     strategySubUpdated,
-                    { gasLimit: 4_000_000 },
+                    { gasLimit: 4_000_000 }
                 );
                 expect(true).to.be.equal(false);
             } catch (err) {
-                expectError(err.toString(), 'SubDatHashMismatch(uint256,bytes32,bytes32)');
+                expectError(err.toString(), "SubDatHashMismatch(uint256,bytes32,bytes32)");
             }
         });
 
-        it('...should fail because subscription is not enabled', async () => {
+        it("...should fail because subscription is not enabled", async () => {
             try {
                 // disable sub
-                const functionData = subProxy.interface.encodeFunctionData('deactivateSub', [subId]);
-                await proxy['execute(address,bytes)'](subProxy.address, functionData, {
+                const functionData = subProxy.interface.encodeFunctionData("deactivateSub", [
+                    subId,
+                ]);
+                await proxy["execute(address,bytes)"](subProxy.address, functionData, {
                     gasLimit: 5000000,
                 });
 
@@ -1077,18 +1134,18 @@ const strategyExecutorTest = async () => {
                     [triggerData],
                     [actionData],
                     strategySub,
-                    { gasLimit: 4_000_000 },
+                    { gasLimit: 4_000_000 }
                 );
                 expect(true).to.be.equal(false);
             } catch (err) {
-                expectError(err.toString(), 'SubNotEnabled(uint256)');
+                expectError(err.toString(), "SubNotEnabled(uint256)");
             }
         });
     });
 };
 
 const strategyStorageTest = async () => {
-    describe('StrategyStorage', () => {
+    describe("StrategyStorage", () => {
         let strategyStorage;
         let owner;
         let strategyStorageFromOwner;
@@ -1097,27 +1154,30 @@ const strategyStorageTest = async () => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
 
-            const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
-            strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategyStorageAddr);
+            const strategyStorageAddr = await getAddrFromRegistry("StrategyStorage");
+            strategyStorage = await hre.ethers.getContractAt(
+                "StrategyStorage",
+                strategyStorageAddr
+            );
 
             owner = await hre.ethers.provider.getSigner(OWNER_ACC);
         });
 
-        it('...should registry a new strategy ', async () => {
+        it("...should registry a new strategy ", async () => {
             const numStrategiesBefore = await strategyStorage.getStrategyCount();
 
             await openStrategyAndBundleStorage();
 
             await strategyStorage
                 .connect(senderAcc)
-                .createStrategy('TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
+                .createStrategy("TestStrategy", ["0x11223344"], ["0x44556677"], [[0, 1, 2]], true);
 
             const numStrategies = await strategyStorage.getStrategyCount();
 
             expect(numStrategies).to.be.eq(+numStrategiesBefore + 1);
         });
 
-        it('...should switch open to public to false', async () => {
+        it("...should switch open to public to false", async () => {
             await impersonateAccount(OWNER_ACC);
 
             strategyStorageFromOwner = strategyStorage.connect(owner);
@@ -1127,34 +1187,58 @@ const strategyStorageTest = async () => {
             await stopImpersonatingAccount(OWNER_ACC);
         });
 
-        it('...should fail to change edit permission from non owner acc', async () => {
+        it("...should fail to change edit permission from non owner acc", async () => {
             try {
                 await strategyStorage.connect(senderAcc).changeEditPermission(false);
                 expect(true).to.be.equal(false);
             } catch (err) {
-                expectError(err.toString(), 'SenderNotOwner()');
+                expectError(err.toString(), "SenderNotOwner()");
             }
         });
 
-        it('...should fail to reg. a new strategy from non owner acc', async () => {
+        it("...should fail to reg. a new strategy from non owner acc", async () => {
             try {
                 await strategyStorage
                     .connect(senderAcc)
-                    .createStrategy('TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
+                    .createStrategy(
+                        "TestStrategy",
+                        ["0x11223344"],
+                        ["0x44556677"],
+                        [[0, 1, 2]],
+                        true
+                    );
                 expect(true).to.be.equal(false);
             } catch (err) {
-                expectError(err.toString(), 'NoAuthToCreateStrategy(address,bool)');
+                expectError(err.toString(), "NoAuthToCreateStrategy(address,bool)");
             }
         });
 
-        it('...should reg. strategies from owner acc', async () => {
+        it("...should reg. strategies from owner acc", async () => {
             await impersonateAccount(OWNER_ACC);
 
             const numStrategiesBefore = await strategyStorage.getStrategyCount();
 
-            await strategyStorageFromOwner.createStrategy('TestStrategy2', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
-            await strategyStorageFromOwner.createStrategy('TestStrategy3', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
-            await strategyStorageFromOwner.createStrategy('TestStrategy4', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
+            await strategyStorageFromOwner.createStrategy(
+                "TestStrategy2",
+                ["0x11223344"],
+                ["0x44556677"],
+                [[0, 1, 2]],
+                true
+            );
+            await strategyStorageFromOwner.createStrategy(
+                "TestStrategy3",
+                ["0x11223344"],
+                ["0x44556677"],
+                [[0, 1, 2]],
+                true
+            );
+            await strategyStorageFromOwner.createStrategy(
+                "TestStrategy4",
+                ["0x11223344"],
+                ["0x44556677"],
+                [[0, 1, 2]],
+                true
+            );
 
             await stopImpersonatingAccount(OWNER_ACC);
 
@@ -1165,38 +1249,32 @@ const strategyStorageTest = async () => {
 
         // view testing
 
-        it('...should fetch a strategy by id', async () => {
+        it("...should fetch a strategy by id", async () => {
             const numStrategies = await strategyStorage.getStrategyCount();
 
             const strategyData = await strategyStorage.getStrategy(+numStrategies - 1);
 
             expect(strategyData.creator).to.be.eq(OWNER_ACC);
-            expect(strategyData.name).to.be.eq('TestStrategy4');
+            expect(strategyData.name).to.be.eq("TestStrategy4");
         });
 
-        it('...should fetch getPaginatedStrategies', async () => {
-            const strategies1 = await strategyStorageFromOwner.getPaginatedStrategies(
-                0,
-                2,
-            );
+        it("...should fetch getPaginatedStrategies", async () => {
+            const strategies1 = await strategyStorageFromOwner.getPaginatedStrategies(0, 2);
 
-            expect(strategies1[0].name).to.be.eq('McdYearnRepayStrategy');
-            expect(strategies1[1].name).to.be.eq('McdYearnRepayWithExchangeStrategy');
+            expect(strategies1[0].name).to.be.eq("McdYearnRepayStrategy");
+            expect(strategies1[1].name).to.be.eq("McdYearnRepayWithExchangeStrategy");
 
-            const strategies2 = await strategyStorageFromOwner.getPaginatedStrategies(
-                2,
-                2,
-            );
+            const strategies2 = await strategyStorageFromOwner.getPaginatedStrategies(2, 2);
 
-            expect(strategies2[0].name).to.be.eq('McdRariRepayStrategy');
-            expect(strategies2[1].name).to.be.eq('McdRariRepayWithExchangeStrategy');
+            expect(strategies2[0].name).to.be.eq("McdRariRepayStrategy");
+            expect(strategies2[1].name).to.be.eq("McdRariRepayWithExchangeStrategy");
         });
     });
 };
 
 const subProxyTest = async () => {
-// this just a proxy contract implementation already tested in SubStore (so just basic tests)
-    describe('SubProxy', () => {
+    // this just a proxy contract implementation already tested in SubStore (so just basic tests)
+    describe("SubProxy", () => {
         let subProxy;
         let senderAcc;
         let strategyStorage;
@@ -1210,10 +1288,13 @@ const subProxyTest = async () => {
             functionData,
             targetAddr,
             ethValue = 0,
-            gl = 5000000,
+            gl = 5000000
         ) => {
             await (useDsProxy
-                ? wallet['execute(address,bytes)'](targetAddr, functionData, { gasLimit: gl, value: ethValue })
+                ? wallet["execute(address,bytes)"](targetAddr, functionData, {
+                      gasLimit: gl,
+                      value: ethValue,
+                  })
                 : executeSafeTx(senderAcc.address, wallet, targetAddr, functionData, 1, ethValue));
         };
 
@@ -1228,17 +1309,32 @@ const subProxyTest = async () => {
         };
 
         before(async () => {
-            const subStorageAddr = await getAddrFromRegistry('SubStorage');
-            subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+            const subStorageAddr = await getAddrFromRegistry("SubStorage");
+            subStorage = await hre.ethers.getContractAt("SubStorage", subStorageAddr);
 
-            subProxy = await redeploy('SubProxy');
+            subProxy = await redeploy("SubProxy");
 
-            const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
-            strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategyStorageAddr);
+            const strategyStorageAddr = await getAddrFromRegistry("StrategyStorage");
+            strategyStorage = await hre.ethers.getContractAt(
+                "StrategyStorage",
+                strategyStorageAddr
+            );
             await openStrategyAndBundleStorage();
 
-            await strategyStorage.createStrategy('TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
-            await strategyStorage.createStrategy('TestStrategy2', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
+            await strategyStorage.createStrategy(
+                "TestStrategy",
+                ["0x11223344"],
+                ["0x44556677"],
+                [[0, 1, 2]],
+                true
+            );
+            await strategyStorage.createStrategy(
+                "TestStrategy2",
+                ["0x11223344"],
+                ["0x44556677"],
+                [[0, 1, 2]],
+                true
+            );
 
             senderAcc = (await hre.ethers.getSigners())[0];
 
@@ -1247,14 +1343,16 @@ const subProxyTest = async () => {
         });
 
         for (let i = 0; i < WALLETS.length; i++) {
-            it('...should add a new subscription', async () => {
+            it("...should add a new subscription", async () => {
                 setupWallet(WALLETS[i]);
                 const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
 
                 const subData = [numStrategies, false, [], []];
                 const subDataHash = getSubHash(subData);
 
-                const functionData = subProxy.interface.encodeFunctionData('subscribeToStrategy', [subData]);
+                const functionData = subProxy.interface.encodeFunctionData("subscribeToStrategy", [
+                    subData,
+                ]);
 
                 const numSubsBefore = await subStorage.getSubsCount();
 
@@ -1267,7 +1365,7 @@ const subProxyTest = async () => {
                 expect(storedSub.strategySubHash).to.be.eq(subDataHash);
             });
 
-            it('...should update the new subscription', async () => {
+            it("...should update the new subscription", async () => {
                 setupWallet(WALLETS[i]);
                 const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
                 const latestSub = +(await subStorage.getSubsCount()) - 1;
@@ -1276,7 +1374,10 @@ const subProxyTest = async () => {
 
                 const subDataHash = getSubHash(updatedSubData);
 
-                const functionData = subProxy.interface.encodeFunctionData('updateSubData', [latestSub, updatedSubData]);
+                const functionData = subProxy.interface.encodeFunctionData("updateSubData", [
+                    latestSub,
+                    updatedSubData,
+                ]);
 
                 await executeTxThroughWallet(functionData, subProxy.address);
 
@@ -1284,11 +1385,13 @@ const subProxyTest = async () => {
                 expect(storedSub.strategySubHash).to.be.eq(subDataHash);
             });
 
-            it('...should deactivate users sub', async () => {
+            it("...should deactivate users sub", async () => {
                 setupWallet(WALLETS[i]);
                 const latestSub = +(await subStorage.getSubsCount()) - 1;
 
-                const functionData = subProxy.interface.encodeFunctionData('deactivateSub', [latestSub]);
+                const functionData = subProxy.interface.encodeFunctionData("deactivateSub", [
+                    latestSub,
+                ]);
 
                 await executeTxThroughWallet(functionData, subProxy.address);
 
@@ -1296,11 +1399,13 @@ const subProxyTest = async () => {
                 expect(storedSub.isEnabled).to.be.eq(false);
             });
 
-            it('...should activate users sub', async () => {
+            it("...should activate users sub", async () => {
                 setupWallet(WALLETS[i]);
                 const latestSub = +(await subStorage.getSubsCount()) - 1;
 
-                const functionData = subProxy.interface.encodeFunctionData('activateSub', [latestSub]);
+                const functionData = subProxy.interface.encodeFunctionData("activateSub", [
+                    latestSub,
+                ]);
 
                 await executeTxThroughWallet(functionData, subProxy.address);
 
@@ -1312,7 +1417,7 @@ const subProxyTest = async () => {
 };
 
 const subStorageTest = async () => {
-    describe('SubStorage', () => {
+    describe("SubStorage", () => {
         let senderAcc;
         let senderAcc2;
         let subStorage;
@@ -1322,19 +1427,26 @@ const subStorageTest = async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             senderAcc2 = (await hre.ethers.getSigners())[1];
 
-            const subStorageAddr = await getAddrFromRegistry('SubStorage');
-            subStorage = await hre.ethers.getContractAt('SubStorage', subStorageAddr);
+            const subStorageAddr = await getAddrFromRegistry("SubStorage");
+            subStorage = await hre.ethers.getContractAt("SubStorage", subStorageAddr);
 
-            const strategyStorageAddr = await getAddrFromRegistry('StrategyStorage');
-            strategyStorage = await hre.ethers.getContractAt('StrategyStorage', strategyStorageAddr);
+            const strategyStorageAddr = await getAddrFromRegistry("StrategyStorage");
+            strategyStorage = await hre.ethers.getContractAt(
+                "StrategyStorage",
+                strategyStorageAddr
+            );
 
             await openStrategyAndBundleStorage();
 
-            await strategyStorage.connect(senderAcc).createStrategy('TestStrategy', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
-            await strategyStorage.connect(senderAcc).createStrategy('TestStrategy2', ['0x11223344'], ['0x44556677'], [[0, 1, 2]], true);
+            await strategyStorage
+                .connect(senderAcc)
+                .createStrategy("TestStrategy", ["0x11223344"], ["0x44556677"], [[0, 1, 2]], true);
+            await strategyStorage
+                .connect(senderAcc)
+                .createStrategy("TestStrategy2", ["0x11223344"], ["0x44556677"], [[0, 1, 2]], true);
         });
 
-        it('...should add a new subscription', async () => {
+        it("...should add a new subscription", async () => {
             const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
 
             const subData = [numStrategies, false, [], []];
@@ -1351,27 +1463,27 @@ const subStorageTest = async () => {
             expect(storedSub.strategySubHash).to.be.eq(subDataHash);
         });
 
-        it('...should fail to add a new subscription with an invalid subId', async () => {
+        it("...should fail to add a new subscription with an invalid subId", async () => {
             try {
                 const subData = [42069, false, [], []];
 
                 await subStorage.connect(senderAcc).subscribeToStrategy(subData);
             } catch (err) {
-                expectError(err.toString(), 'SubIdOutOfRange(uint256,bool)');
+                expectError(err.toString(), "SubIdOutOfRange(uint256,bool)");
             }
         });
 
-        it('...should fail to add a new subscription with an invalid bundleId', async () => {
+        it("...should fail to add a new subscription with an invalid bundleId", async () => {
             try {
                 const subData = [42069, true, [], []];
 
                 await subStorage.connect(senderAcc).subscribeToStrategy(subData);
             } catch (err) {
-                expectError(err.toString(), 'SubIdOutOfRange(uint256,bool)');
+                expectError(err.toString(), "SubIdOutOfRange(uint256,bool)");
             }
         });
 
-        it('...should update the new subscription', async () => {
+        it("...should update the new subscription", async () => {
             const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
             const latestSub = +(await subStorage.getSubsCount()) - 1;
 
@@ -1385,40 +1497,40 @@ const subStorageTest = async () => {
             expect(storedSub.strategySubHash).to.be.eq(subDataHash);
         });
 
-        it('...should fail to update with and invalid subId', async () => {
+        it("...should fail to update with and invalid subId", async () => {
             try {
                 const updatedSubData = [42069, false, [], []];
                 const latestSub = +(await subStorage.getSubsCount()) - 1;
 
                 await subStorage.connect(senderAcc).updateSubData(latestSub, updatedSubData);
             } catch (err) {
-                expectError(err.toString(), 'SubIdOutOfRange(uint256,bool)');
+                expectError(err.toString(), "SubIdOutOfRange(uint256,bool)");
             }
         });
 
-        it('...should fail to update with and invalid bundleId', async () => {
+        it("...should fail to update with and invalid bundleId", async () => {
             try {
                 const updatedSubData = [42069, true, [], []];
                 const latestSub = +(await subStorage.getSubsCount()) - 1;
 
                 await subStorage.connect(senderAcc).updateSubData(latestSub, updatedSubData);
             } catch (err) {
-                expectError(err.toString(), 'SubIdOutOfRange(uint256,bool)');
+                expectError(err.toString(), "SubIdOutOfRange(uint256,bool)");
             }
         });
 
-        it('...should fail to update the subscription from non-owner account', async () => {
+        it("...should fail to update the subscription from non-owner account", async () => {
             try {
                 const updatedSubData = [1, false, [], []];
                 const subStorageSender2 = subStorage.connect(senderAcc2);
 
                 await subStorageSender2.updateSubData(0, updatedSubData);
             } catch (err) {
-                expectError(err.toString(), 'SenderNotSubOwnerError(address,uint256)');
+                expectError(err.toString(), "SenderNotSubOwnerError(address,uint256)");
             }
         });
 
-        it('...should deactivate users sub', async () => {
+        it("...should deactivate users sub", async () => {
             const latestSub = +(await subStorage.getSubsCount()) - 1;
 
             await subStorage.connect(senderAcc).deactivateSub(latestSub);
@@ -1427,17 +1539,17 @@ const subStorageTest = async () => {
             expect(storedSub.isEnabled).to.be.eq(false);
         });
 
-        it('...should fail to deactivate users sub from non-owner account', async () => {
+        it("...should fail to deactivate users sub from non-owner account", async () => {
             try {
                 const subStorageSender2 = subStorage.connect(senderAcc2);
 
                 await subStorageSender2.deactivateSub(0);
             } catch (err) {
-                expectError(err.toString(), 'SenderNotSubOwnerError(address,uint256)');
+                expectError(err.toString(), "SenderNotSubOwnerError(address,uint256)");
             }
         });
 
-        it('...should activate users sub', async () => {
+        it("...should activate users sub", async () => {
             const latestSub = +(await subStorage.getSubsCount()) - 1;
 
             await subStorage.connect(senderAcc).activateSub(latestSub);
@@ -1446,7 +1558,7 @@ const subStorageTest = async () => {
             expect(storedSub.isEnabled).to.be.eq(true);
         });
 
-        it('...should fail to activate users sub from non-owner account', async () => {
+        it("...should fail to activate users sub from non-owner account", async () => {
             try {
                 const latestSub = +(await subStorage.getSubsCount()) - 1;
 
@@ -1454,7 +1566,7 @@ const subStorageTest = async () => {
 
                 await subStorageSender2.activateSub(latestSub);
             } catch (err) {
-                expectError(err.toString(), 'SenderNotSubOwnerError(address,uint256)');
+                expectError(err.toString(), "SenderNotSubOwnerError(address,uint256)");
             }
         });
     });

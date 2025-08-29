@@ -2,17 +2,12 @@
 
 pragma solidity =0.8.24;
 
-interface IAsset {
-}
+interface IAsset { }
 
-interface IVault{
-
-    function joinPool(
-        bytes32 poolId,
-        address sender,
-        address recipient,
-        JoinPoolRequest memory request
-    ) external payable;
+interface IVault {
+    function joinPool(bytes32 poolId, address sender, address recipient, JoinPoolRequest memory request)
+        external
+        payable;
 
     struct JoinPoolRequest {
         IAsset[] assets;
@@ -21,12 +16,8 @@ interface IVault{
         bool fromInternalBalance;
     }
 
-    function exitPool(
-        bytes32 poolId,
-        address sender,
-        address payable recipient,
-        ExitPoolRequest memory request
-    ) external;
+    function exitPool(bytes32 poolId, address sender, address payable recipient, ExitPoolRequest memory request)
+        external;
 
     struct ExitPoolRequest {
         IAsset[] assets;
@@ -36,11 +27,7 @@ interface IVault{
     }
 
     function getPoolTokens(bytes32 poolId)
-    external
-    view
-    returns (
-        address[] memory tokens,
-        uint256[] memory balances,
-        uint256 lastChangeBlock
-    );
+        external
+        view
+        returns (address[] memory tokens, uint256[] memory balances, uint256 lastChangeBlock);
 }

@@ -60,10 +60,7 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
     /// @notice User sets EMode for Aave position on its wallet
     /// @param _market Address provider for specific market
     /// @param _categoryId eMode category id (0 - 255)
-    function _setEmode(address _market, uint8 _categoryId)
-        internal
-        returns (uint256, bytes memory)
-    {
+    function _setEmode(address _market, uint8 _categoryId) internal returns (uint256, bytes memory) {
         IPoolV3 lendingPool = getLendingPool(_market);
         lendingPool.setUserEMode(_categoryId);
 

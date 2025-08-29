@@ -64,16 +64,14 @@ contract ConvexWithdraw is ConvexHelper, ActionBase {
             _params.amount = poolInfo.token.pullTokensIfNeeded(_params.from, _params.amount);
             IBooster(BOOSTER_ADDR).withdraw(_params.poolId, _params.amount);
             poolInfo.lpToken.withdrawTokens(_params.to, _params.amount);
-        } else
-        if (_params.option == WithdrawOption.UNSTAKE) {
-            // cant unstake on behalf of other address 
+        } else if (_params.option == WithdrawOption.UNSTAKE) {
+            // cant unstake on behalf of other address
             _params.from = address(this);
             // crvRewards implements balanceOf, but is not transferable, this is fine because from == address(this)
             _params.amount = poolInfo.crvRewards.pullTokensIfNeeded(_params.from, _params.amount);
             IBRewardPool(poolInfo.crvRewards).withdraw(_params.amount, false);
             poolInfo.token.withdrawTokens(_params.to, _params.amount);
-        } else
-        if (_params.option == WithdrawOption.UNSTAKE_AND_UNWRAP) {
+        } else if (_params.option == WithdrawOption.UNSTAKE_AND_UNWRAP) {
             _params.from = address(this);
             _params.amount = poolInfo.crvRewards.pullTokensIfNeeded(_params.from, _params.amount);
             IBRewardPool(poolInfo.crvRewards).withdrawAndUnwrap(_params.amount, false);

@@ -9,7 +9,6 @@ import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 
 /// @title Reorder account collaterals. Can be used to optimize gas costs when checking account health status
 contract EulerV2ReorderCollaterals is ActionBase, EulerV2Helper {
-
     /// @param account The address of the Euler account, defaults to user's wallet
     /// @param indexes The array of swap steps to reorder collaterals
     struct Params {
@@ -54,11 +53,7 @@ contract EulerV2ReorderCollaterals is ActionBase, EulerV2Helper {
         }
 
         for (uint256 i = 0; i < _params.indexes.length; i++) {
-            IEVC(EVC_ADDR).reorderCollaterals(
-                _params.account,
-                _params.indexes[i][0],
-                _params.indexes[i][1]
-            );
+            IEVC(EVC_ADDR).reorderCollaterals(_params.account, _params.indexes[i][0], _params.indexes[i][1]);
         }
 
         return abi.encode(_params);

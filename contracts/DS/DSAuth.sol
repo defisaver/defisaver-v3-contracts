@@ -28,7 +28,7 @@ contract DSAuth is DSAuthEvents {
         emit LogSetAuthority(address(authority));
     }
 
-    modifier auth {
+    modifier auth() {
         require(isAuthorized(msg.sender, msg.sig), "Not authorized");
         _;
     }

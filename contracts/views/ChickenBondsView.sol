@@ -8,7 +8,6 @@ import { IBondNFT } from "../interfaces/liquity/IBondNFT.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 
 contract ChickenBondsView is LiquityHelper {
-
     struct BondDataFull {
         uint256 bondID; // ERC721 token id
         uint256 lusdAmount; // Lusd amount entered in the bond
@@ -59,7 +58,7 @@ contract ChickenBondsView is LiquityHelper {
     function getUsersBonds(address _userAddr) public view returns (BondDataFull[] memory bonds) {
         IBondNFT bondNFT = IBondNFT(BOND_NFT_ADDRESS);
 
-        uint numTokens = bondNFT.balanceOf(_userAddr);
+        uint256 numTokens = bondNFT.balanceOf(_userAddr);
         bonds = new BondDataFull[](numTokens);
 
         for (uint256 i = 0; i < numTokens; ++i) {

@@ -2,14 +2,11 @@
 pragma solidity =0.8.24;
 
 import { TokenGroupRegistry } from "../../contracts/exchangeV3/registries/TokenGroupRegistry.sol";
-import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { Addresses } from "../utils/Addresses.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
-import { console } from "forge-std/console.sol";
 
 contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -62,24 +59,15 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
     function testGetFeeForRegisteredTokens() public view {
         assertEq(cut.groupIds(Addresses.DAI_ADDR), uint256(Groups.STABLECOIN));
         assertEq(cut.groupIds(Addresses.USDC_ADDR), uint256(Groups.STABLECOIN));
-        assertEq(
-            cut.getFeeForTokens(Addresses.DAI_ADDR, Addresses.USDC_ADDR),
-            STABLE_FEE_DIVIDER
-        );
+        assertEq(cut.getFeeForTokens(Addresses.DAI_ADDR, Addresses.USDC_ADDR), STABLE_FEE_DIVIDER);
 
         assertEq(cut.groupIds(Addresses.WSTETH_ADDR), uint256(Groups.ETH_BASED));
         assertEq(cut.groupIds(Addresses.STETH_ADDR), uint256(Groups.ETH_BASED));
-        assertEq(
-            cut.getFeeForTokens(Addresses.WSTETH_ADDR, Addresses.STETH_ADDR),
-            STANDARD_FEE_DIVIDER
-        );
+        assertEq(cut.getFeeForTokens(Addresses.WSTETH_ADDR, Addresses.STETH_ADDR), STANDARD_FEE_DIVIDER);
 
         assertEq(cut.groupIds(Addresses.WBTC_ADDR), uint256(Groups.BTC_BASED));
         assertEq(cut.groupIds(Addresses.RENBTC_ADDR), uint256(Groups.BTC_BASED));
-        assertEq(
-            cut.getFeeForTokens(Addresses.WBTC_ADDR, Addresses.RENBTC_ADDR),
-            STANDARD_FEE_DIVIDER
-        );
+        assertEq(cut.getFeeForTokens(Addresses.WBTC_ADDR, Addresses.RENBTC_ADDR), STANDARD_FEE_DIVIDER);
     }
 
     function testAddBannedToken() public {
@@ -89,30 +77,18 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
 
         vm.stopPrank();
 
-        assertEq(
-            cut.getFeeForTokens(Addresses.BANNED_TOKEN_ADDR, Addresses.ETH_ADDR),
-            0
-        );
+        assertEq(cut.getFeeForTokens(Addresses.BANNED_TOKEN_ADDR, Addresses.ETH_ADDR), 0);
         assertEq(cut.groupIds(Addresses.BANNED_TOKEN_ADDR), uint256(Groups.BANNED));
     }
 
     function testGetFeeForStandardTokens() public view {
-        assertEq(
-            cut.getFeeForTokens(Addresses.YFI_ADDR, Addresses.ETH_ADDR),
-            STANDARD_FEE_DIVIDER
-        );
+        assertEq(cut.getFeeForTokens(Addresses.YFI_ADDR, Addresses.ETH_ADDR), STANDARD_FEE_DIVIDER);
         assertEq(cut.groupIds(Addresses.YFI_ADDR), uint256(Groups.NOT_LISTED));
         assertEq(cut.groupIds(Addresses.ETH_ADDR), uint256(Groups.ETH_BASED));
 
-        assertEq(
-            cut.getFeeForTokens(Addresses.ETH_ADDR, Addresses.YFI_ADDR),
-            STANDARD_FEE_DIVIDER
-        );
+        assertEq(cut.getFeeForTokens(Addresses.ETH_ADDR, Addresses.YFI_ADDR), STANDARD_FEE_DIVIDER);
 
-        assertEq(
-            cut.getFeeForTokens(Addresses.YFI_ADDR, Addresses.MKR_ADDR),
-            STANDARD_FEE_DIVIDER
-        );
+        assertEq(cut.getFeeForTokens(Addresses.YFI_ADDR, Addresses.MKR_ADDR), STANDARD_FEE_DIVIDER);
         assertEq(cut.groupIds(Addresses.YFI_ADDR), uint256(Groups.NOT_LISTED));
         assertEq(cut.groupIds(Addresses.MKR_ADDR), uint256(Groups.NOT_LISTED));
     }
@@ -132,10 +108,7 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
         assertEq(cut.groupIds(Addresses.YFI_ADDR), nextGroupNumber);
         assertEq(cut.groupIds(Addresses.MKR_ADDR), nextGroupNumber);
 
-        assertEq(
-            cut.getFeeForTokens(Addresses.YFI_ADDR, Addresses.MKR_ADDR),
-            feeDivider
-        );
+        assertEq(cut.getFeeForTokens(Addresses.YFI_ADDR, Addresses.MKR_ADDR), feeDivider);
 
         vm.stopPrank();
     }
@@ -145,10 +118,7 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
 
         cut.changeGroupFee(uint256(Groups.ETH_BASED), 100);
 
-        assertEq(
-            cut.getFeeForTokens(Addresses.WSTETH_ADDR, Addresses.STETH_ADDR),
-            100
-        );
+        assertEq(cut.getFeeForTokens(Addresses.WSTETH_ADDR, Addresses.STETH_ADDR), 100);
     }
 
     function testRevertToAddTokenIfNotOwner() public {
@@ -206,7 +176,7 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
 
     function testRevertToAddTokenToNonExistentGroup() public {
         vm.startPrank(Addresses.OWNER_ADDR);
-        
+
         uint256 groupId = 42;
         vm.expectRevert(abi.encodeWithSelector(TokenGroupRegistry.GroupNonExistent.selector, groupId));
         cut.addTokenInGroup(Addresses.ETH_ADDR, groupId);

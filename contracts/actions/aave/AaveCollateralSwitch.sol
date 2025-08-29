@@ -20,12 +20,13 @@ contract AaveCollateralSwitch is ActionBase, AaveHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeAction(
-        bytes memory _callData,
-        bytes32[] memory,
-        uint8[] memory,
-        bytes32[] memory
-    ) public payable virtual override returns (bytes32) {
+    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
+        public
+        payable
+        virtual
+        override
+        returns (bytes32)
+    {
         Params memory inputData = parseInputs(_callData);
         _switchAsCollateral(inputData);
         return bytes32(0);
@@ -46,7 +47,7 @@ contract AaveCollateralSwitch is ActionBase, AaveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _switchAsCollateral(Params memory _inputData) internal {
-        for (uint256 i = 0; i < _inputData.tokens.length; i++){
+        for (uint256 i = 0; i < _inputData.tokens.length; i++) {
             enableAsCollateral(_inputData.market, _inputData.tokens[i], _inputData.useAsCollateral[i]);
         }
     }

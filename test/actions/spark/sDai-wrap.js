@@ -1,14 +1,14 @@
-const { redeploy } = require('../../utils/utils');
-const { sDaiWrapTest } = require('./spark-tests');
+const { redeploy } = require("../../utils/utils");
+const { sDaiWrapTest } = require("./spark-tests");
 
-describe('sDai-Wrap', function () {
+describe("sDai-Wrap", function () {
     this.timeout(150000);
 
     before(async () => {
-        await redeploy('SDaiWrap');
+        await redeploy("SDaiWrap");
     });
 
-    it('... should run spark dsr wrap test', async () => {
+    it("... should run spark dsr wrap test", async () => {
         await sDaiWrapTest();
     });
 });

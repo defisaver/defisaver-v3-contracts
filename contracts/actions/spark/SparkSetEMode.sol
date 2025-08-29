@@ -60,10 +60,7 @@ contract SparkSetEMode is ActionBase, SparkHelper {
     /// @notice User sets EMode for Spark position on user's wallet
     /// @param _market Address provider for specific market
     /// @param _categoryId eMode category id (0 - 255)
-    function _setEmode(address _market, uint8 _categoryId)
-        internal
-        returns (uint256, bytes memory)
-    {
+    function _setEmode(address _market, uint8 _categoryId) internal returns (uint256, bytes memory) {
         ISparkPool lendingPool = getSparkLendingPool(_market);
         lendingPool.setUserEMode(_categoryId);
 

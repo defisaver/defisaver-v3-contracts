@@ -8,7 +8,6 @@ import { IComet } from "../../interfaces/compoundV3/IComet.sol";
 
 /// @title Borrow base token from CompoundV3.
 contract CompV3Borrow is ActionBase, CompV3Helper {
-
     /// @param market Main Comet proxy contract that is different for each compound market
     /// @param amount Amount of tokens to be borrowed
     /// @param to The address we are sending the borrowed tokens to
@@ -19,7 +18,7 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
         address to;
         address onBehalf;
     }
-    
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -79,5 +78,4 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
-
 }

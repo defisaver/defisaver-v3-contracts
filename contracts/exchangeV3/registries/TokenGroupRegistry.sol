@@ -17,17 +17,23 @@ contract TokenGroupRegistry is AdminAuth {
     /// @dev Array of groups where the index is the grouped id and the value is the fee
     uint256[] public feesPerGroup;
 
-    enum Groups { NOT_LISTED, BANNED, STABLECOIN, ETH_BASED, BTC_BASED}
+    enum Groups {
+        NOT_LISTED,
+        BANNED,
+        STABLECOIN,
+        ETH_BASED,
+        BTC_BASED
+    }
 
     error FeeTooHigh(uint256 fee);
     error GroupNonExistent(uint256 groupId);
 
     constructor() {
         feesPerGroup.push(STANDARD_FEE_DIVIDER); // NOT_LISTED
-        feesPerGroup.push(0);                    // BANNED
-        feesPerGroup.push(STABLE_FEE_DIVIDER);   // STABLECOIN
-        feesPerGroup.push(STABLE_FEE_DIVIDER);   // ETH_BASED
-        feesPerGroup.push(STABLE_FEE_DIVIDER);   // BTC_BASED
+        feesPerGroup.push(0); // BANNED
+        feesPerGroup.push(STABLE_FEE_DIVIDER); // STABLECOIN
+        feesPerGroup.push(STABLE_FEE_DIVIDER); // ETH_BASED
+        feesPerGroup.push(STABLE_FEE_DIVIDER); // BTC_BASED
     }
 
     /// @notice Checks if 2 tokens are in the same group and returns the correct exchange fee for the pair
@@ -39,7 +45,7 @@ contract TokenGroupRegistry is AdminAuth {
         if (firstId == uint8(Groups.BANNED)) {
             return 0;
         }
-    
+
         if (firstId == secondId) {
             return feesPerGroup[secondId];
         }
@@ -70,7 +76,7 @@ contract TokenGroupRegistry is AdminAuth {
     /// @notice Create new group and add tokens
     /// @dev Divider has to gte 50, which means max fee is 2%
     function addNewGroup(address[] memory _tokensAddr, uint256 _feeDivider) public onlyOwner {
-        if(_feeDivider < MAX_FEE_DIVIDER) revert FeeTooHigh(_feeDivider);
+        if (_feeDivider < MAX_FEE_DIVIDER) revert FeeTooHigh(_feeDivider);
 
         feesPerGroup.push(_feeDivider);
 
@@ -80,10 +86,8 @@ contract TokenGroupRegistry is AdminAuth {
     /// @notice Change existing group fee
     /// @dev Divider has to be gte 50, which means max fee is 2%
     function changeGroupFee(uint256 _groupId, uint256 _newFeeDivider) public onlyOwner {
-        if(_newFeeDivider < MAX_FEE_DIVIDER) revert FeeTooHigh(_newFeeDivider);
+        if (_newFeeDivider < MAX_FEE_DIVIDER) revert FeeTooHigh(_newFeeDivider);
 
         feesPerGroup[_groupId] = _newFeeDivider;
     }
-
 }
-

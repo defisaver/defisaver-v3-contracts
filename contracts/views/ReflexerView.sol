@@ -44,10 +44,7 @@ contract ReflexerView is DSMath {
         uint256 redemptionRate;
     }
 
-    function getCollateralTypeInfo(bytes32 _collType)
-        public
-        returns (CollInfo memory collInfo)
-    {
+    function getCollateralTypeInfo(bytes32 _collType) public returns (CollInfo memory collInfo) {
         (
             uint256 debtAmount,
             uint256 accumulatedRates,
@@ -57,10 +54,9 @@ contract ReflexerView is DSMath {
             uint256 liquidationPrice
         ) = ISAFEEngine(SAFE_ENGINE_ADDRESS).collateralTypes(_collType);
 
-        (, uint liqRatio) = IOracleRelayer(ORACLE_RELAYER_ADDRESS).collateralTypes(_collType);
+        (, uint256 liqRatio) = IOracleRelayer(ORACLE_RELAYER_ADDRESS).collateralTypes(_collType);
 
-        (uint stabilityFee,) = ITaxCollector(TAX_COLLECTOR_ADDRESS).collateralTypes(_collType);
-
+        (uint256 stabilityFee,) = ITaxCollector(TAX_COLLECTOR_ADDRESS).collateralTypes(_collType);
 
         collInfo = CollInfo({
             debtCeiling: debtCeiling,
@@ -75,18 +71,14 @@ contract ReflexerView is DSMath {
         });
     }
 
-    function getCollAndRaiInfo(bytes32 _collType)
-        public
-        returns (CollInfo memory collInfo, RaiInfo memory raiInfo) {
-            collInfo = getCollateralTypeInfo(_collType);
-            raiInfo = getRaiInfo();
-        }
+    function getCollAndRaiInfo(bytes32 _collType) public returns (CollInfo memory collInfo, RaiInfo memory raiInfo) {
+        collInfo = getCollateralTypeInfo(_collType);
+        raiInfo = getRaiInfo();
+    }
 
     function getPrice(bytes32 _collType) public returns (uint256) {
-        (, uint256 safetyCRatio) =
-            IOracleRelayer(ORACLE_RELAYER_ADDRESS).collateralTypes(_collType);
-        (, , uint256 safetyPrice, , , ) =
-            ISAFEEngine(SAFE_ENGINE_ADDRESS).collateralTypes(_collType);
+        (, uint256 safetyCRatio) = IOracleRelayer(ORACLE_RELAYER_ADDRESS).collateralTypes(_collType);
+        (,, uint256 safetyPrice,,,) = ISAFEEngine(SAFE_ENGINE_ADDRESS).collateralTypes(_collType);
 
         uint256 redemptionPrice = IOracleRelayer(ORACLE_RELAYER_ADDRESS).redemptionPrice();
 
@@ -94,12 +86,12 @@ contract ReflexerView is DSMath {
     }
 
     function getRaiInfo() public returns (RaiInfo memory raiInfo) {
-        uint medianPrice = 0;
-        
-        try IMedianOracle(MEDIAN_ORACLE_ADDRESS).read() returns (uint p) {
+        uint256 medianPrice = 0;
+
+        try IMedianOracle(MEDIAN_ORACLE_ADDRESS).read() returns (uint256 p) {
             medianPrice = p;
-        } catch(bytes memory) {}
-        
+        } catch (bytes memory) { }
+
         raiInfo = RaiInfo({
             redemptionPrice: IOracleRelayer(ORACLE_RELAYER_ADDRESS).redemptionPrice(),
             currRaiPrice: IMedianOracle(MEDIAN_ORACLE_ADDRESS).read(),
@@ -113,29 +105,19 @@ contract ReflexerView is DSMath {
 
         (uint256 coll, uint256 debt) = ISAFEEngine(SAFE_ENGINE_ADDRESS).safes(collType, safeAddr);
 
-        safeInfo = SafeInfo({
-            safeId: _safeId,
-            coll: coll,
-            debt: debt,
-            safeAddr: safeAddr,
-            collType: collType
-        });
+        safeInfo = SafeInfo({ safeId: _safeId, coll: coll, debt: debt, safeAddr: safeAddr, collType: collType });
     }
 
     function getUserSafes(address _user)
         public
         view
-        returns (
-            uint256[] memory ids,
-            address[] memory safes,
-            bytes32[] memory collateralTypes
-        )
+        returns (uint256[] memory ids, address[] memory safes, bytes32[] memory collateralTypes)
     {
         return IGetSafes(GET_SAFES_ADDR).getSafesAsc(MANAGER_ADDR, _user);
     }
 
     function getUserSafesFullInfo(address _user) public view returns (SafeInfo[] memory safeInfos) {
-        (uint256[] memory ids, , ) = getUserSafes(_user);
+        (uint256[] memory ids,,) = getUserSafes(_user);
 
         safeInfos = new SafeInfo[](ids.length);
 
@@ -146,11 +128,7 @@ contract ReflexerView is DSMath {
 
     function getFullInfo(address _user, bytes32 _collType)
         public
-        returns (
-            CollInfo memory collInfo,
-            RaiInfo memory raiInfo,
-            SafeInfo[] memory safeInfos
-        )
+        returns (CollInfo memory collInfo, RaiInfo memory raiInfo, SafeInfo[] memory safeInfos)
     {
         collInfo = getCollateralTypeInfo(_collType);
         raiInfo = getRaiInfo();

@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import {AdminAuth} from "../../auth/AdminAuth.sol";
-import {DFSExchangeHelper} from "../DFSExchangeHelper.sol";
-import {IOffchainWrapper} from "../../interfaces/exchange/IOffchainWrapper.sol";
-import {TokenUtils} from "../../utils/TokenUtils.sol";
-import {SafeERC20} from "../../utils/SafeERC20.sol";
-import {IERC20} from "../../interfaces/IERC20.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
+import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
+import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { SafeERC20 } from "../../utils/SafeERC20.sol";
+import { IERC20 } from "../../interfaces/IERC20.sol";
 
 /// @title Wrapper contract which will be used if offchain exchange used is Bebop
 contract BebopWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
@@ -48,5 +48,5 @@ contract BebopWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external payable virtual {}
+    receive() external payable virtual { }
 }

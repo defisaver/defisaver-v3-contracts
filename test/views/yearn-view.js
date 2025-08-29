@@ -1,4 +1,4 @@
-const hre = require('hardhat');
+const hre = require("hardhat");
 
 const {
     redeploy,
@@ -8,11 +8,11 @@ const {
     balanceOf,
     WETH_ADDRESS,
     YEARN_REGISTRY_ADDRESS,
-} = require('../utils/utils');
+} = require("../utils/utils");
 
-const { yearnSupply, yearnWithdraw } = require('../utils/actions');
+const { yearnSupply, yearnWithdraw } = require("../utils/actions");
 
-describe('Yearn-view', function () {
+describe("Yearn-view", function () {
     this.timeout(80000);
 
     let yearnView;
@@ -21,28 +21,22 @@ describe('Yearn-view', function () {
     let proxy;
 
     before(async () => {
-        yearnView = await redeploy('YearnView');
-        yearnRegistry = await hre.ethers.getContractAt('IYearnRegistry', YEARN_REGISTRY_ADDRESS);
+        yearnView = await redeploy("YearnView");
+        yearnRegistry = await hre.ethers.getContractAt("IYearnRegistry", YEARN_REGISTRY_ADDRESS);
 
         senderAcc = (await hre.ethers.getSigners())[0];
         proxy = await getProxy(senderAcc.address);
     });
 
-    it('... should get yearn underlying balance', async () => {
+    it("... should get yearn underlying balance", async () => {
         const yWeth = await yearnRegistry.latestVault(WETH_ADDRESS);
 
-        const wethAmount = hre.ethers.utils.parseUnits('10', 18);
+        const wethAmount = hre.ethers.utils.parseUnits("10", 18);
 
         await depositToWeth(wethAmount);
         await approve(WETH_ADDRESS, proxy.address);
 
-        await yearnSupply(
-            WETH_ADDRESS,
-            wethAmount,
-            senderAcc.address,
-            senderAcc.address,
-            proxy,
-        );
+        await yearnSupply(WETH_ADDRESS, wethAmount, senderAcc.address, senderAcc.address, proxy);
 
         const wethBalance = await yearnView.getUnderlyingBalanceInVault(senderAcc.address, yWeth);
 
@@ -54,20 +48,14 @@ describe('Yearn-view', function () {
 
         await approve(yWeth, proxy.address);
 
-        await yearnWithdraw(
-            yWeth,
-            yTokenAmount,
-            senderAcc.address,
-            senderAcc.address,
-            proxy,
-        );
+        await yearnWithdraw(yWeth, yTokenAmount, senderAcc.address, senderAcc.address, proxy);
 
         const balanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
 
         console.log(balanceBefore.toString(), balanceAfter.toString());
     });
 
-    it('... should get pool liquidity', async () => {
+    it("... should get pool liquidity", async () => {
         const yWeth = await yearnRegistry.latestVault(WETH_ADDRESS);
 
         const liqBalance = await yearnView.getPoolLiquidity(yWeth);

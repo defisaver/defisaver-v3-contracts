@@ -37,7 +37,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-    
+
         params.from = _parseParamAddr(params.from, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.depositTarget = _parseParamAddr(params.depositTarget, _paramMapping[2], _subData, _returnValues);
@@ -55,7 +55,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-        ( ,bytes memory logData) = _curveWithdraw(params);
+        (, bytes memory logData) = _curveWithdraw(params);
         logger.logActionDirectEvent("CurveWithdraw", logData);
     }
 
@@ -69,12 +69,8 @@ contract CurveWithdraw is ActionBase, CurveHelper {
     /// @notice Withdraws user deposited tokens from depositTarget
     function _curveWithdraw(Params memory _params) internal returns (uint256 burned, bytes memory logData) {
         if (_params.to == address(0)) revert CurveWithdrawZeroRecipient();
-        (
-            DepositTargetType depositTargetType,
-            bool explicitUnderlying,
-            bool removeOneCoin,
-            bool withdrawExact
-        ) = parseFlags(_params.flags);
+        (DepositTargetType depositTargetType, bool explicitUnderlying, bool removeOneCoin, bool withdrawExact) =
+            parseFlags(_params.flags);
 
         CurveCache memory cache = _getPoolInfo(_params.depositTarget, depositTargetType, explicitUnderlying);
 
@@ -82,7 +78,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
 
         _params.burnAmount = cache.lpToken.pullTokensIfNeeded(_params.from, _params.burnAmount);
         burned = cache.lpToken.getBalance(address(this));
-        
+
         /// @dev pool has mint ownership over lpToken, so if we're withdrawing directly from pool we don't need to approve
         if (cache.pool != cache.depositTarget) {
             cache.lpToken.approveToken(cache.depositTarget, _params.burnAmount);
@@ -90,7 +86,8 @@ contract CurveWithdraw is ActionBase, CurveHelper {
 
         /// @dev if removeOneCoin or explicitUnderlying we dont have to worry about other token balances as they are not updated
         /// @dev otherwise zero amounts specified in _params.amounts doesnt mean that we wont get some of those tokens from withdrawal
-        (uint256 firstIndex, uint256 lastIndex) = _getFirstAndLastTokenIndex(_params.amounts, removeOneCoin, explicitUnderlying);
+        (uint256 firstIndex, uint256 lastIndex) =
+            _getFirstAndLastTokenIndex(_params.amounts, removeOneCoin, explicitUnderlying);
         uint256[] memory balances = new uint256[](cache.N_COINS);
         for (uint256 i = firstIndex; i <= lastIndex; i++) {
             balances[i] = cache.tokens[i].getBalance(address(this));
@@ -98,15 +95,23 @@ contract CurveWithdraw is ActionBase, CurveHelper {
 
         if (depositTargetType == DepositTargetType.ZAP_3POOL) {
             if (removeOneCoin) {
-                ICurve3PoolZap(cache.depositTarget).remove_liquidity_one_coin(cache.pool, _params.burnAmount, int128(int256(firstIndex)), _params.amounts[firstIndex]);
+                ICurve3PoolZap(cache.depositTarget).remove_liquidity_one_coin(
+                    cache.pool, _params.burnAmount, int128(int256(firstIndex)), _params.amounts[firstIndex]
+                );
             } else {
                 uint256[4] memory fixedSizeAmounts;
-                for (uint256 i = firstIndex; i <= lastIndex; i++) fixedSizeAmounts[i] = _params.amounts[i];
+                for (uint256 i = firstIndex; i <= lastIndex; i++) {
+                    fixedSizeAmounts[i] = _params.amounts[i];
+                }
 
                 if (withdrawExact) {
-                    ICurve3PoolZap(cache.depositTarget).remove_liquidity_imbalance(cache.pool, fixedSizeAmounts, _params.burnAmount);
+                    ICurve3PoolZap(cache.depositTarget).remove_liquidity_imbalance(
+                        cache.pool, fixedSizeAmounts, _params.burnAmount
+                    );
                 } else {
-                    ICurve3PoolZap(cache.depositTarget).remove_liquidity(cache.pool, _params.burnAmount, fixedSizeAmounts);
+                    ICurve3PoolZap(cache.depositTarget).remove_liquidity(
+                        cache.pool, _params.burnAmount, fixedSizeAmounts
+                    );
                 }
             }
         } else {
@@ -119,7 +124,7 @@ contract CurveWithdraw is ActionBase, CurveHelper {
                 explicitUnderlying,
                 cache.isFactory
             );
-            (bool success, ) = cache.depositTarget.call(payload);
+            (bool success,) = cache.depositTarget.call(payload);
             if (!success) revert CurveWithdrawPoolReverted();
         }
 
@@ -131,7 +136,9 @@ contract CurveWithdraw is ActionBase, CurveHelper {
             // we tolerate this error up to 1bps (1 / 1_00_00)
             // otherwise slippage shouldn't exist and the pool contract should revert if unable to withdraw the specified amounts
             // however we do this check in case of an invalid deposit zap
-            if (balanceDelta < (_params.amounts[i] - _params.amounts[i] / 1_00_00)) revert CurveWithdrawSlippageHit(i, _params.amounts[i], balanceDelta);
+            if (balanceDelta < (_params.amounts[i] - _params.amounts[i] / 10_000)) {
+                revert CurveWithdrawSlippageHit(i, _params.amounts[i], balanceDelta);
+            }
             if (tokenAddr == TokenUtils.ETH_ADDR) {
                 TokenUtils.depositWeth(balanceDelta);
                 tokenAddr = TokenUtils.WETH_ADDR;
@@ -169,7 +176,8 @@ contract CurveWithdraw is ActionBase, CurveHelper {
 
             selector = bytes4(keccak256(sig));
 
-            payload = bytes.concat(abi.encodePacked(selector, _burnAmount, _oneCoinIndex, _amounts[_oneCoinIndex]), optional);
+            payload =
+                bytes.concat(abi.encodePacked(selector, _burnAmount, _oneCoinIndex, _amounts[_oneCoinIndex]), optional);
         } else if (!_withdrawExact) {
             if (_explicitUnderlying) {
                 sig = "remove_liquidity(uint256,uint256[0],bool)";

@@ -40,20 +40,10 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.lusdAmount = _parseParamUint(
-            params.lusdAmount,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
+        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
-        params.maxFeePercentage = _parseParamUint(
-            params.maxFeePercentage,
-            _paramMapping[3],
-            _subData,
-            _returnValues
-        );
+        params.maxFeePercentage = _parseParamUint(params.maxFeePercentage, _paramMapping[3], _subData, _returnValues);
 
         (uint256 ethRedeemed, bytes memory logData) = _liquityRedeem(params);
         emit ActionEvent("LiquityRedeem", logData);
@@ -95,19 +85,13 @@ contract LiquityRedeem is ActionBase, LiquityHelper {
             _params.maxFeePercentage
         );
 
-        uint256 lusdAmountUsed = lusdBefore - (LUSD_TOKEN_ADDRESS.getBalance(address(this)));   // It isn't guaranteed that the whole requested LUSD amount will be used
+        uint256 lusdAmountUsed = lusdBefore - (LUSD_TOKEN_ADDRESS.getBalance(address(this))); // It isn't guaranteed that the whole requested LUSD amount will be used
         uint256 lusdToReturn = _params.lusdAmount - lusdAmountUsed;
-        ethRedeemed = address(this).balance -ethBefore;
+        ethRedeemed = address(this).balance - ethBefore;
 
         withdrawStaking(ethRedeemed, lusdToReturn, _params.to, _params.from);
 
-        logData = abi.encode(
-            lusdAmountUsed,
-            ethRedeemed,
-            _params.maxFeePercentage,
-            _params.from,
-            _params.to
-        );
+        logData = abi.encode(lusdAmountUsed, ethRedeemed, _params.maxFeePercentage, _params.from, _params.to);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

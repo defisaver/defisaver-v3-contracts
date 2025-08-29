@@ -1,15 +1,11 @@
 /* eslint-disable max-len */
-const { expect } = require('chai');
-const hre = require('hardhat');
+const { expect } = require("chai");
+const hre = require("hardhat");
 
-const { getAssetInfo } = require('@defisaver/tokens');
+const { getAssetInfo } = require("@defisaver/tokens");
 
-const {
-    sparkSupply,
-    sparkBorrow,
-    sparkPayback,
-} = require('../../utils/actions');
-const { VARIABLE_RATE } = require('../../utils/aave');
+const { sparkSupply, sparkBorrow, sparkPayback } = require("../../utils/actions");
+const { VARIABLE_RATE } = require("../../utils/aave");
 
 const {
     getProxy,
@@ -21,13 +17,13 @@ const {
     fetchAmountinUSDPrice,
     setBalance,
     approve,
-} = require('../../utils/utils');
+} = require("../../utils/utils");
 
-const collateralTokens = ['wbtc', 'wstETH', 'rETH'];
-const debtTokens = ['USDC', 'DAI'];
+const collateralTokens = ["wbtc", "wstETH", "rETH"];
+const debtTokens = ["USDC", "DAI"];
 
 const sparkApyAfterValuesTest = async () => {
-    describe('Test Spark V3 apy after values', async () => {
+    describe("Test Spark V3 apy after values", async () => {
         let senderAcc;
         let wallet;
         let snapshotId;
@@ -36,7 +32,7 @@ const sparkApyAfterValuesTest = async () => {
         before(async () => {
             [senderAcc] = await hre.ethers.getSigners();
             wallet = await getProxy(senderAcc.address);
-            sparkViewContract = await redeploy('SparkView');
+            sparkViewContract = await redeploy("SparkView");
         });
         beforeEach(async () => {
             snapshotId = await takeSnapshot();
@@ -55,27 +51,27 @@ const sparkApyAfterValuesTest = async () => {
                 it(`... should estimate supply and borrow rates for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]`, async () => {
                     const collTokenInfoFull = await sparkViewContract.getTokenInfoFull(
                         addrs[network].SPARK_MARKET,
-                        collAsset.address,
+                        collAsset.address
                     );
                     const borrowTokenInfoFull = await sparkViewContract.getTokenInfoFull(
                         addrs[network].SPARK_MARKET,
-                        debtAsset.address,
+                        debtAsset.address
                     );
 
                     if (!collTokenInfoFull.usageAsCollateralEnabled) {
-                        console.log('Collateral asset cant be used as collateral. Skipping test');
+                        console.log("Collateral asset cant be used as collateral. Skipping test");
                         // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }
 
                     const supplyAmount = hre.ethers.utils.parseUnits(
-                        fetchAmountinUSDPrice(collAsset.symbol, '1000000'),
-                        collAsset.decimals,
+                        fetchAmountinUSDPrice(collAsset.symbol, "1000000"),
+                        collAsset.decimals
                     );
                     let borrowAmount = hre.ethers.utils.parseUnits(
-                        fetchAmountinUSDPrice(debtAsset.symbol, '500000'),
-                        debtAsset.decimals,
+                        fetchAmountinUSDPrice(debtAsset.symbol, "500000"),
+                        debtAsset.decimals
                     );
                     if (borrowTokenInfoFull.availableLiquidity.lt(borrowAmount)) {
                         borrowAmount = borrowTokenInfoFull.availableLiquidity.div(2);
@@ -92,7 +88,7 @@ const sparkApyAfterValuesTest = async () => {
                         {
                             reserveAddress: collAsset.address,
                             liquidityAdded: supplyAmount,
-                            liquidityTaken: '0',
+                            liquidityTaken: "0",
                             isDebtAsset: false,
                         },
                         {
@@ -104,7 +100,7 @@ const sparkApyAfterValuesTest = async () => {
                     ];
                     const result = await sparkViewContract.getApyAfterValuesEstimation(
                         addrs[network].SPARK_MARKET,
-                        params,
+                        params
                     );
 
                     const estimatedStateAfter = {
@@ -122,7 +118,7 @@ const sparkApyAfterValuesTest = async () => {
                         collAsset.address,
                         collTokenInfoFull.assetId,
                         senderAcc.address,
-                        senderAcc,
+                        senderAcc
                     );
                     await sparkBorrow(
                         wallet,
@@ -130,7 +126,7 @@ const sparkApyAfterValuesTest = async () => {
                         borrowAmount,
                         senderAcc.address,
                         VARIABLE_RATE,
-                        borrowTokenInfoFull.assetId,
+                        borrowTokenInfoFull.assetId
                     );
                     await setBalance(debtAsset.address, senderAcc.address, paybackAmount);
                     await approve(debtAsset.address, wallet.address, senderAcc);
@@ -141,16 +137,16 @@ const sparkApyAfterValuesTest = async () => {
                         senderAcc.address,
                         VARIABLE_RATE,
                         borrowTokenInfoFull.assetId,
-                        debtAsset.address,
+                        debtAsset.address
                     );
 
                     const collTokenInfoFullAfter = await sparkViewContract.getTokenInfoFull(
                         addrs[network].SPARK_MARKET,
-                        collAsset.address,
+                        collAsset.address
                     );
                     const borrowTokenInfoFullAfter = await sparkViewContract.getTokenInfoFull(
                         addrs[network].SPARK_MARKET,
-                        debtAsset.address,
+                        debtAsset.address
                     );
                     const stateAfter = {
                         collAssetSupplyRate: collTokenInfoFullAfter.supplyRate,
@@ -158,11 +154,11 @@ const sparkApyAfterValuesTest = async () => {
                         debtAssetSupplyRate: borrowTokenInfoFullAfter.supplyRate,
                         debtAssetVariableBorrowRate: borrowTokenInfoFullAfter.borrowRateVariable,
                     };
-                    console.log('=======================');
+                    console.log("=======================");
                     console.log(stateBefore);
-                    console.log('----');
+                    console.log("----");
                     console.log(estimatedStateAfter);
-                    console.log('----');
+                    console.log("----");
                     console.log(stateAfter);
                 });
             }
@@ -170,8 +166,8 @@ const sparkApyAfterValuesTest = async () => {
     });
 };
 
-describe('Spark-apy-after-values', () => {
-    it('... should test Spark APY after values', async () => {
+describe("Spark-apy-after-values", () => {
+    it("... should test Spark APY after values", async () => {
         await sparkApyAfterValuesTest();
     });
 });

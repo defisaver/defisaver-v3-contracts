@@ -81,27 +81,17 @@ library FluidDexTokensUtils {
         uint256 _amount0,
         uint256 _amount1
     ) internal returns (PulledTokensData memory vars) {
-        (vars.amount0, vars.isToken0Native) = _pullTokenIfNeededWithApproval(
-            _amount0,
-            _tokens.token0,
-            _from,
-            _approvalTarget
-        );
+        (vars.amount0, vars.isToken0Native) =
+            _pullTokenIfNeededWithApproval(_amount0, _tokens.token0, _from, _approvalTarget);
 
-        (vars.amount1, vars.isToken1Native) = _pullTokenIfNeededWithApproval(
-            _amount1,
-            _tokens.token1,
-            _from,
-            _approvalTarget
-        );
+        (vars.amount1, vars.isToken1Native) =
+            _pullTokenIfNeededWithApproval(_amount1, _tokens.token1, _from, _approvalTarget);
     }
 
-    function _pullTokenIfNeededWithApproval(
-        uint256 _amount,
-        address _token,
-        address _from,
-        address _approvalTarget
-    ) internal returns (uint256 amount, bool isNative) {
+    function _pullTokenIfNeededWithApproval(uint256 _amount, address _token, address _from, address _approvalTarget)
+        internal
+        returns (uint256 amount, bool isNative)
+    {
         if (_amount == 0) return (0, false);
 
         if (_token == TokenUtils.ETH_ADDR) {

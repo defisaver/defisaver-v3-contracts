@@ -1,3 +1,3 @@
-const { curveUsdFullTest } = require('./curveusd-tests');
+const { curveUsdFullTest } = require("./curveusd-tests");
 
 curveUsdFullTest();

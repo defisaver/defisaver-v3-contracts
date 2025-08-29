@@ -7,7 +7,6 @@ import { AaveHelper } from "./helpers/AaveHelper.sol";
 
 /// @title Action to claim stkAave rewards
 contract AaveClaimStkAave is ActionBase, AaveHelper {
-
     /// @param assets Assets to claim rewards from.
     /// @param amount Amount of rewards to claim.
     /// @param to Address that will be receiving the rewards.
@@ -52,17 +51,12 @@ contract AaveClaimStkAave is ActionBase, AaveHelper {
     function _aaveClaimStkAave(Params memory _params) internal returns (uint256 claimedAmount, bytes memory logData) {
         // amount 0 is safe
         // amount > unclaimedRewards is safe
-        claimedAmount = AaveIncentivesController.claimRewards(
-            _params.assets,
-            _params.amount,
-            _params.to
-        );
+        claimedAmount = AaveIncentivesController.claimRewards(_params.assets, _params.amount, _params.to);
 
         logData = abi.encode(_params, claimedAmount);
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (Params memory params)
-    {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
 }

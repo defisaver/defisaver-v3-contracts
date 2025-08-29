@@ -7,15 +7,14 @@ import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
-/// @dev Used so we can call external setPaused function and test notPaused modifier 
+/// @dev Used so we can call external setPaused function and test notPaused modifier
 contract PausableContract is Pausable {
-    function testModifier() public view notPaused returns(bool) { 
-        return true; 
+    function testModifier() public view notPaused returns (bool) {
+        return true;
     }
 }
 
 contract TestCore_Pausable is Pausable, BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/

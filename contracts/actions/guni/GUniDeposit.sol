@@ -10,7 +10,7 @@ import { GUniHelper } from "./helpers/GUniHelper.sol";
 /// @title Action that adds liquidity to G-UNI pool of interest (mints G-UNI LP tokens)
 contract GUniDeposit is ActionBase, DSMath, GUniHelper {
     using TokenUtils for address;
-    
+
     /// @param pool address of G-UNI pool to add liquidity to
     /// @param token0 address of token0
     /// @param token1 address of token1
@@ -65,8 +65,8 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function gUniDeposit(Params memory _inputData) internal returns (uint256, bytes memory){
-        require (_inputData.to != address(0x0), "Can not send to burn address");
+    function gUniDeposit(Params memory _inputData) internal returns (uint256, bytes memory) {
+        require(_inputData.to != address(0x0), "Can not send to burn address");
 
         _inputData.amount0Max = _inputData.token0.pullTokensIfNeeded(_inputData.from, _inputData.amount0Max);
         _inputData.amount1Max = _inputData.token1.pullTokensIfNeeded(_inputData.from, _inputData.amount1Max);
@@ -74,8 +74,7 @@ contract GUniDeposit is ActionBase, DSMath, GUniHelper {
         _inputData.token0.approveToken(G_UNI_ROUTER_02_ADDRESS, _inputData.amount0Max);
         _inputData.token1.approveToken(G_UNI_ROUTER_02_ADDRESS, _inputData.amount1Max);
 
-        (uint256 amount0, uint256 amount1 , uint256 mintAmount) = 
-            gUniRouter.addLiquidity(
+        (uint256 amount0, uint256 amount1, uint256 mintAmount) = gUniRouter.addLiquidity(
             _inputData.pool,
             _inputData.amount0Max,
             _inputData.amount1Max,

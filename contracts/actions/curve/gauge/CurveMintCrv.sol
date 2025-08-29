@@ -8,8 +8,8 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 /// @title Action that mints Crv tokens based on up to 8 gauges
 contract CurveMintCrv is ActionBase, CurveHelper {
     using TokenUtils for address;
-    
-    /// @param gaugeAddrs Array of up to 8 gauge addresses determining Crv issuance 
+
+    /// @param gaugeAddrs Array of up to 8 gauge addresses determining Crv issuance
     /// @param receiver Address that will receive the Crv issuance
     struct Params {
         address[8] gaugeAddrs;
@@ -24,7 +24,7 @@ contract CurveMintCrv is ActionBase, CurveHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[0], _subData, _returnValues);
-        
+
         (uint256 minted, bytes memory logData) = _curveMintCrv(params);
         emit ActionEvent("CurveMintCrv", logData);
         return bytes32(minted);

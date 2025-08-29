@@ -3,19 +3,9 @@ pragma solidity =0.8.24;
 pragma abicoder v2;
 
 interface IGUniRouter02 {
-    function removeLiquidity(
-        address pool,
-        uint256 burnAmount,
-        uint256 amount0Min,
-        uint256 amount1Min,
-        address receiver
-    )
+    function removeLiquidity(address pool, uint256 burnAmount, uint256 amount0Min, uint256 amount1Min, address receiver)
         external
-        returns (
-            uint256 amount0,
-            uint256 amount1,
-            uint128 liquidityBurned
-        );
+        returns (uint256 amount0, uint256 amount1, uint128 liquidityBurned);
 
     function rebalanceAndAddLiquidity(
         address pool,
@@ -28,14 +18,8 @@ interface IGUniRouter02 {
         uint256 amount0Min,
         uint256 amount1Min,
         address receiver
-    )
-        external
-        returns (
-            uint256 amount0,
-            uint256 amount1,
-            uint256 mintAmount
-        );
-    
+    ) external returns (uint256 amount0, uint256 amount1, uint256 mintAmount);
+
     function addLiquidity(
         address pool,
         uint256 amount0Max,
@@ -43,11 +27,5 @@ interface IGUniRouter02 {
         uint256 amount0Min,
         uint256 amount1Min,
         address receiver
-    )
-        external
-        returns (
-            uint256 amount0,
-            uint256 amount1,
-            uint256 mintAmount
-        );
+    ) external returns (uint256 amount0, uint256 amount1, uint256 mintAmount);
 }

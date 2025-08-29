@@ -10,7 +10,6 @@ import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
 
 /// @title Withdraws assets from Euler vault
 contract EulerV2Withdraw is ActionBase, EulerV2Helper {
-
     /// @param vault The address of the Euler vault
     /// @param account The address of the Euler account, defaults to user's wallet
     /// @param receiver The address to receive the withdrawn assets
@@ -35,7 +34,7 @@ contract EulerV2Withdraw is ActionBase, EulerV2Helper {
         params.account = _parseParamAddr(params.account, _paramMapping[1], _subData, _returnValues);
         params.receiver = _parseParamAddr(params.receiver, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-   
+
         (uint256 withdrawAmount, bytes memory logData) = _withdraw(params);
         emit ActionEvent("EulerV2Withdraw", logData);
         return bytes32(withdrawAmount);
@@ -61,28 +60,19 @@ contract EulerV2Withdraw is ActionBase, EulerV2Helper {
             _params.account = address(this);
         }
 
-        bytes4 vaultActionSelector = _params.amount == type(uint256).max ?
-            IERC4626.redeem.selector : IERC4626.withdraw.selector;
+        bytes4 vaultActionSelector =
+            _params.amount == type(uint256).max ? IERC4626.redeem.selector : IERC4626.withdraw.selector;
 
-        bytes memory vaultCallData = abi.encodeWithSelector(
-            vaultActionSelector,
-            _params.amount,
-            _params.receiver,
-            _params.account
-        );
+        bytes memory vaultCallData =
+            abi.encodeWithSelector(vaultActionSelector, _params.amount, _params.receiver, _params.account);
 
-        bytes memory result = IEVC(EVC_ADDR).call(
-            _params.vault,
-            _params.account,
-            0,
-            vaultCallData
-        );
+        bytes memory result = IEVC(EVC_ADDR).call(_params.vault, _params.account, 0, vaultCallData);
 
         if (_params.amount == type(uint256).max) {
             _params.amount = abi.decode(result, (uint256));
         }
 
-        return (_params.amount,  abi.encode(_params));
+        return (_params.amount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

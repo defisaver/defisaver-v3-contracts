@@ -8,26 +8,19 @@ import { IFuseAsset } from "../interfaces/rari/IFuseAsset.sol";
 import { DSMath } from "../DS/DSMath.sol";
 
 contract RariView is DSMath {
-
     /// @dev Not set as view because it calls some non view methods
     /// @param _tokenAddr Address od the underlying token
     /// @param _fundProxyAddr FundProxy addr
     /// @param _controllerAddr RariFundController addr
-    function getPoolLiquidity(
-        address _tokenAddr,
-        address _fundProxyAddr,
-        address _controllerAddr
-    ) public returns (uint256) {
-
+    function getPoolLiquidity(address _tokenAddr, address _fundProxyAddr, address _controllerAddr)
+        public
+        returns (uint256)
+    {
         string memory currencyCode = IERC20(_tokenAddr).symbol();
 
         // Step 1: Get raw data of fund
-        (
-            string[] memory currencyArr,
-            ,
-            uint8[][] memory pools,
-            uint256[][] memory amountsMap,
-        ) = IFundProxy(_fundProxyAddr).getRawFundBalancesAndPrices();
+        (string[] memory currencyArr,, uint8[][] memory pools, uint256[][] memory amountsMap,) =
+            IFundProxy(_fundProxyAddr).getRawFundBalancesAndPrices();
 
         // Step 2: Get index of currency code we are searching for
         uint256 currencyIndex = findCurrencyIndex(currencyArr, currencyCode);
@@ -41,20 +34,17 @@ contract RariView is DSMath {
             // under 100 ids are legacy
             if (uint8(currencyPoolIds[i]) < 100 && amounts[i] == 0) continue;
 
-            address fuseAssetsAddr = IFundController(_controllerAddr).fuseAssets(
-                uint8(currencyPoolIds[i]),
-                currencyCode
-            );
+            address fuseAssetsAddr =
+                IFundController(_controllerAddr).fuseAssets(uint8(currencyPoolIds[i]), currencyCode);
 
             uint256 cash = IFuseAsset(fuseAssetsAddr).getCash();
 
-            if (cash >= amounts[i]){
+            if (cash >= amounts[i]) {
                 totalFuseAssetBalance += amounts[i];
             } else {
                 totalFuseAssetBalance += cash;
                 break;
             }
-
         }
 
         // STEP 4: Add contract balance to final sum
@@ -63,11 +53,7 @@ contract RariView is DSMath {
         return contractBalance + totalFuseAssetBalance;
     }
 
-    function findCurrencyIndex(string[] memory _currencyArr, string memory _targetCode)
-        public        
-        pure
-        returns (uint256)
-    {
+    function findCurrencyIndex(string[] memory _currencyArr, string memory _targetCode) public pure returns (uint256) {
         for (uint256 i = 0; i < _currencyArr.length; ++i) {
             if (keccak256(abi.encode(_currencyArr[i])) == keccak256(abi.encode(_targetCode))) {
                 return i;

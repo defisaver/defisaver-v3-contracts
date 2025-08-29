@@ -1,7 +1,7 @@
-const { strategyStorageTest } = require('./core-tests');
+const { strategyStorageTest } = require("./core-tests");
 
-describe('Strategy-Storage', () => {
-    it('... should test strategyStorage', async () => {
+describe("Strategy-Storage", () => {
+    it("... should test strategyStorage", async () => {
         await strategyStorageTest();
     }).timeout(50000);
 });

@@ -10,7 +10,7 @@ import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
 /// @title Opens a LiquityV2 trove on a specific market
-/// @notice Opening a trove requires fixed fee of 0.0375 WETH on LiquityV2, regardless of market used. 
+/// @notice Opening a trove requires fixed fee of 0.0375 WETH on LiquityV2, regardless of market used.
 contract LiquityV2Open is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 
@@ -22,7 +22,7 @@ contract LiquityV2Open is ActionBase, LiquityV2Helper {
     /// @param interestBatchManager The address of the interest batch manager
     ///                             (optional - set to address(0) if trove will not join the batch)
     /// @param ownerIndex The index of the owner used to calculate the trove ID
-    ///                   troveId = keccak256(owner, ownerIndex)          
+    ///                   troveId = keccak256(owner, ownerIndex)
     /// @param collAmount The amount of collateral to deposit
     /// @param boldAmount The amount of BOLD to mint
     /// @param upperHint The upper hint for the trove
@@ -58,13 +58,15 @@ contract LiquityV2Open is ActionBase, LiquityV2Helper {
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
-        params.interestBatchManager = _parseParamAddr(params.interestBatchManager, _paramMapping[3], _subData, _returnValues);
+        params.interestBatchManager =
+            _parseParamAddr(params.interestBatchManager, _paramMapping[3], _subData, _returnValues);
         params.ownerIndex = _parseParamUint(params.ownerIndex, _paramMapping[4], _subData, _returnValues);
         params.collAmount = _parseParamUint(params.collAmount, _paramMapping[5], _subData, _returnValues);
         params.boldAmount = _parseParamUint(params.boldAmount, _paramMapping[6], _subData, _returnValues);
         params.upperHint = _parseParamUint(params.upperHint, _paramMapping[7], _subData, _returnValues);
         params.lowerHint = _parseParamUint(params.lowerHint, _paramMapping[8], _subData, _returnValues);
-        params.annualInterestRate = _parseParamUint(params.annualInterestRate, _paramMapping[9], _subData, _returnValues);
+        params.annualInterestRate =
+            _parseParamUint(params.annualInterestRate, _paramMapping[9], _subData, _returnValues);
         params.maxUpfrontFee = _parseParamUint(params.maxUpfrontFee, _paramMapping[10], _subData, _returnValues);
 
         (uint256 collAmount, bytes memory logData) = _liquityOpen(params);
@@ -140,13 +142,12 @@ contract LiquityV2Open is ActionBase, LiquityV2Helper {
             // when pulling max amount, we need to leave some WETH for gas compensation
             if (isMaxPull) {
                 _params.collAmount = _collToken.pullTokensIfNeeded(_params.from, _params.collAmount);
-                
+
                 // This will revert on underflow anyway, added here to better communicate the error to the caller
                 if (_params.collAmount <= ETH_GAS_COMPENSATION) {
                     revert NotEnoughWethForCollateralAndGasCompensation(_params.collAmount);
                 }
                 _params.collAmount -= ETH_GAS_COMPENSATION;
-
             } else {
                 _collToken.pullTokensIfNeeded(_params.from, _params.collAmount + ETH_GAS_COMPENSATION);
             }
@@ -156,7 +157,11 @@ contract LiquityV2Open is ActionBase, LiquityV2Helper {
         }
     }
 
-    function _approveCollateralAndGasCompensation(Params memory _params, address _collToken, address _borrowerOperations) internal {
+    function _approveCollateralAndGasCompensation(
+        Params memory _params,
+        address _collToken,
+        address _borrowerOperations
+    ) internal {
         if (_collToken == TokenUtils.WETH_ADDR) {
             _collToken.approveToken(_borrowerOperations, _params.collAmount + ETH_GAS_COMPENSATION);
         } else {

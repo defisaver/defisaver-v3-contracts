@@ -19,12 +19,11 @@ abstract contract IUniswapRouter {
         uint256 deadline
     ) external virtual returns (uint256[] memory amounts);
 
-    function swapETHForExactTokens(
-        uint amountOut,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external virtual payable returns (uint256[] memory amounts);
+    function swapETHForExactTokens(uint256 amountOut, address[] calldata path, address to, uint256 deadline)
+        external
+        payable
+        virtual
+        returns (uint256[] memory amounts);
 
     function swapTokensForExactETH(
         uint256 amountOut,
@@ -51,14 +50,7 @@ abstract contract IUniswapRouter {
         uint256 amountBMin,
         address to,
         uint256 deadline
-    )
-        external
-        virtual
-        returns (
-            uint256 amountA,
-            uint256 amountB,
-            uint256 liquidity
-        );
+    ) external virtual returns (uint256 amountA, uint256 amountB, uint256 liquidity);
 
     function addLiquidityETH(
         address token,
@@ -67,15 +59,7 @@ abstract contract IUniswapRouter {
         uint256 amountETHMin,
         address to,
         uint256 deadline
-    )
-        external
-        payable
-        virtual
-        returns (
-            uint256 amountToken,
-            uint256 amountETH,
-            uint256 liquidity
-        );
+    ) external payable virtual returns (uint256 amountToken, uint256 amountETH, uint256 liquidity);
 
     function removeLiquidity(
         address tokenA,
@@ -87,11 +71,7 @@ abstract contract IUniswapRouter {
         uint256 deadline
     ) external virtual returns (uint256 amountA, uint256 amountB);
 
-    function quote(
-        uint256 amountA,
-        uint256 reserveA,
-        uint256 reserveB
-    ) public pure virtual returns (uint256 amountB);
+    function quote(uint256 amountA, uint256 reserveA, uint256 reserveB) public pure virtual returns (uint256 amountB);
 
     function getAmountsOut(uint256 amountIn, address[] memory path)
         public

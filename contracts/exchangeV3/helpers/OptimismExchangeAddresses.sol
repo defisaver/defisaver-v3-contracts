@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 contract OptimismExchangeAddresses {
-
     address internal constant FEE_RECIPIENT_ADDRESS = 0x5b12C2B979CB3aB89DD4813837873bC4Dd1930D0;
     address internal constant DISCOUNT_ADDRESS = 0xc526725F694552382e724013d2F8b8DaAAdB5653;
     address internal constant WRAPPER_EXCHANGE_REGISTRY = 0x82b039Ca3c16E971132603f960a6E98582d8F021;

@@ -10,7 +10,7 @@ contract BytesTransientStorageL2 {
         data = _data;
     }
 
-    function getBytesTransiently() public view returns (bytes memory){
+    function getBytesTransiently() public view returns (bytes memory) {
         return data;
     }
 }

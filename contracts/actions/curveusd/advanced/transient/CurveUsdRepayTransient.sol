@@ -58,7 +58,7 @@ contract CurveUsdRepayTransient is ActionBase, CurveUsdHelper {
                             ACTION LOGIC
     //////////////////////////////////////////////////////////////*/
     function _repay(Params memory _params) internal returns (uint256, bytes memory) {
-        /// @dev Zero input will just return so we explicitly revert here (see ICrvUsdController natspec) 
+        /// @dev Zero input will just return so we explicitly revert here (see ICrvUsdController natspec)
         if (_params.exData.srcAmount == 0) revert ZeroAmountError();
 
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
@@ -78,23 +78,15 @@ contract CurveUsdRepayTransient is ActionBase, CurveUsdHelper {
 
         // there shouldn't be any funds left on swapper contract after sell but withdrawing it just in case
         CurveUsdSwapperTransient(curveUsdTransientSwapper).withdrawAll(_params.controllerAddress);
-        
+
         // If the amount received from swap is higher than debt there will be leftover debtTokens
         // that will be sent to the user wallet. In that case, if we also haven't sold 100% of collToken,
         // remaining collateral will be sent to the user wallet as well.
         // When this happens, send all leftover collateral and debt tokens to the user
-        (, uint256 debtTokenReceived) = _sendLeftoverFundsWithSnapshot(
-            collToken,
-            debtToken,
-            collStartingBalance,
-            debtStartingBalance,
-            _params.to
-        );
+        (, uint256 debtTokenReceived) =
+            _sendLeftoverFundsWithSnapshot(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
 
-        return (
-            debtTokenReceived,
-            abi.encode(_params)
-        );
+        return (debtTokenReceived, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

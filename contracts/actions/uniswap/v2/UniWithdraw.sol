@@ -40,12 +40,7 @@ contract UniWithdraw is ActionBase, UniV2Helper {
 
         uniData.tokenA = _parseParamAddr(uniData.tokenA, _paramMapping[0], _subData, _returnValues);
         uniData.tokenB = _parseParamAddr(uniData.tokenB, _paramMapping[1], _subData, _returnValues);
-        uniData.liquidity = _parseParamUint(
-            uniData.liquidity,
-            _paramMapping[2],
-            _subData,
-            _returnValues
-        );
+        uniData.liquidity = _parseParamUint(uniData.liquidity, _paramMapping[2], _subData, _returnValues);
         uniData.to = _parseParamAddr(uniData.to, _paramMapping[3], _subData, _returnValues);
         uniData.from = _parseParamAddr(uniData.from, _paramMapping[4], _subData, _returnValues);
 
@@ -73,7 +68,7 @@ contract UniWithdraw is ActionBase, UniV2Helper {
     function _uniWithdraw(UniWithdrawData memory _uniData) internal returns (uint256, bytes memory) {
         address lpTokenAddr = factory.getPair(_uniData.tokenA, _uniData.tokenB);
 
-        uint pulledTokens = lpTokenAddr.pullTokensIfNeeded(_uniData.from, _uniData.liquidity);
+        uint256 pulledTokens = lpTokenAddr.pullTokensIfNeeded(_uniData.from, _uniData.liquidity);
         lpTokenAddr.approveToken(address(router), pulledTokens);
 
         _uniData.liquidity = pulledTokens;
@@ -85,10 +80,7 @@ contract UniWithdraw is ActionBase, UniV2Helper {
         return (_uniData.liquidity, logData);
     }
 
-    function _withdrawLiquidity(UniWithdrawData memory _uniData)
-        internal
-        returns (uint256 amountA, uint256 amountB)
-    {
+    function _withdrawLiquidity(UniWithdrawData memory _uniData) internal returns (uint256 amountA, uint256 amountB) {
         (amountA, amountB) = router.removeLiquidity(
             _uniData.tokenA,
             _uniData.tokenB,
@@ -100,11 +92,7 @@ contract UniWithdraw is ActionBase, UniV2Helper {
         );
     }
 
-    function parseInputs(bytes memory _callData)
-       public
-        pure
-        returns (UniWithdrawData memory uniData)
-    {
+    function parseInputs(bytes memory _callData) public pure returns (UniWithdrawData memory uniData) {
         uniData = abi.decode(_callData, (UniWithdrawData));
     }
 }

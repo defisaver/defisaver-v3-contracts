@@ -160,7 +160,7 @@ interface IBorrowerOperations {
         uint256 _maxUpfrontFee
     ) external;
 
-    function getEntireBranchColl() external view returns (uint);
+    function getEntireBranchColl() external view returns (uint256);
 
-    function getEntireBranchDebt() external view returns (uint);
+    function getEntireBranchDebt() external view returns (uint256);
 }

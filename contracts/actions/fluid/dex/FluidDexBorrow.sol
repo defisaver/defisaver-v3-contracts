@@ -45,36 +45,15 @@ contract FluidDexBorrow is ActionBase, FluidHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.nftId = _parseParamUint(params.nftId, _paramMapping[2], _subData, _returnValues);
 
-        params.borrowAmount = _parseParamUint(
-            params.borrowAmount,
-            _paramMapping[3],
-            _subData,
-            _returnValues
-        );
-        params.borrowVariableData.debtAmount0 = _parseParamUint(
-            params.borrowVariableData.debtAmount0,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        );
-        params.borrowVariableData.debtAmount1 = _parseParamUint(
-            params.borrowVariableData.debtAmount1,
-            _paramMapping[5],
-            _subData,
-            _returnValues
-        );
-        params.borrowVariableData.maxDebtShares = _parseParamUint(
-            params.borrowVariableData.maxDebtShares,
-            _paramMapping[6],
-            _subData,
-            _returnValues
-        );
-        params.wrapBorrowedEth = _parseParamUint(
-            params.wrapBorrowedEth ? 1 : 0,
-            _paramMapping[7],
-            _subData,
-            _returnValues
-        ) == 1;
+        params.borrowAmount = _parseParamUint(params.borrowAmount, _paramMapping[3], _subData, _returnValues);
+        params.borrowVariableData.debtAmount0 =
+            _parseParamUint(params.borrowVariableData.debtAmount0, _paramMapping[4], _subData, _returnValues);
+        params.borrowVariableData.debtAmount1 =
+            _parseParamUint(params.borrowVariableData.debtAmount1, _paramMapping[5], _subData, _returnValues);
+        params.borrowVariableData.maxDebtShares =
+            _parseParamUint(params.borrowVariableData.maxDebtShares, _paramMapping[6], _subData, _returnValues);
+        params.wrapBorrowedEth =
+            _parseParamUint(params.wrapBorrowedEth ? 1 : 0, _paramMapping[7], _subData, _returnValues) == 1;
 
         (uint256 borrowAmountOrShares, bytes memory logData) = _borrow(params);
         emit ActionEvent("FluidDexBorrow", logData);

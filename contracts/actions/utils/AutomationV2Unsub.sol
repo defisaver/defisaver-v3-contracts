@@ -9,7 +9,6 @@ import { ISubscriptions } from "../../interfaces/ISubscriptions.sol";
 /// @title Unsubscribe from old automation v2.
 /// @notice This action is deprecated.
 contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
-
     enum Protocols {
         MCD,
         COMPOUND,
@@ -32,24 +31,14 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.cdpId = _parseParamUint(
-            params.cdpId,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
-        params.protocol = Protocols(_parseParamUint(
-            uint256(params.protocol),
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        ));
+        params.cdpId = _parseParamUint(params.cdpId, _paramMapping[0], _subData, _returnValues);
+        params.protocol =
+            Protocols(_parseParamUint(uint256(params.protocol), _paramMapping[1], _subData, _returnValues));
 
         bytes memory logData = _automationV2Unsub(params);
         emit ActionEvent("Unsubscribe", logData);
         return bytes32(0);
     }
-
 
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable virtual override {
@@ -67,7 +56,7 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
 
     /// @notice Unsubscribes proxy from automation
     function _automationV2Unsub(Params memory _params) internal returns (bytes memory logData) {
-        ( uint256 cdpId, Protocols protocol ) = ( _params.cdpId, _params.protocol );
+        (uint256 cdpId, Protocols protocol) = (_params.cdpId, _params.protocol);
 
         if (protocol == Protocols.MCD) {
             ISubscriptions(MCD_SUB_ADDRESS).unsubscribe(cdpId);
@@ -75,7 +64,9 @@ contract AutomationV2Unsub is ActionBase, SubscriptionsMainnetAddresses {
             ISubscriptions(COMPOUND_SUB_ADDRESS).unsubscribe();
         } else if (protocol == Protocols.AAVE) {
             ISubscriptions(AAVE_SUB_ADDRESS).unsubscribe();
-        } else revert("Invalid protocol argument");
+        } else {
+            revert("Invalid protocol argument");
+        }
 
         logData = abi.encode(_params);
     }

@@ -1,16 +1,14 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
-const { compV3TransferTest } = require('./compV3-tests');
+const { redeploy } = require("../../utils/utils");
+const { compV3TransferTest } = require("./compV3-tests");
 
-describe('CompV3-Transfer', function () {
+describe("CompV3-Transfer", function () {
     this.timeout(80000);
 
     before(async () => {
-        await redeploy('CompV3Transfer');
+        await redeploy("CompV3Transfer");
     });
 
-    it('... should test CompoundV3 transfer', async () => {
+    it("... should test CompoundV3 transfer", async () => {
         await compV3TransferTest();
     });
 });

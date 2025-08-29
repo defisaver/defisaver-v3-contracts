@@ -12,7 +12,6 @@ import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract SmartWallet is BaseTest {
-
     address payable public owner;
     address payable public walletAddr;
     bool public isSafe;
@@ -39,13 +38,13 @@ contract SmartWallet is BaseTest {
         vm.label(walletAddr, "SmartWallet");
     }
 
-    function createDSProxy() public ownerAsSender() returns(address payable) {
+    function createDSProxy() public ownerAsSender returns (address payable) {
         walletAddr = payable(address(DSProxyFactoryInterface(Addresses.DS_PROXY_FACTORY).build()));
         isSafe = false;
         return walletAddr;
     }
 
-    function createSafe() public ownerAsSender() returns(address payable) {
+    function createSafe() public ownerAsSender returns (address payable) {
         if (safeInitialized) return walletAddr;
 
         uint256 saltNonce = block.timestamp;
@@ -53,22 +52,14 @@ contract SmartWallet is BaseTest {
         owners[0] = owner;
 
         bytes memory setupData = abi.encodeWithSelector(
-            ISafe.setup.selector,
-            owners,
-            1,
-            address(0),
-            bytes(""),
-            address(0),
-            address(0),
-            0,
-            payable(address(0))
+            ISafe.setup.selector, owners, 1, address(0), bytes(""), address(0), address(0), 0, payable(address(0))
         );
 
-        walletAddr = payable(ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY).createProxyWithNonce(
-            Addresses.SAFE_SINGLETON,
-            setupData,
-            saltNonce
-        ));
+        walletAddr = payable(
+            ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY).createProxyWithNonce(
+                Addresses.SAFE_SINGLETON, setupData, saltNonce
+            )
+        );
 
         isSafe = true;
         safeInitialized = true;
@@ -76,11 +67,7 @@ contract SmartWallet is BaseTest {
         return walletAddr;
     }
 
-    function execute(
-        address _target,
-        bytes memory _calldata,
-        uint256 _value
-    ) public ownerAsSender() {
+    function execute(address _target, bytes memory _calldata, uint256 _value) public ownerAsSender {
         if (isSafe) {
             bytes memory signatures = bytes.concat(abi.encode(owner, bytes32(0)), bytes1(0x01));
             bool success = ISafe(walletAddr).execTransaction(
@@ -103,11 +90,7 @@ contract SmartWallet is BaseTest {
         }
     }
 
-    function logExecute(
-        address _target,
-        bytes memory _calldata,
-        uint256 _value
-    ) public {
+    function logExecute(address _target, bytes memory _calldata, uint256 _value) public {
         uint256 startGas = gasleft();
         execute(_target, _calldata, _value);
         uint256 gasUsed = startGas - gasleft();
@@ -115,7 +98,7 @@ contract SmartWallet is BaseTest {
         console2.log("GAS USED: ", gasUsed);
     }
 
-    function ownerApprove(address _token, uint256 _amount) public ownerAsSender() {
+    function ownerApprove(address _token, uint256 _amount) public ownerAsSender {
         approve(_token, walletAddr, _amount);
     }
 }

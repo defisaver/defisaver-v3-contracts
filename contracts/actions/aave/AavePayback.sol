@@ -42,14 +42,8 @@ contract AavePayback is ActionBase, AaveHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[5], _subData, _returnValues);
 
-        (uint256 paybackAmount, bytes memory logData) = _payback(
-            params.market,
-            params.tokenAddr,
-            params.amount,
-            params.rateMode,
-            params.from,
-            params.onBehalf
-        );
+        (uint256 paybackAmount, bytes memory logData) =
+            _payback(params.market, params.tokenAddr, params.amount, params.rateMode, params.from, params.onBehalf);
         emit ActionEvent("AavePayback", logData);
         return bytes32(paybackAmount);
     }
@@ -57,14 +51,8 @@ contract AavePayback is ActionBase, AaveHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _payback(
-            params.market,
-            params.tokenAddr,
-            params.amount,
-            params.rateMode,
-            params.from,
-            params.onBehalf
-        );
+        (, bytes memory logData) =
+            _payback(params.market, params.tokenAddr, params.amount, params.rateMode, params.from, params.onBehalf);
         logger.logActionDirectEvent("AavePayback", logData);
     }
 
@@ -110,14 +98,7 @@ contract AavePayback is ActionBase, AaveHelper {
         // send back any leftover tokens that weren't used in the repay
         _tokenAddr.withdrawTokens(_from, tokensAfter);
 
-        bytes memory logData = abi.encode(
-            _market,
-            _tokenAddr,
-            _amount,
-            _rateMode,
-            _from,
-            _onBehalf
-        );
+        bytes memory logData = abi.encode(_market, _tokenAddr, _amount, _rateMode, _from, _onBehalf);
         return (tokensBefore - tokensAfter, logData);
     }
 

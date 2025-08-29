@@ -29,10 +29,13 @@ contract MorphoBlueWithdrawCollateral is ActionBase, MorphoBlueHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.marketParams.loanToken = _parseParamAddr(params.marketParams.loanToken , _paramMapping[0], _subData, _returnValues);
-        params.marketParams.collateralToken = _parseParamAddr(params.marketParams.collateralToken , _paramMapping[1], _subData, _returnValues);
-        params.marketParams.oracle = _parseParamAddr(params.marketParams.oracle , _paramMapping[2], _subData, _returnValues);
-        params.marketParams.irm = _parseParamAddr(params.marketParams.irm , _paramMapping[3], _subData, _returnValues);
+        params.marketParams.loanToken =
+            _parseParamAddr(params.marketParams.loanToken, _paramMapping[0], _subData, _returnValues);
+        params.marketParams.collateralToken =
+            _parseParamAddr(params.marketParams.collateralToken, _paramMapping[1], _subData, _returnValues);
+        params.marketParams.oracle =
+            _parseParamAddr(params.marketParams.oracle, _paramMapping[2], _subData, _returnValues);
+        params.marketParams.irm = _parseParamAddr(params.marketParams.irm, _paramMapping[3], _subData, _returnValues);
         params.marketParams.lltv = _parseParamUint(params.marketParams.lltv, _paramMapping[4], _subData, _returnValues);
         params.withdrawAmount = _parseParamUint(params.withdrawAmount, _paramMapping[5], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[6], _subData, _returnValues);

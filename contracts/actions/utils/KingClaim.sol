@@ -11,7 +11,7 @@ contract KingClaim is ActionBase {
 
     address constant KING_CLAIM_CONTRACT = 0x6Db24Ee656843E3fE03eb8762a54D86186bA6B64;
     address constant KING_TOKEN = 0x8F08B70456eb22f6109F57b8fafE862ED28E6040;
-    
+
     /// @param to Address where to send the KING token
     /// @param amount Amount of KING token to claim
     /// @param merkleRoot Merkle root of the claim
@@ -29,32 +29,31 @@ contract KingClaim is ActionBase {
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public virtual override payable returns (bytes32) {
+    ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[0], _subData, _returnValues);
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
 
         _claim(inputData);
-        
+
         return bytes32(inputData.amount);
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes memory _callData) public override payable {
+    function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
 
         _claim(inputData);
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-
     //////////////////////////// ACTION LOGIC ////////////////////////////
-    
+
     function _claim(Params memory params) internal {
         uint256 startingBalance = KING_TOKEN.getBalance(address(this));
         IEtherFiClaim(KING_CLAIM_CONTRACT).claim(address(this), params.amount, params.merkleRoot, params.merkleProof);

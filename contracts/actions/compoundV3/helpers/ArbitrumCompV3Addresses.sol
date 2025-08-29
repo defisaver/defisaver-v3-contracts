@@ -7,4 +7,3 @@ contract ArbitrumCompV3Addresses {
     // not yet available
     address internal constant COMP_ETH_COMET = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 }
-

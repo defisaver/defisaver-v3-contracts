@@ -12,7 +12,6 @@ import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2Exe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2AdjustInterestRate is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -65,8 +64,8 @@ contract TestLiquityV2AdjustInterestRate is LiquityV2ExecuteActions {
     }
 
     function _baseTest(bool _isDirect) internal {
-        uint256 collAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
+        uint256 collAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
         uint256 currInterestRate = 1e18 / 10;
         uint256 newInterestRate = 1e18 / 20;
 
@@ -84,13 +83,7 @@ contract TestLiquityV2AdjustInterestRate is LiquityV2ExecuteActions {
                 viewContract
             );
 
-            _adjustInterestRate(
-                markets[i],
-                troveId,
-                _isDirect,
-                newInterestRate,
-                i
-            );
+            _adjustInterestRate(markets[i], troveId, _isDirect, newInterestRate, i);
         }
     }
 
@@ -102,26 +95,14 @@ contract TestLiquityV2AdjustInterestRate is LiquityV2ExecuteActions {
         uint256 _collIndex
     ) internal {
         uint256 maxUpfrontFee = IHintHelpers(_market.hintHelpers()).predictAdjustInterestRateUpfrontFee(
-            _collIndex,
-            _troveId,
-            _newInterestRate
+            _collIndex, _troveId, _newInterestRate
         );
 
-        (uint256 upperHint, uint256 lowerHint) = getInsertPosition(
-            viewContract,
-            _market,
-            _collIndex,
-            _newInterestRate
-        );
+        (uint256 upperHint, uint256 lowerHint) = getInsertPosition(viewContract, _market, _collIndex, _newInterestRate);
 
         bytes memory executeActionCallData = executeActionCalldata(
             liquityV2AdjustInterestRateEncode(
-                address(_market),
-                _troveId,
-                _newInterestRate,
-                upperHint,
-                lowerHint,
-                maxUpfrontFee
+                address(_market), _troveId, _newInterestRate, upperHint, lowerHint, maxUpfrontFee
             ),
             _isDirect
         );

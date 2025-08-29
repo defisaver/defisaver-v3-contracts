@@ -12,7 +12,6 @@ import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2Exe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2Borrow is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -73,18 +72,17 @@ contract TestLiquityV2Borrow is LiquityV2ExecuteActions {
     }
 
     function _baseTest(bool _isDirect, address _interestBatchManager) public {
-        uint256 collAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
+        uint256 collAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
         uint256 additionalBorrowAmountInUSD = 5000;
 
         for (uint256 i = 0; i < markets.length; i++) {
-
             if (_interestBatchManager != address(0)) {
                 vm.startPrank(_interestBatchManager);
                 registerBatchManager(markets[i]);
                 vm.stopPrank();
             }
-            
+
             uint256 troveId = executeLiquityOpenTrove(
                 markets[i],
                 _interestBatchManager,
@@ -98,13 +96,7 @@ contract TestLiquityV2Borrow is LiquityV2ExecuteActions {
                 viewContract
             );
 
-            _borrow(
-                markets[i],
-                troveId,
-                _isDirect,
-                additionalBorrowAmountInUSD,
-                i
-            );
+            _borrow(markets[i], troveId, _isDirect, additionalBorrowAmountInUSD, i);
         }
     }
 
@@ -120,21 +112,11 @@ contract TestLiquityV2Borrow is LiquityV2ExecuteActions {
         LiquityV2View.TroveData memory troveData = viewContract.getTroveInfo(address(_market), _troveId);
         uint256 entireDebt = troveData.debtAmount;
 
-        uint256 maxUpfrontFee = IHintHelpers(_market.hintHelpers()).predictAdjustTroveUpfrontFee(
-            _collIndex,
-            _troveId,
-            borrowAmount
-        );
+        uint256 maxUpfrontFee =
+            IHintHelpers(_market.hintHelpers()).predictAdjustTroveUpfrontFee(_collIndex, _troveId, borrowAmount);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2BorrowEncode(
-                address(_market),
-                sender,
-                _troveId,
-                borrowAmount,
-                maxUpfrontFee
-            ),
-            _isDirect
+            liquityV2BorrowEncode(address(_market), sender, _troveId, borrowAmount, maxUpfrontFee), _isDirect
         );
 
         uint256 senderBoldBalanceBefore = balanceOf(BOLD, sender);

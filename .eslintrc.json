@@ -3,19 +3,22 @@
         "browser": true,
         "commonjs": true,
         "es2021": true,
-        "mocha": true
+        "mocha": true,
+        "node": true
     },
-    "extends": ["airbnb-base"],
+    "extends": [
+        "eslint:recommended",
+        "plugin:import/recommended",
+        "plugin:prettier/recommended" // turns off conflicting rules + runs Prettier
+    ],
     "parserOptions": {
         "ecmaVersion": 12
     },
     "rules": {
-        "indent": ["error", 4],
-        "no-console": "off",
-        "func-names": "off",
-        "prefer-destructuring": "off",
-        "no-plusplus": "off",
-        "no-loop-func": "off",
-        "linebreak-style": "off"
+        "no-console": "off", // allow console.log in scripts/tests
+        "func-names": "off", // allow anonymous functions
+        "prefer-destructuring": "off", // allow direct property access
+        "no-plusplus": "off", // allow i++
+        "no-loop-func": "off" // allow functions inside a loop
     }
 }

@@ -12,7 +12,6 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_BundleStorage is BaseTest, CoreHelper {
-
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -22,6 +21,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
     event BundleCreated(uint256 indexed bundleId);
+
     StrategyStorage strategyStorage;
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -57,13 +57,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
         address sender = address(this);
         uint64[] memory dummyStrategyIds = new uint64[](2);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                BundleStorage.NoAuthToCreateBundle.selector,
-                sender,
-                openToPublic
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(BundleStorage.NoAuthToCreateBundle.selector, sender, openToPublic));
         cut.createBundle(dummyStrategyIds);
     }
 
@@ -76,7 +70,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
         ids[1] = type(uint64).max - 1; // unknownId
 
         vm.expectRevert();
-        cut.createBundle(ids);        
+        cut.createBundle(ids);
     }
 
     function test_should_revert_creating_bundle_with_different_triggers_for_strategies() public {
@@ -88,12 +82,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
         ids[1] = uint64(secondId);
         ids[2] = uint64(thirdId); // has different triggers
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                BundleStorage.DiffTriggersInBundle.selector,
-                ids
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(BundleStorage.DiffTriggersInBundle.selector, ids));
         cut.createBundle(ids);
     }
 
@@ -163,10 +152,7 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _assertBundles(
-        StrategyModel.StrategyBundle[] memory _fetchedBundles,
-        uint256 _realSize
-    ) internal pure {
+    function _assertBundles(StrategyModel.StrategyBundle[] memory _fetchedBundles, uint256 _realSize) internal pure {
         for (uint256 i = 0; i < _realSize; ++i) {
             assertEq(_fetchedBundles[i].creator, Addresses.OWNER_ACC);
             assertEq(_fetchedBundles[i].strategyIds.length, 2);
@@ -219,14 +205,18 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
         bytes4[] memory triggersForFirstAndSecondStrategy = new bytes4[](2);
         triggersForFirstAndSecondStrategy[0] = bytes4(keccak256("First"));
         triggersForFirstAndSecondStrategy[1] = bytes4(keccak256("Second"));
-        
+
         bytes4[] memory actionsIds = new bytes4[](0);
         uint8[][] memory paramMapping = new uint8[][](0);
         bool continuous = true;
 
         startPrank(Addresses.OWNER_ACC);
-        firstId = strategyStorage.createStrategy("First", triggersForFirstAndSecondStrategy, actionsIds, paramMapping, continuous);
-        secondId = strategyStorage.createStrategy("Second", triggersForFirstAndSecondStrategy, actionsIds, paramMapping, continuous);
+        firstId = strategyStorage.createStrategy(
+            "First", triggersForFirstAndSecondStrategy, actionsIds, paramMapping, continuous
+        );
+        secondId = strategyStorage.createStrategy(
+            "Second", triggersForFirstAndSecondStrategy, actionsIds, paramMapping, continuous
+        );
         thirdId = strategyStorage.createStrategy("Third", new bytes4[](0), actionsIds, paramMapping, continuous);
         stopPrank();
     }

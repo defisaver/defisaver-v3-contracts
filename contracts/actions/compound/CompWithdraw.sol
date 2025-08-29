@@ -60,11 +60,7 @@ contract CompWithdraw is ActionBase, CompHelper {
     /// @param _cTokenAddr cToken address
     /// @param _amount Amount of underlying tokens to withdraw
     /// @param _to Address where to send the tokens to (can be left on user's wallet)
-    function _withdraw(
-        address _cTokenAddr,
-        uint256 _amount,
-        address _to
-    ) internal returns (uint256, bytes memory) {
+    function _withdraw(address _cTokenAddr, uint256 _amount, address _to) internal returns (uint256, bytes memory) {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         // because comp returns native eth we need to check the balance of that
@@ -77,11 +73,11 @@ contract CompWithdraw is ActionBase, CompHelper {
         // if _amount type(uint).max that means take out user's wallet whole balance
         if (_amount == type(uint256).max) {
             _amount = _cTokenAddr.getBalance(address(this));
-            if (ICToken(_cTokenAddr).redeem(_amount) != NO_ERROR){
+            if (ICToken(_cTokenAddr).redeem(_amount) != NO_ERROR) {
                 revert CompRedeemError();
             }
         } else {
-            if (ICToken(_cTokenAddr).redeemUnderlying(_amount) != NO_ERROR){
+            if (ICToken(_cTokenAddr).redeemUnderlying(_amount) != NO_ERROR) {
                 revert CompUnderlyingRedeemError();
             }
         }

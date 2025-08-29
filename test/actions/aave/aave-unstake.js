@@ -1,16 +1,14 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require("../../utils/utils");
 
-const { aaveUnstakeTest } = require('./aave-tests');
+const { aaveUnstakeTest } = require("./aave-tests");
 
-describe('Aave-Unstake', function () {
+describe("Aave-Unstake", function () {
     this.timeout(80000);
 
     before(async () => {
-        await redeploy('AaveUnstake');
+        await redeploy("AaveUnstake");
     });
-    it('... should run aave unstake test', async () => {
+    it("... should run aave unstake test", async () => {
         await aaveUnstakeTest();
     });
 });

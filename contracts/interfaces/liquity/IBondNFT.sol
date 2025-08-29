@@ -5,13 +5,12 @@ pragma solidity =0.8.24;
 import { IERC721Enumerable } from "../IERC721Enumerable.sol";
 
 interface IBondNFT is IERC721Enumerable {
-    
     struct BondExtraData {
         uint80 initialHalfDna;
         uint80 finalHalfDna;
-        uint32 troveSize;         // Debt in LUSD
-        uint32 lqtyAmount;        // Holding LQTY, staking or deposited into Pickle
-        uint32 curveGaugeSlopes;  // For 3CRV and Frax pools combined
+        uint32 troveSize; // Debt in LUSD
+        uint32 lqtyAmount; // Holding LQTY, staking or deposited into Pickle
+        uint32 curveGaugeSlopes; // For 3CRV and Frax pools combined
     }
 
     function getBondAmount(uint256 _tokenID) external view returns (uint256 amount);

@@ -1,13 +1,13 @@
-const { redeploy } = require('../../../utils/utils');
-const { morphoAaveV3SetManagerTest } = require('./morpho-aaveV3-tests');
+const { redeploy } = require("../../../utils/utils");
+const { morphoAaveV3SetManagerTest } = require("./morpho-aaveV3-tests");
 
-describe('Morpho-Aave-V3-SetManager', function () {
+describe("Morpho-Aave-V3-SetManager", function () {
     this.timeout(80000);
     before(async () => {
-        await redeploy('MorphoAaveV3SetManager');
+        await redeploy("MorphoAaveV3SetManager");
     });
 
-    it('... should test Morpho AaveV3 supply', async () => {
+    it("... should test Morpho AaveV3 supply", async () => {
         await morphoAaveV3SetManagerTest();
     });
 });

@@ -8,9 +8,9 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { MainnetCompAddresses } from "./MainnetCompAddresses.sol";
 
 /// @title Utility functions and data used in Compound actions
-contract CompHelper is MainnetCompAddresses{
-
+contract CompHelper is MainnetCompAddresses {
     uint256 constant NO_ERROR = 0;
+
     error CompEnterMarketError();
     error CompExitMarketError();
 
@@ -31,7 +31,7 @@ contract CompHelper is MainnetCompAddresses{
 
         uint256[] memory errCodes = IComptroller(COMPTROLLER_ADDR).enterMarkets(markets);
 
-        if (errCodes[0] != NO_ERROR){
+        if (errCodes[0] != NO_ERROR) {
             revert CompEnterMarketError();
         }
     }
@@ -39,7 +39,7 @@ contract CompHelper is MainnetCompAddresses{
     /// @notice Exits the Compound market
     /// @param _cTokenAddr CToken address of the token
     function exitMarket(address _cTokenAddr) public {
-        if (IComptroller(COMPTROLLER_ADDR).exitMarket(_cTokenAddr) != NO_ERROR){
+        if (IComptroller(COMPTROLLER_ADDR).exitMarket(_cTokenAddr) != NO_ERROR) {
             revert CompExitMarketError();
         }
     }

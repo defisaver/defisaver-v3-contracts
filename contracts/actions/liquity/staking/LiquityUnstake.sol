@@ -15,10 +15,10 @@ contract LiquityUnstake is ActionBase, LiquityHelper {
     /// @param wethTo Address that will receive ETH(wrapped) gains
     /// @param lusdTo Address that will receive LUSD token gains
     struct Params {
-        uint256 lqtyAmount; 
-        address to;         
-        address wethTo;     
-        address lusdTo;     
+        uint256 lqtyAmount;
+        address to;
+        address wethTo;
+        address lusdTo;
     }
 
     /// @inheritdoc ActionBase

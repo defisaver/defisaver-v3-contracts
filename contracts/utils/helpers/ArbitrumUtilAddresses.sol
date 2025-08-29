@@ -10,7 +10,6 @@ contract ArbitrumUtilAddresses {
     address internal constant FEE_RECIPIENT = 0xe000e3c9428D539566259cCd89ed5fb85e655A01;
     address internal constant AAVE_MARKET = 0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb;
 
-
     address internal constant UNI_V3_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
     address internal constant UNI_V3_QUOTER = 0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6;
 
@@ -32,10 +31,9 @@ contract ArbitrumUtilAddresses {
     address internal constant SPARK_MARKET = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
     address internal constant EETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address internal constant WEETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; 
+    address internal constant WEETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address internal constant ETHER_FI_LIQUIDITY_POOL = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-
 
     address internal constant CHAINLINK_FEED_REGISTRY = 0x158E27De8B5E5bC3FA1C6D5b365a291c54f6b0Fd;
 

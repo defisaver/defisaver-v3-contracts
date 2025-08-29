@@ -29,7 +29,8 @@ contract SkyClaimRewards is ActionBase, SkyHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.stakingContract = _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
+        inputData.stakingContract =
+            _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
         inputData.rewardToken = _parseParamAddr(inputData.rewardToken, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 

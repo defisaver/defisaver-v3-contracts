@@ -5,7 +5,6 @@ pragma solidity =0.8.24;
 /// @title DFSLib
 /// @notice Provides utility functions for DFS actions.
 library DFSLib {
-
     /// @notice Converts an unsigned 256-bit integer to a signed 256-bit integer.
     /// @dev Reverts if the input value exceeds the maximum value of int256.
     /// @param x The unsigned integer to convert.
@@ -19,7 +18,7 @@ library DFSLib {
     /// @param x The boolean to convert.
     /// @return r The bytes1 representation of `x`.
     function boolToBytes(bool x) internal pure returns (bytes1 r) {
-       return x ? bytes1(0x01) : bytes1(0x00);
+        return x ? bytes1(0x01) : bytes1(0x00);
     }
 
     /// @notice Converts a bytes1 to a boolean.

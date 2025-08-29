@@ -64,10 +64,7 @@ contract LlamaLendBorrow is ActionBase, LlamaLendHelper {
 
         debtAsset.withdrawTokens(_params.to, _params.debtAmount);
 
-        return (
-            _params.debtAmount,
-            abi.encode(_params)
-        );
+        return (_params.debtAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

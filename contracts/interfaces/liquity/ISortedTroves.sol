@@ -4,16 +4,15 @@ pragma solidity =0.8.24;
 
 // Common interface for the SortedTroves Doubly Linked List.
 interface ISortedTroves {
-
     // --- Events ---
-    
+
     event SortedTrovesAddressChanged(address _sortedDoublyLLAddress);
     event BorrowerOperationsAddressChanged(address _borrowerOperationsAddress);
-    event NodeAdded(address _id, uint _NICR);
+    event NodeAdded(address _id, uint256 _NICR);
     event NodeRemoved(address _id);
 
     // --- Functions ---
-    
+
     function setParams(uint256 _size, address _TroveManagerAddress, address _borrowerOperationsAddress) external;
 
     function insert(address _id, uint256 _ICR, address _prevId, address _nextId) external;
@@ -42,5 +41,8 @@ interface ISortedTroves {
 
     function validInsertPosition(uint256 _ICR, address _prevId, address _nextId) external view returns (bool);
 
-    function findInsertPosition(uint256 _ICR, address _prevId, address _nextId) external view returns (address, address);
+    function findInsertPosition(uint256 _ICR, address _prevId, address _nextId)
+        external
+        view
+        returns (address, address);
 }

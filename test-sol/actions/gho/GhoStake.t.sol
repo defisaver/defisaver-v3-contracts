@@ -9,7 +9,6 @@ import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 
 contract TestGhoStake is BaseTest, ActionsUtils, AaveV3Helper {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -34,52 +33,34 @@ contract TestGhoStake is BaseTest, ActionsUtils, AaveV3Helper {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnetLatest();
-        
+
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
 
-        cut = new GhoStake();    
+        cut = new GhoStake();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_gho_stake() public {
-        _baseTest(TestConfig({
-            from: sender,
-            to: walletAddr,
-            amount: 1000e18,
-            isDirect: false
-        }));
+        _baseTest(TestConfig({ from: sender, to: walletAddr, amount: 1000e18, isDirect: false }));
     }
 
     function test_gho_stake_direct() public {
-        _baseTest(TestConfig({
-            from: sender,
-            to: walletAddr,
-            amount: 1000e18,
-            isDirect: true
-        }));
+        _baseTest(TestConfig({ from: sender, to: walletAddr, amount: 1000e18, isDirect: true }));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _baseTest(
-        TestConfig memory _config
-    ) internal {
+    function _baseTest(TestConfig memory _config) internal {
         give(GHO_TOKEN, _config.from, _config.amount);
         approveAsSender(_config.from, GHO_TOKEN, walletAddr, _config.amount);
 
-        bytes memory callData = executeActionCalldata(
-            ghoStakeEncode(
-                _config.from,
-                _config.to,
-                _config.amount
-            ),
-            _config.isDirect
-        );
+        bytes memory callData =
+            executeActionCalldata(ghoStakeEncode(_config.from, _config.to, _config.amount), _config.isDirect);
 
         uint256 ghoBalanceBefore = balanceOf(GHO_TOKEN, _config.from);
         uint256 stkGhoBalanceBefore = balanceOf(STAKED_GHO_TOKEN, _config.to);

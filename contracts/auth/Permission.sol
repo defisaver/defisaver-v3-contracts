@@ -6,7 +6,7 @@ import { SafeModulePermission } from "./SafeModulePermission.sol";
 import { DSProxyPermission } from "./DSProxyPermission.sol";
 
 /// @title Permission contract which works with Safe modules and DSProxy to give execute permission
-contract Permission is DSProxyPermission, SafeModulePermission {   
+contract Permission is DSProxyPermission, SafeModulePermission {
     /// @dev Called from the context of the wallet we are using
     function giveWalletPermission(bool _isDSProxy) public {
         address authContract = _isDSProxy ? PROXY_AUTH_ADDRESS : MODULE_AUTH_ADDRESS;

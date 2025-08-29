@@ -90,13 +90,8 @@ contract PendleTokenRedeem is ActionBase {
         uint256 amountSyOut = IPendleYieldToken(ytToken).redeemPY(address(this));
 
         // Redeem SY tokens to underlying tokens
-        uint256 underlyingAmountOut = ISyToken(syToken).redeem(
-            _params.to,
-            amountSyOut,
-            _params.underlyingToken,
-            _params.minAmountOut,
-            false
-        );
+        uint256 underlyingAmountOut =
+            ISyToken(syToken).redeem(_params.to, amountSyOut, _params.underlyingToken, _params.minAmountOut, false);
 
         return (underlyingAmountOut, abi.encode(_params));
     }

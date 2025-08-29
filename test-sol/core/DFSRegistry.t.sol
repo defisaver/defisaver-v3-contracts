@@ -9,7 +9,6 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
-
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -75,7 +74,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     function test_add_new_contract() public {
         address newContractAddr = address(this);
         uint256 _waitPeriod = 0;
-        
+
         prank(Addresses.OWNER_ACC);
         vm.expectEmit(false, false, false, true, address(cut));
         emit AddNewContract(Addresses.OWNER_ACC, TEST_ID, newContractAddr, _waitPeriod);
@@ -105,7 +104,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     function test_add_new_contract_when_entry_already_exist() public {
         address newContractAddr = address(this);
         uint256 _waitPeriod = 0;
-        
+
         prank(Addresses.OWNER_ACC);
         cut.addNewContract(TEST_ID, newContractAddr, _waitPeriod);
 
@@ -169,7 +168,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         emit StartContractChange(Addresses.OWNER_ACC, TEST_ID, firstContractAddr, newContractAddr);
         cut.startContractChange(TEST_ID, newContractAddr);
 
-        (,,uint256 changeStartTime,bool inContractChange,,) = cut.entries(TEST_ID);
+        (,, uint256 changeStartTime, bool inContractChange,,) = cut.entries(TEST_ID);
         assertEq(changeStartTime, block.timestamp);
         assertEq(inContractChange, true);
 
@@ -202,7 +201,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
-        uint256 waitPeriod = 604800;
+        uint256 waitPeriod = 604_800;
         cut.addNewContract(TEST_ID, firstContractAddr, waitPeriod);
 
         address newContractAddr = address(0xbb);
@@ -220,7 +219,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         address storedPendingAddress = cut.pendingAddresses(TEST_ID);
         assertEq(storedPendingAddress, address(0));
 
-        (address contractAddr,,uint256 changeStartTime,bool inContractChange,,) = cut.entries(TEST_ID);
+        (address contractAddr,, uint256 changeStartTime, bool inContractChange,,) = cut.entries(TEST_ID);
         assertEq(contractAddr, newContractAddr);
         assertEq(changeStartTime, 0);
         assertEq(inContractChange, false);
@@ -250,18 +249,14 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
-        uint256 waitPeriod = 604800;
+        uint256 waitPeriod = 604_800;
         cut.addNewContract(TEST_ID, firstContractAddr, waitPeriod);
 
         address newContractAddr = address(0xbb);
         cut.startContractChange(TEST_ID, newContractAddr);
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                ChangeNotReadyError.selector,
-                block.timestamp,
-                (block.timestamp + waitPeriod)
-            )
+            abi.encodeWithSelector(ChangeNotReadyError.selector, block.timestamp, (block.timestamp + waitPeriod))
         );
         cut.approveContractChange(TEST_ID);
 
@@ -284,7 +279,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         address storedPendingAddress = cut.pendingAddresses(TEST_ID);
         assertEq(storedPendingAddress, address(0));
 
-        (address contractAddr,,uint256 changeStartTime,bool inContractChange,,) = cut.entries(TEST_ID);
+        (address contractAddr,, uint256 changeStartTime, bool inContractChange,,) = cut.entries(TEST_ID);
         assertEq(contractAddr, firstContractAddr);
         assertEq(changeStartTime, 0);
         assertEq(inContractChange, false);
@@ -316,12 +311,12 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         address firstContractAddr = address(0xaa);
         cut.addNewContract(TEST_ID, firstContractAddr, 0);
 
-        uint256 waitPeriod = 604800;
+        uint256 waitPeriod = 604_800;
         vm.expectEmit(false, false, false, false, address(cut));
         emit StartWaitPeriodChange(Addresses.OWNER_ACC, TEST_ID, waitPeriod);
         cut.startWaitPeriodChange(TEST_ID, waitPeriod);
 
-        (,,uint256 changeStartTime,bool inContractChange,bool inWaitPeriodChange,) = cut.entries(TEST_ID);
+        (,, uint256 changeStartTime, bool inContractChange, bool inWaitPeriodChange,) = cut.entries(TEST_ID);
         assertEq(changeStartTime, block.timestamp);
         assertEq(inContractChange, false);
         assertEq(inWaitPeriodChange, true);
@@ -332,7 +327,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
     }
 
     function test_start_wait_period_change_when_entry_does_not_exist() public {
-        uint256 waitPeriod = 604800;
+        uint256 waitPeriod = 604_800;
         prank(Addresses.OWNER_ACC);
         vm.expectRevert(abi.encodeWithSelector(EntryNonExistentError.selector, TEST_ID));
         cut.startWaitPeriodChange(TEST_ID, waitPeriod);
@@ -347,7 +342,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         address newContractAddr = address(0xbb);
         cut.startContractChange(TEST_ID, newContractAddr);
 
-        uint256 waitPeriod = 604800;
+        uint256 waitPeriod = 604_800;
         vm.expectRevert(abi.encodeWithSelector(AlreadyInContractChangeError.selector, TEST_ID));
         cut.startWaitPeriodChange(TEST_ID, waitPeriod);
     }
@@ -356,10 +351,10 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
-        uint256 waitPeriod = 604800;
+        uint256 waitPeriod = 604_800;
         cut.addNewContract(TEST_ID, firstContractAddr, waitPeriod);
 
-        uint256 newWaitPeriod = 1209600;
+        uint256 newWaitPeriod = 1_209_600;
         cut.startWaitPeriodChange(TEST_ID, newWaitPeriod);
 
         vm.warp(block.timestamp + waitPeriod);
@@ -368,14 +363,8 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         emit ApproveWaitPeriodChange(Addresses.OWNER_ACC, TEST_ID, waitPeriod, newWaitPeriod);
         cut.approveWaitPeriodChange(TEST_ID);
 
-        (
-            ,
-            uint256 _waitPeriod,
-            uint256 changeStartTime,
-            bool inContractChange,
-            bool inWaitPeriodChange
-            ,
-        ) = cut.entries(TEST_ID);
+        (, uint256 _waitPeriod, uint256 changeStartTime, bool inContractChange, bool inWaitPeriodChange,) =
+            cut.entries(TEST_ID);
 
         assertEq(_waitPeriod, newWaitPeriod);
         assertEq(changeStartTime, 0);
@@ -409,10 +398,10 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         startPrank(Addresses.OWNER_ACC);
 
         address firstContractAddr = address(0xaa);
-        uint256 waitPeriod = 604800;
+        uint256 waitPeriod = 604_800;
         cut.addNewContract(TEST_ID, firstContractAddr, waitPeriod);
 
-        uint256 newWaitPeriod = 1209600;
+        uint256 newWaitPeriod = 1_209_600;
         uint256 changeStartTime = block.timestamp;
         cut.startWaitPeriodChange(TEST_ID, newWaitPeriod);
 
@@ -421,9 +410,7 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ChangeNotReadyError.selector,
-                momentJustBeforeChangeIsReady,
-                (changeStartTime + waitPeriod)
+                ChangeNotReadyError.selector, momentJustBeforeChangeIsReady, (changeStartTime + waitPeriod)
             )
         );
         cut.approveWaitPeriodChange(TEST_ID);
@@ -438,14 +425,14 @@ contract TestCore_DFSRegistry is DFSRegistry, BaseTest {
         uint256 oldWaitPeriod = 0;
         cut.addNewContract(TEST_ID, firstContractAddr, oldWaitPeriod);
 
-        uint256 newWaitPeriod = 604800;
+        uint256 newWaitPeriod = 604_800;
         cut.startWaitPeriodChange(TEST_ID, newWaitPeriod);
 
         vm.expectEmit(false, false, false, true, address(cut));
         emit CancelWaitPeriodChange(Addresses.OWNER_ACC, TEST_ID, newWaitPeriod, oldWaitPeriod);
         cut.cancelWaitPeriodChange(TEST_ID);
 
-        (,,uint256 changeStartTime,bool inContractChange,bool inWaitPeriodChange,) = cut.entries(TEST_ID);
+        (,, uint256 changeStartTime, bool inContractChange, bool inWaitPeriodChange,) = cut.entries(TEST_ID);
         assertEq(changeStartTime, 0);
         assertEq(inContractChange, false);
         assertEq(inWaitPeriodChange, false);

@@ -31,14 +31,10 @@ contract SkyUnstake is ActionBase, SkyHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.stakingContract = _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
+        inputData.stakingContract =
+            _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
         inputData.stakingToken = _parseParamAddr(inputData.stakingToken, _paramMapping[1], _subData, _returnValues);
-        inputData.amount = _parseParamUint(
-            inputData.amount,
-            _paramMapping[2],
-            _subData,
-            _returnValues
-        );
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
 
         (uint256 amountUnstaked, bytes memory logData) = _skyUnstake(inputData);
@@ -62,7 +58,9 @@ contract SkyUnstake is ActionBase, SkyHelper {
 
     function _skyUnstake(Params memory _inputData) internal returns (uint256, bytes memory logData) {
         require(_inputData.to != address(0));
-        if (_inputData.amount == type(uint256).max) _inputData.amount = _inputData.stakingContract.getBalance(address(this));
+        if (_inputData.amount == type(uint256).max) {
+            _inputData.amount = _inputData.stakingContract.getBalance(address(this));
+        }
         IStakingRewards(_inputData.stakingContract).withdraw(_inputData.amount);
         _inputData.stakingToken.withdrawTokens(_inputData.to, _inputData.amount);
         return (_inputData.amount, abi.encode(_inputData));

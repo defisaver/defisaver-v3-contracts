@@ -13,5 +13,5 @@ interface IBooster {
 
     function poolInfo(uint256) external view returns (PoolInfo memory);
     function deposit(uint256, uint256, bool) external returns (bool);
-    function withdraw(uint256, uint256) external returns(bool);
+    function withdraw(uint256, uint256) external returns (bool);
 }

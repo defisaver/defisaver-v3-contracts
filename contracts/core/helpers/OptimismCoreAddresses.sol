@@ -13,6 +13,4 @@ contract OptimismCoreAddresses {
     address internal constant STRATEGY_STORAGE_ADDR = 0xDdDE69c3Fd246D9D62f9712c814b333728f113A4;
 
     address internal constant PROXY_AUTH_ADDR = 0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043;
-
-
 }

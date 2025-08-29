@@ -11,11 +11,10 @@ import { AdminAuth } from "../auth/AdminAuth.sol";
 /// @notice The trigger expects the lowerPrice and upperPrice inputs to be scaled by 1e8.
 /// @notice It is possible to check only one side of the range by setting the other side price to 0.
 contract CompV3PriceRangeTrigger is ITrigger, AdminAuth {
-
     /// @param market address of the compoundV3 market
     /// @param collToken address of the collateral token from the market
-    /// @param lowerPrice lower price of the collateral token in terms of the base token that represents the triggerable point. 
-    /// @param upperPrice upper price of the collateral token in terms of the base token that represents the triggerable point. 
+    /// @param lowerPrice lower price of the collateral token in terms of the base token that represents the triggerable point.
+    /// @param upperPrice upper price of the collateral token in terms of the base token that represents the triggerable point.
     struct SubParams {
         address market;
         address collToken;
@@ -38,9 +37,9 @@ contract CompV3PriceRangeTrigger is ITrigger, AdminAuth {
     }
 
     //solhint-disable-next-line no-empty-blocks
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
-    
-    function isChangeable() public pure override returns (bool) { 
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 

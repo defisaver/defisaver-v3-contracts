@@ -11,13 +11,8 @@ import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 import { ISafe } from "../interfaces/safe/ISafe.sol";
 import { TxSaverBytesTransientStorage } from "./TxSaverBytesTransientStorage.sol";
 
-/// @title Main entry point for executing TxSaver transactions signed by users through safe wallet 
-contract TxSaverExecutor is 
-    StrategyModel,
-    AdminAuth,
-    CoreHelper,
-    TxSaverBytesTransientStorage
-{
+/// @title Main entry point for executing TxSaver transactions signed by users through safe wallet
+contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTransientStorage {
     bytes4 public constant BOT_AUTH_ID_FOR_TX_SAVER = bytes4(keccak256("BotAuthForTxSaver"));
     bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
@@ -79,8 +74,7 @@ contract TxSaverExecutor is
             );
         } else {
             setBytesTransiently(
-                abi.encode(_estimatedGas, _l1GasCostInEth, _injectedExchangeData),
-                txSaverData.shouldTakeFeeFromPosition
+                abi.encode(_estimatedGas, _l1GasCostInEth, _injectedExchangeData), txSaverData.shouldTakeFeeFromPosition
             );
         }
 
@@ -98,16 +92,18 @@ contract TxSaverExecutor is
             0, // gasPrice
             address(0), // gasToken
             payable(_params.refundReceiver),
-            _params.signatures 
+            _params.signatures
         );
         if (!success) {
             revert SafeExecutionError();
         }
     }
 
-    function parseTxSaverSignedData(bytes calldata _data) 
-        public pure returns (Recipe memory recipe, TxSaverSignedData memory txSaverData)
+    function parseTxSaverSignedData(bytes calldata _data)
+        public
+        pure
+        returns (Recipe memory recipe, TxSaverSignedData memory txSaverData)
     {
-        (recipe, txSaverData) = abi.decode(_data[4:], (Recipe, TxSaverSignedData)); 
+        (recipe, txSaverData) = abi.decode(_data[4:], (Recipe, TxSaverSignedData));
     }
 }

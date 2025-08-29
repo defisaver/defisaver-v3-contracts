@@ -9,7 +9,6 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_BotAuth is BaseTest {
-
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -28,22 +27,22 @@ contract TestCore_BotAuth is BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_add_caller() public {
         startPrank(Addresses.OWNER_ACC);
-        
+
         cut.addCaller(bob);
         assertTrue(cut.approvedCallers(bob));
-        
+
         stopPrank();
     }
 
     function test_should_remove_caller() public {
         startPrank(Addresses.OWNER_ACC);
-        
+
         cut.addCaller(bob);
         assertTrue(cut.approvedCallers(bob));
 
         cut.removeCaller(bob);
         assertFalse(cut.approvedCallers(bob));
-        
+
         stopPrank();
     }
 

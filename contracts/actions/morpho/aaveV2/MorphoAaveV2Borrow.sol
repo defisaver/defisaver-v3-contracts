@@ -49,9 +49,8 @@ contract MorphoAaveV2Borrow is ActionBase, MorphoAaveV2Helper {
     }
 
     function _borrow(Params memory _params) internal returns (uint256, bytes memory) {
-        (address aTokenAddress,,) = IAaveProtocolDataProviderV2(
-            DEFAULT_MARKET_DATA_PROVIDER
-        ).getReserveTokensAddresses(_params.tokenAddr);
+        (address aTokenAddress,,) =
+            IAaveProtocolDataProviderV2(DEFAULT_MARKET_DATA_PROVIDER).getReserveTokensAddresses(_params.tokenAddr);
 
         if (_params.maxGasForMatching == 0) {
             IMorpho(MORPHO_AAVEV2_ADDR).borrow(aTokenAddress, _params.amount);

@@ -38,7 +38,6 @@ interface ITroveManager {
         uint256 lastInterestRateAdjTime;
     }
 
-
     function Troves(uint256 _id)
         external
         view
