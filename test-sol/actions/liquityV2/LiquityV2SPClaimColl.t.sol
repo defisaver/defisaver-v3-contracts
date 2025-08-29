@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IStabilityPool } from "../../../contracts/interfaces/liquityV2/IStabilityPool.sol";
 import { LiquityV2SPClaimColl } from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPClaimColl.sol";
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";

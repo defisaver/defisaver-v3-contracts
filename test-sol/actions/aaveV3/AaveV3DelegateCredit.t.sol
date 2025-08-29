@@ -8,7 +8,6 @@ import { IL2PoolV3 } from "../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
 import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 
 import { BaseTest } from "../../utils/BaseTest.sol";
-import { Addresses } from "../../utils/Addresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 

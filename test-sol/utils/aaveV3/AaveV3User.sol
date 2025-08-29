@@ -3,7 +3,6 @@ pragma solidity =0.8.24;
 
 import { AaveV3Borrow } from "../../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
-import { UserWallet } from "../UserWallet.sol";
 import { AaveV3UserUtils } from "./AaveV3UserUtils.sol";
 
 contract AaveV3User is AaveV3UserUtils {

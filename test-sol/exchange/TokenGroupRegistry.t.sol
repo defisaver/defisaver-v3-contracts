@@ -2,11 +2,9 @@
 pragma solidity =0.8.24;
 
 import { TokenGroupRegistry } from "../../contracts/exchangeV3/registries/TokenGroupRegistry.sol";
-import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { Addresses } from "../utils/Addresses.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
-import { console } from "forge-std/console.sol";
 
 contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
     /*//////////////////////////////////////////////////////////////////////////

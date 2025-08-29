@@ -8,7 +8,6 @@ import { EulerV2Payback } from "../../../contracts/actions/eulerV2/EulerV2Paybac
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
-import { console } from "forge-std/console.sol";
 
 contract TestEulerV2Payback is EulerV2TestHelper {
     /*//////////////////////////////////////////////////////////////////////////

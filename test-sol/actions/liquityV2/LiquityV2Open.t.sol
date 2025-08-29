@@ -15,7 +15,6 @@ import { LiquityV2TestHelper } from "./LiquityV2TestHelper.t.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-import { console2 } from "forge-std/console2.sol";
 
 contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
     /*//////////////////////////////////////////////////////////////////////////

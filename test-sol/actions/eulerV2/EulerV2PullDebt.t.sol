@@ -9,7 +9,6 @@ import { EulerV2Supply } from "../../../contracts/actions/eulerV2/EulerV2Supply.
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
-import { console } from "forge-std/console.sol";
 
 contract TestEulerV2PullDebt is EulerV2TestHelper {
     /*//////////////////////////////////////////////////////////////////////////

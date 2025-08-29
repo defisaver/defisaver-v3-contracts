@@ -24,12 +24,12 @@ number_underscore = "thousands"
 # tab_width = 4
 
 
-# Linting -> https://getfoundry.sh/config/reference/formatter/
+# Linting -> https://getfoundry.sh/config/reference/linter
 [lint]
 # TODO -> Will remove as much of those and fix them in later commits
 exclude_lints = [
-    "unaliased-plain-import",
-    "unused-import",
+    # "unaliased-plain-import",
+    # "unused-import",
     "asm-keccak256",
     "incorrect-shift",
     "unchecked-call",
