@@ -15,7 +15,6 @@
         "ecmaVersion": 12
     },
     "rules": {
-        "indent": ["error", 4],
         "no-console": "off", // allow console.log in scripts/tests
         "func-names": "off", // allow anonymous functions
         "prefer-destructuring": "off", // allow direct property access
