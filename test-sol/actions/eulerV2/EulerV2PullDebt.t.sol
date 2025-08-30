@@ -192,7 +192,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
 
     function _baseTest(TestConfig memory _config) internal {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory testPair = testPairs[i];
             address supplyVault = testPair.supplyAsset;
@@ -227,7 +227,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
             // 3. Pull debt to 'account'
             _pullDebt(_config, borrowVault);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 

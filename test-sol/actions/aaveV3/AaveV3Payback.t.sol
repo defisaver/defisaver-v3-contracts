@@ -60,7 +60,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
 
     function _test_payback(bool _useMaxUint, bool _isL2Direct) public {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             PositionParams memory positionParams = PositionParams({
                 collAddr: testPairs[i].supplyAsset,
@@ -74,7 +74,7 @@ contract TestAaveV3Payback is AaveV3RatioHelper, AaveV3PositionCreator {
             uint256 paybackAmount = _useMaxUint ? type(uint256).max : amountInUSDPrice(testPairs[i].borrowAsset, 10_000);
             _payback(positionParams, paybackAmount, _isL2Direct);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 

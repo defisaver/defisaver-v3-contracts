@@ -25,9 +25,9 @@ contract BaseTest is Config {
     }
 
     modifier revertToSnapshot() {
-        uint256 snapshotId = vm.snapshot();
+        uint256 snapshotId = vm.snapshotState();
         _;
-        vm.revertTo(snapshotId);
+        vm.revertToState(snapshotId);
     }
 
     function setUp() public virtual {

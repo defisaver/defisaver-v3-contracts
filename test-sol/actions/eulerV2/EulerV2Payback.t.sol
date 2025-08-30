@@ -114,7 +114,7 @@ contract TestEulerV2Payback is EulerV2TestHelper {
         bool _isDirect
     ) internal {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory testPair = testPairs[i];
             address supplyVault = testPair.supplyAsset;
@@ -131,7 +131,7 @@ contract TestEulerV2Payback is EulerV2TestHelper {
 
             _paybackToVault(TestConfig(borrowVault, _account, _paybackAmountInUsd, _isDirect));
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 

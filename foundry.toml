@@ -29,9 +29,9 @@ number_underscore = "thousands"
 # TODO -> Will remove as much of those and fix them in later commits
 exclude_lints = [
     # "unaliased-plain-import",
-    # "unused-import",
+    "unused-import",
     "asm-keccak256",
-    "incorrect-shift",
+    # "incorrect-shift",
     "unchecked-call",
     "erc20-unchecked-transfer",
 

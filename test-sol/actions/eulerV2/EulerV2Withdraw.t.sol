@@ -110,7 +110,7 @@ contract TestEulerV2Withdraw is EulerV2TestHelper {
         bool _takeMaxUint256
     ) internal {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory testPair = testPairs[i];
             address vault = testPair.supplyAsset;
@@ -119,7 +119,7 @@ contract TestEulerV2Withdraw is EulerV2TestHelper {
 
             _withdrawFromVault(vault, _account, _withdrawAmountInUsd, _isDirect, _takeMaxUint256);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 

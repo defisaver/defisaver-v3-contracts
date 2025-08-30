@@ -52,7 +52,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_borrow() public {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory pair = testPairs[i];
             uint256 supplyAmount = amountInUSDPrice(pair.supplyAsset, 100_000);
@@ -61,13 +61,13 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
             uint256 borrowAmount = amountInUSDPrice(pair.borrowAsset, 40_000);
             _borrow(borrowAmount, pair.borrowAsset, false);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 
     function test_should_borrow_l2_direct() public {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory pair = testPairs[i];
             uint256 supplyAmount = amountInUSDPrice(pair.supplyAsset, 100_000);
@@ -76,7 +76,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
             uint256 borrowAmount = amountInUSDPrice(pair.borrowAsset, 40_000);
             _borrow(borrowAmount, pair.borrowAsset, true);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 

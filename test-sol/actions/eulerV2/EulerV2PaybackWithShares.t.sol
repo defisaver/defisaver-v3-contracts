@@ -138,7 +138,7 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
 
     function _baseTest(TestConfig memory _config) internal {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory testPair = testPairs[i];
             address supplyVault = testPair.supplyAsset;
@@ -175,7 +175,7 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
             // - Burn borrow vault dTokens for 'account'
             _paybackWithShares(_config, borrowVault);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 
