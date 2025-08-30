@@ -506,14 +506,16 @@
     },
     {
         "name": "CompV3RatioTrigger",
-        "address": "0x7d84DCC2a1f547A8D267c85eed791fd3663562b8",
+        "address": "0xb33Ce7D2E0E06bb069c59ffEd361226B05292fBa",
         "id": "0x506812d0",
         "path": "contracts/triggers/CompV3RatioTrigger.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x7d84DCC2a1f547A8D267c85eed791fd3663562b8"
+        ]
     },
     {
         "name": "AaveV3RatioCheck",
@@ -539,14 +541,16 @@
     },
     {
         "name": "CompV3Borrow",
-        "address": "0x74346bf868Dc9201922A7F7DD26917F7BF5F0f3b",
+        "address": "0xE6e2Aa26A7a9fC2BA3c30ACB715905d5749B5c2b",
         "id": "0xbb9f4021",
         "path": "contracts/actions/compoundV3/CompV3Borrow.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x74346bf868Dc9201922A7F7DD26917F7BF5F0f3b"
+        ]
     },
     {
         "name": "CompV3Claim",
@@ -561,25 +565,29 @@
     },
     {
         "name": "CompV3Payback",
-        "address": "0x73c627b48cb7c2b319E496fc55535Db6eD2c3445",
+        "address": "0x0C9F3aeD4Dcf8dCd7dC4A1D1e42717cFbbE032A7",
         "id": "0xdaa9b106",
         "path": "contracts/actions/compoundV3/CompV3Payback.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x73c627b48cb7c2b319E496fc55535Db6eD2c3445"
+        ]
     },
     {
         "name": "CompV3Supply",
-        "address": "0x94b63bf925C2Ab17F7df6914E110E969cC36A93e",
+        "address": "0x53E9c01B8A74DBB06e83499682aa092186610cBc",
         "id": "0x71643f58",
         "path": "contracts/actions/compoundV3/CompV3Supply.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x94b63bf925C2Ab17F7df6914E110E969cC36A93e"
+        ]
     },
     {
         "name": "CompV3View",
@@ -607,14 +615,16 @@
     },
     {
         "name": "CompV3Withdraw",
-        "address": "0x8543133c3827D29b67D2b012101f463c870C1790",
+        "address": "0x966A54e22124E5058B3F77A28Dd858E819fB3B17",
         "id": "0xc0072381",
         "path": "contracts/actions/compoundV3/CompV3Withdraw.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x8543133c3827D29b67D2b012101f463c870C1790"
+        ]
     },
     {
         "name": "TokenBalance",
@@ -1075,14 +1085,16 @@
     },
     {
         "name": "CompV3RatioCheck",
-        "address": "0xC1ff2500790150c4a1c77B9e702e9984A252b60c",
+        "address": "0x243022bBE8A6E52AFCbD4f21362a7B4124B9013C",
         "id": "0x2ce67bb9",
         "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xC1ff2500790150c4a1c77B9e702e9984A252b60c"
+        ]
     },
     {
         "name": "MorphoBlueRatioTrigger",
@@ -1253,14 +1265,15 @@
     },
     {
         "name": "CompV3SubProxyL2",
-        "address": "0x376d5BBB9e62de2Df23fB7B9fF6365E0231fD1a8",
+        "address": "0xdBd0114E07E60c5FB940A756080E5aE3Fc9C1073",
         "id": "0x49b12183",
         "path": "contracts/actions/compoundV3/CompV3SubProxyL2.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
         "history": [
+            "0x376d5BBB9e62de2Df23fB7B9fF6365E0231fD1a8",
             "0x33Ba53a1367527b09D429EB1392E57A43Cf83f99"
         ]
     },
@@ -1475,6 +1488,28 @@
         "address": "0x03EDC9A683f37BFB7516FF234223fFb6E38D5eb9",
         "id": "0x869398d6",
         "path": "contracts/actions/summerfi/SFApproveTokens.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3PriceTrigger",
+        "address": "0x96798aC76397f511CB0938e8E5C629b4be6F7Eaf",
+        "id": "0xb67d04b5",
+        "path": "contracts/actions/compV3/CompV3PriceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3PriceRangeTrigger",
+        "address": "0x8e614F453b65920Ff250c23C92A96e147E6A955c",
+        "id": "0xe4cdaef5",
+        "path": "contracts/actions/compV3/CompV3PriceRangeTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",

@@ -3555,25 +3555,30 @@
     },
     {
         "name": "CompV3RatioCheck",
-        "address": "0x008E50774B26E92179fe25233E6ee7399c5A11F5",
+        "address": "0xC98d94791216E6c5cf24FD3D2BBFdc577113331B",
         "id": "0x2ce67bb9",
         "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
+        "version": "1.0.2",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x008E50774B26E92179fe25233E6ee7399c5A11F5",
+            "0xEeb7e195d69479910d071Ac1dBC923A17d042960"
+        ]
+    },
+    {
+        "name": "CompV3RatioTrigger",
+        "address": "0x802bBe746AcE6D0bED9aB58622D88E553fe59720",
+        "id": "0x506812d0",
+        "path": "contracts/triggers/CompV3RatioTrigger.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xEeb7e195d69479910d071Ac1dBC923A17d042960"]
-    },
-    {
-        "name": "CompV3RatioTrigger",
-        "address": "0x8ACCaf4e0054AD73789A3ebF344c3061804c29D8",
-        "id": "0x506812d0",
-        "path": "contracts/triggers/CompV3RatioTrigger.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
+        "history": [
+            "0x8ACCaf4e0054AD73789A3ebF344c3061804c29D8"
+        ]
     },
     {
         "name": "CompV3SubProxy",
@@ -4599,6 +4604,28 @@
         "registryIds": [],
         "history": []
     },
+    {
+        "name": "CompV3PriceTrigger",
+        "address": "0xc7F3bc2E90957f7A64275b03f01EE72c6C11afD3",
+        "id": "0xb67d04b5",
+        "path": "contracts/actions/compV3/CompV3PriceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3PriceRangeTrigger",
+        "address": "0x7f98dbBAe15f9c0684AC97e454B85DDAE65f0313",
+        "id": "0xe4cdaef5",
+        "path": "contracts/actions/compV3/CompV3PriceRangeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    }
     { 
         "name": "ExecuteCall",
         "address": "0x538eda025a8be6ff8fc1fe6050ba3aafb7620608",

@@ -2,7 +2,7 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 
 const { configure } = require('@defisaver/sdk');
-const { assets, getAssetInfo, utils: { compare } } = require('@defisaver/tokens');
+const { assets, getAssetInfo, compare } = require('@defisaver/tokens');
 
 const {
     getProxy,
