@@ -4616,20 +4616,22 @@
         "id": "0x91d52698",
         "path": "contracts/triggers/LiquityV2AdjustTimeTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
+        "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
         "history": []
     },
     {
         "name": "LiquityV2DebtInFrontTrigger",
-        "address": "0x66557aE7da534B1d668405e3e90e12E207Bb6277",
+        "address": "0x22899AF903f07FB272C34f6e573E6f967dcC32e7",
         "id": "0xda723e62",
         "path": "contracts/triggers/LiquityV2DebtInFrontTrigger.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
+        "version": "1.0.1",
+        "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x66557aE7da534B1d668405e3e90e12E207Bb6277"
+        ]
     }
 ]
