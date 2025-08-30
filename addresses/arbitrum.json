@@ -1372,14 +1372,16 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0x770e015485d4720398B08Ff226DB4ef29896b5B8",
+        "address": "0x99A36d26A2e1E6776057835C7B5E72A20c8cF5cb",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x770e015485d4720398B08Ff226DB4ef29896b5B8"
+        ]
     },
     {
         "name": "FluidVaultT1Open",

@@ -3747,14 +3747,16 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0xaFD184d6E048c3C8D18356ef4E9adA024E6fb31c",
+        "address": "0x7449c0830B10cbd1BaD1Aa4427Ccb41Fd5C75be5",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xaFD184d6E048c3C8D18356ef4E9adA024E6fb31c"
+        ]
     },
     {
         "name": "BotAuthForTxSaver",

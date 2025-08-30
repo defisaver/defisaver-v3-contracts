@@ -1183,14 +1183,16 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0xA41baFAE6832D6D059eEcac0eBB46c4D8c16c248",
+        "address": "0xAF5D3604B1bE08fadD239b2A7353F01786cE4b0e",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xA41baFAE6832D6D059eEcac0eBB46c4D8c16c248"
+        ]
     },
     {
         "name": "CompV3RatioTrigger",
