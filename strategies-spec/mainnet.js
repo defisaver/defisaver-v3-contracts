@@ -6458,32 +6458,30 @@ const createCompV3FLCloseToCollStrategy = () => {
 
     return compV3FLCloseToCollStrategy.encodeForDsProxyCall();
 };
+
 const createAaveV3EOABoostStrategy = () => {
     const aaveV3EOABoostStrategy = new dfs.Strategy('AaveV3EOABoost');
 
     aaveV3EOABoostStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3EOABoostStrategy.addSubSlot('&checkBoostState', 'uint256');
     aaveV3EOABoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
-    aaveV3EOABoostStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOABoostStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOABoostStrategy.addSubSlot('&enableAsColl', 'bool');
+    aaveV3EOABoostStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOABoostStrategy.addSubSlot('&onBehalfAddr', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger('0', '0', '0', '0');
     aaveV3EOABoostStrategy.addTrigger(aaveV3Trigger);
 
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-        // TODO -> ?
-        '&useDefaultMarket', // default market
-        // TODO -> ?
-        '%marketAddr', // hardcoded because default market is true
+        '&useDefaultMarket', // from subData
+        '&marketAddr', // from subData
         '%amount', // must stay variable
-        // TODO -> ?
         '&proxy', // hardcoded
         '%rateMode', // depends on type of debt we want
         '%assetId', // must stay variable can choose diff. asset
-        // TODO -> ?
-        '&useOnBehalf', // set to false hardcoded
-        // TODO -> ?
-        '%onBehalfAddr', // set to empty because flag is true
+        '&useOnBehalf', // hardcoded to true
+        '&onBehalfAddr', // EOA addr from subData
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -6493,9 +6491,7 @@ const createAaveV3EOABoostStrategy = () => {
             '$1', //  hardcoded piped from borrow
             '%exchangeWrapper', // can pick exchange wrapper
         ),
-        // TODO -> ?
         '&proxy', // hardcoded
-        // TODO -> ?
         '&proxy', // hardcoded
     );
 
@@ -6507,20 +6503,15 @@ const createAaveV3EOABoostStrategy = () => {
     );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-        // TODO -> ?
-        '&useDefaultMarket', // hardcoded default market
-        // TODO -> ?
-        '%market', // hardcoded 0
+        '&useDefaultMarket', // from subData
+        '&market', // from subData
         '$3', // amount hardcoded
-        // TODO -> ?
         '&proxy', // proxy hardcoded
         '%collAddr', // is variable as it can change
         '%assetId', // must be variable
         '&enableAsColl', // hardcoded always enable as coll
-        // TODO -> ?
-        '&useOnBehalf', // hardcoded false use on behalf
-        // TODO -> ?
-        '%onBehalf', // hardcoded 0 as its false
+        '&useOnBehalf', // hardcoded true use on behalf
+        '&onBehalfAddr', // EOA addr from subData
     );
 
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
@@ -6543,8 +6534,10 @@ const createAaveV3EOAFLBoostStrategy = () => {
     aaveV3EOAFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3EOAFLBoostStrategy.addSubSlot('&checkBoostState', 'uint256');
     aaveV3EOAFLBoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
-    aaveV3EOAFLBoostStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOAFLBoostStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOAFLBoostStrategy.addSubSlot('&enableAsColl', 'bool');
+    aaveV3EOAFLBoostStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOAFLBoostStrategy.addSubSlot('&onBehalfAddr', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger('0', '0', '0', '0');
     aaveV3EOAFLBoostStrategy.addTrigger(aaveV3Trigger);
@@ -6565,9 +6558,7 @@ const createAaveV3EOAFLBoostStrategy = () => {
             '%flAmount', // variable as flAmount returns with fee
             '%exchangeWrapper', // can pick exchange wrapper
         ),
-        // TODO -> ?
         '&proxy', // hardcoded
-        // TODO -> ?
         '&proxy', // hardcoded
     );
 
@@ -6579,35 +6570,26 @@ const createAaveV3EOAFLBoostStrategy = () => {
     );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-        // TODO -> ?
-        '&useDefaultMarket', // hardcoded default market
-        // TODO -> ?
-        '%market', // hardcoded 0
+        '&useDefaultMarket', // from subData
+        '&market', // from subData
         '$3', // amount hardcoded
-        // TODO -> ?
         '&proxy', // proxy hardcoded
         '%collAddr', // is variable as it can change
         '%assetId', // must be variable
         '&enableAsColl', // hardcoded always enable as coll
-        // TODO -> ?
-        '&useOnBehalf', // hardcoded false use on behalf
-        // TODO -> ?
-        '%onBehalf', // hardcoded 0 as its false
+        '&useOnBehalf', // hardcoded true use on behalf
+        '&onBehalfAddr', // EOA addr from subData as its true
     );
 
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-        // TODO -> ?
-        '&useDefaultMarket', // default market
-        // TODO -> ?
-        '%marketAddr', // hardcoded because default market is true
+        '&useDefaultMarket', // from subData
+        '&marketAddr', // from subData
         '$1', // from Fl amount
         '%flAddr', // fl address that can change
         '%rateMode', // depends on type of debt we want
         '%assetId', // must stay variable can choose diff. asset
-        // TODO -> ?
         '&useOnBehalf', // set to true hardcoded
-        // TODO -> ?
-        '%onBehalfAddr', // set to empty because flag is true
+        '&onBehalfAddr', // EOA addr from subData because flag is true
     );
 
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
@@ -6630,18 +6612,17 @@ const createAaveV3EOARepayStrategy = () => {
     aaveV3EOARepayStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3EOARepayStrategy.addSubSlot('&checkRepayState', 'uint256');
     aaveV3EOARepayStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    aaveV3EOARepayStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOARepayStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOARepayStrategy.addSubSlot('&onBehalfAddr', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger('0', '0', '0', '0');
     aaveV3EOARepayStrategy.addTrigger(aaveV3Trigger);
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        // TODO -> ?
-        '&useDefaultMarket', // set to true hardcoded
-        // TODO -> ?
-        '%market', // hardcoded because default market is true
+        '&useDefaultMarket', // from subData
+        '&marketAddr', // from subData
         '%amount', // must stay variable
-        // TODO -> ?
         '&proxy', // hardcoded
         '%assetId', // must stay variable can choose diff. asset
     );
@@ -6653,9 +6634,7 @@ const createAaveV3EOARepayStrategy = () => {
             '$1', //  hardcoded piped from fee taking
             '%exchangeWrapper', // can pick exchange wrapper
         ),
-        // TODO -> ?
         '&proxy', // hardcoded
-        // TODO -> ?
         '&proxy', // hardcoded
     );
 
@@ -6667,20 +6646,15 @@ const createAaveV3EOARepayStrategy = () => {
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        // TODO -> ?
-        '&useDefaultMarket', // set to true hardcoded
-        // TODO -> ?
-        '%market', // hardcoded because default market is true
+        '&useDefaultMarket', // from subData
+        '&market', // from subData
         '$3', // amount hardcoded
-        // TODO -> ?
         '&proxy', // proxy hardcoded
         '%rateMode', // variable type of debt
         '%debtAddr', // used just for sdk not actually sent (should this be here?)
         '%assetId', // must be variable
-        // TODO -> ?
-        '&useOnBehalf', // hardcoded false
-        // TODO -> ?
-        '%onBehalf', // hardcoded 0 as its false
+        '&useOnBehalf', // hardcoded true
+        '&onBehalfAddr', // EOA from subData as its true
     );
 
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
@@ -6703,7 +6677,9 @@ const createAaveV3EOAFLRepayStrategy = () => {
     aaveV3EOAFLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3EOAFLRepayStrategy.addSubSlot('&checkRepayState', 'uint256');
     aaveV3EOAFLRepayStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    aaveV3EOAFLRepayStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOAFLRepayStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOAFLRepayStrategy.addSubSlot('&onBehalfAddr', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger('0', '0', '0', '0');
     aaveV3EOAFLRepayStrategy.addTrigger(aaveV3Trigger);
@@ -6724,9 +6700,7 @@ const createAaveV3EOAFLRepayStrategy = () => {
             '0', //  can't hard code because of fee
             '%exchangeWrapper', // can pick exchange wrapper
         ),
-        // TODO -> ?
         '&proxy', // hardcoded
-        // TODO -> ?
         '&proxy', // hardcoded
     );
 
@@ -6738,27 +6712,20 @@ const createAaveV3EOAFLRepayStrategy = () => {
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        // TODO -> ?
-        '&useDefaultMarket', // set to true hardcoded
-        // TODO -> ?
-        '%market', // hardcoded because default market is true
+        '&useDefaultMarket', // from subData
+        '&marketAddr', // from subData
         '$3', // amount hardcoded
-        // TODO -> ?
         '&proxy', // proxy hardcoded
         '%rateMode', // variable type of debt
         '%debtAddr', // used just for sdk not actually sent (should this be here?)
         '%assetId', // must be variable
-        // TODO -> ?
-        '&useOnBehalf', // hardcoded false
-        // TODO -> ?
-        '%onBehalf', // hardcoded 0 as its false
+        '&useOnBehalf', // hardcoded true
+        '&onBehalf', // EOA addr from subData
     );
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        // TODO -> ?
-        '&useDefaultMarket', // set to true hardcoded
-        // TODO -> ?
-        '%market', // hardcoded because default market is true
+        '&useDefaultMarket', // from subData
+        '&marketAddr', // from subData
         '$1', // repay fl amount
         '%flAddr', // flAddr not hardcoded (tx will fail if not returned to correct addr)
         '%assetId', // must stay variable can choose diff. asset
