@@ -181,23 +181,31 @@ async function verifyContract(contractAddress, contractName) {
     };
     const params = new URLSearchParams();
 
-    let apiKey = process.env.ETHERSCAN_API_KEY;
+    const apiKey = process.env.ETHERSCAN_API_KEY;
+    let chainId = 1; // Default to mainnet
 
     if (network === 'arbitrum') {
-        apiKey = process.env.ARBISCAN_API_KEY;
+        chainId = 42161;
     } else if (network === 'optimistic') {
-        apiKey = process.env.OPTIMISTIC_ETHERSCAN_API_KEY;
+        chainId = 10;
     } else if (network === 'base') {
-        apiKey = process.env.BASE_ETHERSCAN_API_KEY;
+        chainId = 8453;
+    } else if (network === 'linea') {
+        chainId = 59144;
     }
 
-    params.append('apikey', apiKey);
-    params.append('module', 'contract');
-    params.append('action', 'verifysourcecode');
+    // V2 API parameters - chainid, module, action, and apikey go in URL
+    const urlParams = new URLSearchParams();
+    urlParams.append('chainid', chainId);
+    urlParams.append('module', 'contract');
+    urlParams.append('action', 'verifysourcecode');
+    urlParams.append('apikey', apiKey);
+
+    // POST body parameters
     params.append('contractaddress', contractAddress);
     params.append('sourceCode', flattenedFile);
     params.append('contractname', contractName);
-    params.append('codeformat', 'solidity-single-file"');
+    params.append('codeformat', 'solidity-single-file');
     let solVersion;
     // https://etherscan.io/solcversions see supported sol versions
     switch (hardhatSettings.solidity.compilers[0].version) {
@@ -214,20 +222,25 @@ async function verifyContract(contractAddress, contractName) {
     /// @notice : MIT license
     params.append('licenseType', 3);
 
+    // V2 API endpoint with URL parameters
+    const url = `https://api.etherscan.io/v2/api?${urlParams.toString()}`;
+    console.log(url);
+
+    const tx = await axios.post(url, params, config);
+    console.log(`Verification submitted with GUID: ${tx.data.result}`);
+
     const blockExplorer = hre.network.config.blockExplorer;
-    let url = `https://api.${blockExplorer}.io/api`;
+    let checkStatusUrl = `https://api.${blockExplorer}.io/api`;
     let demo = `https://${blockExplorer}.io/sourcecode-demo.html`;
     if (!(network === 'mainnet' || network === 'arbitrum')) {
-        url = `https://api-${network}.${blockExplorer}.io/api`;
+        checkStatusUrl = `https://api-${network}.${blockExplorer}.io/api`;
         demo = `https://${network}.${blockExplorer}.io/sourcecode-demo.html`;
     }
 
     if (network === 'base') {
-        url = 'https://api.basescan.org/api';
+        checkStatusUrl = 'https://api.basescan.org/api';
         demo = 'https://basescan.org/sourcecode-demo.html';
     }
-
-    const tx = await axios.post(url, params, config);
     console.log(`Check how verification is going at ${demo} with API key ${apiKey} and receipt GUID ${tx.data.result}`);
 }
 
