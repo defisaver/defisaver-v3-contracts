@@ -6542,11 +6542,13 @@ const createAaveV3EOAFLBoostStrategy = () => {
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger('0', '0', '0', '0');
     aaveV3EOAFLBoostStrategy.addTrigger(aaveV3Trigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        ['%collAddr'],
-        ['%loanAmount'],
-        nullAddress,
-        [],
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+            nullAddress,
+            [],
+        ),
     );
 
     aaveV3EOAFLBoostStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
@@ -6684,11 +6686,13 @@ const createAaveV3EOAFLRepayStrategy = () => {
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger('0', '0', '0', '0');
     aaveV3EOAFLRepayStrategy.addTrigger(aaveV3Trigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        ['%collAddr'],
-        ['%loanAmount'],
-        nullAddress,
-        [],
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+            nullAddress,
+            [],
+        ),
     );
 
     aaveV3EOAFLRepayStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
@@ -6962,11 +6966,13 @@ const createAaveV3EOAFLRepayOnPriceStrategy = () => {
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3EOAFLRepayOnPriceStrategy.addTrigger(trigger);
 
-    const flAction = new dfs.actions.flashloan.BalancerFlashLoanAction(
-        ['&collAsset'],
-        ['%loanAmount'],
-        nullAddress,
-        [],
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+            nullAddress,
+            [],
+        ),
     );
 
     aaveV3EOAFLRepayOnPriceStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
@@ -7059,7 +7065,7 @@ const createAaveV3EOAFLCloseToCollStrategy = () => {
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
-        '$2', // amount hardcoded output from fee taking
+        '$2', // amount hardcoded output from sell action
         '&proxy', // proxy hardcoded
         '%rateMode', // variable type of debt
         '&debtAsset',
@@ -7084,7 +7090,7 @@ const createAaveV3EOAFLCloseToCollStrategy = () => {
     // return:
     // 1. Send collToken flashloan amount to flAddress
     // 2. Send all collToken's left after the close and flRepayment to eoa
-    // 3. Send all baseToken's left after the close and flRepayment to eoa
+    // 3. Send all debtToken's left after the close and flRepayment to eoa
     const sendTokensAction = new dfs.actions.basic.SendTokensAction(
         [
             '&collToken',
@@ -7111,6 +7117,93 @@ const createAaveV3EOAFLCloseToCollStrategy = () => {
     aaveV3EOAFLCloseToCollStrategy.addAction(sendTokensAction);
 
     return aaveV3EOAFLCloseToCollStrategy.encodeForDsProxyCall();
+};
+
+const createAaveV3EOAFLCloseToDebtStrategy = () => {
+    const aaveV3EOAFLCloseToDebtStrategy = new dfs.Strategy('AaveV3EOAFLCloseToDebtStrategy');
+
+    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
+    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&onBehalfAddr', 'address');
+
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3EOAFLCloseToDebtStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%debtAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+        ),
+    );
+
+    const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        '%useDefaultMarket', // hardcoded to false
+        '&marketAddr', // from subData
+        '$2', // amount hardcoded output from flAction
+        '&proxy', // proxy hardcoded
+        '%rateMode', // variable type of debt
+        '&debtAsset',
+        '&debtAssetId',
+        '&useOnBehalf', // hardcoded true
+        '&onBehalfAddr', // EOA addr hardcoded from subData. Or should be SW?
+    );
+
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '%useDefaultMarket', // hardcoded to false
+        '&marketAddr', // from subData
+        '%amount', // sent by backend. MaxUint256 for full balance withdraw
+        '&onBehalfAddr', // EOA addr hardcoded from subData. Or should be SW?
+        '&collAssetId',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&debtAsset',
+            '$3', // output of withdrawAction
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy', // proxy hardcoded
+        '&proxy', // proxy hardcoded
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // sent by backend
+        '&debtAsset',
+        '$4',
+    );
+
+    // return:
+    // 1. Send debtToken's flashloan amount to flAddress
+    // 2. Send all debtToken's left after the close to EOA
+    const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+        [
+            '&debtToken',
+            '&debtToken',
+        ],
+        [
+            '%flAddress', // sent by backend
+            '&onBehalfAddr', // EOA addr from subData
+        ],
+        [
+            '$1',
+            '%max(uint)', // sent by backend
+        ],
+    );
+
+    aaveV3EOAFLCloseToDebtStrategy.addAction(flAction);
+    aaveV3EOAFLCloseToDebtStrategy.addAction(paybackAction);
+    aaveV3EOAFLCloseToDebtStrategy.addAction(withdrawAction);
+    aaveV3EOAFLCloseToDebtStrategy.addAction(sellAction);
+    aaveV3EOAFLCloseToDebtStrategy.addAction(feeTakingAction);
+    aaveV3EOAFLCloseToDebtStrategy.addAction(sendTokensAction);
+
+    return aaveV3EOAFLCloseToDebtStrategy.encodeForDsProxyCall();
 };
 
 module.exports = {
@@ -7238,4 +7331,5 @@ module.exports = {
     createAaveV3EOARepayOnPriceStrategy,
     createAaveV3EOAFLRepayOnPriceStrategy,
     createAaveV3EOAFLCloseToCollStrategy,
+    createAaveV3EOAFLCloseToDebtStrategy,
 };
