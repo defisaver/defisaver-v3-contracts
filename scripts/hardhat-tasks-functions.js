@@ -147,18 +147,22 @@ async function deployContract(contractName, args) {
 
     const networkPrefix = (network === 'mainnet' || network === 'arbitrum') ? '' : `${network}.`;
 
-    if (network !== 'base') {
+    if (network !== 'base' && network !== 'linea') {
         console.log(`Transaction : https://${networkPrefix}${blockExplorer}.io/tx/${contract.deployTransaction.hash}`);
-    } else {
+    } else if (network === 'base') {
         console.log(`Transaction : https://basescan.org/tx/${contract.deployTransaction.hash}`);
+    } else if (network === 'linea') {
+        console.log(`Transaction : https://lineascan.build/tx/${contract.deployTransaction.hash}`);
     }
 
     await contract.deployed();
 
-    if (network !== 'base') {
+    if (network !== 'base' && network !== 'linea') {
         console.log(`Contract deployed to: https://${networkPrefix}${blockExplorer}.io/address/${contract.address}`);
-    } else {
+    } else if (network === 'base') {
         console.log(`Contract deployed to: https://basescan.org/address/${contract.address}`);
+    } else if (network === 'linea') {
+        console.log(`Contract deployed to: https://lineascan.build/address/${contract.address}`);
     }
 
     return contract.address;
@@ -218,7 +222,11 @@ async function verifyContract(contractAddress, contractName) {
     params.append('compilerversion', solVersion);
     params.append('optimizationUsed', hardhatSettings.solidity.compilers[0].settings.optimizer.enabled ? 1 : 0);
     params.append('runs', hardhatSettings.solidity.compilers[0].settings.optimizer.runs);
-    params.append('EVMVersion', '');
+    if (network === 'linea') {
+        params.append('EVMVersion', 'london');
+    } else {
+        params.append('EVMVersion', '');
+    }
     /// @notice : MIT license
     params.append('licenseType', 3);
 
