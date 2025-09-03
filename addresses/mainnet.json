@@ -4627,7 +4627,7 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
-    }
+    },
     { 
         "name": "ExecuteCall",
         "address": "0x538eda025a8be6ff8fc1fe6050ba3aafb7620608",
