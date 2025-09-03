@@ -2,14 +2,14 @@
 
 pragma solidity =0.8.24;
 
-import { LineaFLAddresses } from "./LineaFLAddresses.sol";
+import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
 import { FLFeeFaucet } from "../../../utils/FLFeeFaucet.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { ISafe } from "../../../interfaces/safe/ISafe.sol";
 import { IDSProxy } from "../../../interfaces/IDSProxy.sol";
 
 
-contract FLHelper is LineaFLAddresses, StrategyModel {
+contract FLHelper is MainnetFLAddresses, StrategyModel {
     uint16 internal constant AAVE_REFERRAL_CODE = 64;
     uint16 internal constant SPARK_REFERRAL_CODE = 0;
 

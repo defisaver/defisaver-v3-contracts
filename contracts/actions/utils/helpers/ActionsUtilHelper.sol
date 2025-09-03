@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { LineaActionsUtilAddresses } from "./LineaActionsUtilAddresses.sol";
+import { MainnetActionsUtilAddresses } from "./MainnetActionsUtilAddresses.sol";
 
-contract ActionsUtilHelper is LineaActionsUtilAddresses {
+contract ActionsUtilHelper is MainnetActionsUtilAddresses {
 }

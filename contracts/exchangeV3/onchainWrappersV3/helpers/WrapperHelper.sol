@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { LineaWrapperAddresses } from "./LineaWrapperAddresses.sol";
+import { MainnetWrapperAddresses } from "./MainnetWrapperAddresses.sol";
 
-contract WrapperHelper is LineaWrapperAddresses {
+contract WrapperHelper is MainnetWrapperAddresses {
 }

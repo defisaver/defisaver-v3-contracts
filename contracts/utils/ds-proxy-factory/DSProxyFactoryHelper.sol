@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { LineaProxyFactoryAddresses } from "./LineaProxyFactoryAddresses.sol";
+import { MainnetProxyFactoryAddresses } from "./MainnetProxyFactoryAddresses.sol";
 
-contract DSProxyFactoryHelper is LineaProxyFactoryAddresses {
+contract DSProxyFactoryHelper is MainnetProxyFactoryAddresses {
 }

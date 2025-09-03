@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { LineaAuthAddresses } from "./LineaAuthAddresses.sol";
+import { MainnetAuthAddresses } from "./MainnetAuthAddresses.sol";
 
-contract AuthHelper is LineaAuthAddresses {
+contract AuthHelper is MainnetAuthAddresses {
 }
