@@ -4209,14 +4209,14 @@
     },
     {
         "name": "LiquityV2TargetRatioCheck",
-        "address": "0x44F68fDE354916353B13C895F7081704484a7A8f",
+        "address": "0xAB5e11DBFAa8fBa7C275087a553d0D0E37A02343",
         "id": "0xd54d1b42",
         "path": "contracts/actions/checkers/LiquityV2TargetRatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x44F68fDE354916353B13C895F7081704484a7A8f"]
     },
     {
         "name": "LiquityV2RatioCheck",
