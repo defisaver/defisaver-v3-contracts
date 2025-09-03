@@ -4,9 +4,9 @@ pragma solidity =0.8.24;
 
 contract LineaExchangeAddresses {
 
-    address internal constant FEE_RECIPIENT_ADDRESS = 0xEDFc68e2874B0AFc0963e18AE4D68522aEc7f97D; // TODO: check
-    address internal constant DISCOUNT_ADDRESS = 0x6cA810e07a5a6320439C3BC87466BD2f1afc4dc8; // TODO: check
-    address internal constant WRAPPER_EXCHANGE_REGISTRY = 0x586328A3F24E2c1A41D9A3a5B2Ed123A156dB82e; // TODO: check
-    address internal constant EXCHANGE_AGGREGATOR_REGISTRY_ADDR = 0xB297cB5B1380cDD68A238cA38e8d54C809f3De32; // TODO: check
-    address internal constant TOKEN_GROUP_REGISTRY = 0xa898078f369A78CE6b8023715e8f6d2Ad7d2719f; // TODO: check
+    address internal constant FEE_RECIPIENT_ADDRESS = 0x2226836ec16FF5974dFD8DF740CD461B42FAffD5;
+    address internal constant DISCOUNT_ADDRESS = 0xef86E36CbbDAdA9F5318Df5D6908760cfF226B54;
+    address internal constant WRAPPER_EXCHANGE_REGISTRY = 0x291EAc3cA14b7FcA8a93af4f6198E76FcFc6B0cD;
+    address internal constant EXCHANGE_AGGREGATOR_REGISTRY_ADDR = 0xa793DaA424d731Bf597eA3A46a16aFA283D80ea7;
+    address internal constant TOKEN_GROUP_REGISTRY = 0xe40178A2f521FDdF0410d87AE853aDf04500502f;
 }
