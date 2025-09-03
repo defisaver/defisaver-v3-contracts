@@ -7155,13 +7155,13 @@ const createAaveV3EOAFLCloseToDebtStrategy = () => {
         '&debtAsset',
         '&debtAssetId',
         '&useOnBehalf', // hardcoded true
-        '&onBehalfAddr', // EOA addr hardcoded from subData. Or should be SW?
+        '&onBehalfAddr', // EOA addr hardcoded from subData
     );
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '&useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
-        '%amount', // sent by backend. MaxUint256 for full balance withdraw
+        '%amount', // sent by backend
         '&proxy', // proxy hardcoded
         '&collAssetId',
     );
