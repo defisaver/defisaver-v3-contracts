@@ -17,7 +17,7 @@ contract BytesTransientStorage {
         require(_data.length >= 32);
         // write length of _data to first slot
         assembly {
-            tstore(0, _data.length)
+            sstore(0, _data.length)
         }
         // calculate how many slots at full size are we going to use
         uint256 chunks = _data.length / 32;
@@ -26,7 +26,7 @@ contract BytesTransientStorage {
         for (i; i <= chunks; ++i) {
             bytes32 chunk = bytes32(_data[32 * (i-1) : 32 * i]); // chunks are bytes32: _data[0:32] -> _data[32:64] -> etc
             assembly {
-                tstore(i, chunk)
+                sstore(i, chunk)
             }
         }
         // if there's any leftover write it in the next slot by writing last 32 bytes and then shifting left to delete what's already stored
@@ -35,7 +35,7 @@ contract BytesTransientStorage {
             bytes32 lastPart = bytes32(_data[_data.length - 32 : _data.length]);
             lastPart = lastPart << ((32 - leftover) * 8);
             assembly {
-                tstore(i, lastPart)
+                sstore(i, lastPart)
             }
         }
     }
@@ -44,7 +44,7 @@ contract BytesTransientStorage {
         uint256 dataLength;
         // fetch data length from first slot
         assembly{
-            dataLength := tload(0)
+            dataLength := sload(0)
         }
         // find out how many full size chunks there are
         uint256 chunks = dataLength / 32;
@@ -53,7 +53,7 @@ contract BytesTransientStorage {
         for (i; i <= chunks; ++i) {
             bytes32 chunk;
             assembly {
-                chunk := tload(i)
+                chunk := sload(i)
             }
             result = bytes.concat(result, chunk);
         }
@@ -62,7 +62,7 @@ contract BytesTransientStorage {
         if (leftover > 0) {
             bytes32 lastChunk;
             assembly {
-                lastChunk := tload(i)
+                lastChunk := sload(i)
             }
             bytes memory cutChunk = new bytes(leftover);
             for (uint256 j = 0; j < leftover; j++) {
