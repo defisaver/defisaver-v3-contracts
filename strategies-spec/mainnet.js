@@ -6463,7 +6463,7 @@ const createAaveV3EOABoostStrategy = () => {
     const aaveV3EOABoostStrategy = new dfs.Strategy('AaveV3EOABoost');
 
     aaveV3EOABoostStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOABoostStrategy.addSubSlot('&checkBoostState', 'uint256');
+    aaveV3EOABoostStrategy.addSubSlot('&checkBoostState', 'uint256'); // TODO -> Should be uint256 or uint8?
     // aaveV3EOABoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOABoostStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOABoostStrategy.addSubSlot('&useOnBehalf', 'bool');
@@ -6513,6 +6513,7 @@ const createAaveV3EOABoostStrategy = () => {
         '&onBehalfAddr', // EOA addr from subData
     );
 
+    // TODO -> add market and user param here in EVERY CHECK ACTION
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkBoostState',
         '&targetRatio',
