@@ -6463,8 +6463,8 @@ const createAaveV3EOABoostStrategy = () => {
     const aaveV3EOABoostStrategy = new dfs.Strategy('AaveV3EOABoost');
 
     aaveV3EOABoostStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOABoostStrategy.addSubSlot('&checkBoostState', 'uint256');
-    aaveV3EOABoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    aaveV3EOABoostStrategy.addSubSlot('&checkBoostState', 'uint256'); // TODO -> Should be uint256 or uint8?
+    // aaveV3EOABoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOABoostStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOABoostStrategy.addSubSlot('&useOnBehalf', 'bool');
     aaveV3EOABoostStrategy.addSubSlot('&onBehalfAddr', 'address');
@@ -6473,7 +6473,7 @@ const createAaveV3EOABoostStrategy = () => {
     aaveV3EOABoostStrategy.addTrigger(aaveV3Trigger);
 
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-        '&useDefaultMarket', // from subData
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '%amount', // must stay variable
         '&proxy', // hardcoded
@@ -6502,7 +6502,7 @@ const createAaveV3EOABoostStrategy = () => {
     );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-        '&useDefaultMarket', // from subData
+        '%useDefaultMarket', // hardcoded to false
         '&market', // from subData
         '$3', // amount hardcoded
         '&proxy', // proxy hardcoded
@@ -6513,6 +6513,7 @@ const createAaveV3EOABoostStrategy = () => {
         '&onBehalfAddr', // EOA addr from subData
     );
 
+    // TODO -> add market and user param here in EVERY CHECK ACTION
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkBoostState',
         '&targetRatio',
@@ -6532,7 +6533,7 @@ const createAaveV3EOAFLBoostStrategy = () => {
 
     aaveV3EOAFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3EOAFLBoostStrategy.addSubSlot('&checkBoostState', 'uint256');
-    aaveV3EOAFLBoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    // aaveV3EOAFLBoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLBoostStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOAFLBoostStrategy.addSubSlot('&useOnBehalf', 'bool');
     aaveV3EOAFLBoostStrategy.addSubSlot('&onBehalfAddr', 'address');
@@ -6570,7 +6571,7 @@ const createAaveV3EOAFLBoostStrategy = () => {
     );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-        '&useDefaultMarket', // from subData
+        '%useDefaultMarket', // hardcoded to false
         '&market', // from subData
         '$3', // amount hardcoded
         '&proxy', // proxy hardcoded
@@ -6582,7 +6583,7 @@ const createAaveV3EOAFLBoostStrategy = () => {
     );
 
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-        '&useDefaultMarket', // from subData
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '$1', // from Fl amount
         '%flAddr', // fl address that can change
@@ -6611,7 +6612,7 @@ const createAaveV3EOARepayStrategy = () => {
 
     aaveV3EOARepayStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3EOARepayStrategy.addSubSlot('&checkRepayState', 'uint256');
-    aaveV3EOARepayStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    // aaveV3EOARepayStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOARepayStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOARepayStrategy.addSubSlot('&useOnBehalf', 'bool');
     aaveV3EOARepayStrategy.addSubSlot('&onBehalfAddr', 'address');
@@ -6620,7 +6621,7 @@ const createAaveV3EOARepayStrategy = () => {
     aaveV3EOARepayStrategy.addTrigger(aaveV3Trigger);
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '&useDefaultMarket', // from subData
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '%amount', // must stay variable
         '&proxy', // hardcoded
@@ -6646,7 +6647,7 @@ const createAaveV3EOARepayStrategy = () => {
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        '&useDefaultMarket', // from subData
+        '%useDefaultMarket', // hardcoded to false
         '&market', // from subData
         '$3', // amount hardcoded
         '&proxy', // proxy hardcoded
@@ -6676,7 +6677,7 @@ const createAaveV3EOAFLRepayStrategy = () => {
 
     aaveV3EOAFLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3EOAFLRepayStrategy.addSubSlot('&checkRepayState', 'uint256');
-    aaveV3EOAFLRepayStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    // aaveV3EOAFLRepayStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLRepayStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOAFLRepayStrategy.addSubSlot('&useOnBehalf', 'bool');
     aaveV3EOAFLRepayStrategy.addSubSlot('&onBehalfAddr', 'address');
@@ -6714,7 +6715,7 @@ const createAaveV3EOAFLRepayStrategy = () => {
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        '&useDefaultMarket', // from subData
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '$3', // amount hardcoded
         '&proxy', // proxy hardcoded
@@ -6726,7 +6727,7 @@ const createAaveV3EOAFLRepayStrategy = () => {
     );
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '&useDefaultMarket', // from subData
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '$1', // repay fl amount
         '%flAddr', // flAddr not hardcoded (tx will fail if not returned to correct addr)
@@ -6754,7 +6755,7 @@ const createAaveV3EOABoostOnPriceStrategy = () => {
     aaveV3EOABoostOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
     aaveV3EOABoostOnPriceStrategy.addSubSlot('&debtAsset', 'address');
     aaveV3EOABoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
-    aaveV3EOABoostOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    // aaveV3EOABoostOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOABoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOABoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3EOABoostOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
@@ -6764,7 +6765,7 @@ const createAaveV3EOABoostOnPriceStrategy = () => {
     aaveV3EOABoostOnPriceStrategy.addTrigger(trigger);
 
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-        '&useDefaultMarket', // hardcode to false
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '%amount', // amount to borrow, must stay variable, sent from backend
         '&proxy',
@@ -6789,7 +6790,7 @@ const createAaveV3EOABoostOnPriceStrategy = () => {
         '$2', // output of sell action
     );
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-        '&useDefaultMarket', // hardcode to false
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '$3', // output of gas fee taker action
         '&proxy',
@@ -6818,7 +6819,7 @@ const createAaveV3EOAFLBoostOnPriceStrategy = () => {
     aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
     aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&debtAsset', 'address');
     aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
-    aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    // aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
@@ -6851,7 +6852,7 @@ const createAaveV3EOAFLBoostOnPriceStrategy = () => {
         '$2', // output of sell action
     );
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
-        '&useDefaultMarket', // hardcode to false
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '$3', // output of gas fee taker action
         '&proxy',
@@ -6862,7 +6863,7 @@ const createAaveV3EOAFLBoostOnPriceStrategy = () => {
         '&onBehalfAddr', // EOA addr hardcoded from subData
     );
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
-        '&useDefaultMarket', // hardcode to false
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '$1',
         '%flAddress', // fl address, sent by backend
@@ -6891,7 +6892,7 @@ const createAaveV3EOARepayOnPriceStrategy = () => {
     aaveV3EOARepayOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
     aaveV3EOARepayOnPriceStrategy.addSubSlot('&debtAsset', 'address');
     aaveV3EOARepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
-    aaveV3EOARepayOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    // aaveV3EOARepayOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOARepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOARepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3EOARepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
@@ -6901,7 +6902,7 @@ const createAaveV3EOARepayOnPriceStrategy = () => {
     aaveV3EOARepayOnPriceStrategy.addTrigger(aaveV3Trigger);
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '&useDefaultMarket', // hardcoded to false
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '%amount', // must stay variable
         '&proxy', // hardcoded
@@ -6927,7 +6928,7 @@ const createAaveV3EOARepayOnPriceStrategy = () => {
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        '&useDefaultMarket', // hardcoded to false
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '$3', // amount hardcoded piped from fee taking
         '&proxy', // proxy hardcoded
@@ -6959,7 +6960,7 @@ const createAaveV3EOAFLRepayOnPriceStrategy = () => {
     aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
     aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&debtAsset', 'address');
     aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
-    aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    // aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
@@ -6998,7 +6999,7 @@ const createAaveV3EOAFLRepayOnPriceStrategy = () => {
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        '&useDefaultMarket', // hardcoded to false
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '$3', // amount hardcoded output from fee taking
         '&proxy', // proxy hardcoded
@@ -7010,7 +7011,7 @@ const createAaveV3EOAFLRepayOnPriceStrategy = () => {
     );
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '&useDefaultMarket',
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr',
         '$1', // repay fl amount
         '%flAddr', // flAddr not hardcoded (tx will fail if not returned to correct addr)
@@ -7039,7 +7040,7 @@ const createAaveV3EOAFLCloseToCollStrategy = () => {
     aaveV3EOAFLCloseToCollStrategy.addSubSlot('&debtAsset', 'address');
     aaveV3EOAFLCloseToCollStrategy.addSubSlot('&debtAssetId', 'uint16');
     aaveV3EOAFLCloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
-    aaveV3EOAFLCloseToCollStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    // aaveV3EOAFLCloseToCollStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLCloseToCollStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOAFLCloseToCollStrategy.addSubSlot('&useOnBehalf', 'bool');
     aaveV3EOAFLCloseToCollStrategy.addSubSlot('&onBehalfAddr', 'address');
@@ -7066,7 +7067,7 @@ const createAaveV3EOAFLCloseToCollStrategy = () => {
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        '&useDefaultMarket', // hardcoded to false
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '$2', // amount hardcoded output from sell action
         '&proxy', // proxy hardcoded
@@ -7078,7 +7079,7 @@ const createAaveV3EOAFLCloseToCollStrategy = () => {
     );
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '&useDefaultMarket', // hardcoded to false
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '%amount', // sent by backend. MaxUint256 for full balance withdraw
         '&proxy', // proxy hardcoded
@@ -7131,7 +7132,7 @@ const createAaveV3EOAFLCloseToDebtStrategy = () => {
     aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&debtAsset', 'address');
     aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&debtAssetId', 'uint16');
     aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
-    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&useDefaultMarket', 'bool');
+    // aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&useOnBehalf', 'bool');
     aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&onBehalfAddr', 'address');
@@ -7147,7 +7148,7 @@ const createAaveV3EOAFLCloseToDebtStrategy = () => {
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        '&useDefaultMarket', // hardcoded to false
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '$2', // amount hardcoded output from flAction
         '&proxy', // proxy hardcoded
@@ -7159,7 +7160,7 @@ const createAaveV3EOAFLCloseToDebtStrategy = () => {
     );
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        '&useDefaultMarket', // hardcoded to false
+        '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
         '%amount', // sent by backend
         '&proxy', // proxy hardcoded
