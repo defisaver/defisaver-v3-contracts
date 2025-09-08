@@ -30,10 +30,7 @@ class BaseLiquityV2StrategyTest {
         await this.setUpCallers();
         await this.setUpContracts();
         // await this.addLiquidity();
-        console.log('setUpContracts');
-        console.log(this.botAcc.address);
         await addBotCaller(this.botAcc.address, this.isFork);
-        console.log('addBotCaller');
     }
 
     async takeSnapshot() {
@@ -63,6 +60,8 @@ class BaseLiquityV2StrategyTest {
         this.contracts.strategyExecutor = strategyExecutor.connect(this.botAcc);
         this.contracts.flAction = await getContractFromRegistry('FLAction', this.isFork);
         this.contracts.view = await redeploy('LiquityV2View', this.isFork);
+        /*
+        redeploying this will break creation of new liquity troves (time travel)
         await redeploy('LiquityV2Open', this.isFork);
         await redeploy('LiquityV2RatioCheck', this.isFork);
         await redeploy('LiquityV2Borrow', this.isFork);
@@ -71,8 +70,9 @@ class BaseLiquityV2StrategyTest {
         await redeploy('LiquityV2Adjust', this.isFork);
         await redeploy('LiquityV2Withdraw', this.isFork);
         await redeploy('LiquityV2Payback', this.isFork);
-        await redeploy('LiquityV2AdjustRateDebtInFrontTrigger', this.isFork);
         await redeploy('LiquityV2AdjustInterestRate', this.isFork);
+        */
+        await redeploy('LiquityV2AdjustRateDebtInFrontTrigger', this.isFork);
         await redeploy('LiquityV2NewInterestRateChecker', this.isFork);
     }
 
@@ -104,7 +104,7 @@ class BaseLiquityV2StrategyTest {
 
     async openTrove(testPair, collAmount, debtAmount, openInterestRate = 1) {
         const collAsset = getAssetInfo(testPair.supplyTokenSymbol);
-        const interestRate = hre.ethers.utils.parseUnits(openInterestRate.toString(), 18);
+        const interestRate = hre.ethers.utils.parseUnits(openInterestRate.toString(), 16);
         const ownerIndex = 0;
 
         await liquityV2Open(

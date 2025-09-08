@@ -68,6 +68,7 @@ const executeStrategy = async (
             subId, strategyIndex, triggerCallData, actionsCallData, { gasLimit: 8000000 },
         );
     } else {
+        console.log('executing strategy');
         callData = strategyExecutorByBot.interface.encodeFunctionData(
             'executeStrategy', [subId, strategyIndex, triggerCallData, actionsCallData, strategySub],
         );
@@ -5960,7 +5961,7 @@ const callLiquityV2InterestRateAdjustmentStrategy = async (
 
     actionsCallData.push(liquityV2AdjustInterestRateAction.encodeForDsProxyCall());
     actionsCallData.push(liquityV2NewInterestRateCheckerAction.encodeForDsProxyCall());
-
+    console.log('executing strategy');
     const { callData, receipt } = await executeStrategy(
         false,
         strategyExecutor,
