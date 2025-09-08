@@ -72,7 +72,7 @@ class BaseLiquityV2StrategyTest {
         await redeploy('LiquityV2Payback', this.isFork);
         await redeploy('LiquityV2AdjustInterestRate', this.isFork);
         */
-        await redeploy('LiquityV2AdjustRateDebtInFrontTrigger', this.isFork);
+        this.contracts.trigger = await redeploy('LiquityV2AdjustRateDebtInFrontTrigger', this.isFork);
         await redeploy('LiquityV2NewInterestRateChecker', this.isFork);
     }
 
@@ -123,8 +123,8 @@ class BaseLiquityV2StrategyTest {
         );
 
         const encodedData = hre.ethers.utils.defaultAbiCoder.encode(
-            ['address', 'uint256'],
-            [this.proxy.address, ownerIndex],
+            ['address', 'address', 'uint256'],
+            [this.proxy.address, this.proxy.address, ownerIndex],
         );
         const troveId = hre.ethers.utils.keccak256(encodedData);
 

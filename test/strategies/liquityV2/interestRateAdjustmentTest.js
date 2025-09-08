@@ -1,7 +1,7 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
-const { getLiquityV2TestPairs, deployLiquityV2InterestRateAdjustmentStrategy } = require('../../utils/liquityV2');
+const { getLiquityV2TestPairs, deployLiquityV2InterestRateAdjustmentStrategy, getLiquityV2Hints } = require('../../utils/liquityV2');
 const { BaseLiquityV2StrategyTest } = require('./common');
 const { subLiquityV2InterestRateAdjustmentBundle } = require('../utils/strategy-subs');
 const { fetchAmountInUSDPrice, isNetworkFork } = require('../../utils/utils');
@@ -14,24 +14,6 @@ class InterestRateAdjustmentTest extends BaseLiquityV2StrategyTest {
             this.proxy,
             this.isFork,
         );
-    }
-
-    static async getHintsAndMaxFee(market, troveId, newInterestRate) {
-        const hintHelpers = await hre.ethers.getContractAt(
-            'IHintHelpers',
-            (await hre.ethers.getContractAt('IAddressesRegistry', market)).hintHelpers(),
-        );
-
-        const upperHint = 0;
-        const lowerHint = 0;
-
-        const maxUpfrontFee = await hintHelpers.predictAdjustInterestRateUpfrontFee(
-            1,
-            troveId,
-            newInterestRate,
-        );
-
-        return { upperHint, lowerHint, maxUpfrontFee };
     }
 
     async executeInterestRateAdjustment(
@@ -48,30 +30,29 @@ class InterestRateAdjustmentTest extends BaseLiquityV2StrategyTest {
 
         const view = await hre.ethers.getContractAt('LiquityV2View', this.contracts.view.address);
         const troveInfoBefore = await view.callStatic.getTroveInfo(market, troveId);
-        console.log(troveInfoBefore);
         const interestRateBefore = troveInfoBefore.annualInterestRate;
-        console.log(interestRateBefore);
-        const newInterestRate = (interestRateBefore / 1e16) + interestRateChange;
+        const newInterestRate = interestRateBefore.add(interestRateChange * 1e16);
 
-        const { upperHint, lowerHint, maxUpfrontFee } = await InterestRateAdjustmentTest
-            .getHintsAndMaxFee(
-                market,
-                troveId,
-                newInterestRate,
-            );
+        const { upperHint, lowerHint } = await getLiquityV2Hints(market, 1, newInterestRate);
 
+        const maxUpfrontFee = hre.ethers.constants.MaxUint256;
+        const trigger = await hre.ethers.getContractAt('LiquityV2AdjustRateDebtInFrontTrigger', this.contracts.trigger.address);
+        const shouldExecuteStrategy = await trigger.callStatic.isTriggered([], strategySub[2][0]);
+        console.log(shouldExecuteStrategy);
         await callLiquityV2InterestRateAdjustmentStrategy(
             this.contracts.strategyExecutor,
-            0,
+            124,
             subId,
             strategySub,
             newInterestRate,
             upperHint,
             lowerHint,
             maxUpfrontFee,
+            market,
+            troveId,
         );
 
-        const troveInfoAfter = await this.contracts.view.getTroveInfo(market, troveId);
+        const troveInfoAfter = await this.contracts.view.callStatic.getTroveInfo(market, troveId);
         return {
             interestRateBefore,
             interestRateAfter: troveInfoAfter.annualInterestRate,

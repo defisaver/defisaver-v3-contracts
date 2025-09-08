@@ -5959,8 +5959,9 @@ const callLiquityV2InterestRateAdjustmentStrategy = async (
         0, // interestRateChange
     );
 
-    actionsCallData.push(liquityV2AdjustInterestRateAction.encodeForDsProxyCall());
-    actionsCallData.push(liquityV2NewInterestRateCheckerAction.encodeForDsProxyCall());
+    actionsCallData.push(liquityV2AdjustInterestRateAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityV2NewInterestRateCheckerAction.encodeForRecipe()[0]);
+    triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint256', 'uint256'], [placeHolderAddr, 0, 0, 0]));
     console.log('executing strategy');
     const { callData, receipt } = await executeStrategy(
         false,
