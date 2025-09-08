@@ -29,8 +29,11 @@ class BaseLiquityV2StrategyTest {
 
         await this.setUpCallers();
         await this.setUpContracts();
-        await this.addLiquidity();
+        // await this.addLiquidity();
+        console.log('setUpContracts');
+        console.log(this.botAcc.address);
         await addBotCaller(this.botAcc.address, this.isFork);
+        console.log('addBotCaller');
     }
 
     async takeSnapshot() {
@@ -68,6 +71,9 @@ class BaseLiquityV2StrategyTest {
         await redeploy('LiquityV2Adjust', this.isFork);
         await redeploy('LiquityV2Withdraw', this.isFork);
         await redeploy('LiquityV2Payback', this.isFork);
+        await redeploy('LiquityV2AdjustRateDebtInFrontTrigger', this.isFork);
+        await redeploy('LiquityV2AdjustInterestRate', this.isFork);
+        await redeploy('LiquityV2NewInterestRateChecker', this.isFork);
     }
 
     async addLiquidity() {
@@ -96,9 +102,9 @@ class BaseLiquityV2StrategyTest {
         );
     }
 
-    async openTrove(testPair, collAmount, debtAmount) {
+    async openTrove(testPair, collAmount, debtAmount, openInterestRate = 1) {
         const collAsset = getAssetInfo(testPair.supplyTokenSymbol);
-        const interestRate = hre.ethers.utils.parseUnits('1', 18);
+        const interestRate = hre.ethers.utils.parseUnits(openInterestRate.toString(), 18);
         const ownerIndex = 0;
 
         await liquityV2Open(
