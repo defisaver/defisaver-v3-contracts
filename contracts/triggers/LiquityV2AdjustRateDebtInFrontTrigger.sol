@@ -13,7 +13,7 @@ import {LiquityV2Helper} from "../actions/liquityV2/helpers/LiquityV2Helper.sol"
 import {TriggerHelper} from "./helpers/TriggerHelper.sol";
 import {AdminAuth} from "../auth/AdminAuth.sol";
 import {DSMath} from "../DS/DSMath.sol";
-import {TransientStorage} from "../utils/TransientStorage.sol";
+import {TransientStorageCancun} from "../utils/TransientStorageCancun.sol";
 
 /// @title Trigger contract that triggers if calculated debt in front of a trove is below a certain threshold
 /// @notice This trigger takes all the branches into account
@@ -24,7 +24,7 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is
     LiquityV2Helper,
     DSMath
 {
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
+    TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
     /// @notice Error thrown when an invalid market address is provided
     error InvalidMarketAddress();
 

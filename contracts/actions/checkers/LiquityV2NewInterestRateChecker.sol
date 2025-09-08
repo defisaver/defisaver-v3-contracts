@@ -3,14 +3,14 @@
 pragma solidity =0.8.24;
 
 import {ActionBase} from "../ActionBase.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";   
+import { TransientStorageCancun } from "../../utils/TransientStorageCancun.sol";   
 import { IAddressesRegistry } from "../../interfaces/liquityV2/IAddressesRegistry.sol";
 import { ITroveManager } from "../../interfaces/liquityV2/ITroveManager.sol";
 
 /// @title Action to check the new interest rate of the LiquityV2 position after strategy execution.
 contract LiquityV2NewInterestRateChecker is ActionBase {
 
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
+    TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     error BadAfterRate(uint256 oldRate, uint256 newRate);
 
