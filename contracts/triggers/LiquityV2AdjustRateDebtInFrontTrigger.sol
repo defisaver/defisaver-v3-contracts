@@ -15,8 +15,13 @@ import {AdminAuth} from "../auth/AdminAuth.sol";
 import {DSMath} from "../DS/DSMath.sol";
 import {TransientStorageCancun} from "../utils/TransientStorageCancun.sol";
 
-/// @title Trigger contract that triggers if calculated debt in front of a trove is below a certain threshold
-/// @notice This trigger takes all the branches into account
+/// @title LiquityV2 Interest Rate Adjustment Debt in Front Trigger
+/// @notice Triggers when the calculated debt in front of a LiquityV2 trove falls below specified thresholds,
+///         enabling automatic interest rate adjustments to protect from redemptions.
+/// @dev This trigger monitors debt in front across all LiquityV2 branches (ETH, wstETH, rETH) and triggers
+///      when conditions are met for interest rate adjustment. It considers both critical and non-critical
+///      debt thresholds, with different logic based on whether adjustment fees are zero.
+/// @author DeFi Saver
 contract LiquityV2AdjustRateDebtInFrontTrigger is
     ITrigger,
     AdminAuth,
@@ -24,19 +29,24 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is
     LiquityV2Helper,
     DSMath
 {
+    /// @notice Transient storage contract for storing temporary data during execution
     TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
+    
     /// @notice Error thrown when an invalid market address is provided
     error InvalidMarketAddress();
 
+    /// @notice Cooldown period for interest rate adjustments (7 days)
     uint256 constant INTEREST_RATE_ADJ_COOLDOWN = 7 days;
 
     /// @notice Maximum number of iterations to get the debt in front for a current trove branch
+    /// @dev Prevents infinite loops when traversing the sorted troves list
     uint256 internal constant MAX_ITERATIONS = 1000;
 
-    /// @param market address of the market
-    /// @param troveId id of the trove
-    /// @param criticalDebtInFrontLimit limit for critical debt in front (execute strat always)
-    /// @param nonCriticalDebtInFrontLimit limit for non critical debt in front (execute strat if debt in front is below this limit and no adjustment fee)
+    /// @notice Parameters for the LiquityV2 interest rate adjustment trigger
+    /// @param market Address of the LiquityV2 market (branch) to monitor
+    /// @param troveId ID of the trove to monitor for debt in front
+    /// @param criticalDebtInFrontLimit Critical threshold - strategy executes when debt in front is below this limit
+    /// @param nonCriticalDebtInFrontLimit Non-critical threshold - strategy executes when debt in front is below this limit AND adjustment fee is zero
     struct SubParams {
         address market;
         uint256 troveId;
@@ -44,26 +54,30 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is
         uint256 nonCriticalDebtInFrontLimit;
     }
 
-    /// @notice Helper struct containing the total debt and unbacked debt of a single market
-    /// @dev totalDebt is the total bold debt of the market
-    /// @dev unbackedDebt is the unbacked bold debt of the market. Diff between total debt and stability pool bold deposits
+    /// @notice Helper struct containing debt information for a single LiquityV2 market
+    /// @param totalDebt Total BOLD debt of the market (all troves combined)
+    /// @param unbackedDebt Unbacked BOLD debt (difference between total debt and stability pool deposits)
     struct Market {
         uint256 totalDebt;
         uint256 unbackedDebt;
     }
 
-    /// @notice Helper struct containing the current market and other markets data.
-    /// @notice Used for estimating the redemption amounts per market
-    /// @dev current is the current market we are calculating the debt in front for
-    /// @dev otherMarkets are the 2 other markets
+    /// @notice Helper struct containing debt data for current and other markets
+    /// @dev Used for estimating redemption amounts across all branches during debt in front calculation
+    /// @param current The market we are calculating debt in front for
+    /// @param otherMarkets Array containing the other two markets (branches)
     struct Markets {
         Market current;
         Market[] otherMarkets;
     }
 
-    /// @notice Checks if the debt in front of the trove is below the minimum debt in front
-    /// @param _subData bytes encoded SubParams struct
-    /// @return bool true if the debt in front of the trove is below the minimum debt in front
+    /// @notice Checks if the debt in front of the trove is below the specified thresholds
+    /// @dev This function determines whether to trigger the interest rate adjustment strategy based on:
+    ///      1. Whether the trove is eligible for interest rate adjustment (active, no batch manager, cooldown passed)
+    ///      2. Whether the debt in front is below the critical or non-critical thresholds
+    ///      3. Whether adjustment fees are zero (affects which threshold to use)
+    /// @param _subData Encoded SubParams struct containing market, troveId, and threshold limits
+    /// @return bool True if the strategy should be triggered, false otherwise
     function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
@@ -84,18 +98,23 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is
         }
     }
 
-    /// @notice Gets the debt in front for a given market and trove
-    /// @param _market address of the market (a.k.a. branch)
-    /// @param _trove id of the trove
-    /// @return debtInFront debt in front of the trove
-    /// @dev This function estimates the total real debt in front of a given trove.
-    /// Because redemptions are routed through every branch, the total debt in front 
-    /// is usually higher than the debt of the troves preceding the current trove in its given branch.
-    /// General equation:
-    /// X * branchRedeemPercentage = branchDebtInFront
-    /// X * (totalDebtOrUnbackedDebtOnBranch / totalDebtOrUnbackedDebt) = branchDebtInFront
-    /// X = branchDebtInFront * totalDebtOrUnbackedDebt / totalDebtOrUnbackedDebtOnBranch
-    /// Where X is the estimated redemption amount for which all debt in front of the trove in its branch will be redeemed.
+    /// @notice Calculates the total debt in front of a specific trove across all LiquityV2 branches
+    /// @dev This function estimates the real debt in front by considering cross-branch redemptions.
+    ///      Since redemptions are routed through every branch, the total debt in front is usually
+    ///      higher than just the debt of preceding troves in the same branch.
+    ///      
+    ///      The calculation uses two main cases:
+    ///      1. Current branch has unbacked debt: Uses unbacked debt proportions
+    ///      2. Current branch has zero unbacked debt: Uses total debt proportions
+    ///      
+    ///      Mathematical approach:
+    ///      X * branchRedeemPercentage = branchDebtInFront
+    ///      X * (totalDebtOrUnbackedDebtOnBranch / totalDebtOrUnbackedDebt) = branchDebtInFront
+    ///      X = branchDebtInFront * totalDebtOrUnbackedDebt / totalDebtOrUnbackedDebtOnBranch
+    ///      Where X is the estimated redemption amount for which all debt in front will be redeemed.
+    /// @param _market Address of the LiquityV2 market (branch) containing the trove
+    /// @param _trove ID of the trove to calculate debt in front for
+    /// @return debtInFront Total estimated debt in front of the trove across all branches
     function getDebtInFront(
         address _market,
         uint256 _trove
@@ -153,12 +172,20 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is
         return branchDebtInFront + redemptionAmounts[0] + redemptionAmounts[1];
     }
 
+    /// @notice Parses the subscription data into SubParams struct
+    /// @param _subData Encoded subscription parameters
+    /// @return params Decoded SubParams struct
     function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
 
+    /// @notice Returns the changed subscription data (not used in this trigger)
+    /// @param _subData Original subscription data
+    /// @return Empty bytes array as this trigger doesn't modify subscription data
     function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
 
+    /// @notice Returns whether the trigger parameters can be changed
+    /// @return false This trigger does not support parameter changes
     function isChangeable() public pure override returns (bool) {
         return false;
     }
@@ -167,6 +194,13 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is
                             INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
+    /// @notice Checks if the trove is eligible for interest rate adjustment and gets current interest rate
+    /// @dev Validates that the trove is active, has no batch manager, and checks if cooldown period has passed
+    /// @param _market Address of the LiquityV2 market
+    /// @param _troveId ID of the trove to check
+    /// @return adjustmentFeeZero True if adjustment fee is zero (cooldown period has passed)
+    /// @return interestRate Current annual interest rate of the trove
+    /// @return shouldExecuteStrategy True if the trove is eligible for interest rate adjustment
     function getAdjustmentFeeAndInterestRate(address _market, uint256 _troveId) internal view returns (bool adjustmentFeeZero, uint256 interestRate, bool shouldExecuteStrategy) {
         IAddressesRegistry market = IAddressesRegistry(_market);
         ITroveManager troveManager = ITroveManager(market.troveManager());
