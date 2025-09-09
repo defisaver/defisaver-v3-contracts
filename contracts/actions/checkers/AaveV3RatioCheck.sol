@@ -4,7 +4,6 @@ pragma solidity =0.8.24;
 
 import {ActionBase} from "../ActionBase.sol";
 import {AaveV3RatioHelper} from "../aaveV3/helpers/AaveV3RatioHelper.sol";
-// TODO -> can use TSCancun? Should need to redeploy trigger too ?
 import {TransientStorage} from "../../utils/TransientStorage.sol";
 
 /// @title Action to check the ratio of the Aave V3 position after strategy execution.
@@ -44,6 +43,7 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
 
         address market;
         address user;
+        /// @dev Those params are added later, hence the check
         if (_paramMapping.length == 4) {
             market = _parseParamAddr(address(inputData.market), _paramMapping[2], _subData, _returnValues);
             user = _parseParamAddr(address(inputData.user), _paramMapping[3], _subData, _returnValues);
