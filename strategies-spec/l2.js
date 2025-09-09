@@ -2568,6 +2568,8 @@ const createAaveV3EOABoostL2Strategy = () => {
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkBoostState',
         '&targetRatio',
+        '&marketAddr',
+        '&onBehalfAddr',
     );
 
     aaveV3EOABoostL2Strategy.addAction(borrowAction);
@@ -2644,6 +2646,8 @@ const createAaveV3EOAFLBoostL2Strategy = () => {
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkBoostState',
         '&targetRatio',
+        '&marketAddr',
+        '&onBehalfAddr',
     );
 
     aaveV3EOAFLBoostL2Strategy.addAction(flAction);
@@ -2711,6 +2715,8 @@ const createAaveV3EOARepayL2Strategy = () => {
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkRepayState',
         '&targetRatio',
+        '&marketAddr',
+        '&onBehalfAddr',
     );
 
     aaveV3EOARepayL2Strategy.addAction(withdrawAction);
@@ -2784,6 +2790,8 @@ const createAaveV3EOAFLRepayL2Strategy = () => {
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkRepayState',
         '&targetRatio',
+        '&marketAddr',
+        '&onBehalfAddr',
     );
 
     aaveV3EOAFLRepayL2Strategy.addAction(flAction);
@@ -2853,6 +2861,7 @@ const createAaveV3EOABoostOnPriceL2Strategy = () => {
     const openRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
         '&marketAddr',
+        '&onBehalfAddr',
     );
     aaveV3EOABoostOnPriceL2Strategy.addAction(borrowAction);
     aaveV3EOABoostOnPriceL2Strategy.addAction(sellAction);
@@ -2927,6 +2936,7 @@ const createAaveV3EOAFLBoostOnPriceL2Strategy = () => {
     const openRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
         '&marketAddr',
+        '&onBehalfAddr',
     );
     aaveV3EOAFLBoostOnPriceL2Strategy.addAction(flAction);
     aaveV3EOAFLBoostOnPriceL2Strategy.addAction(sellAction);
@@ -2995,6 +3005,7 @@ const createAaveV3EOARepayOnPriceL2Strategy = () => {
     const checkerAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
         '&marketAddr',
+        '&onBehalfAddr',
     );
 
     aaveV3EOARepayOnPriceL2Strategy.addAction(withdrawAction);
@@ -3073,6 +3084,7 @@ const createAaveV3EOAFLRepayOnPriceL2Strategy = () => {
     const checkerAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
         '&marketAddr',
+        '&onBehalfAddr',
     );
 
     aaveV3EOAFLRepayOnPriceL2Strategy.addAction(sellAction);

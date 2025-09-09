@@ -6513,10 +6513,12 @@ const createAaveV3EOABoostStrategy = () => {
         '&onBehalfAddr', // EOA addr from subData
     );
 
-    // TODO -> add market and user param here in EVERY CHECK ACTION
+    // TODO -> Update this in defisaver-sdk
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkBoostState',
         '&targetRatio',
+        '&marketAddr',
+        '&onBehalfAddr',
     );
 
     aaveV3EOABoostStrategy.addAction(borrowAction);
@@ -6596,6 +6598,8 @@ const createAaveV3EOAFLBoostStrategy = () => {
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkBoostState',
         '&targetRatio',
+        '&marketAddr',
+        '&onBehalfAddr',
     );
 
     aaveV3EOAFLBoostStrategy.addAction(sellAction);
@@ -6661,6 +6665,8 @@ const createAaveV3EOARepayStrategy = () => {
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkRepayState',
         '&targetRatio',
+        '&marketAddr',
+        '&onBehalfAddr',
     );
 
     aaveV3EOARepayStrategy.addAction(withdrawAction);
@@ -6737,6 +6743,8 @@ const createAaveV3EOAFLRepayStrategy = () => {
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkRepayState',
         '&targetRatio',
+        '&marketAddr',
+        '&onBehalfAddr',
     );
 
     aaveV3EOAFLRepayStrategy.addAction(sellAction);
@@ -6803,6 +6811,7 @@ const createAaveV3EOABoostOnPriceStrategy = () => {
     const openRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
         '&marketAddr', // from subData
+        '&onBehalfAddr',
     );
     aaveV3EOABoostOnPriceStrategy.addAction(borrowAction);
     aaveV3EOABoostOnPriceStrategy.addAction(sellAction);
@@ -6875,6 +6884,7 @@ const createAaveV3EOAFLBoostOnPriceStrategy = () => {
     const openRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
         '&marketAddr',
+        '&onBehalfAddr',
     );
     aaveV3EOAFLBoostOnPriceStrategy.addAction(flAction);
     aaveV3EOAFLBoostOnPriceStrategy.addAction(sellAction);
@@ -6942,6 +6952,7 @@ const createAaveV3EOARepayOnPriceStrategy = () => {
     const checkerAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
         '&marketAddr',
+        '&onBehalfAddr',
     );
 
     aaveV3EOARepayOnPriceStrategy.addAction(withdrawAction);
@@ -7021,6 +7032,7 @@ const createAaveV3EOAFLRepayOnPriceStrategy = () => {
     const checkerAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
         '&marketAddr',
+        '&onBehalfAddr',
     );
 
     aaveV3EOAFLRepayOnPriceStrategy.addAction(sellAction);

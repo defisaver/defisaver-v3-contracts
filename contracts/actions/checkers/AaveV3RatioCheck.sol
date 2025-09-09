@@ -9,7 +9,7 @@ import {TransientStorage} from "../../utils/TransientStorage.sol";
 /// @title Action to check the ratio of the Aave V3 position after strategy execution.
 contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
     /// @notice 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    uint256 internal constant RATIO_OFFSET = 5e16;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
@@ -22,6 +22,8 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
 
     /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
     /// @param targetRatio Target ratio.
+    /// @param market Aave V3 Market parameter that was added later in order to add support for different markets in strategies
+    /// @param user EOA or Smart Wallet address parameter that was added later in order to add support for EOA strategies
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;
