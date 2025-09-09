@@ -10,20 +10,14 @@ import {AaveV3Helper} from "./helpers/AaveV3Helper.sol";
 import {StrategyModel} from "../../core/strategy/StrategyModel.sol";
 import {CoreHelper} from "../../core/helpers/CoreHelper.sol";
 
-// TODO -> This is done in an L2 way, is it ok for mainnet too? Not sure if even need new contract? Prob yes and can't just redeploy and change previous
 /// @title Subscribes users to boost/repay strategies with EOA support
 contract AaveV3SubProxyV2 is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType, AaveV3Helper {
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
 
-    uint64 public immutable REPAY_BUNDLE_EOA_ID;
-    uint64 public immutable BOOST_BUNDLE_EOA_ID;
-
-    constructor(uint64 _repayBundleId, uint64 _boostBundleId, uint64 _repayBundleEoaId, uint64 _boostBundleEoaId) {
+    constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
         REPAY_BUNDLE_ID = _repayBundleId;
         BOOST_BUNDLE_ID = _boostBundleId;
-        REPAY_BUNDLE_EOA_ID = _repayBundleEoaId;
-        BOOST_BUNDLE_EOA_ID = _boostBundleEoaId;
     }
 
     enum RatioState {
@@ -45,8 +39,7 @@ contract AaveV3SubProxyV2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         uint128 targetRatioRepay;
         bool boostEnabled;
         address market;
-        bool useOnBehalf;
-        address onBehalfAddr;
+        bool isEOA;
     }
 
     /// @notice Parses input data and subscribes user to repay and boost bundles
@@ -150,14 +143,11 @@ contract AaveV3SubProxyV2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         view
         returns (StrategySub memory repaySub)
     {
-        repaySub.strategyOrBundleId = _subData.useOnBehalf ? REPAY_BUNDLE_EOA_ID : REPAY_BUNDLE_ID;
+        repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
-        // TODO -> Prob don't even need `.onBehalfAddr` because here we will get the user addr
-        address user = _subData.useOnBehalf ? _eoa : _wallet;
+        address user = _subData.isEOA ? _eoa : _wallet;
 
-        // format data for ratio trigger if currRatio < minRatio = true
-        // TODO -> we don't have that check from comment above?
         // owner, market, triggerRatioRepay, ratioState
         bytes memory triggerData =
             abi.encode(user, _subData.market, uint256(_subData.minRatio), uint8(RatioState.UNDER));
@@ -168,7 +158,7 @@ contract AaveV3SubProxyV2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         repaySub.subData[0] = bytes32(uint256(_subData.targetRatioRepay)); // targetRatio
         repaySub.subData[1] = bytes32(uint256(1)); // ratioState = repay
         repaySub.subData[2] = bytes32(uint256(uint160(_subData.market))); // market addr
-        repaySub.subData[3] = bytes32(uint256(_subData.useOnBehalf ? 1 : 0)); // useOnBehalf
+        repaySub.subData[3] = bytes32(uint256(_subData.isEOA ? 1 : 0)); // useOnBehalf
         repaySub.subData[4] = bytes32(uint256(uint160(user))); // onBehalfAddr
     }
 
@@ -178,13 +168,11 @@ contract AaveV3SubProxyV2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         view
         returns (StrategySub memory boostSub)
     {
-        boostSub.strategyOrBundleId = _subData.useOnBehalf ? BOOST_BUNDLE_EOA_ID : BOOST_BUNDLE_ID;
+        boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
-        address user = _subData.useOnBehalf ? _eoa : _wallet;
+        address user = _subData.isEOA ? _eoa : _wallet;
 
-        // format data for ratio trigger if currRatio > maxRatio = true
-        // TODO -> we don't have that check from comment above?
         bytes memory triggerData = abi.encode(user, _subData.market, uint256(_subData.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
@@ -193,7 +181,7 @@ contract AaveV3SubProxyV2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         boostSub.subData[0] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
         boostSub.subData[1] = bytes32(uint256(0)); // ratioState = boost
         boostSub.subData[2] = bytes32(uint256(uint160(_subData.market))); // market addr
-        boostSub.subData[3] = bytes32(uint256(_subData.useOnBehalf ? 1 : 0)); // onBehalfOf
+        boostSub.subData[3] = bytes32(uint256(_subData.isEOA ? 1 : 0)); // onBehalfOf
         boostSub.subData[4] = bytes32(uint256(uint160(user))); // onBehalfAddr
     }
 
@@ -204,8 +192,7 @@ contract AaveV3SubProxyV2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         user.targetRatioRepay = uint128(bytes16(_encodedInput[48:64]));
         user.boostEnabled = (bytes1(_encodedInput[64:65])) != bytes1(0x00); // compare to get bool
         user.market = address(bytes20(_encodedInput[65:85]));
-        user.useOnBehalf = (bytes1(_encodedInput[85:86])) != bytes1(0x00); // compare to get bool
-        user.onBehalfAddr = address(bytes20(_encodedInput[86:106]));
+        user.isEOA = (bytes1(_encodedInput[85:86])) != bytes1(0x00); // compare to get bool
     }
 
     function parseSubIds(bytes calldata _encodedInput) public pure returns (uint32 subId1, uint32 subId2) {
