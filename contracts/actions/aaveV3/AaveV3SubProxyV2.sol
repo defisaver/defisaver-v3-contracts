@@ -35,8 +35,8 @@ contract AaveV3SubProxyV2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
     struct AaveSubData {
         uint128 minRatio;
         uint128 maxRatio;
-        uint128 targetRatioBoost;
         uint128 targetRatioRepay;
+        uint128 targetRatioBoost;
         bool boostEnabled;
         address market;
         bool isEOA;
@@ -188,8 +188,8 @@ contract AaveV3SubProxyV2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
     function parseSubData(bytes calldata _encodedInput) public pure returns (AaveSubData memory user) {
         user.minRatio = uint128(bytes16(_encodedInput[0:16]));
         user.maxRatio = uint128(bytes16(_encodedInput[16:32]));
-        user.targetRatioBoost = uint128(bytes16(_encodedInput[32:48]));
-        user.targetRatioRepay = uint128(bytes16(_encodedInput[48:64]));
+        user.targetRatioRepay = uint128(bytes16(_encodedInput[32:48]));
+        user.targetRatioBoost = uint128(bytes16(_encodedInput[48:64]));
         user.boostEnabled = (bytes1(_encodedInput[64:65])) != bytes1(0x00); // compare to get bool
         user.market = address(bytes20(_encodedInput[65:85]));
         user.isEOA = (bytes1(_encodedInput[85:86])) != bytes1(0x00); // compare to get bool
