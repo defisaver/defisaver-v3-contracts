@@ -20,12 +20,12 @@ contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
         // write flag to first slot to indicate if fee is taken from position or EOA/wallet
         uint256 flag = _takeFeeFromPosition ? POSITION_FEE_FLAG : EOA_OR_WALLET_FEE_FLAG;
         assembly {
-            sstore(0, flag)
+            tstore(0, flag)
         }
 
         // write length of _data to second slot
         assembly {
-            sstore(1, dataLength)
+            tstore(1, dataLength)
         }
 
         // calculate how many slots at full size are we going to use
@@ -37,7 +37,7 @@ contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
             bytes32 chunk;
             assembly {
                 chunk := mload(add(_data, mul(0x20, i))) // chunks are bytes32: _data[0:32] -> _data[32:64] -> etc
-                sstore(slot, chunk)
+                tstore(slot, chunk)
             }
         }
     }
@@ -45,7 +45,7 @@ contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
     function getFeeType() public view returns (uint256) {
         uint256 feeType;
         assembly{
-            feeType := sload(0)
+            feeType := tload(0)
         }
         return feeType;
     }
@@ -54,7 +54,7 @@ contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
         uint256 dataLength;
         // fetch data length from second slot
         assembly{
-            dataLength := sload(1)
+            dataLength := tload(1)
         }
         // find out how many full size chunks there are
         uint256 chunks = dataLength / 32;
@@ -64,7 +64,7 @@ contract TxSaverBytesTransientStorage is ITxSaverBytesTransientStorage {
             bytes32 chunk;
             uint256 slot = i + 1;
             assembly {
-                chunk := sload(slot)
+                chunk := tload(slot)
             }
             result = bytes.concat(result, chunk);
         }

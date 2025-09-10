@@ -234,7 +234,7 @@ library StorageSlot {
     function tload(AddressSlotType slot) internal view returns (address value) {
         /// @solidity memory-safe-assembly
         assembly {
-            value := sload(slot)
+            value := tload(slot)
         }
     }
 
@@ -244,7 +244,7 @@ library StorageSlot {
     function tstore(AddressSlotType slot, address value) internal {
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(slot, value)
+            tstore(slot, value)
         }
     }
 
@@ -254,7 +254,7 @@ library StorageSlot {
     function tload(BooleanSlotType slot) internal view returns (bool value) {
         /// @solidity memory-safe-assembly
         assembly {
-            value := sload(slot)
+            value := tload(slot)
         }
     }
 
@@ -264,7 +264,7 @@ library StorageSlot {
     function tstore(BooleanSlotType slot, bool value) internal {
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(slot, value)
+            tstore(slot, value)
         }
     }
 
@@ -274,7 +274,7 @@ library StorageSlot {
     function tload(Bytes32SlotType slot) internal view returns (bytes32 value) {
         /// @solidity memory-safe-assembly
         assembly {
-            value := sload(slot)
+            value := tload(slot)
         }
     }
 
@@ -284,7 +284,7 @@ library StorageSlot {
     function tstore(Bytes32SlotType slot, bytes32 value) internal {
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(slot, value)
+            tstore(slot, value)
         }
     }
 
@@ -294,7 +294,7 @@ library StorageSlot {
     function tload(Uint256SlotType slot) internal view returns (uint256 value) {
         /// @solidity memory-safe-assembly
         assembly {
-            value := sload(slot)
+            value := tload(slot)
         }
     }
 
@@ -304,7 +304,7 @@ library StorageSlot {
     function tstore(Uint256SlotType slot, uint256 value) internal {
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(slot, value)
+            tstore(slot, value)
         }
     }
 
@@ -314,7 +314,7 @@ library StorageSlot {
     function tload(Int256SlotType slot) internal view returns (int256 value) {
         /// @solidity memory-safe-assembly
         assembly {
-            value := sload(slot)
+            value := tload(slot)
         }
     }
 
@@ -324,7 +324,7 @@ library StorageSlot {
     function tstore(Int256SlotType slot, int256 value) internal {
         /// @solidity memory-safe-assembly
         assembly {
-            sstore(slot, value)
+            tstore(slot, value)
         }
     }
 }
