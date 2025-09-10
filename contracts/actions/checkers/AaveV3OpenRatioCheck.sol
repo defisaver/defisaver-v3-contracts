@@ -21,6 +21,7 @@ contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
     struct Params {
         uint256 targetRatio;
         address market;
+        address user;
     }
 
     /// @inheritdoc ActionBase
