@@ -86,7 +86,7 @@ async function deployContract(contractName, args) {
         overrides = {
             // The price (in wei) per unit of gas
             maxFeePerGas: hre.ethers.utils.parseUnits(gasPriceSelected, 'gwei'),
-            maxPriorityFeePerGas: hre.ethers.utils.parseUnits('1.1', 'gwei'),
+            maxPriorityFeePerGas: hre.ethers.utils.parseUnits('0.05', 'gwei'),
         };
     }
     if (args.nonce) {

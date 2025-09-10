@@ -2137,7 +2137,7 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x5BAD7F432e22BcF1937C8361933c9C804179aEDf",
+        "address": "0xe5b2f8d31b47f09400d8afb599e0f239179de6b6",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.11",
@@ -2145,6 +2145,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x5BAD7F432e22BcF1937C8361933c9C804179aEDf",
             "0x0CB0170F3413e54405F64d3C23BA3A1D8Bb96D99",
             "0xFe3BfD9E4d102275AC223704B7c470759E5C883b",
             "0xea6092C334Cc1Ed2a4154C2101D70d09B7Ad0b1E",
@@ -4209,14 +4210,14 @@
     },
     {
         "name": "LiquityV2TargetRatioCheck",
-        "address": "0x44F68fDE354916353B13C895F7081704484a7A8f",
+        "address": "0xAB5e11DBFAa8fBa7C275087a553d0D0E37A02343",
         "id": "0xd54d1b42",
         "path": "contracts/actions/checkers/LiquityV2TargetRatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x44F68fDE354916353B13C895F7081704484a7A8f"]
     },
     {
         "name": "LiquityV2RatioCheck",
@@ -4627,7 +4628,7 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
-    }
+    },
     { 
         "name": "ExecuteCall",
         "address": "0x538eda025a8be6ff8fc1fe6050ba3aafb7620608",
@@ -4638,5 +4639,29 @@
         "changeTime": "0",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "LiquityV2AdjustTimeTrigger",
+        "address": "0xDAC16ee91E5407214B75FB1871AaDf356010a939",
+        "id": "0x91d52698",
+        "path": "contracts/triggers/LiquityV2AdjustTimeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityV2DebtInFrontTrigger",
+        "address": "0x22899AF903f07FB272C34f6e573E6f967dcC32e7",
+        "id": "0xda723e62",
+        "path": "contracts/triggers/LiquityV2DebtInFrontTrigger.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": [
+            "0x66557aE7da534B1d668405e3e90e12E207Bb6277"
+        ]
     }
 ]
