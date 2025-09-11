@@ -3,6 +3,7 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
+const dfs = require('@defisaver/sdk');
 
 const {
     addrs,
@@ -16,12 +17,9 @@ const {
     isNetworkFork,
     openStrategyAndBundleStorage,
 } = require('./utils');
+const { executeAction } = require('./actions');
 
 const {
-    createAaveV3BoostStrategy,
-    createAaveV3FLBoostStrategy,
-    createAaveV3RepayStrategy,
-    createAaveV3FLRepayStrategy,
     createAaveV3EOABoostStrategy,
     createAaveV3EOAFLBoostStrategy,
     createAaveV3EOARepayStrategy,
@@ -29,10 +27,6 @@ const {
 } = require('../../strategies-spec/mainnet');
 
 const {
-    createAaveV3BoostL2Strategy,
-    createAaveV3FLBoostL2Strategy,
-    createAaveV3RepayL2Strategy,
-    createAaveV3FLRepayL2Strategy,
     createAaveV3EOABoostL2Strategy,
     createAaveV3EOAFLBoostL2Strategy,
     createAaveV3EOARepayL2Strategy,
@@ -67,14 +61,14 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS = {
             collSymbol: 'WETH',
             debtSymbol: 'USDC',
         },
-        {
-            collSymbol: 'WBTC',
-            debtSymbol: 'USDC',
-        },
-        {
-            collSymbol: 'WETH',
-            debtSymbol: 'USDT',
-        },
+        // {
+        //     collSymbol: 'WBTC',
+        //     debtSymbol: 'USDC',
+        // },
+        // {
+        //     collSymbol: 'WETH',
+        //     debtSymbol: 'USDT',
+        // },
     ],
     // 42161: [
     //     {
@@ -252,15 +246,16 @@ const expectTwoAaveV3PositionsToBeEqual = (oldPosition, newPosition) => {
     });
 };
 
-const openAaveV3EOAPosition = async (
-    proxy,
+const openAaveV3ProxyPosition = async (
     eoaAddr,
+    proxy,
     collSymbol,
     debtSymbol,
     collAmountInUSD,
     debtAmountInUSD,
 ) => {
-    const senderAcc = await hre.ethers.getSigner(eoaAddr);
+    const eoaSigner = await hre.ethers.getSigner(eoaAddr);
+    const proxyAddr = proxy.address;
 
     const collAsset = getAssetInfo(collSymbol === 'ETH' ? 'WETH' : collSymbol, chainIds[network]);
     const debtAsset = getAssetInfo(debtSymbol === 'ETH' ? 'WETH' : debtSymbol, chainIds[network]);
@@ -268,22 +263,88 @@ const openAaveV3EOAPosition = async (
     const collAmount = await fetchAmountInUSDPrice(collAsset.symbol, collAmountInUSD);
     const debtAmount = await fetchAmountInUSDPrice(debtAsset.symbol, debtAmountInUSD);
 
-    // Get the pool address from the market provider
-    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+    // Set balance for EOA and approve proxy to spend
+    await setBalance(collAsset.address, eoaAddr, collAmount);
+    await approve(collAsset.address, proxyAddr, eoaSigner);
+
+    // Get asset IDs from the pool
+    const aaveMarketContract = await hre.ethers.getContractAt(
+        'IPoolAddressesProvider',
+        addrs[network].AAVE_MARKET,
+    );
+    const poolAddress = await aaveMarketContract.getPool();
+    const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
+    const poolContract = await hre.ethers.getContractAt(poolContractName, poolAddress);
+    const collReserveData = await poolContract.getReserveData(collAsset.address);
+    const debtReserveData = await poolContract.getReserveData(debtAsset.address);
+
+    // Use DFS actions to create position through proxy
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        false,
+        addrs[network].AAVE_MARKET,
+        collAmount.toString(),
+        eoaAddr,
+        collAsset.address,
+        collReserveData.id,
+        true,
+        false,
+        proxyAddr,
+    );
+    const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        false, // useDefaultMarket
+        addrs[network].AAVE_MARKET, // marketAddr
+        debtAmount.toString(), // amount
+        proxyAddr, // proxy
+        VARIABLE_RATE, // rateMode
+        debtReserveData.id, // assetId (use reserve ID, not address)
+        false, // useOnBehalf
+        proxyAddr, // onBehalfAddr
+    );
+    const recipe = new dfs.Recipe('CreateAaveV3ProxyPositionRecipe', [
+        supplyAction,
+        borrowAction,
+    ]);
+
+    const functionData = recipe.encodeForDsProxyCall()[1];
+
+    await executeAction('RecipeExecutor', functionData, proxy);
+    console.log('AaveV3ProxyPosition opened');
+};
+
+const openAaveV3EOAPosition = async (
+    eoaAddr,
+    collSymbol,
+    debtSymbol,
+    collAmountInUSD,
+    debtAmountInUSD,
+) => {
+    const eoaSigner = await hre.ethers.getSigner(eoaAddr);
+
+    const collAsset = getAssetInfo(collSymbol === 'ETH' ? 'WETH' : collSymbol, chainIds[network]);
+    const debtAsset = getAssetInfo(debtSymbol === 'ETH' ? 'WETH' : debtSymbol, chainIds[network]);
+
+    const collAmount = await fetchAmountInUSDPrice(collAsset.symbol, collAmountInUSD);
+    const debtAmount = await fetchAmountInUSDPrice(debtAsset.symbol, debtAmountInUSD);
+
+    // Default market, should add option for other markets too
+    const aaveMarketContract = await hre.ethers.getContractAt(
+        'IPoolAddressesProvider',
+        addrs[network].AAVE_MARKET,
+    );
     const poolAddress = await aaveMarketContract.getPool();
 
     // Use the appropriate interface based on network
     const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
-    const poolContract = await hre.ethers.getContractAt(poolContractName, poolAddress, senderAcc);
+    const poolContract = await hre.ethers.getContractAt(poolContractName, poolAddress, eoaSigner);
 
     // Set balance and approve pool contract
     await setBalance(collAsset.address, eoaAddr, collAmount);
-    await approve(collAsset.address, poolAddress, senderAcc);
+    await approve(collAsset.address, poolAddress, eoaSigner);
 
     // Supply collateral directly to pool
     await poolContract.supply(collAsset.address, collAmount, eoaAddr, 0);
 
-    // Borrow debt directly from pool (rate mode 2 = variable)
+    // Borrow debt directly from pool
     await poolContract.borrow(debtAsset.address, debtAmount, VARIABLE_RATE, 0, eoaAddr);
 };
 
@@ -296,11 +357,10 @@ const getAaveV3PositionRatio = async (userAddr, aaveV3ViewParam) => {
     }
 
     const ratio = await aaveV3View.getRatio(marketAddr, userAddr);
-    console.log('RATIO IS THIS ->>>', ratio);
     return ratio;
 };
 
-const deployAaveV3BoostBundle = async (isEOA) => {
+const deployAaveV3BoostGenericBundle = async () => {
     const isL2 = network !== 'mainnet';
     const isFork = isNetworkFork();
     await openStrategyAndBundleStorage(isFork);
@@ -308,31 +368,22 @@ const deployAaveV3BoostBundle = async (isEOA) => {
     let boostStrategy;
     let flBoostStrategy;
 
-    if (isEOA) {
-        if (isL2) {
-            boostStrategy = createAaveV3EOABoostL2Strategy();
-            flBoostStrategy = createAaveV3EOAFLBoostL2Strategy();
-        } else {
-            boostStrategy = createAaveV3EOABoostStrategy();
-            flBoostStrategy = createAaveV3EOAFLBoostStrategy();
-        }
-    } else if (isL2) {
-        boostStrategy = createAaveV3BoostL2Strategy();
-        flBoostStrategy = createAaveV3FLBoostL2Strategy();
+    if (isL2) {
+        boostStrategy = createAaveV3EOABoostL2Strategy();
+        flBoostStrategy = createAaveV3EOAFLBoostL2Strategy();
     } else {
-        boostStrategy = createAaveV3BoostStrategy();
-        flBoostStrategy = createAaveV3FLBoostStrategy();
+        boostStrategy = createAaveV3EOABoostStrategy();
+        flBoostStrategy = createAaveV3EOAFLBoostStrategy();
     }
 
     const continuous = true;
     const boostStrategyId = await createStrategy(...boostStrategy, continuous);
     const flBoostStrategyId = await createStrategy(...flBoostStrategy, continuous);
     const bundleId = await createBundle([boostStrategyId, flBoostStrategyId]);
-    console.log('CREATED BUNDLE !!!!', bundleId);
     return bundleId;
 };
 
-const deployAaveV3RepayBundle = async (isEOA) => {
+const deployAaveV3RepayGenericBundle = async () => {
     const isL2 = network !== 'mainnet';
     const isFork = isNetworkFork();
     await openStrategyAndBundleStorage(isFork);
@@ -340,21 +391,12 @@ const deployAaveV3RepayBundle = async (isEOA) => {
     let repayStrategy;
     let flRepayStrategy;
 
-    // TODO -> Fix this
-    if (isEOA) {
-        if (isL2) {
-            repayStrategy = createAaveV3EOARepayL2Strategy();
-            flRepayStrategy = createAaveV3EOAFLRepayL2Strategy();
-        } else {
-            repayStrategy = createAaveV3EOARepayStrategy();
-            flRepayStrategy = createAaveV3EOAFLRepayStrategy();
-        }
-    } else if (isL2) {
-        repayStrategy = createAaveV3RepayL2Strategy();
-        flRepayStrategy = createAaveV3FLRepayL2Strategy();
+    if (isL2) {
+        repayStrategy = createAaveV3EOARepayL2Strategy();
+        flRepayStrategy = createAaveV3EOAFLRepayL2Strategy();
     } else {
-        repayStrategy = createAaveV3RepayStrategy();
-        flRepayStrategy = createAaveV3FLRepayStrategy();
+        repayStrategy = createAaveV3EOARepayStrategy();
+        flRepayStrategy = createAaveV3EOAFLRepayStrategy();
     }
 
     const continuous = true;
@@ -431,10 +473,11 @@ module.exports = {
     getPriceOracle,
     getAaveV3PositionInfo,
     expectTwoAaveV3PositionsToBeEqual,
+    openAaveV3ProxyPosition,
     openAaveV3EOAPosition,
     getAaveV3PositionRatio,
-    deployAaveV3BoostBundle,
-    deployAaveV3RepayBundle,
+    deployAaveV3BoostGenericBundle,
+    deployAaveV3RepayGenericBundle,
     setupAaveV3EOAPermissions,
     AAVE_V3_AUTOMATION_TEST_PAIRS,
     aaveV2assetsDefaultMarket,

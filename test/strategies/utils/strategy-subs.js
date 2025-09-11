@@ -324,7 +324,7 @@ const subAaveV3AutomationStrategy = async (
     };
 };
 
-const subAaveV3EOAAutomationStrategy = async (
+const subAaveV3AutomationStrategyGeneric = async (
     proxy,
     minRatio,
     maxRatio,
@@ -332,6 +332,7 @@ const subAaveV3EOAAutomationStrategy = async (
     optimalRatioRepay,
     boostEnabled,
     eoaAddr,
+    isEOA,
 ) => {
     const encoder = automationSdk.strategySubService.aaveV3Encode;
 
@@ -351,7 +352,7 @@ const subAaveV3EOAAutomationStrategy = async (
         optimalRatioBoost, // targetRatioBoost
         true, // isBoostEnabled
         marketAddr, // marketAddr
-        true, // useOnBehalf (true for EOA)
+        isEOA, // useOnBehalf (true for EOA)
         eoaAddr, // onBehalfAddr
     );
 
@@ -369,7 +370,7 @@ const subAaveV3EOAAutomationStrategy = async (
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-    // console.log(`GasUsed subToAaveV3EOAProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+    console.log(`GasUsed subToAaveV3EOAProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 
     const latestSubId = await getLatestSubId();
 
@@ -1154,7 +1155,7 @@ module.exports = {
     subLiquityAutomationStrategy,
     subAaveV2AutomationStrategy,
     subAaveV3AutomationStrategy,
-    subAaveV3EOAAutomationStrategy,
+    subAaveV3AutomationStrategyGeneric,
     subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,

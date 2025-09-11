@@ -11,7 +11,6 @@ const {
     revertToSnapshot,
     chainIds,
     getContractFromRegistry,
-    getAddrFromRegistry,
     getStrategyExecutorContract,
     getAndSetMockExchangeWrapper,
     formatMockExchangeObjUsdFeed,
@@ -20,12 +19,13 @@ const {
     redeploy,
     sendEther,
     addBalancerFlLiquidity,
+    placeHolderAddr,
 } = require('../../../utils/utils');
 
 const { addBotCaller } = require('../../utils/utils-strategies');
 const {
     subAaveV3EOAAutomationStrategy,
-    subAaveV3AutomationStrategy,
+    subAaveV3AutomationStrategyGeneric,
 } = require('../../utils/strategy-subs');
 const {
     callAaveV3EOABoostStrategy,
@@ -33,10 +33,11 @@ const {
 } = require('../../utils/strategy-calls');
 const {
     AAVE_V3_AUTOMATION_TEST_PAIRS,
+    openAaveV3ProxyPosition,
     openAaveV3EOAPosition,
     getAaveV3PositionRatio,
-    deployAaveV3BoostBundle,
-    deployAaveV3RepayBundle,
+    deployAaveV3BoostGenericBundle,
+    deployAaveV3RepayGenericBundle,
     setupAaveV3EOAPermissions,
 } = require('../../../utils/aave');
 
@@ -86,8 +87,8 @@ const runEOABoostTests = () => {
             await redeploy('AaveV3OpenRatioCheck', isFork);
             await redeploy('AaveV3View', isFork);
 
-            const newRepayBundleId = await deployAaveV3RepayBundle(true);
-            const newBoostBundleId = await deployAaveV3BoostBundle(true);
+            const newRepayBundleId = await deployAaveV3RepayGenericBundle(true);
+            const newBoostBundleId = await deployAaveV3BoostGenericBundle(true);
             subProxyContract = await redeploy(
                 'AaveV3SubProxyV2',
                 isFork,
@@ -110,7 +111,6 @@ const runEOABoostTests = () => {
             // TODO -> refactor this to work for both EOA and proxy
             if (isEOA) {
                 await openAaveV3EOAPosition(
-                    proxy,
                     senderAcc.address,
                     collAsset.symbol,
                     debtAsset.symbol,
@@ -126,10 +126,13 @@ const runEOABoostTests = () => {
                     debtAsset.address,
                 );
             } else {
-                // TODO: Add openAaveV3ProxyPosition function and regular AaveV3
-                // strategy calls
-                throw new Error(
-                    'Proxy position opening not implemented yet - only EOA tests supported for now',
+                await openAaveV3ProxyPosition(
+                    senderAcc.address,
+                    proxy,
+                    collAsset.symbol,
+                    debtAsset.symbol,
+                    COLL_AMOUNT_IN_USD,
+                    DEBT_AMOUNT_IN_USD,
                 );
             }
 
@@ -142,7 +145,7 @@ const runEOABoostTests = () => {
             let subData;
             let boostSubId;
             if (isEOA) {
-                const result = await subAaveV3EOAAutomationStrategy(
+                const result = await subAaveV3AutomationStrategyGeneric(
                     proxy,
                     TRIGGER_REPAY_RATIO,
                     TRIGGER_BOOST_RATIO,
@@ -150,27 +153,34 @@ const runEOABoostTests = () => {
                     TARGET_RATIO_REPAY,
                     BOOST_ENABLED,
                     senderAcc.address,
+                    true,
                 );
                 boostSubId = result.boostSubId;
                 subData = result.subData;
             } else {
-                console.log('SHOULD NOT BE HERE !!!!');
-                console.log('SHOULD NOT BE HERE !!!!');
-                console.log('SHOULD NOT BE HERE !!!!');
-                console.log('SHOULD NOT BE HERE !!!!');
-                console.log('SHOULD NOT BE HERE !!!!');
-                const result = await subAaveV3AutomationStrategy(
+                console.log('SUBBING TO AAVE PROXY !!!!');
+                console.log('SUBBING TO AAVE PROXY !!!!');
+                console.log('SUBBING TO AAVE PROXY !!!!');
+                console.log('SUBBING TO AAVE PROXY !!!!');
+                console.log('SUBBING TO AAVE PROXY !!!!');
+                const result = await subAaveV3AutomationStrategyGeneric(
                     proxy,
                     TRIGGER_REPAY_RATIO,
                     TRIGGER_BOOST_RATIO,
                     TARGET_RATIO_BOOST,
                     TARGET_RATIO_REPAY,
-                    true,
+                    BOOST_ENABLED,
+                    senderAcc.address,
+                    false,
                 );
                 boostSubId = result.boostSubId;
-                subData = result.boostSub;
+                subData = result.subData;
             }
 
+            console.log('SUBBED !!!!');
+            console.log('SUBBED !!!!');
+            console.log('SUBBED !!!!');
+            console.log('SUBBED !!!!');
             // Get sub info
             const subDataInStruct = await subProxyContract.parseSubData(subData);
             console.log('subDataInStruct ---------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
@@ -179,7 +189,7 @@ const runEOABoostTests = () => {
             const strategySub = await subProxyContract.formatBoostSub(
                 subDataInStruct,
                 proxy.address,
-                positionOwner,
+                senderAcc.address,
             );
 
             console.log('strategySub BOOST  ------->>>>>>>>>> \n', strategySub);
@@ -201,16 +211,17 @@ const runEOABoostTests = () => {
 
             // Execute strategy
             if (isFLStrategy) {
-                console.log('SHOULD NOT BE HERE !!!!');
-                console.log('SHOULD NOT BE HERE !!!!');
-                console.log('SHOULD NOT BE HERE !!!!');
-                console.log('SHOULD NOT BE HERE !!!!');
-                console.log('SHOULD NOT BE HERE !!!!');
-                console.log('SHOULD NOT BE HERE !!!!');
-                console.log('SHOULD NOT BE HERE !!!!');
+                console.log('Executing FL Boost strategy !!!!');
+                console.log('Executing FL Boost strategy !!!!');
+                console.log('Executing FL Boost strategy !!!!');
+                console.log('Executing FL Boost strategy !!!!');
+                console.log('Executing FL Boost strategy !!!!');
+                console.log('Executing FL Boost strategy !!!!');
+                console.log('Executing FL Boost strategy !!!!');
                 await addBalancerFlLiquidity(debtAsset.address);
                 await addBalancerFlLiquidity(collAsset.address);
 
+                // TODO -> pass random params like placeholderAddr, to check if piping works
                 await callAaveV3EOAFLBoostStrategy(
                     strategyExecutor,
                     1,
@@ -221,9 +232,10 @@ const runEOABoostTests = () => {
                     flAddr,
                     debtAsset.address,
                     collAsset.address,
-                    positionOwner,
+                    placeHolderAddr, // doesnt matter what we put here, will look at it from subData
                 );
             } else {
+                // TODO -> pass random params like placeholderAddr, to check if piping works
                 await callAaveV3EOABoostStrategy(
                     strategyExecutor,
                     0,
@@ -231,7 +243,7 @@ const runEOABoostTests = () => {
                     strategySub,
                     exchangeObject,
                     boostAmount,
-                    positionOwner,
+                    placeHolderAddr, // doesnt matter what we put here, will look at it from subData
                 );
             }
 
@@ -253,30 +265,28 @@ const runEOABoostTests = () => {
                 chainIds[network],
             );
 
-            // TODO: Enable proxy tests when openAaveV3ProxyPosition and regular
-            // strategy calls are implemented
-            // it(`... should execute aaveV3 boost strategy for ${pair.collSymbol} /
-            // ${pair.debtSymbol} pair`, async () => {
-            //     const isEOA = false;
-            //     const isFLStrategy = false;
-            //     await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
-            // });
-            // it(`... should execute aaveV3 FL boost strategy for ${pair.collSymbol} /
-            // ${pair.debtSymbol} pair`, async () => {
-            //     const isEOA = false;
-            //     const isFLStrategy = true;
-            //     await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
-            // });
+            it(`... should execute aaveV3 SW boost strategy for ${pair.collSymbol} /
+            ${pair.debtSymbol} pair`, async () => {
+                const isEOA = false;
+                const isFLStrategy = false;
+                await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
+            });
+            it(`... should execute aaveV3 SW FL boost strategy for ${pair.collSymbol} /
+            ${pair.debtSymbol} pair`, async () => {
+                const isEOA = false;
+                const isFLStrategy = true;
+                await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
+            });
             it(`... should execute aaveV3 EOA boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = true;
                 const isFLStrategy = false;
                 await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
             });
-            // it(`... should execute aaveV3 EOA FL boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
-            //     const isEOA = true;
-            //     const isFLStrategy = true;
-            //     await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
-            // });
+            it(`... should execute aaveV3 EOA FL boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+                const isEOA = true;
+                const isFLStrategy = true;
+                await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
+            });
         }
     });
 };

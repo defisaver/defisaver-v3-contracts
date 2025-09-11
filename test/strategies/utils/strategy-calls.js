@@ -6602,16 +6602,6 @@ const callAaveV3EOABoostStrategy = async (
         placeHolderAddr,
     );
 
-    // console.log('CALLING STRAT !!!!!!');
-    // console.log('CALLING STRAT !!!!!!');
-    // console.log('CALLING STRAT !!!!!!');
-    // console.log('CALLING STRAT !!!!!!');
-    // console.log('CALLING STRAT !!!!!!');
-    // console.log('CALLING STRAT !!!!!!');
-    // console.log('CALLING STRAT !!!!!!');
-    // console.log('CALLING STRAT !!!!!!');
-    // console.log('CALLING STRAT !!!!!!');
-
     const feeTakingAction = isL2
         ? new dfs.actions.basic.GasFeeActionL2(gasCost, exchangeObject[1], '0', '0', '10000000')
         : new dfs.actions.basic.GasFeeAction(gasCost, exchangeObject[1], '0');
@@ -6646,16 +6636,14 @@ const callAaveV3EOABoostStrategy = async (
         ),
     );
 
-    console.log('ACTIONS CALL DATA -->>>>>>');
-    console.log(actionsCallData);
-    console.log('TRIGER CALL DATA -->>>>>>');
-    console.log(triggerCallData);
+    // console.log('ACTIONS CALL DATA -->>>>>>');
+    // console.log(actionsCallData);
+    // console.log('TRIGER CALL DATA -->>>>>>');
+    // console.log(triggerCallData);
     // console.log('subId --->>> \n', subId);
     // console.log('strategyIndex --->>> \n', strategyIndex);
     // console.log('strategySub --->>>> \n', strategySub);
 
-    // TODO -> only to fix this !!!
-    // TODO -> Should prob add approvals and delegations to SW from EOA
     const { callData, receipt } = await executeStrategy(
         isL2,
         strategyExecutor,
