@@ -4662,5 +4662,27 @@
         "history": [
             "0x66557aE7da534B1d668405e3e90e12E207Bb6277"
         ]
+    },
+    {
+        "name": "LiquityV2AdjustRateDebtInFrontTrigger",
+        "address": "0xF80C54C53AfE8c09c62D270F535d41A71A1c485D",
+        "id": "0xd9aa7af4",
+        "path": "contracts/triggers/LiquityV2AdjustRateDebtInFrontTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityV2NewInterestRateChecker",
+        "address": "0xb8E229d794e72AD5493D74BB1B17b0885573DC37",
+        "id": "0xc3bbc489",
+        "path": "contracts/actions/checkers/LiquityV2NewInterestRateChecker.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
     }
 ]
