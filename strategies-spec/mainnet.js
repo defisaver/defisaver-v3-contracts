@@ -6074,6 +6074,41 @@ const createLiquityV2PaybackFromSPStrategy = () => {
     return liquityV2PaybackFromSPStrategy.encodeForDsProxyCall();
 };
 
+const createLiquityV2InterestRateAdjustmentStrategy = () => {
+    const liquityV2InterestRateAdjustmentStrategy = new dfs.Strategy('LiquityV2InterestRateAdjustmentStrategy');
+    liquityV2InterestRateAdjustmentStrategy.addSubSlot('&market', 'address');
+    liquityV2InterestRateAdjustmentStrategy.addSubSlot('&troveId', 'uint256');
+    liquityV2InterestRateAdjustmentStrategy.addSubSlot('&interestRateChange', 'uint256');
+
+    const liquityV2AdjustRateDebtInFrontTrigger = new dfs.triggers.LiquityV2AdjustRateDebtInFrontTrigger(
+        'market',
+        'troveId',
+        'criticalDebtInFrontLimit',
+        'nonCriticalDebtInFrontLimit',
+    );
+    liquityV2InterestRateAdjustmentStrategy.addTrigger(liquityV2AdjustRateDebtInFrontTrigger);
+
+    const liquityV2AdjustInterestRateAction = new dfs.actions.liquityV2.LiquityV2AdjustInterestRateAction(
+        '&market',
+        '&troveId',
+        '%newAnnualInterestRate', // sent by backend
+        '%upperHint', // sent by backend
+        '%lowerHint', // sent by backend
+        '%maxUpfrontFee', // sent by backend
+    );
+
+    const liquityV2NewInterestRateCheckerAction = new dfs.actions.checkers.LiquityV2NewInterestRateCheckerAction(
+        '&market',
+        '&troveId',
+        '&interestRateChange',
+    );
+
+    liquityV2InterestRateAdjustmentStrategy.addAction(liquityV2AdjustInterestRateAction);
+    liquityV2InterestRateAdjustmentStrategy.addAction(liquityV2NewInterestRateCheckerAction);
+
+    return liquityV2InterestRateAdjustmentStrategy.encodeForDsProxyCall();
+};
+
 const createCompV3BoostOnPriceStrategy = () => {
     const compV3BoostOnPriceStrategy = new dfs.Strategy('CompV3BoostOnPriceStrategy');
     compV3BoostOnPriceStrategy.addSubSlot('&market', 'address');
@@ -6569,6 +6604,7 @@ module.exports = {
     createFluidT1BoostStrategy,
     createFluidT1FLBoostStrategy,
     createLiquityV2PaybackFromSPStrategy,
+    createLiquityV2InterestRateAdjustmentStrategy,
     createCompV3BoostOnPriceStrategy,
     createCompV3FLBoostOnPriceStrategy,
     createCompV3RepayOnPriceStrategy,

@@ -19,6 +19,7 @@ const {
     createLiquityV2FLRepayOnPriceStrategy,
     createLiquityV2FLBoostWithCollOnPriceStrategy,
     createLiquityV2PaybackFromSPStrategy,
+    createLiquityV2InterestRateAdjustmentStrategy,
 } = require('../../strategies-spec/mainnet');
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
 
@@ -37,7 +38,7 @@ const getLiquityV2Hints = async (market, collIndex, interestRate, isFork = false
     const seed = 42;
 
     const viewContract = await getContractFromRegistry('LiquityV2View', isFork);
-    const { upperHint, lowerHint } = await viewContract.getInsertPosition(
+    const { prevId, nextId } = await viewContract.getInsertPosition(
         market,
         collIndex,
         interestRate,
@@ -45,7 +46,7 @@ const getLiquityV2Hints = async (market, collIndex, interestRate, isFork = false
         seed,
     );
 
-    return { upperHint, lowerHint };
+    return { upperHint: prevId, lowerHint: nextId };
 };
 
 const getLiquityV2MaxUpfrontFee = async (
@@ -100,7 +101,7 @@ const getLiquityV2TestPairs = async () => [
         collIndex: 0,
     },
     {
-        market: '0x2d4ef56cb626e9a4c90c156018ba9ce269573c61',
+        market: '0x8d733F7ea7c23Cbea7C613B6eBd845d46d3aAc54',
         supplyTokenSymbol: 'wstETH',
         collIndex: 1,
     },
@@ -200,6 +201,13 @@ const deployLiquityV2PaybackFromSPStrategy = async (proxy, isFork) => {
     return liquityV2PaybackFromSPStrategyId;
 };
 
+const deployLiquityV2InterestRateAdjustmentStrategy = async (proxy, isFork) => {
+    await openStrategyAndBundleStorage(isFork);
+    const interestRateAdjustmentStrategy = createLiquityV2InterestRateAdjustmentStrategy();
+    const interestRateAdjustmentStrategyId = await createStrategy(...interestRateAdjustmentStrategy, true);
+    return interestRateAdjustmentStrategyId;
+};
+
 module.exports = {
     getLiquityV2Hints,
     getLiquityV2MaxUpfrontFee,
@@ -211,6 +219,7 @@ module.exports = {
     deployLiquityV2BoostOnPriceBundle,
     deployLiquityV2RepayOnPriceBundle,
     deployLiquityV2PaybackFromSPStrategy,
+    deployLiquityV2InterestRateAdjustmentStrategy,
     CollActionType,
     DebtActionType,
 };
