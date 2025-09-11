@@ -6463,7 +6463,7 @@ const createAaveV3EOABoostStrategy = () => {
     const aaveV3EOABoostStrategy = new dfs.Strategy('AaveV3EOABoost');
 
     aaveV3EOABoostStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOABoostStrategy.addSubSlot('&checkBoostState', 'uint256');
+    aaveV3EOABoostStrategy.addSubSlot('&checkBoostState', 'uint8');
     // aaveV3EOABoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOABoostStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOABoostStrategy.addSubSlot('&useOnBehalf', 'bool');
@@ -6503,7 +6503,7 @@ const createAaveV3EOABoostStrategy = () => {
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         '%useDefaultMarket', // hardcoded to false
-        '&market', // from subData
+        '&marketAddr', // from subData
         '$3', // amount hardcoded
         '&proxy', // proxy hardcoded
         '%collAddr', // is variable as it can change
@@ -6513,7 +6513,6 @@ const createAaveV3EOABoostStrategy = () => {
         '&onBehalfAddr', // EOA addr from subData
     );
 
-    // TODO -> Update this in defisaver-sdk
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkBoostState',
         '&targetRatio',
@@ -6534,7 +6533,7 @@ const createAaveV3EOAFLBoostStrategy = () => {
     const aaveV3EOAFLBoostStrategy = new dfs.Strategy('AaveV3EOAFLBoost');
 
     aaveV3EOAFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOAFLBoostStrategy.addSubSlot('&checkBoostState', 'uint256');
+    aaveV3EOAFLBoostStrategy.addSubSlot('&checkBoostState', 'uint8');
     // aaveV3EOAFLBoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLBoostStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOAFLBoostStrategy.addSubSlot('&useOnBehalf', 'bool');
@@ -6574,12 +6573,12 @@ const createAaveV3EOAFLBoostStrategy = () => {
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         '%useDefaultMarket', // hardcoded to false
-        '&market', // from subData
+        '&marketAddr', // from subData
         '$3', // amount hardcoded
         '&proxy', // proxy hardcoded
         '%collAddr', // is variable as it can change
         '%assetId', // must be variable
-        '%enableAsColl', // hardcoded always enable as coll
+        '%enableAsColl', // backend hardcoded always enable as coll
         '&useOnBehalf', // hardcoded true use on behalf
         '&onBehalfAddr', // EOA addr from subData as its true
     );
@@ -6615,7 +6614,7 @@ const createAaveV3EOARepayStrategy = () => {
     const aaveV3EOARepayStrategy = new dfs.Strategy('AaveV3EOARepay');
 
     aaveV3EOARepayStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOARepayStrategy.addSubSlot('&checkRepayState', 'uint256');
+    aaveV3EOARepayStrategy.addSubSlot('&checkRepayState', 'uint8');
     // aaveV3EOARepayStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOARepayStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOARepayStrategy.addSubSlot('&useOnBehalf', 'bool');
@@ -6652,7 +6651,7 @@ const createAaveV3EOARepayStrategy = () => {
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         '%useDefaultMarket', // hardcoded to false
-        '&market', // from subData
+        '&marketAddr', // from subData
         '$3', // amount hardcoded
         '&proxy', // proxy hardcoded
         '%rateMode', // variable type of debt
@@ -6682,7 +6681,7 @@ const createAaveV3EOAFLRepayStrategy = () => {
     const aaveV3EOAFLRepayStrategy = new dfs.Strategy('AaveV3EOAFLRepay');
 
     aaveV3EOAFLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOAFLRepayStrategy.addSubSlot('&checkRepayState', 'uint256');
+    aaveV3EOAFLRepayStrategy.addSubSlot('&checkRepayState', 'uint8');
     // aaveV3EOAFLRepayStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLRepayStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOAFLRepayStrategy.addSubSlot('&useOnBehalf', 'bool');

@@ -33,6 +33,7 @@ const {
 } = require('./triggers');
 
 const {
+    addrs,
     DAI_ADDR,
     WBTC_ADDR,
     WETH_ADDRESS,
@@ -320,6 +321,87 @@ const subAaveV3AutomationStrategy = async (
         boostSubId: subId2,
         repaySub: subData.repaySub,
         boostSub: subData.boostSub,
+    };
+};
+
+const subAaveV3EOAAutomationStrategy = async (
+    proxy,
+    minRatio,
+    maxRatio,
+    optimalRatioBoost,
+    optimalRatioRepay,
+    boostEnabled,
+    eoaAddr,
+) => {
+    const encoder = automationSdk.strategySubService.aaveV3Encode;
+
+    // Bundle ID for AaveV3 EOA strategies - using 1 for boost strategies
+    // AAVE_V3_EOA_REPAY = 52,
+    // AAVE_V3_EOA_BOOST = 53,
+    const bundleId = boostEnabled ? 53 : 52;
+
+    // Get AAVE market address (network and addrs are already imported at top of file)
+    const marketAddr = addrs[network].AAVE_MARKET;
+
+    const subInputArray = encoder.leverageManagementGeneric(
+        bundleId, // strategyOrBundleId
+        minRatio, // triggerRatioRepay
+        maxRatio, // triggerRatioBoost
+        optimalRatioRepay, // targetRatioRepay
+        optimalRatioBoost, // targetRatioBoost
+        true, // isBoostEnabled
+        marketAddr, // marketAddr
+        true, // useOnBehalf (true for EOA)
+        eoaAddr, // onBehalfAddr
+    );
+
+    // Extract subData from the array [strategyOrBundleId, isBundle, subData]
+    // leverageManagementGeneric returns [strategyOrBundleId, isBundle, subData]
+    const subInput = subInputArray[2]; // subData is already a hex string, not an array
+
+    const subProxyName = 'AaveV3SubProxyV2';
+    const subProxyAddr = await getAddrFromRegistry(subProxyName);
+    const AaveV3SubProxyV2 = await hre.ethers.getContractFactory(subProxyName);
+    const functionData = AaveV3SubProxyV2.interface.encodeFunctionData('subToAaveAutomation', [subInput]);
+    // console.log('functionData', functionData);
+
+    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
+    // console.log(`GasUsed subToAaveV3EOAProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+
+    const latestSubId = await getLatestSubId();
+
+    let subId1 = '0';
+    let subId2 = '0';
+
+    if (boostEnabled) {
+        subId1 = (parseInt(latestSubId, 10) - 1).toString();
+        subId2 = latestSubId;
+    } else {
+        subId1 = latestSubId;
+        subId2 = '0';
+    }
+
+    // Parse the subscription data and format boost sub like the non-EOA version does
+    const { repaySub, boostSub } = await hre.ethers.getContractAt('AaveV3SubProxyV2', subProxyAddr)
+        .then((c) => [c, c.parseSubData(subInput)])
+        .then(async ([c, subData]) => {
+            // eslint-disable-next-line no-param-reassign
+            subData = await subData;
+            return ({
+                boostSub: await c.formatBoostSub(subData, proxy.address, eoaAddr),
+                repaySub: await c.formatRepaySub(subData, proxy.address, eoaAddr),
+            });
+        });
+
+    return {
+        repaySubId: subId1,
+        boostSubId: subId2,
+        subData: subInput, // Return the parsed boost sub struct
+        repaySub,
+        boostSub,
     };
 };
 
@@ -1072,6 +1154,7 @@ module.exports = {
     subLiquityAutomationStrategy,
     subAaveV2AutomationStrategy,
     subAaveV3AutomationStrategy,
+    subAaveV3EOAAutomationStrategy,
     subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,

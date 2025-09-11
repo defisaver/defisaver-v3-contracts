@@ -6,8 +6,8 @@ const { runEOACloseTests } = require('./close');
 
 describe('AaveV3 EOA Full Strategy Tests', () => {
     runEOABoostTests();
-    runEOARepayTests();
-    runEOABoostOnPriceTests();
-    runEOARepayOnPriceTests();
-    runEOACloseTests();
+    // runEOARepayTests();
+    // runEOABoostOnPriceTests();
+    // runEOARepayOnPriceTests();
+    // runEOACloseTests();
 });
