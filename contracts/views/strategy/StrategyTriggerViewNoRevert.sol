@@ -196,6 +196,7 @@ contract StrategyTriggerViewNoRevert is
     function _verifyAaveV3MinDebtPosition(
         address _smartWallet
     ) internal view returns (TriggerStatus) {
+        // TODO -> Hardcoded DEFAULT_AAVE_MARKET
         /// @dev AaveV3 automation only supports Core market at the moment (Default market)
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
         (, uint256 totalDebtUSD ,,,,) = lendingPool.getUserAccountData(_smartWallet);

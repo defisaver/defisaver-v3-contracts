@@ -147,6 +147,7 @@ contract LSVView is
         uint256 _counter
     ) internal view returns (uint256 counter) {
         counter = _counter;
+        // TODO -> hardcoding DEFAULT_AAVE_MARKET
         IPoolV3 lendingPool = getLendingPool(DEFAULT_AAVE_MARKET);
         DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
             TokenUtils.WETH_ADDR
@@ -376,6 +377,7 @@ contract LSVView is
         address[] memory _collTokens
     ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) 
         {
+        // TODO -> Hardcoded DEFAULT_AAVE_MARKET
         IPoolV3 lendingPool = getLendingPool(DEFAULT_AAVE_MARKET);
         DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
             TokenUtils.WETH_ADDR
