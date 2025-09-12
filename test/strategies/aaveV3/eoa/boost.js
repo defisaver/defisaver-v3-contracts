@@ -19,14 +19,10 @@ const {
     redeploy,
     sendEther,
     addBalancerFlLiquidity,
-    placeHolderAddr,
 } = require('../../../utils/utils');
 
 const { addBotCaller } = require('../../utils/utils-strategies');
-const {
-    subAaveV3EOAAutomationStrategy,
-    subAaveV3AutomationStrategyGeneric,
-} = require('../../utils/strategy-subs');
+const { subAaveV3AutomationStrategyGeneric } = require('../../utils/strategy-subs');
 const {
     callAaveV3EOABoostStrategy,
     callAaveV3EOAFLBoostStrategy,
@@ -41,13 +37,6 @@ const {
     setupAaveV3EOAPermissions,
 } = require('../../../utils/aave');
 
-const TRIGGER_REPAY_RATIO = 120;
-const TRIGGER_BOOST_RATIO = 200;
-const TARGET_RATIO_BOOST = 180;
-const TARGET_RATIO_REPAY = 150;
-const COLL_AMOUNT_IN_USD = '40000';
-const DEBT_AMOUNT_IN_USD = '15000';
-const BOOST_AMOUNT_IN_USD = '5000';
 const BOOST_ENABLED = true;
 
 const runEOABoostTests = () => {
@@ -105,17 +94,28 @@ const runEOABoostTests = () => {
             await revertToSnapshot(snapshotId);
         });
 
-        const baseTest = async (collAsset, debtAsset, isEOA, isFLStrategy) => {
+        const baseTest = async (
+            collAsset,
+            debtAsset,
+            triggerRatioRepay,
+            triggerRatioBoost,
+            targetRatioRepay,
+            targetRatioBoost,
+            collAmountInUSD,
+            debtAmountInUSD,
+            boostAmountInUSD,
+            isEOA,
+            isFLStrategy,
+        ) => {
             const positionOwner = isEOA ? senderAcc.address : proxy.address;
             // Open position
-            // TODO -> refactor this to work for both EOA and proxy
             if (isEOA) {
                 await openAaveV3EOAPosition(
                     senderAcc.address,
                     collAsset.symbol,
                     debtAsset.symbol,
-                    COLL_AMOUNT_IN_USD,
-                    DEBT_AMOUNT_IN_USD,
+                    collAmountInUSD,
+                    debtAmountInUSD,
                 );
 
                 // EOA delegates to the actual Smart Wallet address that executes the strategy
@@ -131,8 +131,8 @@ const runEOABoostTests = () => {
                     proxy,
                     collAsset.symbol,
                     debtAsset.symbol,
-                    COLL_AMOUNT_IN_USD,
-                    DEBT_AMOUNT_IN_USD,
+                    collAmountInUSD,
+                    debtAmountInUSD,
                 );
             }
 
@@ -141,16 +141,15 @@ const runEOABoostTests = () => {
             console.log('ratioBefore', ratioBefore);
 
             // Create subscription based on whether it's EOA or proxy
-            // TODO -> refactor this to work for both EOA and proxy
             let subData;
             let boostSubId;
             if (isEOA) {
                 const result = await subAaveV3AutomationStrategyGeneric(
                     proxy,
-                    TRIGGER_REPAY_RATIO,
-                    TRIGGER_BOOST_RATIO,
-                    TARGET_RATIO_BOOST,
-                    TARGET_RATIO_REPAY,
+                    triggerRatioRepay,
+                    triggerRatioBoost,
+                    targetRatioRepay,
+                    targetRatioBoost,
                     BOOST_ENABLED,
                     senderAcc.address,
                     true,
@@ -159,16 +158,12 @@ const runEOABoostTests = () => {
                 subData = result.subData;
             } else {
                 console.log('SUBBING TO AAVE PROXY !!!!');
-                console.log('SUBBING TO AAVE PROXY !!!!');
-                console.log('SUBBING TO AAVE PROXY !!!!');
-                console.log('SUBBING TO AAVE PROXY !!!!');
-                console.log('SUBBING TO AAVE PROXY !!!!');
                 const result = await subAaveV3AutomationStrategyGeneric(
                     proxy,
-                    TRIGGER_REPAY_RATIO,
-                    TRIGGER_BOOST_RATIO,
-                    TARGET_RATIO_BOOST,
-                    TARGET_RATIO_REPAY,
+                    triggerRatioRepay,
+                    triggerRatioBoost,
+                    targetRatioRepay,
+                    targetRatioBoost,
                     BOOST_ENABLED,
                     senderAcc.address,
                     false,
@@ -178,13 +173,10 @@ const runEOABoostTests = () => {
             }
 
             console.log('SUBBED !!!!');
-            console.log('SUBBED !!!!');
-            console.log('SUBBED !!!!');
-            console.log('SUBBED !!!!');
             // Get sub info
             const subDataInStruct = await subProxyContract.parseSubData(subData);
-            console.log('subDataInStruct ---------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-            console.log(subDataInStruct);
+            // console.log('subDataInStruct ---------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+            // console.log(subDataInStruct);
 
             const strategySub = await subProxyContract.formatBoostSub(
                 subDataInStruct,
@@ -192,8 +184,8 @@ const runEOABoostTests = () => {
                 senderAcc.address,
             );
 
-            console.log('strategySub BOOST  ------->>>>>>>>>> \n', strategySub);
-            const boostAmount = await fetchAmountInUSDPrice(debtAsset.symbol, BOOST_AMOUNT_IN_USD);
+            // console.log('strategySub BOOST  ------->>>>>>>>>> \n', strategySub);
+            const boostAmount = await fetchAmountInUSDPrice(debtAsset.symbol, boostAmountInUSD);
             console.log(boostAmount);
 
             const exchangeObject = await formatMockExchangeObjUsdFeed(
@@ -203,20 +195,14 @@ const runEOABoostTests = () => {
                 mockWrapper,
             );
 
-            console.log('exchangeObject !!!!!');
-            console.log('exchangeObject !!!!!');
-            console.log('exchangeObject !!!!!');
-            console.log('exchangeObject !!!!!');
-            console.log(exchangeObject);
+            // console.log('exchangeObject !!!!!');
+            // console.log('exchangeObject !!!!!');
+            // console.log('exchangeObject !!!!!');
+            // console.log('exchangeObject !!!!!');
+            // console.log(exchangeObject);
 
             // Execute strategy
             if (isFLStrategy) {
-                console.log('Executing FL Boost strategy !!!!');
-                console.log('Executing FL Boost strategy !!!!');
-                console.log('Executing FL Boost strategy !!!!');
-                console.log('Executing FL Boost strategy !!!!');
-                console.log('Executing FL Boost strategy !!!!');
-                console.log('Executing FL Boost strategy !!!!');
                 console.log('Executing FL Boost strategy !!!!');
                 await addBalancerFlLiquidity(debtAsset.address);
                 await addBalancerFlLiquidity(collAsset.address);
@@ -232,7 +218,6 @@ const runEOABoostTests = () => {
                     flAddr,
                     debtAsset.address,
                     collAsset.address,
-                    placeHolderAddr, // doesnt matter what we put here, will look at it from subData
                 );
             } else {
                 // TODO -> pass random params like placeholderAddr, to check if piping works
@@ -243,13 +228,12 @@ const runEOABoostTests = () => {
                     strategySub,
                     exchangeObject,
                     boostAmount,
-                    placeHolderAddr, // doesnt matter what we put here, will look at it from subData
                 );
             }
 
             const ratioAfter = await getAaveV3PositionRatio(positionOwner);
             console.log('ratioAfter', ratioAfter);
-
+            console.log('ratioBefore', ratioBefore);
             expect(ratioAfter).to.be.lt(ratioBefore);
         };
 
@@ -269,23 +253,71 @@ const runEOABoostTests = () => {
             ${pair.debtSymbol} pair`, async () => {
                 const isEOA = false;
                 const isFLStrategy = false;
-                await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
+                await baseTest(
+                    collAsset,
+                    debtAsset,
+                    pair.triggerRatioRepay,
+                    pair.triggerRatioBoost,
+                    pair.targetRatioRepay,
+                    pair.targetRatioBoost,
+                    pair.collAmountInUSD,
+                    pair.debtAmountInUSD,
+                    pair.boostAmountInUSD,
+                    isEOA,
+                    isFLStrategy,
+                );
             });
             it(`... should execute aaveV3 SW FL boost strategy for ${pair.collSymbol} /
             ${pair.debtSymbol} pair`, async () => {
                 const isEOA = false;
                 const isFLStrategy = true;
-                await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
+                await baseTest(
+                    collAsset,
+                    debtAsset,
+                    pair.triggerRatioRepay,
+                    pair.triggerRatioBoost,
+                    pair.targetRatioRepay,
+                    pair.targetRatioBoost,
+                    pair.collAmountInUSD,
+                    pair.debtAmountInUSD,
+                    pair.boostAmountInUSD,
+                    isEOA,
+                    isFLStrategy,
+                );
             });
             it(`... should execute aaveV3 EOA boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = true;
                 const isFLStrategy = false;
-                await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
+                await baseTest(
+                    collAsset,
+                    debtAsset,
+                    pair.triggerRatioRepay,
+                    pair.triggerRatioBoost,
+                    pair.targetRatioRepay,
+                    pair.targetRatioBoost,
+                    pair.collAmountInUSD,
+                    pair.debtAmountInUSD,
+                    pair.boostAmountInUSD,
+                    isEOA,
+                    isFLStrategy,
+                );
             });
             it(`... should execute aaveV3 EOA FL boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = true;
                 const isFLStrategy = true;
-                await baseTest(collAsset, debtAsset, isEOA, isFLStrategy);
+                await baseTest(
+                    collAsset,
+                    debtAsset,
+                    pair.triggerRatioRepay,
+                    pair.triggerRatioBoost,
+                    pair.targetRatioRepay,
+                    pair.targetRatioBoost,
+                    pair.collAmountInUSD,
+                    pair.debtAmountInUSD,
+                    pair.boostAmountInUSD,
+                    isEOA,
+                    isFLStrategy,
+                );
             });
         }
     });
