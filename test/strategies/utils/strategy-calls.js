@@ -6779,20 +6779,38 @@ const callAaveV3EOARepayStrategy = async (
     strategySub,
     exchangeObject,
     repayAmount,
-    onBehalfOf,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
     const actionsCallData = [];
     const gasCost = 1000000;
 
+    // Get debt asset ID from exchange object (srcAddr should be the debt token we're borrowing)
+    const marketAddr = addrs[network].AAVE_MARKET;
+    const poolAddressesProvider = await hre.ethers.getContractAt(
+        'IPoolAddressesProvider',
+        marketAddr,
+    );
+    const poolAddress = await poolAddressesProvider.getPool();
+    const lendingPool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
+
+    const collTokenAddr = exchangeObject[0]; // srcAddr in exchange object is the collateral token
+    const collReserveData = await lendingPool.getReserveData(collTokenAddr);
+    const collAssetId = collReserveData.id;
+
+    const debtTokenAddr = exchangeObject[1]; // destAddr in exchange object is the debt token
+    const debtReserveData = await lendingPool.getReserveData(debtTokenAddr);
+    const debtAssetId = debtReserveData.id;
+
+    console.log(`Using collateral asset ID: ${collAssetId} for token: ${collTokenAddr}`);
+    console.log(`Using debt asset ID: ${debtAssetId} for token: ${debtTokenAddr}`);
+
     const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        false,
-        placeHolderAddr,
+        false, // use default market
+        placeHolderAddr, // market
         repayAmount,
-        placeHolderAddr,
-        0,
-        onBehalfOf,
+        placeHolderAddr, // to
+        collAssetId, // assetId
     );
     const sellAction = new dfs.actions.basic.SellAction(
         exchangeObject,
@@ -6800,21 +6818,24 @@ const callAaveV3EOARepayStrategy = async (
         placeHolderAddr,
     );
     const feeTakingAction = isL2
-        ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
-        : new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, '0');
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, exchangeObject[1], '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, exchangeObject[1], '0');
     const aaveV3PaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         false,
-        placeHolderAddr,
-        0,
-        placeHolderAddr,
-        2,
-        onBehalfOf,
+        placeHolderAddr, // market
+        0, // amount
+        placeHolderAddr, // from
+        2, // rate mode
+        debtTokenAddr, // tokenAddr
+        debtAssetId, // assetId
+        false, // useOnBehalf
+        placeHolderAddr, // onBehalfAddr
     );
     const aaveV3RatioCheckAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         0,
         0,
         placeHolderAddr,
-        onBehalfOf,
+        placeHolderAddr,
     );
 
     actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
@@ -6823,7 +6844,12 @@ const callAaveV3EOARepayStrategy = async (
     actionsCallData.push(aaveV3PaybackAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3RatioCheckAction.encodeForRecipe()[0]);
 
-    triggerCallData.push(abiCoder.encode(['uint256'], [0]));
+    triggerCallData.push(
+        abiCoder.encode(
+            ['address', 'address', 'uint256', 'uint8'],
+            [placeHolderAddr, placeHolderAddr, 0, 0],
+        ),
+    );
 
     const { callData, receipt } = await executeStrategy(
         isL2,
@@ -6850,57 +6876,79 @@ const callAaveV3EOAFLRepayStrategy = async (
     exchangeObject,
     repayAmount,
     flAddr,
-    collToken,
-    debtToken,
-    onBehalfOf,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
     const actionsCallData = [];
     const gasCost = 1000000;
+    const collToken = exchangeObject[0];
+    const debtToken = exchangeObject[1];
 
     const flAction = new dfs.actions.flashloan.FLAction(
-        new dfs.actions.flashloan.BalancerFlashLoanAction([debtToken], [repayAmount]),
+        new dfs.actions.flashloan.BalancerFlashLoanAction([collToken], [repayAmount]),
     );
-    const aaveV3PaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
-        false,
-        placeHolderAddr,
-        0,
-        placeHolderAddr,
-        2,
-        onBehalfOf,
+
+    // Get collateral asset ID for FL version
+    const marketAddr = addrs[network].AAVE_MARKET;
+    const poolAddressesProvider = await hre.ethers.getContractAt(
+        'IPoolAddressesProvider',
+        marketAddr,
     );
-    const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        false,
-        placeHolderAddr,
-        0,
-        placeHolderAddr,
-        0,
-        onBehalfOf,
-    );
+    const poolAddress = await poolAddressesProvider.getPool();
+    const lendingPool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
+    const collReserveData = await lendingPool.getReserveData(collToken);
+    const collAssetId = collReserveData.id;
+    const debtReserveData = await lendingPool.getReserveData(debtToken);
+    const debtAssetId = debtReserveData.id;
+
     const sellAction = new dfs.actions.basic.SellAction(
         exchangeObject,
         placeHolderAddr,
         placeHolderAddr,
     );
     const feeTakingAction = isL2
-        ? new dfs.actions.basic.GasFeeActionL2(gasCost, collToken, '0', '0', '10000000')
-        : new dfs.actions.basic.GasFeeAction(gasCost, collToken, '0');
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, debtToken, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, debtToken, '0');
+
+    const aaveV3PaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        false,
+        placeHolderAddr,
+        0,
+        placeHolderAddr,
+        2,
+        debtToken,
+        debtAssetId, // debtAssetId, should calculate this !!!
+        false,
+        placeHolderAddr,
+    );
+    const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        false,
+        placeHolderAddr,
+        0,
+        flAddr,
+        collAssetId, // assetId, should calculate this !!!
+    );
+
     const aaveV3RatioCheckAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         0, // checkBoostState
         0, // targetRatio (placeholder)
         placeHolderAddr,
-        onBehalfOf,
+        placeHolderAddr,
     );
 
     actionsCallData.push(flAction.encodeForRecipe()[0]);
-    actionsCallData.push(aaveV3PaybackAction.encodeForRecipe()[0]);
-    actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3PaybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3RatioCheckAction.encodeForRecipe()[0]);
 
-    triggerCallData.push(abiCoder.encode(['uint256'], [0]));
+    triggerCallData.push(
+        abiCoder.encode(
+            ['address', 'address', 'uint256', 'uint8'],
+            [placeHolderAddr, placeHolderAddr, 0, 0],
+        ),
+    );
 
     const { callData, receipt } = await executeStrategy(
         isL2,

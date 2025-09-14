@@ -350,7 +350,7 @@ const subAaveV3AutomationStrategyGeneric = async (
         maxRatio, // triggerRatioBoost
         optimalRatioRepay, // targetRatioRepay
         optimalRatioBoost, // targetRatioBoost
-        true, // isBoostEnabled
+        boostEnabled, // isBoostEnabled
         marketAddr, // marketAddr
         isEOA, // useOnBehalf (true for EOA)
         eoaAddr, // onBehalfAddr

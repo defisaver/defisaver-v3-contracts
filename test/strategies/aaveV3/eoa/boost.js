@@ -28,7 +28,7 @@ const {
     callAaveV3EOAFLBoostStrategy,
 } = require('../../utils/strategy-calls');
 const {
-    AAVE_V3_AUTOMATION_TEST_PAIRS,
+    AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST,
     openAaveV3ProxyPosition,
     openAaveV3EOAPosition,
     getAaveV3PositionRatio,
@@ -237,7 +237,7 @@ const runEOABoostTests = () => {
             expect(ratioAfter).to.be.lt(ratioBefore);
         };
 
-        const testPairs = AAVE_V3_AUTOMATION_TEST_PAIRS[chainIds[network]] || [];
+        const testPairs = AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST[chainIds[network]] || [];
         for (let i = 0; i < testPairs.length; ++i) {
             const pair = testPairs[i];
             const collAsset = getAssetInfo(

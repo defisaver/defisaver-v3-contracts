@@ -51,7 +51,7 @@ const WSETH_ASSET_ID_IN_AAVE_V3_MARKET = 1;
 const LUSD_ASSET_ID_IN_AAVE_V3_MARKET = 10;
 const A_WETH_ADDRESS_V3 = '0x4d5F47FA6A74757f35C14fD3a6Ef8E3C9BC514E8';
 
-const AAVE_V3_AUTOMATION_TEST_PAIRS = {
+const AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST = {
     1: [
         {
             collSymbol: 'WETH',
@@ -86,16 +86,103 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS = {
             debtAmountInUSD: 15_000,
             boostAmountInUSD: 2_500,
         },
+        // {
+        //     collSymbol: 'WETH',
+        //     debtSymbol: 'USDT',
+        //     triggerRatioRepay: 120,
+        //     triggerRatioBoost: 190,
+        //     targetRatioRepay: 150,
+        //     targetRatioBoost: 180,
+        //     collAmountInUSD: 40_000,
+        //     debtAmountInUSD: 15_000,
+        //     boostAmountInUSD: 5_000,
+        //     repayAmountInUSD: 7_000,
+        // },
+    ],
+    // 42161: [
+    //     {
+    //         collSymbol: 'WETH',
+    //         debtSymbol: 'USDC',
+    //     },
+    //     {
+    //         collSymbol: 'WBTC',
+    //         debtSymbol: 'USDC',
+    //     },
+    //     {
+    //         collSymbol: 'WETH',
+    //         debtSymbol: 'USDT',
+    //     },
+    // ],
+    // 8453: [
+    //     {
+    //         collSymbol: 'WETH',
+    //         debtSymbol: 'USDC',
+    //     },
+    //     {
+    //         collSymbol: 'WBTC',
+    //         debtSymbol: 'USDC',
+    //     },
+    // ],
+    // 10: [
+    //     {
+    //         collSymbol: 'WETH',
+    //         debtSymbol: 'USDC',
+    //     },
+    //     {
+    //         collSymbol: 'WBTC',
+    //         debtSymbol: 'USDC',
+    //     },
+    //     {
+    //         collSymbol: 'WETH',
+    //         debtSymbol: 'DAI',
+    //     },
+    // ],
+};
+const AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY = {
+    1: [
+        {
+            collSymbol: 'WETH',
+            debtSymbol: 'DAI',
+            triggerRatioRepay: 165,
+            triggerRatioBoost: 350,
+            targetRatioRepay: 225,
+            targetRatioBoost: 300,
+            collAmountInUSD: 40_000,
+            debtAmountInUSD: 20_000,
+            repayAmountInUSD: 9_000,
+        },
+        {
+            collSymbol: 'WETH',
+            debtSymbol: 'USDC',
+            triggerRatioRepay: 165,
+            triggerRatioBoost: 350,
+            targetRatioRepay: 225,
+            targetRatioBoost: 300,
+            collAmountInUSD: 40_000,
+            debtAmountInUSD: 20_000,
+            repayAmountInUSD: 9_000,
+        },
         {
             collSymbol: 'WETH',
             debtSymbol: 'USDT',
-            triggerRatioRepay: 120,
-            triggerRatioBoost: 190,
-            targetRatioRepay: 150,
-            targetRatioBoost: 180,
+            triggerRatioRepay: 165,
+            triggerRatioBoost: 350,
+            targetRatioRepay: 225,
+            targetRatioBoost: 300,
             collAmountInUSD: 40_000,
-            debtAmountInUSD: 15_000,
-            boostAmountInUSD: 5_000,
+            debtAmountInUSD: 20_000,
+            repayAmountInUSD: 9_000,
+        },
+        {
+            collSymbol: 'WBTC',
+            debtSymbol: 'USDC',
+            triggerRatioRepay: 165,
+            triggerRatioBoost: 350,
+            targetRatioRepay: 205,
+            targetRatioBoost: 300,
+            collAmountInUSD: 40_000,
+            debtAmountInUSD: 20_000,
+            repayAmountInUSD: 9_000,
         },
     ],
     // 42161: [
@@ -507,7 +594,8 @@ module.exports = {
     deployAaveV3BoostGenericBundle,
     deployAaveV3RepayGenericBundle,
     setupAaveV3EOAPermissions,
-    AAVE_V3_AUTOMATION_TEST_PAIRS,
+    AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST,
+    AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY,
     aaveV2assetsDefaultMarket,
     AAVE_NO_DEBT_MODE,
     STABLE_RATE,

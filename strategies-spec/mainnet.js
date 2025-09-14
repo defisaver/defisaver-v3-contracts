@@ -6635,7 +6635,7 @@ const createAaveV3EOARepayStrategy = () => {
         formatExchangeObj(
             '%collAddr', // must stay variable
             '%debtAddr', // must stay variable
-            '$1', //  hardcoded piped from fee taking
+            '$1', //  hardcoded piped from withdraw action
             '%exchangeWrapper', // can pick exchange wrapper
         ),
         '&proxy', // hardcoded
@@ -6705,7 +6705,7 @@ const createAaveV3EOAFLRepayStrategy = () => {
         formatExchangeObj(
             '%collAddr', // must stay variable
             '%debtAddr', // must stay variable
-            '0', //  can't hard code because of fee
+            '%0', //  can't hard code because of potential FL fee
             '%exchangeWrapper', // can pick exchange wrapper
         ),
         '&proxy', // hardcoded
