@@ -6805,10 +6805,21 @@ const callAaveV3EOARepayStrategy = async (
     console.log(`Using collateral asset ID: ${collAssetId} for token: ${collTokenAddr}`);
     console.log(`Using debt asset ID: ${debtAssetId} for token: ${debtTokenAddr}`);
 
+    // Get aToken address for collateral token (needed for PullTokenAction)
+    const aTokenAddr = collReserveData.aTokenAddress;
+    console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collTokenAddr}`);
+
+    // Pull aTokens from EOA to Smart Wallet before withdraw
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        aTokenAddr,
+        placeHolderAddr, // from (EOA address)
+        repayAmount, // amount to pull
+    );
+
     const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         false, // use default market
         placeHolderAddr, // market
-        repayAmount,
+        0,
         placeHolderAddr, // to
         collAssetId, // assetId
     );
@@ -6838,6 +6849,8 @@ const callAaveV3EOARepayStrategy = async (
         placeHolderAddr,
     );
 
+    console.log('BEFORE EXEC');
+    actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
@@ -6901,6 +6914,10 @@ const callAaveV3EOAFLRepayStrategy = async (
     const debtReserveData = await lendingPool.getReserveData(debtToken);
     const debtAssetId = debtReserveData.id;
 
+    // Get aToken address for collateral token (needed for PullTokenAction)
+    const aTokenAddr = collReserveData.aTokenAddress;
+    console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collToken}`);
+
     const sellAction = new dfs.actions.basic.SellAction(
         exchangeObject,
         placeHolderAddr,
@@ -6921,6 +6938,13 @@ const callAaveV3EOAFLRepayStrategy = async (
         false,
         placeHolderAddr,
     );
+
+    // Pull aTokens from EOA to Smart Wallet before withdraw
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        aTokenAddr,
+        placeHolderAddr, // from (EOA address)
+        repayAmount, // amount to pull
+    );
     const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         false,
         placeHolderAddr,
@@ -6940,6 +6964,7 @@ const callAaveV3EOAFLRepayStrategy = async (
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3PaybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3RatioCheckAction.encodeForRecipe()[0]);
 

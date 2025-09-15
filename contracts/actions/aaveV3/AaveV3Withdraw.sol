@@ -93,7 +93,6 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
             tokenBefore = tokenAddr.getBalance(_to);
         }
 
-        // TODO -> should probably pull tokens from EOA to SW ???
         // withdraw underlying tokens from aave and send _to address
         lendingPool.withdraw(tokenAddr, _amount, _to);
 

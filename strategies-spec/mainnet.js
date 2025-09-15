@@ -6497,14 +6497,14 @@ const createAaveV3EOABoostStrategy = () => {
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '0', // must stay variable backend sets gasCost
         '%collAddr', // must stay variable as coll can differ
-        '$2', // hardcoded output from withdraw action
+        '$2', // hardcoded output from sell action
         '%dfsFeeDivider', // defaults at 0.05%
     );
 
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
-        '$3', // amount hardcoded
+        '$3', // amount hardcoded - output of feeTakingAction
         '&proxy', // proxy hardcoded
         '%collAddr', // is variable as it can change
         '%assetId', // must be variable
@@ -6623,10 +6623,16 @@ const createAaveV3EOARepayStrategy = () => {
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3EOARepayStrategy.addTrigger(aaveV3Trigger);
 
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '%aCollTokenAddr', // aToken for collateral
+        '&onBehalfAddr', // hardcoded from subData
+        '%amount', // must stay variable
+    );
+
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
-        '%amount', // must stay variable
+        '$1', // output of pullTokenAction
         '&proxy', // hardcoded
         '%assetId', // must stay variable can choose diff. asset
     );
@@ -6635,7 +6641,7 @@ const createAaveV3EOARepayStrategy = () => {
         formatExchangeObj(
             '%collAddr', // must stay variable
             '%debtAddr', // must stay variable
-            '$1', //  hardcoded piped from withdraw action
+            '$2', //  hardcoded piped from withdraw action
             '%exchangeWrapper', // can pick exchange wrapper
         ),
         '&proxy', // hardcoded
@@ -6645,14 +6651,14 @@ const createAaveV3EOARepayStrategy = () => {
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '0', // must stay variable backend sets gasCost
         '%debtAddr', // must stay variable as debt can differ
-        '$2', // hardcoded output from withdraw action
+        '$3', // hardcoded output from withdraw action
         '%dfsFeeDivider', // defaults at 0.05%
     );
 
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
-        '$3', // amount hardcoded
+        '$4', // amount hardcoded - output of feeTakingAction
         '&proxy', // proxy hardcoded
         '%rateMode', // variable type of debt
         '%debtAddr', // used just for sdk not actually sent (should this be here?)
@@ -6668,6 +6674,7 @@ const createAaveV3EOARepayStrategy = () => {
         '&onBehalfAddr',
     );
 
+    aaveV3EOARepayStrategy.addAction(pullTokenAction);
     aaveV3EOARepayStrategy.addAction(withdrawAction);
     aaveV3EOARepayStrategy.addAction(sellAction);
     aaveV3EOARepayStrategy.addAction(feeTakingAction);
@@ -6731,10 +6738,16 @@ const createAaveV3EOAFLRepayStrategy = () => {
         '&onBehalfAddr', // EOA addr from subData
     );
 
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '%aCollTokenAddr', // aToken for collateral
+        '&onBehalfAddr', // EOA/SW addr from subData
+        '$1', // output of FL action // TODO -> not sure if ok because of FL fees?
+    );
+
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
-        '$1', // repay fl amount
+        '$5', // repay fl amount
         '%flAddr', // flAddr not hardcoded (tx will fail if not returned to correct addr)
         '%assetId', // must stay variable can choose diff. asset
     );
@@ -6749,6 +6762,7 @@ const createAaveV3EOAFLRepayStrategy = () => {
     aaveV3EOAFLRepayStrategy.addAction(sellAction);
     aaveV3EOAFLRepayStrategy.addAction(feeTakingAction);
     aaveV3EOAFLRepayStrategy.addAction(paybackAction);
+    aaveV3EOAFLRepayStrategy.addAction(pullTokenAction);
     aaveV3EOAFLRepayStrategy.addAction(withdrawAction);
     aaveV3EOAFLRepayStrategy.addAction(checkerAction);
 

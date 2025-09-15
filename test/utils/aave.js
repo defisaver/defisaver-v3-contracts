@@ -536,11 +536,25 @@ const setupAaveV3EOAPermissions = async (userAddress, smartWalletAddress, collTo
         console.log(`  - Approving collateral token ${collTokenAddr} for Smart Wallet`);
         await approve(collTokenAddr, smartWalletAddress, userSigner);
 
-        // Get debt token address and delegate
-        console.log(`  - Setting up debt delegation for ${debtTokenAddr}`);
+        // Get aToken address and approve it for Smart Wallet (needed for PullTokenAction in repay strategies)
         const poolAddressesProvider = await hre.ethers.getContractAt('IPoolAddressesProvider', marketAddr);
         const poolAddress = await poolAddressesProvider.getPool();
         const lendingPool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
+        const collReserveData = await lendingPool.getReserveData(collTokenAddr);
+        const aTokenAddr = collReserveData.aTokenAddress;
+
+        console.log(`  - Approving aToken ${aTokenAddr} for Smart Wallet`);
+        await approve(aTokenAddr, smartWalletAddress, userSigner);
+
+        // Verify aToken balance and approval
+        const aTokenContract = await hre.ethers.getContractAt('IERC20', aTokenAddr);
+        const aTokenBalance = await aTokenContract.balanceOf(userAddress);
+        const aTokenAllowance = await aTokenContract.allowance(userAddress, smartWalletAddress);
+        console.log(`  - aToken balance: ${hre.ethers.utils.formatEther(aTokenBalance)}`);
+        console.log(`  - aToken allowance: ${hre.ethers.utils.formatEther(aTokenAllowance)}`);
+
+        // Get debt token address and delegate
+        console.log(`  - Setting up debt delegation for ${debtTokenAddr}`);
         const reserveData = await lendingPool.getReserveData(debtTokenAddr);
         const variableDebtTokenAddress = reserveData.variableDebtTokenAddress;
 

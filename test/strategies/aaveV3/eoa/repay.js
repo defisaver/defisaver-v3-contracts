@@ -75,6 +75,7 @@ const runEOARepayTests = () => {
             await redeploy('AaveV3RatioCheck', isFork);
             await redeploy('AaveV3OpenRatioCheck', isFork);
             await redeploy('AaveV3View', isFork);
+            await redeploy('PullToken', isFork);
 
             const newRepayBundleId = await deployAaveV3RepayGenericBundle(true);
             const newBoostBundleId = await deployAaveV3BoostGenericBundle(true);
@@ -150,43 +151,19 @@ const runEOARepayTests = () => {
             console.log('ratioBefore', ratioBefore);
 
             // Create subscription based on whether it's EOA or proxy
-            let subData;
-            let repaySubId;
-            if (isEOA) {
-                const result = await subAaveV3AutomationStrategyGeneric(
-                    proxy,
-                    triggerRatioRepay,
-                    triggerRatioBoost,
-                    targetRatioRepay,
-                    targetRatioBoost,
-                    BOOST_ENABLED,
-                    senderAcc.address,
-                    true,
-                );
-                repaySubId = result.repaySubId;
-                subData = result.subData;
-            } else {
-                console.log('SUBBING TO AAVE PROXY !!!!');
-                const result = await subAaveV3AutomationStrategyGeneric(
-                    proxy,
-                    triggerRatioRepay,
-                    triggerRatioBoost,
-                    targetRatioRepay,
-                    targetRatioBoost,
-                    BOOST_ENABLED,
-                    senderAcc.address,
-                    false,
-                );
-                repaySubId = result.repaySubId;
-                subData = result.subData;
-            }
+            const result = await subAaveV3AutomationStrategyGeneric(
+                proxy,
+                triggerRatioRepay,
+                triggerRatioBoost,
+                targetRatioRepay,
+                targetRatioBoost,
+                BOOST_ENABLED,
+                senderAcc.address,
+                isEOA,
+            );
+            const repaySubId = result.repaySubId;
+            const subData = result.subData;
 
-            // TODO -> Seems like this is not ok ??
-            console.log('SUBBED !!!!');
-            console.log('SUBBED !!!!');
-            console.log('SUBBED !!!!');
-            console.log('SUBBED !!!!');
-            console.log('SUBBED !!!!');
             console.log('SUBBED !!!!');
             console.log('REPAY SUB ID AND SUB DATA!!!!');
             console.log(repaySubId);
@@ -302,40 +279,40 @@ const runEOARepayTests = () => {
                 );
             });
             // TODO -> Should probably give proper allowances for this to work
-            // it(`... should execute aaveV3 EOA repay strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
-            //     const isEOA = true;
-            //     const isFLStrategy = false;
-            //     await baseTest(
-            //         collAsset,
-            //         debtAsset,
-            //         pair.triggerRatioRepay,
-            //         pair.triggerRatioBoost,
-            //         pair.targetRatioRepay,
-            //         pair.targetRatioBoost,
-            //         pair.collAmountInUSD,
-            //         pair.debtAmountInUSD,
-            //         pair.repayAmountInUSD,
-            //         isEOA,
-            //         isFLStrategy,
-            //     );
-            // });
-            // it(`... should execute aaveV3 EOA FL repay strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
-            //     const isEOA = true;
-            //     const isFLStrategy = true;
-            //     await baseTest(
-            //         collAsset,
-            //         debtAsset,
-            //         pair.triggerRatioRepay,
-            //         pair.triggerRatioBoost,
-            //         pair.targetRatioRepay,
-            //         pair.targetRatioBoost,
-            //         pair.collAmountInUSD,
-            //         pair.debtAmountInUSD,
-            //         pair.repayAmountInUSD,
-            //         isEOA,
-            //         isFLStrategy,
-            //     );
-            // });
+            it(`... should execute aaveV3 EOA repay strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+                const isEOA = true;
+                const isFLStrategy = false;
+                await baseTest(
+                    collAsset,
+                    debtAsset,
+                    pair.triggerRatioRepay,
+                    pair.triggerRatioBoost,
+                    pair.targetRatioRepay,
+                    pair.targetRatioBoost,
+                    pair.collAmountInUSD,
+                    pair.debtAmountInUSD,
+                    pair.repayAmountInUSD,
+                    isEOA,
+                    isFLStrategy,
+                );
+            });
+            it(`... should execute aaveV3 EOA FL repay strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+                const isEOA = true;
+                const isFLStrategy = true;
+                await baseTest(
+                    collAsset,
+                    debtAsset,
+                    pair.triggerRatioRepay,
+                    pair.triggerRatioBoost,
+                    pair.targetRatioRepay,
+                    pair.targetRatioBoost,
+                    pair.collAmountInUSD,
+                    pair.debtAmountInUSD,
+                    pair.repayAmountInUSD,
+                    isEOA,
+                    isFLStrategy,
+                );
+            });
         }
     });
 };
