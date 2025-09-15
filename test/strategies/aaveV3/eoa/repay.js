@@ -1,4 +1,4 @@
-// AaveV3 EOA Boost strategies
+// AaveV3 Repay strategies
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -22,7 +22,7 @@ const {
 } = require('../../../utils/utils');
 
 const { addBotCaller } = require('../../utils/utils-strategies');
-const { subAaveV3AutomationStrategyGeneric } = require('../../utils/strategy-subs');
+const { subAaveV3LeverageManagementGeneric } = require('../../utils/strategy-subs');
 const {
     callAaveV3EOARepayStrategy,
     callAaveV3EOAFLRepayStrategy,
@@ -39,8 +39,8 @@ const {
 
 const BOOST_ENABLED = false;
 
-const runEOARepayTests = () => {
-    describe('AaveV3 EOA Repay Strategies Tests', () => {
+const runRepayTests = () => {
+    describe('AaveV3 Repay Strategies Tests', () => {
         let snapshotId;
         let senderAcc;
         let proxy;
@@ -151,7 +151,7 @@ const runEOARepayTests = () => {
             console.log('ratioBefore', ratioBefore);
 
             // Create subscription based on whether it's EOA or proxy
-            const result = await subAaveV3AutomationStrategyGeneric(
+            const result = await subAaveV3LeverageManagementGeneric(
                 proxy,
                 triggerRatioRepay,
                 triggerRatioBoost,
@@ -318,5 +318,5 @@ const runEOARepayTests = () => {
 };
 
 module.exports = {
-    runEOARepayTests,
+    runRepayTests,
 };

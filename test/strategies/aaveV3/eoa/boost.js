@@ -1,4 +1,4 @@
-// AaveV3 EOA Boost strategies
+// AaveV3 Boost strategies
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -22,7 +22,7 @@ const {
 } = require('../../../utils/utils');
 
 const { addBotCaller } = require('../../utils/utils-strategies');
-const { subAaveV3AutomationStrategyGeneric } = require('../../utils/strategy-subs');
+const { subAaveV3LeverageManagementGeneric } = require('../../utils/strategy-subs');
 const {
     callAaveV3EOABoostStrategy,
     callAaveV3EOAFLBoostStrategy,
@@ -39,8 +39,8 @@ const {
 
 const BOOST_ENABLED = true;
 
-const runEOABoostTests = () => {
-    describe('AaveV3 EOA Boost Strategies Tests', () => {
+const runBoostTests = () => {
+    describe('AaveV3 Boost Strategies Tests', () => {
         let snapshotId;
         let senderAcc;
         let proxy;
@@ -141,36 +141,18 @@ const runEOABoostTests = () => {
             console.log('ratioBefore', ratioBefore);
 
             // Create subscription based on whether it's EOA or proxy
-            let subData;
-            let boostSubId;
-            if (isEOA) {
-                const result = await subAaveV3AutomationStrategyGeneric(
-                    proxy,
-                    triggerRatioRepay,
-                    triggerRatioBoost,
-                    targetRatioRepay,
-                    targetRatioBoost,
-                    BOOST_ENABLED,
-                    senderAcc.address,
-                    true,
-                );
-                boostSubId = result.boostSubId;
-                subData = result.subData;
-            } else {
-                console.log('SUBBING TO AAVE PROXY !!!!');
-                const result = await subAaveV3AutomationStrategyGeneric(
-                    proxy,
-                    triggerRatioRepay,
-                    triggerRatioBoost,
-                    targetRatioRepay,
-                    targetRatioBoost,
-                    BOOST_ENABLED,
-                    senderAcc.address,
-                    false,
-                );
-                boostSubId = result.boostSubId;
-                subData = result.subData;
-            }
+            const result = await subAaveV3LeverageManagementGeneric(
+                proxy,
+                triggerRatioRepay,
+                triggerRatioBoost,
+                targetRatioRepay,
+                targetRatioBoost,
+                BOOST_ENABLED,
+                senderAcc.address,
+                isEOA,
+            );
+            const boostSubId = result.boostSubId;
+            const subData = result.subData;
 
             console.log('SUBBED !!!!');
             // Get sub info
@@ -324,5 +306,5 @@ const runEOABoostTests = () => {
 };
 
 module.exports = {
-    runEOABoostTests,
+    runBoostTests,
 };

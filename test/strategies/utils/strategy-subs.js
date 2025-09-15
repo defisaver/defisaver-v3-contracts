@@ -324,12 +324,12 @@ const subAaveV3AutomationStrategy = async (
     };
 };
 
-const subAaveV3AutomationStrategyGeneric = async (
+const subAaveV3LeverageManagementGeneric = async (
     proxy,
     minRatio,
     maxRatio,
-    optimalRatioRepay,
-    optimalRatioBoost,
+    targetRatioRepay,
+    targetRatioBoost,
     boostEnabled,
     eoaAddr,
     isEOA,
@@ -348,8 +348,8 @@ const subAaveV3AutomationStrategyGeneric = async (
         bundleId, // strategyOrBundleId
         minRatio, // triggerRatioRepay
         maxRatio, // triggerRatioBoost
-        optimalRatioRepay, // targetRatioRepay
-        optimalRatioBoost, // targetRatioBoost
+        targetRatioRepay, // targetRatioRepay
+        targetRatioBoost, // targetRatioBoost
         boostEnabled, // isBoostEnabled
         marketAddr, // marketAddr
         isEOA, // useOnBehalf (true for EOA)
@@ -1155,7 +1155,7 @@ module.exports = {
     subLiquityAutomationStrategy,
     subAaveV2AutomationStrategy,
     subAaveV3AutomationStrategy,
-    subAaveV3AutomationStrategyGeneric,
+    subAaveV3LeverageManagementGeneric,
     subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
