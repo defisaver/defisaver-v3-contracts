@@ -39,7 +39,7 @@ contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
         address user;
         /// @dev User param is added later, hence the check
         if (_paramMapping.length == 3) {
-            user = _parseParamAddr(address(inputData.user), _paramMapping[2], _subData, _returnValues);
+            user = _parseParamAddr(inputData.user, _paramMapping[2], _subData, _returnValues);
         }
 
         if (user == address(0)) user = address(this); // default to proxy

@@ -9,14 +9,15 @@ import {DSMath} from "../DS/DSMath.sol";
 import {AaveV3RatioHelper} from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is outside of given range specified during subscription
-/// @notice This uses the AaveV3 oracle, which returns the price of the collateral token in terms of the base (debt) token.
+/// @dev Uses the Aave V3 oracle, which provides asset prices in a shared base currency.
+/// @notice The contract computes the base/quote ratio by dividing the oracle prices of the two tokens.
 /// @notice The trigger expects the lowerPrice and upperPrice inputs to be scaled by 1e8.
 /// @notice It is possible to check only one side of the range by setting the other side price to 0.
-contract AaveV3PriceRangeTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper {
+contract AaveV3QuotePriceRangeTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelper {
     /// @param baseTokenAddr address of the base token which is quoted
     /// @param quoteTokenAddr address of the quote token
-    /// @param lowerPrice lower price of the collateral token in terms of the base token that represents the triggerable point.
-    /// @param upperPrice upper price of the collateral token in terms of the base token that represents the triggerable point.
+    /// @param lowerPrice lower price of the base token in terms of the quote token that represents the triggerable point.
+    /// @param upperPrice upper price of the base token in terms of the quote token that represents the triggerable point.
     struct SubParams {
         address baseTokenAddr;
         address quoteTokenAddr;
@@ -26,13 +27,13 @@ contract AaveV3PriceRangeTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelp
 
     IAaveV3Oracle public constant aaveOracleV3 = IAaveV3Oracle(AAVE_ORACLE_V3);
 
-    /// @notice Checks chainlink oracle for current prices and triggers if it's in a correct state
+    /// @notice Checks Aave V3 oracle for current prices and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 currPrice = getPrice(triggerSubData.baseTokenAddr, triggerSubData.quoteTokenAddr);
 
-        /// @dev Only check `lowerPrice` if `upperPrice` is not set. Need this check for when we only have STOP_LOSS and `upperPrice == 0`
+        /// @dev Only check `lowerPrice` if `upperPrice` is not set.
         if (triggerSubData.upperPrice == 0) return currPrice < triggerSubData.lowerPrice;
 
         return currPrice < triggerSubData.lowerPrice || currPrice > triggerSubData.upperPrice;

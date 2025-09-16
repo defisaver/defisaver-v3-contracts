@@ -6459,18 +6459,16 @@ const createCompV3FLCloseToCollStrategy = () => {
     return compV3FLCloseToCollStrategy.encodeForDsProxyCall();
 };
 
-const createAaveV3EOABoostStrategy = () => {
-    const aaveV3EOABoostStrategy = new dfs.Strategy('AaveV3EOABoost');
+const createAaveV3GenericBoostStrategy = () => {
+    const aaveV3GenericBoostStrategy = new dfs.Strategy('AaveV3GenericBoost');
 
-    aaveV3EOABoostStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOABoostStrategy.addSubSlot('&checkBoostState', 'uint8');
-    // aaveV3EOABoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
-    aaveV3EOABoostStrategy.addSubSlot('&marketAddr', 'address');
-    // aaveV3EOABoostStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOABoostStrategy.addSubSlot('&user', 'address');
+    aaveV3GenericBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3GenericBoostStrategy.addSubSlot('&checkBoostState', 'uint8');
+    aaveV3GenericBoostStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericBoostStrategy.addSubSlot('&user', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger(nullAddress, nullAddress, '0', '0');
-    aaveV3EOABoostStrategy.addTrigger(aaveV3Trigger);
+    aaveV3GenericBoostStrategy.addTrigger(aaveV3Trigger);
 
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
         '%useDefaultMarket', // hardcoded to false
@@ -6520,38 +6518,36 @@ const createAaveV3EOABoostStrategy = () => {
         '&user',
     );
 
-    aaveV3EOABoostStrategy.addAction(borrowAction);
-    aaveV3EOABoostStrategy.addAction(sellAction);
-    aaveV3EOABoostStrategy.addAction(feeTakingAction);
-    aaveV3EOABoostStrategy.addAction(supplyAction);
-    aaveV3EOABoostStrategy.addAction(checkerAction);
+    aaveV3GenericBoostStrategy.addAction(borrowAction);
+    aaveV3GenericBoostStrategy.addAction(sellAction);
+    aaveV3GenericBoostStrategy.addAction(feeTakingAction);
+    aaveV3GenericBoostStrategy.addAction(supplyAction);
+    aaveV3GenericBoostStrategy.addAction(checkerAction);
 
-    return aaveV3EOABoostStrategy.encodeForDsProxyCall();
+    return aaveV3GenericBoostStrategy.encodeForDsProxyCall();
 };
 
-const createAaveV3EOAFLBoostStrategy = () => {
-    const aaveV3EOAFLBoostStrategy = new dfs.Strategy('AaveV3EOAFLBoost');
+const createAaveV3GenericFLBoostStrategy = () => {
+    const aaveV3GenericFLBoostStrategy = new dfs.Strategy('AaveV3GenericFLBoost');
 
-    aaveV3EOAFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOAFLBoostStrategy.addSubSlot('&checkBoostState', 'uint8');
-    // aaveV3EOAFLBoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
-    aaveV3EOAFLBoostStrategy.addSubSlot('&marketAddr', 'address');
-    // aaveV3EOAFLBoostStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOAFLBoostStrategy.addSubSlot('&user', 'address');
+    aaveV3GenericFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3GenericFLBoostStrategy.addSubSlot('&checkBoostState', 'uint8');
+    aaveV3GenericFLBoostStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLBoostStrategy.addSubSlot('&user', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger(nullAddress, nullAddress, '0', '0');
-    aaveV3EOAFLBoostStrategy.addTrigger(aaveV3Trigger);
+    aaveV3GenericFLBoostStrategy.addTrigger(aaveV3Trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
-            ['%collAsset'], // sent by backend
+            ['%debtAsset'], // sent by backend
             ['%flAmount'], // sent by backend
             nullAddress,
             [],
         ),
     );
 
-    aaveV3EOAFLBoostStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+    aaveV3GenericFLBoostStrategy.addAction(flAction);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -6601,27 +6597,25 @@ const createAaveV3EOAFLBoostStrategy = () => {
         '&user',
     );
 
-    aaveV3EOAFLBoostStrategy.addAction(sellAction);
-    aaveV3EOAFLBoostStrategy.addAction(feeTakingAction);
-    aaveV3EOAFLBoostStrategy.addAction(supplyAction);
-    aaveV3EOAFLBoostStrategy.addAction(borrowAction);
-    aaveV3EOAFLBoostStrategy.addAction(checkerAction);
+    aaveV3GenericFLBoostStrategy.addAction(sellAction);
+    aaveV3GenericFLBoostStrategy.addAction(feeTakingAction);
+    aaveV3GenericFLBoostStrategy.addAction(supplyAction);
+    aaveV3GenericFLBoostStrategy.addAction(borrowAction);
+    aaveV3GenericFLBoostStrategy.addAction(checkerAction);
 
-    return aaveV3EOAFLBoostStrategy.encodeForDsProxyCall();
+    return aaveV3GenericFLBoostStrategy.encodeForDsProxyCall();
 };
 
-const createAaveV3EOARepayStrategy = () => {
-    const aaveV3EOARepayStrategy = new dfs.Strategy('AaveV3EOARepay');
+const createAaveV3GenericRepayStrategy = () => {
+    const aaveV3GenericRepayStrategy = new dfs.Strategy('AaveV3GenericRepay');
 
-    aaveV3EOARepayStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOARepayStrategy.addSubSlot('&checkRepayState', 'uint8');
-    // aaveV3EOARepayStrategy.addSubSlot('&useDefaultMarket', 'bool');
-    aaveV3EOARepayStrategy.addSubSlot('&marketAddr', 'address');
-    // aaveV3EOARepayStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOARepayStrategy.addSubSlot('&user', 'address');
+    aaveV3GenericRepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3GenericRepayStrategy.addSubSlot('&checkRepayState', 'uint8');
+    aaveV3GenericRepayStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericRepayStrategy.addSubSlot('&user', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger(nullAddress, nullAddress, '0', '0');
-    aaveV3EOARepayStrategy.addTrigger(aaveV3Trigger);
+    aaveV3GenericRepayStrategy.addTrigger(aaveV3Trigger);
 
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
         '%aCollTokenAddr', // aToken for collateral
@@ -6661,7 +6655,7 @@ const createAaveV3EOARepayStrategy = () => {
         '$4', // amount hardcoded - output of feeTakingAction
         '&proxy', // proxy hardcoded
         '%rateMode', // variable type of debt - 2
-        '%debtAddr', // used just for sdk not actually sent (should this be here?)
+        '%debtAddr', // used just for sdk not actually sent
         '%assetId', // must be variable
         '%useOnBehalf', // hardcoded true
         '&user', // EOA/SW from subData
@@ -6674,28 +6668,26 @@ const createAaveV3EOARepayStrategy = () => {
         '&user',
     );
 
-    aaveV3EOARepayStrategy.addAction(pullTokenAction);
-    aaveV3EOARepayStrategy.addAction(withdrawAction);
-    aaveV3EOARepayStrategy.addAction(sellAction);
-    aaveV3EOARepayStrategy.addAction(feeTakingAction);
-    aaveV3EOARepayStrategy.addAction(paybackAction);
-    aaveV3EOARepayStrategy.addAction(checkerAction);
+    aaveV3GenericRepayStrategy.addAction(pullTokenAction);
+    aaveV3GenericRepayStrategy.addAction(withdrawAction);
+    aaveV3GenericRepayStrategy.addAction(sellAction);
+    aaveV3GenericRepayStrategy.addAction(feeTakingAction);
+    aaveV3GenericRepayStrategy.addAction(paybackAction);
+    aaveV3GenericRepayStrategy.addAction(checkerAction);
 
-    return aaveV3EOARepayStrategy.encodeForDsProxyCall();
+    return aaveV3GenericRepayStrategy.encodeForDsProxyCall();
 };
 
-const createAaveV3EOAFLRepayStrategy = () => {
-    const aaveV3EOAFLRepayStrategy = new dfs.Strategy('AaveV3EOAFLRepay');
+const createAaveV3GenericFLRepayStrategy = () => {
+    const aaveV3GenericFLRepayStrategy = new dfs.Strategy('AaveV3GenericFLRepay');
 
-    aaveV3EOAFLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOAFLRepayStrategy.addSubSlot('&checkRepayState', 'uint8');
-    // aaveV3EOAFLRepayStrategy.addSubSlot('&useDefaultMarket', 'bool');
-    aaveV3EOAFLRepayStrategy.addSubSlot('&marketAddr', 'address');
-    // aaveV3EOAFLRepayStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOAFLRepayStrategy.addSubSlot('&user', 'address');
+    aaveV3GenericFLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3GenericFLRepayStrategy.addSubSlot('&checkRepayState', 'uint8');
+    aaveV3GenericFLRepayStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLRepayStrategy.addSubSlot('&user', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger(nullAddress, nullAddress, '0', '0');
-    aaveV3EOAFLRepayStrategy.addTrigger(aaveV3Trigger);
+    aaveV3GenericFLRepayStrategy.addTrigger(aaveV3Trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -6706,7 +6698,7 @@ const createAaveV3EOAFLRepayStrategy = () => {
         ),
     );
 
-    aaveV3EOAFLRepayStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+    aaveV3GenericFLRepayStrategy.addAction(flAction);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -6759,31 +6751,29 @@ const createAaveV3EOAFLRepayStrategy = () => {
         '&user',
     );
 
-    aaveV3EOAFLRepayStrategy.addAction(sellAction);
-    aaveV3EOAFLRepayStrategy.addAction(feeTakingAction);
-    aaveV3EOAFLRepayStrategy.addAction(paybackAction);
-    aaveV3EOAFLRepayStrategy.addAction(pullTokenAction);
-    aaveV3EOAFLRepayStrategy.addAction(withdrawAction);
-    aaveV3EOAFLRepayStrategy.addAction(checkerAction);
+    aaveV3GenericFLRepayStrategy.addAction(sellAction);
+    aaveV3GenericFLRepayStrategy.addAction(feeTakingAction);
+    aaveV3GenericFLRepayStrategy.addAction(paybackAction);
+    aaveV3GenericFLRepayStrategy.addAction(pullTokenAction);
+    aaveV3GenericFLRepayStrategy.addAction(withdrawAction);
+    aaveV3GenericFLRepayStrategy.addAction(checkerAction);
 
-    return aaveV3EOAFLRepayStrategy.encodeForDsProxyCall();
+    return aaveV3GenericFLRepayStrategy.encodeForDsProxyCall();
 };
 
-const createAaveV3EOABoostOnPriceStrategy = () => {
-    const aaveV3EOABoostOnPriceStrategy = new dfs.Strategy('AaveV3EOABoostOnPriceStrategy');
+const createAaveV3GenericBoostOnPriceStrategy = () => {
+    const aaveV3GenericBoostOnPriceStrategy = new dfs.Strategy('AaveV3GenericBoostOnPriceStrategy');
 
-    aaveV3EOABoostOnPriceStrategy.addSubSlot('&collAsset', 'address');
-    aaveV3EOABoostOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
-    aaveV3EOABoostOnPriceStrategy.addSubSlot('&debtAsset', 'address');
-    aaveV3EOABoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
-    // aaveV3EOABoostOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
-    aaveV3EOABoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
-    aaveV3EOABoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    // aaveV3EOABoostOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOABoostOnPriceStrategy.addSubSlot('&user', 'address');
+    aaveV3GenericBoostOnPriceStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3GenericBoostOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3GenericBoostOnPriceStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3GenericBoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3GenericBoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3GenericBoostOnPriceStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
-    aaveV3EOABoostOnPriceStrategy.addTrigger(trigger);
+    aaveV3GenericBoostOnPriceStrategy.addTrigger(trigger);
 
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
         '%useDefaultMarket', // hardcoded to false
@@ -6826,29 +6816,27 @@ const createAaveV3EOABoostOnPriceStrategy = () => {
         '&marketAddr', // from subData
         '&user',
     );
-    aaveV3EOABoostOnPriceStrategy.addAction(borrowAction);
-    aaveV3EOABoostOnPriceStrategy.addAction(sellAction);
-    aaveV3EOABoostOnPriceStrategy.addAction(feeTakingAction);
-    aaveV3EOABoostOnPriceStrategy.addAction(supplyAction);
-    aaveV3EOABoostOnPriceStrategy.addAction(openRatioCheckAction);
-    return aaveV3EOABoostOnPriceStrategy.encodeForDsProxyCall();
+    aaveV3GenericBoostOnPriceStrategy.addAction(borrowAction);
+    aaveV3GenericBoostOnPriceStrategy.addAction(sellAction);
+    aaveV3GenericBoostOnPriceStrategy.addAction(feeTakingAction);
+    aaveV3GenericBoostOnPriceStrategy.addAction(supplyAction);
+    aaveV3GenericBoostOnPriceStrategy.addAction(openRatioCheckAction);
+    return aaveV3GenericBoostOnPriceStrategy.encodeForDsProxyCall();
 };
 
-const createAaveV3EOAFLBoostOnPriceStrategy = () => {
-    const aaveV3EOAFLBoostOnPriceStrategy = new dfs.Strategy('AaveV3EOAFLBoostOnPriceStrategy');
+const createAaveV3GenericFLBoostOnPriceStrategy = () => {
+    const aaveV3GenericFLBoostOnPriceStrategy = new dfs.Strategy('AaveV3GenericFLBoostOnPriceStrategy');
 
-    aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&collAsset', 'address');
-    aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
-    aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&debtAsset', 'address');
-    aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
-    // aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
-    aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
-    aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    // aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&user', 'address');
+    aaveV3GenericFLBoostOnPriceStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3GenericFLBoostOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3GenericFLBoostOnPriceStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3GenericFLBoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3GenericFLBoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3GenericFLBoostOnPriceStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
-    aaveV3EOAFLBoostOnPriceStrategy.addTrigger(trigger);
+    aaveV3GenericFLBoostOnPriceStrategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -6899,30 +6887,28 @@ const createAaveV3EOAFLBoostOnPriceStrategy = () => {
         '&marketAddr',
         '&user',
     );
-    aaveV3EOAFLBoostOnPriceStrategy.addAction(flAction);
-    aaveV3EOAFLBoostOnPriceStrategy.addAction(sellAction);
-    aaveV3EOAFLBoostOnPriceStrategy.addAction(feeTakingAction);
-    aaveV3EOAFLBoostOnPriceStrategy.addAction(supplyAction);
-    aaveV3EOAFLBoostOnPriceStrategy.addAction(borrowAction);
-    aaveV3EOAFLBoostOnPriceStrategy.addAction(openRatioCheckAction);
-    return aaveV3EOAFLBoostOnPriceStrategy.encodeForDsProxyCall();
+    aaveV3GenericFLBoostOnPriceStrategy.addAction(flAction);
+    aaveV3GenericFLBoostOnPriceStrategy.addAction(sellAction);
+    aaveV3GenericFLBoostOnPriceStrategy.addAction(feeTakingAction);
+    aaveV3GenericFLBoostOnPriceStrategy.addAction(supplyAction);
+    aaveV3GenericFLBoostOnPriceStrategy.addAction(borrowAction);
+    aaveV3GenericFLBoostOnPriceStrategy.addAction(openRatioCheckAction);
+    return aaveV3GenericFLBoostOnPriceStrategy.encodeForDsProxyCall();
 };
 
-const createAaveV3EOARepayOnPriceStrategy = () => {
-    const aaveV3EOARepayOnPriceStrategy = new dfs.Strategy('AaveV3EOARepayOnPrice');
+const createAaveV3GenericRepayOnPriceStrategy = () => {
+    const aaveV3GenericRepayOnPriceStrategy = new dfs.Strategy('AaveV3GenericRepayOnPrice');
 
-    aaveV3EOARepayOnPriceStrategy.addSubSlot('&collAsset', 'address');
-    aaveV3EOARepayOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
-    aaveV3EOARepayOnPriceStrategy.addSubSlot('&debtAsset', 'address');
-    aaveV3EOARepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
-    // aaveV3EOARepayOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
-    aaveV3EOARepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
-    aaveV3EOARepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    // aaveV3EOARepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOARepayOnPriceStrategy.addSubSlot('&user', 'address');
+    aaveV3GenericRepayOnPriceStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3GenericRepayOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3GenericRepayOnPriceStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3GenericRepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3GenericRepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericRepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3GenericRepayOnPriceStrategy.addSubSlot('&user', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
-    aaveV3EOARepayOnPriceStrategy.addTrigger(aaveV3Trigger);
+    aaveV3GenericRepayOnPriceStrategy.addTrigger(aaveV3Trigger);
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '%useDefaultMarket', // hardcoded to false
@@ -6968,30 +6954,28 @@ const createAaveV3EOARepayOnPriceStrategy = () => {
         '&user',
     );
 
-    aaveV3EOARepayOnPriceStrategy.addAction(withdrawAction);
-    aaveV3EOARepayOnPriceStrategy.addAction(sellAction);
-    aaveV3EOARepayOnPriceStrategy.addAction(feeTakingAction);
-    aaveV3EOARepayOnPriceStrategy.addAction(paybackAction);
-    aaveV3EOARepayOnPriceStrategy.addAction(checkerAction);
+    aaveV3GenericRepayOnPriceStrategy.addAction(withdrawAction);
+    aaveV3GenericRepayOnPriceStrategy.addAction(sellAction);
+    aaveV3GenericRepayOnPriceStrategy.addAction(feeTakingAction);
+    aaveV3GenericRepayOnPriceStrategy.addAction(paybackAction);
+    aaveV3GenericRepayOnPriceStrategy.addAction(checkerAction);
 
-    return aaveV3EOARepayOnPriceStrategy.encodeForDsProxyCall();
+    return aaveV3GenericRepayOnPriceStrategy.encodeForDsProxyCall();
 };
 
-const createAaveV3EOAFLRepayOnPriceStrategy = () => {
-    const aaveV3EOAFLRepayOnPriceStrategy = new dfs.Strategy('AaveV3EOAFLRepayOnPrice');
+const createAaveV3GenericFLRepayOnPriceStrategy = () => {
+    const aaveV3GenericFLRepayOnPriceStrategy = new dfs.Strategy('AaveV3GenericFLRepayOnPrice');
 
-    aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&collAsset', 'address');
-    aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
-    aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&debtAsset', 'address');
-    aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
-    // aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
-    aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
-    aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    // aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&user', 'address');
+    aaveV3GenericFLRepayOnPriceStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3GenericFLRepayOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3GenericFLRepayOnPriceStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3GenericFLRepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3GenericFLRepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLRepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    aaveV3GenericFLRepayOnPriceStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
-    aaveV3EOAFLRepayOnPriceStrategy.addTrigger(trigger);
+    aaveV3GenericFLRepayOnPriceStrategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -7002,7 +6986,7 @@ const createAaveV3EOAFLRepayOnPriceStrategy = () => {
         ),
     );
 
-    aaveV3EOAFLRepayOnPriceStrategy.addAction(new dfs.actions.flashloan.FLAction(flAction));
+    aaveV3GenericFLRepayOnPriceStrategy.addAction(flAction);
 
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -7048,30 +7032,28 @@ const createAaveV3EOAFLRepayOnPriceStrategy = () => {
         '&user',
     );
 
-    aaveV3EOAFLRepayOnPriceStrategy.addAction(sellAction);
-    aaveV3EOAFLRepayOnPriceStrategy.addAction(feeTakingAction);
-    aaveV3EOAFLRepayOnPriceStrategy.addAction(paybackAction);
-    aaveV3EOAFLRepayOnPriceStrategy.addAction(withdrawAction);
-    aaveV3EOAFLRepayOnPriceStrategy.addAction(checkerAction);
+    aaveV3GenericFLRepayOnPriceStrategy.addAction(sellAction);
+    aaveV3GenericFLRepayOnPriceStrategy.addAction(feeTakingAction);
+    aaveV3GenericFLRepayOnPriceStrategy.addAction(paybackAction);
+    aaveV3GenericFLRepayOnPriceStrategy.addAction(withdrawAction);
+    aaveV3GenericFLRepayOnPriceStrategy.addAction(checkerAction);
 
-    return aaveV3EOAFLRepayOnPriceStrategy.encodeForDsProxyCall();
+    return aaveV3GenericFLRepayOnPriceStrategy.encodeForDsProxyCall();
 };
 
-const createAaveV3EOAFLCloseToCollStrategy = () => {
-    const aaveV3EOAFLCloseToCollStrategy = new dfs.Strategy('AaveV3EOAFLCloseToCollStrategy');
+const createAaveV3GenericFLCloseToCollStrategy = () => {
+    const aaveV3GenericFLCloseToCollStrategy = new dfs.Strategy('AaveV3GenericFLCloseToCollStrategy');
 
-    aaveV3EOAFLCloseToCollStrategy.addSubSlot('&collAsset', 'address');
-    aaveV3EOAFLCloseToCollStrategy.addSubSlot('&collAssetId', 'uint16');
-    aaveV3EOAFLCloseToCollStrategy.addSubSlot('&debtAsset', 'address');
-    aaveV3EOAFLCloseToCollStrategy.addSubSlot('&debtAssetId', 'uint16');
-    aaveV3EOAFLCloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
-    // aaveV3EOAFLCloseToCollStrategy.addSubSlot('&useDefaultMarket', 'bool');
-    aaveV3EOAFLCloseToCollStrategy.addSubSlot('&marketAddr', 'address');
-    // aaveV3EOAFLCloseToCollStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOAFLCloseToCollStrategy.addSubSlot('&user', 'address');
+    aaveV3GenericFLCloseToCollStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3GenericFLCloseToCollStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3GenericFLCloseToCollStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3GenericFLCloseToCollStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3GenericFLCloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
+    aaveV3GenericFLCloseToCollStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLCloseToCollStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
-    aaveV3EOAFLCloseToCollStrategy.addTrigger(trigger);
+    aaveV3GenericFLCloseToCollStrategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -7121,7 +7103,7 @@ const createAaveV3EOAFLCloseToCollStrategy = () => {
     // 1. Send collAsset flashloan amount to flAddress
     // 2. Send all collAsset's left after the close and flRepayment to eoa
     // 3. Send all debtAsset's left after the close and flRepayment to eoa
-    const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+    const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
         [
             '&collAsset',
             '&collAsset',
@@ -7139,31 +7121,29 @@ const createAaveV3EOAFLCloseToCollStrategy = () => {
         ],
     );
 
-    aaveV3EOAFLCloseToCollStrategy.addAction(flAction);
-    aaveV3EOAFLCloseToCollStrategy.addAction(sellAction);
-    aaveV3EOAFLCloseToCollStrategy.addAction(paybackAction);
-    aaveV3EOAFLCloseToCollStrategy.addAction(withdrawAction);
-    aaveV3EOAFLCloseToCollStrategy.addAction(feeTakingAction);
-    aaveV3EOAFLCloseToCollStrategy.addAction(sendTokensAction);
+    aaveV3GenericFLCloseToCollStrategy.addAction(flAction);
+    aaveV3GenericFLCloseToCollStrategy.addAction(sellAction);
+    aaveV3GenericFLCloseToCollStrategy.addAction(paybackAction);
+    aaveV3GenericFLCloseToCollStrategy.addAction(withdrawAction);
+    aaveV3GenericFLCloseToCollStrategy.addAction(feeTakingAction);
+    aaveV3GenericFLCloseToCollStrategy.addAction(sendTokensAction);
 
-    return aaveV3EOAFLCloseToCollStrategy.encodeForDsProxyCall();
+    return aaveV3GenericFLCloseToCollStrategy.encodeForDsProxyCall();
 };
 
-const createAaveV3EOAFLCloseToDebtStrategy = () => {
-    const aaveV3EOAFLCloseToDebtStrategy = new dfs.Strategy('AaveV3EOAFLCloseToDebtStrategy');
+const createAaveV3GenericFLCloseToDebtStrategy = () => {
+    const aaveV3GenericFLCloseToDebtStrategy = new dfs.Strategy('AaveV3GenericFLCloseToDebtStrategy');
 
-    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&collAsset', 'address');
-    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&collAssetId', 'uint16');
-    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&debtAsset', 'address');
-    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&debtAssetId', 'uint16');
-    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
-    // aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&useDefaultMarket', 'bool');
-    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&marketAddr', 'address');
-    // aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&user', 'address');
+    aaveV3GenericFLCloseToDebtStrategy.addSubSlot('&collAsset', 'address');
+    aaveV3GenericFLCloseToDebtStrategy.addSubSlot('&collAssetId', 'uint16');
+    aaveV3GenericFLCloseToDebtStrategy.addSubSlot('&debtAsset', 'address');
+    aaveV3GenericFLCloseToDebtStrategy.addSubSlot('&debtAssetId', 'uint16');
+    aaveV3GenericFLCloseToDebtStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
+    aaveV3GenericFLCloseToDebtStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3GenericFLCloseToDebtStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
-    aaveV3EOAFLCloseToDebtStrategy.addTrigger(trigger);
+    aaveV3GenericFLCloseToDebtStrategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -7212,7 +7192,7 @@ const createAaveV3EOAFLCloseToDebtStrategy = () => {
     // return:
     // 1. Send debtToken's flashloan amount to flAddress
     // 2. Send all debtToken's left after the close to EOA
-    const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+    const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
         [
             '&debtAsset',
             '&debtAsset',
@@ -7227,14 +7207,14 @@ const createAaveV3EOAFLCloseToDebtStrategy = () => {
         ],
     );
 
-    aaveV3EOAFLCloseToDebtStrategy.addAction(flAction);
-    aaveV3EOAFLCloseToDebtStrategy.addAction(paybackAction);
-    aaveV3EOAFLCloseToDebtStrategy.addAction(withdrawAction);
-    aaveV3EOAFLCloseToDebtStrategy.addAction(sellAction);
-    aaveV3EOAFLCloseToDebtStrategy.addAction(feeTakingAction);
-    aaveV3EOAFLCloseToDebtStrategy.addAction(sendTokensAction);
+    aaveV3GenericFLCloseToDebtStrategy.addAction(flAction);
+    aaveV3GenericFLCloseToDebtStrategy.addAction(paybackAction);
+    aaveV3GenericFLCloseToDebtStrategy.addAction(withdrawAction);
+    aaveV3GenericFLCloseToDebtStrategy.addAction(sellAction);
+    aaveV3GenericFLCloseToDebtStrategy.addAction(feeTakingAction);
+    aaveV3GenericFLCloseToDebtStrategy.addAction(sendTokensAction);
 
-    return aaveV3EOAFLCloseToDebtStrategy.encodeForDsProxyCall();
+    return aaveV3GenericFLCloseToDebtStrategy.encodeForDsProxyCall();
 };
 
 module.exports = {
@@ -7353,14 +7333,14 @@ module.exports = {
     createCompV3FLRepayOnPriceStrategy,
     createCompV3FLCloseToDebtStrategy,
     createCompV3FLCloseToCollStrategy,
-    createAaveV3EOABoostStrategy,
-    createAaveV3EOAFLBoostStrategy,
-    createAaveV3EOARepayStrategy,
-    createAaveV3EOAFLRepayStrategy,
-    createAaveV3EOABoostOnPriceStrategy,
-    createAaveV3EOAFLBoostOnPriceStrategy,
-    createAaveV3EOARepayOnPriceStrategy,
-    createAaveV3EOAFLRepayOnPriceStrategy,
-    createAaveV3EOAFLCloseToCollStrategy,
-    createAaveV3EOAFLCloseToDebtStrategy,
+    createAaveV3GenericBoostStrategy,
+    createAaveV3GenericFLBoostStrategy,
+    createAaveV3GenericRepayStrategy,
+    createAaveV3GenericFLRepayStrategy,
+    createAaveV3GenericBoostOnPriceStrategy,
+    createAaveV3GenericFLBoostOnPriceStrategy,
+    createAaveV3GenericRepayOnPriceStrategy,
+    createAaveV3GenericFLRepayOnPriceStrategy,
+    createAaveV3GenericFLCloseToCollStrategy,
+    createAaveV3GenericFLCloseToDebtStrategy,
 };
