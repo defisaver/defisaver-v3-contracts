@@ -6772,6 +6772,176 @@ const callAaveV3EOAFLBoostStrategy = async (
     );
 };
 
+const callAaveV3EOABoostOnPriceStrategy = async (
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    exchangeObject,
+    boostAmount,
+) => {
+    const isL2 = network !== 'mainnet';
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+
+    const aaveV3BorrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        false, // useDefaultMarket
+        placeHolderAddr, // marketAddr
+        boostAmount, // amount
+        placeHolderAddr, // to
+        2, // rateMode (VARIABLE)
+        0, // debt asset ID - will use from subData
+        false, // useOnBehalf. Doesn't matter as it will use from subData
+        placeHolderAddr,
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, exchangeObject[1], '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, exchangeObject[1], '0');
+    const aaveV3SupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        false, // useDefaultMarket
+        placeHolderAddr, // market
+        0, // amount
+        placeHolderAddr, // from
+        placeHolderAddr, // tokenAddr (collateral token)
+        0, // assetId - will use from subData
+        true, // enableAsColl
+        false, // useOnBehalf
+        placeHolderAddr, // onBehalf
+    );
+    const aaveV3OpenRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
+        0, // targetRatio (placeholder)
+        placeHolderAddr, // marketAddr
+        placeHolderAddr, // user
+    );
+
+    actionsCallData.push(aaveV3BorrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3SupplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3OpenRatioCheckAction.encodeForRecipe()[0]);
+
+    console.log(actionsCallData);
+    // Price trigger data - different from ratio trigger
+    triggerCallData.push(
+        abiCoder.encode(
+            ['address', 'address', 'uint256', 'uint8'],
+            [placeHolderAddr, placeHolderAddr, 0, 0],
+        ),
+    );
+
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(
+        `GasUsed callAaveV3EOABoostOnPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
+const callAaveV3EOAFLBoostOnPriceStrategy = async (
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    exchangeObject,
+    boostAmount,
+    flAddr,
+    debtToken,
+    collToken,
+) => {
+    const isL2 = network !== 'mainnet';
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction([debtToken], [boostAmount]),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, collToken, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, collToken, '0');
+
+    const aaveV3SupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        false, // useDefaultMarket
+        placeHolderAddr, // market
+        0, // amount
+        placeHolderAddr, // from
+        placeHolderAddr, // collTokenAddr -  from subData
+        0, // assetId - from subData
+        true, // enableAsColl
+        false, // useOnBehalf
+        placeHolderAddr, // onBehalf
+    );
+
+    const aaveV3BorrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        false, // useDefaultMarket
+        placeHolderAddr, // marketAddr
+        0, // amount (from FL)
+        flAddr, // onBehalf (FL address)
+        2, // rateMode (VARIABLE)
+        0, // assetId - from subData
+        false, // useOnBehalf
+        placeHolderAddr, // onBehalfAddr
+    );
+
+    const aaveV3OpenRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
+        0, // targetRatio (placeholder)
+        placeHolderAddr, // marketAddr
+        placeHolderAddr, // onBehalfAddr
+    );
+
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3SupplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3BorrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3OpenRatioCheckAction.encodeForRecipe()[0]);
+
+    // Price trigger data - different from ratio trigger
+    triggerCallData.push(
+        abiCoder.encode(
+            ['address', 'address', 'uint256', 'uint8'],
+            [placeHolderAddr, placeHolderAddr, 0, 0],
+        ),
+    );
+
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(
+        `GasUsed callAaveV3EOAFLBoostOnPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
 const callAaveV3EOARepayStrategy = async (
     strategyExecutor,
     strategyIndex,
@@ -7098,6 +7268,8 @@ module.exports = {
     callCompV3FLCloseToDebtStrategy,
     callAaveV3EOABoostStrategy,
     callAaveV3EOAFLBoostStrategy,
+    callAaveV3EOABoostOnPriceStrategy,
+    callAaveV3EOAFLBoostOnPriceStrategy,
     callAaveV3EOARepayStrategy,
     callAaveV3EOAFLRepayStrategy,
 };

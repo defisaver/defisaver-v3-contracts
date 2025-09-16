@@ -24,6 +24,10 @@ const {
     createAaveV3EOAFLBoostStrategy,
     createAaveV3EOARepayStrategy,
     createAaveV3EOAFLRepayStrategy,
+    createAaveV3EOABoostOnPriceStrategy,
+    createAaveV3EOAFLBoostOnPriceStrategy,
+    createAaveV3EOARepayOnPriceStrategy,
+    createAaveV3EOAFLRepayOnPriceStrategy,
 } = require('../../strategies-spec/mainnet');
 
 const {
@@ -31,6 +35,10 @@ const {
     createAaveV3EOAFLBoostL2Strategy,
     createAaveV3EOARepayL2Strategy,
     createAaveV3EOAFLRepayL2Strategy,
+    createAaveV3EOABoostOnPriceL2Strategy,
+    createAaveV3EOAFLBoostOnPriceL2Strategy,
+    createAaveV3EOARepayOnPriceL2Strategy,
+    createAaveV3EOAFLRepayOnPriceL2Strategy,
 } = require('../../strategies-spec/l2');
 
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
@@ -521,6 +529,52 @@ const deployAaveV3RepayGenericBundle = async () => {
     return bundleId;
 };
 
+const deployAaveV3BoostOnPriceGenericBundle = async () => {
+    const isL2 = network !== 'mainnet';
+    const isFork = isNetworkFork();
+    await openStrategyAndBundleStorage(isFork);
+
+    let boostStrategy;
+    let flBoostStrategy;
+
+    if (isL2) {
+        boostStrategy = createAaveV3EOABoostOnPriceL2Strategy();
+        flBoostStrategy = createAaveV3EOAFLBoostOnPriceL2Strategy();
+    } else {
+        boostStrategy = createAaveV3EOABoostOnPriceStrategy();
+        flBoostStrategy = createAaveV3EOAFLBoostOnPriceStrategy();
+    }
+
+    const continuous = false;
+    const boostStrategyId = await createStrategy(...boostStrategy, continuous);
+    const flBoostStrategyId = await createStrategy(...flBoostStrategy, continuous);
+    const bundleId = await createBundle([boostStrategyId, flBoostStrategyId]);
+    return bundleId;
+};
+
+const deployAaveV3RepayOnPriceGenericBundle = async () => {
+    const isL2 = network !== 'mainnet';
+    const isFork = isNetworkFork();
+    await openStrategyAndBundleStorage(isFork);
+
+    let repayStrategy;
+    let flRepayStrategy;
+
+    if (isL2) {
+        repayStrategy = createAaveV3EOARepayOnPriceL2Strategy();
+        flRepayStrategy = createAaveV3EOAFLRepayOnPriceL2Strategy();
+    } else {
+        repayStrategy = createAaveV3EOARepayOnPriceStrategy();
+        flRepayStrategy = createAaveV3EOAFLRepayOnPriceStrategy();
+    }
+
+    const continuous = false;
+    const repayStrategyId = await createStrategy(...repayStrategy, continuous);
+    const flRepayStrategyId = await createStrategy(...flRepayStrategy, continuous);
+    const bundleId = await createBundle([repayStrategyId, flRepayStrategyId]);
+    return bundleId;
+};
+
 const setupAaveV3EOAPermissions = async (userAddress, smartWalletAddress, collTokenAddr, debtTokenAddr) => {
     console.log('Setting up AaveV3 EOA permissions...');
     console.log(`  - Collateral token: ${collTokenAddr}`);
@@ -591,6 +645,16 @@ const setupAaveV3EOAPermissions = async (userAddress, smartWalletAddress, collTo
     }
 };
 
+const getAaveV3AssetId = async (tokenAddress, market = null) => {
+    const marketAddr = market || addrs[network].AAVE_MARKET;
+    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', marketAddr);
+    const poolAddress = await aaveMarketContract.getPool();
+    const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
+    const poolContract = await hre.ethers.getContractAt(poolContractName, poolAddress);
+    const reserveData = await poolContract.getReserveData(tokenAddress);
+    return reserveData.id;
+};
+
 module.exports = {
     getAaveDataProvider,
     getAaveLendingPoolV2,
@@ -607,7 +671,10 @@ module.exports = {
     getAaveV3PositionRatio,
     deployAaveV3BoostGenericBundle,
     deployAaveV3RepayGenericBundle,
+    deployAaveV3BoostOnPriceGenericBundle,
+    deployAaveV3RepayOnPriceGenericBundle,
     setupAaveV3EOAPermissions,
+    getAaveV3AssetId,
     AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST,
     AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY,
     aaveV2assetsDefaultMarket,

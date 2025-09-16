@@ -406,6 +406,38 @@ const subAaveV3LeverageManagementGeneric = async (
     };
 };
 
+const subAaveV3LeverageManagementOnPriceGeneric = async (
+    proxy,
+    eoaAddr,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    targetRatio,
+    triggerPrice,
+    priceState,
+    isEOA,
+    bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.leverageManagementOnPriceGeneric(
+        bundleId,
+        triggerPrice,
+        priceState,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        targetRatio,
+        isEOA,
+        isEOA ? eoaAddr : proxy.address,
+    );
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 const subCompV2AutomationStrategy = async (
     proxy,
     minRatio,
@@ -1156,6 +1188,7 @@ module.exports = {
     subAaveV2AutomationStrategy,
     subAaveV3AutomationStrategy,
     subAaveV3LeverageManagementGeneric,
+    subAaveV3LeverageManagementOnPriceGeneric,
     subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
