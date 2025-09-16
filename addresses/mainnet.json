@@ -4663,5 +4663,71 @@
         "history": [
             "0x66557aE7da534B1d668405e3e90e12E207Bb6277"
         ]
+    },
+    {
+        "name": "SkyStakingEngineClaimRewards",
+        "address": "0x0aF3F032A8544c63c35FD2995be8EE2Df68d2c21",
+        "id": "0xfdbd8ef6",
+        "path": "contracts/actions/sky/SkyStakingEngineClaimRewards.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SkyStakingEngineOpen",
+        "address": "0x7F7669d926beeba495e8D97C6DAF6C000F05AEC0",
+        "id": "0x677c3722",
+        "path": "contracts/actions/sky/SkyStakingEngineOpen.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SkyStakingEngineSelectFarm",
+        "address": "0x44fe1615294E9D50faeb690D2a944EAF8B500892",
+        "id": "0x7e2517f6",
+        "path": "contracts/actions/sky/SkyStakingEngineSelectFarm.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SkyStakingEngineStake",
+        "address": "0xBb7F34F8A7809Ffe0775D13a783fE885EBB9aea5",
+        "id": "0xa5236ed6",
+        "path": "contracts/actions/sky/SkyStakingEngineStake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SkyStakingEngineUnstake",
+        "address": "0x5456F09bBbBDB6bFad50A22256bAC7f3DDaab121",
+        "id": "0x51a3f99a",
+        "path": "contracts/actions/sky/SkyStakingEngineUnstake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SkyView",
+        "address": "0x5456F09bBbBDB6bFad50A22256bAC7f3DDaab121",
+        "id": "0x6431452a",
+        "path": "contracts/views/SkyView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
     }
 ]
