@@ -21,7 +21,7 @@ contract TestCore_AdminVault is AdminVault, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_constructor() public {
+    function test_constructor() public view {
         assertEq(cut.owner(), address(this));
         assertEq(cut.admin(), ADMIN_ADDR);
     }

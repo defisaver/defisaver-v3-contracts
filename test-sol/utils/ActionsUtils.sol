@@ -36,6 +36,7 @@ import { LiquityV2AdjustInterestRate } from "../../contracts/actions/liquityV2/t
 import { LiquityV2SPDeposit } from "../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
 import { LiquityV2SPWithdraw } from "../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPWithdraw.sol";
 import { LiquityV2SPClaimColl } from "../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPClaimColl.sol";
+import { LiquityV2RatioCheck} from "../../contracts/actions/checkers/LiquityV2RatioCheck.sol";
 import { EulerV2Supply } from "../../contracts/actions/eulerV2/EulerV2Supply.sol";
 import { EulerV2Withdraw } from "../../contracts/actions/eulerV2/EulerV2Withdraw.sol";
 import { EulerV2Borrow } from "../../contracts/actions/eulerV2/EulerV2Borrow.sol";
@@ -71,6 +72,7 @@ import {SkyStakingEngineStake} from "../../contracts/actions/sky/SkyStakingEngin
 import {SkyStakingEngineUnstake} from "../../contracts/actions/sky/SkyStakingEngineUnstake.sol";
 import {SkyStakingEngineClaimRewards} from "../../contracts/actions/sky/SkyStakingEngineClaimRewards.sol";
 import {SkyStakingEngineSelectFarm} from "../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
+import { GhoStake } from "../../contracts/actions/aaveV3/GhoStake.sol";
 
 contract ActionsUtils {
 
@@ -958,6 +960,23 @@ contract ActionsUtils {
         );
     }
 
+
+    function liquityV2RatioCheckEncode(
+        address _market,
+        uint256 _troveId,
+        LiquityV2RatioCheck.RatioState _ratioState,
+        uint256 _targetRatio
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            LiquityV2RatioCheck.Params({
+                market: _market,
+                troveId: _troveId,
+                ratioState: _ratioState,
+                targetRatio: _targetRatio
+            })
+        );
+    }
+
     function sendTokensAndUnwrapEncode(
         address[] memory _tokens,
         address[] memory _receivers,
@@ -1326,4 +1345,15 @@ contract ActionsUtils {
         );
     }
 
+    function ghoStakeEncode(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(GhoStake.Params({
+            from: _from,
+            to: _to,
+            amount: _amount
+        }));
+    }
 }

@@ -2,15 +2,16 @@
 
 pragma solidity =0.8.24;
 
-import { ActionBase } from "../ActionBase.sol";
-import { AaveV3RatioHelper } from "../aaveV3/helpers/AaveV3RatioHelper.sol";
+import {ActionBase} from "../ActionBase.sol";
+import {AaveV3RatioHelper} from "../aaveV3/helpers/AaveV3RatioHelper.sol";
 
 /// @title Action to check the ratio of the Aave V3 position after strategy execution.
 /// @notice This action only checks for current ratio, without comparing it to the start ratio.
 contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
-
     /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    /// @notice We are checking for 5% RATIO_OFFSET only when the target ratio is < 999%
+    uint256 internal constant RATIO_LIMIT = 9990000000000000000;
 
     error BadAfterRatio(uint256 currentRatio, uint256 targetRatio);
 
@@ -35,8 +36,11 @@ contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
 
         uint256 currRatio = getRatio(market, address(this));
 
-        if (currRatio > (targetRatio + RATIO_OFFSET) || currRatio < (targetRatio - RATIO_OFFSET)) {
-            revert BadAfterRatio(currRatio, targetRatio);
+        /// @notice If `targetRatio` is 999% or more then skip `RATIO_OFFSET` check because it is very hard to be precise under 5%.
+        if (targetRatio < RATIO_LIMIT) {
+            if (currRatio > (targetRatio + RATIO_OFFSET) || currRatio < (targetRatio - RATIO_OFFSET)) {
+                revert BadAfterRatio(currRatio, targetRatio);
+            }
         }
 
         emit ActionEvent("AaveV3OpenRatioCheck", abi.encode(currRatio));

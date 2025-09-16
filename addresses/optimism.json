@@ -136,6 +136,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0x57AE9cc546fd969916703A5bC11a1482957C5346",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "KyberInputScalingHelper",
         "address": "0x1E3b2371b3790bDc7C667d50aB077Dce7121391A",
         "id": "0x559d99f5",
@@ -340,7 +351,7 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xb099119B6B713614a589D078b4655DFdB75BCef6",
+        "address": "0x5c278b10b839e5ec0a80bcfa8923bae11613c67d",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.11",
@@ -348,6 +359,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+          "0xb099119B6B713614a589D078b4655DFdB75BCef6",
           "0xD313cdea0F3e759d8Aa0130F768895BDBd371b1d",
           "0xe2171e5503558ee8723e69807f9f1eb654943a3e",
           "0xf56a2a8fa68d2e608ed7060be55e96e008dcc3ca",
@@ -376,6 +388,17 @@
         "address": "0x491f0858Ef9e6987e260587322149Ac33D762e6e",
         "id": "0x69885459",
         "path": "contracts/utils/TransientStorage.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TransientStorageCancun",
+        "address": "0x7c717bA104B5531A040D93F6AAc3D701C95BA9BC",
+        "id": "0x099eb80a",
+        "path": "contracts/utils/TransientStorageCancun.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
@@ -1112,14 +1135,15 @@
     },
     {
         "name": "CompV3View",
-        "address": "0x2c88d93Ec06F404C67CD3d2df29084FAfe2C8605",
+        "address": "0xd135293f1b0493fae154a8b9ba641dffa9fc7ea9",
         "id": "0x16be4292",
         "path": "contracts/views/CompV3View.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x2c88d93Ec06F404C67CD3d2df29084FAfe2C8605",
             "0x969d845618596787DBc64687Ee90b16931BBBCBC"
         ]
     },
@@ -1160,14 +1184,16 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0xA41baFAE6832D6D059eEcac0eBB46c4D8c16c248",
+        "address": "0xAF5D3604B1bE08fadD239b2A7353F01786cE4b0e",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xA41baFAE6832D6D059eEcac0eBB46c4D8c16c248"
+        ]
     },
     {
         "name": "CompV3RatioTrigger",
@@ -1196,6 +1222,28 @@
         "address": "0xcc63B281b29a4c7f33aF780e9B480A15eb676e81",
         "id": "0x869398d6",
         "path": "contracts/actions/summerfi/SFApproveTokens.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    { 
+        "name": "ExecuteCall",
+        "address": "0xfd5ac928aac40d490bcf1a83038d58aa90ea39a7",
+        "id": "0xd82327eb",
+        "path": "contracts/actions/utils/ExecuteCall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CreateSub",
+        "address": "0x2daED8030BFC87B3d27c02E2f044B9CF4841Ff3e",
+        "id": "0xf41e543f",
+        "path": "contracts/actions/utils/CreateSub.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",

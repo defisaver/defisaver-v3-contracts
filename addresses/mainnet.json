@@ -303,6 +303,17 @@
         "history": []
     },
     {
+        "name": "BebopWrapper",
+        "address": "0x2608919087226099B74C919480c2ed785415E832",
+        "id": "0x8391a2d1",
+        "path": "contracts/exchangeV3/offchainWrappersV3/BebopWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveWrapperV3",
         "address": "0xF5E8C498b6697F0704F0C50448714C5E328b33E2",
         "id": "0xb856c9af",
@@ -738,6 +749,17 @@
         "history": []
     },
     {
+        "name": "TransientStorageCancun",
+        "address": "0x0304E27cccE28bAB4d78C6cb7AfD4cd01c87c1e4",
+        "id": "0x099eb80a",
+        "path": "contracts/utils/TransientStorageCancun.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "CurveView",
         "address": "0x79fdec1d39f6282a92e5e087d10ba0b0cef89a84",
         "id": "0x7da42156",
@@ -768,14 +790,15 @@
     },
     {
         "name": "CompV3View",
-        "address": "0x566b1Bd61E4C164DC22f51883942655DaA7Ea297",
+        "address": "0x687bf45bb6279b47a104052b5036da008315f622",
         "id": "0x16be4292",
         "path": "contracts/views/CompV3View.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x566b1Bd61E4C164DC22f51883942655DaA7Ea297",
             "0xf522b1588688b9887623b9C666175684d284D363"
         ]
     },
@@ -1149,14 +1172,14 @@
     },
     {
         "name": "McdTokenConverter",
-        "address": "0x1ef664440dc7342253780472dad90d9a3258a71d",
+        "address": "0x8064B61A4DCc913C21Ca9bf7fF56314993d10849",
         "id": "0xdd5b6f15",
         "path": "contracts/actions/mcd/McdTokenConverter.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x1ef664440dc7342253780472dad90d9a3258a71d"]
     },
     {
         "name": "McdGenerate",
@@ -2114,7 +2137,7 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x5BAD7F432e22BcF1937C8361933c9C804179aEDf",
+        "address": "0xe5b2f8d31b47f09400d8afb599e0f239179de6b6",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
         "version": "1.0.11",
@@ -2122,6 +2145,7 @@
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x5BAD7F432e22BcF1937C8361933c9C804179aEDf",
             "0x0CB0170F3413e54405F64d3C23BA3A1D8Bb96D99",
             "0xFe3BfD9E4d102275AC223704B7c470759E5C883b",
             "0xea6092C334Cc1Ed2a4154C2101D70d09B7Ad0b1E",
@@ -3532,25 +3556,30 @@
     },
     {
         "name": "CompV3RatioCheck",
-        "address": "0x008E50774B26E92179fe25233E6ee7399c5A11F5",
+        "address": "0xC98d94791216E6c5cf24FD3D2BBFdc577113331B",
         "id": "0x2ce67bb9",
         "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
+        "version": "1.0.2",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0x008E50774B26E92179fe25233E6ee7399c5A11F5",
+            "0xEeb7e195d69479910d071Ac1dBC923A17d042960"
+        ]
+    },
+    {
+        "name": "CompV3RatioTrigger",
+        "address": "0x802bBe746AcE6D0bED9aB58622D88E553fe59720",
+        "id": "0x506812d0",
+        "path": "contracts/triggers/CompV3RatioTrigger.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xEeb7e195d69479910d071Ac1dBC923A17d042960"]
-    },
-    {
-        "name": "CompV3RatioTrigger",
-        "address": "0x8ACCaf4e0054AD73789A3ebF344c3061804c29D8",
-        "id": "0x506812d0",
-        "path": "contracts/triggers/CompV3RatioTrigger.sol",
-        "version": "1.0.0",
-        "inRegistry": true,
-        "changeTime": "86400",
-        "registryIds": [],
-        "history": []
+        "history": [
+            "0x8ACCaf4e0054AD73789A3ebF344c3061804c29D8"
+        ]
     },
     {
         "name": "CompV3SubProxy",
@@ -3719,14 +3748,16 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0xaFD184d6E048c3C8D18356ef4E9adA024E6fb31c",
+        "address": "0x7449c0830B10cbd1BaD1Aa4427Ccb41Fd5C75be5",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xaFD184d6E048c3C8D18356ef4E9adA024E6fb31c"
+        ]
     },
     {
         "name": "BotAuthForTxSaver",
@@ -3812,6 +3843,17 @@
         "address": "0x3fD02e65B4fb12381946D03815Ff3FF8Ebe2fC63",
         "id": "0xe1c6999c",
         "path": "contracts/actions/aaveV3/GhoUnstake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 86400,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "GhoStake",
+        "address": "0x6cfBFd04702f3b7d4fc52D457eDf91D6E4A081bb",
+        "id": "0x1904bda0",
+        "path": "contracts/actions/aaveV3/GhoStake.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": 86400,
@@ -4168,14 +4210,14 @@
     },
     {
         "name": "LiquityV2TargetRatioCheck",
-        "address": "0x44F68fDE354916353B13C895F7081704484a7A8f",
+        "address": "0xAB5e11DBFAa8fBa7C275087a553d0D0E37A02343",
         "id": "0xd54d1b42",
         "path": "contracts/actions/checkers/LiquityV2TargetRatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x44F68fDE354916353B13C895F7081704484a7A8f"]
     },
     {
         "name": "LiquityV2RatioCheck",
@@ -4564,5 +4606,62 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "CompV3PriceTrigger",
+        "address": "0xc7F3bc2E90957f7A64275b03f01EE72c6C11afD3",
+        "id": "0xb67d04b5",
+        "path": "contracts/actions/compV3/CompV3PriceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "CompV3PriceRangeTrigger",
+        "address": "0x7f98dbBAe15f9c0684AC97e454B85DDAE65f0313",
+        "id": "0xe4cdaef5",
+        "path": "contracts/actions/compV3/CompV3PriceRangeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    { 
+        "name": "ExecuteCall",
+        "address": "0x538eda025a8be6ff8fc1fe6050ba3aafb7620608",
+        "id": "0xd82327eb",
+        "path": "contracts/actions/utils/ExecuteCall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityV2AdjustTimeTrigger",
+        "address": "0xDAC16ee91E5407214B75FB1871AaDf356010a939",
+        "id": "0x91d52698",
+        "path": "contracts/triggers/LiquityV2AdjustTimeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityV2DebtInFrontTrigger",
+        "address": "0x22899AF903f07FB272C34f6e573E6f967dcC32e7",
+        "id": "0xda723e62",
+        "path": "contracts/triggers/LiquityV2DebtInFrontTrigger.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": [
+            "0x66557aE7da534B1d668405e3e90e12E207Bb6277"
+        ]
     }
 ]
