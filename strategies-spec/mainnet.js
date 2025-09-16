@@ -6466,8 +6466,8 @@ const createAaveV3EOABoostStrategy = () => {
     aaveV3EOABoostStrategy.addSubSlot('&checkBoostState', 'uint8');
     // aaveV3EOABoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOABoostStrategy.addSubSlot('&marketAddr', 'address');
-    aaveV3EOABoostStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOABoostStrategy.addSubSlot('&onBehalfAddr', 'address');
+    // aaveV3EOABoostStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOABoostStrategy.addSubSlot('&user', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3EOABoostStrategy.addTrigger(aaveV3Trigger);
@@ -6479,8 +6479,8 @@ const createAaveV3EOABoostStrategy = () => {
         '&proxy', // hardcoded
         '%rateMode', // depends on type of debt we want
         '%assetId', // must stay variable can choose diff. asset
-        '&useOnBehalf', // hardcoded to true
-        '&onBehalfAddr', // EOA addr from subData
+        '%useOnBehalf', // hardcoded to true
+        '&user', // EOA/SW addr from subData
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -6509,15 +6509,15 @@ const createAaveV3EOABoostStrategy = () => {
         '%collAddr', // is variable as it can change
         '%assetId', // must be variable
         '%enableAsColl', // backend hardcoded always enable as coll
-        '&useOnBehalf', // hardcoded true use on behalf
-        '&onBehalfAddr', // EOA addr from subData
+        '%useOnBehalf', // hardcoded to true
+        '&user', // EOA/SW addr from subData
     );
 
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkBoostState',
         '&targetRatio',
         '&marketAddr',
-        '&onBehalfAddr',
+        '&user',
     );
 
     aaveV3EOABoostStrategy.addAction(borrowAction);
@@ -6536,8 +6536,8 @@ const createAaveV3EOAFLBoostStrategy = () => {
     aaveV3EOAFLBoostStrategy.addSubSlot('&checkBoostState', 'uint8');
     // aaveV3EOAFLBoostStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLBoostStrategy.addSubSlot('&marketAddr', 'address');
-    aaveV3EOAFLBoostStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOAFLBoostStrategy.addSubSlot('&onBehalfAddr', 'address');
+    // aaveV3EOAFLBoostStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOAFLBoostStrategy.addSubSlot('&user', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3EOAFLBoostStrategy.addTrigger(aaveV3Trigger);
@@ -6579,8 +6579,8 @@ const createAaveV3EOAFLBoostStrategy = () => {
         '%collAddr', // is variable as it can change
         '%assetId', // must be variable
         '%enableAsColl', // backend hardcoded always enable as coll
-        '&useOnBehalf', // hardcoded true use on behalf
-        '&onBehalfAddr', // EOA addr from subData as its true
+        '%useOnBehalf', // hardcoded true use on behalf
+        '&user', // EOA/SW addr from subData
     );
 
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
@@ -6588,17 +6588,17 @@ const createAaveV3EOAFLBoostStrategy = () => {
         '&marketAddr', // from subData
         '$1', // from Fl amount
         '%flAddr', // fl address that can change
-        '%rateMode', // depends on type of debt we want
+        '%rateMode', // hardcoded 2 (VARIABLE)
         '%assetId', // must stay variable can choose diff. asset
-        '&useOnBehalf', // set to true hardcoded
-        '&onBehalfAddr', // EOA addr from subData because flag is true
+        '%useOnBehalf', // set to true hardcoded
+        '&user', // EOA/SW addr from subData
     );
 
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkBoostState',
         '&targetRatio',
         '&marketAddr',
-        '&onBehalfAddr',
+        '&user',
     );
 
     aaveV3EOAFLBoostStrategy.addAction(sellAction);
@@ -6617,15 +6617,15 @@ const createAaveV3EOARepayStrategy = () => {
     aaveV3EOARepayStrategy.addSubSlot('&checkRepayState', 'uint8');
     // aaveV3EOARepayStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOARepayStrategy.addSubSlot('&marketAddr', 'address');
-    aaveV3EOARepayStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOARepayStrategy.addSubSlot('&onBehalfAddr', 'address');
+    // aaveV3EOARepayStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOARepayStrategy.addSubSlot('&user', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3EOARepayStrategy.addTrigger(aaveV3Trigger);
 
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
         '%aCollTokenAddr', // aToken for collateral
-        '&onBehalfAddr', // hardcoded from subData
+        '&user', // hardcoded from subData
         '%amount', // must stay variable
     );
 
@@ -6660,18 +6660,18 @@ const createAaveV3EOARepayStrategy = () => {
         '&marketAddr', // from subData
         '$4', // amount hardcoded - output of feeTakingAction
         '&proxy', // proxy hardcoded
-        '%rateMode', // variable type of debt
+        '%rateMode', // variable type of debt - 2
         '%debtAddr', // used just for sdk not actually sent (should this be here?)
         '%assetId', // must be variable
-        '&useOnBehalf', // hardcoded true
-        '&onBehalfAddr', // EOA from subData as its true
+        '%useOnBehalf', // hardcoded true
+        '&user', // EOA/SW from subData
     );
 
     const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
         '&checkRepayState',
         '&targetRatio',
         '&marketAddr',
-        '&onBehalfAddr',
+        '&user',
     );
 
     aaveV3EOARepayStrategy.addAction(pullTokenAction);
@@ -6691,8 +6691,8 @@ const createAaveV3EOAFLRepayStrategy = () => {
     aaveV3EOAFLRepayStrategy.addSubSlot('&checkRepayState', 'uint8');
     // aaveV3EOAFLRepayStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLRepayStrategy.addSubSlot('&marketAddr', 'address');
-    aaveV3EOAFLRepayStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOAFLRepayStrategy.addSubSlot('&onBehalfAddr', 'address');
+    // aaveV3EOAFLRepayStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOAFLRepayStrategy.addSubSlot('&user', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3RatioTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3EOAFLRepayStrategy.addTrigger(aaveV3Trigger);
@@ -6712,7 +6712,7 @@ const createAaveV3EOAFLRepayStrategy = () => {
         formatExchangeObj(
             '%collAddr', // must stay variable
             '%debtAddr', // must stay variable
-            '%0', //  can't hard code because of potential FL fee
+            '%amount', //  can't hard code because of potential FL fee
             '%exchangeWrapper', // can pick exchange wrapper
         ),
         '&proxy', // hardcoded
@@ -6734,14 +6734,14 @@ const createAaveV3EOAFLRepayStrategy = () => {
         '%rateMode', // variable type of debt
         '%debtAddr', // used just for sdk not actually sent (should this be here?)
         '%assetId', // must be variable
-        '&useOnBehalf', // hardcoded true
-        '&onBehalfAddr', // EOA addr from subData
+        '%useOnBehalf', // hardcoded true
+        '&user', // EOA/SW addr from subData
     );
 
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
         '%aCollTokenAddr', // aToken for collateral
-        '&onBehalfAddr', // EOA/SW addr from subData
-        '$1', // output of FL action // TODO -> not sure if ok because of FL fees?
+        '&user', // EOA/SW addr from subData
+        '$1', // output of FL action
     );
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
@@ -6756,7 +6756,7 @@ const createAaveV3EOAFLRepayStrategy = () => {
         '&checkRepayState',
         '&targetRatio',
         '&marketAddr',
-        '&onBehalfAddr',
+        '&user',
     );
 
     aaveV3EOAFLRepayStrategy.addAction(sellAction);
@@ -6779,8 +6779,8 @@ const createAaveV3EOABoostOnPriceStrategy = () => {
     // aaveV3EOABoostOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOABoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOABoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOABoostOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOABoostOnPriceStrategy.addSubSlot('&onBehalfAddr', 'address');
+    // aaveV3EOABoostOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOABoostOnPriceStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3EOABoostOnPriceStrategy.addTrigger(trigger);
@@ -6792,8 +6792,8 @@ const createAaveV3EOABoostOnPriceStrategy = () => {
         '&proxy',
         '%rateMode', // hardcode to VARIABLE = 2
         '&debtAssetId',
-        '&useOnBehalf', // hardcoded to true from subData
-        '&onBehalfAddr', // EOA addr hardcoded from subData
+        '%useOnBehalf', // hardcoded to true
+        '&user', // EOA/SW addr hardcoded from subData
     );
     const sellAction = new dfs.actions.basic.SellAction(
         formatExchangeObj(
@@ -6818,13 +6818,13 @@ const createAaveV3EOABoostOnPriceStrategy = () => {
         '&collAsset',
         '&collAssetId',
         '%enableAsColl', // hardcode to true
-        '&useOnBehalf', // hardcoded to true from subData
-        '&onBehalfAddr', // EOA addr hardcoded from subData
+        '%useOnBehalf', // hardcoded to true
+        '&user', // EOA/SW addr hardcoded from subData
     );
     const openRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
         '&marketAddr', // from subData
-        '&onBehalfAddr',
+        '&user',
     );
     aaveV3EOABoostOnPriceStrategy.addAction(borrowAction);
     aaveV3EOABoostOnPriceStrategy.addAction(sellAction);
@@ -6844,8 +6844,8 @@ const createAaveV3EOAFLBoostOnPriceStrategy = () => {
     // aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&onBehalfAddr', 'address');
+    // aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOAFLBoostOnPriceStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3EOAFLBoostOnPriceStrategy.addTrigger(trigger);
@@ -6881,8 +6881,8 @@ const createAaveV3EOAFLBoostOnPriceStrategy = () => {
         '&collAsset',
         '&collAssetId',
         '%enableAsColl', // hardcode to true
-        '&useOnBehalf', // hardcoded to true from subData
-        '&onBehalfAddr', // EOA addr hardcoded from subData
+        '%useOnBehalf', // hardcoded to true
+        '&user', // EOA/SW addr hardcoded from subData
     );
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
         '%useDefaultMarket', // hardcoded to false
@@ -6891,13 +6891,13 @@ const createAaveV3EOAFLBoostOnPriceStrategy = () => {
         '%flAddress', // fl address, sent by backend
         '%rateMode', // hardcode to VARIABLE = 2
         '&debtAssetId',
-        '&useOnBehalf', // hardcoded to true from subData
-        '&onBehalfAddr', // EOA addr hardcoded from subData
+        '%useOnBehalf', // hardcoded to true
+        '&user', // EOA/SW addr hardcoded from subData
     );
     const openRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
         '&marketAddr',
-        '&onBehalfAddr',
+        '&user',
     );
     aaveV3EOAFLBoostOnPriceStrategy.addAction(flAction);
     aaveV3EOAFLBoostOnPriceStrategy.addAction(sellAction);
@@ -6918,8 +6918,8 @@ const createAaveV3EOARepayOnPriceStrategy = () => {
     // aaveV3EOARepayOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOARepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOARepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOARepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOARepayOnPriceStrategy.addSubSlot('&onBehalfAddr', 'address');
+    // aaveV3EOARepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOARepayOnPriceStrategy.addSubSlot('&user', 'address');
 
     const aaveV3Trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3EOARepayOnPriceStrategy.addTrigger(aaveV3Trigger);
@@ -6958,14 +6958,14 @@ const createAaveV3EOARepayOnPriceStrategy = () => {
         '%rateMode', // variable type of debt
         '&debtAsset',
         '&debtAssetId',
-        '&useOnBehalf', // hardcoded true
-        '&onBehalfAddr', // EOA addr hardcoded from subData
+        '%useOnBehalf', // hardcoded true
+        '&user', // EOA/SW addr hardcoded from subData
     );
 
     const checkerAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
         '&marketAddr',
-        '&onBehalfAddr',
+        '&user',
     );
 
     aaveV3EOARepayOnPriceStrategy.addAction(withdrawAction);
@@ -6987,8 +6987,8 @@ const createAaveV3EOAFLRepayOnPriceStrategy = () => {
     // aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&onBehalfAddr', 'address');
+    // aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOAFLRepayOnPriceStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3EOAFLRepayOnPriceStrategy.addTrigger(trigger);
@@ -7030,8 +7030,8 @@ const createAaveV3EOAFLRepayOnPriceStrategy = () => {
         '%rateMode', // variable type of debt
         '&debtAsset',
         '&debtAssetId',
-        '&useOnBehalf', // hardcoded true
-        '&onBehalfAddr', // EOA addr hardcoded from subData
+        '%useOnBehalf', // hardcoded true
+        '&user', // EOA/SW addr hardcoded from subData
     );
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
@@ -7045,7 +7045,7 @@ const createAaveV3EOAFLRepayOnPriceStrategy = () => {
     const checkerAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         '&targetRatio',
         '&marketAddr',
-        '&onBehalfAddr',
+        '&user',
     );
 
     aaveV3EOAFLRepayOnPriceStrategy.addAction(sellAction);
@@ -7067,8 +7067,8 @@ const createAaveV3EOAFLCloseToCollStrategy = () => {
     aaveV3EOAFLCloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
     // aaveV3EOAFLCloseToCollStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLCloseToCollStrategy.addSubSlot('&marketAddr', 'address');
-    aaveV3EOAFLCloseToCollStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOAFLCloseToCollStrategy.addSubSlot('&onBehalfAddr', 'address');
+    // aaveV3EOAFLCloseToCollStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOAFLCloseToCollStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3EOAFLCloseToCollStrategy.addTrigger(trigger);
@@ -7099,14 +7099,14 @@ const createAaveV3EOAFLCloseToCollStrategy = () => {
         '%rateMode', // variable type of debt
         '&debtAsset',
         '&debtAssetId',
-        '&useOnBehalf', // hardcoded true
-        '&onBehalfAddr', // EOA addr hardcoded from subData
+        '%useOnBehalf', // hardcoded true
+        '&user', // EOA/SW addr hardcoded from subData
     );
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
-        '%amount', // sent by backend. MaxUint256 for full balance withdraw
+        '%amount', // sent by backend
         '&proxy', // proxy hardcoded
         '&collAssetId',
     );
@@ -7129,8 +7129,8 @@ const createAaveV3EOAFLCloseToCollStrategy = () => {
         ],
         [
             '%flAddress', // sent by backend
-            '&onBehalfAddr', // EOA addr from subData
-            '&onBehalfAddr', // EOA addr from subData
+            '&user', // EOA/SW addr from subData
+            '&user', // EOA/SW addr from subData
         ],
         [
             '$1',
@@ -7159,8 +7159,8 @@ const createAaveV3EOAFLCloseToDebtStrategy = () => {
     aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
     // aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&useDefaultMarket', 'bool');
     aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&marketAddr', 'address');
-    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&useOnBehalf', 'bool');
-    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&onBehalfAddr', 'address');
+    // aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&useOnBehalf', 'bool');
+    aaveV3EOAFLCloseToDebtStrategy.addSubSlot('&user', 'address');
 
     const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3EOAFLCloseToDebtStrategy.addTrigger(trigger);
@@ -7180,8 +7180,8 @@ const createAaveV3EOAFLCloseToDebtStrategy = () => {
         '%rateMode', // variable type of debt
         '&debtAsset',
         '&debtAssetId',
-        '&useOnBehalf', // hardcoded true
-        '&onBehalfAddr', // EOA addr hardcoded from subData
+        '%useOnBehalf', // hardcoded true
+        '&user', // EOA/SW addr hardcoded from subData
     );
 
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
@@ -7219,7 +7219,7 @@ const createAaveV3EOAFLCloseToDebtStrategy = () => {
         ],
         [
             '%flAddress', // sent by backend
-            '&onBehalfAddr', // EOA addr from subData
+            '&user', // EOA/SW addr from subData
         ],
         [
             '$1',
