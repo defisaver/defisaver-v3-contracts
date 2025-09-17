@@ -45,6 +45,7 @@ const {
     findInsertPosition,
 } = require('../../utils/liquity');
 const { CollActionType, DebtActionType } = require('../../utils/liquityV2');
+const { getAaveV3ReserveData } = require('../../utils/aave');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
@@ -6571,22 +6572,12 @@ const callAaveV3GenericBoostStrategy = async (
     const actionsCallData = [];
     const gasCost = 1000000;
 
-    // Get debt asset ID from exchange object (srcAddr should be the debt token we're borrowing)
-    const marketAddr = addrs[network].AAVE_MARKET;
-    const poolAddressesProvider = await hre.ethers.getContractAt(
-        'IPoolAddressesProvider',
-        marketAddr,
-    );
-    const poolAddress = await poolAddressesProvider.getPool();
-    const lendingPool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
     const debtTokenAddr = exchangeObject[0]; // srcAddr in exchange object is the debt token
-    const debtReserveData = await lendingPool.getReserveData(debtTokenAddr);
-    const debtAssetId = debtReserveData.id;
+    const debtAssetId = (await getAaveV3ReserveData(debtTokenAddr)).id;
 
     // Get collateral asset ID from exchange object (destAddr should be the collateral token we're supplying)
     const collTokenAddr = exchangeObject[1]; // destAddr in exchange object is the collateral token
-    const collReserveData = await lendingPool.getReserveData(collTokenAddr);
-    const collAssetId = collReserveData.id;
+    const collAssetId = (await getAaveV3ReserveData(collTokenAddr)).id;
 
     console.log(`Using debt asset ID: ${debtAssetId} for token: ${debtTokenAddr}`);
     console.log(`Using collateral asset ID: ${collAssetId} for token: ${collTokenAddr}`);
@@ -6641,14 +6632,6 @@ const callAaveV3GenericBoostStrategy = async (
         ),
     );
 
-    // console.log('ACTIONS CALL DATA -->>>>>>');
-    // console.log(actionsCallData);
-    // console.log('TRIGER CALL DATA -->>>>>>');
-    // console.log(triggerCallData);
-    // console.log('subId --->>> \n', subId);
-    // console.log('strategyIndex --->>> \n', strategyIndex);
-    // console.log('strategySub --->>>> \n', strategySub);
-
     const { callData, receipt } = await executeStrategy(
         isL2,
         strategyExecutor,
@@ -6694,16 +6677,7 @@ const callAaveV3GenericFLBoostStrategy = async (
         ? new dfs.actions.basic.GasFeeActionL2(gasCost, collToken, '0', '0', '10000000')
         : new dfs.actions.basic.GasFeeAction(gasCost, collToken, '0');
 
-    // Get collateral asset ID for FL version
-    const marketAddr = addrs[network].AAVE_MARKET;
-    const poolAddressesProvider = await hre.ethers.getContractAt(
-        'IPoolAddressesProvider',
-        marketAddr,
-    );
-    const poolAddress = await poolAddressesProvider.getPool();
-    const lendingPool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
-    const collReserveData = await lendingPool.getReserveData(collToken);
-    const collAssetId = collReserveData.id;
+    const collAssetId = (await getAaveV3ReserveData(collToken)).id;
 
     console.log(`FL Using collateral asset ID: ${collAssetId} for token: ${collToken}`);
 
@@ -6719,8 +6693,7 @@ const callAaveV3GenericFLBoostStrategy = async (
         placeHolderAddr, // onBehalf
     );
     // Get debt asset ID for FL version
-    const debtReserveData = await lendingPool.getReserveData(debtToken);
-    const debtAssetId = debtReserveData.id;
+    const debtAssetId = (await getAaveV3ReserveData(debtToken)).id;
 
     console.log(`FL Using debt asset ID: ${debtAssetId} for token: ${debtToken}`);
 
@@ -6769,6 +6742,205 @@ const callAaveV3GenericFLBoostStrategy = async (
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
         `GasUsed callAaveV3GenericFLBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
+const callAaveV3GenericRepayStrategy = async (
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    exchangeObject,
+    repayAmount,
+) => {
+    const isL2 = network !== 'mainnet';
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+
+    const collTokenAddr = exchangeObject[0]; // srcAddr in exchange object is the collateral token
+    const collAssetId = (await getAaveV3ReserveData(collTokenAddr)).id;
+
+    const debtTokenAddr = exchangeObject[1]; // destAddr in exchange object is the debt token
+    const debtAssetId = (await getAaveV3ReserveData(debtTokenAddr)).id;
+
+    console.log(`Using collateral asset ID: ${collAssetId} for token: ${collTokenAddr}`);
+    console.log(`Using debt asset ID: ${debtAssetId} for token: ${debtTokenAddr}`);
+
+    // Get aToken address for collateral token (needed for PullTokenAction)
+    const aTokenAddr = (await getAaveV3ReserveData(collTokenAddr)).aTokenAddress;
+    console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collTokenAddr}`);
+
+    // Pull aTokens from EOA to Smart Wallet before withdraw
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        aTokenAddr,
+        placeHolderAddr, // from (EOA address)
+        repayAmount, // amount to pull
+    );
+
+    const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        false, // use default market
+        placeHolderAddr, // market
+        0,
+        placeHolderAddr, // to
+        collAssetId, // assetId
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, exchangeObject[1], '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, exchangeObject[1], '0');
+    const aaveV3PaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        false,
+        placeHolderAddr, // market
+        0, // amount
+        placeHolderAddr, // from
+        2, // rate mode
+        debtTokenAddr, // tokenAddr
+        debtAssetId, // assetId
+        true, // useOnBehalf
+        placeHolderAddr, // onBehalfAddr
+    );
+    const aaveV3RatioCheckAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        0,
+        0,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    console.log('BEFORE EXEC');
+    actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3PaybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3RatioCheckAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(
+        abiCoder.encode(
+            ['address', 'address', 'uint256', 'uint8'],
+            [placeHolderAddr, placeHolderAddr, 0, 0],
+        ),
+    );
+
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(
+        `GasUsed callAaveV3GenericRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
+const callAaveV3GenericFLRepayStrategy = async (
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    exchangeObject,
+    repayAmount,
+    flAddr,
+) => {
+    const isL2 = network !== 'mainnet';
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+    const collToken = exchangeObject[0];
+    const debtToken = exchangeObject[1];
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction([collToken], [repayAmount]),
+    );
+
+    const collAssetId = (await getAaveV3ReserveData(collToken)).id;
+    const debtAssetId = (await getAaveV3ReserveData(debtToken)).id;
+
+    // Get aToken address for collateral token (needed for PullTokenAction)
+    const aTokenAddr = (await getAaveV3ReserveData(collToken)).aTokenAddress;
+    console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collToken}`);
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, debtToken, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, debtToken, '0');
+
+    const aaveV3PaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
+        false,
+        placeHolderAddr,
+        0,
+        placeHolderAddr,
+        2,
+        debtToken,
+        debtAssetId, // debtAssetId
+        true,
+        placeHolderAddr,
+    );
+
+    // Pull aTokens from EOA to Smart Wallet before withdraw
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        aTokenAddr,
+        placeHolderAddr, // from (EOA address)
+        0, // amount to pull
+    );
+    const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        false,
+        placeHolderAddr,
+        0,
+        flAddr,
+        collAssetId, // assetId
+    );
+
+    const aaveV3RatioCheckAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        0, // checkBoostState
+        0, // targetRatio (placeholder)
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3PaybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3RatioCheckAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(
+        abiCoder.encode(
+            ['address', 'address', 'uint256', 'uint8'],
+            [placeHolderAddr, placeHolderAddr, 0, 0],
+        ),
+    );
+
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(
+        `GasUsed callAaveV3GenericFLRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 
@@ -6941,7 +7113,7 @@ const callAaveV3GenericFLBoostOnPriceStrategy = async (
     );
 };
 
-const callAaveV3GenericRepayStrategy = async (
+const callAaveV3GenericRepayOnPriceStrategy = async (
     strategyExecutor,
     strategyIndex,
     subId,
@@ -6954,33 +7126,11 @@ const callAaveV3GenericRepayStrategy = async (
     const actionsCallData = [];
     const gasCost = 1000000;
 
-    // Get debt asset ID from exchange object (srcAddr should be the debt token we're borrowing)
-    const marketAddr = addrs[network].AAVE_MARKET;
-    const poolAddressesProvider = await hre.ethers.getContractAt(
-        'IPoolAddressesProvider',
-        marketAddr,
-    );
-    const poolAddress = await poolAddressesProvider.getPool();
-    const lendingPool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
-
-    const collTokenAddr = exchangeObject[0]; // srcAddr in exchange object is the collateral token
-    const collReserveData = await lendingPool.getReserveData(collTokenAddr);
-    const collAssetId = collReserveData.id;
-
-    const debtTokenAddr = exchangeObject[1]; // destAddr in exchange object is the debt token
-    const debtReserveData = await lendingPool.getReserveData(debtTokenAddr);
-    const debtAssetId = debtReserveData.id;
-
-    console.log(`Using collateral asset ID: ${collAssetId} for token: ${collTokenAddr}`);
-    console.log(`Using debt asset ID: ${debtAssetId} for token: ${debtTokenAddr}`);
-
-    // Get aToken address for collateral token (needed for PullTokenAction)
-    const aTokenAddr = collReserveData.aTokenAddress;
-    console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collTokenAddr}`);
-
+    const collTokenAddr = exchangeObject[0];
+    const aCollTokenAddr = (await getAaveV3ReserveData(collTokenAddr)).aTokenAddress;
     // Pull aTokens from EOA to Smart Wallet before withdraw
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-        aTokenAddr,
+        aCollTokenAddr,
         placeHolderAddr, // from (EOA address)
         repayAmount, // amount to pull
     );
@@ -6990,7 +7140,7 @@ const callAaveV3GenericRepayStrategy = async (
         placeHolderAddr, // market
         0,
         placeHolderAddr, // to
-        collAssetId, // assetId
+        0, // assetId - will be from subData
     );
     const sellAction = new dfs.actions.basic.SellAction(
         exchangeObject,
@@ -6998,34 +7148,34 @@ const callAaveV3GenericRepayStrategy = async (
         placeHolderAddr,
     );
     const feeTakingAction = isL2
-        ? new dfs.actions.basic.GasFeeActionL2(gasCost, exchangeObject[1], '0', '0', '10000000')
-        : new dfs.actions.basic.GasFeeAction(gasCost, exchangeObject[1], '0');
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, '0');
     const aaveV3PaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         false,
         placeHolderAddr, // market
         0, // amount
         placeHolderAddr, // from
         2, // rate mode
-        debtTokenAddr, // tokenAddr
-        debtAssetId, // assetId
+        placeHolderAddr, // tokenAddr
+        0, // assetId
         true, // useOnBehalf
         placeHolderAddr, // onBehalfAddr
     );
-    const aaveV3RatioCheckAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
-        0,
+    const aaveV3OpenRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         0,
         placeHolderAddr,
         placeHolderAddr,
     );
 
-    console.log('BEFORE EXEC');
     actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3PaybackAction.encodeForRecipe()[0]);
-    actionsCallData.push(aaveV3RatioCheckAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3OpenRatioCheckAction.encodeForRecipe()[0]);
 
+    console.log(actionsCallData);
+    // Price trigger data - different from ratio trigger
     triggerCallData.push(
         abiCoder.encode(
             ['address', 'address', 'uint256', 'uint8'],
@@ -7046,11 +7196,11 @@ const callAaveV3GenericRepayStrategy = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
-        `GasUsed callAaveV3GenericRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed callAaveV3GenericBoostOnPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 
-const callAaveV3GenericFLRepayStrategy = async (
+const callAaveV3GenericFLRepayOnPriceStrategy = async (
     strategyExecutor,
     strategyIndex,
     subId,
@@ -7064,27 +7214,13 @@ const callAaveV3GenericFLRepayStrategy = async (
     const actionsCallData = [];
     const gasCost = 1000000;
     const collToken = exchangeObject[0];
-    const debtToken = exchangeObject[1];
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction([collToken], [repayAmount]),
     );
 
-    // Get collateral asset ID for FL version
-    const marketAddr = addrs[network].AAVE_MARKET;
-    const poolAddressesProvider = await hre.ethers.getContractAt(
-        'IPoolAddressesProvider',
-        marketAddr,
-    );
-    const poolAddress = await poolAddressesProvider.getPool();
-    const lendingPool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
-    const collReserveData = await lendingPool.getReserveData(collToken);
-    const collAssetId = collReserveData.id;
-    const debtReserveData = await lendingPool.getReserveData(debtToken);
-    const debtAssetId = debtReserveData.id;
-
     // Get aToken address for collateral token (needed for PullTokenAction)
-    const aTokenAddr = collReserveData.aTokenAddress;
+    const aTokenAddr = (await getAaveV3ReserveData(collToken)).aTokenAddress;
     console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collToken}`);
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -7093,8 +7229,8 @@ const callAaveV3GenericFLRepayStrategy = async (
         placeHolderAddr,
     );
     const feeTakingAction = isL2
-        ? new dfs.actions.basic.GasFeeActionL2(gasCost, debtToken, '0', '0', '10000000')
-        : new dfs.actions.basic.GasFeeAction(gasCost, debtToken, '0');
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, '0');
 
     const aaveV3PaybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         false,
@@ -7102,8 +7238,8 @@ const callAaveV3GenericFLRepayStrategy = async (
         0,
         placeHolderAddr,
         2,
-        debtToken,
-        debtAssetId, // debtAssetId
+        placeHolderAddr, // debtAsset
+        0, // debtAssetId
         true,
         placeHolderAddr,
     );
@@ -7119,11 +7255,10 @@ const callAaveV3GenericFLRepayStrategy = async (
         placeHolderAddr,
         0,
         flAddr,
-        collAssetId, // assetId
+        0, // collAssetId
     );
 
-    const aaveV3RatioCheckAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
-        0, // checkBoostState
+    const aaveV3OpenRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
         0, // targetRatio (placeholder)
         placeHolderAddr,
         placeHolderAddr,
@@ -7135,7 +7270,7 @@ const callAaveV3GenericFLRepayStrategy = async (
     actionsCallData.push(aaveV3PaybackAction.encodeForRecipe()[0]);
     actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
-    actionsCallData.push(aaveV3RatioCheckAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3OpenRatioCheckAction.encodeForRecipe()[0]);
 
     triggerCallData.push(
         abiCoder.encode(
@@ -7267,8 +7402,10 @@ module.exports = {
     callCompV3FLCloseToDebtStrategy,
     callAaveV3GenericBoostStrategy,
     callAaveV3GenericFLBoostStrategy,
-    callAaveV3GenericBoostOnPriceStrategy,
-    callAaveV3GenericFLBoostOnPriceStrategy,
     callAaveV3GenericRepayStrategy,
     callAaveV3GenericFLRepayStrategy,
+    callAaveV3GenericBoostOnPriceStrategy,
+    callAaveV3GenericFLBoostOnPriceStrategy,
+    callAaveV3GenericRepayOnPriceStrategy,
+    callAaveV3GenericFLRepayOnPriceStrategy,
 };

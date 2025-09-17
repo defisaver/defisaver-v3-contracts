@@ -35,7 +35,7 @@ const {
     getAaveV3PositionRatio,
     deployAaveV3BoostOnPriceGenericBundle,
     setupAaveV3EOAPermissions,
-    getAaveV3AssetId,
+    getAaveV3ReserveData,
 } = require('../../../utils/aave');
 
 const TRIGGER_PRICE_UNDER = 999_999;
@@ -143,8 +143,8 @@ const runBoostOnPriceTests = () => {
 
             console.log('ASSETS');
             // Get asset IDs
-            const collAssetId = await getAaveV3AssetId(collAsset.address);
-            const debtAssetId = await getAaveV3AssetId(debtAsset.address);
+            const collAssetId = (await getAaveV3ReserveData(collAsset.address)).id;
+            const debtAssetId = (await getAaveV3ReserveData(debtAsset.address)).id;
 
             const user = isEOA ? senderAcc.address : proxy.address;
 

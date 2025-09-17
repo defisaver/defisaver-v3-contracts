@@ -644,14 +644,14 @@ const setupAaveV3EOAPermissions = async (userAddress, smartWalletAddress, collTo
     }
 };
 
-const getAaveV3AssetId = async (tokenAddress, market = null) => {
+const getAaveV3ReserveData = async (tokenAddress, market = null) => {
     const marketAddr = market || addrs[network].AAVE_MARKET;
     const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', marketAddr);
     const poolAddress = await aaveMarketContract.getPool();
     const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
     const poolContract = await hre.ethers.getContractAt(poolContractName, poolAddress);
     const reserveData = await poolContract.getReserveData(tokenAddress);
-    return reserveData.id;
+    return reserveData;
 };
 
 module.exports = {
@@ -673,7 +673,7 @@ module.exports = {
     deployAaveV3BoostOnPriceGenericBundle,
     deployAaveV3RepayOnPriceGenericBundle,
     setupAaveV3EOAPermissions,
-    getAaveV3AssetId,
+    getAaveV3ReserveData,
     AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST,
     AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY,
     aaveV2assetsDefaultMarket,
