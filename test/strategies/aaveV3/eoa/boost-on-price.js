@@ -25,8 +25,8 @@ const {
 const { addBotCaller } = require('../../utils/utils-strategies');
 const { subAaveV3LeverageManagementOnPriceGeneric } = require('../../utils/strategy-subs');
 const {
-    callAaveV3EOABoostOnPriceStrategy,
-    callAaveV3EOAFLBoostOnPriceStrategy,
+    callAaveV3GenericBoostOnPriceStrategy,
+    callAaveV3GenericFLBoostOnPriceStrategy,
 } = require('../../utils/strategy-calls');
 const {
     AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST,
@@ -146,10 +146,12 @@ const runBoostOnPriceTests = () => {
             const collAssetId = await getAaveV3AssetId(collAsset.address);
             const debtAssetId = await getAaveV3AssetId(debtAsset.address);
 
+            const user = isEOA ? senderAcc.address : proxy.address;
+
             // Create subscription based on whether it's EOA or proxy
             const result = await subAaveV3LeverageManagementOnPriceGeneric(
                 proxy,
-                senderAcc.address,
+                user,
                 collAsset.address,
                 collAssetId,
                 debtAsset.address,
@@ -158,7 +160,6 @@ const runBoostOnPriceTests = () => {
                 targetRatio,
                 triggerPrice,
                 priceState,
-                isEOA,
                 bundleId,
             );
             const boostSubId = result.subId;
@@ -183,7 +184,7 @@ const runBoostOnPriceTests = () => {
                 await addBalancerFlLiquidity(debtAsset.address);
                 await addBalancerFlLiquidity(collAsset.address);
 
-                await callAaveV3EOAFLBoostOnPriceStrategy(
+                await callAaveV3GenericFLBoostOnPriceStrategy(
                     strategyExecutor,
                     1,
                     boostSubId,
@@ -192,10 +193,9 @@ const runBoostOnPriceTests = () => {
                     boostAmount,
                     flAddr,
                     debtAsset.address,
-                    collAsset.address,
                 );
             } else {
-                await callAaveV3EOABoostOnPriceStrategy(
+                await callAaveV3GenericBoostOnPriceStrategy(
                     strategyExecutor,
                     0,
                     boostSubId,

@@ -75,6 +75,7 @@ const runBoostTests = () => {
             await redeploy('AaveV3RatioCheck', isFork);
             await redeploy('AaveV3OpenRatioCheck', isFork);
             await redeploy('AaveV3View', isFork);
+            await redeploy('SubProxy', isFork);
 
             await deployAaveV3RepayGenericBundle(true);
             await deployAaveV3BoostGenericBundle(true);

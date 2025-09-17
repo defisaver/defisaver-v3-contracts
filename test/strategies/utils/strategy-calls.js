@@ -6802,8 +6802,8 @@ const callAaveV3GenericBoostOnPriceStrategy = async (
     );
 
     const feeTakingAction = isL2
-        ? new dfs.actions.basic.GasFeeActionL2(gasCost, exchangeObject[1], '0', '0', '10000000')
-        : new dfs.actions.basic.GasFeeAction(gasCost, exchangeObject[1], '0');
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, '0');
     const aaveV3SupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         false, // useDefaultMarket
         placeHolderAddr, // market
@@ -6862,7 +6862,6 @@ const callAaveV3GenericFLBoostOnPriceStrategy = async (
     boostAmount,
     flAddr,
     debtToken,
-    collToken,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -6878,8 +6877,8 @@ const callAaveV3GenericFLBoostOnPriceStrategy = async (
         placeHolderAddr,
     );
     const feeTakingAction = isL2
-        ? new dfs.actions.basic.GasFeeActionL2(gasCost, collToken, '0', '0', '10000000')
-        : new dfs.actions.basic.GasFeeAction(gasCost, collToken, '0');
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, '0');
 
     const aaveV3SupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         false, // useDefaultMarket

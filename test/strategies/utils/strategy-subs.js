@@ -359,7 +359,7 @@ const subAaveV3LeverageManagementGeneric = async (
 
 const subAaveV3LeverageManagementOnPriceGeneric = async (
     proxy,
-    eoaAddr,
+    user,
     collAsset,
     collAssetId,
     debtAsset,
@@ -368,7 +368,6 @@ const subAaveV3LeverageManagementOnPriceGeneric = async (
     targetRatio,
     triggerPrice,
     priceState,
-    isEOA,
     bundleId,
 ) => {
     const strategySub = automationSdk.strategySubService.aaveV3Encode.leverageManagementOnPriceGeneric(
@@ -381,8 +380,7 @@ const subAaveV3LeverageManagementOnPriceGeneric = async (
         debtAssetId,
         marketAddr,
         targetRatio,
-        isEOA,
-        isEOA ? eoaAddr : proxy.address,
+        user,
     );
 
     const subId = await subToStrategy(proxy, strategySub);
