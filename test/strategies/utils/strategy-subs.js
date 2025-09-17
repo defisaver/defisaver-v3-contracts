@@ -326,84 +326,35 @@ const subAaveV3AutomationStrategy = async (
 
 const subAaveV3LeverageManagementGeneric = async (
     proxy,
-    minRatio,
-    maxRatio,
-    targetRatioRepay,
-    targetRatioBoost,
-    boostEnabled,
     eoaAddr,
+    marketAddr,
+    ratioState,
+    targetRatio,
+    triggerRatio,
     isEOA,
+    isBoost,
 ) => {
     const encoder = automationSdk.strategySubService.aaveV3Encode;
 
     // Bundle ID for AaveV3 EOA strategies - using 1 for boost strategies
     // AAVE_V3_EOA_REPAY = 52,
     // AAVE_V3_EOA_BOOST = 53,
-    const bundleId = boostEnabled ? 53 : 52;
+    const bundleId = isBoost ? 53 : 52;
 
-    // Get AAVE market address (network and addrs are already imported at top of file)
-    const marketAddr = addrs[network].AAVE_MARKET;
+    const user = isEOA ? eoaAddr : proxy.address;
 
-    const subInputArray = encoder.leverageManagementGeneric(
+    const strategySub = encoder.leverageManagementWithoutSubProxy(
         bundleId, // strategyOrBundleId
-        minRatio, // triggerRatioRepay
-        maxRatio, // triggerRatioBoost
-        targetRatioRepay, // targetRatioRepay
-        targetRatioBoost, // targetRatioBoost
-        boostEnabled, // isBoostEnabled
         marketAddr, // marketAddr
-        isEOA, // useOnBehalf (true for EOA)
-        eoaAddr, // onBehalfAddr
+        user, // user - EOA / SW, depending if it is EOA strategy
+        ratioState, // ratioState -> 0 for boost, 1 for repay
+        targetRatio, // targetRatio
+        triggerRatio, // for trigger
+        true, // isGeneric
     );
 
-    // Extract subData from the array [strategyOrBundleId, isBundle, subData]
-    // leverageManagementGeneric returns [strategyOrBundleId, isBundle, subData]
-    const subInput = subInputArray[2]; // subData is already a hex string, not an array
-
-    const subProxyName = 'AaveV3SubProxyV2';
-    const subProxyAddr = await getAddrFromRegistry(subProxyName);
-    const AaveV3SubProxyV2 = await hre.ethers.getContractFactory(subProxyName);
-    const functionData = AaveV3SubProxyV2.interface.encodeFunctionData('subToAaveAutomation', [subInput]);
-    // console.log('functionData', functionData);
-
-    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
-
-    const gasUsed = await getGasUsed(receipt);
-    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-    console.log(`GasUsed subToAaveV3EOAProxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
-
-    const latestSubId = await getLatestSubId();
-
-    let subId1 = '0';
-    let subId2 = '0';
-
-    if (boostEnabled) {
-        subId1 = (parseInt(latestSubId, 10) - 1).toString();
-        subId2 = latestSubId;
-    } else {
-        subId1 = latestSubId;
-        subId2 = '0';
-    }
-
-    // Parse the subscription data and format boost sub like the non-EOA version does
-    const { repaySub, boostSub } = await hre.ethers.getContractAt('AaveV3SubProxyV2', subProxyAddr)
-        .then((c) => [c, c.parseSubData(subInput)])
-        .then(async ([c, subData]) => {
-            // eslint-disable-next-line no-param-reassign
-            subData = await subData;
-            return ({
-                boostSub: await c.formatBoostSub(subData, proxy.address, eoaAddr),
-                repaySub: await c.formatRepaySub(subData, proxy.address, eoaAddr),
-            });
-        });
-
-    return {
-        repaySubId: subId1,
-        boostSubId: subId2,
-        subData: subInput, // Return the parsed boost sub struct
-        repaySub,
-        boostSub,
-    };
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
 };
 
 const subAaveV3LeverageManagementOnPriceGeneric = async (

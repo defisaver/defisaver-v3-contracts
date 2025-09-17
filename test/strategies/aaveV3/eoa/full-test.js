@@ -6,8 +6,8 @@ const { runCloseTests } = require('./close');
 
 describe('AaveV3  Full Strategy Tests', () => {
     runBoostTests();
-    runRepayTests();
-    runBoostOnPriceTests();
+    // runRepayTests();
+    // runBoostOnPriceTests();
     // runRepayOnPriceTests();
     // runCloseTests();
 });

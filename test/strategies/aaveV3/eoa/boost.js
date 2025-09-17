@@ -24,8 +24,8 @@ const {
 const { addBotCaller } = require('../../utils/utils-strategies');
 const { subAaveV3LeverageManagementGeneric } = require('../../utils/strategy-subs');
 const {
-    callAaveV3EOABoostStrategy,
-    callAaveV3EOAFLBoostStrategy,
+    callAaveV3GenericBoostStrategy,
+    callAaveV3GenericFLBoostStrategy,
 } = require('../../utils/strategy-calls');
 const {
     AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST,
@@ -37,7 +37,8 @@ const {
     setupAaveV3EOAPermissions,
 } = require('../../../utils/aave');
 
-const BOOST_ENABLED = true;
+const IS_BOOST = true;
+const RATIO_STATE = 0;
 
 const runBoostTests = () => {
     describe('AaveV3 Boost Strategies Tests', () => {
@@ -78,12 +79,6 @@ const runBoostTests = () => {
 
             const newRepayBundleId = await deployAaveV3RepayGenericBundle(true);
             const newBoostBundleId = await deployAaveV3BoostGenericBundle(true);
-            subProxyContract = await redeploy(
-                'AaveV3SubProxyV2',
-                isFork,
-                newRepayBundleId,
-                newBoostBundleId,
-            );
         });
 
         beforeEach(async () => {
@@ -140,31 +135,25 @@ const runBoostTests = () => {
             const ratioBefore = await getAaveV3PositionRatio(positionOwner);
             console.log('ratioBefore', ratioBefore);
 
+            // TODO -> This is default market, should not be fixed
+            // Get AAVE market address (network and addrs are already imported at top of file)
+            const marketAddr = addrs[network].AAVE_MARKET;
+
             // Create subscription based on whether it's EOA or proxy
             const result = await subAaveV3LeverageManagementGeneric(
                 proxy,
-                triggerRatioRepay,
-                triggerRatioBoost,
-                targetRatioRepay,
-                targetRatioBoost,
-                BOOST_ENABLED,
                 senderAcc.address,
+                marketAddr,
+                RATIO_STATE, // ratio state for boost !
+                targetRatioBoost,
+                triggerRatioBoost,
                 isEOA,
+                IS_BOOST, // is boost
             );
-            const boostSubId = result.boostSubId;
-            const subData = result.subData;
+            const boostSubId = result.subId;
+            const strategySub = result.strategySub;
 
             console.log('SUBBED !!!!');
-            // Get sub info
-            const subDataInStruct = await subProxyContract.parseSubData(subData);
-            // console.log('subDataInStruct ---------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-            // console.log(subDataInStruct);
-
-            const strategySub = await subProxyContract.formatBoostSub(
-                subDataInStruct,
-                proxy.address,
-                senderAcc.address,
-            );
 
             // console.log('strategySub BOOST  ------->>>>>>>>>> \n', strategySub);
             const boostAmount = await fetchAmountInUSDPrice(debtAsset.symbol, boostAmountInUSD);
@@ -190,7 +179,7 @@ const runBoostTests = () => {
                 await addBalancerFlLiquidity(collAsset.address);
 
                 // TODO -> pass random params like placeholderAddr, to check if piping works
-                await callAaveV3EOAFLBoostStrategy(
+                await callAaveV3GenericFLBoostStrategy(
                     strategyExecutor,
                     1,
                     boostSubId,
@@ -203,7 +192,7 @@ const runBoostTests = () => {
                 );
             } else {
                 // TODO -> pass random params like placeholderAddr, to check if piping works
-                await callAaveV3EOABoostStrategy(
+                await callAaveV3GenericBoostStrategy(
                     strategyExecutor,
                     0,
                     boostSubId,

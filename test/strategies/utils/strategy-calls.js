@@ -6558,7 +6558,7 @@ const callCompV3FLCloseToDebtStrategy = async (
     console.log(`GasUsed callCompV3FLCloseToDebtStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
 
-const callAaveV3EOABoostStrategy = async (
+const callAaveV3GenericBoostStrategy = async (
     strategyExecutor,
     strategyIndex,
     subId,
@@ -6598,7 +6598,7 @@ const callAaveV3EOABoostStrategy = async (
         placeHolderAddr,
         2,
         debtAssetId, // Use correct debt asset ID
-        false, // useOnBehalf. Doesn't matter as it will use from subData
+        true, // useOnBehalf
         placeHolderAddr,
     );
     const sellAction = new dfs.actions.basic.SellAction(
@@ -6618,7 +6618,7 @@ const callAaveV3EOABoostStrategy = async (
         collTokenAddr, // tokenAddr (collateral token - WBTC)
         collAssetId, // assetId (calculated from WBTC)
         true, // enableAsColl
-        false, // useOnBehalf
+        true, // useOnBehalf
         placeHolderAddr, // onBehalf
     );
     const aaveV3RatioCheckAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
@@ -6662,11 +6662,11 @@ const callAaveV3EOABoostStrategy = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
-        `GasUsed callAaveV3EOABoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed callAaveV3GenericBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 
-const callAaveV3EOAFLBoostStrategy = async (
+const callAaveV3GenericFLBoostStrategy = async (
     strategyExecutor,
     strategyIndex,
     subId,
@@ -6715,7 +6715,7 @@ const callAaveV3EOAFLBoostStrategy = async (
         collToken, // tokenAddr (collateral token)
         collAssetId, // assetId (calculated from collateral token)
         true, // enableAsColl
-        false, // useOnBehalf
+        true, // useOnBehalf
         placeHolderAddr, // onBehalf
     );
     // Get debt asset ID for FL version
@@ -6731,7 +6731,7 @@ const callAaveV3EOAFLBoostStrategy = async (
         flAddr,
         2,
         debtAssetId, // Use correct debt asset ID
-        false, // useOnBehalf
+        true, // useOnBehalf
         placeHolderAddr,
     );
     const aaveV3RatioCheckAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
@@ -6768,11 +6768,11 @@ const callAaveV3EOAFLBoostStrategy = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
-        `GasUsed callAaveV3EOAFLBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed callAaveV3GenericFLBoostStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 
-const callAaveV3EOABoostOnPriceStrategy = async (
+const callAaveV3GenericBoostOnPriceStrategy = async (
     strategyExecutor,
     strategyIndex,
     subId,
@@ -6792,7 +6792,7 @@ const callAaveV3EOABoostOnPriceStrategy = async (
         placeHolderAddr, // to
         2, // rateMode (VARIABLE)
         0, // debt asset ID - will use from subData
-        false, // useOnBehalf. Doesn't matter as it will use from subData
+        true, // useOnBehalf
         placeHolderAddr,
     );
     const sellAction = new dfs.actions.basic.SellAction(
@@ -6812,7 +6812,7 @@ const callAaveV3EOABoostOnPriceStrategy = async (
         placeHolderAddr, // tokenAddr (collateral token)
         0, // assetId - will use from subData
         true, // enableAsColl
-        false, // useOnBehalf
+        true, // useOnBehalf
         placeHolderAddr, // onBehalf
     );
     const aaveV3OpenRatioCheckAction = new dfs.actions.checkers.AaveV3OpenRatioCheckAction(
@@ -6849,11 +6849,11 @@ const callAaveV3EOABoostOnPriceStrategy = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
-        `GasUsed callAaveV3EOABoostOnPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed callAaveV3GenericBoostOnPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 
-const callAaveV3EOAFLBoostOnPriceStrategy = async (
+const callAaveV3GenericFLBoostOnPriceStrategy = async (
     strategyExecutor,
     strategyIndex,
     subId,
@@ -6889,7 +6889,7 @@ const callAaveV3EOAFLBoostOnPriceStrategy = async (
         placeHolderAddr, // collTokenAddr -  from subData
         0, // assetId - from subData
         true, // enableAsColl
-        false, // useOnBehalf
+        true, // useOnBehalf
         placeHolderAddr, // onBehalf
     );
 
@@ -6900,7 +6900,7 @@ const callAaveV3EOAFLBoostOnPriceStrategy = async (
         flAddr, // onBehalf (FL address)
         2, // rateMode (VARIABLE)
         0, // assetId - from subData
-        false, // useOnBehalf
+        true, // useOnBehalf
         placeHolderAddr, // onBehalfAddr
     );
 
@@ -6938,11 +6938,11 @@ const callAaveV3EOAFLBoostOnPriceStrategy = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
-        `GasUsed callAaveV3EOAFLBoostOnPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed callAaveV3GenericFLBoostOnPriceStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 
-const callAaveV3EOARepayStrategy = async (
+const callAaveV3GenericRepayStrategy = async (
     strategyExecutor,
     strategyIndex,
     subId,
@@ -7009,7 +7009,7 @@ const callAaveV3EOARepayStrategy = async (
         2, // rate mode
         debtTokenAddr, // tokenAddr
         debtAssetId, // assetId
-        false, // useOnBehalf
+        true, // useOnBehalf
         placeHolderAddr, // onBehalfAddr
     );
     const aaveV3RatioCheckAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
@@ -7047,11 +7047,11 @@ const callAaveV3EOARepayStrategy = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
-        `GasUsed callAaveV3EOARepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed callAaveV3GenericRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 
-const callAaveV3EOAFLRepayStrategy = async (
+const callAaveV3GenericFLRepayStrategy = async (
     strategyExecutor,
     strategyIndex,
     subId,
@@ -7104,8 +7104,8 @@ const callAaveV3EOAFLRepayStrategy = async (
         placeHolderAddr,
         2,
         debtToken,
-        debtAssetId, // debtAssetId, should calculate this !!!
-        false,
+        debtAssetId, // debtAssetId
+        true,
         placeHolderAddr,
     );
 
@@ -7120,7 +7120,7 @@ const callAaveV3EOAFLRepayStrategy = async (
         placeHolderAddr,
         0,
         flAddr,
-        collAssetId, // assetId, should calculate this !!!
+        collAssetId, // assetId
     );
 
     const aaveV3RatioCheckAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
@@ -7158,7 +7158,7 @@ const callAaveV3EOAFLRepayStrategy = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
-        `GasUsed callAaveV3EOAFLRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed callAaveV3GenericFLRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 
@@ -7266,10 +7266,10 @@ module.exports = {
     callCompV3FLBoostOnPriceStrategy,
     callCompV3FLCloseToCollStrategy,
     callCompV3FLCloseToDebtStrategy,
-    callAaveV3EOABoostStrategy,
-    callAaveV3EOAFLBoostStrategy,
-    callAaveV3EOABoostOnPriceStrategy,
-    callAaveV3EOAFLBoostOnPriceStrategy,
-    callAaveV3EOARepayStrategy,
-    callAaveV3EOAFLRepayStrategy,
+    callAaveV3GenericBoostStrategy,
+    callAaveV3GenericFLBoostStrategy,
+    callAaveV3GenericBoostOnPriceStrategy,
+    callAaveV3GenericFLBoostOnPriceStrategy,
+    callAaveV3GenericRepayStrategy,
+    callAaveV3GenericFLRepayStrategy,
 };

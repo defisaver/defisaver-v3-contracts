@@ -20,25 +20,25 @@ const {
 const { executeAction } = require('./actions');
 
 const {
-    createAaveV3EOABoostStrategy,
-    createAaveV3EOAFLBoostStrategy,
-    createAaveV3EOARepayStrategy,
-    createAaveV3EOAFLRepayStrategy,
-    createAaveV3EOABoostOnPriceStrategy,
-    createAaveV3EOAFLBoostOnPriceStrategy,
-    createAaveV3EOARepayOnPriceStrategy,
-    createAaveV3EOAFLRepayOnPriceStrategy,
+    createAaveV3GenericBoostStrategy,
+    createAaveV3GenericFLBoostStrategy,
+    createAaveV3GenericRepayStrategy,
+    createAaveV3GenericFLRepayStrategy,
+    createAaveV3GenericBoostOnPriceStrategy,
+    createAaveV3GenericFLBoostOnPriceStrategy,
+    createAaveV3GenericRepayOnPriceStrategy,
+    createAaveV3GenericFLRepayOnPriceStrategy,
 } = require('../../strategies-spec/mainnet');
 
 const {
-    createAaveV3EOABoostL2Strategy,
-    createAaveV3EOAFLBoostL2Strategy,
-    createAaveV3EOARepayL2Strategy,
-    createAaveV3EOAFLRepayL2Strategy,
-    createAaveV3EOABoostOnPriceL2Strategy,
-    createAaveV3EOAFLBoostOnPriceL2Strategy,
-    createAaveV3EOARepayOnPriceL2Strategy,
-    createAaveV3EOAFLRepayOnPriceL2Strategy,
+    createAaveV3GenericBoostL2Strategy,
+    createAaveV3GenericFLBoostL2Strategy,
+    createAaveV3GenericRepayL2Strategy,
+    createAaveV3GenericFLRepayL2Strategy,
+    createAaveV3GenericBoostOnPriceL2Strategy,
+    createAaveV3GenericFLBoostOnPriceL2Strategy,
+    createAaveV3GenericRepayOnPriceL2Strategy,
+    createAaveV3GenericFLRepayOnPriceL2Strategy,
 } = require('../../strategies-spec/l2');
 
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
@@ -492,11 +492,11 @@ const deployAaveV3BoostGenericBundle = async () => {
     let flBoostStrategy;
 
     if (isL2) {
-        boostStrategy = createAaveV3EOABoostL2Strategy();
-        flBoostStrategy = createAaveV3EOAFLBoostL2Strategy();
+        boostStrategy = createAaveV3GenericBoostL2Strategy();
+        flBoostStrategy = createAaveV3GenericFLBoostL2Strategy();
     } else {
-        boostStrategy = createAaveV3EOABoostStrategy();
-        flBoostStrategy = createAaveV3EOAFLBoostStrategy();
+        boostStrategy = createAaveV3GenericBoostStrategy();
+        flBoostStrategy = createAaveV3GenericFLBoostStrategy();
     }
 
     const continuous = true;
@@ -515,11 +515,11 @@ const deployAaveV3RepayGenericBundle = async () => {
     let flRepayStrategy;
 
     if (isL2) {
-        repayStrategy = createAaveV3EOARepayL2Strategy();
-        flRepayStrategy = createAaveV3EOAFLRepayL2Strategy();
+        repayStrategy = createAaveV3GenericRepayL2Strategy();
+        flRepayStrategy = createAaveV3GenericFLRepayL2Strategy();
     } else {
-        repayStrategy = createAaveV3EOARepayStrategy();
-        flRepayStrategy = createAaveV3EOAFLRepayStrategy();
+        repayStrategy = createAaveV3GenericRepayStrategy();
+        flRepayStrategy = createAaveV3GenericFLRepayStrategy();
     }
 
     const continuous = true;
@@ -538,11 +538,11 @@ const deployAaveV3BoostOnPriceGenericBundle = async () => {
     let flBoostStrategy;
 
     if (isL2) {
-        boostStrategy = createAaveV3EOABoostOnPriceL2Strategy();
-        flBoostStrategy = createAaveV3EOAFLBoostOnPriceL2Strategy();
+        boostStrategy = createAaveV3GenericBoostOnPriceL2Strategy();
+        flBoostStrategy = createAaveV3GenericFLBoostOnPriceL2Strategy();
     } else {
-        boostStrategy = createAaveV3EOABoostOnPriceStrategy();
-        flBoostStrategy = createAaveV3EOAFLBoostOnPriceStrategy();
+        boostStrategy = createAaveV3GenericBoostOnPriceStrategy();
+        flBoostStrategy = createAaveV3GenericFLBoostOnPriceStrategy();
     }
 
     const continuous = false;
@@ -561,11 +561,11 @@ const deployAaveV3RepayOnPriceGenericBundle = async () => {
     let flRepayStrategy;
 
     if (isL2) {
-        repayStrategy = createAaveV3EOARepayOnPriceL2Strategy();
-        flRepayStrategy = createAaveV3EOAFLRepayOnPriceL2Strategy();
+        repayStrategy = createAaveV3GenericRepayOnPriceL2Strategy();
+        flRepayStrategy = createAaveV3GenericFLRepayOnPriceL2Strategy();
     } else {
-        repayStrategy = createAaveV3EOARepayOnPriceStrategy();
-        flRepayStrategy = createAaveV3EOAFLRepayOnPriceStrategy();
+        repayStrategy = createAaveV3GenericRepayOnPriceStrategy();
+        flRepayStrategy = createAaveV3GenericFLRepayOnPriceStrategy();
     }
 
     const continuous = false;
