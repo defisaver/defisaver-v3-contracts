@@ -133,7 +133,7 @@ module.exports = {
             accounts: [process.env.PRIV_KEY_OPTIMISM],
             chainId: 10,
             name: 'optimistic',
-            txType: 0,
+            txType: 2,
             blockExplorer: 'etherscan',
             contractVerification: true,
         },
@@ -142,7 +142,7 @@ module.exports = {
             accounts: [process.env.PRIV_KEY_BASE],
             chainId: 8453,
             name: 'base',
-            txType: 0,
+            txType: 2,
             blockExplorer: 'etherscan',
             contractVerification: true,
         },
@@ -155,6 +155,15 @@ module.exports = {
             blockExplorer: 'arbiscan',
             contractVerification: true,
         },
+        linea: {
+            url: process.env.LINEA_NODE,
+            accounts: [process.env.PRIV_KEY_LINEA],
+            chainId: 59144,
+            name: 'linea',
+            txType: 0,
+            blockExplorer: 'etherscan',
+            contractVerification: true,
+        },
     },
     solidity: {
         compilers: [
@@ -165,7 +174,7 @@ module.exports = {
                         enabled: true,
                         runs: 1000,
                     },
-                    evmVersion: 'cancun',
+                    evmVersion: 'cancun', // london used only for Linea
                 },
             },
         ],
@@ -193,6 +202,7 @@ module.exports = {
         Arbitrum: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         Optimism: '0x4200000000000000000000000000000000000006',
         Base: '0x4200000000000000000000000000000000000006',
+        Linea: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
     },
 };
 

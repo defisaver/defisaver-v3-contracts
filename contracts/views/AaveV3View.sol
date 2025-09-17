@@ -132,6 +132,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         bool isActive;
         bool isPaused;
         bool isFrozen;
+        address debtTokenAddress;
     }
 
     /// @notice Params for supply and borrow rate estimation
@@ -338,7 +339,8 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             label: "", // deprecated, not 1:1 related to asset
             isActive: isActive,
             isPaused: isPaused,
-            isFrozen: isFrozen
+            isFrozen: isFrozen,
+            debtTokenAddress: reserveData.variableDebtTokenAddress
         });
     }
 
