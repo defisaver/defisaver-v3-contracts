@@ -223,12 +223,11 @@ const runBoostOnPriceTests = () => {
                 chainIds[network],
             );
 
-            it(`... should execute aaveV3 SW boost on price strategy for ${pair.collSymbol} /
+            it(`... should execute aaveV3 SW boost on price strategy (UNDER) for ${pair.collSymbol} /
             ${pair.debtSymbol} pair`, async () => {
                 const isEOA = false;
                 const isFLStrategy = false;
 
-                // Test UNDER price state
                 await baseTest(
                     collAsset,
                     debtAsset,
@@ -241,8 +240,13 @@ const runBoostOnPriceTests = () => {
                     TRIGGER_PRICE_UNDER,
                     PRICE_STATE_UNDER,
                 );
+            });
 
-                // Test OVER price state
+            it(`... should execute aaveV3 SW boost on price strategy (OVER) for ${pair.collSymbol} /
+            ${pair.debtSymbol} pair`, async () => {
+                const isEOA = false;
+                const isFLStrategy = false;
+
                 await baseTest(
                     collAsset,
                     debtAsset,
@@ -257,12 +261,11 @@ const runBoostOnPriceTests = () => {
                 );
             });
 
-            it(`... should execute aaveV3 SW FL boost on price strategy for ${pair.collSymbol} /
+            it(`... should execute aaveV3 SW FL boost on price strategy (UNDER) for ${pair.collSymbol} /
             ${pair.debtSymbol} pair`, async () => {
                 const isEOA = false;
                 const isFLStrategy = true;
 
-                // Test UNDER price state
                 await baseTest(
                     collAsset,
                     debtAsset,
@@ -275,8 +278,13 @@ const runBoostOnPriceTests = () => {
                     TRIGGER_PRICE_UNDER,
                     PRICE_STATE_UNDER,
                 );
+            });
 
-                // Test OVER price state
+            it(`... should execute aaveV3 SW FL boost on price strategy (OVER) for ${pair.collSymbol} /
+            ${pair.debtSymbol} pair`, async () => {
+                const isEOA = false;
+                const isFLStrategy = true;
+
                 await baseTest(
                     collAsset,
                     debtAsset,
@@ -291,11 +299,10 @@ const runBoostOnPriceTests = () => {
                 );
             });
 
-            it(`... should execute aaveV3 EOA boost on price strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+            it(`... should execute aaveV3 EOA boost on price strategy (UNDER) for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = true;
                 const isFLStrategy = false;
 
-                // Test UNDER price state
                 await baseTest(
                     collAsset,
                     debtAsset,
@@ -308,8 +315,12 @@ const runBoostOnPriceTests = () => {
                     TRIGGER_PRICE_UNDER,
                     PRICE_STATE_UNDER,
                 );
+            });
 
-                // Test OVER price state
+            it(`... should execute aaveV3 EOA boost on price strategy (OVER) for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+                const isEOA = true;
+                const isFLStrategy = false;
+
                 await baseTest(
                     collAsset,
                     debtAsset,
@@ -324,11 +335,10 @@ const runBoostOnPriceTests = () => {
                 );
             });
 
-            it(`... should execute aaveV3 EOA FL boost on price strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+            it(`... should execute aaveV3 EOA FL boost on price strategy (UNDER) for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = true;
                 const isFLStrategy = true;
 
-                // Test UNDER price state
                 await baseTest(
                     collAsset,
                     debtAsset,
@@ -341,8 +351,12 @@ const runBoostOnPriceTests = () => {
                     TRIGGER_PRICE_UNDER,
                     PRICE_STATE_UNDER,
                 );
+            });
 
-                // Test OVER price state
+            it(`... should execute aaveV3 EOA FL boost on price strategy (OVER) for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+                const isEOA = true;
+                const isFLStrategy = true;
+
                 await baseTest(
                     collAsset,
                     debtAsset,
