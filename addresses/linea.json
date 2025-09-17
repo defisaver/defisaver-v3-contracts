@@ -1,5 +1,16 @@
 [
     {
+        "name": "DFSRegistry",
+        "address": "0x09fBeC68D216667C3262211D2E5609578951dCE0",
+        "id": "0x34486add",
+        "path": "contracts/core/DFSRegistry.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "AdminVault",
         "address": "0x71a9ef13c960c2f1dd17962d3592a5bcdfad6de0",
         "id": "0xeb51cb26",
@@ -15,17 +26,6 @@
         "address": "0x44e98bb58d725f2ef93a195f518b335dcb784c78",
         "id": "0x35934e1a",
         "path": "contracts/core/DefisaverLogger.sol",
-        "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
-        "registryIds": [],
-        "history": []
-    },
-    {
-        "name": "DFSRegistry",
-        "address": "0x09fBeC68D216667C3262211D2E5609578951dCE0",
-        "id": "0x34486add",
-        "path": "contracts/core/DFSRegistry.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
