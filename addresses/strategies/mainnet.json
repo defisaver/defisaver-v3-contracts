@@ -6053,5 +6053,32 @@
       ]
     ],
     "bundleId": 51
+  },
+  {
+    "name": "LiquityV2InterestRateAdjustmentStrategy",
+    "id": 124,
+    "isContinuous": true,
+    "triggerIds": [
+      "LiquityV2AdjustRateDebtInFrontTrigger"
+    ],
+    "actionIds": [
+      "LiquityV2AdjustInterestRate",
+      "LiquityV2NewInterestRateChecker"
+    ],
+    "paramMapping": [
+      [
+        "&1",
+        "&2",
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        "&1",
+        "&2",
+        "&3"
+      ]
+    ]
   }
 ]
