@@ -17,7 +17,6 @@ contract LiquityV2DebtInFrontTrigger is
     LiquityV2Helper
 {
 
-
     /// @param market address of the market
     /// @param troveId id of the trove
     /// @param debtInFrontMin minimum debt in front, below which the trigger will be triggered

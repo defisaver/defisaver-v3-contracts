@@ -29,7 +29,6 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is
     /// @notice Transient storage contract for storing temporary data during execution
     TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
-
     /// @notice Parameters for the LiquityV2 interest rate adjustment trigger
     /// @param market Address of the LiquityV2 market (branch) to monitor
     /// @param troveId ID of the trove to monitor for debt in front
@@ -52,12 +51,15 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is
     function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
-        
-        (bool isAdjustmentFeeZero, uint256 interestRate, bool shouldExecuteStrategy) = getAdjustmentFeeAndInterestRate(triggerSubData.market, triggerSubData.troveId);
+        (bool isAdjustmentFeeZero, uint256 interestRate, bool shouldExecuteStrategy) = getAdjustmentFeeAndInterestRate(
+            triggerSubData.market,
+            triggerSubData.troveId
+        );
         
         if (!shouldExecuteStrategy) {
             return false;
         }
+
         uint256 debtInFront = getDebtInFront(triggerSubData.market, triggerSubData.troveId);
 
         tempStorage.setBytes32("LIQUITY_V2_INTEREST_RATE", bytes32(interestRate));
@@ -76,7 +78,10 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is
     /// @return adjustmentFeeZero True if adjustment fee is zero (cooldown period has passed)
     /// @return interestRate Current annual interest rate of the trove
     /// @return shouldExecuteStrategy True if the trove is eligible for interest rate adjustment
-    function getAdjustmentFeeAndInterestRate(address _market, uint256 _troveId) internal view returns (bool adjustmentFeeZero, uint256 interestRate, bool shouldExecuteStrategy) {
+    function getAdjustmentFeeAndInterestRate(
+        address _market,
+        uint256 _troveId
+    ) internal view returns (bool adjustmentFeeZero, uint256 interestRate, bool shouldExecuteStrategy) {
         IAddressesRegistry market = IAddressesRegistry(_market);
         ITroveManager troveManager = ITroveManager(market.troveManager());
         IBorrowerOperations borrowerOperations = IBorrowerOperations(market.borrowerOperations());
@@ -93,9 +98,10 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is
 
         ITroveManager.LatestTroveData memory troveData = troveManager.getLatestTroveData(_troveId);
 
-        return (block.timestamp >= troveData.lastInterestRateAdjTime + INTEREST_RATE_ADJ_COOLDOWN, troveData.annualInterestRate, true);
+        adjustmentFeeZero = block.timestamp >= troveData.lastInterestRateAdjTime + INTEREST_RATE_ADJ_COOLDOWN;
+        interestRate = troveData.annualInterestRate;
+        shouldExecuteStrategy = true;
     }
-
 
     function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));

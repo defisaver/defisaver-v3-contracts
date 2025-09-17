@@ -490,7 +490,6 @@ const mineBlock = async () => {
 };
 
 const timeTravel = async (timeIncrease) => {
-    console.log('time travel');
     await hre.network.provider.request({
         method: 'evm_increaseTime',
         params: [timeIncrease],

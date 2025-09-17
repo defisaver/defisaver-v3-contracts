@@ -68,7 +68,6 @@ const executeStrategy = async (
             subId, strategyIndex, triggerCallData, actionsCallData, { gasLimit: 8000000 },
         );
     } else {
-        console.log('executing strategy');
         callData = strategyExecutorByBot.interface.encodeFunctionData(
             'executeStrategy', [subId, strategyIndex, triggerCallData, actionsCallData, strategySub],
         );
@@ -3878,8 +3877,6 @@ const callLiquityDebtInFrontRepayStrategy = async (
 
     const { upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount);
 
-    console.log(flAddr);
-
     const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
         '0', // no liquity fee charged in recipe
         '0',
@@ -3907,7 +3904,6 @@ const callLiquityDebtInFrontRepayStrategy = async (
     const strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
     const strategyIndex = 0;
-    console.log(subId, strategyIndex, triggerCallData, actionsCallData, strategySub);
 
     // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
@@ -5962,7 +5958,6 @@ const callLiquityV2InterestRateAdjustmentStrategy = async (
     actionsCallData.push(liquityV2AdjustInterestRateAction.encodeForRecipe()[0]);
     actionsCallData.push(liquityV2NewInterestRateCheckerAction.encodeForRecipe()[0]);
     triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint256', 'uint256'], [placeHolderAddr, 0, 0, 0]));
-    console.log('executing strategy');
     const { callData, receipt } = await executeStrategy(
         false,
         strategyExecutor,
