@@ -32,7 +32,6 @@ contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
     /// @notice Error thrown when an invalid market address is provided
     error InvalidMarketAddress();
 
-
     /// @notice Helper struct containing the total debt and unbacked debt of a single market
     /// @dev totalDebt is the total bold debt of the market
     /// @dev unbackedDebt is the unbacked bold debt of the market. Diff between total debt and stability pool bold deposits
@@ -49,6 +48,7 @@ contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
         Market current;
         Market[] otherMarkets;
     }
+
     /// @notice Gets the debt in front for a given market and trove
     /// @param _market address of the market (a.k.a. branch)
     /// @param _trove id of the trove
@@ -96,6 +96,18 @@ contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
             if (branchDebtInFront == 0) {
                 return markets.otherMarkets[0].unbackedDebt + markets.otherMarkets[1].unbackedDebt;
             }
+
+            // 1. First redemption call:
+            // - add up all the unbacked debt from other branches
+            // - remove the unbacked debt from total debt as it will be redeemed on the first call
+            // - update the total debt of other branches
+            uint256 redeemAmountFromFirstCall = markets.otherMarkets[0].unbackedDebt + markets.otherMarkets[1].unbackedDebt;
+            totalDebt -= redeemAmountFromFirstCall;
+            markets.otherMarkets[0].totalDebt -= markets.otherMarkets[0].unbackedDebt;
+            markets.otherMarkets[1].totalDebt -= markets.otherMarkets[1].unbackedDebt;
+
+            // 2. Second redemption call:
+            // Perform the split by total debt because there is no more unbacked debt to redeem
             uint256 estimatedRedemptionAmount = branchDebtInFront * totalDebt / markets.current.totalDebt;
             uint256[] memory redemptionAmounts = _calculateRedemptionAmounts(
                 estimatedRedemptionAmount,
@@ -103,8 +115,9 @@ contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
                 markets,
                 false // isTotalUnbacked = false. Proportional to total debt
             );
-            return branchDebtInFront + redemptionAmounts[0] + redemptionAmounts[1] + 
-                   markets.otherMarkets[0].unbackedDebt + markets.otherMarkets[1].unbackedDebt;
+            uint256 redeemAmountFromSecondCall = branchDebtInFront + redemptionAmounts[0] + redemptionAmounts[1];
+
+            return redeemAmountFromFirstCall + redeemAmountFromSecondCall;
         }
 
         // CASE 2: Current branch has unbacked debt
