@@ -104,7 +104,6 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST = {
         //     collAmountInUSD: 40_000,
         //     debtAmountInUSD: 15_000,
         //     boostAmountInUSD: 5_000,
-        //     repayAmountInUSD: 7_000,
         // },
     ],
     // 42161: [

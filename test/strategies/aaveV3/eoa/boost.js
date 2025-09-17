@@ -47,7 +47,6 @@ const runBoostTests = () => {
         let proxy;
         let botAcc;
         let strategyExecutor;
-        let subProxyContract;
         let mockWrapper;
         let flAddr;
 
@@ -77,8 +76,8 @@ const runBoostTests = () => {
             await redeploy('AaveV3OpenRatioCheck', isFork);
             await redeploy('AaveV3View', isFork);
 
-            const newRepayBundleId = await deployAaveV3RepayGenericBundle(true);
-            const newBoostBundleId = await deployAaveV3BoostGenericBundle(true);
+            await deployAaveV3RepayGenericBundle(true);
+            await deployAaveV3BoostGenericBundle(true);
         });
 
         beforeEach(async () => {
@@ -92,9 +91,7 @@ const runBoostTests = () => {
         const baseTest = async (
             collAsset,
             debtAsset,
-            triggerRatioRepay,
             triggerRatioBoost,
-            targetRatioRepay,
             targetRatioBoost,
             collAmountInUSD,
             debtAmountInUSD,
@@ -135,7 +132,7 @@ const runBoostTests = () => {
             const ratioBefore = await getAaveV3PositionRatio(positionOwner);
             console.log('ratioBefore', ratioBefore);
 
-            // TODO -> This is default market, should not be fixed
+            // TODO -> This is default market, should not be hardcoded
             // Get AAVE market address (network and addrs are already imported at top of file)
             const marketAddr = addrs[network].AAVE_MARKET;
 
@@ -227,9 +224,7 @@ const runBoostTests = () => {
                 await baseTest(
                     collAsset,
                     debtAsset,
-                    pair.triggerRatioRepay,
                     pair.triggerRatioBoost,
-                    pair.targetRatioRepay,
                     pair.targetRatioBoost,
                     pair.collAmountInUSD,
                     pair.debtAmountInUSD,
@@ -245,9 +240,7 @@ const runBoostTests = () => {
                 await baseTest(
                     collAsset,
                     debtAsset,
-                    pair.triggerRatioRepay,
                     pair.triggerRatioBoost,
-                    pair.targetRatioRepay,
                     pair.targetRatioBoost,
                     pair.collAmountInUSD,
                     pair.debtAmountInUSD,
@@ -262,9 +255,7 @@ const runBoostTests = () => {
                 await baseTest(
                     collAsset,
                     debtAsset,
-                    pair.triggerRatioRepay,
                     pair.triggerRatioBoost,
-                    pair.targetRatioRepay,
                     pair.targetRatioBoost,
                     pair.collAmountInUSD,
                     pair.debtAmountInUSD,
@@ -279,9 +270,7 @@ const runBoostTests = () => {
                 await baseTest(
                     collAsset,
                     debtAsset,
-                    pair.triggerRatioRepay,
                     pair.triggerRatioBoost,
-                    pair.targetRatioRepay,
                     pair.targetRatioBoost,
                     pair.collAmountInUSD,
                     pair.debtAmountInUSD,

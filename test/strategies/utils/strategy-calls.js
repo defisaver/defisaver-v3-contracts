@@ -7113,7 +7113,7 @@ const callAaveV3GenericFLRepayStrategy = async (
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
         aTokenAddr,
         placeHolderAddr, // from (EOA address)
-        repayAmount, // amount to pull
+        0, // amount to pull
     );
     const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         false,

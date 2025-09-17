@@ -24,8 +24,8 @@ const {
 const { addBotCaller } = require('../../utils/utils-strategies');
 const { subAaveV3LeverageManagementGeneric } = require('../../utils/strategy-subs');
 const {
-    callAaveV3EOARepayStrategy,
-    callAaveV3EOAFLRepayStrategy,
+    callAaveV3GenericRepayStrategy,
+    callAaveV3GenericFLRepayStrategy,
 } = require('../../utils/strategy-calls');
 const {
     AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY,
@@ -37,7 +37,8 @@ const {
     setupAaveV3EOAPermissions,
 } = require('../../../utils/aave');
 
-const BOOST_ENABLED = false;
+const IS_BOOST = false;
+const RATIO_STATE = 1;
 
 const runRepayTests = () => {
     describe('AaveV3 Repay Strategies Tests', () => {
@@ -46,7 +47,6 @@ const runRepayTests = () => {
         let proxy;
         let botAcc;
         let strategyExecutor;
-        let subProxyContract;
         let mockWrapper;
         let flAddr;
 
@@ -77,14 +77,8 @@ const runRepayTests = () => {
             await redeploy('AaveV3View', isFork);
             await redeploy('PullToken', isFork);
 
-            const newRepayBundleId = await deployAaveV3RepayGenericBundle(true);
-            const newBoostBundleId = await deployAaveV3BoostGenericBundle(true);
-            subProxyContract = await redeploy(
-                'AaveV3SubProxyV2',
-                isFork,
-                newRepayBundleId,
-                newBoostBundleId,
-            );
+            await deployAaveV3RepayGenericBundle(true);
+            await deployAaveV3BoostGenericBundle(true);
         });
 
         beforeEach(async () => {
@@ -99,9 +93,7 @@ const runRepayTests = () => {
             collAsset,
             debtAsset,
             triggerRatioRepay,
-            triggerRatioBoost,
             targetRatioRepay,
-            targetRatioBoost,
             collAmountInUSD,
             debtAmountInUSD,
             repayAmountInUSD,
@@ -150,36 +142,30 @@ const runRepayTests = () => {
             console.log('ratioBefore', ratioBefore);
             console.log('ratioBefore', ratioBefore);
 
+            // TODO -> This is default market, should not be hardcoded
+            // Get AAVE market address (network and addrs are already imported at top of file)
+            const marketAddr = addrs[network].AAVE_MARKET;
+
             // Create subscription based on whether it's EOA or proxy
             const result = await subAaveV3LeverageManagementGeneric(
                 proxy,
-                triggerRatioRepay,
-                triggerRatioBoost,
-                targetRatioRepay,
-                targetRatioBoost,
-                BOOST_ENABLED,
                 senderAcc.address,
+                marketAddr,
+                RATIO_STATE,
+                targetRatioRepay,
+                triggerRatioRepay,
                 isEOA,
+                IS_BOOST,
             );
-            const repaySubId = result.repaySubId;
-            const subData = result.subData;
+
+            const repaySubId = result.subId;
+            const strategySub = result.strategySub;
 
             console.log('SUBBED !!!!');
             console.log('REPAY SUB ID AND SUB DATA!!!!');
             console.log(repaySubId);
-            console.log(subData);
-            // Get sub info
-            const subDataInStruct = await subProxyContract.parseSubData(subData);
-            // console.log('subDataInStruct ---------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-            // console.log(subDataInStruct);
+            console.log(strategySub);
 
-            const strategySub = await subProxyContract.formatRepaySub(
-                subDataInStruct,
-                proxy.address,
-                senderAcc.address,
-            );
-
-            console.log('strategySub REPAY  ------->>>>>>>>>> \n', strategySub);
             const repayAmount = await fetchAmountInUSDPrice(collAsset.symbol, repayAmountInUSD);
             console.log(repayAmount);
 
@@ -203,7 +189,7 @@ const runRepayTests = () => {
                 await addBalancerFlLiquidity(debtAsset.address);
 
                 // TODO -> pass random params like placeholderAddr, to check if piping works
-                await callAaveV3EOAFLRepayStrategy(
+                await callAaveV3GenericFLRepayStrategy(
                     strategyExecutor,
                     1,
                     repaySubId,
@@ -214,7 +200,7 @@ const runRepayTests = () => {
                 );
             } else {
                 // TODO -> pass random params like placeholderAddr, to check if piping works
-                await callAaveV3EOARepayStrategy(
+                await callAaveV3GenericRepayStrategy(
                     strategyExecutor,
                     0,
                     repaySubId,
@@ -250,9 +236,7 @@ const runRepayTests = () => {
                     collAsset,
                     debtAsset,
                     pair.triggerRatioRepay,
-                    pair.triggerRatioBoost,
                     pair.targetRatioRepay,
-                    pair.targetRatioBoost,
                     pair.collAmountInUSD,
                     pair.debtAmountInUSD,
                     pair.repayAmountInUSD,
@@ -268,9 +252,7 @@ const runRepayTests = () => {
                     collAsset,
                     debtAsset,
                     pair.triggerRatioRepay,
-                    pair.triggerRatioBoost,
                     pair.targetRatioRepay,
-                    pair.targetRatioBoost,
                     pair.collAmountInUSD,
                     pair.debtAmountInUSD,
                     pair.repayAmountInUSD,
@@ -286,9 +268,7 @@ const runRepayTests = () => {
                     collAsset,
                     debtAsset,
                     pair.triggerRatioRepay,
-                    pair.triggerRatioBoost,
                     pair.targetRatioRepay,
-                    pair.targetRatioBoost,
                     pair.collAmountInUSD,
                     pair.debtAmountInUSD,
                     pair.repayAmountInUSD,
@@ -303,9 +283,7 @@ const runRepayTests = () => {
                     collAsset,
                     debtAsset,
                     pair.triggerRatioRepay,
-                    pair.triggerRatioBoost,
                     pair.targetRatioRepay,
-                    pair.targetRatioBoost,
                     pair.collAmountInUSD,
                     pair.debtAmountInUSD,
                     pair.repayAmountInUSD,
