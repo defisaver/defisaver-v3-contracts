@@ -6475,7 +6475,7 @@ const createAaveV3GenericBoostStrategy = () => {
         '&marketAddr', // from subData
         '%amount', // must stay variable
         '&proxy', // hardcoded
-        '%rateMode', // depends on type of debt we want
+        '%rateMode', // always 2 (variable)
         '%assetId', // must stay variable can choose diff. asset
         '%useOnBehalf', // hardcoded to true
         '&user', // EOA/SW addr from subData
@@ -6645,7 +6645,7 @@ const createAaveV3GenericRepayStrategy = () => {
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '0', // must stay variable backend sets gasCost
         '%debtAddr', // must stay variable as debt can differ
-        '$3', // hardcoded output from withdraw action
+        '$3', // hardcoded output from sell action
         '%dfsFeeDivider', // defaults at 0.05%
     );
 
@@ -6713,7 +6713,7 @@ const createAaveV3GenericFLRepayStrategy = () => {
 
     const feeTakingAction = new dfs.actions.basic.GasFeeAction(
         '0', // must stay variable backend sets gasCost
-        '%debtAddr', // must stay variable as coll can differ
+        '%debtAddr', // must stay variable as debt can differ
         '$2', // hardcoded output from sell
         '%dfsFeeDivider', // defaults at 0.05%
     );
@@ -6724,7 +6724,7 @@ const createAaveV3GenericFLRepayStrategy = () => {
         '$3', // amount hardcoded
         '&proxy', // proxy hardcoded
         '%rateMode', // variable type of debt
-        '%debtAddr', // used just for sdk not actually sent (should this be here?)
+        '%debtAddr', // used just for sdk not actually sent
         '%assetId', // must be variable
         '%useOnBehalf', // hardcoded true
         '&user', // EOA/SW addr from subData
@@ -6918,7 +6918,7 @@ const createAaveV3GenericRepayOnPriceStrategy = () => {
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
-        '$1', // must stay variable
+        '$1', // output of pullTokenAction
         '&proxy', // hardcoded
         '&collAssetId',
     );
