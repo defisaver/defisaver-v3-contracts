@@ -12,6 +12,7 @@ const supportedNetworks = {
     arbitrum: '42161',
     optimism: '10',
     base: '8453',
+    linea: '59144',
 };
 
 const getNetworkId = (network) => supportedNetworks[network];
@@ -148,11 +149,6 @@ const syncAll = async (options) => {
     const contractsFromTenderly = await getContractsFromTenderly(networkId);
 
     if (contractsFromTenderly === null) {
-        return;
-    }
-
-    if (contractsFromTenderly.length === 0) {
-        console.log(`No contracts found in Tenderly for network: ${network}`);
         return;
     }
 

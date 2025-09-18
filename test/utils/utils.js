@@ -271,6 +271,7 @@ const chainIds = {
     optimism: 10,
     arbitrum: 42161,
     base: 8453,
+    linea: 59144,
 };
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically

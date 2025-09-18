@@ -71,7 +71,7 @@
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
         "version": "1.0.0",
-        "inRegistry": false,
+        "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
         "history": []
