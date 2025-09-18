@@ -7064,7 +7064,7 @@ const createAaveV3GenericFLCloseToCollStrategy = () => {
     aaveV3GenericFLCloseToCollStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3GenericFLCloseToCollStrategy.addSubSlot('&user', 'address');
 
-    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    const trigger = new dfs.triggers.AaveV3QuotePriceRangeTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3GenericFLCloseToCollStrategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
@@ -7088,7 +7088,7 @@ const createAaveV3GenericFLCloseToCollStrategy = () => {
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
-        '$2', // amount hardcoded output from sell action
+        '%uint(max)', // backend sends max uint
         '&proxy', // proxy hardcoded
         '%rateMode', // variable type of debt
         '&debtAsset',
@@ -7100,12 +7100,12 @@ const createAaveV3GenericFLCloseToCollStrategy = () => {
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
         '%aCollTokenAddr', // aToken for collateral
         '&user', // hardcoded from subData
-        '$1', // output of FL action
+        '%uint(max)', // backend sends max uint
     );
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
-        '$4', // output of pullToken
+        '%uint(max)', // backend sends max uint
         '&proxy', // proxy hardcoded
         '&collAssetId',
     );
@@ -7116,23 +7116,26 @@ const createAaveV3GenericFLCloseToCollStrategy = () => {
         '$5',
     );
 
+    // return flashloan. This has to be separate action, because we don't want to unwrap weth
+    const sendTokenToFLAction = new dfs.actions.basic.SendTokenAction(
+        '&collAsset',
+        '%flAddress', // sent by backend
+        '$1',
+    );
+
     // return:
-    // 1. Send collAsset flashloan amount to flAddress
-    // 2. Send all collAsset's left after the close and flRepayment to eoa
-    // 3. Send all debtAsset's left after the close and flRepayment to eoa
+    // 1. Send all collAsset's left after the close and flRepayment to eoa
+    // 2. Send all debtAsset's left after the close and flRepayment to eoa
     const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
         [
-            '&collAsset',
             '&collAsset',
             '&debtAsset',
         ],
         [
-            '%flAddress', // sent by backend
             '&eoa', // EOA
             '&eoa', // EOA
         ],
         [
-            '$1',
             '%max(uint)', // sent by backend
             '%max(uint)', // sent by backend
         ],
@@ -7144,6 +7147,7 @@ const createAaveV3GenericFLCloseToCollStrategy = () => {
     aaveV3GenericFLCloseToCollStrategy.addAction(pullTokenAction);
     aaveV3GenericFLCloseToCollStrategy.addAction(withdrawAction);
     aaveV3GenericFLCloseToCollStrategy.addAction(feeTakingAction);
+    aaveV3GenericFLCloseToCollStrategy.addAction(sendTokenToFLAction);
     aaveV3GenericFLCloseToCollStrategy.addAction(sendTokensAction);
 
     return aaveV3GenericFLCloseToCollStrategy.encodeForDsProxyCall();
@@ -7160,7 +7164,7 @@ const createAaveV3GenericFLCloseToDebtStrategy = () => {
     aaveV3GenericFLCloseToDebtStrategy.addSubSlot('&marketAddr', 'address');
     aaveV3GenericFLCloseToDebtStrategy.addSubSlot('&user', 'address');
 
-    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    const trigger = new dfs.triggers.AaveV3QuotePriceRangeTrigger(nullAddress, nullAddress, '0', '0');
     aaveV3GenericFLCloseToDebtStrategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
@@ -7173,7 +7177,7 @@ const createAaveV3GenericFLCloseToDebtStrategy = () => {
     const paybackAction = new dfs.actions.aaveV3.AaveV3PaybackAction(
         '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
-        '$1', // amount hardcoded output from flAction
+        '%uint(max)', // backend sends max uint
         '&proxy', // proxy hardcoded
         '%rateMode', // variable type of debt
         '&debtAsset',
@@ -7185,7 +7189,7 @@ const createAaveV3GenericFLCloseToDebtStrategy = () => {
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
         '%aCollTokenAddr', // aToken for collateral
         '&user', // hardcoded from subData
-        '%amount', // must stay variable
+        '%uint(max)', // backend sends max uint
     );
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '%useDefaultMarket', // hardcoded to false
