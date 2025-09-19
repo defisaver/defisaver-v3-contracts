@@ -92,15 +92,15 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST = {
             debtAmountInUSD: 15_000,
             boostAmountInUSD: 2_500,
         },
-        // {
-        //     collSymbol: 'WETH',
-        //     debtSymbol: 'USDT',
-        //     triggerRatioBoost: 190,
-        //     targetRatioBoost: 180,
-        //     collAmountInUSD: 40_000,
-        //     debtAmountInUSD: 15_000,
-        //     boostAmountInUSD: 5_000,
-        // },
+        {
+            collSymbol: 'WETH',
+            debtSymbol: 'USDT',
+            triggerRatioBoost: 190,
+            targetRatioBoost: 180,
+            collAmountInUSD: 40_000,
+            debtAmountInUSD: 15_000,
+            boostAmountInUSD: 5_000,
+        },
     ],
     // 42161: [
     //     {
