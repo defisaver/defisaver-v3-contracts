@@ -6566,7 +6566,7 @@ const callAaveV3GenericBoostStrategy = async (
     strategySub,
     exchangeObject,
     boostAmount,
-    marketAddress = null,
+    marketAddress,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -6754,6 +6754,7 @@ const callAaveV3GenericRepayStrategy = async (
     strategySub,
     exchangeObject,
     repayAmount,
+    marketAddress,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -6761,17 +6762,17 @@ const callAaveV3GenericRepayStrategy = async (
     const gasCost = 1000000;
 
     const collTokenAddr = exchangeObject[0]; // srcAddr in exchange object is the collateral token
-    const collAssetId = (await getAaveV3ReserveData(collTokenAddr)).id;
+    const collAssetId = (await getAaveV3ReserveData(collTokenAddr, marketAddress)).id;
 
     const debtTokenAddr = exchangeObject[1]; // destAddr in exchange object is the debt token
-    const debtAssetId = (await getAaveV3ReserveData(debtTokenAddr)).id;
+    const debtAssetId = (await getAaveV3ReserveData(debtTokenAddr, marketAddress)).id;
 
-    console.log(`Using collateral asset ID: ${collAssetId} for token: ${collTokenAddr}`);
-    console.log(`Using debt asset ID: ${debtAssetId} for token: ${debtTokenAddr}`);
+    console.log(`Using collateral asset ID: ${collAssetId} for token: ${collTokenAddr} on market: ${marketAddress}`);
+    console.log(`Using debt asset ID: ${debtAssetId} for token: ${debtTokenAddr} on market: ${marketAddress}`);
 
     // Get aToken address for collateral token (needed for PullTokenAction)
-    const aTokenAddr = (await getAaveV3ReserveData(collTokenAddr)).aTokenAddress;
-    console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collTokenAddr}`);
+    const aTokenAddr = (await getAaveV3ReserveData(collTokenAddr, marketAddress)).aTokenAddress;
+    console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collTokenAddr} on market: ${marketAddress}`);
 
     // Pull aTokens from EOA to Smart Wallet before withdraw
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
@@ -6813,7 +6814,6 @@ const callAaveV3GenericRepayStrategy = async (
         placeHolderAddr,
     );
 
-    console.log('BEFORE EXEC');
     actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
@@ -6853,6 +6853,7 @@ const callAaveV3GenericFLRepayStrategy = async (
     exchangeObject,
     repayAmount,
     flAddr,
+    marketAddress,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -6865,12 +6866,12 @@ const callAaveV3GenericFLRepayStrategy = async (
         new dfs.actions.flashloan.BalancerFlashLoanAction([collToken], [repayAmount]),
     );
 
-    const collAssetId = (await getAaveV3ReserveData(collToken)).id;
-    const debtAssetId = (await getAaveV3ReserveData(debtToken)).id;
+    const collAssetId = (await getAaveV3ReserveData(collToken, marketAddress)).id;
+    const debtAssetId = (await getAaveV3ReserveData(debtToken, marketAddress)).id;
 
     // Get aToken address for collateral token (needed for PullTokenAction)
-    const aTokenAddr = (await getAaveV3ReserveData(collToken)).aTokenAddress;
-    console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collToken}`);
+    const aTokenAddr = (await getAaveV3ReserveData(collToken, marketAddress)).aTokenAddress;
+    console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collToken} on market: ${marketAddress}`);
 
     const sellAction = new dfs.actions.basic.SellAction(
         exchangeObject,

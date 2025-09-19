@@ -169,9 +169,11 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST = {
 };
 const AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY = {
     1: [
+        // Core Market pairs
         {
             collSymbol: 'WETH',
             debtSymbol: 'DAI',
+            marketAddr: addrs[network].AAVE_MARKET,
             triggerRatioRepay: 165,
             targetRatioRepay: 225,
             collAmountInUSD: 40_000,
@@ -181,6 +183,7 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY = {
         {
             collSymbol: 'WETH',
             debtSymbol: 'USDC',
+            marketAddr: addrs[network].AAVE_MARKET,
             triggerRatioRepay: 165,
             targetRatioRepay: 225,
             collAmountInUSD: 40_000,
@@ -190,6 +193,7 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY = {
         {
             collSymbol: 'WETH',
             debtSymbol: 'USDT',
+            marketAddr: addrs[network].AAVE_MARKET,
             triggerRatioRepay: 165,
             targetRatioRepay: 225,
             collAmountInUSD: 40_000,
@@ -199,8 +203,30 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY = {
         {
             collSymbol: 'WBTC',
             debtSymbol: 'USDC',
+            marketAddr: addrs[network].AAVE_MARKET,
             triggerRatioRepay: 165,
             targetRatioRepay: 205,
+            collAmountInUSD: 40_000,
+            debtAmountInUSD: 20_000,
+            repayAmountInUSD: 9_000,
+        },
+        // Prime Market pairs
+        {
+            collSymbol: 'WETH',
+            debtSymbol: 'USDC',
+            marketAddr: addrs[network].AAVE_V3_PRIME_MARKET,
+            triggerRatioRepay: 200,
+            targetRatioRepay: 235,
+            collAmountInUSD: 40_000,
+            debtAmountInUSD: 20_000,
+            repayAmountInUSD: 9_000,
+        },
+        {
+            collSymbol: 'WETH',
+            debtSymbol: 'GHO',
+            marketAddr: addrs[network].AAVE_V3_PRIME_MARKET,
+            triggerRatioRepay: 200,
+            targetRatioRepay: 235,
             collAmountInUSD: 40_000,
             debtAmountInUSD: 20_000,
             repayAmountInUSD: 9_000,

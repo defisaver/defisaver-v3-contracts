@@ -100,8 +100,12 @@ const runRepayTests = () => {
             repayAmountInUSD,
             isEOA,
             isFLStrategy,
+            marketAddress,
         ) => {
+            // Use the passed market address or fall back to default
+            const marketAddr = marketAddress || addrs[network].AAVE_MARKET;
             const positionOwner = isEOA ? senderAcc.address : proxy.address;
+
             // Open position
             if (isEOA) {
                 await openAaveV3EOAPosition(
@@ -110,6 +114,7 @@ const runRepayTests = () => {
                     debtAsset.symbol,
                     collAmountInUSD,
                     debtAmountInUSD,
+                    marketAddr,
                 );
 
                 // EOA delegates to the actual Smart Wallet address that executes the strategy
@@ -118,6 +123,7 @@ const runRepayTests = () => {
                     proxy.address, // The actual Smart Wallet executing address
                     collAsset.address,
                     debtAsset.address,
+                    marketAddr,
                 );
             } else {
                 await openAaveV3ProxyPosition(
@@ -127,25 +133,12 @@ const runRepayTests = () => {
                     debtAsset.symbol,
                     collAmountInUSD,
                     debtAmountInUSD,
+                    marketAddr,
                 );
             }
 
             // Check ratioBefore
-            const ratioBefore = await getAaveV3PositionRatio(positionOwner);
-            console.log('ratioBefore', ratioBefore);
-            console.log('ratioBefore', ratioBefore);
-            console.log('ratioBefore', ratioBefore);
-            console.log('ratioBefore', ratioBefore);
-            console.log('ratioBefore', ratioBefore);
-            console.log('ratioBefore', ratioBefore);
-            console.log('ratioBefore', ratioBefore);
-            console.log('ratioBefore', ratioBefore);
-            console.log('ratioBefore', ratioBefore);
-            console.log('ratioBefore', ratioBefore);
-
-            // TODO -> This is default market, should not be hardcoded
-            // Get AAVE market address (network and addrs are already imported at top of file)
-            const marketAddr = addrs[network].AAVE_MARKET;
+            const ratioBefore = await getAaveV3PositionRatio(positionOwner, null, marketAddr);
 
             // Create subscription based on whether it's EOA or proxy
             const result = await subAaveV3LeverageManagementGeneric(
@@ -177,12 +170,6 @@ const runRepayTests = () => {
                 mockWrapper,
             );
 
-            // console.log('exchangeObject !!!!!');
-            // console.log('exchangeObject !!!!!');
-            // console.log('exchangeObject !!!!!');
-            // console.log('exchangeObject !!!!!');
-            // console.log(exchangeObject);
-
             // Execute strategy
             if (isFLStrategy) {
                 console.log('Executing FL Boost strategy !!!!');
@@ -198,6 +185,7 @@ const runRepayTests = () => {
                     exchangeObject,
                     repayAmount,
                     flAddr,
+                    marketAddr,
                 );
             } else {
                 // TODO -> pass random params like placeholderAddr, to check if piping works
@@ -208,10 +196,11 @@ const runRepayTests = () => {
                     strategySub,
                     exchangeObject,
                     repayAmount,
+                    marketAddr,
                 );
             }
 
-            const ratioAfter = await getAaveV3PositionRatio(positionOwner);
+            const ratioAfter = await getAaveV3PositionRatio(positionOwner, null, marketAddr);
             console.log('ratioAfter', ratioAfter);
             console.log('ratioBefore', ratioBefore);
             expect(ratioAfter).to.be.gt(ratioBefore);
@@ -229,8 +218,14 @@ const runRepayTests = () => {
                 chainIds[network],
             );
 
+            // Determine market name based on market address
+            const marketName =
+                pair.marketAddr === addrs[network].AAVE_MARKET
+                    ? 'Aave V3 Core Market'
+                    : 'Aave V3 Prime Market';
+
             it(`... should execute aaveV3 SW repay strategy for ${pair.collSymbol} /
-            ${pair.debtSymbol} pair`, async () => {
+            ${pair.debtSymbol} pair on ${marketName}`, async () => {
                 const isEOA = false;
                 const isFLStrategy = false;
                 await baseTest(
@@ -243,10 +238,11 @@ const runRepayTests = () => {
                     pair.repayAmountInUSD,
                     isEOA,
                     isFLStrategy,
+                    pair.marketAddr,
                 );
             });
             it(`... should execute aaveV3 SW FL repay strategy for ${pair.collSymbol} /
-            ${pair.debtSymbol} pair`, async () => {
+            ${pair.debtSymbol} pair on ${marketName}`, async () => {
                 const isEOA = false;
                 const isFLStrategy = true;
                 await baseTest(
@@ -259,10 +255,10 @@ const runRepayTests = () => {
                     pair.repayAmountInUSD,
                     isEOA,
                     isFLStrategy,
+                    pair.marketAddr,
                 );
             });
-            // TODO -> Should probably give proper allowances for this to work
-            it(`... should execute aaveV3 EOA repay strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+            it(`... should execute aaveV3 EOA repay strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair on ${marketName}`, async () => {
                 const isEOA = true;
                 const isFLStrategy = false;
                 await baseTest(
@@ -275,9 +271,10 @@ const runRepayTests = () => {
                     pair.repayAmountInUSD,
                     isEOA,
                     isFLStrategy,
+                    pair.marketAddr,
                 );
             });
-            it(`... should execute aaveV3 EOA FL repay strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+            it(`... should execute aaveV3 EOA FL repay strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair on ${marketName}`, async () => {
                 const isEOA = true;
                 const isFLStrategy = true;
                 await baseTest(
@@ -290,6 +287,7 @@ const runRepayTests = () => {
                     pair.repayAmountInUSD,
                     isEOA,
                     isFLStrategy,
+                    pair.marketAddr,
                 );
             });
         }
