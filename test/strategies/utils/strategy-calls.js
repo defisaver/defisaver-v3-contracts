@@ -6566,6 +6566,7 @@ const callAaveV3GenericBoostStrategy = async (
     strategySub,
     exchangeObject,
     boostAmount,
+    marketAddress = null,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -6573,11 +6574,11 @@ const callAaveV3GenericBoostStrategy = async (
     const gasCost = 1000000;
 
     const debtTokenAddr = exchangeObject[0]; // srcAddr in exchange object is the debt token
-    const debtAssetId = (await getAaveV3ReserveData(debtTokenAddr)).id;
+    const debtAssetId = (await getAaveV3ReserveData(debtTokenAddr, marketAddress)).id;
 
     // Get collateral asset ID from exchange object (destAddr should be the collateral token we're supplying)
     const collTokenAddr = exchangeObject[1]; // destAddr in exchange object is the collateral token
-    const collAssetId = (await getAaveV3ReserveData(collTokenAddr)).id;
+    const collAssetId = (await getAaveV3ReserveData(collTokenAddr, marketAddress)).id;
 
     console.log(`Using debt asset ID: ${debtAssetId} for token: ${debtTokenAddr}`);
     console.log(`Using collateral asset ID: ${collAssetId} for token: ${collTokenAddr}`);
@@ -6659,6 +6660,7 @@ const callAaveV3GenericFLBoostStrategy = async (
     flAddr,
     debtToken,
     collToken,
+    marketAddr,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -6677,9 +6679,9 @@ const callAaveV3GenericFLBoostStrategy = async (
         ? new dfs.actions.basic.GasFeeActionL2(gasCost, collToken, '0', '0', '10000000')
         : new dfs.actions.basic.GasFeeAction(gasCost, collToken, '0');
 
-    const collAssetId = (await getAaveV3ReserveData(collToken)).id;
+    const collAssetId = (await getAaveV3ReserveData(collToken, marketAddr)).id;
 
-    console.log(`FL Using collateral asset ID: ${collAssetId} for token: ${collToken}`);
+    console.log(`FL Using collateral asset ID: ${collAssetId} for token: ${collToken} on market: ${marketAddr}`);
 
     const aaveV3SupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         false, // useDefaultMarket
@@ -6693,9 +6695,9 @@ const callAaveV3GenericFLBoostStrategy = async (
         placeHolderAddr, // onBehalf
     );
     // Get debt asset ID for FL version
-    const debtAssetId = (await getAaveV3ReserveData(debtToken)).id;
+    const debtAssetId = (await getAaveV3ReserveData(debtToken, marketAddr)).id;
 
-    console.log(`FL Using debt asset ID: ${debtAssetId} for token: ${debtToken}`);
+    console.log(`FL Using debt asset ID: ${debtAssetId} for token: ${debtToken} on market: ${marketAddr}`);
 
     const aaveV3BorrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
         false,

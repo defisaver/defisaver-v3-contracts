@@ -99,7 +99,11 @@ const runBoostTests = () => {
             boostAmountInUSD,
             isEOA,
             isFLStrategy,
+            marketAddress = null,
         ) => {
+            // Use the passed market address or fall back to default
+            const marketAddr = marketAddress || addrs[network].AAVE_MARKET;
+
             const positionOwner = isEOA ? senderAcc.address : proxy.address;
             // Open position
             if (isEOA) {
@@ -109,6 +113,7 @@ const runBoostTests = () => {
                     debtAsset.symbol,
                     collAmountInUSD,
                     debtAmountInUSD,
+                    marketAddr,
                 );
 
                 // EOA delegates to the actual Smart Wallet address that executes the strategy
@@ -117,6 +122,7 @@ const runBoostTests = () => {
                     proxy.address, // The actual Smart Wallet executing address
                     collAsset.address,
                     debtAsset.address,
+                    marketAddr,
                 );
             } else {
                 await openAaveV3ProxyPosition(
@@ -126,16 +132,13 @@ const runBoostTests = () => {
                     debtAsset.symbol,
                     collAmountInUSD,
                     debtAmountInUSD,
+                    marketAddr,
                 );
             }
 
             // Check ratioBefore
-            const ratioBefore = await getAaveV3PositionRatio(positionOwner);
+            const ratioBefore = await getAaveV3PositionRatio(positionOwner, null, marketAddr);
             console.log('ratioBefore', ratioBefore);
-
-            // TODO -> This is default market, should not be hardcoded
-            // Get AAVE market address (network and addrs are already imported at top of file)
-            const marketAddr = addrs[network].AAVE_MARKET;
 
             // Create subscription based on whether it's EOA or proxy
             const result = await subAaveV3LeverageManagementGeneric(
@@ -153,7 +156,6 @@ const runBoostTests = () => {
 
             console.log('SUBBED !!!!');
 
-            // console.log('strategySub BOOST  ------->>>>>>>>>> \n', strategySub);
             const boostAmount = await fetchAmountInUSDPrice(debtAsset.symbol, boostAmountInUSD);
             console.log(boostAmount);
 
@@ -163,12 +165,6 @@ const runBoostTests = () => {
                 boostAmount,
                 mockWrapper,
             );
-
-            // console.log('exchangeObject !!!!!');
-            // console.log('exchangeObject !!!!!');
-            // console.log('exchangeObject !!!!!');
-            // console.log('exchangeObject !!!!!');
-            // console.log(exchangeObject);
 
             // Execute strategy
             if (isFLStrategy) {
@@ -187,6 +183,7 @@ const runBoostTests = () => {
                     flAddr,
                     debtAsset.address,
                     collAsset.address,
+                    marketAddr,
                 );
             } else {
                 // TODO -> pass random params like placeholderAddr, to check if piping works
@@ -197,15 +194,17 @@ const runBoostTests = () => {
                     strategySub,
                     exchangeObject,
                     boostAmount,
+                    marketAddr,
                 );
             }
 
-            const ratioAfter = await getAaveV3PositionRatio(positionOwner);
+            const ratioAfter = await getAaveV3PositionRatio(positionOwner, null, marketAddr);
             console.log('ratioAfter', ratioAfter);
             console.log('ratioBefore', ratioBefore);
             expect(ratioAfter).to.be.lt(ratioBefore);
         };
 
+        // Test each test pair with its specified market
         const testPairs = AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST[chainIds[network]] || [];
         for (let i = 0; i < testPairs.length; ++i) {
             const pair = testPairs[i];
@@ -218,8 +217,13 @@ const runBoostTests = () => {
                 chainIds[network],
             );
 
+            // Determine market name based on market address
+            const marketName = pair.marketAddr === addrs[network].AAVE_MARKET
+                ? 'Aave V3 Core Market'
+                : 'Aave V3 Prime Market';
+
             it(`... should execute aaveV3 SW boost strategy for ${pair.collSymbol} /
-            ${pair.debtSymbol} pair`, async () => {
+            ${pair.debtSymbol} pair on ${marketName}`, async () => {
                 const isEOA = false;
                 const isFLStrategy = false;
                 await baseTest(
@@ -232,10 +236,11 @@ const runBoostTests = () => {
                     pair.boostAmountInUSD,
                     isEOA,
                     isFLStrategy,
+                    pair.marketAddr,
                 );
             });
             it(`... should execute aaveV3 SW FL boost strategy for ${pair.collSymbol} /
-            ${pair.debtSymbol} pair`, async () => {
+            ${pair.debtSymbol} pair on ${marketName}`, async () => {
                 const isEOA = false;
                 const isFLStrategy = true;
                 await baseTest(
@@ -248,9 +253,10 @@ const runBoostTests = () => {
                     pair.boostAmountInUSD,
                     isEOA,
                     isFLStrategy,
+                    pair.marketAddr,
                 );
             });
-            it(`... should execute aaveV3 EOA boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+            it(`... should execute aaveV3 EOA boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair on ${marketName}`, async () => {
                 const isEOA = true;
                 const isFLStrategy = false;
                 await baseTest(
@@ -263,9 +269,10 @@ const runBoostTests = () => {
                     pair.boostAmountInUSD,
                     isEOA,
                     isFLStrategy,
+                    pair.marketAddr,
                 );
             });
-            it(`... should execute aaveV3 EOA FL boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+            it(`... should execute aaveV3 EOA FL boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair on ${marketName}`, async () => {
                 const isEOA = true;
                 const isFLStrategy = true;
                 await baseTest(
@@ -278,6 +285,7 @@ const runBoostTests = () => {
                     pair.boostAmountInUSD,
                     isEOA,
                     isFLStrategy,
+                    pair.marketAddr,
                 );
             });
         }

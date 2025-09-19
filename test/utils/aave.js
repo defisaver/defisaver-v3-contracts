@@ -65,9 +65,11 @@ const A_WETH_ADDRESS_V3 = '0x4d5F47FA6A74757f35C14fD3a6Ef8E3C9BC514E8';
 
 const AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST = {
     1: [
+        // Core Market pairs
         {
             collSymbol: 'WETH',
             debtSymbol: 'DAI',
+            marketAddr: addrs[network].AAVE_MARKET,
             triggerRatioBoost: 190,
             targetRatioBoost: 180,
             collAmountInUSD: 40_000,
@@ -77,6 +79,7 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST = {
         {
             collSymbol: 'WETH',
             debtSymbol: 'USDC',
+            marketAddr: addrs[network].AAVE_MARKET,
             triggerRatioBoost: 190,
             targetRatioBoost: 180,
             collAmountInUSD: 40_000,
@@ -86,6 +89,7 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST = {
         {
             collSymbol: 'WBTC',
             debtSymbol: 'USDC',
+            marketAddr: addrs[network].AAVE_MARKET,
             triggerRatioBoost: 190,
             targetRatioBoost: 180,
             collAmountInUSD: 40_000,
@@ -95,6 +99,28 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST = {
         {
             collSymbol: 'WETH',
             debtSymbol: 'USDT',
+            marketAddr: addrs[network].AAVE_MARKET,
+            triggerRatioBoost: 190,
+            targetRatioBoost: 180,
+            collAmountInUSD: 40_000,
+            debtAmountInUSD: 15_000,
+            boostAmountInUSD: 5_000,
+        },
+        // Prime Market pairs
+        {
+            collSymbol: 'WETH',
+            debtSymbol: 'USDC',
+            marketAddr: addrs[network].AAVE_V3_PRIME_MARKET,
+            triggerRatioBoost: 190,
+            targetRatioBoost: 180,
+            collAmountInUSD: 40_000,
+            debtAmountInUSD: 15_000,
+            boostAmountInUSD: 5_000,
+        },
+        {
+            collSymbol: 'WETH',
+            debtSymbol: 'GHO',
+            marketAddr: addrs[network].AAVE_V3_PRIME_MARKET,
             triggerRatioBoost: 190,
             targetRatioBoost: 180,
             collAmountInUSD: 40_000,
@@ -363,6 +389,7 @@ const openAaveV3ProxyPosition = async (
     debtSymbol,
     collAmountInUSD,
     debtAmountInUSD,
+    marketAddress = null,
 ) => {
     const eoaSigner = await hre.ethers.getSigner(eoaAddr);
     const proxyAddr = proxy.address;
@@ -378,9 +405,10 @@ const openAaveV3ProxyPosition = async (
     await approve(collAsset.address, proxyAddr, eoaSigner);
 
     // Get asset IDs from the pool
+    const marketAddr = marketAddress || addrs[network].AAVE_MARKET;
     const aaveMarketContract = await hre.ethers.getContractAt(
         'IPoolAddressesProvider',
-        addrs[network].AAVE_MARKET,
+        marketAddr,
     );
     const poolAddress = await aaveMarketContract.getPool();
     const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
@@ -391,7 +419,7 @@ const openAaveV3ProxyPosition = async (
     // Use DFS actions to create position through proxy
     const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         false,
-        addrs[network].AAVE_MARKET,
+        marketAddr,
         collAmount.toString(),
         eoaAddr,
         collAsset.address,
@@ -402,7 +430,7 @@ const openAaveV3ProxyPosition = async (
     );
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
         false, // useDefaultMarket
-        addrs[network].AAVE_MARKET, // marketAddr
+        marketAddr, // marketAddr
         debtAmount.toString(), // amount
         proxyAddr, // proxy
         VARIABLE_RATE, // rateMode
@@ -427,6 +455,7 @@ const openAaveV3EOAPosition = async (
     debtSymbol,
     collAmountInUSD,
     debtAmountInUSD,
+    marketAddress = null,
 ) => {
     const eoaSigner = await hre.ethers.getSigner(eoaAddr);
 
@@ -436,10 +465,11 @@ const openAaveV3EOAPosition = async (
     const collAmount = await fetchAmountInUSDPrice(collAsset.symbol, collAmountInUSD);
     const debtAmount = await fetchAmountInUSDPrice(debtAsset.symbol, debtAmountInUSD);
 
-    // Default market, should add option for other markets too
+    // Use the passed market address or fall back to default
+    const marketAddr = marketAddress || addrs[network].AAVE_MARKET;
     const aaveMarketContract = await hre.ethers.getContractAt(
         'IPoolAddressesProvider',
-        addrs[network].AAVE_MARKET,
+        marketAddr,
     );
     const poolAddress = await aaveMarketContract.getPool();
 
@@ -458,8 +488,8 @@ const openAaveV3EOAPosition = async (
     await poolContract.borrow(debtAsset.address, debtAmount, VARIABLE_RATE, 0, eoaAddr);
 };
 
-const getAaveV3PositionRatio = async (userAddr, aaveV3ViewParam) => {
-    const marketAddr = addrs[network].AAVE_MARKET;
+const getAaveV3PositionRatio = async (userAddr, aaveV3ViewParam, marketAddress = null) => {
+    const marketAddr = marketAddress || addrs[network].AAVE_MARKET;
 
     let aaveV3View = aaveV3ViewParam;
     if (!aaveV3View) {
@@ -575,7 +605,7 @@ const deployAaveV3CloseGenericBundle = async () => {
     return bundleId;
 };
 
-const setupAaveV3EOAPermissions = async (userAddress, smartWalletAddress, collTokenAddr, debtTokenAddr) => {
+const setupAaveV3EOAPermissions = async (userAddress, smartWalletAddress, collTokenAddr, debtTokenAddr, marketAddress = null) => {
     console.log('Setting up AaveV3 EOA permissions...');
     console.log(`  - Collateral token: ${collTokenAddr}`);
     console.log(`  - Debt token: ${debtTokenAddr}`);
@@ -583,7 +613,7 @@ const setupAaveV3EOAPermissions = async (userAddress, smartWalletAddress, collTo
     // Get user signer
     const userSigner = await hre.ethers.getSigner(userAddress);
     // Get market addresses provider and actual pool
-    const marketAddr = addrs[network].AAVE_MARKET;
+    const marketAddr = marketAddress || addrs[network].AAVE_MARKET;
 
     try {
         // Approve collateral token for Smart Wallet
