@@ -156,9 +156,9 @@ const runRepayTests = () => {
             const strategySub = result.strategySub;
 
             console.log('SUBBED !!!!');
-            console.log('REPAY SUB ID AND SUB DATA!!!!');
-            console.log(repaySubId);
-            console.log(strategySub);
+            // console.log('REPAY SUB ID AND SUB DATA!!!!');
+            // console.log(repaySubId);
+            // console.log(strategySub);
 
             const repayAmount = await fetchAmountInUSDPrice(collAsset.symbol, repayAmountInUSD);
             console.log(repayAmount);

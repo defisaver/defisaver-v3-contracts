@@ -7002,7 +7002,6 @@ const callAaveV3GenericBoostOnPriceStrategy = async (
     actionsCallData.push(aaveV3SupplyAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3OpenRatioCheckAction.encodeForRecipe()[0]);
 
-    console.log(actionsCallData);
     // Price trigger data - different from ratio trigger
     triggerCallData.push(
         abiCoder.encode(
@@ -7123,6 +7122,7 @@ const callAaveV3GenericRepayOnPriceStrategy = async (
     strategySub,
     exchangeObject,
     repayAmount,
+    marketAddress,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -7130,7 +7130,7 @@ const callAaveV3GenericRepayOnPriceStrategy = async (
     const gasCost = 1000000;
 
     const collTokenAddr = exchangeObject[0];
-    const aCollTokenAddr = (await getAaveV3ReserveData(collTokenAddr)).aTokenAddress;
+    const aCollTokenAddr = (await getAaveV3ReserveData(collTokenAddr, marketAddress)).aTokenAddress;
     // Pull aTokens from EOA to Smart Wallet before withdraw
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
         aCollTokenAddr,
@@ -7177,7 +7177,6 @@ const callAaveV3GenericRepayOnPriceStrategy = async (
     actionsCallData.push(aaveV3PaybackAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3OpenRatioCheckAction.encodeForRecipe()[0]);
 
-    console.log(actionsCallData);
     // Price trigger data - different from ratio trigger
     triggerCallData.push(
         abiCoder.encode(
@@ -7211,6 +7210,7 @@ const callAaveV3GenericFLRepayOnPriceStrategy = async (
     exchangeObject,
     repayAmount,
     flAddr,
+    marketAddress,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -7223,7 +7223,7 @@ const callAaveV3GenericFLRepayOnPriceStrategy = async (
     );
 
     // Get aToken address for collateral token (needed for PullTokenAction)
-    const aTokenAddr = (await getAaveV3ReserveData(collToken)).aTokenAddress;
+    const aTokenAddr = (await getAaveV3ReserveData(collToken, marketAddress)).aTokenAddress;
     console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collToken}`);
 
     const sellAction = new dfs.actions.basic.SellAction(

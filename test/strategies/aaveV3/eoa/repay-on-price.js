@@ -103,6 +103,7 @@ const runRepayOnPriceTests = () => {
             isFLStrategy,
             triggerPrice,
             priceState,
+            marketAddress,
         ) => {
             const positionOwner = isEOA ? senderAcc.address : proxy.address;
 
@@ -114,6 +115,7 @@ const runRepayOnPriceTests = () => {
                     debtAsset.symbol,
                     collAmountInUSD,
                     debtAmountInUSD,
+                    marketAddress,
                 );
 
                 // EOA delegates to the actual Smart Wallet address that executes the strategy
@@ -122,6 +124,7 @@ const runRepayOnPriceTests = () => {
                     proxy.address, // The actual Smart Wallet executing address
                     collAsset.address,
                     debtAsset.address,
+                    marketAddress,
                 );
             } else {
                 await openAaveV3ProxyPosition(
@@ -131,20 +134,17 @@ const runRepayOnPriceTests = () => {
                     debtAsset.symbol,
                     collAmountInUSD,
                     debtAmountInUSD,
+                    marketAddress,
                 );
             }
 
             // Check ratioBefore
-            const ratioBefore = await getAaveV3PositionRatio(positionOwner);
+            const ratioBefore = await getAaveV3PositionRatio(positionOwner, null, marketAddress);
             console.log('ratioBefore', ratioBefore);
 
-            // Get market address
-            const marketAddr = addrs[network].AAVE_MARKET;
-
-            console.log('ASSETS');
             // Get asset IDs
-            const collAssetId = (await getAaveV3ReserveData(collAsset.address)).id;
-            const debtAssetId = (await getAaveV3ReserveData(debtAsset.address)).id;
+            const collAssetId = (await getAaveV3ReserveData(collAsset.address, marketAddress)).id;
+            const debtAssetId = (await getAaveV3ReserveData(debtAsset.address, marketAddress)).id;
 
             const user = isEOA ? senderAcc.address : proxy.address;
 
@@ -156,7 +156,7 @@ const runRepayOnPriceTests = () => {
                 collAssetId,
                 debtAsset.address,
                 debtAssetId,
-                marketAddr,
+                marketAddress,
                 targetRatio,
                 triggerPrice,
                 priceState,
@@ -166,7 +166,7 @@ const runRepayOnPriceTests = () => {
             const strategySub = result.strategySub;
 
             console.log('SUBBED !!!!');
-            console.log(repaySubId, strategySub);
+            // console.log(repaySubId, strategySub);
 
             const repayAmount = await fetchAmountInUSDPrice(collAsset.symbol, repayAmountInUSD);
             console.log(repayAmount);
@@ -192,6 +192,7 @@ const runRepayOnPriceTests = () => {
                     exchangeObject,
                     repayAmount,
                     flAddr,
+                    marketAddress,
                 );
             } else {
                 await callAaveV3GenericRepayOnPriceStrategy(
@@ -201,10 +202,11 @@ const runRepayOnPriceTests = () => {
                     strategySub,
                     exchangeObject,
                     repayAmount,
+                    marketAddress,
                 );
             }
 
-            const ratioAfter = await getAaveV3PositionRatio(positionOwner);
+            const ratioAfter = await getAaveV3PositionRatio(positionOwner, null, marketAddress);
             console.log('ratioAfter', ratioAfter);
             console.log('ratioBefore', ratioBefore);
             expect(ratioAfter).to.be.gt(ratioBefore);
@@ -222,8 +224,12 @@ const runRepayOnPriceTests = () => {
                 chainIds[network],
             );
 
+            // Determine market name for test description
+            const marketName =
+                pair.marketAddr === addrs[network].AAVE_MARKET ? 'Core Market' : 'Prime Market';
+
             it(`... should execute aaveV3 SW Repay on price strategy (UNDER) for ${pair.collSymbol} /
-            ${pair.debtSymbol} pair`, async () => {
+            ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
                 const isEOA = false;
                 const isFLStrategy = false;
 
@@ -238,11 +244,12 @@ const runRepayOnPriceTests = () => {
                     isFLStrategy,
                     TRIGGER_PRICE_UNDER,
                     PRICE_STATE_UNDER,
+                    pair.marketAddr,
                 );
             });
 
             it(`... should execute aaveV3 SW Repay on price strategy (OVER) for ${pair.collSymbol} /
-            ${pair.debtSymbol} pair`, async () => {
+            ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
                 const isEOA = false;
                 const isFLStrategy = false;
 
@@ -257,11 +264,12 @@ const runRepayOnPriceTests = () => {
                     isFLStrategy,
                     TRIGGER_PRICE_OVER,
                     PRICE_STATE_OVER,
+                    pair.marketAddr,
                 );
             });
 
             it(`... should execute aaveV3 SW FL Repay on price strategy (UNDER) for ${pair.collSymbol} /
-            ${pair.debtSymbol} pair`, async () => {
+            ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
                 const isEOA = false;
                 const isFLStrategy = true;
 
@@ -276,11 +284,12 @@ const runRepayOnPriceTests = () => {
                     isFLStrategy,
                     TRIGGER_PRICE_UNDER,
                     PRICE_STATE_UNDER,
+                    pair.marketAddr,
                 );
             });
 
             it(`... should execute aaveV3 SW FL Repay on price strategy (OVER) for ${pair.collSymbol} /
-            ${pair.debtSymbol} pair`, async () => {
+            ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
                 const isEOA = false;
                 const isFLStrategy = true;
 
@@ -295,10 +304,11 @@ const runRepayOnPriceTests = () => {
                     isFLStrategy,
                     TRIGGER_PRICE_OVER,
                     PRICE_STATE_OVER,
+                    pair.marketAddr,
                 );
             });
 
-            it(`... should execute aaveV3 EOA Repay on price strategy (UNDER) for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+            it(`... should execute aaveV3 EOA Repay on price strategy (UNDER) for ${pair.collSymbol} / ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
                 const isEOA = true;
                 const isFLStrategy = false;
 
@@ -313,10 +323,11 @@ const runRepayOnPriceTests = () => {
                     isFLStrategy,
                     TRIGGER_PRICE_UNDER,
                     PRICE_STATE_UNDER,
+                    pair.marketAddr,
                 );
             });
 
-            it(`... should execute aaveV3 EOA Repay on price strategy (OVER) for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+            it(`... should execute aaveV3 EOA Repay on price strategy (OVER) for ${pair.collSymbol} / ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
                 const isEOA = true;
                 const isFLStrategy = false;
 
@@ -331,10 +342,11 @@ const runRepayOnPriceTests = () => {
                     isFLStrategy,
                     TRIGGER_PRICE_OVER,
                     PRICE_STATE_OVER,
+                    pair.marketAddr,
                 );
             });
 
-            it(`... should execute aaveV3 EOA FL Repay on price strategy (UNDER) for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+            it(`... should execute aaveV3 EOA FL Repay on price strategy (UNDER) for ${pair.collSymbol} / ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
                 const isEOA = true;
                 const isFLStrategy = true;
 
@@ -349,10 +361,11 @@ const runRepayOnPriceTests = () => {
                     isFLStrategy,
                     TRIGGER_PRICE_UNDER,
                     PRICE_STATE_UNDER,
+                    pair.marketAddr,
                 );
             });
 
-            it(`... should execute aaveV3 EOA FL Repay on price strategy (OVER) for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+            it(`... should execute aaveV3 EOA FL Repay on price strategy (OVER) for ${pair.collSymbol} / ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {
                 const isEOA = true;
                 const isFLStrategy = true;
 
@@ -367,6 +380,7 @@ const runRepayOnPriceTests = () => {
                     isFLStrategy,
                     TRIGGER_PRICE_OVER,
                     PRICE_STATE_OVER,
+                    pair.marketAddr,
                 );
             });
         }
