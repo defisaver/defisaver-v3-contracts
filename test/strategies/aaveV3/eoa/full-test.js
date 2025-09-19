@@ -9,5 +9,5 @@ describe('AaveV3  Full Strategy Tests', () => {
     runRepayTests();
     runBoostOnPriceTests();
     runRepayOnPriceTests();
-    // runCloseTests();
+    runCloseTests();
 });

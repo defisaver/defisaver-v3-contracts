@@ -7307,6 +7307,7 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
     exchangeObject,
     flAmount,
     flAddr,
+    marketAddress,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -7332,7 +7333,7 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
     );
 
     // Get aToken address for collateral token (needed for PullTokenAction)
-    const aTokenAddr = (await getAaveV3ReserveData(collToken)).aTokenAddress;
+    const aTokenAddr = (await getAaveV3ReserveData(collToken, marketAddress)).aTokenAddress;
     console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collToken}`);
 
     // Pull aTokens from EOA to Smart Wallet before withdraw
@@ -7404,6 +7405,7 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
     exchangeObject,
     flAmount,
     flAddr,
+    marketAddress,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -7434,7 +7436,7 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
     );
 
     // Get aToken address for collateral token (needed for PullTokenAction)
-    const aTokenAddr = (await getAaveV3ReserveData(collToken)).aTokenAddress;
+    const aTokenAddr = (await getAaveV3ReserveData(collToken, marketAddress)).aTokenAddress;
     console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collToken}`);
 
     // Pull aTokens from EOA to Smart Wallet before withdraw

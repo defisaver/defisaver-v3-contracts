@@ -100,6 +100,7 @@ const runCloseTests = () => {
             stopLossType,
             takeProfitPrice,
             takeProfitType,
+            marketAddress,
         ) => {
             const positionOwner = isEOA ? senderAcc.address : proxy.address;
 
@@ -111,6 +112,7 @@ const runCloseTests = () => {
                     debtAsset.symbol,
                     collAmountInUSD,
                     debtAmountInUSD,
+                    marketAddress,
                 );
 
                 // EOA delegates to the actual Smart Wallet address that executes the strategy
@@ -119,6 +121,7 @@ const runCloseTests = () => {
                     proxy.address, // The actual Smart Wallet executing address
                     collAsset.address,
                     debtAsset.address,
+                    marketAddress,
                 );
             } else {
                 await openAaveV3ProxyPosition(
@@ -128,19 +131,17 @@ const runCloseTests = () => {
                     debtAsset.symbol,
                     collAmountInUSD,
                     debtAmountInUSD,
+                    marketAddress,
                 );
             }
 
             // Check ratioBefore
-            const ratioBefore = await getAaveV3PositionRatio(positionOwner);
+            const ratioBefore = await getAaveV3PositionRatio(positionOwner, null, marketAddress);
             console.log('ratioBefore', ratioBefore);
 
-            // Get market address
-            const marketAddr = addrs[network].AAVE_MARKET;
-
             // Get asset IDs
-            const collAssetId = (await getAaveV3ReserveData(collAsset.address)).id;
-            const debtAssetId = (await getAaveV3ReserveData(debtAsset.address)).id;
+            const collAssetId = (await getAaveV3ReserveData(collAsset.address, marketAddress)).id;
+            const debtAssetId = (await getAaveV3ReserveData(debtAsset.address, marketAddress)).id;
 
             const user = isEOA ? senderAcc.address : proxy.address;
 
@@ -164,7 +165,7 @@ const runCloseTests = () => {
                 collAssetId,
                 debtAsset.address,
                 debtAssetId,
-                marketAddr,
+                marketAddress,
                 stopLossPrice,
                 stopLossType,
                 takeProfitPrice,
@@ -218,6 +219,7 @@ const runCloseTests = () => {
                     exchangeObject,
                     flAmount,
                     flAddr,
+                    marketAddress,
                 );
             } else {
                 // Close to collateral: flash loan collateral asset, sell to get debt asset
@@ -239,10 +241,11 @@ const runCloseTests = () => {
                     exchangeObject,
                     flAmount,
                     flAddr,
+                    marketAddress,
                 );
             }
 
-            const ratioAfter = await getAaveV3PositionRatio(positionOwner);
+            const ratioAfter = await getAaveV3PositionRatio(positionOwner, null, marketAddress);
             console.log('ratioAfter', ratioAfter);
             console.log('ratioBefore', ratioBefore);
             // ratio should be 0 at the end because position is closed
@@ -263,6 +266,10 @@ const runCloseTests = () => {
                 chainIds[network],
             );
 
+            // Determine market name for test description
+            const marketName =
+                pair.marketAddr === addrs[network].AAVE_MARKET ? 'Core Market' : 'Prime Market';
+
             for (let j = 0; j < closeStrategyConfigs.length; ++j) {
                 const config = closeStrategyConfigs[j];
                 const strategyTypeName = automationSdk.utils.getCloseStrategyType(
@@ -275,7 +282,9 @@ const runCloseTests = () => {
                 // SW Tests
                 it(`... should execute aaveV3 SW Close (${getCloseStrategyTypeName(
                     strategyTypeName,
-                )}) for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+                )}) for ${pair.collSymbol} / ${
+                    pair.debtSymbol
+                } pair on Aave V3 ${marketName}`, async () => {
                     const isEOA = false;
                     console.log(`Testing SW Close strategy type: ${strategyTypeName}`);
                     await baseTest(
@@ -288,13 +297,16 @@ const runCloseTests = () => {
                         config.stopLossType,
                         config.takeProfitPrice,
                         config.takeProfitType,
+                        pair.marketAddr,
                     );
                 });
 
                 // EOA Tests
                 it(`... should execute aaveV3 EOA Close (${getCloseStrategyTypeName(
                     strategyTypeName,
-                )}) for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
+                )}) for ${pair.collSymbol} / ${
+                    pair.debtSymbol
+                } pair on Aave V3 ${marketName}`, async () => {
                     const isEOA = true;
                     console.log(`Testing EOA Close strategy type: ${strategyTypeName}`);
                     await baseTest(
@@ -307,6 +319,7 @@ const runCloseTests = () => {
                         config.stopLossType,
                         config.takeProfitPrice,
                         config.takeProfitType,
+                        pair.marketAddr,
                     );
                 });
             }
