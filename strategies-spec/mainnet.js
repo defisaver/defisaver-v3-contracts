@@ -7105,7 +7105,7 @@ const createAaveV3GenericFLCloseToCollStrategy = () => {
     const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         '%useDefaultMarket', // hardcoded to false
         '&marketAddr', // from subData
-        '%uint(max)', // backend sends max uint
+        '$4', // output of pullTokenAction
         '&proxy', // proxy hardcoded
         '&collAssetId',
     );
@@ -7216,22 +7216,17 @@ const createAaveV3GenericFLCloseToDebtStrategy = () => {
         '$5',
     );
 
-    // return:
-    // 1. Send debtToken's flashloan amount to flAddress
-    // 2. Send all debtToken's left after the close to EOA
-    const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
-        [
-            '&debtAsset',
-            '&debtAsset',
-        ],
-        [
-            '%flAddress', // sent by backend
-            '&eoa', // EOA
-        ],
-        [
-            '$1',
-            '%max(uint)', // sent by backend
-        ],
+    // return flashloan. This has to be separate action, because we don't want to unwrap weth
+    const sendTokenToFLAction = new dfs.actions.basic.SendTokenAction(
+        '&debtAsset',
+        '%flAddress', // sent by backend
+        '$1',
+    );
+
+    const sendTokenToEOAAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&debtAsset',
+        '&eoa', // sent by backend
+        '%max(uint)',
     );
 
     aaveV3GenericFLCloseToDebtStrategy.addAction(flAction);
@@ -7240,7 +7235,8 @@ const createAaveV3GenericFLCloseToDebtStrategy = () => {
     aaveV3GenericFLCloseToDebtStrategy.addAction(withdrawAction);
     aaveV3GenericFLCloseToDebtStrategy.addAction(sellAction);
     aaveV3GenericFLCloseToDebtStrategy.addAction(feeTakingAction);
-    aaveV3GenericFLCloseToDebtStrategy.addAction(sendTokensAction);
+    aaveV3GenericFLCloseToDebtStrategy.addAction(sendTokenToFLAction);
+    aaveV3GenericFLCloseToDebtStrategy.addAction(sendTokenToEOAAction);
 
     return aaveV3GenericFLCloseToDebtStrategy.encodeForDsProxyCall();
 };

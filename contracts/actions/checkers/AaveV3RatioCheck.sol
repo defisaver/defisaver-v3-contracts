@@ -47,8 +47,8 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
         address user;
         /// @dev Those params are added later, hence the check
         if (_paramMapping.length == 4) {
-            market = _parseParamAddr(address(inputData.market), _paramMapping[2], _subData, _returnValues);
-            user = _parseParamAddr(address(inputData.user), _paramMapping[3], _subData, _returnValues);
+            market = _parseParamAddr(inputData.market, _paramMapping[2], _subData, _returnValues);
+            user = _parseParamAddr(inputData.user, _paramMapping[3], _subData, _returnValues);
         }
 
         if (market == address(0)) market = DEFAULT_AAVE_MARKET; // if not specified -> default to default market

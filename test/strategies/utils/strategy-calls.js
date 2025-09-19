@@ -7359,11 +7359,8 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
         ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
         : new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, '0');
 
-    const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
-        [placeHolderAddr, placeHolderAddr],
-        [flAddr, placeHolderAddr],
-        [0, hre.ethers.constants.MaxUint256],
-    );
+    const sendTokenToFLAction = new dfs.actions.basic.SendTokenAction(placeHolderAddr, flAddr, 0);
+    const sendTokenToEOAAction = new dfs.actions.basic.SendTokenAndUnwrapAction(placeHolderAddr, placeHolderAddr, hre.ethers.constants.MaxUint256);
 
     actionsCallData.push(flAction.encodeForRecipe()[0]);
     actionsCallData.push(aaveV3PaybackAction.encodeForRecipe()[0]);
@@ -7371,7 +7368,8 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
     actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
     actionsCallData.push(sellAction.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
-    actionsCallData.push(sendTokensAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendTokenToFLAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendTokenToEOAAction.encodeForRecipe()[0]);
 
     triggerCallData.push(
         abiCoder.encode(
@@ -7448,7 +7446,7 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
     const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         false,
         placeHolderAddr,
-        MAX_UINT,
+        0,
         placeHolderAddr,
         0, // collAssetId
     );
@@ -7459,7 +7457,7 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
 
     const sendTokenToFLAction = new dfs.actions.basic.SendTokenAction(placeHolderAddr, flAddr, 0);
 
-    const sendTokensAction = new dfs.actions.basic.SendTokensAction(
+    const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
         [placeHolderAddr, placeHolderAddr],
         [placeHolderAddr, placeHolderAddr],
         [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],

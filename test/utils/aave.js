@@ -106,6 +106,16 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST = {
             debtAmountInUSD: 15_000,
             boostAmountInUSD: 5_000,
         },
+        {
+            collSymbol: 'USDT',
+            debtSymbol: 'WETH',
+            marketAddr: addrs[network].AAVE_MARKET,
+            triggerRatioBoost: 190,
+            targetRatioBoost: 165,
+            collAmountInUSD: 40_000,
+            debtAmountInUSD: 15_000,
+            boostAmountInUSD: 5_000,
+        },
         // Prime Market pairs
         {
             collSymbol: 'WETH',
@@ -117,6 +127,16 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST = {
             debtAmountInUSD: 15_000,
             boostAmountInUSD: 5_000,
         },
+        // {
+        //     collSymbol: 'USDC',
+        //     debtSymbol: 'WETH',
+        //     marketAddr: addrs[network].AAVE_V3_PRIME_MARKET,
+        //     triggerRatioBoost: 190,
+        //     targetRatioBoost: 185,
+        //     collAmountInUSD: 40_000,
+        //     debtAmountInUSD: 15_000,
+        //     boostAmountInUSD: 5_000,
+        // },
         {
             collSymbol: 'WETH',
             debtSymbol: 'GHO',
@@ -210,7 +230,27 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY = {
             debtAmountInUSD: 20_000,
             repayAmountInUSD: 9_000,
         },
+        {
+            collSymbol: 'USDT',
+            debtSymbol: 'WETH',
+            marketAddr: addrs[network].AAVE_MARKET,
+            triggerRatioRepay: 165,
+            targetRatioRepay: 210,
+            collAmountInUSD: 40_000,
+            debtAmountInUSD: 20_000,
+            repayAmountInUSD: 9_000,
+        },
         // Prime Market pairs
+        {
+            collSymbol: 'USDC',
+            debtSymbol: 'WETH',
+            marketAddr: addrs[network].AAVE_MARKET,
+            triggerRatioRepay: 165,
+            targetRatioRepay: 210,
+            collAmountInUSD: 40_000,
+            debtAmountInUSD: 20_000,
+            repayAmountInUSD: 9_000,
+        },
         {
             collSymbol: 'WETH',
             debtSymbol: 'USDC',
@@ -732,7 +772,7 @@ const getAaveV3CloseStrategyConfigs = (automationSdk) => [
     {
         stopLossPrice: 0,
         stopLossType: null,
-        takeProfitPrice: 1, // Minimal price - will always trigger
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
         takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
     },
     // Stop Loss Only - In Collateral (very low quote price = always triggers)
@@ -746,7 +786,7 @@ const getAaveV3CloseStrategyConfigs = (automationSdk) => [
     {
         stopLossPrice: 0,
         stopLossType: null,
-        takeProfitPrice: 1, // Minimal price - will always trigger
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
         takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
     },
     // Stop Loss Only - In Debt
@@ -760,28 +800,28 @@ const getAaveV3CloseStrategyConfigs = (automationSdk) => [
     {
         stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
         stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-        takeProfitPrice: 1, // Minimal price - will always trigger
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
         takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
     },
     // Take Profit In Collateral, Stop Loss In Debt
     {
         stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
         stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
-        takeProfitPrice: 1, // Minimal price - will always trigger
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
         takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
     },
     // Both - In Debt
     {
         stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
         stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
-        takeProfitPrice: 1, // Minimal price - will always trigger
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
         takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
     },
     // Take Profit In Debt, Stop Loss In Collateral
     {
         stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
         stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-        takeProfitPrice: 1, // Minimal price - will always trigger
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
         takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
     },
 ];
