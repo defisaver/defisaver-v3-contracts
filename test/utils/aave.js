@@ -127,16 +127,6 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST = {
             debtAmountInUSD: 15_000,
             boostAmountInUSD: 5_000,
         },
-        // {
-        //     collSymbol: 'USDC',
-        //     debtSymbol: 'WETH',
-        //     marketAddr: addrs[network].AAVE_V3_PRIME_MARKET,
-        //     triggerRatioBoost: 190,
-        //     targetRatioBoost: 185,
-        //     collAmountInUSD: 40_000,
-        //     debtAmountInUSD: 15_000,
-        //     boostAmountInUSD: 5_000,
-        // },
         {
             collSymbol: 'WETH',
             debtSymbol: 'GHO',
@@ -241,16 +231,6 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY = {
             repayAmountInUSD: 9_000,
         },
         // Prime Market pairs
-        {
-            collSymbol: 'USDC',
-            debtSymbol: 'WETH',
-            marketAddr: addrs[network].AAVE_MARKET,
-            triggerRatioRepay: 165,
-            targetRatioRepay: 210,
-            collAmountInUSD: 40_000,
-            debtAmountInUSD: 20_000,
-            repayAmountInUSD: 9_000,
-        },
         {
             collSymbol: 'WETH',
             debtSymbol: 'USDC',

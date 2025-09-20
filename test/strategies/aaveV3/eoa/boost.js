@@ -172,7 +172,6 @@ const runBoostTests = () => {
                 await addBalancerFlLiquidity(debtAsset.address);
                 await addBalancerFlLiquidity(collAsset.address);
 
-                // TODO -> pass random params like placeholderAddr, to check if piping works
                 await callAaveV3GenericFLBoostStrategy(
                     strategyExecutor,
                     1,
@@ -186,7 +185,6 @@ const runBoostTests = () => {
                     marketAddr,
                 );
             } else {
-                // TODO -> pass random params like placeholderAddr, to check if piping works
                 await callAaveV3GenericBoostStrategy(
                     strategyExecutor,
                     0,
