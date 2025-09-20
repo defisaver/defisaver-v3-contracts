@@ -110,6 +110,7 @@ const runRepayTests = () => {
             if (isEOA) {
                 await openAaveV3EOAPosition(
                     senderAcc.address,
+                    proxy,
                     collAsset.symbol,
                     debtAsset.symbol,
                     collAmountInUSD,

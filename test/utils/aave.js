@@ -471,7 +471,7 @@ const openAaveV3ProxyPosition = async (
         collAsset.address,
         collReserveData.id,
         true,
-        false,
+        true,
         proxyAddr,
     );
     const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
@@ -481,7 +481,7 @@ const openAaveV3ProxyPosition = async (
         proxyAddr, // proxy
         VARIABLE_RATE, // rateMode
         debtReserveData.id, // assetId (use reserve ID, not address)
-        false, // useOnBehalf
+        true, // useOnBehalf
         proxyAddr, // onBehalfAddr
     );
     const recipe = new dfs.Recipe('CreateAaveV3ProxyPositionRecipe', [
@@ -497,6 +497,7 @@ const openAaveV3ProxyPosition = async (
 
 const openAaveV3EOAPosition = async (
     eoaAddr,
+    proxy,
     collSymbol,
     debtSymbol,
     collAmountInUSD,
@@ -504,6 +505,7 @@ const openAaveV3EOAPosition = async (
     marketAddress = null,
 ) => {
     const eoaSigner = await hre.ethers.getSigner(eoaAddr);
+    const proxyAddr = proxy.address;
 
     const collAsset = getAssetInfo(collSymbol === 'ETH' ? 'WETH' : collSymbol, chainIds[network]);
     const debtAsset = getAssetInfo(debtSymbol === 'ETH' ? 'WETH' : debtSymbol, chainIds[network]);
@@ -522,16 +524,50 @@ const openAaveV3EOAPosition = async (
     // Use the appropriate interface based on network
     const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
     const poolContract = await hre.ethers.getContractAt(poolContractName, poolAddress, eoaSigner);
+    const collReserveData = await poolContract.getReserveData(collAsset.address);
+    const debtReserveData = await poolContract.getReserveData(debtAsset.address);
 
     // Set balance and approve pool contract
     await setBalance(collAsset.address, eoaAddr, collAmount);
+    await approve(collAsset.address, proxyAddr, eoaSigner);
     await approve(collAsset.address, poolAddress, eoaSigner);
 
-    // Supply collateral directly to pool
-    await poolContract.supply(collAsset.address, collAmount, eoaAddr, 0);
+    // Approve variable debt token delegation to proxy
+    const debtTokenContract = await hre.ethers.getContractAt('IDebtToken', debtReserveData.variableDebtTokenAddress, eoaSigner);
+    await debtTokenContract.approveDelegation(proxyAddr, debtAmount);
+    console.log('Debt token approved for delegation');
 
-    // Borrow debt directly from pool
-    await poolContract.borrow(debtAsset.address, debtAmount, VARIABLE_RATE, 0, eoaAddr);
+    // Use DFS actions to create position through proxy
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        false, // useDefaultMarket
+        marketAddr, // marketAddr
+        collAmount.toString(), // amount
+        eoaAddr, // from
+        collAsset.address, // asset
+        collReserveData.id, // assetId
+        true, // enableAsColl
+        true, // useOnBehalf
+        eoaAddr, // onBehalf
+    );
+    const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        false, // useDefaultMarket
+        marketAddr, // marketAddr
+        debtAmount.toString(), // amount
+        proxyAddr, // to
+        VARIABLE_RATE, // rateMode
+        debtReserveData.id, // assetId
+        true, // useOnBehalf
+        eoaAddr, // onBehalf
+    );
+    const recipe = new dfs.Recipe('CreateAaveV3EOAPositionRecipe', [
+        supplyAction,
+        borrowAction,
+    ]);
+
+    const functionData = recipe.encodeForDsProxyCall()[1];
+
+    await executeAction('RecipeExecutor', functionData, proxy);
+    console.log('AaveV3EOAPosition opened via recipe');
 };
 
 const getAaveV3PositionRatio = async (userAddr, aaveV3ViewParam, marketAddress = null) => {
