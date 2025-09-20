@@ -232,7 +232,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         _actionsCallData[1] = sellEncode(Addresses.WETH_ADDR, Addresses.DAI_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER);
         _actionsCallData[2] = gasFeeEncode(REPAY_GAS_COST, Addresses.DAI_ADDR);
         _actionsCallData[3] = aaveV3PaybackEncode(0, wallet, 2, debtAsset.id,true, false, address(0), address(0));
-        _actionsCallData[4] = aaveV3RatioCheckEncode(0, 0);
+        _actionsCallData[4] = aaveV3RatioCheckEncode(0, 0, AAVE_MARKET, wallet);
 
         executor.executeStrategy(repaySubId, INDEX_REPAY, _triggerCallData, _actionsCallData, repaySub);
 
@@ -260,7 +260,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         _actionsCallData[2] = gasFeeEncode(REPAY_FL_GAS_COST, Addresses.DAI_ADDR);
         _actionsCallData[3] = aaveV3PaybackEncode(0, wallet, 2, debtAsset.id,true, false, address(0), address(0));
         _actionsCallData[4] = aaveV3WithdrawEncode(collateralAsset.id, true, 0, address(flAction), address(0));
-        _actionsCallData[5] = aaveV3RatioCheckEncode(0, 0);
+        _actionsCallData[5] = aaveV3RatioCheckEncode(0, 0, AAVE_MARKET, wallet);
 
         uint beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
@@ -283,7 +283,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         _actionsCallData[1] = sellEncode(Addresses.DAI_ADDR, Addresses.WETH_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER);
         _actionsCallData[2] = gasFeeEncode(BOOST_GAS_COST, Addresses.WETH_ADDR);
         _actionsCallData[3] = aaveV3SupplyEncode(0, wallet, collateralAsset.id, true, false, address(0), address(0));
-        _actionsCallData[4] = aaveV3RatioCheckEncode(0, 0);
+        _actionsCallData[4] = aaveV3RatioCheckEncode(0, 0, AAVE_MARKET, wallet);
 
         uint beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
@@ -306,7 +306,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         _actionsCallData[2] = gasFeeEncode(BOOST_FL_GAS_COST, Addresses.WETH_ADDR);
         _actionsCallData[3] = aaveV3SupplyEncode(0, wallet, collateralAsset.id, true, false, address(0), address(0));
         _actionsCallData[4] = aaveV3BorrowEncode(0, address(flAction), 2, debtAsset.id, true, false, address(0), address(0));
-        _actionsCallData[5] = aaveV3RatioCheckEncode(0, 0);
+        _actionsCallData[5] = aaveV3RatioCheckEncode(0, 0, AAVE_MARKET, wallet);
 
         uint beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 

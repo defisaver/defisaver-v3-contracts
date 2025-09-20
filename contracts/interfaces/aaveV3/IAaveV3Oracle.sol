@@ -5,9 +5,9 @@ import {IPriceOracleGetter} from "./IPriceOracleGetter.sol";
 
 interface IAaveV3Oracle is IPriceOracleGetter {
     /**
-     * @notice Returns a list of prices from a list of assets addresses
+     * @notice Returns a list of prices from a list of assets addresses scaled to 1e8
      * @param assets The list of assets addresses
-     * @return The prices of the given assets
+     * @return The prices of the given assets scaled to 1e8
      */
     function getAssetsPrices(address[] calldata assets) external view returns (uint256[] memory);
 
