@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { McdHelper } from "./helpers/McdHelper.sol";
-import { ActionBase } from "../ActionBase.sol";
-import { IMkrSkyConverter } from "../../interfaces/mcd/IMkrSkyConverter.sol";
-import { IDaiUSDSConverter } from "../../interfaces/mcd/IDaiUSDSConverter.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import {McdHelper} from "./helpers/McdHelper.sol";
+import {ActionBase} from "../ActionBase.sol";
+import {IMkrSkyConverter} from "../../interfaces/mcd/IMkrSkyConverter.sol";
+import {IDaiUSDSConverter} from "../../interfaces/mcd/IDaiUSDSConverter.sol";
+import {TokenUtils} from "../../utils/TokenUtils.sol";
 
-/// @title Convert MKR <-> SKY and DAI <-> USDS
+/// @title Convert MKR -> SKY and DAI <-> USDS
 contract McdTokenConverter is ActionBase, McdHelper {
     using TokenUtils for address;
 
@@ -60,25 +60,20 @@ contract McdTokenConverter is ActionBase, McdHelper {
         _inputData.amount = _inputData.tokenAddr.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         uint256 newTokenAmount;
 
-        if (_inputData.tokenAddr == USDS_ADDRESS){
+        if (_inputData.tokenAddr == USDS_ADDRESS) {
             USDS_ADDRESS.approveToken(DAI_USDS_CONVERTER, _inputData.amount);
             IDaiUSDSConverter(DAI_USDS_CONVERTER).usdsToDai(_inputData.to, _inputData.amount);
             newTokenAmount = _inputData.amount;
-
-        } else if (_inputData.tokenAddr == DAI_ADDRESS) {    
+        } else if (_inputData.tokenAddr == DAI_ADDRESS) {
             DAI_ADDRESS.approveToken(DAI_USDS_CONVERTER, _inputData.amount);
             IDaiUSDSConverter(DAI_USDS_CONVERTER).daiToUsds(_inputData.to, _inputData.amount);
             newTokenAmount = _inputData.amount;
-
-        } else if (_inputData.tokenAddr == SKY_ADDRESS){
-            SKY_ADDRESS.approveToken(MRK_SKY_CONVERTER, _inputData.amount);
-            IMkrSkyConverter(MRK_SKY_CONVERTER).skyToMkr(_inputData.to, _inputData.amount);
-            newTokenAmount = _inputData.amount / IMkrSkyConverter(MRK_SKY_CONVERTER).rate();
-
-        } else if (_inputData.tokenAddr == MKR_ADDRESS){
+        } else if (_inputData.tokenAddr == MKR_ADDRESS) {
             MKR_ADDRESS.approveToken(MRK_SKY_CONVERTER, _inputData.amount);
             IMkrSkyConverter(MRK_SKY_CONVERTER).mkrToSky(_inputData.to, _inputData.amount);
-            newTokenAmount = _inputData.amount * IMkrSkyConverter(MRK_SKY_CONVERTER).rate();
+            uint256 skyAmount = _inputData.amount * IMkrSkyConverter(MRK_SKY_CONVERTER).rate();
+            uint256 skyFee = skyAmount * IMkrSkyConverter(MRK_SKY_CONVERTER).fee() / WAD;
+            newTokenAmount = skyAmount - skyFee;
         }
         return (newTokenAmount, abi.encode(_inputData, newTokenAmount));
     }
