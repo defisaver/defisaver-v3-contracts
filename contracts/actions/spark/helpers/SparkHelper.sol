@@ -10,7 +10,7 @@ import { ISparkPoolAddressesProvider } from "../../../interfaces/spark/ISparkPoo
 /// @title Utility functions and data used in Spark actions
 contract SparkHelper is MainnetSparkAddresses {
     
-    uint16 public constant SPARK_REFERRAL_CODE = 0;
+    uint16 public constant SPARK_REFERRAL_CODE = 64;
     
     
     /// @notice Returns the lending pool contract of the specified market
