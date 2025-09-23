@@ -15,8 +15,6 @@ import { LiquityV2Helper } from "../actions/liquityV2/helpers/LiquityV2Helper.so
 
 contract LiquityV2View is LiquityV2Helper {
 
-    error InvalidMarketAddress();
-
     struct TroveData {
         uint256 troveId;
         address owner;

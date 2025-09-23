@@ -6,7 +6,7 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ITroveManager } from "../../../interfaces/liquity/ITroveManager.sol";
 import { IBorrowerOperations } from "../../../interfaces/liquity/IBorrowerOperations.sol";
 import { IPriceFeed } from "../../../interfaces/liquity/IPriceFeed.sol";
-import { IHintHelpers } from "../../../interfaces/liquity/IHintHelpers.sol";
+import { IHintHelpersV1 } from "../../../interfaces/liquity/IHintHelpersV1.sol";
 import { ISortedTroves } from "../../../interfaces/liquity/ISortedTroves.sol";
 import { ICollSurplusPool } from "../../../interfaces/liquity/ICollSurplusPool.sol";
 import { IStabilityPool } from "../../../interfaces/liquity/IStabilityPool.sol";
@@ -26,7 +26,7 @@ contract LiquityHelper is MainnetLiquityAddresses {
     IBorrowerOperations constant public BorrowerOperations = IBorrowerOperations(BORROWER_OPERATIONS_ADDRESS);
     ITroveManager constant public TroveManager = ITroveManager(TROVE_MANAGER_ADDRESS);
     ISortedTroves constant public SortedTroves = ISortedTroves(SORTED_TROVES_ADDRESS);
-    IHintHelpers constant public HintHelpers = IHintHelpers(HINT_HELPERS_ADDRESS);
+    IHintHelpersV1 constant public HintHelpers = IHintHelpersV1(HINT_HELPERS_ADDRESS);
     ICollSurplusPool constant public CollSurplusPool = ICollSurplusPool(COLL_SURPLUS_POOL_ADDRESS);
     IStabilityPool constant public StabilityPool = IStabilityPool(STABILITY_POOL_ADDRESS);
     ILQTYStaking constant public LQTYStaking = ILQTYStaking(LQTY_STAKING_ADDRESS);

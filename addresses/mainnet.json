@@ -4647,21 +4647,46 @@
         "path": "contracts/triggers/LiquityV2AdjustTimeTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
     {
         "name": "LiquityV2DebtInFrontTrigger",
-        "address": "0x22899AF903f07FB272C34f6e573E6f967dcC32e7",
+        "address": "0xD8Ed394cB77F960Ee095379A17cB58d175B75C52",
         "id": "0xda723e62",
         "path": "contracts/triggers/LiquityV2DebtInFrontTrigger.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x22899AF903f07FB272C34f6e573E6f967dcC32e7",
             "0x66557aE7da534B1d668405e3e90e12E207Bb6277"
+        ]
+    },
+    {
+        "name": "LiquityV2NewInterestRateChecker",
+        "address": "0xb8E229d794e72AD5493D74BB1B17b0885573DC37",
+        "id": "0xc3bbc489",
+        "path": "contracts/actions/checkers/LiquityV2NewInterestRateChecker.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityV2AdjustRateDebtInFrontTrigger",
+        "address": "0xD930d80bD8CAB6C170823A8DaB68b4b339b0Be8e",
+        "id": "0xd9aa7af4",
+        "path": "contracts/triggers/LiquityV2AdjustRateDebtInFrontTrigger.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0xF80C54C53AfE8c09c62D270F535d41A71A1c485D"
         ]
     },
     {
