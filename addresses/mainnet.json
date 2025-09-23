@@ -4655,7 +4655,7 @@
         "path": "contracts/triggers/LiquityV2AdjustTimeTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4666,24 +4666,11 @@
         "path": "contracts/triggers/LiquityV2DebtInFrontTrigger.sol",
         "version": "1.0.2",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": [
             "0x22899AF903f07FB272C34f6e573E6f967dcC32e7",
             "0x66557aE7da534B1d668405e3e90e12E207Bb6277"
-        ]
-    },
-    {
-        "name": "LiquityV2AdjustRateDebtInFrontTrigger",
-        "address": "0xD930d80bD8CAB6C170823A8DaB68b4b339b0Be8e",
-        "id": "0xd9aa7af4",
-        "path": "contracts/triggers/LiquityV2AdjustRateDebtInFrontTrigger.sol",
-        "version": "1.0.1",
-        "inRegistry": true,
-        "changeTime": "0",
-        "registryIds": [],
-        "history": [
-            "0xF80C54C53AfE8c09c62D270F535d41A71A1c485D"
         ]
     },
     {
@@ -4693,6 +4680,85 @@
         "path": "contracts/actions/checkers/LiquityV2NewInterestRateChecker.sol",
         "version": "1.0.0",
         "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "LiquityV2AdjustRateDebtInFrontTrigger",
+        "address": "0xD930d80bD8CAB6C170823A8DaB68b4b339b0Be8e",
+        "id": "0xd9aa7af4",
+        "path": "contracts/triggers/LiquityV2AdjustRateDebtInFrontTrigger.sol",
+        "version": "1.0.1",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": [
+            "0xF80C54C53AfE8c09c62D270F535d41A71A1c485D"
+        ]
+    },
+    {
+        "name": "SkyStakingEngineClaimRewards",
+        "address": "0x0aF3F032A8544c63c35FD2995be8EE2Df68d2c21",
+        "id": "0xfdbd8ef6",
+        "path": "contracts/actions/sky/SkyStakingEngineClaimRewards.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SkyStakingEngineOpen",
+        "address": "0x7F7669d926beeba495e8D97C6DAF6C000F05AEC0",
+        "id": "0x677c3722",
+        "path": "contracts/actions/sky/SkyStakingEngineOpen.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SkyStakingEngineSelectFarm",
+        "address": "0x44fe1615294E9D50faeb690D2a944EAF8B500892",
+        "id": "0x7e2517f6",
+        "path": "contracts/actions/sky/SkyStakingEngineSelectFarm.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SkyStakingEngineStake",
+        "address": "0xBb7F34F8A7809Ffe0775D13a783fE885EBB9aea5",
+        "id": "0xa5236ed6",
+        "path": "contracts/actions/sky/SkyStakingEngineStake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SkyStakingEngineUnstake",
+        "address": "0x5456F09bBbBDB6bFad50A22256bAC7f3DDaab121",
+        "id": "0x51a3f99a",
+        "path": "contracts/actions/sky/SkyStakingEngineUnstake.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SkyView",
+        "address": "0x0b2621aE77952606A3b95d06E31b10132C51C860",
+        "id": "0x6431452a",
+        "path": "contracts/views/SkyView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
         "history": []
