@@ -1810,14 +1810,17 @@
     },
     {
         "name": "SparkSupply",
-        "address": "0xcb4505a5ED92e405BF1F5cD7C791B15c4564AAe9",
+        "address": "0xD10608B45718437082B9aF5DdC498080ad63Ac9E",
         "id": "0x92e0c47c",
         "path": "contracts/actions/spark/SparkSupply.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0x9e1d7AAA55D83D36d55BF11cAe4d922aF52B6eF0"]
+        "history": [
+            "0xcb4505a5ED92e405BF1F5cD7C791B15c4564AAe9",
+            "0x9e1d7AAA55D83D36d55BF11cAe4d922aF52B6eF0"
+        ]
     },
     {
         "name": "SparkSPKClaim",
@@ -1887,14 +1890,16 @@
     },
     {
         "name": "SparkBorrow",
-        "address": "0x3E2C366065bA0f6f9936C2C6A802D72F250b27AA",
+        "address": "0x7a0207c1b5864B41629abBA4137b82a69F21F34d",
         "id": "0x9bc097ab",
         "path": "contracts/actions/spark/SparkBorrow.sol",
         "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x3E2C366065bA0f6f9936C2C6A802D72F250b27AA"
+        ]
     },
     {
         "name": "AaveV3ClaimRewards",
