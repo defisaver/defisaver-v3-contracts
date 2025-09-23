@@ -474,10 +474,12 @@ contract ActionsUtils {
         );
     }
 
-    function aaveV3RatioCheckEncode(uint8 _state, uint _targetRatio) public pure returns (bytes memory) {
+    function aaveV3RatioCheckEncode(uint8 _state, uint _targetRatio, address _market, address _user) public pure returns (bytes memory) {
         AaveV3RatioCheck.Params memory params = AaveV3RatioCheck.Params({
             ratioState: AaveV3RatioCheck.RatioState(_state),
-            targetRatio: _targetRatio
+            targetRatio: _targetRatio,
+            market: _market,
+            user: _user
         });
 
         return abi.encode(params);

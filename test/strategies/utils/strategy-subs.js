@@ -33,6 +33,7 @@ const {
 } = require('./triggers');
 
 const {
+    addrs,
     DAI_ADDR,
     WBTC_ADDR,
     WETH_ADDRESS,
@@ -321,6 +322,101 @@ const subAaveV3AutomationStrategy = async (
         repaySub: subData.repaySub,
         boostSub: subData.boostSub,
     };
+};
+
+const subAaveV3LeverageManagementGeneric = async (
+    proxy,
+    eoaAddr,
+    marketAddr,
+    ratioState,
+    targetRatio,
+    triggerRatio,
+    isEOA,
+    isBoost,
+) => {
+    const encoder = automationSdk.strategySubService.aaveV3Encode;
+
+    // Bundle ID for AaveV3 EOA strategies - using 1 for boost strategies
+    // AAVE_V3_EOA_REPAY = 52,
+    // AAVE_V3_EOA_BOOST = 53,
+    const bundleId = isBoost ? 53 : 52;
+
+    const user = isEOA ? eoaAddr : proxy.address;
+
+    const strategySub = encoder.leverageManagementWithoutSubProxy(
+        bundleId, // strategyOrBundleId
+        marketAddr, // marketAddr
+        user, // user - EOA / SW, depending if it is EOA strategy
+        ratioState, // ratioState -> 0 for boost, 1 for repay
+        targetRatio, // targetRatio
+        triggerRatio, // for trigger
+        true, // isGeneric
+    );
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
+const subAaveV3LeverageManagementOnPriceGeneric = async (
+    proxy,
+    user,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    targetRatio,
+    triggerPrice,
+    priceState,
+    bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.leverageManagementOnPriceGeneric(
+        bundleId,
+        triggerPrice,
+        priceState,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        targetRatio,
+        user,
+    );
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
+const subAaveV3CloseGeneric = async (
+    proxy,
+    user,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    stopLossPrice,
+    stopLossType,
+    takeProfitPrice,
+    takeProfitType,
+    bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.closeOnPriceGeneric(
+        bundleId,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        user,
+        stopLossPrice,
+        stopLossType,
+        takeProfitPrice,
+        takeProfitType,
+    );
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
 };
 
 const subCompV2AutomationStrategy = async (
@@ -1072,6 +1168,9 @@ module.exports = {
     subLiquityAutomationStrategy,
     subAaveV2AutomationStrategy,
     subAaveV3AutomationStrategy,
+    subAaveV3LeverageManagementGeneric,
+    subAaveV3LeverageManagementOnPriceGeneric,
+    subAaveV3CloseGeneric,
     subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,

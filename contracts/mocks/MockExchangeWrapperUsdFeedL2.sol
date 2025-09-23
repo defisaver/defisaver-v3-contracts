@@ -23,7 +23,7 @@ contract MockExchangeWrapperUsdFeedL2 is IExchangeV3, TokenPriceHelperL2 {
         uint256 _srcAmount,
         bytes calldata /*_additionalData*/
     ) external override returns (uint256) {    
-        IERC20(_srcAddr).transfer(address(this), _srcAmount);
+        IERC20(_srcAddr).safeTransfer(address(this), _srcAmount);
 
         uint256 srcTokenPriceInUSD = getPriceInUSD(_srcAddr);
         uint256 srcTokenDec = IERC20(_srcAddr).decimals();

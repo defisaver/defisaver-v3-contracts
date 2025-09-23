@@ -2,15 +2,14 @@
 
 pragma solidity =0.8.24;
 
-import { ActionBase } from "../ActionBase.sol";
-import { AaveV3RatioHelper } from "../aaveV3/helpers/AaveV3RatioHelper.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import {ActionBase} from "../ActionBase.sol";
+import {AaveV3RatioHelper} from "../aaveV3/helpers/AaveV3RatioHelper.sol";
+import {TransientStorage} from "../../utils/TransientStorage.sol";
 
 /// @title Action to check the ratio of the Aave V3 position after strategy execution.
 contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
-
     /// @notice 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    uint256 internal constant RATIO_OFFSET = 5e16;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
@@ -23,9 +22,13 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
 
     /// @param ratioState State of the ratio (IN_BOOST or IN_REPAY)
     /// @param targetRatio Target ratio.
+    /// @param market Aave V3 Market parameter that was added later in order to add support for different markets in strategies
+    /// @param user EOA or Smart Wallet address parameter that was added later in order to add support for EOA strategies
     struct Params {
         RatioState ratioState;
         uint256 targetRatio;
+        address market;
+        address user;
     }
 
     /// @inheritdoc ActionBase
@@ -40,10 +43,21 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
         uint256 ratioState = _parseParamUint(uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues);
         uint256 targetRatio = _parseParamUint(uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues);
 
-        uint256 currRatio = getRatio(DEFAULT_AAVE_MARKET, address(this));
+        address market;
+        address user;
+        /// @dev Those params are added later, hence the check
+        if (_paramMapping.length == 4) {
+            market = _parseParamAddr(inputData.market, _paramMapping[2], _subData, _returnValues);
+            user = _parseParamAddr(inputData.user, _paramMapping[3], _subData, _returnValues);
+        }
+
+        if (market == address(0)) market = DEFAULT_AAVE_MARKET; // if not specified -> default to default market
+        if (user == address(0)) user = address(this); // default to proxy
+
+        uint256 currRatio = getRatio(market, user);
 
         uint256 startRatio = uint256(tempStorage.getBytes32("AAVE_RATIO"));
-        
+
         // if we are doing repay
         if (RatioState(ratioState) == RatioState.IN_REPAY) {
             // if repay ratio should be better off
@@ -86,5 +100,4 @@ contract AaveV3RatioCheck is ActionBase, AaveV3RatioHelper {
     function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
-
 }
