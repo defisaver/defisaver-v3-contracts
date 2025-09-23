@@ -889,14 +889,16 @@
     },
     {
         "name": "AaveV3RatioCheck",
-        "address": "0x0Cf69Cc3A9f9d1848C78e745c504d5AA320a8153",
+        "address": "0x82AF88864E1A9dC1d6d2931C60A1CA25E4951487",
         "id": "0x71ef3d4e",
         "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x0Cf69Cc3A9f9d1848C78e745c504d5AA320a8153"
+        ]
     },
     {
         "name": "FLActionL2",
@@ -1372,14 +1374,15 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0x99A36d26A2e1E6776057835C7B5E72A20c8cF5cb",
+        "address": "0x2583Ce06479C26AB60AE554BE5dC57F7D4B3D9a1",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x99A36d26A2e1E6776057835C7B5E72A20c8cF5cb",
             "0x770e015485d4720398B08Ff226DB4ef29896b5B8"
         ]
     },
@@ -1640,6 +1643,17 @@
         "path": "contracts/actions/utils/ExecuteCall.sol",
         "version": "1.0.0",
         "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3QuotePriceRangeTrigger",
+        "address": "0x427a2F399B5c7d6Ab380AFa90fc8B4C44015E210",
+        "id": "0x1b12e080",
+        "path": "contracts/triggers/AaveV3QuotePriceRangeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
         "history": []
