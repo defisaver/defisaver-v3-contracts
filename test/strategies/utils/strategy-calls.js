@@ -3877,8 +3877,6 @@ const callLiquityDebtInFrontRepayStrategy = async (
 
     const { upperHint, lowerHint } = await findInsertPosition(newCollAmount, newDebtAmount);
 
-    console.log(flAddr);
-
     const liquityAdjustAction = new dfs.actions.liquity.LiquityAdjustAction(
         '0', // no liquity fee charged in recipe
         '0',
@@ -3906,7 +3904,6 @@ const callLiquityDebtInFrontRepayStrategy = async (
     const strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
     const strategyIndex = 0;
-    console.log(subId, strategyIndex, triggerCallData, actionsCallData, strategySub);
 
     // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(subId, strategyIndex, triggerCallData, actionsCallData, strategySub, {
@@ -5935,6 +5932,46 @@ const callLiquityV2FLCloseToDebtStrategy = async (
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(`GasUsed callLiquityV2FLCloseToDebtStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 };
+
+const callLiquityV2InterestRateAdjustmentStrategy = async (
+    strategyExecutor, strategyIndex, subId, strategySub, newInterestRate, upperHint, lowerHint, maxUpfrontFee,
+) => {
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+
+    const liquityV2AdjustInterestRateAction = new dfs.actions.liquityV2.LiquityV2AdjustInterestRateAction(
+        placeHolderAddr, // market
+        0, // troveId
+        newInterestRate,
+        upperHint,
+        lowerHint,
+        maxUpfrontFee,
+    );
+
+    const liquityV2NewInterestRateCheckerAction = new dfs.actions.checkers.LiquityV2NewInterestRateCheckerAction(
+        placeHolderAddr, // market
+        0, // troveId
+        0, // interestRateChange
+    );
+
+    actionsCallData.push(liquityV2AdjustInterestRateAction.encodeForRecipe()[0]);
+    actionsCallData.push(liquityV2NewInterestRateCheckerAction.encodeForRecipe()[0]);
+    triggerCallData.push(abiCoder.encode(['address', 'uint256', 'uint256', 'uint256'], [placeHolderAddr, 0, 0, 0]));
+    const { callData, receipt } = await executeStrategy(
+        false,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(`GasUsed callLiquityV2InterestRateAdjustmentStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+};
+
 const callFluidT1RepayStrategy = async (
     strategyExecutor, strategyIndex, subId, strategySub, exchangeObject, repayAmount, debtToken,
 ) => {
@@ -6648,6 +6685,7 @@ module.exports = {
     callLiquityV2CloseToCollStrategy,
     callLiquityV2FLCloseToCollStrategy,
     callLiquityV2FLCloseToDebtStrategy,
+    callLiquityV2InterestRateAdjustmentStrategy,
     callFluidT1RepayStrategy,
     callFluidT1FLRepayStrategy,
     callFluidT1BoostStrategy,
