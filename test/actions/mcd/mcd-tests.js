@@ -1689,6 +1689,7 @@ const mcdTokenConverterTest = async () => {
         const MKR_ADDRESS = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
         const SKY_ADDRESS = '0x56072C95FAA701256059aa122697B133aDEd9279';
         const USDS_ADDRESS = '0xdC035D45d973E3EC169d2276DDab16f1e407384F';
+        const MRK_SKY_CONVERTER = '0xA1Ea1bA18E88C381C724a75F23a130420C403f9a';
 
         before(async () => {
             [senderAcc] = await hre.ethers.getSigners();
@@ -1713,27 +1714,27 @@ const mcdTokenConverterTest = async () => {
             const newDaiBalance = await balanceOf(DAI_ADDR, senderAcc.address);
             expect(newDaiBalance).to.be.equal(usdsAmount);
         });
-        it('... should convert MKR to SKY', async () => {
+        it('... should convert MKR to SKY with fee calculation', async () => {
             const mkrAmount = hre.ethers.utils.parseUnits('100', 18);
             await setBalance(MKR_ADDRESS, senderAcc.address, mkrAmount);
             await setBalance(SKY_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
             await approve(MKR_ADDRESS, proxy.address);
 
+            const converter = await hre.ethers.getContractAt('IMkrSkyConverter', MRK_SKY_CONVERTER);
+            const rate = await converter.callStatic.rate();
+            const fee = await converter.callStatic.fee();
+
+            // Calculate expected SKY amount with fee deduction (same logic as contract)
+            const skyAmount = mkrAmount.mul(rate);
+            const skyFee = skyAmount.mul(fee).div(hre.ethers.utils.parseUnits('1', 18));
+            const expectedSkyAmount = skyAmount.sub(skyFee);
+
             await mcdTokenConvert(proxy, MKR_ADDRESS, senderAcc.address, senderAcc.address, mkrAmount);
             const newSkyBalance = await balanceOf(SKY_ADDRESS, senderAcc.address);
-            expect(newSkyBalance).to.be.equal(mkrAmount.mul('24000'));
-        });
 
-        it('... should convert SKY to MKR', async () => {
-            const skyAmount = hre.ethers.utils.parseUnits('100', 18);
-            await setBalance(SKY_ADDRESS, senderAcc.address, skyAmount);
-            await setBalance(MKR_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
-            await approve(SKY_ADDRESS, proxy.address);
-
-            await mcdTokenConvert(proxy, SKY_ADDRESS, senderAcc.address, senderAcc.address, skyAmount);
-            const newMkrBalance = await balanceOf(MKR_ADDRESS, senderAcc.address);
-            expect(newMkrBalance).to.be.equal(skyAmount.div('24000'));
+            expect(newSkyBalance).to.be.equal(expectedSkyAmount);
         });
+        // Note: SKY to MKR conversion is removed
     });
 };
 
