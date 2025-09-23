@@ -1689,6 +1689,7 @@ const mcdTokenConverterTest = async () => {
         const MKR_ADDRESS = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
         const SKY_ADDRESS = '0x56072C95FAA701256059aa122697B133aDEd9279';
         const USDS_ADDRESS = '0xdC035D45d973E3EC169d2276DDab16f1e407384F';
+        const MRK_SKY_CONVERTER = '0xA1Ea1bA18E88C381C724a75F23a130420C403f9a';
 
         before(async () => {
             [senderAcc] = await hre.ethers.getSigners();
@@ -1719,15 +1720,7 @@ const mcdTokenConverterTest = async () => {
             await setBalance(SKY_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('0', 18));
             await approve(MKR_ADDRESS, proxy.address);
 
-            // Get the actual rate and fee from the converter contract
-            const MRK_SKY_CONVERTER = '0xA1Ea1bA18E88C381C724a75F23a130420C403f9a';
-            const converterInterface = new hre.ethers.utils.Interface([
-                'function rate() external returns (uint256)',
-                'function fee() external returns (uint256)',
-            ]);
-            const converter = new hre.ethers.Contract(MRK_SKY_CONVERTER, converterInterface, senderAcc);
-
-            // Use callStatic to get the return values without sending transactions
+            const converter = await hre.ethers.getContractAt('IMkrSkyConverter', MRK_SKY_CONVERTER);
             const rate = await converter.callStatic.rate();
             const fee = await converter.callStatic.fee();
 
