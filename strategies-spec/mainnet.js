@@ -6460,7 +6460,7 @@ const createCompV3FLCloseToCollStrategy = () => {
 };
 
 const createAaveV3GenericBoostStrategy = () => {
-    const aaveV3GenericBoostStrategy = new dfs.Strategy('AaveV3GenericBoost');
+    const aaveV3GenericBoostStrategy = new dfs.Strategy('AaveV3GenericBoostStrategy');
 
     aaveV3GenericBoostStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3GenericBoostStrategy.addSubSlot('&checkBoostState', 'uint8');
@@ -6528,7 +6528,7 @@ const createAaveV3GenericBoostStrategy = () => {
 };
 
 const createAaveV3GenericFLBoostStrategy = () => {
-    const aaveV3GenericFLBoostStrategy = new dfs.Strategy('AaveV3GenericFLBoost');
+    const aaveV3GenericFLBoostStrategy = new dfs.Strategy('AaveV3GenericFLBoostStrategy');
 
     aaveV3GenericFLBoostStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3GenericFLBoostStrategy.addSubSlot('&checkBoostState', 'uint8');
@@ -6607,7 +6607,7 @@ const createAaveV3GenericFLBoostStrategy = () => {
 };
 
 const createAaveV3GenericRepayStrategy = () => {
-    const aaveV3GenericRepayStrategy = new dfs.Strategy('AaveV3GenericRepay');
+    const aaveV3GenericRepayStrategy = new dfs.Strategy('AaveV3GenericRepayStrategy');
 
     aaveV3GenericRepayStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3GenericRepayStrategy.addSubSlot('&checkRepayState', 'uint8');
@@ -6679,7 +6679,7 @@ const createAaveV3GenericRepayStrategy = () => {
 };
 
 const createAaveV3GenericFLRepayStrategy = () => {
-    const aaveV3GenericFLRepayStrategy = new dfs.Strategy('AaveV3GenericFLRepay');
+    const aaveV3GenericFLRepayStrategy = new dfs.Strategy('AaveV3GenericFLRepayStrategy');
 
     aaveV3GenericFLRepayStrategy.addSubSlot('&targetRatio', 'uint256');
     aaveV3GenericFLRepayStrategy.addSubSlot('&checkRepayState', 'uint8');
@@ -6897,7 +6897,7 @@ const createAaveV3GenericFLBoostOnPriceStrategy = () => {
 };
 
 const createAaveV3GenericRepayOnPriceStrategy = () => {
-    const aaveV3GenericRepayOnPriceStrategy = new dfs.Strategy('AaveV3GenericRepayOnPrice');
+    const aaveV3GenericRepayOnPriceStrategy = new dfs.Strategy('AaveV3GenericRepayOnPriceStrategy');
 
     aaveV3GenericRepayOnPriceStrategy.addSubSlot('&collAsset', 'address');
     aaveV3GenericRepayOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
@@ -6970,7 +6970,7 @@ const createAaveV3GenericRepayOnPriceStrategy = () => {
 };
 
 const createAaveV3GenericFLRepayOnPriceStrategy = () => {
-    const aaveV3GenericFLRepayOnPriceStrategy = new dfs.Strategy('AaveV3GenericFLRepayOnPrice');
+    const aaveV3GenericFLRepayOnPriceStrategy = new dfs.Strategy('AaveV3GenericFLRepayOnPriceStrategy');
 
     aaveV3GenericFLRepayOnPriceStrategy.addSubSlot('&collAsset', 'address');
     aaveV3GenericFLRepayOnPriceStrategy.addSubSlot('&collAssetId', 'uint16');
