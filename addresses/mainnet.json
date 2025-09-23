@@ -4721,7 +4721,7 @@
     },
     {
         "name": "SkyView",
-        "address": "0x5456F09bBbBDB6bFad50A22256bAC7f3DDaab121",
+        "address": "0x0b2621aE77952606A3b95d06E31b10132C51C860",
         "id": "0x6431452a",
         "path": "contracts/views/SkyView.sol",
         "version": "1.0.0",
