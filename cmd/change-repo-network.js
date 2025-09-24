@@ -26,6 +26,21 @@ async function execShellCommand(cmd) {
     });
 }
 
+function getAllFiles(dirPath, arrayOfFiles = []) {
+    const files = fs.readdirSync(dirPath);
+    files.forEach((file) => {
+        if (file !== 'flattened') {
+            const fullPath = `${dirPath}/${file}`;
+            if (fs.statSync(fullPath).isDirectory()) {
+                getAllFiles(fullPath, arrayOfFiles);
+            } else {
+                arrayOfFiles.push(fullPath);
+            }
+        }
+    });
+    return arrayOfFiles;
+}
+
 async function changeWethAddress(oldNetwork, newNetwork) {
     const TokenUtilsContract = 'contracts/utils/TokenUtils.sol';
     const tokenUtilsContract = (
@@ -50,7 +65,7 @@ async function changeHardhatConfig(oldNetwork, newNetwork) {
 
     const newConfig = {
         chainId: chainIds[networkName],
-        nodeEnv: `${newNetwork.toUpperCase()}_NODE`,
+        nodeEnv: networkName === 'mainnet' ? 'ETHEREUM_NODE' : `${newNetwork.toUpperCase()}_NODE`,
         evmVersion: networkName === 'linea' ? 'london' : 'cancun',
     };
 
@@ -82,21 +97,6 @@ async function changeHardhatConfig(oldNetwork, newNetwork) {
 }
 
 async function changeNetworkNameForAddresses(oldNetwork, newNetwork) {
-    const getAllFiles = (dirPath, arrayOfFiles = []) => {
-        const files = fs.readdirSync(dirPath);
-        files.forEach((file) => {
-            if (file !== 'flattened') {
-                const fullPath = `${dirPath}/${file}`;
-                if (fs.statSync(fullPath).isDirectory()) {
-                    getAllFiles(fullPath, arrayOfFiles);
-                } else {
-                    arrayOfFiles.push(fullPath);
-                }
-            }
-        });
-        return arrayOfFiles;
-    };
-
     const files = getAllFiles('./contracts');
     await Promise.all(files.map(async (file) => {
         const helperRegex = 'Helper(.*)sol';
@@ -120,6 +120,54 @@ async function changeNetworkNameForAddresses(oldNetwork, newNetwork) {
     }));
 }
 
+async function excludeCancunSpecificChanges(oldNetwork, newNetwork) {
+    const targetFiles = [
+        'contracts/actions/checkers/CompV3RatioCheck.sol',
+        'contracts/triggers/CompV3PriceTrigger.sol',
+        'contracts/triggers/CompV3RatioTrigger.sol',
+    ];
+
+    if (newNetwork === 'Linea') {
+        const files = getAllFiles('./contracts');
+        await Promise.all(files.map(async (file) => {
+            const content = (await fs.readFileSync(file)).toString();
+            let updatedContent = content
+                .replace(/tload\(/g, 'sload(')
+                .replace(/tstore\(/g, 'sstore(');
+
+            if (targetFiles.some((target) => file.includes(target))) {
+                updatedContent = updatedContent
+                    .replace(/TransientStorageCancun/g, 'TransientStorage')
+                    .replace(/TRANSIENT_STORAGE_CANCUN/g, 'TRANSIENT_STORAGE');
+            }
+
+            if (updatedContent !== content) {
+                console.log(`Updating ${file}`);
+                fs.writeFileSync(file, updatedContent);
+            }
+        }));
+    } else if (oldNetwork === 'Linea') {
+        const files = getAllFiles('./contracts');
+        await Promise.all(files.map(async (file) => {
+            const content = (await fs.readFileSync(file)).toString();
+            let updatedContent = content
+                .replace(/sload\(/g, 'tload(')
+                .replace(/sstore\(/g, 'tstore(');
+
+            if (targetFiles.some((target) => file.includes(target))) {
+                updatedContent = updatedContent
+                    .replace(/TransientStorage/g, 'TransientStorageCancun')
+                    .replace(/TRANSIENT_STORAGE/g, 'TRANSIENT_STORAGE_CANCUN');
+            }
+
+            if (updatedContent !== content) {
+                console.log(`Updating ${file}`);
+                fs.writeFileSync(file, updatedContent);
+            }
+        }));
+    }
+}
+
 async function main() {
     try {
         console.log(`Changing repo network from ${oldNetworkName} to ${newNetworkName}...`);
@@ -129,6 +177,8 @@ async function main() {
         console.log('✓ Updated WETH addresses');
         await changeHardhatConfig(oldNetworkName, newNetworkName);
         console.log('✓ Updated hardhat config');
+        await excludeCancunSpecificChanges(oldNetworkName, newNetworkName);
+        console.log('✓ Excluded Cancun-specific changes');
         console.log('Compiling contracts...');
         await execShellCommand('npx hardhat compile');
         console.log('✓ Compilation complete');
