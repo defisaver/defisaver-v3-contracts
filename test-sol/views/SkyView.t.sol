@@ -50,35 +50,23 @@ contract TestSkyView is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_skyView_Direct_USDS_FARM() public {
-        _baseTest(true, USDS_FARM);
-    }
-
     function test_skyView_USDS_FARM() public {
-        _baseTest(false, USDS_FARM);
-    }
-
-    function test_skyView_Direct_SPARK_FARM() public {
-        _baseTest(true, SPARK_FARM);
+        _baseTest(USDS_FARM);
     }
 
     function test_skyView_SPARK_FARM() public {
-        _baseTest(false, SPARK_FARM);
-    }
-
-    function test_skyView_Direct_NO_FARM() public {
-        _baseTest(true, address(0));
+        _baseTest(SPARK_FARM);
     }
 
     function test_skyView_NO_FARM() public {
-        _baseTest(false, address(0));
+        _baseTest(address(0));
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function _baseTest(bool _isDirect, address _farm) internal {
+    function _baseTest(address _farm) internal {
         // ! Give SKY to sender and approve wallet
         give(SKY_ADDRESS, sender, AMOUNT);
         approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
@@ -92,7 +80,7 @@ contract TestSkyView is SkyExecuteActions {
 
         // Execution logic
         bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineStakeEncode(STAKING_ENGINE, index, AMOUNT, sender), _isDirect);
+            executeActionCalldata(skyStakingEngineStakeEncode(STAKING_ENGINE, index, AMOUNT, sender), false);
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
         emit ILockstakeEngine.Lock(walletAddr, index, AMOUNT, SKY_REFERRAL_CODE);
         wallet.execute(address(stake), executeActionCallData, 0);
