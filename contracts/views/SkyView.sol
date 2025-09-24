@@ -11,6 +11,7 @@ import {SkyHelper} from "../../contracts/actions/sky/helpers/SkyHelper.sol";
 
 contract SkyView is SkyHelper {
     struct UrnInfo {
+        uint256 urnIndex;
         address urnAddr;
         address selectedFarm;
         address farmRewardToken;
@@ -41,15 +42,20 @@ contract SkyView is SkyHelper {
     function getUrnInfo(address _user, uint256 _index) public view returns (UrnInfo memory) {
         ILockstakeEngine engine = ILockstakeEngine(STAKING_ENGINE);
         address urnAddr = engine.ownerUrns(_user, _index);
-        address selectedFarm = engine.urnFarms(urnAddr);
-        address farmRewardToken = IStakingRewards(selectedFarm).rewardsToken();
-
         IVat.Urn memory urn = IVat(engine.vat()).urns(engine.ilk(), urnAddr);
         uint256 amountStaked = urn.ink;
         uint256 amountBorrowed = urn.art;
-        uint256 amountEarned = IStakingRewards(selectedFarm).earned(urnAddr);
+
+        address selectedFarm = engine.urnFarms(urnAddr);
+        address farmRewardToken;
+        uint256 amountEarned;
+        if (selectedFarm != address(0)) {
+            farmRewardToken = IStakingRewards(selectedFarm).rewardsToken();
+            amountEarned = IStakingRewards(selectedFarm).earned(urnAddr);
+        }
 
         return UrnInfo({
+            urnIndex: _index,
             urnAddr: urnAddr,
             selectedFarm: selectedFarm,
             farmRewardToken: farmRewardToken,
