@@ -8,6 +8,7 @@ const chainIds = {
     optimism: 10,
     arbitrum: 42161,
     base: 8453,
+    linea: 59144,
 };
 
 const createFork = async (network) => {

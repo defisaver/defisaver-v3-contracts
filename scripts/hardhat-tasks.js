@@ -35,6 +35,7 @@ task('customFlatten', 'Flattens for our DFS team')
         await flatten(await findPathByContractName(args.contractName));
     });
 
+// DEPRECATED. This will be removed in future. Use 'node scripts/change-repo-network.js' instead.
 task('changeRepoNetwork', 'Changes addresses in helper files')
     .addOptionalPositionalParam('oldNetworkName', 'Name of the network that replaces old')
     .addOptionalPositionalParam('newNetworkName', 'Name of the network that replaces old')
@@ -59,4 +60,3 @@ task('deployOnFork', 'Deploys contracts on an existing fork')
             process.exit(1);
         }
     });
-

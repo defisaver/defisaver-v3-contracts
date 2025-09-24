@@ -238,15 +238,11 @@ async function verifyContract(contractAddress, contractName) {
     console.log(`Verification submitted with GUID: ${tx.data.result}`);
 
     const blockExplorer = hre.network.config.blockExplorer;
-    let checkStatusUrl = `https://api.${blockExplorer}.io/api`;
     let demo = `https://${blockExplorer}.io/sourcecode-demo.html`;
     if (!(network === 'mainnet' || network === 'arbitrum')) {
-        checkStatusUrl = `https://api-${network}.${blockExplorer}.io/api`;
         demo = `https://${network}.${blockExplorer}.io/sourcecode-demo.html`;
     }
-
     if (network === 'base') {
-        checkStatusUrl = 'https://api.basescan.org/api';
         demo = 'https://basescan.org/sourcecode-demo.html';
     }
     console.log(`Check how verification is going at ${demo} with API key ${apiKey} and receipt GUID ${tx.data.result}`);
