@@ -17,6 +17,12 @@ contract SkyView is SkyHelper {
         address farmRewardToken;
         uint256 amountStaked;
         uint256 amountBorrowed;
+        AmountEarnedPerFarm[] amountsEarned;
+    }
+
+    struct AmountEarnedPerFarm {
+        address farm;
+        address rewardToken;
         uint256 amountEarned;
     }
 
@@ -28,18 +34,22 @@ contract SkyView is SkyHelper {
         uint256 totalSkyLockedInSparkFarm;
     }
 
-    function getUserInfo(address _user) public view returns (UrnInfo[] memory) {
+    function getUserInfo(address _user, address[] calldata _farms) public view returns (UrnInfo[] memory) {
         uint256 numOfUrns = ILockstakeEngine(STAKING_ENGINE).ownerUrnsCount(_user);
         UrnInfo[] memory urns = new UrnInfo[](numOfUrns);
 
         for (uint256 i = 0; i < numOfUrns; ++i) {
-            urns[i] = getUrnInfo(_user, i);
+            urns[i] = getUrnInfo(_user, i, _farms);
         }
 
         return urns;
     }
 
-    function getUrnInfo(address _user, uint256 _index) public view returns (UrnInfo memory) {
+    function getUrnInfo(address _user, uint256 _index, address[] calldata _farms)
+        public
+        view
+        returns (UrnInfo memory)
+    {
         ILockstakeEngine engine = ILockstakeEngine(STAKING_ENGINE);
         address urnAddr = engine.ownerUrns(_user, _index);
         IVat.Urn memory urn = IVat(engine.vat()).urns(engine.ilk(), urnAddr);
@@ -48,10 +58,18 @@ contract SkyView is SkyHelper {
 
         address selectedFarm = engine.urnFarms(urnAddr);
         address farmRewardToken;
-        uint256 amountEarned;
+        AmountEarnedPerFarm[] memory amountsEarned = new AmountEarnedPerFarm[](_farms.length);
+
         if (selectedFarm != address(0)) {
             farmRewardToken = IStakingRewards(selectedFarm).rewardsToken();
-            amountEarned = IStakingRewards(selectedFarm).earned(urnAddr);
+        }
+
+        for (uint256 i = 0; i < _farms.length; ++i) {
+            amountsEarned[i] = AmountEarnedPerFarm({
+                farm: _farms[i],
+                rewardToken: IStakingRewards(_farms[i]).rewardsToken(),
+                amountEarned: IStakingRewards(_farms[i]).earned(urnAddr)
+            });
         }
 
         return UrnInfo({
@@ -61,7 +79,7 @@ contract SkyView is SkyHelper {
             farmRewardToken: farmRewardToken,
             amountStaked: amountStaked,
             amountBorrowed: amountBorrowed,
-            amountEarned: amountEarned
+            amountsEarned: amountsEarned
         });
     }
 

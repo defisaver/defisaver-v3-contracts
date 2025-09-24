@@ -97,7 +97,11 @@ contract TestSkyView is SkyExecuteActions {
         emit ILockstakeEngine.Lock(walletAddr, index, AMOUNT, SKY_REFERRAL_CODE);
         wallet.execute(address(stake), executeActionCallData, 0);
 
-        SkyView.UrnInfo[] memory urnsInfo = cut.getUserInfo(walletAddr);
+        address[] memory farms = new address[](2);
+        farms[0] = USDS_FARM;
+        farms[1] = SPARK_FARM;
+
+        SkyView.UrnInfo[] memory urnsInfo = cut.getUserInfo(walletAddr, farms);
 
         assertEq(urnsInfo[index].urnIndex, 0);
         assertEq(urnsInfo[index].urnAddr, urnAddr);
@@ -106,12 +110,21 @@ contract TestSkyView is SkyExecuteActions {
 
         if (_farm != address(0)) {
             assertEq(urnsInfo[index].farmRewardToken, IStakingRewards(_farm).rewardsToken());
-            skip(365 days);
-            SkyView.UrnInfo[] memory urnsInfoAfterAYear = cut.getUserInfo(walletAddr);
-            assertGt(urnsInfoAfterAYear[index].amountEarned, urnsInfo[index].amountEarned); // check if user is earning rewards
         } else {
             assertEq(urnsInfo[index].farmRewardToken, address(0));
-            assertEq(urnsInfo[index].amountEarned, 0);
+        }
+
+        skip(365 days);
+        SkyView.UrnInfo[] memory urnsInfoAfterAYear = cut.getUserInfo(walletAddr, farms);
+
+        for (uint256 i = 0; i < urnsInfoAfterAYear[index].amountsEarned.length; i++) {
+            if (urnsInfoAfterAYear[index].amountsEarned[i].farm == _farm) {
+                assertGt(
+                    urnsInfoAfterAYear[index].amountsEarned[i].amountEarned,
+                    urnsInfo[index].amountsEarned[i].amountEarned
+                );
+                break;
+            }
         }
     }
 }
