@@ -15,7 +15,7 @@ contract PlasmaUtilAddresses {
     address internal constant UNI_V3_QUOTER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address internal constant DAI_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // TODO: double check if DAI will be live
-    address internal constant WETH_ADDR = 0x9895D81bB462A195b4922ED7De0e3ACD007c32CB;
+    address internal constant WETH_ADDR = 0x6100E367285b01F48D07953803A2d8dCA5D19873;
     address internal constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address internal constant MKR_PROXY_REGISTRY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // no DSProxy on Linea
