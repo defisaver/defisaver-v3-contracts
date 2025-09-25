@@ -147,22 +147,26 @@ async function deployContract(contractName, args) {
 
     const networkPrefix = (network === 'mainnet' || network === 'arbitrum') ? '' : `${network}.`;
 
-    if (network !== 'base' && network !== 'linea') {
-        console.log(`Transaction : https://${networkPrefix}${blockExplorer}.io/tx/${contract.deployTransaction.hash}`);
-    } else if (network === 'base') {
+    if (network === 'base') {
         console.log(`Transaction : https://basescan.org/tx/${contract.deployTransaction.hash}`);
     } else if (network === 'linea') {
         console.log(`Transaction : https://lineascan.build/tx/${contract.deployTransaction.hash}`);
+    } else if (network === 'plasma') {
+        console.log(`Transaction : https://${blockExplorer}.to/tx/${contract.deployTransaction.hash}`);
+    } else {
+        console.log(`Transaction : https://${networkPrefix}${blockExplorer}.io/tx/${contract.deployTransaction.hash}`);
     }
 
     await contract.deployed();
 
-    if (network !== 'base' && network !== 'linea') {
-        console.log(`Contract deployed to: https://${networkPrefix}${blockExplorer}.io/address/${contract.address}`);
-    } else if (network === 'base') {
+    if (network === 'base') {
         console.log(`Contract deployed to: https://basescan.org/address/${contract.address}`);
     } else if (network === 'linea') {
         console.log(`Contract deployed to: https://lineascan.build/address/${contract.address}`);
+    } else if (network === 'plasma') {
+        console.log(`Contract deployed to: https://${blockExplorer}.to/address/${contract.address}`);
+    } else {
+        console.log(`Contract deployed to: https://${networkPrefix}${blockExplorer}.io/address/${contract.address}`);
     }
 
     return contract.address;

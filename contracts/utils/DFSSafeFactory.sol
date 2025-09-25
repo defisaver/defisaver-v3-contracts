@@ -35,14 +35,16 @@ contract DFSSafeFactory {
 
         if (chainId == 1){
             safeFactory = ISafeProxyFactory(0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2);
-        } else if (chainId == 10){
+        } else if (chainId == 10) {
             safeFactory = ISafeProxyFactory(0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC);
-        } else if (chainId == 42161){
+        } else if (chainId == 42161) {
             safeFactory = ISafeProxyFactory(0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2);
-        } else if (chainId == 8453){
+        } else if (chainId == 8453) {
             safeFactory = ISafeProxyFactory(0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC);
-        } else if (chainId == 59144){
+        } else if (chainId == 59144) {
             safeFactory = ISafeProxyFactory(0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC);
+        } else if (chainId == 9745) {
+            safeFactory = ISafeProxyFactory(0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC); // TODO:P
         } else {
             revert UnsupportedChain(chainId);
         }

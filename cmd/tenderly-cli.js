@@ -13,6 +13,7 @@ const supportedNetworks = {
     optimism: '10',
     base: '8453',
     linea: '59144',
+    plasma: '9745',
 };
 
 const getNetworkId = (network) => supportedNetworks[network];

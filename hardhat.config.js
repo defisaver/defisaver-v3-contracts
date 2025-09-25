@@ -164,6 +164,15 @@ module.exports = {
             blockExplorer: 'etherscan',
             contractVerification: true,
         },
+        plasma: {
+            url: process.env.PLASMA_NODE,
+            accounts: [process.env.PRIV_KEY_PLASMA],
+            chainId: 9745,
+            name: 'plasma',
+            txType: 2,
+            blockExplorer: 'plasmascan',
+            contractVerification: false,
+        },
     },
     solidity: {
         compilers: [
@@ -203,6 +212,7 @@ module.exports = {
         Optimism: '0x4200000000000000000000000000000000000006',
         Base: '0x4200000000000000000000000000000000000006',
         Linea: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
+        Plasma: '0x9895D81bB462A195b4922ED7De0e3ACD007c32CB',
     },
 };
 

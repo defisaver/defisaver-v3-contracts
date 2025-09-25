@@ -9,6 +9,7 @@ const chainIds = {
     arbitrum: 42161,
     base: 8453,
     linea: 59144,
+    plasma: 9745,
 };
 
 const createFork = async (network) => {

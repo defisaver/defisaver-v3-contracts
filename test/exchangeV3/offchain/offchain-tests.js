@@ -70,6 +70,7 @@ const getNetworkNameByChainId = (chainId) => {
     if (chainId === 42161) return 'arbitrum';
     if (chainId === 8453) return 'base';
     if (chainId === 59144) return 'linea';
+    if (chainId === 9745) return 'plasma';
     return 'ethereum';
 };
 

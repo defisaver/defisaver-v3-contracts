@@ -291,6 +291,7 @@ const chainIds = {
     arbitrum: 42161,
     base: 8453,
     linea: 59144,
+    plasma: 9745,
 };
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
