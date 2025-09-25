@@ -17,9 +17,7 @@ task('fladepver', 'Deploys and verifies contract on etherscan')
     .addOptionalPositionalParam('nonce', 'The nonce to use in the transaction')
     .setAction(async (args) => {
         await flatten(await findPathByContractName(args.contractName));
-        const contractAddress = await deployContract(args.contractName, args);
-        await sleep(30000);
-        await verifyContract(contractAddress, args.contractName);
+        await deployContract(args.contractName, args);
     });
 
 task('customVerify', 'Verifies a contract on etherscan')
