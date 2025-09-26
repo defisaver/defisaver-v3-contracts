@@ -515,5 +515,16 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "TxSaverExecutor",
+        "address": "0xa4673229241Fb5fAaCFd849375DCb8fc8d07e826",
+        "id": "0x91bfbd87",
+        "path": "contracts/tx-saver/MockTxSaverExecutor.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]
