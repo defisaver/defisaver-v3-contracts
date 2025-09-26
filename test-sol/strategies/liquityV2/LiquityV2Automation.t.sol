@@ -51,7 +51,7 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
     StrategyExecutor executor;
     uint256 troveId;
 
-    StrategyModel.StrategySub sub;
+    StrategyModel.StrategySub subscription;
 
     address[] STABILITY_POOLS = [
         0x5721cbbd64fc7Ae3Ef44A0A3F9a790A9264Cf9BF,
@@ -178,7 +178,7 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
             _actionsCallData[3] = liquityV2RatioCheckEncode(address(0), 11, LiquityV2RatioCheck.RatioState.IN_REPAY, 0);
 
             uint256 subId = SubStorage(SUB_STORAGE_ADDR).getSubsCount() - 1;
-            executor.executeStrategy(subId, STRATEGY_OR_BUNDLE_ID, _triggerCallData, _actionsCallData, sub);
+            executor.executeStrategy(subId, STRATEGY_OR_BUNDLE_ID, _triggerCallData, _actionsCallData, subscription);
         }
 
         // ! Checks ->
@@ -222,22 +222,22 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
         SubProxy subProxy = new SubProxy();
         uint8 ratioStateEncoded = 1;
         bytes memory triggerData = abi.encode(address(_market), troveId, _triggerRatio, ratioStateEncoded);
-        sub.isBundle = false;
-        sub.strategyOrBundleId = STRATEGY_OR_BUNDLE_ID;
+        subscription.isBundle = false;
+        subscription.strategyOrBundleId = STRATEGY_OR_BUNDLE_ID;
 
         // ! trigger data
-        sub.triggerData = new bytes[](1);
-        sub.triggerData[0] = triggerData;
+        subscription.triggerData = new bytes[](1);
+        subscription.triggerData[0] = triggerData;
 
         // ! sub data
-        sub.subData = new bytes32[](5);
-        sub.subData[0] = bytes32(uint256(uint160(address(_market))));
-        sub.subData[1] = bytes32(troveId);
-        sub.subData[2] = bytes32(uint256(uint160(BOLD_ADDR)));
-        sub.subData[3] = bytes32(_targetRatio);
-        sub.subData[4] = bytes32(uint256(ratioStateEncoded));
+        subscription.subData = new bytes32[](5);
+        subscription.subData[0] = bytes32(uint256(uint160(address(_market))));
+        subscription.subData[1] = bytes32(troveId);
+        subscription.subData[2] = bytes32(uint256(uint160(BOLD_ADDR)));
+        subscription.subData[3] = bytes32(_targetRatio);
+        subscription.subData[4] = bytes32(uint256(ratioStateEncoded));
 
-        bytes memory subscribeCallData = abi.encodeWithSelector(subProxy.subscribeToStrategy.selector, sub);
+        bytes memory subscribeCallData = abi.encodeWithSelector(subProxy.subscribeToStrategy.selector, subscription);
         wallet.execute(address(subProxy), subscribeCallData, 0);
     }
 
