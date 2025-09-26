@@ -12,10 +12,10 @@ contract PlasmaFLAddresses {
     address internal constant AAVE_V3_LENDING_POOL = 0x925a2A7214Ed92428B5b1B090F80b25700095e12;
     address internal constant AAVE_V3_LENDING_POOL_ADDRESS_PROVIDER = 0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9;
     
-    address internal constant RECIPE_EXECUTOR_ADDR = 0x50bCFC115283dF48Ab6382551B9B93b08E197747; // TODO:P
+    address internal constant RECIPE_EXECUTOR_ADDR = 0xB8af168883D049FF9C811ab5B5DE179f3e7d6Fb7;
 
     ////////// NOT USED
-    address internal constant DAI_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // TODO:p double check if DAI will be live
+    address internal constant DAI_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // No deployment on Plasma
     address internal constant VAULT_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant MORPHO_BLUE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant UNI_V3_FACTORY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

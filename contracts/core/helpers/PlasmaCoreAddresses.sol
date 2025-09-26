@@ -7,7 +7,7 @@ contract PlasmaCoreAddresses {
     address internal constant DEFISAVER_LOGGER = 0x02a516861f41262F22617511d00B6FCcAb65f762;
     address internal constant MODULE_AUTH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // Not needed now, waiting for automation
 
-    address internal constant RECIPE_EXECUTOR_ADDR = 0x50bCFC115283dF48Ab6382551B9B93b08E197747; // TODO:P
+    address internal constant RECIPE_EXECUTOR_ADDR = 0xB8af168883D049FF9C811ab5B5DE179f3e7d6Fb7;
     address internal constant SUB_STORAGE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant BUNDLE_STORAGE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant STRATEGY_STORAGE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

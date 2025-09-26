@@ -13,7 +13,7 @@ const storageSlots = require('../storageSlots.json');
 
 const { BigNumber } = hre.ethers;
 
-const { getAllFiles } = require('../../scripts/hardhat-tasks-functions');
+const { findAllFiles } = require('../../scripts/hardhat-tasks-functions');
 
 const { deployAsOwner, deployContract } = require('../../scripts/utils/deployer');
 
@@ -210,20 +210,20 @@ const addrs = {
         REGISTRY_ADDR: '0x44e98bB58d725F2eF93a195F518b335dCB784c78',
         OWNER_ACC: '0x13fa3D42C09E5E15153F08bb90A79A3Bd63E289D',
         WETH_ADDRESS: '0x6100E367285b01F48D07953803A2d8dCA5D19873',
-        DAI_ADDRESS: '0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5', // TODO:p
-        USDC_ADDR: '0x176211869cA2b568f2A7D4EE941E073a821EE1ff', // TODO:p
+        DAI_ADDRESS: '', // No deployment on Plasma
+        USDC_ADDR: '', // No deployment on Plasma
         WRAPPER_EXCHANGE_REGISTRY: '0xef86E36CbbDAdA9F5318Df5D6908760cfF226B54',
-        FEE_RECEIVER: '0x2226836ec16ff5974dfd8df740cd461b42faffd5', // TODO:p
-        FEE_RECIPIENT_ADDR: '0x2226836ec16ff5974dfd8df740cd461b42faffd5', // TODO:p
+        FEE_RECEIVER: '0x4C0607dAD18c0DE19f6d7b25c0B0f1990818e9d7',
+        FEE_RECIPIENT_ADDR: '0x4C0607dAD18c0DE19f6d7b25c0B0f1990818e9d7',
         TOKEN_GROUP_REGISTRY: '0x09fBeC68D216667C3262211D2E5609578951dCE0',
         AAVE_MARKET: '0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9',
         AAVE_V3_VIEW: '0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C',
-        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', // TODO:p
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         ADMIN_VAULT: '0x6AB90ff536f0E2a880DbCdef1bB665C2acC0eDdC',
         ADMIN_ACC: '0x7CF4F485e3a7fDa831e0579465881C51F3912A28',
         EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0xe40178A2f521FDdF0410d87AE853aDf04500502f',
         AVG_GAS_PRICE: 0.001,
-        ZEROX_WRAPPER: '0x49658e0cf3883c338397c7257619b280df581057', // TODO:p
+        ZEROX_WRAPPER: '0x16c9de87215D2198614dbC5419658eAdf4465025',
     },
 };
 
@@ -1533,7 +1533,7 @@ const isWalletNameDsProxy = (w) => w === 'DS_PROXY';
 
 const generateIds = () => {
     const idsMap = {};
-    const files = getAllFiles('./contracts');
+    const files = findAllFiles('./contracts');
 
     // add extra non-contract name ids
     files.push('/StrategyExecutorID.sol');
