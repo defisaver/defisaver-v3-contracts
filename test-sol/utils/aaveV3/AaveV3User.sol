@@ -15,7 +15,8 @@ contract AaveV3User is AaveV3UserUtils {
         uint256 _amount,
         bool _isSafe,
         uint16 _assetId,
-        address _market
+        address _market,
+        address _onBehalfAddr
     ) public {
         AaveV3Supply aaveV3Supply = new AaveV3Supply();
 
@@ -24,10 +25,10 @@ contract AaveV3User is AaveV3UserUtils {
             from: _isSafe ? safeAddr : proxyAddr,
             assetId: _assetId,
             enableAsColl: true,
-            useDefaultMarket: true,
+            useDefaultMarket: false,
             useOnBehalf: false,
             market: _market,
-            onBehalf: address(0)
+            onBehalf: _onBehalfAddr
         });
 
         bytes memory fnData = abi.encodeWithSignature("executeActionDirect(bytes)", abi.encode(params));
@@ -39,7 +40,8 @@ contract AaveV3User is AaveV3UserUtils {
         address _market,
         uint256 _amount,
         uint8 _rateMode,
-        uint16 _assetId
+        uint16 _assetId,
+        address _onBehalfAddr
     ) public {
         AaveV3Borrow aaveV3Borrow = new AaveV3Borrow();
 
@@ -51,7 +53,7 @@ contract AaveV3User is AaveV3UserUtils {
             useDefaultMarket: true,
             useOnBehalf: false,
             market: _market,
-            onBehalf: address(0)
+            onBehalf: _onBehalfAddr
         });
 
         bytes memory fnData = abi.encodeWithSignature("executeActionDirect(bytes)", abi.encode(params));

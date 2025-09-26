@@ -478,7 +478,7 @@ const openAaveV3ProxyPosition = async (
         false, // useDefaultMarket
         marketAddr, // marketAddr
         debtAmount.toString(), // amount
-        proxyAddr, // proxy
+        eoaAddr, // send tokens to EOA
         VARIABLE_RATE, // rateMode
         debtReserveData.id, // assetId (use reserve ID, not address)
         true, // useOnBehalf
@@ -553,7 +553,7 @@ const openAaveV3EOAPosition = async (
         false, // useDefaultMarket
         marketAddr, // marketAddr
         debtAmount.toString(), // amount
-        proxyAddr, // to
+        eoaAddr, // send tokens to EOA
         VARIABLE_RATE, // rateMode
         debtReserveData.id, // assetId
         true, // useOnBehalf

@@ -164,8 +164,8 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     function _createAaveV3Position(bool _isSafe, address _wallet) internal {
         gibTokens(_wallet, Addresses.WETH_ADDR, INITIAL_TOKEN_AMOUNT);
 
-        user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET);
-        user.borrow(_isSafe, AAVE_MARKET, INITIAL_DEBT_DAI_AMOUNT, 2, debtAsset.id);
+        user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET, wallet);
+        user.borrow(_isSafe, AAVE_MARKET, INITIAL_DEBT_DAI_AMOUNT, 2, debtAsset.id, wallet);
     }
 
     function _subToAutomationBundles(bool _isSafe) internal {
@@ -274,7 +274,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     function _testAaveV3BoostStrategy(bool _isSafe) internal {
         _walletSetUpBeforeEachTest(_isSafe);
 
-        user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET);
+        user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET, wallet);
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
@@ -296,7 +296,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     function _testAaveV3BoostFLStrategy(bool _isSafe) internal {
         _walletSetUpBeforeEachTest(_isSafe);
 
-        user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET);
+        user.supply(INITIAL_COLLATERAL_WETH_AMOUNT, _isSafe, collateralAsset.id, AAVE_MARKET, wallet);
 
         bytes[] memory _triggerCallData = new bytes[](1);
 
