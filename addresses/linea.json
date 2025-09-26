@@ -504,5 +504,16 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "AaveV3ViewSmall",
+        "address": "0xc9D6EfA6e08B66a5Cdc516Bcd5807c2fa69E0f2A",
+        "id": "0xbac9c32d",
+        "path": "contracts/views/AaveV3ViewSmall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]
