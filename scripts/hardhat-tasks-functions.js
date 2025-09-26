@@ -56,17 +56,53 @@ function sleep(ms) {
     });
 }
 
-async function deployContract(contractName, args) {
+const getExplorerUrls = (hash) => {
+    const network = hre.network.config.name;
+    const blockExplorer = hre.network.config.blockExplorer;
+    const networkPrefix = (network === 'mainnet' || network === 'arbitrum') ? '' : `${network}.`;
+
+    if (network === 'base') {
+        return {
+            txUrl: `https://basescan.org/tx/${hash}`,
+            addressUrl: 'https://basescan.org/address/',
+        };
+    } if (network === 'linea') {
+        return {
+            txUrl: `https://lineascan.build/tx/${hash}`,
+            addressUrl: 'https://lineascan.build/address/',
+        };
+    } if (network === 'plasma') {
+        return {
+            txUrl: `https://${blockExplorer}.to/tx/${hash}`,
+            addressUrl: `https://${blockExplorer}.to/address/`,
+        };
+    }
+    return {
+        txUrl: `https://${networkPrefix}${blockExplorer}.io/tx/${hash}`,
+        addressUrl: `https://${networkPrefix}${blockExplorer}.io/address/`,
+    };
+};
+
+async function deployContract(contractNames, args) {
     const gasPriceSelected = args.gas;
     const network = hre.network.config.name;
-    const prompt = await getInput(`You're deploying ${contractName} on ${network} at gas price of ${gasPriceSelected} gwei${args.nonce ? ` with nonce : ${args.nonce}` : ''}. Are you 100% sure? (Y/n)!\n`);
+
+    const contracts = Array.isArray(contractNames) ? contractNames : [contractNames];
+
+    console.log('\nPreparing to deploy the following contracts:');
+    contracts.forEach((name, i) => console.log(`${i + 1}. ${name}`));
+    console.log();
+
+    const nonceInfo = args.nonce ? ` with nonce: ${args.nonce}` : '';
+    const prompt = await getInput(`You're deploying ${contracts.length} contract(s) on ${network} at gas price of ${gasPriceSelected} gwei${nonceInfo}.\nAre you 100% sure? (Y/n)!\n`);
     if (prompt.toLowerCase() === 'n') {
         rl.close();
         console.log('You did not agree to continue with deployment');
         process.exit(1);
     }
+
     if (gasPriceSelected > 300) {
-        gasPriceWarning = await getInput(`You used a gas price of ${gasPriceSelected} gwei. Are you 100% sure? (Y/n)!\n`);
+        const gasPriceWarning = await getInput(`You used a gas price of ${gasPriceSelected} gwei. This is quite high! Are you 100% sure? (Y/n)!\n`);
         if (gasPriceWarning.toLowerCase() === 'n') {
             rl.close();
             console.log('You did not agree to continue with deployment');
@@ -93,83 +129,85 @@ async function deployContract(contractName, args) {
         overrides.nonce = parseInt(args.nonce, 10);
     }
 
-    const contractPath = `contracts/flattened/${contractName}.sol`;
+    await Promise.all(contracts.map(async (contractName) => {
+        const contractPath = `contracts/flattened/${contractName}.sol`;
+        const contractString = await fs.readFileSync(`${__dirname}/../${contractPath}`).toString('utf-8');
 
-    const helperRegex = /contract (.*)Addresses/g;
-    const contractString = (await fs.readFileSync(`${__dirname}/../${contractPath}`).toString('utf-8'));
+        // Check for correct network addresses
+        const helperRegex = /contract (.*)Addresses/g;
+        const addressesUsed = contractString.match(helperRegex);
+        const networkFormatted = network === 'optimistic' ? 'optimism' : network;
 
-    const addressesUsed = contractString.match(helperRegex);
-    console.log(addressesUsed);
-    const networkFormatted = network === 'optimistic' ? 'optimism' : network;
-    if (addressesUsed) {
-        for (let i = 0; i < addressesUsed.length; i++) {
-            if (!(addressesUsed[i].toLowerCase().includes(networkFormatted.toLowerCase()))) {
-                console.log('ERROR! Check if addresses are matching!');
-                console.log(addressesUsed[i]);
-                console.log(network);
+        if (addressesUsed) {
+            const invalidAddresses = addressesUsed.filter((addressContract) => (
+                !addressContract.toLowerCase().includes(networkFormatted.toLowerCase())
+            ));
+            if (invalidAddresses.length > 0) {
+                console.log(`ERROR! Check if addresses are matching in ${contractName}!`);
+                console.log('Found:', invalidAddresses[0]);
+                console.log('Expected network:', network);
                 process.exit(1);
             }
         }
-    }
+    }));
 
+    // Get deployer wallet - only need to do this once for all contracts
     const useEncrypted = await getInput('Do you wish to use encrypted key from .env? (Y/n)!\n');
     let deployer;
     if (useEncrypted.toLowerCase() !== 'n') {
-        const secretKey = readlineSync.question('Enter secret key for decrypting private key for deployment address!\n', {
-            hideEchoBack: true, // The typed text on screen is hidden by `*` (default).
-            mask: '',
-        });
+        const secretKey = readlineSync.question(
+            'Enter secret key for decrypting private key for deployment address!\n',
+            {
+                hideEchoBack: true,
+                mask: '',
+            },
+        );
 
         let encryptedKey = process.env.ENCRYPTED_KEY;
-
         if (network !== 'mainnet') {
             encryptedKey = process.env[`ENCRYPTED_KEY_${network.toUpperCase()}`];
         }
 
         const decryptedKey = decrypt(encryptedKey, secretKey);
-        deployer = new hre.ethers.Wallet(
-            decryptedKey,
-            hre.ethers.provider,
-        );
+        deployer = new hre.ethers.Wallet(decryptedKey, hre.ethers.provider);
     } else {
         [deployer] = await hre.ethers.getSigners();
     }
 
-    console.log('Deploying from:', deployer.address);
+    console.log('\nDeploying from:', deployer.address);
     console.log('Account balance:', (await deployer.getBalance()).toString());
 
-    let Contract = await hre.ethers.getContractFactory(
-        `${contractPath}:${contractName}`,
-    );
-    Contract = Contract.connect(deployer);
-    const contract = await Contract.deploy(overrides);
-    const blockExplorer = hre.network.config.blockExplorer;
+    // Deploy contracts sequentially to maintain nonce order
+    const deployedAddresses = {};
+    let currentNonce = args.nonce ? parseInt(args.nonce, 10) : await deployer.getTransactionCount();
 
-    const networkPrefix = (network === 'mainnet' || network === 'arbitrum') ? '' : `${network}.`;
+    await contracts.reduce(async (promise, contractName) => {
+        await promise;
+        console.log(`\nDeploying ${contractName}...`);
+        const contractPath = `contracts/flattened/${contractName}.sol`;
+        const currentOverrides = { ...overrides, nonce: currentNonce++ };
 
-    if (network === 'base') {
-        console.log(`Transaction : https://basescan.org/tx/${contract.deployTransaction.hash}`);
-    } else if (network === 'linea') {
-        console.log(`Transaction : https://lineascan.build/tx/${contract.deployTransaction.hash}`);
-    } else if (network === 'plasma') {
-        console.log(`Transaction : https://${blockExplorer}.to/tx/${contract.deployTransaction.hash}`);
-    } else {
-        console.log(`Transaction : https://${networkPrefix}${blockExplorer}.io/tx/${contract.deployTransaction.hash}`);
-    }
+        const Contract = await hre.ethers.getContractFactory(`${contractPath}:${contractName}`);
+        const deployerContract = Contract.connect(deployer);
+        const contract = await deployerContract.deploy(currentOverrides);
 
-    await contract.deployed();
+        const { txUrl, addressUrl } = getExplorerUrls(contract.deployTransaction.hash);
+        console.log(`Transaction: ${txUrl}`);
 
-    if (network === 'base') {
-        console.log(`Contract deployed to: https://basescan.org/address/${contract.address}`);
-    } else if (network === 'linea') {
-        console.log(`Contract deployed to: https://lineascan.build/address/${contract.address}`);
-    } else if (network === 'plasma') {
-        console.log(`Contract deployed to: https://${blockExplorer}.to/address/${contract.address}`);
-    } else {
-        console.log(`Contract deployed to: https://${networkPrefix}${blockExplorer}.io/address/${contract.address}`);
-    }
+        await contract.deployed();
+        deployedAddresses[contractName] = contract.address;
+        console.log(`${contractName} deployed to: ${addressUrl}${contract.address}`);
+    }, Promise.resolve());
 
-    return contract.address;
+    console.log('\n=== Deployment Summary ===');
+    console.log(`${'Contract Name'.padEnd(30)}Address`);
+    console.log('─'.repeat(75));
+    Object.entries(deployedAddresses).forEach(([name, address]) => {
+        console.log(`${name.padEnd(30)}${address}`);
+    });
+    console.log('─'.repeat(75));
+
+    return deployedAddresses;
 }
 
 async function verifyContract(contractAddress, contractName) {
@@ -287,17 +325,16 @@ async function flatten(filePath) {
     });
     fs.writeFileSync(`contracts/flattened/${fileName}`, data, flags);
 }
-const getAllFiles = function (dirPath, arrayOfFiles) {
-    files = fs.readdirSync(dirPath);
-
-    arrayOfFiles = arrayOfFiles || [];
+const getAllFiles = function (dirPath, arrayOfFiles = []) {
+    const files = fs.readdirSync(dirPath);
 
     files.forEach((file) => {
         if (file !== 'flattened') {
-            if (fs.statSync(`${dirPath}/${file}`).isDirectory()) {
-                arrayOfFiles = getAllFiles(`${dirPath}/${file}`, arrayOfFiles);
+            const fullPath = path.join(dirPath, file);
+            if (fs.statSync(fullPath).isDirectory()) {
+                getAllFiles(fullPath, arrayOfFiles);
             } else {
-                arrayOfFiles.push(path.join(dirPath, '/', file));
+                arrayOfFiles.push(fullPath);
             }
         }
     });
@@ -306,14 +343,19 @@ const getAllFiles = function (dirPath, arrayOfFiles) {
 };
 
 async function findPathByContractName(contractName) {
-    console.log(contractName);
-    files = getAllFiles('./contracts');
+    const files = getAllFiles('./contracts');
     let foundPath = '';
+
     files.forEach((file) => {
         if (contractName === path.basename(file, '.sol')) {
             foundPath = file;
         }
     });
+
+    if (!foundPath) {
+        throw new Error(`Contract ${contractName} not found in the contracts directory`);
+    }
+
     return foundPath;
 }
 
