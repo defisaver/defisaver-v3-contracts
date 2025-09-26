@@ -5,10 +5,10 @@ pragma solidity =0.8.24;
 contract PlasmaActionsUtilAddresses {
     address internal constant DFS_REG_CONTROLLER_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // DSProxies not supported on Linea
     address internal constant SUB_STORAGE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // Not needed now, waiting for automation
-    address internal constant TRANSIENT_STORAGE = 0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d; // TODO:P zapravo postoji cancun pa moze da ide transation storage
-    address internal constant TRANSIENT_STORAGE_CANCUN = 0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d; // regular transient storage since no cancun support on Linea
-    address internal constant REGISTRY_ADDR = 0x09fBeC68D216667C3262211D2E5609578951dCE0; // TODO:P
-    address internal constant DFS_LOGGER_ADDR = 0x44e98bB58d725F2eF93a195F518b335dCB784c78; // TODO:P
+    address internal constant TRANSIENT_STORAGE = 0x291EAc3cA14b7FcA8a93af4f6198E76FcFc6B0cD;
+    address internal constant TRANSIENT_STORAGE_CANCUN = 0xa793DaA424d731Bf597eA3A46a16aFA283D80ea7;
+    address internal constant REGISTRY_ADDR = 0x44e98bB58d725F2eF93a195F518b335dCB784c78;
+    address internal constant DFS_LOGGER_ADDR = 0x02a516861f41262F22617511d00B6FCcAb65f762;
     address internal constant PROXY_AUTH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // Not needed now, waiting for automation
 
     // not yet implemented
