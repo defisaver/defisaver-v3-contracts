@@ -4,11 +4,132 @@
 const fs = require('fs-extra');
 const { exec } = require('child_process');
 const axios = require('axios');
+const ethers = require('ethers');
 const path = require('path');
 const readline = require('readline');
 const readlineSync = require('readline-sync');
 const hardhatSettings = require('../hardhat.config');
 const { encrypt, decrypt } = require('./utils/crypto');
+
+function findAllFiles(dirPath, arrayOfFiles = []) {
+    const files = fs.readdirSync(dirPath);
+
+    files.forEach((file) => {
+        if (file !== 'flattened') {
+            const fullPath = path.join(dirPath, file);
+            if (fs.statSync(fullPath).isDirectory()) {
+                findAllFiles(fullPath, arrayOfFiles);
+            } else {
+                arrayOfFiles.push(fullPath);
+            }
+        }
+    });
+
+    return arrayOfFiles;
+}
+
+async function updateContractsAddressesInJsonFiles(deployedAddresses, contracts, network) {
+    const allFiles = findAllFiles(path.join(__dirname, '..', 'contracts'));
+    const contractPaths = {};
+    contracts.forEach((contractName) => {
+        const originalPath = allFiles.find((file) => {
+            const fileName = path.basename(file, '.sol');
+            return fileName === contractName && !file.includes('flattened');
+        });
+        if (originalPath) {
+            contractPaths[contractName] = path.relative(path.join(__dirname, '..'), originalPath);
+        }
+    });
+
+    const networkLowercase = network.toLowerCase();
+    const addressesFilePath = path.join(__dirname, '..', 'addresses', `${networkLowercase}.json`);
+    const addressesDir = path.join(__dirname, '..', 'addresses');
+    if (!fs.existsSync(addressesDir)) {
+        fs.mkdirSync(addressesDir);
+    }
+
+    let addresses = [];
+    if (fs.existsSync(addressesFilePath)) {
+        try {
+            const fileContent = await fs.readFile(addressesFilePath, 'utf8');
+            // Clean up any trailing commas or malformed JSON
+            const cleanContent = fileContent.replace(/,(\s*[\]}])/g, '$1');
+            addresses = JSON.parse(cleanContent);
+            if (!Array.isArray(addresses)) {
+                console.log(`Warning: ${networkLowercase}.json does not contain an array, resetting file`);
+                addresses = [];
+            }
+        } catch (error) {
+            console.log(`Warning: Error parsing ${networkLowercase}.json, resetting file:`, error.message);
+            addresses = [];
+        }
+    }
+
+    console.log('\nUpdating contract entries:');
+    Object.entries(deployedAddresses).forEach(([contractName, newAddress]) => {
+        try {
+            const contractPath = contractPaths[contractName] || `contracts/flattened/${contractName}.sol`;
+            const isAction = contractPath.includes('actions');
+            const inRegistry = isAction;
+            const changeTime = inRegistry ? '86400' : 0;
+
+            const existingEntryIndex = addresses.findIndex((entry) => entry.name === contractName);
+
+            if (existingEntryIndex !== -1) {
+                // Update existing entry
+                const entry = addresses[existingEntryIndex];
+                const currentVersion = entry.version;
+                const versionParts = currentVersion.split('.');
+                versionParts[2] = (parseInt(versionParts[2], 10) + 1).toString();
+                const newVersion = versionParts.join('.');
+
+                const history = entry.history || [];
+                if (entry.address && entry.address !== newAddress) {
+                    history.unshift(entry.address);
+                }
+
+                addresses[existingEntryIndex] = {
+                    ...entry,
+                    address: newAddress,
+                    version: newVersion,
+                    history,
+                };
+
+                console.log(`\n${contractName}:`);
+                console.log('  - New address:', newAddress);
+                console.log('  - Old address moved to history:', entry.address);
+                console.log('  - New version:', newVersion);
+            } else {
+                // Create new entry
+                const newEntry = {
+                    name: contractName,
+                    address: newAddress,
+                    id: ethers.utils.id(contractName).slice(0, 10),
+                    path: contractPath,
+                    version: '1.0.0',
+                    inRegistry,
+                    changeTime,
+                    registryIds: [],
+                    history: [],
+                };
+                addresses.push(newEntry);
+
+                console.log(`\n${contractName}:`);
+                console.log('  - Created new entry with address:', newAddress);
+            }
+        } catch (error) {
+            console.log(`⚠️  Warning: Failed to process ${contractName}:`, error.message);
+        }
+    });
+
+    // Write all changes at once
+    try {
+        await fs.writeFile(addressesFilePath, JSON.stringify(addresses, null, 4));
+        console.log(`\n✓ Successfully updated ${networkLowercase}.json with all changes`);
+    } catch (error) {
+        console.log(`\n❌ Error writing to ${networkLowercase}.json:`, error.message);
+    }
+}
 
 async function changeWethAddress(oldNetworkName, newNetworkName) {
     const TokenUtilsContract = 'contracts/utils/TokenUtils.sol';
@@ -93,6 +214,9 @@ async function deployContract(contractNames, args) {
     contracts.forEach((name, i) => console.log(`${i + 1}. ${name}`));
     console.log();
 
+    /* //////////////////////////////////////////////////////////////
+                            AGREE_TO_DEPLOY
+    ////////////////////////////////////////////////////////////// */
     const nonceInfo = args.nonce ? ` with nonce: ${args.nonce}` : '';
     const prompt = await getInput(`You're deploying ${contracts.length} contract(s) on ${network} at gas price of ${gasPriceSelected} gwei${nonceInfo}.\nAre you 100% sure? (Y/n)!\n`);
     if (prompt.toLowerCase() === 'n') {
@@ -101,6 +225,9 @@ async function deployContract(contractNames, args) {
         process.exit(1);
     }
 
+    /* //////////////////////////////////////////////////////////////
+                            CHECK_GAS_PRICE
+    ////////////////////////////////////////////////////////////// */
     if (gasPriceSelected > 300) {
         const gasPriceWarning = await getInput(`You used a gas price of ${gasPriceSelected} gwei. This is quite high! Are you 100% sure? (Y/n)!\n`);
         if (gasPriceWarning.toLowerCase() === 'n') {
@@ -109,8 +236,13 @@ async function deployContract(contractNames, args) {
             process.exit(1);
         }
     }
+
     console.log('Starting deployment process');
     await execShellCommand('npx hardhat compile');
+
+    /* //////////////////////////////////////////////////////////////
+                          SET_DEPLOY_CONFIG
+    ////////////////////////////////////////////////////////////// */
     const txType = hre.network.config.txType;
     let overrides;
     if (txType === 0) {
@@ -129,6 +261,9 @@ async function deployContract(contractNames, args) {
         overrides.nonce = parseInt(args.nonce, 10);
     }
 
+    /* //////////////////////////////////////////////////////////////
+                        CHECK_NETWORK_ADDRESSES
+    ////////////////////////////////////////////////////////////// */
     await Promise.all(contracts.map(async (contractName) => {
         const contractPath = `contracts/flattened/${contractName}.sol`;
         const contractString = await fs.readFileSync(`${__dirname}/../${contractPath}`).toString('utf-8');
@@ -151,6 +286,9 @@ async function deployContract(contractNames, args) {
         }
     }));
 
+    /* //////////////////////////////////////////////////////////////
+                            SET_UP_DEPLOYER
+    ////////////////////////////////////////////////////////////// */
     // Get deployer wallet - only need to do this once for all contracts
     const useEncrypted = await getInput('Do you wish to use encrypted key from .env? (Y/n)!\n');
     let deployer;
@@ -174,6 +312,9 @@ async function deployContract(contractNames, args) {
         [deployer] = await hre.ethers.getSigners();
     }
 
+    /* //////////////////////////////////////////////////////////////
+                             DEPLOY !!!
+    ////////////////////////////////////////////////////////////// */
     console.log('\nDeploying from:', deployer.address);
     console.log('Account balance:', (await deployer.getBalance()).toString());
 
@@ -185,6 +326,7 @@ async function deployContract(contractNames, args) {
         await promise;
         console.log(`\nDeploying ${contractName}...`);
         const contractPath = `contracts/flattened/${contractName}.sol`;
+
         const currentOverrides = { ...overrides, nonce: currentNonce++ };
 
         const Contract = await hre.ethers.getContractFactory(`${contractPath}:${contractName}`);
@@ -199,6 +341,9 @@ async function deployContract(contractNames, args) {
         console.log(`${contractName} deployed to: ${addressUrl}${contract.address}`);
     }, Promise.resolve());
 
+    /* //////////////////////////////////////////////////////////////
+                        SHOW_DEPLOYMENT_SUMMARY
+    ////////////////////////////////////////////////////////////// */
     console.log('\n=== Deployment Summary ===');
     console.log(`${'Contract Name'.padEnd(30)}Address`);
     console.log('─'.repeat(75));
@@ -206,6 +351,12 @@ async function deployContract(contractNames, args) {
         console.log(`${name.padEnd(30)}${address}`);
     });
     console.log('─'.repeat(75));
+
+    /* //////////////////////////////////////////////////////////////
+                        UPDATE_ADDRESSES_FILES
+    ////////////////////////////////////////////////////////////// */
+    console.log('\nUpdating addresses files...');
+    await updateContractsAddressesInJsonFiles(deployedAddresses, contracts, network);
 
     return deployedAddresses;
 }
@@ -325,25 +476,9 @@ async function flatten(filePath) {
     });
     fs.writeFileSync(`contracts/flattened/${fileName}`, data, flags);
 }
-const getAllFiles = function (dirPath, arrayOfFiles = []) {
-    const files = fs.readdirSync(dirPath);
-
-    files.forEach((file) => {
-        if (file !== 'flattened') {
-            const fullPath = path.join(dirPath, file);
-            if (fs.statSync(fullPath).isDirectory()) {
-                getAllFiles(fullPath, arrayOfFiles);
-            } else {
-                arrayOfFiles.push(fullPath);
-            }
-        }
-    });
-
-    return arrayOfFiles;
-};
 
 async function findPathByContractName(contractName) {
-    const files = getAllFiles('./contracts');
+    const files = findAllFiles('./contracts');
     let foundPath = '';
 
     files.forEach((file) => {
@@ -374,12 +509,12 @@ async function encryptPrivateKey() {
 }
 
 async function changeNetworkNameForAddresses(oldNetworkName, newNetworkName) {
-    files = getAllFiles('./contracts');
+    const files = findAllFiles('./contracts');
     files.map(async (file) => {
         const helperRegex = 'Helper(.*)sol';
         if (file.toString().match(helperRegex)) {
             const fileDir = path.dirname(file);
-            const filesInSameDir = getAllFiles(fileDir);
+            const filesInSameDir = findAllFiles(fileDir);
             let rewrite = false;
             filesInSameDir.forEach((fileInSameDir) => {
                 if (fileInSameDir.toString().includes(newNetworkName)) {
@@ -404,7 +539,7 @@ module.exports = {
     flatten,
     verifyContract,
     deployContract,
-    getAllFiles,
+    findAllFiles,
     sleep,
     findPathByContractName,
     encryptPrivateKey,
