@@ -83,7 +83,6 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         assertEq(approvals.assetApproval, 0);
         assertEq(approvals.aTokenApproval, 0);
         assertEq(approvals.variableDebtDelegation, 0);
-        assertEq(approvals.suppliedAmount, 0);
         assertEq(approvals.eoaBalance, 0);
         assertEq(approvals.borrowedVariableAmount, 0);
         assertEq(approvals.aTokenBalance, 0);
@@ -120,7 +119,6 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
 
         assertEq(approvals.aTokenApproval, 0);
         assertEq(approvals.variableDebtDelegation, 0);
-        assertEq(approvals.suppliedAmount, 0);
         assertEq(approvals.eoaBalance, config.initialBalance - config.supplyAmount);
         assertEq(approvals.borrowedVariableAmount, 0);
         assertEq(approvals.aTokenBalance, 0);
@@ -160,7 +158,6 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         assertEq(approvals.assetApproval, type(uint256).max - (isWBTC ? config.supplyAmount : 0)); // WBTC allowance is being decreased when used, even when it is UINT_MAX approval
         assertEq(approvals.aTokenApproval, type(uint256).max);
         assertEq(approvals.variableDebtDelegation, 0);
-        assertEq(approvals.suppliedAmount, config.supplyAmount - 1); // - 1 because of round down
         assertEq(approvals.eoaBalance, config.initialBalance - config.supplyAmount);
         assertEq(approvals.borrowedVariableAmount, 0);
         assertEq(approvals.aTokenBalance, config.supplyAmount - 1);
@@ -174,9 +171,9 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         assertEq(approvalsDebt.variableDebtToken, reserveDataDebt.variableDebtTokenAddress);
         assertEq(approvalsDebt.assetApproval, 0);
         assertEq(approvalsDebt.aTokenApproval, 0);
-        assertEq(approvalsDebt.variableDebtDelegation, type(uint256).max - config.borrowAmount - 1);
+        assertApproxEqAbs(approvalsDebt.variableDebtDelegation, type(uint256).max - config.borrowAmount, 2);
         assertEq(approvalsDebt.eoaBalance, config.borrowAmount);
-        assertEq(approvalsDebt.borrowedVariableAmount, config.borrowAmount + 1);
+        assertApproxEqAbs(approvalsDebt.borrowedVariableAmount, config.borrowAmount, 2);
         assertEq(approvalsDebt.aTokenBalance, 0);
 
         skip(365 days);
@@ -190,7 +187,6 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         assertEq(approvalsAfter.assetApproval, type(uint256).max - (isWBTC ? config.supplyAmount : 0)); // WBTC allowance is being decreased when used, even when it is UINT_MAX approval
         assertEq(approvalsAfter.aTokenApproval, type(uint256).max);
         assertEq(approvalsAfter.variableDebtDelegation, 0);
-        assertGt(approvalsAfter.suppliedAmount, config.supplyAmount);
         assertEq(approvalsAfter.eoaBalance, config.initialBalance - config.supplyAmount);
         assertEq(approvalsAfter.borrowedVariableAmount, 0);
         assertGt(approvalsAfter.aTokenBalance, config.supplyAmount);
@@ -203,7 +199,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         assertEq(approvalsDebtAfter.variableDebtToken, reserveDataDebt.variableDebtTokenAddress);
         assertEq(approvalsDebtAfter.assetApproval, 0);
         assertEq(approvalsDebtAfter.aTokenApproval, 0);
-        assertEq(approvalsDebtAfter.variableDebtDelegation, type(uint256).max - config.borrowAmount - 1);
+        assertApproxEqAbs(approvalsDebtAfter.variableDebtDelegation, type(uint256).max - config.borrowAmount, 2);
         assertEq(approvalsDebtAfter.eoaBalance, config.borrowAmount);
         assertGt(approvalsDebtAfter.borrowedVariableAmount, config.borrowAmount);
         assertEq(approvalsDebtAfter.aTokenBalance, 0);

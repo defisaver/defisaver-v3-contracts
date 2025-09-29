@@ -174,7 +174,6 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint256 assetApproval; // EOA approval to SW for underlying asset
         uint256 aTokenApproval; // EOA approval to SW for aToken
         uint256 variableDebtDelegation; // EOA debt delegation to SW for variable debt
-        uint256 suppliedAmount; // amount EOA has supplied
         uint256 borrowedVariableAmount; // amount EOA has borrowed (variable)
         uint256 eoaBalance; // EOA's underlying asset balance
         uint256 aTokenBalance; // EOA's aToken balance
@@ -625,7 +624,6 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             assetApproval: IERC20(_asset).allowance(_eoa, _proxy),
             aTokenApproval: IERC20(reserveData.aTokenAddress).allowance(_eoa, _proxy),
             variableDebtDelegation: IDebtToken(reserveData.variableDebtTokenAddress).borrowAllowance(_eoa, _proxy),
-            suppliedAmount: currentATokenBalance,
             borrowedVariableAmount: currentVariableDebt,
             eoaBalance: IERC20(_asset).balanceOf(_eoa),
             aTokenBalance: IERC20(reserveData.aTokenAddress).balanceOf(_eoa)
