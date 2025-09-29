@@ -603,7 +603,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     /// @param _eoa Address of the EOA
     /// @param _proxy Address of the smart wallet
     /// @param _market Address of the Aave market
-    /// @return approvalData Array of EOAApprovalData for all assets
+    /// @return approvalData EOAApprovalData for selected params
     function getEOAApprovalsAndBalances(address _asset, address _eoa, address _proxy, address _market)
         public
         view
