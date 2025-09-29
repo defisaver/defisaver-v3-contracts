@@ -7,7 +7,6 @@ const {
     deployContract,
     findPathByContractName,
     encryptPrivateKey,
-    changeNetworkNameForAddresses,
 } = require('./hardhat-tasks-functions');
 
 task('fladepver', 'Deploys and verifies contract(s) on etherscan')
@@ -56,14 +55,6 @@ task('customFlatten', 'Flattens for our DFS team')
     .addOptionalPositionalParam('contractName', 'The contract to flatten')
     .setAction(async (args) => {
         await flatten(await findPathByContractName(args.contractName));
-    });
-
-// DEPRECATED. This will be removed in future. Use 'node scripts/change-repo-network.js' instead.
-task('changeRepoNetwork', 'Changes addresses in helper files')
-    .addOptionalPositionalParam('oldNetworkName', 'Name of the network that replaces old')
-    .addOptionalPositionalParam('newNetworkName', 'Name of the network that replaces old')
-    .setAction(async (args) => {
-        await changeNetworkNameForAddresses(args.oldNetworkName, args.newNetworkName);
     });
 
 task('encryptPrivateKey', 'Encrypt private key')
