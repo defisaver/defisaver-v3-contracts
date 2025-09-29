@@ -626,7 +626,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             variableDebtDelegation: IDebtToken(reserveData.variableDebtTokenAddress).borrowAllowance(_eoa, _proxy),
             borrowedVariableAmount: currentVariableDebt,
             eoaBalance: IERC20(_asset).balanceOf(_eoa),
-            aTokenBalance: IERC20(reserveData.aTokenAddress).balanceOf(_eoa)
+            aTokenBalance: currentATokenBalance
         });
     }
 

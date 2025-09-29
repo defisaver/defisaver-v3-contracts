@@ -59,7 +59,6 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
 
         cut = new AaveV3View();
 
-        // Initialize test configurations
         _initializeTestConfigs();
 
         lendingPool = getLendingPool(DEFAULT_AAVE_MARKET);
