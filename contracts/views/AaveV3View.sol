@@ -607,7 +607,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     function getEOAApprovalsAndBalances(address _asset, address _eoa, address _proxy, address _market)
         public
         view
-        returns (EOAApprovalData memory)
+        returns (EOAApprovalData memory approvalData)
     {
         IPoolV3 lendingPool = getLendingPool(_market);
         IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
@@ -618,7 +618,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         (uint256 currentATokenBalance,, uint256 currentVariableDebt,,,,,,) =
             dataProvider.getUserReserveData(_asset, _eoa);
 
-        return EOAApprovalData({
+        approvalData = EOAApprovalData({
             asset: _asset,
             aToken: reserveData.aTokenAddress,
             variableDebtToken: reserveData.variableDebtTokenAddress,
