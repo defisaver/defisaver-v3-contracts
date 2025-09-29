@@ -60,7 +60,7 @@ npx hardhat test ./test/aaveV3/full-test.js --network hardhat
 
 `npx hardhat customVerify [contract-address] [contract-name] --network [hardhat-settings-network-name]`  - will verify on etherscan if a contract was deployed using a single file from customFlatten task 
 
-`npx hardhat fladepver [contract-name] [gas-in-gwei] [nonce (optional)] --network [hardhat-settings-network-name]` - will flatten to a single file (save it in contracts/flattened), deploy from it and then verify it on etherscan
+`npx hardhat fladepver [gas-in-gwei] [ContractName1 ContractNam2 ... ContractNameN] [nonce (optional)] --network [hardhat-settings-network-name]` - will flatten to a single file (save it in contracts/flattened), deploy from it and then verify it on etherscan
 
 `npx hardhat encryptPrivateKey` - will encrypt the key with the secretWord. Put the output in .env as ENCRYPTED_KEY. Later on during deployment process it will ask you for secret word to decrypt the key for deployment use.
 
