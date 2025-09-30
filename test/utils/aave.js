@@ -530,7 +530,6 @@ const openAaveV3EOAPosition = async (
     // Set balance and approve pool contract
     await setBalance(collAsset.address, eoaAddr, collAmount);
     await approve(collAsset.address, proxyAddr, eoaSigner);
-    await approve(collAsset.address, poolAddress, eoaSigner);
 
     // Approve variable debt token delegation to proxy
     const debtTokenContract = await hre.ethers.getContractAt('IDebtToken', debtReserveData.variableDebtTokenAddress, eoaSigner);
