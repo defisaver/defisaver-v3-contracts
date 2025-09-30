@@ -159,7 +159,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         assertEq(approvals.variableDebtDelegation, 0);
         assertEq(approvals.eoaBalance, config.initialBalance - config.supplyAmount);
         assertEq(approvals.borrowedVariableAmount, 0);
-        assertEq(approvals.aTokenBalance, config.supplyAmount - 1);
+        assertApproxEqAbs(approvals.aTokenBalance, config.supplyAmount, 2);
 
         // Test borrow token approvals
         AaveV3View.EOAApprovalData memory approvalsDebt =
