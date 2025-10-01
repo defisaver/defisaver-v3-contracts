@@ -78,6 +78,8 @@ const runCloseTests = () => {
             await redeploy('AaveV3OpenRatioCheck', isFork);
             await redeploy('AaveV3View', isFork);
             await redeploy('SubProxy', isFork);
+            await redeploy('SendTokenAndUnwrap', isFork);
+            await redeploy('SendTokensAndUnwrap', isFork);
 
             bundleId = await deployAaveV3CloseGenericBundle();
         });

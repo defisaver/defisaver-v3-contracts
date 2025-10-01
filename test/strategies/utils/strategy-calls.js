@@ -7446,7 +7446,7 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
     const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         false,
         placeHolderAddr,
-        0,
+        MAX_UINT,
         placeHolderAddr,
         0, // collAssetId
     );
