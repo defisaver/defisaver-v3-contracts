@@ -268,8 +268,7 @@ const runCloseTests = () => {
             );
 
             // Determine market name for test description
-            const marketName =
-                pair.marketAddr === addrs[network].AAVE_MARKET ? 'Core Market' : 'Prime Market';
+            const marketName = pair.marketAddr === addrs[network].AAVE_MARKET ? 'Core Market' : 'Prime Market';
 
             for (let j = 0; j < closeStrategyConfigs.length; ++j) {
                 const config = closeStrategyConfigs[j];

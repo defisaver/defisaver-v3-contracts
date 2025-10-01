@@ -32,12 +32,10 @@ const {
     openAaveV3ProxyPosition,
     openAaveV3EOAPosition,
     getAaveV3PositionRatio,
-    deployAaveV3BoostGenericBundle,
     deployAaveV3RepayGenericBundle,
     setupAaveV3EOAPermissions,
 } = require('../../../utils/aave');
 
-const IS_BOOST = false;
 const RATIO_STATE = 1;
 
 const runRepayTests = () => {
@@ -49,6 +47,7 @@ const runRepayTests = () => {
         let strategyExecutor;
         let mockWrapper;
         let flAddr;
+        let bundleId;
 
         before(async () => {
             // Setup
@@ -78,8 +77,7 @@ const runRepayTests = () => {
             await redeploy('PullToken', isFork);
             await redeploy('SubProxy', isFork);
 
-            await deployAaveV3RepayGenericBundle(true);
-            await deployAaveV3BoostGenericBundle(true);
+            bundleId = await deployAaveV3RepayGenericBundle();
         });
 
         beforeEach(async () => {
@@ -143,6 +141,7 @@ const runRepayTests = () => {
 
             // Create subscription based on whether it's EOA or proxy
             const result = await subAaveV3LeverageManagementGeneric(
+                bundleId,
                 proxy,
                 senderAcc.address,
                 marketAddr,
@@ -150,7 +149,6 @@ const runRepayTests = () => {
                 targetRatioRepay,
                 triggerRatioRepay,
                 isEOA,
-                IS_BOOST,
             );
 
             const repaySubId = result.subId;
@@ -220,10 +218,9 @@ const runRepayTests = () => {
             );
 
             // Determine market name based on market address
-            const marketName =
-                pair.marketAddr === addrs[network].AAVE_MARKET
-                    ? 'Aave V3 Core Market'
-                    : 'Aave V3 Prime Market';
+            const marketName = pair.marketAddr === addrs[network].AAVE_MARKET
+                ? 'Aave V3 Core Market'
+                : 'Aave V3 Prime Market';
 
             it(`... should execute aaveV3 SW repay strategy for ${pair.collSymbol} /
             ${pair.debtSymbol} pair on ${marketName}`, async () => {

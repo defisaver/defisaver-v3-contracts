@@ -226,8 +226,8 @@ const runRepayOnPriceTests = () => {
             );
 
             // Determine market name for test description
-            const marketName =
-                pair.marketAddr === addrs[network].AAVE_MARKET ? 'Core Market' : 'Prime Market';
+            const marketName = pair.marketAddr === addrs[network].AAVE_MARKET
+                ? 'Core Market' : 'Prime Market';
 
             it(`... should execute aaveV3 SW Repay on price strategy (UNDER) for ${pair.collSymbol} /
             ${pair.debtSymbol} pair on Aave V3 ${marketName}`, async () => {

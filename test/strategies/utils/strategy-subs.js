@@ -43,7 +43,6 @@ const {
     chainIds,
     BOLD_ADDR,
     network,
-    getAddrFromRegistry,
     executeTxFromProxy,
     getGasUsed,
     calcGasToUSD,
@@ -325,6 +324,7 @@ const subAaveV3AutomationStrategy = async (
 };
 
 const subAaveV3LeverageManagementGeneric = async (
+    bundleId,
     proxy,
     eoaAddr,
     marketAddr,
@@ -332,14 +332,8 @@ const subAaveV3LeverageManagementGeneric = async (
     targetRatio,
     triggerRatio,
     isEOA,
-    isBoost,
 ) => {
     const encoder = automationSdk.strategySubService.aaveV3Encode;
-
-    // Bundle ID for AaveV3 EOA strategies - using 1 for boost strategies
-    // AAVE_V3_EOA_REPAY = 52,
-    // AAVE_V3_EOA_BOOST = 53,
-    const bundleId = isBoost ? 53 : 52;
 
     const user = isEOA ? eoaAddr : proxy.address;
 

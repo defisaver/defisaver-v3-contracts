@@ -33,11 +33,9 @@ const {
     openAaveV3EOAPosition,
     getAaveV3PositionRatio,
     deployAaveV3BoostGenericBundle,
-    deployAaveV3RepayGenericBundle,
     setupAaveV3EOAPermissions,
 } = require('../../../utils/aave');
 
-const IS_BOOST = true;
 const RATIO_STATE = 0;
 
 const runBoostTests = () => {
@@ -49,6 +47,7 @@ const runBoostTests = () => {
         let strategyExecutor;
         let mockWrapper;
         let flAddr;
+        let bundleId;
 
         before(async () => {
             // Setup
@@ -77,8 +76,7 @@ const runBoostTests = () => {
             await redeploy('AaveV3View', isFork);
             await redeploy('SubProxy', isFork);
 
-            await deployAaveV3RepayGenericBundle(true);
-            await deployAaveV3BoostGenericBundle(true);
+            bundleId = await deployAaveV3BoostGenericBundle();
         });
 
         beforeEach(async () => {
@@ -143,6 +141,7 @@ const runBoostTests = () => {
 
             // Create subscription based on whether it's EOA or proxy
             const result = await subAaveV3LeverageManagementGeneric(
+                bundleId,
                 proxy,
                 senderAcc.address,
                 marketAddr,
@@ -150,7 +149,6 @@ const runBoostTests = () => {
                 targetRatioBoost,
                 triggerRatioBoost,
                 isEOA,
-                IS_BOOST, // is boost
             );
             const boostSubId = result.subId;
             const strategySub = result.strategySub;
