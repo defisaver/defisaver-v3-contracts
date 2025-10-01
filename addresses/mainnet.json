@@ -3587,7 +3587,7 @@
         "name": "CompV3SubProxy",
         "address": "0x2f62a2ec44ed48dd5f2d56b308558ac065e8b794",
         "id": "0x8c896d4c",
-        "path": "contracts/triggers/CompV3RatioTrigger.sol",
+        "path": "contracts/triggers/CompV3SubProxy.sol",
         "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
