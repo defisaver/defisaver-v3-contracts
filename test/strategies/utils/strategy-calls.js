@@ -7345,7 +7345,7 @@ const callAaveV3GenericFLCloseToDebtStrategy = async (
     const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         false,
         placeHolderAddr,
-        MAX_UINT,
+        0,
         placeHolderAddr,
         0, // collAssetId
     );
@@ -7446,7 +7446,7 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
     const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
         false,
         placeHolderAddr,
-        MAX_UINT,
+        0,
         placeHolderAddr,
         0, // collAssetId
     );
