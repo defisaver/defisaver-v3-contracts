@@ -16,7 +16,6 @@ const {
     calcGasToUSD,
     AVG_GAS_PRICE,
     placeHolderAddr,
-    // MCD_MANAGER_ADDR,
     WETH_ADDRESS,
     DAI_ADDR,
     UNISWAP_WRAPPER,
@@ -7496,6 +7495,100 @@ const callAaveV3GenericFLCloseToCollStrategy = async (
     );
 };
 
+const callAaveV3OldBoostStrategy = async (
+    strategyExecutor,
+    subId,
+    collAddr,
+    debtAddr,
+    collAssetId,
+    debtAssetId,
+    boostAmount,
+    strategyIndex,
+    boostSub,
+) => {
+    const actionsCallData = [];
+    const triggerCallData = [];
+
+    const borrowAction = new dfs.actions.aaveV3.AaveV3BorrowAction(
+        true, // default market
+        placeHolderAddr, // hardcoded because default market is true
+        boostAmount, // must stay variable
+        placeHolderAddr, // proxy hardcoded
+        2, // rateMode: variable
+        debtAssetId, // must stay variable can choose diff. asset
+        false, // set to true hardcoded
+        placeHolderAddr, // set to empty because flag is true
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            debtAddr,
+            collAddr,
+            '0',
+            addrs[network].UNISWAP_V3_WRAPPER,
+            0,
+            3000,
+        ),
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const boostGasCost = 1_000_000; // 1 mil gas
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        boostGasCost,
+        collAddr,
+        '0',
+        '0',
+    );
+
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        true, // hardcoded default market
+        placeHolderAddr, // hardcoded with a flag default market
+        0, // amount hardcoded from fee taker
+        placeHolderAddr, // proxy hardcoded
+        collAddr, // is variable as it can change
+        collAssetId, // must be variable
+        true, // hardcoded always enable as coll
+        false, // hardcoded false use on behalf
+        placeHolderAddr, // hardcoded onBehalf
+    );
+
+    const checkerAction = new dfs.actions.checkers.AaveV3RatioCheckAction(
+        0, // checkBoostState
+        0, // 0
+    );
+
+    actionsCallData.push(borrowAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(supplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(checkerAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(
+        abiCoder.encode(
+            ['address', 'address', 'uint256', 'uint8'],
+            [placeHolderAddr, placeHolderAddr, 0, 0],
+        ),
+    );
+
+    const isL2 = network !== 'mainnet';
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        boostSub,
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(boostGasCost, 0, callData);
+    console.log(
+        `GasUsed callAaveV3GenericFLRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
 module.exports = {
     callDcaStrategy,
     callMcdRepayStrategy,
@@ -7610,4 +7703,5 @@ module.exports = {
     callAaveV3GenericFLRepayOnPriceStrategy,
     callAaveV3GenericFLCloseToCollStrategy,
     callAaveV3GenericFLCloseToDebtStrategy,
+    callAaveV3OldBoostStrategy,
 };

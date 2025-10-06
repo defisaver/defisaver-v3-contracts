@@ -288,30 +288,26 @@ const subAaveV3AutomationStrategy = async (
     optimalRatioBoost,
     optimalRatioRepay,
     boostEnabled,
+    subProxy,
 ) => {
-    const minRatioBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(minRatio), 16);
-    const maxRatioBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(maxRatio), 16);
-    const optimalRatioBoostBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(optimalRatioBoost), 16);
-    const optimalRatioRepayBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(optimalRatioRepay), 16);
-    const boostEnabledBytes = boostEnabled ? '0x01' : '0x00';
-    const subInput = hre.ethers.utils.concat([
-        minRatioBytes,
-        maxRatioBytes,
-        optimalRatioBoostBytes,
-        optimalRatioRepayBytes,
-        boostEnabledBytes,
-    ]);
+    const subInput = automationSdk.strategySubService.aaveV3Encode.leverageManagement(
+        minRatio,
+        maxRatio,
+        optimalRatioBoost,
+        optimalRatioRepay,
+        boostEnabled,
+    );
 
-    const subData = await subToAaveV3Proxy(proxy, subInput);
+    const subData = await subToAaveV3Proxy(proxy, subInput, subProxy);
 
     let subId1 = '0';
     let subId2 = '0';
 
     if (boostEnabled) {
-        subId1 = (parseInt(subData.subId, 10) - 1).toString();
-        subId2 = subData.subId;
+        subId1 = (parseInt(subData.latestSubId, 10) - 1).toString();
+        subId2 = subData.latestSubId;
     } else {
-        subId1 = subData.subId;
+        subId1 = subData.latestSubId;
         subId2 = '0';
     }
 

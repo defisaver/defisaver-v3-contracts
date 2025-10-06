@@ -127,8 +127,8 @@ const activateSub = async (proxy, subId) => {
     return subId;
 };
 
-const subToAaveV3Proxy = async (proxy, inputData) => {
-    const aaveSubProxyAddr = addrs[network].AAVE_SUB_PROXY;
+const subToAaveV3Proxy = async (proxy, inputData, subProxyAddr = null) => {
+    const aaveSubProxyAddr = subProxyAddr || addrs[network].AAVE_SUB_PROXY;
 
     const AaveSubProxy = await hre.ethers.getContractFactory('AaveV3SubProxy');
     const functionData = AaveSubProxy.interface.encodeFunctionData(
@@ -136,9 +136,11 @@ const subToAaveV3Proxy = async (proxy, inputData) => {
         [inputData],
     );
 
+    console.log('BEFORE RECEIPT');
     const receipt = await executeTxFromProxy(proxy, aaveSubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
+    console.log('AFTER RECEIPT');
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
     console.log(`GasUsed subToAaveV3Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 
@@ -149,10 +151,35 @@ const subToAaveV3Proxy = async (proxy, inputData) => {
         .then(async ([c, subData]) => {
             // eslint-disable-next-line no-param-reassign
             subData = await subData;
-            return ({
-                boostSub: await c.formatBoostSub(subData),
-                repaySub: await c.formatRepaySub(subData),
-            });
+            let boostSub = await c.formatBoostSub(subData);
+            let repaySub = await c.formatRepaySub(subData);
+
+            // Fix trigger data: replace first 32 bytes with proxy address
+            const proxyAddrHex = proxy.address.slice(2);
+            const paddedProxyAddr = `000000000000000000000000${proxyAddrHex}`;
+
+            // Put proxy address instead of AaveV3SubProxy address
+            const newBoostTriggerData = `0x${paddedProxyAddr}${boostSub.triggerData[0].slice(66)}`;
+
+            // eslint-disable-next-line max-len
+            // Create new boostSub object with corrected trigger data (both property and array index)
+            const correctedBoostSub = {
+                ...boostSub,
+                triggerData: [newBoostTriggerData],
+            };
+            // Also fix the array index
+            correctedBoostSub[2] = [newBoostTriggerData];
+
+            // Put proxy address instead of AaveV3SubProxy address
+            const newRepayTriggerData = `0x${paddedProxyAddr}${repaySub.triggerData[0].slice(66)}`;
+            const correctedRepaySub = {
+                ...repaySub,
+                triggerData: [newRepayTriggerData],
+            };
+            // Also fix the array index
+            correctedRepaySub[2] = [newRepayTriggerData];
+
+            return { boostSub: correctedBoostSub, repaySub: correctedRepaySub };
         });
 
     return { latestSubId, repaySub, boostSub };
