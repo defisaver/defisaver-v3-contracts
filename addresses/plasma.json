@@ -485,14 +485,16 @@
     },
     {
         "name": "DFSSafeFactory",
-        "address": "0x1155BF929D78F1DeF999ACedE1867f79A7C66066",
+        "address": "0xdf92F1c22A4E114919B14bdb274071d5a55E3E58",
         "id": "0x001c87d3",
         "path": "contracts/utils/DFSSafeFactory.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x1155BF929D78F1DeF999ACedE1867f79A7C66066"
+        ]
     },
     {
         "name": "KyberAggregatorWrapper",
