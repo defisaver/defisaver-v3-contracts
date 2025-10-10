@@ -1274,5 +1274,16 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "UpdateSub",
+        "address": "0xAe6ea1d13dF2bE60dC7933DB56067Cb89d6A2cDe",
+        "id": "0xa985d903",
+        "path": "contracts/actions/utils/UpdateSub.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]
