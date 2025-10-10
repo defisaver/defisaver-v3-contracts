@@ -52,6 +52,9 @@ const getKyberApiUrlByChainId = (chainId) => {
     if (chainId === 8453) {
         return 'https://aggregator-api.kyberswap.com/base/api/v1/';
     }
+    if (chainId === 59144) {
+        return 'https://aggregator-api.kyberswap.com/linea/api/v1/';
+    }
     return 'https://aggregator-api.kyberswap.com/ethereum/api/v1/';
 };
 
@@ -66,6 +69,8 @@ const getNetworkNameByChainId = (chainId) => {
     if (chainId === 10) return 'optimism';
     if (chainId === 42161) return 'arbitrum';
     if (chainId === 8453) return 'base';
+    if (chainId === 59144) return 'linea';
+    if (chainId === 9745) return 'plasma';
     return 'ethereum';
 };
 

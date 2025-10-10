@@ -938,6 +938,21 @@ const subLiquityV2CloseBundle = async (
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
+
+const subLiquityV2InterestRateAdjustmentBundle = async (
+    proxy, market, troveId, criticalDebtInFrontLimit, nonCriticalDebtInFrontLimit, interestRateChange,
+) => {
+    const strategySub = automationSdk.strategySubService.liquityV2Encode.interestRateAdjustment(
+        market,
+        troveId,
+        criticalDebtInFrontLimit,
+        nonCriticalDebtInFrontLimit,
+        interestRateChange,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 const subMorphoBlueLeverageManagementOnPrice = async (
     proxy, strategyOrBundleId, marketParams, user, targetRatio, price, priceState, isBundle = true,
 ) => {
@@ -1178,6 +1193,7 @@ module.exports = {
     subLiquityV2RepayBundle,
     subLiquityV2BoostBundle,
     subLiquityV2CloseBundle,
+    subLiquityV2InterestRateAdjustmentBundle,
     subMorphoBlueLeverageManagementOnPrice,
     subFluidVaultT1RepayBundle,
     subFluidVaultT1BoostBundle,

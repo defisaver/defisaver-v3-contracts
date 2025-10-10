@@ -56,14 +56,16 @@ npx hardhat test ./test/aaveV3/full-test.js --network hardhat
 
 ### Custom hardhat tasks
 
-`npx hardhat changeRepoNetwork [current-network-name] [new-network-name]` -  will change which contract the helper contracts import and extend
-
 `npx hardhat customFlatten [contract-name]` -  will flatten contract that is ready for deployment and put it in contracts/flattened folder
 
 `npx hardhat customVerify [contract-address] [contract-name] --network [hardhat-settings-network-name]`  - will verify on etherscan if a contract was deployed using a single file from customFlatten task 
 
-`npx hardhat fladepver [contract-name] [gas-in-gwei] [nonce (optional)] --network [hardhat-settings-network-name]` - will flatten to a single file (save it in contracts/flattened), deploy from it and then verify it on etherscan
+`npx hardhat fladepver [gas-in-gwei] [ContractName1 ContractNam2 ... ContractNameN] [nonce (optional)] --network [hardhat-settings-network-name]` - will flatten to a single file (save it in contracts/flattened), deploy from it and then verify it on etherscan
 
 `npx hardhat encryptPrivateKey` - will encrypt the key with the secretWord. Put the output in .env as ENCRYPTED_KEY. Later on during deployment process it will ask you for secret word to decrypt the key for deployment use.
 
 `npx hardhat deployOnFork [Contract1] [Contract2] [ContractN]` - deploys the specified contracts on a Tenderly fork. Before running this command, add the Tenderly fork ID to the .env file where you want to deploy.
+
+### Custom commands
+
+`node ./cmd/change-repo-network [current-network-name] [new-network-name]` - will change which contract the helper contracts import and extend

@@ -6059,11 +6059,11 @@
     "id": 124,
     "isContinuous": true,
     "triggerIds": [
-      null
+      "LiquityV2AdjustRateDebtInFrontTrigger"
     ],
     "actionIds": [
       "LiquityV2AdjustInterestRate",
-      null
+      "LiquityV2NewInterestRateChecker"
     ],
     "paramMapping": [
       [

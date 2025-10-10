@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-interface IHintHelpers {
+interface IHintHelpersV1 {
 
     function getRedemptionHints(
         uint _LUSDamount, 

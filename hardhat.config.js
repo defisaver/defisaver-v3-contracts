@@ -133,7 +133,7 @@ module.exports = {
             accounts: [process.env.PRIV_KEY_OPTIMISM],
             chainId: 10,
             name: 'optimistic',
-            txType: 0,
+            txType: 2,
             blockExplorer: 'etherscan',
             contractVerification: true,
         },
@@ -142,7 +142,7 @@ module.exports = {
             accounts: [process.env.PRIV_KEY_BASE],
             chainId: 8453,
             name: 'base',
-            txType: 0,
+            txType: 2,
             blockExplorer: 'etherscan',
             contractVerification: true,
         },
@@ -155,6 +155,24 @@ module.exports = {
             blockExplorer: 'arbiscan',
             contractVerification: true,
         },
+        linea: {
+            url: process.env.LINEA_NODE,
+            accounts: [process.env.PRIV_KEY_LINEA],
+            chainId: 59144,
+            name: 'linea',
+            txType: 0,
+            blockExplorer: 'etherscan',
+            contractVerification: true,
+        },
+        plasma: {
+            url: process.env.PLASMA_NODE,
+            accounts: [process.env.PRIV_KEY_PLASMA],
+            chainId: 9745,
+            name: 'plasma',
+            txType: 2,
+            blockExplorer: 'plasmascan',
+            contractVerification: false,
+        },
     },
     solidity: {
         compilers: [
@@ -165,7 +183,7 @@ module.exports = {
                         enabled: true,
                         runs: 1000,
                     },
-                    evmVersion: 'cancun',
+                    evmVersion: 'cancun', // london used only for Linea
                 },
             },
         ],
@@ -179,6 +197,16 @@ module.exports = {
     },
     etherscan: {
         apiKey: process.env.ETHERSCAN_API_KEY,
+        customChains: [
+            {
+                network: 'plasma',
+                chainId: 9745,
+                urls: {
+                    apiURL: 'https://api.routescan.io/v2/network/mainnet/evm/9745/etherscan',
+                    browserURL: 'https://plasmascan.io',
+                },
+            },
+        ],
     },
     tenderly: {
         username: process.env.TENDERLY_USERNAME,
@@ -193,6 +221,8 @@ module.exports = {
         Arbitrum: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
         Optimism: '0x4200000000000000000000000000000000000006',
         Base: '0x4200000000000000000000000000000000000006',
+        Linea: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
+        Plasma: '0x6100E367285b01F48D07953803A2d8dCA5D19873',
     },
 };
 

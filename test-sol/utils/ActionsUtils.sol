@@ -67,6 +67,11 @@ import { FluidDexPayback } from "../../contracts/actions/fluid/dex/FluidDexPayba
 import { FluidDexWithdraw } from "../../contracts/actions/fluid/dex/FluidDexWithdraw.sol";
 import { UmbrellaStake } from "../../contracts/actions/aaveV3/umbrella/UmbrellaStake.sol";
 import { UmbrellaUnstake } from "../../contracts/actions/aaveV3/umbrella/UmbrellaUnstake.sol";
+import {SkyStakingEngineOpen} from "../../contracts/actions/sky/SkyStakingEngineOpen.sol";
+import {SkyStakingEngineStake} from "../../contracts/actions/sky/SkyStakingEngineStake.sol";
+import {SkyStakingEngineUnstake} from "../../contracts/actions/sky/SkyStakingEngineUnstake.sol";
+import {SkyStakingEngineClaimRewards} from "../../contracts/actions/sky/SkyStakingEngineClaimRewards.sol";
+import {SkyStakingEngineSelectFarm} from "../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 import { GhoStake } from "../../contracts/actions/aaveV3/GhoStake.sol";
 
 contract ActionsUtils {
@@ -1268,6 +1273,76 @@ contract ActionsUtils {
                 stkAmount: _stkAmount,
                 useATokens: _useATokens,
                 minAmountOut: _minAmountOut
+            })
+        );
+    }
+
+    function skyStakingEngineOpenEncode(address _stakingContract)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(SkyStakingEngineOpen.Params({stakingContract: _stakingContract}));
+    }
+
+    function skyStakingEngineStakeEncode(
+        address _stakingContract,
+        uint256 _index,
+        uint256 _amount,
+        address _from
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SkyStakingEngineStake.Params({
+                stakingContract: _stakingContract,
+                index: _index,
+                amount: _amount,
+                from: _from
+            })
+        );
+    }
+
+    function skyStakingEngineUnstakeEncode(
+        address _stakingContract,
+        uint256 _index,
+        uint256 _amount,
+        address _to
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SkyStakingEngineUnstake.Params({
+                stakingContract: _stakingContract,
+                index: _index,
+                amount: _amount,
+                to: _to
+            })
+        );
+    }
+
+    function skyStakingEngineClaimRewardsEncode(
+        address _stakingContract,
+        uint256 _index,
+        address _farm,
+        address _to
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SkyStakingEngineClaimRewards.Params({
+                stakingContract: _stakingContract,
+                index: _index,
+                farm: _farm,
+                to: _to
+            })
+        );
+    } 
+    
+    function skyStakingEngineSelectFarmEncode(
+        address _stakingContract,
+        uint256 _index,
+        address _farm
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SkyStakingEngineSelectFarm.Params({
+                stakingContract: _stakingContract,
+                index: _index,
+                farm: _farm
             })
         );
     }
