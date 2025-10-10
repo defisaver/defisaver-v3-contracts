@@ -985,6 +985,11 @@ const setupAaveV3EOAPermissions = async (userAddress, smartWalletAddress, collTo
             console.log(`  - Verified debt delegation allowance: ${hre.ethers.utils.formatEther(verifyAllowance)}`);
         }
 
+        // Revoke collateral token approval (only aToken approval needed)
+        console.log(`  - Revoking collateral token ${collTokenAddr} approval`);
+        const collTokenContract = await hre.ethers.getContractAt('IERC20', collTokenAddr);
+        await collTokenContract.connect(userSigner).approve(smartWalletAddress, '0');
+
         console.log('AaveV3 EOA permissions setup completed successfully!');
     } catch (error) {
         console.log('Error setting up permissions:', error.message);
