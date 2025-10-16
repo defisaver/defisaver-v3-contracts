@@ -517,5 +517,16 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "FluidView",
+        "address": "0x27C0BAe2338cE28097122393faF90375B9395dd1",
+        "id": "0xae75a797",
+        "path": "contracts/views/FluidView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]

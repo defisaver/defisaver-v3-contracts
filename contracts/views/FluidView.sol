@@ -604,7 +604,7 @@ contract FluidView is FluidRatioHelper {
         // To lower the gas cost, we cap the gas limit at 9M, ensuring ~140k gas remains for fetching fWETH details
         // and enough gas is left for further operations within the same block.
         // For arbitrum, we don't need to cap as WETH will have EIP-2612 support.
-        if (_fToken == F_WETH_TOKEN_ADDR && block.chainid != 42161) {
+        if (_fToken == F_WRAPPED_NATIVE_TOKEN_ADDR && block.chainid != 42161) {
             details = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getFTokenDetails{ gas: 9_000_000 }(_fToken);
         } else {
             details = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getFTokenDetails(_fToken);
