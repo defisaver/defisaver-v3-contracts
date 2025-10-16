@@ -271,10 +271,10 @@ contract FluidView is FluidRatioHelper {
             borrowToken0: borrowToken0,
             borrowToken1: borrowToken1,
 
-            supplyToken0Decimals: supplyToken0 != ETH_ADDR ? IERC20(supplyToken0).decimals() : 18,
-            supplyToken1Decimals: supplyToken1 != address(0) ? (supplyToken1 != ETH_ADDR ? IERC20(supplyToken1).decimals() : 18) : 0,
-            borrowToken0Decimals: borrowToken0 != ETH_ADDR ? IERC20(borrowToken0).decimals(): 18,
-            borrowToken1Decimals: borrowToken1 != address(0) ? (borrowToken1 != ETH_ADDR ? IERC20(borrowToken1).decimals() : 18) : 0,
+            supplyToken0Decimals: supplyToken0 != NATIVE_TOKEN_ADDR ? IERC20(supplyToken0).decimals() : 18,
+            supplyToken1Decimals: supplyToken1 != address(0) ? (supplyToken1 != NATIVE_TOKEN_ADDR ? IERC20(supplyToken1).decimals() : 18) : 0,
+            borrowToken0Decimals: borrowToken0 != NATIVE_TOKEN_ADDR ? IERC20(borrowToken0).decimals(): 18,
+            borrowToken1Decimals: borrowToken1 != address(0) ? (borrowToken1 != NATIVE_TOKEN_ADDR ? IERC20(borrowToken1).decimals() : 18) : 0,
 
             collateralFactor: data.configs.collateralFactor,
             liquidationThreshold: data.configs.liquidationThreshold,
