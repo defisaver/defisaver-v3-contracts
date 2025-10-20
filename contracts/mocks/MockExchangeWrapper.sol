@@ -18,7 +18,11 @@ contract MockExchangeWrapper is DSMath, IExchangeV3, AdminAuth {
     /// @param _srcAmount From amount
     /// @param _additionalData Route and swap params
     /// @return uint256 amount of tokens received from selling
-    function sell(address _srcAddr, address _destAddr, uint256 _srcAmount, bytes calldata _additionalData) external override returns (uint) {    
+    function sell(address _srcAddr, address _destAddr, uint256 _srcAmount, bytes calldata _additionalData)
+        external
+        override
+        returns (uint256)
+    {
         IERC20(_srcAddr).safeTransfer(address(this), _srcAmount);
 
         (uint256 rate) = abi.decode(_additionalData, (uint256));
@@ -32,11 +36,16 @@ contract MockExchangeWrapper is DSMath, IExchangeV3, AdminAuth {
     /// @notice Return a rate for which we can sell an amount of tokens
     /// @param _additionalData Route and swap params
     /// @return uint256 Rate (price)
-    function getSellRate(address, address, uint256, bytes memory _additionalData) public pure override returns (uint) {
+    function getSellRate(address, address, uint256, bytes memory _additionalData)
+        public
+        pure
+        override
+        returns (uint256)
+    {
         (uint256 rate) = abi.decode(_additionalData, (uint256));
         return rate;
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external payable {}
+    receive() external payable { }
 }

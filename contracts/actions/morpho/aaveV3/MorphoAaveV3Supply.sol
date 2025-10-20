@@ -36,28 +36,12 @@ contract MorphoAaveV3Supply is ActionBase, MorphoAaveV3Helper {
         Params memory params = parseInputs(_callData);
 
         params.emodeId = _parseParamUint(params.emodeId, _paramMapping[0], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(
-            params.tokenAddr,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
+        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(
-            params.onBehalf,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        );
+        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
         params.supplyAsColl =
-            _parseParamUint(
-                params.supplyAsColl ? 1 : 0,
-                _paramMapping[5],
-                _subData,
-                _returnValues
-            ) ==
-            1;
+            _parseParamUint(params.supplyAsColl ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
 
         (uint256 amount, bytes memory logData) = _supply(params);
         emit ActionEvent("MorphoAaveV3Supply", logData);
@@ -86,17 +70,10 @@ contract MorphoAaveV3Supply is ActionBase, MorphoAaveV3Helper {
         }
 
         if (_params.supplyAsColl) {
-            IMorphoAaveV3(morphoAddress).supplyCollateral(
-                _params.tokenAddr,
-                _params.amount,
-                _params.onBehalf
-            );
+            IMorphoAaveV3(morphoAddress).supplyCollateral(_params.tokenAddr, _params.amount, _params.onBehalf);
         } else {
             IMorphoAaveV3(morphoAddress).supply(
-                _params.tokenAddr,
-                _params.amount,
-                _params.onBehalf,
-                _params.maxIterations
+                _params.tokenAddr, _params.amount, _params.onBehalf, _params.maxIterations
             );
         }
 

@@ -19,9 +19,7 @@ library FluidWithdrawLiquidityLogic {
     /// @notice Withdraws tokens from a Fluid liquidity layer
     /// @param _data Withdraw data
     /// @return Amount of tokens withdrawn. In case of max withdrawal, it will be the exact total amount withdrawn.
-    function withdraw(
-        FluidLiquidityModel.WithdrawData memory _data
-    ) internal returns (uint256) {
+    function withdraw(FluidLiquidityModel.WithdrawData memory _data) internal returns (uint256) {
         _data.vaultType.requireLiquidityCollateral();
 
         bool shouldWrapWithdrawnEth = _data.wrapWithdrawnEth && _data.supplyToken == TokenUtils.ETH_ADDR;
@@ -29,17 +27,10 @@ library FluidWithdrawLiquidityLogic {
         address sendTokensTo = shouldWrapWithdrawnEth ? address(this) : _data.to;
 
         // type(int256).min will trigger max withdrawal inside the vault
-        int256 withdrawAmount = _data.amount == type(uint256).max
-            ? type(int256).min
-            : -_data.amount.signed256();
+        int256 withdrawAmount = _data.amount == type(uint256).max ? type(int256).min : -_data.amount.signed256();
 
-        ( , withdrawAmount , ) = _data.vaultType.isT1Vault()
-            ? IFluidVaultT1(_data.vault).operate(
-                _data.nftId,
-                withdrawAmount,
-                0, /* newDebt_ */
-                sendTokensTo
-            )
+        (, withdrawAmount,) = _data.vaultType.isT1Vault()
+            ? IFluidVaultT1(_data.vault).operate(_data.nftId, withdrawAmount, 0, /* newDebt_ */ sendTokensTo)
             : IFluidVaultT3(_data.vault).operate(
                 _data.nftId,
                 withdrawAmount,

@@ -10,7 +10,6 @@ import { GasFeeHelper } from "../fee/helpers/GasFeeHelper.sol";
 
 /// @title A special Limit Sell action used as a part of the limit order strategy
 contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
-
     using TokenUtils for address;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
@@ -30,42 +29,31 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public virtual override payable returns (bytes32) {
+    ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.exchangeData.srcAddr = _parseParamAddr(
-            params.exchangeData.srcAddr,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
-        params.exchangeData.destAddr = _parseParamAddr(
-            params.exchangeData.destAddr,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
+        params.exchangeData.srcAddr =
+            _parseParamAddr(params.exchangeData.srcAddr, _paramMapping[0], _subData, _returnValues);
+        params.exchangeData.destAddr =
+            _parseParamAddr(params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues);
 
-        params.exchangeData.srcAmount = _parseParamUint(
-            params.exchangeData.srcAmount,
-            _paramMapping[2],
-            _subData,
-            _returnValues
-        );
+        params.exchangeData.srcAmount =
+            _parseParamUint(params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 exchangedAmount, bytes memory logData) = _dfsSell(params.exchangeData, params.from, params.to, params.gasUsed);
+        (uint256 exchangedAmount, bytes memory logData) =
+            _dfsSell(params.exchangeData, params.from, params.to, params.gasUsed);
         emit ActionEvent("LimitSell", logData);
         return bytes32(exchangedAmount);
     }
 
     /// @inheritdoc ActionBase
     /// @dev No direct action as it's a part of the limit order strategy
-    function executeActionDirect(bytes memory _callData) public virtual override payable   {}
+    function executeActionDirect(bytes memory _callData) public payable virtual override { }
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
@@ -76,12 +64,10 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
     /// @param _from Address from which we'll pull the srcTokens
     /// @param _to Address where we'll send the _to token
     /// @param _gasUsed Gas used for this strategy so we can take the fee
-    function _dfsSell(
-        ExchangeData memory _exchangeData,
-        address _from,
-        address _to,
-        uint256 _gasUsed
-    ) internal returns (uint256, bytes memory) {
+    function _dfsSell(ExchangeData memory _exchangeData, address _from, address _to, uint256 _gasUsed)
+        internal
+        returns (uint256, bytes memory)
+    {
         // if we set srcAmount to max, take the whole user's wallet balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
@@ -97,9 +83,9 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         if (_exchangeData.minPrice != currPrice) {
             revert WrongPriceFromTrigger(currPrice, _exchangeData.minPrice);
         }
-     
+
         _exchangeData.srcAddr.pullTokensIfNeeded(_from, _exchangeData.srcAmount);
-        
+
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
         {
@@ -129,7 +115,10 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
         params = abi.decode(_callData, (Params));
     }
 
-    function _takeGasFee(uint256 _gasUsed, uint256 _soldAmount, address _feeToken) internal returns (uint256 amountAfterFee) {
+    function _takeGasFee(uint256 _gasUsed, uint256 _soldAmount, address _feeToken)
+        internal
+        returns (uint256 amountAfterFee)
+    {
         uint256 txCost = calcGasCost(_gasUsed, _feeToken, 0);
 
         // cap at 20% of the max amount

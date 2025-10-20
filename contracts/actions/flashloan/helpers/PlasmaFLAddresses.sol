@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 contract PlasmaFLAddresses {
-
     address internal constant WETH_ADDR = 0x6100E367285b01F48D07953803A2d8dCA5D19873;
 
     // AAVE_LENDING_POOL == AAVE_V3_LENDING_POOL so current automation doesn't break
@@ -11,7 +10,7 @@ contract PlasmaFLAddresses {
     address internal constant AAVE_LENDING_POOL_ADDRESS_PROVIDER = 0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9;
     address internal constant AAVE_V3_LENDING_POOL = 0x925a2A7214Ed92428B5b1B090F80b25700095e12;
     address internal constant AAVE_V3_LENDING_POOL_ADDRESS_PROVIDER = 0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9;
-    
+
     address internal constant RECIPE_EXECUTOR_ADDR = 0xB8af168883D049FF9C811ab5B5DE179f3e7d6Fb7;
 
     ////////// NOT USED

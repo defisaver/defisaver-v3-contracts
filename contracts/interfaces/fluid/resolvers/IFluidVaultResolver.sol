@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 interface IFluidVaultResolver {
-
     struct Tokens {
         address token0;
         address token1;
@@ -45,23 +44,23 @@ interface IFluidVaultResolver {
         // - T2: debt token per 1 col share
         // - T3: debt shares per 1 col token
         // - T4: debt shares per 1 col share
-        uint oraclePriceOperate;
-        uint oraclePriceLiquidate;
+        uint256 oraclePriceOperate;
+        uint256 oraclePriceLiquidate;
         address rebalancer;
-        uint lastUpdateTimestamp;
+        uint256 lastUpdateTimestamp;
     }
 
     struct ExchangePricesAndRates {
-        uint lastStoredLiquiditySupplyExchangePrice; // 0 in case of smart col
-        uint lastStoredLiquidityBorrowExchangePrice; // 0 in case of smart debt
-        uint lastStoredVaultSupplyExchangePrice;
-        uint lastStoredVaultBorrowExchangePrice;
-        uint liquiditySupplyExchangePrice; // set to 1e12 in case of smart col
-        uint liquidityBorrowExchangePrice; // set to 1e12 in case of smart debt
-        uint vaultSupplyExchangePrice;
-        uint vaultBorrowExchangePrice;
-        uint supplyRateLiquidity; // set to 0 in case of smart col. Must get per token through DexEntireData
-        uint borrowRateLiquidity; // set to 0 in case of smart debt. Must get per token through DexEntireData
+        uint256 lastStoredLiquiditySupplyExchangePrice; // 0 in case of smart col
+        uint256 lastStoredLiquidityBorrowExchangePrice; // 0 in case of smart debt
+        uint256 lastStoredVaultSupplyExchangePrice;
+        uint256 lastStoredVaultBorrowExchangePrice;
+        uint256 liquiditySupplyExchangePrice; // set to 1e12 in case of smart col
+        uint256 liquidityBorrowExchangePrice; // set to 1e12 in case of smart debt
+        uint256 vaultSupplyExchangePrice;
+        uint256 vaultBorrowExchangePrice;
+        uint256 supplyRateLiquidity; // set to 0 in case of smart col. Must get per token through DexEntireData
+        uint256 borrowRateLiquidity; // set to 0 in case of smart debt. Must get per token through DexEntireData
         // supplyRateVault or borrowRateVault:
         // - when normal col / debt: rate at liquidity + diff rewards or fee through magnifier (rewardsOrFeeRate below)
         // - when smart col / debt: rewards or fee rate at the vault itself. always == rewardsOrFeeRate below.
@@ -69,63 +68,63 @@ interface IFluidVaultResolver {
         // - rateAtLiquidity for token0 or token1 (DexResolver)
         // - the rewards or fee rate at the vault (VaultResolver)
         // - the Dex APR (currently off-chain compiled through tracking swap events at the DEX)
-        int supplyRateVault; // can be negative in case of smart col (meaning pay to supply)
-        int borrowRateVault; // can be negative in case of smart debt (meaning get paid to borrow)
+        int256 supplyRateVault; // can be negative in case of smart col (meaning pay to supply)
+        int256 borrowRateVault; // can be negative in case of smart debt (meaning get paid to borrow)
         // rewardsOrFeeRateSupply: rewards or fee rate in percent 1e2 precision (1% = 100, 100% = 10000).
         // positive rewards, negative fee.
         // for smart col vaults: supplyRateVault == supplyRateLiquidity.
         // for normal col vaults: relative percent to supplyRateLiquidity, e.g.:
         // when rewards: supplyRateLiquidity = 4%, rewardsOrFeeRateSupply = 20%, supplyRateVault = 4.8%.
         // when fee: supplyRateLiquidity = 4%, rewardsOrFeeRateSupply = -30%, supplyRateVault = 2.8%.
-        int rewardsOrFeeRateSupply;
+        int256 rewardsOrFeeRateSupply;
         // rewardsOrFeeRateBorrow: rewards or fee rate in percent 1e2 precision (1% = 100, 100% = 10000).
         // negative rewards, positive fee.
         // for smart debt vaults: borrowRateVault == borrowRateLiquidity.
         // for normal debt vaults: relative percent to borrowRateLiquidity, e.g.:
         // when rewards: borrowRateLiquidity = 4%, rewardsOrFeeRateBorrow = -20%, borrowRateVault = 3.2%.
         // when fee: borrowRateLiquidity = 4%, rewardsOrFeeRateBorrow = 30%, borrowRateVault = 5.2%.
-        int rewardsOrFeeRateBorrow;
+        int256 rewardsOrFeeRateBorrow;
     }
 
     struct TotalSupplyAndBorrow {
-        uint totalSupplyVault;
-        uint totalBorrowVault;
-        uint totalSupplyLiquidityOrDex;
-        uint totalBorrowLiquidityOrDex;
-        uint absorbedSupply;
-        uint absorbedBorrow;
+        uint256 totalSupplyVault;
+        uint256 totalBorrowVault;
+        uint256 totalSupplyLiquidityOrDex;
+        uint256 totalBorrowLiquidityOrDex;
+        uint256 absorbedSupply;
+        uint256 absorbedBorrow;
     }
 
     struct LimitsAndAvailability {
         // in case of DEX: withdrawable / borrowable amount of vault at DEX, BUT there could be that DEX can not withdraw
         // that much at Liquidity! So for DEX this must be combined with returned data in DexResolver.
-        uint withdrawLimit;
-        uint withdrawableUntilLimit;
-        uint withdrawable;
-        uint borrowLimit;
-        uint borrowableUntilLimit; // borrowable amount until any borrow limit (incl. max utilization limit)
-        uint borrowable; // actual currently borrowable amount (borrow limit - already borrowed) & considering balance, max utilization
-        uint borrowLimitUtilization; // borrow limit for `maxUtilization` config at Liquidity
-        uint minimumBorrowing;
+        uint256 withdrawLimit;
+        uint256 withdrawableUntilLimit;
+        uint256 withdrawable;
+        uint256 borrowLimit;
+        uint256 borrowableUntilLimit; // borrowable amount until any borrow limit (incl. max utilization limit)
+        uint256 borrowable; // actual currently borrowable amount (borrow limit - already borrowed) & considering balance, max utilization
+        uint256 borrowLimitUtilization; // borrow limit for `maxUtilization` config at Liquidity
+        uint256 minimumBorrowing;
     }
 
     struct CurrentBranchState {
-        uint status; // if 0 then not liquidated, if 1 then liquidated, if 2 then merged, if 3 then closed
-        int minimaTick;
-        uint debtFactor;
-        uint partials;
-        uint debtLiquidity;
-        uint baseBranchId;
-        int baseBranchMinima;
+        uint256 status; // if 0 then not liquidated, if 1 then liquidated, if 2 then merged, if 3 then closed
+        int256 minimaTick;
+        uint256 debtFactor;
+        uint256 partials;
+        uint256 debtLiquidity;
+        uint256 baseBranchId;
+        int256 baseBranchMinima;
     }
 
     struct VaultState {
-        uint totalPositions;
-        int topTick;
-        uint currentBranch;
-        uint totalBranch;
-        uint totalBorrow;
-        uint totalSupply;
+        uint256 totalPositions;
+        int256 topTick;
+        uint256 currentBranch;
+        uint256 totalBranch;
+        uint256 totalBorrow;
+        uint256 totalSupply;
         CurrentBranchState currentBranchState;
     }
 
@@ -177,42 +176,43 @@ interface IFluidVaultResolver {
     }
 
     struct UserPosition {
-        uint nftId;
+        uint256 nftId;
         address owner;
         bool isLiquidated;
         bool isSupplyPosition; // if true that means borrowing is 0
-        int tick;
-        uint tickId;
-        uint beforeSupply;
-        uint beforeBorrow;
-        uint beforeDustBorrow;
-        uint supply;
-        uint borrow;
-        uint dustBorrow;
+        int256 tick;
+        uint256 tickId;
+        uint256 beforeSupply;
+        uint256 beforeBorrow;
+        uint256 beforeDustBorrow;
+        uint256 supply;
+        uint256 borrow;
+        uint256 dustBorrow;
     }
 
     /// @notice Retrieves the position data for a given NFT ID and the corresponding vault data.
     /// @param nftId_ The NFT ID for which to retrieve the position data.
     /// @return userPosition_ The UserPosition structure containing the position data.
     /// @return vaultData_ The VaultEntireData structure containing the vault data.
-    function positionByNftId(
-        uint nftId_
-    ) external view returns (UserPosition memory userPosition_, VaultEntireData memory vaultData_);
+    function positionByNftId(uint256 nftId_)
+        external
+        view
+        returns (UserPosition memory userPosition_, VaultEntireData memory vaultData_);
 
     /// @notice Returns an array of NFT IDs for all positions of a given user.
     /// @param user_ The address of the user for whom to fetch positions.
     /// @return nftIds_ An array of NFT IDs representing the user's positions.
-    function positionsNftIdOfUser(address user_) external view returns (uint[] memory nftIds_);
+    function positionsNftIdOfUser(address user_) external view returns (uint256[] memory nftIds_);
 
     /// @notice Get the addresses of all the vaults.
     /// @return vaults_ The addresses of all the vaults.
     function getAllVaultsAddresses() external view returns (address[] memory vaults_);
 
-    function getVaultId(address vault_) external view returns (uint id_);
+    function getVaultId(address vault_) external view returns (uint256 id_);
 
-    function getVaultAddress(uint vaultId_) external view returns (address vault_);
+    function getVaultAddress(uint256 vaultId_) external view returns (address vault_);
 
     function getVaultEntireData(address vault_) external view returns (VaultEntireData memory vaultData_);
 
-    function vaultByNftId(uint nftId_) external view returns (address vault_);
+    function vaultByNftId(uint256 nftId_) external view returns (address vault_);
 }

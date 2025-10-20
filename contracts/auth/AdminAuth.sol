@@ -17,14 +17,14 @@ contract AdminAuth is AuthHelper {
     error SenderNotAdmin();
 
     modifier onlyOwner() {
-        if (adminVault.owner() != msg.sender){
+        if (adminVault.owner() != msg.sender) {
             revert SenderNotOwner();
         }
         _;
     }
 
     modifier onlyAdmin() {
-        if (adminVault.admin() != msg.sender){
+        if (adminVault.admin() != msg.sender) {
             revert SenderNotAdmin();
         }
         _;

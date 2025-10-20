@@ -9,7 +9,7 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 contract CurveClaimFees is ActionBase, CurveHelper {
     using TokenUtils for address;
 
-    /// @param claimFor Address for which to claim fees 
+    /// @param claimFor Address for which to claim fees
     /// @param receiver Address that will receive the tokens
     struct Params {
         address claimFor;

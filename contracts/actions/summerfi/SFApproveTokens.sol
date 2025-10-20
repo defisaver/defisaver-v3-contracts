@@ -50,12 +50,13 @@ contract SFApproveTokens is ActionBase, SFHelper {
         bool sumAmounts;
     }
 
-    function executeAction(
-        bytes memory _callData,
-        bytes32[] memory,
-        uint8[] memory,
-        bytes32[] memory
-    ) public payable virtual override returns (bytes32) {
+    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
+        public
+        payable
+        virtual
+        override
+        returns (bytes32)
+    {
         Params memory params = parseInputs(_callData);
         bytes memory logData = _sfApprove(params);
         emit ActionEvent("SFApproveTokens", logData);
@@ -85,13 +86,11 @@ contract SFApproveTokens is ActionBase, SFHelper {
 
         _requireExactVersionOfSetApprovalActionInRegistry();
 
-        (bytes32[] memory targets, ) = IOperationsRegistry(SF_OPERATIONS_REGISTRY).getOperation(
-            SF_OPERATION_NAME
-        );
+        (bytes32[] memory targets,) = IOperationsRegistry(SF_OPERATIONS_REGISTRY).getOperation(SF_OPERATION_NAME);
 
         Call[] memory calls = new Call[](SF_NUM_OF_OPERATION_ACTIONS);
         for (uint256 i; i < SF_NUM_OF_OPERATION_ACTIONS; ++i) {
-            calls[i] = Call({target: targets[i], data: new bytes(0), skip: true});
+            calls[i] = Call({ target: targets[i], data: new bytes(0), skip: true });
         }
         calls[OPERATION_SET_APPROVAL_INDEX].target = SF_SET_APPROVAL_HASH;
         calls[OPERATION_SET_APPROVAL_INDEX].skip = false;
@@ -130,12 +129,10 @@ contract SFApproveTokens is ActionBase, SFHelper {
         }
     }
 
-    function _verifyThatApprovalIsSet(
-        address tokenAddr,
-        address owner,
-        address spender,
-        uint256 expectedAllowance
-    ) internal view {
+    function _verifyThatApprovalIsSet(address tokenAddr, address owner, address spender, uint256 expectedAllowance)
+        internal
+        view
+    {
         uint256 allowanceSet = IERC20(tokenAddr).allowance(owner, spender);
         if (allowanceSet < expectedAllowance) {
             revert SFApproveFailed(spender, owner);
@@ -143,15 +140,10 @@ contract SFApproveTokens is ActionBase, SFHelper {
     }
 
     function _sfExecute(address sfProxy, Call[] memory calls) internal returns (bytes32) {
-        return
-            IDSProxy(sfProxy).execute(
-                SF_OPERATION_EXECUTOR,
-                abi.encodeWithSelector(
-                    IOperationExecutor.executeOp.selector,
-                    calls,
-                    SF_OPERATION_NAME
-                )
-            );
+        return IDSProxy(sfProxy).execute(
+            SF_OPERATION_EXECUTOR,
+            abi.encodeWithSelector(IOperationExecutor.executeOp.selector, calls, SF_OPERATION_NAME)
+        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

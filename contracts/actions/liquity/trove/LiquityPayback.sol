@@ -15,8 +15,8 @@ contract LiquityPayback is ActionBase, LiquityHelper {
     /// @param upperHint Upper hint for finding a Trove in linked list
     /// @param lowerHint Lower hint for finding a Trove in linked list
     struct Params {
-        uint256 lusdAmount; 
-        address from;       
+        uint256 lusdAmount;
+        address from;
         address upperHint;
         address lowerHint;
     }
@@ -30,12 +30,7 @@ contract LiquityPayback is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.lusdAmount = _parseParamUint(
-            params.lusdAmount,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
+        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
 
         (uint256 repayAmount, bytes memory logData) = _liquityPayback(params);
@@ -67,7 +62,7 @@ contract LiquityPayback is ActionBase, LiquityHelper {
         uint256 paybackAmount = lusdAmountPulled;
 
         // If when we repay the position the trove debt is below MIN_DEBT, we repay to the minimum debt allowed
-        if (wholeDebt < (lusdAmountPulled + MIN_DEBT) && _params.lusdAmount == type(uint256).max){
+        if (wholeDebt < (lusdAmountPulled + MIN_DEBT) && _params.lusdAmount == type(uint256).max) {
             paybackAmount = wholeDebt - MIN_DEBT;
             LUSD_TOKEN_ADDRESS.withdrawTokens(_params.from, (lusdAmountPulled - paybackAmount));
         }

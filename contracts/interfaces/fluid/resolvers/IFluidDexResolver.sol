@@ -6,7 +6,6 @@ import { IFluidDexT1 } from "../IFluidDexT1.sol";
 import { IFluidLiquidityResolverStructs } from "./IFluidLiquidityResolverStructs.sol";
 
 interface IFluidDexResolver {
-
     struct DexState {
         uint256 lastToLastStoredPrice;
         uint256 lastStoredPrice; // price of pool after the most recent swap
@@ -74,25 +73,25 @@ interface IFluidDexResolver {
     // shares being below max supply / borrow shares etc.
     struct SwapLimitsAndAvailability {
         // liquidity total amounts
-        uint liquiditySupplyToken0;
-        uint liquiditySupplyToken1;
-        uint liquidityBorrowToken0;
-        uint liquidityBorrowToken1;
+        uint256 liquiditySupplyToken0;
+        uint256 liquiditySupplyToken1;
+        uint256 liquidityBorrowToken0;
+        uint256 liquidityBorrowToken1;
         // liquidity limits
-        uint liquidityWithdrawableToken0;
-        uint liquidityWithdrawableToken1;
-        uint liquidityBorrowableToken0;
-        uint liquidityBorrowableToken1;
+        uint256 liquidityWithdrawableToken0;
+        uint256 liquidityWithdrawableToken1;
+        uint256 liquidityBorrowableToken0;
+        uint256 liquidityBorrowableToken1;
         // utilization limits based on config at Dex. (e.g. liquiditySupplyToken0 * Configs.utilizationLimitToken0 / 1e3)
-        uint utilizationLimitToken0;
-        uint utilizationLimitToken1;
+        uint256 utilizationLimitToken0;
+        uint256 utilizationLimitToken1;
         // swappable amounts until utilization limit.
         // In a swap that does both withdraw and borrow, the effective amounts might be less because withdraw / borrow affect each other
         // (both increase utilization).
-        uint withdrawableUntilUtilizationLimitToken0; // x = totalSupply - totalBorrow / maxUtilizationPercentage
-        uint withdrawableUntilUtilizationLimitToken1;
-        uint borrowableUntilUtilizationLimitToken0; // x = maxUtilizationPercentage * totalSupply - totalBorrow.
-        uint borrowableUntilUtilizationLimitToken1;
+        uint256 withdrawableUntilUtilizationLimitToken0; // x = totalSupply - totalBorrow / maxUtilizationPercentage
+        uint256 withdrawableUntilUtilizationLimitToken1;
+        uint256 borrowableUntilUtilizationLimitToken0; // x = maxUtilizationPercentage * totalSupply - totalBorrow.
+        uint256 borrowableUntilUtilizationLimitToken1;
         // additional liquidity related data such as supply amount, limits, expansion etc.
         IFluidLiquidityResolverStructs.UserSupplyData liquidityUserSupplyDataToken0;
         IFluidLiquidityResolverStructs.UserSupplyData liquidityUserSupplyDataToken1;
@@ -155,7 +154,7 @@ interface IFluidDexResolver {
         // liquidity token related data
         IFluidLiquidityResolverStructs.OverallTokenData liquidityTokenData0;
         IFluidLiquidityResolverStructs.OverallTokenData liquidityTokenData1;
-    }    
+    }
 
     /// @notice Get the entire data for a DEX
     /// @param dex_ The address of the DEX
@@ -175,12 +174,10 @@ interface IFluidDexResolver {
     /// @param token1Amt_ Amount of token1 to deposit
     /// @param minSharesAmt_ Minimum amount of shares to receive
     /// @return shares_ Estimated amount of shares to be minted
-    function estimateDeposit(
-        address dex_,
-        uint token0Amt_,
-        uint token1Amt_,
-        uint minSharesAmt_
-    ) external payable returns (uint shares_);
+    function estimateDeposit(address dex_, uint256 token0Amt_, uint256 token1Amt_, uint256 minSharesAmt_)
+        external
+        payable
+        returns (uint256 shares_);
 
     /// @dev Estimate withdrawal of tokens
     /// @param dex_ The address of the DEX contract
@@ -188,12 +185,9 @@ interface IFluidDexResolver {
     /// @param token1Amt_ Amount of token1 to withdraw
     /// @param maxSharesAmt_ Maximum amount of shares to burn
     /// @return shares_ Estimated amount of shares to be burned
-    function estimateWithdraw(
-        address dex_,
-        uint token0Amt_,
-        uint token1Amt_,
-        uint maxSharesAmt_
-    ) external returns (uint shares_);
+    function estimateWithdraw(address dex_, uint256 token0Amt_, uint256 token1Amt_, uint256 maxSharesAmt_)
+        external
+        returns (uint256 shares_);
 
     /// @dev Estimate withdrawal of a perfect amount of collateral liquidity in one token
     /// @param dex_ The address of the DEX contract
@@ -201,12 +195,9 @@ interface IFluidDexResolver {
     /// @param minToken0_ The minimum amount of token0 the user is willing to accept
     /// @param minToken1_ The minimum amount of token1 the user is willing to accept
     /// @return withdrawAmt_ Estimated amount of tokens to be withdrawn
-    function estimateWithdrawPerfectInOneToken(
-        address dex_,
-        uint shares_,
-        uint minToken0_,
-        uint minToken1_
-    ) external returns (uint withdrawAmt_);
+    function estimateWithdrawPerfectInOneToken(address dex_, uint256 shares_, uint256 minToken0_, uint256 minToken1_)
+        external
+        returns (uint256 withdrawAmt_);
 
     /// @dev Estimate borrowing of tokens
     /// @param dex_ The address of the DEX contract
@@ -214,12 +205,9 @@ interface IFluidDexResolver {
     /// @param token1Amt_ Amount of token1 to borrow
     /// @param maxSharesAmt_ Maximum amount of shares to mint
     /// @return shares_ Estimated amount of shares to be minted
-    function estimateBorrow(
-        address dex_,
-        uint token0Amt_,
-        uint token1Amt_,
-        uint maxSharesAmt_
-    ) external returns (uint shares_);
+    function estimateBorrow(address dex_, uint256 token0Amt_, uint256 token1Amt_, uint256 maxSharesAmt_)
+        external
+        returns (uint256 shares_);
 
     /// @dev Estimate paying back of borrowed tokens
     /// @param dex_ The address of the DEX contract
@@ -227,12 +215,10 @@ interface IFluidDexResolver {
     /// @param token1Amt_ Amount of token1 to pay back
     /// @param minSharesAmt_ Minimum amount of shares to burn
     /// @return shares_ Estimated amount of shares to be burned
-    function estimatePayback(
-        address dex_,
-        uint token0Amt_,
-        uint token1Amt_,
-        uint minSharesAmt_
-    ) external payable returns (uint shares_);
+    function estimatePayback(address dex_, uint256 token0Amt_, uint256 token1Amt_, uint256 minSharesAmt_)
+        external
+        payable
+        returns (uint256 shares_);
 
     /// @dev Estimate paying back of a perfect amount of borrowed tokens in one token
     /// @param dex_ The address of the DEX contract
@@ -240,10 +226,8 @@ interface IFluidDexResolver {
     /// @param maxToken0_ Maximum amount of token0 to pay back
     /// @param maxToken1_ Maximum amount of token1 to pay back
     /// @return paybackAmt_ Estimated amount of tokens to be paid back
-    function estimatePaybackPerfectInOneToken(
-        address dex_,
-        uint shares_,
-        uint maxToken0_,
-        uint maxToken1_
-    ) external payable returns (uint paybackAmt_);
+    function estimatePaybackPerfectInOneToken(address dex_, uint256 shares_, uint256 maxToken0_, uint256 maxToken1_)
+        external
+        payable
+        returns (uint256 paybackAmt_);
 }

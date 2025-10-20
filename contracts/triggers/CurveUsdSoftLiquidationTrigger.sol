@@ -51,7 +51,7 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
         params = abi.decode(_subData, (SubParams));
     }
 
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
 
     function isChangeable() public pure override returns (bool) {
         return false;

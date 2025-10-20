@@ -23,7 +23,7 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
     error TargetRatioMiss(uint256, uint256);
 
     /// @dev 2% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 20000000000000000;
+    uint256 internal constant RATIO_OFFSET = 20_000_000_000_000_000;
 
     /// @param vaultId Id of the vault
     /// @param joinAddr Collateral join address
@@ -53,46 +53,19 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
     ) public payable virtual override(ActionBase, DFSSell, GasFeeTaker) returns (bytes32) {
         BoostParams memory boostParams = parseCompositeParams(_callData);
 
-        boostParams.vaultId = _parseParamUint(
-            boostParams.vaultId,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
+        boostParams.vaultId = _parseParamUint(boostParams.vaultId, _paramMapping[0], _subData, _returnValues);
 
-        boostParams.joinAddr = _parseParamAddr(
-            boostParams.joinAddr,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
+        boostParams.joinAddr = _parseParamAddr(boostParams.joinAddr, _paramMapping[1], _subData, _returnValues);
 
-        boostParams.flAmount = _parseParamUint(
-            boostParams.flAmount,
-            _paramMapping[2],
-            _subData,
-            _returnValues
-        );
+        boostParams.flAmount = _parseParamUint(boostParams.flAmount, _paramMapping[2], _subData, _returnValues);
 
-        boostParams.exchangeData.srcAddr = _parseParamAddr(
-            boostParams.exchangeData.srcAddr,
-            _paramMapping[3],
-            _subData,
-            _returnValues
-        );
-        boostParams.exchangeData.destAddr = _parseParamAddr(
-            boostParams.exchangeData.destAddr,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        );
+        boostParams.exchangeData.srcAddr =
+            _parseParamAddr(boostParams.exchangeData.srcAddr, _paramMapping[3], _subData, _returnValues);
+        boostParams.exchangeData.destAddr =
+            _parseParamAddr(boostParams.exchangeData.destAddr, _paramMapping[4], _subData, _returnValues);
 
-        boostParams.exchangeData.srcAmount = _parseParamUint(
-            boostParams.exchangeData.srcAmount,
-            _paramMapping[5],
-            _subData,
-            _returnValues
-        );
+        boostParams.exchangeData.srcAmount =
+            _parseParamUint(boostParams.exchangeData.srcAmount, _paramMapping[5], _subData, _returnValues);
 
         (bytes memory logData, uint256 suppliedAmount) = _boost(boostParams);
         emit ActionEvent("McdBoostComposite", logData);
@@ -108,15 +81,12 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         override(ActionBase, DFSSell, GasFeeTaker)
     {
         BoostParams memory boostParams = parseCompositeParams(_callData);
-        (bytes memory logData, ) = _boost(boostParams);
+        (bytes memory logData,) = _boost(boostParams);
         logger.logActionDirectEvent("McdBoostComposite", logData);
     }
 
     /// @notice Executes boost logic
-    function _boost(BoostParams memory _boostParams)
-        internal
-        returns (bytes memory logData, uint256 supplyAmount)
-    {
+    function _boost(BoostParams memory _boostParams) internal returns (bytes memory logData, uint256 supplyAmount) {
         if (_boostParams.exchangeData.srcAddr != DAI_ADDR) {
             revert WrongAsset(_boostParams.exchangeData.srcAddr);
         }
@@ -125,7 +95,7 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
 
         uint256 ratioBefore;
         if (_boostParams.gasUsed != 0) {
-             ratioBefore = getRatio(_boostParams.vaultId, _boostParams.nextPrice);
+            ratioBefore = getRatio(_boostParams.vaultId, _boostParams.nextPrice);
         }
 
         address collateralAsset = _boostParams.exchangeData.destAddr;
@@ -136,32 +106,19 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         }
 
         // Sell debt asset for collateral asset
-        (uint256 exchangedAmount, ) = _dfsSell(
-            _boostParams.exchangeData,
-            address(this),
-            address(this),
-            false
-        );
+        (uint256 exchangedAmount,) = _dfsSell(_boostParams.exchangeData, address(this), address(this), false);
 
         // Take gas fee if part of strategy
         if (_boostParams.gasUsed != 0) {
-            supplyAmount = _takeFee(
-                GasFeeTakerParams(
-                    _boostParams.gasUsed,
-                    collateralAsset,
-                    exchangedAmount,
-                    MAX_DFS_FEE
-                )
-            );
+            supplyAmount =
+                _takeFee(GasFeeTakerParams(_boostParams.gasUsed, collateralAsset, exchangedAmount, MAX_DFS_FEE));
         } else {
             supplyAmount = exchangedAmount;
         }
 
         // Supply collateral
         {
-            int256 vatSupplyAmount = toPositiveInt(
-                convertTo18(_boostParams.joinAddr, supplyAmount)
-            );
+            int256 vatSupplyAmount = toPositiveInt(convertTo18(_boostParams.joinAddr, supplyAmount));
             collateralAsset.approveToken(_boostParams.joinAddr, supplyAmount);
             IJoin(_boostParams.joinAddr).join(urn, supplyAmount);
 
@@ -192,12 +149,7 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         logData = abi.encode(boostAmount, exchangedAmount, supplyAmount, _boostParams.flAddr);
     }
 
-    function _drawDebt(
-        uint256 _drawAmount,
-        uint256 _vaultId,
-        address _urn,
-        bytes32 _ilk
-    ) internal returns (uint256) {
+    function _drawDebt(uint256 _drawAmount, uint256 _vaultId, address _urn, bytes32 _ilk) internal returns (uint256) {
         uint256 daiVatBalance = vat.dai(_urn);
         uint256 rate = IJug(JUG_ADDRESS).drip(_ilk);
         int256 drawAmountNormalized = normalizeDrawAmount(_drawAmount, rate, daiVatBalance);
@@ -212,21 +164,11 @@ contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
     }
 
     /// @inheritdoc ActionBase
-    function actionType()
-        public
-        pure
-        virtual
-        override(ActionBase, DFSSell, GasFeeTaker)
-        returns (uint8)
-    {
+    function actionType() public pure virtual override(ActionBase, DFSSell, GasFeeTaker) returns (uint8) {
         return uint8(ActionType.CUSTOM_ACTION);
     }
 
-    function parseCompositeParams(bytes memory _calldata)
-        public
-        pure
-        returns (BoostParams memory params)
-    {
+    function parseCompositeParams(bytes memory _calldata) public pure returns (BoostParams memory params) {
         params = abi.decode(_calldata, (BoostParams));
     }
 }

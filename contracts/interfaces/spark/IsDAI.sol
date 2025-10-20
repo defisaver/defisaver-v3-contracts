@@ -3,7 +3,6 @@ pragma solidity =0.8.24;
 
 import { IERC20 } from "../IERC20.sol";
 
-
 interface IsDAI is IERC20 {
     function deposit(uint256 _amount, address _receiver) external;
     function mint(uint256 _shares, address _receiver) external;

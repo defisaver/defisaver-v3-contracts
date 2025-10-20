@@ -27,12 +27,13 @@ contract MerklClaim is ActionBase, MerklHelper {
         address to;
     }
 
-    function executeAction(
-        bytes memory _callData,
-        bytes32[] memory,
-        uint8[] memory,
-        bytes32[] memory
-    ) public payable virtual override returns (bytes32) {
+    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
+        public
+        payable
+        virtual
+        override
+        returns (bytes32)
+    {
         Params memory params = parseInputs(_callData);
 
         (bytes memory logData) = _claim(params);

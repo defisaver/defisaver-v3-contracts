@@ -7,7 +7,6 @@ import { IERC20 } from "../interfaces/IERC20.sol";
 
 /// @title Helper contract where we can retrieve the 2 wei Dydx fee
 contract FLFeeFaucet {
-
     using SafeERC20 for IERC20;
 
     /// @notice Sends 2 wei to msg.sender

@@ -9,7 +9,6 @@ import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
 
 /// @title Switch if vault will be used as collateral or not
 contract EulerV2CollateralSwitch is ActionBase, EulerV2Helper {
-
     /// @param vault The address of the vault
     /// @param account The address of the Euler account, defaults to user's wallet
     /// @param enableAsColl Whether to enable or disable the vault as collateral
@@ -30,7 +29,8 @@ contract EulerV2CollateralSwitch is ActionBase, EulerV2Helper {
 
         params.vault = _parseParamAddr(params.vault, _paramMapping[0], _subData, _returnValues);
         params.account = _parseParamAddr(params.account, _paramMapping[1], _subData, _returnValues);
-        params.enableAsColl = _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[2], _subData, _returnValues) == 1;
+        params.enableAsColl =
+            _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[2], _subData, _returnValues) == 1;
 
         bytes memory logData = _collateralSwitch(params);
         emit ActionEvent("EulerV2CollateralSwitch", logData);

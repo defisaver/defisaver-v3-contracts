@@ -12,7 +12,6 @@ import { ISpotter } from "../../../interfaces/mcd/ISpotter.sol";
 
 /// @title Helper methods for Mcd ratio calc.
 contract McdRatioHelper is DSMath {
-
     IVat public constant Vat = IVat(0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B);
     ISpotter public constant spotter = ISpotter(0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3);
     IManager public constant manager = IManager(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
@@ -28,7 +27,7 @@ contract McdRatioHelper is DSMath {
 
         if (debt == 0) return 0;
 
-        return rdiv(wmul(collateral, price), debt) / (10**18);
+        return rdiv(wmul(collateral, price), debt) / (10 ** 18);
     }
 
     /// @notice Gets CDP info (collateral, debt)
@@ -38,7 +37,7 @@ contract McdRatioHelper is DSMath {
         address urn = manager.urns(_vaultId);
 
         (uint256 collateral, uint256 debt) = Vat.urns(_ilk, urn);
-        (, uint256 rate, , , ) = Vat.ilks(_ilk);
+        (, uint256 rate,,,) = Vat.ilks(_ilk);
 
         return (collateral, rmul(debt, rate));
     }
@@ -47,7 +46,7 @@ contract McdRatioHelper is DSMath {
     /// @param _ilk Ilk of the CDP
     function getPrice(bytes32 _ilk) public view returns (uint256) {
         (, uint256 mat) = spotter.ilks(_ilk);
-        (, , uint256 spot, , ) = Vat.ilks(_ilk);
+        (,, uint256 spot,,) = Vat.ilks(_ilk);
 
         return rmul(rmul(spot, spotter.par()), mat);
     }

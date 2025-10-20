@@ -71,10 +71,7 @@ contract LlamaLendSupply is ActionBase, LlamaLendHelper {
             ILlamaLendController(_params.controllerAddress).add_collateral(_params.collateralAmount, _params.onBehalfOf);
         }
 
-        return (
-            _params.collateralAmount,
-            abi.encode(_params)
-        );
+        return (_params.collateralAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

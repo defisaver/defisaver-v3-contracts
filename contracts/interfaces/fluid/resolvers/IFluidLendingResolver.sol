@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 interface IFluidLendingResolver {
-
     // amounts are always in normal (for withInterest already multiplied with exchange price)
     struct UserSupplyData {
         bool modeWithInterest; // true if mode = with interest, false = without interest
@@ -102,9 +101,7 @@ interface IFluidLendingResolver {
     /// @return liquidityBalance_ current Liquidity supply balance of `address(this)` for the underyling asset
     /// @return liquidityExchangePrice_ (updated) exchange price for the underlying assset in the liquidity protocol (without rewards)
     /// @return tokenExchangePrice_ (updated) exchange price between fToken and the underlying assset (with rewards)
-    function getFTokenInternalData(
-        address fToken_
-    )
+    function getFTokenInternalData(address fToken_)
         external
         view
         returns (
@@ -129,14 +126,13 @@ interface IFluidLendingResolver {
     function getUserPositions(address user_) external view returns (FTokenDetailsUserPosition[] memory);
 
     /// @notice gets rewards related data: the `rewardsRateModel_` contract and the current `rewardsRate_` for the `fToken_`
-    function getFTokenRewards(
-        address fToken_
-    ) external view returns (address rewardsRateModel_, uint256 rewardsRate_);
+    function getFTokenRewards(address fToken_)
+        external
+        view
+        returns (address rewardsRateModel_, uint256 rewardsRate_);
 
     /// @notice gets rewards rate model config constants
-    function getFTokenRewardsRateModelConfig(
-        address fToken_
-    )
+    function getFTokenRewardsRateModelConfig(address fToken_)
         external
         view
         returns (
@@ -151,21 +147,14 @@ interface IFluidLendingResolver {
 
     /// @notice gets a `user_` position for an `fToken_`.
     /// @return userPosition user position struct
-    function getUserPosition(
-        address fToken_,
-        address user_
-    ) external view returns (UserPosition memory userPosition);
+    function getUserPosition(address fToken_, address user_) external view returns (UserPosition memory userPosition);
 
     /// @notice gets `fToken_` preview amounts for `assets_` or `shares_`.
     /// @return previewDeposit_ preview for deposit of `assets_`
     /// @return previewMint_ preview for mint of `shares_`
     /// @return previewWithdraw_ preview for withdraw of `assets_`
     /// @return previewRedeem_ preview for redeem of `shares_`
-    function getPreviews(
-        address fToken_,
-        uint256 assets_,
-        uint256 shares_
-    )
+    function getPreviews(address fToken_, uint256 assets_, uint256 shares_)
         external
         view
         returns (uint256 previewDeposit_, uint256 previewMint_, uint256 previewWithdraw_, uint256 previewRedeem_);

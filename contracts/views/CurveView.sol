@@ -2,7 +2,9 @@
 pragma solidity =0.8.24;
 
 import { CurveHelper } from "../actions/curve/helpers/CurveHelper.sol";
-import { ICurveFactory, ICurveFactoryLP, ICurveFactoryPool, IGaugeController } from "../interfaces/curve/ICurveFactory.sol";
+import {
+    ICurveFactory, ICurveFactoryLP, ICurveFactoryPool, IGaugeController
+} from "../interfaces/curve/ICurveFactory.sol";
 import { ILiquidityGauge } from "../interfaces/curve/ILiquidityGauge.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 import { IRegistry } from "../interfaces/curve/IRegistry.sol";
@@ -17,26 +19,29 @@ contract CurveView is CurveHelper {
         ICurveFactoryLP factoryLp;
         ICurveFactoryPool factoryPool;
         ICurveFactory factory;
-
     }
 
     function gaugeBalance(address _gaugeAddr, address _user) external view returns (uint256) {
         return ILiquidityGauge(_gaugeAddr).balanceOf(_user);
     }
 
-    function getPoolDataFromLpToken(address _lpToken) external view returns (
-        uint256 virtualPrice,
-        address pool,
-        string memory poolName,
-        address[8] memory tokens,
-        uint256[8] memory decimals,
-        uint256[8] memory balances,
-        address[8] memory underlyingTokens,
-        uint256[8] memory underlyingDecimals,
-        uint256[8] memory underlyingBalances,
-        address[10] memory gauges,
-        int128[10] memory gaugeTypes
-    ) {
+    function getPoolDataFromLpToken(address _lpToken)
+        external
+        view
+        returns (
+            uint256 virtualPrice,
+            address pool,
+            string memory poolName,
+            address[8] memory tokens,
+            uint256[8] memory decimals,
+            uint256[8] memory balances,
+            address[8] memory underlyingTokens,
+            uint256[8] memory underlyingDecimals,
+            uint256[8] memory underlyingBalances,
+            address[10] memory gauges,
+            int128[10] memory gaugeTypes
+        )
+    {
         IRegistry Registry = getRegistry();
         pool = Registry.get_pool_from_lp_token(_lpToken);
 
@@ -89,19 +94,15 @@ contract CurveView is CurveHelper {
         }
     }
 
-    function getUserLP(
-        address _user,
-        uint256 _startIndex,
-        uint256 _returnSize,
-        uint256 _loopLimit
-    ) external view returns (
-        LpBalance[] memory lpBalances,
-        uint256 nextIndex
-    ) {
+    function getUserLP(address _user, uint256 _startIndex, uint256 _returnSize, uint256 _loopLimit)
+        external
+        view
+        returns (LpBalance[] memory lpBalances, uint256 nextIndex)
+    {
         lpBalances = new LpBalance[](_returnSize);
         IRegistry registry = getRegistry();
         uint256 listSize = registry.pool_count();
-        
+
         uint256 nzCount = 0;
         uint256 index = _startIndex;
         for (uint256 i = 0; index < listSize && nzCount < _returnSize && i < _loopLimit; i++) {

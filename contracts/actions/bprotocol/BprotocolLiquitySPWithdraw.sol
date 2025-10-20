@@ -6,7 +6,6 @@ import { ActionBase } from "../ActionBase.sol";
 import { BprotocolLiquitySPHelper } from "./helpers/BprotocolLiquitySPHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
-
 /// @title BprotocolLiquitySPWithdraw - Action that withdraws LUSD from Bprotocol
 /// @dev LQTY rewards accrue over time and are paid out each time the user interacts with the protocol
 /// @dev Idealy the WETH returned amount will be zero (shares paid out in LUSD in full) but depends on the protocol usage
@@ -51,8 +50,9 @@ contract BprotocolLiquitySPWithdraw is ActionBase, BprotocolLiquitySPHelper {
     }
 
     function _withdraw(Params memory _params) internal returns (uint256, bytes memory) {
-        if (_params.shareAmount == type(uint256).max)
+        if (_params.shareAmount == type(uint256).max) {
             _params.shareAmount = BAMM_ADDRESS.getBalance(address(this));
+        }
 
         uint256 ethBefore = address(this).balance;
         uint256 lusdBefore = LUSD_TOKEN_ADDRESS.getBalance(address(this));
@@ -68,10 +68,7 @@ contract BprotocolLiquitySPWithdraw is ActionBase, BprotocolLiquitySPHelper {
         LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, lusdReturned);
         LQTY_TOKEN_ADDRESS.withdrawTokens(_params.lqtyTo, lqtyRewarded);
 
-        return (
-            lusdReturned,
-            abi.encode(_params, lusdReturned, ethReturned, lqtyRewarded)
-        );
+        return (lusdReturned, abi.encode(_params, lusdReturned, ethReturned, lqtyRewarded));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory _params) {

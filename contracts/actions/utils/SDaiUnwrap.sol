@@ -7,7 +7,6 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { IsDAI } from "../../interfaces/spark/IsDAI.sol";
 import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
 
-
 /// @title Action that redeems sDai for dai.
 contract SDaiUnwrap is ActionBase, SparkHelper, UtilHelper {
     using TokenUtils for address;
@@ -62,9 +61,7 @@ contract SDaiUnwrap is ActionBase, SparkHelper, UtilHelper {
         IsDAI(SDAI_ADDR).redeem(_params.amount, _params.to, _params.from);
         daiAmount = DAI_ADDR.getBalance(_params.to) - daiAmount;
 
-        logData = abi.encode(
-            _params, daiAmount
-        );
+        logData = abi.encode(_params, daiAmount);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

@@ -54,7 +54,10 @@ contract EtherFiWrap is ActionBase, EtherFiHelper {
     /*//////////////////////////////////////////////////////////////
                             ACTION LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _etherFiWrap(Params memory _inputData) internal returns (uint256 weEthReceivedAmount, bytes memory logData){
+    function _etherFiWrap(Params memory _inputData)
+        internal
+        returns (uint256 weEthReceivedAmount, bytes memory logData)
+    {
         _inputData.amount = EETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
 
         EETH_ADDR.approveToken(WEETH_ADDR, _inputData.amount);

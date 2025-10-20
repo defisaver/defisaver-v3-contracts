@@ -23,7 +23,7 @@ contract CurveUsdSelfLiquidateWithCollTransient is ActionBase, CurveUsdHelper {
     /// @param gasUsed Only used as part of a strategy, estimated gas used for this tx
     struct Params {
         address controllerAddress;
-        uint256 percentage; 
+        uint256 percentage;
         uint256 minCrvUsdExpected;
         address to;
         DFSExchangeData.ExchangeData exData;
@@ -66,7 +66,7 @@ contract CurveUsdSelfLiquidateWithCollTransient is ActionBase, CurveUsdHelper {
                             ACTION LOGIC
     //////////////////////////////////////////////////////////////*/
     function _liquidate(Params memory _params) internal returns (uint256, bytes memory) {
-        /// @dev Zero input will just return so we explicitly revert here (see ICrvUsdController natspec) 
+        /// @dev Zero input will just return so we explicitly revert here (see ICrvUsdController natspec)
         if (_params.exData.srcAmount == 0) revert ZeroAmountError();
 
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
@@ -84,30 +84,17 @@ contract CurveUsdSelfLiquidateWithCollTransient is ActionBase, CurveUsdHelper {
         uint256 debtStartingBalance = debtToken.getBalance(address(this));
 
         ICrvUsdController(_params.controllerAddress).liquidate_extended(
-            address(this),
-            _params.minCrvUsdExpected,
-            _params.percentage,
-            false,
-            curveUsdTransientSwapper,
-            info
+            address(this), _params.minCrvUsdExpected, _params.percentage, false, curveUsdTransientSwapper, info
         );
 
         // there shouldn't be any funds left on swapper contract after sell but withdrawing it just in case
         CurveUsdSwapperTransient(curveUsdTransientSwapper).withdrawAll(_params.controllerAddress);
 
         // there will usually be both coll token and debt token, unless we're selling all collateral
-        (, uint256 debtTokenReceived) = _sendLeftoverFundsWithSnapshot(
-            collToken,
-            debtToken,
-            collStartingBalance,
-            debtStartingBalance,
-            _params.to
-        );
+        (, uint256 debtTokenReceived) =
+            _sendLeftoverFundsWithSnapshot(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
 
-        return (
-            debtTokenReceived,
-            abi.encode(_params)
-        );
+        return (debtTokenReceived, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

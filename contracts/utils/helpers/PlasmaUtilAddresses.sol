@@ -8,7 +8,7 @@ contract PlasmaUtilAddresses {
     address internal constant DEFAULT_BOT = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant BOT_REGISTRY_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant FEE_RECIPIENT = 0x4C0607dAD18c0DE19f6d7b25c0B0f1990818e9d7;
-    address internal constant AAVE_MARKET = 0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9; 
+    address internal constant AAVE_MARKET = 0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9;
     address internal constant AAVE_V3_MARKET = 0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9;
 
     address internal constant UNI_V3_ROUTER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -28,7 +28,7 @@ contract PlasmaUtilAddresses {
     address internal constant WBTC_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant SPARK_MARKET = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant EETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address internal constant WEETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; 
+    address internal constant WEETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant ETHER_FI_LIQUIDITY_POOL = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address internal constant CHAINLINK_WBTC_ADDR = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;

@@ -8,9 +8,8 @@ import { TransientStorage } from "../../utils/TransientStorage.sol";
 
 /// @title Action to check the ratio of the Morpho Aave V2 position after strategy execution.
 contract MorphoAaveV2RatioCheck is ActionBase, MorphoAaveV2Helper {
-
     /// @notice 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
@@ -54,7 +53,7 @@ contract MorphoAaveV2RatioCheck is ActionBase, MorphoAaveV2Helper {
         uint256 currRatio = getSafetyRatio(user);
 
         uint256 startRatio = uint256(tempStorage.getBytes32("MORPHO_AAVEV2_RATIO"));
-        
+
         // if we are doing repay
         if (RatioState(ratioState) == RatioState.IN_REPAY) {
             // if repay ratio should be better off
@@ -87,7 +86,7 @@ contract MorphoAaveV2RatioCheck is ActionBase, MorphoAaveV2Helper {
 
     /// @inheritdoc ActionBase
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
@@ -97,5 +96,4 @@ contract MorphoAaveV2RatioCheck is ActionBase, MorphoAaveV2Helper {
     function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
-
 }

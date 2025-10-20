@@ -73,7 +73,7 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
         info[0] = _params.gasUsed;
         info[1] = _params.controllerId;
         if (_params.sellAllCollateral) info[2] = 1;
-        
+
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
         address collToken = ILlamaLendController(_params.controllerAddress).collateral_token();
@@ -81,23 +81,23 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
         uint256 collStartingBalance = collToken.getBalance(address(this));
         uint256 debtStartingBalance = debtToken.getBalance(address(this));
         if (_params.controllerAddress == OLD_WETH_CONTROLLER && block.chainid == 1) {
-            ILlamaLendController(_params.controllerAddress)
-            .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, false, llamalendSwapper, info);
+            ILlamaLendController(_params.controllerAddress).liquidate_extended(
+                address(this), _params.minCrvUsdExpected, _params.percentage, false, llamalendSwapper, info
+            );
         } else {
-            ILlamaLendController(_params.controllerAddress)
-            .liquidate_extended(address(this), _params.minCrvUsdExpected, _params.percentage, llamalendSwapper, info);
+            ILlamaLendController(_params.controllerAddress).liquidate_extended(
+                address(this), _params.minCrvUsdExpected, _params.percentage, llamalendSwapper, info
+            );
         }
-        
+
         // there shouldn't be any funds left on swapper contract but withdrawing it just in case
         LlamaLendSwapper(llamalendSwapper).withdrawAll(_params.controllerAddress);
 
         // there will usually be both coll token and debt token, unless we're selling all collateral
-        (, uint256 debtTokenReceived) = _sendLeftoverFunds(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
-    
-        return (
-            debtTokenReceived,
-            abi.encode(_params)
-        );
+        (, uint256 debtTokenReceived) =
+            _sendLeftoverFunds(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
+
+        return (debtTokenReceived, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

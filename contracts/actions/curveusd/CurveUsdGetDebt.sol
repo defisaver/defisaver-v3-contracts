@@ -6,7 +6,6 @@ import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
 
 /// @title Action that returns users crvusd debt on a given market
 contract CurveUsdGetDebt is ActionBase {
-
     /// @param controllerAddress Address of the curveusd market controller
     /// @param debtor Address which owns the curveusd position
     struct Params {
@@ -31,7 +30,7 @@ contract CurveUsdGetDebt is ActionBase {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public override payable {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {

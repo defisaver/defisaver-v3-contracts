@@ -19,12 +19,7 @@ import { AaveV3Helper } from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
 
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
-contract StrategyTriggerViewNoRevert is
-    StrategyModel,
-    CoreHelper,
-    CheckWalletType,
-    AaveV3Helper
-{
+contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletType, AaveV3Helper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     address internal constant DEFAULT_SPARK_MARKET_MAINNET = 0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
@@ -50,18 +45,15 @@ contract StrategyTriggerViewNoRevert is
     /// @param triggerCalldata - The calldata to pass to the trigger.
     /// @param triggerSubData - The sub data to pass to the trigger.
     /// @return TriggerStatus - The status of the trigger (FALSE, TRUE, REVERT).
-    function checkSingleTrigger(
-        bytes4 triggerId,
-        bytes memory triggerCalldata,
-        bytes memory triggerSubData
-    ) public returns (TriggerStatus) {
+    function checkSingleTrigger(bytes4 triggerId, bytes memory triggerCalldata, bytes memory triggerSubData)
+        public
+        returns (TriggerStatus)
+    {
         address triggerAddr = registry.getAddr(triggerId);
 
         if (triggerAddr == address(0)) return TriggerStatus.REVERT;
 
-        try ITrigger(triggerAddr).isTriggered(triggerCalldata, triggerSubData) returns (
-            bool isTriggered
-        ) {
+        try ITrigger(triggerAddr).isTriggered(triggerCalldata, triggerSubData) returns (bool isTriggered) {
             if (!isTriggered) {
                 return TriggerStatus.FALSE;
             } else {
@@ -71,16 +63,13 @@ contract StrategyTriggerViewNoRevert is
             return TriggerStatus.REVERT;
         }
     }
-    
+
     /// @notice Check if a single trigger is triggered or not.
     /// @dev This function uses low level `call` with try-catch to avoid revert.
     /// @param triggerId - The ID of the trigger to check.
     /// @param txData - The calldata to pass to the trigger.
     /// @return TriggerStatus - The status of the trigger (FALSE, TRUE, REVERT).
-    function checkSingleTriggerLowLevel(
-        bytes4 triggerId,
-        bytes memory txData
-    ) public returns (TriggerStatus) {
+    function checkSingleTriggerLowLevel(bytes4 triggerId, bytes memory txData) public returns (TriggerStatus) {
         address triggerAddr = registry.getAddr(triggerId);
 
         if (triggerAddr == address(0)) return TriggerStatus.REVERT;
@@ -98,27 +87,23 @@ contract StrategyTriggerViewNoRevert is
             return TriggerStatus.REVERT;
         }
     }
-    
+
     /// @notice Check if a strategy is triggered or not for a given sub
     /// @dev This function uses high level `isTriggered` call with try-catch to avoid revert.
     /// @param _sub - The subscription to check.
     /// @param _triggerCallData - The calldata to pass to the triggers.
     /// @param smartWallet - The smart wallet of the subscription.
     /// @return TriggerStatus - The status of the trigger (FALSE, TRUE, REVERT).
-    function checkTriggers(
-        StrategySub memory _sub,
-        bytes[] calldata _triggerCallData,
-        address smartWallet
-    ) public returns (TriggerStatus) {
+    function checkTriggers(StrategySub memory _sub, bytes[] calldata _triggerCallData, address smartWallet)
+        public
+        returns (TriggerStatus)
+    {
         Strategy memory strategy;
 
         uint256 strategyId = _sub.strategyOrBundleId;
 
         if (_sub.isBundle) {
-            strategyId = BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(
-                _sub.strategyOrBundleId,
-                0
-            );
+            strategyId = BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(_sub.strategyOrBundleId, 0);
         }
 
         strategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
@@ -129,9 +114,7 @@ contract StrategyTriggerViewNoRevert is
 
         for (uint256 i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
-            try
-                ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i])
-            returns (bool isTriggered) {
+            try ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i]) returns (bool isTriggered) {
                 if (!isTriggered) {
                     return TriggerStatus.FALSE;
                 }
@@ -139,7 +122,7 @@ contract StrategyTriggerViewNoRevert is
                 return TriggerStatus.REVERT;
             }
         }
-        
+
         // check DCA & LO for all chains
         if (strategyId.isDCAStrategy() || strategyId.isLimitOrderStrategy()) {
             return _tryToVerifyRequiredAmountAndAllowance(smartWallet, _sub.subData);
@@ -161,23 +144,23 @@ contract StrategyTriggerViewNoRevert is
     /*//////////////////////////////////////////////////////////////
                               VERIFY LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _tryToVerifyRequiredAmountAndAllowance(
-        address _smartWallet,
-        bytes32[] memory _subData
-    ) internal view returns (TriggerStatus)  {
-        try this.verifyRequiredAmountAndAllowance(_smartWallet, _subData) returns (
-            TriggerStatus status
-        ) {
+    function _tryToVerifyRequiredAmountAndAllowance(address _smartWallet, bytes32[] memory _subData)
+        internal
+        view
+        returns (TriggerStatus)
+    {
+        try this.verifyRequiredAmountAndAllowance(_smartWallet, _subData) returns (TriggerStatus status) {
             return status;
         } catch {
             return TriggerStatus.REVERT;
         }
     }
 
-    function verifyRequiredAmountAndAllowance(
-        address _smartWallet,
-        bytes32[] memory _subData
-    ) external view returns (TriggerStatus)  {
+    function verifyRequiredAmountAndAllowance(address _smartWallet, bytes32[] memory _subData)
+        external
+        view
+        returns (TriggerStatus)
+    {
         address sellTokenAddr = address(uint160(uint256(_subData[0])));
         uint256 desiredAmount = uint256(_subData[2]);
 
@@ -193,31 +176,25 @@ contract StrategyTriggerViewNoRevert is
         return hasEnoughBalance ? TriggerStatus.TRUE : TriggerStatus.FALSE;
     }
 
-    function _verifyAaveV3MinDebtPosition(
-        address _smartWallet
-    ) internal view returns (TriggerStatus) {
+    function _verifyAaveV3MinDebtPosition(address _smartWallet) internal view returns (TriggerStatus) {
         // TODO -> Hardcoded DEFAULT_AAVE_MARKET
         /// @dev AaveV3 automation only supports Core market at the moment (Default market)
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
-        (, uint256 totalDebtUSD ,,,,) = lendingPool.getUserAccountData(_smartWallet);
+        (, uint256 totalDebtUSD,,,,) = lendingPool.getUserAccountData(_smartWallet);
         return _hasEnoughMinDebtInUSD(totalDebtUSD) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
     }
 
-    function _verifySparkMinDebtPosition(
-        address _smartWallet
-    ) internal view returns (TriggerStatus) {
+    function _verifySparkMinDebtPosition(address _smartWallet) internal view returns (TriggerStatus) {
         /// @dev Spark automation is only deployed on Mainnet, so we can hardcode the market address
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_SPARK_MARKET_MAINNET).getPool());
-        (, uint256 totalDebtUSD ,,,,) = lendingPool.getUserAccountData(_smartWallet);
+        (, uint256 totalDebtUSD,,,,) = lendingPool.getUserAccountData(_smartWallet);
         return _hasEnoughMinDebtInUSD(totalDebtUSD) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
     }
 
     /*//////////////////////////////////////////////////////////////
                                 HELPERS
-    //////////////////////////////////////////////////////////////*/    
-    function _fetchTokenHolder(
-        address _subWallet
-    ) internal view returns (address) {
+    //////////////////////////////////////////////////////////////*/
+    function _fetchTokenHolder(address _subWallet) internal view returns (address) {
         if (isDSProxy(_subWallet)) {
             return DSProxy(payable(_subWallet)).owner();
         }
@@ -230,7 +207,7 @@ contract StrategyTriggerViewNoRevert is
         if (block.chainid == 1) {
             return _userDebtInUSD >= MIN_DEBT_IN_USD_MAINNET;
         }
-        
+
         return _userDebtInUSD >= MIN_DEBT_IN_USD_L2;
     }
 }

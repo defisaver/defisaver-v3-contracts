@@ -320,12 +320,10 @@ interface IEVC {
     /// balance of the EVC contract will be forwarded.
     /// @param data The encoded data which is called on the target contract.
     /// @return result The result of the call.
-    function call(
-        address targetContract,
-        address onBehalfOfAccount,
-        uint256 value,
-        bytes calldata data
-    ) external payable returns (bytes memory result);
+    function call(address targetContract, address onBehalfOfAccount, uint256 value, bytes calldata data)
+        external
+        payable
+        returns (bytes memory result);
 
     /// @notice For a given account, calls into one of the enabled collateral vaults from the currently enabled
     /// controller vault as per data encoded.
@@ -340,12 +338,10 @@ interface IEVC {
     /// balance of the EVC contract will be forwarded.
     /// @param data The encoded data which is called on the target collateral.
     /// @return result The result of the call.
-    function controlCollateral(
-        address targetCollateral,
-        address onBehalfOfAccount,
-        uint256 value,
-        bytes calldata data
-    ) external payable returns (bytes memory result);
+    function controlCollateral(address targetCollateral, address onBehalfOfAccount, uint256 value, bytes calldata data)
+        external
+        payable
+        returns (bytes memory result);
 
     /// @notice Executes multiple calls into the target contracts while checks deferred as per batch items provided.
     /// @dev This function defers the account and vault status checks (it's a checks-deferrable call). If the outermost

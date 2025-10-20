@@ -14,7 +14,7 @@ import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
 
 /// @title Action that gets and receives a FL from Aave V3 and does not return funds but opens debt position on Aave V3
 /// @dev In order to open debt position, FL action must have credit delegation allowance from onBehalfOf address
-/// @dev No credit delegation allowance should be left after FL to prevent someone to borrow funds and generate debt onBehalfOf address 
+/// @dev No credit delegation allowance should be left after FL to prevent someone to borrow funds and generate debt onBehalfOf address
 contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanBase {
     using TokenUtils for address;
 
@@ -28,12 +28,12 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
     error CreditDelegationAllowanceLeftError(uint256 amountLeft);
 
     /// @inheritdoc ActionBase
-    function executeAction(
-        bytes memory _callData,
-        bytes32[] memory,
-        uint8[] memory,
-        bytes32[] memory
-    ) public override payable returns (bytes32) {
+    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
+        public
+        payable
+        override
+        returns (bytes32)
+    {
         FlashLoanParams memory flData = parseInputs(_callData);
 
         // check to make sure modes are not 0
@@ -50,21 +50,18 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
         }
 
         bytes memory recipeData = flData.recipeData;
-        uint flAmount = _flAaveV3(flData, recipeData);
+        uint256 flAmount = _flAaveV3(flData, recipeData);
 
         // revert if some credit delegation allowance is left
         for (uint256 i = 0; i < flData.tokens.length; ++i) {
             DataTypes.ReserveData memory reserveData = IPoolV3(AAVE_V3_LENDING_POOL).getReserveData(flData.tokens[i]);
-            
-            address debtToken = DataTypes.InterestRateMode(flData.modes[i]) == DataTypes.InterestRateMode.VARIABLE 
-                ? reserveData.variableDebtTokenAddress 
+
+            address debtToken = DataTypes.InterestRateMode(flData.modes[i]) == DataTypes.InterestRateMode.VARIABLE
+                ? reserveData.variableDebtTokenAddress
                 : reserveData.stableDebtTokenAddress;
-            
-            uint256 creditDelegationAllowance = IDebtToken(debtToken).borrowAllowance(
-                flData.onBehalfOf,
-                address(this)
-            );
-            
+
+            uint256 creditDelegationAllowance = IDebtToken(debtToken).borrowAllowance(flData.onBehalfOf, address(this));
+
             if (creditDelegationAllowance > 0) {
                 revert CreditDelegationAllowanceLeftError(creditDelegationAllowance);
             }
@@ -74,10 +71,10 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public override payable {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
-    function actionType() public override pure returns (uint8) {
+    function actionType() public pure override returns (uint8) {
         return uint8(ActionType.FL_ACTION);
     }
 
@@ -86,8 +83,7 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
     /// @notice Gets a Fl from AaveV3 and returns back the execution to the action address
     /// @param _flData All the amounts/tokens and related aave fl data
     /// @param _params Rest of the data we have in the recipe
-    function _flAaveV3(FlashLoanParams memory _flData, bytes memory _params) internal returns (uint) {
-
+    function _flAaveV3(FlashLoanParams memory _flData, bytes memory _params) internal returns (uint256) {
         IPoolV3(AAVE_V3_LENDING_POOL).flashLoan(
             address(this),
             _flData.tokens,
@@ -99,8 +95,7 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
         );
 
         emit ActionEvent(
-            "FLAaveV3CarryDebt",
-            abi.encode(_flData.tokens, _flData.amounts, _flData.modes, _flData.onBehalfOf)
+            "FLAaveV3CarryDebt", abi.encode(_flData.tokens, _flData.amounts, _flData.modes, _flData.onBehalfOf)
         );
 
         return _flData.amounts[0];
@@ -115,10 +110,10 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
         address _initiator,
         bytes memory _params
     ) public nonReentrant returns (bool) {
-        if (msg.sender != AAVE_V3_LENDING_POOL){
+        if (msg.sender != AAVE_V3_LENDING_POOL) {
             revert OnlyAaveCallerError();
         }
-        if (_initiator != address(this)){
+        if (_initiator != address(this)) {
             revert SameCallerError();
         }
 
@@ -139,5 +134,5 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external payable {}
+    receive() external payable { }
 }

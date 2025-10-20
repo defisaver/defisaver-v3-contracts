@@ -59,14 +59,15 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _curveUsdSelfLiquidate(Params memory _params) internal returns (uint256, bytes memory) {      
+    function _curveUsdSelfLiquidate(Params memory _params) internal returns (uint256, bytes memory) {
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
         uint256 userWholeDebt = ICrvUsdController(_params.controllerAddress).debt(address(this));
-        (uint256 collInCrvUsd, uint256 collInDepositAsset) = getCollAmountsFromAMM(_params.controllerAddress, address(this));
+        (uint256 collInCrvUsd, uint256 collInDepositAsset) =
+            getCollAmountsFromAMM(_params.controllerAddress, address(this));
 
         uint256 amountToPull;
-        
+
         if (collInCrvUsd < userWholeDebt) {
             /// @dev in some cases debt - collInCrvUsd will fall few wei short of closing the position
             // if we don't have enough crvUsd in coll, pull the rest from the user
@@ -76,7 +77,7 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
         }
 
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
-        
+
         uint256 collAssetBalancePreLiq = collateralAsset.getBalance(address(this));
         uint256 crvUsdBalancePreLiq = CRVUSD_TOKEN_ADDR.getBalance(address(this));
 
@@ -87,7 +88,7 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
 
         uint256 collAssetReceivedFromLiq = collAssetBalanceAfterLiq - collAssetBalancePreLiq;
         collateralAsset.withdrawTokens(_params.to, collAssetReceivedFromLiq);
-        
+
         if (collInCrvUsd > userWholeDebt) {
             // we return any extra CrvUSD that was left in coll after liquidation
             uint256 extraCrvUsdFromColl = crvUsdBalanceAfterLiq - crvUsdBalancePreLiq;
@@ -100,10 +101,7 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
             CRVUSD_TOKEN_ADDR.approveToken(_params.controllerAddress, 0);
         }
 
-        return (
-            collAssetReceivedFromLiq,
-            abi.encode(_params, collInCrvUsd, collInDepositAsset, userWholeDebt)
-        );
+        return (collAssetReceivedFromLiq, abi.encode(_params, collInCrvUsd, collInDepositAsset, userWholeDebt));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

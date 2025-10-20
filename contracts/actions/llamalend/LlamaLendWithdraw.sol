@@ -58,15 +58,15 @@ contract LlamaLendWithdraw is ActionBase, LlamaLendHelper {
 
     function _llamaLendWithdraw(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.collateralAmount == 0) revert ZeroAmountWithdraw();
-        
+
         /// @dev figure out if we need this calculated on-chain
         if (_params.collateralAmount == type(uint256).max) {
             _params.collateralAmount = userMaxWithdraw(_params.controllerAddress, address(this));
         }
-        
+
         address collateralAsset = ILlamaLendController(_params.controllerAddress).collateral_token();
 
-        if (_params.controllerAddress == OLD_WETH_CONTROLLER && block.chainid == 1){
+        if (_params.controllerAddress == OLD_WETH_CONTROLLER && block.chainid == 1) {
             ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount, false);
         } else {
             ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount);
@@ -74,10 +74,7 @@ contract LlamaLendWithdraw is ActionBase, LlamaLendHelper {
 
         collateralAsset.withdrawTokens(_params.to, _params.collateralAmount);
 
-        return (
-            _params.collateralAmount,
-            abi.encode(_params)
-        );
+        return (_params.collateralAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

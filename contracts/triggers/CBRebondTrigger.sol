@@ -26,7 +26,7 @@ contract CBRebondTrigger is ITrigger, AdminAuth, CBHelper {
         uint256 currentBLusdAmount = CBManager.calcAccruedBLUSD(triggerSubData.bondID);
 
         uint256 bondBLUSDCap = CBManager.calcBondBLUSDCap(triggerSubData.bondID);
-        
+
         (uint256 optimalLusdRebondAmount, uint256 marketPrice) = getOptimalLusdAmount(bondBLUSDCap, currentBLusdAmount);
 
         uint256 currentLusdAmount = wmul(currentBLusdAmount, marketPrice);
@@ -47,7 +47,7 @@ contract CBRebondTrigger is ITrigger, AdminAuth, CBHelper {
         params = abi.decode(_subData, (SubParams));
     }
 
-    function changedSubData(bytes memory _subData) public view override returns (bytes memory) {}
+    function changedSubData(bytes memory _subData) public view override returns (bytes memory) { }
 
     function isChangeable() public pure override returns (bool) {
         return false;

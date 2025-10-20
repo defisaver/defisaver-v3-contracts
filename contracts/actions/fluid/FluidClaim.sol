@@ -28,7 +28,7 @@ contract FluidClaim is ActionBase, FluidHelper {
         uint256 cycle;
         bytes32[] merkleProof;
         bytes metadata;
-    }   
+    }
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -67,7 +67,7 @@ contract FluidClaim is ActionBase, FluidHelper {
     //////////////////////////////////////////////////////////////*/
     function _claim(Params memory _params) internal returns (uint256, bytes memory) {
         address rewardToken = IFluidMerkleDistributor(FLUID_MERKLE_DISTRIBUTOR).TOKEN();
-        
+
         uint256 rewardTokenBalanceBefore = rewardToken.getBalance(address(this));
 
         IFluidMerkleDistributor(FLUID_MERKLE_DISTRIBUTOR).claim(

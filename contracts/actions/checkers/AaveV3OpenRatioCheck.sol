@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import {ActionBase} from "../ActionBase.sol";
-import {AaveV3RatioHelper} from "../aaveV3/helpers/AaveV3RatioHelper.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { AaveV3RatioHelper } from "../aaveV3/helpers/AaveV3RatioHelper.sol";
 
 /// @title Action to check the ratio of the Aave V3 position after strategy execution.
 /// @notice This action only checks for current ratio, without comparing it to the start ratio.
@@ -59,7 +59,7 @@ contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
 
     /// @inheritdoc ActionBase
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {

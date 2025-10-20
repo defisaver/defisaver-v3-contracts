@@ -7,14 +7,14 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 
 /// @title StrategyStorage - Record of all the Strategies created
 contract StrategyStorage is StrategyModel, AdminAuth {
-
     Strategy[] public strategies;
     bool public openToPublic = false;
 
-    error NoAuthToCreateStrategy(address,bool);
+    error NoAuthToCreateStrategy(address, bool);
+
     event StrategyCreated(uint256 indexed strategyId);
 
-    modifier onlyAuthCreators {
+    modifier onlyAuthCreators() {
         if (adminVault.owner() != msg.sender && openToPublic == false) {
             revert NoAuthToCreateStrategy(msg.sender, openToPublic);
         }
@@ -36,14 +36,16 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         uint8[][] memory _paramMapping,
         bool _continuous
     ) public onlyAuthCreators returns (uint256) {
-        strategies.push(Strategy({
+        strategies.push(
+            Strategy({
                 name: _name,
                 creator: msg.sender,
                 triggerIds: _triggerIds,
                 actionIds: _actionIds,
                 paramMapping: _paramMapping,
-                continuous : _continuous
-        }));
+                continuous: _continuous
+            })
+        );
 
         emit StrategyCreated(strategies.length - 1);
 
@@ -59,28 +61,28 @@ contract StrategyStorage is StrategyModel, AdminAuth {
 
     ////////////////////////////// VIEW METHODS /////////////////////////////////
 
-    function getStrategy(uint _strategyId) public view returns (Strategy memory) {
+    function getStrategy(uint256 _strategyId) public view returns (Strategy memory) {
         return strategies[_strategyId];
     }
+
     function getStrategyCount() public view returns (uint256) {
         return strategies.length;
     }
 
-    function getPaginatedStrategies(uint _page, uint _perPage) public view returns (Strategy[] memory) {
+    function getPaginatedStrategies(uint256 _page, uint256 _perPage) public view returns (Strategy[] memory) {
         Strategy[] memory strategiesPerPage = new Strategy[](_perPage);
 
-        uint start = _page * _perPage;
-        uint end = start + _perPage;
+        uint256 start = _page * _perPage;
+        uint256 end = start + _perPage;
 
         end = (end > strategies.length) ? strategies.length : end;
 
-        uint count = 0;
-        for (uint i = start; i < end; i++) {
+        uint256 count = 0;
+        for (uint256 i = start; i < end; i++) {
             strategiesPerPage[count] = strategies[i];
             count++;
         }
 
         return strategiesPerPage;
     }
-
 }

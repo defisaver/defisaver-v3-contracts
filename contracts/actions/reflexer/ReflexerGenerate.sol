@@ -20,7 +20,7 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
         uint256 amount;
         address to;
     }
-    
+
     error InvalidCollateralType();
 
     /// @inheritdoc ActionBase
@@ -36,7 +36,8 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
         inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 borrowedAmount, bytes memory logData) = _reflexerGenerate(inputData.safeId, inputData.amount, inputData.to);
+        (uint256 borrowedAmount, bytes memory logData) =
+            _reflexerGenerate(inputData.safeId, inputData.amount, inputData.to);
         emit ActionEvent("ReflexerGenerate", logData);
         return bytes32(borrowedAmount);
     }
@@ -58,19 +59,16 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
     /// @param _safeId Id of the safe
     /// @param _amount Amount of rai to be generated
     /// @param _to Address which will receive the rai
-    function _reflexerGenerate(
-        uint256 _safeId,
-        uint256 _amount,
-        address _to
-    ) internal returns (uint256, bytes memory) {
+    function _reflexerGenerate(uint256 _safeId, uint256 _amount, address _to)
+        internal
+        returns (uint256, bytes memory)
+    {
         address safe = safeManager.safes(_safeId);
         bytes32 collType = safeManager.collateralTypes(_safeId);
 
         // Generate rai and move to proxy balance
         safeManager.modifySAFECollateralization(
-            _safeId,
-            int256(0),
-            _getGeneratedDeltaDebt(TAX_COLLECTOR_ADDRESS, safe, collType, _amount)
+            _safeId, int256(0), _getGeneratedDeltaDebt(TAX_COLLECTOR_ADDRESS, safe, collType, _amount)
         );
         safeManager.transferInternalCoins(_safeId, address(this), toRad(_amount));
 
@@ -95,16 +93,14 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
     /// @param safeHandler address
     /// @param collateralType bytes32
     /// @return deltaDebt
-    function _getGeneratedDeltaDebt(
-        address taxCollector,
-        address safeHandler,
-        bytes32 collateralType,
-        uint256 wad
-    ) internal returns (int256 deltaDebt) {
+    function _getGeneratedDeltaDebt(address taxCollector, address safeHandler, bytes32 collateralType, uint256 wad)
+        internal
+        returns (int256 deltaDebt)
+    {
         // Updates stability fee rate
         uint256 rate = ITaxCollector(taxCollector).taxSingle(collateralType);
 
-        if (rate <= 0){
+        if (rate <= 0) {
             revert InvalidCollateralType();
         }
 

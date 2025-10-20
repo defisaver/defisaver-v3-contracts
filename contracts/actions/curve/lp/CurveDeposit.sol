@@ -40,7 +40,8 @@ contract CurveDeposit is ActionBase, CurveHelper {
 
         params.from = _parseParamAddr(params.from, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.depositTargetOrPool = _parseParamAddr(params.depositTargetOrPool, _paramMapping[2], _subData, _returnValues);
+        params.depositTargetOrPool =
+            _parseParamAddr(params.depositTargetOrPool, _paramMapping[2], _subData, _returnValues);
         params.minMintAmount = _parseParamUint(params.minMintAmount, _paramMapping[3], _subData, _returnValues);
         params.flags = uint8(_parseParamUint(params.flags, _paramMapping[4], _subData, _returnValues));
         for (uint256 i = 0; i < params.amounts.length; i++) {
@@ -68,10 +69,7 @@ contract CurveDeposit is ActionBase, CurveHelper {
 
     function _curveDeposit(Params memory _params) internal returns (uint256 received, bytes memory logData) {
         if (_params.to == address(0)) revert CurveDepositZeroRecipient();
-        (
-            DepositTargetType depositTargetType,
-            bool explicitUnderlying,,
-        ) = parseFlags(_params.flags);
+        (DepositTargetType depositTargetType, bool explicitUnderlying,,) = parseFlags(_params.flags);
 
         CurveCache memory cache = _getPoolInfo(_params.depositTargetOrPool, depositTargetType, explicitUnderlying);
 
@@ -93,11 +91,13 @@ contract CurveDeposit is ActionBase, CurveHelper {
 
         if (depositTargetType == DepositTargetType.ZAP_3POOL) {
             uint256[4] memory fixedSizeAmounts;
-            for (uint256 i = 0; i < 4; i++) fixedSizeAmounts[i] = _params.amounts[i];
+            for (uint256 i = 0; i < 4; i++) {
+                fixedSizeAmounts[i] = _params.amounts[i];
+            }
             ICurve3PoolZap(cache.depositTarget).add_liquidity(cache.pool, fixedSizeAmounts, _params.minMintAmount);
         } else {
             bytes memory payload = _constructPayload(_params.amounts, _params.minMintAmount, explicitUnderlying);
-            (bool success, ) = cache.depositTarget.call{ value: msgValue }(payload);
+            (bool success,) = cache.depositTarget.call{ value: msgValue }(payload);
             if (!success) revert CurveDepositPoolReverted();
         }
 
@@ -111,7 +111,11 @@ contract CurveDeposit is ActionBase, CurveHelper {
     }
 
     /// @dev Constructs payload for external contract call
-    function _constructPayload(uint256[] memory _amounts, uint256 _minMintAmount, bool _explicitUnderlying) internal pure returns (bytes memory payload) {
+    function _constructPayload(uint256[] memory _amounts, uint256 _minMintAmount, bool _explicitUnderlying)
+        internal
+        pure
+        returns (bytes memory payload)
+    {
         bytes memory sig;
         bytes4 selector;
         bytes memory optional;

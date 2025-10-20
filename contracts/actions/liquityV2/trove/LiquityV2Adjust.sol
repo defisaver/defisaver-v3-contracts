@@ -14,8 +14,14 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 contract LiquityV2Adjust is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 
-    enum CollActionType { SUPPLY, WITHDRAW }
-    enum DebtActionType { PAYBACK, BORROW }
+    enum CollActionType {
+        SUPPLY,
+        WITHDRAW
+    }
+    enum DebtActionType {
+        PAYBACK,
+        BORROW
+    }
 
     /// @param market The address of the LiquityV2 market (collateral branch)
     /// @param from The address to pull the tokens from
@@ -54,8 +60,10 @@ contract LiquityV2Adjust is ActionBase, LiquityV2Helper {
         params.collAmount = _parseParamUint(params.collAmount, _paramMapping[4], _subData, _returnValues);
         params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[5], _subData, _returnValues);
         params.maxUpfrontFee = _parseParamUint(params.maxUpfrontFee, _paramMapping[6], _subData, _returnValues);
-        params.collAction = CollActionType(_parseParamUint(uint8(params.collAction), _paramMapping[7], _subData, _returnValues));
-        params.debtAction = DebtActionType(_parseParamUint(uint8(params.debtAction), _paramMapping[8], _subData, _returnValues));
+        params.collAction =
+            CollActionType(_parseParamUint(uint8(params.collAction), _paramMapping[7], _subData, _returnValues));
+        params.debtAction =
+            DebtActionType(_parseParamUint(uint8(params.debtAction), _paramMapping[8], _subData, _returnValues));
 
         (uint256 debtAmount, bytes memory logData) = _adjust(params);
         emit ActionEvent("LiquityV2Adjust", logData);
@@ -89,8 +97,7 @@ contract LiquityV2Adjust is ActionBase, LiquityV2Helper {
         if (_params.debtAction == DebtActionType.PAYBACK) {
             address troveManager = IAddressesRegistry(_params.market).troveManager();
 
-            uint256 entireDebt = ITroveManager(troveManager)
-                .getLatestTroveData(_params.troveId).entireDebt;
+            uint256 entireDebt = ITroveManager(troveManager).getLatestTroveData(_params.troveId).entireDebt;
 
             uint256 maxRepayment = entireDebt > MIN_DEBT ? entireDebt - MIN_DEBT : 0;
 

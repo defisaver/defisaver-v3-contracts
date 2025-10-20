@@ -36,28 +36,12 @@ contract MorphoAaveV3Withdraw is ActionBase, MorphoAaveV3Helper {
         Params memory params = parseInputs(_callData);
 
         params.emodeId = _parseParamUint(params.emodeId, _paramMapping[0], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(
-            params.tokenAddr,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
+        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(
-            params.onBehalf,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        );
+        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
         params.withdrawAsColl =
-            _parseParamUint(
-                params.withdrawAsColl ? 1 : 0,
-                _paramMapping[5],
-                _subData,
-                _returnValues
-            ) ==
-            1;
+            _parseParamUint(params.withdrawAsColl ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
 
         (uint256 amount, bytes memory logData) = _withdraw(params);
         emit ActionEvent("MorphoAaveV3Withdraw", logData);
@@ -87,18 +71,11 @@ contract MorphoAaveV3Withdraw is ActionBase, MorphoAaveV3Helper {
 
         if (_params.withdrawAsColl) {
             IMorphoAaveV3(morphoAddress).withdrawCollateral(
-                _params.tokenAddr,
-                _params.amount,
-                _params.onBehalf,
-                _params.to
+                _params.tokenAddr, _params.amount, _params.onBehalf, _params.to
             );
         } else {
             IMorphoAaveV3(morphoAddress).withdraw(
-                _params.tokenAddr,
-                _params.amount,
-                _params.onBehalf,
-                _params.to,
-                _params.maxIterations
+                _params.tokenAddr, _params.amount, _params.onBehalf, _params.to, _params.maxIterations
             );
         }
 
