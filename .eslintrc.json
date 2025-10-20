@@ -19,6 +19,7 @@
         "func-names": "off", // allow anonymous functions
         "prefer-destructuring": "off", // allow direct property access
         "no-plusplus": "off", // allow i++
-        "no-loop-func": "off" // allow functions inside a loop
+        "no-loop-func": "off", // allow functions inside a loop
+        "indent": ["error", 4]
     }
 }
