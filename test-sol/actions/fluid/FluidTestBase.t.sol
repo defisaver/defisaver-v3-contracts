@@ -7,9 +7,6 @@ import { IFluidVaultResolver } from "../../../contracts/interfaces/fluid/resolve
 import { IFluidDexResolver } from "../../../contracts/interfaces/fluid/resolvers/IFluidDexResolver.sol";
 import { IFluidVault } from "../../../contracts/interfaces/fluid/vaults/IFluidVault.sol";
 import { IFluidVaultT1 } from "../../../contracts/interfaces/fluid/vaults/IFluidVaultT1.sol";
-import { IFluidVaultT2 } from "../../../contracts/interfaces/fluid/vaults/IFluidVaultT2.sol";
-import { IFluidVaultT3 } from "../../../contracts/interfaces/fluid/vaults/IFluidVaultT3.sol";
-import { IFluidVaultT4 } from "../../../contracts/interfaces/fluid/vaults/IFluidVaultT4.sol";
 import { FluidDexModel } from "../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { FluidView } from "../../../contracts/views/FluidView.sol";
 import { FluidHelper } from "../../../contracts/actions/fluid/helpers/FluidHelper.sol";

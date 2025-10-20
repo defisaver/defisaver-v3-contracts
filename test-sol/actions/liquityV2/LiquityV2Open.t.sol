@@ -7,7 +7,6 @@ import { ITroveManager } from "../../../contracts/interfaces/liquityV2/ITroveMan
 import { IHintHelpers } from "../../../contracts/interfaces/liquityV2/IHintHelpers.sol";
 import { IPriceFeed } from "../../../contracts/interfaces/liquityV2/IPriceFeed.sol";
 import { ITroveNFT } from "../../../contracts/interfaces/liquityV2/ITroveNFT.sol";
-import { IBorrowerOperations } from "../../../contracts/interfaces/liquityV2/IBorrowerOperations.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 
@@ -15,7 +14,6 @@ import { LiquityV2TestHelper } from "./LiquityV2TestHelper.t.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-import { console2 } from "forge-std/console2.sol";
 
 contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
     /*//////////////////////////////////////////////////////////////////////////

@@ -8,7 +8,6 @@ import { MockChainlinkAggregator } from "../../contracts/mocks/MockChainlinkAggr
 import { TrailingStopTrigger } from "../../contracts/triggers/TrailingStopTrigger.sol";
 import { DSMath } from "../../contracts/DS/DSMath.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
-import { console } from "forge-std/console.sol";
 
 contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
     /*//////////////////////////////////////////////////////////////////////////

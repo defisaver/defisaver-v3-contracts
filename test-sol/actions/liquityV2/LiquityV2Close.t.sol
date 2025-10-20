@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { ITroveNFT } from "../../../contracts/interfaces/liquityV2/ITroveNFT.sol";
 import { ITroveManager } from "../../../contracts/interfaces/liquityV2/ITroveManager.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";

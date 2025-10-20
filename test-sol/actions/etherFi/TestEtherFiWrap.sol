@@ -9,7 +9,6 @@ import { EtherFiHelper } from "../../../contracts/actions/etherfi/helpers/EtherF
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
-import { Addresses } from "../../utils/Addresses.sol";
 
 import { console } from "forge-std/console.sol";
 

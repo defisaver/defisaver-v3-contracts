@@ -4,8 +4,6 @@ pragma solidity =0.8.24;
 
 import { IDebtToken } from "../../contracts/interfaces/aaveV3/IDebtToken.sol";
 import { IPoolV3 } from "../../contracts/interfaces/aaveV3/IPoolV3.sol";
-import { IPoolAddressesProvider } from "../../contracts/interfaces/aaveV3/IPoolAddressesProvider.sol";
-import { IAaveProtocolDataProvider } from "../../contracts/interfaces/aaveV3/IAaveProtocolDataProvider.sol";
 import { IERC20 } from "../../contracts/interfaces/IERC20.sol";
 import { DataTypes } from "../../contracts/interfaces/aaveV3/DataTypes.sol";
 import { SafeERC20 } from "../../contracts/utils/SafeERC20.sol";

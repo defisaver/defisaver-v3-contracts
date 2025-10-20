@@ -7,7 +7,6 @@ import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 import { IL2PoolV3 } from "../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
 import { IAaveProtocolDataProvider } from "../../../contracts/interfaces/aaveV3/IAaveProtocolDataProvider.sol";
-import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { Addresses } from "../../utils/Addresses.sol";

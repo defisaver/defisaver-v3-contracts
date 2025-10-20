@@ -9,7 +9,6 @@ import { IL2PoolV3 } from "../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
 import { IAaveProtocolDataProvider } from "../../../contracts/interfaces/aaveV3/IAaveProtocolDataProvider.sol";
 import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 
-import { Addresses } from "../../utils/Addresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 

@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IBorrowerOperations } from "../../../contracts/interfaces/liquityV2/IBorrowerOperations.sol";
 import { ITroveManager } from "../../../contracts/interfaces/liquityV2/ITroveManager.sol";
 import { IHintHelpers } from "../../../contracts/interfaces/liquityV2/IHintHelpers.sol";
 import { IPriceFeed } from "../../../contracts/interfaces/liquityV2/IPriceFeed.sol";
