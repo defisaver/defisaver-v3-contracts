@@ -52,7 +52,7 @@
     "dotenv-safe": "^8.2.0",
     "envfile": "^6.17.0",
     "eslint": "^8.57.0",
-    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.4",
@@ -68,7 +68,7 @@
     "prettier-plugin-solidity": "^1.0.0-alpha.59",
     "readline-sync": "^1.4.10",
     "solhint": "^3.3.6",
-    "solhint-plugin-prettier": "0.0.5",
+    "solhint-plugin-prettier": "^0.1.0",
     "solidity-coverage": "^0.8.14"
   },
   "husky": {
