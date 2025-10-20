@@ -14,7 +14,7 @@ For a quick start, you can copy `.env.example` (which contains default values) a
 2. Set the `ETHEREUM_NODE` variable in the `.env` file with a mainnet RPC URL.
 3. Install dependencies:
    ```sh
-   forge install foundry-rs/forge-std dapphub/ds-test --no-commit
+   forge install foundry-rs/forge-std dapphub/ds-test
     ```
 4. Run tests:
     ```sh

@@ -86,6 +86,9 @@ contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
         // Sanity check to avoid division by 0. Highly unlikely to ever happen.
         if (markets.current.totalDebt == 0) return 0;
 
+        uint256 estimatedRedemptionAmount;
+        uint256[] memory redemptionAmounts;
+        
         // CASE 1: Current branch has 0 unbacked debt
         // When totalUnbackedDebt is 0, redemptions will be proportional with the branch size and not to unbacked debt.
         // When unbacked debt is 0 for some branch, next redemption call won't touch that branch, so in order to estimate total debt in front we will:
@@ -108,8 +111,8 @@ contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
 
             // 2. Second redemption call:
             // Perform the split by total debt because there is no more unbacked debt to redeem
-            uint256 estimatedRedemptionAmount = branchDebtInFront * totalDebt / markets.current.totalDebt;
-            uint256[] memory redemptionAmounts = _calculateRedemptionAmounts(
+            estimatedRedemptionAmount = branchDebtInFront * totalDebt / markets.current.totalDebt;
+            redemptionAmounts = _calculateRedemptionAmounts(
                 estimatedRedemptionAmount,
                 totalDebt,
                 markets,
@@ -121,8 +124,8 @@ contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
         }
 
         // CASE 2: Current branch has unbacked debt
-        uint256 estimatedRedemptionAmount = branchDebtInFront * totalUnbackedDebt / markets.current.unbackedDebt;
-        uint256[] memory redemptionAmounts = _calculateRedemptionAmounts(
+        estimatedRedemptionAmount = branchDebtInFront * totalUnbackedDebt / markets.current.unbackedDebt;
+        redemptionAmounts = _calculateRedemptionAmounts(
             estimatedRedemptionAmount,
             totalUnbackedDebt,
             markets,
