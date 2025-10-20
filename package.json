@@ -75,7 +75,7 @@
     "husky": {
         "hooks": {
             "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true",
-            "pre-commit": "npm run lint",
+            "pre-commit": "npm run format:lint:check",
             "commit-msg": "npx --no-install commitlint --edit $1"
         }
     },
