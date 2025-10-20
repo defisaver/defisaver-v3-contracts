@@ -649,5 +649,38 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "PendleTokenRedeem",
+        "address": "0xB4c5f33bb5791D0174Df1879b809Bf57eE540B62",
+        "id": "0x3de77432",
+        "path": "contracts/actions/pendle/PendleTokenRedeem.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "PendleWrapper",
+        "address": "0x862E533198C9656B75bB6A5dDF0953F7ED5E8507",
+        "id": "0x42cdd62e",
+        "path": "contracts/exchangeV3/offchainWrappersV3/PendleWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "DFSSellNoFee",
+        "address": "0x45314C4265a378427f204483b3eFb89981129085",
+        "id": "0xebf16d4a",
+        "path": "contracts/actions/exchange/DFSSellNoFee.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]
