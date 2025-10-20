@@ -31,10 +31,14 @@ number_underscore = "thousands"
 exclude_lints = [
     # "unaliased-plain-import",
     # "unused-import",
-    "asm-keccak256",
     # "incorrect-shift",
     "unchecked-call",
+    "unsafe-typecast",
+    "named-struct-fields",
+    "unwrapped-modifier-logic",
+    "unsafe-cheatcode",
     "erc20-unchecked-transfer",
+    "asm-keccak256",
 
     "mixed-case-function",
     "mixed-case-variable",
