@@ -15,7 +15,6 @@ import { ExecuteActionsBase } from "./ExecuteActionsBase.sol";
 import { SmartWallet } from "../SmartWallet.sol";
 
 contract LiquityV2ExecuteActions is ExecuteActionsBase, LiquityV2TestHelper {
-
     struct OpenTroveVars {
         address collToken;
         address wethToken;
@@ -54,20 +53,15 @@ contract LiquityV2ExecuteActions is ExecuteActionsBase, LiquityV2TestHelper {
             ? ITroveManager(_market.troveManager()).getLatestBatchData(_batchManager).annualInterestRate
             : _annualInterestRate;
 
-        (vars.upperHint, vars.lowerHint) = getInsertPosition(
-            _viewContract,
-            _market,
-            _collIndex,
-            _annualInterestRate
-        );
+        (vars.upperHint, vars.lowerHint) = getInsertPosition(_viewContract, _market, _collIndex, _annualInterestRate);
 
         vars.collPriceWAD = IPriceFeed(_market.priceFeed()).lastGoodPrice();
         vars.collAmount = amountInUSDPriceMock(vars.collToken, _collAmountInUSD, vars.collPriceWAD / 1e10);
         vars.borrowAmount = amountInUSDPriceMock(vars.bold, _borrowAmountInUSD, 1e8);
 
         vars.predictMaxUpfrontFee = _batchManager != address(0)
-                ? vars.hintHelpers.predictOpenTroveAndJoinBatchUpfrontFee(_collIndex, vars.borrowAmount, _batchManager)
-                : vars.hintHelpers.predictOpenTroveUpfrontFee(_collIndex, vars.borrowAmount, _annualInterestRate);
+            ? vars.hintHelpers.predictOpenTroveAndJoinBatchUpfrontFee(_collIndex, vars.borrowAmount, _batchManager)
+            : vars.hintHelpers.predictOpenTroveUpfrontFee(_collIndex, vars.borrowAmount, _annualInterestRate);
 
         if (vars.collToken == vars.wethToken) {
             give(vars.wethToken, _wallet.owner(), vars.collAmount + ETH_GAS_COMPENSATION);

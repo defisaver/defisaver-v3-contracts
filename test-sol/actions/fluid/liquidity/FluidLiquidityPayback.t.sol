@@ -17,7 +17,6 @@ import { Vm } from "forge-std/Vm.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
 contract TestFluidLiquidityPayback is FluidTestBase {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -70,9 +69,9 @@ contract TestFluidLiquidityPayback is FluidTestBase {
     function test_should_payback_part() public {
         bool isDirect = false;
         bool isMaxPayback = false;
-        uint256 initialSupplyAmountUSD = 50000;
-        uint256 initialBorrowAmountUSD = 30000;
-        uint256 paybackAmountUSD = 10000;
+        uint256 initialSupplyAmountUSD = 50_000;
+        uint256 initialBorrowAmountUSD = 30_000;
+        uint256 paybackAmountUSD = 10_000;
 
         for (uint256 i = 0; i < t1VaultsSelected.length; ++i) {
             _baseTest(
@@ -89,9 +88,9 @@ contract TestFluidLiquidityPayback is FluidTestBase {
     function test_should_payback_action_direct() public {
         bool isDirect = true;
         bool isMaxPayback = false;
-        uint256 initialSupplyAmountUSD = 50000;
-        uint256 initialBorrowAmountUSD = 30000;
-        uint256 paybackAmountUSD = 10000;
+        uint256 initialSupplyAmountUSD = 50_000;
+        uint256 initialBorrowAmountUSD = 30_000;
+        uint256 paybackAmountUSD = 10_000;
 
         for (uint256 i = 0; i < t1VaultsSelected.length; ++i) {
             _baseTest(
@@ -112,12 +111,12 @@ contract TestFluidLiquidityPayback is FluidTestBase {
         uint256[] memory paybackAmounts = new uint256[](5);
         paybackAmounts[0] = 99;
         paybackAmounts[1] = 9982;
-        paybackAmounts[2] = 29178;
+        paybackAmounts[2] = 29_178;
         paybackAmounts[3] = 3333;
-        paybackAmounts[4] = 31112;
+        paybackAmounts[4] = 31_112;
 
-        uint256 initialSupplyAmountUSD = 50000;
-        uint256 initialBorrowAmountUSD = 31113;
+        uint256 initialSupplyAmountUSD = 50_000;
+        uint256 initialBorrowAmountUSD = 31_113;
 
         for (uint256 i = 0; i < paybackAmounts.length; ++i) {
             for (uint256 j = 0; j < t1VaultsSelected.length; ++j) {
@@ -132,17 +131,17 @@ contract TestFluidLiquidityPayback is FluidTestBase {
             }
         }
     }
-    
+
     function test_should_max_payback() public {
         bool isDirect = false;
         bool isMaxPayback = true;
 
-        uint256 initSupplyAmountsUSD = 100000;
+        uint256 initSupplyAmountsUSD = 100_000;
         uint256[] memory initBorrowAmountsUSD = new uint256[](5);
-        initBorrowAmountsUSD[0] = 50001;
-        initBorrowAmountsUSD[1] = 31122;
+        initBorrowAmountsUSD[0] = 50_001;
+        initBorrowAmountsUSD[1] = 31_122;
         initBorrowAmountsUSD[2] = 100;
-        initBorrowAmountsUSD[3] = 22567;
+        initBorrowAmountsUSD[3] = 22_567;
         initBorrowAmountsUSD[4] = 999;
 
         for (uint256 i = 0; i < initBorrowAmountsUSD.length; ++i) {
@@ -181,11 +180,7 @@ contract TestFluidLiquidityPayback is FluidTestBase {
         for (uint256 i = 0; i < vaults.length; ++i) {
             uint256 nftId = _t1VaultsSelected
                 ? executeFluidVaultT1Open(
-                    address(vaults[i]),
-                    _initialSupplyAmountUSD,
-                    _initialBorrowAmountUSD,
-                    wallet,
-                    address(t1OpenContract)
+                    address(vaults[i]), _initialSupplyAmountUSD, _initialBorrowAmountUSD, wallet, address(t1OpenContract)
                 )
                 : executeFluidVaultT2Open(
                     address(vaults[i]),
@@ -218,18 +213,9 @@ contract TestFluidLiquidityPayback is FluidTestBase {
 
             bytes memory executeActionCallData = executeActionCalldata(
                 _t1VaultsSelected
-                    ? fluidVaultT1PaybackEncode(
-                        address(vaults[i]),
-                        nftId,
-                        paybackAmount,
-                        sender
-                    )
+                    ? fluidVaultT1PaybackEncode(address(vaults[i]), nftId, paybackAmount, sender)
                     : fluidDexPaybackEncode(
-                        address(vaults[i]),
-                        sender,
-                        nftId,
-                        paybackAmount,
-                        FluidDexModel.PaybackVariableData(0, 0, 0, 0)
+                        address(vaults[i]), sender, nftId, paybackAmount, FluidDexModel.PaybackVariableData(0, 0, 0, 0)
                     ),
                 _isDirect
             );
@@ -238,9 +224,8 @@ contract TestFluidLiquidityPayback is FluidTestBase {
 
             vars.senderBorrowTokenBalanceBefore = balanceOf(tokens.borrow0, sender);
             vars.senderEthBalanceBefore = address(sender).balance;
-            vars.walletBorrowTokenBalanceBefore = isNativePayback
-                ? address(walletAddr).balance
-                : balanceOf(tokens.borrow0, walletAddr);
+            vars.walletBorrowTokenBalanceBefore =
+                isNativePayback ? address(walletAddr).balance : balanceOf(tokens.borrow0, walletAddr);
 
             vm.recordLogs();
             wallet.execute(
@@ -252,15 +237,14 @@ contract TestFluidLiquidityPayback is FluidTestBase {
 
             vars.senderBorrowTokenBalanceAfter = balanceOf(tokens.borrow0, sender);
             vars.senderEthBalanceAfter = address(sender).balance;
-            vars.walletBorrowTokenBalanceAfter = isNativePayback
-                ? address(walletAddr).balance
-                : balanceOf(tokens.borrow0, walletAddr);
+            vars.walletBorrowTokenBalanceAfter =
+                isNativePayback ? address(walletAddr).balance : balanceOf(tokens.borrow0, walletAddr);
 
             IFluidVaultResolver.UserPosition memory userPositionAfter = fetchPositionByNftId(nftId);
 
             // make sure no dust is left on wallet
             assertEq(vars.walletBorrowTokenBalanceAfter, vars.walletBorrowTokenBalanceBefore);
-            
+
             if (_isMaxPayback) {
                 assertEq(userPositionAfter.borrow, 0);
 
@@ -270,10 +254,8 @@ contract TestFluidLiquidityPayback is FluidTestBase {
                     // parse logs to find exact payback amount
                     for (uint256 j = 0; i < logs.length; ++j) {
                         if (logs[j].topics[0] == IFluidVault.LogOperate.selector) {
-                            ( , , , int256 debtAmt , ) = abi.decode(
-                                logs[j].data,
-                                (address, uint256, int256, int256, address)
-                            );
+                            (,,, int256 debtAmt,) =
+                                abi.decode(logs[j].data, (address, uint256, int256, int256, address));
                             exactPaybackAmount = uint256(-debtAmt);
                             break;
                         }

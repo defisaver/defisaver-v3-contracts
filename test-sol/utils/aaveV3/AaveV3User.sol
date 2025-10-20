@@ -7,16 +7,10 @@ import { UserWallet } from "../UserWallet.sol";
 import { AaveV3UserUtils } from "./AaveV3UserUtils.sol";
 
 contract AaveV3User is AaveV3UserUtils {
-
     //solhint-disable-next-line no-empty-blocks
-    constructor() AaveV3UserUtils() {}
+    constructor() AaveV3UserUtils() { }
 
-    function supply(
-        uint256 _amount,
-        bool _isSafe,
-        uint16 _assetId,
-        address _market
-    ) public {
+    function supply(uint256 _amount, bool _isSafe, uint16 _assetId, address _market) public {
         AaveV3Supply aaveV3Supply = new AaveV3Supply();
 
         AaveV3Supply.Params memory params = AaveV3Supply.Params({
@@ -34,13 +28,7 @@ contract AaveV3User is AaveV3UserUtils {
         executeWithWallet(_isSafe, address(aaveV3Supply), fnData, 0);
     }
 
-    function borrow(
-        bool _isSafe,
-        address _market,
-        uint256 _amount,
-        uint8 _rateMode,
-        uint16 _assetId
-    ) public {
+    function borrow(bool _isSafe, address _market, uint256 _amount, uint8 _rateMode, uint16 _assetId) public {
         AaveV3Borrow aaveV3Borrow = new AaveV3Borrow();
 
         AaveV3Borrow.Params memory params = AaveV3Borrow.Params({

@@ -11,7 +11,6 @@ import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { console } from "forge-std/console.sol";
 
 contract TestEulerV2Payback is EulerV2TestHelper {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -51,33 +50,21 @@ contract TestEulerV2Payback is EulerV2TestHelper {
     function test_should_payback_on_main_account() public {
         address account = walletAddr;
         bool isDirect = false;
-        uint256 collateralAmountInUsd = 100000;
-        uint256 borrowAmountInUsd = 50000;
-        uint256 paybackAmountInUsd = 40000;
+        uint256 collateralAmountInUsd = 100_000;
+        uint256 borrowAmountInUsd = 50_000;
+        uint256 paybackAmountInUsd = 40_000;
 
-        _baseTest(
-            account,
-            collateralAmountInUsd,
-            borrowAmountInUsd,
-            paybackAmountInUsd,
-            isDirect
-        );
+        _baseTest(account, collateralAmountInUsd, borrowAmountInUsd, paybackAmountInUsd, isDirect);
     }
 
     function test_should_payback_on_default_main_account() public {
         address account = address(0);
         bool isDirect = false;
-        uint256 collateralAmountInUsd = 100000;
-        uint256 borrowAmountInUsd = 50000;
+        uint256 collateralAmountInUsd = 100_000;
+        uint256 borrowAmountInUsd = 50_000;
         uint256 paybackAmountInUsd = 10;
 
-        _baseTest(
-            account,
-            collateralAmountInUsd,
-            borrowAmountInUsd,
-            paybackAmountInUsd,
-            isDirect
-        );
+        _baseTest(account, collateralAmountInUsd, borrowAmountInUsd, paybackAmountInUsd, isDirect);
     }
 
     function test_should_payback_with_action_direct() public {
@@ -87,61 +74,37 @@ contract TestEulerV2Payback is EulerV2TestHelper {
         uint256 borrowAmountInUsd = 5000;
         uint256 paybackAmountInUsd = 4999;
 
-        _baseTest(
-            account,
-            collateralAmountInUsd,
-            borrowAmountInUsd,
-            paybackAmountInUsd,
-            isDirect
-        );
+        _baseTest(account, collateralAmountInUsd, borrowAmountInUsd, paybackAmountInUsd, isDirect);
     }
 
     function test_should_payback_full_amount_on_sub_account_with_controller_removal() public {
         address account = getSubAccount(walletAddr, 0x01);
         bool isDirect = true;
-        uint256 collateralAmountInUsd = 100000;
-        uint256 borrowAmountInUsd = 50000;
+        uint256 collateralAmountInUsd = 100_000;
+        uint256 borrowAmountInUsd = 50_000;
         uint256 paybackAmountInUsd = type(uint256).max;
 
-        _baseTest(
-            account,
-            collateralAmountInUsd,
-            borrowAmountInUsd,
-            paybackAmountInUsd,
-            isDirect
-        );
+        _baseTest(account, collateralAmountInUsd, borrowAmountInUsd, paybackAmountInUsd, isDirect);
     }
 
     function test_should_payback_full_amount() public {
         address account = walletAddr;
         bool isDirect = false;
-        uint256 collateralAmountInUsd = 100000;
-        uint256 borrowAmountInUsd = 50000;
+        uint256 collateralAmountInUsd = 100_000;
+        uint256 borrowAmountInUsd = 50_000;
         uint256 paybackAmountInUsd = type(uint256).max;
 
-        _baseTest(
-            account,
-            collateralAmountInUsd,
-            borrowAmountInUsd,
-            paybackAmountInUsd,
-            isDirect
-        );
+        _baseTest(account, collateralAmountInUsd, borrowAmountInUsd, paybackAmountInUsd, isDirect);
     }
 
     function test_should_payback_full_amount_with_controller_removal() public {
         address account = walletAddr;
         bool isDirect = false;
-        uint256 collateralAmountInUsd = 100000;
-        uint256 borrowAmountInUsd = 50000;
+        uint256 collateralAmountInUsd = 100_000;
+        uint256 borrowAmountInUsd = 50_000;
         uint256 paybackAmountInUsd = type(uint256).max;
 
-        _baseTest(
-            account,
-            collateralAmountInUsd,
-            borrowAmountInUsd,
-            paybackAmountInUsd,
-            isDirect
-        );
+        _baseTest(account, collateralAmountInUsd, borrowAmountInUsd, paybackAmountInUsd, isDirect);
     }
 
     function _baseTest(
@@ -167,35 +130,20 @@ contract TestEulerV2Payback is EulerV2TestHelper {
 
             createEulerV2Position(positionParams, wallet, _account);
 
-            _paybackToVault(
-                TestConfig(
-                    borrowVault,
-                    _account,
-                    _paybackAmountInUsd,
-                    _isDirect
-                )
-            );
+            _paybackToVault(TestConfig(borrowVault, _account, _paybackAmountInUsd, _isDirect));
 
             vm.revertTo(snapshotId);
         }
     }
 
-    function _paybackToVault(
-        TestConfig memory _config
-    ) internal {
+    function _paybackToVault(TestConfig memory _config) internal {
         address assetToken = IEVault(_config.vault).asset();
 
         bytes memory callData = executeActionCalldata(
-            eulerV2PaybackEncode(
-                _config.vault,
-                _config.account,
-                sender,
-                _config.paybackAmountInUsd
-            ),
-            _config.isDirect
+            eulerV2PaybackEncode(_config.vault, _config.account, sender, _config.paybackAmountInUsd), _config.isDirect
         );
 
-        address account = _config.account == address(0) ? walletAddr: _config.account;
+        address account = _config.account == address(0) ? walletAddr : _config.account;
 
         bool isMaxPayback = _config.paybackAmountInUsd == type(uint256).max;
 

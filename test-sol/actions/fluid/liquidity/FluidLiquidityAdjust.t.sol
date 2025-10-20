@@ -11,7 +11,6 @@ import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 
 contract TestFluidLiquidityAdjust is FluidTestBase {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -66,9 +65,9 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.SUPPLY,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.BORROW,
-                openSupplyAmountUsd: 50000,
+                openSupplyAmountUsd: 50_000,
                 openBorrowAmountUsd: 0,
-                supplyAmountUsd: 20000,
+                supplyAmountUsd: 20_000,
                 borrowAmountUsd: 0,
                 isMaxSupplyAmount: false,
                 isMaxBorrowAmount: false,
@@ -83,9 +82,9 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.SUPPLY,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.BORROW,
-                openSupplyAmountUsd: 50000,
+                openSupplyAmountUsd: 50_000,
                 openBorrowAmountUsd: 0,
-                supplyAmountUsd: 20000,
+                supplyAmountUsd: 20_000,
                 borrowAmountUsd: 0,
                 isMaxSupplyAmount: true,
                 isMaxBorrowAmount: false,
@@ -100,27 +99,27 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.SUPPLY,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.BORROW,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 10000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 10_000,
                 supplyAmountUsd: 0,
-                borrowAmountUsd: 10000,
+                borrowAmountUsd: 10_000,
                 isMaxSupplyAmount: false,
                 isMaxBorrowAmount: false,
                 sendWrappedEth: false
             })
         );
     }
-    
+
     function test_should_just_borrow_while_send_wrapped_eth() public {
         _baseTest(
             TestConfig({
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.SUPPLY,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.BORROW,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 10000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 10_000,
                 supplyAmountUsd: 0,
-                borrowAmountUsd: 10000,
+                borrowAmountUsd: 10_000,
                 isMaxSupplyAmount: false,
                 isMaxBorrowAmount: false,
                 sendWrappedEth: true
@@ -134,9 +133,9 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.WITHDRAW,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.BORROW,
-                openSupplyAmountUsd: 50000,
+                openSupplyAmountUsd: 50_000,
                 openBorrowAmountUsd: 0,
-                supplyAmountUsd: 20000,
+                supplyAmountUsd: 20_000,
                 borrowAmountUsd: 0,
                 isMaxSupplyAmount: false,
                 isMaxBorrowAmount: false,
@@ -151,9 +150,9 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.WITHDRAW,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.BORROW,
-                openSupplyAmountUsd: 50000,
+                openSupplyAmountUsd: 50_000,
                 openBorrowAmountUsd: 0,
-                supplyAmountUsd: 20000,
+                supplyAmountUsd: 20_000,
                 borrowAmountUsd: 0,
                 isMaxSupplyAmount: false,
                 isMaxBorrowAmount: false,
@@ -161,16 +160,16 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
             })
         );
     }
-    
+
     function test_should_max_withdraw() public {
         _baseTest(
             TestConfig({
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.WITHDRAW,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.BORROW,
-                openSupplyAmountUsd: 50000,
+                openSupplyAmountUsd: 50_000,
                 openBorrowAmountUsd: 0,
-                supplyAmountUsd: 50000,
+                supplyAmountUsd: 50_000,
                 borrowAmountUsd: 0,
                 isMaxSupplyAmount: true,
                 isMaxBorrowAmount: false,
@@ -185,9 +184,9 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.WITHDRAW,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.BORROW,
-                openSupplyAmountUsd: 50000,
+                openSupplyAmountUsd: 50_000,
                 openBorrowAmountUsd: 0,
-                supplyAmountUsd: 50000,
+                supplyAmountUsd: 50_000,
                 borrowAmountUsd: 0,
                 isMaxSupplyAmount: true,
                 isMaxBorrowAmount: false,
@@ -202,10 +201,10 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.SUPPLY,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.PAYBACK,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 30000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 30_000,
                 supplyAmountUsd: 0,
-                borrowAmountUsd: 10000,
+                borrowAmountUsd: 10_000,
                 isMaxSupplyAmount: false,
                 isMaxBorrowAmount: false,
                 sendWrappedEth: false
@@ -219,10 +218,10 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.SUPPLY,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.PAYBACK,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 30000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 30_000,
                 supplyAmountUsd: 0,
-                borrowAmountUsd: 30000,
+                borrowAmountUsd: 30_000,
                 isMaxSupplyAmount: false,
                 isMaxBorrowAmount: true,
                 sendWrappedEth: false
@@ -236,10 +235,10 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.SUPPLY,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.BORROW,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 30000,
-                supplyAmountUsd: 20000,
-                borrowAmountUsd: 10000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 30_000,
+                supplyAmountUsd: 20_000,
+                borrowAmountUsd: 10_000,
                 isMaxSupplyAmount: false,
                 isMaxBorrowAmount: false,
                 sendWrappedEth: false
@@ -253,10 +252,10 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.SUPPLY,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.BORROW,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 30000,
-                supplyAmountUsd: 20000,
-                borrowAmountUsd: 10000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 30_000,
+                supplyAmountUsd: 20_000,
+                borrowAmountUsd: 10_000,
                 isMaxSupplyAmount: false,
                 isMaxBorrowAmount: false,
                 sendWrappedEth: true
@@ -270,10 +269,10 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: true,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.SUPPLY,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.PAYBACK,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 30000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 30_000,
                 supplyAmountUsd: 5000,
-                borrowAmountUsd: 20000,
+                borrowAmountUsd: 20_000,
                 isMaxSupplyAmount: false,
                 isMaxBorrowAmount: false,
                 sendWrappedEth: false
@@ -287,8 +286,8 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.WITHDRAW,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.BORROW,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 30000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 30_000,
                 supplyAmountUsd: 2000,
                 borrowAmountUsd: 5000,
                 isMaxSupplyAmount: false,
@@ -304,9 +303,9 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.WITHDRAW,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.PAYBACK,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 30000,
-                supplyAmountUsd: 10000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 30_000,
+                supplyAmountUsd: 10_000,
                 borrowAmountUsd: 9000,
                 isMaxSupplyAmount: false,
                 isMaxBorrowAmount: false,
@@ -321,9 +320,9 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.WITHDRAW,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.PAYBACK,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 30000,
-                supplyAmountUsd: 10000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 30_000,
+                supplyAmountUsd: 10_000,
                 borrowAmountUsd: 9000,
                 isMaxSupplyAmount: false,
                 isMaxBorrowAmount: false,
@@ -338,10 +337,10 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: true,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.SUPPLY,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.PAYBACK,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 30000,
-                supplyAmountUsd: 20000,
-                borrowAmountUsd: 30000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 30_000,
+                supplyAmountUsd: 20_000,
+                borrowAmountUsd: 30_000,
                 isMaxSupplyAmount: true,
                 isMaxBorrowAmount: true,
                 sendWrappedEth: false
@@ -355,10 +354,10 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.WITHDRAW,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.PAYBACK,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 30000,
-                supplyAmountUsd: 50000,
-                borrowAmountUsd: 30000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 30_000,
+                supplyAmountUsd: 50_000,
+                borrowAmountUsd: 30_000,
                 isMaxSupplyAmount: true,
                 isMaxBorrowAmount: true,
                 sendWrappedEth: false
@@ -372,10 +371,10 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.WITHDRAW,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.PAYBACK,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 30000,
-                supplyAmountUsd: 50000,
-                borrowAmountUsd: 30000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 30_000,
+                supplyAmountUsd: 50_000,
+                borrowAmountUsd: 30_000,
                 isMaxSupplyAmount: true,
                 isMaxBorrowAmount: true,
                 sendWrappedEth: true
@@ -389,8 +388,8 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 isDirect: false,
                 supplyActionType: FluidVaultT1Adjust.CollActionType.WITHDRAW,
                 borrowActionType: FluidVaultT1Adjust.DebtActionType.BORROW,
-                openSupplyAmountUsd: 50000,
-                openBorrowAmountUsd: 30000,
+                openSupplyAmountUsd: 50_000,
+                openBorrowAmountUsd: 30_000,
                 supplyAmountUsd: 2000,
                 borrowAmountUsd: 5000,
                 isMaxSupplyAmount: false,
@@ -406,10 +405,8 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
         bool isNativeBorrow;
         uint256 supplyTokenAmount;
         uint256 borrowTokenAmount;
-
         IFluidVaultResolver.UserPosition userPositionBefore;
         IFluidVaultResolver.UserPosition userPositionAfter;
-
         // SNAPSHOTS
         uint256 senderBorrowTokenBalanceBefore;
         uint256 senderSupplyTokenBalanceBefore;
@@ -430,25 +427,19 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
         uint256 walletWethTokenBalanceAfter;
     }
 
-    function _baseTest(
-        TestConfig memory _config
-    ) internal {
+    function _baseTest(TestConfig memory _config) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
             IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(vaults[i]).constantsView();
             TempLocalVars memory vars;
 
             vars.nftId = executeFluidVaultT1Open(
-                vaults[i],
-                _config.openSupplyAmountUsd,
-                _config.openBorrowAmountUsd,
-                wallet,
-                address(openContract)
+                vaults[i], _config.openSupplyAmountUsd, _config.openBorrowAmountUsd, wallet, address(openContract)
             );
 
             vars.isNativeSupply = constants.supplyToken == TokenUtils.ETH_ADDR;
             vars.isNativeBorrow = constants.borrowToken == TokenUtils.ETH_ADDR;
             vars.userPositionBefore = fetchPositionByNftId(vars.nftId);
-            
+
             // .--------- SUPPLY ----------.
             if (_config.supplyActionType == FluidVaultT1Adjust.CollActionType.SUPPLY && _config.supplyAmountUsd > 0) {
                 address supplyToken = vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken;
@@ -484,11 +475,15 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
             }
 
             // .--------- TAKE SNAPSHOTS ----------.
-            vars.senderSupplyTokenBalanceBefore = balanceOf(vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, sender);
-            vars.senderBorrowTokenBalanceBefore = balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, sender);
+            vars.senderSupplyTokenBalanceBefore =
+                balanceOf(vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, sender);
+            vars.senderBorrowTokenBalanceBefore =
+                balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, sender);
             vars.senderEthTokenBalanceBefore = address(sender).balance;
-            vars.walletSupplyTokenBalanceBefore = balanceOf(vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, walletAddr);
-            vars.walletBorrowTokenBalanceBefore = balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, walletAddr);
+            vars.walletSupplyTokenBalanceBefore =
+                balanceOf(vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, walletAddr);
+            vars.walletBorrowTokenBalanceBefore =
+                balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, walletAddr);
             vars.walletWethTokenBalanceBefore = balanceOf(TokenUtils.WETH_ADDR, walletAddr);
             vars.walletEthTokenBalanceBefore = address(walletAddr).balance;
 
@@ -511,11 +506,15 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
             wallet.execute(address(cut), executeActionCallData, 0);
 
             // .--------- TAKE SNAPSHOTS ----------.
-            vars.senderSupplyTokenBalanceAfter = balanceOf(vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, sender);
-            vars.senderBorrowTokenBalanceAfter = balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, sender);
+            vars.senderSupplyTokenBalanceAfter =
+                balanceOf(vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, sender);
+            vars.senderBorrowTokenBalanceAfter =
+                balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, sender);
             vars.senderEthTokenBalanceAfter = address(sender).balance;
-            vars.walletSupplyTokenBalanceAfter = balanceOf(vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, walletAddr);
-            vars.walletBorrowTokenBalanceAfter = balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, walletAddr);
+            vars.walletSupplyTokenBalanceAfter =
+                balanceOf(vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, walletAddr);
+            vars.walletBorrowTokenBalanceAfter =
+                balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, walletAddr);
             vars.walletWethTokenBalanceAfter = balanceOf(TokenUtils.WETH_ADDR, walletAddr);
             vars.walletEthTokenBalanceAfter = address(walletAddr).balance;
             vars.userPositionAfter = fetchPositionByNftId(vars.nftId);
@@ -532,7 +531,9 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 if (_config.isMaxSupplyAmount) {
                     assertEq(vars.senderSupplyTokenBalanceAfter, 0);
                 } else {
-                    assertEq(vars.senderSupplyTokenBalanceAfter, vars.senderSupplyTokenBalanceBefore - vars.supplyTokenAmount);
+                    assertEq(
+                        vars.senderSupplyTokenBalanceAfter, vars.senderSupplyTokenBalanceBefore - vars.supplyTokenAmount
+                    );
                 }
             }
 
@@ -555,9 +556,14 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                     }
                 } else {
                     if (vars.isNativeSupply && !_config.sendWrappedEth) {
-                        assertEq(vars.senderEthTokenBalanceAfter, vars.senderEthTokenBalanceBefore + vars.supplyTokenAmount);
+                        assertEq(
+                            vars.senderEthTokenBalanceAfter, vars.senderEthTokenBalanceBefore + vars.supplyTokenAmount
+                        );
                     } else {
-                        assertEq(vars.senderSupplyTokenBalanceAfter, vars.senderSupplyTokenBalanceBefore + vars.supplyTokenAmount);
+                        assertEq(
+                            vars.senderSupplyTokenBalanceAfter,
+                            vars.senderSupplyTokenBalanceBefore + vars.supplyTokenAmount
+                        );
                     }
                 }
             }
@@ -574,7 +580,9 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                         );
                     }
                 } else {
-                    assertEq(vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore - vars.borrowTokenAmount);
+                    assertEq(
+                        vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore - vars.borrowTokenAmount
+                    );
                 }
             }
 
@@ -583,7 +591,9 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 if (vars.isNativeBorrow && !_config.sendWrappedEth) {
                     assertEq(vars.senderEthTokenBalanceAfter, vars.senderEthTokenBalanceBefore + vars.borrowTokenAmount);
                 } else {
-                    assertEq(vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore + vars.borrowTokenAmount);
+                    assertEq(
+                        vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore + vars.borrowTokenAmount
+                    );
                 }
             }
         }

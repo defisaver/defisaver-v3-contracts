@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import {SkyStakingEngineOpen} from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
-import {SkyStakingEngineStake, SkyHelper} from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
-import {SkyStakingEngineSelectFarm} from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
+import { SkyStakingEngineOpen } from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
+import { SkyStakingEngineStake, SkyHelper } from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
+import { SkyStakingEngineSelectFarm } from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 
-import {ExecuteActionsBase} from "./ExecuteActionsBase.sol";
-import {SmartWallet} from "../SmartWallet.sol";
+import { ExecuteActionsBase } from "./ExecuteActionsBase.sol";
+import { SmartWallet } from "../SmartWallet.sol";
 
 contract SkyExecuteActions is ExecuteActionsBase, SkyHelper {
     function executeSkyStakingEngineOpen(address _stakingEngine, SkyStakingEngineOpen _cut, SmartWallet _wallet)

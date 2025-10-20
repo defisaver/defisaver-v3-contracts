@@ -4,7 +4,6 @@ pragma solidity =0.8.24;
 import { StrategyBuilder } from "./StrategyBuilder.sol";
 
 library Strategies {
-
     function createCompV3Repay() public returns (uint256) {
         StrategyBuilder repayStrategy = new StrategyBuilder("CompV3Repay", true);
         repayStrategy.addSubMapping("&market");

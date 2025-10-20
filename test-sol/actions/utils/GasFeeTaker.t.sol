@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { ILendingPoolAddressesProviderV2 } from "../../../contracts/interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import { ILendingPoolAddressesProviderV2 } from
+    "../../../contracts/interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import { IPriceOracleGetterAave } from "../../../contracts/interfaces/aaveV2/IPriceOracleGetterAave.sol";
 import { GasFeeTaker } from "../../../contracts/actions/fee/GasFeeTaker.sol";
 
@@ -9,7 +10,6 @@ import { BaseTest } from "../../utils/BaseTest.sol";
 import { console } from "forge-std/console.sol";
 
 contract TestGasFeeTaker is BaseTest, GasFeeTaker {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -40,33 +40,33 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker {
         console.log(price);
     }
 
-   function testGetMaticPrice() public view {
-       uint256 price = cut.getPriceInUSD(matic);
+    function testGetMaticPrice() public view {
+        uint256 price = cut.getPriceInUSD(matic);
 
-       console.log(price);
-   }
+        console.log(price);
+    }
 
-   function testWBTCPrice() public view {
+    function testWBTCPrice() public view {
         uint256 price = cut.getPriceInETH(wbtc);
 
         address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
 
-        uint aavePrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(wbtc);
+        uint256 aavePrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(wbtc);
 
         console.log(price);
         console.log(aavePrice);
-   }
-   
-   function testDaiPrice() public view {
+    }
+
+    function testDaiPrice() public view {
         uint256 price = cut.getPriceInETH(DAI_ADDR);
 
         address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
 
-        uint aavePrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(DAI_ADDR);
+        uint256 aavePrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(DAI_ADDR);
 
         console.log(price);
         console.log(aavePrice);
-   }
+    }
 
     function testPriceForNonTokenAddr() public view {
         uint256 price = cut.getPriceInUSD(aDAI);
@@ -74,15 +74,15 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker {
         console.log(price);
 
         assertEq(price, 0);
-   }
+    }
 
     function testGasCost() public {
-        vm.fee(100000000000);
+        vm.fee(100_000_000_000);
         console.log(tx.gasprice);
-        uint gasCost = cut.calcGasCost(1_000_000, DAI_ADDR, 0);
+        uint256 gasCost = cut.calcGasCost(1_000_000, DAI_ADDR, 0);
         console.log("Gas cost:", gasCost);
 
-        gasCost = cut.calcGasCost(1_000_000, aDAI , 0);
+        gasCost = cut.calcGasCost(1_000_000, aDAI, 0);
         console.log("Gas cost:", gasCost);
         assertEq(gasCost, 0);
 

@@ -2,32 +2,32 @@
 
 pragma solidity =0.8.24;
 
-import {console} from "forge-std/Test.sol";
+import { console } from "forge-std/Test.sol";
 
-import {BaseTest} from "../../utils/BaseTest.sol";
-import {SmartWallet} from "../../utils/SmartWallet.sol";
-import {RegistryUtils} from "../../utils/RegistryUtils.sol";
-import {Addresses} from "../../utils/Addresses.sol";
-import {ActionsUtils} from "../../utils/ActionsUtils.sol";
+import { BaseTest } from "../../utils/BaseTest.sol";
+import { SmartWallet } from "../../utils/SmartWallet.sol";
+import { RegistryUtils } from "../../utils/RegistryUtils.sol";
+import { Addresses } from "../../utils/Addresses.sol";
+import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 
-import {IERC20} from "../../../contracts/interfaces/IERC20.sol";
-import {IStabilityPool} from "../../../contracts/interfaces/liquityV2/IStabilityPool.sol";
-import {IHintHelpers} from "../../../contracts/interfaces/liquityV2/IHintHelpers.sol";
-import {IPriceFeed} from "../../../contracts/interfaces/liquityV2/IPriceFeed.sol";
-import {IAddressesRegistry} from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
+import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
+import { IStabilityPool } from "../../../contracts/interfaces/liquityV2/IStabilityPool.sol";
+import { IHintHelpers } from "../../../contracts/interfaces/liquityV2/IHintHelpers.sol";
+import { IPriceFeed } from "../../../contracts/interfaces/liquityV2/IPriceFeed.sol";
+import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
 
-import {LiquityV2Open} from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
-import {LiquityV2SPDeposit} from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
-import {LiquityV2RatioCheck} from "../../../contracts/actions/checkers/LiquityV2RatioCheck.sol";
-import {LiquityV2View} from "../../../contracts/views/LiquityV2View.sol";
-import {LiquityV2RatioTrigger} from "../../../contracts/triggers/LiquityV2RatioTrigger.sol";
-import {LiquityV2TestHelper} from "./../../actions/liquityV2/LiquityV2TestHelper.t.sol";
-import {LiquityV2ExecuteActions} from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
-import {LiquityV2Utils} from "../../utils/liquityV2/LiquityV2Utils.sol";
+import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
+import { LiquityV2SPDeposit } from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
+import { LiquityV2RatioCheck } from "../../../contracts/actions/checkers/LiquityV2RatioCheck.sol";
+import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
+import { LiquityV2RatioTrigger } from "../../../contracts/triggers/LiquityV2RatioTrigger.sol";
+import { LiquityV2TestHelper } from "./../../actions/liquityV2/LiquityV2TestHelper.t.sol";
+import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
+import { LiquityV2Utils } from "../../utils/liquityV2/LiquityV2Utils.sol";
 
-import {SubProxy, StrategyModel} from "../../../contracts/core/strategy/SubProxy.sol";
-import {SubStorage} from "../../../contracts/core/strategy/SubStorage.sol";
-import {StrategyExecutor} from "../../../contracts/core/strategy/StrategyExecutor.sol";
+import { SubProxy, StrategyModel } from "../../../contracts/core/strategy/SubProxy.sol";
+import { SubStorage } from "../../../contracts/core/strategy/SubStorage.sol";
+import { StrategyExecutor } from "../../../contracts/core/strategy/StrategyExecutor.sol";
 
 contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
     /*//////////////////////////////////////////////////////////////////////////

@@ -15,7 +15,6 @@ import { LiquityV2ExecuteActions } from "../utils/executeActions/LiquityV2Execut
 import { SmartWallet } from "../utils/SmartWallet.sol";
 
 contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -65,13 +64,13 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
     function _test_trigger_not_active_time_not_passed() public {
         for (uint256 i = 0; i < markets.length; i++) {
             uint256 troveId = _openTroveAndAdjustInterestRate(markets[i], i);
-            
+
             bool isTriggered = cut.isAdjustmentFeeZero(address(markets[i]), troveId);
             assertFalse(isTriggered, "Trigger should not be active immediately after adjustment");
 
             // Advance time by 6 days (still less than 7 days cooldown)
             vm.warp(block.timestamp + 6 days);
-            
+
             isTriggered = cut.isAdjustmentFeeZero(address(markets[i]), troveId);
             assertFalse(isTriggered, "Trigger should not be active before 7 days cooldown");
         }
@@ -81,19 +80,19 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
     function _test_trigger_active_time_passed() public {
         for (uint256 i = 0; i < markets.length; i++) {
             uint256 troveId = _openTroveAndAdjustInterestRate(markets[i], i);
-            
+
             bool isTriggered = cut.isAdjustmentFeeZero(address(markets[i]), troveId);
             assertFalse(isTriggered, "Trigger should not be active immediately after adjustment");
 
             // Advance time by exactly 7 days
             vm.warp(block.timestamp + 7 days);
-            
+
             isTriggered = cut.isAdjustmentFeeZero(address(markets[i]), troveId);
             assertTrue(isTriggered, "Trigger should be active after exactly 7 days cooldown");
 
             // Test with more than 7 days
             vm.warp(block.timestamp + 1 days); // Now 8 days total
-            
+
             isTriggered = cut.isAdjustmentFeeZero(address(markets[i]), troveId);
             assertTrue(isTriggered, "Trigger should be active after more than 7 days cooldown");
         }
@@ -102,7 +101,7 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
     /// @dev Time expensive test because of interest rate change in linked list. Commented out.
     function _test_trigger_not_active_trove_has_batch_manager() public {
         address batchManager = address(0xdeadbeef);
-        
+
         for (uint256 i = 0; i < markets.length; i++) {
             // Register batch manager first
             vm.startPrank(batchManager);
@@ -113,9 +112,9 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
             uint256 troveId = executeLiquityOpenTrove(
                 markets[i],
                 batchManager, // Use batch manager
-                30000, // collAmountInUSD
+                30_000, // collAmountInUSD
                 i, // collIndex
-                10000, // borrowAmountInUSD
+                10_000, // borrowAmountInUSD
                 1e18 / 10, // annualInterestRate (10%)
                 0, // nonce
                 wallet,
@@ -134,7 +133,7 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
 
             // Even after 7+ days, should still be false due to batch manager
             vm.warp(block.timestamp + 8 days);
-            
+
             isTriggered = cut.isAdjustmentFeeZero(address(markets[i]), troveId);
             assertFalse(isTriggered, "Trigger should not be active for trove with batch manager even after cooldown");
         }
@@ -145,9 +144,12 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
     //////////////////////////////////////////////////////////////////////////*/
 
     /// @dev Opens a trove and adjusts its interest rate to set the adjustment time
-    function _openTroveAndAdjustInterestRate(IAddressesRegistry _market, uint256 _collIndex) internal returns (uint256 troveId) {
-        uint256 collAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
+    function _openTroveAndAdjustInterestRate(IAddressesRegistry _market, uint256 _collIndex)
+        internal
+        returns (uint256 troveId)
+    {
+        uint256 collAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
         uint256 initialInterestRate = 6e16; // 6%
         uint256 newInterestRate = initialInterestRate + 1; // slightly higher than initial interest rate
 
@@ -177,26 +179,14 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
         uint256 _collIndex
     ) internal {
         uint256 maxUpfrontFee = IHintHelpers(_market.hintHelpers()).predictAdjustInterestRateUpfrontFee(
-            _collIndex,
-            _troveId,
-            _newInterestRate
+            _collIndex, _troveId, _newInterestRate
         );
 
-        (uint256 upperHint, uint256 lowerHint) = getInsertPosition(
-            viewContract,
-            _market,
-            _collIndex,
-            _newInterestRate
-        );
+        (uint256 upperHint, uint256 lowerHint) = getInsertPosition(viewContract, _market, _collIndex, _newInterestRate);
 
         bytes memory executeActionCallData = executeActionCalldata(
             liquityV2AdjustInterestRateEncode(
-                address(_market),
-                _troveId,
-                _newInterestRate,
-                upperHint,
-                lowerHint,
-                maxUpfrontFee
+                address(_market), _troveId, _newInterestRate, upperHint, lowerHint, maxUpfrontFee
             ),
             true // isDirect
         );

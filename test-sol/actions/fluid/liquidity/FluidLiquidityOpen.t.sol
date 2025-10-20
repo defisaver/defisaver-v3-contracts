@@ -11,7 +11,6 @@ import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { Vm } from "forge-std/Vm.sol";
 
 contract TestFluidLiquidityOpen is FluidTestBase {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -47,8 +46,8 @@ contract TestFluidLiquidityOpen is FluidTestBase {
     function test_should_open_position() public {
         bool isDirect = false;
         bool takeMaxUint256 = false;
-        uint256 collateralAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
+        uint256 collateralAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
         bool wrapBorrowedEth = false;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
@@ -56,8 +55,8 @@ contract TestFluidLiquidityOpen is FluidTestBase {
     function test_should_open_position_direct_action() public {
         bool isDirect = true;
         bool takeMaxUint256 = false;
-        uint256 collateralAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
+        uint256 collateralAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
         bool wrapBorrowedEth = false;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
@@ -65,8 +64,8 @@ contract TestFluidLiquidityOpen is FluidTestBase {
     function test_should_open_position_with_maxUint256() public {
         bool isDirect = false;
         bool takeMaxUint256 = true;
-        uint256 collateralAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
+        uint256 collateralAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
         bool wrapBorrowedEth = false;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
@@ -74,7 +73,7 @@ contract TestFluidLiquidityOpen is FluidTestBase {
     function test_should_open_only_supply_position() public {
         bool isDirect = false;
         bool takeMaxUint256 = false;
-        uint256 collateralAmountInUSD = 30000;
+        uint256 collateralAmountInUSD = 30_000;
         uint256 borrowAmountInUSD = 0;
         bool wrapBorrowedEth = false;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
@@ -83,8 +82,8 @@ contract TestFluidLiquidityOpen is FluidTestBase {
     function test_should_open_position_with_borrow_eth_wrap() public {
         bool isDirect = false;
         bool takeMaxUint256 = false;
-        uint256 collateralAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
+        uint256 collateralAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
         bool wrapBorrowedEth = true;
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, borrowAmountInUSD, wrapBorrowedEth);
     }
@@ -104,7 +103,7 @@ contract TestFluidLiquidityOpen is FluidTestBase {
             constants.supplyToken = isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken;
             uint256 supplyAmount = amountInUSDPrice(constants.supplyToken, collateralAmountInUSD);
             give(constants.supplyToken, sender, supplyAmount);
-            approveAsSender(sender, constants.supplyToken, walletAddr, supplyAmount);    
+            approveAsSender(sender, constants.supplyToken, walletAddr, supplyAmount);
 
             uint256 borrowAmount = borrowAmountInUSD != 0
                 ? amountInUSDPrice(isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, borrowAmountInUSD)
@@ -123,10 +122,8 @@ contract TestFluidLiquidityOpen is FluidTestBase {
             );
 
             uint256 senderSupplyTokenBalanceBefore = balanceOf(constants.supplyToken, sender);
-            uint256 senderBorrowTokenBalanceBefore = isNativeBorrow 
-                ? (
-                    wrapBorrowedEth? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance
-                )
+            uint256 senderBorrowTokenBalanceBefore = isNativeBorrow
+                ? (wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance)
                 : balanceOf(constants.borrowToken, sender);
 
             vm.recordLogs();
@@ -136,10 +133,8 @@ contract TestFluidLiquidityOpen is FluidTestBase {
             assertFalse(createdNft == 0);
 
             uint256 senderSupplyTokenBalanceAfter = balanceOf(constants.supplyToken, sender);
-            uint256 senderBorrowTokenBalanceAfter = isNativeBorrow 
-                ? (
-                    wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance 
-                ) 
+            uint256 senderBorrowTokenBalanceAfter = isNativeBorrow
+                ? (wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance)
                 : balanceOf(constants.borrowToken, sender);
 
             assertEq(senderSupplyTokenBalanceAfter, senderSupplyTokenBalanceBefore - supplyAmount);
@@ -155,11 +150,9 @@ contract TestFluidLiquidityOpen is FluidTestBase {
         }
     }
 
-    function _logData(
-        uint256 supplyAmount,
-        uint256 borrowAmount,
-        IFluidVaultResolver.UserPosition memory userPosition
-    ) internal {
+    function _logData(uint256 supplyAmount, uint256 borrowAmount, IFluidVaultResolver.UserPosition memory userPosition)
+        internal
+    {
         emit log_named_uint("supplyAmount", supplyAmount);
         emit log_named_uint("borrowAmount", borrowAmount);
         emit log_named_address("owner", userPosition.owner);

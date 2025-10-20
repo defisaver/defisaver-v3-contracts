@@ -14,7 +14,6 @@ import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2Exe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -93,11 +92,11 @@ contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
             TestConfig({
                 isDirect: false,
                 interestBatchManager: address(0),
-                supplyAmountInUSD: 30000,
+                supplyAmountInUSD: 30_000,
                 withdrawAmountInUSD: 0,
-                borrowAmountInUSD: 10000,
+                borrowAmountInUSD: 10_000,
                 paybackAmountInUSD: 0,
-                openCollateralAmountInUSD: 40000,
+                openCollateralAmountInUSD: 40_000,
                 openBorrowAmountInUSD: 5000
             })
         );
@@ -109,11 +108,11 @@ contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
                 isDirect: true,
                 interestBatchManager: address(0xdeadbeaf),
                 supplyAmountInUSD: 0,
-                withdrawAmountInUSD: 10000,
+                withdrawAmountInUSD: 10_000,
                 borrowAmountInUSD: 0,
-                paybackAmountInUSD: 10000,
-                openCollateralAmountInUSD: 40000,
-                openBorrowAmountInUSD: 15000
+                paybackAmountInUSD: 10_000,
+                openCollateralAmountInUSD: 40_000,
+                openBorrowAmountInUSD: 15_000
             })
         );
     }
@@ -123,12 +122,12 @@ contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
             TestConfig({
                 isDirect: true,
                 interestBatchManager: address(0xdeadbeaf),
-                supplyAmountInUSD: 10000,
+                supplyAmountInUSD: 10_000,
                 withdrawAmountInUSD: 0,
                 borrowAmountInUSD: 0,
-                paybackAmountInUSD: 10000,
-                openCollateralAmountInUSD: 40000,
-                openBorrowAmountInUSD: 15000
+                paybackAmountInUSD: 10_000,
+                openCollateralAmountInUSD: 40_000,
+                openBorrowAmountInUSD: 15_000
             })
         );
     }
@@ -140,10 +139,10 @@ contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
                 interestBatchManager: address(0xdeadbeaf),
                 supplyAmountInUSD: 0,
                 withdrawAmountInUSD: 5000,
-                borrowAmountInUSD: 10000,
+                borrowAmountInUSD: 10_000,
                 paybackAmountInUSD: 0,
-                openCollateralAmountInUSD: 50000,
-                openBorrowAmountInUSD: 15000
+                openCollateralAmountInUSD: 50_000,
+                openBorrowAmountInUSD: 15_000
             })
         );
     }
@@ -171,44 +170,37 @@ contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
         }
     }
 
-    function _adjust(
-        IAddressesRegistry _market,
-        uint256 _troveId,
-        TestConfig memory _config,
-        uint256 _collIndex
-    ) internal {
+    function _adjust(IAddressesRegistry _market, uint256 _troveId, TestConfig memory _config, uint256 _collIndex)
+        internal
+    {
         TestAdjustLocalVars memory vars;
 
         vars.troveDataBefore = viewContract.getTroveInfo(address(_market), _troveId);
         vars.collToken = _market.collToken();
         vars.collPriceWAD = IPriceFeed(_market.priceFeed()).lastGoodPrice();
-        
+
         vars.supplyAmount = _config.supplyAmountInUSD > 0
             ? amountInUSDPriceMock(vars.collToken, _config.supplyAmountInUSD, vars.collPriceWAD / 1e10)
             : 0;
-        
-        vars.paybackAmount = _config.paybackAmountInUSD > 0
-            ? amountInUSDPriceMock(BOLD, _config.paybackAmountInUSD, 1e18)
-            : 0;
-        
+
+        vars.paybackAmount =
+            _config.paybackAmountInUSD > 0 ? amountInUSDPriceMock(BOLD, _config.paybackAmountInUSD, 1e18) : 0;
+
         vars.withdrawAmount = _config.withdrawAmountInUSD > 0
             ? amountInUSDPriceMock(vars.collToken, _config.withdrawAmountInUSD, vars.collPriceWAD / 1e10)
             : 0;
-        
-        vars.borrowAmount = _config.borrowAmountInUSD > 0
-            ? amountInUSDPriceMock(BOLD, _config.borrowAmountInUSD, 1e18)
-            : 0;
-        
+
+        vars.borrowAmount =
+            _config.borrowAmountInUSD > 0 ? amountInUSDPriceMock(BOLD, _config.borrowAmountInUSD, 1e18) : 0;
+
         vars.collAmount = vars.supplyAmount > 0 ? vars.supplyAmount : vars.withdrawAmount;
         vars.debtAmount = vars.borrowAmount > 0 ? vars.borrowAmount : vars.paybackAmount;
-        
-        vars.collAction = vars.supplyAmount > 0 
-            ? LiquityV2Adjust.CollActionType.SUPPLY
-            : LiquityV2Adjust.CollActionType.WITHDRAW;
-        
-        vars.debtAction = vars.borrowAmount > 0
-            ? LiquityV2Adjust.DebtActionType.BORROW
-            : LiquityV2Adjust.DebtActionType.PAYBACK;
+
+        vars.collAction =
+            vars.supplyAmount > 0 ? LiquityV2Adjust.CollActionType.SUPPLY : LiquityV2Adjust.CollActionType.WITHDRAW;
+
+        vars.debtAction =
+            vars.borrowAmount > 0 ? LiquityV2Adjust.DebtActionType.BORROW : LiquityV2Adjust.DebtActionType.PAYBACK;
 
         if (_config.supplyAmountInUSD > 0) {
             give(vars.collToken, sender, vars.supplyAmount);
@@ -222,12 +214,8 @@ contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
 
         vars.maxUpfrontFee = vars.borrowAmount == 0
             ? 0
-            : IHintHelpers(_market.hintHelpers()).predictAdjustTroveUpfrontFee(
-                _collIndex,
-                _troveId,
-                vars.borrowAmount
-            );
-            
+            : IHintHelpers(_market.hintHelpers()).predictAdjustTroveUpfrontFee(_collIndex, _troveId, vars.borrowAmount);
+
         vars.executeActionCallData = executeActionCalldata(
             liquityV2AdjustEncode(
                 address(_market),
@@ -247,7 +235,7 @@ contract TestLiquityV2Adjust is LiquityV2ExecuteActions {
         vars.senderBoldBalanceBefore = balanceOf(BOLD, sender);
 
         wallet.execute(address(cut), vars.executeActionCallData, 0);
-        
+
         vars.senderCollBalanceAfter = balanceOf(vars.collToken, sender);
         vars.senderBoldBalanceAfter = balanceOf(BOLD, sender);
         vars.troveDataAfter = viewContract.getTroveInfo(address(_market), _troveId);
