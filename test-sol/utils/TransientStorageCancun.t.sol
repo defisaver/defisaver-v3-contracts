@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { TransientStorageCancun } from "../../contracts/utils/TransientStorageCancun.sol";
-import "forge-std/Test.sol";
+import { Test } from "forge-std/Test.sol";
 
 contract TestTransientStorageCancun is Test {
     TransientStorageCancun transientStorage;

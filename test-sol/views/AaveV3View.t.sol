@@ -19,7 +19,6 @@ import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 
 import { AaveV3View } from "../../contracts/views/AaveV3View.sol";
 import { AaveV3Helper } from "../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
-import "forge-std/console.sol";
 
 contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
     /*//////////////////////////////////////////////////////////////////////////

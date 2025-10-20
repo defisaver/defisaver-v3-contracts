@@ -7,9 +7,6 @@ import { UserWallet } from "../UserWallet.sol";
 import { AaveV3UserUtils } from "./AaveV3UserUtils.sol";
 
 contract AaveV3User is AaveV3UserUtils {
-    //solhint-disable-next-line no-empty-blocks
-    constructor() AaveV3UserUtils() { }
-
     function supply(uint256 _amount, bool _isSafe, uint16 _assetId, address _market) public {
         AaveV3Supply aaveV3Supply = new AaveV3Supply();
 

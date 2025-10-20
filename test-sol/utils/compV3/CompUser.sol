@@ -6,9 +6,6 @@ import { CompV3Supply } from "../../../contracts/actions/compoundV3/CompV3Supply
 import { CompV3Borrow } from "../../../contracts/actions/compoundV3/CompV3Borrow.sol";
 
 contract CompUser is CompUserUtils {
-    //solhint-disable-next-line no-empty-blocks
-    constructor() CompUserUtils() { }
-
     function supply(bool _isSafe, address _market, address _tokenAddr, uint256 _amount) public {
         CompV3Supply compV3Supply = new CompV3Supply();
 
