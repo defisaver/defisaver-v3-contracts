@@ -360,7 +360,7 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
         let collAssetId;
         let debtAssetId;
         let flAction;
-        let flAddr;
+        let flAddr; // eslint-disable-line no-unused-vars
         let aaveV3SubProxy;
 
         before(async () => {

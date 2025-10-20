@@ -3,8 +3,6 @@ const sdk = require('@defisaver/sdk');
 const { expect } = require('chai');
 const hre = require('hardhat');
 const { getAssetInfo, assets } = require('@defisaver/tokens');
-const path = require('path');
-const fs = require('fs');
 
 const {
     redeploy,

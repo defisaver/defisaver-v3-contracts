@@ -17,7 +17,6 @@ const {
     fetchAmountInUSDPrice,
     getContractFromRegistry,
     balanceOf,
-    resetForkToBlock,
 } = require('../../utils/utils');
 const {
     getFluidVaultT4TestPairs,
