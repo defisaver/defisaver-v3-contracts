@@ -28,19 +28,34 @@ const EMODE = {
 
 const supplyTestData = [
     {
-        tokenSymbol: 'WETH', amount: '100', emode: EMODE.ETH, isCollateral: false,
+        tokenSymbol: 'WETH',
+        amount: '100',
+        emode: EMODE.ETH,
+        isCollateral: false,
     },
     {
-        tokenSymbol: 'wstETH', amount: '5', emode: EMODE.ETH, isCollateral: true,
+        tokenSymbol: 'wstETH',
+        amount: '5',
+        emode: EMODE.ETH,
+        isCollateral: true,
     },
     {
-        tokenSymbol: 'DAI', amount: '10000', emode: EMODE.ETH, isCollateral: true,
+        tokenSymbol: 'DAI',
+        amount: '10000',
+        emode: EMODE.ETH,
+        isCollateral: true,
     },
     {
-        tokenSymbol: 'USDC', amount: '10000', emode: EMODE.ETH, isCollateral: true,
+        tokenSymbol: 'USDC',
+        amount: '10000',
+        emode: EMODE.ETH,
+        isCollateral: true,
     },
     {
-        tokenSymbol: 'WBTC', amount: '2', emode: EMODE.ETH, isCollateral: true,
+        tokenSymbol: 'WBTC',
+        amount: '2',
+        emode: EMODE.ETH,
+        isCollateral: true,
     },
 ];
 
@@ -68,9 +83,7 @@ const morphoAaveV3SupplyTest = async () => {
         });
 
         for (let i = 0; i < supplyTestData.length; i++) {
-            const {
-                tokenSymbol, amount, emode, isCollateral,
-            } = supplyTestData[i];
+            const { tokenSymbol, amount, emode, isCollateral } = supplyTestData[i];
 
             it(`should supply ${amount} ${tokenSymbol} to MorphoAaveV3, emode: ${emode}, coll: ${isCollateral}`, async () => {
                 const token = getAssetInfo(tokenSymbol);
@@ -127,12 +140,17 @@ const morphoAaveV3SetManagerTest = async () => {
         });
         it('should approve address to manage MorphoAaveV3 proxy position', async () => {
             const setManagerAction = new dfs.actions.morpho.MorphoAaveV3SetManagerAction(
-                EMODE.ETH, senderAcc.address, true,
+                EMODE.ETH,
+                senderAcc.address,
+                true,
             );
             const functionData = setManagerAction.encodeForDsProxyCall()[1];
 
             await executeAction('MorphoAaveV3SetManager', functionData, proxy);
-            const morphoAaveV3 = await hre.ethers.getContractAt('IMorphoAaveV3', '0x33333aea097c193e66081E930c33020272b33333');
+            const morphoAaveV3 = await hre.ethers.getContractAt(
+                'IMorphoAaveV3',
+                '0x33333aea097c193e66081E930c33020272b33333',
+            );
             const permission = await morphoAaveV3.isManagedBy(proxy.address, senderAcc.address);
             console.log(permission);
             // eslint-disable-next-line no-unused-expressions
@@ -164,9 +182,7 @@ const morphoAaveV3WithdrawTest = async () => {
         });
 
         for (let i = 0; i < supplyTestData.length; i++) {
-            const {
-                tokenSymbol, amount, emode, isCollateral,
-            } = supplyTestData[i];
+            const { tokenSymbol, amount, emode, isCollateral } = supplyTestData[i];
 
             it(`should supply ${amount} ${tokenSymbol} to MorphoAaveV3 then withdraw, emode: ${emode}, coll: ${isCollateral}`, async () => {
                 const token = getAssetInfo(tokenSymbol);
@@ -250,9 +266,7 @@ const morphoAaveV3BorrowTest = async () => {
             proxy = await getProxy(senderAcc.address);
         });
         for (let i = 0; i < supplyTestData.length; i++) {
-            const {
-                tokenSymbol, amount, emode, isCollateral,
-            } = supplyTestData[i];
+            const { tokenSymbol, amount, emode, isCollateral } = supplyTestData[i];
 
             it(`should supply ${amount} ${tokenSymbol} to MorphoAaveV3 and then borrow ETH, emode: ${emode}, coll: ${isCollateral}`, async () => {
                 if (!isCollateral) return;
@@ -317,9 +331,7 @@ const morphoAaveV3PaybackTest = async () => {
         });
 
         for (let i = 0; i < supplyTestData.length; i++) {
-            const {
-                tokenSymbol, amount, emode, isCollateral,
-            } = supplyTestData[i];
+            const { tokenSymbol, amount, emode, isCollateral } = supplyTestData[i];
 
             it(`should supply ${amount} ${tokenSymbol} to MorphoAaveV3 and then borrow ETH, emode: ${emode}, coll: ${isCollateral}`, async () => {
                 if (!isCollateral) return;
@@ -349,7 +361,11 @@ const morphoAaveV3PaybackTest = async () => {
                     proxy.address,
                     4,
                 );
-                await setBalance(WETH_ADDRESS, senderAcc.address, hre.ethers.utils.parseUnits('2', 18));
+                await setBalance(
+                    WETH_ADDRESS,
+                    senderAcc.address,
+                    hre.ethers.utils.parseUnits('2', 18),
+                );
                 await approve(WETH_ADDRESS, proxy.address);
 
                 const morpho = await view.getMorphoAddressByEmode(1);

@@ -40,22 +40,24 @@ const createAaveV3ImportRecipe = ({
 }) => {
     debtAmounts = debtAmounts.map((e) => e.mul(1_00_01).div(1_00_00));
     const actions = [
-        new sdk.actions.flashloan.FLAction(new sdk.actions.flashloan.BalancerFlashLoanAction(
-            debtTokenAddresses,
-            debtAmounts,
-        )),
+        new sdk.actions.flashloan.FLAction(
+            new sdk.actions.flashloan.BalancerFlashLoanAction(debtTokenAddresses, debtAmounts),
+        ),
 
-        ...debtAssetIds.map((debtAssetId, i) => new sdk.actions.aaveV3.AaveV3PaybackAction(
-            true,
-            nullAddress,
-            MAX_UINT,
-            proxyAddress,
-            VARIABLE_RATE,
-            debtTokenAddresses[i],
-            debtAssetId,
-            true,
-            oasisProxyAddress,
-        )),
+        ...debtAssetIds.map(
+            (debtAssetId, i) =>
+                new sdk.actions.aaveV3.AaveV3PaybackAction(
+                    true,
+                    nullAddress,
+                    MAX_UINT,
+                    proxyAddress,
+                    VARIABLE_RATE,
+                    debtTokenAddresses[i],
+                    debtAssetId,
+                    true,
+                    oasisProxyAddress,
+                ),
+        ),
 
         new sdk.actions.summerfi.SFApproveTokensAction(
             oasisProxyAddress,
@@ -64,9 +66,14 @@ const createAaveV3ImportRecipe = ({
             collAmounts.map((e) => e.mul(100_01).div(100_00)),
         ),
 
-        ...collATokenAddresses.map((collATokenAddress) => new sdk.actions.basic.PullTokenAction(
-            collATokenAddress, oasisProxyAddress, MAX_UINT,
-        )),
+        ...collATokenAddresses.map(
+            (collATokenAddress) =>
+                new sdk.actions.basic.PullTokenAction(
+                    collATokenAddress,
+                    oasisProxyAddress,
+                    MAX_UINT,
+                ),
+        ),
 
         new sdk.actions.aaveV3.AaveV3CollateralSwitchAction(
             true,
@@ -78,22 +85,27 @@ const createAaveV3ImportRecipe = ({
 
         new sdk.actions.aaveV3.AaveV3SetEModeAction(true, nullAddress, emodeCategoryId),
 
-        ...debtAssetIds.map((debtAssetId, i) => new sdk.actions.aaveV3.AaveV3BorrowAction(
-            true,
-            nullAddress,
-            debtAmounts[i],
-            flAddress,
-            VARIABLE_RATE,
-            debtAssetId,
-            false,
-        )),
+        ...debtAssetIds.map(
+            (debtAssetId, i) =>
+                new sdk.actions.aaveV3.AaveV3BorrowAction(
+                    true,
+                    nullAddress,
+                    debtAmounts[i],
+                    flAddress,
+                    VARIABLE_RATE,
+                    debtAssetId,
+                    false,
+                ),
+        ),
     ];
     return new sdk.Recipe('SummerFiAaveV3Import', actions);
 };
 
 const getPositionInfo = async (user, aaveV3View) => {
     const market = addrs[network].AAVE_MARKET;
-    const pool = await ethers.getContractAt('IPoolAddressesProvider', market).then((c) => ethers.getContractAt('IPoolV3', c.getPool()));
+    const pool = await ethers
+        .getContractAt('IPoolAddressesProvider', market)
+        .then((c) => ethers.getContractAt('IPoolV3', c.getPool()));
     const {
         eMode: emodeCategoryId,
         collAddr,
@@ -105,40 +117,41 @@ const getPositionInfo = async (user, aaveV3View) => {
     const useAsCollateralFlags = enabledAsColl.slice(0, collTokenAddresses.length);
     const debtTokenAddresses = borrowAddr.filter((e) => e !== nullAddress);
 
-    const {
-        collAssetIds,
-        collATokenAddresses,
-    } = await Promise.all(
+    const { collAssetIds, collATokenAddresses } = await Promise.all(
         collTokenAddresses.map(async (c) => getAaveReserveData(pool, c)),
-    ).then((arr) => arr.reduce((acc, { id, aTokenAddress }) => ({
-        collAssetIds: [...acc.collAssetIds, id],
-        collATokenAddresses: [...acc.collATokenAddresses, aTokenAddress],
-    }), ({
-        collAssetIds: [],
-        collATokenAddresses: [],
-    })));
+    ).then((arr) =>
+        arr.reduce(
+            (acc, { id, aTokenAddress }) => ({
+                collAssetIds: [...acc.collAssetIds, id],
+                collATokenAddresses: [...acc.collATokenAddresses, aTokenAddress],
+            }),
+            {
+                collAssetIds: [],
+                collATokenAddresses: [],
+            },
+        ),
+    );
 
-    const {
-        debtAssetIds,
-    } = await Promise.all(
+    const { debtAssetIds } = await Promise.all(
         debtTokenAddresses.map(async (c) => getAaveReserveData(pool, c)),
-    ).then((arr) => arr.reduce((acc, { id }) => ({
-        debtAssetIds: [...acc.debtAssetIds, id],
-    }), ({
-        debtAssetIds: [],
-    })));
+    ).then((arr) =>
+        arr.reduce(
+            (acc, { id }) => ({
+                debtAssetIds: [...acc.debtAssetIds, id],
+            }),
+            {
+                debtAssetIds: [],
+            },
+        ),
+    );
 
-    const debtAmounts = await aaveV3View.getTokenBalances(
-        market,
-        user,
-        debtTokenAddresses,
-    ).then((r) => r.map(({ borrowsVariable }) => borrowsVariable));
+    const debtAmounts = await aaveV3View
+        .getTokenBalances(market, user, debtTokenAddresses)
+        .then((r) => r.map(({ borrowsVariable }) => borrowsVariable));
 
-    const collAmounts = await aaveV3View.getTokenBalances(
-        market,
-        user,
-        collTokenAddresses,
-    ).then((r) => r.map(({ balance }) => balance));
+    const collAmounts = await aaveV3View
+        .getTokenBalances(market, user, collTokenAddresses)
+        .then((r) => r.map(({ balance }) => balance));
 
     return {
         collAssetIds,
@@ -156,9 +169,15 @@ const getPositionInfo = async (user, aaveV3View) => {
 const validatePositionShift = (oldPosition, newPosition) => {
     expect(oldPosition.emodeCategoryId).to.be.eq(newPosition.emodeCategoryId);
     oldPosition.collAssetIds.map((e, i) => expect(e).to.be.eq(newPosition.collAssetIds[i]));
-    oldPosition.collATokenAddresses.map((e, i) => expect(e).to.be.eq(newPosition.collATokenAddresses[i]));
-    oldPosition.useAsCollateralFlags.map((e, i) => expect(e).to.be.eq(newPosition.useAsCollateralFlags[i]));
-    oldPosition.debtTokenAddresses.map((e, i) => expect(e).to.be.eq(newPosition.debtTokenAddresses[i]));
+    oldPosition.collATokenAddresses.map((e, i) =>
+        expect(e).to.be.eq(newPosition.collATokenAddresses[i]),
+    );
+    oldPosition.useAsCollateralFlags.map((e, i) =>
+        expect(e).to.be.eq(newPosition.useAsCollateralFlags[i]),
+    );
+    oldPosition.debtTokenAddresses.map((e, i) =>
+        expect(e).to.be.eq(newPosition.debtTokenAddresses[i]),
+    );
     oldPosition.debtAssetIds.map((e, i) => expect(e).to.be.eq(newPosition.debtAssetIds[i]));
 
     oldPosition.collAmounts.map((e, i) => {
@@ -187,7 +206,9 @@ describe('Summerfi-AaveV3-Import', function () {
     before(async () => {
         console.log('isFork', isFork);
 
-        const userAddress = await ethers.getContractAt('IDSProxy', sfProxyAddress).then((e) => e.owner());
+        const userAddress = await ethers
+            .getContractAt('IDSProxy', sfProxyAddress)
+            .then((e) => e.owner());
         userAcc = await ethers.getSigner(userAddress);
 
         if (isFork) {
@@ -238,7 +259,9 @@ describe('Summerfi-AaveV3-Import', function () {
         const dfsMigratedPosition = await getPositionInfo(wallet.address, aaveV3View);
         validatePositionShift(sfPositionInfo, dfsMigratedPosition);
 
-        const currentSfPositionRatios = await aaveV3View.getRatios(addrs[network].AAVE_MARKET, [sfProxyAddress]);
+        const currentSfPositionRatios = await aaveV3View.getRatios(addrs[network].AAVE_MARKET, [
+            sfProxyAddress,
+        ]);
         expect(currentSfPositionRatios[0]).to.be.eq(0);
 
         tx = await guard.connect(userAcc).permit(wallet.address, sfProxyAddress, false);

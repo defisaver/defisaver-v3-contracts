@@ -19,8 +19,8 @@ const yearnSupplyTest = async (testLength) => {
     describe('Yearn-Supply', function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
         let yearnRegistry;
 
         const yearnPairs = [
@@ -38,7 +38,10 @@ const yearnSupplyTest = async (testLength) => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-            yearnRegistry = await hre.ethers.getContractAt('IYearnRegistry', YEARN_REGISTRY_ADDRESS);
+            yearnRegistry = await hre.ethers.getContractAt(
+                'IYearnRegistry',
+                YEARN_REGISTRY_ADDRESS,
+            );
         });
         // eslint-disable-next-line no-param-reassign
         if (testLength === 0) testLength = yearnPairs.length;
@@ -57,7 +60,9 @@ const yearnSupplyTest = async (testLength) => {
                         senderAcc.address,
                     );
                 } else {
-                    await depositToWeth(hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18));
+                    await depositToWeth(
+                        hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18),
+                    );
                 }
 
                 const tokenAmountStart = await balanceOf(token, senderAcc.address);
@@ -66,7 +71,11 @@ const yearnSupplyTest = async (testLength) => {
                 const amountToSupply = tokenAmountStart.div(10);
                 await approve(token, proxy.address);
                 await yearnSupply(
-                    token, amountToSupply, senderAcc.address, senderAcc.address, proxy,
+                    token,
+                    amountToSupply,
+                    senderAcc.address,
+                    senderAcc.address,
+                    proxy,
                 );
 
                 const tokenAmountAfterFirst = await balanceOf(token, senderAcc.address);
@@ -75,11 +84,13 @@ const yearnSupplyTest = async (testLength) => {
                 expect(tokenAmountAfterFirst).to.be.eq(tokenAmountStart.sub(amountToSupply));
                 expect(yTokenAmountAfterFirst).to.be.gt(yTokenAmountStart);
 
-                await yearnSupply(token,
+                await yearnSupply(
+                    token,
                     hre.ethers.constants.MaxUint256,
                     senderAcc.address,
                     senderAcc.address,
-                    proxy);
+                    proxy,
+                );
 
                 const tokenAmountEnd = await balanceOf(token, senderAcc.address);
                 const yTokenAmountEnd = await balanceOf(yToken, senderAcc.address);
@@ -95,8 +106,8 @@ const yearnWithdrawTest = async (testLength) => {
     describe('Yearn-Withdraw', function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
         let yearnRegistry;
 
         const yearnPairs = [
@@ -114,7 +125,10 @@ const yearnWithdrawTest = async (testLength) => {
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
-            yearnRegistry = await hre.ethers.getContractAt('IYearnRegistry', YEARN_REGISTRY_ADDRESS);
+            yearnRegistry = await hre.ethers.getContractAt(
+                'IYearnRegistry',
+                YEARN_REGISTRY_ADDRESS,
+            );
         });
 
         // eslint-disable-next-line no-param-reassign
@@ -134,14 +148,18 @@ const yearnWithdrawTest = async (testLength) => {
                         senderAcc.address,
                     );
                 } else {
-                    await depositToWeth(hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18));
+                    await depositToWeth(
+                        hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '10000'), 18),
+                    );
                 }
                 await approve(token, proxy.address);
-                await yearnSupply(token,
+                await yearnSupply(
+                    token,
                     hre.ethers.constants.MaxUint256,
                     senderAcc.address,
                     senderAcc.address,
-                    proxy);
+                    proxy,
+                );
 
                 const tokenAmountStart = await balanceOf(token, senderAcc.address);
                 const yTokenAmountStart = await balanceOf(yToken, senderAcc.address);

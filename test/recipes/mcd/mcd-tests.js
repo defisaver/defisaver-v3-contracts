@@ -36,7 +36,10 @@ const BigNumber = hre.ethers.BigNumber;
 const SUPPLY_AMOUNT_IN_USD = '150000';
 const GENERATE_AMOUNT_IN_USD = '50000';
 const {
-    openVaultForExactAmountInDecimals, gUniDeposit, openVault, executeAction,
+    openVaultForExactAmountInDecimals,
+    gUniDeposit,
+    openVault,
+    executeAction,
 } = require('../../utils/actions');
 
 const McdPaybackAction = dfs.actions.maker.MakerPaybackAction;
@@ -409,12 +412,7 @@ const mcdCloseTest = async () => {
                 const vaultColl = fetchAmountinUSDPrice('WETH', SUPPLY_AMOUNT_IN_USD);
 
                 const amountDai = (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString();
-                const vaultId = await openVault(
-                    proxy,
-                    ilkData.ilkLabel,
-                    vaultColl,
-                    amountDai,
-                );
+                const vaultId = await openVault(proxy, ilkData.ilkLabel, vaultColl, amountDai);
 
                 const daiAddr = makerAddresses.MCD_DAI;
 
@@ -485,12 +483,7 @@ const mcdCloseTest = async () => {
                 const amountDai = (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString();
                 const amountColl = fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD);
 
-                const vaultId = await openVault(
-                    proxy,
-                    ilkData.ilkLabel,
-                    amountColl,
-                    amountDai,
-                );
+                const vaultId = await openVault(proxy, ilkData.ilkLabel, amountColl, amountDai);
 
                 // Vault debt + 1 dai to handle stability fee
                 let flAmount = (parseFloat(amountDai) + 1).toString();

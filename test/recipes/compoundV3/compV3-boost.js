@@ -62,12 +62,7 @@ describe('CompoundV3 Boost recipe test', function () {
             );
 
             // Supply action
-            await supplyCompV3(
-                proxy,
-                tokenData.address,
-                colAmount,
-                senderAcc.address,
-            );
+            await supplyCompV3(proxy, tokenData.address, colAmount, senderAcc.address);
 
             const borrowingAmount = hre.ethers.utils.parseUnits(
                 fetchAmountinUSDPrice('USDC', '2000'),
@@ -142,12 +137,7 @@ describe('CompoundV3 Boost recipe test', function () {
             );
 
             // Supply action
-            await supplyCompV3(
-                proxy,
-                tokenData.address,
-                colAmount,
-                senderAcc.address,
-            );
+            await supplyCompV3(proxy, tokenData.address, colAmount, senderAcc.address);
 
             const borrowingAmount = hre.ethers.utils.parseUnits(
                 fetchAmountinUSDPrice('USDC', '2000'),
@@ -183,15 +173,8 @@ describe('CompoundV3 Boost recipe test', function () {
             const boostRecipe = new dfs.Recipe('FLBoostRecipe', [
                 flAaveV2Action,
                 new dfs.actions.basic.SellAction(exchangeOrder, proxy.address, proxy.address),
-                new dfs.actions.compoundV3.CompoundV3SupplyAction(
-                    collToken,
-                    '$2',
-                    proxy.address,
-                ),
-                new dfs.actions.compoundV3.CompoundV3BorrowAction(
-                    '$1',
-                    aaveV2FlAddr,
-                ),
+                new dfs.actions.compoundV3.CompoundV3SupplyAction(collToken, '$2', proxy.address),
+                new dfs.actions.compoundV3.CompoundV3BorrowAction('$1', aaveV2FlAddr),
             ]);
 
             const functionData = boostRecipe.encodeForDsProxyCall();

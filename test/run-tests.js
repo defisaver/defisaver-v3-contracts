@@ -36,16 +36,9 @@ class TestRunner extends events.EventEmitter {
         this.retries = 0;
         this.liveNodes = 0;
         this.startEpoch = 0;
-        this.on(
-            'NodeReady',
-            this.nodeReadyListener,
-        ).on(
-            'NodeClosed',
-            this.nodeClosedListener,
-        ).on(
-            'TestClosed',
-            this.testClosedListener,
-        );
+        this.on('NodeReady', this.nodeReadyListener)
+            .on('NodeClosed', this.nodeClosedListener)
+            .on('TestClosed', this.testClosedListener);
     }
 
     nodeReadyListener(nodeHandle, id) {
@@ -96,10 +89,12 @@ class TestRunner extends events.EventEmitter {
     }
 
     run(nodeCount, testFileNames) {
-        this.pendingTests = testFileNames.map((e) => Object({
-            retries: MAX_RETRIES,
-            fileName: e,
-        }));
+        this.pendingTests = testFileNames.map((e) =>
+            Object({
+                retries: MAX_RETRIES,
+                fileName: e,
+            }),
+        );
         this.total = this.pendingTests.length;
         this.startEpoch = Date.now();
 
@@ -117,9 +112,7 @@ class TestRunner extends events.EventEmitter {
 
     startNode(id) {
         this.liveNodes++;
-        const nodeHandle = exec(
-            `npx hardhat node --port ${8545 + id}`,
-        ).on(
+        const nodeHandle = exec(`npx hardhat node --port ${8545 + id}`).on(
             'close',
             (code, signal) => this.emit('NodeClosed', id, signal),
         );
@@ -142,12 +135,9 @@ class TestRunner extends events.EventEmitter {
                     console.log(stdout);
                 }
             },
-        ).on(
-            'close',
-            function () {
-                runner.emit('TestClosed', nodeHandle, this, test, id);
-            },
-        );
+        ).on('close', function () {
+            runner.emit('TestClosed', nodeHandle, this, test, id);
+        });
         return testHandle;
     }
 
@@ -160,7 +150,13 @@ class TestRunner extends events.EventEmitter {
     finish() {
         const comp = (a, b) => (a.fileName > b.fileName ? 1 : -1);
         this.passedTests.sort(comp).forEach((e) => console.log(e.output));
-        this.passedTests.sort((a, b) => b.time - a.time).forEach((e) => console.log(`${e.fileName.padEnd(32)}\tretries: ${MAX_RETRIES - e.retries}\ttime: ${e.time}`));
+        this.passedTests
+            .sort((a, b) => b.time - a.time)
+            .forEach((e) =>
+                console.log(
+                    `${e.fileName.padEnd(32)}\tretries: ${MAX_RETRIES - e.retries}\ttime: ${e.time}`,
+                ),
+            );
         console.log(`${this.passed}/${this.total} tests passed`);
         if (this.total !== this.passed) exit(1);
         exit(0);
@@ -174,4 +170,4 @@ class TestRunner extends events.EventEmitter {
     let nodeCount = DEFAULT_NODE_COUNT;
     if (process.argv.length > 2) nodeCount = process.argv[2];
     runner.run(nodeCount, testFileNames);
-}());
+})();

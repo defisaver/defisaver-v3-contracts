@@ -51,7 +51,14 @@ class RepayTest extends BaseFluidT1StrategyTest {
         );
 
         return {
-            collAsset, debtAsset, nftId, subId, strategySub, repayAmount, exchangeObject, ratioBefore,
+            collAsset,
+            debtAsset,
+            nftId,
+            subId,
+            strategySub,
+            repayAmount,
+            exchangeObject,
+            ratioBefore,
         };
     }
 
@@ -60,7 +67,13 @@ class RepayTest extends BaseFluidT1StrategyTest {
         this.testPairs.forEach((pair, i) => {
             it('... should call Fluid T1 repay strategy', async () => {
                 const {
-                    debtAsset, nftId, subId, strategySub, repayAmount, exchangeObject, ratioBefore,
+                    debtAsset,
+                    nftId,
+                    subId,
+                    strategySub,
+                    repayAmount,
+                    exchangeObject,
+                    ratioBefore,
                 } = await this.openAndSubscribe(pair);
 
                 await callFluidT1RepayStrategy(
@@ -80,7 +93,14 @@ class RepayTest extends BaseFluidT1StrategyTest {
             });
             it('... should call Fluid FL repay strategy', async () => {
                 const {
-                    collAsset, debtAsset, nftId, subId, strategySub, repayAmount, exchangeObject, ratioBefore,
+                    collAsset,
+                    debtAsset,
+                    nftId,
+                    subId,
+                    strategySub,
+                    repayAmount,
+                    exchangeObject,
+                    ratioBefore,
                 } = await this.openAndSubscribe(pair);
 
                 await callFluidT1FLRepayStrategy(
@@ -110,9 +130,15 @@ module.exports = async function runRepayTests() {
     const repayTest = new RepayTest(testPairs, isFork);
     describe('Fluid Vault T1 Repay Strategy Tests', function () {
         this.timeout(1200000);
-        before(async () => { await repayTest.setUp(); });
-        beforeEach(async () => { await repayTest.takeSnapshot(); });
-        afterEach(async () => { await repayTest.revertToSnapshot(); });
+        before(async () => {
+            await repayTest.setUp();
+        });
+        beforeEach(async () => {
+            await repayTest.takeSnapshot();
+        });
+        afterEach(async () => {
+            await repayTest.revertToSnapshot();
+        });
         repayTest.runTests();
     });
 };

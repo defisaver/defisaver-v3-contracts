@@ -48,7 +48,11 @@ const SAFE_MANAGER_ADDR = '0xEfe0B4cA532769a3AE758fD82E1426a03A94F185';
 
 const reflexerOpenTest = async () => {
     describe('Reflexer-Open', () => {
-        let senderAcc; let proxy; let reflexerView; let logger; let reflexerViewAddr;
+        let senderAcc;
+        let proxy;
+        let reflexerView;
+        let logger;
+        let reflexerViewAddr;
 
         before(async () => {
             reflexerViewAddr = await getAddrFromRegistry('ReflexerView');
@@ -77,8 +81,7 @@ const reflexerOpenTest = async () => {
 
         it('... should log every event', async () => {
             const snapshot = await takeSnapshot();
-            await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(reflexerOpen(proxy, ADAPTER_ADDRESS)).to.emit(logger, 'ActionDirectEvent');
             revertToSnapshot(snapshot);
         }).timeout(10000);
     });
@@ -86,7 +89,11 @@ const reflexerOpenTest = async () => {
 
 const reflexerSupplyTest = async () => {
     describe('Reflexer-Supply', () => {
-        let senderAcc; let proxy; let reflexerView; let weth; let logger;
+        let senderAcc;
+        let proxy;
+        let reflexerView;
+        let weth;
+        let logger;
         let reflexerViewAddr;
 
         before(async () => {
@@ -102,13 +109,17 @@ const reflexerSupplyTest = async () => {
             const snapshot = await takeSnapshot();
             await reflexerOpen(proxy, ADAPTER_ADDRESS);
 
-            const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            const amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             await depositToWeth(amountWETH.toString());
 
             const safeID = await lastSafeID(proxy.address);
             const from = senderAcc.address;
-            await expect(() => reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
+            await expect(() =>
+                reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from),
+            ).to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
 
             const info = await getSafeInfo(reflexerView, safeID);
             expect(info.coll.toString()).to.be.equal(amountWETH);
@@ -119,16 +130,25 @@ const reflexerSupplyTest = async () => {
             const snapshot = await takeSnapshot();
             await reflexerOpen(proxy, ADAPTER_ADDRESS);
 
-            const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            const amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             await depositToWeth(amountWETH.toString());
             await send(WETH_ADDRESS, proxy.address, amountWETH);
 
             const safeID = await lastSafeID(proxy.address);
             const from = proxy.address;
             const proxyStartingBalance = await balanceOf(WETH_ADDRESS, proxy.address);
-            await expect(() => reflexerSupply(proxy, safeID,
-                hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, from))
-                .to.changeTokenBalance(weth, proxy, proxyStartingBalance.mul(-1));
+            await expect(() =>
+                reflexerSupply(
+                    proxy,
+                    safeID,
+                    hre.ethers.constants.MaxUint256,
+                    ADAPTER_ADDRESS,
+                    from,
+                ),
+            ).to.changeTokenBalance(weth, proxy, proxyStartingBalance.mul(-1));
 
             const info = await getSafeInfo(reflexerView, safeID);
             expect(info.coll.toString()).to.be.equal(proxyStartingBalance);
@@ -139,15 +159,24 @@ const reflexerSupplyTest = async () => {
             const snapshot = await takeSnapshot();
             await reflexerOpen(proxy, ADAPTER_ADDRESS);
 
-            const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            const amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             await depositToWeth(amountWETH.toString());
 
             const safeID = await lastSafeID(proxy.address);
             const from = senderAcc.address;
             const startingBalance = await balanceOf(WETH_ADDRESS, from);
-            await expect(() => reflexerSupply(proxy, safeID,
-                hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, from))
-                .to.changeTokenBalance(weth, senderAcc, startingBalance.mul(-1));
+            await expect(() =>
+                reflexerSupply(
+                    proxy,
+                    safeID,
+                    hre.ethers.constants.MaxUint256,
+                    ADAPTER_ADDRESS,
+                    from,
+                ),
+            ).to.changeTokenBalance(weth, senderAcc, startingBalance.mul(-1));
 
             const info = await getSafeInfo(reflexerView, safeID);
             expect(info.coll.toString()).to.be.equal(startingBalance);
@@ -156,23 +185,31 @@ const reflexerSupplyTest = async () => {
 
         it('... should log every event', async () => {
             const snapshot = await takeSnapshot();
-            await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(reflexerOpen(proxy, ADAPTER_ADDRESS)).to.emit(logger, 'ActionDirectEvent');
 
-            const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            const amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             await depositToWeth(amountWETH.toString());
 
             const safeID = await lastSafeID(proxy.address);
             const from = senderAcc.address;
-            await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from)).to.emit(
+                logger,
+                'ActionDirectEvent',
+            );
             revertToSnapshot(snapshot);
         }).timeout(40000);
     });
 };
 const reflexerGenerateTest = async () => {
     describe('Reflexer-Generate', () => {
-        let senderAcc; let proxy; let rai; let weth; let logger;
+        let senderAcc;
+        let proxy;
+        let rai;
+        let weth;
+        let logger;
 
         before(async () => {
             logger = await hre.ethers.getContractAt('DefisaverLogger', LOGGER_ADDR);
@@ -189,36 +226,47 @@ const reflexerGenerateTest = async () => {
             const safeID = await lastSafeID(proxy.address);
 
             const amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
-            const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            const amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             await depositToWeth(amountWETH.toString());
 
             const from = senderAcc.address;
-            await expect(() => reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
+            await expect(() =>
+                reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from),
+            ).to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
 
             const to = senderAcc.address;
-            await expect(() => reflexerGenerate(proxy, safeID, amountRai, to))
-                .to.changeTokenBalance(rai, senderAcc, amountRai);
+            await expect(() =>
+                reflexerGenerate(proxy, safeID, amountRai, to),
+            ).to.changeTokenBalance(rai, senderAcc, amountRai);
             revertToSnapshot(snapshot);
         }).timeout(40000);
 
         it('... should log every event', async () => {
             const snapshot = await takeSnapshot();
-            await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(reflexerOpen(proxy, ADAPTER_ADDRESS)).to.emit(logger, 'ActionDirectEvent');
 
-            const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            const amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             const amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
             await depositToWeth(amountWETH.toString());
 
             const safeID = await lastSafeID(proxy.address);
             const from = senderAcc.address;
-            await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from)).to.emit(
+                logger,
+                'ActionDirectEvent',
+            );
 
             const to = senderAcc.address;
-            await expect(reflexerGenerate(proxy, safeID, amountRai, to))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(reflexerGenerate(proxy, safeID, amountRai, to)).to.emit(
+                logger,
+                'ActionDirectEvent',
+            );
             revertToSnapshot(snapshot);
         }).timeout(40000);
     });
@@ -256,23 +304,29 @@ const reflexerPaybackTest = async () => {
             const safeID = await lastSafeID(proxy.address);
 
             let amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
-            let amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            let amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             amountWETH = amountWETH.mul(5); // 20 eth
             amountRai = amountRai.mul(10); // 10k rai
             await depositToWeth(amountWETH.toString());
 
             const from = senderAcc.address;
-            await expect(() => reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
+            await expect(() =>
+                reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from),
+            ).to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
 
             const to = senderAcc.address;
-            await expect(() => reflexerGenerate(proxy, safeID, amountRai, to))
-                .to.changeTokenBalance(rai, senderAcc, amountRai);
+            await expect(() =>
+                reflexerGenerate(proxy, safeID, amountRai, to),
+            ).to.changeTokenBalance(rai, senderAcc, amountRai);
 
             const amountToPayback = amountRai.div(2); // 5k rai
 
-            await expect(() => reflexerPayback(proxy, safeID, amountToPayback, from, RAI_ADDR))
-                .to.changeTokenBalance(rai, senderAcc, amountToPayback.mul(-1));
+            await expect(() =>
+                reflexerPayback(proxy, safeID, amountToPayback, from, RAI_ADDR),
+            ).to.changeTokenBalance(rai, senderAcc, amountToPayback.mul(-1));
             revertToSnapshot(snapshot);
         }).timeout(50000);
 
@@ -282,18 +336,23 @@ const reflexerPaybackTest = async () => {
             const safeID = await lastSafeID(proxy.address);
 
             let amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
-            let amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            let amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             amountWETH = amountWETH.mul(5); // 20 eth
             amountRai = amountRai.mul(10); // 10k rai
             await depositToWeth(amountWETH.toString());
 
             const from = senderAcc.address;
-            await expect(() => reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
+            await expect(() =>
+                reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from),
+            ).to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
 
             const to = senderAcc.address;
-            await expect(() => reflexerGenerate(proxy, safeID, amountRai, to))
-                .to.changeTokenBalance(rai, senderAcc, amountRai);
+            await expect(() =>
+                reflexerGenerate(proxy, safeID, amountRai, to),
+            ).to.changeTokenBalance(rai, senderAcc, amountRai);
 
             await reflexerPayback(proxy, safeID, hre.ethers.constants.MaxUint256, from, RAI_ADDR);
 
@@ -313,18 +372,23 @@ const reflexerPaybackTest = async () => {
             const safeID = await lastSafeID(proxy.address);
 
             let amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
-            let amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            let amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             amountWETH = amountWETH.mul(5); // 20 eth
             amountRai = amountRai.mul(10); // 10k rai
             await depositToWeth(amountWETH.toString());
 
             const from = senderAcc.address;
-            await expect(() => reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
+            await expect(() =>
+                reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from),
+            ).to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
 
             const to = senderAcc.address;
-            await expect(() => reflexerGenerate(proxy, safeID, amountRai, to))
-                .to.changeTokenBalance(rai, senderAcc, amountRai);
+            await expect(() =>
+                reflexerGenerate(proxy, safeID, amountRai, to),
+            ).to.changeTokenBalance(rai, senderAcc, amountRai);
 
             const amountToPayback = amountRai.mul(2); // amount is bigger than debt
 
@@ -344,25 +408,31 @@ const reflexerPaybackTest = async () => {
 
         it('... should log every event', async () => {
             const snapshot = await takeSnapshot();
-            await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(reflexerOpen(proxy, ADAPTER_ADDRESS)).to.emit(logger, 'ActionDirectEvent');
 
-            const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            const amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             const amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
             await depositToWeth(amountWETH.toString());
 
             const safeID = await lastSafeID(proxy.address);
             const from = senderAcc.address;
-            await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from)).to.emit(
+                logger,
+                'ActionDirectEvent',
+            );
 
             const to = senderAcc.address;
-            await expect(reflexerGenerate(proxy, safeID, amountRai, to))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(reflexerGenerate(proxy, safeID, amountRai, to)).to.emit(
+                logger,
+                'ActionDirectEvent',
+            );
 
-            await expect(reflexerPayback(proxy, safeID,
-                hre.ethers.constants.MaxUint256, from, RAI_ADDR))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(
+                reflexerPayback(proxy, safeID, hre.ethers.constants.MaxUint256, from, RAI_ADDR),
+            ).to.emit(logger, 'ActionDirectEvent');
             revertToSnapshot(snapshot);
         }).timeout(40000);
     });
@@ -370,7 +440,11 @@ const reflexerPaybackTest = async () => {
 
 const reflexerWithdrawTest = async () => {
     describe('Reflexer-Withdraw', () => {
-        let senderAcc; let proxy; let reflexerView; let weth; let logger;
+        let senderAcc;
+        let proxy;
+        let reflexerView;
+        let weth;
+        let logger;
         let reflexerViewAddr;
 
         before(async () => {
@@ -387,7 +461,10 @@ const reflexerWithdrawTest = async () => {
             const snapshot = await takeSnapshot();
             await reflexerOpen(proxy, ADAPTER_ADDRESS);
 
-            const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            const amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             await depositToWeth(amountWETH.toString());
 
             const safeID = await lastSafeID(proxy.address);
@@ -399,8 +476,9 @@ const reflexerWithdrawTest = async () => {
             const to = senderAcc.address;
             const withdrawAmount = (infoBeforeWithdraw.coll / 4).toString();
 
-            await expect(() => reflexerWithdraw(proxy, safeID, withdrawAmount, ADAPTER_ADDRESS, to))
-                .to.changeTokenBalance(weth, senderAcc, withdrawAmount);
+            await expect(() =>
+                reflexerWithdraw(proxy, safeID, withdrawAmount, ADAPTER_ADDRESS, to),
+            ).to.changeTokenBalance(weth, senderAcc, withdrawAmount);
 
             const infoAfterWithdraw = await getSafeInfo(reflexerView, safeID);
             expect(infoAfterWithdraw.coll).to.be.equal(amountWETH.sub(withdrawAmount));
@@ -412,17 +490,27 @@ const reflexerWithdrawTest = async () => {
             await reflexerOpen(proxy, ADAPTER_ADDRESS);
             const safeID = await lastSafeID(proxy.address);
 
-            const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            const amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             await depositToWeth(amountWETH.toString());
 
             const from = senderAcc.address;
-            await expect(() => reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
+            await expect(() =>
+                reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from),
+            ).to.changeTokenBalance(weth, senderAcc, amountWETH.mul(-1));
 
             const to = senderAcc.address;
-            await expect(() => reflexerWithdraw(proxy, safeID,
-                hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, to))
-                .to.changeTokenBalance(weth, senderAcc, amountWETH);
+            await expect(() =>
+                reflexerWithdraw(
+                    proxy,
+                    safeID,
+                    hre.ethers.constants.MaxUint256,
+                    ADAPTER_ADDRESS,
+                    to,
+                ),
+            ).to.changeTokenBalance(weth, senderAcc, amountWETH);
 
             const infoAfterWithdraw = await getSafeInfo(reflexerView, safeID);
             expect(infoAfterWithdraw.coll).to.be.equal(0);
@@ -431,20 +519,30 @@ const reflexerWithdrawTest = async () => {
 
         it('... should log every event', async () => {
             const snapshot = await takeSnapshot();
-            await expect(reflexerOpen(proxy, ADAPTER_ADDRESS))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(reflexerOpen(proxy, ADAPTER_ADDRESS)).to.emit(logger, 'ActionDirectEvent');
 
-            const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            const amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             await depositToWeth(amountWETH.toString());
 
             const safeID = await lastSafeID(proxy.address);
             const from = senderAcc.address;
-            await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(reflexerSupply(proxy, safeID, amountWETH, ADAPTER_ADDRESS, from)).to.emit(
+                logger,
+                'ActionDirectEvent',
+            );
             const to = senderAcc.address;
-            await expect(reflexerWithdraw(proxy, safeID,
-                hre.ethers.constants.MaxUint256, ADAPTER_ADDRESS, to))
-                .to.emit(logger, 'ActionDirectEvent');
+            await expect(
+                reflexerWithdraw(
+                    proxy,
+                    safeID,
+                    hre.ethers.constants.MaxUint256,
+                    ADAPTER_ADDRESS,
+                    to,
+                ),
+            ).to.emit(logger, 'ActionDirectEvent');
             revertToSnapshot(snapshot);
         }).timeout(40000);
     });
@@ -462,7 +560,10 @@ const reflexerSaviourTest = async () => {
                 'ISAFESaviour',
                 NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS,
             );
-            safeManager = await hre.ethers.getContractAt('ISAFEManager', REFLEXER_SAFE_MANAGER_ADDR);
+            safeManager = await hre.ethers.getContractAt(
+                'ISAFEManager',
+                REFLEXER_SAFE_MANAGER_ADDR,
+            );
             uniRouter = await hre.ethers.getContractAt('IUniswapRouter', UNIV2_ROUTER_ADDRESS);
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
@@ -475,7 +576,10 @@ const reflexerSaviourTest = async () => {
             const safeHandler = await safeManager.safes(safeID);
 
             const amountRai = hre.ethers.utils.parseUnits(MIN_VAULT_RAI_AMOUNT, 18);
-            const amountWETH = hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD), 18);
+            const amountWETH = hre.ethers.utils.parseUnits(
+                fetchAmountinUSDPrice('WETH', WETH_SUPPLY_AMOUNT_IN_USD),
+                18,
+            );
             await depositToWeth(amountWETH.toString());
 
             const from = senderAcc.address;
@@ -502,22 +606,12 @@ const reflexerSaviourTest = async () => {
 
             await approve(RAI_WETH_LP_TOKEN_ADDRESS, proxy.address);
             // deposit half
-            await reflexerSaviourDeposit(
-                proxy,
-                from,
-                safeID,
-                lpTokenAmount.div(2),
-            );
+            await reflexerSaviourDeposit(proxy, from, safeID, lpTokenAmount.div(2));
             let saviourBalance = await saviour.lpTokenCover(safeHandler);
             expect(saviourBalance).to.be.eq(lpTokenAmount.div(2));
 
             // deposit uint max
-            await reflexerSaviourDeposit(
-                proxy,
-                from,
-                safeID,
-                hre.ethers.constants.MaxUint256,
-            );
+            await reflexerSaviourDeposit(proxy, from, safeID, hre.ethers.constants.MaxUint256);
             saviourBalance = await saviour.lpTokenCover(safeHandler);
             expect(saviourBalance).to.be.eq(lpTokenAmount);
 
@@ -546,14 +640,17 @@ const reflexerWithdrawStuckFundsTest = async () => {
             impersonateAccount(proxyOwner);
             const proxyOwnerSigner = await hre.ethers.getSigner(proxyOwner);
 
-            const dsProxy = (await hre.ethers.getContractAt('IDSProxy', proxyAddr)).connect(proxyOwnerSigner);
+            const dsProxy = (await hre.ethers.getContractAt('IDSProxy', proxyAddr)).connect(
+                proxyOwnerSigner,
+            );
             const safeEngine = await hre.ethers.getContractAt('ISAFEEngine', SAFE_ENGINE_ADDR);
             const safeManager = await hre.ethers.getContractAt('ISAFEManager', SAFE_MANAGER_ADDR);
             const safeOwnerAddr = await safeManager.safes(safeId);
 
             const raiStuckAmountInRadPrecision = await safeEngine.coinBalance(safeOwnerAddr);
-            const raiStuckAmountInWadPrecision = raiStuckAmountInRadPrecision
-                .div(BigNumber.from(10).pow(27));
+            const raiStuckAmountInWadPrecision = raiStuckAmountInRadPrecision.div(
+                BigNumber.from(10).pow(27),
+            );
             const raiSignerBalanceBefore = await balanceOf(RAI_ADDR, signer.address);
 
             console.log('------------BEFORE--------------');
@@ -567,14 +664,24 @@ const reflexerWithdrawStuckFundsTest = async () => {
             const raiSignerBalanceAfter = await balanceOf(RAI_ADDR, signer.address);
 
             const leftoverRaiOnProxyInRadPrecision = await safeEngine.coinBalance(proxyAddr);
-            const leftoverRaiOnProxyInWadPrecision = leftoverRaiOnProxyInRadPrecision
-                .div(BigNumber.from(10).pow(27));
+            const leftoverRaiOnProxyInWadPrecision = leftoverRaiOnProxyInRadPrecision.div(
+                BigNumber.from(10).pow(27),
+            );
 
             console.log('------------AFTER--------------');
-            console.log('raiStuckAmountInRadPrecisionAfter', raiStuckAmountInRadPrecisionAfter.toString());
+            console.log(
+                'raiStuckAmountInRadPrecisionAfter',
+                raiStuckAmountInRadPrecisionAfter.toString(),
+            );
             console.log('raiSignerBalanceAfter', raiSignerBalanceAfter.toString());
-            console.log('leftoverRaiOnProxyInRadPrecision', leftoverRaiOnProxyInRadPrecision.toString());
-            console.log('leftoverRaiOnProxyInWadPrecision', leftoverRaiOnProxyInWadPrecision.toString());
+            console.log(
+                'leftoverRaiOnProxyInRadPrecision',
+                leftoverRaiOnProxyInRadPrecision.toString(),
+            );
+            console.log(
+                'leftoverRaiOnProxyInWadPrecision',
+                leftoverRaiOnProxyInWadPrecision.toString(),
+            );
 
             expect(raiStuckAmountInRadPrecisionAfter).to.be.eq(BigNumber.from('0'));
             expect(raiSignerBalanceAfter).to.be.eq(

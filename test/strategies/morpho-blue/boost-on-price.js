@@ -23,18 +23,23 @@ const {
     approve,
 } = require('../../utils/utils');
 
-const {
-    addBotCaller,
-    createStrategy,
-    createBundle,
-} = require('../utils/utils-strategies');
+const { addBotCaller, createStrategy, createBundle } = require('../utils/utils-strategies');
 
 const { topUp } = require('../../../scripts/utils/fork');
 const { subMorphoBlueLeverageManagementOnPrice } = require('../utils/strategy-subs');
-const { createMorphoBlueBoostOnTargetPriceStrategy, createMorphoBlueFLBoostOnTargetPriceStrategy } = require('../../../strategies-spec/mainnet');
-const { createMorphoBlueBoostOnTargetPriceL2Strategy, createMorphoBlueFLBoostOnTargetPriceL2Strategy } = require('../../../strategies-spec/l2');
+const {
+    createMorphoBlueBoostOnTargetPriceStrategy,
+    createMorphoBlueFLBoostOnTargetPriceStrategy,
+} = require('../../../strategies-spec/mainnet');
+const {
+    createMorphoBlueBoostOnTargetPriceL2Strategy,
+    createMorphoBlueFLBoostOnTargetPriceL2Strategy,
+} = require('../../../strategies-spec/l2');
 const { morphoBlueSupplyCollateral, morphoBlueBorrow } = require('../../utils/actions');
-const { callMorphoBlueBoostOnTargetPriceStrategy, callMorphoBlueFLBoostOnTargetPriceStrategy } = require('../utils/strategy-calls');
+const {
+    callMorphoBlueBoostOnTargetPriceStrategy,
+    callMorphoBlueFLBoostOnTargetPriceStrategy,
+} = require('../utils/strategy-calls');
 const { MORPHO_BLUE_ADDRESS } = require('../../utils/morpho-blue');
 
 /* //////////////////////////////////////////////////////////////
@@ -91,7 +96,8 @@ const L2_MARKETS_WITH_UNI_V3_LIQUIDITY = [
         uniV3Fee: 500,
     },
 ];
-const TEST_MARKETS = network === 'mainnet' ? L1_MARKETS_WITH_UNI_V3_LIQUIDITY : L2_MARKETS_WITH_UNI_V3_LIQUIDITY;
+const TEST_MARKETS =
+    network === 'mainnet' ? L1_MARKETS_WITH_UNI_V3_LIQUIDITY : L2_MARKETS_WITH_UNI_V3_LIQUIDITY;
 
 // make initial ratio ~ 200
 const COLL_AMOUNT_IN_USD = 10000;
@@ -107,15 +113,20 @@ const TARGET_RATIO = 175;
 
 const deployBoostOnPriceBundle = async (isFork) => {
     await openStrategyAndBundleStorage(isFork);
-    const boostOnPriceStrategy = network === 'mainnet'
-        ? createMorphoBlueBoostOnTargetPriceStrategy()
-        : createMorphoBlueBoostOnTargetPriceL2Strategy();
-    const flBoostOnPriceStrategy = network === 'mainnet'
-        ? createMorphoBlueFLBoostOnTargetPriceStrategy()
-        : createMorphoBlueFLBoostOnTargetPriceL2Strategy();
+    const boostOnPriceStrategy =
+        network === 'mainnet'
+            ? createMorphoBlueBoostOnTargetPriceStrategy()
+            : createMorphoBlueBoostOnTargetPriceL2Strategy();
+    const flBoostOnPriceStrategy =
+        network === 'mainnet'
+            ? createMorphoBlueFLBoostOnTargetPriceStrategy()
+            : createMorphoBlueFLBoostOnTargetPriceL2Strategy();
     const boostOnPriceStrategyId = await createStrategy(...boostOnPriceStrategy, false);
     const flBoostOnPriceStrategyId = await createStrategy(...flBoostOnPriceStrategy, false);
-    const boostOnPriceBundleId = await createBundle([boostOnPriceStrategyId, flBoostOnPriceStrategyId]);
+    const boostOnPriceBundleId = await createBundle([
+        boostOnPriceStrategyId,
+        flBoostOnPriceStrategyId,
+    ]);
     return boostOnPriceBundleId;
 };
 const formatMarketParams = (marketParams) => [
@@ -125,14 +136,7 @@ const formatMarketParams = (marketParams) => [
     marketParams.irm,
     marketParams.lltv,
 ];
-const createPosition = async (
-    marketParams,
-    loanToken,
-    collToken,
-    senderAcc,
-    proxy,
-    user,
-) => {
+const createPosition = async (marketParams, loanToken, collToken, senderAcc, proxy, user) => {
     // give auth for EOA automation
     if (user !== proxy.address) {
         const morphoBlue = await hre.ethers.getContractAt('IMorphoBlue', MORPHO_BLUE_ADDRESS);
@@ -168,18 +172,21 @@ const calculateMorphoPrice = async (loanToken, collToken, oracle) => {
     const currentPrice = price
         .mul(pricePrecision)
         .div(
-            hre.ethers.BigNumber.from(10).pow(oracleDecimals + loanToken.decimals - collToken.decimals),
+            hre.ethers.BigNumber.from(10).pow(
+                oracleDecimals + loanToken.decimals - collToken.decimals,
+            ),
         );
     return currentPrice.div(pricePrecision);
 };
-const formatExchangeObjForMarket = (marketParams, amount) => formatExchangeObj(
-    marketParams.loanToken,
-    marketParams.collateralToken,
-    amount,
-    addrs[network].UNISWAP_V3_WRAPPER,
-    0,
-    marketParams.uniV3Fee,
-);
+const formatExchangeObjForMarket = (marketParams, amount) =>
+    formatExchangeObj(
+        marketParams.loanToken,
+        marketParams.collateralToken,
+        amount,
+        addrs[network].UNISWAP_V3_WRAPPER,
+        0,
+        marketParams.uniV3Fee,
+    );
 
 /* //////////////////////////////////////////////////////////////
                               TEST
@@ -216,11 +223,18 @@ const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
             user = eoaBoost ? senderAcc.address : proxy.address;
 
             // setup contracts
-            const strategyContractName = network === 'mainnet' ? 'StrategyExecutor' : 'StrategyExecutorL2';
-            strategyExecutor = await hre.ethers.getContractAt(strategyContractName, addrs[network].STRATEGY_EXECUTOR_ADDR);
+            const strategyContractName =
+                network === 'mainnet' ? 'StrategyExecutor' : 'StrategyExecutorL2';
+            strategyExecutor = await hre.ethers.getContractAt(
+                strategyContractName,
+                addrs[network].STRATEGY_EXECUTOR_ADDR,
+            );
             strategyExecutor = strategyExecutor.connect(botAcc);
             flAction = await getContractFromRegistry('FLAction', isFork);
-            view = await hre.ethers.getContractAt('MorphoBlueHelper', addrs[network].MORPHO_BLUE_VIEW);
+            view = await hre.ethers.getContractAt(
+                'MorphoBlueHelper',
+                addrs[network].MORPHO_BLUE_VIEW,
+            );
             await redeploy('MorphoBluePriceTrigger', isFork);
             await redeploy('MorphoBlueTargetRatioCheck', isFork);
 
@@ -230,13 +244,20 @@ const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
             // add bot caller
             await addBotCaller(botAcc.address, isFork);
         });
-        beforeEach(async () => { snapshotId = await takeSnapshot(); });
-        afterEach(async () => { await revertToSnapshot(snapshotId); });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
 
         for (let i = 0; i < TEST_MARKETS.length; i++) {
             const marketParams = TEST_MARKETS[i];
             const loanToken = getAssetInfoByAddress(marketParams.loanToken, chainIds[network]);
-            const collToken = getAssetInfoByAddress(marketParams.collateralToken, chainIds[network]);
+            const collToken = getAssetInfoByAddress(
+                marketParams.collateralToken,
+                chainIds[network],
+            );
 
             it(`... should call regular Morpho blue boost on price strategy for ${eoaBoost ? 'EOA' : 'wallet'} position: [${collToken.symbol}/${loanToken.symbol}]`, async () => {
                 // 1. create position
@@ -261,7 +282,10 @@ const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
                 );
 
                 // 5. calculate boost amount
-                const boostAmount = await fetchAmountInUSDPrice(loanToken.symbol, BOOST_LOAN_AMOUNT_IN_USD);
+                const boostAmount = await fetchAmountInUSDPrice(
+                    loanToken.symbol,
+                    BOOST_LOAN_AMOUNT_IN_USD,
+                );
 
                 // 6. create exchange order
                 const exchangeOrder = formatExchangeObjForMarket(marketParams, boostAmount);
@@ -304,7 +328,10 @@ const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
                 );
 
                 // 5. calculate boost amount
-                const boostAmount = await fetchAmountInUSDPrice(loanToken.symbol, BOOST_LOAN_AMOUNT_IN_USD);
+                const boostAmount = await fetchAmountInUSDPrice(
+                    loanToken.symbol,
+                    BOOST_LOAN_AMOUNT_IN_USD,
+                );
 
                 // 6. create exchange order
                 const exchangeOrder = formatExchangeObjForMarket(marketParams, boostAmount);

@@ -1,10 +1,6 @@
-const {
-    aaveV2assetsDefaultMarket,
-} = require('../../utils/aave');
+const { aaveV2assetsDefaultMarket } = require('../../utils/aave');
 
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require('../../utils/utils');
 
 const { aaveWithdrawTest } = require('./aave-tests');
 

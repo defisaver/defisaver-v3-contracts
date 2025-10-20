@@ -61,20 +61,24 @@ const morphoBlueApyAfterValuesTest = async () => {
                     fetchAmountinUSDPrice(debtAsset.symbol, '200000'),
                     debtAsset.decimals,
                 );
-                let marketInfo = await morphoBlueViewContract.callStatic.getMarketInfo(marketParams);
+                let marketInfo =
+                    await morphoBlueViewContract.callStatic.getMarketInfo(marketParams);
                 const borrowRateBefore = marketInfo.borrowRate;
 
                 if (marketInfo.totalSupplyAssets - marketInfo.totalBorrowAssets < borrowAmount) {
-                    console.log('Skipping test for opening position for [coll: %s, debt: %s] as borrow amount is too high', collAsset.symbol, debtAsset.symbol);
+                    console.log(
+                        'Skipping test for opening position for [coll: %s, debt: %s] as borrow amount is too high',
+                        collAsset.symbol,
+                        debtAsset.symbol,
+                    );
                     return;
                 }
 
-                const estimatedBorrowRateWithMarket = await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
-                    marketParams,
-                    [
-                        [true, '0', borrowAmount],
-                    ],
-                );
+                const estimatedBorrowRateWithMarket =
+                    await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
+                        marketParams,
+                        [[true, '0', borrowAmount]],
+                    );
                 const estimatedBorrowRate = estimatedBorrowRateWithMarket.borrowRate;
 
                 await setBalance(collAsset.address, senderAcc.address, supplyAmount);
@@ -101,13 +105,13 @@ const morphoBlueApyAfterValuesTest = async () => {
                 console.log('Real borrow rate:', realBorrowRate.toString());
                 expect(estimatedBorrowRate).to.be.closeTo(realBorrowRate, 1e6);
 
-                const estimatedBorrowRateWithMarketAfterRepay = await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
-                    marketParams,
-                    [
-                        [true, repayAmount, '0'],
-                    ],
-                );
-                const estimatedBorrowRateAfterRepay = estimatedBorrowRateWithMarketAfterRepay.borrowRate;
+                const estimatedBorrowRateWithMarketAfterRepay =
+                    await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
+                        marketParams,
+                        [[true, repayAmount, '0']],
+                    );
+                const estimatedBorrowRateAfterRepay =
+                    estimatedBorrowRateWithMarketAfterRepay.borrowRate;
 
                 await setBalance(debtAsset.address, senderAcc.address, repayAmount);
                 await approve(debtAsset.address, wallet.address, senderAcc);
@@ -121,7 +125,10 @@ const morphoBlueApyAfterValuesTest = async () => {
                 marketInfo = await morphoBlueViewContract.callStatic.getMarketInfo(marketParams);
                 const realBorrowRateAfterRepay = marketInfo.borrowRate;
 
-                console.log('Estimated borrow rate after repay:', estimatedBorrowRateAfterRepay.toString());
+                console.log(
+                    'Estimated borrow rate after repay:',
+                    estimatedBorrowRateAfterRepay.toString(),
+                );
                 console.log('Real borrow rate after repay:', realBorrowRateAfterRepay.toString());
                 expect(estimatedBorrowRateAfterRepay).to.be.closeTo(realBorrowRateAfterRepay, 1e6);
             });
@@ -134,15 +141,15 @@ const morphoBlueApyAfterValuesTest = async () => {
                     fetchAmountinUSDPrice(debtAsset.symbol, '500000'),
                     debtAsset.decimals,
                 );
-                let marketInfo = await morphoBlueViewContract.callStatic.getMarketInfo(marketParams);
+                let marketInfo =
+                    await morphoBlueViewContract.callStatic.getMarketInfo(marketParams);
                 const borrowRateBefore = marketInfo.borrowRate;
 
-                const estimatedBorrowRateWithMarket = await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
-                    marketParams,
-                    [
-                        [false, supplyAmount, withdrawAmount],
-                    ],
-                );
+                const estimatedBorrowRateWithMarket =
+                    await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
+                        marketParams,
+                        [[false, supplyAmount, withdrawAmount]],
+                    );
 
                 const estimatedBorrowRate = estimatedBorrowRateWithMarket.borrowRate;
                 await setBalance(debtAsset.address, senderAcc.address, supplyAmount);
@@ -188,16 +195,18 @@ const morphoBlueApyAfterValuesTest = async () => {
                 await approve(debtAsset.address, wallet.address, senderAcc);
                 await approve(collAsset.address, wallet.address, senderAcc);
 
-                let marketInfo = await morphoBlueViewContract.callStatic.getMarketInfo(marketParams);
+                let marketInfo =
+                    await morphoBlueViewContract.callStatic.getMarketInfo(marketParams);
                 const borrowRateBefore = marketInfo.borrowRate;
 
-                const estimatedBorrowRateWithMarket = await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
-                    marketParams,
-                    [
-                        [false, supplyDebtAssetAmount, '0'],
-                        [true, '0', borrowAmount],
-                    ],
-                );
+                const estimatedBorrowRateWithMarket =
+                    await morphoBlueViewContract.callStatic.getApyAfterValuesEstimation(
+                        marketParams,
+                        [
+                            [false, supplyDebtAssetAmount, '0'],
+                            [true, '0', borrowAmount],
+                        ],
+                    );
                 const estimatedBorrowRate = estimatedBorrowRateWithMarket.borrowRate;
 
                 const recipe = new dfs.Recipe('Create', [

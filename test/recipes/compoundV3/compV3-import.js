@@ -65,10 +65,7 @@ describe('CompoundV3 Import recipe test', function () {
     it('... should import position without debt ', async () => {
         let token = getAssetInfoByAddress(USDC_ADDR);
         let fetchedAmountWithUSD = fetchAmountinUSDPrice(token.symbol, '10000');
-        const USDCamount = hre.ethers.utils.parseUnits(
-            fetchedAmountWithUSD,
-            token.decimals,
-        );
+        const USDCamount = hre.ethers.utils.parseUnits(fetchedAmountWithUSD, token.decimals);
 
         await setBalance(USDC_ADDR, senderAcc.address, USDCamount);
         await approve(USDC_ADDR, COMET_ADDR, senderAcc);
@@ -79,10 +76,7 @@ describe('CompoundV3 Import recipe test', function () {
             token = getAssetInfoByAddress(assets[i].asset);
 
             fetchedAmountWithUSD = fetchAmountinUSDPrice(token.symbol, '10000');
-            const amount = hre.ethers.utils.parseUnits(
-                fetchedAmountWithUSD,
-                token.decimals,
-            );
+            const amount = hre.ethers.utils.parseUnits(fetchedAmountWithUSD, token.decimals);
 
             await setBalance(token.address, senderAcc.address, amount);
             await approve(token.address, COMET_ADDR, senderAcc);
@@ -98,7 +92,10 @@ describe('CompoundV3 Import recipe test', function () {
         const oldProxyDepositValue = oldProxyData.depositValue;
         for (let i = 0; i < oldProxyData.collAmounts.length; i++) {
             await withdrawCompV3(
-                proxy, proxy.address, oldProxyData.collAddr[i], oldProxyData.collAmounts[i],
+                proxy,
+                proxy.address,
+                oldProxyData.collAddr[i],
+                oldProxyData.collAmounts[i],
             );
         }
         await comet.allow(proxy.address, true);
@@ -113,12 +110,14 @@ describe('CompoundV3 Import recipe test', function () {
         const transferCollateralActions = [];
         for (let i = 0; i < collAmounts.length; i++) {
             if (collAmounts[i] !== 0) {
-                transferCollateralActions.push(new dfs.actions.compoundV3.CompoundV3TransferAction(
-                    senderAcc.address,
-                    proxy.address,
-                    userData.collAddr[i],
-                    collAmounts[i],
-                ));
+                transferCollateralActions.push(
+                    new dfs.actions.compoundV3.CompoundV3TransferAction(
+                        senderAcc.address,
+                        proxy.address,
+                        userData.collAddr[i],
+                        collAmounts[i],
+                    ),
+                );
             }
         }
         const transferRecipe = new dfs.Recipe('TransferRecipe', [
@@ -137,25 +136,21 @@ describe('CompoundV3 Import recipe test', function () {
             expect(collAmounts[i]).to.be.equal(proxyCollateralAmounts[i]);
         }
         // eslint-disable-next-line max-len
-        expect(userDepositValue.toString()).to.be.equal((proxyDepositValue - oldProxyDepositValue).toString());
+        expect(userDepositValue.toString()).to.be.equal(
+            (proxyDepositValue - oldProxyDepositValue).toString(),
+        );
     });
 
     it('... should import position with debt ', async () => {
         let token = getAssetInfoByAddress(USDC_ADDR);
         let fetchedAmountWithUSD = fetchAmountinUSDPrice(token.symbol, '10000');
-        const USDCamount = hre.ethers.utils.parseUnits(
-            fetchedAmountWithUSD,
-            token.decimals,
-        );
+        const USDCamount = hre.ethers.utils.parseUnits(fetchedAmountWithUSD, token.decimals);
 
         for (let i = 0; i < assets.length; i++) {
             token = getAssetInfoByAddress(assets[i].asset);
 
             fetchedAmountWithUSD = fetchAmountinUSDPrice(token.symbol, '10000');
-            const amount = hre.ethers.utils.parseUnits(
-                fetchedAmountWithUSD,
-                token.decimals,
-            );
+            const amount = hre.ethers.utils.parseUnits(fetchedAmountWithUSD, token.decimals);
 
             await setBalance(token.address, senderAcc.address, amount);
             await approve(token.address, COMET_ADDR, senderAcc);
@@ -176,7 +171,10 @@ describe('CompoundV3 Import recipe test', function () {
         const oldProxyData = await compV3View.getLoanData(proxy.address);
         for (let i = 0; i < oldProxyData.collAmounts.length; i++) {
             await withdrawCompV3(
-                proxy, proxy.address, oldProxyData.collAddr[i], oldProxyData.collAmounts[i],
+                proxy,
+                proxy.address,
+                oldProxyData.collAddr[i],
+                oldProxyData.collAmounts[i],
             );
         }
 
@@ -191,12 +189,14 @@ describe('CompoundV3 Import recipe test', function () {
         const transferCollateralActions = [];
         for (let i = 0; i < collAmounts.length; i++) {
             if (collAmounts[i] !== 0) {
-                transferCollateralActions.push(new dfs.actions.compoundV3.CompoundV3TransferAction(
-                    senderAcc.address,
-                    proxy.address,
-                    userData.collAddr[i],
-                    collAmounts[i],
-                ));
+                transferCollateralActions.push(
+                    new dfs.actions.compoundV3.CompoundV3TransferAction(
+                        senderAcc.address,
+                        proxy.address,
+                        userData.collAddr[i],
+                        collAmounts[i],
+                    ),
+                );
             }
         }
 
@@ -210,10 +210,7 @@ describe('CompoundV3 Import recipe test', function () {
                 senderAcc.address,
             ),
             ...transferCollateralActions,
-            new dfs.actions.compoundV3.CompoundV3BorrowAction(
-                '$2',
-                proxy.address,
-            ),
+            new dfs.actions.compoundV3.CompoundV3BorrowAction('$2', proxy.address),
             new dfs.actions.basic.SendTokenAction(USDC_ADDR, dydxFlAddr, flashloanAmount),
         ]);
 
@@ -228,7 +225,7 @@ describe('CompoundV3 Import recipe test', function () {
         for (let i = 0; i < collAmounts.length; i++) {
             expect(collAmounts[i]).to.be.equal(proxyCollateralAmounts[i]);
         }
-        expect(userBorrowAmount).to.be.lt((proxyBorrowAmount));
+        expect(userBorrowAmount).to.be.lt(proxyBorrowAmount);
         expect(proxyBorrowAmount).to.be.lt(flashloanAmount);
     });
 });

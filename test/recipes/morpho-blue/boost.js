@@ -4,22 +4,41 @@ const { expect } = require('chai');
 const dfs = require('@defisaver/sdk');
 const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy,
-    setBalance, approve, nullAddress,
-    fetchAmountinUSDPrice, formatMockExchangeObj, setNewExchangeWrapper, getAddrFromRegistry,
+    takeSnapshot,
+    revertToSnapshot,
+    getProxy,
+    redeploy,
+    setBalance,
+    approve,
+    nullAddress,
+    fetchAmountinUSDPrice,
+    formatMockExchangeObj,
+    setNewExchangeWrapper,
+    getAddrFromRegistry,
 } = require('../../utils/utils');
 const {
-    getMarkets, collateralSupplyAmountInUsd, supplyToMarket, borrowAmountInUsd,
+    getMarkets,
+    collateralSupplyAmountInUsd,
+    supplyToMarket,
+    borrowAmountInUsd,
 } = require('../../utils/morpho-blue');
-const { morphoBlueSupplyCollateral, morphoBlueBorrow, executeAction } = require('../../utils/actions');
+const {
+    morphoBlueSupplyCollateral,
+    morphoBlueBorrow,
+    executeAction,
+} = require('../../utils/actions');
 
 describe('Morpho-Blue-Boost', function () {
     this.timeout(80000);
 
     const markets = getMarkets();
 
-    let senderAcc; let proxy; let snapshot; let view;
-    let borrowAmountInWei; let mockWrapper;
+    let senderAcc;
+    let proxy;
+    let snapshot;
+    let view;
+    let borrowAmountInWei;
+    let mockWrapper;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -38,22 +57,27 @@ describe('Morpho-Blue-Boost', function () {
             const collToken = getAssetInfoByAddress(marketParams[1]);
             await supplyToMarket(marketParams);
             const supplyAmount = fetchAmountinUSDPrice(
-                collToken.symbol, collateralSupplyAmountInUsd,
+                collToken.symbol,
+                collateralSupplyAmountInUsd,
             );
-            const supplyAmountInWei = hre.ethers.utils.parseUnits(
-                supplyAmount, collToken.decimals,
-            );
+            const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, collToken.decimals);
             await setBalance(collToken.address, senderAcc.address, supplyAmountInWei);
             await approve(collToken.address, proxy.address, senderAcc);
             await morphoBlueSupplyCollateral(
-                proxy, marketParams, supplyAmountInWei, senderAcc.address, nullAddress,
+                proxy,
+                marketParams,
+                supplyAmountInWei,
+                senderAcc.address,
+                nullAddress,
             );
             const borrowAmount = fetchAmountinUSDPrice(loanToken.symbol, borrowAmountInUsd);
-            borrowAmountInWei = hre.ethers.utils.parseUnits(
-                borrowAmount, loanToken.decimals,
-            );
+            borrowAmountInWei = hre.ethers.utils.parseUnits(borrowAmount, loanToken.decimals);
             await morphoBlueBorrow(
-                proxy, marketParams, borrowAmountInWei, nullAddress, senderAcc.address,
+                proxy,
+                marketParams,
+                borrowAmountInWei,
+                nullAddress,
+                senderAcc.address,
             );
         }
     });
@@ -82,11 +106,7 @@ describe('Morpho-Blue-Boost', function () {
                 proxy.address,
             );
             const sellAction = new dfs.actions.basic.SellAction(
-                await formatMockExchangeObj(
-                    loanToken,
-                    collToken,
-                    boostAmount,
-                ),
+                await formatMockExchangeObj(loanToken, collToken, boostAmount),
                 proxy.address,
                 proxy.address,
             );
@@ -128,11 +148,7 @@ describe('Morpho-Blue-Boost', function () {
                 ),
             );
             const sellAction = new dfs.actions.basic.SellAction(
-                await formatMockExchangeObj(
-                    loanToken,
-                    collToken,
-                    boostAmount,
-                ),
+                await formatMockExchangeObj(loanToken, collToken, boostAmount),
                 proxy.address,
                 proxy.address,
             );

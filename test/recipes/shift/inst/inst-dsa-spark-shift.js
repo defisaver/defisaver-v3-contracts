@@ -17,9 +17,7 @@ const {
     network,
     getOwnerAddr,
 } = require('../../../utils/utils');
-const {
-    VARIABLE_RATE,
-} = require('../../../utils/aave');
+const { VARIABLE_RATE } = require('../../../utils/aave');
 const { executeAction } = require('../../../utils/actions');
 const { topUp } = require('../../../../scripts/utils/fork');
 const { getSparkPositionInfo, expectTwoSparkPositionsToBeEqual } = require('../../../utils/spark');
@@ -40,22 +38,24 @@ const createSparkImportRecipe = ({
 }) => {
     debtAmounts = debtAmounts.map((e) => e.mul(1_00_01).div(1_00_00));
     const actions = [
-        new sdk.actions.flashloan.FLAction(new sdk.actions.flashloan.BalancerFlashLoanAction(
-            debtTokenAddresses,
-            debtAmounts,
-        )),
+        new sdk.actions.flashloan.FLAction(
+            new sdk.actions.flashloan.BalancerFlashLoanAction(debtTokenAddresses, debtAmounts),
+        ),
 
-        ...debtAssetIds.map((debtAssetId, i) => new sdk.actions.spark.SparkPaybackAction(
-            true,
-            nullAddress,
-            MAX_UINT,
-            walletAddress,
-            VARIABLE_RATE,
-            debtTokenAddresses[i],
-            debtAssetId,
-            true,
-            dsaProxyAddress,
-        )),
+        ...debtAssetIds.map(
+            (debtAssetId, i) =>
+                new sdk.actions.spark.SparkPaybackAction(
+                    true,
+                    nullAddress,
+                    MAX_UINT,
+                    walletAddress,
+                    VARIABLE_RATE,
+                    debtTokenAddresses[i],
+                    debtAssetId,
+                    true,
+                    dsaProxyAddress,
+                ),
+        ),
 
         new sdk.actions.insta.InstPullTokensAction(
             dsaProxyAddress,
@@ -74,15 +74,18 @@ const createSparkImportRecipe = ({
 
         new sdk.actions.spark.SparkSetEModeAction(true, nullAddress, emodeCategoryId),
 
-        ...debtAssetIds.map((debtAssetId, i) => new sdk.actions.spark.SparkBorrowAction(
-            true,
-            nullAddress,
-            debtAmounts[i],
-            flAddress,
-            VARIABLE_RATE,
-            debtAssetId,
-            false,
-        )),
+        ...debtAssetIds.map(
+            (debtAssetId, i) =>
+                new sdk.actions.spark.SparkBorrowAction(
+                    true,
+                    nullAddress,
+                    debtAmounts[i],
+                    flAddress,
+                    VARIABLE_RATE,
+                    debtAssetId,
+                    false,
+                ),
+        ),
     ];
     return new sdk.Recipe('InstDsaSparkV3Import', actions);
 };
@@ -132,9 +135,7 @@ describe('DSA-Spark-Import', function () {
 
     it('... should execute Spark migration from DSA to DFS smart wallet', async () => {
         // approve smart wallet from DSA
-        const ABI = [
-            'function add(address)',
-        ];
+        const ABI = ['function add(address)'];
         const iface = new hre.ethers.utils.Interface(ABI);
         const data = iface.encodeFunctionData('add', [wallet.address]);
         await dsaProxy.cast(['AUTHORITY-A'], [data], userAddress);
@@ -152,7 +153,9 @@ describe('DSA-Spark-Import', function () {
         const dfsMigratedPosition = await getSparkPositionInfo(wallet.address, sparkView);
         expectTwoSparkPositionsToBeEqual(dsaPositionInfo, dfsMigratedPosition);
 
-        const currentDsaPositionRatios = await sparkView.getRatios(addrs[network].SPARK_MARKET, [dsaAddress]);
+        const currentDsaPositionRatios = await sparkView.getRatios(addrs[network].SPARK_MARKET, [
+            dsaAddress,
+        ]);
         expect(currentDsaPositionRatios[0]).to.be.eq(0);
     });
 });

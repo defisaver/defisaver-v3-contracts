@@ -18,8 +18,8 @@ const lidoStakeTest = async () => {
     describe('Lido WETH staking', function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -51,8 +51,8 @@ const lidoWrapTest = async () => {
     describe('Lido WStEth', function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -112,7 +112,11 @@ const lidoWrapTest = async () => {
             await approve(STETH_ADDRESS, proxy.address);
             const wStEthBalanceBefore = await balanceOf(WSTETH_ADDRESS, senderAcc.address);
             await lidoWrap(
-                hre.ethers.constants.MaxUint256, senderAcc.address, senderAcc.address, false, proxy,
+                hre.ethers.constants.MaxUint256,
+                senderAcc.address,
+                senderAcc.address,
+                false,
+                proxy,
             );
             const wStEthBalanceAfter = await balanceOf(WSTETH_ADDRESS, senderAcc.address);
 
@@ -147,8 +151,8 @@ const lidoUnwrapTest = async () => {
     describe('Lido WETH staking', function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];

@@ -59,6 +59,6 @@ describe('Claim Morpho token rewards', function () {
         await morphoBlueClaim(proxy, CLAIMER_EOA, rewardToken, distributorContract, amount, proofs);
         const balanceAfter = await balanceOf(rewardToken, CLAIMER_EOA);
 
-        expect((balanceAfter).sub(balanceBefore)).to.be.eq(amount);
+        expect(balanceAfter.sub(balanceBefore)).to.be.eq(amount);
     });
 });

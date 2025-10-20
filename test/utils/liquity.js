@@ -1,8 +1,6 @@
 const { getAssetInfo } = require('@defisaver/tokens');
 const hre = require('hardhat');
-const {
-    getAddrFromRegistry, balanceOf, getContractFromRegistry, BN2Float,
-} = require('./utils');
+const { getAddrFromRegistry, balanceOf, getContractFromRegistry, BN2Float } = require('./utils');
 
 const collChangeId = { SUPPLY: 0, WITHDRAW: 1 };
 const debtChangeId = { PAYBACK: 0, BORROW: 1 };
@@ -61,18 +59,24 @@ const prefetchedHints = {
 };
 
 const getHints = async (
-    troveOwner, actionId, from, collAmount, LUSDamount, actionId2, isFork = false,
+    troveOwner,
+    actionId,
+    from,
+    collAmount,
+    LUSDamount,
+    actionId2,
+    isFork = false,
 ) => {
     const blockNum = hre.ethers.provider.blockNumber;
-    const paramsSerialized = JSON.stringify(
-        {
-            blockNum, troveOwner, actionId, from, collAmount, LUSDamount,
-        },
-    );
-    const paramsEncoded = hre.ethers.utils.defaultAbiCoder.encode(
-        ['string'],
-        [paramsSerialized],
-    );
+    const paramsSerialized = JSON.stringify({
+        blockNum,
+        troveOwner,
+        actionId,
+        from,
+        collAmount,
+        LUSDamount,
+    });
+    const paramsEncoded = hre.ethers.utils.defaultAbiCoder.encode(['string'], [paramsSerialized]);
     const paramsHash = hre.ethers.utils.keccak256(paramsEncoded);
     let hints = prefetchedHints[paramsHash];
 
@@ -80,32 +84,40 @@ const getHints = async (
 
     const liquityView = await getContractFromRegistry('LiquityView', isFork);
 
-    const NICR = await liquityView['predictNICRForAdjust(address,uint8,uint8,address,uint256,uint256)'](troveOwner, actionId, actionId2, from, collAmount, LUSDamount);
+    const NICR = await liquityView[
+        'predictNICRForAdjust(address,uint8,uint8,address,uint256,uint256)'
+    ](troveOwner, actionId, actionId2, from, collAmount, LUSDamount);
 
     console.log('NICR: ', BN2Float(NICR, 16));
 
-    const approxHint = (await liquityView['getApproxHint(uint256,uint256,uint256)'](NICR, 20, 42)).hintAddress;
-    hints = await liquityView['findInsertPosition(uint256,address,address)'](NICR, approxHint, approxHint);
+    const approxHint = (await liquityView['getApproxHint(uint256,uint256,uint256)'](NICR, 20, 42))
+        .hintAddress;
+    hints = await liquityView['findInsertPosition(uint256,address,address)'](
+        NICR,
+        approxHint,
+        approxHint,
+    );
 
     return hints;
 };
 
 const getRedemptionHints = async (lusdAmount, from) => {
     const blockNum = hre.ethers.provider.blockNumber;
-    const paramsSerialized = JSON.stringify(
-        { blockNum, lusdAmount, from },
-    );
-    const paramsEncoded = hre.ethers.utils.defaultAbiCoder.encode(
-        ['string'],
-        [paramsSerialized],
-    );
+    const paramsSerialized = JSON.stringify({ blockNum, lusdAmount, from });
+    const paramsEncoded = hre.ethers.utils.defaultAbiCoder.encode(['string'], [paramsSerialized]);
     const paramsHash = hre.ethers.utils.keccak256(paramsEncoded);
     let hints = prefetchedHints[paramsHash];
 
     if (hints !== undefined) return hints;
 
-    const liquityView = await hre.ethers.getContractAt('LiquityView', getAddrFromRegistry('LiquityView'));
-    const priceFeed = await hre.ethers.getContractAt('IPriceFeed', '0x4c517D4e2C851CA76d7eC94B805269Df0f2201De');
+    const liquityView = await hre.ethers.getContractAt(
+        'LiquityView',
+        getAddrFromRegistry('LiquityView'),
+    );
+    const priceFeed = await hre.ethers.getContractAt(
+        'IPriceFeed',
+        '0x4c517D4e2C851CA76d7eC94B805269Df0f2201De',
+    );
     const collPrice = await priceFeed.callStatic.fetchPrice();
 
     if (lusdAmount === hre.ethers.constants.MaxUint256) {
@@ -113,15 +125,8 @@ const getRedemptionHints = async (lusdAmount, from) => {
         // eslint-disable-next-line no-param-reassign
         lusdAmount = await balanceOf(lusdAddr, from);
     }
-    const {
-        firstRedemptionHint,
-        partialRedemptionHintNICR,
-        truncatedLUSDamount,
-    } = await liquityView['getRedemptionHints(uint256,uint256,uint256)'](
-        lusdAmount,
-        collPrice,
-        0,
-    );
+    const { firstRedemptionHint, partialRedemptionHintNICR, truncatedLUSDamount } =
+        await liquityView['getRedemptionHints(uint256,uint256,uint256)'](lusdAmount, collPrice, 0);
     const { hintAddress } = await liquityView['getApproxHint(uint256,uint256,uint256)'](
         partialRedemptionHintNICR,
         200,
@@ -143,32 +148,39 @@ const getRedemptionHints = async (lusdAmount, from) => {
 };
 
 const findInsertPosition = async (collAmount, debtAmount, numOfTrials = 400, randomSeed = 42) => {
-    const liquityView = await hre.ethers.getContractAt('LiquityView', getAddrFromRegistry('LiquityView'));
+    const liquityView = await hre.ethers.getContractAt(
+        'LiquityView',
+        getAddrFromRegistry('LiquityView'),
+    );
 
-    const { upperHint, lowerHint } = await liquityView['getInsertPosition(uint256,uint256,uint256,uint256)'](collAmount, debtAmount, numOfTrials, randomSeed);
+    const { upperHint, lowerHint } = await liquityView[
+        'getInsertPosition(uint256,uint256,uint256,uint256)'
+    ](collAmount, debtAmount, numOfTrials, randomSeed);
 
     return { upperHint, lowerHint };
 };
 
 const getTroveInfo = async (troveOwner) => {
-    const liquityView = await hre.ethers.getContractAt('LiquityView', getAddrFromRegistry('LiquityView'));
+    const liquityView = await hre.ethers.getContractAt(
+        'LiquityView',
+        getAddrFromRegistry('LiquityView'),
+    );
 
     return liquityView['getTroveInfo(address)'](troveOwner);
 };
 
 const getDebtInFront = async (troveOwner) => {
-    const liquityView = await hre.ethers.getContractAt('LiquityView', getAddrFromRegistry('LiquityView'));
+    const liquityView = await hre.ethers.getContractAt(
+        'LiquityView',
+        getAddrFromRegistry('LiquityView'),
+    );
 
     return liquityView['getDebtInFront(address,uint256,uint256)'](troveOwner, 0, 1000);
 };
 
 const getRatio = async (liquityView, troveOwner) => {
-    const {
-        troveStatus,
-        collAmount,
-        debtAmount,
-        collPrice,
-    } = await liquityView.getTroveInfo(troveOwner);
+    const { troveStatus, collAmount, debtAmount, collPrice } =
+        await liquityView.getTroveInfo(troveOwner);
 
     const ratio = collAmount.mul(collPrice).div(debtAmount);
     return { ratio, troveStatus };

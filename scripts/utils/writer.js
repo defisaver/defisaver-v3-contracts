@@ -32,7 +32,9 @@ const write = async (contractName, network, address, ...args) => {
     try {
         const currentDir = await getCurrentDir();
 
-        fsPromises.mkdir(`${currentDir}/${DEPLOYMENTS_FOLDER_NAME}`, { recursive: true }).catch(console.error);
+        fsPromises
+            .mkdir(`${currentDir}/${DEPLOYMENTS_FOLDER_NAME}`, { recursive: true })
+            .catch(console.error);
 
         const writeFilename = `${currentDir}/${DEPLOYMENTS_FOLDER_NAME}/${contractName}.json`;
         await fsPromises.writeFile(writeFilename, JSON.stringify(newFile, null, '\t'));

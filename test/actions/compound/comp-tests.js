@@ -4,10 +4,16 @@ const { expect } = require('chai');
 const hre = require('hardhat');
 
 // eslint-disable-next-line max-len
-const compoundCollateralAssets = assets.filter((a) => a.compoundCollateral).map((a) => getAssetInfo(a.symbol));
+const compoundCollateralAssets = assets
+    .filter((a) => a.compoundCollateral)
+    .map((a) => getAssetInfo(a.symbol));
 
 const {
-    supplyComp, withdrawComp, borrowComp, paybackComp, claimComp,
+    supplyComp,
+    withdrawComp,
+    borrowComp,
+    paybackComp,
+    claimComp,
 } = require('../../utils/actions');
 const {
     fetchAmountinUSDPrice,
@@ -23,8 +29,8 @@ const compSupplyTest = async (compTestLength) => {
     describe('Comp-Supply', function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -69,8 +75,8 @@ const compWithdrawTest = async (compTestLength) => {
     describe('Comp-Withdraw', function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -119,8 +125,8 @@ const compBorrowTest = async (compTestLength) => {
     describe('Comp-Borrow', function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -130,8 +136,8 @@ const compBorrowTest = async (compTestLength) => {
         for (let i = 0; i < compTestLength; ++i) {
             const cTokenData = compoundCollateralAssets[i];
             if (cTokenData.symbol === 'cWBTC Legacy') {
-            // Jump over WBTC Legacy
-            // eslint-disable-next-line no-continue
+                // Jump over WBTC Legacy
+                // eslint-disable-next-line no-continue
                 continue;
             }
 
@@ -183,8 +189,9 @@ const compPaybackTest = async (compTestLength) => {
     describe('Comp-Payback', function () {
         this.timeout(80000);
 
-        let senderAcc; let proxy; let
-            compView;
+        let senderAcc;
+        let proxy;
+        let compView;
 
         before(async () => {
             const compViewAddr = await getAddrFromRegistry('CompView');
@@ -240,7 +247,11 @@ const compPaybackTest = async (compTestLength) => {
                 const borrowBalanceBefore = await getBorrowBalance(compView, proxy.address, cToken);
 
                 await paybackComp(
-                    proxy, cToken, assetInfo.address, borrowingAmount, senderAcc.address,
+                    proxy,
+                    cToken,
+                    assetInfo.address,
+                    borrowingAmount,
+                    senderAcc.address,
                 );
 
                 const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
@@ -257,7 +268,8 @@ const compClaimTest = async () => {
     describe('Comp-Claim', function () {
         this.timeout(80000);
 
-        let senderAcc; let proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];

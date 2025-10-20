@@ -21,5 +21,6 @@
         "no-plusplus": "off", // allow i++
         "no-loop-func": "off", // allow functions inside a loop
         "indent": ["error", 4]
-    }
+    },
+    "ignorePatterns": ["gen/sdk/**/*.ts"]
 }

@@ -38,7 +38,11 @@ const createFork = async (network) => {
                 verification_visibility: 'src',
             },
         };
-        const forkRes = await axios.post('https://api.tenderly.co/api/v1/account/defisaver-v2/project/strategies/vnets', body, { headers });
+        const forkRes = await axios.post(
+            'https://api.tenderly.co/api/v1/account/defisaver-v2/project/strategies/vnets',
+            body,
+            { headers },
+        );
         const rpcUrl = forkRes.data.rpcs.find((e) => e.name === 'Admin RPC').url;
         return rpcUrl;
     } catch (err) {
@@ -60,7 +64,11 @@ const topUp = async (account, network = 'mainnet') => {
     };
 
     try {
-        await axios.post(`https://virtual.${network}.rpc.tenderly.co/${process.env.FORK_ID}`, body, { headers });
+        await axios.post(
+            `https://virtual.${network}.rpc.tenderly.co/${process.env.FORK_ID}`,
+            body,
+            { headers },
+        );
     } catch (error) {
         console.error('Error:', error.response ? error.response.data : error.message);
     }

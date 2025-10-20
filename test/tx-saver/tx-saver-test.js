@@ -24,11 +24,7 @@ const {
     chainIds,
     network,
 } = require('../utils/utils');
-const {
-    predictSafeAddress,
-    SAFE_MASTER_COPY_VERSIONS,
-    deploySafe,
-} = require('../utils/safe');
+const { predictSafeAddress, SAFE_MASTER_COPY_VERSIONS, deploySafe } = require('../utils/safe');
 const { topUp } = require('../../scripts/utils/fork');
 const {
     addBotCallerForTxSaver,
@@ -84,7 +80,11 @@ describe('TxSaver tests', function () {
             0, // payment
             hre.ethers.constants.AddressZero, // payment receiver
         ];
-        const predictedSafeAddr = await predictSafeAddress(SAFE_MASTER_COPY_VERSIONS.V141, setupData, '0');
+        const predictedSafeAddr = await predictSafeAddress(
+            SAFE_MASTER_COPY_VERSIONS.V141,
+            setupData,
+            '0',
+        );
         await deploySafe(SAFE_MASTER_COPY_VERSIONS.V141, setupData, '0');
         safeWallet = await hre.ethers.getContractAt('ISafe', predictedSafeAddr);
     };
@@ -100,7 +100,11 @@ describe('TxSaver tests', function () {
             0, // payment
             hre.ethers.constants.AddressZero, // payment receiver
         ];
-        const predictedSafeAddr = await predictSafeAddress(SAFE_MASTER_COPY_VERSIONS.V141, setupData, '0');
+        const predictedSafeAddr = await predictSafeAddress(
+            SAFE_MASTER_COPY_VERSIONS.V141,
+            setupData,
+            '0',
+        );
         await deploySafe(SAFE_MASTER_COPY_VERSIONS.V141, setupData, '0');
         const multisigWallet = await hre.ethers.getContractAt('ISafe', predictedSafeAddr);
         return multisigWallet;
@@ -164,18 +168,20 @@ describe('TxSaver tests', function () {
     });
 
     it('... should fail to call executeTx without caller permission', async () => {
-        await expect(txSaverExecutor.connect(senderAcc).executeTx(
-            {
-                safe: safeWallet.address,
-                refundReceiver: nullAddress,
-                data: '0x',
-                signatures: '0x',
-            },
-            estimatedGas,
-            0,
-            emptyInjectedOrder,
-            gasParams,
-        )).to.be.revertedWith('BotNotApproved');
+        await expect(
+            txSaverExecutor.connect(senderAcc).executeTx(
+                {
+                    safe: safeWallet.address,
+                    refundReceiver: nullAddress,
+                    data: '0x',
+                    signatures: '0x',
+                },
+                estimatedGas,
+                0,
+                emptyInjectedOrder,
+                gasParams,
+            ),
+        ).to.be.revertedWith('BotNotApproved');
     });
 
     it('... should fail to execute TxSaver tx as deadline passed', async () => {
@@ -200,13 +206,15 @@ describe('TxSaver tests', function () {
             sellAmount,
         );
         const txParamsForExecution = await getTxParams(functionData);
-        await expect(txSaverExecutorByBot.executeTx(
-            txParamsForExecution,
-            estimatedGas,
-            0,
-            emptyInjectedOrder,
-            gasParams,
-        )).to.be.revertedWith('TxSaverSignatureExpired');
+        await expect(
+            txSaverExecutorByBot.executeTx(
+                txParamsForExecution,
+                estimatedGas,
+                0,
+                emptyInjectedOrder,
+                gasParams,
+            ),
+        ).to.be.revertedWith('TxSaverSignatureExpired');
     });
 
     it('... should fail to call RecipeExecutor from TxSaverExecutor if caller is not TxSaverExecutor', async () => {
@@ -235,10 +243,11 @@ describe('TxSaver tests', function () {
         const decodedTxSaverData = decodedData[1];
 
         const recipeExecutor = await hre.ethers.getContractAt('RecipeExecutor', recipeExecutorAddr);
-        await expect(recipeExecutor.connect(senderAcc).executeRecipeFromTxSaver(
-            decodedRecipe,
-            decodedTxSaverData,
-        )).to.be.revertedWith('TxSaverAuthorizationError');
+        await expect(
+            recipeExecutor
+                .connect(senderAcc)
+                .executeRecipeFromTxSaver(decodedRecipe, decodedTxSaverData),
+        ).to.be.revertedWith('TxSaverAuthorizationError');
     });
 
     it('... should not take fee for TxSaver on regular sell', async () => {
@@ -250,11 +259,7 @@ describe('TxSaver tests', function () {
         await setBalance(srcToken, senderAcc.address, sellAmount);
         await approve(srcToken, safeWallet.address, senderAcc);
         const recipe = new dfs.Recipe('RegularSell', [
-            new dfs.actions.basic.PullTokenAction(
-                srcToken,
-                senderAcc.address,
-                sellAmount,
-            ),
+            new dfs.actions.basic.PullTokenAction(srcToken, senderAcc.address, sellAmount),
             new dfs.actions.basic.SellAction(
                 formatExchangeObj(
                     srcToken,
@@ -271,16 +276,27 @@ describe('TxSaver tests', function () {
         const functionData = recipe.encodeForDsProxyCall()[1];
 
         const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
-        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
 
         await executeAction('RecipeExecutor', functionData, safeWallet);
 
         const eoaFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, senderAcc.address);
-        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
-        const txSaverFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txSaverExecutor.address);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
+        const txSaverFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            txSaverExecutor.address,
+        );
 
         expect(eoaFeeTokenBalanceBefore.sub(eoaFeeTokenBalanceAfter)).to.be.equal(sellAmount);
-        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(0);
+        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(
+            0,
+        );
         expect(txSaverFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
     });
 
@@ -295,7 +311,10 @@ describe('TxSaver tests', function () {
 
         const controllerId = 0;
         const llamaControllerAddr = getControllers(chainId)[controllerId];
-        const controller = await hre.ethers.getContractAt('ILlamaLendController', llamaControllerAddr);
+        const controller = await hre.ethers.getContractAt(
+            'ILlamaLendController',
+            llamaControllerAddr,
+        );
 
         const collTokenAddr = await controller.collateral_token();
         const collToken = getAssetInfoByAddress(collTokenAddr, chainId);
@@ -329,7 +348,10 @@ describe('TxSaver tests', function () {
             collToken,
             debtToken,
         );
-        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
 
         const txParamsForExecution = await getTxParams(functionData);
         await txSaverExecutorByBot.executeTx(
@@ -340,7 +362,10 @@ describe('TxSaver tests', function () {
             gasParams,
         );
 
-        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
 
         const expectedFeeTaken = await calculateExpectedFeeTaken(
             estimatedGas,
@@ -357,7 +382,11 @@ describe('TxSaver tests', function () {
         const feeTokenAddress = feeTokenAsset.address;
         const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
 
-        await setBalance(feeTokenAddress, senderAcc.address, hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals));
+        await setBalance(
+            feeTokenAddress,
+            senderAcc.address,
+            hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals),
+        );
         await approve(feeTokenAddress, safeWallet.address, senderAcc);
 
         const txSaverSignedData = {
@@ -368,10 +397,17 @@ describe('TxSaver tests', function () {
             shouldTakeFeeFromPosition: false,
         };
 
-        const functionData = await openAavePositionEncodedData(senderAcc, safeWallet, txSaverSignedData);
+        const functionData = await openAavePositionEncodedData(
+            senderAcc,
+            safeWallet,
+            txSaverSignedData,
+        );
 
         const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
-        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
 
         const txParamsForExecution = await getTxParams(functionData);
         await txSaverExecutorByBot.executeTx(
@@ -383,8 +419,14 @@ describe('TxSaver tests', function () {
         );
 
         const eoaFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, senderAcc.address);
-        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
-        const txSaverFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txSaverExecutor.address);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
+        const txSaverFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            txSaverExecutor.address,
+        );
 
         const expectedFeeTaken = await calculateExpectedFeeTaken(
             estimatedGas,
@@ -395,7 +437,9 @@ describe('TxSaver tests', function () {
 
         const feeTaken = eoaFeeTokenBalanceBefore.sub(eoaFeeTokenBalanceAfter);
         expect(feeTaken).to.be.equal(expectedFeeTaken);
-        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(feeTaken);
+        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(
+            feeTaken,
+        );
         expect(txSaverFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
     });
 
@@ -412,10 +456,17 @@ describe('TxSaver tests', function () {
             shouldTakeFeeFromPosition: false,
         };
 
-        const functionData = await openAavePositionEncodedData(senderAcc, safeWallet, txSaverSignedData);
+        const functionData = await openAavePositionEncodedData(
+            senderAcc,
+            safeWallet,
+            txSaverSignedData,
+        );
 
         const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
-        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
 
         const txParamsForExecution = await getTxParams(functionData);
         await txSaverExecutorByBot.executeTx(
@@ -427,8 +478,14 @@ describe('TxSaver tests', function () {
         );
 
         const eoaFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, senderAcc.address);
-        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
-        const txSaverFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txSaverExecutor.address);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
+        const txSaverFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            txSaverExecutor.address,
+        );
         const feeTaken = eoaFeeTokenBalanceBefore.sub(eoaFeeTokenBalanceAfter);
 
         expect(feeTaken).to.be.equal(0);
@@ -446,7 +503,11 @@ describe('TxSaver tests', function () {
         const sellAmount = hre.ethers.utils.parseUnits('1000', 18);
 
         const maxTxCostInFeeToken = hre.ethers.utils.parseUnits('100', feeTokenAsset.decimals);
-        await setBalance(feeTokenAddress, senderAcc.address, hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals));
+        await setBalance(
+            feeTokenAddress,
+            senderAcc.address,
+            hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals),
+        );
         await approve(feeTokenAddress, safeWallet.address, senderAcc);
 
         const txSaverSignedData = {
@@ -484,7 +545,10 @@ describe('TxSaver tests', function () {
         injectedOrder.wrapperData = hre.ethers.utils.arrayify(exchangeData);
 
         const eoaFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, senderAcc.address);
-        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
 
         const txParamsForExecution = await getTxParams(functionData);
         await txSaverExecutorByBot.executeTx(
@@ -496,8 +560,14 @@ describe('TxSaver tests', function () {
         );
 
         const eoaFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, senderAcc.address);
-        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
-        const txSaverFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txSaverExecutor.address);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
+        const txSaverFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            txSaverExecutor.address,
+        );
 
         const expectedFeeTaken = await calculateExpectedFeeTaken(
             estimatedGas,
@@ -508,7 +578,9 @@ describe('TxSaver tests', function () {
 
         const feeTaken = eoaFeeTokenBalanceBefore.sub(eoaFeeTokenBalanceAfter).sub(sellAmount);
         expect(feeTaken).to.be.equal(expectedFeeTaken);
-        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(feeTaken);
+        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(
+            feeTaken,
+        );
         expect(txSaverFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
     });
 
@@ -517,7 +589,11 @@ describe('TxSaver tests', function () {
         const feeTokenAddress = feeTokenAsset.address;
         const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
 
-        await setBalance(feeTokenAddress, senderAcc.address, hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals));
+        await setBalance(
+            feeTokenAddress,
+            senderAcc.address,
+            hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals),
+        );
         await approve(feeTokenAddress, safeWallet.address, senderAcc);
 
         const txSaverSignedData = {
@@ -527,16 +603,22 @@ describe('TxSaver tests', function () {
             deadline: 0,
             shouldTakeFeeFromPosition: false,
         };
-        const functionData = await openAavePositionEncodedData(senderAcc, safeWallet, txSaverSignedData);
+        const functionData = await openAavePositionEncodedData(
+            senderAcc,
+            safeWallet,
+            txSaverSignedData,
+        );
 
         const txParamsForExecution = await getTxParams(functionData);
-        await expect(txSaverExecutorByBot.executeTx(
-            txParamsForExecution,
-            estimatedGas,
-            0,
-            emptyInjectedOrder,
-            gasParams,
-        )).to.be.reverted;
+        await expect(
+            txSaverExecutorByBot.executeTx(
+                txParamsForExecution,
+                estimatedGas,
+                0,
+                emptyInjectedOrder,
+                gasParams,
+            ),
+        ).to.be.reverted;
     });
 
     it('... should fail to take fee from EOA because of missing fee tokens on user account', async () => {
@@ -551,16 +633,22 @@ describe('TxSaver tests', function () {
             deadline: 0,
             shouldTakeFeeFromPosition: false,
         };
-        const functionData = await openAavePositionEncodedData(senderAcc, safeWallet, txSaverSignedData);
+        const functionData = await openAavePositionEncodedData(
+            senderAcc,
+            safeWallet,
+            txSaverSignedData,
+        );
 
         const txParamsForExecution = await getTxParams(functionData);
-        await expect(txSaverExecutorByBot.executeTx(
-            txParamsForExecution,
-            estimatedGas,
-            0,
-            emptyInjectedOrder,
-            gasParams,
-        )).to.be.reverted;
+        await expect(
+            txSaverExecutorByBot.executeTx(
+                txParamsForExecution,
+                estimatedGas,
+                0,
+                emptyInjectedOrder,
+                gasParams,
+            ),
+        ).to.be.reverted;
     });
 
     it('... should take fee from multisig wallet when executing TxSaver tx', async () => {
@@ -570,7 +658,11 @@ describe('TxSaver tests', function () {
         const feeTokenAsset = getAssetInfo('DAI', chainIds[network]);
         const feeTokenAddress = feeTokenAsset.address;
         const feeTokenPriceInEth = await tokenPriceHelper.getPriceInETH(feeTokenAddress);
-        await setBalance(feeTokenAddress, multisigWallet.address, hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals));
+        await setBalance(
+            feeTokenAddress,
+            multisigWallet.address,
+            hre.ethers.utils.parseUnits('10000', feeTokenAsset.decimals),
+        );
 
         const txSaverSignedData = {
             maxTxCostInFeeToken: hre.ethers.utils.parseUnits('50', feeTokenAsset.decimals),
@@ -579,7 +671,11 @@ describe('TxSaver tests', function () {
             deadline: 0,
             shouldTakeFeeFromPosition: false,
         };
-        const functionData = await openAavePositionEncodedData(senderAcc, multisigWallet, txSaverSignedData);
+        const functionData = await openAavePositionEncodedData(
+            senderAcc,
+            multisigWallet,
+            txSaverSignedData,
+        );
 
         const firstSignature = await signSafeTransaction(
             owner1,
@@ -602,8 +698,14 @@ describe('TxSaver tests', function () {
             signatures: hre.ethers.utils.arrayify(secondSignature + firstSignature.slice(2)),
         };
 
-        const walletFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, multisigWallet.address);
-        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const walletFeeTokenBalanceBefore = await balanceOf(
+            feeTokenAddress,
+            multisigWallet.address,
+        );
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
 
         await txSaverExecutorByBot.executeTx(
             txParams,
@@ -614,8 +716,14 @@ describe('TxSaver tests', function () {
         );
 
         const walletFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, multisigWallet.address);
-        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
-        const txSaverFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, txSaverExecutor.address);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
+        const txSaverFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            txSaverExecutor.address,
+        );
 
         const expectedFeeTaken = await calculateExpectedFeeTaken(
             estimatedGas,
@@ -626,7 +734,9 @@ describe('TxSaver tests', function () {
         const feeTaken = walletFeeTokenBalanceBefore.sub(walletFeeTokenBalanceAfter);
 
         expect(feeTaken).to.be.equal(expectedFeeTaken);
-        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(feeTaken);
+        expect(feeRecipientFeeTokenBalanceAfter.sub(feeRecipientFeeTokenBalanceBefore)).to.be.equal(
+            feeTaken,
+        );
         expect(txSaverFeeTokenBalanceAfter).to.be.equal(BigNumber.from('0'));
     });
 
@@ -660,7 +770,10 @@ describe('TxSaver tests', function () {
             uniV3FeeForDaiUsdcPool,
         );
 
-        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
 
         const txParamsForExecution = await getTxParams(functionData);
         await txSaverExecutorByBot.executeTx(
@@ -671,7 +784,10 @@ describe('TxSaver tests', function () {
             gasParams,
         );
 
-        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
 
         const expectedFeeTaken = await calculateExpectedFeeTaken(
             estimatedGas,
@@ -712,7 +828,10 @@ describe('TxSaver tests', function () {
             sellAmount,
             uniV3FeeForDaiUsdcPool,
         );
-        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
 
         const txParamsForExecution = await getTxParams(functionData);
         await txSaverExecutorByBot.executeTx(
@@ -722,7 +841,10 @@ describe('TxSaver tests', function () {
             emptyInjectedOrder,
             gasParams,
         );
-        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
         expect(feeRecipientFeeTokenBalanceBefore).to.be.equal(feeRecipientFeeTokenBalanceAfter);
     });
 
@@ -770,7 +892,10 @@ describe('TxSaver tests', function () {
         injectedOrder.wrapper = wrapperAddr;
         injectedOrder.wrapperData = hre.ethers.utils.arrayify(exchangeData);
 
-        const feeRecipientFeeTokenBalanceBefore = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceBefore = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
 
         const txParamsForExecution = await getTxParams(functionData);
         await txSaverExecutorByBot.executeTx(
@@ -781,7 +906,10 @@ describe('TxSaver tests', function () {
             gasParams,
         );
 
-        const feeRecipientFeeTokenBalanceAfter = await balanceOf(feeTokenAddress, addrs[network].TX_SAVER_FEE_RECEIVER);
+        const feeRecipientFeeTokenBalanceAfter = await balanceOf(
+            feeTokenAddress,
+            addrs[network].TX_SAVER_FEE_RECEIVER,
+        );
 
         const expectedFeeTaken = await calculateExpectedFeeTaken(
             estimatedGas,
@@ -826,12 +954,14 @@ describe('TxSaver tests', function () {
         );
 
         const txParamsForExecution = await getTxParams(functionData);
-        await expect(txSaverExecutorByBot.executeTx(
-            txParamsForExecution,
-            estimatedGas,
-            0,
-            emptyInjectedOrder,
-            gasParams,
-        )).to.be.reverted;
+        await expect(
+            txSaverExecutorByBot.executeTx(
+                txParamsForExecution,
+                estimatedGas,
+                0,
+                emptyInjectedOrder,
+                gasParams,
+            ),
+        ).to.be.reverted;
     });
 });

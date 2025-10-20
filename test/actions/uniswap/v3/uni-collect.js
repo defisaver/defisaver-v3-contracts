@@ -1,8 +1,6 @@
 /* eslint-disable no-await-in-loop */
 
-const {
-    redeploy,
-} = require('../../../utils/utils');
+const { redeploy } = require('../../../utils/utils');
 
 const { uniV3CollectTest } = require('./univ3-tests');
 

@@ -1,11 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const hre = require('hardhat');
 const { topUp } = require('./utils/fork');
-const {
-    getOwnerAddr,
-    redeploy,
-    network,
-} = require('../test/utils/utils');
+const { getOwnerAddr, redeploy, network } = require('../test/utils/utils');
 
 async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];

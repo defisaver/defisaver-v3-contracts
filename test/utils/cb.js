@@ -14,22 +14,24 @@ const calcRebondMs = (accrualParameter, marketPricePremium, chickenInAMMFee) => 
 
     return new Dec(accrualParameter).mul(dividend.div(divisor)).round().toNumber();
 };
-const calcAccruedAmountForMs = (systemInfo, blusdcap, ms) => (ms * +blusdcap)
- / (ms + +systemInfo.accrualParameter)
- * +systemInfo.marketPrice;
+const calcAccruedAmountForMs = (systemInfo, blusdcap, ms) =>
+    ((ms * +blusdcap) / (ms + +systemInfo.accrualParameter)) * +systemInfo.marketPrice;
 
 const getSystemInfo = async (chickenBondsView) => {
     const systemInfo = await chickenBondsView.getSystemInfo();
 
     return {
         bLUSDSupply: assetAmountInEth(systemInfo.bLUSDSupply, 'bLUSD'),
-        accrualParameter: new Dec(assetAmountInEth(systemInfo.accrualParameter)).mul(1000).toString(),
+        accrualParameter: new Dec(assetAmountInEth(systemInfo.accrualParameter))
+            .mul(1000)
+            .toString(),
         chickenInAMMFee: assetAmountInEth(systemInfo.chickenInAMMFee),
         totalReserveLUSD: assetAmountInEth(systemInfo.totalReserveLUSD, 'LUSD'),
     };
 };
 
-const calcCBondsBLUSDMarketPremium = (floorPrice, marketPrice) => new Dec(marketPrice).div(floorPrice).toString();
+const calcCBondsBLUSDMarketPremium = (floorPrice, marketPrice) =>
+    new Dec(marketPrice).div(floorPrice).toString();
 
 const getRebondTime = async (chickenBondsView, rebondTrigger, lusdAmount) => {
     const systemInfo = await getSystemInfo(chickenBondsView);

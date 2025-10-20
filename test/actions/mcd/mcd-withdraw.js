@@ -1,8 +1,6 @@
 const { ilks } = require('@defisaver/tokens');
 
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require('../../utils/utils');
 const { mcdWithdrawTest } = require('./mcd-tests');
 
 describe('Mcd-Withdraw', function () {

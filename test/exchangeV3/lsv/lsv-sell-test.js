@@ -39,15 +39,21 @@ describe('LsvSell', function () {
         wallet = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         await redeploy('LSVSell');
     });
-    beforeEach(async () => { snapshotId = await takeSnapshot(); });
-    afterEach(async () => { await revertToSnapshot(snapshotId); });
+    beforeEach(async () => {
+        snapshotId = await takeSnapshot();
+    });
+    afterEach(async () => {
+        await revertToSnapshot(snapshotId);
+    });
 
     const expectStakeInsteadOfSell = async (tx, srcToken, destToken) => {
         const txHash = tx.hash;
         const receipt = await hre.ethers.provider.getTransactionReceipt(txHash);
         for (let i = 0; i < receipt.logs.length; i++) {
             const log = receipt.logs[i];
-            const lsvSellEncoded = hre.ethers.utils.keccak256(hre.ethers.utils.toUtf8Bytes('LSVSell'));
+            const lsvSellEncoded = hre.ethers.utils.keccak256(
+                hre.ethers.utils.toUtf8Bytes('LSVSell'),
+            );
             if (log.topics.length === 2 && log.topics[1] === lsvSellEncoded) {
                 const logDataSliced = receipt.logs[i].data.slice(130);
                 const decodedData = hre.ethers.utils.defaultAbiCoder.decode(
@@ -64,7 +70,10 @@ describe('LsvSell', function () {
     };
 
     const getEethTokens = async () => {
-        const etherFiPool = await hre.ethers.getContractAt('ILiquidityPool', ETHER_FI_LIQUIDITY_POOL);
+        const etherFiPool = await hre.ethers.getContractAt(
+            'ILiquidityPool',
+            ETHER_FI_LIQUIDITY_POOL,
+        );
         await etherFiPool.connect(senderAcc).deposit({ value: srcAmount.mul(2) });
     };
 

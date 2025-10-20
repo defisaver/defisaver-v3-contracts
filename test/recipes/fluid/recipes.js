@@ -109,7 +109,9 @@ describe('Fluid-Dex-T4-Recipes', function () {
             );
 
             if (nftId === 0) {
-                console.log(`Failed to open position on fluid vault t4: ${collToken0.symbol}-${collToken1.symbol}/${debtToken0.symbol}-${debtToken1.symbol}. Skipping test...`);
+                console.log(
+                    `Failed to open position on fluid vault t4: ${collToken0.symbol}-${collToken1.symbol}/${debtToken0.symbol}-${debtToken1.symbol}. Skipping test...`,
+                );
                 return;
             }
 
@@ -177,7 +179,9 @@ describe('Fluid-Dex-T4-Recipes', function () {
             );
 
             if (nftId === 0) {
-                console.log(`Failed to open position on fluid vault t4: ${collToken0.symbol}-${collToken1.symbol}/${debtToken0.symbol}-${debtToken1.symbol}. Skipping test...`);
+                console.log(
+                    `Failed to open position on fluid vault t4: ${collToken0.symbol}-${collToken1.symbol}/${debtToken0.symbol}-${debtToken1.symbol}. Skipping test...`,
+                );
                 return;
             }
 
@@ -254,7 +258,9 @@ describe('Fluid-Dex-T4-Recipes', function () {
             );
 
             if (nftId === 0) {
-                console.log(`Failed to open position on fluid vault t4: ${collToken0.symbol}-${collToken1.symbol}/${debtToken0.symbol}-${debtToken1.symbol}. Skipping test...`);
+                console.log(
+                    `Failed to open position on fluid vault t4: ${collToken0.symbol}-${collToken1.symbol}/${debtToken0.symbol}-${debtToken1.symbol}. Skipping test...`,
+                );
                 return;
             }
 
@@ -322,7 +328,9 @@ describe('Fluid-Dex-T4-Recipes', function () {
             );
 
             if (nftId === 0) {
-                console.log(`Failed to open position on fluid vault t4: ${collToken0.symbol}-${collToken1.symbol}/${debtToken0.symbol}-${debtToken1.symbol}. Skipping test...`);
+                console.log(
+                    `Failed to open position on fluid vault t4: ${collToken0.symbol}-${collToken1.symbol}/${debtToken0.symbol}-${debtToken1.symbol}. Skipping test...`,
+                );
                 return;
             }
 
@@ -394,7 +402,9 @@ describe('Fluid-Dex-T4-Recipes', function () {
             );
 
             if (nftId === 0) {
-                console.log(`Failed to open position on fluid vault t4: ${collToken0.symbol}-${collToken1.symbol}/${debtToken0.symbol}-${debtToken1.symbol}. Skipping test...`);
+                console.log(
+                    `Failed to open position on fluid vault t4: ${collToken0.symbol}-${collToken1.symbol}/${debtToken0.symbol}-${debtToken1.symbol}. Skipping test...`,
+                );
                 return;
             }
 

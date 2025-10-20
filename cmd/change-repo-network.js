@@ -43,9 +43,7 @@ function getAllFiles(dirPath, arrayOfFiles = []) {
 
 async function changeWethAddress(oldNetwork, newNetwork) {
     const TokenUtilsContract = 'contracts/utils/TokenUtils.sol';
-    const tokenUtilsContract = (
-        await fs.readFileSync(TokenUtilsContract)
-    ).toString();
+    const tokenUtilsContract = (await fs.readFileSync(TokenUtilsContract)).toString();
 
     fs.writeFileSync(
         TokenUtilsContract,
@@ -98,26 +96,26 @@ async function changeHardhatConfig(oldNetwork, newNetwork) {
 
 async function changeNetworkNameForAddresses(oldNetwork, newNetwork) {
     const files = getAllFiles('./contracts');
-    await Promise.all(files.map(async (file) => {
-        const helperRegex = 'Helper(.*)sol';
-        if (file.toString().match(helperRegex)) {
-            const fileDir = path.dirname(file);
-            const filesInSameDir = getAllFiles(fileDir);
-            let rewrite = false;
-            filesInSameDir.forEach((fileInSameDir) => {
-                if (fileInSameDir.toString().includes(newNetwork)) {
-                    rewrite = true;
+    await Promise.all(
+        files.map(async (file) => {
+            const helperRegex = 'Helper(.*)sol';
+            if (file.toString().match(helperRegex)) {
+                const fileDir = path.dirname(file);
+                const filesInSameDir = getAllFiles(fileDir);
+                let rewrite = false;
+                filesInSameDir.forEach((fileInSameDir) => {
+                    if (fileInSameDir.toString().includes(newNetwork)) {
+                        rewrite = true;
+                    }
+                });
+                if (rewrite) {
+                    console.log(file);
+                    const contractContent = (await fs.readFileSync(file.toString())).toString();
+                    fs.writeFileSync(file, contractContent.replaceAll(oldNetwork, newNetwork));
                 }
-            });
-            if (rewrite) {
-                console.log(file);
-                const contractContent = (
-                    await fs.readFileSync(file.toString())
-                ).toString();
-                fs.writeFileSync(file, contractContent.replaceAll(oldNetwork, newNetwork));
             }
-        }
-    }));
+        }),
+    );
 }
 
 async function excludeCancunSpecificChanges(oldNetwork, newNetwork) {
@@ -129,42 +127,46 @@ async function excludeCancunSpecificChanges(oldNetwork, newNetwork) {
 
     if (newNetwork === 'Linea') {
         const files = getAllFiles('./contracts');
-        await Promise.all(files.map(async (file) => {
-            const content = (await fs.readFileSync(file)).toString();
-            let updatedContent = content
-                .replace(/tload\(/g, 'sload(')
-                .replace(/tstore\(/g, 'sstore(');
+        await Promise.all(
+            files.map(async (file) => {
+                const content = (await fs.readFileSync(file)).toString();
+                let updatedContent = content
+                    .replace(/tload\(/g, 'sload(')
+                    .replace(/tstore\(/g, 'sstore(');
 
-            if (targetFiles.some((target) => file.includes(target))) {
-                updatedContent = updatedContent
-                    .replace(/TransientStorageCancun/g, 'TransientStorage')
-                    .replace(/TRANSIENT_STORAGE_CANCUN/g, 'TRANSIENT_STORAGE');
-            }
+                if (targetFiles.some((target) => file.includes(target))) {
+                    updatedContent = updatedContent
+                        .replace(/TransientStorageCancun/g, 'TransientStorage')
+                        .replace(/TRANSIENT_STORAGE_CANCUN/g, 'TRANSIENT_STORAGE');
+                }
 
-            if (updatedContent !== content) {
-                console.log(`Updating ${file}`);
-                fs.writeFileSync(file, updatedContent);
-            }
-        }));
+                if (updatedContent !== content) {
+                    console.log(`Updating ${file}`);
+                    fs.writeFileSync(file, updatedContent);
+                }
+            }),
+        );
     } else if (oldNetwork === 'Linea') {
         const files = getAllFiles('./contracts');
-        await Promise.all(files.map(async (file) => {
-            const content = (await fs.readFileSync(file)).toString();
-            let updatedContent = content
-                .replace(/sload\(/g, 'tload(')
-                .replace(/sstore\(/g, 'tstore(');
+        await Promise.all(
+            files.map(async (file) => {
+                const content = (await fs.readFileSync(file)).toString();
+                let updatedContent = content
+                    .replace(/sload\(/g, 'tload(')
+                    .replace(/sstore\(/g, 'tstore(');
 
-            if (targetFiles.some((target) => file.includes(target))) {
-                updatedContent = updatedContent
-                    .replace(/TransientStorage/g, 'TransientStorageCancun')
-                    .replace(/TRANSIENT_STORAGE/g, 'TRANSIENT_STORAGE_CANCUN');
-            }
+                if (targetFiles.some((target) => file.includes(target))) {
+                    updatedContent = updatedContent
+                        .replace(/TransientStorage/g, 'TransientStorageCancun')
+                        .replace(/TRANSIENT_STORAGE/g, 'TRANSIENT_STORAGE_CANCUN');
+                }
 
-            if (updatedContent !== content) {
-                console.log(`Updating ${file}`);
-                fs.writeFileSync(file, updatedContent);
-            }
-        }));
+                if (updatedContent !== content) {
+                    console.log(`Updating ${file}`);
+                    fs.writeFileSync(file, updatedContent);
+                }
+            }),
+        );
     }
 }
 

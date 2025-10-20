@@ -63,9 +63,7 @@ const instAaveDebtShiftTest = async () => {
             await impersonateAccount(OWNER_ACC);
             ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
             const dsaContractImpersonated = await dsaContract.connect(ownerAcc);
-            const ABI = [
-                'function add(address)',
-            ];
+            const ABI = ['function add(address)'];
             const iface = new hre.ethers.utils.Interface(ABI);
             const data = iface.encodeFunctionData('add', [proxy.address]);
             await dsaContractImpersonated.cast(['AUTHORITY-A'], [data], OWNER_ACC);
@@ -118,10 +116,7 @@ const instAaveDebtShiftTest = async () => {
             const instTokenPullAction = new dfs.actions.insta.InstPullTokensAction(
                 dsaAddress,
                 [AWETH_ADDR, AWBTC_ADDR],
-                [
-                    hre.ethers.constants.MaxUint256,
-                    hre.ethers.constants.MaxUint256,
-                ],
+                [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
                 proxy.address,
             );
             const aaveSetAsCollateral = new dfs.actions.aave.AaveCollateralSwitchAction(
@@ -149,12 +144,18 @@ const instAaveDebtShiftTest = async () => {
             ]);
             const functionData = transferRecipe.encodeForDsProxyCall();
 
-            const usdtDebtAmount = await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', dsaAddress);
+            const usdtDebtAmount = await balanceOf(
+                '0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec',
+                dsaAddress,
+            );
             const wbtcCollAmount = await balanceOf(AWBTC_ADDR, dsaAddress);
             const wethCollAmount = await balanceOf(AWETH_ADDR, dsaAddress);
 
             await executeAction('RecipeExecutor', functionData[1], impersonatedProxy);
-            const usdtDebtAmountAfter = await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', proxy.address);
+            const usdtDebtAmountAfter = await balanceOf(
+                '0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec',
+                proxy.address,
+            );
             const wbtcCollAmountAfter = await balanceOf(AWBTC_ADDR, proxy.address);
             const wethCollAmountAfter = await balanceOf(AWETH_ADDR, proxy.address);
 
@@ -174,9 +175,7 @@ const instAaveDebtShiftTest = async () => {
             await impersonateAccount(OWNER_ACC);
             ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
             const dsaContractImpersonated = await dsaContract.connect(ownerAcc);
-            const ABI = [
-                'function add(address)',
-            ];
+            const ABI = ['function add(address)'];
             const iface = new hre.ethers.utils.Interface(ABI);
             const data = iface.encodeFunctionData('add', [proxy.address]);
             await dsaContractImpersonated.cast(['AUTHORITY-A'], [data], OWNER_ACC);
@@ -244,10 +243,7 @@ const instAaveDebtShiftTest = async () => {
             const instTokenPullAction = new dfs.actions.insta.InstPullTokensAction(
                 dsaAddress,
                 [ALINK_ADDR, AWETH_ADDR],
-                [
-                    hre.ethers.constants.MaxUint256,
-                    hre.ethers.constants.MaxUint256,
-                ],
+                [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
                 proxy.address,
             );
             const aaveSetAsCollateral = new dfs.actions.aave.AaveCollateralSwitchAction(
@@ -278,13 +274,25 @@ const instAaveDebtShiftTest = async () => {
             ]);
             const functionData = transferRecipe.encodeForDsProxyCall();
 
-            const busdDebtAmount = await balanceOf('0xbA429f7011c9fa04cDd46a2Da24dc0FF0aC6099c', dsaAddress);
-            const usdtDebtAmount = await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', dsaAddress);
+            const busdDebtAmount = await balanceOf(
+                '0xbA429f7011c9fa04cDd46a2Da24dc0FF0aC6099c',
+                dsaAddress,
+            );
+            const usdtDebtAmount = await balanceOf(
+                '0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec',
+                dsaAddress,
+            );
             const linkCollAmount = await balanceOf(ALINK_ADDR, dsaAddress);
             const wethCollAmount = await balanceOf(AWETH_ADDR, dsaAddress);
             await executeAction('RecipeExecutor', functionData[1], impersonatedProxy);
-            const busdDebtAmountAfter = await balanceOf('0xbA429f7011c9fa04cDd46a2Da24dc0FF0aC6099c', proxy.address);
-            const usdtDebtAmountAfter = await balanceOf('0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec', proxy.address);
+            const busdDebtAmountAfter = await balanceOf(
+                '0xbA429f7011c9fa04cDd46a2Da24dc0FF0aC6099c',
+                proxy.address,
+            );
+            const usdtDebtAmountAfter = await balanceOf(
+                '0x531842cEbbdD378f8ee36D171d6cC9C4fcf475Ec',
+                proxy.address,
+            );
             const linkCollAmountAfter = await balanceOf(ALINK_ADDR, proxy.address);
             const wethCollAmountAfter = await balanceOf(AWETH_ADDR, proxy.address);
             expect(linkCollAmount).to.be.lte(linkCollAmountAfter);
@@ -318,13 +326,11 @@ const instAaveNoDebtShiftTest = async () => {
             dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress);
         });
         it('... Migrate aave debtless position from INST ', async () => {
-        // Approve dsproxy to have authority over DSA account!
+            // Approve dsproxy to have authority over DSA account!
             await impersonateAccount(OWNER_ACC);
             ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
             const dsaContractImpersonated = dsaContract.connect(ownerAcc);
-            const ABI = [
-                'function add(address)',
-            ];
+            const ABI = ['function add(address)'];
             const iface = new hre.ethers.utils.Interface(ABI);
             const data = iface.encodeFunctionData('add', [OWNER_ACC]);
             await dsaContractImpersonated.cast(['AUTHORITY-A'], [data], OWNER_ACC);
@@ -402,9 +408,7 @@ const instCompDebtShiftTest = async () => {
             await impersonateAccount(OWNER_ACC);
             ownerAcc = await hre.ethers.provider.getSigner(OWNER_ACC);
             const dsaContractImpersonated = await dsaContract.connect(ownerAcc);
-            const ABI = [
-                'function add(address)',
-            ];
+            const ABI = ['function add(address)'];
             const iface = new hre.ethers.utils.Interface(ABI);
             const data = iface.encodeFunctionData('add', [proxy.address]);
             await dsaContractImpersonated.cast(['AUTHORITY-A'], [data], OWNER_ACC);
@@ -461,10 +465,7 @@ const instCompDebtShiftTest = async () => {
             const instTokenPullAction = new dfs.actions.insta.InstPullTokensAction(
                 dsaAddress,
                 [CCOMP_ADDR, CUNI_ADDR],
-                [
-                    hre.ethers.constants.MaxUint256,
-                    hre.ethers.constants.MaxUint256,
-                ],
+                [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
                 proxy.address,
             );
             const compCollSwitchAction = new dfs.actions.compound.CompoundCollateralSwitchAction(

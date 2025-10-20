@@ -1,6 +1,4 @@
-const {
-    redeploy,
-} = require('../../../utils/utils');
+const { redeploy } = require('../../../utils/utils');
 const { uniSupplyTest } = require('./uni-tests');
 
 describe('Uni-Supply', function () {

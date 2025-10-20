@@ -63,9 +63,11 @@ class BaseFluidT1StrategyTest {
     }
 
     async setUpContracts() {
-        const strategyContractName = network === 'mainnet' ? 'StrategyExecutor' : 'StrategyExecutorL2';
+        const strategyContractName =
+            network === 'mainnet' ? 'StrategyExecutor' : 'StrategyExecutorL2';
         const strategyExecutor = await hre.ethers.getContractAt(
-            strategyContractName, addrs[network].STRATEGY_EXECUTOR_ADDR,
+            strategyContractName,
+            addrs[network].STRATEGY_EXECUTOR_ADDR,
         );
         this.contracts.strategyExecutor = strategyExecutor.connect(this.botAcc);
         this.contracts.flAction = await getContractFromRegistry('FLAction', this.isFork);
@@ -78,10 +80,9 @@ class BaseFluidT1StrategyTest {
         await redeploy('FluidVaultT1Adjust', this.isFork);
         await redeploy('FluidVaultT1Withdraw', this.isFork);
         await redeploy('FluidVaultT1Payback', this.isFork);
-        const mockExchangeName = network === 'mainnet' ? 'MockExchangeWrapperUsdFeed' : 'MockExchangeWrapperUsdFeedL2';
-        this.contracts.mockWrapper = await redeploy(
-            mockExchangeName, this.isFork,
-        );
+        const mockExchangeName =
+            network === 'mainnet' ? 'MockExchangeWrapperUsdFeed' : 'MockExchangeWrapperUsdFeedL2';
+        this.contracts.mockWrapper = await redeploy(mockExchangeName, this.isFork);
         await setNewExchangeWrapper(this.senderAcc, this.contracts.mockWrapper.address);
     }
 

@@ -41,22 +41,24 @@ const createAaveV3ImportRecipe = ({
 }) => {
     debtAmounts = debtAmounts.map((e) => e.mul(1_00_01).div(1_00_00));
     const actions = [
-        new sdk.actions.flashloan.FLAction(new sdk.actions.flashloan.BalancerFlashLoanAction(
-            debtTokenAddresses,
-            debtAmounts,
-        )),
+        new sdk.actions.flashloan.FLAction(
+            new sdk.actions.flashloan.BalancerFlashLoanAction(debtTokenAddresses, debtAmounts),
+        ),
 
-        ...debtAssetIds.map((debtAssetId, i) => new sdk.actions.aaveV3.AaveV3PaybackAction(
-            true,
-            nullAddress,
-            MAX_UINT,
-            walletAddress,
-            VARIABLE_RATE,
-            debtTokenAddresses[i],
-            debtAssetId,
-            true,
-            dsaProxyAddress,
-        )),
+        ...debtAssetIds.map(
+            (debtAssetId, i) =>
+                new sdk.actions.aaveV3.AaveV3PaybackAction(
+                    true,
+                    nullAddress,
+                    MAX_UINT,
+                    walletAddress,
+                    VARIABLE_RATE,
+                    debtTokenAddresses[i],
+                    debtAssetId,
+                    true,
+                    dsaProxyAddress,
+                ),
+        ),
 
         new sdk.actions.insta.InstPullTokensAction(
             dsaProxyAddress,
@@ -75,15 +77,18 @@ const createAaveV3ImportRecipe = ({
 
         new sdk.actions.aaveV3.AaveV3SetEModeAction(true, nullAddress, emodeCategoryId),
 
-        ...debtAssetIds.map((debtAssetId, i) => new sdk.actions.aaveV3.AaveV3BorrowAction(
-            true,
-            nullAddress,
-            debtAmounts[i],
-            flAddress,
-            VARIABLE_RATE,
-            debtAssetId,
-            false,
-        )),
+        ...debtAssetIds.map(
+            (debtAssetId, i) =>
+                new sdk.actions.aaveV3.AaveV3BorrowAction(
+                    true,
+                    nullAddress,
+                    debtAmounts[i],
+                    flAddress,
+                    VARIABLE_RATE,
+                    debtAssetId,
+                    false,
+                ),
+        ),
     ];
     return new sdk.Recipe('InstDsaAaveV3Import', actions);
 };
@@ -133,9 +138,7 @@ describe('DSA-AaveV3-Import', function () {
 
     it('... should execute AaveV3 migration from DSA to DFS smart wallet', async () => {
         // approve smart wallet from DSA
-        const ABI = [
-            'function add(address)',
-        ];
+        const ABI = ['function add(address)'];
         const iface = new hre.ethers.utils.Interface(ABI);
         const data = iface.encodeFunctionData('add', [wallet.address]);
         await dsaProxy.cast(['AUTHORITY-A'], [data], userAddress);
@@ -153,7 +156,9 @@ describe('DSA-AaveV3-Import', function () {
         const dfsMigratedPosition = await getAaveV3PositionInfo(wallet.address, aaveV3View);
         expectTwoAaveV3PositionsToBeEqual(dsaPositionInfo, dfsMigratedPosition);
 
-        const currentDsaPositionRatios = await aaveV3View.getRatios(addrs[network].AAVE_MARKET, [dsaAddress]);
+        const currentDsaPositionRatios = await aaveV3View.getRatios(addrs[network].AAVE_MARKET, [
+            dsaAddress,
+        ]);
         expect(currentDsaPositionRatios[0]).to.be.eq(0);
     });
 });

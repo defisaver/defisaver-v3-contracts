@@ -4,11 +4,7 @@ const hre = require('hardhat');
 
 const { getAssetInfo } = require('@defisaver/tokens');
 
-const {
-    sparkSupply,
-    sparkBorrow,
-    sparkPayback,
-} = require('../../utils/actions');
+const { sparkSupply, sparkBorrow, sparkPayback } = require('../../utils/actions');
 const { VARIABLE_RATE } = require('../../utils/aave');
 
 const {

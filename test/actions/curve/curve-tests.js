@@ -1,5 +1,9 @@
 const dfs = require('@defisaver/sdk');
-let { utils: { curveUtils: { poolInfo } } } = require('@defisaver/sdk');
+let {
+    utils: {
+        curveUtils: { poolInfo },
+    },
+} = require('@defisaver/sdk');
 const { expect } = require('chai');
 const hre = require('hardhat');
 
@@ -47,23 +51,25 @@ const testDeposit = async (
     useUnderlying,
     amountEach,
 ) => {
-    const amounts = (useUnderlying ? pool.underlyingDecimals : pool.decimals).map(
-        (e) => Float2BN(amountEach, e),
+    const amounts = (useUnderlying ? pool.underlyingDecimals : pool.decimals).map((e) =>
+        Float2BN(amountEach, e),
     );
 
-    const assetsToApprove = await (new dfs.actions.curve.CurveDepositAction(
+    const assetsToApprove = await new dfs.actions.curve.CurveDepositAction(
         sender,
         receiver,
         pool.swapAddr,
         minMintAmount,
         useUnderlying,
         amounts,
-    )).getAssetsToApprove();
+    ).getAssetsToApprove();
 
-    await Promise.all(assetsToApprove.map(async (e, i) => {
-        await setBalance(e.asset, sender, amounts[i]);
-        await approve(e.asset, proxy.address);
-    }));
+    await Promise.all(
+        assetsToApprove.map(async (e, i) => {
+            await setBalance(e.asset, sender, amounts[i]);
+            await approve(e.asset, proxy.address);
+        }),
+    );
 
     await setBalance(pool.lpToken, receiver, Float2BN('0'));
     await curveDeposit(
@@ -91,18 +97,17 @@ const testWithdraw = async (
     amountEach,
     { removeOneCoin } = { removeOneCoin: false },
 ) => {
-    const amounts = (useUnderlying ? pool.underlyingDecimals : pool.decimals).map(
-        (e, i) => ((!removeOneCoin || i === 0) ? Float2BN(amountEach, e) : Float2BN('0')),
+    const amounts = (useUnderlying ? pool.underlyingDecimals : pool.decimals).map((e, i) =>
+        !removeOneCoin || i === 0 ? Float2BN(amountEach, e) : Float2BN('0'),
     );
     await approve(pool.lpToken, proxy.address);
 
     const balancesBefore = await Promise.all(
-        (useUnderlying ? pool.underlyingCoins : pool.coins)
-            .map(async (c) => {
-                // eslint-disable-next-line no-param-reassign
-                if (c === ETH_ADDR) c = WETH_ADDRESS;
-                return balanceOf(c, receiver);
-            }),
+        (useUnderlying ? pool.underlyingCoins : pool.coins).map(async (c) => {
+            // eslint-disable-next-line no-param-reassign
+            if (c === ETH_ADDR) c = WETH_ADDRESS;
+            return balanceOf(c, receiver);
+        }),
     );
 
     await curveWithdraw(
@@ -122,11 +127,11 @@ const testWithdraw = async (
             // eslint-disable-next-line no-param-reassign
             if (c === ETH_ADDR) c = WETH_ADDRESS;
             const balance = await balanceOf(c, receiver).then((e) => e.sub(balancesBefore[i]));
-            expect(
-                balance,
-            ).to.be.gte(amounts[i].sub(
-                amounts[i].div(1_00_00), // max allowed slippage hardcoded in CurveWithdraw
-            ));
+            expect(balance).to.be.gte(
+                amounts[i].sub(
+                    amounts[i].div(1_00_00), // max allowed slippage hardcoded in CurveWithdraw
+                ),
+            );
             if (withdrawExact || (removeOneCoin && i !== 0)) {
                 expect(balance).to.be.lte(amounts[i]);
                 // if we are getting tokens we arent expecting something is probably wrong
@@ -164,33 +169,35 @@ const curveDepositTest = async (testLength) => {
             await revertToSnapshot(snapshot);
         });
 
-        await Promise.all(poolInfo.slice(0, testLength).map(async (pool) => {
-            const poolName = pool.name;
-            it(`... should deposit coins [${poolName}]`, async () => {
-                await testDeposit(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    '0', // minMintAmount
-                    false,
-                    amountEach,
-                );
-            });
-            it(`... should deposit underlyingCoins [${poolName}]`, async function () {
-                /// @dev no test if no underlying
-                if (!pool.depositContract && !pool.underlyingFlag) this.skip();
-                await testDeposit(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    '0', // minMintAmount
-                    true,
-                    amountEach,
-                );
-            });
-        }));
+        await Promise.all(
+            poolInfo.slice(0, testLength).map(async (pool) => {
+                const poolName = pool.name;
+                it(`... should deposit coins [${poolName}]`, async () => {
+                    await testDeposit(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        '0', // minMintAmount
+                        false,
+                        amountEach,
+                    );
+                });
+                it(`... should deposit underlyingCoins [${poolName}]`, async function () {
+                    /// @dev no test if no underlying
+                    if (!pool.depositContract && !pool.underlyingFlag) this.skip();
+                    await testDeposit(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        '0', // minMintAmount
+                        true,
+                        amountEach,
+                    );
+                });
+            }),
+        );
     });
 };
 
@@ -225,58 +232,60 @@ const curveWithdrawOneCoinTest = async (testLength) => {
             await revertToSnapshot(snapshot);
         });
 
-        await Promise.all(poolInfo.slice(0, testLength).map(async (pool) => {
-            const poolName = pool.name;
+        await Promise.all(
+            poolInfo.slice(0, testLength).map(async (pool) => {
+                const poolName = pool.name;
 
-            it(`... should deposit then withdraw one coin [${poolName}]`, async function () {
-                /// @dev these two pools dont implement remove_liquidity_one_coin
-                if (['susd', 'compound'].includes(poolName)) this.skip();
-                const lpMinted = await testDeposit(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    '0', // minMintAmount
-                    false,
-                    amountEach,
-                );
-                await testWithdraw(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    lpMinted,
-                    false,
-                    false,
-                    `${+amountEach * 0.2}`,
-                    { removeOneCoin: true },
-                );
-            });
-            it(`... should deposit then withdraw one underlying coin [${poolName}]`, async function () {
-                /// @dev no test if no underlying
-                if (!pool.depositContract && !pool.underlyingFlag) this.skip();
-                const lpMinted = await testDeposit(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    '0', // minMintAmount
-                    true,
-                    amountEach,
-                );
-                await testWithdraw(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    lpMinted,
-                    true,
-                    false,
-                    `${+amountEach * 0.2}`,
-                    { removeOneCoin: true },
-                );
-            });
-        }));
+                it(`... should deposit then withdraw one coin [${poolName}]`, async function () {
+                    /// @dev these two pools dont implement remove_liquidity_one_coin
+                    if (['susd', 'compound'].includes(poolName)) this.skip();
+                    const lpMinted = await testDeposit(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        '0', // minMintAmount
+                        false,
+                        amountEach,
+                    );
+                    await testWithdraw(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        lpMinted,
+                        false,
+                        false,
+                        `${+amountEach * 0.2}`,
+                        { removeOneCoin: true },
+                    );
+                });
+                it(`... should deposit then withdraw one underlying coin [${poolName}]`, async function () {
+                    /// @dev no test if no underlying
+                    if (!pool.depositContract && !pool.underlyingFlag) this.skip();
+                    const lpMinted = await testDeposit(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        '0', // minMintAmount
+                        true,
+                        amountEach,
+                    );
+                    await testWithdraw(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        lpMinted,
+                        true,
+                        false,
+                        `${+amountEach * 0.2}`,
+                        { removeOneCoin: true },
+                    );
+                });
+            }),
+        );
     });
 };
 
@@ -311,53 +320,55 @@ const curveWithdrawTest = async (testLength) => {
             await revertToSnapshot(snapshot);
         });
 
-        await Promise.all(poolInfo.slice(0, testLength).map(async (pool) => {
-            const poolName = pool.name;
-            it(`... should deposit then withdraw coins [${poolName}]`, async () => {
-                const lpMinted = await testDeposit(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    '0', // minMintAmount
-                    false,
-                    amountEach,
-                );
-                await testWithdraw(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    lpMinted,
-                    false,
-                    false,
-                    `${+amountEach * 0.2}`,
-                );
-            });
-            it(`... should deposit then withdraw underlyingCoins [${poolName}]`, async function () {
-                /// @dev no test if no underlying
-                if (!pool.depositContract && !pool.underlyingFlag) this.skip();
-                const lpMinted = await testDeposit(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    '0', // minMintAmount
-                    true,
-                    amountEach,
-                );
-                await testWithdraw(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    lpMinted,
-                    true,
-                    false,
-                    `${+amountEach * 0.2}`,
-                );
-            });
-        }));
+        await Promise.all(
+            poolInfo.slice(0, testLength).map(async (pool) => {
+                const poolName = pool.name;
+                it(`... should deposit then withdraw coins [${poolName}]`, async () => {
+                    const lpMinted = await testDeposit(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        '0', // minMintAmount
+                        false,
+                        amountEach,
+                    );
+                    await testWithdraw(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        lpMinted,
+                        false,
+                        false,
+                        `${+amountEach * 0.2}`,
+                    );
+                });
+                it(`... should deposit then withdraw underlyingCoins [${poolName}]`, async function () {
+                    /// @dev no test if no underlying
+                    if (!pool.depositContract && !pool.underlyingFlag) this.skip();
+                    const lpMinted = await testDeposit(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        '0', // minMintAmount
+                        true,
+                        amountEach,
+                    );
+                    await testWithdraw(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        lpMinted,
+                        true,
+                        false,
+                        `${+amountEach * 0.2}`,
+                    );
+                });
+            }),
+        );
     });
 };
 
@@ -393,59 +404,57 @@ const curveWithdrawExactTest = async (testLength) => {
         });
 
         await Promise.all(
-            poolInfo
-                .slice(0, testLength)
-                .map(async (pool) => {
-                    const poolName = pool.name;
-                    it(`... should deposit then withdraw exact coins [${poolName}]`, async function () {
-                        /// @dev factory pools dont implement this method
-                        if (pool.isFactory) this.skip();
-                        const lpMinted = await testDeposit(
-                            proxy,
-                            senderAddr,
-                            senderAddr,
-                            pool,
-                            '0', // minMintAmount
-                            false,
-                            amountEach,
-                        );
-                        await testWithdraw(
-                            proxy,
-                            senderAddr,
-                            senderAddr,
-                            pool,
-                            lpMinted,
-                            false,
-                            true,
-                            `${+amountEach * 0.2}`,
-                        );
-                    });
-                    it(`... should deposit then withdraw exact underlyingCoins [${poolName}]`, async function () {
-                        /// @dev factory pools dont implement this method
-                        if (pool.isFactory) this.skip();
-                        /// @dev no test if no underlying
-                        if (!pool.depositContract && !pool.underlyingFlag) this.skip();
-                        const lpMinted = await testDeposit(
-                            proxy,
-                            senderAddr,
-                            senderAddr,
-                            pool,
-                            '0', // minMintAmount
-                            true,
-                            amountEach,
-                        );
-                        await testWithdraw(
-                            proxy,
-                            senderAddr,
-                            senderAddr,
-                            pool,
-                            lpMinted,
-                            true,
-                            true,
-                            `${+amountEach * 0.2}`,
-                        );
-                    });
-                }),
+            poolInfo.slice(0, testLength).map(async (pool) => {
+                const poolName = pool.name;
+                it(`... should deposit then withdraw exact coins [${poolName}]`, async function () {
+                    /// @dev factory pools dont implement this method
+                    if (pool.isFactory) this.skip();
+                    const lpMinted = await testDeposit(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        '0', // minMintAmount
+                        false,
+                        amountEach,
+                    );
+                    await testWithdraw(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        lpMinted,
+                        false,
+                        true,
+                        `${+amountEach * 0.2}`,
+                    );
+                });
+                it(`... should deposit then withdraw exact underlyingCoins [${poolName}]`, async function () {
+                    /// @dev factory pools dont implement this method
+                    if (pool.isFactory) this.skip();
+                    /// @dev no test if no underlying
+                    if (!pool.depositContract && !pool.underlyingFlag) this.skip();
+                    const lpMinted = await testDeposit(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        '0', // minMintAmount
+                        true,
+                        amountEach,
+                    );
+                    await testWithdraw(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        lpMinted,
+                        true,
+                        true,
+                        `${+amountEach * 0.2}`,
+                    );
+                });
+            }),
         );
     });
 };
@@ -455,8 +464,10 @@ const curveGaugeDepositTest = async (testLength) => {
         this.timeout(1000000);
         const amountEach = '1000';
 
-        let senderAcc; let senderAddr;
-        let proxy; let proxyAddr;
+        let senderAcc;
+        let senderAddr;
+        let proxy;
+        let proxyAddr;
         let curveView;
 
         before(async () => {
@@ -472,26 +483,35 @@ const curveGaugeDepositTest = async (testLength) => {
             curveView = await getContractFromRegistry('CurveView');
         });
 
-        await Promise.all(poolInfo.slice(0, testLength).map(async (pool) => {
-            const poolName = pool.name;
+        await Promise.all(
+            poolInfo.slice(0, testLength).map(async (pool) => {
+                const poolName = pool.name;
 
-            it(`... should deposit LP tokens into gauge [${poolName}]`, async () => {
-                const lpMinted = await testDeposit(
-                    proxy,
-                    senderAddr,
-                    senderAddr,
-                    pool,
-                    '0', // minMintAmount
-                    false,
-                    amountEach,
-                );
+                it(`... should deposit LP tokens into gauge [${poolName}]`, async () => {
+                    const lpMinted = await testDeposit(
+                        proxy,
+                        senderAddr,
+                        senderAddr,
+                        pool,
+                        '0', // minMintAmount
+                        false,
+                        amountEach,
+                    );
 
-                await approve(pool.lpToken, proxyAddr);
-                // eslint-disable-next-line max-len
-                await curveGaugeDeposit(proxy, pool.gauges[0], pool.lpToken, senderAddr, proxyAddr, lpMinted);
-                expect(await curveView.gaugeBalance(pool.gauges[0], proxyAddr)).to.be.gt('0');
-            });
-        }));
+                    await approve(pool.lpToken, proxyAddr);
+                    // eslint-disable-next-line max-len
+                    await curveGaugeDeposit(
+                        proxy,
+                        pool.gauges[0],
+                        pool.lpToken,
+                        senderAddr,
+                        proxyAddr,
+                        lpMinted,
+                    );
+                    expect(await curveView.gaugeBalance(pool.gauges[0], proxyAddr)).to.be.gt('0');
+                });
+            }),
+        );
     });
 };
 
@@ -500,8 +520,10 @@ const curveGaugeWithdrawTest = async (testLength) => {
         this.timeout(1000000);
         const amountEach = '1000';
 
-        let senderAcc; let senderAddr;
-        let proxy; let proxyAddr;
+        let senderAcc;
+        let senderAddr;
+        let proxy;
+        let proxyAddr;
         let curveView;
 
         before(async () => {
@@ -534,11 +556,24 @@ const curveGaugeWithdrawTest = async (testLength) => {
 
                 await approve(pool.lpToken, proxyAddr);
                 // eslint-disable-next-line max-len
-                await curveGaugeDeposit(proxy, pool.gauges[0], pool.lpToken, senderAddr, proxyAddr, lpMinted);
+                await curveGaugeDeposit(
+                    proxy,
+                    pool.gauges[0],
+                    pool.lpToken,
+                    senderAddr,
+                    proxyAddr,
+                    lpMinted,
+                );
                 expect(await curveView.gaugeBalance(pool.gauges[0], proxyAddr)).to.be.gt('0');
 
                 // eslint-disable-next-line max-len
-                await curveGaugeWithdraw(proxy, pool.gauges[0], pool.lpToken, senderAddr, hre.ethers.constants.MaxUint256);
+                await curveGaugeWithdraw(
+                    proxy,
+                    pool.gauges[0],
+                    pool.lpToken,
+                    senderAddr,
+                    hre.ethers.constants.MaxUint256,
+                );
                 expect(await balanceOf(pool.lpToken, senderAddr)).to.be.eq(lpMinted);
             });
         });
@@ -591,8 +626,10 @@ const curveStethPoolDepositTest = async () => {
         const ethAmount = '10';
         const ethAmountHalf = '5';
 
-        let senderAcc; let senderAddr;
-        let proxy; let proxyAddr;
+        let senderAcc;
+        let senderAddr;
+        let proxy;
+        let proxyAddr;
 
         before(async () => {
             await resetForkToBlock(13000000);
@@ -612,13 +649,7 @@ const curveStethPoolDepositTest = async () => {
             await approve(WETH_ADDRESS, proxyAddr);
 
             const tokensBefore = await balanceOf(STE_CRV_ADDR, senderAddr);
-            await curveStethPoolDeposit(
-                proxy,
-                senderAddr,
-                senderAddr,
-                [amount, '0'],
-                '0',
-            );
+            await curveStethPoolDeposit(proxy, senderAddr, senderAddr, [amount, '0'], '0');
 
             const tokensAfter = await balanceOf(STE_CRV_ADDR, senderAddr);
             const lpMinted = tokensAfter.sub(tokensBefore);
@@ -634,13 +665,7 @@ const curveStethPoolDepositTest = async () => {
             await approve(STETH_ADDRESS, proxyAddr);
 
             const tokensBefore = await balanceOf(STE_CRV_ADDR, senderAddr);
-            await curveStethPoolDeposit(
-                proxy,
-                senderAddr,
-                senderAddr,
-                ['0', amount],
-                '0',
-            );
+            await curveStethPoolDeposit(proxy, senderAddr, senderAddr, ['0', amount], '0');
 
             const tokensAfter = await balanceOf(STE_CRV_ADDR, senderAddr);
             const lpMinted = tokensAfter.sub(tokensBefore);
@@ -658,13 +683,7 @@ const curveStethPoolDepositTest = async () => {
             await approve(STETH_ADDRESS, proxyAddr);
 
             const tokensBefore = await balanceOf(STE_CRV_ADDR, senderAddr);
-            await curveStethPoolDeposit(
-                proxy,
-                senderAddr,
-                senderAddr,
-                [amount, amount],
-                '0',
-            );
+            await curveStethPoolDeposit(proxy, senderAddr, senderAddr, [amount, amount], '0');
 
             const tokensAfter = await balanceOf(STE_CRV_ADDR, senderAddr);
             const lpMinted = tokensAfter.sub(tokensBefore);
@@ -707,8 +726,10 @@ const curveStethPoolWithdrawTest = async () => {
         const amount = '10';
         const amountHalf = '5';
 
-        let senderAcc; let senderAddr;
-        let proxy; let proxyAddr;
+        let senderAcc;
+        let senderAddr;
+        let proxy;
+        let proxyAddr;
 
         before(async () => {
             await resetForkToBlock(13000000);
@@ -744,7 +765,9 @@ const curveStethPoolWithdrawTest = async () => {
             const lpBurned = maxBurnAmount.sub(tokensAfter);
             const wethWithdrawn = wethAfter.sub(wethBefore);
             expect(+BN2Float(wethWithdrawn)).to.be.closeTo(+BN2Float(maxBurnAmount), 0.01);
-            console.log(`Withdrawn ${BN2Float(wethWithdrawn)} WETH burning ${BN2Float(lpBurned)} steCrv`);
+            console.log(
+                `Withdrawn ${BN2Float(wethWithdrawn)} WETH burning ${BN2Float(lpBurned)} steCrv`,
+            );
         });
 
         it(`... should burn ${amount} steCrv and withdraw ${amount} stEth`, async () => {
@@ -770,7 +793,9 @@ const curveStethPoolWithdrawTest = async () => {
             const lpBurned = maxBurnAmount.sub(tokensAfter);
             const stethWithdrawn = stethAfter.sub(stethBefore);
             expect(+BN2Float(stethWithdrawn)).to.be.closeTo(+BN2Float(maxBurnAmount), 0.01);
-            console.log(`Withdrawn ${BN2Float(stethWithdrawn)} stEth burning ${BN2Float(lpBurned)} steCrv`);
+            console.log(
+                `Withdrawn ${BN2Float(stethWithdrawn)} stEth burning ${BN2Float(lpBurned)} steCrv`,
+            );
         });
 
         it(`... should burn ${amount} steCrv and withdraw ${amountHalf} Eth and ${amountHalf} stEth`, async () => {
@@ -801,7 +826,9 @@ const curveStethPoolWithdrawTest = async () => {
             const stethWithdrawn = stethAfter.sub(stethBefore);
             expect(+BN2Float(wethWithdrawn)).to.be.closeTo(+BN2Float(withdrawAmount), 0.01);
             expect(+BN2Float(stethWithdrawn)).to.be.closeTo(+BN2Float(withdrawAmount), 0.01);
-            console.log(`Withdrawn ${BN2Float(wethWithdrawn)} WETH and ${BN2Float(stethWithdrawn)} stEth burning ${BN2Float(lpBurned)} steCrv`);
+            console.log(
+                `Withdrawn ${BN2Float(wethWithdrawn)} WETH and ${BN2Float(stethWithdrawn)} stEth burning ${BN2Float(lpBurned)} steCrv`,
+            );
         });
     });
 };

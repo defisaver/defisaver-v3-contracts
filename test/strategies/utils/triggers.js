@@ -30,13 +30,19 @@ const createLiquityTrigger = async (user, ratio, ratioState) => {
 };
 
 const createCurveUsdCollRatioTrigger = async (user, controllerAddr, ratio, ratioState) => {
-    const param = abiCoder.encode(['address', 'address', 'uint256', 'uint8'], [user, controllerAddr, ratio, ratioState]);
+    const param = abiCoder.encode(
+        ['address', 'address', 'uint256', 'uint8'],
+        [user, controllerAddr, ratio, ratioState],
+    );
 
     return param;
 };
 
 const createMorphoBlueRatioTrigger = async (marketId, user, ratio, state) => {
-    const param = abiCoder.encode(['bytes32', 'address', 'uint256', 'uint8'], [marketId, user, ratio, state]);
+    const param = abiCoder.encode(
+        ['bytes32', 'address', 'uint256', 'uint8'],
+        [marketId, user, ratio, state],
+    );
     return param;
 };
 

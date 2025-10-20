@@ -1,9 +1,6 @@
 /* eslint-disable max-len */
 const hre = require('hardhat');
-const {
-    getContractFromRegistry,
-    openStrategyAndBundleStorage,
-} = require('./utils');
+const { getContractFromRegistry, openStrategyAndBundleStorage } = require('./utils');
 const {
     createLiquityV2RepayStrategy,
     createLiquityV2FLRepayStrategy,
@@ -29,7 +26,10 @@ const DebtActionType = { PAYBACK: 0, BORROW: 1 };
 const getLiquityV2Hints = async (market, collIndex, interestRate, isFork = false) => {
     const marketContract = await hre.ethers.getContractAt('IAddressesRegistry', market);
     const sortedTrovesAddr = await marketContract.sortedTroves();
-    const sortedTrovesContract = await hre.ethers.getContractAt('contracts/interfaces/liquityV2/ISortedTroves.sol:ISortedTroves', sortedTrovesAddr);
+    const sortedTrovesContract = await hre.ethers.getContractAt(
+        'contracts/interfaces/liquityV2/ISortedTroves.sol:ISortedTroves',
+        sortedTrovesAddr,
+    );
     const trovesSize = await sortedTrovesContract.getSize();
     if (trovesSize <= 2) {
         return { upperHint: 0, lowerHint: 0 };
@@ -58,7 +58,10 @@ const getLiquityV2MaxUpfrontFee = async (
 ) => {
     const marketContract = await hre.ethers.getContractAt('IAddressesRegistry', market);
     const hintHelpersAddr = await marketContract.hintHelpers();
-    const hintHelpersContract = await hre.ethers.getContractAt('contracts/interfaces/liquityV2/IHintHelpers.sol:IHintHelpers', hintHelpersAddr);
+    const hintHelpersContract = await hre.ethers.getContractAt(
+        'contracts/interfaces/liquityV2/IHintHelpers.sol:IHintHelpers',
+        hintHelpersAddr,
+    );
 
     if (batchManager !== hre.ethers.constants.AddressZero) {
         const fee = await hintHelpersContract.predictOpenTroveAndJoinBatchUpfrontFee(
@@ -76,15 +79,13 @@ const getLiquityV2MaxUpfrontFee = async (
     return fee;
 };
 
-const getLiquityV2AdjustBorrowMaxUpfrontFee = async (
-    market,
-    collIndex,
-    troveId,
-    debtIncrease,
-) => {
+const getLiquityV2AdjustBorrowMaxUpfrontFee = async (market, collIndex, troveId, debtIncrease) => {
     const marketContract = await hre.ethers.getContractAt('IAddressesRegistry', market);
     const hintHelpersAddr = await marketContract.hintHelpers();
-    const hintHelpersContract = await hre.ethers.getContractAt('contracts/interfaces/liquityV2/IHintHelpers.sol:IHintHelpers', hintHelpersAddr);
+    const hintHelpersContract = await hre.ethers.getContractAt(
+        'contracts/interfaces/liquityV2/IHintHelpers.sol:IHintHelpers',
+        hintHelpersAddr,
+    );
 
     const fee = await hintHelpersContract.predictAdjustTroveUpfrontFee(
         collIndex,
@@ -125,9 +126,11 @@ const deployLiquityV2BoostBundle = async (proxy, isFork) => {
     const boostStrategyId = await createStrategy(...boostStrategy, true);
     const flBoostStrategyId = await createStrategy(...flBoostStrategy, true);
     const flBoostWithCollStrategyId = await createStrategy(...flBoostWithCollStrategy, true);
-    const bundleId = await createBundle(
-        [boostStrategyId, flBoostStrategyId, flBoostWithCollStrategyId],
-    );
+    const bundleId = await createBundle([
+        boostStrategyId,
+        flBoostStrategyId,
+        flBoostWithCollStrategyId,
+    ]);
     return bundleId;
 };
 
@@ -143,13 +146,11 @@ const deployLiquityV2CloseBundle = async (proxy, isFork) => {
     const flCloseToDebt = createLiquityV2FLCloseToDebtStrategy();
     const flCloseToDebtStrategyId = await createStrategy(...flCloseToDebt, false);
 
-    const bundleId = await createBundle(
-        [
-            closeToCollateralStrategyId,
-            flCloseToCollateralStrategyId,
-            flCloseToDebtStrategyId,
-        ],
-    );
+    const bundleId = await createBundle([
+        closeToCollateralStrategyId,
+        flCloseToCollateralStrategyId,
+        flCloseToDebtStrategyId,
+    ]);
     return bundleId;
 };
 
@@ -157,38 +158,49 @@ const deployLiquityV2BoostOnPriceBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
     const liquityV2BoostOnPriceStrategy = createLiquityV2BoostOnPriceStrategy();
-    const liquityV2BoostOnPriceStrategyId = await createStrategy(...liquityV2BoostOnPriceStrategy, false);
+    const liquityV2BoostOnPriceStrategyId = await createStrategy(
+        ...liquityV2BoostOnPriceStrategy,
+        false,
+    );
 
     const liquityV2FLBoostOnPriceStrategy = createLiquityV2FLBoostOnPriceStrategy();
-    const liquityV2FLBoostOnPriceStrategyId = await createStrategy(...liquityV2FLBoostOnPriceStrategy, false);
+    const liquityV2FLBoostOnPriceStrategyId = await createStrategy(
+        ...liquityV2FLBoostOnPriceStrategy,
+        false,
+    );
 
     const liquityV2FLBoostWithCollOnPriceStrategy = createLiquityV2FLBoostWithCollOnPriceStrategy();
-    const liquityV2FLBoostWithCollOnPriceStrategyId = await createStrategy(...liquityV2FLBoostWithCollOnPriceStrategy, false);
-
-    const bundleId = await createBundle(
-        [
-            liquityV2BoostOnPriceStrategyId,
-            liquityV2FLBoostOnPriceStrategyId,
-            liquityV2FLBoostWithCollOnPriceStrategyId,
-        ],
+    const liquityV2FLBoostWithCollOnPriceStrategyId = await createStrategy(
+        ...liquityV2FLBoostWithCollOnPriceStrategy,
+        false,
     );
+
+    const bundleId = await createBundle([
+        liquityV2BoostOnPriceStrategyId,
+        liquityV2FLBoostOnPriceStrategyId,
+        liquityV2FLBoostWithCollOnPriceStrategyId,
+    ]);
     return bundleId;
 };
 
 const deployLiquityV2RepayOnPriceBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
     const liquityV2RepayOnPriceStrategy = createLiquityV2RepayOnPriceStrategy();
-    const liquityV2RepayOnPriceStrategyId = await createStrategy(...liquityV2RepayOnPriceStrategy, false);
+    const liquityV2RepayOnPriceStrategyId = await createStrategy(
+        ...liquityV2RepayOnPriceStrategy,
+        false,
+    );
 
     const liquityV2FLRepayOnPriceStrategy = createLiquityV2FLRepayOnPriceStrategy();
-    const liquityV2FLRepayOnPriceStrategyId = await createStrategy(...liquityV2FLRepayOnPriceStrategy, false);
-
-    const bundleId = await createBundle(
-        [
-            liquityV2RepayOnPriceStrategyId,
-            liquityV2FLRepayOnPriceStrategyId,
-        ],
+    const liquityV2FLRepayOnPriceStrategyId = await createStrategy(
+        ...liquityV2FLRepayOnPriceStrategy,
+        false,
     );
+
+    const bundleId = await createBundle([
+        liquityV2RepayOnPriceStrategyId,
+        liquityV2FLRepayOnPriceStrategyId,
+    ]);
     return bundleId;
 };
 
@@ -196,7 +208,10 @@ const deployLiquityV2PaybackFromSPStrategy = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
     const liquityV2PaybackFromSPStrategy = createLiquityV2PaybackFromSPStrategy();
-    const liquityV2PaybackFromSPStrategyId = await createStrategy(...liquityV2PaybackFromSPStrategy, true);
+    const liquityV2PaybackFromSPStrategyId = await createStrategy(
+        ...liquityV2PaybackFromSPStrategy,
+        true,
+    );
 
     return liquityV2PaybackFromSPStrategyId;
 };
@@ -204,7 +219,10 @@ const deployLiquityV2PaybackFromSPStrategy = async (proxy, isFork) => {
 const deployLiquityV2InterestRateAdjustmentStrategy = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
     const interestRateAdjustmentStrategy = createLiquityV2InterestRateAdjustmentStrategy();
-    const interestRateAdjustmentStrategyId = await createStrategy(...interestRateAdjustmentStrategy, true);
+    const interestRateAdjustmentStrategyId = await createStrategy(
+        ...interestRateAdjustmentStrategy,
+        true,
+    );
     return interestRateAdjustmentStrategyId;
 };
 

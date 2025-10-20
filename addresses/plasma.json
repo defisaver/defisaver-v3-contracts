@@ -173,9 +173,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C"
-        ]
+        "history": ["0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C"]
     },
     {
         "name": "AaveV3ViewSmall",
@@ -494,9 +492,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x1155BF929D78F1DeF999ACedE1867f79A7C66066"
-        ]
+        "history": ["0x1155BF929D78F1DeF999ACedE1867f79A7C66066"]
     },
     {
         "name": "KyberAggregatorWrapper",

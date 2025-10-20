@@ -14,7 +14,10 @@ const aaveV3ViewTest = async () => {
         let aggregatorContract;
 
         before(async () => {
-            aggregatorContract = await hre.ethers.getContractAt('IUmbrellaDataAggregator', UMBRELLA_DATA_AGGREGATOR_ADDRESS);
+            aggregatorContract = await hre.ethers.getContractAt(
+                'IUmbrellaDataAggregator',
+                UMBRELLA_DATA_AGGREGATOR_ADDRESS,
+            );
             viewContract = await redeploy('AaveV3View', false);
         });
         it('... should call getTokensAggregatedData', async () => {

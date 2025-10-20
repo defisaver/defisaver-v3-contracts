@@ -11,11 +11,7 @@ const {
     setBalance,
 } = require('../../utils/utils');
 const { pullTokensInstDSA } = require('../../utils/actions');
-const {
-    AUNI_ADDR,
-    AWETH_ADDR,
-    ADAI_ADDR,
-} = require('../../utils/utils');
+const { AUNI_ADDR, AWETH_ADDR, ADAI_ADDR } = require('../../utils/utils');
 
 const instaPullTokensTest = async () => {
     // @dev DSA proxy present at block: 20484188 with owner=OWNER_ACC
@@ -47,9 +43,7 @@ const instaPullTokensTest = async () => {
 
             proxy = await getProxy(OWNER_ACC);
 
-            const ABI = [
-                'function add(address)',
-            ];
+            const ABI = ['function add(address)'];
             const iface = new hre.ethers.utils.Interface(ABI);
             const data = iface.encodeFunctionData('add', [proxy.address]);
 

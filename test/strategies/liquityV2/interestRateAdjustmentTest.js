@@ -1,7 +1,11 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
-const { getLiquityV2TestPairs, deployLiquityV2InterestRateAdjustmentStrategy, getLiquityV2Hints } = require('../../utils/liquityV2');
+const {
+    getLiquityV2TestPairs,
+    deployLiquityV2InterestRateAdjustmentStrategy,
+    getLiquityV2Hints,
+} = require('../../utils/liquityV2');
 const { BaseLiquityV2StrategyTest } = require('./common');
 const { subLiquityV2InterestRateAdjustmentBundle } = require('../utils/strategy-subs');
 const { fetchAmountInUSDPrice, isNetworkFork } = require('../../utils/utils');
@@ -17,7 +21,11 @@ class InterestRateAdjustmentTest extends BaseLiquityV2StrategyTest {
     }
 
     async executeInterestRateAdjustment(
-        market, troveId, interestRateChange, criticalLimit, nonCriticalLimit,
+        market,
+        troveId,
+        interestRateChange,
+        criticalLimit,
+        nonCriticalLimit,
     ) {
         const { subId, strategySub } = await subLiquityV2InterestRateAdjustmentBundle(
             this.proxy,
@@ -36,7 +44,10 @@ class InterestRateAdjustmentTest extends BaseLiquityV2StrategyTest {
         const { upperHint, lowerHint } = await getLiquityV2Hints(market, 1, newInterestRate);
 
         const maxUpfrontFee = hre.ethers.constants.MaxUint256;
-        const trigger = await hre.ethers.getContractAt('LiquityV2AdjustRateDebtInFrontTrigger', this.contracts.trigger.address);
+        const trigger = await hre.ethers.getContractAt(
+            'LiquityV2AdjustRateDebtInFrontTrigger',
+            this.contracts.trigger.address,
+        );
         const shouldExecuteStrategy = await trigger.callStatic.isTriggered([], strategySub[2][0]);
         console.log(shouldExecuteStrategy);
         await callLiquityV2InterestRateAdjustmentStrategy(
@@ -98,9 +109,15 @@ module.exports = async function runInterestRateAdjustmentTests() {
     const interestRateAdjustmentTest = new InterestRateAdjustmentTest(testPairs, isFork);
     describe('LiquityV2 Interest Rate Adjustment Strategy Tests', function () {
         this.timeout(1200000);
-        before(async () => { await interestRateAdjustmentTest.setUp(); });
-        beforeEach(async () => { await interestRateAdjustmentTest.takeSnapshot(); });
-        afterEach(async () => { await interestRateAdjustmentTest.revertToSnapshot(); });
+        before(async () => {
+            await interestRateAdjustmentTest.setUp();
+        });
+        beforeEach(async () => {
+            await interestRateAdjustmentTest.takeSnapshot();
+        });
+        afterEach(async () => {
+            await interestRateAdjustmentTest.revertToSnapshot();
+        });
         interestRateAdjustmentTest.runTests();
     });
 };

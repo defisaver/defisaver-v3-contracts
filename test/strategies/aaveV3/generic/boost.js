@@ -215,9 +215,10 @@ const runBoostTests = () => {
             );
 
             // Determine market name based on market address
-            const marketName = pair.marketAddr === addrs[network].AAVE_MARKET
-                ? 'Aave V3 Core Market'
-                : 'Aave V3 Prime Market';
+            const marketName =
+                pair.marketAddr === addrs[network].AAVE_MARKET
+                    ? 'Aave V3 Core Market'
+                    : 'Aave V3 Prime Market';
 
             it(`... should execute aaveV3 SW boost strategy for ${pair.collSymbol} /
             ${pair.debtSymbol} pair on ${marketName}`, async () => {

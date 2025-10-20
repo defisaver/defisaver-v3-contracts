@@ -8,7 +8,11 @@ const { getLiquityV2TestPairs, deployLiquityV2CloseBundle } = require('../../uti
 const { BaseLiquityV2StrategyTest } = require('./common');
 const { subLiquityV2CloseBundle } = require('../utils/strategy-subs');
 const {
-    formatExchangeObjSdk, BOLD_ADDR, addrs, network, isNetworkFork,
+    formatExchangeObjSdk,
+    BOLD_ADDR,
+    addrs,
+    network,
+    isNetworkFork,
     balanceOf,
     WETH_ADDRESS,
     ETH_ADDR,
@@ -16,7 +20,11 @@ const {
     setBalance,
     fetchAmountInUSDPrice,
 } = require('../../utils/utils');
-const { callLiquityV2CloseToCollStrategy, callLiquityV2FLCloseToCollStrategy, callLiquityV2FLCloseToDebtStrategy } = require('../utils/strategy-calls');
+const {
+    callLiquityV2CloseToCollStrategy,
+    callLiquityV2FLCloseToCollStrategy,
+    callLiquityV2FLCloseToDebtStrategy,
+} = require('../utils/strategy-calls');
 
 class CloseTest extends BaseLiquityV2StrategyTest {
     async setUp() {
@@ -98,7 +106,11 @@ class CloseTest extends BaseLiquityV2StrategyTest {
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
                 console.log('troveId', troveId);
 
-                const { subId, strategySub } = await this.subCloseBundle(pair.market, troveId, collAsset.address);
+                const { subId, strategySub } = await this.subCloseBundle(
+                    pair.market,
+                    troveId,
+                    collAsset.address,
+                );
 
                 const stateBefore = {
                     troveInfo: await this.contracts.view.getTroveInfo(pair.market, troveId),
@@ -142,7 +154,11 @@ class CloseTest extends BaseLiquityV2StrategyTest {
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
                 console.log('troveId', troveId);
 
-                const { subId, strategySub } = await this.subCloseBundle(pair.market, troveId, collAsset.address);
+                const { subId, strategySub } = await this.subCloseBundle(
+                    pair.market,
+                    troveId,
+                    collAsset.address,
+                );
 
                 const stateBefore = {
                     troveInfo: await this.contracts.view.getTroveInfo(pair.market, troveId),
@@ -188,7 +204,11 @@ class CloseTest extends BaseLiquityV2StrategyTest {
                 const troveId = await this.openTrove(pair, supplyAmount, boldAmount);
                 console.log('troveId', troveId);
 
-                const { subId, strategySub } = await this.subCloseBundle(pair.market, troveId, collAsset.address);
+                const { subId, strategySub } = await this.subCloseBundle(
+                    pair.market,
+                    troveId,
+                    collAsset.address,
+                );
 
                 const stateBefore = {
                     troveInfo: await this.contracts.view.getTroveInfo(pair.market, troveId),
@@ -238,9 +258,15 @@ module.exports = async function runCloseTests() {
     const closeTest = new CloseTest(testPairs, isFork);
     describe('LiquityV2 Close Strategy Tests', function () {
         this.timeout(1200000);
-        before(async () => { await closeTest.setUp(); });
-        beforeEach(async () => { await closeTest.takeSnapshot(); });
-        afterEach(async () => { await closeTest.revertToSnapshot(); });
+        before(async () => {
+            await closeTest.setUp();
+        });
+        beforeEach(async () => {
+            await closeTest.takeSnapshot();
+        });
+        afterEach(async () => {
+            await closeTest.revertToSnapshot();
+        });
         closeTest.runTests();
     });
 };

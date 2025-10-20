@@ -147,11 +147,7 @@ describe('CompV3 Create test', function () {
                 proxy.address,
             ),
             // Supply bought WETH to Compound
-            new dfs.actions.compoundV3.CompoundV3SupplyAction(
-                collAddress,
-                '$2',
-                proxy.address,
-            ),
+            new dfs.actions.compoundV3.CompoundV3SupplyAction(collAddress, '$2', proxy.address),
             // Supply WETH from EOA wallet to Compound
             new dfs.actions.compoundV3.CompoundV3SupplyAction(
                 collAddress,

@@ -28,14 +28,12 @@ const {
     setBalance,
     addrs,
     takeSnapshot,
-    revertToSnapshot, getContractFromRegistry, getOwnerAddr,
+    revertToSnapshot,
+    getContractFromRegistry,
+    getOwnerAddr,
     network,
 } = require('../utils/utils');
-const {
-    predictSafeAddress,
-    signSafeTx,
-    encodeSetupArgs,
-} = require('../utils/safe');
+const { predictSafeAddress, signSafeTx, encodeSetupArgs } = require('../utils/safe');
 
 const botRefillTest = async () => {
     describe('Bot-Refills', function () {
@@ -49,13 +47,19 @@ const botRefillTest = async () => {
 
         before(async () => {
             botRefillsContract = await getContractFromRegistry('BotRefills');
-            feeRecipientContract = await hre.ethers.getContractAt('FeeRecipient', addrs[network].FEE_RECIPIENT_ADDR);
+            feeRecipientContract = await hre.ethers.getContractAt(
+                'FeeRecipient',
+                addrs[network].FEE_RECIPIENT_ADDR,
+            );
             feeReceiverAddr = await feeRecipientContract.getFeeAddr();
             refillCaller = addrs[network].REFILL_CALLER;
 
             await impersonateAccount(feeReceiverAddr);
 
-            let wethContract = await hre.ethers.getContractAt('IERC20', addrs[network].WETH_ADDRESS);
+            let wethContract = await hre.ethers.getContractAt(
+                'IERC20',
+                addrs[network].WETH_ADDRESS,
+            );
 
             let signer = await hre.ethers.provider.getSigner(feeReceiverAddr);
             wethContract = wethContract.connect(signer);
@@ -249,12 +253,16 @@ const dfsRegistryControllerTest = async () => {
     describe('DFS-Registry-Controller', function () {
         this.timeout(80000);
 
-        let dfsRegController; let senderAcc;
+        let dfsRegController;
+        let senderAcc;
 
         const ADMIN_VAULT = '0xCCf3d848e08b94478Ed8f46fFead3008faF581fD';
 
         before(async () => {
-            dfsRegController = await hre.ethers.getContractAt('DFSProxyRegistryController', DFS_REG_CONTROLLER);
+            dfsRegController = await hre.ethers.getContractAt(
+                'DFSProxyRegistryController',
+                DFS_REG_CONTROLLER,
+            );
 
             await impersonateAccount(ADMIN_ACC);
 
@@ -328,11 +336,19 @@ const tokenPriceHelperTest = async () => {
     describe('Token-Price-Helper', function () {
         this.timeout(80000);
 
-        let tokenPriceHelper; let tokenPriceHelperAddr; let tokenHelperOld;
+        let tokenPriceHelper;
+        let tokenPriceHelperAddr;
+        let tokenHelperOld;
         before(async () => {
             tokenPriceHelperAddr = await getAddrFromRegistry('TokenPriceHelper');
-            tokenPriceHelper = await hre.ethers.getContractAt('TokenPriceHelper', tokenPriceHelperAddr);
-            tokenHelperOld = await hre.ethers.getContractAt('TokenPriceHelper', '0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b');
+            tokenPriceHelper = await hre.ethers.getContractAt(
+                'TokenPriceHelper',
+                tokenPriceHelperAddr,
+            );
+            tokenHelperOld = await hre.ethers.getContractAt(
+                'TokenPriceHelper',
+                '0xBa2e5E56A92e93Cc0Cd84626cf762E6B2b30349b',
+            );
         });
 
         for (let i = 0; i < assets.length; i++) {
@@ -387,10 +403,14 @@ const tokenPriceHelperL2Test = async () => {
     describe('Token-Price-Helper-L2 (Using GasFeeTakerL2)', function () {
         this.timeout(80000);
 
-        let tokenPriceHelper; let tokenPriceHelperAddr;
+        let tokenPriceHelper;
+        let tokenPriceHelperAddr;
         before(async () => {
             tokenPriceHelperAddr = await getAddrFromRegistry('GasFeeTakerL2');
-            tokenPriceHelper = await hre.ethers.getContractAt('GasFeeTakerL2', tokenPriceHelperAddr);
+            tokenPriceHelper = await hre.ethers.getContractAt(
+                'GasFeeTakerL2',
+                tokenPriceHelperAddr,
+            );
         });
 
         for (let i = 0; i < assets.length; i++) {
@@ -407,7 +427,8 @@ const tokenPriceHelperL2Test = async () => {
                 const priceInUSD = await tokenPriceHelper.getPriceInUSD(address);
                 const aaveInUSD = await tokenPriceHelper.getAaveTokenPriceInUSD(address);
                 const chainlinkInUSD = await tokenPriceHelper.getChainlinkPriceInUSD(
-                    address, false,
+                    address,
+                    false,
                 );
                 const priceInETH = await tokenPriceHelper.getPriceInETH(address);
                 const aaveInETH = await tokenPriceHelper.getAaveTokenPriceInETH(address);
@@ -463,16 +484,23 @@ const dfsSafeFactoryTest = async () => {
                 safeFactory,
             );
 
-            await setBalance(addrs[network].WETH_ADDRESS, predictedAddress, hre.ethers.utils.parseUnits('10', 18));
+            await setBalance(
+                addrs[network].WETH_ADDRESS,
+                predictedAddress,
+                hre.ethers.utils.parseUnits('10', 18),
+            );
             const tokenBalanceAction = new sdk.actions.basic.TokenBalanceAction(
                 addrs[network].WETH_ADDRESS,
                 predictedAddress,
             );
-            const recipe = new sdk.Recipe('Test Recipe',
-                [tokenBalanceAction,
-                    new sdk.actions.basic.SendTokenAction(
-                        addrs[network].WETH_ADDRESS, signer.address, '$1',
-                    )]);
+            const recipe = new sdk.Recipe('Test Recipe', [
+                tokenBalanceAction,
+                new sdk.actions.basic.SendTokenAction(
+                    addrs[network].WETH_ADDRESS,
+                    signer.address,
+                    '$1',
+                ),
+            ]);
             const recipeExecutor = await getAddrFromRegistry('RecipeExecutor');
             const safeTxParams = {
                 to: recipeExecutor,
@@ -490,9 +518,16 @@ const dfsSafeFactoryTest = async () => {
             const setupArgsEncoded = await encodeSetupArgs(setupArgs);
             await dfsSafeFactory.createSafeAndExecute(
                 [singletonAddr, setupArgsEncoded, saltNonce],
-                [safeTxParams.to, safeTxParams.value, safeTxParams.data, safeTxParams.operation,
-                    safeTxParams.safeTxGas, safeTxParams.baseGas, safeTxParams.gasPrice,
-                    safeTxParams.gasToken, safeTxParams.refundReceiver,
+                [
+                    safeTxParams.to,
+                    safeTxParams.value,
+                    safeTxParams.data,
+                    safeTxParams.operation,
+                    safeTxParams.safeTxGas,
+                    safeTxParams.baseGas,
+                    safeTxParams.gasPrice,
+                    safeTxParams.gasToken,
+                    safeTxParams.refundReceiver,
                     signature,
                 ],
             );

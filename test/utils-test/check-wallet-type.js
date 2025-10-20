@@ -1,9 +1,6 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
-const {
-    redeploy,
-    getProxy,
-} = require('../utils/utils');
+const { redeploy, getProxy } = require('../utils/utils');
 const { createSafe } = require('../utils/safe');
 
 describe('CheckWalletType', () => {

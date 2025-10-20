@@ -29,7 +29,10 @@ const encodeSetupArgs = async (setupArgs) => {
 const createSafe = async (senderAddress) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
-    const safeProxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', SAFE_PROXY_FACTORY_ADDR);
+    const safeProxyFactory = await hre.ethers.getContractAt(
+        'ISafeProxyFactory',
+        SAFE_PROXY_FACTORY_ADDR,
+    );
 
     const saltNonce = Date.now();
     const setupData = [
@@ -44,10 +47,7 @@ const createSafe = async (senderAddress) => {
     ];
 
     const safeInterface = await hre.ethers.getContractAt('ISafe', SAFE_SINGLETON_ADDR);
-    const functionData = safeInterface.interface.encodeFunctionData(
-        'setup',
-        setupData,
-    );
+    const functionData = safeInterface.interface.encodeFunctionData('setup', setupData);
 
     let receipt = await safeProxyFactory.createProxyWithNonce(
         SAFE_SINGLETON_ADDR,
@@ -90,7 +90,10 @@ const executeSafeTx = async (
     console.log(`Tx hash of safe ${txHash}`);
 
     // encode r and s
-    let sig = abiCoder.encode(['address', 'bytes32'], [senderAddress, '0x0000000000000000000000000000000000000000000000000000000000000000']);
+    let sig = abiCoder.encode(
+        ['address', 'bytes32'],
+        [senderAddress, '0x0000000000000000000000000000000000000000000000000000000000000000'],
+    );
 
     // add v = 1
     sig += '01';
@@ -121,12 +124,10 @@ const getSafeCreationArgs = async (safeAddress) => {
         topics: [SAFE_CONSTANTS.SAFE_SETUP_TOPIC_0],
     });
     if (!setupEvent) return;
-    const [
-        owners,
-        threshold,
-        _,
-        fallbackHandler,
-    ] = hre.ethers.utils.defaultAbiCoder.decode(['address[]', 'uint256', 'address', 'address'], setupEvent.data);
+    const [owners, threshold, _, fallbackHandler] = hre.ethers.utils.defaultAbiCoder.decode(
+        ['address[]', 'uint256', 'address', 'address'],
+        setupEvent.data,
+    );
 
     const setupArgs = [
         owners, // _owners - List of Safe owners.
@@ -150,21 +151,24 @@ const getSafeCreationArgs = async (safeAddress) => {
     };
 };
 
-const predictSafeAddress = async (
-    masterCopyAddress,
-    setupArgs,
-    saltNonce,
-    safeFactory,
-) => {
+const predictSafeAddress = async (masterCopyAddress, setupArgs, saltNonce, safeFactory) => {
     const setupArgsEncoded = await encodeSetupArgs(setupArgs);
     let safeProxyFactory;
     if (!safeFactory) {
-        safeProxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', SAFE_PROXY_FACTORY_ADDR);
+        safeProxyFactory = await hre.ethers.getContractAt(
+            'ISafeProxyFactory',
+            SAFE_PROXY_FACTORY_ADDR,
+        );
     } else {
         safeProxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', safeFactory);
     }
     const proxyCreationCode = await safeProxyFactory.proxyCreationCode(); // can cache
-    const salt = hre.ethers.utils.keccak256(hre.ethers.utils.solidityPack(['bytes', 'uint256'], [hre.ethers.utils.keccak256(setupArgsEncoded), saltNonce]));
+    const salt = hre.ethers.utils.keccak256(
+        hre.ethers.utils.solidityPack(
+            ['bytes', 'uint256'],
+            [hre.ethers.utils.keccak256(setupArgsEncoded), saltNonce],
+        ),
+    );
 
     return hre.ethers.utils.getCreate2Address(
         safeProxyFactory.address,
@@ -175,18 +179,15 @@ const predictSafeAddress = async (
     );
 };
 
-const deploySafe = async (
-    masterCopyAddress,
-    setupArgs,
-    saltNonce,
-) => {
+const deploySafe = async (masterCopyAddress, setupArgs, saltNonce) => {
     const setupArgsEncoded = await encodeSetupArgs(setupArgs);
-    const proxyFactory = await hre.ethers.getContractAt('ISafeProxyFactory', SAFE_PROXY_FACTORY_ADDR);
-    return proxyFactory.createProxyWithNonce(
-        masterCopyAddress,
-        setupArgsEncoded,
-        saltNonce,
-    ).then((e) => e.wait());
+    const proxyFactory = await hre.ethers.getContractAt(
+        'ISafeProxyFactory',
+        SAFE_PROXY_FACTORY_ADDR,
+    );
+    return proxyFactory
+        .createProxyWithNonce(masterCopyAddress, setupArgsEncoded, saltNonce)
+        .then((e) => e.wait());
 };
 
 /**

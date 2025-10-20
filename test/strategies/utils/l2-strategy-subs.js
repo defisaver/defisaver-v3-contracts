@@ -1,10 +1,6 @@
 /* eslint-disable max-len */
 const automationSdk = require('@defisaver/automation-sdk');
-const {
-    subToAaveV3Proxy,
-    updateAaveProxy,
-    subToStrategy,
-} = require('./utils-strategies');
+const { subToAaveV3Proxy, updateAaveProxy, subToStrategy } = require('./utils-strategies');
 
 const subAaveV3L2AutomationStrategy = async (
     proxy,
@@ -90,7 +86,10 @@ const subAaveV3CloseBundle = async (
         baseTokenAddress: triggerBaseAsset,
         quoteTokenAddress: triggerQuoteAsset,
         price: targetPrice,
-        ratioState: (priceState === 1) ? automationSdk.enums.RatioState.UNDER : automationSdk.enums.RatioState.OVER,
+        ratioState:
+            priceState === 1
+                ? automationSdk.enums.RatioState.UNDER
+                : automationSdk.enums.RatioState.OVER,
     };
     const subData = {
         collAsset: _collAsset,

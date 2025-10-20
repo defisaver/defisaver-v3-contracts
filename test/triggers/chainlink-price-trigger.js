@@ -1,5 +1,10 @@
 const {
-    redeploy, DAI_ADDR, WETH_ADDRESS, ETH_ADDR, STETH_ADDRESS, WSTETH_ADDRESS,
+    redeploy,
+    DAI_ADDR,
+    WETH_ADDRESS,
+    ETH_ADDR,
+    STETH_ADDRESS,
+    WSTETH_ADDRESS,
 } = require('../utils/utils');
 
 const BITCOIN_ADDR = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';

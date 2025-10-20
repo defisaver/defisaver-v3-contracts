@@ -1,6 +1,4 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require('../../utils/utils');
 const { reflexerSupplyTest } = require('./reflexer-tests');
 
 describe('Reflexer-Supply', () => {

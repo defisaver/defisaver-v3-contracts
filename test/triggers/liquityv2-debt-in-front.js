@@ -11,13 +11,49 @@ describe('LiquityV2DebtInFrontTrigger', () => {
     });
 
     it('test debt in front for live troves', async () => {
-        console.log('first WETH trove:', await trigger.getDebtInFront(WETH_MARKET_ADDR, '108944359109208165624092356986168793957147284372283522328459696677773946197825'));
-        console.log('second WETH trove:', await trigger.getDebtInFront(WETH_MARKET_ADDR, '102247037494986730506041632222868001124387697185626929998095238518734059870154'));
+        console.log(
+            'first WETH trove:',
+            await trigger.getDebtInFront(
+                WETH_MARKET_ADDR,
+                '108944359109208165624092356986168793957147284372283522328459696677773946197825',
+            ),
+        );
+        console.log(
+            'second WETH trove:',
+            await trigger.getDebtInFront(
+                WETH_MARKET_ADDR,
+                '102247037494986730506041632222868001124387697185626929998095238518734059870154',
+            ),
+        );
 
-        console.log('first WSTETH trove:', await trigger.getDebtInFront(WSTETH_MARKET_ADDR, '84584793446274299276752993650601041604392276772434272513777653610156952793625'));
-        console.log('second WSTETH trove:', await trigger.getDebtInFront(WSTETH_MARKET_ADDR, '75612223830594747844811694143670180236762873742227582769905911215507573448955'));
+        console.log(
+            'first WSTETH trove:',
+            await trigger.getDebtInFront(
+                WSTETH_MARKET_ADDR,
+                '84584793446274299276752993650601041604392276772434272513777653610156952793625',
+            ),
+        );
+        console.log(
+            'second WSTETH trove:',
+            await trigger.getDebtInFront(
+                WSTETH_MARKET_ADDR,
+                '75612223830594747844811694143670180236762873742227582769905911215507573448955',
+            ),
+        );
 
-        console.log('first RETH trove:', await trigger.getDebtInFront(RETH_MARKET_ADDR, '75612223830594747844811694143670180236762873742227582769905911215507573448955'));
-        console.log('second RETH trove:', await trigger.getDebtInFront(RETH_MARKET_ADDR, '101318353602513319362042961451262258831981010153947727694444000866271403819447'));
+        console.log(
+            'first RETH trove:',
+            await trigger.getDebtInFront(
+                RETH_MARKET_ADDR,
+                '75612223830594747844811694143670180236762873742227582769905911215507573448955',
+            ),
+        );
+        console.log(
+            'second RETH trove:',
+            await trigger.getDebtInFront(
+                RETH_MARKET_ADDR,
+                '101318353602513319362042961451262258831981010153947727694444000866271403819447',
+            ),
+        );
     });
 });

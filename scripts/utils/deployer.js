@@ -16,7 +16,9 @@ const getGasPrice = async (exGasPrice) => {
         newGasPrice = exGasPrice.add(exGasPrice.div('8'));
     } else if (hre.network.name === 'mainnet') {
         defaultGasPrice = ethers.BigNumber.from(hre.network.config.gasPrice);
-        newGasPrice = defaultGasPrice.gt('0') ? defaultGasPrice : await hre.ethers.provider.getGasPrice();
+        newGasPrice = defaultGasPrice.gt('0')
+            ? defaultGasPrice
+            : await hre.ethers.provider.getGasPrice();
     }
 
     if (exGasPrice.gte(newGasPrice)) {
@@ -28,7 +30,9 @@ const getGasPrice = async (exGasPrice) => {
 
 const deploy = async (contractName, signer, action, gasPrice, nonce, ...args) => {
     try {
-        console.log(`---------------------------- ${contractName} --------------------------------`);
+        console.log(
+            `---------------------------- ${contractName} --------------------------------`,
+        );
 
         const Contract = await hre.ethers.getContractFactory(contractName, signer);
 
@@ -94,13 +98,14 @@ const deployAndReturnGasUsed = async (contractName, signer, action, gasPrice, no
 };
 
 // eslint-disable-next-line max-len
-const deployWithNewGasPrice = (contractName, signer, action, exGasPrice, nonce, ...args) => new Promise((resolve) => {
-    getGasPrice(exGasPrice).then((gasPrice) => {
-        deploy(contractName, signer, action, gasPrice, nonce, ...args).then((contract) => {
-            if (contract !== null) resolve(contract);
+const deployWithNewGasPrice = (contractName, signer, action, exGasPrice, nonce, ...args) =>
+    new Promise((resolve) => {
+        getGasPrice(exGasPrice).then((gasPrice) => {
+            deploy(contractName, signer, action, gasPrice, nonce, ...args).then((contract) => {
+                if (contract !== null) resolve(contract);
+            });
         });
     });
-});
 
 const deployContract = async (contractName, ...args) => {
     const signers = await hre.ethers.getSigners();
@@ -132,14 +137,15 @@ const deployContractAndReturnGasUsed = async (contractName, ...args) => {
     );
 };
 
-const deployAsOwner = async (contractName, signer, ...args) => deployWithNewGasPrice(
-    contractName,
-    signer,
-    'Deploying',
-    ethers.BigNumber.from('0'),
-    -1,
-    ...args,
-);
+const deployAsOwner = async (contractName, signer, ...args) =>
+    deployWithNewGasPrice(
+        contractName,
+        signer,
+        'Deploying',
+        ethers.BigNumber.from('0'),
+        -1,
+        ...args,
+    );
 
 module.exports = {
     deploy,

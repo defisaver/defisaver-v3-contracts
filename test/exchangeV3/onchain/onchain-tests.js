@@ -25,37 +25,63 @@ const { sell, executeAction } = require('../../utils/actions');
 
 const trades = [
     {
-        sellToken: 'WETH', buyToken: 'DAI', amount: '1', fee: 3000,
+        sellToken: 'WETH',
+        buyToken: 'DAI',
+        amount: '1',
+        fee: 3000,
     },
     {
-        sellToken: 'DAI', buyToken: 'WBTC', amount: '30000', fee: 3000,
+        sellToken: 'DAI',
+        buyToken: 'WBTC',
+        amount: '30000',
+        fee: 3000,
     },
     {
-        sellToken: 'WETH', buyToken: 'USDC', amount: '1', fee: 3000,
+        sellToken: 'WETH',
+        buyToken: 'USDC',
+        amount: '1',
+        fee: 3000,
     },
     {
-        sellToken: 'USDC', buyToken: 'WETH', amount: '3000', fee: 3000,
+        sellToken: 'USDC',
+        buyToken: 'WETH',
+        amount: '3000',
+        fee: 3000,
     },
     {
-        sellToken: 'WETH', buyToken: 'USDT', amount: '1', fee: 3000,
+        sellToken: 'WETH',
+        buyToken: 'USDT',
+        amount: '1',
+        fee: 3000,
     },
     {
-        sellToken: 'DAI', buyToken: 'USDC', amount: '3000', fee: 500,
+        sellToken: 'DAI',
+        buyToken: 'USDC',
+        amount: '3000',
+        fee: 500,
     },
 ];
 
 const curveTrades = [
     {
-        sellToken: 'WETH', buyToken: 'LUSD', amount: '1',
+        sellToken: 'WETH',
+        buyToken: 'LUSD',
+        amount: '1',
     },
     {
-        sellToken: 'LUSD', buyToken: 'WETH', amount: '3000',
+        sellToken: 'LUSD',
+        buyToken: 'WETH',
+        amount: '3000',
     },
     {
-        sellToken: 'WETH', buyToken: 'STETH', amount: '1',
+        sellToken: 'WETH',
+        buyToken: 'STETH',
+        amount: '1',
     },
     {
-        sellToken: 'STETH', buyToken: 'WETH', amount: '1',
+        sellToken: 'STETH',
+        buyToken: 'WETH',
+        amount: '1',
     },
 ];
 
@@ -113,7 +139,10 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
 
     const expectedOutput = amount.mul(rate).div(Float2BN('1'));
 
-    const feeReceiverAmountBefore = await balanceOf(sellAssetInfo.address, addrs[network].FEE_RECEIVER);
+    const feeReceiverAmountBefore = await balanceOf(
+        sellAssetInfo.address,
+        addrs[network].FEE_RECEIVER,
+    );
 
     await sell(
         proxy,
@@ -130,22 +159,29 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         true, // sell in recipe so we can check the fee
     );
 
-    const feeReceiverAmountAfter = await balanceOf(sellAssetInfo.address, addrs[network].FEE_RECEIVER);
+    const feeReceiverAmountAfter = await balanceOf(
+        sellAssetInfo.address,
+        addrs[network].FEE_RECEIVER,
+    );
 
     const buyBalanceAfter = await balanceOf(buyAssetInfo.address, senderAcc.address);
 
     // test fee amount
-    const tokenGroupRegistry = await hre.ethers.getContractAt('TokenGroupRegistry', addrs[network].TOKEN_GROUP_REGISTRY);
-    const fee = await tokenGroupRegistry.getFeeForTokens(sellAssetInfo.address, buyAssetInfo.address);
+    const tokenGroupRegistry = await hre.ethers.getContractAt(
+        'TokenGroupRegistry',
+        addrs[network].TOKEN_GROUP_REGISTRY,
+    );
+    const fee = await tokenGroupRegistry.getFeeForTokens(
+        sellAssetInfo.address,
+        buyAssetInfo.address,
+    );
     const feeAmount = amount.div(fee);
 
     // must be closeTo because 1 wei steth bug
     expect(feeReceiverAmountAfter).to.be.closeTo(feeReceiverAmountBefore.add(feeAmount), '1');
 
     expect(buyBalanceAfter).is.gt('0');
-    if (Math.abs(
-        buyBalanceAfter - expectedOutput,
-    ) > expectedOutput * 0.01) {
+    if (Math.abs(buyBalanceAfter - expectedOutput) > expectedOutput * 0.01) {
         console.log(`
         Bad liquidity or rate getter:
         Expected: ${+BN2Float(expectedOutput, buyAssetInfo.decimals)}
@@ -180,12 +216,7 @@ const dfsSellSameAssetTest = async () => {
                 amount.toString(),
             );
             const dfsSellAction = new dfs.actions.basic.SellAction(
-                formatExchangeObj(
-                    daiAddr,
-                    daiAddr,
-                    amount.toString(),
-                    placeHolderAddr,
-                ),
+                formatExchangeObj(daiAddr, daiAddr, amount.toString(), placeHolderAddr),
                 proxy.address,
                 proxy.address,
             );
@@ -247,19 +278,33 @@ const dfsSellTest = async () => {
             const trade = trades[i];
 
             it(`... should sell on Kyber ${trade.sellToken} for ${trade.buyToken}`, async () => {
-                const kyberRate = await executeSell(senderAcc, proxy, dfsPrices, trade, kyberWrapper);
+                const kyberRate = await executeSell(
+                    senderAcc,
+                    proxy,
+                    dfsPrices,
+                    trade,
+                    kyberWrapper,
+                );
                 console.log(`Kyber sell rate -> ${kyberRate}`);
             });
             it(`... should sell on Uniswap ${trade.sellToken} for ${trade.buyToken}`, async () => {
                 const uniRate = await executeSell(
-                    senderAcc, proxy, dfsPrices,
+                    senderAcc,
+                    proxy,
+                    dfsPrices,
                     { ...trade, fee: 0 },
                     uniWrapper,
                 );
                 console.log(`Uniswap sell rate -> ${uniRate}`);
             });
             it(`... should sell on UniswapV3 ${trade.sellToken} for ${trade.buyToken}`, async () => {
-                const uniV3Rate = await executeSell(senderAcc, proxy, dfsPrices, trade, uniV3Wrapper);
+                const uniV3Rate = await executeSell(
+                    senderAcc,
+                    proxy,
+                    dfsPrices,
+                    trade,
+                    uniV3Wrapper,
+                );
                 console.log(`UniswapV3 sell rate -> ${uniV3Rate}`);
             });
         }
