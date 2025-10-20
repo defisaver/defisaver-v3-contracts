@@ -1504,15 +1504,24 @@ const filterEthersObject = (obj) => {
 
 const isProxySafe = (proxy) => proxy.functions.nonce !== undefined;
 
-// executes tx through safe or dsproxy depending the type
+const isProxyDSAProxy = async (proxy) => {
+    try {
+        const implementations = await proxy.implementations();
+        return implementations !== nullAddress;
+    } catch (error) {
+        return false;
+    }
+};
+
+// executes tx through wallet depending the type
 const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => {
     let receipt;
+    // If signer is not set, try setting it with _address
+    if (!proxy.signer.address) {
+        // eslint-disable-next-line no-underscore-dangle
+        proxy.signer.address = proxy.signer._address;
+    }
     if (isProxySafe(proxy)) {
-        // If signer is not set, try setting it with _address
-        if (!proxy.signer.address) {
-            // eslint-disable-next-line no-underscore-dangle
-            proxy.signer.address = proxy.signer._address;
-        }
         receipt = await executeSafeTx(
             proxy.signer.address,
             proxy,
@@ -1522,10 +1531,22 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
             ethValue,
         );
     } else {
-        receipt = await proxy['execute(address,bytes)'](targetAddr, callData, {
-            gasLimit: 10000000,
-            value: ethValue,
-        });
+        const isDSAProxy = await isProxyDSAProxy(proxy);
+
+        if (isDSAProxy) {
+            await impersonateAccount(proxy.signer.address);
+            receipt = await proxy['cast(string[],bytes[],address)'](['DefiSaverConnector'], [callData], nullAddress, {
+                gasLimit: 10000000,
+                value: ethValue,
+            });
+            await stopImpersonatingAccount(proxy.signer.address);
+        } else {
+            // Default to DSProxy execution
+            receipt = await proxy['execute(address,bytes)'](targetAddr, callData, {
+                gasLimit: 10000000,
+                value: ethValue,
+            });
+        }
     }
 
     return receipt;

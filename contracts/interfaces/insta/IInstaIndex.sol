@@ -7,4 +7,6 @@ interface IInstaIndex {
         uint accountVersion,
         address _origin
     ) external returns (address _account);
+
+    function master() external view returns (address);
 }

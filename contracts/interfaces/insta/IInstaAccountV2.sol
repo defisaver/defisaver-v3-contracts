@@ -9,4 +9,6 @@ interface IInstaAccountV2 {
         bytes[] memory,
         address
     ) external;
+
+    function implementations() external view returns (address);
 }
