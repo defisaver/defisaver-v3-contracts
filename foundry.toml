@@ -35,10 +35,11 @@ exclude_lints = [
     # "incorrect-shift",
     # "unchecked-call",
     # "unsafe-cheatcode",
+    # "erc20-unchecked-transfer",
+    # "divide-before-multiply",
     "unsafe-typecast",
     "named-struct-fields",
     "unwrapped-modifier-logic",
-    "erc20-unchecked-transfer",
     "asm-keccak256",
 
     "mixed-case-function",
