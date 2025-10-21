@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+
+import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { IInstaList } from "../interfaces/insta/IInstaList.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { DSProxy } from "../DS/DSProxy.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { ActionsUtilHelper } from "./utils/helpers/ActionsUtilHelper.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
 import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
 abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
@@ -168,10 +171,18 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     }
 
     function fetchOwnersOrWallet() internal view returns (address) {
-        if (isDSProxy(address(this))) 
-            return DSProxy(payable(address(this))).owner();
+        WalletType walletType = getWalletType(address(this));
 
-        // if not DSProxy, we assume we are in context of Safe
+        if (walletType == WalletType.DS_PROXY) {
+            return DSProxy(payable(address(this))).owner();
+        }
+
+        if (walletType == WalletType.DSA_PROXY) {
+            uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(address(this));
+            return IInstaList(DSA_LIST_ADDR).accountLink(dsaId).last;
+        }
+
+        // Otherwise, we assume we are in context of Safe
         address[] memory owners = ISafe(address(this)).getOwners();
         return owners.length == 1 ? owners[0] : address(this);
     }
