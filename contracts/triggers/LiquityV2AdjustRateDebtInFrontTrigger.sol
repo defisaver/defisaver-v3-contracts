@@ -7,7 +7,6 @@ import { ITrigger } from "../interfaces/ITrigger.sol";
 import { LiquityV2Helper } from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { DSMath } from "../DS/DSMath.sol";
 import { TransientStorageCancun } from "../utils/TransientStorageCancun.sol";
 import { IAddressesRegistry } from "../interfaces/liquityV2/IAddressesRegistry.sol";
 import { ITroveManager } from "../interfaces/liquityV2/ITroveManager.sol";

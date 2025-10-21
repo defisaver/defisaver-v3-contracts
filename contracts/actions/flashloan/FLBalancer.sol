@@ -5,7 +5,6 @@ import { ActionBase } from "../ActionBase.sol";
 
 import { IFlashLoanRecipient } from "../../interfaces/balancer/IFlashLoanRecipient.sol";
 import { IFlashLoans } from "../../interfaces/balancer/IFlashLoans.sol";
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
 import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";

@@ -5,7 +5,6 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
-import { ITroveManager } from "../interfaces/liquityV2/ITroveManager.sol";
 import { IAddressesRegistry } from "../interfaces/liquityV2/IAddressesRegistry.sol";
 import { IPriceFeed } from "../interfaces/liquityV2/IPriceFeed.sol";
 

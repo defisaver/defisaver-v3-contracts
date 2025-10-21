@@ -3,9 +3,7 @@
 pragma solidity =0.8.24;
 
 import { MainnetLiquityAddresses } from "./MainnetLiquityAddresses.sol";
-import { IBondNFT } from "../../../interfaces/liquity/IBondNFT.sol";
 import { ISwaps } from "../../../interfaces/curve/ISwaps.sol";
-import { ChickenBondsView } from "../../../views/ChickenBondsView.sol";
 import { Sqrt } from "../../../utils/math/Sqrt.sol";
 import { DSMath } from "../../../DS/DSMath.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";

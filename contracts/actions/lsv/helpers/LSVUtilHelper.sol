@@ -11,7 +11,6 @@ import { IWeEth } from "../../../interfaces/etherFi/IWeEth.sol";
 import { IRestakeManager } from "../../../interfaces/renzo/IRestakeManager.sol";
 import { IRenzoOracle } from "../../../interfaces/renzo/IRenzoOracle.sol";
 import { DSMath } from "../../../DS/DSMath.sol";
-import { LSVProfitTracker } from "../../../utils/LSVProfitTracker.sol";
 
 contract LSVUtilHelper is DSMath, LSVUtilMainnetAddresses {
     function getAmountInETHFromLST(address lstAddress, uint256 lstAmount) public view returns (uint256 ethAmount) {

@@ -15,7 +15,10 @@
         "lint:js": "eslint . --ext .js,.ts",
         "lint:js:fix": "eslint . --ext .js,.ts --fix",
         "format:lint:check": "npm run format:check && npm run lint:js",
-        "format:lint:fix": "npm run format:fix && npm run lint:js:fix"
+        "format:lint:fix": "npm run format:fix && npm run lint:js:fix",
+        "format:sol": "forge fmt",
+        "lint:sol": "forge lint",
+        "format:lint:sol": "forge fmt && forge lint"
     },
     "repository": {
         "type": "git",

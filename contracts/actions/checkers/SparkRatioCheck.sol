@@ -4,7 +4,6 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { SparkRatioHelper } from "../spark/helpers/SparkRatioHelper.sol";
-import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { TransientStorage } from "../../utils/TransientStorage.sol";
 
 /// @title Action to check the ratio of the Spark position after strategy execution.

@@ -5,7 +5,6 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
-import { ISubscriptions } from "../../interfaces/ISubscriptions.sol";
 import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
@@ -49,7 +48,9 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
     function subToMcdAutomation(
         McdSubData calldata _subData,
         bool // _shouldLegacyUnsub no longer needed, kept to keep the function sig the same
-    ) public {
+    )
+        public
+    {
         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission(isDSProxy(address(this)));
 

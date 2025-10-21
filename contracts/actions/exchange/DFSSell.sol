@@ -6,7 +6,6 @@ import { DFSExchangeWithTxSaver } from "../../exchangeV3/DFSExchangeWithTxSaver.
 import { TokenGroupRegistry } from "../../exchangeV3/registries/TokenGroupRegistry.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { ITxSaverBytesTransientStorage } from "../../interfaces/ITxSaverBytesTransientStorage.sol";
 
 /// @title A exchange sell action through the dfs exchange
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
@@ -108,9 +107,8 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
         /// @dev only check for custom fee if a non standard fee is sent
         if (!_isDirect) {
             if (_exchangeData.dfsFeeDivider != RECIPE_FEE) {
-                _exchangeData.dfsFeeDivider = TokenGroupRegistry(TOKEN_GROUP_REGISTRY).getFeeForTokens(
-                    _exchangeData.srcAddr, _exchangeData.destAddr
-                );
+                _exchangeData.dfsFeeDivider = TokenGroupRegistry(TOKEN_GROUP_REGISTRY)
+                    .getFeeForTokens(_exchangeData.srcAddr, _exchangeData.destAddr);
             }
         } else {
             _exchangeData.dfsFeeDivider = 0;

@@ -2,8 +2,6 @@
 
 pragma solidity =0.8.24;
 
-import { IERC20 } from "./IERC20.sol";
-
 abstract contract IWETH {
     function allowance(address, address) public view virtual returns (uint256);
 

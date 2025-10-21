@@ -6,7 +6,6 @@ import { IAuth } from "../../interfaces/IAuth.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 import { StrategyModel } from "./StrategyModel.sol";
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
 import { BotAuth } from "./BotAuth.sol";
 import { DFSRegistry } from "../DFSRegistry.sol";
 import { SubStorage } from "../strategy/SubStorage.sol";
@@ -88,7 +87,10 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, CheckWalletTy
     ) internal {
         address authAddr = isDSProxy(_userWallet) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
 
-        IAuth(authAddr).callExecute{ value: msg.value }(
+        IAuth(authAddr)
+        .callExecute{
+            value: msg.value
+        }(
             _userWallet,
             RECIPE_EXECUTOR_ADDR,
             abi.encodeWithSelector(

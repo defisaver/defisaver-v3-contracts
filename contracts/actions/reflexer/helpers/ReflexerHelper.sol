@@ -6,7 +6,6 @@ import { DSMath } from "../../../DS/DSMath.sol";
 import { ISAFEEngine } from "../../../interfaces/reflexer/ISAFEEngine.sol";
 import { ISAFEManager } from "../../../interfaces/reflexer/ISAFEManager.sol";
 import { IBasicTokenAdapters } from "../../../interfaces/reflexer/IBasicTokenAdapters.sol";
-import { ISAFESaviour } from "../../../interfaces/reflexer/ISAFESaviour.sol";
 import { MainnetReflexerAddresses } from "./MainnetReflexerAddresses.sol";
 
 /// @title Helper methods for MCDSaverProxy

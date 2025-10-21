@@ -2,9 +2,6 @@
 
 pragma solidity =0.8.24;
 
-import { IVat } from "./IVat.sol";
-import { IGem } from "./IGem.sol";
-
 abstract contract ICdpRegistry {
     function open(bytes32 ilk, address usr) public virtual returns (uint256);
 

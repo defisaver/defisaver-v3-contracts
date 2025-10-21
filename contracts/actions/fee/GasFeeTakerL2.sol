@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.24;
 
-import { FeeRecipient } from "../../utils/FeeRecipient.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { GasFeeHelperL2 } from "./helpers/GasFeeHelperL2.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";

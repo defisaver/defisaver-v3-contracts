@@ -4,7 +4,6 @@ pragma solidity =0.8.24;
 
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import { IWStEth } from "../interfaces/lido/IWStEth.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { DSMath } from "../DS/DSMath.sol";
 import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol";

@@ -7,7 +7,6 @@ import {
     ICrvUsdControllerFactory,
     ICurveUsdSwapper
 } from "../../../interfaces/curveusd/ICurveUsd.sol";
-import { IAddressProvider } from "../../../interfaces/curve/IAddressProvider.sol";
 
 import { IERC20 } from "../../../interfaces/IERC20.sol";
 import { DSMath } from "../../../DS/DSMath.sol";

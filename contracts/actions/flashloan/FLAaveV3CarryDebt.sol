@@ -2,7 +2,6 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
 import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
 import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
@@ -84,15 +83,16 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
     /// @param _flData All the amounts/tokens and related aave fl data
     /// @param _params Rest of the data we have in the recipe
     function _flAaveV3(FlashLoanParams memory _flData, bytes memory _params) internal returns (uint256) {
-        IPoolV3(AAVE_V3_LENDING_POOL).flashLoan(
-            address(this),
-            _flData.tokens,
-            _flData.amounts,
-            _flData.modes,
-            _flData.onBehalfOf,
-            _params,
-            AAVE_REFERRAL_CODE
-        );
+        IPoolV3(AAVE_V3_LENDING_POOL)
+            .flashLoan(
+                address(this),
+                _flData.tokens,
+                _flData.amounts,
+                _flData.modes,
+                _flData.onBehalfOf,
+                _params,
+                AAVE_REFERRAL_CODE
+            );
 
         emit ActionEvent(
             "FLAaveV3CarryDebt", abi.encode(_flData.tokens, _flData.amounts, _flData.modes, _flData.onBehalfOf)

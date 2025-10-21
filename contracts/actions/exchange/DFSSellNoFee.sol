@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
-import { TokenGroupRegistry } from "../../exchangeV3/registries/TokenGroupRegistry.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 

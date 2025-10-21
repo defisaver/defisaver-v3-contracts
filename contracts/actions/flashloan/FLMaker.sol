@@ -7,7 +7,6 @@ import { IERC3156FlashBorrower } from "../../interfaces/flashloan/IERC3156FlashB
 import { IERC3156FlashLender } from "../../interfaces/flashloan/IERC3156FlashLender.sol";
 
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
 import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
 
@@ -51,9 +50,8 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
     /// @param _amount Amount of DAI to FL
     /// @param _taskData Rest of the data we have in the task
     function _flMaker(uint256 _amount, bytes memory _taskData) internal returns (uint256) {
-        IERC3156FlashLender(DSS_FLASH_ADDR).flashLoan(
-            IERC3156FlashBorrower(address(this)), DAI_ADDR, _amount, _taskData
-        );
+        IERC3156FlashLender(DSS_FLASH_ADDR)
+            .flashLoan(IERC3156FlashBorrower(address(this)), DAI_ADDR, _amount, _taskData);
 
         emit ActionEvent("FLMaker", abi.encode(_amount));
         return _amount;

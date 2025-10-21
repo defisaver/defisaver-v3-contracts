@@ -3,11 +3,8 @@
 pragma solidity =0.8.24;
 
 import { DSMath } from "../../../DS/DSMath.sol";
-import { DSProxy } from "../../../DS/DSProxy.sol";
 import { IManager } from "../../../interfaces/mcd/IManager.sol";
-import { IJoin } from "../../../interfaces/mcd/IJoin.sol";
 import { IVat } from "../../../interfaces/mcd/IVat.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ISpotter } from "../../../interfaces/mcd/ISpotter.sol";
 
 /// @title Helper methods for Mcd ratio calc.

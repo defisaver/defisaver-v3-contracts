@@ -4,7 +4,6 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { Permission } from "../../auth/Permission.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 
 /// @title Action to enable/disable smart wallet authorization
 contract HandleAuth is ActionBase, Permission {
