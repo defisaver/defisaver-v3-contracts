@@ -460,7 +460,7 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 address borrowToken = vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken;
 
                 vars.borrowTokenAmount = _config.isMaxBorrowAmount
-                    ? vars.userPositionBefore.borrow * 1001 / 1000 // add 0.1% buffer
+                    ? vars.userPositionBefore.borrow * 1001 / 1000  // add 0.1% buffer
                     : amountInUSDPrice(borrowToken, _config.borrowAmountUsd);
 
                 give(borrowToken, sender, vars.borrowTokenAmount);

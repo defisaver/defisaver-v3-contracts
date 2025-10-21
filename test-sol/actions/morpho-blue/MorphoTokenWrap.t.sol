@@ -94,9 +94,8 @@ contract TestMorphoTokenWrap is BaseTest, ActionsUtils, MorphoBlueHelper {
         // give wrapper contract some role
         ILegacyMorphoToken(LEGACY_MORPHO_TOKEN).setUserRole(MORPHO_TOKEN_WRAPPER, role, true);
         // make sure that role can call 'transferFrom' on legacy morpho token
-        ILegacyMorphoToken(LEGACY_MORPHO_TOKEN).setRoleCapability(
-            role, bytes4(keccak256("transferFrom(address,address,uint256)")), true
-        );
+        ILegacyMorphoToken(LEGACY_MORPHO_TOKEN)
+            .setRoleCapability(role, bytes4(keccak256("transferFrom(address,address,uint256)")), true);
         vm.stopPrank();
     }
 }

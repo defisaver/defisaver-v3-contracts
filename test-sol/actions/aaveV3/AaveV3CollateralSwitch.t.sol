@@ -100,10 +100,11 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
         _assertParams(params);
     }
 
-    function testFuzz_encode_decode_inputs(uint16[3] memory _assetIds, bool[3] memory _useAsCollateral, address _market)
-        public
-        view
-    {
+    function testFuzz_encode_decode_inputs(
+        uint16[3] memory _assetIds,
+        bool[3] memory _useAsCollateral,
+        address _market
+    ) public view {
         uint16[] memory assetIds = new uint16[](3);
         bool[] memory useAsCollateral = new bool[](3);
         for (uint256 i = 0; i < 3; i++) {
