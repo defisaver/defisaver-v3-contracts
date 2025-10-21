@@ -74,22 +74,34 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper {
         uint256 stkSharesToBurn =
             (_params.stkAmount == type(uint256).max) ? _params.stkToken.getBalance(address(this)) : _params.stkAmount;
 
-        uint256 amountUnstaked = IERC4626StakeToken(_params.stkToken).redeem(
-            stkSharesToBurn, address(this), /* receiver */ address(this) /* owner */
-        );
+        uint256 amountUnstaked = IERC4626StakeToken(_params.stkToken)
+            .redeem(
+                stkSharesToBurn,
+                address(this),
+                /* receiver */
+                address(this) /* owner */
+            );
 
         address waTokenOrGHO = IERC4626(_params.stkToken).asset();
         bool isGHOStaking = waTokenOrGHO == GHO_TOKEN;
 
         if (!isGHOStaking) {
             if (_params.useATokens) {
-                amountUnstaked = IStaticATokenV2(waTokenOrGHO).redeemATokens(
-                    amountUnstaked, address(this), /* receiver */ address(this) /* owner */
-                );
+                amountUnstaked = IStaticATokenV2(waTokenOrGHO)
+                    .redeemATokens(
+                        amountUnstaked,
+                        address(this),
+                        /* receiver */
+                        address(this) /* owner */
+                    );
             } else {
-                amountUnstaked = IERC4626(waTokenOrGHO).redeem(
-                    amountUnstaked, address(this), /* receiver */ address(this) /* owner */
-                );
+                amountUnstaked = IERC4626(waTokenOrGHO)
+                    .redeem(
+                        amountUnstaked,
+                        address(this),
+                        /* receiver */
+                        address(this) /* owner */
+                    );
             }
         }
 

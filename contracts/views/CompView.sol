@@ -348,9 +348,7 @@ contract CompView is Exponential, DSMath {
             );
 
             retVal[i] = EstimatedRates({
-                cTokenAddr: _params[i].cTokenAddr,
-                supplyRate: estimatedSupplyRate,
-                borrowRate: estimatedBorrowRate
+                cTokenAddr: _params[i].cTokenAddr, supplyRate: estimatedSupplyRate, borrowRate: estimatedBorrowRate
             });
         }
     }

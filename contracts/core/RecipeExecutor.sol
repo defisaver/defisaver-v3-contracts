@@ -364,9 +364,8 @@ contract RecipeExecutor is
         _currRecipe.callData[0] = abi.encode(params);
 
         /// @dev FL action is called directly so that we can check who the msg.sender of FL is
-        ActionBase(_flActionAddr).executeAction(
-            _currRecipe.callData[0], _currRecipe.subData, _currRecipe.paramMapping[0], _returnValues
-        );
+        ActionBase(_flActionAddr)
+            .executeAction(_currRecipe.callData[0], _currRecipe.subData, _currRecipe.paramMapping[0], _returnValues);
 
         isDSProxy ? removeProxyPermission(_flActionAddr) : disableModule(_flActionAddr);
     }

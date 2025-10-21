@@ -25,7 +25,8 @@ contract SparkView is SparkHelper, SparkRatioHelper {
     uint256 internal constant BORROWABLE_IN_ISOLATION_MASK =
         0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant BORROWING_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFFFFFFFFF; // prettier-ignore
-    uint256 internal constant STABLE_BORROWING_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFF; // prettier-ignore
+    uint256 internal constant STABLE_BORROWING_MASK =
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant LTV_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000; // prettier-ignore
     uint256 internal constant RESERVE_FACTOR_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
     uint256 internal constant LIQUIDATION_THRESHOLD_MASK =
@@ -442,11 +443,7 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         return (self.data & ~STABLE_BORROWING_MASK) != 0;
     }
 
-    function getBorrowableInIsolation(SparkDataTypes.ReserveConfigurationMap memory self)
-        internal
-        pure
-        returns (bool)
-    {
+    function getBorrowableInIsolation(SparkDataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
         return (self.data & ~BORROWABLE_IN_ISOLATION_MASK) != 0;
     }
 
@@ -528,20 +525,21 @@ contract SparkView is SparkHelper, SparkRatioHelper {
             }
 
             (estimatedRate.supplyRate,, estimatedRate.variableBorrowRate) = ISparkReserveInterestRateStrategy(
-                reserve.interestRateStrategyAddress
-            ).calculateInterestRates(
-                SparkDataTypes.CalculateInterestRatesParams({
-                    unbacked: reserve.unbacked,
-                    liquidityAdded: _reserveParams[i].liquidityAdded,
-                    liquidityTaken: _reserveParams[i].liquidityTaken,
-                    totalStableDebt: currTotalStableDebt,
-                    totalVariableDebt: totalVarDebt,
-                    averageStableBorrowRate: currAvgStableBorrowRate,
-                    reserveFactor: getReserveFactor(reserve.configuration),
-                    reserve: _reserveParams[i].reserveAddress,
-                    aToken: reserve.aTokenAddress
-                })
-            );
+                    reserve.interestRateStrategyAddress
+                )
+                .calculateInterestRates(
+                    SparkDataTypes.CalculateInterestRatesParams({
+                        unbacked: reserve.unbacked,
+                        liquidityAdded: _reserveParams[i].liquidityAdded,
+                        liquidityTaken: _reserveParams[i].liquidityTaken,
+                        totalStableDebt: currTotalStableDebt,
+                        totalVariableDebt: totalVarDebt,
+                        averageStableBorrowRate: currAvgStableBorrowRate,
+                        reserveFactor: getReserveFactor(reserve.configuration),
+                        reserve: _reserveParams[i].reserveAddress,
+                        aToken: reserve.aTokenAddress
+                    })
+                );
 
             estimatedRates[i] = estimatedRate;
         }

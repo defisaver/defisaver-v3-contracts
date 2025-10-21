@@ -69,9 +69,9 @@ contract LiquityOpen is ActionBase, LiquityHelper {
         TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.collAmount);
         TokenUtils.withdrawWeth(_params.collAmount);
 
-        BorrowerOperations.openTrove{ value: _params.collAmount }(
-            _params.maxFeePercentage, _params.lusdAmount, _params.upperHint, _params.lowerHint
-        );
+        BorrowerOperations.openTrove{
+            value: _params.collAmount
+        }(_params.maxFeePercentage, _params.lusdAmount, _params.upperHint, _params.lowerHint);
 
         LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, _params.lusdAmount);
 

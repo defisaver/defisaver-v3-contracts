@@ -59,7 +59,9 @@ contract DFSSafeFactory {
                 _creationData.singleton, _creationData.initializer, _creationData.saltNonce
             )
         );
-        createdSafe.execTransaction{ value: msg.value }(
+        createdSafe.execTransaction{
+            value: msg.value
+        }(
             _executionData.to,
             _executionData.value,
             _executionData.data,

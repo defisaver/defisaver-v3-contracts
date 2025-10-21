@@ -62,9 +62,8 @@ contract MorphoBlueReallocateLiquidity is ActionBase, MorphoBlueHelper {
          * 5. No withdrawal amount can exceed the liquidity available in the market for a particular vault.
          */
         for (uint256 i = 0; i < _params.vaults.length; i++) {
-            IPublicAllocator(PUBLIC_ALLOCATOR).reallocateTo(
-                _params.vaults[i], _params.withdrawals[i], _params.marketParams
-            );
+            IPublicAllocator(PUBLIC_ALLOCATOR)
+                .reallocateTo(_params.vaults[i], _params.withdrawals[i], _params.marketParams);
         }
 
         logData = abi.encode(_params);

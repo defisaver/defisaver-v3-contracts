@@ -38,7 +38,10 @@ library FluidSupplyDexLogic {
         int256 exactCollSharesMinted;
 
         (nftId, exactCollSharesMinted,) = _data.vaultType.isT2Vault()
-            ? IFluidVaultT2(_data.vault).operate{ value: msgValue }(
+            ? IFluidVaultT2(_data.vault)
+            .operate{
+                value: msgValue
+            }(
                 _data.nftId,
                 vars.amount0.signed256(),
                 vars.amount1.signed256(),
@@ -46,7 +49,10 @@ library FluidSupplyDexLogic {
                 0, /* debtAmount */
                 address(0) /* to */
             )
-            : IFluidVaultT4(_data.vault).operate{ value: msgValue }(
+            : IFluidVaultT4(_data.vault)
+            .operate{
+                value: msgValue
+            }(
                 _data.nftId,
                 vars.amount0.signed256(),
                 vars.amount1.signed256(),

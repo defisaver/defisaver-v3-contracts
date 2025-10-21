@@ -82,18 +82,19 @@ contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTr
     }
 
     function _executeSafeTx(SafeTxParams memory _params) internal {
-        bool success = ISafe(_params.safe).execTransaction(
-            registry.getAddr(RECIPE_EXECUTOR_ID),
-            0, // value
-            _params.data,
-            ISafe.Operation.DelegateCall,
-            0, // safeTxGas,
-            0, // baseGas
-            0, // gasPrice
-            address(0), // gasToken
-            payable(_params.refundReceiver),
-            _params.signatures
-        );
+        bool success = ISafe(_params.safe)
+            .execTransaction(
+                registry.getAddr(RECIPE_EXECUTOR_ID),
+                0, // value
+                _params.data,
+                ISafe.Operation.DelegateCall,
+                0, // safeTxGas,
+                0, // baseGas
+                0, // gasPrice
+                address(0), // gasToken
+                payable(_params.refundReceiver),
+                _params.signatures
+            );
         if (!success) {
             revert SafeExecutionError();
         }

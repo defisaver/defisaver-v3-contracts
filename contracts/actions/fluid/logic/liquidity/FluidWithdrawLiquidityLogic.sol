@@ -30,15 +30,23 @@ library FluidWithdrawLiquidityLogic {
         int256 withdrawAmount = _data.amount == type(uint256).max ? type(int256).min : -_data.amount.signed256();
 
         (, withdrawAmount,) = _data.vaultType.isT1Vault()
-            ? IFluidVaultT1(_data.vault).operate(_data.nftId, withdrawAmount, 0, /* newDebt_ */ sendTokensTo)
-            : IFluidVaultT3(_data.vault).operate(
-                _data.nftId,
-                withdrawAmount,
-                0, /* newDebtToken0_ */
-                0, /* newDebtToken1_ */
-                0, /* debtSharesMinMax_ */
-                sendTokensTo
-            );
+            ? IFluidVaultT1(_data.vault)
+                .operate(
+                    _data.nftId,
+                    withdrawAmount,
+                    0,
+                    /* newDebt_ */
+                    sendTokensTo
+                )
+            : IFluidVaultT3(_data.vault)
+                .operate(
+                    _data.nftId,
+                    withdrawAmount,
+                    0, /* newDebtToken0_ */
+                    0, /* newDebtToken1_ */
+                    0, /* debtSharesMinMax_ */
+                    sendTokensTo
+                );
 
         uint256 exactAmount = uint256(-withdrawAmount);
 

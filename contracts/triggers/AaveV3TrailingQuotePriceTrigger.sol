@@ -98,28 +98,24 @@ contract AaveV3TrailingQuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3R
             (, uint256 baseMaxRoundIdNextTimestamp) =
                 getRoundInfo(triggerSubData.baseTokenAddr, triggerCallData.baseMaxRoundIdNext, baseAggregator);
 
-            if (
-                !roundEncompassed(
+            if (!roundEncompassed(
                     triggerCallData.baseMaxRoundId,
                     triggerCallData.baseMaxRoundIdNext,
                     baseMaxPriceTimeStamp,
                     baseMaxRoundIdNextTimestamp,
                     quoteMaxPriceTimeStamp
-                )
-            ) return false;
+                )) return false;
         } else {
             (, uint256 quoteMaxRoundIdNextTimestamp) =
                 getRoundInfo(triggerSubData.quoteTokenAddr, triggerCallData.quoteMaxRoundIdNext, quoteAggregator);
 
-            if (
-                !roundEncompassed(
+            if (!roundEncompassed(
                     triggerCallData.quoteMaxRoundId,
                     triggerCallData.quoteMaxRoundIdNext,
                     quoteMaxPriceTimeStamp,
                     quoteMaxRoundIdNextTimestamp,
                     baseMaxPriceTimeStamp
-                )
-            ) return false;
+                )) return false;
         }
 
         address[] memory assets = new address[](2);

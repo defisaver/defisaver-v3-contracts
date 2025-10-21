@@ -126,10 +126,7 @@ interface IFluidLendingResolver {
     function getUserPositions(address user_) external view returns (FTokenDetailsUserPosition[] memory);
 
     /// @notice gets rewards related data: the `rewardsRateModel_` contract and the current `rewardsRate_` for the `fToken_`
-    function getFTokenRewards(address fToken_)
-        external
-        view
-        returns (address rewardsRateModel_, uint256 rewardsRate_);
+    function getFTokenRewards(address fToken_) external view returns (address rewardsRateModel_, uint256 rewardsRate_);
 
     /// @notice gets rewards rate model config constants
     function getFTokenRewardsRateModelConfig(address fToken_)

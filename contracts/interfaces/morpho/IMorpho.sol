@@ -5,7 +5,6 @@ import { MorphoTypes } from "./MorphoTypes.sol";
 
 interface IMorpho {
     /// STORAGE ///
-
     function NO_REFERRAL_CODE() external view returns (uint8);
     function VARIABLE_INTEREST_MODE() external view returns (uint8);
     function MAX_BASIS_POINTS() external view returns (uint16);

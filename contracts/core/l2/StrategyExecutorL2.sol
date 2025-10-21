@@ -77,7 +77,10 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
     ) internal {
         address authAddr = isDSProxy(_userWallet) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
 
-        IAuth(authAddr).callExecute{ value: msg.value }(
+        IAuth(authAddr)
+        .callExecute{
+            value: msg.value
+        }(
             _userWallet,
             RECIPE_EXECUTOR_ADDR,
             abi.encodeWithSelector(

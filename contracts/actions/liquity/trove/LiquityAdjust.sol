@@ -104,7 +104,9 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
             LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
         }
 
-        BorrowerOperations.adjustTrove{ value: supplyAmount }(
+        BorrowerOperations.adjustTrove{
+            value: supplyAmount
+        }(
             _params.maxFeePercentage,
             _params.collAmount,
             _params.lusdAmount,

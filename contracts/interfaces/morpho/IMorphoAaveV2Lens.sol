@@ -5,7 +5,6 @@ import { MorphoTypes } from "./MorphoTypes.sol";
 
 interface IMorphoAaveV2Lens {
     /// STORAGE ///
-
     function DEFAULT_LIQUIDATION_CLOSE_FACTOR() external view returns (uint16);
 
     function HEALTH_FACTOR_LIQUIDATION_THRESHOLD() external view returns (uint256);

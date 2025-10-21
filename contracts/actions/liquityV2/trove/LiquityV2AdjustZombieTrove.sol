@@ -117,16 +117,17 @@ contract LiquityV2AdjustZombieTrove is ActionBase, LiquityV2Helper {
             BOLD_ADDR.pullTokensIfNeeded(_params.from, _params.debtAmount);
         }
 
-        IBorrowerOperations(borrowerOperations).adjustZombieTrove(
-            _params.troveId,
-            _params.collAmount,
-            _params.collAction == CollActionType.SUPPLY,
-            _params.debtAmount,
-            _params.debtAction == DebtActionType.BORROW,
-            _params.upperHint,
-            _params.lowerHint,
-            _params.maxUpfrontFee
-        );
+        IBorrowerOperations(borrowerOperations)
+            .adjustZombieTrove(
+                _params.troveId,
+                _params.collAmount,
+                _params.collAction == CollActionType.SUPPLY,
+                _params.debtAmount,
+                _params.debtAction == DebtActionType.BORROW,
+                _params.upperHint,
+                _params.lowerHint,
+                _params.maxUpfrontFee
+            );
 
         if (_params.collAction == CollActionType.WITHDRAW) {
             collToken.withdrawTokens(_params.to, _params.collAmount);

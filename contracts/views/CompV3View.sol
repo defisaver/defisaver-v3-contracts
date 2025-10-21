@@ -21,9 +21,8 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         /// @dev This is a temporary fix for the wUSDM price feed. The recorded price is as of 8/8/2025.
         /// We are okay with this price having a discrepancy with the actual price over time and it is here solely to avoid breaking other calls.
         if (
-            _priceFeed == wUSDM_PRICE_FEED && block.chainid == 1
-                || _priceFeed == wUSDM_PRICE_FEED_ARBI && block.chainid == 42_161
-                || _priceFeed == wUSDM_PRICE_FEED_OPTI_ONE && block.chainid == 10
+            _priceFeed == wUSDM_PRICE_FEED && block.chainid == 1 || _priceFeed == wUSDM_PRICE_FEED_ARBI
+                && block.chainid == 42_161 || _priceFeed == wUSDM_PRICE_FEED_OPTI_ONE && block.chainid == 10
                 || _priceFeed == wUSDM_PRICE_FEED_OPTI_TWO && block.chainid == 10
         ) {
             return wUSDM_PRICE;

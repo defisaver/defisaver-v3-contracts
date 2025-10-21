@@ -90,9 +90,9 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         uint256 collateralAmountInUnit; // Amount of collateral in unit of account. If coll is NOT supported by the borrow vault, returns 0
         uint256 collateralAmountInAsset; // Amount of collateral in asset's decimals
         uint256 collateralAmountInUSD; // Amount of collateral in USD, in 18 decimals
-            // If collateralAmountInUnit is present AND unit of account is USD, this will be the same as collateralAmountInUnit
-            // If collateralAmountInUnit is present AND unit of account is not USD, this will return chainlink price in USD
-            // If collateralAmountInUnit is NOT present, this will return chainlink price in USD
+        // If collateralAmountInUnit is present AND unit of account is USD, this will be the same as collateralAmountInUnit
+        // If collateralAmountInUnit is present AND unit of account is not USD, this will return chainlink price in USD
+        // If collateralAmountInUnit is NOT present, this will return chainlink price in USD
     }
 
     /// @notice User data with loan information
@@ -147,8 +147,9 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
             unitOfAccount = IEVault(controller).unitOfAccount();
             oracle = IEVault(controller).oracle();
             borrowAmountInAsset = IEVault(controller).debtOf(_user);
-            borrowAmountInUnit =
-                _getOracleAmountInUnitOfAccount(oracle, IEVault(controller).asset(), unitOfAccount, borrowAmountInAsset);
+            borrowAmountInUnit = _getOracleAmountInUnitOfAccount(
+                oracle, IEVault(controller).asset(), unitOfAccount, borrowAmountInAsset
+            );
         }
 
         for (uint256 i = 0; i < collaterals.length; ++i) {

@@ -7,7 +7,6 @@ pragma solidity ^0.8.0;
 /// @dev Common types and structs used in Morpho contracts.
 library MorphoTypes {
     /// ENUMS ///
-
     enum PositionType {
         SUPPLIERS_IN_P2P,
         SUPPLIERS_ON_POOL,
