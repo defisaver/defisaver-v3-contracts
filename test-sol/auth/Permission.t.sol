@@ -9,6 +9,7 @@ import { AuthHelper } from "../../contracts/auth/helpers/AuthHelper.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
+import { WalletType } from "../../contracts/utils/DFSTypes.sol";
 
 contract TestCore_Permission is AuthHelper, BaseTest {
     
@@ -61,7 +62,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
     function _giveProxyPermission() internal {
         bytes memory givePermCalldata = abi.encodeWithSelector(
             Permission.giveAuthContractPermission.selector,
-            true /* isDSProxy */
+            WalletType.DSPROXY
         );
         
         dsProxyWallet.execute(address(cut), givePermCalldata, 0);
@@ -70,7 +71,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
     function _giveSafePermission() internal {
         bytes memory givePermCalldata = abi.encodeWithSelector(
             Permission.giveAuthContractPermission.selector,
-            false /* isDSProxy */
+            WalletType.SAFE
         );
         
         safeWallet.execute(address(cut), givePermCalldata, 0);

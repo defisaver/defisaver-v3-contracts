@@ -94,8 +94,7 @@ pragma solidity =0.8.24;
 *
 */
 
-import { DSProxyPermission } from "../auth/DSProxyPermission.sol";
-import { SafeModulePermission } from "../auth/SafeModulePermission.sol";
+import { Permission } from "../auth/Permission.sol";
 import { CheckWalletType } from "../utils/CheckWalletType.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
@@ -109,6 +108,7 @@ import { TokenUtils } from "../utils/TokenUtils.sol";
 import { TxSaverGasCostCalc } from "../utils/TxSaverGasCostCalc.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
+import { WalletType } from "../utils/DFSTypes.sol";
 
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
@@ -117,8 +117,7 @@ import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransi
 
 contract RecipeExecutor is 
     StrategyModel,
-    DSProxyPermission,
-    SafeModulePermission,
+    Permission,
     AdminAuth,
     CoreHelper,
     TxSaverGasCostCalc,
@@ -363,10 +362,9 @@ contract RecipeExecutor is
         address _flActionAddr,
         bytes32[] memory _returnValues
     ) internal {
+        WalletType walletType = getWalletType(address(this));
 
-        bool isDSProxy = isDSProxy(address(this));
-
-        isDSProxy ? giveProxyPermission(_flActionAddr) : enableModule(_flActionAddr);
+        givePermissionTo(walletType, _flActionAddr);
 
         // encode data for FL
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
@@ -385,7 +383,7 @@ contract RecipeExecutor is
             _returnValues
         );
 
-        isDSProxy ? removeProxyPermission(_flActionAddr) : disableModule(_flActionAddr);
+        removePermissionFrom(walletType, _flActionAddr);
     }
 
     /// @notice Checks if the specified address is of FL type action

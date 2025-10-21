@@ -2,12 +2,15 @@
 
 pragma solidity =0.8.24;
 
+
+import { ISafe } from "../../../interfaces/safe/ISafe.sol";
+import { IDSProxy } from "../../../interfaces/IDSProxy.sol";
+import { IInstaAccountV2 } from "../../../interfaces/insta/IInstaAccountV2.sol";
+
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
 import { FLFeeFaucet } from "../../../utils/FLFeeFaucet.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
-import { ISafe } from "../../../interfaces/safe/ISafe.sol";
-import { IDSProxy } from "../../../interfaces/IDSProxy.sol";
-
+import { WalletType } from "../../../utils/DFSTypes.sol";
 
 contract FLHelper is MainnetFLAddresses, StrategyModel {
     uint16 internal constant AAVE_REFERRAL_CODE = 64;
@@ -23,26 +26,48 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
             )
         );
 
+    /// @dev Used for DSA Proxy Accounts
+    string private constant DEFISAVER_CONNECTOR_NAME = "DefiSaverConnector";
+
     // Revert if execution fails when using safe wallet
     error SafeExecutionError();
 
-    function _executeRecipe(address _wallet, bool _isDSProxy, Recipe memory _currRecipe, uint256 _paybackAmount) internal {
-        if (_isDSProxy) {
+    function _executeRecipe(address _wallet, WalletType _walletType, Recipe memory _currRecipe, uint256 _paybackAmount) internal {
+        bytes memory data = abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount);
+
+        if (_walletType == WalletType.DSPROXY) {
             IDSProxy(_wallet).execute{value: address(this).balance}(
                 RECIPE_EXECUTOR_ADDR,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
+                data
             );
-        } else {
-            bool success = ISafe(_wallet).execTransactionFromModule(
-                RECIPE_EXECUTOR_ADDR,
-                address(this).balance,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
-                ISafe.Operation.DelegateCall
-            );
+            return;
+        }
+        
+        if (_walletType == WalletType.DSAPROXY) {
+            string[] memory connectors = new string[](1);
+            connectors[0] = DEFISAVER_CONNECTOR_NAME;
 
-            if (!success) {
-                revert SafeExecutionError();
-             }
+            bytes[] memory connectorsData = new bytes[](1);
+            connectorsData[0] = data;
+
+            IInstaAccountV2(_wallet).cast{value: address(this).balance}(
+                connectors,
+                connectorsData,
+                address(0) // _origin (Used only for Event logging so we deliberately set it to address(0))
+            );
+            return;
+        }
+        
+        // Otherwise, we assume we are in context of Safe
+        bool success = ISafe(_wallet).execTransactionFromModule(
+            RECIPE_EXECUTOR_ADDR,
+            address(this).balance,
+            data,
+            ISafe.Operation.DelegateCall
+        );
+        
+        if (!success) {
+            revert SafeExecutionError();
         }
     }
 }

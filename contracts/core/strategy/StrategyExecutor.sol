@@ -6,11 +6,11 @@ import { IAuth } from "../../interfaces/IAuth.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 import { StrategyModel } from "./StrategyModel.sol";
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
 import { BotAuth } from "./BotAuth.sol";
 import { DFSRegistry } from "../DFSRegistry.sol";
 import { SubStorage } from "../strategy/SubStorage.sol";
 import { CoreHelper } from "../helpers/CoreHelper.sol";
+import { WalletType } from "../../utils/DFSTypes.sol";
 
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, CheckWalletType {
@@ -88,7 +88,11 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, CheckWalletTy
         StrategySub memory _sub,
         address _userWallet
     ) internal {
-        address authAddr = isDSProxy(_userWallet) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
+        WalletType walletType = getWalletType(_userWallet);
+
+        address authAddr = MODULE_AUTH_ADDR;
+        if (walletType == WalletType.DSPROXY) authAddr = PROXY_AUTH_ADDR;
+        if (walletType == WalletType.DSAPROXY) authAddr = DSA_AUTH_ADDR;
 
         IAuth(authAddr).callExecute{value: msg.value}(
             _userWallet,

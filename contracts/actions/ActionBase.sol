@@ -173,13 +173,14 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     function fetchOwnersOrWallet() internal view returns (address) {
         WalletType walletType = getWalletType(address(this));
 
-        if (walletType == WalletType.DS_PROXY) {
+        if (walletType == WalletType.DSPROXY) {
             return DSProxy(payable(address(this))).owner();
         }
 
-        if (walletType == WalletType.DSA_PROXY) {
+        if (walletType == WalletType.DSAPROXY) {
             uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(address(this));
-            return IInstaList(DSA_LIST_ADDR).accountLink(dsaId).last;
+            // TODO: Check if it is still the owner (iterate?)
+            return IInstaList(DSA_LIST_ADDR).accountLink(dsaId).first;
         }
 
         // Otherwise, we assume we are in context of Safe

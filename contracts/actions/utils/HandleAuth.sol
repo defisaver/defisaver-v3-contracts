@@ -4,7 +4,6 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { Permission } from "../../auth/Permission.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 
 /// @title Action to enable/disable smart wallet authorization
 contract HandleAuth is ActionBase, Permission {
@@ -39,14 +38,9 @@ contract HandleAuth is ActionBase, Permission {
     //////////////////////////// ACTION LOGIC ////////////////////////////
    
     function handleAuth(Params memory _inputData) internal {
-        bool isDSProxy = isDSProxy(address(this));
-        address authContract = isDSProxy ? PROXY_AUTH_ADDRESS : MODULE_AUTH_ADDRESS;
-        
-        if (_inputData.enableAuth){
-            isDSProxy ? giveProxyPermission(authContract) : enableModule(authContract);
-        } else {
-            isDSProxy ? removeProxyPermission(authContract): disableModule(authContract);
-        }
+        _inputData.enableAuth
+            ? giveAuthContractPermission(getWalletType(address(this)))
+            : removeAuthContractPermission(getWalletType(address(this)));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

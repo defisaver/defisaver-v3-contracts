@@ -8,7 +8,7 @@ interface IInstaAccountV2 {
         string[] memory,
         bytes[] memory,
         address
-    ) external;
+    ) external payable returns (bytes32);
 
     function implementations() external view returns (address);
 

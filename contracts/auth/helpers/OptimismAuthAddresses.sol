@@ -8,4 +8,5 @@ contract OptimismAuthAddresses {
     address internal constant ADMIN_ADDR = 0x98118fD1Da4b3369AEe87778168e97044980632F;
     address internal constant PROXY_AUTH_ADDRESS = 0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043;
     address internal constant MODULE_AUTH_ADDRESS = 0x6D6Bc726955d46AC4EBbEe0f2c3Ed01128E261A6;
+    address internal constant DSA_AUTH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 }

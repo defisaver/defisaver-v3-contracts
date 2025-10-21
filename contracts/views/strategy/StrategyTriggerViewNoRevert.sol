@@ -5,6 +5,7 @@ import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
 import { IPoolAddressesProvider } from "../../interfaces/aaveV3/IPoolAddressesProvider.sol";
 import { IERC20 } from "../../interfaces/IERC20.sol";
 import { ISafe } from "../../interfaces/safe/ISafe.sol";
+import { IInstaList } from "../../interfaces/insta/IInstaList.sol";
 import { ITrigger } from "../../interfaces/ITrigger.sol";
 import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
@@ -16,6 +17,7 @@ import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { StrategyIDs } from "./StrategyIDs.sol";
 import { AaveV3Helper } from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
+import { WalletType } from "../../utils/DFSTypes.sol";
 
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
@@ -217,10 +219,18 @@ contract StrategyTriggerViewNoRevert is
     function _fetchTokenHolder(
         address _subWallet
     ) internal view returns (address) {
-        if (isDSProxy(_subWallet)) {
+        WalletType walletType = getWalletType(_subWallet);
+        if (walletType == WalletType.DSPROXY) {
             return DSProxy(payable(_subWallet)).owner();
         }
-        // if not DSProxy, we assume we are in context of Safe
+
+        if (walletType == WalletType.DSAPROXY) {
+            uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(_subWallet);
+            // TODO: Check if it is still the owner (iterate?)
+            return IInstaList(DSA_LIST_ADDR).accountLink(dsaId).first;
+        }
+
+        // Otherwise, we assume we are in context of Safe
         address[] memory owners = ISafe(_subWallet).getOwners();
         return owners.length == 1 ? owners[0] : _subWallet;
     }

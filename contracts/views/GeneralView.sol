@@ -1,21 +1,33 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { CheckWalletType } from "../utils/CheckWalletType.sol";
 import { IDSProxy } from "../interfaces/IDSProxy.sol";
 import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { IInstaList } from "../interfaces/insta/IInstaList.sol";
 
-contract GeneralView is CheckWalletType{
+import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { WalletType } from "../utils/DFSTypes.sol";
 
-    enum WalletType { DSPROXY, SAFE }
+contract GeneralView is CheckWalletType {
 
     function getSmartWalletInfo(address smartWalletAddress) public view returns (WalletType smartWalletType, address owner) {
-        if (isDSProxy(smartWalletAddress))
-            return (WalletType.DSPROXY, IDSProxy(payable(smartWalletAddress)).owner());
+        smartWalletType = getWalletType(smartWalletAddress);
 
-        // if not DSProxy, we assume we are in context of Safe
-        smartWalletType = WalletType.SAFE;
+        if (smartWalletType == WalletType.DSPROXY) {
+            owner = IDSProxy(payable(smartWalletAddress)).owner();
 
+            return (smartWalletType, owner);
+        }
+
+        if (smartWalletType == WalletType.DSAPROXY) {
+            uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(smartWalletAddress);
+            // TODO: Check if it is still the owner (iterate?)
+            owner = IInstaList(DSA_LIST_ADDR).accountLink(dsaId).first;
+
+            return (smartWalletType, owner);
+        }
+
+        // Otherwise, we assume we are in context of Safe
         address[] memory owners = ISafe(smartWalletAddress).getOwners();
         owner = owners.length == 1 ? owners[0] : smartWalletAddress;
     }

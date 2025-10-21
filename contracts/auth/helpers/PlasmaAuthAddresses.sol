@@ -8,4 +8,5 @@ contract PlasmaAuthAddresses {
     address internal constant ADMIN_ADDR = 0x7CF4F485e3a7fDa831e0579465881C51F3912A28; // USED IN ADMIN VAULT CONSTRUCTOR
     address internal constant PROXY_AUTH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // Not needed now, waiting for automation
     address internal constant MODULE_AUTH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // Not needed now, waiting for automation
+    address internal constant DSA_AUTH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 }
