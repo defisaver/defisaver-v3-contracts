@@ -21,7 +21,7 @@ contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWall
         StrategySub calldata _sub
     ) public {
          /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveAuthContractPermission(isDSProxy(address(this)));
+        giveAuthContractPermission(getWalletType(address(this)));
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(_sub);
     }
@@ -43,7 +43,7 @@ contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWall
         uint _subId
     ) public {
          /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveAuthContractPermission(isDSProxy(address(this)));
+        giveAuthContractPermission(getWalletType(address(this)));
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId);
     }
 
@@ -56,7 +56,7 @@ contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWall
         StrategySub calldata _sub
     ) public {
          /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveAuthContractPermission(isDSProxy(address(this)));
+        giveAuthContractPermission(getWalletType(address(this)));
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_subId, _sub);
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId);
     }
