@@ -9,6 +9,8 @@ import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterf
 import { DSProxy } from "../../contracts/DS/DSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { IInstaIndex } from "../../contracts/interfaces/insta/IInstaIndex.sol";
+import { IInstaAccountV2 } from "../../contracts/interfaces/insta/IInstaAccountV2.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract SmartWallet is BaseTest {
@@ -16,9 +18,12 @@ contract SmartWallet is BaseTest {
     address payable public owner;
     address payable public walletAddr;
     bool public isSafe;
+    bool public isDSA;
+    bool public isDSProxy;
     bool private safeInitialized;
 
     error SafeTxFailed();
+    error UnsupportedWalletType();
 
     modifier ownerAsSender() {
         vm.prank(owner);
@@ -42,6 +47,16 @@ contract SmartWallet is BaseTest {
     function createDSProxy() public ownerAsSender() returns(address payable) {
         walletAddr = payable(address(DSProxyFactoryInterface(Addresses.DS_PROXY_FACTORY).build()));
         isSafe = false;
+        isDSA = false;
+        isDSProxy = true;
+        return walletAddr;
+    }
+
+    function createDSAProxy() public ownerAsSender() returns(address payable) {
+        walletAddr = payable(IInstaIndex(Addresses.INSTADAPP_INDEX_V2).build(owner, 2, address(0)));
+        isSafe = false;
+        isDSA = true;
+        isDSProxy = false;
         return walletAddr;
     }
 
@@ -71,6 +86,8 @@ contract SmartWallet is BaseTest {
         ));
 
         isSafe = true;
+        isDSA = false;
+        isDSProxy = false;
         safeInitialized = true;
 
         return walletAddr;
@@ -98,8 +115,17 @@ contract SmartWallet is BaseTest {
             if (!success) {
                 revert SafeTxFailed();
             }
-        } else {
+        } else if (isDSProxy) {
             DSProxy(walletAddr).execute(_target, _calldata);
+        } else if (isDSA) {
+            // Always execute cast, regardless of the target
+            string[] memory connectorNames = new string[](1);
+            connectorNames[0] = "DefiSaverConnector";
+            bytes[] memory connectorData = new bytes[](1);
+            connectorData[0] = _calldata;
+            IInstaAccountV2(walletAddr).cast(connectorNames, connectorData, owner);
+        } else {
+            revert UnsupportedWalletType();
         }
     }
 

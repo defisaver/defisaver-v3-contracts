@@ -11,4 +11,8 @@ interface IInstaAccountV2 {
     ) external;
 
     function implementations() external view returns (address);
+
+    function isAuth(address _user) external view returns (bool);
+    function enable(address _user) external;
+    function disable(address _user) external;
 }
