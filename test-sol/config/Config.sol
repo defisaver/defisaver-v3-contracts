@@ -35,6 +35,7 @@ contract Config is Tokens {
 
     function initConfig() internal {
         if (bytes(configData.json).length == 0) {
+            // forge-lint: disable-next-line(unsafe-cheatcode)
             configData.json = vm.readFile(string(abi.encodePacked(vm.projectRoot(), "/test-sol/config/config.json")));
         }
     }
