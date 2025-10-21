@@ -1,5 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-
 require('dotenv-safe').config();
 
 const hre = require('hardhat');
@@ -97,7 +95,6 @@ const deployAndReturnGasUsed = async (contractName, signer, action, gasPrice, no
     }
 };
 
-// eslint-disable-next-line max-len
 const deployWithNewGasPrice = (contractName, signer, action, exGasPrice, nonce, ...args) =>
     new Promise((resolve) => {
         getGasPrice(exGasPrice).then((gasPrice) => {

@@ -1,5 +1,3 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable max-len */
 const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
@@ -411,7 +409,6 @@ const reflexerWithdrawStuckFunds = async (proxy, safeId, to) => {
     return tx;
 };
 const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount) => {
-    // eslint-disable-next-line max-len
     const reflexerSaviourDepositAction =
         new dfs.actions.reflexer.ReflexerNativeUniV2SaviourDepositAction(
             from,
@@ -423,7 +420,6 @@ const reflexerSaviourDeposit = async (proxy, from, safeId, lpTokenAmount) => {
     return tx;
 };
 const reflexerSaviourWithdraw = async (proxy, to, safeId, lpTokenAmount) => {
-    // eslint-disable-next-line max-len
     const reflexerSaviourWithdrawAction =
         new dfs.actions.reflexer.ReflexerNativeUniV2SaviourWithdrawAction(
             to,
@@ -648,7 +644,6 @@ const openMcd = async (proxy, joinAddr, mcdManager = MCD_MANAGER_ADDR) => {
         const vaultsAfter = await getVaultsForUser(proxy.address);
 
         return vaultsAfter.ids[vaultsAfter.ids.length - 1].toString();
-        // eslint-disable-next-line no-else-return
     } else {
         let vaultIds = await getCropJoinVaultIds(proxy.address);
 

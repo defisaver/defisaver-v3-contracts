@@ -32,7 +32,6 @@ describe('Morpho-Blue-SetAuthWithSig', function () {
         const deadline = '2015495230';
         const signature = hre.ethers.utils.splitSignature(
             // @dev - _signTypedData will be renamed to signTypedData in future ethers versions
-            // eslint-disable-next-line no-underscore-dangle
             await senderAcc._signTypedData(
                 {
                     chainId,

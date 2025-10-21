@@ -86,7 +86,6 @@ describe('LlamaLend-Withdraw', function () {
                 supplyAmountInWei.div(10),
             );
             const collTokenAfterWithdraw = await balanceOf(collTokenAddr, senderAcc.address);
-            // eslint-disable-next-line max-len
             expect(collTokenAfterWithdraw.sub(collTokenBeforeWithdraw)).to.be.eq(
                 supplyAmountInWei.div(10),
             );

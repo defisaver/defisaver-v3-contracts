@@ -101,7 +101,6 @@ describe('LlamaLend-Boost', function () {
             console.log(infoAfterBoost.collRatio / 1e18);
             expect(infoAfterBoost.collRatio).to.be.lt(infoBeforeBoost.collRatio);
             expect(infoAfterBoost.debtAmount).to.be.gt(infoBeforeBoost.debtAmount);
-            // eslint-disable-next-line max-len
             expect(infoAfterBoost.marketCollateralAmount).to.be.gt(
                 infoBeforeBoost.marketCollateralAmount,
             );

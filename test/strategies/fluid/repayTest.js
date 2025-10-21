@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { subFluidVaultT1RepayBundle } = require('../utils/strategy-subs');

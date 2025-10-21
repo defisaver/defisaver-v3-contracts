@@ -1,6 +1,4 @@
-/* eslint-disable no-param-reassign */
 /* eslint-disable no-undef */ // This is to disable warning for hre undefined in file
-/* eslint-disable import/no-extraneous-dependencies */ // This is to disable warnings for imports
 const fs = require('fs-extra');
 const { exec } = require('child_process');
 const axios = require('axios');

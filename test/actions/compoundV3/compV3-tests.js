@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable no-await-in-loop */
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const hre = require('hardhat');

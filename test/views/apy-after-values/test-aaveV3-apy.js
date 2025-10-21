@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const { expect } = require('chai');
 const hre = require('hardhat');
 
@@ -52,7 +51,6 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                 const collAsset = getAssetInfo(collateralTokens[i]);
                 const debtAsset = getAssetInfo(debtTokens[j]);
                 if (collAsset.symbol === debtAsset.symbol) {
-                    // eslint-disable-next-line no-continue
                     continue;
                 }
                 it(`... should estimate supply and borrow rates for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]`, async () => {
@@ -71,13 +69,11 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                     );
                     if (!isAssetBorrowable) {
                         console.log('Borrow asset is paused, inactive or frozen. Skipping test');
-                        // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }
                     if (!collTokenInfoFull.usageAsCollateralEnabled) {
                         console.log('Collateral asset cant be used as collateral. Skipping test');
-                        // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }

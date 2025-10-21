@@ -65,7 +65,6 @@ const testSupply = async ({ proxy, tokenAddress, amount, senderAcc, view }) => {
         bn.sub(supplyBefore),
     );
 
-    // eslint-disable-next-line no-param-reassign
     if (amount.eq(ethers.constants.MaxUint256)) amount = collBalance;
     // Aave 1 wei math error
     expect(totalSupplied.add('1')).to.be.gte(supplyBefore.add(amount));

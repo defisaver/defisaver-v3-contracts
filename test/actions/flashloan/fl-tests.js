@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-mixed-operators */
 const { getAssetInfo } = require('@defisaver/tokens');
 const hre = require('hardhat');
 const Dec = require('decimal.js');

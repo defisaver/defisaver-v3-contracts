@@ -94,7 +94,6 @@ describe('LlamaLend-Supply', function () {
                 proxy.address,
             );
             console.log(positionInfoAfterSupply.collRatio / 1e18);
-            // eslint-disable-next-line max-len
             expect(
                 positionInfoAfterSupply.marketCollateralAmount.sub(
                     positionInfoBeforeSupply.marketCollateralAmount,

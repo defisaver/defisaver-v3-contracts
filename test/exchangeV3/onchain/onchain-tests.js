@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const hre = require('hardhat');
@@ -128,7 +127,6 @@ const executeSell = async (senderAcc, proxy, dfsPrices, trade, wrapper, isCurve 
         return -1;
     }
 
-    // eslint-disable-next-line no-unused-vars
     const rate = await dfsPrices.callStatic.getExpectedRate(
         wrapper.address,
         sellAssetInfo.address,

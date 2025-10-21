@@ -93,7 +93,6 @@ const permitTokenTest = async () => {
             const deadline = '2015495230';
 
             const signature = hre.ethers.utils.splitSignature(
-                // eslint-disable-next-line no-underscore-dangle
                 await senderAcc._signTypedData(
                     {
                         name,
@@ -176,7 +175,6 @@ const wrapEthTest = async () => {
             makerAddresses = await fetchMakerAddresses();
             recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
 
-            // eslint-disable-next-line prefer-destructuring
             senderAcc = (await hre.ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address);
 
@@ -817,7 +815,6 @@ const automationV2UnsubTest = async () => {
                 ownerAcc,
             );
 
-            // eslint-disable-next-line no-unused-expressions
             expect(
                 (await mcdSubscriptions['subscribersPos(uint256)'](cdpId)).subscribed,
                 "The proxy isn't subscribed.",
@@ -825,7 +822,6 @@ const automationV2UnsubTest = async () => {
 
             await automationV2Unsub(impersonatedProxy, '0', cdpId);
 
-            // eslint-disable-next-line no-unused-expressions
             expect(
                 (await mcdSubscriptions['subscribersPos(uint256)'](cdpId)).subscribed,
                 "Couldn't unsubscribe the proxy.",
@@ -850,7 +846,6 @@ const automationV2UnsubTest = async () => {
                 ownerAcc,
             );
 
-            // eslint-disable-next-line no-unused-expressions
             expect(
                 (await compoundSubscriptions['subscribersPos(address)'](ownerProxy.address))
                     .subscribed,
@@ -859,7 +854,6 @@ const automationV2UnsubTest = async () => {
 
             await automationV2Unsub(impersonatedProxy, '1');
 
-            // eslint-disable-next-line no-unused-expressions
             expect(
                 (await compoundSubscriptions['subscribersPos(address)'](ownerProxy.address))
                     .subscribed,
@@ -885,7 +879,6 @@ const automationV2UnsubTest = async () => {
                 ownerAcc,
             );
 
-            // eslint-disable-next-line no-unused-expressions
             expect(
                 (await aaveSubscriptions['subscribersPos(address)'](ownerProxy.address)).subscribed,
                 "The proxy isn't subscribed.",
@@ -893,7 +886,6 @@ const automationV2UnsubTest = async () => {
 
             await automationV2Unsub(impersonatedProxy, '2');
 
-            // eslint-disable-next-line no-unused-expressions
             expect(
                 (await aaveSubscriptions['subscribersPos(address)'](ownerProxy.address)).subscribed,
                 "Couldn't unsubscribe the proxy.",

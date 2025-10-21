@@ -1,5 +1,3 @@
-/* eslint-disable class-methods-use-this */
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
 const automationSdk = require('@defisaver/automation-sdk');

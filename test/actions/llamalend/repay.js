@@ -97,7 +97,6 @@ describe('LlamaLend-Repay', function () {
             console.log(infoAfterBoost.collRatio / 1e18);
             expect(infoAfterBoost.collRatio).to.be.gt(infoBeforeBoost.collRatio);
             expect(infoAfterBoost.debtAmount).to.be.lt(infoBeforeBoost.debtAmount);
-            // eslint-disable-next-line max-len
             expect(infoAfterBoost.marketCollateralAmount).to.be.lt(
                 infoBeforeBoost.marketCollateralAmount,
             );
@@ -151,7 +150,6 @@ describe('LlamaLend-Repay', function () {
 
             expect(infoAfterBoost.collRatio).to.be.eq(0);
             expect(infoAfterBoost.debtAmount).to.be.lt(infoBeforeBoost.debtAmount);
-            // eslint-disable-next-line max-len
             expect(infoAfterBoost.marketCollateralAmount).to.be.lt(
                 infoBeforeBoost.marketCollateralAmount,
             );

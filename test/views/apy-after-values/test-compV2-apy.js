@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
@@ -58,7 +57,6 @@ const compV2ApyAfterValuesTest = async () => {
                     cantSupplyTokens[Object.keys(cTokens)[i]] ||
                     cantBorrowTokens[Object.keys(cTokens)[j]]
                 ) {
-                    // eslint-disable-next-line no-continue
                     continue;
                 }
                 const collAsset = getAssetInfo(Object.keys(cTokens)[i]);

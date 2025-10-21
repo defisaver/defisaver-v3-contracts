@@ -323,7 +323,6 @@ const aaveV3RepayStrategyTest = async (numTestPairs) => {
                     collAssetInfo.decimals,
                 );
 
-                // eslint-disable-next-line max-len
                 await callAaveFLV3RepayL2Strategy(
                     botAcc,
                     strategyExecutor,
@@ -478,7 +477,6 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
                     subIds.boostSub,
                 );
 
-                // eslint-disable-next-line max-len
                 const ratioAfter = await aaveView.getSafetyRatio(
                     addrs[network].AAVE_MARKET,
                     proxyAddr,
@@ -492,7 +490,6 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
             //     console.log('ENTER !!!!!');
             //     console.log('ENTER !!!!!');
             //     console.log('ENTER !!!!!');
-            //     // eslint-disable-next-line max-len
             //     const ratioBefore = await aaveView.getSafetyRatio(addrs[network].AAVE_MARKET, proxyAddr);
             //     console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
@@ -1215,7 +1212,6 @@ const aaveV3CloseToCollStrategyTest = async (numTestPairs) => {
             });
 
             it('... should call AaveV3 Close strategy', async () => {
-                // eslint-disable-next-line max-len
                 const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
@@ -1488,7 +1484,6 @@ const aaveV3FLCloseToCollStrategyTest = async (numTestPairs) => {
                     debtAssetInfo.decimals,
                 );
 
-                // eslint-disable-next-line max-len
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
                     fetchAmountinUSDPrice(collAssetInfo.symbol, usdSwapAmount),

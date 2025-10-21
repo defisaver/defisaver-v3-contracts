@@ -39,9 +39,7 @@ const getSecondTokenAmount = async (tokenA, tokenB, amountTokenA) => {
 
     // pair order can be switched, you send eth/dai but it's dai/eth
     if (pairData.tokenA.toLowerCase() !== tokenA.toLowerCase()) {
-        // eslint-disable-next-line prefer-destructuring
         reserveA = reserves[1];
-        // eslint-disable-next-line prefer-destructuring
         reserveB = reserves[0];
     }
 

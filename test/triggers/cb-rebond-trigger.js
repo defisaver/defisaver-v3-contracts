@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable no-mixed-operators */
 const hre = require('hardhat');
 const Dec = require('decimal.js');
 

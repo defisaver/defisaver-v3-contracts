@@ -49,7 +49,6 @@ const getLatestSubId = async () => {
     return latestSubId;
 };
 
-// eslint-disable-next-line max-len
 const createStrategy = async (strategyName, triggerIds, actionIds, paramMapping, continuous) => {
     const storageAddr = await getAddrFromRegistry('StrategyStorage');
     const storage = await hre.ethers.getContractAt('StrategyStorage', storageAddr);
@@ -157,7 +156,6 @@ const subToAaveV3Proxy = async (proxy, inputData, subProxyAddr = null) => {
         .getContractAt('AaveV3SubProxy', aaveSubProxyAddr)
         .then((c) => [c, c.parseSubData(inputData)])
         .then(async ([c, subData]) => {
-            // eslint-disable-next-line no-param-reassign
             subData = await subData;
             let boostSub = await c.formatBoostSub(subData);
             let repaySub = await c.formatRepaySub(subData);
@@ -169,7 +167,6 @@ const subToAaveV3Proxy = async (proxy, inputData, subProxyAddr = null) => {
             // Put proxy address instead of AaveV3SubProxy address
             const newBoostTriggerData = `0x${paddedProxyAddr}${boostSub.triggerData[0].slice(66)}`;
 
-            // eslint-disable-next-line max-len
             // Create new boostSub object with corrected trigger data (both property and array index)
             const correctedBoostSub = {
                 ...boostSub,
@@ -215,7 +212,6 @@ const subToSparkProxy = async (proxy, inputData) => {
         .getContractAt('SparkSubProxy', sparkSubProxyAddr)
         .then((c) => [c, c.parseSubData(inputData)])
         .then(async ([c, subData]) => {
-            // eslint-disable-next-line no-param-reassign
             subData = await subData;
 
             return {

@@ -43,7 +43,6 @@ const yearnSupplyTest = async (testLength) => {
                 YEARN_REGISTRY_ADDRESS,
             );
         });
-        // eslint-disable-next-line no-param-reassign
         if (testLength === 0) testLength = yearnPairs.length;
         for (let i = 0; i < testLength; i++) {
             it(`... should supply ${yearnPairs[i].name} to Yearn`, async () => {
@@ -131,7 +130,6 @@ const yearnWithdrawTest = async (testLength) => {
             );
         });
 
-        // eslint-disable-next-line no-param-reassign
         if (testLength === 0) testLength = yearnPairs.length;
         for (let i = 0; i < testLength; i++) {
             it(`... should withdraw ${yearnPairs[i].name} from Yearn`, async () => {

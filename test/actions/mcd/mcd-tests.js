@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const { ilks, getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { BigNumber } = require('ethers');
@@ -133,7 +132,6 @@ const mcdSupplyTest = async (mcdTestLength) => {
             const ilkData = ilks[i];
             const joinAddr = ilkData.join;
             const tokenData = getAssetInfo(ilkData.asset);
-            // eslint-disable-next-line max-len
             const amountFetchedFromUSD = fetchAmountinUSDPrice(
                 tokenData.symbol,
                 SUPPLY_AMOUNT_IN_USD,
@@ -141,13 +139,11 @@ const mcdSupplyTest = async (mcdTestLength) => {
             it(`... should supply ${amountFetchedFromUSD} ${tokenData.symbol} to a ${ilkData.ilkLabel} vault`, async () => {
                 // skip uni tokens
                 if (tokenData.symbol.indexOf('UNIV2') !== -1) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
                 // erc20 token has an edge case for setting balance so we skip
                 if (tokenData.symbol === 'GUSD' || tokenData.symbol === 'RENBTC') {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -158,7 +154,6 @@ const mcdSupplyTest = async (mcdTestLength) => {
                     ilkData.ilkLabel === 'CRVV1ETHSTETH-A' ||
                     ilkData.ilkLabel === 'TUSD-A'
                 ) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -236,13 +231,11 @@ const mcdGenerateTest = async (mcdTestLength) => {
             it(`... should generate ${GENERATE_AMOUNT_IN_USD} DAI for ${ilkData.ilkLabel} vault`, async () => {
                 // skip uni tokens
                 if (tokenData.symbol.indexOf('UNIV2') !== -1) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
                 // erc20 token has an edge case for setting balance so we skip
                 if (tokenData.symbol === 'GUSD' || tokenData.symbol === 'RENBTC') {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -254,14 +247,12 @@ const mcdGenerateTest = async (mcdTestLength) => {
                     ilkData.ilkLabel === 'CRVV1ETHSTETH-A' ||
                     ilkData.ilkLabel === 'TUSD-A'
                 ) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
 
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -379,20 +370,17 @@ const mcdMergeTest = async (mcdTestLength) => {
                 }
                 // skip uni tokens
                 if (tokenData.symbol.indexOf('UNIV2') !== -1) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
                 // TODO: Try to increase maximum debt for ilk
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
                 // TODO: ERC20 Proxy edge cases
                 if (tokenData.symbol === 'GUSD' || tokenData.symbol === 'RENBTC') {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -404,7 +392,6 @@ const mcdMergeTest = async (mcdTestLength) => {
                     ilkData.ilkLabel === 'CRVV1ETHSTETH-A' ||
                     ilkData.ilkLabel === 'TUSD-A'
                 ) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -426,12 +413,10 @@ const mcdMergeTest = async (mcdTestLength) => {
 
                 const vault2After = await getVaultInfo(mcdView, vaultId2, ilkData.ilkBytes);
 
-                // eslint-disable-next-line max-len
                 expect(vault2After.debt).to.be.closeTo(
                     vault1Before.debt + vault2Before.debt,
                     0.0001,
                 );
-                // eslint-disable-next-line max-len
                 expect(vault2After.coll).to.be.closeTo(
                     vault1Before.coll + vault2Before.coll,
                     0.0001,
@@ -468,13 +453,11 @@ const mcdPaybackTest = async (mcdTestLength) => {
             it(`... should payback ${PARTIAL_DAI_AMOUNT} DAI for ${ilkData.ilkLabel} vault`, async () => {
                 // skip uni tokens
                 if (tokenData.symbol.indexOf('UNIV2') !== -1) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
                 // erc20 token has an edge case for setting balance so we skip
                 if (tokenData.symbol === 'GUSD' || tokenData.symbol === 'RENBTC') {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -486,14 +469,12 @@ const mcdPaybackTest = async (mcdTestLength) => {
                     ilkData.ilkLabel === 'CRVV1ETHSTETH-A' ||
                     ilkData.ilkLabel === 'TUSD-A'
                 ) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
 
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -527,13 +508,11 @@ const mcdPaybackTest = async (mcdTestLength) => {
             it(`... should payback all debt by sending amount higher than debt DAI for ${ilkData.ilkLabel} vault`, async () => {
                 // skip uni tokens
                 if (tokenData.symbol.indexOf('UNIV2') !== -1) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
                 // erc20 token has an edge case for setting balance so we skip
                 if (tokenData.symbol === 'GUSD' || tokenData.symbol === 'RENBTC') {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -545,14 +524,12 @@ const mcdPaybackTest = async (mcdTestLength) => {
                     ilkData.ilkLabel === 'CRVV1ETHSTETH-A' ||
                     ilkData.ilkLabel === 'TUSD-A'
                 ) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
 
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -594,13 +571,11 @@ const mcdPaybackTest = async (mcdTestLength) => {
             it(`... should payback all debt by sending uint.max as parameter for ${ilkData.ilkLabel} vault`, async () => {
                 // skip uni tokens
                 if (tokenData.symbol.indexOf('UNIV2') !== -1) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
                 // erc20 token has an edge case for setting balance so we skip
                 if (tokenData.symbol === 'GUSD' || tokenData.symbol === 'RENBTC') {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -612,14 +587,12 @@ const mcdPaybackTest = async (mcdTestLength) => {
                     ilkData.ilkLabel === 'CRVV1ETHSTETH-A' ||
                     ilkData.ilkLabel === 'TUSD-A'
                 ) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
 
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -734,20 +707,17 @@ const mcdWithdrawTest = async (mcdTestLength) => {
 
             if (supplyAmount === 0) {
                 // skip tokens we don't have price for
-                // eslint-disable-next-line no-continue
                 continue;
             }
 
             it(`... should withdraw ${withdrawAmount} ${tokenData.symbol} from ${ilkData.ilkLabel} vault`, async () => {
                 // skip uni tokens
                 if (tokenData.symbol.indexOf('UNIV2') !== -1) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
                 // erc20 token has an edge case for setting balance so we skip
                 if (tokenData.symbol === 'GUSD' || tokenData.symbol === 'RENBTC') {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -759,7 +729,6 @@ const mcdWithdrawTest = async (mcdTestLength) => {
                     ilkData.ilkLabel === 'CRVV1ETHSTETH-A' ||
                     ilkData.ilkLabel === 'TUSD-A'
                 ) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -767,7 +736,6 @@ const mcdWithdrawTest = async (mcdTestLength) => {
                 // TODO: Maybe optimize this so it's called only once per running tests
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -797,13 +765,11 @@ const mcdWithdrawTest = async (mcdTestLength) => {
             it(`... should withdraw all coll ${tokenData.symbol} from ${ilkData.ilkLabel} vault`, async () => {
                 // skip uni tokens
                 if (tokenData.symbol.indexOf('UNIV2') !== -1) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
                 // erc20 token has an edge case for setting balance so we skip
                 if (tokenData.symbol === 'GUSD' || tokenData.symbol === 'RENBTC') {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -815,14 +781,12 @@ const mcdWithdrawTest = async (mcdTestLength) => {
                     ilkData.ilkLabel === 'CRVV1ETHSTETH-A' ||
                     ilkData.ilkLabel === 'TUSD-A'
                 ) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
 
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -1016,7 +980,6 @@ const mcdFLRepayCompositeTest = async () => {
                 expect(repayAmount).to.not.be.eq(0, `cant fetch price for ${tokenData.symbol}`);
 
                 // create a vault
-                // eslint-disable-next-line no-await-in-loop
                 const vaultId = await openVault(
                     proxy,
                     ilkData.ilkLabel,
@@ -1184,7 +1147,6 @@ const mcdRepayCompositeTest = async () => {
                 const repayAmount = fetchAmountinUSDPrice(tokenData.symbol, USD_REPAY_AMOUNT);
                 expect(repayAmount).to.not.be.eq(0, `cant fetch price for ${tokenData.symbol}`);
                 // create a vault
-                // eslint-disable-next-line no-await-in-loop
                 const vaultId = await openVault(
                     proxy,
                     ilkData.ilkLabel,
@@ -1351,7 +1313,6 @@ const mcdFLBoostCompositeTest = async () => {
                 );
 
                 // create a vault
-                // eslint-disable-next-line no-await-in-loop
                 const vaultId = await openVault(
                     proxy,
                     ilkData.ilkLabel,
@@ -1511,15 +1472,7 @@ const mcdBoostCompositeTest = async () => {
                 tokenData.address = WETH_ADDRESS;
             }
 
-            if (
-                ![
-                    'ETH',
-                    'WBTC',
-                    'wstETH',
-                    // eslint-disable-next-line no-continue
-                ].includes(tokenData.symbol)
-            )
-                continue;
+            if (!['ETH', 'WBTC', 'wstETH'].includes(tokenData.symbol)) continue;
 
             it(`... should call a boost ${USD_BOOST_AMOUNT} DAI on a ${ilkData.ilkLabel} vault`, async () => {
                 const boostAmount = Float2BN(USD_BOOST_AMOUNT);
@@ -1533,7 +1486,6 @@ const mcdBoostCompositeTest = async () => {
                 );
 
                 // create a vault
-                // eslint-disable-next-line no-await-in-loop
                 const vaultId = await openVault(
                     proxy,
                     ilkData.ilkLabel,

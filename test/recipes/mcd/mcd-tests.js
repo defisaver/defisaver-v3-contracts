@@ -404,7 +404,6 @@ const mcdCloseTest = async () => {
             it(`... should close a ${ilkData.ilkLabel} Vault and return Dai`, async () => {
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -475,7 +474,6 @@ const mcdCloseTest = async () => {
                 const canGenerate = await canGenerateDebt(ilkData);
 
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -591,7 +589,6 @@ const mcdCreateTest = async () => {
             it(`... should create a ${ilkData.ilkLabel} Vault and generate Dai`, async () => {
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -649,7 +646,6 @@ const mcdCreateTest = async () => {
             it(`... should create a leveraged ${ilkData.ilkLabel} Vault and generate Dai`, async () => {
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -679,7 +675,6 @@ const mcdCreateTest = async () => {
                 );
 
                 const createVaultRecipe = new dfs.Recipe('CreateVaultRecipe', [
-                    // eslint-disable-next-line max-len
                     // new dfs.actions.flashloan.AaveV2FlashLoanAction([daiAmount], [daiAddr], [0], nullAddress, nullAddress, []),
                     new dfs.actions.flashloan.DyDxFlashLoanAction(
                         daiAmount,

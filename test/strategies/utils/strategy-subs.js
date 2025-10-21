@@ -1,6 +1,4 @@
-/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const automationSdk = require('@defisaver/automation-sdk');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -52,7 +50,6 @@ const { COMP_V3_MARKETS } = require('../../utils/compoundV3');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
-// eslint-disable-next-line max-len
 const subUniContinuousCollectStrategy = async (
     proxy,
     strategyId,
@@ -109,7 +106,6 @@ const subUniV3RangeOrderStrategy = async (proxy, tokenId, state, recipient, stra
 
     const triggerData = await createUniV3RangeOrderTrigger(tokenId, state);
     const strategySub = [strategyId, isBundle, [triggerData], [tokenIdEncoded, recipientEncoded]];
-    // eslint-disable-next-line max-len
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
@@ -240,7 +236,6 @@ const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId)
     return { subId, strategySub };
 };
 
-// eslint-disable-next-line max-len
 const subLimitOrderStrategy = async (
     proxy,
     tokenAddrSell,
@@ -679,7 +674,6 @@ const updateSparkAutomationStrategy = async (
     const subId = await updateSparkProxy(proxy, subInput);
 
     if (subId2 === '0' && boostEnabled === true) {
-        // eslint-disable-next-line no-param-reassign
         subId2 = subId;
     }
 
@@ -688,7 +682,6 @@ const updateSparkAutomationStrategy = async (
         .getContractAt('SparkSubProxy', sparkSubProxyAddr)
         .then((c) => [c, c.parseSubData('0x'.concat(subInput.slice(18)))])
         .then(async ([c, subData]) => {
-            // eslint-disable-next-line no-param-reassign
             subData = await subData;
 
             return {

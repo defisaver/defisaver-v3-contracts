@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const dfs = require('@defisaver/sdk');
 const { BigNumber } = require('ethers');
@@ -169,7 +168,6 @@ const llamaLendLevCreateEncodedData = async (
             0, // gas used
         ),
     ]);
-    // eslint-disable-next-line consistent-return
     return recipe.encodeForTxSaverCall(txSaverSignedData)[1];
 };
 

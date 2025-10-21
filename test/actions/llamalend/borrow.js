@@ -87,7 +87,6 @@ describe('LlamaLend-Borrow', function () {
                 borrowAmountWei.div(10),
             );
             const debtTokenBalanceAfter = await balanceOf(debtTokenAddr, senderAcc.address);
-            // eslint-disable-next-line max-len
             expect(debtTokenBalanceAfter.sub(debtTokenBalanceBefore)).to.be.eq(
                 borrowAmountWei.div(10),
             );

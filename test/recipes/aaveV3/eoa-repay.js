@@ -78,7 +78,6 @@ describe('Aave-EOA-Repay', function () {
         );
         const signature = hre.ethers.utils.splitSignature(
             // @dev - _signTypedData will be renamed to signTypedData in future ethers versions
-            // eslint-disable-next-line no-underscore-dangle
             await senderAcc._signTypedData(
                 {
                     name, // aToken.name

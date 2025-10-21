@@ -3,7 +3,6 @@ const { resetForkToBlock } = require('../../utils/utils');
 const { compoundFullTest } = require('./comp-tests');
 const config = require('../../../hardhat.config');
 
-// eslint-disable-next-line max-len
 const compoundCollateralAssets = assets
     .filter((a) => a.compoundCollateral)
     .map((a) => getAssetInfo(a.symbol));

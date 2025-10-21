@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const automationSdk = require('@defisaver/automation-sdk');
 const { subToAaveV3Proxy, updateAaveProxy, subToStrategy } = require('./utils-strategies');
 
@@ -63,7 +62,6 @@ const updateAaveV3L2AutomationStrategy = async (
     const subId = await updateAaveProxy(proxy, subInput);
 
     if (subId2 === '0' && boostEnabled === true) {
-        // eslint-disable-next-line no-param-reassign
         subId2 = subId;
     }
 

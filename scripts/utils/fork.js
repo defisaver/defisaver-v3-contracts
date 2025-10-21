@@ -1,5 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-
 const axios = require('axios');
 const { randomUUID } = require('crypto');
 

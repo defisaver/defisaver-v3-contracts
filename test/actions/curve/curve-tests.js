@@ -104,7 +104,6 @@ const testWithdraw = async (
 
     const balancesBefore = await Promise.all(
         (useUnderlying ? pool.underlyingCoins : pool.coins).map(async (c) => {
-            // eslint-disable-next-line no-param-reassign
             if (c === ETH_ADDR) c = WETH_ADDRESS;
             return balanceOf(c, receiver);
         }),
@@ -124,7 +123,6 @@ const testWithdraw = async (
 
     await Promise.all(
         (useUnderlying ? pool.underlyingCoins : pool.coins).map(async (c, i) => {
-            // eslint-disable-next-line no-param-reassign
             if (c === ETH_ADDR) c = WETH_ADDRESS;
             const balance = await balanceOf(c, receiver).then((e) => e.sub(balancesBefore[i]));
             expect(balance).to.be.gte(
@@ -499,7 +497,6 @@ const curveGaugeDepositTest = async (testLength) => {
                     );
 
                     await approve(pool.lpToken, proxyAddr);
-                    // eslint-disable-next-line max-len
                     await curveGaugeDeposit(
                         proxy,
                         pool.gauges[0],
@@ -555,7 +552,6 @@ const curveGaugeWithdrawTest = async (testLength) => {
                 );
 
                 await approve(pool.lpToken, proxyAddr);
-                // eslint-disable-next-line max-len
                 await curveGaugeDeposit(
                     proxy,
                     pool.gauges[0],
@@ -566,7 +562,6 @@ const curveGaugeWithdrawTest = async (testLength) => {
                 );
                 expect(await curveView.gaugeBalance(pool.gauges[0], proxyAddr)).to.be.gt('0');
 
-                // eslint-disable-next-line max-len
                 await curveGaugeWithdraw(
                     proxy,
                     pool.gauges[0],

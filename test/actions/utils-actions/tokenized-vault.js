@@ -1,7 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable guard-for-in */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-shadow */
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
 

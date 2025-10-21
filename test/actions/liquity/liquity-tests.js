@@ -105,11 +105,9 @@ const liquityOpenTest = async () => {
         });
 
         afterEach(async () => {
-            // eslint-disable-next-line object-curly-newline
             const { troveStatus, collAmount, debtAmount, collPrice } =
                 await liquityView['getTroveInfo(address)'](proxyAddr);
             console.log(`\tTrove status: ${troveStatus}`);
-            // eslint-disable-next-line eqeqeq
             if (troveStatus != 1) {
                 console.log('\tTrove not active');
                 return;
@@ -123,7 +121,6 @@ const liquityOpenTest = async () => {
         });
 
         it(`... should open Trove with $${wethAmountTotalValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
-            // eslint-disable-next-line max-len
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -135,7 +132,6 @@ const liquityOpenTest = async () => {
 
             const { collAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
             expect(collAmount).to.equal(collAmountOpen);
-            // eslint-disable-next-line max-len
             expect(await balanceOf(lusdAddr, senderAddr)).to.equal(
                 lusdAmountOpen.add(lusdAmountFee),
             );
@@ -147,7 +143,6 @@ const liquityOpenTest = async () => {
         });
 
         it('... should open Trove with whole WETH balance as collateral', async () => {
-            // eslint-disable-next-line max-len
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -204,11 +199,9 @@ const liquitySupplyTest = async () => {
         });
 
         afterEach(async () => {
-            // eslint-disable-next-line object-curly-newline
             const { troveStatus, collAmount, debtAmount, collPrice } =
                 await liquityView['getTroveInfo(address)'](proxyAddr);
             console.log(`\tTrove status: ${troveStatus}`);
-            // eslint-disable-next-line eqeqeq
             if (troveStatus != 1) {
                 console.log('\tTrove not active');
                 return;
@@ -222,7 +215,6 @@ const liquitySupplyTest = async () => {
         });
 
         it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
-            // eslint-disable-next-line max-len
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -292,11 +284,9 @@ const liquityWithdrawTest = async () => {
         });
 
         afterEach(async () => {
-            // eslint-disable-next-line object-curly-newline
             const { troveStatus, collAmount, debtAmount, collPrice } =
                 await liquityView['getTroveInfo(address)'](proxyAddr);
             console.log(`\tTrove status: ${troveStatus}`);
-            // eslint-disable-next-line eqeqeq
             if (troveStatus != 1) {
                 console.log('\tTrove not active');
                 return;
@@ -310,7 +300,6 @@ const liquityWithdrawTest = async () => {
         });
 
         it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
-            // eslint-disable-next-line max-len
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -368,11 +357,9 @@ const liquityBorrowTest = async () => {
         });
 
         afterEach(async () => {
-            // eslint-disable-next-line object-curly-newline
             const { troveStatus, collAmount, debtAmount, collPrice } =
                 await liquityView['getTroveInfo(address)'](proxyAddr);
             console.log(`\tTrove status: ${troveStatus}`);
-            // eslint-disable-next-line eqeqeq
             if (troveStatus != 1) {
                 console.log('\tTrove not active');
                 return;
@@ -386,7 +373,6 @@ const liquityBorrowTest = async () => {
         });
 
         it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD debt`, async () => {
-            // eslint-disable-next-line max-len
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -448,11 +434,9 @@ const liqiutyPaybackTest = async () => {
         });
 
         afterEach(async () => {
-            // eslint-disable-next-line object-curly-newline
             const { troveStatus, collAmount, debtAmount, collPrice } =
                 await liquityView['getTroveInfo(address)'](proxyAddr);
             console.log(`\tTrove status: ${troveStatus}`);
-            // eslint-disable-next-line eqeqeq
             if (troveStatus != 1) {
                 console.log('\tTrove not active');
                 return;
@@ -466,7 +450,6 @@ const liqiutyPaybackTest = async () => {
         });
 
         it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
-            // eslint-disable-next-line max-len
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -530,11 +513,9 @@ const liquityCloseTest = async () => {
         });
 
         afterEach(async () => {
-            // eslint-disable-next-line object-curly-newline
             const { troveStatus, collAmount, debtAmount, collPrice } =
                 await liquityView['getTroveInfo(address)'](proxyAddr);
             console.log(`\tTrove status: ${troveStatus}`);
-            // eslint-disable-next-line eqeqeq
             if (troveStatus != 1) {
                 console.log('\tTrove not active');
                 return;
@@ -548,7 +529,6 @@ const liquityCloseTest = async () => {
         });
 
         it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
-            // eslint-disable-next-line max-len
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -560,7 +540,6 @@ const liquityCloseTest = async () => {
 
             const { collAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
             expect(collAmount).to.equal(collAmountOpen);
-            // eslint-disable-next-line max-len
             expect(await balanceOf(lusdAddr, senderAddr)).to.equal(
                 lusdAmountOpen.add(lusdAmountFee),
             );
@@ -599,7 +578,6 @@ const liquitySPDepositTest = async () => {
         });
 
         afterEach(async () => {
-            // eslint-disable-next-line object-curly-newline
             const { compoundedLUSD, ethGain, lqtyGain } =
                 await liquityView['getDepositorInfo(address)'](proxyAddr);
 
@@ -618,10 +596,8 @@ const liquitySPDepositTest = async () => {
         it('... should deposit the remainder of available LUSD', async () => {
             // const wethBalance = await balanceOf(WETH_ADDRESS, proxyAddr);
             // const lqtyBalance = await balanceOf(lqtyAddr, proxyAddr);
-            // eslint-disable-next-line max-len
             // const { ethGain, lqtyGain } = await liquityView['getDepositorInfo(address)'](proxyAddr);
 
-            // eslint-disable-next-line max-len
             await liquitySPDeposit(
                 proxy,
                 hre.ethers.constants.MaxUint256,
@@ -668,7 +644,6 @@ const liquitySPWithdrawTest = async () => {
         });
 
         afterEach(async () => {
-            // eslint-disable-next-line object-curly-newline
             const { compoundedLUSD, ethGain, lqtyGain } =
                 await liquityView['getDepositorInfo(address)'](proxyAddr);
 
@@ -687,7 +662,6 @@ const liquitySPWithdrawTest = async () => {
         it(`... should withdraw ${BN2Float(lusdAmountWithdraw)}`, async () => {
             // const wethBalance = await balanceOf(WETH_ADDRESS, proxyAddr);
             // const lqtyBalance = await balanceOf(lqtyAddr, proxyAddr);
-            // eslint-disable-next-line max-len
             // const { ethGain, lqtyGain } = await liquityView['getDepositorInfo(address)'](proxyAddr);
 
             await liquitySPWithdraw(proxy, lusdAmountWithdraw, senderAddr, proxyAddr, proxyAddr);
@@ -704,10 +678,8 @@ const liquitySPWithdrawTest = async () => {
         it('... should withdraw the rest of the deposited LUSD', async () => {
             // const wethBalance = await balanceOf(WETH_ADDRESS, proxyAddr);
             // const lqtyBalance = await balanceOf(lqtyAddr, proxyAddr);
-            // eslint-disable-next-line max-len
             // const { ethGain, lqtyGain } = await liquityView['getDepositorInfo(address)'](proxyAddr);
 
-            // eslint-disable-next-line max-len
             await liquitySPWithdraw(
                 proxy,
                 hre.ethers.constants.MaxUint256,
@@ -765,11 +737,9 @@ const liquityEthGainToTroveTest = async () => {
         });
 
         afterEach(async () => {
-            // eslint-disable-next-line object-curly-newline
             const { troveStatus, collAmount, debtAmount, collPrice } =
                 await liquityView['getTroveInfo(address)'](proxyAddr);
             console.log(`\tTrove status: ${troveStatus}`);
-            // eslint-disable-next-line eqeqeq
             if (troveStatus != 1) {
                 console.log('\tTrove not active');
                 return;
@@ -854,7 +824,6 @@ const liquityStakeTest = async () => {
         });
 
         afterEach(async () => {
-            // eslint-disable-next-line object-curly-newline
             const { stake, ethGain, lusdGain } =
                 await liquityView['getStakeInfo(address)'](proxyAddr);
 
@@ -864,7 +833,6 @@ const liquityStakeTest = async () => {
         });
 
         it(`... should deposit ${BN2Float(lqtyAmountStake)} LQTY to the staking contract`, async () => {
-            // eslint-disable-next-line max-len
             await liquityStake(proxy, lqtyAmountStake, senderAddr, proxyAddr, proxyAddr);
 
             const { stake } = await liquityView['getStakeInfo(address)'](proxyAddr);
@@ -876,7 +844,6 @@ const liquityStakeTest = async () => {
             const lusdBalance = await balanceOf(lusdAddr, proxyAddr);
             const { ethGain, lusdGain } = await liquityView['getStakeInfo(address)'](proxyAddr);
 
-            // eslint-disable-next-line max-len
             await liquityStake(
                 proxy,
                 hre.ethers.constants.MaxUint256,
@@ -923,7 +890,6 @@ const liquityUnstakeTest = async () => {
         });
 
         afterEach(async () => {
-            // eslint-disable-next-line object-curly-newline
             const { stake, ethGain, lusdGain } =
                 await liquityView['getStakeInfo(address)'](proxyAddr);
 
@@ -933,7 +899,6 @@ const liquityUnstakeTest = async () => {
         });
 
         it(`... should deposit ${BN2Float(lqtyAmountStake)} LQTY to the staking contract`, async () => {
-            // eslint-disable-next-line max-len
             await liquityStake(proxy, lqtyAmountStake, senderAddr, proxyAddr, proxyAddr);
 
             const { stake } = await liquityView['getStakeInfo(address)'](proxyAddr);
@@ -945,7 +910,6 @@ const liquityUnstakeTest = async () => {
             const lusdBalance = await balanceOf(lusdAddr, proxyAddr);
             const { ethGain, lusdGain } = await liquityView['getStakeInfo(address)'](proxyAddr);
 
-            // eslint-disable-next-line max-len
             await liquityUnstake(proxy, lqtyAmountUnstake, senderAddr, proxyAddr, proxyAddr);
 
             const lqtyBalance = await balanceOf(lqtyAddr, senderAddr);
@@ -965,7 +929,6 @@ const liquityUnstakeTest = async () => {
             const lusdBalance = await balanceOf(lusdAddr, proxyAddr);
             const { ethGain, lusdGain } = await liquityView['getStakeInfo(address)'](proxyAddr);
 
-            // eslint-disable-next-line max-len
             await liquityUnstake(
                 proxy,
                 hre.ethers.constants.MaxUint256,
@@ -1016,14 +979,12 @@ const liquityRedeemTest = async () => {
         });
 
         it(`... should redeem ${BN2Float(lusdAmountRedeem)} LUSD worth of ETH`, async () => {
-            // eslint-disable-next-line max-len
             await liquityRedeem(proxy, lusdAmountRedeem, senderAddr, senderAddr, maxFeePercentage);
             ethRedeemed = await balanceOf(WETH_ADDRESS, senderAddr);
             expect(ethRedeemed).to.be.gt(0);
         });
 
         it('... should redeem using the whole LUSD balance', async () => {
-            // eslint-disable-next-line max-len
             await liquityRedeem(
                 proxy,
                 hre.ethers.constants.MaxUint256,
@@ -1085,11 +1046,9 @@ const liquityAdjustTest = async () => {
         });
 
         afterEach(async () => {
-            // eslint-disable-next-line object-curly-newline
             const { troveStatus, collAmount, debtAmount, collPrice } =
                 await liquityView['getTroveInfo(address)'](proxyAddr);
             console.log(`\tTrove status: ${troveStatus}`);
-            // eslint-disable-next-line eqeqeq
             if (troveStatus != 1) {
                 console.log('\tTrove not active');
                 return;
@@ -1103,7 +1062,6 @@ const liquityAdjustTest = async () => {
         });
 
         it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
-            // eslint-disable-next-line max-len
             await liquityOpen(
                 proxy,
                 maxFeePercentage,

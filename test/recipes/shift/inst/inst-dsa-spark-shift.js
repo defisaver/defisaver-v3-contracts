@@ -1,6 +1,3 @@
-/* eslint-disable array-callback-return */
-/* eslint-disable no-param-reassign */
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { ethers } = require('hardhat');
 const sdk = require('@defisaver/sdk');

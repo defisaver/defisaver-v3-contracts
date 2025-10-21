@@ -1,5 +1,3 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable spaced-comment */
 const { expect } = require('chai');
 const hre = require('hardhat');
 const ethers = require('ethers');

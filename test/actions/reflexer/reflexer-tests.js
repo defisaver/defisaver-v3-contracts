@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 const { expect } = require('chai');
 const { BigNumber } = require('ethers');
 const hre = require('hardhat');

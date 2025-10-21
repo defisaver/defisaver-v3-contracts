@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable consistent-return */
 /* eslint-disable no-unused-vars */
 const hre = require('hardhat');
 const { nullAddress } = require('./utils');
@@ -223,7 +221,6 @@ const signSafeTx = async (safeInstance, safeTx, signer, chainId = 1) => {
     // console.log('=======================================');
 
     // @dev - _signTypedData will be renamed to signTypedData in future ethers versions
-    // eslint-disable-next-line no-underscore-dangle
     const signature = await signer._signTypedData(domain, EIP712_SAFE_TX_TYPE, safeTx);
     return signature;
 };

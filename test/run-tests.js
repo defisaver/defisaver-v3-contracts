@@ -1,13 +1,9 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable guard-for-in */
 const { exec } = require('child_process');
 const events = require('events');
 const fs = require('fs');
 const { exit } = require('process');
 
 function getTestFiles(dir, files_) {
-    // eslint-disable-next-line no-param-reassign
     files_ = files_ || [];
     const files = fs.readdirSync(dir);
     for (const i in files) {
@@ -64,9 +60,7 @@ class TestRunner extends events.EventEmitter {
     testClosedListener(nodeHandle, testHandle, test, id) {
         if (testHandle.exitCode === 0) {
             this.passed++;
-            // eslint-disable-next-line no-param-reassign
             test.endTime = Date.now();
-            // eslint-disable-next-line no-param-reassign
             test.time = Math.ceil((test.endTime - test.startTime) / 1000);
             this.passedTests.push(test);
             this.emit('NodeReady', nodeHandle, id);
@@ -77,7 +71,6 @@ class TestRunner extends events.EventEmitter {
             this.pendingTests.push(test);
         } else if (test.retries > 0) {
             this.retries++;
-            // eslint-disable-next-line no-param-reassign
             test.retries--;
             this.pendingTests.push(test);
             this.emit('NodeReady', nodeHandle, id);
@@ -100,7 +93,6 @@ class TestRunner extends events.EventEmitter {
 
         const min = (a, b) => (a > b ? b : a);
         if (nodeCount > min(this.total, MAX_NODE_COUNT)) {
-            // eslint-disable-next-line no-param-reassign
             nodeCount = min(this.total, MAX_NODE_COUNT);
         }
         for (let i = 0; i < nodeCount; i++) {
@@ -122,13 +114,11 @@ class TestRunner extends events.EventEmitter {
     }
 
     startTest(nodeHandle, id, test) {
-        // eslint-disable-next-line no-param-reassign
         test.startTime = Date.now();
         const runner = this;
         const testHandle = exec(
             `npx hardhat test --network local${id} ${test.fileName}`,
             (error, stdout) => {
-                // eslint-disable-next-line no-param-reassign
                 test.output = stdout;
                 if (error) {
                     console.log(error);

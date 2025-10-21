@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { redeploy } = require('../utils/utils');
 

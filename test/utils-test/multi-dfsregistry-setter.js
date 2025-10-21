@@ -123,7 +123,6 @@ describe('Multi-DFSRegistry-Setter', function () {
 
         multiDFSRegistrySetter = multiDFSRegistrySetter.connect(callerAcc);
 
-        // eslint-disable-next-line max-len
         await multiDFSRegistrySetter.approveMultipleContractChanges([exampleID, exampleID2], {
             gasLimit: 3000000,
         });

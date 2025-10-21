@@ -1,6 +1,3 @@
-/* eslint-disable no-continue */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-param-reassign */
 const { expect } = require('chai');
 const hre = require('hardhat');
 const { convexDeposit, convexWithdraw, convexClaim } = require('../../utils/actions');

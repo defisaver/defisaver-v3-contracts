@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 const hre = require('hardhat');
 const { expect } = require('chai');
 const dfs = require('@defisaver/sdk');

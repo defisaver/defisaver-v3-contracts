@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const hre = require('hardhat');

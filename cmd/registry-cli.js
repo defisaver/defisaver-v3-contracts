@@ -1,7 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-param-reassign */
-/* eslint-disable import/no-extraneous-dependencies */
 require('dotenv-safe').config();
 
 const ethers = require('ethers');

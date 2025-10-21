@@ -1,6 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable import/no-extraneous-dependencies */
-
 const dfs = require('@defisaver/sdk');
 
 const { formatExchangeObj, nullAddress, placeHolderAddr } = require('../test/utils/utils');

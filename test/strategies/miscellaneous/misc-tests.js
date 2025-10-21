@@ -104,7 +104,6 @@ const limitOrderStrategyTest = async () => {
 
             strategyExecutor = await redeployCore(network !== 'mainnet');
 
-            // eslint-disable-next-line no-unused-expressions
             network === 'mainnet' ? await redeploy('LimitSell') : await redeploy('LimitSellL2');
             await redeploy('OffchainPriceTrigger');
 
@@ -144,7 +143,6 @@ const limitOrderStrategyTest = async () => {
                     [tokenAddrSell, uniV3Fee, tokenAddrBuy],
                 );
 
-                // eslint-disable-next-line max-len
                 currPrice = await uniV3Wrapper.getSellRate(
                     tokenAddrSell,
                     tokenAddrBuy,
@@ -182,7 +180,6 @@ const limitOrderStrategyTest = async () => {
                 const buyBalanceBefore = await balanceOf(destAddrTransformed, senderAcc.address);
                 const sellBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
 
-                // eslint-disable-next-line max-len
                 await callLimitOrderStrategy(
                     botAcc,
                     minPrice,
@@ -234,7 +231,6 @@ const limitOrderStrategyTest = async () => {
                     [tokenAddrSell, uniV3Fee, tokenAddrBuy],
                 );
 
-                // eslint-disable-next-line max-len
                 currPrice = await uniV3Wrapper.getSellRate(
                     tokenAddrSell,
                     tokenAddrBuy,
@@ -272,7 +268,6 @@ const limitOrderStrategyTest = async () => {
                 const buyBalanceBefore = await balanceOf(destAddrTransformed, senderAcc.address);
                 const sellBalanceBefore = await balanceOf(tokenAddrSell, senderAcc.address);
 
-                // eslint-disable-next-line max-len
                 await callLimitOrderStrategy(
                     botAcc,
                     minPrice,

@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 const hre = require('hardhat');
 
 const { getAssetInfo } = require('@defisaver/tokens');

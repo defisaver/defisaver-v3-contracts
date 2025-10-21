@@ -171,7 +171,6 @@ const dfsRegistryTest = async () => {
             it('...should register a new contract with 0 wait time', async () => {
                 await impersonateAccount(OWNER_ACC);
 
-                // eslint-disable-next-line no-shadow
                 const registryByOwner = registry.connect(owner);
                 await registryByOwner.addNewContract(id1, contractAddr1, 0, gasLimit);
 
@@ -649,7 +648,6 @@ const proxyAuthTest = async () => {
 
         it('...should fail when ProxyAuth has no DSProxy.authority()', async () => {
             try {
-                // eslint-disable-next-line max-len
                 const encodedCall = new dfs.actions.basic.SumInputsAction(
                     1,
                     2,
@@ -669,7 +667,6 @@ const proxyAuthTest = async () => {
             try {
                 await redeploy('StrategyExecutor'); // set diff. address to be StrategyExecutor
 
-                // eslint-disable-next-line max-len
                 const encodedCall = new dfs.actions.basic.SumInputsAction(
                     1,
                     2,

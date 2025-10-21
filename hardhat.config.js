@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 require('dotenv-safe').config();
 require('@nomiclabs/hardhat-waffle');
 require('@nomicfoundation/hardhat-verify');

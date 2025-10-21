@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 const { expect } = require('chai');
 const hre = require('hardhat');
 const { getAssetInfoByAddress } = require('@defisaver/tokens');
@@ -135,7 +134,6 @@ describe('CompoundV3 Import recipe test', function () {
         for (let i = 0; i < collAmounts.length; i++) {
             expect(collAmounts[i]).to.be.equal(proxyCollateralAmounts[i]);
         }
-        // eslint-disable-next-line max-len
         expect(userDepositValue.toString()).to.be.equal(
             (proxyDepositValue - oldProxyDepositValue).toString(),
         );

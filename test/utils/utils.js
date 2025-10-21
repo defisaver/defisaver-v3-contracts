@@ -1,8 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable max-len */
-/* eslint-disable no-else-return */
-/* eslint-disable import/no-unresolved */
-/* eslint-disable no-await-in-loop */
 // const { default: curve } = require('@curvefi/api');
 const curve = import('@curvefi/api');
 const fs = require('fs');
@@ -552,10 +547,10 @@ const setBalance = async (tokenAddr, userAddr, value) => {
 
         tokenContract = await hre.ethers.getContractAt('IProxyERC20', newTokenAddr);
         const tokenState = await tokenContract.callStatic.tokenState();
-        // eslint-disable-next-line no-param-reassign
         tokenAddr = tokenState;
-        // eslint-disable-next-line no-empty
-    } catch (error) {}
+    } catch (error) {
+        console.log(error);
+    }
     const slotInfo = await findBalancesSlot(tokenAddr);
     let index;
     if (slotInfo.isVyper) {
@@ -880,7 +875,6 @@ const approve = async (tokenAddr, to, signer) => {
     if (allowance.toString() === '0') {
         if (signer) {
             const tokenContractSigner = tokenContract.connect(signer);
-            // eslint-disable-next-line max-len
             await tokenContractSigner.approve(to, hre.ethers.constants.MaxUint256, {
                 gasLimit: 1000000,
             });
@@ -932,7 +926,6 @@ const formatMockExchangeObj = async (
     wrapper = undefined,
 ) => {
     if (!wrapper) {
-        // eslint-disable-next-line no-param-reassign
         wrapper = await getContractFromRegistry('MockExchangeWrapper');
     }
 
@@ -1014,7 +1007,6 @@ const formatMockExchangeObjUsdFeed = async (
     ];
 };
 
-// eslint-disable-next-line max-len
 const formatExchangeObj = (
     srcAddr,
     destAddr,
@@ -1071,7 +1063,6 @@ const formatExchangeObj = (
     ];
 };
 
-// eslint-disable-next-line no-underscore-dangle
 let _curveObj;
 const curveApiInit = async () => {
     if (!_curveObj) {
@@ -1099,7 +1090,6 @@ const formatExchangeObjCurve = async (srcAddr, destAddr, amount, wrapper) => {
 
     const exchangeData = hre.ethers.utils.defaultAbiCoder.encode(
         ['address[11]', 'uint256[5][5]', 'address[5]'],
-        // eslint-disable-next-line no-underscore-dangle
         [args._route, args._swapParams, args._pools],
     );
     if (exchangeData.toString().includes('5e74c9036fb86bd7ecdcb084a0673efc32ea31cb')) {
@@ -1310,7 +1300,6 @@ const getGasUsed = async (receipt) => {
 
 const callDataCost = (calldata) => {
     if (calldata.slice(0, 2) === '0x') {
-        // eslint-disable-next-line no-param-reassign
         calldata = calldata.slice(2);
     }
 
@@ -1328,7 +1317,6 @@ const callDataCost = (calldata) => {
 
 const calcGasToUSD = (gasUsed, gasPriceInGwei = 0, callData = 0) => {
     if (gasPriceInGwei === 0) {
-        // eslint-disable-next-line no-param-reassign
         gasPriceInGwei = addrs[network].AVG_GAS_PRICE;
     }
 
@@ -1364,12 +1352,10 @@ const cacheChainlinkPrice = async (tokenSymbol, tokenAddr) => {
     try {
         if (cachedTokenPrices[tokenSymbol]) return cachedTokenPrices[tokenSymbol];
 
-        // eslint-disable-next-line no-param-reassign
         if (tokenAddr.toLowerCase() === WBTC_ADDR.toLowerCase()) tokenAddr = BTC_ADDR;
 
         let wstethMultiplier = '1';
         if (tokenAddr.toLowerCase() === WSTETH_ADDRESS.toLowerCase()) {
-            // eslint-disable-next-line no-param-reassign
             tokenAddr = STETH_ADDRESS;
             wstethMultiplier = BN2Float(
                 await hre.ethers.provider.call({
@@ -1528,7 +1514,6 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
     if (isProxySafe(proxy)) {
         // If signer is not set, try setting it with _address
         if (!proxy.signer.address) {
-            // eslint-disable-next-line no-underscore-dangle
             proxy.signer.address = proxy.signer._address;
         }
         receipt = await executeSafeTx(

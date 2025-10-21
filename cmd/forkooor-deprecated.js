@@ -1,7 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable no-shadow */
-/* eslint-disable no-use-before-define */
-/* eslint-disable import/no-extraneous-dependencies */
 /*
  *
  *
@@ -192,7 +188,6 @@ const {
 program.version('0.0.1');
 // let forkedAddresses = '';
 try {
-    // eslint-disable-next-line global-require
     // forkedAddresses = require('../forked-addr.json');
 } catch (err) {
     console.log('No forked registry set yet, please run deploy');
@@ -208,7 +203,6 @@ function setEnv(key, value) {
     const result = parse(data);
     result[key] = value;
 
-    // eslint-disable-next-line consistent-return
     fs.writeFileSync(pathToEnv, stringify(result));
 }
 
@@ -217,7 +211,6 @@ const forkSetup = async (sender) => {
 
     if (sender) {
         senderAcc = hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -249,7 +242,6 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -296,7 +288,6 @@ const updateMcdCloseStrategySub = async (subId, vaultId, type, price, priceState
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -372,7 +363,6 @@ const updateMcdCloseToCollStrategySub = async (subId, vaultId, type, price, pric
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -450,7 +440,6 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio,
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -475,7 +464,6 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -514,7 +502,6 @@ const cbRebondSub = async (bondId, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -551,7 +538,6 @@ const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState,
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
     let proxy = await getProxy(senderAcc.address);
@@ -575,7 +561,6 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -640,7 +625,6 @@ const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sende
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -682,7 +666,6 @@ const mcdBoostRepaySub = async ({
 
     if (senderAddr) {
         senderAcc = hre.ethers.provider.getSigner(senderAddr.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -751,7 +734,6 @@ const aaveAutomationSub = async ({
 
     if (senderAddr) {
         senderAcc = hre.ethers.provider.getSigner(senderAddr.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -818,7 +800,6 @@ const compAutomationSub = async ({
 
     if (senderAddr) {
         senderAcc = hre.ethers.provider.getSigner(senderAddr.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -881,7 +862,6 @@ const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -915,7 +895,6 @@ const liquityCloseToCollStrategySub = async (price, priceState, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -943,7 +922,6 @@ const liquityCloseToCollStrategySub = async (price, priceState, sender) => {
     console.log(`Subscribed to liquity close strategy with sub id #${subId}`);
 };
 
-// eslint-disable-next-line max-len
 const updateSmartSavingsStrategySub = async (
     protocol,
     subId,
@@ -958,7 +936,6 @@ const updateSmartSavingsStrategySub = async (
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1020,7 +997,6 @@ const activateSub = async (subId, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1058,7 +1034,6 @@ const deactivateSub = async (subId, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1096,7 +1071,6 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1162,13 +1136,11 @@ const createLiquityTrove = async (coll, debt, sender) => {
     }
 };
 
-// eslint-disable-next-line consistent-return
 const createMcdVault = async (type, coll, debt, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1250,7 +1222,6 @@ const createCB = async (lusdAmount, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1328,7 +1299,6 @@ const getTrove = async (acc) => {
         const senderAcc = (await hre.ethers.getSigners())[0];
 
         const proxy = await getProxy(senderAcc.address);
-        // eslint-disable-next-line no-param-reassign
         acc = proxy.address;
     }
 
@@ -1349,7 +1319,6 @@ const callSell = async (srcTokenLabel, destTokenLabel, srcAmount, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1389,7 +1358,6 @@ const supplyCdp = async (type, cdpId, amount, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1430,7 +1398,6 @@ const withdrawLiquity = async (collAmount, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1464,7 +1431,6 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1499,7 +1465,6 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1681,7 +1646,6 @@ const subAaveAutomation = async (
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1732,7 +1696,6 @@ const subAaveV3MainnetAutomation = async (
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1816,7 +1779,6 @@ const subAaveClose = async (
     let senderAcc = (await hre.ethers.getSigners())[0];
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
     proxy = await getProxy(senderAcc.address);
@@ -1900,7 +1862,6 @@ const subAaveCloseWithMaximumGasPrice = async (
     let senderAcc = (await hre.ethers.getSigners())[0];
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
     proxy = await getProxy(senderAcc.address);
@@ -1974,7 +1935,6 @@ const subSparkAutomation = async (
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2048,7 +2008,6 @@ const subSparkClose = async (
     let senderAcc = (await hre.ethers.getSigners())[0];
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
     proxy = await getProxy(senderAcc.address);
@@ -2115,7 +2074,6 @@ const subLimitOrder = async (
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2144,10 +2102,8 @@ const subLimitOrder = async (
     await redeploy('OffchainPriceTrigger', true);
 
     console.log(network);
-    // eslint-disable-next-line no-unused-expressions
     network === 'mainnet' ? await redeploy('LimitSell', true) : await redeploy('LimitSellL2', true);
 
-    // eslint-disable-next-line max-len
     // const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
     await openStrategyAndBundleStorage(true);
 
@@ -2452,7 +2408,6 @@ const getAavePos = async (sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2483,7 +2438,6 @@ const getAavePos = async (sender) => {
         if (!amount.eq(0)) {
             console.log(aaveInfo.collAddr[i]);
             const collAssetInfo = assets.find(
-                // eslint-disable-next-line max-len
                 (a) =>
                     a.addresses[chainIds[network]].toLocaleLowerCase() ===
                     aaveInfo.collAddr[i].toLowerCase(),
@@ -2521,7 +2475,6 @@ const getCompV3Pos = async (isEOA, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2553,7 +2506,6 @@ const getCompV3Pos = async (isEOA, sender) => {
     compInfo.collAmounts.forEach((amount, i) => {
         if (!amount.eq(0)) {
             const collAssetInfo = assets.find(
-                // eslint-disable-next-line max-len
                 (a) =>
                     a.addresses[chainIds[network]].toLocaleLowerCase() ===
                     compInfo.collAddr[i].toLowerCase(),
@@ -2583,7 +2535,6 @@ const updateAaveV3AutomationSub = async (
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2683,7 +2634,6 @@ const createCompV3Position = async (collType, collAmount, debtAmount, isEOA, sen
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2782,7 +2732,6 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2850,7 +2799,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2923,9 +2871,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 // setting this so we can do topUp and addBotCaller from this script
                 for (let i = 0; i < options.bots.length; i++) {
                     const botAddr = options.bots[i];
-                    // eslint-disable-next-line no-await-in-loop
                     await topUp(botAddr);
-                    // eslint-disable-next-line no-await-in-loop
                     await addBotCaller(botAddr, true);
                 }
             }
@@ -3055,7 +3001,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-ss <protocol> <vaultId> <minRatio> <targetRatio> [senderAddr]')
         .description('Subscribes to a Smart Savings strategy')
         .action(async (protocol, vaultId, minRatio, targetRatio, senderAddr) => {
-            // eslint-disable-next-line max-len
             await smartSavingsStrategySub(protocol, vaultId, minRatio, targetRatio, senderAddr);
             process.exit(0);
         });
@@ -3064,7 +3009,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-mcd-close <vaultId> <type> <price> <priceState> [senderAddr]')
         .description('Subscribes to a Mcd close to dai strategy')
         .action(async (vaultId, type, price, priceState, senderAddr) => {
-            // eslint-disable-next-line max-len
             await mcdCloseStrategySub(vaultId, type, price, priceState, senderAddr);
             process.exit(0);
         });
@@ -3073,7 +3017,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-cb-rebond <bondId> [senderAddr]')
         .description('Subscribes a bond to the rebonding strategy')
         .action(async (bondId, senderAddr) => {
-            // eslint-disable-next-line max-len
             await cbRebondSub(bondId, senderAddr);
             process.exit(0);
         });
@@ -3089,7 +3032,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             // triggerRatio should be [110 - 1000] (in that format)
             // triggerState : over/under
             // When executing strategy from bundle, ChickenIn strategy index is 0, ChickenOut is 1
-            // eslint-disable-next-line max-len
             await liqCBPaybackSub(sourceId, sourceType, triggerRatio, triggerState, senderAddr);
             process.exit(0);
         });
@@ -3106,7 +3048,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-mcd-trailing-close-to-coll <vaultId> <type> <percentage> [senderAddr]')
         .description('Subscribes to a Trailing Mcd close to coll strategy')
         .action(async (vaultId, type, percentage, senderAddr) => {
-            // eslint-disable-next-line max-len
             await mcdTrailingCloseStrategySub(vaultId, type, percentage, false, senderAddr);
             process.exit(0);
         });
@@ -3115,7 +3056,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-mcd-trailing-close-to-dai <vaultId> <type> <percentage> [senderAddr]')
         .description('Subscribes to a Trailing Mcd close to dai strategy')
         .action(async (vaultId, percentage, senderAddr) => {
-            // eslint-disable-next-line max-len
             await mcdTrailingCloseStrategySub(vaultId, percentage, true, senderAddr);
             process.exit(0);
         });
@@ -3126,7 +3066,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         )
         .description('Subscribes to aave automation can be both b/r')
         .action(async (minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, senderAcc) => {
-            // eslint-disable-next-line max-len
             await subAaveAutomation(
                 minRatio,
                 maxRatio,
@@ -3151,7 +3090,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line max-len
                 await subAaveV3MainnetAutomation(
                     minRatio,
                     maxRatio,
@@ -3296,7 +3234,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line max-len
                 await subSparkAutomation(
                     minRatio,
                     maxRatio,
@@ -3380,7 +3317,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line no-param-reassign
                 boostEnabled = boostEnabled === 'true';
                 await subMorphoAaveV2Automation(
                     minRatio,
@@ -3397,7 +3333,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-mcd-close-to-coll <vaultId> <type> <price> <priceState> [senderAddr]')
         .description('Subscribes to a Mcd close to coll strategy')
         .action(async (vaultId, type, price, priceState, senderAddr) => {
-            // eslint-disable-next-line max-len
             await mcdCloseToCollStrategySub(vaultId, type, price, priceState, senderAddr);
             process.exit(0);
         });
@@ -3406,7 +3341,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-trailing-liquity-close <percentage> [senderAddr]')
         .description('Subscribes to a trailing liquity to coll strategy')
         .action(async (percentage, senderAddr) => {
-            // eslint-disable-next-line max-len
             await liquityTrailingCloseToCollStrategySub(percentage, senderAddr);
             process.exit(0);
         });
@@ -3415,7 +3349,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-liquity-close-to-coll <price> <priceState> [senderAddr]')
         .description('Subscribes to a Liquity to coll strategy')
         .action(async (price, priceState, senderAddr) => {
-            // eslint-disable-next-line max-len
             await liquityCloseToCollStrategySub(price, priceState, senderAddr);
             process.exit(0);
         });
@@ -3434,7 +3367,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line no-param-reassign
                 boostEnabled = boostEnabled === 'true';
                 await subLiquityAutomation(
                     minRatio,
@@ -3453,7 +3385,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             'sub-limit-order <srcTokenLabel> <destTokenLabel> <srcAmount> <targetPrice> <expireDays> <orderType> [senderAddr]',
         )
         .description('Subscribes to a limit order')
-        // eslint-disable-next-line max-len
         .action(
             async (
                 srcTokenLabel,
@@ -3464,7 +3395,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 orderType,
                 senderAddr,
             ) => {
-                // eslint-disable-next-line max-len
                 await subLimitOrder(
                     srcTokenLabel,
                     destTokenLabel,
@@ -3499,7 +3429,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         )
         .description('Updates mcd close to coll strategy')
         .action(async (subId, vaultId, type, price, priceState, senderAddr) => {
-            // eslint-disable-next-line max-len
             await updateMcdCloseToCollStrategySub(
                 subId,
                 vaultId,
@@ -3526,7 +3455,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 optimalRatioRepay,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line max-len
                 await updateAaveV3AutomationSub(
                     subIdRepay,
                     subIdBoost,
@@ -3556,7 +3484,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line no-param-reassign
                 boostEnabled = boostEnabled === 'true';
                 await updateSubDataMorphoAaveV2(
                     subIdRepay,
@@ -3587,7 +3514,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 optimalRatioRepay,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line no-param-reassign
                 await updateSubDataAaveV2(
                     subIdRepay,
                     subIdBoost,
@@ -3616,7 +3542,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 optimalRatioRepay,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line no-param-reassign
                 await updateSubDataCompV2(
                     subIdRepay,
                     subIdBoost,
@@ -3646,7 +3571,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line no-param-reassign
                 boostEnabled = boostEnabled === 'true';
                 await updateLiquity(
                     subIdRepay,
@@ -3666,7 +3590,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('update-ss <protocol> <subId> <vaultId> <minRatio> <targetRatio> [senderAddr]')
         .description('Updates to a Smart Savings strategy')
         .action(async (protocol, subId, vaultId, minRatio, targetRatio, senderAddr) => {
-            // eslint-disable-next-line max-len
             await updateSmartSavingsStrategySub(
                 protocol,
                 subId,

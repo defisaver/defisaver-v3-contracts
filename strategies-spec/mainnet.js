@@ -1,6 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable import/no-extraneous-dependencies */
-
 const dfs = require('@defisaver/sdk');
 
 const { formatExchangeObj, nullAddress, placeHolderAddr } = require('../test/utils/utils');
@@ -2346,7 +2343,6 @@ const createAaveV3FlRepayOnPriceStrategy = () => {
 };
 
 const aaveV3CloseActions = {
-    // eslint-disable-next-line max-len
     flAction: () =>
         new dfs.actions.flashloan.FLAction(
             new dfs.actions.flashloan.AaveV3FlashLoanAction(
@@ -3367,7 +3363,6 @@ const createSparkFLRepayStrategy = () => {
 };
 
 const sparkCloseActions = {
-    // eslint-disable-next-line max-len
     flAction: () =>
         new dfs.actions.flashloan.FLAction(
             new dfs.actions.flashloan.BalancerFlashLoanAction(

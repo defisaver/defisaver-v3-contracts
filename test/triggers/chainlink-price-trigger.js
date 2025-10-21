@@ -23,7 +23,6 @@ describe('ChainLink-price-trigger', function () {
 
     it('... should get price from chainlink from different assets', async () => {
         for (let i = 0; i < tokens.length; ++i) {
-            // eslint-disable-next-line no-await-in-loop
             const price = await chainLinkPriceTrigger.getPrice(tokens[i]);
             console.log(names[i], ':', price / 1e8);
         }

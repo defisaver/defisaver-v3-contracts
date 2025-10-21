@@ -1,9 +1,7 @@
-/* eslint-disable no-await-in-loop */
 const { assets, getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const hre = require('hardhat');
 
-// eslint-disable-next-line max-len
 const compoundCollateralAssets = assets
     .filter((a) => a.compoundCollateral)
     .map((a) => getAssetInfo(a.symbol));
@@ -40,7 +38,6 @@ const compSupplyTest = async (compTestLength) => {
             const cTokenData = compoundCollateralAssets[i];
             if (cTokenData.symbol === 'cWBTC Legacy') {
                 // Jump over WBTC Legacy
-                // eslint-disable-next-line no-continue
                 continue;
             }
             const fetchedAmountWithUSD = fetchAmountinUSDPrice(cTokenData.underlyingAsset, '10000');
@@ -87,7 +84,6 @@ const compWithdrawTest = async (compTestLength) => {
             const cTokenData = compoundCollateralAssets[i];
             if (cTokenData.symbol === 'cWBTC Legacy') {
                 // Jump over WBTC Legacy
-                // eslint-disable-next-line no-continue
                 continue;
             }
 
@@ -137,7 +133,6 @@ const compBorrowTest = async (compTestLength) => {
             const cTokenData = compoundCollateralAssets[i];
             if (cTokenData.symbol === 'cWBTC Legacy') {
                 // Jump over WBTC Legacy
-                // eslint-disable-next-line no-continue
                 continue;
             }
 
@@ -204,7 +199,6 @@ const compPaybackTest = async (compTestLength) => {
             const cTokenData = compoundCollateralAssets[i];
             if (cTokenData.symbol === 'cWBTC Legacy') {
                 // Jump over WBTC Legacy
-                // eslint-disable-next-line no-continue
                 continue;
             }
             const fetchedAmountWithUSD = fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000');

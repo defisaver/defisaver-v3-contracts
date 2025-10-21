@@ -1,7 +1,3 @@
-/* eslint-disable no-nested-ternary */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
 const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 
@@ -86,7 +82,6 @@ const executeStrategy = async (
     return { callData, receipt };
 };
 
-// eslint-disable-next-line max-len
 const callDcaStrategy = async (
     botAcc,
     strategyExecutor,
@@ -129,7 +124,6 @@ const callDcaStrategy = async (
     let receipt;
 
     if (network === 'mainnet') {
-        // eslint-disable-next-line max-len
         receipt = await strategyExecutorByBot.executeStrategy(
             subId,
             0,
@@ -141,7 +135,6 @@ const callDcaStrategy = async (
             },
         );
     } else {
-        // eslint-disable-next-line max-len
         receipt = await strategyExecutorByBot.executeStrategy(
             subId,
             0,
@@ -161,7 +154,6 @@ const callDcaStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callUniV3RangeOrderStrategy = async (
     botAcc,
     strategyExecutor,
@@ -192,7 +184,6 @@ const callUniV3RangeOrderStrategy = async (
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     const strategyIndex = 0;
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -212,7 +203,6 @@ const callUniV3RangeOrderStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callUniV3CollectStrategy = async (botAcc, strategyExecutor, subId, strategySub, nftOwner) => {
     const triggerCallData = [];
     const actionsCallData = [];
@@ -231,7 +221,6 @@ const callUniV3CollectStrategy = async (botAcc, strategyExecutor, subId, strateg
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     const strategyIndex = 0;
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -297,7 +286,6 @@ const callMcdRepayFromYearnWithExchangeStrategy = async (
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -353,7 +341,6 @@ const callMcdRepayFromYearnStrategy = async (
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -373,7 +360,6 @@ const callMcdRepayFromYearnStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callMcdRepayStrategy = async (
     botAcc,
     strategyExecutor,
@@ -436,7 +422,6 @@ const callMcdRepayStrategy = async (
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -456,7 +441,6 @@ const callMcdRepayStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callFLMcdRepayStrategy = async (
     botAcc,
     strategyExecutor,
@@ -524,7 +508,6 @@ const callFLMcdRepayStrategy = async (
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], [nextPrice, '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -574,7 +557,6 @@ const callMcdRepayCompositeStrategy = async (
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -635,7 +617,6 @@ const callMcdFLRepayCompositeStrategy = async (
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -686,7 +667,6 @@ const callMcdBoostCompositeStrategy = async (
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -747,7 +727,6 @@ const callMcdFLBoostCompositeStrategy = async (
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -767,7 +746,6 @@ const callMcdFLBoostCompositeStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callMcdBoostStrategy = async (
     botAcc,
     strategyExecutor,
@@ -829,7 +807,6 @@ const callMcdBoostStrategy = async (
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -849,7 +826,6 @@ const callMcdBoostStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callFLMcdBoostStrategy = async (
     botAcc,
     strategyExecutor,
@@ -916,7 +892,6 @@ const callFLMcdBoostStrategy = async (
     triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -967,7 +942,6 @@ const callCompRepayStrategy = async (botAcc, strategyExecutor, subId, strategySu
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     const strategyIndex = 0;
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -1019,7 +993,6 @@ const callCompBoostStrategy = async (botAcc, strategyExecutor, subId, strategySu
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     const strategyIndex = 0;
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -1094,7 +1067,6 @@ const callLimitOrderStrategy = async (
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
     let receipt;
     if (network === 'mainnet') {
-        // eslint-disable-next-line max-len
         receipt = await strategyExecutorByBot.executeStrategy(
             subId,
             0,
@@ -1106,7 +1078,6 @@ const callLimitOrderStrategy = async (
             },
         );
     } else {
-        // eslint-disable-next-line max-len
         receipt = await strategyExecutorByBot.executeStrategy(
             subId,
             0,
@@ -1126,7 +1097,6 @@ const callLimitOrderStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callMcdCloseToCollStrategy = async (
     proxy,
     botAcc,
@@ -1200,7 +1170,6 @@ const callMcdCloseToCollStrategy = async (
     } else {
         triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
     }
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -1220,7 +1189,6 @@ const callMcdCloseToCollStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callMcdCloseToDaiStrategy = async (
     proxy,
     botAcc,
@@ -1287,7 +1255,6 @@ const callMcdCloseToDaiStrategy = async (
     } else {
         triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
     }
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -1349,7 +1316,6 @@ const callReflexerBoostStrategy = async (
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
     const strategyIndex = 0;
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -1421,7 +1387,6 @@ const callReflexerFLBoostStrategy = async (
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
     const strategyIndex = 1;
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -1483,7 +1448,6 @@ const callReflexerRepayStrategy = async (
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
     const strategyIndex = 0;
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -1552,7 +1516,6 @@ const callReflexerFLRepayStrategy = async (
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
     const strategyIndex = 1;
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -1638,7 +1601,6 @@ const callLiquityBoostStrategy = async (
     const strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
     const strategyId = 0;
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyId,
@@ -1731,7 +1693,6 @@ const callLiquityFLBoostStrategy = async (
     const strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
     const strategyId = 1;
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyId,
@@ -1846,7 +1807,6 @@ const callLiquityFLBoostWithCollStrategy = async (
     const strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
     const strategyId = 2;
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyId,
@@ -1933,7 +1893,6 @@ const callLiquityRepayStrategy = async (
     const strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
     const strategyId = 0;
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyId,
@@ -2026,7 +1985,6 @@ const callLiquityFLRepayStrategy = async (
     const strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
     const strategyId = 1;
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyId,
@@ -2046,7 +2004,6 @@ const callLiquityFLRepayStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callLiquityCloseToCollStrategy = async (
     botAcc,
     strategyExecutor,
@@ -2110,7 +2067,6 @@ const callLiquityCloseToCollStrategy = async (
         triggerCallData.push(abiCoder.encode(['uint256', 'uint8'], ['0', '0']));
     }
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -2130,7 +2086,6 @@ const callLiquityCloseToCollStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callCbRebondStrategy = async (botAcc, strategyExecutor, subId, strategySub) => {
     const actionsCallData = [];
     const cbChickenInAction = new dfs.actions.chickenBonds.CBChickenInAction(
@@ -2172,7 +2127,6 @@ const callCbRebondStrategy = async (botAcc, strategyExecutor, subId, strategySub
 
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -2377,7 +2331,6 @@ const callMorphoAaveV2FLBoostStrategy = async ({
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyId,
@@ -2435,7 +2388,6 @@ const callMorphoAaveV2BoostStrategy = async ({
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyId,
@@ -2498,7 +2450,6 @@ const callMorphoAaveV2FLRepayStrategy = async ({
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyId,
@@ -2557,7 +2508,6 @@ const callMorphoAaveV2RepayStrategy = async ({
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyId,
@@ -2577,7 +2527,6 @@ const callMorphoAaveV2RepayStrategy = async ({
     );
 };
 
-// eslint-disable-next-line max-len
 const callAaveV2BoostStrategy = async (
     botAcc,
     strategyExecutor,
@@ -2642,7 +2591,6 @@ const callAaveV2BoostStrategy = async (
     const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -2662,7 +2610,6 @@ const callAaveV2BoostStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callAaveFLV2BoostStrategy = async (
     botAcc,
     strategyExecutor,
@@ -2737,7 +2684,6 @@ const callAaveFLV2BoostStrategy = async (
     const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -2757,7 +2703,6 @@ const callAaveFLV2BoostStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callAaveV2RepayStrategy = async (
     botAcc,
     strategyExecutor,
@@ -2820,7 +2765,6 @@ const callAaveV2RepayStrategy = async (
     const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -2840,7 +2784,6 @@ const callAaveV2RepayStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callAaveFLV2RepayStrategy = async (
     botAcc,
     strategyExecutor,
@@ -2913,7 +2856,6 @@ const callAaveFLV2RepayStrategy = async (
     const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -2933,7 +2875,6 @@ const callAaveFLV2RepayStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callCompV2BoostStrategy = async (
     botAcc,
     strategyExecutor,
@@ -2995,7 +2936,6 @@ const callCompV2BoostStrategy = async (
     const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -3015,7 +2955,6 @@ const callCompV2BoostStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callCompFLV2BoostStrategy = async (
     botAcc,
     strategyExecutor,
@@ -3087,7 +3026,6 @@ const callCompFLV2BoostStrategy = async (
     const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -3107,7 +3045,6 @@ const callCompFLV2BoostStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callCompV2RepayStrategy = async (
     botAcc,
     strategyExecutor,
@@ -3169,7 +3106,6 @@ const callCompV2RepayStrategy = async (
     const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -3189,7 +3125,6 @@ const callCompV2RepayStrategy = async (
     );
 };
 
-// eslint-disable-next-line max-len
 const callCompFLV2RepayStrategy = async (
     botAcc,
     strategyExecutor,
@@ -3261,7 +3196,6 @@ const callCompFLV2RepayStrategy = async (
     const triggerCallData = [hre.ethers.utils.defaultAbiCoder.encode(['uint256'], ['0'])];
 
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -3362,7 +3296,6 @@ const callSparkRepayStrategy = async (
         sub,
     ]);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -3472,7 +3405,6 @@ const callSparkFLRepayStrategy = async (
         sub,
     ]);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -3567,7 +3499,6 @@ const callSparkBoostStrategy = async (
         sub,
     ]);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -3680,7 +3611,6 @@ const callSparkFLBoostStrategy = async (
         sub,
     ]);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -3701,7 +3631,6 @@ const callSparkFLBoostStrategy = async (
 };
 
 const sparkCloseActionsEncoded = {
-    // eslint-disable-next-line max-len
     flAction: ({ repayAmount, flAsset }) =>
         new dfs.actions.flashloan.FLAction(
             new dfs.actions.flashloan.BalancerFlashLoanAction([flAsset], [repayAmount], []),
@@ -3729,7 +3658,6 @@ const sparkCloseActionsEncoded = {
             '0',
         ).encodeForRecipe()[0],
 
-    // eslint-disable-next-line max-len
     sellAction: async ({ srcTokenInfo, destTokenInfo, swapAmount }) =>
         new dfs.actions.basic.SellAction(
             await formatMockExchangeObj(srcTokenInfo, destTokenInfo, swapAmount),
@@ -3775,7 +3703,6 @@ const callSparkCloseToDebtStrategy = async (
             withdrawAmount: partialAmounts?.withdrawAmount || hre.ethers.constants.MaxUint256,
         }),
     );
-    // eslint-disable-next-line max-len
     actionsCallData.push(
         await sparkCloseActionsEncoded.sellAction({
             srcTokenInfo,
@@ -3838,7 +3765,6 @@ const callSparkFLCloseToDebtStrategy = async (
             withdrawAmount: withdrawAmount || hre.ethers.constants.MaxUint256,
         }),
     );
-    // eslint-disable-next-line max-len
     actionsCallData.push(
         await sparkCloseActionsEncoded.sellAction({
             srcTokenInfo,
@@ -4191,7 +4117,6 @@ const callLiquityDebtInFrontRepayStrategy = async (
 
     const strategyIndex = 0;
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -4212,7 +4137,6 @@ const callLiquityDebtInFrontRepayStrategy = async (
 };
 
 const aaveV3CloseActionsEncoded = {
-    // eslint-disable-next-line max-len
     flAction: ({ repayAmount, flAsset }) =>
         new dfs.actions.flashloan.FLAction(
             new dfs.actions.flashloan.AaveV3FlashLoanAction(
@@ -4245,7 +4169,6 @@ const aaveV3CloseActionsEncoded = {
             '0',
         ).encodeForRecipe()[0],
 
-    // eslint-disable-next-line max-len
     sellAction: async ({ srcTokenInfo, destTokenInfo, swapAmount }) =>
         new dfs.actions.basic.SellAction(
             await formatMockExchangeObj(srcTokenInfo, destTokenInfo, swapAmount),
@@ -4291,7 +4214,6 @@ const callAaveCloseToDebtWithMaximumGasPriceStrategy = async (
             withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
         }),
     );
-    // eslint-disable-next-line max-len
     actionsCallData.push(
         await aaveV3CloseActionsEncoded.sellAction({
             srcTokenInfo,
@@ -4348,7 +4270,6 @@ const callAaveCloseToDebtStrategy = async (
             withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
         }),
     );
-    // eslint-disable-next-line max-len
     actionsCallData.push(
         await aaveV3CloseActionsEncoded.sellAction({
             srcTokenInfo,
@@ -4417,7 +4338,6 @@ const callAaveFLCloseToDebtWithMaximumGasPriceStrategy = async (
             withdrawAmount: withdrawAmount || MAXUINT,
         }),
     );
-    // eslint-disable-next-line max-len
     actionsCallData.push(
         await aaveV3CloseActionsEncoded.sellAction({
             srcTokenInfo,
@@ -4484,7 +4404,6 @@ const callAaveFLCloseToDebtStrategy = async (
             withdrawAmount: withdrawAmount || MAXUINT,
         }),
     );
-    // eslint-disable-next-line max-len
     actionsCallData.push(
         await aaveV3CloseActionsEncoded.sellAction({
             srcTokenInfo,
@@ -4800,7 +4719,6 @@ const callCurveUsdAdvancedRepayStrategy = async (
         ),
     );
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -4868,7 +4786,6 @@ const callCurveUsdRepayStrategy = async (
         ),
     );
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -4942,7 +4859,6 @@ const callCurveUsdFLRepayStrategy = async (
         ),
     );
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -5013,7 +4929,6 @@ const callCurveUsdBoostStrategy = async (
         ),
     );
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -5085,7 +5000,6 @@ const callCurveUsdFLDebtBoostStrategy = async (
         ),
     );
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -5163,7 +5077,6 @@ const callCurveUsdFLCollBoostStrategy = async (
         ),
     );
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -5301,7 +5214,6 @@ const callMorphoBlueBoostStrategy = async (
         ),
     );
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -5394,7 +5306,6 @@ const callMorphoBlueFLCollBoostStrategy = async (
         ),
     );
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -5480,7 +5391,6 @@ const callMorphoBlueFLDebtBoostStrategy = async (
         ),
     );
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -5558,7 +5468,6 @@ const callMorphoBlueRepayStrategy = async (
         ),
     );
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -5644,7 +5553,6 @@ const callMorphoBlueFLCollRepayStrategy = async (
         ),
     );
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -5737,7 +5645,6 @@ const callMorphoBlueFLDebtRepayStrategy = async (
         ),
     );
     const strategyExecutorByBot = strategyExecutor.connect(botAcc);
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,

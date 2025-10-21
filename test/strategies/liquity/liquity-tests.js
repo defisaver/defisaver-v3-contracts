@@ -160,7 +160,6 @@ const liquityBoostStrategyTest = async () => {
 
             const strategyId1 = await createStrategy(...liquityBoostStrategy, true);
             const strategyId2 = await createStrategy(...liquityFLBoostStrategy, true);
-            // eslint-disable-next-line max-len
             const strategyId3 = await createStrategy(...LiquityFLBoostWithCollStrategy, true);
 
             const bundleId = await createBundle([strategyId1, strategyId2, strategyId3]);
@@ -186,7 +185,6 @@ const liquityBoostStrategyTest = async () => {
 
             const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', BOOST_AMOUNT_USD));
 
-            // eslint-disable-next-line max-len
             await callLiquityBoostStrategy(
                 botAcc,
                 strategyExecutor,
@@ -212,7 +210,6 @@ const liquityBoostStrategyTest = async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
             const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', BOOST_AMOUNT_USD));
 
-            // eslint-disable-next-line max-len
             await callLiquityFLBoostStrategy(
                 botAcc,
                 strategyExecutor,
@@ -238,7 +235,6 @@ const liquityBoostStrategyTest = async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
             const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', BOOST_AMOUNT_USD));
 
-            // eslint-disable-next-line max-len
             await callLiquityFLBoostWithCollStrategy(
                 botAcc,
                 strategyExecutor,
@@ -352,7 +348,6 @@ const liquityRepayStrategyTest = async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
             const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', REPAY_AMOUNT_USD));
 
-            // eslint-disable-next-line max-len
             await callLiquityRepayStrategy(
                 botAcc,
                 strategyExecutor,
@@ -377,7 +372,6 @@ const liquityRepayStrategyTest = async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
             const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', REPAY_AMOUNT_USD));
 
-            // eslint-disable-next-line max-len
             await callLiquityFLRepayStrategy(
                 botAcc,
                 strategyExecutor,
@@ -521,7 +515,6 @@ const liquityCBPaybackTest = async () => {
             bondId = bonds[bonds.length - 1].bondID.toString();
             const bondAmount = bonds[bonds.length - 1].lusdAmount;
 
-            // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subLiquityCBPaybackStrategy(
                 proxy,
                 bondId,
@@ -575,7 +568,6 @@ const liquityCBPaybackTest = async () => {
             let debtAfter;
             let lusdEOABefore;
             let lusdEOAAfter;
-            // eslint-disable-next-line max-len
 
             ({ subId, strategySub } = await subLiquityCBPaybackStrategy(
                 proxy,
@@ -624,7 +616,6 @@ const liquityCBPaybackTest = async () => {
             ({ subId } = await subCbRebondStrategy(proxy, bondId, '31'));
             cbRebondSubId = subId;
 
-            // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subLiquityCBPaybackStrategy(
                 proxy,
                 cbRebondSubId,
@@ -675,7 +666,6 @@ const liquityCBPaybackTest = async () => {
             ({ subId } = await subCbRebondStrategy(proxy, bondId, '31'));
             cbRebondSubId = subId;
 
-            // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subLiquityCBPaybackStrategy(
                 proxy,
                 cbRebondSubId,
@@ -724,7 +714,6 @@ const liquityCBPaybackTest = async () => {
             bondId = bonds[bonds.length - 1].bondID.toString();
             const bondAmount = bonds[bonds.length - 1].lusdAmount;
 
-            // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subLiquityCBPaybackStrategy(
                 proxy,
                 bondId,
@@ -777,7 +766,6 @@ const liquityCBPaybackTest = async () => {
             ({ subId } = await subCbRebondStrategy(proxy, bondId, '31'));
             cbRebondSubId = subId;
 
-            // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subLiquityCBPaybackStrategy(
                 proxy,
                 cbRebondSubId,
@@ -898,7 +886,6 @@ const liquityCloseToCollStrategyTest = async () => {
             const ethPrice = 1500;
             await setMockPrice(mockedPriceFeed, roundId, ETH_ADDR, ethPrice);
 
-            // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subLiquityTrailingCloseToCollStrategy(
                 proxy,
                 percentage,
@@ -969,7 +956,6 @@ const liquityCloseToCollStrategyTest = async () => {
 
             const targetPrice = currPrice - 100; // Target is smaller so we can execute it
 
-            // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subLiquityCloseToCollStrategy(
                 proxy,
                 targetPrice,
@@ -1286,7 +1272,6 @@ const liquityDebtInFrontRepayStrategyTest = async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
             const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '500'));
 
-            // eslint-disable-next-line max-len
             await callLiquityDebtInFrontRepayStrategy(
                 botAcc,
                 strategyExecutor,

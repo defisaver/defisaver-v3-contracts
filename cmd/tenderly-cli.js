@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable import/no-extraneous-dependencies */
 require('dotenv-safe').config();
 const fs = require('fs');
 const path = require('path');

@@ -606,7 +606,6 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     debtAssetInfo.decimals,
                 );
 
-                // eslint-disable-next-line max-len
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
                     fetchAmountinUSDPrice(collAssetInfo.symbol, usdSwapAmount),
@@ -769,7 +768,6 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
                     debtAssetInfo.decimals,
                 );
 
-                // eslint-disable-next-line max-len
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
                     fetchAmountinUSDPrice(collAssetInfo.symbol, usdSwapAmount),

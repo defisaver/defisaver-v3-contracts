@@ -94,7 +94,6 @@ const callAaveV3RepayL2Strategy = async (
         actionsCallData,
     ]);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -199,7 +198,6 @@ const callAaveFLV3RepayL2Strategy = async (
         actionsCallData,
     ]);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -291,7 +289,6 @@ const callAaveV3BoostL2Strategy = async (
         actionsCallData,
     ]);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -399,7 +396,6 @@ const callAaveFLV3BoostL2Strategy = async (
         actionsCallData,
     ]);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -419,7 +415,6 @@ const callAaveFLV3BoostL2Strategy = async (
 };
 
 const aaveV3CloseActionsEncoded = {
-    // eslint-disable-next-line max-len
     flAction: ({ repayAmount, flAsset }) =>
         new dfs.actions.flashloan.AaveV3FlashLoanAction(
             [flAsset],
@@ -450,7 +445,6 @@ const aaveV3CloseActionsEncoded = {
             '0',
         ).encodeForRecipe()[0],
 
-    // eslint-disable-next-line max-len
     sellAction: async ({ srcTokenInfo, destTokenInfo, swapAmount }) =>
         new dfs.actions.basic.SellAction(
             await formatMockExchangeObj(srcTokenInfo, destTokenInfo, swapAmount),
@@ -495,7 +489,6 @@ const callAaveCloseToDebtL2Strategy = async (
             withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
         }),
     );
-    // eslint-disable-next-line max-len
     actionsCallData.push(
         await aaveV3CloseActionsEncoded.sellAction({
             srcTokenInfo,
@@ -556,7 +549,6 @@ const callAaveFLCloseToDebtL2Strategy = async (
             withdrawAmount: withdrawAmount || MAXUINT,
         }),
     );
-    // eslint-disable-next-line max-len
     actionsCallData.push(
         await aaveV3CloseActionsEncoded.sellAction({
             srcTokenInfo,

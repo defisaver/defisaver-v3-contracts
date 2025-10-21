@@ -1,7 +1,3 @@
-/* eslint-disable eqeqeq */
-/* eslint-disable max-len */
-/* eslint-disable camelcase */
-
 const hre = require('hardhat');
 const dfs = require('@defisaver/sdk');
 const { expect } = require('chai');

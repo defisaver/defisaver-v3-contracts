@@ -122,7 +122,6 @@ const getRedemptionHints = async (lusdAmount, from) => {
 
     if (lusdAmount === hre.ethers.constants.MaxUint256) {
         const lusdAddr = getAssetInfo('LUSD').address;
-        // eslint-disable-next-line no-param-reassign
         lusdAmount = await balanceOf(lusdAddr, from);
     }
     const { firstRedemptionHint, partialRedemptionHintNICR, truncatedLUSDamount } =

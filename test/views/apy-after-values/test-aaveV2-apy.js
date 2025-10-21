@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const { expect } = require('chai');
 const hre = require('hardhat');
 
@@ -48,7 +47,6 @@ const aaveV2ApyAfterValuesTest = async () => {
                 const collAsset = getAssetInfo(collateralTokens[i]);
                 const debtAsset = getAssetInfo(debtTokens[j]);
                 if (collAsset.symbol === debtAsset.symbol) {
-                    // eslint-disable-next-line no-continue
                     continue;
                 }
                 it(`... should estimate supply and borrow rates for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]`, async () => {
@@ -64,7 +62,6 @@ const aaveV2ApyAfterValuesTest = async () => {
                         console.log(
                             `skipping test case for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]. Collateral reserve is not active or it is frozen`,
                         );
-                        // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }
@@ -75,7 +72,6 @@ const aaveV2ApyAfterValuesTest = async () => {
                         console.log(
                             `skipping test case for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]. Borrow reserve is not active or borrowing is not enabled`,
                         );
-                        // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }

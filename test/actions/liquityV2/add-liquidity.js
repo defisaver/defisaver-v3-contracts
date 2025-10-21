@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { getOwnerAddr, getProxy, setBalance } = require('../../utils/utils');
 const { topUp } = require('../../../scripts/utils/fork');

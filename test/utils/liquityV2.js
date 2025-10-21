@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { getContractFromRegistry, openStrategyAndBundleStorage } = require('./utils');
 const {

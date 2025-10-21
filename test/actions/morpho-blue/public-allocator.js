@@ -1,11 +1,5 @@
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable max-len */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-mixed-operators */
-/* eslint-disable no-undef */
-
 /// @dev Data fetching adapted from 'https://github.com/morpho-org/public-allocator-scripts'
+/* eslint-disable no-undef */
 
 const hre = require('hardhat');
 const { expect } = require('chai');
@@ -16,7 +10,6 @@ const {
     chainIds,
     network,
     isNetworkFork,
-    addrs,
     getOwnerAddr,
     setBalance,
     approve,
@@ -235,7 +228,7 @@ const morphoBlueReallocateLiquidityTest = async (isFork) => {
                 withdrawals,
             );
             const functionData = action.encodeForDsProxyCall()[1];
-            const tx = await executeAction('MorphoBlueReallocateLiquidity', functionData, proxy);
+            await executeAction('MorphoBlueReallocateLiquidity', functionData, proxy);
         });
         it('... test MorphoBlue reallocate with borrow inside recipe', async () => {
             const marketData = await fetchMarketData();

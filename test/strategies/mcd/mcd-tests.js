@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
 
@@ -79,7 +78,6 @@ const createRepayBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
     const strategyId1 = await createStrategy(...repayCompositeStrategyEncoded, true);
-    // eslint-disable-next-line max-len
     const strategyId2 = await createStrategy(...flRepayCompositeStrategyEncoded, true);
 
     return createBundle([strategyId1, strategyId2]);
@@ -207,7 +205,6 @@ const mcdBoostStrategyTest = async (numTests) => {
 
                 const ratioBefore = await getRatio(mcdView, vaultId);
 
-                // eslint-disable-next-line max-len
                 await callMcdBoostCompositeStrategy(
                     botAcc,
                     strategyExecutor,
@@ -234,7 +231,6 @@ const mcdBoostStrategyTest = async (numTests) => {
 
                 const ratioBefore = await getRatio(mcdView, vaultId);
 
-                // eslint-disable-next-line max-len
                 await callMcdFLBoostCompositeStrategy(
                     botAcc,
                     strategyExecutor,
@@ -374,7 +370,6 @@ const mcdRepayStrategyTest = async (numTests) => {
 
                 console.log(ratioBefore.toString());
 
-                // eslint-disable-next-line max-len
                 await callMcdRepayCompositeStrategy(
                     botAcc,
                     strategyExecutor,
@@ -399,7 +394,6 @@ const mcdRepayStrategyTest = async (numTests) => {
                 await revertToSnapshot(snapshotId);
                 const ratioBefore = await getRatio(mcdView, vaultId);
 
-                // eslint-disable-next-line max-len
                 await callMcdFLRepayCompositeStrategy(
                     botAcc,
                     strategyExecutor,

@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 const { expect } = require('chai');
 
 const hre = require('hardhat');
@@ -1262,7 +1261,6 @@ const aaveV3ClaimRewardsTest = async () => {
         // Rewards only supported on Optimism. Tested on 15281577
         it('... should claim OP rewards on Optimism DSProxy position', async () => {
             if (network !== 'optimism') {
-                // eslint-disable-next-line no-unused-expressions
                 expect(true).to.be.true;
             }
 
@@ -1376,7 +1374,6 @@ const aaveV3DelegateCreditWithSigTest = async () => {
 
             const signature = hre.ethers.utils.splitSignature(
                 // @dev - _signTypedData will be renamed to signTypedData in future ethers versions
-                // eslint-disable-next-line no-underscore-dangle
                 await senderAcc._signTypedData(
                     {
                         name: 'Aave Ethereum Variable Debt WETH', // debtToken.name

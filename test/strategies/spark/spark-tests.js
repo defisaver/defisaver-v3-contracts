@@ -264,7 +264,6 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
             });
 
             it('... should call Spark Repay strategy', async () => {
-                // eslint-disable-next-line max-len
                 const ratioBefore = await sparkView.getRatio(
                     addrs[network].SPARK_MARKET,
                     proxyAddr,
@@ -295,7 +294,6 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
             });
 
             it('... should call Spark With FL Repay strategy', async () => {
-                // eslint-disable-next-line max-len
                 const ratioBefore = await sparkView.getRatio(
                     addrs[network].SPARK_MARKET,
                     proxyAddr,
@@ -321,7 +319,6 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
                     collAssetInfo.decimals,
                 );
 
-                // eslint-disable-next-line max-len
                 await callSparkFLRepayStrategy(
                     botAcc,
                     strategyExecutor,
@@ -463,7 +460,6 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
             });
 
             it('... should call Spark Boost strategy', async () => {
-                // eslint-disable-next-line max-len
                 const ratioBefore = await sparkView.getRatio(
                     addrs[network].SPARK_MARKET,
                     proxyAddr,
@@ -494,7 +490,6 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
             });
 
             it('... should call Spark With FL Boost strategy', async () => {
-                // eslint-disable-next-line max-len
                 const ratioBefore = await sparkView.getRatio(
                     addrs[network].SPARK_MARKET,
                     proxyAddr,
@@ -1341,7 +1336,6 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
 
             it('... should call Spark Close strategy', async () => {
                 snapshotId4partial = await takeSnapshot();
-                // eslint-disable-next-line max-len
                 const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
@@ -1671,7 +1665,6 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
                     debtAssetInfo.decimals,
                 );
 
-                // eslint-disable-next-line max-len
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
                     fetchAmountinUSDPrice(collAssetInfo.symbol, usdSwapAmount),

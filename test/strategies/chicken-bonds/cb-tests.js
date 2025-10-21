@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
 const automationSdk = require('@defisaver/automation-sdk');
@@ -99,7 +98,6 @@ const cbRebondStrategyTest = async () => {
         });
 
         it('... should make a Chicken Bond Rebond strategy and subscribe', async () => {
-            // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subCbRebondStrategy(proxy, bondID, strategyId));
             const smallBondObject = await subCbRebondStrategy(proxy, smallBondId, strategyId);
             smallBondSubId = smallBondObject.subId;

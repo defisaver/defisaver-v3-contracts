@@ -108,7 +108,6 @@ const morphoAaveV3SupplyTest = async () => {
 
                 // seems to be one wei off
                 if (isCollateral) {
-                    // eslint-disable-next-line max-len
                     expect(userInfo[2][i].collateralBalance).to.be.closeTo(amountFormatted, 1);
                 } else {
                     expect(userInfo[2][i].supplyBalance).to.be.closeTo(amountFormatted, 1);
@@ -153,7 +152,6 @@ const morphoAaveV3SetManagerTest = async () => {
             );
             const permission = await morphoAaveV3.isManagedBy(proxy.address, senderAcc.address);
             console.log(permission);
-            // eslint-disable-next-line no-unused-expressions
             expect(permission).to.be.true;
         });
     });

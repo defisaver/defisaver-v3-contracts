@@ -1,5 +1,3 @@
-/* eslint-disable array-callback-return */
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { addrs, nullAddress, network } = require('./utils');

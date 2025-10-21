@@ -1,5 +1,3 @@
-/* eslint-disable one-var-declaration-per-line */
-/* eslint-disable one-var */
 const { expect } = require('chai');
 const hre = require('hardhat');
 const sdk = require('@defisaver/sdk');

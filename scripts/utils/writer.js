@@ -1,5 +1,3 @@
-/* eslint-disable global-require */
-// eslint-disable-next-line import/no-extraneous-dependencies
 require('dotenv-safe').config();
 
 const fs = require('fs');
@@ -11,7 +9,6 @@ const DEPLOYMENTS_FOLDER_NAME = 'deployments';
 
 const write = async (contractName, network, address, ...args) => {
     const filename = (await getFile('./artifacts/', `${contractName}.json`))[0];
-    // eslint-disable-next-line import/no-dynamic-require
     const file = require(filename);
 
     const newFile = {

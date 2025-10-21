@@ -87,7 +87,6 @@ describe('LlamaLend-Payback', function () {
             await approve(debtTokenAddr, proxy.address, senderAcc);
             console.log(await balanceOf(debtTokenAddr, senderAcc.address));
             const maxActiveBand = await getActiveBand(controllerAddr);
-            // eslint-disable-next-line max-len
             await llamalendPayback(
                 proxy,
                 controllerAddr,
@@ -103,7 +102,6 @@ describe('LlamaLend-Payback', function () {
             );
             console.log(positionInfoAfterSupply.collRatio / 1e18);
             // here we expect that debt has risen maximally 0.001% from interest
-            // eslint-disable-next-line max-len
             expect(
                 positionInfoBeforeSupply.debtAmount.sub(positionInfoAfterSupply.debtAmount),
             ).to.be.closeTo(borrowAmountWei.div(10), borrowAmountWei.div(1e5));
@@ -145,7 +143,6 @@ describe('LlamaLend-Payback', function () {
             await setBalance(debtTokenAddr, senderAcc.address, borrowAmountWei.mul(101).div(100));
             await approve(debtTokenAddr, proxy.address, senderAcc);
             const maxActiveBand = await getActiveBand(controllerAddr);
-            // eslint-disable-next-line max-len
             await llamalendPayback(
                 proxy,
                 controllerAddr,
@@ -173,7 +170,6 @@ describe('LlamaLend-Payback', function () {
                 debtTokenAddr,
                 senderAcc.address,
             );
-            // eslint-disable-next-line max-len
             expect(
                 borrowAmountWei.mul(101).div(100).sub(positionInfoBeforeSupply.debtAmount),
             ).to.be.closeTo(senderDebtTokenBalanceAfterMaxPayback, borrowAmountWei.div(1e5));

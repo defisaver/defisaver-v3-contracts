@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable import/no-extraneous-dependencies */
 const fs = require('fs-extra');
 const { exec } = require('child_process');
 const path = require('path');

@@ -1,6 +1,3 @@
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-// eslint-disable-next-line import/no-extraneous-dependencies
 const hre = require('hardhat');
 const readline = require('readline');
 

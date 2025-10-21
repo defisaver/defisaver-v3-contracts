@@ -1,5 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable max-len */
 require('dotenv-safe').config();
 
 const ethers = require('ethers');

@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
