@@ -48,7 +48,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_supply() public {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory testPair = testPairs[i];
 
@@ -59,13 +59,13 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
 
             _supply(testPair.supplyAsset, supplyAmount, false);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 
     function test_should_supply_maxUint256() public {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory testPair = testPairs[i];
 
@@ -77,13 +77,13 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
 
             _supply(testPair.supplyAsset, supplyAmount, false);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 
     function test_should_supply_on_direct_action_l2() public {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory testPair = testPairs[i];
 
@@ -94,7 +94,7 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
 
             _supply(testPair.supplyAsset, supplyAmount, true);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 

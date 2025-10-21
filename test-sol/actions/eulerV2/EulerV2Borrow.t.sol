@@ -89,7 +89,7 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
 
         bool isDirect = true;
 
-        uint256 snapshotId = vm.snapshot();
+        uint256 snapshotId = vm.snapshotState();
 
         _supplyToVault(supplyVault, account, supplyAmountInUsd);
 
@@ -97,7 +97,7 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
 
         _borrowFromVault(TestConfig(borrowVault, account, secondBorrowAmountInUsd, isDirect));
 
-        vm.revertTo(snapshotId);
+        vm.revertToState(snapshotId);
     }
 
     function test_should_borrow_on_main_account_and_two_sub_accounts() public {
@@ -128,13 +128,13 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
 
         address borrowVault = E_USDC_2_GOVERNED;
 
-        uint256 snapshotId = vm.snapshot();
+        uint256 snapshotId = vm.snapshotState();
 
         address[] memory supportedVaultCollaterals = IEVault(borrowVault).LTVList();
 
         if (supportedVaultCollaterals.length < 2) {
             console.log("Skipping test: Vault does not support two collaterals");
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
             return;
         }
 
@@ -151,14 +151,14 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
             })
         );
 
-        vm.revertTo(snapshotId);
+        vm.revertToState(snapshotId);
     }
 
     function _baseTest(address _account, uint256 _supplyAmountInUsd, uint256 _borrowAmountInUsd, bool _isDirect)
         internal
     {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory testPair = testPairs[i];
             address supplyVault = testPair.supplyAsset;
@@ -172,7 +172,7 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
                 })
             );
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 
