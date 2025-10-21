@@ -16,8 +16,6 @@
         "lint:js:fix": "eslint . --ext .js,.ts --fix",
         "format:lint:check": "npm run format:check && npm run lint:js",
         "format:lint:fix": "npm run format:fix && npm run lint:js:fix",
-        "format:sol": "forge fmt",
-        "lint:sol": "forge lint",
         "format:lint:sol": "forge fmt && forge lint"
     },
     "repository": {
@@ -78,7 +76,7 @@
     "husky": {
         "hooks": {
             "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true",
-            "pre-commit": "npm run format:lint:check",
+            "pre-commit": "npm run format:lint:fix && npm run format:lint:sol && git add .",
             "commit-msg": "npx --no-install commitlint --edit $1"
         }
     },
