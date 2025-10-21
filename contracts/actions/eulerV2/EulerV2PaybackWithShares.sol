@@ -76,6 +76,8 @@ contract EulerV2PaybackWithShares is ActionBase, EulerV2Helper {
         // When disabling controller, 'from' and 'account' should be controlled by the same owner
         // otherwise this will revert as authorization error on Euler side
         if (accountDebtAfter == 0) {
+            // Actual EVC function is named `call`, so it is safe to disable rule
+            // forge-lint: disable-next-line(unchecked-call)
             IEVC(EVC_ADDR).call(_params.vault, _params.account, 0, abi.encodeCall(IRiskManager.disableController, ()));
         }
 

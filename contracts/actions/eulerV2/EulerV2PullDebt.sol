@@ -70,6 +70,8 @@ contract EulerV2PullDebt is ActionBase, EulerV2Helper {
 
         uint256 accountDebtBefore = IBorrowing(_params.vault).debtOf(_params.account);
 
+        // Actual EVC function is named `call`, so it is safe to disable rule
+        // forge-lint: disable-next-line(unchecked-call)
         IEVC(EVC_ADDR).call(_params.vault, _params.account, 0, pullDebtCallData);
 
         uint256 accountDebtAfter = IBorrowing(_params.vault).debtOf(_params.account);

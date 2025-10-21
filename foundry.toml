@@ -33,7 +33,7 @@ exclude_lints = [
     # "unaliased-plain-import",
     # "unused-import",
     # "incorrect-shift",
-    "unchecked-call",
+    # "unchecked-call",
     "unsafe-typecast",
     "named-struct-fields",
     "unwrapped-modifier-logic",

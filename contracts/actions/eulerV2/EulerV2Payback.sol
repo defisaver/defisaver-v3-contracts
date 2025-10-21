@@ -79,6 +79,8 @@ contract EulerV2Payback is ActionBase, EulerV2Helper {
         _params.amount = IEVault(_params.vault).repay(_params.amount, _params.account);
 
         if (maxPayback) {
+            // Actual EVC function is named `call`, so it is safe to disable rule
+            // forge-lint: disable-next-line(unchecked-call)
             IEVC(EVC_ADDR).call(_params.vault, _params.account, 0, abi.encodeCall(IRiskManager.disableController, ()));
         }
 
