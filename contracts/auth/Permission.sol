@@ -41,7 +41,7 @@ contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermissi
         }
     }
 
-    function _getAuthContractAddress(WalletType _walletType) internal view returns (address) {
+    function _getAuthContractAddress(WalletType _walletType) internal pure returns (address) {
         if (_walletType == WalletType.DSPROXY) return PROXY_AUTH_ADDRESS;
         if (_walletType == WalletType.DSAPROXY) return DSA_AUTH_ADDRESS;
         return MODULE_AUTH_ADDRESS;
