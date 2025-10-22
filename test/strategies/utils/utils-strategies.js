@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 const hre = require('hardhat');
 const {
     getAddrFromRegistry,
@@ -136,11 +137,9 @@ const subToAaveV3Proxy = async (proxy, inputData, subProxyAddr = null) => {
         [inputData],
     );
 
-    console.log('BEFORE RECEIPT');
     const receipt = await executeTxFromProxy(proxy, aaveSubProxyAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
-    console.log('AFTER RECEIPT');
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
     console.log(`GasUsed subToAaveV3Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
 
@@ -151,8 +150,8 @@ const subToAaveV3Proxy = async (proxy, inputData, subProxyAddr = null) => {
         .then(async ([c, subData]) => {
             // eslint-disable-next-line no-param-reassign
             subData = await subData;
-            let boostSub = await c.formatBoostSub(subData);
-            let repaySub = await c.formatRepaySub(subData);
+            const boostSub = await c.formatBoostSub(subData);
+            const repaySub = await c.formatRepaySub(subData);
 
             // Fix trigger data: replace first 32 bytes with proxy address
             const proxyAddrHex = proxy.address.slice(2);
