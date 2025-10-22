@@ -13,6 +13,4 @@ contract ArbitrumCoreAddresses {
     address internal constant SUB_STORAGE_ADDR = 0x24ab68395660b910BfBF1cc88BaA316BA06354eE;
     address internal constant BUNDLE_STORAGE_ADDR = 0x8332F2a50A9a6C85a476e1ea33031681291cB694;
     address internal constant STRATEGY_STORAGE_ADDR = 0x6aeA695fcd0655650323e9dc5f80Ac0b15A91Da2;
-
-    address internal constant RECIPE_EXECUTOR_ADDR = 0x4417bffFD5e3131069f62Fac07e40704EE234404;
 }

@@ -13,6 +13,4 @@ contract BaseCoreAddresses {
     address internal constant SUB_STORAGE_ADDR = 0x44e98bB58d725F2eF93a195F518b335dCB784c78;
     address internal constant BUNDLE_STORAGE_ADDR = 0x6AB90ff536f0E2a880DbCdef1bB665C2acC0eDdC;
     address internal constant STRATEGY_STORAGE_ADDR = 0x3Ca96CebC7779Ee86685c67c999d0f03158Ee9cA;
-
-    address internal constant RECIPE_EXECUTOR_ADDR = 0xd0Ae279e330f98C399375f80968C8bf860202766;
 }
