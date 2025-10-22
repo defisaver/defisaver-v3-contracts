@@ -18,9 +18,9 @@ contract BaseFLAddresses {
     address internal constant UNI_V3_FACTORY = 0x33128a8fC17869897dcE68Ed026d694621f6FDfD;
 
     address internal constant MORPHO_BLUE_ADDR = 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb;
-    
-    address internal constant RECIPE_EXECUTOR_ADDR = 0xd0Ae279e330f98C399375f80968C8bf860202766;
 
+    address internal constant DFS_REGISTRY_ADDR = 0x347FB634271F666353F23A3362f3935D96F97476;
+    
     ////////// NOT USED
 
     address internal constant SOLO_MARGIN_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

@@ -10,6 +10,7 @@ import { IInstaAccountV2 } from "../../../interfaces/insta/IInstaAccountV2.sol";
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
 import { FLFeeFaucet } from "../../../utils/FLFeeFaucet.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
+import { DFSRegistry } from "../../../core/DFSRegistry.sol";
 import { WalletType } from "../../../utils/DFSTypes.sol";
 
 contract FLHelper is MainnetFLAddresses, StrategyModel {
@@ -17,6 +18,7 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
     uint16 internal constant SPARK_REFERRAL_CODE = 0;
 
     FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
+    DFSRegistry public constant dfsRegistry = DFSRegistry(DFS_REGISTRY_ADDR);
 
     /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR =
@@ -25,6 +27,9 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
                 "_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"
             )
         );
+
+    /// @dev Id of the RecipeExecutor contract
+    bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     /// @dev Used for DSA Proxy Accounts
     string private constant DEFISAVER_CONNECTOR_NAME = "DefiSaverConnector";
@@ -37,7 +42,7 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
 
         if (_walletType == WalletType.DSPROXY) {
             IDSProxy(_wallet).execute{value: address(this).balance}(
-                RECIPE_EXECUTOR_ADDR,
+                dfsRegistry.getAddr(RECIPE_EXECUTOR_ID),
                 data
             );
             return;
@@ -63,7 +68,7 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
         
         // Otherwise, we assume we are in context of Safe
         bool success = ISafe(_wallet).execTransactionFromModule(
-            RECIPE_EXECUTOR_ADDR,
+            dfsRegistry.getAddr(RECIPE_EXECUTOR_ID),
             address(this).balance,
             data,
             ISafe.Operation.DelegateCall
