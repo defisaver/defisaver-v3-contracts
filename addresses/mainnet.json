@@ -4769,13 +4769,15 @@
     },
     {
         "name": "SkyView",
-        "address": "0x0b2621aE77952606A3b95d06E31b10132C51C860",
+        "address": "0xCC3DA103AD79319A2fA68327bDFA27DB4489caDf",
         "id": "0x6431452a",
         "path": "contracts/views/SkyView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x0b2621aE77952606A3b95d06E31b10132C51C860"
+        ]
     }
 ]

@@ -405,7 +405,7 @@ contract RecipeExecutor is
             response := mload(0)
             
             // throw if delegatecall failed
-            if eq(succeeded, 0) {
+            if iszero(succeeded) {
                 revert(0, 0)
             }
         }
