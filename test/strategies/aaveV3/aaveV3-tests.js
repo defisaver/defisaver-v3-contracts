@@ -76,7 +76,8 @@ const {
     callAaveFLCloseToCollStrategy,
     callAaveCloseToDebtStrategy,
     callAaveFLCloseToDebtStrategy,
-    callAaveV3OldBoostStrategy,
+    callAaveV3BoostStrategy,
+    callAaveV3FLBoostStrategy,
 } = require('../utils/strategy-calls');
 
 const {
@@ -465,7 +466,7 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
                     debtAssetInfo.decimals,
                 );
 
-                await callAaveV3OldBoostStrategy(
+                await callAaveV3BoostStrategy(
                     strategyExecutor,
                     subIds.boostSubId,
                     collAddr,
@@ -486,60 +487,41 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
                 expect(ratioAfter).to.be.lt(ratioBefore);
             });
 
-            // it('... should call AaveV3 With FL Boost strategy', async () => {
-            //     console.log('ENTER !!!!!');
-            //     console.log('ENTER !!!!!');
-            //     console.log('ENTER !!!!!');
-            //     console.log('ENTER !!!!!');
-            //     // eslint-disable-next-line max-len
-            //     const ratioBefore = await aaveView.getSafetyRatio(addrs[network].AAVE_MARKET, proxyAddr);
-            //     console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
+            it('... should call AaveV3 With FL Boost strategy', async () => {
+                const ratioBefore = await aaveView.getSafetyRatio(
+                    addrs[network].AAVE_MARKET,
+                    proxyAddr,
+                );
+                console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
-            //     const targetRatio = hre.ethers.utils.parseUnits('1.5', '18');
-            //     const ratioOver = hre.ethers.utils.parseUnits('1.7', '18');
+                const boostAmount = hre.ethers.utils.parseUnits(
+                    fetchAmountinUSDPrice(testPairs[i].debtAsset, '1000'),
+                    debtAssetInfo.decimals,
+                );
 
-            //     // update
-            //     const updatedSubIds = await updateAaveV3L2AutomationStrategy(
-            //         proxy,
-            //         subIds.repaySubId,
-            //         subIds.boostSubId,
-            //         '0',
-            //         ratioOver.toHexString().slice(2),
-            //         targetRatio.toHexString().slice(2),
-            //         '0',
-            //         true,
-            //     );
+                console.log('boostAmount (debt):', boostAmount.toString());
 
-            //     const boostAmount = hre.ethers.utils.parseUnits(
-            //         fetchAmountinUSDPrice(testPairs[i].debtAsset, '1000'),
-            //         debtAssetInfo.decimals,
-            //     );
+                await callAaveV3FLBoostStrategy(
+                    strategyExecutor,
+                    subIds.boostSubId,
+                    collAddr,
+                    debtAddr,
+                    collAssetId,
+                    debtAssetId,
+                    boostAmount,
+                    0, // strategyIndex
+                    subIds.boostSub,
+                    flAddr,
+                );
 
-            //     try {
-            //         await callAaveFLV3BoostL2Strategy(
-            //             botAcc,
-            //             strategyExecutor,
-            //             updatedSubIds.secondSub,
-            //             collAddr,
-            //             debtAddr,
-            //             collAssetId,
-            //             debtAssetId,
-            //             boostAmount,
-            //             flAction.address,
-            //             1, // strategyIndex
-            //         );
-            //     } catch (error) {
-            //         console.log(error);
-            //         throw error;
-            //     }
-
-            //     const ratioAfter = await aaveView.getSafetyRatio(
-            //         addrs[network].AAVE_MARKET,
-            //         proxyAddr,
-            //     );
-            //     console.log(`Aave position ratio: ${ratioAfter / 1e16}%`);
-            //     expect(ratioAfter).to.be.lt(ratioBefore);
-            // });
+                // eslint-disable-next-line max-len
+                const ratioAfter = await aaveView.getSafetyRatio(
+                    addrs[network].AAVE_MARKET,
+                    proxyAddr,
+                );
+                console.log(`Aave position ratio: ${ratioAfter / 1e16}%`);
+                expect(ratioAfter).to.be.lt(ratioBefore);
+            });
         }
     });
 };
