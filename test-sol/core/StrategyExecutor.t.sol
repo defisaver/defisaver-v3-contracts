@@ -9,16 +9,16 @@ import {RecipeExecutor} from '../../contracts/core/RecipeExecutor.sol';
 import {SubStorage} from '../../contracts/core/strategy/SubStorage.sol';
 import {StrategyModel} from '../../contracts/core/strategy/StrategyModel.sol';
 import {SubProxy} from '../../contracts/core/strategy/SubProxy.sol';
-
 import {GasPriceTrigger} from '../../contracts/triggers/GasPriceTrigger.sol';
 import {PullToken} from "../../contracts/actions/utils/PullToken.sol";
-
 import {BaseTest} from '../utils/BaseTest.sol';
 import {RegistryUtils} from '../utils/RegistryUtils.sol';
 import {ActionsUtils} from '../utils/ActionsUtils.sol';
 import {SmartWallet} from '../utils/SmartWallet.sol';
 import {Addresses} from '../utils/Addresses.sol';
 import {StrategyBuilder} from '../utils/StrategyBuilder.sol';
+import {DefiSaverConnector} from '../../contracts/actions/insta/DefiSaverConnector.sol';
+import {IInstaConnectorsV2} from '../../contracts/interfaces/insta/IInstaConnectorsV2.sol';
 
 contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
@@ -57,7 +57,6 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
         cut = new StrategyExecutor();
         subStorage = SubStorage(SUB_STORAGE_ADDR);
 
-        vm.etch(RECIPE_EXECUTOR_ADDR, address(new RecipeExecutor()).code);
         vm.etch(MODULE_AUTH_ADDR, address(new SafeModuleAuth()).code);
         vm.etch(PROXY_AUTH_ADDR, address(new ProxyAuth()).code);
 
@@ -67,6 +66,7 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
         redeploy('StrategyExecutorID', address(cut));
         redeploy('PullToken', address(new PullToken()));
         redeploy('GasPriceTrigger', address(new GasPriceTrigger()));
+        redeploy('RecipeExecutor', address(new RecipeExecutor()));
         redeploy('SubProxy', subProxyAddr);
         redeploy('BotAuth', botAuthAddr);
     }
@@ -135,6 +135,16 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
         sender = wallet.owner();
         
         _callStrategyBaseTest();
+    }
+
+    function test_should_call_strategy_for_dsa_proxy_wallet() public {
+        wallet = new SmartWallet(charlie);
+        walletAddr = wallet.createDSAProxy();
+        sender = wallet.owner();
+        
+        _callStrategyBaseTest();
+
+        _addDefiSaverConnector();
     }
 
     function test_should_fail_to_execute_strategy_for_inactive_triggers() public {
@@ -270,5 +280,24 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
     function _add_bot_caller() internal {
         prank(Addresses.OWNER_ACC);
         BotAuth(botAuthAddr).addCaller(address(this));
+    }
+
+    function _addDefiSaverConnector() internal {
+        address defiSaverConnector = address(new DefiSaverConnector());
+        vm.label(defiSaverConnector, "DefiSaverConnector");
+
+        IInstaConnectorsV2 connector = IInstaConnectorsV2(Addresses.INSTADAPP_CONNECTORS_V2);
+
+        address[] memory connectors = new address[](1);
+        connectors[0] = defiSaverConnector;
+
+        string[] memory connectorNames = new string[](1);
+        connectorNames[0] = 'DefiSaverConnector';
+
+        vm.prank(Addresses.INSTADAPP_MASTER_ACCOUNT);
+        connector.addConnectors(connectorNames, connectors);
+
+        (bool isOk, ) = connector.isConnectors(connectorNames);
+        assertTrue(isOk);
     }
 }

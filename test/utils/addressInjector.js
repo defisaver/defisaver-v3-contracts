@@ -17,8 +17,7 @@ class CoreAddressesInjector {
             this.contentBeforeInjection = fs.readFileSync(this.contractFilePath, this.encoding);
             const newContent = this.contentBeforeInjection
                 .replace(/(PROXY_AUTH_ADDR\s*=\s*)0x[a-fA-F0-9]{40}/, `$1${proxyAuthAddr}`)
-                .replace(/(MODULE_AUTH_ADDR\s*=\s*)0x[a-fA-F0-9]{40}/, `$1${safeModuleAuthAddr}`)
-                .replace(/(RECIPE_EXECUTOR_ADDR\s*=\s*)0x[a-fA-F0-9]{40}/, `$1${recipeExecutorAddr}`);
+                .replace(/(MODULE_AUTH_ADDR\s*=\s*)0x[a-fA-F0-9]{40}/, `$1${safeModuleAuthAddr}`);
             fs.writeFileSync(this.contractFilePath, newContent);
             await execAsync('npx hardhat compile');
         } catch (err) {

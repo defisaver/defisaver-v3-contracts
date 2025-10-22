@@ -2,6 +2,7 @@
 pragma solidity =0.8.24;
 
 import { ProxyAuth } from "../../contracts/core/strategy/ProxyAuth.sol";
+import { WalletAuth } from "../../contracts/core/strategy/WalletAuth.sol";
 import { DSProxyPermission } from "../../contracts/auth/DSProxyPermission.sol";
 import { StrategyExecutor } from "../../contracts/core/strategy/StrategyExecutor.sol";
 import { RecipeExecutor } from "../../contracts/core/RecipeExecutor.sol";
@@ -28,6 +29,7 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
     
     address strategyExecutorAddr;
     address dsProxyPermissionAddr;
+    address recipeExecutorAddr;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -46,7 +48,8 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
         strategyExecutorAddr = address(new StrategyExecutor());
         redeploy("StrategyExecutorID", strategyExecutorAddr);
 
-        vm.etch(RECIPE_EXECUTOR_ADDR, address(new RecipeExecutor()).code);
+        recipeExecutorAddr = address(new RecipeExecutor());
+        redeploy("RecipeExecutor", recipeExecutorAddr);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -55,18 +58,18 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
     function test_should_fail_to_call_execute_when_sender_is_not_executor() public {
         vm.expectRevert(
             abi.encodeWithSelector(
-                ProxyAuth.SenderNotExecutorError.selector,
+                WalletAuth.SenderNotExecutorError.selector,
                 address(this),
                 strategyExecutorAddr
             )
         );
-        cut.callExecute(dsProxyAddr, RECIPE_EXECUTOR_ADDR, bytes("0x"));
+        cut.callExecute(dsProxyAddr, recipeExecutorAddr, bytes("0x"));
     }
 
     function test_should_fail_to_execute_tx_when_no_auth_is_given() public {
         prank(strategyExecutorAddr);
         vm.expectRevert();
-        cut.callExecute(dsProxyAddr, RECIPE_EXECUTOR_ADDR, bytes("0x"));
+        cut.callExecute(dsProxyAddr, recipeExecutorAddr, bytes("0x"));
     }
 
     function test_should_execute_tx() public {
@@ -99,6 +102,6 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
 
         // execute tx from auth contract
         prank(strategyExecutorAddr);
-        cut.callExecute(dsProxyAddr, RECIPE_EXECUTOR_ADDR, recipeExecutorCalldata);
+        cut.callExecute(dsProxyAddr, recipeExecutorAddr, recipeExecutorCalldata);
     }
 }
