@@ -73,6 +73,9 @@ import {SkyStakingEngineUnstake} from "../../contracts/actions/sky/SkyStakingEng
 import {SkyStakingEngineClaimRewards} from "../../contracts/actions/sky/SkyStakingEngineClaimRewards.sol";
 import {SkyStakingEngineSelectFarm} from "../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 import { GhoStake } from "../../contracts/actions/aaveV3/GhoStake.sol";
+import {CreateSub} from "../../contracts/actions/utils/CreateSub.sol";
+import {ToggleSub} from "../../contracts/actions/utils/ToggleSub.sol";
+import {StrategyModel} from "../../contracts/core/strategy/StrategyModel.sol";
 
 contract ActionsUtils {
 
@@ -1354,6 +1357,24 @@ contract ActionsUtils {
             from: _from,
             to: _to,
             amount: _amount
+        }));
+    }
+
+    function createSubEncode(
+        StrategyModel.StrategySub memory _sub
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(CreateSub.Params({
+            sub: _sub
+        }));
+    }
+
+    function toggleSubEncode(
+        uint256 _subId,
+        bool _active
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(ToggleSub.Params({
+            subId: _subId,
+            active: _active
         }));
     }
 }
