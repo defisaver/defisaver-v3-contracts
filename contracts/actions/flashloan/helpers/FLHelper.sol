@@ -50,10 +50,13 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
             bytes[] memory connectorsData = new bytes[](1);
             connectorsData[0] = data;
 
+            // Origin will only be used for event logging, so here we will set it to the FL contract
+            address origin = address(this);
+
             IInstaAccountV2(_wallet).cast{value: address(this).balance}(
                 connectors,
                 connectorsData,
-                address(0) // _origin (Used only for Event logging so we deliberately set it to address(0))
+                origin
             );
             return;
         }
