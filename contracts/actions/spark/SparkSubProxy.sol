@@ -45,7 +45,7 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
         bytes calldata _encodedInput
     ) public {
          /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveAuthContractPermission(getWalletType(address(this)));
+        _giveAuthContractPermission(getWalletType(address(this)));
 
         SparkSubData memory subData = parseSubData(_encodedInput);
 
@@ -67,7 +67,7 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
         bytes calldata _encodedInput
     ) public {
         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveAuthContractPermission(getWalletType(address(this)));
+        _giveAuthContractPermission(getWalletType(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SparkSubData memory subData = parseSubData(_encodedInput[8:]);
@@ -101,7 +101,7 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
         bytes calldata _encodedInput
     ) public {
         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveAuthContractPermission(getWalletType(address(this)));
+        _giveAuthContractPermission(getWalletType(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);

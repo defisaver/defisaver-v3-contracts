@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { Permission } from "../../contracts/auth/Permission.sol";
+import { MockPermission } from "../../contracts/mocks/MockPermission.sol";
 import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { IInstaAccountV2 } from "../../contracts/interfaces/insta/IInstaAccountV2.sol";
 import { DSAuthority } from "../../contracts/DS/DSAuthority.sol";
 import { DSAuth } from "../../contracts/DS/DSAuth.sol";
 import { AuthHelper } from "../../contracts/auth/helpers/AuthHelper.sol";
@@ -16,15 +17,17 @@ contract TestCore_Permission is AuthHelper, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
-    Permission cut;
+    MockPermission cut;
 
     /*//////////////////////////////////////////////////////////////////////////
                                      VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
     SmartWallet dsProxyWallet;
     SmartWallet safeWallet;
+    SmartWallet dsaProxyWallet;
     address dsProxyAddr;
     address safeAddr;
+    address dsaProxyAddr;
 
     bytes4 constant EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
 
@@ -34,61 +37,134 @@ contract TestCore_Permission is AuthHelper, BaseTest {
     function setUp() public override {
         forkMainnetLatest();
 
-        cut = new Permission();
+        cut = new MockPermission();
 
         safeWallet = new SmartWallet(bob);
         safeAddr = safeWallet.createSafe();
         
         dsProxyWallet = new SmartWallet(alice);
         dsProxyAddr = dsProxyWallet.createDSProxy();
+
+        dsaProxyWallet = new SmartWallet(charlie);
+        dsaProxyAddr = dsaProxyWallet.createDSAProxy();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_give_dsProxy_permission() public {
-        _giveProxyPermission();
-        _verifyProxyPermission();
+    function test_giveAndRemove_dsProxy_authContractPermission() public {
+        _givePermission(WalletType.DSPROXY, true, DSA_AUTH_ADDRESS);
+        _verifyDSProxyPermission(PROXY_AUTH_ADDRESS, true);
+        _removePermission(WalletType.DSPROXY, true, DSA_AUTH_ADDRESS);
+        _verifyDSProxyPermission(PROXY_AUTH_ADDRESS, false);
     }
 
-    function test_should_give_safe_permission() public {
-        _giveSafePermission();
-        _verifySafePermission();
+    function test_giveAndRemove_dsProxy_arbitraryPermission() public {
+        address addr = address(0x111);
+        _givePermission(WalletType.DSPROXY, false, addr);
+        _verifyDSProxyPermission(addr, true);
+        _removePermission(WalletType.DSPROXY, false, addr);
+        _verifyDSProxyPermission(addr, false);
+    }
+
+    function test_giveAndRemove_safe_authContractPermission() public {
+        _givePermission(WalletType.SAFE, true, MODULE_AUTH_ADDRESS);
+        _verifySafePermission(MODULE_AUTH_ADDRESS, true);
+        _removePermission(WalletType.SAFE, true, MODULE_AUTH_ADDRESS);
+        _verifySafePermission(MODULE_AUTH_ADDRESS, false);
+    }
+
+    function test_giveAndRemove_safe_arbitraryPermission() public {
+        address addr = address(0x111);
+        _givePermission(WalletType.SAFE, false, addr);
+        _verifySafePermission(addr, true);
+        _removePermission(WalletType.SAFE, false, addr);
+        _verifySafePermission(addr, false);
+    }
+
+    function test_giveAndRemove_dsaProxy_authContractPermission() public {
+        _giveDsaProxyPermission(DSA_AUTH_ADDRESS);
+        _verifyDsaProxyPermission(DSA_AUTH_ADDRESS, true);
+        _removeDsaProxyPermission(DSA_AUTH_ADDRESS);
+        _verifyDsaProxyPermission(DSA_AUTH_ADDRESS, false);
+    }
+
+    function test_giveAndRemove_dsaProxy_arbitraryPermission() public {
+        address addr = address(0x111);
+        _giveDsaProxyPermission(addr);
+        _verifyDsaProxyPermission(addr, true);
+        _removeDsaProxyPermission(addr);
+        _verifyDsaProxyPermission(addr, false);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _giveProxyPermission() internal {
-        bytes memory givePermCalldata = abi.encodeWithSelector(
-            Permission.giveAuthContractPermission.selector,
-            WalletType.DSPROXY
-        );
-        
-        dsProxyWallet.execute(address(cut), givePermCalldata, 0);
+    function _givePermission(WalletType _walletType, bool _isAuthPermission, address _to) internal {
+        bytes memory givePermCalldata = _isAuthPermission
+            ? abi.encodeCall(MockPermission.giveAuthContractPermission, (_walletType))
+            : abi.encodeCall(MockPermission.givePermissionTo, (_walletType, _to));
+            
+        _getWalletByType(_walletType).execute(address(cut), givePermCalldata, 0);
     }
 
-    function _giveSafePermission() internal {
-        bytes memory givePermCalldata = abi.encodeWithSelector(
-            Permission.giveAuthContractPermission.selector,
-            WalletType.SAFE
-        );
-        
-        safeWallet.execute(address(cut), givePermCalldata, 0);
+    function _removePermission(WalletType _walletType, bool _isAuthPermission, address _from) internal {
+        bytes memory removePermCalldata = _isAuthPermission
+            ? abi.encodeCall(MockPermission.removeAuthContractPermission, (_walletType))
+            : abi.encodeCall(MockPermission.removePermissionFrom, (_walletType, _from));
+            
+        _getWalletByType(_walletType).execute(address(cut), removePermCalldata, 0);
     }
 
-    function _verifyProxyPermission() internal view {
+    /// @dev Mock DSA tests.
+    /// Tested through RecipeExecutor and DefiSaverConnector because we can't execute arbitrary calls to DSA Proxy Account
+    function _giveDsaProxyPermission(address _addr) internal {
+        // Self-call to enable permission (simulate execution in the context of the DSA Proxy Account)
+        vm.prank(dsaProxyAddr);
+        IInstaAccountV2(dsaProxyAddr).enable(_addr);
+    }
+
+    function _removeDsaProxyPermission(address _addr) internal {
+        // Self-call to disable permission (simulate execution in the context of the DSA Proxy Account)
+        vm.prank(dsaProxyAddr);
+        IInstaAccountV2(dsaProxyAddr).disable(_addr);
+    }
+
+    function _verifyDSProxyPermission(address _addr, bool _enabled) internal view {
         DSAuthority authority = DSAuthority(DSAuth(dsProxyAddr).authority());
-        assertTrue(
-            authority.canCall(
-                PROXY_AUTH_ADDRESS,
-                dsProxyAddr,
-                EXECUTE_SELECTOR
-            )
-        );
+        bool canCall = authority.canCall(_addr, dsProxyAddr, EXECUTE_SELECTOR);
+        if (_enabled) {
+            assertTrue(canCall);
+        } else {
+            assertFalse(canCall);
+        }
     }
 
-    function _verifySafePermission() internal view {
-        assertTrue(ISafe(safeAddr).isModuleEnabled(MODULE_AUTH_ADDRESS));
+    function _verifySafePermission(address _addr, bool _enabled) internal view {
+        bool isEnabled = ISafe(safeAddr).isModuleEnabled(_addr);
+        if (_enabled) {
+            assertTrue(isEnabled);
+        } else {
+            assertFalse(isEnabled);
+        }
+    }
+
+    function _verifyDsaProxyPermission(address _addr, bool _enabled) internal view {
+        bool isAuth = IInstaAccountV2(dsaProxyAddr).isAuth(_addr);
+        if (_enabled) {
+            assertTrue(isAuth);
+        } else {
+            assertFalse(isAuth);
+        }
+    }
+
+    function _getWalletByType(WalletType _walletType) internal view returns (SmartWallet) {
+        if (_walletType == WalletType.DSPROXY) {
+            return dsProxyWallet;
+        } else if (_walletType == WalletType.SAFE) {
+            return safeWallet;
+        } else if (_walletType == WalletType.DSAPROXY) {
+            return dsaProxyWallet;
+        }
     }
 } 

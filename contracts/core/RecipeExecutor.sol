@@ -53,7 +53,7 @@ pragma solidity =0.8.24;
 *                   └──────────────┘            ┌───────────┤  YES  ├────────────┘                                                           │  │
 *                                               │           └───────┘                                                                        │  │
 *                                               ▼                                                                                            │  │
-*                                        ┌──────────────┐       givePermissionTo                 ┌────────────────────────┐                  │  │
+*                                        ┌──────────────┐       _givePermissionTo                ┌────────────────────────┐                  │  │
 *                                        │              ├───────────────────────────────────────►│       Permission       │                  │  │
 *                                        │              │                                        └────────────────────────┘                  │  │
 *                                        │              │                                  -for safe -> enable FL action as module           │  │
@@ -85,7 +85,7 @@ pragma solidity =0.8.24;
 *                                        │              │                                                          └────────┘
 *                                        │              │
 *                                        │              │
-*                                        │              │       removePermissionFrom              ┌────────────────────────┐
+*                                        │              │       _removePermissionFrom             ┌────────────────────────┐
 *                                        │              ├────────────────────────────────────────►│       Permission       │
 *                                        │              │                                         └────────────────────────┘
 *                                        └──────────────┘
@@ -363,7 +363,7 @@ contract RecipeExecutor is
     ) internal {
         WalletType walletType = getWalletType(address(this));
 
-        givePermissionTo(walletType, _flActionAddr);
+        _givePermissionTo(walletType, _flActionAddr);
 
         // encode data for FL
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
@@ -382,7 +382,7 @@ contract RecipeExecutor is
             _returnValues
         );
 
-        removePermissionFrom(walletType, _flActionAddr);
+        _removePermissionFrom(walletType, _flActionAddr);
     }
 
     /// @notice Checks if the specified address is of FL type action
