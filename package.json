@@ -16,7 +16,8 @@
         "lint:js:fix": "eslint . --ext .js,.ts --fix",
         "format:lint:check": "npm run format:check && npm run lint:js",
         "format:lint:fix": "npm run format:fix && npm run lint:js:fix",
-        "format:lint:sol": "forge fmt && forge lint"
+        "format:lint:sol": "forge fmt && forge lint",
+        "prepare": "husky"
     },
     "repository": {
         "type": "git",
@@ -65,20 +66,13 @@
         "hardhat-gas-reporter": "^2.2.1",
         "hardhat-log-remover": "^2.0.0",
         "hardhat-tracer": "3.1.0",
-        "husky": "^4.3.0",
+        "husky": "^9.1.7",
         "prettier": "^3.6.2",
         "prettier-plugin-solidity": "^1.0.0-alpha.59",
         "readline-sync": "^1.4.10",
         "solhint": "^3.3.6",
         "solhint-plugin-prettier": "^0.1.0",
         "solidity-coverage": "^0.8.14"
-    },
-    "husky": {
-        "hooks": {
-            "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true",
-            "pre-commit": "npm run format:lint:fix && npm run format:lint:sol && git add .",
-            "commit-msg": "npx --no-install commitlint --edit $1"
-        }
     },
     "commitlint": {
         "extends": [
