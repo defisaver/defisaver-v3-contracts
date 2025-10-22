@@ -418,7 +418,7 @@ async function verifyContract(contractAddress, contractName) {
     if (network === 'linea') {
         params.append('EVMVersion', 'london');
     } else {
-        params.append('EVMVersion', '');
+        params.append('EVMVersion', 'cancun');
     }
     /// @notice : MIT license
     params.append('licenseType', 3);
