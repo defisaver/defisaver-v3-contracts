@@ -53,7 +53,7 @@ pragma solidity =0.8.24;
 *                   └──────────────┘            ┌───────────┤  YES  ├────────────┘                                                           │  │
 *                                               │           └───────┘                                                                        │  │
 *                                               ▼                                                                                            │  │
-*                                        ┌──────────────┐       giveAuthContractPermission       ┌────────────────────────┐                  │  │
+*                                        ┌──────────────┐       givePermissionTo                 ┌────────────────────────┐                  │  │
 *                                        │              ├───────────────────────────────────────►│       Permission       │                  │  │
 *                                        │              │                                        └────────────────────────┘                  │  │
 *                                        │              │                                  -for safe -> enable FL action as module           │  │
@@ -85,7 +85,7 @@ pragma solidity =0.8.24;
 *                                        │              │                                                          └────────┘
 *                                        │              │
 *                                        │              │
-*                                        │              │       removeWalletPermission            ┌────────────────────────┐
+*                                        │              │       removePermissionFrom              ┌────────────────────────┐
 *                                        │              ├────────────────────────────────────────►│       Permission       │
 *                                        │              │                                         └────────────────────────┘
 *                                        └──────────────┘
@@ -94,6 +94,10 @@ pragma solidity =0.8.24;
 *
 */
 
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
+import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
 import { Permission } from "../auth/Permission.sol";
 import { CheckWalletType } from "../utils/CheckWalletType.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
@@ -109,11 +113,6 @@ import { TxSaverGasCostCalc } from "../utils/TxSaverGasCostCalc.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
-
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
-import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
 
 contract RecipeExecutor is 
     StrategyModel,

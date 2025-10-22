@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import {IInstaConnectorsV2} from '../../contracts/interfaces/insta/IInstaConnectorsV2.sol';
+import {DefiSaverConnector} from '../../contracts/actions/insta/DefiSaverConnector.sol';
 import {RecipeExecutor} from '../../contracts/core/RecipeExecutor.sol';
 import {StrategyModel} from '../../contracts/core/strategy/StrategyModel.sol';
-
 import {PullToken} from "../../contracts/actions/utils/PullToken.sol";
 import {SendToken} from "../../contracts/actions/utils/SendToken.sol";
 import {FLAction} from "../../contracts/actions/flashloan/FLAction.sol";
-
 import {BaseTest} from '../utils/BaseTest.sol';
 import {RegistryUtils} from '../utils/RegistryUtils.sol';
 import {ActionsUtils} from '../utils/ActionsUtils.sol';
@@ -25,21 +25,31 @@ contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
-    SmartWallet wallet;
-    address walletAddr;
-    address sender;
-
     address flAddress;
+
+    SmartWallet[] wallets;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnetLatest();
+        
+        SmartWallet safeWallet = new SmartWallet(bob);
 
-        wallet = new SmartWallet(bob);
-        walletAddr = wallet.walletAddr();
-        sender = wallet.owner();
+        SmartWallet dsProxyWallet = new SmartWallet(alice);
+        dsProxyWallet.createDSProxy();
+
+        SmartWallet dsaProxyWallet = new SmartWallet(charlie);
+        dsaProxyWallet.createDSAProxy();
+
+        wallets = new SmartWallet[](3);
+
+        wallets[0] = safeWallet;
+        wallets[1] = dsProxyWallet;
+        wallets[2] = dsaProxyWallet;
+
+        _addDefiSaverConnector();
 
         cut = new RecipeExecutor();
 
@@ -55,71 +65,75 @@ contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, BaseTest {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_execute_recipe_without_flashloan() public {
-        address tokenAddr = Addresses.WETH_ADDR;
-        uint256 amount = 1 ether;
+        for (uint256 i = 0; i < wallets.length; i++) {
+            address tokenAddr = Addresses.WETH_ADDR;
+            uint256 amount = 1 ether;
 
-        bytes[] memory actionsCalldata = new bytes[](2);
-        actionsCalldata[0] = pullTokenEncode(tokenAddr, sender, amount);
-        actionsCalldata[1] = sendTokenEncode(tokenAddr, sender, amount);
+            bytes[] memory actionsCalldata = new bytes[](2);
+            actionsCalldata[0] = pullTokenEncode(tokenAddr, wallets[i].owner(), amount);
+            actionsCalldata[1] = sendTokenEncode(tokenAddr, wallets[i].owner(), amount);
 
-        bytes4[] memory ids = new bytes4[](2);
-        ids[0] = bytes4(keccak256("PullToken"));
-        ids[1] = bytes4(keccak256("SendToken"));
-        
-        StrategyModel.Recipe memory recipe = _create_placeholder_recipe(
-            "TestRecipeWithoutFlashloan",
-            actionsCalldata,
-            ids
-        );
+            bytes4[] memory ids = new bytes4[](2);
+            ids[0] = bytes4(keccak256("PullToken"));
+            ids[1] = bytes4(keccak256("SendToken"));
+            
+            StrategyModel.Recipe memory recipe = _create_placeholder_recipe(
+                "TestRecipeWithoutFlashloan",
+                actionsCalldata,
+                ids
+            );
 
-        bytes memory _calldata = abi.encodeWithSelector(
-            RecipeExecutor.executeRecipe.selector,
-            recipe
-        );
+            bytes memory _calldata = abi.encodeWithSelector(
+                RecipeExecutor.executeRecipe.selector,
+                recipe
+            );
 
-        give(tokenAddr, sender, amount);
-        approveAsSender(sender, tokenAddr, walletAddr, amount);
+            give(tokenAddr, wallets[i].owner(), amount);
+            approveAsSender(wallets[i].owner(), tokenAddr, wallets[i].walletAddr(), amount);
 
-        uint256 senderBalanceBefore = balanceOf(tokenAddr, sender);
-        wallet.execute(address(cut), _calldata, 0);
-        uint256 senderBalanceAfter = balanceOf(tokenAddr, sender);
+            uint256 senderBalanceBefore = balanceOf(tokenAddr, wallets[i].owner());
+            wallets[i].execute(address(cut), _calldata, 0);
+            uint256 senderBalanceAfter = balanceOf(tokenAddr, wallets[i].owner());
 
-        assertEq(senderBalanceBefore, senderBalanceAfter);
+            assertEq(senderBalanceBefore, senderBalanceAfter);
+        }
     }
 
     function test_should_execute_recipe_with_flashloan() public {
-        address tokenAddr = Addresses.WETH_ADDR;
-        uint256 amount = 1 ether;
+        for (uint256 i = 0; i < wallets.length; i++) {
+            address tokenAddr = Addresses.WETH_ADDR;
+            uint256 amount = 1 ether;
 
-        bytes[] memory actionsCalldata = new bytes[](2);
-        actionsCalldata[0] = flActionEncode(tokenAddr, amount, FLSource.BALANCER);
-        actionsCalldata[1] = sendTokenEncode(tokenAddr, flAddress, amount);
+            bytes[] memory actionsCalldata = new bytes[](2);
+            actionsCalldata[0] = flActionEncode(tokenAddr, amount, FLSource.BALANCER);
+            actionsCalldata[1] = sendTokenEncode(tokenAddr, flAddress, amount);
 
-        bytes4[] memory ids = new bytes4[](2);
-        ids[0] = bytes4(keccak256("FLAction"));
-        ids[1] = bytes4(keccak256("SendToken"));
+            bytes4[] memory ids = new bytes4[](2);
+            ids[0] = bytes4(keccak256("FLAction"));
+            ids[1] = bytes4(keccak256("SendToken"));
 
-        StrategyModel.Recipe memory recipe = _create_placeholder_recipe(
-            "TestRecipeWithFlashloan",
-            actionsCalldata,
-            ids
-        );
+            StrategyModel.Recipe memory recipe = _create_placeholder_recipe(
+                "TestRecipeWithFlashloan",
+                actionsCalldata,
+                ids
+            );
 
-        bytes memory _calldata = abi.encodeWithSelector(
-            RecipeExecutor.executeRecipe.selector,
-            recipe
-        );
+            bytes memory _calldata = abi.encodeWithSelector(
+                RecipeExecutor.executeRecipe.selector,
+                recipe
+            );
 
-        uint256 senderBalanceBefore = balanceOf(tokenAddr, sender);
-        uint256 walletBalanceBefore = balanceOf(tokenAddr, walletAddr);
+            uint256 senderBalanceBefore = balanceOf(tokenAddr, wallets[i].owner());
+            uint256 walletBalanceBefore = balanceOf(tokenAddr, wallets[i].walletAddr());
 
-        wallet.execute(address(cut), _calldata, 0);
+            wallets[i].execute(address(cut), _calldata, 0);
 
-        uint256 senderBalanceAfter = balanceOf(tokenAddr, sender);
-        uint256 walletBalanceAfter = balanceOf(tokenAddr, walletAddr);
+            uint256 senderBalanceAfter = balanceOf(tokenAddr, wallets[i].owner());
+            uint256 walletBalanceAfter = balanceOf(tokenAddr, wallets[i].walletAddr());
 
-        assertEq(senderBalanceBefore, senderBalanceAfter);
-        assertEq(walletBalanceBefore, walletBalanceAfter);
+            assertEq(senderBalanceBefore, senderBalanceAfter);
+            assertEq(walletBalanceBefore, walletBalanceAfter);
+        }
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -142,5 +156,25 @@ contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, BaseTest {
             actionIds: _actionIds,
             paramMapping: paramMap
         });
+    }
+
+
+    function _addDefiSaverConnector() internal {
+        address defiSaverConnector = address(new DefiSaverConnector());
+        vm.label(defiSaverConnector, "DefiSaverConnector");
+
+        IInstaConnectorsV2 connector = IInstaConnectorsV2(Addresses.INSTADAPP_CONNECTORS_V2);
+
+        address[] memory connectors = new address[](1);
+        connectors[0] = defiSaverConnector;
+
+        string[] memory connectorNames = new string[](1);
+        connectorNames[0] = 'DefiSaverConnector';
+
+        vm.prank(Addresses.INSTADAPP_MASTER_ACCOUNT);
+        connector.addConnectors(connectorNames, connectors);
+
+        (bool isOk, ) = connector.isConnectors(connectorNames);
+        assertTrue(isOk);
     }
 }

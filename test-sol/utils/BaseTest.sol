@@ -14,6 +14,7 @@ contract BaseTest is Config {
     // EOA USERS
     address internal constant bob = address(0xbb);
     address internal constant alice = address(0xaa);
+    address internal constant charlie = address(0xcc);
 
     using SafeERC20 for IERC20;
 
