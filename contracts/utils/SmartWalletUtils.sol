@@ -4,6 +4,7 @@ pragma solidity =0.8.24;
 
 import { IDSProxyFactory } from "../interfaces/IDSProxyFactory.sol";
 import { IInstaList } from "../interfaces/insta/IInstaList.sol";
+import { IInstaAccountV2 } from "../interfaces/insta/IInstaAccountV2.sol";
 import { IDSProxy } from "../interfaces/IDSProxy.sol";
 import { ISafe } from "../interfaces/safe/ISafe.sol";
 import { DSProxyFactoryHelper } from "./ds-proxy-factory/DSProxyFactoryHelper.sol";
@@ -39,7 +40,7 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
 
     /// @notice Fetch the owner of the smart wallet or the wallet itself
     /// @dev For 1/1 safe it returns the owner, otherwise it returns the wallet itself
-    /// @dev For DSA Proxy Accounts, it returns the first owner if it is not removed or the wallet itself
+    /// @dev For DSA Proxy Accounts, it returns the first owner if authorized or the wallet itself
     /// @param _wallet Address of the smart wallet
     /// @return Address of the owner or wallet
     function _fetchOwnerOrWallet(address _wallet) internal view returns (address) {
@@ -50,17 +51,13 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
         }
 
         if (walletType == WalletType.DSAPROXY) {
-            IInstaList list = IInstaList(DSA_LIST_ADDR);
-            uint64 dsaId = list.accountID(_wallet);
-            address firstOwner = list.accountLink(dsaId).first;
-            IInstaList.AccountList memory accList = list.accountList(dsaId, firstOwner);
-            bool isFirstAccountRemoved = accList.prev == address(0) && accList.next == address(0);
-            // If first account is removed, return the wallet itself
-            return isFirstAccountRemoved ? address(this) : firstOwner;
+            uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(_wallet);
+            address firstOwner = IInstaList(DSA_LIST_ADDR).accountLink(dsaId).first;
+            return IInstaAccountV2(_wallet).isAuth(firstOwner) ? firstOwner : _wallet;
         }
 
         // Otherwise, we assume we are in context of Safe
-        address[] memory owners = ISafe(address(this)).getOwners();
-        return owners.length == 1 ? owners[0] : address(this);
+        address[] memory owners = ISafe(_wallet).getOwners();
+        return owners.length == 1 ? owners[0] : _wallet;
     }
 }
