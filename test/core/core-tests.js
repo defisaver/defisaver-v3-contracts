@@ -21,7 +21,6 @@ const {
     placeHolderAddr,
     OWNER_ACC,
     REGISTRY_ADDR,
-    WETH_ADDRESS,
     revertToSnapshot,
     takeSnapshot,
     getAdminAddr,
@@ -29,6 +28,8 @@ const {
     isWalletNameDsProxy,
     expectError,
     isWalletNameDsaProxy,
+    network,
+    addrs,
 } = require('../utils/utils');
 
 const { deployContract } = require('../../scripts/utils/deployer');
@@ -82,7 +83,7 @@ const addPlaceholderStrategy = async (proxy, maxGasPrice) => {
     dummyStrategy.addSubSlot('&amount', 'uint256');
 
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-        WETH_ADDRESS, '&eoa', '&amount',
+        addrs[network].WETH_ADDRESS, '&eoa', '&amount',
     );
 
     dummyStrategy.addTrigger((new dfs.triggers.GasPriceTrigger(0)));
@@ -807,7 +808,9 @@ const recipeExecutorTest = async () => {
 
             // Redeploy contracts.
             await redeploy('RecipeExecutor');
-            strategyExecutor = await redeploy('StrategyExecutor');
+            strategyExecutor = network === 'mainnet'
+                ? await redeploy('StrategyExecutor')
+                : await redeploy('StrategyExecutorL2');
             const flActionContract = await redeploy('FLAction');
             flAddr = flActionContract.address;
             await redeploy('PullToken');
@@ -828,7 +831,7 @@ const recipeExecutorTest = async () => {
             dsaProxy = await getProxy(senderAcc.address, false, true);
 
             // Init test data.
-            actionData = (new dfs.actions.basic.PullTokenAction(WETH_ADDRESS, placeHolderAddr, 0)).encodeForRecipe()[0];
+            actionData = (new dfs.actions.basic.PullTokenAction(addrs[network].WETH_ADDRESS, placeHolderAddr, 0)).encodeForRecipe()[0];
             triggerData = abiCoder.encode(['uint256'], [0]);
 
             await openStrategyAndBundleStorage();
@@ -844,14 +847,24 @@ const recipeExecutorTest = async () => {
                 setupWallet(WALLETS[i]);
                 const { strategySub, subId } = await addPlaceholderStrategy(wallet, maxGasPrice);
                 try {
-                    await strategyExecutorByBot.executeStrategy(
-                        subId,
-                        0,
-                        [triggerData],
-                        [actionData],
-                        strategySub,
-                        { gasLimit: 5000000 },
-                    );
+                    if (network === 'mainnet') {
+                        await strategyExecutorByBot.executeStrategy(
+                            subId,
+                            0,
+                            [triggerData],
+                            [actionData],
+                            strategySub,
+                            { gasLimit: 5000000 },
+                        );
+                    } else {
+                        await strategyExecutorByBot.executeStrategy(
+                            subId,
+                            0,
+                            [triggerData],
+                            [actionData],
+                            { gasLimit: 5000000 },
+                        );
+                    }
                     expect(true).to.be.equal(false);
                 } catch (err) {
                     if (useDsProxy || useDsaProxy) {
@@ -864,6 +877,7 @@ const recipeExecutorTest = async () => {
 
             it(`...should execute recipe by strategy through ${WALLETS[i]}`, async () => {
                 setupWallet(WALLETS[i]);
+
                 const { strategyId, subId } = await addPlaceholderStrategy(wallet, maxGasPrice);
 
                 // update sub data so trigger will pass
@@ -879,63 +893,73 @@ const recipeExecutorTest = async () => {
                 await executeAction('RecipeExecutor', functionData, wallet);
 
                 // deposit weth and give allowance to wallet for pull action
-                await depositToWeth(pullAmount);
-                await approve(WETH_ADDRESS, wallet.address);
+                await depositToWeth(pullAmount, senderAcc);
+                await approve(addrs[network].WETH_ADDRESS, wallet.address, senderAcc);
 
-                const beforeBalance = await balanceOf(WETH_ADDRESS, wallet.address);
+                const beforeBalance = await balanceOf(addrs[network].WETH_ADDRESS, wallet.address);
 
-                await strategyExecutorByBot.executeStrategy(
-                    subId,
-                    0,
-                    [triggerData],
-                    [actionData],
-                    strategySub,
-                    { gasLimit: 5000000 },
-                );
+                if (network === 'mainnet') {
+                    await strategyExecutorByBot.executeStrategy(
+                        subId,
+                        0,
+                        [triggerData],
+                        [actionData],
+                        strategySub,
+                        { gasLimit: 5000000 },
+                    );
+                } else {
+                    await strategyExecutorByBot.executeStrategy(
+                        subId,
+                        0,
+                        [triggerData],
+                        [actionData],
+                        { gasLimit: 5000000 },
+                    );
+                }
 
-                const afterBalance = await balanceOf(WETH_ADDRESS, wallet.address);
+                const afterBalance = await balanceOf(addrs[network].WETH_ADDRESS, wallet.address);
                 expect(beforeBalance.add(pullAmount)).to.be.eq(afterBalance);
             });
 
             it(`...should execute basic placeholder recipe through ${WALLETS[i]}`, async () => {
                 setupWallet(WALLETS[i]);
-                const beforeBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
+                const beforeBalance = await balanceOf(addrs[network].WETH_ADDRESS, senderAcc.address);
 
                 await depositToWeth(pullAmount);
-                await approve(WETH_ADDRESS, wallet.address);
+                await approve(addrs[network].WETH_ADDRESS, wallet.address);
 
                 const dummyRecipe = new dfs.Recipe('DummyRecipe', [
                     new dfs.actions.basic.PullTokenAction(
-                        WETH_ADDRESS, senderAcc.address, pullAmount,
+                        addrs[network].WETH_ADDRESS, senderAcc.address, pullAmount,
                     ),
                     new dfs.actions.basic.SendTokenAction(
-                        WETH_ADDRESS, senderAcc.address, pullAmount,
+                        addrs[network].WETH_ADDRESS, senderAcc.address, pullAmount,
                     ),
                 ]);
 
                 const functionData = dummyRecipe.encodeForDsProxyCall()[1];
                 await executeAction('RecipeExecutor', functionData, wallet);
 
-                const afterBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
+                const afterBalance = await balanceOf(addrs[network].WETH_ADDRESS, senderAcc.address);
                 expect(beforeBalance.add(pullAmount)).to.be.eq(afterBalance);
             });
 
             it(`...should execute basic recipe with FL through ${WALLETS[i]}`, async () => {
                 setupWallet(WALLETS[i]);
-                const beforeBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
+                const beforeBalance = await balanceOf(addrs[network].WETH_ADDRESS, senderAcc.address);
                 const dummyRecipeWithFL = new dfs.Recipe('DummyRecipeWithFl', [
                     new dfs.actions.flashloan.FLAction(
                         new dfs.actions.flashloan.BalancerFlashLoanAction(
-                            [WETH_ADDRESS], [pullAmount],
+                            [addrs[network].WETH_ADDRESS], [pullAmount],
                         ),
                     ),
-                    new dfs.actions.basic.SendTokenAction(WETH_ADDRESS, flAddr, pullAmount),
+                    new dfs.actions.basic.SendTokenAction(addrs[network].WETH_ADDRESS, flAddr, pullAmount),
                 ]);
 
                 const functionData = dummyRecipeWithFL.encodeForDsProxyCall()[1];
                 await executeAction('RecipeExecutor', functionData, wallet);
 
-                const afterBalance = await balanceOf(WETH_ADDRESS, senderAcc.address);
+                const afterBalance = await balanceOf(addrs[network].WETH_ADDRESS, senderAcc.address);
                 expect(beforeBalance).to.be.eq(afterBalance);
             });
         }
@@ -978,7 +1002,7 @@ const strategyExecutorTest = async () => {
             ({ strategySub, strategyId, subId } = await addPlaceholderStrategy(proxy, maxGasPrice));
 
             const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-                WETH_ADDRESS, placeHolderAddr, 0,
+                addrs[network].WETH_ADDRESS, placeHolderAddr, 0,
             );
 
             actionData = pullTokenAction.encodeForRecipe()[0];
