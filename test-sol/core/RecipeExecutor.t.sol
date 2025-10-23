@@ -13,10 +13,11 @@ import {RegistryUtils} from '../utils/RegistryUtils.sol';
 import {ActionsUtils} from '../utils/ActionsUtils.sol';
 import {SmartWallet} from '../utils/SmartWallet.sol';
 import {Addresses} from '../utils/Addresses.sol';
+import {DSAProxyUtils} from '../utils/dsa/DSAProxyUtils.sol';
 
 /// @dev Recipe execution from strategy is already tested in StrategyExecutor tests
 /// @dev Here, we just test direct recipe execution with and without flash loan
-contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, BaseTest {
+contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, DSAProxyUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -156,25 +157,5 @@ contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, BaseTest {
             actionIds: _actionIds,
             paramMapping: paramMap
         });
-    }
-
-
-    function _addDefiSaverConnector() internal {
-        address defiSaverConnector = address(new DefiSaverConnector());
-        vm.label(defiSaverConnector, "DefiSaverConnector");
-
-        IInstaConnectorsV2 connector = IInstaConnectorsV2(Addresses.INSTADAPP_CONNECTORS_V2);
-
-        address[] memory connectors = new address[](1);
-        connectors[0] = defiSaverConnector;
-
-        string[] memory connectorNames = new string[](1);
-        connectorNames[0] = 'DefiSaverConnector';
-
-        vm.prank(Addresses.INSTADAPP_MASTER_ACCOUNT);
-        connector.addConnectors(connectorNames, connectors);
-
-        (bool isOk, ) = connector.isConnectors(connectorNames);
-        assertTrue(isOk);
     }
 }

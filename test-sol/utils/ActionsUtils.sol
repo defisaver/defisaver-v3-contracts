@@ -76,6 +76,7 @@ import { GhoStake } from "../../contracts/actions/aaveV3/GhoStake.sol";
 import {CreateSub} from "../../contracts/actions/utils/CreateSub.sol";
 import {ToggleSub} from "../../contracts/actions/utils/ToggleSub.sol";
 import {StrategyModel} from "../../contracts/core/strategy/StrategyModel.sol";
+import {HandleAuth} from "../../contracts/actions/utils/HandleAuth.sol";
 
 contract ActionsUtils {
 
@@ -1375,6 +1376,14 @@ contract ActionsUtils {
         params = abi.encode(ToggleSub.Params({
             subId: _subId,
             active: _active
+        }));
+    }
+
+    function handleAuthEncode(
+        bool _enableAuth
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(HandleAuth.Params({
+            enableAuth: _enableAuth
         }));
     }
 }

@@ -21,8 +21,9 @@ import {Addresses} from '../utils/Addresses.sol';
 import {StrategyBuilder} from '../utils/StrategyBuilder.sol';
 import {DefiSaverConnector} from '../../contracts/actions/insta/DefiSaverConnector.sol';
 import {IInstaConnectorsV2} from '../../contracts/interfaces/insta/IInstaConnectorsV2.sol';
+import {DSAProxyUtils} from '../utils/dsa/DSAProxyUtils.sol';
 
-contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
+contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, DSAProxyUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -310,24 +311,5 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
     function _add_bot_caller() internal {
         prank(Addresses.OWNER_ACC);
         BotAuth(botAuthAddr).addCaller(address(this));
-    }
-
-    function _addDefiSaverConnector() internal {
-        address defiSaverConnector = address(new DefiSaverConnector());
-        vm.label(defiSaverConnector, "DefiSaverConnector");
-
-        IInstaConnectorsV2 connector = IInstaConnectorsV2(Addresses.INSTADAPP_CONNECTORS_V2);
-
-        address[] memory connectors = new address[](1);
-        connectors[0] = defiSaverConnector;
-
-        string[] memory connectorNames = new string[](1);
-        connectorNames[0] = 'DefiSaverConnector';
-
-        vm.prank(Addresses.INSTADAPP_MASTER_ACCOUNT);
-        connector.addConnectors(connectorNames, connectors);
-
-        (bool isOk, ) = connector.isConnectors(connectorNames);
-        assertTrue(isOk);
     }
 }
