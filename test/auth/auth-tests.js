@@ -158,7 +158,7 @@ const dsProxyPermissionTest = async () => {
         let dsProxyPermission;
 
         before(async () => {
-            dsProxyPermission = await deployContract('DSProxyPermission');
+            dsProxyPermission = await deployContract('MockDSProxyPermission');
 
             ownerAcc1 = (await hre.ethers.getSigners())[0];
             ownerAcc2 = (await hre.ethers.getSigners())[1];
