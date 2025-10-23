@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
-contract MockCheckWalletType is CheckWalletType {
+contract MockSmartWalletUtils is SmartWalletUtils {
     function isDSProxy(address _proxy) public view returns (bool) {
         return super._isDSProxy(_proxy);
     }
@@ -16,5 +16,9 @@ contract MockCheckWalletType is CheckWalletType {
 
     function getWalletType(address _proxy) public view returns (WalletType) {
         return super._getWalletType(_proxy);
+    }
+
+    function fetchOwnerOrWallet(address _wallet) public view returns (address) {
+        return super._fetchOwnerOrWallet(_wallet);
     }
 }

@@ -6,12 +6,12 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { ISubscriptions } from "../../interfaces/ISubscriptions.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Contract that subscribes users to Compound V2 automation bundles
-contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
+contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID;
 

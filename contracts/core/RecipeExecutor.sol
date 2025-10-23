@@ -99,7 +99,7 @@ import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
 import { ISafe } from "../interfaces/safe/ISafe.sol";
 import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
 import { Permission } from "../auth/Permission.sol";
-import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
@@ -120,7 +120,7 @@ contract RecipeExecutor is
     AdminAuth,
     CoreHelper,
     TxSaverGasCostCalc,
-    CheckWalletType
+    SmartWalletUtils
 {
     bytes4 public constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);

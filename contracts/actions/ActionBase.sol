@@ -9,11 +9,11 @@ import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { DSProxy } from "../DS/DSProxy.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { ActionsUtilHelper } from "./utils/helpers/ActionsUtilHelper.sol";
-import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
-abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
+abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
     event ActionEvent(
         string indexed logName,
         bytes data
@@ -108,7 +108,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
             } else {
                 /// @dev The last two values are specially reserved for proxy addr and owner addr
                 if (_mapType == 254) return address(this); // wallet address
-                if (_mapType == 255) return fetchOwnersOrWallet(); // owner if 1/1 wallet or the wallet itself
+                if (_mapType == 255) return _fetchOwnerOrWallet(address(this)); // owner if 1/1 wallet or the wallet itself
 
                 _param = address(uint160(uint256(_subData[getSubIndex(_mapType)])));
             }
@@ -168,23 +168,5 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
             revert ReturnIndexValueError();
         }
         return (_type - SUB_MIN_INDEX_VALUE);
-    }
-
-    function fetchOwnersOrWallet() internal view returns (address) {
-        WalletType walletType = _getWalletType(address(this));
-
-        if (walletType == WalletType.DSPROXY) {
-            return DSProxy(payable(address(this))).owner();
-        }
-
-        if (walletType == WalletType.DSAPROXY) {
-            uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(address(this));
-            // TODO: Check if it is still the owner (iterate?)
-            return IInstaList(DSA_LIST_ADDR).accountLink(dsaId).first;
-        }
-
-        // Otherwise, we assume we are in context of Safe
-        address[] memory owners = ISafe(address(this)).getOwners();
-        return owners.length == 1 ? owners[0] : address(this);
     }
 }

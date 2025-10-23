@@ -4,14 +4,14 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { SubStorage } from "./SubStorage.sol";
 import { DFSRegistry } from "../DFSRegistry.sol";
 import { StrategyModel } from "./StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Called through user wallet, handles auth and calls subscription contract
-contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
+contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 

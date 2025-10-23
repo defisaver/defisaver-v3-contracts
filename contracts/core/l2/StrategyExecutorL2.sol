@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { IAuth } from "../../interfaces/IAuth.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../strategy/StrategyModel.sol";
 import { BotAuth } from "../strategy/BotAuth.sol";
 import { DFSRegistry } from "../DFSRegistry.sol";
@@ -13,7 +13,7 @@ import { CoreHelper } from "../helpers/CoreHelper.sol";
 import { WalletType } from "../../utils/DFSTypes.sol";
 
 /// @title Main entry point for executing automated strategies
-contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWalletType {
+contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, SmartWalletUtils {
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 

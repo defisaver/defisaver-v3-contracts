@@ -2,25 +2,25 @@
 
 pragma solidity =0.8.24;
 
-import { MockCheckWalletType } from "../../contracts/mocks/MockCheckWalletType.sol";
+import { MockSmartWalletUtils } from "../../contracts/mocks/MockSmartWalletUtils.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { WalletType } from "../../contracts/utils/DFSTypes.sol";
 
-contract TestCore_CheckWalletType is BaseTest {
+contract TestCore_SmartWalletUtils is BaseTest {
 
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
-    MockCheckWalletType cut;
+    MockSmartWalletUtils cut;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnetLatest();
-        cut = new MockCheckWalletType();
+        cut = new MockSmartWalletUtils();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
