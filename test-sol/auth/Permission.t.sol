@@ -158,7 +158,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
         }
     }
 
-    function _getWalletByType(WalletType _walletType) internal view returns (SmartWallet) {
+    function _getWalletByType(WalletType _walletType) internal view returns (SmartWallet wallet) {
         if (_walletType == WalletType.DSPROXY) {
             return dsProxyWallet;
         } else if (_walletType == WalletType.SAFE) {
