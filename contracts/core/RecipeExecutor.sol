@@ -361,7 +361,7 @@ contract RecipeExecutor is
         address _flActionAddr,
         bytes32[] memory _returnValues
     ) internal {
-        WalletType walletType = getWalletType(address(this));
+        WalletType walletType = _getWalletType(address(this));
 
         _givePermissionTo(walletType, _flActionAddr);
 

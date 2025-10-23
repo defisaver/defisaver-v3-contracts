@@ -171,7 +171,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     }
 
     function fetchOwnersOrWallet() internal view returns (address) {
-        WalletType walletType = getWalletType(address(this));
+        WalletType walletType = _getWalletType(address(this));
 
         if (walletType == WalletType.DSPROXY) {
             return DSProxy(payable(address(this))).owner();

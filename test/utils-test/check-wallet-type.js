@@ -1,7 +1,6 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
 const {
-    redeploy,
     getProxy,
 } = require('../utils/utils');
 const { createSafe } = require('../utils/safe');
@@ -12,9 +11,8 @@ describe('CheckWalletType', () => {
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
-        const realCheckWalletTypeInstance = await redeploy('CheckWalletType');
         const mock = await hre.ethers.getContractFactory('MockCheckWalletType');
-        checkWalletTypeInstance = await mock.deploy(realCheckWalletTypeInstance.address);
+        checkWalletTypeInstance = await mock.deploy();
     });
 
     it('... should return true for DsProxy wallet', async () => {

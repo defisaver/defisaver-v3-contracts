@@ -19,7 +19,7 @@ contract CBRebondSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, C
         uint256 _bondID
     ) public {
          /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(getWalletType(address(this)));
+        _giveAuthContractPermission(_getWalletType(address(this)));
 
         // returns .length which is the next id we are subscribing
         uint256 newSubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount();

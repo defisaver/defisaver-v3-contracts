@@ -219,7 +219,7 @@ contract StrategyTriggerViewNoRevert is
     function _fetchTokenHolder(
         address _subWallet
     ) internal view returns (address) {
-        WalletType walletType = getWalletType(_subWallet);
+        WalletType walletType = _getWalletType(_subWallet);
         if (walletType == WalletType.DSPROXY) {
             return DSProxy(payable(_subWallet)).owner();
         }

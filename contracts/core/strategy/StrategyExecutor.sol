@@ -89,7 +89,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, CheckWalletTy
         StrategySub memory _sub,
         address _userWallet
     ) internal {
-        WalletType walletType = getWalletType(_userWallet);
+        WalletType walletType = _getWalletType(_userWallet);
 
         address authAddr = MODULE_AUTH_ADDR;
         if (walletType == WalletType.DSPROXY) authAddr = PROXY_AUTH_ADDR;

@@ -34,7 +34,7 @@ contract LimitOrderSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission,
 
     function subToLimitOrder(LimitOrderSub memory _subData) external {
          /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(getWalletType(address(this)));
+        _giveAuthContractPermission(_getWalletType(address(this)));
 
         _validateData(_subData);
 

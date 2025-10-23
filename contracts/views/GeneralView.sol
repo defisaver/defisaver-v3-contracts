@@ -11,7 +11,7 @@ import { WalletType } from "../utils/DFSTypes.sol";
 contract GeneralView is CheckWalletType {
 
     function getSmartWalletInfo(address smartWalletAddress) public view returns (WalletType smartWalletType, address owner) {
-        smartWalletType = getWalletType(smartWalletAddress);
+        smartWalletType = _getWalletType(smartWalletAddress);
 
         if (smartWalletType == WalletType.DSPROXY) {
             owner = IDSProxy(payable(smartWalletAddress)).owner();

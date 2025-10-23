@@ -56,7 +56,7 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         bytes calldata _encodedInput
     ) public {
          /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(getWalletType(address(this)));
+        _giveAuthContractPermission(_getWalletType(address(this)));
 
         CompV3SubData memory subData = parseSubData(_encodedInput);
         StrategySub memory repaySub = formatRepaySub(subData, address(this), msg.sender);
@@ -77,7 +77,7 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         bytes calldata _encodedInput
     ) public {
         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(getWalletType(address(this)));
+        _giveAuthContractPermission(_getWalletType(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         CompV3SubData memory subData = parseSubData(_encodedInput[8:]);
@@ -111,7 +111,7 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, C
         bytes calldata _encodedInput
     ) public {
         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(getWalletType(address(this)));
+        _giveAuthContractPermission(_getWalletType(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);

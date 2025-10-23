@@ -256,7 +256,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
             balancesBefore[i] = _assets[i].getBalance(address(this));
         }
 
-        _executeRecipe(wallet, getWalletType(wallet), currRecipe, _amounts[0] + _fees[0]);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _amounts[0] + _fees[0]);
 
         // return FL
         for (uint256 i = 0; i < _assets.length; i++) {
@@ -297,7 +297,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
             balancesBefore[i] = _tokens[i].getBalance(address(this));
         }
 
-        _executeRecipe(wallet, getWalletType(wallet), currRecipe, _amounts[0] + _feeAmounts[0]);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _amounts[0] + _feeAmounts[0]);
         
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i] + (_feeAmounts[i]);
@@ -332,7 +332,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
         uint256 paybackAmount = _amount +_fee;
 
-        _executeRecipe(wallet, getWalletType(wallet), currRecipe, paybackAmount);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, paybackAmount);
 
         if (_token.getBalance(address(this)) != paybackAmount + balanceBefore) {
             revert WrongPaybackAmountError();
@@ -364,7 +364,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         params.tokens[0].withdrawTokens(wallet, params.amounts[0]);
         params.tokens[1].withdrawTokens(wallet, params.amounts[1]);
 
-        _executeRecipe(wallet, getWalletType(wallet), currRecipe, params.amounts[0]);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, params.amounts[0]);
 
         uint256 expectedBalance0 = params.modes[0] + params.amounts[0] + _fee0;
         uint256 expectedBalance1 = params.modes[1] + params.amounts[1] + _fee1;
@@ -402,7 +402,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
         uint256 balanceBefore = token.getBalance(address(this));
 
-        _executeRecipe(wallet, getWalletType(wallet), currRecipe, assets);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, assets);
 
         if (token.getBalance(address(this)) != assets + balanceBefore) {
             revert WrongPaybackAmountError();

@@ -6,6 +6,7 @@ import { IAuth } from "../../interfaces/IAuth.sol";
 import { Pausable } from "../../auth/Pausable.sol";
 import { CoreHelper } from "./../helpers/CoreHelper.sol";
 
+/// @notice Base auth contract used by all specific auth contracts
 abstract contract WalletAuth is Pausable, CoreHelper, IAuth {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
