@@ -597,8 +597,8 @@ const proxyAuthTest = async () => {
 
         it('...should callExecute when auth is given to proxyAuth and StrategyExecutor set', async () => {
             // give proxy permission to ProxyAuth
-            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
-            const functionData = DSProxyPermission.interface.encodeFunctionData(
+            const MockDSProxyPermission = await hre.ethers.getContractFactory('MockDSProxyPermission');
+            const functionData = MockDSProxyPermission.interface.encodeFunctionData(
                 'giveProxyPermission',
                 [proxyAuth.address],
             );
@@ -674,7 +674,7 @@ const safeModuleAuthTest = async () => {
 
         it('... should callExecute when auth is given to safeModuleAuth and StrategyExecutor is set', async () => {
             // give safe module permission to SafeModuleAuth
-            const SafeModulePermission = await hre.ethers.getContractFactory('SafeModulePermission');
+            const SafeModulePermission = await hre.ethers.getContractFactory('MockSafeModulePermission');
             const functionData = SafeModulePermission.interface.encodeFunctionData(
                 'enableModule',
                 [safeModuleAuth.address],
@@ -725,7 +725,7 @@ const safeModuleAuthTest = async () => {
         });
 
         it('... should fail when safeModuleAuth is paused', async () => {
-            const SafeModulePermission = await hre.ethers.getContractFactory('SafeModulePermission');
+            const SafeModulePermission = await hre.ethers.getContractFactory('MockSafeModulePermission');
             const functionData = SafeModulePermission.interface.encodeFunctionData(
                 'enableModule',
                 [safeModuleAuth.address],
@@ -803,15 +803,15 @@ const recipeExecutorTest = async () => {
 
         const giveAuthPermissionsToWallets = async () => {
             // give permission to ProxyAuth
-            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
-            const functionDataDsProxy = DSProxyPermission.interface.encodeFunctionData(
+            const MockDSProxyPermission = await hre.ethers.getContractFactory('MockDSProxyPermission');
+            const functionDataDsProxy = MockDSProxyPermission.interface.encodeFunctionData(
                 'giveProxyPermission',
                 [proxyAuth.address],
             );
             await dsProxy['execute(address,bytes)'](dsProxyPermission.address, functionDataDsProxy, { gasLimit: 1500000 });
 
             // give permission to SafeModuleAuth
-            const SafeModulePermission = await hre.ethers.getContractFactory('SafeModulePermission');
+            const SafeModulePermission = await hre.ethers.getContractFactory('MockSafeModulePermission');
             const functionDataSafe = SafeModulePermission.interface.encodeFunctionData(
                 'enableModule',
                 [safeModuleAuth.address],

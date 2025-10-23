@@ -27,11 +27,11 @@ contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermissi
     /// @param _to Address of the contract to give permission to
     function _givePermissionTo(WalletType _walletType, address _to) internal {
         if (_walletType == WalletType.DSPROXY) {
-            giveProxyPermission(_to);
+            _giveProxyPermission(_to);
         } else if (_walletType == WalletType.DSAPROXY) {
-            giveDSAProxyPermission(_to);
+            _giveDSAProxyPermission(_to);
         } else {
-            enableModule(_to);
+            _enableModule(_to);
         }
     }
 
@@ -41,11 +41,11 @@ contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermissi
     /// @param _from Address of the contract to remove permission from
     function _removePermissionFrom(WalletType _walletType, address _from) internal {
         if (_walletType == WalletType.DSPROXY) {
-            removeProxyPermission(_from);
+            _removeProxyPermission(_from);
         } else if (_walletType == WalletType.DSAPROXY) {
-            removeDSAProxyPermission(_from);
+            _removeDSAProxyPermission(_from);
         } else {
-            disableModule(_from);
+            _disableModule(_from);
         }
     }
 

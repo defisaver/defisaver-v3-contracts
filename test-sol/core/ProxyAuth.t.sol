@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { ProxyAuth } from "../../contracts/core/strategy/ProxyAuth.sol";
 import { WalletAuth } from "../../contracts/core/strategy/WalletAuth.sol";
-import { DSProxyPermission } from "../../contracts/auth/DSProxyPermission.sol";
+import { MockDSProxyPermission } from "../../contracts/mocks/MockDSProxyPermission.sol";
 import { StrategyExecutor } from "../../contracts/core/strategy/StrategyExecutor.sol";
 import { RecipeExecutor } from "../../contracts/core/RecipeExecutor.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
@@ -44,7 +44,7 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
         vm.etch(PROXY_AUTH_ADDR, address(newCut).code);
         cut = ProxyAuth(PROXY_AUTH_ADDR);
 
-        dsProxyPermissionAddr = address(new DSProxyPermission());
+        dsProxyPermissionAddr = address(new MockDSProxyPermission());
         strategyExecutorAddr = address(new StrategyExecutor());
         redeploy("StrategyExecutorID", strategyExecutorAddr);
 
@@ -75,7 +75,7 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
     function test_should_execute_tx() public {
         // first approve auth contract to call execute from dsProxy
         bytes memory permissionCalldata = abi.encodeWithSelector(
-            DSProxyPermission.giveProxyPermission.selector, address(cut)
+            MockDSProxyPermission.giveProxyPermission.selector, address(cut)
         );
         wallet.execute(dsProxyPermissionAddr, permissionCalldata, 0);
 

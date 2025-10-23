@@ -11,7 +11,7 @@ contract DSAProxyPermission is AuthHelper {
     /// @notice Called in the context of DSA proxy account to authorize an address
     /// @param _contractAddr Address which will be authorized
     /// @dev Can't enable the same contract twice
-    function giveDSAProxyPermission(address _contractAddr) public {
+    function _giveDSAProxyPermission(address _contractAddr) internal {
         if (!IInstaAccountV2(address(this)).isAuth(_contractAddr)) {
             IInstaAccountV2(address(this)).enable(_contractAddr);
         }
@@ -20,7 +20,7 @@ contract DSAProxyPermission is AuthHelper {
     /// @notice Called in the context of DSA proxy account to remove authority of an address
     /// @param _contractAddr Auth address which will be removed from auth list
     /// @dev Can't remove a contract that is not authorized
-    function removeDSAProxyPermission(address _contractAddr) public {
+    function _removeDSAProxyPermission(address _contractAddr) internal {
         if (IInstaAccountV2(address(this)).isAuth(_contractAddr)) {
             IInstaAccountV2(address(this)).disable(_contractAddr);
         }

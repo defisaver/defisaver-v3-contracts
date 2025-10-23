@@ -167,8 +167,8 @@ const dsProxyPermissionTest = async () => {
         });
 
         it('... should through DSProxy give contract permission', async () => {
-            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
-            const functionData = DSProxyPermission.interface.encodeFunctionData(
+            const MockDSProxyPermission = await hre.ethers.getContractFactory('MockDSProxyPermission');
+            const functionData = MockDSProxyPermission.interface.encodeFunctionData(
                 'giveProxyPermission',
                 [ownerAcc2.address],
             );
@@ -180,8 +180,8 @@ const dsProxyPermissionTest = async () => {
         });
 
         it('... should through DSProxy remove contract permission', async () => {
-            const DSProxyPermission = await hre.ethers.getContractFactory('DSProxyPermission');
-            const functionData = DSProxyPermission.interface.encodeFunctionData(
+            const MockDSProxyPermission = await hre.ethers.getContractFactory('MockDSProxyPermission');
+            const functionData = MockDSProxyPermission.interface.encodeFunctionData(
                 'removeProxyPermission',
                 [ownerAcc2.address],
             );
@@ -203,7 +203,7 @@ const safeModulePermissionTest = async () => {
         let snapshotId;
 
         before(async () => {
-            modulePermissionContract = await redeploy('SafeModulePermission');
+            modulePermissionContract = await redeploy('MockSafeModulePermission');
 
             flAddr = await getAddrFromRegistry('FLAction');
 

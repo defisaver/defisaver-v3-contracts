@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { SafeModulePermission } from "../../contracts/auth/SafeModulePermission.sol";
+import { MockSafeModulePermission } from "../../contracts/mocks/MockSafeModulePermission.sol";
 import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
-contract TestCore_SafeModulePermission is SafeModulePermission, BaseTest {
+contract TestCore_SafeModulePermission is MockSafeModulePermission, BaseTest {
     
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
-    SafeModulePermission cut;
+    MockSafeModulePermission cut;
 
     /*//////////////////////////////////////////////////////////////////////////
                                      VARIABLES
@@ -34,7 +34,7 @@ contract TestCore_SafeModulePermission is SafeModulePermission, BaseTest {
         walletAddr = wallet.createSafe();
         sender = wallet.owner();
 
-        cut = new SafeModulePermission();
+        cut = new MockSafeModulePermission();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -170,12 +170,12 @@ contract TestCore_SafeModulePermission is SafeModulePermission, BaseTest {
                                       HELPERS
     //////////////////////////////////////////////////////////////////////////*/
     function _enable_safe_module(address _moduleAddr) internal {
-        bytes memory enableCalldata = abi.encodeWithSelector(SafeModulePermission.enableModule.selector, _moduleAddr);
+        bytes memory enableCalldata = abi.encodeWithSelector(MockSafeModulePermission.enableModule.selector, (_moduleAddr));
         wallet.execute(address(cut), enableCalldata, 0);
     }
 
     function _disable_module(address _moduleAddr) internal {
-        bytes memory disableCalldata = abi.encodeWithSelector(SafeModulePermission.disableModule.selector, _moduleAddr);
+        bytes memory disableCalldata = abi.encodeWithSelector(MockSafeModulePermission.disableModule.selector, (_moduleAddr));
         wallet.execute(address(cut), disableCalldata, 0);
     }
 }
