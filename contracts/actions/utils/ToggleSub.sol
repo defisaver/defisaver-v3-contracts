@@ -46,7 +46,7 @@ contract ToggleSub is ActionBase, Permission {
 
     function updateSubData(Params memory _inputData) internal {
         if (_inputData.active) {
-             /// @notice This gives permission to dsproxy or safe to our auth contract to be able to execute the strategy.
+             /// @notice This gives wallet permission to our auth contract to be able to execute the strategy.
             _giveAuthContractPermission(_getWalletType(address(this)));
             SubStorage(SUB_STORAGE_ADDR).activateSub(_inputData.subId);
         } else {

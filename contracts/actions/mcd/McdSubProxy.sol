@@ -47,7 +47,7 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
         McdSubData calldata _subData,
         bool // _shouldLegacyUnsub no longer needed, kept to keep the function sig the same
     ) public {
-         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
 
         StrategySub memory repaySub = formatRepaySub(_subData);
@@ -69,7 +69,7 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
         uint32 _subId2,
         McdSubData calldata _subData
     ) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
         // update repay as we must have a subId, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(_subData);
@@ -100,7 +100,7 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
         uint32 _subId1,
         uint32 _subId2
     ) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
 

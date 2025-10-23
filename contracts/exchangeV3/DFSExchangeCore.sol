@@ -138,7 +138,7 @@ contract DFSExchangeCore is
 
     /// @notice Takes a feePercentage and sends it to wallet
     /// @param _amount Amount of the whole trade
-    /// @param _wallet Address of the users wallet (safe or dsproxy)
+    /// @param _wallet Address of the users wallet
     /// @param _token Address of the token
     /// @param _dfsFeeDivider Dfs fee divider
     /// @return feeAmount Amount owner earned on the fee
