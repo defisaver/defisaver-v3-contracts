@@ -14,34 +14,7 @@ const {
     approve,
 } = require('../../utils/utils');
 const { executeAction } = require('../../utils/actions');
-
-const addDefiSaverConnector = async (dfsConnectorAddress) => {
-    const instaConnectorsV2Address = '0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11';
-
-    const masterAddr = '0x2386DC45AdDed673317eF068992F19421B481F4c';
-    const masterSigner = await hre.ethers.getSigner(masterAddr);
-    const instaConnectorsV2Contract = await hre.ethers.getContractAt('IInstaConnectorsV2', instaConnectorsV2Address, masterSigner);
-
-    // Fund master account
-    const zeroAddress = hre.ethers.constants.AddressZero;
-    const zeroAcc = await hre.ethers.provider.getSigner(zeroAddress);
-    await impersonateAccount(zeroAddress);
-    await sendEther(zeroAcc, masterAddr, '5');
-    await stopImpersonatingAccount(zeroAddress);
-
-    // Add connector
-    await impersonateAccount(masterAddr);
-    await instaConnectorsV2Contract.addConnectors(
-        ['DefiSaverConnector'],
-        [dfsConnectorAddress],
-        { gasLimit: 800000 },
-    );
-    await stopImpersonatingAccount(masterAddr);
-
-    // Check if connector is properly added
-    const response = await instaConnectorsV2Contract.isConnectors(['DefiSaverConnector']);
-    expect(response.isOk).to.be.eq(true);
-};
+const { addDefiSaverConnector } = require('../../utils/insta');
 
 const dfsConnectorTest = async () => {
     describe('Test DefiSaverConnector', function () {

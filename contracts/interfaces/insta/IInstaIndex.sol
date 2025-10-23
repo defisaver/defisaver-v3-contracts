@@ -2,6 +2,9 @@
 pragma solidity =0.8.24;
 
 interface IInstaIndex {
+
+    event LogAccountCreated(address sender, address indexed owner, address indexed account, address indexed origin);
+
     function build(
         address _owner,
         uint accountVersion,
