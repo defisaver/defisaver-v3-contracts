@@ -8,7 +8,7 @@ import { ISafe } from "../../interfaces/safe/ISafe.sol";
 import { IInstaList } from "../../interfaces/insta/IInstaList.sol";
 import { ITrigger } from "../../interfaces/ITrigger.sol";
 import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { DSProxy } from "../../DS/DSProxy.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { DFSRegistry } from "../../core/DFSRegistry.sol";
@@ -24,7 +24,7 @@ import { WalletType } from "../../utils/DFSTypes.sol";
 contract StrategyTriggerViewNoRevert is
     StrategyModel,
     CoreHelper,
-    CheckWalletType,
+    SmartWalletUtils,
     AaveV3Helper
 {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
@@ -183,7 +183,7 @@ contract StrategyTriggerViewNoRevert is
         address sellTokenAddr = address(uint160(uint256(_subData[0])));
         uint256 desiredAmount = uint256(_subData[2]);
 
-        address tokenHolder = _fetchTokenHolder(_smartWallet);
+        address tokenHolder = _fetchOwnerOrWallet(_smartWallet);
         bool hasEnoughBalance = sellTokenAddr.getBalance(tokenHolder) >= desiredAmount;
 
         if (tokenHolder != _smartWallet) {
@@ -216,25 +216,6 @@ contract StrategyTriggerViewNoRevert is
     /*//////////////////////////////////////////////////////////////
                                 HELPERS
     //////////////////////////////////////////////////////////////*/    
-    function _fetchTokenHolder(
-        address _subWallet
-    ) internal view returns (address) {
-        WalletType walletType = _getWalletType(_subWallet);
-        if (walletType == WalletType.DSPROXY) {
-            return DSProxy(payable(_subWallet)).owner();
-        }
-
-        if (walletType == WalletType.DSAPROXY) {
-            uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(_subWallet);
-            // TODO: Check if it is still the owner (iterate?)
-            return IInstaList(DSA_LIST_ADDR).accountLink(dsaId).first;
-        }
-
-        // Otherwise, we assume we are in context of Safe
-        address[] memory owners = ISafe(_subWallet).getOwners();
-        return owners.length == 1 ? owners[0] : _subWallet;
-    }
-
     function _hasEnoughMinDebtInUSD(uint256 _userDebtInUSD) internal view returns (bool) {
         if (block.chainid == 1) {
             return _userDebtInUSD >= MIN_DEBT_IN_USD_MAINNET;
