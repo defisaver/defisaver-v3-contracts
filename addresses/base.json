@@ -1523,13 +1523,68 @@
         "registryIds": [],
         "history": []
     },
-    { 
+    {
         "name": "ExecuteCall",
         "address": "0x232c43c354dbebb75c1ed0d9a3fddde5d630e335",
         "id": "0xd82327eb",
         "path": "contracts/actions/utils/ExecuteCall.sol",
         "version": "1.0.0",
         "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexOpen",
+        "address": "0x5eA8Da9679145D51F5eAEC8Bf2f42f47003A8799",
+        "id": "0x7d4e6bb2",
+        "path": "contracts/actions/fluid/dex/FluidDexOpen.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexSupply",
+        "address": "0x2fCb7db80d3Be5C1B0049dF074b1AcFbcA93A867",
+        "id": "0x3cf3e466",
+        "path": "contracts/actions/fluid/dex/FluidDexSupply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexWithdraw",
+        "address": "0xEaBA867c49FE8e53F5716fFF8857F239bd7202e1",
+        "id": "0x4f1673fd",
+        "path": "contracts/actions/fluid/dex/FluidDexWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexBorrow",
+        "address": "0x9D40776a876fA67C6757DA386434844cB6616C5F",
+        "id": "0x81fb1de1",
+        "path": "contracts/actions/fluid/dex/FluidDexBorrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexPayback",
+        "address": "0xc177c885872592EDA598276bD3FAe5B6d27F80Bf",
+        "id": "0x1de2c822",
+        "path": "contracts/actions/fluid/dex/FluidDexPayback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
         "history": []
