@@ -28,6 +28,14 @@ contract DefiSaverConnector is AdminAuth, InstaConnectorHelper, IConnectorInterf
         return "DefiSaverConnector";
     }
 
+    /// @notice Returns the ID of the connector
+    /// @dev Only used for V1 DSA Proxy accounts
+    /// @return _type Type of the connector. Unused, always returned as 1
+    /// @return _id ID of the connector, representing (totalConnectors + 1) at the time this connector was added
+    function connectorID() external override pure returns (uint256 _type, uint256 _id) {
+        return (1, 103);
+    }
+
     /// @notice Revert on plain ether transfer
     // solhint-disable reason-string
     // solhint-disable gas-custom-errors
