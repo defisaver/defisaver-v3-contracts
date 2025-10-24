@@ -17,8 +17,5 @@ interface IUmbrellaRewardsController {
      * @param reward Address of the `reward` which `emissionPerSecond` should be returned
      * @return emissionPerSecond Current amount of rewards distributed every second
      */
-    function calculateCurrentEmission(address asset, address reward)
-        external
-        view
-        returns (uint256 emissionPerSecond);
+    function calculateCurrentEmission(address asset, address reward) external view returns (uint256 emissionPerSecond);
 }

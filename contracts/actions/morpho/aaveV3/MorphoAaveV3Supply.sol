@@ -72,9 +72,8 @@ contract MorphoAaveV3Supply is ActionBase, MorphoAaveV3Helper {
         if (_params.supplyAsColl) {
             IMorphoAaveV3(morphoAddress).supplyCollateral(_params.tokenAddr, _params.amount, _params.onBehalf);
         } else {
-            IMorphoAaveV3(morphoAddress).supply(
-                _params.tokenAddr, _params.amount, _params.onBehalf, _params.maxIterations
-            );
+            IMorphoAaveV3(morphoAddress)
+                .supply(_params.tokenAddr, _params.amount, _params.onBehalf, _params.maxIterations);
         }
 
         bytes memory logData = abi.encode(_params);

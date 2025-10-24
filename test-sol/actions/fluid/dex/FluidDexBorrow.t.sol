@@ -88,7 +88,9 @@ contract TestFluidDexBorrow is FluidTestBase {
     function test_should_borrow_token_0() public {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
-                TestConfig({ isDirect: false, wrapBorrowedEth: false, borrowAmount0InUSD: 30_000, borrowAmount1InUSD: 0 }),
+                TestConfig({
+                    isDirect: false, wrapBorrowedEth: false, borrowAmount0InUSD: 30_000, borrowAmount1InUSD: 0
+                }),
                 t3VaultsSelected[i]
             );
         }
@@ -97,7 +99,9 @@ contract TestFluidDexBorrow is FluidTestBase {
     function test_should_borrow_token_1() public {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
-                TestConfig({ isDirect: false, wrapBorrowedEth: false, borrowAmount0InUSD: 0, borrowAmount1InUSD: 30_000 }),
+                TestConfig({
+                    isDirect: false, wrapBorrowedEth: false, borrowAmount0InUSD: 0, borrowAmount1InUSD: 30_000
+                }),
                 t3VaultsSelected[i]
             );
         }
@@ -107,10 +111,7 @@ contract TestFluidDexBorrow is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    isDirect: false,
-                    wrapBorrowedEth: false,
-                    borrowAmount0InUSD: 30_000,
-                    borrowAmount1InUSD: 30_000
+                    isDirect: false, wrapBorrowedEth: false, borrowAmount0InUSD: 30_000, borrowAmount1InUSD: 30_000
                 }),
                 t3VaultsSelected[i]
             );
@@ -120,7 +121,9 @@ contract TestFluidDexBorrow is FluidTestBase {
     function test_should_borrow_with_eth_wrap() public {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
-                TestConfig({ isDirect: false, wrapBorrowedEth: true, borrowAmount0InUSD: 30_000, borrowAmount1InUSD: 0 }),
+                TestConfig({
+                    isDirect: false, wrapBorrowedEth: true, borrowAmount0InUSD: 30_000, borrowAmount1InUSD: 0
+                }),
                 t3VaultsSelected[i]
             );
         }
@@ -129,7 +132,9 @@ contract TestFluidDexBorrow is FluidTestBase {
     function test_should_borrow_action_direct() public {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
-                TestConfig({ isDirect: true, wrapBorrowedEth: false, borrowAmount0InUSD: 30_000, borrowAmount1InUSD: 0 }),
+                TestConfig({
+                    isDirect: true, wrapBorrowedEth: false, borrowAmount0InUSD: 30_000, borrowAmount1InUSD: 0
+                }),
                 t3VaultsSelected[i]
             );
         }
@@ -173,7 +178,8 @@ contract TestFluidDexBorrow is FluidTestBase {
             vars.isNativeBorrow0 = constants.borrowToken.token0 == TokenUtils.ETH_ADDR;
             vars.borrowAmount0 = config.borrowAmount0InUSD != 0
                 ? amountInUSDPrice(
-                    vars.isNativeBorrow0 ? TokenUtils.WETH_ADDR : constants.borrowToken.token0, config.borrowAmount0InUSD
+                    vars.isNativeBorrow0 ? TokenUtils.WETH_ADDR : constants.borrowToken.token0,
+                    config.borrowAmount0InUSD
                 )
                 : 0;
 
@@ -181,7 +187,8 @@ contract TestFluidDexBorrow is FluidTestBase {
             vars.isNativeBorrow1 = constants.borrowToken.token1 == TokenUtils.ETH_ADDR;
             vars.borrowAmount1 = config.borrowAmount1InUSD != 0
                 ? amountInUSDPrice(
-                    vars.isNativeBorrow1 ? TokenUtils.WETH_ADDR : constants.borrowToken.token1, config.borrowAmount1InUSD
+                    vars.isNativeBorrow1 ? TokenUtils.WETH_ADDR : constants.borrowToken.token1,
+                    config.borrowAmount1InUSD
                 )
                 : 0;
 

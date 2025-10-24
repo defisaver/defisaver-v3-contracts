@@ -22,9 +22,8 @@ contract SafeModuleAuth is WalletAuth {
         onlyExecutor
         notPaused
     {
-        bool success = ISafe(_safeAddr).execTransactionFromModule(
-            _recipeExecutorAddr, msg.value, _callData, ISafe.Operation.DelegateCall
-        );
+        bool success = ISafe(_safeAddr)
+            .execTransactionFromModule(_recipeExecutorAddr, msg.value, _callData, ISafe.Operation.DelegateCall);
 
         // Execute from module does not revert on failure so we explicitly revert if it fails
         if (!success) {

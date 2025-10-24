@@ -90,8 +90,8 @@ contract DFSExchangeCore is DSMath, DFSExchangeHelper, DFSExchangeData, Exchange
 
         IERC20(_exData.srcAddr).safeTransfer(_exData.wrapper, _exData.srcAmount);
 
-        swappedTokens =
-            IExchangeV3(_exData.wrapper).sell(_exData.srcAddr, _exData.destAddr, _exData.srcAmount, _exData.wrapperData);
+        swappedTokens = IExchangeV3(_exData.wrapper)
+            .sell(_exData.srcAddr, _exData.destAddr, _exData.srcAmount, _exData.wrapperData);
     }
 
     function _takeDfsExchangeFee(ExchangeData memory exData, address smartWallet) internal {

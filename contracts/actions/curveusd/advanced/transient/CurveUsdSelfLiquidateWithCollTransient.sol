@@ -83,9 +83,10 @@ contract CurveUsdSelfLiquidateWithCollTransient is ActionBase, CurveUsdHelper {
         uint256 collStartingBalance = collToken.getBalance(address(this));
         uint256 debtStartingBalance = debtToken.getBalance(address(this));
 
-        ICrvUsdController(_params.controllerAddress).liquidate_extended(
-            address(this), _params.minCrvUsdExpected, _params.percentage, false, curveUsdTransientSwapper, info
-        );
+        ICrvUsdController(_params.controllerAddress)
+            .liquidate_extended(
+                address(this), _params.minCrvUsdExpected, _params.percentage, false, curveUsdTransientSwapper, info
+            );
 
         // there shouldn't be any funds left on swapper contract after sell but withdrawing it just in case
         CurveUsdSwapperTransient(curveUsdTransientSwapper).withdrawAll(_params.controllerAddress);

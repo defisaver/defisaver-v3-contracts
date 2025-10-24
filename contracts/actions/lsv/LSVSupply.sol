@@ -48,10 +48,7 @@ contract LSVSupply is ActionBase, LSVUtilHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _lsvSupply(Params memory _inputData)
-        internal
-        returns (uint256 amountSuppliedInETH, bytes memory logData)
-    {
+    function _lsvSupply(Params memory _inputData) internal returns (uint256 amountSuppliedInETH, bytes memory logData) {
         amountSuppliedInETH = getAmountInETHFromLST(_inputData.token, _inputData.amount);
         LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS).supply(_inputData.protocol, amountSuppliedInETH);
 

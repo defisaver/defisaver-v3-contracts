@@ -96,10 +96,7 @@ interface IBorrowerOperations {
         uint128 maxInterestRate;
     }
 
-    function getInterestIndividualDelegateOf(uint256 _troveId)
-        external
-        view
-        returns (InterestIndividualDelegate memory);
+    function getInterestIndividualDelegateOf(uint256 _troveId) external view returns (InterestIndividualDelegate memory);
     function setInterestIndividualDelegate(
         uint256 _troveId,
         address _delegate,

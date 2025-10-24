@@ -112,8 +112,10 @@ contract MorphoAaveV2View is MorphoAaveV2Helper {
                 market: markets[i],
                 underlying: underlying,
                 decimals: uint8(IERC20(underlying).decimals()),
-                userSupplyRate: IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentUserSupplyRatePerYear(markets[i], _usr),
-                userBorrowRate: IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentUserBorrowRatePerYear(markets[i], _usr),
+                userSupplyRate: IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR)
+                    .getCurrentUserSupplyRatePerYear(markets[i], _usr),
+                userBorrowRate: IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR)
+                    .getCurrentUserBorrowRatePerYear(markets[i], _usr),
                 supplyBalanceInP2P: supplyBalanceInP2P,
                 supplyBalanceOnPool: supplyBalanceOnPool,
                 borrowBalanceInP2P: borrowBalanceInP2P,

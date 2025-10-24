@@ -166,10 +166,12 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         _assertParams(params);
     }
 
-    function testFuzz_encode_decode_inputs_no_onbehalf(uint256 _amount, address _from, uint16 _assetId, address _market)
-        public
-        view
-    {
+    function testFuzz_encode_decode_inputs_no_onbehalf(
+        uint256 _amount,
+        address _from,
+        uint16 _assetId,
+        address _market
+    ) public view {
         AaveV3Supply.Params memory params = AaveV3Supply.Params({
             amount: _amount,
             from: _from,
@@ -183,10 +185,12 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         _assertParams(params);
     }
 
-    function testFuzz_encode_decode_inputs_no_market(uint256 _amount, address _from, uint16 _assetId, address _onBehalf)
-        public
-        view
-    {
+    function testFuzz_encode_decode_inputs_no_market(
+        uint256 _amount,
+        address _from,
+        uint16 _assetId,
+        address _onBehalf
+    ) public view {
         AaveV3Supply.Params memory params = AaveV3Supply.Params({
             amount: _amount,
             from: _from,

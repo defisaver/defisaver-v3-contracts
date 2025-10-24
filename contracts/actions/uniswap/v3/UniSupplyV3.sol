@@ -5,8 +5,9 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { UniV3Helper } from "./helpers/UniV3Helper.sol";
-import { IUniswapV3NonfungiblePositionManager } from
-    "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+import {
+    IUniswapV3NonfungiblePositionManager
+} from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Supplies liquidity to a UniswapV3 position represented by TokenId
 contract UniSupplyV3 is ActionBase, UniV3Helper {
@@ -91,19 +92,16 @@ contract UniSupplyV3 is ActionBase, UniV3Helper {
     /// @dev increases liquidity by token amounts desired
     /// @return liquidity new liquidity amount
 
-    function _uniSupply(Params memory _uniData)
-        internal
-        returns (uint128 liquidity, uint256 amount0, uint256 amount1)
-    {
+    function _uniSupply(Params memory _uniData) internal returns (uint128 liquidity, uint256 amount0, uint256 amount1) {
         IUniswapV3NonfungiblePositionManager.IncreaseLiquidityParams memory increaseLiquidityParams =
-        IUniswapV3NonfungiblePositionManager.IncreaseLiquidityParams({
-            tokenId: _uniData.tokenId,
-            amount0Desired: _uniData.amount0Desired,
-            amount1Desired: _uniData.amount1Desired,
-            amount0Min: _uniData.amount0Min,
-            amount1Min: _uniData.amount1Min,
-            deadline: _uniData.deadline
-        });
+            IUniswapV3NonfungiblePositionManager.IncreaseLiquidityParams({
+                tokenId: _uniData.tokenId,
+                amount0Desired: _uniData.amount0Desired,
+                amount1Desired: _uniData.amount1Desired,
+                amount0Min: _uniData.amount0Min,
+                amount1Min: _uniData.amount1Min,
+                deadline: _uniData.deadline
+            });
         (liquidity, amount0, amount1) = positionManager.increaseLiquidity(increaseLiquidityParams);
     }
 

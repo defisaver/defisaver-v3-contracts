@@ -359,9 +359,8 @@ contract RecipeExecutor is StrategyModel, Permission, AdminAuth, CoreHelper, TxS
         _currRecipe.callData[0] = abi.encode(params);
 
         /// @dev FL action is called directly so that we can check who the msg.sender of FL is
-        ActionBase(_flActionAddr).executeAction(
-            _currRecipe.callData[0], _currRecipe.subData, _currRecipe.paramMapping[0], _returnValues
-        );
+        ActionBase(_flActionAddr)
+            .executeAction(_currRecipe.callData[0], _currRecipe.subData, _currRecipe.paramMapping[0], _returnValues);
 
         _removePermissionFrom(walletType, _flActionAddr);
     }

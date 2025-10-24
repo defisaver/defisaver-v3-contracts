@@ -13,7 +13,12 @@ contract DSAAuth is WalletAuth {
     /// @dev All calls will be forwarded to RecipeExecutor. See DefiSaverConnector.
     /// @param _dsaProxyAddr Address of the users DSA Proxy
     /// @param _callData Call data of the function to be called
-    function callExecute(address _dsaProxyAddr, address, /* _contractAddr */ bytes memory _callData)
+    function callExecute(
+        address _dsaProxyAddr,
+        address,
+        /* _contractAddr */
+        bytes memory _callData
+    )
         public
         payable
         onlyExecutor

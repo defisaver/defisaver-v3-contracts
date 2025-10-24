@@ -95,9 +95,13 @@ contract McdSupply is ActionBase, McdHelper {
         return (_amount, logData);
     }
 
-    function _cropperSupply(uint256 _vaultId, address _tokenAddr, address _joinAddr, uint256 _amount, int256 _vatAmount)
-        internal
-    {
+    function _cropperSupply(
+        uint256 _vaultId,
+        address _tokenAddr,
+        address _joinAddr,
+        uint256 _amount,
+        int256 _vatAmount
+    ) internal {
         bytes32 ilk = ICdpRegistry(CDP_REGISTRY).ilks(_vaultId);
         address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
 

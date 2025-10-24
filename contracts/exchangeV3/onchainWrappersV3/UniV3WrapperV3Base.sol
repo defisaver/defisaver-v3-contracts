@@ -33,10 +33,7 @@ contract UniV3WrapperV3Base is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
         IERC20(_srcAddr).safeApprove(address(router), _srcAmount);
 
         ISwapRouter02.ExactInputParams memory params = ISwapRouter02.ExactInputParams({
-            path: _additionalData,
-            recipient: msg.sender,
-            amountIn: _srcAmount,
-            amountOutMinimum: 1
+            path: _additionalData, recipient: msg.sender, amountIn: _srcAmount, amountOutMinimum: 1
         });
         /// @dev DFSExchangeCore contains slippage check
 

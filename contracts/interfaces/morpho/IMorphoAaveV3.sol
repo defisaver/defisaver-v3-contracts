@@ -87,9 +87,7 @@ interface IMorphoAaveV3 is IMorphoGetters, IMorphoSetters {
         uint256 deadline,
         Types.Signature calldata signature
     ) external returns (uint256 supplied);
-    function supplyCollateral(address underlying, uint256 amount, address onBehalf)
-        external
-        returns (uint256 supplied);
+    function supplyCollateral(address underlying, uint256 amount, address onBehalf) external returns (uint256 supplied);
     function supplyCollateralWithPermit(
         address underlying,
         uint256 amount,

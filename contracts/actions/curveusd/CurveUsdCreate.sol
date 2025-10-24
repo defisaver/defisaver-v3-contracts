@@ -69,9 +69,8 @@ contract CurveUsdCreate is ActionBase, CurveUsdHelper {
         _params.collateralAmount = collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);
         collateralAsset.approveToken(_params.controllerAddress, _params.collateralAmount);
 
-        ICrvUsdController(_params.controllerAddress).create_loan(
-            _params.collateralAmount, _params.debtAmount, _params.nBands
-        );
+        ICrvUsdController(_params.controllerAddress)
+            .create_loan(_params.collateralAmount, _params.debtAmount, _params.nBands);
 
         CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, _params.debtAmount);
 

@@ -70,13 +70,11 @@ contract MorphoAaveV3Withdraw is ActionBase, MorphoAaveV3Helper {
         }
 
         if (_params.withdrawAsColl) {
-            IMorphoAaveV3(morphoAddress).withdrawCollateral(
-                _params.tokenAddr, _params.amount, _params.onBehalf, _params.to
-            );
+            IMorphoAaveV3(morphoAddress)
+                .withdrawCollateral(_params.tokenAddr, _params.amount, _params.onBehalf, _params.to);
         } else {
-            IMorphoAaveV3(morphoAddress).withdraw(
-                _params.tokenAddr, _params.amount, _params.onBehalf, _params.to, _params.maxIterations
-            );
+            IMorphoAaveV3(morphoAddress)
+                .withdraw(_params.tokenAddr, _params.amount, _params.onBehalf, _params.to, _params.maxIterations);
         }
 
         _params.amount = _params.tokenAddr.getBalance(_params.to) - tokensBefore;

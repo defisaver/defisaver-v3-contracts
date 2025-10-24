@@ -80,11 +80,8 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
             }
 
             /// @dev if we don't have access to the next price on-chain this returns true, if we do this compares the nextPrice param we sent
-            if (
-                !IMCDPriceVerifier(MCD_PRICE_VERIFIER).verifyVaultNextPrice(
-                    triggerCallData.nextPrice, triggerSubData.vaultId
-                )
-            ) {
+            if (!IMCDPriceVerifier(MCD_PRICE_VERIFIER)
+                    .verifyVaultNextPrice(triggerCallData.nextPrice, triggerSubData.vaultId)) {
                 revert WrongNextPrice(triggerCallData.nextPrice);
             }
         }

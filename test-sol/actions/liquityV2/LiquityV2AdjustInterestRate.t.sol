@@ -6,7 +6,9 @@ import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAdd
 import { IHintHelpers } from "../../../contracts/interfaces/liquityV2/IHintHelpers.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
-import { LiquityV2AdjustInterestRate } from "../../../contracts/actions/liquityV2/trove/LiquityV2AdjustInterestRate.sol";
+import {
+    LiquityV2AdjustInterestRate
+} from "../../../contracts/actions/liquityV2/trove/LiquityV2AdjustInterestRate.sol";
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
@@ -94,9 +96,8 @@ contract TestLiquityV2AdjustInterestRate is LiquityV2ExecuteActions {
         uint256 _newInterestRate,
         uint256 _collIndex
     ) internal {
-        uint256 maxUpfrontFee = IHintHelpers(_market.hintHelpers()).predictAdjustInterestRateUpfrontFee(
-            _collIndex, _troveId, _newInterestRate
-        );
+        uint256 maxUpfrontFee = IHintHelpers(_market.hintHelpers())
+            .predictAdjustInterestRateUpfrontFee(_collIndex, _troveId, _newInterestRate);
 
         (uint256 upperHint, uint256 lowerHint) = getInsertPosition(viewContract, _market, _collIndex, _newInterestRate);
 
