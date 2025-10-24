@@ -4735,8 +4735,6 @@
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": [
-            "0x0b2621aE77952606A3b95d06E31b10132C51C860"
-        ]
+        "history": ["0x0b2621aE77952606A3b95d06E31b10132C51C860"]
     }
 ]

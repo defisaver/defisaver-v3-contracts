@@ -136,7 +136,9 @@ const compBorrowTest = async (compTestLength) => {
                 continue;
             }
 
-            it(`... should borrow ${fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000')} ${cTokenData.underlyingAsset} from Compound`, async () => {
+            it(`... should borrow ${fetchAmountinUSDPrice(cTokenData.underlyingAsset, '1000')} ${
+                cTokenData.underlyingAsset
+            } from Compound`, async () => {
                 const assetInfo = getAssetInfo(cTokenData.underlyingAsset);
                 const cToken = cTokenData.address;
 

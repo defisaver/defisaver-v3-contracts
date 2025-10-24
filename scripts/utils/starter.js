@@ -14,7 +14,9 @@ const start = (main) => {
 
         console.log('-------------------------------------------------------------');
         rl.question(
-            `Network: ${hre.network.name}\nGas price: ${parseInt(hre.network.config.gasPrice, 10) / 1e9} gwei\nCONFIRM [y]/n: `,
+            `Network: ${hre.network.name}\nGas price: ${
+                parseInt(hre.network.config.gasPrice, 10) / 1e9
+            } gwei\nCONFIRM [y]/n: `,
             (answer) => {
                 if (answer === 'y' || answer === '') {
                     main()

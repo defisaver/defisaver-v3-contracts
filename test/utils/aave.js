@@ -996,7 +996,9 @@ const setupAaveV3EOAPermissions = async (
         // Check current allowance
         const currentAllowance = await debtToken.borrowAllowance(userAddress, smartWalletAddress);
         console.log(
-            `  - Current debt delegation allowance: ${hre.ethers.utils.formatEther(currentAllowance)}`,
+            `  - Current debt delegation allowance: ${hre.ethers.utils.formatEther(
+                currentAllowance,
+            )}`,
         );
 
         if (currentAllowance.lt(hre.ethers.constants.MaxUint256.div(2))) {
@@ -1021,7 +1023,9 @@ const setupAaveV3EOAPermissions = async (
                 smartWalletAddress,
             );
             console.log(
-                `  - Verified debt delegation allowance: ${hre.ethers.utils.formatEther(verifyAllowance)}`,
+                `  - Verified debt delegation allowance: ${hre.ethers.utils.formatEther(
+                    verifyAllowance,
+                )}`,
             );
         }
 

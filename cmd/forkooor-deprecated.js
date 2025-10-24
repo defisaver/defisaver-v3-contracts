@@ -2625,7 +2625,9 @@ const setMockChainlinkPrice = async (tokenLabel, price) => {
     const oracleData = await c.latestRoundData(srcToken.address, USD_QUOTE);
 
     console.log(
-        `Current price for token ${tokenLabel} at ${new Date(oracleData.updatedAt * 1000).toLocaleTimeString('en-US')} is $${oracleData.answer / 1e8}`,
+        `Current price for token ${tokenLabel} at ${new Date(
+            oracleData.updatedAt * 1000,
+        ).toLocaleTimeString('en-US')} is $${oracleData.answer / 1e8}`,
     );
 };
 

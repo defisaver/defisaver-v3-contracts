@@ -144,7 +144,9 @@ class TestRunner extends events.EventEmitter {
             .sort((a, b) => b.time - a.time)
             .forEach((e) =>
                 console.log(
-                    `${e.fileName.padEnd(32)}\tretries: ${MAX_RETRIES - e.retries}\ttime: ${e.time}`,
+                    `${e.fileName.padEnd(32)}\tretries: ${MAX_RETRIES - e.retries}\ttime: ${
+                        e.time
+                    }`,
                 ),
             );
         console.log(`${this.passed}/${this.total} tests passed`);

@@ -551,7 +551,9 @@ const liquityCBPaybackTest = async () => {
             console.log(`Bond size was ${bondAmount / 1e18}`);
             console.log(`Debt was ${debtBefore / 1e18}`);
             console.log(
-                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${lusdEOAAfter.sub(lusdEOABefore) / 1e18} LUSD to his eoa`,
+                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${
+                    lusdEOAAfter.sub(lusdEOABefore) / 1e18
+                } LUSD to his eoa`,
             );
             await revertToSnapshot(snapshot);
         });
@@ -600,7 +602,9 @@ const liquityCBPaybackTest = async () => {
             console.log(`Bond size was ${bondAmount / 1e18}`);
             console.log(`Debt was ${debtBefore / 1e18}`);
             console.log(
-                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${lusdEOAAfter.sub(lusdEOABefore) / 1e18} LUSD to his eoa`,
+                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${
+                    lusdEOAAfter.sub(lusdEOABefore) / 1e18
+                } LUSD to his eoa`,
             );
             await revertToSnapshot(snapshot);
         });
@@ -651,7 +655,9 @@ const liquityCBPaybackTest = async () => {
             console.log(`Bond size was ${bondAmount / 1e18}`);
             console.log(`Debt was ${debtBefore / 1e18}`);
             console.log(
-                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${lusdEOAAfter.sub(lusdEOABefore) / 1e18} LUSD to his eoa`,
+                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${
+                    lusdEOAAfter.sub(lusdEOABefore) / 1e18
+                } LUSD to his eoa`,
             );
             await revertToSnapshot(snapshot);
         });
@@ -700,7 +706,9 @@ const liquityCBPaybackTest = async () => {
             console.log(`Bond size was ${bondAmount / 1e18}`);
             console.log(`Debt was ${debtBefore / 1e18}`);
             console.log(
-                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${lusdEOAAfter.sub(lusdEOABefore) / 1e18} LUSD to his eoa`,
+                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${
+                    lusdEOAAfter.sub(lusdEOABefore) / 1e18
+                } LUSD to his eoa`,
             );
             await revertToSnapshot(snapshot);
         });
@@ -750,7 +758,9 @@ const liquityCBPaybackTest = async () => {
             console.log(`Bond size was ${bondAmount / 1e18}`);
             console.log(`Debt was ${debtBefore / 1e18}`);
             console.log(
-                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${lusdEOAAfter.sub(lusdEOABefore) / 1e18} LUSD to his eoa`,
+                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${
+                    lusdEOAAfter.sub(lusdEOABefore) / 1e18
+                } LUSD to his eoa`,
             );
             await revertToSnapshot(snapshot);
         });
@@ -802,7 +812,9 @@ const liquityCBPaybackTest = async () => {
             console.log(`Bond size was ${bondAmount / 1e18}`);
             console.log(`Debt was ${debtBefore / 1e18}`);
             console.log(
-                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${lusdEOAAfter.sub(lusdEOABefore) / 1e18} LUSD to his eoa`,
+                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${
+                    lusdEOAAfter.sub(lusdEOABefore) / 1e18
+                } LUSD to his eoa`,
             );
             await revertToSnapshot(snapshot);
         });
