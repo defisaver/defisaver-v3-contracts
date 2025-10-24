@@ -30,6 +30,7 @@ const {
     isWalletNameDsaProxy,
     network,
     addrs,
+    createDsaProxy,
 } = require('../utils/utils');
 
 const { deployContract } = require('../../scripts/utils/deployer');
@@ -804,21 +805,22 @@ const recipeExecutorTest = async () => {
         before(async () => {
             // Add connector for DSA Proxy Accounts.
             const dfsConnector = await redeploy('DefiSaverConnector');
-            await addDefiSaverConnector(dfsConnector.address);
+            await addDefiSaverConnector(dfsConnector.address, hre.config.dsaProxyVersion);
 
             // Redeploy contracts.
-            await redeploy('RecipeExecutor');
-            strategyExecutor = network === 'mainnet'
-                ? await redeploy('StrategyExecutor')
-                : await redeploy('StrategyExecutorL2');
-            const flActionContract = await redeploy('FLAction');
-            flAddr = flActionContract.address;
             await redeploy('PullToken');
             await redeploy('SendToken');
             await redeploy('HandleAuth');
             await redeploy('CreateSub');
             await redeploy('UpdateSub');
             await redeploy('GasPriceTrigger');
+            await redeploy('RecipeExecutor');
+
+            strategyExecutor = network === 'mainnet'
+                ? await redeploy('StrategyExecutor')
+                : await redeploy('StrategyExecutorL2');
+            const flActionContract = await redeploy('FLAction');
+            flAddr = flActionContract.address;
 
             // Set up signers.
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -826,9 +828,9 @@ const recipeExecutorTest = async () => {
             strategyExecutorByBot = strategyExecutor.connect(botAcc);
 
             // Create smart wallets.
-            dsProxy = await getProxy(senderAcc.address, false, false);
-            safe = await getProxy(senderAcc.address, true, false);
-            dsaProxy = await getProxy(senderAcc.address, false, true);
+            dsProxy = await getProxy(senderAcc.address, false);
+            safe = await getProxy(senderAcc.address, true);
+            dsaProxy = await createDsaProxy(senderAcc.address, hre.config.dsaProxyVersion);
 
             // Init test data.
             actionData = (new dfs.actions.basic.PullTokenAction(addrs[network].WETH_ADDRESS, placeHolderAddr, 0)).encodeForRecipe()[0];

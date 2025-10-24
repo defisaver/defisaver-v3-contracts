@@ -19,29 +19,32 @@ const { addDefiSaverConnector } = require('../../utils/insta');
 const dfsConnectorTest = async () => {
     describe('Test DefiSaverConnector', function () {
         this.timeout(150000);
-
-        const dsaOwner = '0xF6Da9e9D73d7893223578D32a95d6d7de5522767';
-        const dsaAddress = '0x4C6Cd7b623e7E7741C20bdAF3452269277534eF8';
-
+        let owner;
+        let dsaAddress;
         let dfsConnector;
         let flContract;
         let dsaSigner;
         let dsaContract;
 
         before(async () => {
-            dfsConnector = await redeploy('DefiSaverConnector');
-            dsaSigner = hre.ethers.provider.getSigner(dsaOwner);
-            dsaSigner.address = dsaOwner;
-            dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress, dsaSigner);
+            // Determine test data to use based on dsa proxy version
+            const isV1DSAProxy = hre.config.dsaProxyVersion === 1;
+            owner = isV1DSAProxy ? '0x4b180783Bf8Ca2094498faf050f64F17d20D8A7f' : '0xF6Da9e9D73d7893223578D32a95d6d7de5522767';
+            dsaAddress = isV1DSAProxy ? '0x084405249d814795F3aFF6B3b34754d1d651D029' : '0x4C6Cd7b623e7E7741C20bdAF3452269277534eF8';
 
-            // Fund dsa account
+            dfsConnector = await redeploy('DefiSaverConnector');
+            dsaSigner = hre.ethers.provider.getSigner(owner);
+            dsaSigner.address = owner;
+            dsaContract = await hre.ethers.getContractAt(isV1DSAProxy ? 'IInstaAccountV1' : 'IInstaAccountV2', dsaAddress, dsaSigner);
+
+            // Fund dsa account owner
             const zeroAddress = hre.ethers.constants.AddressZero;
             const zeroAcc = hre.ethers.provider.getSigner(zeroAddress);
             await impersonateAccount(zeroAddress);
-            await sendEther(zeroAcc, dsaOwner, '5');
+            await sendEther(zeroAcc, owner, '5');
             await stopImpersonatingAccount(zeroAddress);
 
-            await addDefiSaverConnector(dfsConnector.address);
+            await addDefiSaverConnector(dfsConnector.address, hre.config.dsaProxyVersion);
 
             flContract = await redeploy('FLAction');
             await redeploy('RecipeExecutor');
@@ -49,19 +52,19 @@ const dfsConnectorTest = async () => {
 
         it('... execute simple recipe with existing dsa account', async () => {
             const amount = hre.ethers.utils.parseUnits('1', 18);
-            await setBalance(WETH_ADDRESS, dsaOwner, amount);
-            await impersonateAccount(dsaOwner);
+            await setBalance(WETH_ADDRESS, owner, amount);
+            await impersonateAccount(owner);
             await approve(WETH_ADDRESS, dsaAddress, dsaSigner);
-            await stopImpersonatingAccount(dsaOwner);
+            await stopImpersonatingAccount(owner);
 
             const pullTokenAction = new dfs.actions.basic.PullTokenAction(
                 WETH_ADDRESS,
-                dsaOwner,
+                owner,
                 amount,
             );
             const sendTokenAction = new dfs.actions.basic.SendTokenAction(
                 WETH_ADDRESS,
-                dsaOwner,
+                owner,
                 amount,
             );
             const basicRecipe = new dfs.Recipe('BasicRecipe', [
@@ -70,11 +73,11 @@ const dfsConnectorTest = async () => {
             ]);
             const functionData = basicRecipe.encodeForDsProxyCall()[1];
 
-            const balanceBefore = await balanceOf(WETH_ADDRESS, dsaOwner);
+            const balanceBefore = await balanceOf(WETH_ADDRESS, owner);
 
             await executeAction('RecipeExecutor', functionData, dsaContract);
 
-            const balanceAfter = await balanceOf(WETH_ADDRESS, dsaOwner);
+            const balanceAfter = await balanceOf(WETH_ADDRESS, owner);
             expect(balanceAfter).to.be.eq(balanceBefore);
         });
 
