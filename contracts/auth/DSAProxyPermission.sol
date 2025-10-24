@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import {AuthHelper} from "./helpers/AuthHelper.sol";
-import {IInstaAccountV2} from "../interfaces/insta/IInstaAccountV2.sol";
+import {IInstaAccount} from "../interfaces/insta/IInstaAccount.sol";
 
 /// @title DSAProxyPermission contract which works with DSA proxy account to give/remove auth permission to a contract
 contract DSAProxyPermission is AuthHelper {
@@ -12,8 +12,8 @@ contract DSAProxyPermission is AuthHelper {
     /// @param _contractAddr Address which will be authorized
     /// @dev Can't enable the same contract twice
     function _giveDSAProxyPermission(address _contractAddr) internal {
-        if (!IInstaAccountV2(address(this)).isAuth(_contractAddr)) {
-            IInstaAccountV2(address(this)).enable(_contractAddr);
+        if (!IInstaAccount(address(this)).isAuth(_contractAddr)) {
+            IInstaAccount(address(this)).enable(_contractAddr);
         }
     }
 
@@ -21,8 +21,8 @@ contract DSAProxyPermission is AuthHelper {
     /// @param _contractAddr Auth address which will be removed from auth list
     /// @dev Can't remove a contract that is not authorized
     function _removeDSAProxyPermission(address _contractAddr) internal {
-        if (IInstaAccountV2(address(this)).isAuth(_contractAddr)) {
-            IInstaAccountV2(address(this)).disable(_contractAddr);
+        if (IInstaAccount(address(this)).isAuth(_contractAddr)) {
+            IInstaAccount(address(this)).disable(_contractAddr);
         }
     }
 }

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-interface IInstaAccountV2 {
+import { IInstaAccount } from "./IInstaAccount.sol";
+
+interface IInstaAccountV2 is IInstaAccount {
     function cast(
         string[] memory,
         bytes[] memory,
@@ -9,8 +11,4 @@ interface IInstaAccountV2 {
     ) external payable returns (bytes32);
 
     function implementations() external view returns (address);
-
-    function isAuth(address _user) external view returns (bool);
-    function enable(address _user) external;
-    function disable(address _user) external;
 }

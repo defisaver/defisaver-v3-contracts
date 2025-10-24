@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { MockPermission } from "../../contracts/mocks/MockPermission.sol";
 import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
-import { IInstaAccountV2 } from "../../contracts/interfaces/insta/IInstaAccountV2.sol";
+import { IInstaAccount } from "../../contracts/interfaces/insta/IInstaAccount.sol";
 import { DSAuthority } from "../../contracts/DS/DSAuthority.sol";
 import { DSAuth } from "../../contracts/DS/DSAuth.sol";
 import { AuthHelper } from "../../contracts/auth/helpers/AuthHelper.sol";
@@ -121,13 +121,13 @@ contract TestCore_Permission is AuthHelper, BaseTest {
     function _giveDsaProxyPermission(address _addr) internal {
         // Self-call to enable permission (simulate execution in the context of the DSA Proxy Account)
         vm.prank(dsaProxyAddr);
-        IInstaAccountV2(dsaProxyAddr).enable(_addr);
+        IInstaAccount(dsaProxyAddr).enable(_addr);
     }
 
     function _removeDsaProxyPermission(address _addr) internal {
         // Self-call to disable permission (simulate execution in the context of the DSA Proxy Account)
         vm.prank(dsaProxyAddr);
-        IInstaAccountV2(dsaProxyAddr).disable(_addr);
+        IInstaAccount(dsaProxyAddr).disable(_addr);
     }
 
     function _verifyDSProxyPermission(address _addr, bool _enabled) internal view {
@@ -150,7 +150,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
     }
 
     function _verifyDsaProxyPermission(address _addr, bool _enabled) internal view {
-        bool isAuth = IInstaAccountV2(dsaProxyAddr).isAuth(_addr);
+        bool isAuth = IInstaAccount(dsaProxyAddr).isAuth(_addr);
         if (_enabled) {
             assertTrue(isAuth);
         } else {

@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { MockSmartWalletUtils } from "../../contracts/mocks/MockSmartWalletUtils.sol";
-import { IInstaAccountV2 } from "../../contracts/interfaces/insta/IInstaAccountV2.sol";
+import { IInstaAccount } from "../../contracts/interfaces/insta/IInstaAccount.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { WalletType } from "../../contracts/utils/DFSTypes.sol";
@@ -81,7 +81,7 @@ contract TestCore_SmartWalletUtils is BaseTest {
 
         // disable auth for dsa owner
         vm.prank(dsaProxyAddress); // simulate self-call
-        IInstaAccountV2(dsaProxyAddress).disable(charlie);
+        IInstaAccount(dsaProxyAddress).disable(charlie);
         assertTrue(cut.fetchOwnerOrWallet(dsaProxyAddress) == dsaProxyAddress);
     }
 }

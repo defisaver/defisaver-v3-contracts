@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { IDSProxyFactory } from "../interfaces/IDSProxyFactory.sol";
 import { IInstaList } from "../interfaces/insta/IInstaList.sol";
-import { IInstaAccountV2 } from "../interfaces/insta/IInstaAccountV2.sol";
+import { IInstaAccount } from "../interfaces/insta/IInstaAccount.sol";
 import { IDSProxy } from "../interfaces/IDSProxy.sol";
 import { ISafe } from "../interfaces/safe/ISafe.sol";
 import { DSProxyFactoryHelper } from "./ds-proxy-factory/DSProxyFactoryHelper.sol";
@@ -53,7 +53,7 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
         if (walletType == WalletType.DSAPROXY) {
             uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(_wallet);
             address firstOwner = IInstaList(DSA_LIST_ADDR).accountLink(dsaId).first;
-            return IInstaAccountV2(_wallet).isAuth(firstOwner) ? firstOwner : _wallet;
+            return IInstaAccount(_wallet).isAuth(firstOwner) ? firstOwner : _wallet;
         }
 
         // Otherwise, we assume we are in context of Safe
