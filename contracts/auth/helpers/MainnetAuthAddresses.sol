@@ -8,5 +8,5 @@ contract MainnetAuthAddresses {
     address internal constant ADMIN_ADDR = 0x25eFA336886C74eA8E282ac466BdCd0199f85BB9; // USED IN ADMIN VAULT CONSTRUCTOR
     address internal constant PROXY_AUTH_ADDRESS = 0x149667b6FAe2c63D1B4317C716b0D0e4d3E2bD70;
     address internal constant MODULE_AUTH_ADDRESS = 0x7407974DDBF539e552F1d051e44573090912CC3D;
-    address internal constant DSA_AUTH_ADDRESS = 0xfc6f5dDEEC0e6122a501d9Ba8a9b428c74c4640A;
+    address internal constant DSA_AUTH_ADDRESS = 0xA6386AcD1511Bf3781Efed000886436834aFCf65;
 }
