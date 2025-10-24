@@ -83,10 +83,9 @@ contract CurveUsdSelfLiquidateWithColl is ActionBase, CurveUsdHelper {
             _params.dfsFeeDivider
         );
 
-        ICrvUsdController(_params.controllerAddress)
-            .liquidate_extended(
-                address(this), _params.minCrvUsdExpected, _params.percentage, false, curveUsdSwapper, swapData
-            );
+        ICrvUsdController(_params.controllerAddress).liquidate_extended(
+            address(this), _params.minCrvUsdExpected, _params.percentage, false, curveUsdSwapper, swapData
+        );
 
         // cleanup after the callback if any funds are left over
         CurveUsdSwapper(curveUsdSwapper).withdrawAll(_params.controllerAddress);

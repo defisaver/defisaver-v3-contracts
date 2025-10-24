@@ -51,8 +51,9 @@ contract SkyStakingEngineSelectFarm is ActionBase, SkyHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _skyStakingEngineSelectFarm(Params memory _inputData) internal returns (address, bytes memory logData) {
-        ILockstakeEngine(_inputData.stakingContract)
-            .selectFarm(address(this), _inputData.index, _inputData.farm, SKY_REFERRAL_CODE);
+        ILockstakeEngine(_inputData.stakingContract).selectFarm(
+            address(this), _inputData.index, _inputData.farm, SKY_REFERRAL_CODE
+        );
         return (_inputData.farm, abi.encode(_inputData));
     }
 

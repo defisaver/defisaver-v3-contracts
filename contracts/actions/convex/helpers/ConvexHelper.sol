@@ -64,7 +64,11 @@ contract ConvexHelper is MainnetConvexAddresses {
     /// @dev CRV and CVX are always base rewards and are located at indices 0 and 1 respectively
     /// @dev some pools have CRV or CVX as extra rewards and their earned amounts are added to base rewards earned amounts
     /// @dev in these cases the return array will have empty elements
-    function _earnedRewards(address _account, address _rewardContract) internal view returns (Reward[] memory rewards) {
+    function _earnedRewards(address _account, address _rewardContract)
+        internal
+        view
+        returns (Reward[] memory rewards)
+    {
         uint256 crvEarned = IBRewardPool(_rewardContract).earned(_account);
         uint256 cvxEarned = _cvxMintAmount(crvEarned);
 

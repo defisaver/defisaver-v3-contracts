@@ -82,7 +82,11 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, ActionsUtils, BaseTest {
     function _claim(bool _isL2Direct) public {
         if (_isL2Direct) {
             AaveV3ClaimRewards.Params memory params = AaveV3ClaimRewards.Params({
-                amount: 100, to: sender, reward: address(0), assets: new address[](0), assetsLength: 0
+                amount: 100,
+                to: sender,
+                reward: address(0),
+                assets: new address[](0),
+                assetsLength: 0
             });
 
             wallet.execute(address(cut), cut.encodeInputs(params), 0);

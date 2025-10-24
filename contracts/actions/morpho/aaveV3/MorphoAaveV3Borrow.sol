@@ -59,8 +59,9 @@ contract MorphoAaveV3Borrow is ActionBase, MorphoAaveV3Helper {
             _params.onBehalf = address(this);
         }
 
-        IMorphoAaveV3(morphoAddress)
-            .borrow(_params.tokenAddr, _params.amount, _params.onBehalf, _params.to, _params.maxIterations);
+        IMorphoAaveV3(morphoAddress).borrow(
+            _params.tokenAddr, _params.amount, _params.onBehalf, _params.to, _params.maxIterations
+        );
 
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);

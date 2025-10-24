@@ -158,8 +158,12 @@ contract AaveView is AaveHelper, DSMath {
             (
                 userTokens[i].balance,
                 userTokens[i].borrowsStable,
-                userTokens[i].borrowsVariable,,,
-                userTokens[i].stableBorrowRate,,,
+                userTokens[i].borrowsVariable,
+                ,
+                ,
+                userTokens[i].stableBorrowRate,
+                ,
+                ,
                 userTokens[i].enabledAsCollateral
             ) = dataProvider.getUserReserveData(asset, _user);
         }
@@ -209,9 +213,11 @@ contract AaveView is AaveHelper, DSMath {
         view
         returns (TokenInfoFull memory _tokenInfo)
     {
-        (, // uint256 decimals
+        (
+            , // uint256 decimals
             uint256 ltv,
-            uint256 liquidationThreshold,, //   uint256 liquidationBonus
+            uint256 liquidationThreshold,
+            , //   uint256 liquidationBonus
             , //   uint256 reserveFactor
             bool usageAsCollateralEnabled,
             bool borrowingEnabled,
@@ -228,7 +234,10 @@ contract AaveView is AaveHelper, DSMath {
             t.totalVariableDebt,
             t.liquidityRate,
             t.variableBorrowRate,
-            t.stableBorrowRate,,,,
+            t.stableBorrowRate,
+            ,
+            ,
+            ,
         ) = _dataProvider.getReserveData(_token);
 
         (address aToken,,) = _dataProvider.getReserveTokensAddresses(_token);
@@ -303,12 +312,8 @@ contract AaveView is AaveHelper, DSMath {
         for (uint64 i = 0; i < reserves.length; i++) {
             address reserve = reserves[i].tokenAddress;
 
-            (
-                uint256 aTokenBalance,
-                uint256 borrowsStable,
-                uint256 borrowsVariable,,,,,,
-                bool usageAsCollateralEnabled
-            ) = dataProvider.getUserReserveData(reserve, _user);
+            (uint256 aTokenBalance, uint256 borrowsStable, uint256 borrowsVariable,,,,,, bool usageAsCollateralEnabled)
+            = dataProvider.getUserReserveData(reserve, _user);
             uint256 price = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(reserve);
 
             if (aTokenBalance > 0) {
@@ -410,16 +415,15 @@ contract AaveView is AaveHelper, DSMath {
                 + _reserveParams[i].liquidityAdded - _reserveParams[i].liquidityTaken;
 
             (estimatedRate.supplyRate,, estimatedRate.variableBorrowRate) = IReserveInterestRateStrategyV2(
-                    reserve.interestRateStrategyAddress
-                )
-                .calculateInterestRates(
-                    _reserveParams[i].reserveAddress,
-                    availableLiquidity,
-                    totalStableDebt,
-                    totalVariableDebt,
-                    avgStableRate,
-                    getReserveFactor(reserve.configuration)
-                );
+                reserve.interestRateStrategyAddress
+            ).calculateInterestRates(
+                _reserveParams[i].reserveAddress,
+                availableLiquidity,
+                totalStableDebt,
+                totalVariableDebt,
+                avgStableRate,
+                getReserveFactor(reserve.configuration)
+            );
 
             estimatedRates[i] = estimatedRate;
         }

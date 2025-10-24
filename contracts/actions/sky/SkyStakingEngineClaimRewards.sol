@@ -54,8 +54,9 @@ contract SkyStakingEngineClaimRewards is ActionBase, SkyHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _skyStakingEngineClaimRewards(Params memory _inputData) internal returns (uint256, bytes memory logData) {
-        uint256 amount = ILockstakeEngine(_inputData.stakingContract)
-            .getReward(address(this), _inputData.index, _inputData.farm, _inputData.to);
+        uint256 amount = ILockstakeEngine(_inputData.stakingContract).getReward(
+            address(this), _inputData.index, _inputData.farm, _inputData.to
+        );
 
         return (amount, abi.encode(_inputData));
     }

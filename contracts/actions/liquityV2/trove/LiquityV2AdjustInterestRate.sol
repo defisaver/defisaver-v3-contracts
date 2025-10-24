@@ -66,14 +66,9 @@ contract LiquityV2AdjustInterestRate is ActionBase, LiquityV2Helper {
     function _adjustInterestRate(Params memory _params) internal returns (uint256, bytes memory) {
         address borrowerOperations = IAddressesRegistry(_params.market).borrowerOperations();
 
-        IBorrowerOperations(borrowerOperations)
-            .adjustTroveInterestRate(
-                _params.troveId,
-                _params.newAnnualInterestRate,
-                _params.upperHint,
-                _params.lowerHint,
-                _params.maxUpfrontFee
-            );
+        IBorrowerOperations(borrowerOperations).adjustTroveInterestRate(
+            _params.troveId, _params.newAnnualInterestRate, _params.upperHint, _params.lowerHint, _params.maxUpfrontFee
+        );
 
         return (_params.newAnnualInterestRate, abi.encode(_params));
     }

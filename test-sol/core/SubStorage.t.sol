@@ -58,7 +58,10 @@ contract TestCore_SubStorage is SubStorage, BaseTest {
         uint256 subId = _createDummySub(bob);
 
         StrategyModel.StrategySub memory updatedSub = StrategyModel.StrategySub({
-            strategyOrBundleId: 0, isBundle: true, triggerData: new bytes[](0), subData: new bytes32[](0)
+            strategyOrBundleId: 0,
+            isBundle: true,
+            triggerData: new bytes[](0),
+            subData: new bytes32[](0)
         });
         vm.expectRevert(abi.encodeWithSelector(SenderNotSubOwnerError.selector, address(this), subId));
         cut.updateSubData(subId, updatedSub);
@@ -68,7 +71,10 @@ contract TestCore_SubStorage is SubStorage, BaseTest {
         uint256 subId = _createDummySub(address(this));
 
         StrategyModel.StrategySub memory updatedSub = StrategyModel.StrategySub({
-            strategyOrBundleId: 1, isBundle: true, triggerData: new bytes[](0), subData: new bytes32[](0)
+            strategyOrBundleId: 1,
+            isBundle: true,
+            triggerData: new bytes[](0),
+            subData: new bytes32[](0)
         });
         bytes32 expectedUpdatedSubHash = keccak256(abi.encode(updatedSub));
 
@@ -119,7 +125,10 @@ contract TestCore_SubStorage is SubStorage, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function _createDummySub(address _sender) internal returns (uint256 subId) {
         StrategyModel.StrategySub memory sub = StrategyModel.StrategySub({
-            strategyOrBundleId: 0, isBundle: true, triggerData: new bytes[](0), subData: new bytes32[](0)
+            strategyOrBundleId: 0,
+            isBundle: true,
+            triggerData: new bytes[](0),
+            subData: new bytes32[](0)
         });
 
         prank(_sender);

@@ -80,7 +80,10 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         if (_isT1Vault) {
             IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(_vault).constantsView();
             tokens = TokensData({
-                supply0: constants.supplyToken, supply1: address(0), borrow0: constants.borrowToken, borrow1: address(0)
+                supply0: constants.supplyToken,
+                supply1: address(0),
+                borrow0: constants.borrowToken,
+                borrow1: address(0)
             });
         } else {
             IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
@@ -97,15 +100,9 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         internal
         returns (uint256 shares)
     {
-        try IFluidDexResolver(FLUID_DEX_RESOLVER)
-            .estimateDeposit(
-                _dexPool,
-                _tokenAmount0,
-                _tokenAmount1,
-                1 /* minCollShares */
-            ) returns (
-            uint256 _shares
-        ) {
+        try IFluidDexResolver(FLUID_DEX_RESOLVER).estimateDeposit(
+            _dexPool, _tokenAmount0, _tokenAmount1, 1 /* minCollShares */
+        ) returns (uint256 _shares) {
             // Slightly reduce shares (simulate slippage). This means we expect at least this amount of shares.
             shares = _shares * 100 / 101;
         } catch {
@@ -118,13 +115,9 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         internal
         returns (uint256 shares)
     {
-        shares = IFluidDexResolver(FLUID_DEX_RESOLVER)
-            .estimateWithdraw(
-                _dexPool,
-                _tokenAmount0,
-                _tokenAmount1,
-                uint256(type(int256).max) /* maxCollShares */
-            );
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateWithdraw(
+            _dexPool, _tokenAmount0, _tokenAmount1, uint256(type(int256).max) /* maxCollShares */
+        );
         // Slightly increase shares (simulate slippage). This means we allow this amount of shares to be burned.
         shares = shares * 101 / 100;
     }
@@ -136,9 +129,8 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         uint256 minToken0AmountToAccept = _inToken0 ? 1 : 0;
         uint256 minToken1AmountToAccept = _inToken0 ? 0 : 1;
 
-        collateral = _fluidView.estimateDexPositionCollateralInOneToken(
-            _nftId, minToken0AmountToAccept, minToken1AmountToAccept
-        );
+        collateral =
+            _fluidView.estimateDexPositionCollateralInOneToken(_nftId, minToken0AmountToAccept, minToken1AmountToAccept);
 
         emit log_named_uint("estimated collateral", collateral);
 
@@ -152,15 +144,9 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
     {
         if (_tokenAmount0 == 0 && _tokenAmount1 == 0) return shares;
 
-        try IFluidDexResolver(FLUID_DEX_RESOLVER)
-            .estimateBorrow(
-                _dexPool,
-                _tokenAmount0,
-                _tokenAmount1,
-                uint256(type(int256).max) /* maxDebtShares */
-            ) returns (
-            uint256 _shares
-        ) {
+        try IFluidDexResolver(FLUID_DEX_RESOLVER).estimateBorrow(
+            _dexPool, _tokenAmount0, _tokenAmount1, uint256(type(int256).max) /* maxDebtShares */
+        ) returns (uint256 _shares) {
             // Slightly increase shares (simulate slippage). This means we allow this amount of shares to be minted.
             shares = _shares * 101 / 100;
         } catch {
@@ -173,13 +159,9 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         internal
         returns (uint256 shares)
     {
-        shares = IFluidDexResolver(FLUID_DEX_RESOLVER)
-            .estimatePayback(
-                _dexPool,
-                _tokenAmount0,
-                _tokenAmount1,
-                0 /* minSharesAmt_ */
-            );
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimatePayback(
+            _dexPool, _tokenAmount0, _tokenAmount1, 0 /* minSharesAmt_ */
+        );
         // Slightly reduce shares (simulate slippage). This means we expect at least this amount of shares to be burned.
         shares = shares * 100 / 101;
     }

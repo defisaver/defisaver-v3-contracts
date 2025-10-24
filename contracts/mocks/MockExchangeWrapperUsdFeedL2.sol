@@ -17,12 +17,7 @@ contract MockExchangeWrapperUsdFeedL2 is IExchangeV3, TokenPriceHelperL2 {
     /// @param _destAddr Destination token address
     /// @param _srcAmount Source token amount
     /// @return amount of destAddr tokens received
-    function sell(
-        address _srcAddr,
-        address _destAddr,
-        uint256 _srcAmount,
-        bytes calldata /*_additionalData*/
-    )
+    function sell(address _srcAddr, address _destAddr, uint256 _srcAmount, bytes calldata /*_additionalData*/ )
         external
         override
         returns (uint256)

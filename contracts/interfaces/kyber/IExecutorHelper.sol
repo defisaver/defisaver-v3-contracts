@@ -358,7 +358,10 @@ interface IExecutorHelper {
 
     function executeKSClassic(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
 
-    function executeUniV3KSElastic(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
+    function executeUniV3KSElastic(bytes memory data, uint256 flagsAndPrevAmountOut)
+        external
+        payable
+        returns (uint256);
 
     function executeRfq(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
 
@@ -386,7 +389,10 @@ interface IExecutorHelper {
 
     function executeCamelot(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
 
-    function executeKyberLimitOrder(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
+    function executeKyberLimitOrder(bytes memory data, uint256 flagsAndPrevAmountOut)
+        external
+        payable
+        returns (uint256);
 
     function executeMaverick(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
 
@@ -394,7 +400,10 @@ interface IExecutorHelper {
 
     function executeAlgebraV1(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
 
-    function executeBalancerBatch(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
+    function executeBalancerBatch(bytes memory data, uint256 flagsAndPrevAmountOut)
+        external
+        payable
+        returns (uint256);
 
     function executeWombat(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
 
@@ -431,9 +440,15 @@ interface IExecutorHelper {
 
     function executeSwaapV2(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
 
-    function executeNomiswapStable(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
+    function executeNomiswapStable(bytes memory data, uint256 flagsAndPrevAmountOut)
+        external
+        payable
+        returns (uint256);
 
-    function executeArbswapStable(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
+    function executeArbswapStable(bytes memory data, uint256 flagsAndPrevAmountOut)
+        external
+        payable
+        returns (uint256);
 
     function executeBancorV2(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
 
@@ -488,7 +503,10 @@ interface IExecutorHelper {
 
     function executeMantleUsd(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
 
-    function executeBedrockUniETH(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
+    function executeBedrockUniETH(bytes memory data, uint256 flagsAndPrevAmountOut)
+        external
+        payable
+        returns (uint256);
 
     function executeMaiPSM(bytes memory data, uint256 flagsAndPrevAmountOut) external payable returns (uint256);
 }

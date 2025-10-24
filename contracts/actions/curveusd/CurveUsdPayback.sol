@@ -96,8 +96,9 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
             startingCrvUsdBalanceWithoutDebt = CRVUSD_TOKEN_ADDR.getBalance(address(this)) - debt;
         }
 
-        ICrvUsdController(_params.controllerAddress)
-            .repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false);
+        ICrvUsdController(_params.controllerAddress).repay(
+            _params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false
+        );
 
         uint256 baseReceivedFromColl;
         uint256 crvUsdReceivedFromColl;

@@ -3,10 +3,7 @@ pragma solidity =0.8.24;
 
 import { CurveHelper } from "../actions/curve/helpers/CurveHelper.sol";
 import {
-    ICurveFactory,
-    ICurveFactoryLP,
-    ICurveFactoryPool,
-    IGaugeController
+    ICurveFactory, ICurveFactoryLP, ICurveFactoryPool, IGaugeController
 } from "../interfaces/curve/ICurveFactory.sol";
 import { ILiquidityGauge } from "../interfaces/curve/ILiquidityGauge.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";

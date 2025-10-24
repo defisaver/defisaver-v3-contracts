@@ -178,11 +178,7 @@ contract TestFluidLiquidityPayback is FluidTestBase {
         for (uint256 i = 0; i < vaults.length; ++i) {
             uint256 nftId = _t1VaultsSelected
                 ? executeFluidVaultT1Open(
-                    address(vaults[i]),
-                    _initialSupplyAmountUSD,
-                    _initialBorrowAmountUSD,
-                    wallet,
-                    address(t1OpenContract)
+                    address(vaults[i]), _initialSupplyAmountUSD, _initialBorrowAmountUSD, wallet, address(t1OpenContract)
                 )
                 : executeFluidVaultT2Open(
                     address(vaults[i]),
@@ -206,7 +202,7 @@ contract TestFluidLiquidityPayback is FluidTestBase {
             IFluidVaultResolver.UserPosition memory userPositionBefore = fetchPositionByNftId(nftId);
 
             uint256 paybackAmount = _isMaxPayback
-                ? userPositionBefore.borrow * 1001 / 1000  // add 0.1% buffer
+                ? userPositionBefore.borrow * 1001 / 1000 // add 0.1% buffer
                 : amountInUSDPrice(tokens.borrow0, _paybackAmountUSD);
 
             give(tokens.borrow0, sender, paybackAmount);

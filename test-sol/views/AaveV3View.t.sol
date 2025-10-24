@@ -249,7 +249,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                 supplyAmount: 30e18, // 30 WETH
                 borrowAmount: 50_000e6, // 50k USDT
                 initialBalance: 100e18 // 100 WETH
-            })
+             })
         );
 
         // WETH/USDC
@@ -260,7 +260,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                 supplyAmount: 30e18, // 30 WETH
                 borrowAmount: 50_000e6, // 50k USDC
                 initialBalance: 100e18 // 100 WETH
-            })
+             })
         );
 
         // WBTC/USDT
@@ -271,7 +271,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                 supplyAmount: 3e8, // 3 WBTC
                 borrowAmount: 100_000e6, // 100k USDT
                 initialBalance: 10e8 // 10 WBTC
-            })
+             })
         );
 
         // WBTC/GHO
@@ -282,7 +282,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                 supplyAmount: 3e8, // 3 WBTC
                 borrowAmount: 100_000e8, // 100k GHO
                 initialBalance: 10e8 // 10 WBTC
-            })
+             })
         );
 
         // USDT/WETH
@@ -293,7 +293,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                 supplyAmount: 75_000e6, // 75k USDT
                 borrowAmount: 5e18, // 5 WETH
                 initialBalance: 1_000_000e6 // 1M USDT
-            })
+             })
         );
 
         // // GHO/WETH
@@ -315,7 +315,7 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                 supplyAmount: 300_000e18, // 300k DAI
                 borrowAmount: 1e8, // 1 WBTC
                 initialBalance: 500_000e18 // 500k DAI
-            })
+             })
         );
     }
 }

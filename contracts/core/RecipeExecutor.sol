@@ -364,8 +364,9 @@ contract RecipeExecutor is
         _currRecipe.callData[0] = abi.encode(params);
 
         /// @dev FL action is called directly so that we can check who the msg.sender of FL is
-        ActionBase(_flActionAddr)
-            .executeAction(_currRecipe.callData[0], _currRecipe.subData, _currRecipe.paramMapping[0], _returnValues);
+        ActionBase(_flActionAddr).executeAction(
+            _currRecipe.callData[0], _currRecipe.subData, _currRecipe.paramMapping[0], _returnValues
+        );
 
         isDSProxy ? removeProxyPermission(_flActionAddr) : disableModule(_flActionAddr);
     }
@@ -381,9 +382,7 @@ contract RecipeExecutor is
         assembly {
             let succeeded := delegatecall(sub(gas(), 5000), _target, add(_data, 0x20), mload(_data), 0, 32)
             response := mload(0)
-            if iszero(succeeded) {
-                revert(0, 0)
-            }
+            if iszero(succeeded) { revert(0, 0) }
         }
     }
 }

@@ -64,8 +64,8 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExc
         override
         returns (uint256 rate)
     {
-        (rate,) = KyberNetworkProxyInterface(KYBER_INTERFACE)
-            .getExpectedRate(IERC20(_srcAddr), IERC20(_destAddr), _srcAmount);
+        (rate,) =
+            KyberNetworkProxyInterface(KYBER_INTERFACE).getExpectedRate(IERC20(_srcAddr), IERC20(_destAddr), _srcAmount);
 
         // multiply with decimal difference in src token
         rate = rate * (10 ** (18 - getDecimals(_srcAddr)));

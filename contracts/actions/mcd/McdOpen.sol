@@ -50,7 +50,10 @@ contract McdOpen is ActionBase, McdHelper {
 
     /// @param _joinAddr Join address of the maker collateral
     /// @param _mcdManager The manager address we are using
-    function _mcdOpen(address _joinAddr, address _mcdManager) internal returns (uint256 vaultId, bytes memory logData) {
+    function _mcdOpen(address _joinAddr, address _mcdManager)
+        internal
+        returns (uint256 vaultId, bytes memory logData)
+    {
         bytes32 ilk = IJoin(_joinAddr).ilk();
 
         if (_mcdManager == CROPPER) {

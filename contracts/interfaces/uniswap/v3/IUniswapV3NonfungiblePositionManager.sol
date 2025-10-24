@@ -58,7 +58,11 @@ abstract contract IUniswapV3NonfungiblePositionManager {
         uint128 amount1Max;
     }
 
-    function collect(CollectParams calldata params) external payable virtual returns (uint256 amount0, uint256 amount1);
+    function collect(CollectParams calldata params)
+        external
+        payable
+        virtual
+        returns (uint256 amount0, uint256 amount1);
 
     function positions(uint256 tokenId)
         external

@@ -210,7 +210,10 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
         subDataEncoded[1] = bytes32(uint256(_subData.amount));
 
         sub = StrategyModel.StrategySub({
-            strategyOrBundleId: uint64(strategyId), isBundle: false, triggerData: _triggerData, subData: subDataEncoded
+            strategyOrBundleId: uint64(strategyId),
+            isBundle: false,
+            triggerData: _triggerData,
+            subData: subDataEncoded
         });
 
         subId = subStorage.getSubsCount();

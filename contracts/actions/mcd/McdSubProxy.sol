@@ -48,9 +48,7 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
     function subToMcdAutomation(
         McdSubData calldata _subData,
         bool // _shouldLegacyUnsub no longer needed, kept to keep the function sig the same
-    )
-        public
-    {
+    ) public {
         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission(isDSProxy(address(this)));
 

@@ -68,8 +68,9 @@ contract CurveStethPoolDeposit is ActionBase, CurveHelper {
             STETH_ADDR.approveToken(CURVE_STETH_POOL_ADDR, _params.amounts[1]);
         }
 
-        receivedLp = ICurveStethPool(CURVE_STETH_POOL_ADDR)
-        .add_liquidity{ value: _params.amounts[0] }(_params.amounts, _params.minMintAmount);
+        receivedLp = ICurveStethPool(CURVE_STETH_POOL_ADDR).add_liquidity{ value: _params.amounts[0] }(
+            _params.amounts, _params.minMintAmount
+        );
 
         STE_CRV_ADDR.withdrawTokens(_params.to, receivedLp);
 

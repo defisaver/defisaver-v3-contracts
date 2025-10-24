@@ -24,7 +24,11 @@ contract McdView is DSMath, McdHelper {
     /// @param _managerAddr Address of the McdManger or Cropper contract
     /// @param _vaultId Id of the Vaults
     /// @param _ilk Ilk of the Vault
-    function getVaultInfo(address _managerAddr, uint256 _vaultId, bytes32 _ilk) public view returns (uint256, uint256) {
+    function getVaultInfo(address _managerAddr, uint256 _vaultId, bytes32 _ilk)
+        public
+        view
+        returns (uint256, uint256)
+    {
         address urn;
         if (_managerAddr == CROPPER) {
             address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);

@@ -142,10 +142,9 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
         vars.sendTokensTo =
             (vars.sendWithdrawnEthAsWrapped || vars.sendBorrowedEthAsWrapped) ? address(this) : _params.to;
 
-        (, int256 exactCollAmt, int256 exactDebtAmt) = IFluidVaultT1(_params.vault)
-        .operate{
-            value: vars.msgValue
-        }(_params.nftId, vars.supplyTokenAmount, vars.borrowTokenAmount, vars.sendTokensTo);
+        (, int256 exactCollAmt, int256 exactDebtAmt) = IFluidVaultT1(_params.vault).operate{ value: vars.msgValue }(
+            _params.nftId, vars.supplyTokenAmount, vars.borrowTokenAmount, vars.sendTokensTo
+        );
 
         if (vars.sendWithdrawnEthAsWrapped) {
             TokenUtils.depositWeth(uint256(-exactCollAmt));
