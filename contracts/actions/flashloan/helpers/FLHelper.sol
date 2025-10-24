@@ -6,6 +6,7 @@ pragma solidity =0.8.24;
 import { ISafe } from "../../../interfaces/safe/ISafe.sol";
 import { IDSProxy } from "../../../interfaces/IDSProxy.sol";
 import { IInstaAccountV2 } from "../../../interfaces/insta/IInstaAccountV2.sol";
+import { IAccountImplementation } from "../../../interfaces/summerfi/IAccountImplementation.sol";
 
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
 import { FLFeeFaucet } from "../../../utils/FLFeeFaucet.sol";
@@ -62,6 +63,14 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
                 connectors,
                 connectorsData,
                 origin
+            );
+            return;
+        }
+
+        if (_walletType == WalletType.SUMMERFI) {
+            IAccountImplementation(_wallet).execute{value: address(this).balance}(
+                dfsRegistry.getAddr(RECIPE_EXECUTOR_ID),
+                data
             );
             return;
         }

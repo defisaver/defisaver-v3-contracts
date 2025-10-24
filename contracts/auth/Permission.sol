@@ -5,12 +5,12 @@ pragma solidity =0.8.24;
 import { SafeModulePermission } from "./SafeModulePermission.sol";
 import { DSProxyPermission } from "./DSProxyPermission.sol";
 import { DSAProxyPermission } from "./DSAProxyPermission.sol";
+import { SummerfiPermission } from "./SummerfiPermission.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title Permission contract to give execute permission on Smart Wallets
 /// @dev Called from the context of the wallet we are using
-contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermission {
-
+contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermission, SummerfiPermission {
     function giveAuthContractPermission(WalletType _walletType) public {
         givePermissionTo(_walletType, _getAuthContractAddress(_walletType));
     }
@@ -24,6 +24,8 @@ contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermissi
             giveProxyPermission(_to);
         } else if (_walletType == WalletType.DSAPROXY) {
             giveDSAProxyPermission(_to);
+        } else if (_walletType == WalletType.SUMMERFI) {
+            giveSummerfiPermission(_to);
         } else {
             // Defaults to Safe
             enableModule(_to);
@@ -35,6 +37,8 @@ contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermissi
             removeProxyPermission(_from);
         } else if (_walletType == WalletType.DSAPROXY) {
             removeDSAProxyPermission(_from);
+        } else if (_walletType == WalletType.SUMMERFI) {
+            removeSummerfiPermission(_from);
         } else {
             // Defaults to Safe
             disableModule(_from);
