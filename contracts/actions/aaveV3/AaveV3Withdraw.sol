@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { ActionBase } from "../ActionBase.sol";
-import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
-import { DFSLib } from "../../utils/DFSLib.sol";
+import {TokenUtils} from "../../utils/TokenUtils.sol";
+import {ActionBase} from "../ActionBase.sol";
+import {AaveV3Helper} from "./helpers/AaveV3Helper.sol";
+import {IPoolV3} from "../../interfaces/aaveV3/IPoolV3.sol";
+import {DFSLib} from "../../utils/DFSLib.sol";
 
 /// @title Withdraw a token from an Aave market
 contract AaveV3Withdraw is ActionBase, AaveV3Helper {
@@ -45,12 +45,8 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
             params.market = DEFAULT_AAVE_MARKET;
         }
 
-        (uint256 withdrawnAmount, bytes memory logData) = _withdraw(
-            params.market,
-            params.assetId,
-            params.amount,
-            params.to
-        );
+        (uint256 withdrawnAmount, bytes memory logData) =
+            _withdraw(params.market, params.assetId, params.amount, params.to);
         emit ActionEvent("AaveV3Withdraw", logData);
         return bytes32(withdrawnAmount);
     }
@@ -58,23 +54,13 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _withdraw(
-            params.market,
-            params.assetId,
-            params.amount,
-            params.to
-        );
+        (, bytes memory logData) = _withdraw(params.market, params.assetId, params.amount, params.to);
         logger.logActionDirectEvent("AaveV3Withdraw", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) = _withdraw(
-            params.market,
-            params.assetId,
-            params.amount,
-            params.to
-        );
+        (, bytes memory logData) = _withdraw(params.market, params.assetId, params.amount, params.to);
         logger.logActionDirectEvent("AaveV3Withdraw", logData);
     }
 
