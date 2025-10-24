@@ -258,7 +258,9 @@ const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
                 chainIds[network],
             );
 
-            it(`... should call regular Morpho blue boost on price strategy for ${eoaBoost ? 'EOA' : 'wallet'} position: [${collToken.symbol}/${loanToken.symbol}]`, async () => {
+            it(`... should call regular Morpho blue boost on price strategy for ${
+                eoaBoost ? 'EOA' : 'wallet'
+            } position: [${collToken.symbol}/${loanToken.symbol}]`, async () => {
                 // 1. create position
                 await createPosition(marketParams, loanToken, collToken, senderAcc, proxy, user);
 
@@ -304,7 +306,9 @@ const morphoBoostOnPriceStrategyTest = async (isFork, eoaBoost) => {
                 const ratioAfter = await view.callStatic.getRatioUsingParams(marketParams, user);
                 expect(ratioAfter).to.be.lt(ratioBefore);
             });
-            it(`... should call flash loan Morpho blue boost on price strategy for ${eoaBoost ? 'EOA' : 'wallet'} position: [${collToken.symbol}/${loanToken.symbol}]`, async () => {
+            it(`... should call flash loan Morpho blue boost on price strategy for ${
+                eoaBoost ? 'EOA' : 'wallet'
+            } position: [${collToken.symbol}/${loanToken.symbol}]`, async () => {
                 // 1. create position
                 await createPosition(marketParams, loanToken, collToken, senderAcc, proxy, user);
 

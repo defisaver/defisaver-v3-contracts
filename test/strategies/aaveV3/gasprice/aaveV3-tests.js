@@ -335,10 +335,14 @@ const aaveV3CloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -670,10 +674,14 @@ const aaveV3FLCloseToCollWithMaximumGasPriceStrategyTest = async (numTestPairs) 
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -1012,10 +1020,14 @@ const aaveV3CloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) =>
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -1327,10 +1339,14 @@ const aaveV3FLCloseToDebtWithMaximumGasPriceStrategyTest = async (numTestPairs) 
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 

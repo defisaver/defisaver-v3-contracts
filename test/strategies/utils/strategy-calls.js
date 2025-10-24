@@ -6959,7 +6959,9 @@ const callCompV3RepayStrategyTemplate = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
-        `GasUsed ${isOnPriceStrategy ? 'callCompV3RepayOnPriceStrategy' : 'callCompV3RepayStrategy'}: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed ${
+            isOnPriceStrategy ? 'callCompV3RepayOnPriceStrategy' : 'callCompV3RepayStrategy'
+        }: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 const callCompV3FLRepayStrategyTemplate = async (
@@ -7036,7 +7038,9 @@ const callCompV3FLRepayStrategyTemplate = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
-        `GasUsed ${isOnPriceStrategy ? 'callCompV3FLRepayOnPriceStrategy' : 'callCompV3FLRepayStrategy'}: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed ${
+            isOnPriceStrategy ? 'callCompV3FLRepayOnPriceStrategy' : 'callCompV3FLRepayStrategy'
+        }: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 const callCompV3BoostStrategyTemplate = async (
@@ -7107,7 +7111,9 @@ const callCompV3BoostStrategyTemplate = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
-        `GasUsed ${isOnPriceStrategy ? 'callCompV3BoostOnPriceStrategy' : 'callCompV3BoostStrategy'}: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed ${
+            isOnPriceStrategy ? 'callCompV3BoostOnPriceStrategy' : 'callCompV3BoostStrategy'
+        }: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 const callCompV3FLBoostStrategyTemplate = async (
@@ -7184,7 +7190,9 @@ const callCompV3FLBoostStrategyTemplate = async (
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasCost, 0, callData);
     console.log(
-        `GasUsed ${isOnPriceStrategy ? 'callCompV3FLBoostOnPriceStrategy' : 'callCompV3FLBoostStrategy'}: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+        `GasUsed ${
+            isOnPriceStrategy ? 'callCompV3FLBoostOnPriceStrategy' : 'callCompV3FLBoostStrategy'
+        }: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
     );
 };
 
@@ -8605,7 +8613,9 @@ const callAaveV3FLBoostStrategy = async (
         ? new dfs.actions.basic.GasFeeActionL2(gasCost, collAddr, '0', '0', '10000000')
         : new dfs.actions.basic.GasFeeAction(gasCost, collAddr, '0');
 
-    console.log(`FL Using collateral asset ID: ${collAssetId} for token: ${collAddr} on market: true`);
+    console.log(
+        `FL Using collateral asset ID: ${collAssetId} for token: ${collAddr} on market: true`,
+    );
 
     const aaveV3SupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
         false, // useDefaultMarket

@@ -132,7 +132,9 @@ const BprotocolLiquitySPWithdrawTest = () =>
         );
         afterEach(() => revertToSnapshot(snapshot));
 
-        it(`... should deposit ${BN2Float(DEPOSIT_AMOUNT)} LUSD then withdraw zero (LQTY reward claim only)`, async () => {
+        it(`... should deposit ${BN2Float(
+            DEPOSIT_AMOUNT,
+        )} LUSD then withdraw zero (LQTY reward claim only)`, async () => {
             await testDeposit(proxy, DEPOSIT_AMOUNT, senderAcc.address, senderAcc.address);
             const { lusdReturned, wethReturnedValue } = await testWithdraw(
                 proxy,
@@ -145,7 +147,9 @@ const BprotocolLiquitySPWithdrawTest = () =>
             console.log({ withdrawnValue: BN2Float(withdrawnValue) });
         });
 
-        it(`... should deposit ${BN2Float(DEPOSIT_AMOUNT)} LUSD then withdraw half from Bprotocol`, async () => {
+        it(`... should deposit ${BN2Float(
+            DEPOSIT_AMOUNT,
+        )} LUSD then withdraw half from Bprotocol`, async () => {
             const sharesMinted = await testDeposit(
                 proxy,
                 DEPOSIT_AMOUNT,

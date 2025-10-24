@@ -161,7 +161,9 @@ const curveUsdBoostStrategyTest = async () => {
                     );
                     const collRatioAfter = userDataAfter.collRatio;
                     console.log(
-                        `Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`,
+                        `Collateral ratio went from ${collRatioBefore / 1e16}% to ${
+                            collRatioAfter / 1e16
+                        }%`,
                     );
                     expect(collRatioBefore).to.be.gt(collRatioAfter);
                     await revertToSnapshot(snapshot);
@@ -214,7 +216,9 @@ const curveUsdBoostStrategyTest = async () => {
                 const collRatioAfter = userDataAfter.collRatio;
                 console.log(`User received ${collAfter.sub(collBefore)} of coll on his EOA`);
                 console.log(
-                    `Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`,
+                    `Collateral ratio went from ${collRatioBefore / 1e16}% to ${
+                        collRatioAfter / 1e16
+                    }%`,
                 );
                 expect(collRatioBefore).to.be.gt(collRatioAfter);
                 await revertToSnapshot(snapshot);
@@ -251,7 +255,9 @@ const curveUsdBoostStrategyTest = async () => {
                 const userDataAfter = await crvUsdView.userData(controllerAddress, proxy.address);
                 const collRatioAfter = userDataAfter.collRatio;
                 console.log(
-                    `Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`,
+                    `Collateral ratio went from ${collRatioBefore / 1e16}% to ${
+                        collRatioAfter / 1e16
+                    }%`,
                 );
                 expect(collRatioBefore).to.be.gt(collRatioAfter);
                 await revertToSnapshot(snapshot);
@@ -366,7 +372,9 @@ const curveUsdRepayStrategyTest = async () => {
                     );
                     const collRatioAfter = userDataAfter.collRatio;
                     console.log(
-                        `Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`,
+                        `Collateral ratio went from ${collRatioBefore / 1e16}% to ${
+                            collRatioAfter / 1e16
+                        }%`,
                     );
                     expect(collRatioAfter).to.be.gt(collRatioBefore);
                     await revertToSnapshot(snapshot);
@@ -401,7 +409,9 @@ const curveUsdRepayStrategyTest = async () => {
                 const userDataAfter = await crvusdView.userData(controllerAddress, proxy.address);
                 const collRatioAfter = userDataAfter.collRatio;
                 console.log(
-                    `Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`,
+                    `Collateral ratio went from ${collRatioBefore / 1e16}% to ${
+                        collRatioAfter / 1e16
+                    }%`,
                 );
                 expect(collRatioAfter).to.be.gt(collRatioBefore);
                 await revertToSnapshot(snapshot);
@@ -442,7 +452,9 @@ const curveUsdRepayStrategyTest = async () => {
                 const userDataAfter = await crvusdView.userData(controllerAddress, proxy.address);
                 const collRatioAfter = userDataAfter.collRatio;
                 console.log(
-                    `Collateral ratio went from ${collRatioBefore / 1e16}% to ${collRatioAfter / 1e16}%`,
+                    `Collateral ratio went from ${collRatioBefore / 1e16}% to ${
+                        collRatioAfter / 1e16
+                    }%`,
                 );
                 expect(collRatioAfter).to.be.gt(collRatioBefore);
                 await revertToSnapshot(snapshot);

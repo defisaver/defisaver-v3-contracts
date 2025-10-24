@@ -143,7 +143,9 @@ const compV3SupplyTest = async () => {
                     expect(balanceAfter).to.be.gt(balanceBefore);
                 });
             }
-            it(`should supply ${compAssets[network][compMarkets[m]].bAsset} (base asset) to CompoundV3`, async () => {
+            it(`should supply ${
+                compAssets[network][compMarkets[m]].bAsset
+            } (base asset) to CompoundV3`, async () => {
                 const bAsset = compAssets[network][compMarkets[m]].bAsset;
 
                 const token = getAssetInfo(bAsset, chainId);
@@ -166,7 +168,9 @@ const compV3SupplyTest = async () => {
                 expect(balanceAfter).to.be.gt(balanceBefore);
             });
 
-            it(`should supply ${compAssets[network][compMarkets[m]].bAsset} (base asset) to CompoundV3 from proxy to eoa`, async () => {
+            it(`should supply ${
+                compAssets[network][compMarkets[m]].bAsset
+            } (base asset) to CompoundV3 from proxy to eoa`, async () => {
                 const bAsset = compAssets[network][compMarkets[m]].bAsset;
 
                 const token = getAssetInfo(bAsset, chainId);
@@ -303,7 +307,9 @@ const compV3TransferTest = async () => {
                 });
             }
 
-            it(`... should transfer ${compAssets[network][compMarkets[m]].bAsset} (base asset)`, async () => {
+            it(`... should transfer ${
+                compAssets[network][compMarkets[m]].bAsset
+            } (base asset)`, async () => {
                 const bAsset = compAssets[network][compMarkets[m]].bAsset;
                 const cometContract = await hre.ethers.getContractAt(
                     'IComet',
@@ -516,7 +522,9 @@ const compV3WithdrawTest = async () => {
                 });
             }
 
-            it(`... should withdraw MAX.UINT ${compAssets[network][compMarkets[m]].bAsset} (base asset)`, async () => {
+            it(`... should withdraw MAX.UINT ${
+                compAssets[network][compMarkets[m]].bAsset
+            } (base asset)`, async () => {
                 const bAsset = compAssets[network][compMarkets[m]].bAsset;
                 const assetInfo = getAssetInfo(bAsset, chainId);
                 const amount = hre.ethers.utils.parseUnits('1000', assetInfo.decimals);
@@ -547,7 +555,9 @@ const compV3WithdrawTest = async () => {
                 expect(balanceAfter).to.be.gt(balanceBefore);
             });
 
-            it(`... should withdraw ${compAssets[network][compMarkets[m]].bAsset} (base asset)`, async () => {
+            it(`... should withdraw ${
+                compAssets[network][compMarkets[m]].bAsset
+            } (base asset)`, async () => {
                 const bAsset = compAssets[network][compMarkets[m]].bAsset;
                 const assetInfo = getAssetInfo(bAsset, chainId);
                 const amount = hre.ethers.utils.parseUnits('1000', assetInfo.decimals);

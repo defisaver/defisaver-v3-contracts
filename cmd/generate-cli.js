@@ -75,7 +75,9 @@ const genSdkSignatures = (repoPath) => {
         const namespace = relativePath.split(sep).join('.');
         let namespacePrefix = namespace ? `${namespace}.` : '';
         namespacePrefix = namespacePrefix.split('.src.')[1];
-        return `const ${className.charAt(0).toLowerCase() + className.slice(1)} = new dfs.${namespacePrefix}${className}(\n    ${params.join(',\n    ')}\n);`;
+        return `const ${
+            className.charAt(0).toLowerCase() + className.slice(1)
+        } = new dfs.${namespacePrefix}${className}(\n    ${params.join(',\n    ')}\n);`;
     }
 
     function processSdkDirectory(dirPath, type, output = []) {
@@ -317,7 +319,9 @@ const generateSolidityActionContent = (templateContent, actionName) => {
     const enumDefinitions = Object.entries(enums)
         .map(([name, enumDef]) => {
             const enumComments = enumDef.comments.map((c) => `    /// ${c}`).join('\n');
-            return `${enumComments ? `\n${enumComments}\n` : ''}    enum ${name} { ${enumDef.values.join(', ')} }`;
+            return `${
+                enumComments ? `\n${enumComments}\n` : ''
+            }    enum ${name} { ${enumDef.values.join(', ')} }`;
         })
         .join('\n');
 
@@ -961,7 +965,9 @@ const generateActionMdFile = (contractName, outputPath = 'gen/md/actions') => {
             .filter((line) => line.endsWith(';'));
 
         // Format comments above struct and params inside
-        return `    ${paramComments.join('\n    ')}\n    struct Params {\n        ${params.join('\n        ')}\n    }`;
+        return `    ${paramComments.join('\n    ')}\n    struct Params {\n        ${params.join(
+            '\n        ',
+        )}\n    }`;
     }
 
     function extractReturnValue(content) {
@@ -985,7 +991,9 @@ const generateActionMdFile = (contractName, outputPath = 'gen/md/actions') => {
         }
         if (lines.length) {
             lines.push(
-                `bytes memory logData = abi.encode(${contractName.endsWith('Check') ? 'currRatio' : 'params'});`,
+                `bytes memory logData = abi.encode(${
+                    contractName.endsWith('Check') ? 'currRatio' : 'params'
+                });`,
             );
             return `\`\`\`solidity
 ${lines.join('\n')}
@@ -1013,7 +1021,9 @@ ${lines.join('\n')}
     const sdkSignature = findSdkActionSignatureFromTemplateFile(contractName);
     let sdkSection = sdkSignature
         ? `\n${sdkSignature}`
-        : `\nconst ${contractName[0].toLowerCase()}${contractName.slice(1)}Action = new dfs.actions.${contractName}Action(\n    ...args\n);\n`;
+        : `\nconst ${contractName[0].toLowerCase()}${contractName.slice(
+              1,
+          )}Action = new dfs.actions.${contractName}Action(\n    ...args\n);\n`;
 
     sdkSection = `\`\`\`ts${sdkSection}\n\`\`\``;
 
@@ -1249,7 +1259,12 @@ ${natspec.notice.length > 0 ? `> **Notes**\n>\n> ${natspec.notice.join('\n> ')}\
 
 ## SDK Action
 \`\`\`ts
-${triggerSignature || `const ${triggerName[0].toLowerCase()}${triggerName.slice(1)} = new dfs.triggers.${triggerName}(\n    ...args\n);`}
+${
+    triggerSignature ||
+    `const ${triggerName[0].toLowerCase()}${triggerName.slice(
+        1,
+    )} = new dfs.triggers.${triggerName}(\n    ...args\n);`
+}
 \`\`\`
 
 ## Subscription Parameters

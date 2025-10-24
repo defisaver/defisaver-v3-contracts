@@ -763,10 +763,14 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -832,10 +836,14 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -1074,10 +1082,14 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -1146,10 +1158,14 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -1407,10 +1423,14 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -1484,10 +1504,14 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -1730,10 +1754,14 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -1810,10 +1838,14 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 

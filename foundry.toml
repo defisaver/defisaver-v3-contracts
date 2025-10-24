@@ -27,8 +27,7 @@ number_underscore = "thousands"
 
 
 # Linting -> https://getfoundry.sh/config/reference/linter
-[lint]
-# TODO -> Will remove as much of those and fix them in later commits
+[profile.lint]
 exclude_lints = [
     # "unaliased-plain-import",
     # "unused-import",

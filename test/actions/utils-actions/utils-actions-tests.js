@@ -528,7 +528,9 @@ const sendTokensTest = async () => {
             await revertToSnapshot(snapshotId);
         });
         for (let i = 0; i < tokens.length; i++) {
-            it(`... should send ${i + 1} tokens using recipe made out of SendToken Actions`, async () => {
+            it(`... should send ${
+                i + 1
+            } tokens using recipe made out of SendToken Actions`, async () => {
                 const recipe = new dfs.Recipe('SendTokenRecipe');
                 // This is here only so on both sides it's recipe
                 recipe.addAction(

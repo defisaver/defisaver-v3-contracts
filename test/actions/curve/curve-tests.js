@@ -822,7 +822,9 @@ const curveStethPoolWithdrawTest = async () => {
             expect(+BN2Float(wethWithdrawn)).to.be.closeTo(+BN2Float(withdrawAmount), 0.01);
             expect(+BN2Float(stethWithdrawn)).to.be.closeTo(+BN2Float(withdrawAmount), 0.01);
             console.log(
-                `Withdrawn ${BN2Float(wethWithdrawn)} WETH and ${BN2Float(stethWithdrawn)} stEth burning ${BN2Float(lpBurned)} steCrv`,
+                `Withdrawn ${BN2Float(wethWithdrawn)} WETH and ${BN2Float(
+                    stethWithdrawn,
+                )} stEth burning ${BN2Float(lpBurned)} steCrv`,
             );
         });
     });
