@@ -58,15 +58,19 @@ contract TestCore_Permission is AuthHelper, BaseTest {
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
     function _giveProxyPermission() internal {
-        bytes memory givePermCalldata =
-            abi.encodeWithSelector(Permission.giveWalletPermission.selector, true /* isDSProxy */ );
+        bytes memory givePermCalldata = abi.encodeWithSelector(
+            Permission.giveWalletPermission.selector,
+            true /* isDSProxy */
+        );
 
         dsProxyWallet.execute(address(cut), givePermCalldata, 0);
     }
 
     function _giveSafePermission() internal {
-        bytes memory givePermCalldata =
-            abi.encodeWithSelector(Permission.giveWalletPermission.selector, false /* isDSProxy */ );
+        bytes memory givePermCalldata = abi.encodeWithSelector(
+            Permission.giveWalletPermission.selector,
+            false /* isDSProxy */
+        );
 
         safeWallet.execute(address(cut), givePermCalldata, 0);
     }

@@ -59,10 +59,7 @@ contract ReflexerGenerate is ActionBase, ReflexerHelper {
     /// @param _safeId Id of the safe
     /// @param _amount Amount of rai to be generated
     /// @param _to Address which will receive the rai
-    function _reflexerGenerate(uint256 _safeId, uint256 _amount, address _to)
-        internal
-        returns (uint256, bytes memory)
-    {
+    function _reflexerGenerate(uint256 _safeId, uint256 _amount, address _to) internal returns (uint256, bytes memory) {
         address safe = safeManager.safes(_safeId);
         bytes32 collType = safeManager.collateralTypes(_safeId);
 

@@ -366,9 +366,7 @@ contract TestFluidDexWithdraw is FluidTestBase {
                 vars.shares =
                     estimateWithdrawShares(vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1);
                 if (vars.shares == 0) {
-                    emit log_string(
-                        "Failed to estimate withdraw shares. Setting it to max and leaving tx to fail for debugging..."
-                    );
+                    emit log_string("Failed to estimate withdraw shares. Setting it to max and leaving tx to fail for debugging...");
                     vars.shares = uint256(type(int256).max);
                 }
             }

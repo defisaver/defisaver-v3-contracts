@@ -409,9 +409,8 @@ contract FluidView is FluidRatioHelper {
     {
         IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
 
-        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateDeposit(
-            constants.supply, _token0Amount, _token1Amount, _minSharesAmount
-        );
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER)
+            .estimateDeposit(constants.supply, _token0Amount, _token1Amount, _minSharesAmount);
     }
 
     /// @notice Estimate how much deposit shares will be burned for a variable dex withdraw for T2 and T4 vaults
@@ -429,9 +428,8 @@ contract FluidView is FluidRatioHelper {
     {
         IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
 
-        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateWithdraw(
-            constants.supply, _token0Amount, _token1Amount, _maxSharesAmount
-        );
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER)
+            .estimateWithdraw(constants.supply, _token0Amount, _token1Amount, _maxSharesAmount);
     }
 
     /// @notice Estimate how much debt shares will be received for a variable dex borrow for T3 and T4 vaults
@@ -449,9 +447,8 @@ contract FluidView is FluidRatioHelper {
     {
         IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
 
-        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateBorrow(
-            constants.borrow, _token0Amount, _token1Amount, _maxSharesAmount
-        );
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER)
+            .estimateBorrow(constants.borrow, _token0Amount, _token1Amount, _maxSharesAmount);
     }
 
     /// @notice Estimate how much debt shares will be burned for a variable dex payback for T3 and T4 vaults
@@ -469,9 +466,8 @@ contract FluidView is FluidRatioHelper {
     {
         IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
 
-        shares = IFluidDexResolver(FLUID_DEX_RESOLVER).estimatePayback(
-            constants.borrow, _token0Amount, _token1Amount, _minSharesAmount
-        );
+        shares = IFluidDexResolver(FLUID_DEX_RESOLVER)
+            .estimatePayback(constants.borrow, _token0Amount, _token1Amount, _minSharesAmount);
     }
 
     /// @notice Estimate how much collateral is worth in terms of one token for a given nft of dex position.
@@ -504,9 +500,13 @@ contract FluidView is FluidRatioHelper {
         (IFluidVaultResolver.UserPosition memory userPosition, IFluidVaultResolver.VaultEntireData memory vaultData) =
             IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
 
-        collateral = IFluidDexResolver(FLUID_DEX_RESOLVER).estimateWithdrawPerfectInOneToken(
-            vaultData.constantVariables.supply, userPosition.supply, _minToken0AmountToAccept, _minToken1AmountToAccept
-        );
+        collateral = IFluidDexResolver(FLUID_DEX_RESOLVER)
+            .estimateWithdrawPerfectInOneToken(
+                vaultData.constantVariables.supply,
+                userPosition.supply,
+                _minToken0AmountToAccept,
+                _minToken1AmountToAccept
+            );
     }
 
     /// @notice Estimate how much debt is worth in terms of one token for a given nft of dex position.
@@ -539,12 +539,13 @@ contract FluidView is FluidRatioHelper {
         (IFluidVaultResolver.UserPosition memory userPosition, IFluidVaultResolver.VaultEntireData memory vaultData) =
             IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
 
-        debt = IFluidDexResolver(FLUID_DEX_RESOLVER).estimatePaybackPerfectInOneToken(
-            vaultData.constantVariables.borrow,
-            userPosition.borrow,
-            _maxToken0AmountToPayback,
-            _maxToken1AmountToPayback
-        );
+        debt = IFluidDexResolver(FLUID_DEX_RESOLVER)
+            .estimatePaybackPerfectInOneToken(
+                vaultData.constantVariables.borrow,
+                userPosition.borrow,
+                _maxToken0AmountToPayback,
+                _maxToken1AmountToPayback
+            );
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -655,8 +656,9 @@ contract FluidView is FluidRatioHelper {
         address _oracle,
         uint256 _sharesWithdrawable
     ) internal view returns (DexSupplyData memory dexSupplyData) {
-        address quoteToken =
-            _isQuoteInToken0ForSmartCollOracle(_oracle) ? _dexData.constantViews.token0 : _dexData.constantViews.token1;
+        address quoteToken = _isQuoteInToken0ForSmartCollOracle(_oracle)
+            ? _dexData.constantViews.token0
+            : _dexData.constantViews.token1;
 
         (uint256 quoteTokensPerShare,) = IDexSmartCollOracle(_oracle).dexSmartColSharesRates();
 
@@ -692,8 +694,9 @@ contract FluidView is FluidRatioHelper {
         address _oracle,
         uint256 _sharesBorrowable
     ) internal view returns (DexBorrowData memory dexBorrowData) {
-        address quoteToken =
-            _isQuoteInToken0ForSmartDebtOracle(_oracle) ? _dexData.constantViews.token0 : _dexData.constantViews.token1;
+        address quoteToken = _isQuoteInToken0ForSmartDebtOracle(_oracle)
+            ? _dexData.constantViews.token0
+            : _dexData.constantViews.token1;
 
         (uint256 quoteTokensPerShare,) = IDexSmartDebtOracle(_oracle).dexSmartDebtSharesRates();
 

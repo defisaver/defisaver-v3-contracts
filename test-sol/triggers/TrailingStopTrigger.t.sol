@@ -120,17 +120,14 @@ contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
         bytes memory subData = abi.encode(ETH_ADDR, percentage, startRoundId);
 
         MockChainlinkAggregator.MockRoundData[] memory mockRounds = new MockChainlinkAggregator.MockRoundData[](3);
-        mockRounds[0] =
-            MockChainlinkAggregator.MockRoundData({ roundId: startRoundId, answer: 10_000, updatedAt: block.timestamp });
+        mockRounds[0] = MockChainlinkAggregator.MockRoundData({
+            roundId: startRoundId, answer: 10_000, updatedAt: block.timestamp
+        });
         mockRounds[1] = MockChainlinkAggregator.MockRoundData({
-            roundId: maxRoundId,
-            answer: 15_000,
-            updatedAt: block.timestamp + 60 * 60
+            roundId: maxRoundId, answer: 15_000, updatedAt: block.timestamp + 60 * 60
         });
         mockRounds[2] = MockChainlinkAggregator.MockRoundData({
-            roundId: maxRoundId + 1,
-            answer: 12_000,
-            updatedAt: block.timestamp + 60 * 60 * 2
+            roundId: maxRoundId + 1, answer: 12_000, updatedAt: block.timestamp + 60 * 60 * 2
         });
         mockAggregator.setMockRounds(mockRounds);
 
@@ -146,17 +143,14 @@ contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
         bytes memory callData = abi.encode(maxRoundId);
 
         MockChainlinkAggregator.MockRoundData[] memory mockRounds = new MockChainlinkAggregator.MockRoundData[](3);
-        mockRounds[0] =
-            MockChainlinkAggregator.MockRoundData({ roundId: startRoundId, answer: 10_000, updatedAt: block.timestamp });
+        mockRounds[0] = MockChainlinkAggregator.MockRoundData({
+            roundId: startRoundId, answer: 10_000, updatedAt: block.timestamp
+        });
         mockRounds[1] = MockChainlinkAggregator.MockRoundData({
-            roundId: maxRoundId,
-            answer: 15_000,
-            updatedAt: block.timestamp + 60 * 60
+            roundId: maxRoundId, answer: 15_000, updatedAt: block.timestamp + 60 * 60
         });
         mockRounds[2] = MockChainlinkAggregator.MockRoundData({
-            roundId: maxRoundId + 1,
-            answer: 12_000,
-            updatedAt: block.timestamp + 60 * 60 * 2
+            roundId: maxRoundId + 1, answer: 12_000, updatedAt: block.timestamp + 60 * 60 * 2
         });
         mockAggregator.setMockRounds(mockRounds);
 

@@ -70,15 +70,16 @@ contract FluidClaim is ActionBase, FluidHelper {
 
         uint256 rewardTokenBalanceBefore = rewardToken.getBalance(address(this));
 
-        IFluidMerkleDistributor(FLUID_MERKLE_DISTRIBUTOR).claim(
-            address(this), /* recipient_ */
-            _params.cumulativeAmount,
-            _params.positionType,
-            _params.positionId,
-            _params.cycle,
-            _params.merkleProof,
-            _params.metadata
-        );
+        IFluidMerkleDistributor(FLUID_MERKLE_DISTRIBUTOR)
+            .claim(
+                address(this), /* recipient_ */
+                _params.cumulativeAmount,
+                _params.positionType,
+                _params.positionId,
+                _params.cycle,
+                _params.merkleProof,
+                _params.metadata
+            );
 
         uint256 claimed = rewardToken.getBalance(address(this)) - rewardTokenBalanceBefore;
 

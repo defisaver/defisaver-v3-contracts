@@ -4,8 +4,9 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { UniV3Helper } from "./helpers/UniV3Helper.sol";
-import { IUniswapV3NonfungiblePositionManager } from
-    "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+import {
+    IUniswapV3NonfungiblePositionManager
+} from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Decreases liquidity from a position represented by tokenID, and collects tokensOwed from position to recipient
 contract UniWithdrawV3 is ActionBase, UniV3Helper {
@@ -78,26 +79,26 @@ contract UniWithdrawV3 is ActionBase, UniV3Helper {
     /// @return amount0 returns how much tokens were added to tokensOwed on position
     function _uniWithdraw(Params memory _uniData) internal returns (uint256 amount0, uint256 amount1) {
         IUniswapV3NonfungiblePositionManager.DecreaseLiquidityParams memory decreaseLiquidityParams =
-        IUniswapV3NonfungiblePositionManager.DecreaseLiquidityParams({
-            tokenId: _uniData.tokenId,
-            liquidity: _uniData.liquidity,
-            amount0Min: _uniData.amount0Min,
-            amount1Min: _uniData.amount1Min,
-            deadline: _uniData.deadline
-        });
+            IUniswapV3NonfungiblePositionManager.DecreaseLiquidityParams({
+                tokenId: _uniData.tokenId,
+                liquidity: _uniData.liquidity,
+                amount0Min: _uniData.amount0Min,
+                amount1Min: _uniData.amount1Min,
+                deadline: _uniData.deadline
+            });
         (amount0, amount1) = positionManager.decreaseLiquidity(decreaseLiquidityParams);
     }
 
     /// @dev collects from tokensOwed on position, sends to recipient, up to amountMax
     /// @return amount0 amount sent to the recipient
     function _uniCollect(Params memory _uniData) internal returns (uint256 amount0, uint256 amount1) {
-        IUniswapV3NonfungiblePositionManager.CollectParams memory collectParams = IUniswapV3NonfungiblePositionManager
-            .CollectParams({
-            tokenId: _uniData.tokenId,
-            recipient: _uniData.recipient,
-            amount0Max: _uniData.amount0Max,
-            amount1Max: _uniData.amount1Max
-        });
+        IUniswapV3NonfungiblePositionManager.CollectParams memory collectParams =
+            IUniswapV3NonfungiblePositionManager.CollectParams({
+                tokenId: _uniData.tokenId,
+                recipient: _uniData.recipient,
+                amount0Max: _uniData.amount0Max,
+                amount1Max: _uniData.amount1Max
+            });
         (amount0, amount1) = positionManager.collect(collectParams);
     }
 

@@ -122,8 +122,13 @@ contract TestFluidLiquidityBorrow is FluidTestBase {
                 _t1VaultsSelected
                     ? fluidVaultT1BorrowEncode(vaults[i], nftId, borrowAmount, sender, _wrapBorrowedEth)
                     : fluidDexBorrowEncode(
-                        vaults[i], sender, nftId, borrowAmount, FluidDexModel.BorrowVariableData(0, 0, 0), _wrapBorrowedEth
-                    ),
+                            vaults[i],
+                            sender,
+                            nftId,
+                            borrowAmount,
+                            FluidDexModel.BorrowVariableData(0, 0, 0),
+                            _wrapBorrowedEth
+                        ),
                 _isDirect
             );
 

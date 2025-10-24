@@ -52,7 +52,11 @@ library FluidPaybackDexLogic {
     {
         // We always pull maximum amount of token 0 that user allowed and refund any dust amount later
         FluidDexTokensUtils.PulledTokensData memory vars = FluidDexTokensUtils.pullTokensIfNeededWithApproval(
-            _tokens, _data.from, _data.vault, _data.variableData.maxAmountToPull, 0 /* amount1 */
+            _tokens,
+            _data.from,
+            _data.vault,
+            _data.variableData.maxAmountToPull,
+            0 /* amount1 */
         );
 
         uint256 msgValue = vars.isToken0Native ? vars.amount0 : 0;

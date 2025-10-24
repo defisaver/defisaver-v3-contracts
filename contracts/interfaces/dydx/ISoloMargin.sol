@@ -31,7 +31,6 @@ library Actions {
         Liquidate, // liquidate an undercollateralized or expiring account
         Vaporize, // use excess tokens to zero-out a completely negative account
         Call // send arbitrary data to an address
-
     }
 
     enum AccountLayout {
@@ -224,13 +223,11 @@ library Types {
     enum AssetDenomination {
         Wei, // the amount is denominated in wei
         Par // the amount is denominated in par
-
     }
 
     enum AssetReference {
         Delta, // the amount is given as a delta from the current value
         Target // the amount is given as an exact number to end up at
-
     }
 
     struct AssetAmount {
@@ -294,11 +291,7 @@ abstract contract ISoloMargin {
 
     function getIsLocalOperator(address, address) public view virtual returns (bool);
 
-    function getAccountPar(Account.Info memory account, uint256 marketId)
-        public
-        view
-        virtual
-        returns (Types.Par memory);
+    function getAccountPar(Account.Info memory account, uint256 marketId) public view virtual returns (Types.Par memory);
 
     function ownerSetMarginPremium(uint256 marketId, Decimal.D256 memory marginPremium) public virtual;
 
@@ -350,11 +343,7 @@ abstract contract ISoloMargin {
 
     function getLiquidationSpread() public view virtual returns (Decimal.D256 memory);
 
-    function getAccountWei(Account.Info memory account, uint256 marketId)
-        public
-        view
-        virtual
-        returns (Types.Wei memory);
+    function getAccountWei(Account.Info memory account, uint256 marketId) public view virtual returns (Types.Wei memory);
 
     function getMarketTotalPar(uint256 marketId) public view virtual returns (Types.TotalPar memory);
 

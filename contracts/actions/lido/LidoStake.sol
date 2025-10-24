@@ -53,10 +53,7 @@ contract LidoStake is ActionBase, DSMath, LidoHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice pulls weth, transforms it into eth, stakes it with lido, receives stEth and sends it to target address
-    function _lidoStake(Params memory _inputData)
-        internal
-        returns (uint256 stEthReceivedAmount, bytes memory logData)
-    {
+    function _lidoStake(Params memory _inputData) internal returns (uint256 stEthReceivedAmount, bytes memory logData) {
         _inputData.amount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         TokenUtils.withdrawWeth(_inputData.amount);
 

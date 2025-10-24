@@ -177,9 +177,8 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
         uint256 _newInterestRate,
         uint256 _collIndex
     ) internal {
-        uint256 maxUpfrontFee = IHintHelpers(_market.hintHelpers()).predictAdjustInterestRateUpfrontFee(
-            _collIndex, _troveId, _newInterestRate
-        );
+        uint256 maxUpfrontFee = IHintHelpers(_market.hintHelpers())
+            .predictAdjustInterestRateUpfrontFee(_collIndex, _troveId, _newInterestRate);
 
         (uint256 upperHint, uint256 lowerHint) = getInsertPosition(viewContract, _market, _collIndex, _newInterestRate);
 

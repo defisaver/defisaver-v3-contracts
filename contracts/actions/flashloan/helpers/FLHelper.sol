@@ -29,12 +29,13 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
                 RECIPE_EXECUTOR_ADDR, abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
             );
         } else {
-            bool success = ISafe(_wallet).execTransactionFromModule(
-                RECIPE_EXECUTOR_ADDR,
-                address(this).balance,
-                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
-                ISafe.Operation.DelegateCall
-            );
+            bool success = ISafe(_wallet)
+                .execTransactionFromModule(
+                    RECIPE_EXECUTOR_ADDR,
+                    address(this).balance,
+                    abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount),
+                    ISafe.Operation.DelegateCall
+                );
 
             if (!success) {
                 revert SafeExecutionError();

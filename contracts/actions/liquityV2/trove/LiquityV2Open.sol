@@ -99,35 +99,37 @@ contract LiquityV2Open is ActionBase, LiquityV2Helper {
         _approveCollateralAndGasCompensation(_params, collToken, borrowerOperations);
 
         if (_params.interestBatchManager != address(0)) {
-            IBorrowerOperations(borrowerOperations).openTroveAndJoinInterestBatchManager(
-                IBorrowerOperations.OpenTroveAndJoinInterestBatchManagerParams({
-                    owner: address(this),
-                    ownerIndex: _params.ownerIndex,
-                    collAmount: _params.collAmount,
-                    boldAmount: _params.boldAmount,
-                    upperHint: _params.upperHint,
-                    lowerHint: _params.lowerHint,
-                    interestBatchManager: _params.interestBatchManager,
-                    maxUpfrontFee: _params.maxUpfrontFee,
-                    addManager: address(0),
-                    removeManager: address(0),
-                    receiver: address(0)
-                })
-            );
+            IBorrowerOperations(borrowerOperations)
+                .openTroveAndJoinInterestBatchManager(
+                    IBorrowerOperations.OpenTroveAndJoinInterestBatchManagerParams({
+                        owner: address(this),
+                        ownerIndex: _params.ownerIndex,
+                        collAmount: _params.collAmount,
+                        boldAmount: _params.boldAmount,
+                        upperHint: _params.upperHint,
+                        lowerHint: _params.lowerHint,
+                        interestBatchManager: _params.interestBatchManager,
+                        maxUpfrontFee: _params.maxUpfrontFee,
+                        addManager: address(0),
+                        removeManager: address(0),
+                        receiver: address(0)
+                    })
+                );
         } else {
-            IBorrowerOperations(borrowerOperations).openTrove(
-                address(this),
-                _params.ownerIndex,
-                _params.collAmount,
-                _params.boldAmount,
-                _params.upperHint,
-                _params.lowerHint,
-                _params.annualInterestRate,
-                _params.maxUpfrontFee,
-                address(0),
-                address(0),
-                address(0)
-            );
+            IBorrowerOperations(borrowerOperations)
+                .openTrove(
+                    address(this),
+                    _params.ownerIndex,
+                    _params.collAmount,
+                    _params.boldAmount,
+                    _params.upperHint,
+                    _params.lowerHint,
+                    _params.annualInterestRate,
+                    _params.maxUpfrontFee,
+                    address(0),
+                    address(0),
+                    address(0)
+                );
         }
 
         BOLD_ADDR.withdrawTokens(_params.to, _params.boldAmount);

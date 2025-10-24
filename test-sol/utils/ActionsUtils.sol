@@ -114,11 +114,7 @@ contract ActionsUtils {
         returns (bytes memory)
     {
         CompV3Supply.Params memory params = CompV3Supply.Params({
-            market: _market,
-            tokenAddr: _tokenAddr,
-            amount: _amount,
-            from: _from,
-            onBehalf: address(0)
+            market: _market, tokenAddr: _tokenAddr, amount: _amount, from: _from, onBehalf: address(0)
         });
 
         return abi.encode(params);
@@ -130,11 +126,7 @@ contract ActionsUtils {
         returns (bytes memory)
     {
         CompV3Withdraw.Params memory params = CompV3Withdraw.Params({
-            market: _market,
-            to: _to,
-            asset: _tokenAddr,
-            amount: _amount,
-            onBehalf: address(0)
+            market: _market, to: _to, asset: _tokenAddr, amount: _amount, onBehalf: address(0)
         });
 
         return abi.encode(params);
@@ -189,10 +181,7 @@ contract ActionsUtils {
 
     function gasFeeEncode(uint256 _gasUsed, address _feeToken) public pure returns (bytes memory) {
         GasFeeTaker.GasFeeTakerParams memory params = GasFeeTaker.GasFeeTakerParams({
-            gasUsed: _gasUsed,
-            feeToken: _feeToken,
-            availableAmount: 0,
-            dfsFeeDivider: 0
+            gasUsed: _gasUsed, feeToken: _feeToken, availableAmount: 0, dfsFeeDivider: 0
         });
 
         return abi.encode(params);
@@ -333,11 +322,7 @@ contract ActionsUtils {
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             AaveV3Withdraw.Params({
-                assetId: _assetId,
-                useDefaultMarket: _useDefaultMarket,
-                amount: _amount,
-                to: _to,
-                market: _market
+                assetId: _assetId, useDefaultMarket: _useDefaultMarket, amount: _amount, to: _to, market: _market
             })
         );
     }
@@ -397,11 +382,7 @@ contract ActionsUtils {
     {
         params = abi.encode(
             AaveV3ClaimRewards.Params({
-                amount: _amount,
-                to: _to,
-                reward: _reward,
-                assetsLength: uint8(_assets.length),
-                assets: _assets
+                amount: _amount, to: _to, reward: _reward, assetsLength: uint8(_assets.length), assets: _assets
             })
         );
     }
@@ -456,10 +437,7 @@ contract ActionsUtils {
         returns (bytes memory)
     {
         AaveV3RatioCheck.Params memory params = AaveV3RatioCheck.Params({
-            ratioState: AaveV3RatioCheck.RatioState(_state),
-            targetRatio: _targetRatio,
-            market: _market,
-            user: _user
+            ratioState: AaveV3RatioCheck.RatioState(_state), targetRatio: _targetRatio, market: _market, user: _user
         });
 
         return abi.encode(params);
@@ -492,11 +470,7 @@ contract ActionsUtils {
     {
         params = abi.encode(
             EulerV2Supply.Params({
-                vault: _vault,
-                account: _account,
-                from: _from,
-                amount: _amount,
-                enableAsColl: _enableAsColl
+                vault: _vault, account: _account, from: _from, amount: _amount, enableAsColl: _enableAsColl
             })
         );
     }
@@ -524,8 +498,9 @@ contract ActionsUtils {
         pure
         returns (bytes memory params)
     {
-        params =
-            abi.encode(EulerV2Borrow.Params({ vault: _vault, account: _account, receiver: _receiver, amount: _amount }));
+        params = abi.encode(
+            EulerV2Borrow.Params({ vault: _vault, account: _account, receiver: _receiver, amount: _amount })
+        );
     }
 
     function eulerV2CollateralSwitchEncode(address _vault, address _account, bool _enableAsColl)
@@ -593,8 +568,9 @@ contract ActionsUtils {
         pure
         returns (bytes memory params)
     {
-        params =
-            abi.encode(LiquityV2Payback.Params({ market: _market, from: _from, troveId: _troveId, amount: _amount }));
+        params = abi.encode(
+            LiquityV2Payback.Params({ market: _market, from: _from, troveId: _troveId, amount: _amount })
+        );
     }
 
     function liquityV2SupplyEncode(address _market, address _from, uint256 _troveId, uint256 _amount)
@@ -602,8 +578,9 @@ contract ActionsUtils {
         pure
         returns (bytes memory params)
     {
-        params =
-            abi.encode(LiquityV2Supply.Params({ market: _market, from: _from, troveId: _troveId, amount: _amount }));
+        params = abi.encode(
+            LiquityV2Supply.Params({ market: _market, from: _from, troveId: _troveId, amount: _amount })
+        );
     }
 
     function liquityV2WithdrawEncode(address _market, address _to, uint256 _troveId, uint256 _amount)
@@ -647,11 +624,7 @@ contract ActionsUtils {
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             LiquityV2SPWithdraw.Params({
-                market: _market,
-                boldTo: _boldTo,
-                collGainTo: _collGainTo,
-                amount: _amount,
-                doClaim: _doClaim
+                market: _market, boldTo: _boldTo, collGainTo: _collGainTo, amount: _amount, doClaim: _doClaim
             })
         );
     }
@@ -779,11 +752,7 @@ contract ActionsUtils {
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             LiquityV2Borrow.Params({
-                market: _market,
-                to: _to,
-                troveId: _troveId,
-                amount: _amount,
-                maxUpfrontFee: _maxUpfrontFee
+                market: _market, to: _to, troveId: _troveId, amount: _amount, maxUpfrontFee: _maxUpfrontFee
             })
         );
     }
@@ -800,19 +769,16 @@ contract ActionsUtils {
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             LiquityV2RatioCheck.Params({
-                market: _market,
-                troveId: _troveId,
-                ratioState: _ratioState,
-                targetRatio: _targetRatio
+                market: _market, troveId: _troveId, ratioState: _ratioState, targetRatio: _targetRatio
             })
         );
     }
 
-    function sendTokensAndUnwrapEncode(address[] memory _tokens, address[] memory _receivers, uint256[] memory _amounts)
-        public
-        pure
-        returns (bytes memory params)
-    {
+    function sendTokensAndUnwrapEncode(
+        address[] memory _tokens,
+        address[] memory _receivers,
+        uint256[] memory _amounts
+    ) public pure returns (bytes memory params) {
         params = abi.encode(SendTokensAndUnwrap.Params({ tokens: _tokens, receivers: _receivers, amounts: _amounts }));
     }
 
@@ -857,11 +823,7 @@ contract ActionsUtils {
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             FluidVaultT1Withdraw.Params({
-                vault: _vault,
-                nftId: _nftId,
-                amount: _amount,
-                to: _to,
-                wrapWithdrawnEth: _wrapWithdrawnEth
+                vault: _vault, nftId: _nftId, amount: _amount, to: _to, wrapWithdrawnEth: _wrapWithdrawnEth
             })
         );
     }
@@ -875,11 +837,7 @@ contract ActionsUtils {
     ) public pure returns (bytes memory params) {
         params = abi.encode(
             FluidVaultT1Borrow.Params({
-                vault: _vault,
-                nftId: _nftId,
-                amount: _amount,
-                to: _to,
-                wrapBorrowedEth: _wrapBorrowedEth
+                vault: _vault, nftId: _nftId, amount: _amount, to: _to, wrapBorrowedEth: _wrapBorrowedEth
             })
         );
     }
@@ -1087,10 +1045,7 @@ contract ActionsUtils {
     {
         params = abi.encode(
             SkyStakingEngineStake.Params({
-                stakingContract: _stakingContract,
-                index: _index,
-                amount: _amount,
-                from: _from
+                stakingContract: _stakingContract, index: _index, amount: _amount, from: _from
             })
         );
     }
@@ -1101,7 +1056,9 @@ contract ActionsUtils {
         returns (bytes memory params)
     {
         params = abi.encode(
-            SkyStakingEngineUnstake.Params({ stakingContract: _stakingContract, index: _index, amount: _amount, to: _to })
+            SkyStakingEngineUnstake.Params({
+                stakingContract: _stakingContract, index: _index, amount: _amount, to: _to
+            })
         );
     }
 
@@ -1112,10 +1069,7 @@ contract ActionsUtils {
     {
         params = abi.encode(
             SkyStakingEngineClaimRewards.Params({
-                stakingContract: _stakingContract,
-                index: _index,
-                farm: _farm,
-                to: _to
+                stakingContract: _stakingContract, index: _index, farm: _farm, to: _to
             })
         );
     }

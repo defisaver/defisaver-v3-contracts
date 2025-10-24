@@ -64,9 +64,8 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
     function _lsvWithdraw(Params memory _inputData) internal returns (uint256 remainingAmount, bytes memory logData) {
         uint256 amountWithdrawnInETH = getAmountInETHFromLST(_inputData.token, _inputData.amount);
 
-        uint256 realisedProfitInETH = LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS).withdraw(
-            _inputData.protocol, amountWithdrawnInETH, _inputData.isPositionClosing
-        );
+        uint256 realisedProfitInETH = LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS)
+            .withdraw(_inputData.protocol, amountWithdrawnInETH, _inputData.isPositionClosing);
 
         uint256 feeAmountInETH = calculateFee(realisedProfitInETH);
 

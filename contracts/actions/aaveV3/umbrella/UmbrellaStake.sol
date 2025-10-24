@@ -114,7 +114,11 @@ contract UmbrellaStake is ActionBase, AaveV3Helper {
     function _wrapATokensToWaTokens(address _aToken, address _waToken, uint256 _amount) internal returns (uint256) {
         _aToken.approveToken(_waToken, _amount);
 
-        uint256 waTokenAmount = IStaticATokenV2(_waToken).depositATokens(_amount, address(this) /* receiver */ );
+        uint256 waTokenAmount = IStaticATokenV2(_waToken)
+            .depositATokens(
+                _amount,
+                address(this) /* receiver */
+            );
 
         return waTokenAmount;
     }
@@ -130,7 +134,11 @@ contract UmbrellaStake is ActionBase, AaveV3Helper {
     {
         _underlying.approveToken(_waToken, _amount);
 
-        uint256 waTokenAmount = IERC4626(_waToken).deposit(_amount, address(this) /* receiver */ );
+        uint256 waTokenAmount = IERC4626(_waToken)
+            .deposit(
+                _amount,
+                address(this) /* receiver */
+            );
 
         return waTokenAmount;
     }

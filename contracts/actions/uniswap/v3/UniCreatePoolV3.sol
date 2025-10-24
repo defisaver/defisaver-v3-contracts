@@ -5,8 +5,9 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { UniV3Helper } from "./helpers/UniV3Helper.sol";
-import { IUniswapV3NonfungiblePositionManager } from
-    "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+import {
+    IUniswapV3NonfungiblePositionManager
+} from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Action for creating Uniswap V3 Pool and minting a position in it after that
 /// @notice If pool already exists, it will only mint a position in pool
@@ -113,20 +114,20 @@ contract UniCreatePoolV3 is ActionBase, UniV3Helper {
         internal
         returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)
     {
-        IUniswapV3NonfungiblePositionManager.MintParams memory mintParams = IUniswapV3NonfungiblePositionManager
-            .MintParams({
-            token0: _inputData.token0,
-            token1: _inputData.token1,
-            fee: _inputData.fee,
-            tickLower: _inputData.tickLower,
-            tickUpper: _inputData.tickUpper,
-            amount0Desired: _inputData.amount0Desired,
-            amount1Desired: _inputData.amount1Desired,
-            amount0Min: _inputData.amount0Min,
-            amount1Min: _inputData.amount1Min,
-            recipient: _inputData.recipient,
-            deadline: _inputData.deadline
-        });
+        IUniswapV3NonfungiblePositionManager.MintParams memory mintParams =
+            IUniswapV3NonfungiblePositionManager.MintParams({
+                token0: _inputData.token0,
+                token1: _inputData.token1,
+                fee: _inputData.fee,
+                tickLower: _inputData.tickLower,
+                tickUpper: _inputData.tickUpper,
+                amount0Desired: _inputData.amount0Desired,
+                amount1Desired: _inputData.amount1Desired,
+                amount0Min: _inputData.amount0Min,
+                amount1Min: _inputData.amount1Min,
+                recipient: _inputData.recipient,
+                deadline: _inputData.deadline
+            });
         (tokenId, liquidity, amount0, amount1) = positionManager.mint(mintParams);
     }
 
