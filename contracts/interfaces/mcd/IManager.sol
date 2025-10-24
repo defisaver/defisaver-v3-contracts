@@ -3,21 +3,21 @@
 pragma solidity =0.8.24;
 
 abstract contract IManager {
-    function last(address) virtual public returns (uint);
-    function cdpCan(address, uint, address) virtual public view returns (uint);
-    function ilks(uint) virtual public view returns (bytes32);
-    function owns(uint) virtual public view returns (address);
-    function urns(uint) virtual public view returns (address);
-    function vat() virtual public view returns (address);
-    function open(bytes32, address) virtual public returns (uint);
-    function give(uint, address) virtual public;
-    function cdpAllow(uint, address, uint) virtual public;
-    function urnAllow(address, uint) virtual public;
-    function frob(uint, int, int) virtual public;
-    function flux(uint, address, uint) virtual public;
-    function move(uint, address, uint) virtual public;
-    function exit(address, uint, address, uint) virtual public;
-    function quit(uint, address) virtual public;
-    function enter(address, uint) virtual public;
-    function shift(uint, uint) virtual public;
+    function last(address) public virtual returns (uint256);
+    function cdpCan(address, uint256, address) public view virtual returns (uint256);
+    function ilks(uint256) public view virtual returns (bytes32);
+    function owns(uint256) public view virtual returns (address);
+    function urns(uint256) public view virtual returns (address);
+    function vat() public view virtual returns (address);
+    function open(bytes32, address) public virtual returns (uint256);
+    function give(uint256, address) public virtual;
+    function cdpAllow(uint256, address, uint256) public virtual;
+    function urnAllow(address, uint256) public virtual;
+    function frob(uint256, int256, int256) public virtual;
+    function flux(uint256, address, uint256) public virtual;
+    function move(uint256, address, uint256) public virtual;
+    function exit(address, uint256, address, uint256) public virtual;
+    function quit(uint256, address) public virtual;
+    function enter(address, uint256) public virtual;
+    function shift(uint256, uint256) public virtual;
 }

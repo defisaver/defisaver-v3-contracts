@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 const dfs = require('@defisaver/sdk');
 const hre = require('hardhat');
 const { getAddrFromRegistry } = require('./utils');

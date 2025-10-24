@@ -11,7 +11,6 @@ import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 contract LimitOrderSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHelper, SmartWalletUtils {
-
     error InvalidTokenAddresses(address tokenSellAddr, address tokenBuyAddr);
     error InvalidAmount();
 
@@ -21,7 +20,10 @@ contract LimitOrderSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission,
         LIMIT_ORDER_ID = _limitOrderId;
     }
 
-    enum OrderType { TAKE_PROFIT, STOP_LOSS }
+    enum OrderType {
+        TAKE_PROFIT,
+        STOP_LOSS
+    }
 
     struct LimitOrderSub {
         address tokenSellAddr; // erc20 sell token address
@@ -50,10 +52,10 @@ contract LimitOrderSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission,
         uint256 goodUntilTimestamp = block.timestamp + _subData.goodUntilDuration;
 
         bytes memory triggerData = abi.encode(_subData.limitPrice, goodUntilTimestamp, _subData.orderType);
-        limitOrderSub.triggerData =  new bytes[](1);
+        limitOrderSub.triggerData = new bytes[](1);
         limitOrderSub.triggerData[0] = triggerData;
 
-        limitOrderSub.subData =  new bytes32[](3);
+        limitOrderSub.subData = new bytes32[](3);
         limitOrderSub.subData[0] = bytes32(uint256(uint160(_subData.tokenSellAddr)));
         limitOrderSub.subData[1] = bytes32(uint256(uint160(_subData.tokenBuyAddr)));
         limitOrderSub.subData[2] = bytes32(uint256(_subData.amount));

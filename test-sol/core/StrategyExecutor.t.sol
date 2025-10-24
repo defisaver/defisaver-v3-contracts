@@ -77,20 +77,14 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_fail_to_call_execute_when_sender_is_not_authorized_bot() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(StrategyExecutor.BotNotApproved.selector, address(this), 0)
-        );
+        vm.expectRevert(abi.encodeWithSelector(StrategyExecutor.BotNotApproved.selector, address(this), 0));
         StrategyModel.StrategySub memory dummySub;
         cut.executeStrategy(0, 0, new bytes[](0), new bytes[](0), dummySub);
     }
 
     function test_should_fail_to_call_execute_when_sub_data_hash_mismatch() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_dummy_strategy(
-            DummySubData({
-                token: Addresses.WETH_ADDR,
-                amount: 1,
-                maxGasPrice: type(uint256).max
-            })
+            DummySubData({ token: Addresses.WETH_ADDR, amount: 1, maxGasPrice: type(uint256).max })
         );
 
         bytes32 storedSubHash = keccak256(abi.encode(sub));
@@ -100,23 +94,14 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
         _add_bot_caller();
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                StrategyExecutor.SubDatHashMismatch.selector,
-                subId,
-                changedSubHash,
-                storedSubHash
-            )
+            abi.encodeWithSelector(StrategyExecutor.SubDatHashMismatch.selector, subId, changedSubHash, storedSubHash)
         );
         cut.executeStrategy(subId, 0, new bytes[](0), new bytes[](0), sub);
     }
 
     function test_should_fail_to_call_execute_when_sub_is_not_enabled() public {
         (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_dummy_strategy(
-            DummySubData({
-                token: Addresses.WETH_ADDR,
-                amount: 1,
-                maxGasPrice: type(uint256).max
-            })
+            DummySubData({ token: Addresses.WETH_ADDR, amount: 1, maxGasPrice: type(uint256).max })
         );
 
         _disable_sub(subId, sub);
@@ -135,7 +120,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
         wallet = new SmartWallet(alice);
         walletAddr = wallet.createDSProxy();
         sender = wallet.owner();
-        
+
         _callStrategyBaseTest();
     }
 
@@ -150,11 +135,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
     }
 
     function test_should_fail_to_execute_strategy_for_inactive_triggers() public {
-        DummySubData memory subData = DummySubData({
-            token: Addresses.WETH_ADDR,
-            amount: 1,
-            maxGasPrice: 0
-        });
+        DummySubData memory subData = DummySubData({ token: Addresses.WETH_ADDR, amount: 1, maxGasPrice: 0 });
 
         (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_dummy_strategy(subData);
 
@@ -167,34 +148,25 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
         actionsCalldata[0] = pullTokenEncode(subData.token, sender, subData.amount);
 
         bytes[] memory triggerCalldata = new bytes[](1);
-        triggerCalldata[0] = abi.encode(GasPriceTrigger.SubParams({maxGasPrice: subData.maxGasPrice}));
+        triggerCalldata[0] = abi.encode(GasPriceTrigger.SubParams({ maxGasPrice: subData.maxGasPrice }));
 
         uint256 strategyIndex = 0;
 
-        ///@dev Set higher gas price than maxGasPrice. This will make the trigger inactive. 
+        ///@dev Set higher gas price than maxGasPrice. This will make the trigger inactive.
         vm.txGasPrice(1);
 
         /// @dev Inner revert which we can't catch. Generic revert will be bubbled up.
         //vm.expectRevert(abi.encodeWithSelector(RecipeExecutor.TriggerNotActiveError.selector, 0));
         vm.expectRevert();
-        cut.executeStrategy(
-            subId,
-            strategyIndex,
-            triggerCalldata,
-            actionsCalldata,
-            sub
-        );
+        cut.executeStrategy(subId, strategyIndex, triggerCalldata, actionsCalldata, sub);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
     function _callStrategyBaseTest() internal {
-        DummySubData memory subData = DummySubData({
-            token: Addresses.WETH_ADDR,
-            amount: 1 ether,
-            maxGasPrice: type(uint256).max
-        });
+        DummySubData memory subData =
+            DummySubData({ token: Addresses.WETH_ADDR, amount: 1 ether, maxGasPrice: type(uint256).max });
 
         (uint256 subId, StrategyModel.StrategySub memory sub) = _sub_to_dummy_strategy(subData);
 
@@ -207,59 +179,50 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
         actionsCalldata[0] = pullTokenEncode(subData.token, sender, subData.amount);
 
         bytes[] memory triggerCalldata = new bytes[](1);
-        triggerCalldata[0] = abi.encode(GasPriceTrigger.SubParams({maxGasPrice: subData.maxGasPrice}));
+        triggerCalldata[0] = abi.encode(GasPriceTrigger.SubParams({ maxGasPrice: subData.maxGasPrice }));
 
         uint256 strategyIndex = 0;
 
         uint256 senderBalanceBefore = balanceOf(subData.token, sender);
 
-        cut.executeStrategy(
-            subId,
-            strategyIndex,
-            triggerCalldata,
-            actionsCalldata,
-            sub
-        );
+        cut.executeStrategy(subId, strategyIndex, triggerCalldata, actionsCalldata, sub);
 
         uint256 senderBalanceAfter = balanceOf(subData.token, sender);
 
         assertEq(senderBalanceAfter, senderBalanceBefore - subData.amount);
     }
 
-
     function _add_placeholder_strategy() internal returns (uint256) {
-        StrategyBuilder strategy = new StrategyBuilder('dummyStrategy', true);
-        strategy.addSubMapping('&token');
-        strategy.addSubMapping('&amount');
+        StrategyBuilder strategy = new StrategyBuilder("dummyStrategy", true);
+        strategy.addSubMapping("&token");
+        strategy.addSubMapping("&amount");
 
         string[] memory pullTokenParams = new string[](3);
-        pullTokenParams[0] = '&token';
-        pullTokenParams[1] = '&eoa';
-        pullTokenParams[2] = '&amount';
-        strategy.addAction('PullToken', pullTokenParams);
+        pullTokenParams[0] = "&token";
+        pullTokenParams[1] = "&eoa";
+        pullTokenParams[2] = "&amount";
+        strategy.addAction("PullToken", pullTokenParams);
 
-        strategy.addTrigger('GasPriceTrigger');
+        strategy.addTrigger("GasPriceTrigger");
 
         return strategy.createStrategy();
     }
 
-    function _sub_to_dummy_strategy(DummySubData memory _subData) 
-        internal returns (uint256 subId, StrategyModel.StrategySub memory sub) 
+    function _sub_to_dummy_strategy(DummySubData memory _subData)
+        internal
+        returns (uint256 subId, StrategyModel.StrategySub memory sub)
     {
         uint256 strategyId = _add_placeholder_strategy();
 
         bytes[] memory _triggerData = new bytes[](1);
-        _triggerData[0] = abi.encode(GasPriceTrigger.SubParams({maxGasPrice: _subData.maxGasPrice}));
+        _triggerData[0] = abi.encode(GasPriceTrigger.SubParams({ maxGasPrice: _subData.maxGasPrice }));
 
         bytes32[] memory subDataEncoded = new bytes32[](2);
         subDataEncoded[0] = bytes32(uint256(uint160(_subData.token)));
         subDataEncoded[1] = bytes32(uint256(_subData.amount));
 
         sub = StrategyModel.StrategySub({
-            strategyOrBundleId: uint64(strategyId),
-            isBundle: false,
-            triggerData: _triggerData,
-            subData: subDataEncoded
+            strategyOrBundleId: uint64(strategyId), isBundle: false, triggerData: _triggerData, subData: subDataEncoded
         });
 
         subId = subStorage.getSubsCount();

@@ -5,7 +5,6 @@ pragma solidity =0.8.24;
 import { IFluidVault } from "./IFluidVault.sol";
 
 interface IFluidVaultT3 is IFluidVault {
-
     /// @notice Performs operations on a vault position
     /// @dev This function allows users to modify their vault position by adjusting collateral and debt
     /// @param nftId_ The ID of the NFT representing the vault position
@@ -20,11 +19,11 @@ interface IFluidVaultT3 is IFluidVault {
     /// @custom:security Re-entrancy protection is implemented
     /// @custom:security ETH balance is validated before and after operation
     function operate(
-        uint nftId_,
-        int newCol_,
-        int newDebtToken0_,
-        int newDebtToken1_,
-        int debtSharesMinMax_,
+        uint256 nftId_,
+        int256 newCol_,
+        int256 newDebtToken0_,
+        int256 newDebtToken1_,
+        int256 debtSharesMinMax_,
         address to_
     )
         external
@@ -32,9 +31,8 @@ interface IFluidVaultT3 is IFluidVault {
         returns (
             uint256, // nftId_
             int256, // final supply amount. if - then withdraw
-            int256 // final borrow amount. if - then payback
-        );
-
+            int256
+        ); // final borrow amount. if - then payback
 
     /// @notice Performs operations on a vault position with perfect collateral shares
     /// @dev This function allows users to modify their vault position by adjusting collateral and debt
@@ -51,11 +49,11 @@ interface IFluidVaultT3 is IFluidVault {
     ///              2 - token0 borrow or payback amount
     ///              3 - token1 borrow or payback amount
     function operatePerfect(
-        uint nftId_,
-        int newCol_,
-        int perfectDebtShares_,
-        int debtToken0MinMax_,
-        int debtToken1MinMax_,
+        uint256 nftId_,
+        int256 newCol_,
+        int256 perfectDebtShares_,
+        int256 debtToken0MinMax_,
+        int256 debtToken1MinMax_,
         address to_
     )
         external

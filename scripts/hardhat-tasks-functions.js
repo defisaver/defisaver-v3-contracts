@@ -1,6 +1,4 @@
-/* eslint-disable no-param-reassign */
 /* eslint-disable no-undef */ // This is to disable warning for hre undefined in file
-/* eslint-disable import/no-extraneous-dependencies */ // This is to disable warnings for imports
 const fs = require('fs-extra');
 const { exec } = require('child_process');
 const axios = require('axios');
@@ -56,11 +54,16 @@ async function updateContractsAddressesInJsonFiles(deployedAddresses, contracts,
             const cleanContent = fileContent.replace(/,(\s*[\]}])/g, '$1');
             addresses = JSON.parse(cleanContent);
             if (!Array.isArray(addresses)) {
-                console.log(`Warning: ${networkLowercase}.json does not contain an array, resetting file`);
+                console.log(
+                    `Warning: ${networkLowercase}.json does not contain an array, resetting file`,
+                );
                 addresses = [];
             }
         } catch (error) {
-            console.log(`Warning: Error parsing ${networkLowercase}.json, resetting file:`, error.message);
+            console.log(
+                `Warning: Error parsing ${networkLowercase}.json, resetting file:`,
+                error.message,
+            );
             addresses = [];
         }
     }
@@ -68,7 +71,8 @@ async function updateContractsAddressesInJsonFiles(deployedAddresses, contracts,
     console.log('\nUpdating contract entries:');
     Object.entries(deployedAddresses).forEach(([contractName, newAddress]) => {
         try {
-            const contractPath = contractPaths[contractName] || `contracts/flattened/${contractName}.sol`;
+            const contractPath =
+                contractPaths[contractName] || `contracts/flattened/${contractName}.sol`;
             const isAction = contractPath.includes('actions');
             const inRegistry = isAction;
             const changeTime = inRegistry ? '86400' : 0;
@@ -133,9 +137,7 @@ async function updateContractsAddressesInJsonFiles(deployedAddresses, contracts,
 
 async function changeWethAddress(oldNetworkName, newNetworkName) {
     const TokenUtilsContract = 'contracts/utils/TokenUtils.sol';
-    const tokenUtilsContract = (
-        await fs.readFileSync(TokenUtilsContract)
-    ).toString();
+    const tokenUtilsContract = (await fs.readFileSync(TokenUtilsContract)).toString();
 
     fs.writeFileSync(
         TokenUtilsContract,
@@ -180,19 +182,21 @@ function sleep(ms) {
 const getExplorerUrls = (hash) => {
     const network = hre.network.config.name;
     const blockExplorer = hre.network.config.blockExplorer;
-    const networkPrefix = (network === 'mainnet' || network === 'arbitrum') ? '' : `${network}.`;
+    const networkPrefix = network === 'mainnet' || network === 'arbitrum' ? '' : `${network}.`;
 
     if (network === 'base') {
         return {
             txUrl: `https://basescan.org/tx/${hash}`,
             addressUrl: 'https://basescan.org/address/',
         };
-    } if (network === 'linea') {
+    }
+    if (network === 'linea') {
         return {
             txUrl: `https://lineascan.build/tx/${hash}`,
             addressUrl: 'https://lineascan.build/address/',
         };
-    } if (network === 'plasma') {
+    }
+    if (network === 'plasma') {
         return {
             txUrl: `https://${blockExplorer}.to/tx/${hash}`,
             addressUrl: `https://${blockExplorer}.to/address/`,
@@ -218,7 +222,9 @@ async function deployContract(contractNames, args) {
                             AGREE_TO_DEPLOY
     ////////////////////////////////////////////////////////////// */
     const nonceInfo = args.nonce ? ` with nonce: ${args.nonce}` : '';
-    const prompt = await getInput(`You're deploying ${contracts.length} contract(s) on ${network} at gas price of ${gasPriceSelected} gwei${nonceInfo}.\nAre you 100% sure? (Y/n)!\n`);
+    const prompt = await getInput(
+        `You're deploying ${contracts.length} contract(s) on ${network} at gas price of ${gasPriceSelected} gwei${nonceInfo}.\nAre you 100% sure? (Y/n)!\n`,
+    );
     if (prompt.toLowerCase() === 'n') {
         rl.close();
         console.log('You did not agree to continue with deployment');
@@ -229,7 +235,9 @@ async function deployContract(contractNames, args) {
                             CHECK_GAS_PRICE
     ////////////////////////////////////////////////////////////// */
     if (gasPriceSelected > 300) {
-        const gasPriceWarning = await getInput(`You used a gas price of ${gasPriceSelected} gwei. This is quite high! Are you 100% sure? (Y/n)!\n`);
+        const gasPriceWarning = await getInput(
+            `You used a gas price of ${gasPriceSelected} gwei. This is quite high! Are you 100% sure? (Y/n)!\n`,
+        );
         if (gasPriceWarning.toLowerCase() === 'n') {
             rl.close();
             console.log('You did not agree to continue with deployment');
@@ -264,27 +272,32 @@ async function deployContract(contractNames, args) {
     /* //////////////////////////////////////////////////////////////
                         CHECK_NETWORK_ADDRESSES
     ////////////////////////////////////////////////////////////// */
-    await Promise.all(contracts.map(async (contractName) => {
-        const contractPath = `contracts/flattened/${contractName}.sol`;
-        const contractString = await fs.readFileSync(`${__dirname}/../${contractPath}`).toString('utf-8');
+    await Promise.all(
+        contracts.map(async (contractName) => {
+            const contractPath = `contracts/flattened/${contractName}.sol`;
+            const contractString = await fs
+                .readFileSync(`${__dirname}/../${contractPath}`)
+                .toString('utf-8');
 
-        // Check for correct network addresses
-        const helperRegex = /contract (.*)Addresses/g;
-        const addressesUsed = contractString.match(helperRegex);
-        const networkFormatted = network === 'optimistic' ? 'optimism' : network;
+            // Check for correct network addresses
+            const helperRegex = /contract (.*)Addresses/g;
+            const addressesUsed = contractString.match(helperRegex);
+            const networkFormatted = network === 'optimistic' ? 'optimism' : network;
 
-        if (addressesUsed) {
-            const invalidAddresses = addressesUsed.filter((addressContract) => (
-                !addressContract.toLowerCase().includes(networkFormatted.toLowerCase())
-            ));
-            if (invalidAddresses.length > 0) {
-                console.log(`ERROR! Check if addresses are matching in ${contractName}!`);
-                console.log('Found:', invalidAddresses[0]);
-                console.log('Expected network:', network);
-                process.exit(1);
+            if (addressesUsed) {
+                const invalidAddresses = addressesUsed.filter(
+                    (addressContract) =>
+                        !addressContract.toLowerCase().includes(networkFormatted.toLowerCase()),
+                );
+                if (invalidAddresses.length > 0) {
+                    console.log(`ERROR! Check if addresses are matching in ${contractName}!`);
+                    console.log('Found:', invalidAddresses[0]);
+                    console.log('Expected network:', network);
+                    process.exit(1);
+                }
             }
-        }
-    }));
+        }),
+    );
 
     /* //////////////////////////////////////////////////////////////
                             SET_UP_DEPLOYER
@@ -406,14 +419,17 @@ async function verifyContract(contractAddress, contractName) {
     let solVersion;
     // https://etherscan.io/solcversions see supported sol versions
     switch (hardhatSettings.solidity.compilers[0].version) {
-    case ('=0.8.24'):
-        solVersion = 'v0.8.24+commit.e11b9ed9';
-        break;
-    default:
-        solVersion = 'v0.8.24+commit.e11b9ed9';
+        case '=0.8.24':
+            solVersion = 'v0.8.24+commit.e11b9ed9';
+            break;
+        default:
+            solVersion = 'v0.8.24+commit.e11b9ed9';
     }
     params.append('compilerversion', solVersion);
-    params.append('optimizationUsed', hardhatSettings.solidity.compilers[0].settings.optimizer.enabled ? 1 : 0);
+    params.append(
+        'optimizationUsed',
+        hardhatSettings.solidity.compilers[0].settings.optimizer.enabled ? 1 : 0,
+    );
     params.append('runs', hardhatSettings.solidity.compilers[0].settings.optimizer.runs);
     if (network === 'linea') {
         params.append('EVMVersion', 'london');
@@ -438,7 +454,9 @@ async function verifyContract(contractAddress, contractName) {
     if (network === 'base') {
         demo = 'https://basescan.org/sourcecode-demo.html';
     }
-    console.log(`Check how verification is going at ${demo} with API key ${apiKey} and receipt GUID ${tx.data.result}`);
+    console.log(
+        `Check how verification is going at ${demo} with API key ${apiKey} and receipt GUID ${tx.data.result}`,
+    );
 }
 
 async function flatten(filePath) {
@@ -461,9 +479,7 @@ async function flatten(filePath) {
     }
     // Flatten file, delete unneeded licenses and pragmas
     await execShellCommand(`npx hardhat flatten ${filePath} > contracts/flattened/${fileName}`);
-    let data = (
-        await fs.readFileSync(`contracts/flattened/${fileName}`)
-    ).toString();
+    let data = (await fs.readFileSync(`contracts/flattened/${fileName}`)).toString();
     data = data.replace(pragmaRegex, '');
     data = data.replace(topLvlCommentsRegex, '');
     const flags = { flag: 'a+' };
@@ -499,10 +515,13 @@ async function encryptPrivateKey() {
         hideEchoBack: true, // The typed text on screen is hidden by `*` (default).
         mask: '',
     });
-    const secretKey = readlineSync.question('Enter secret key for decrypting private key for deployment address!\n', {
-        hideEchoBack: true, // The typed text on screen is hidden by `*` (default).
-        mask: '',
-    });
+    const secretKey = readlineSync.question(
+        'Enter secret key for decrypting private key for deployment address!\n',
+        {
+            hideEchoBack: true, // The typed text on screen is hidden by `*` (default).
+            mask: '',
+        },
+    );
     encryptedKey = await encrypt(privateKey, secretKey);
     console.log('Encrypted key to put in .env file:');
     console.log(encryptedKey);
@@ -517,4 +536,5 @@ module.exports = {
     findPathByContractName,
     encryptPrivateKey,
     execShellCommand,
+    changeWethAddress,
 };

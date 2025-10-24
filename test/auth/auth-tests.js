@@ -173,7 +173,9 @@ const dsProxyPermissionTest = async () => {
                 [ownerAcc2.address],
             );
 
-            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, { gasLimit: 1500000 });
+            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, {
+                gasLimit: 1500000,
+            });
 
             const hasPermission = await getProxyAuth(proxy.address, ownerAcc2.address);
             expect(hasPermission).to.be.equal(true);
@@ -186,7 +188,9 @@ const dsProxyPermissionTest = async () => {
                 [ownerAcc2.address],
             );
 
-            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, { gasLimit: 1500000 });
+            await proxy['execute(address,bytes)'](dsProxyPermission.address, functionData, {
+                gasLimit: 1500000,
+            });
 
             const hasPermission = await getProxyAuth(proxy.address, ownerAcc2.address);
             expect(hasPermission).to.be.equal(false);
@@ -215,8 +219,12 @@ const safeModulePermissionTest = async () => {
             safeInstance = await hre.ethers.getContractAt('ISafe', safeAddr);
         });
 
-        beforeEach(async () => { snapshotId = await takeSnapshot(); });
-        afterEach(async () => { await revertToSnapshot(snapshotId); });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
 
         const enableSafeModule = async (moduleAddr) => {
             const enableModuleFuncData = modulePermissionContract.interface.encodeFunctionData(

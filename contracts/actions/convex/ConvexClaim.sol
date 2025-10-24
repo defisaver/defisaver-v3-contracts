@@ -30,7 +30,7 @@ contract ConvexClaim is ConvexHelper, ActionBase {
         params.from = _parseParamAddr(params.from, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.rewardContract = _parseParamAddr(params.rewardContract, _paramMapping[2], _subData, _returnValues);
-        
+
         (uint256 crvEarned, bytes memory logData) = _claim(params);
         emit ActionEvent("ConvexClaim", logData);
         return bytes32(crvEarned);

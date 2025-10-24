@@ -20,10 +20,13 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sma
         BOOST_BUNDLE_ID = _boostBundleId;
     }
 
-    enum RatioState { OVER, UNDER }
+    enum RatioState {
+        OVER,
+        UNDER
+    }
 
     /// @dev 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
 
     error WrongSubParams(uint128 minRatio, uint128 maxRatio);
     error RangeTooClose(uint128 ratio, uint128 targetRatio);
@@ -112,9 +115,7 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sma
     }
 
     /// @notice Deactivates Repay sub and if exists a Boost sub
-    function deactivateSub(
-        bytes calldata _encodedInput
-    ) public {
+    function deactivateSub(bytes calldata _encodedInput) public {
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).deactivateSub(subId1);
@@ -123,7 +124,6 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sma
             SubStorage(SUB_STORAGE_ADDR).deactivateSub(subId2);
         }
     }
-
 
     ///////////////////////////////// HELPER FUNCTIONS /////////////////////////////////
 
@@ -147,11 +147,12 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sma
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(address(this), DEFAULT_AAVE_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
-        repaySub.triggerData =  new bytes[](1);
+        bytes memory triggerData =
+            abi.encode(address(this), DEFAULT_AAVE_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
+        repaySub.triggerData = new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
-        repaySub.subData =  new bytes32[](4);
+        repaySub.subData = new bytes32[](4);
         repaySub.subData[0] = bytes32(uint256(_user.targetRatioRepay)); // targetRatio
         repaySub.subData[1] = bytes32(uint256(1)); // ratioState = repay
         repaySub.subData[2] = bytes32(uint256(1)); // useDefaultMarket = true
@@ -164,11 +165,12 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sma
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(address(this), DEFAULT_AAVE_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData =
+            abi.encode(address(this), DEFAULT_AAVE_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
-        boostSub.subData =  new bytes32[](5);
+        boostSub.subData = new bytes32[](5);
         boostSub.subData[0] = bytes32(uint256(_user.targetRatioBoost)); // targetRatio
         boostSub.subData[1] = bytes32(uint256(0)); // ratioState = boost
         boostSub.subData[2] = bytes32(uint256(1)); // useDefaultMarket = true

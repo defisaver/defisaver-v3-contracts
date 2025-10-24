@@ -14,11 +14,11 @@ contract ProxyAuth is WalletAuth {
     /// @param _proxyAddr Address of the users DSProxy
     /// @param _contractAddr Address of the contract which to execute
     /// @param _callData Call data of the function to be called
-    function callExecute(
-        address _proxyAddr,
-        address _contractAddr,
-        bytes memory _callData
-    ) public payable onlyExecutor {
-        IDSProxy(_proxyAddr).execute{value: msg.value}(_contractAddr, _callData);
+    function callExecute(address _proxyAddr, address _contractAddr, bytes memory _callData)
+        public
+        payable
+        onlyExecutor
+    {
+        IDSProxy(_proxyAddr).execute{ value: msg.value }(_contractAddr, _callData);
     }
 }

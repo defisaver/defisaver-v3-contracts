@@ -30,18 +30,8 @@ contract CBRedeem is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.bLUSDAmount = _parseParamUint(
-            params.bLUSDAmount,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
-        params.minLUSDFromSP = _parseParamUint(
-            params.minLUSDFromSP,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
+        params.bLUSDAmount = _parseParamUint(params.bLUSDAmount, _paramMapping[0], _subData, _returnValues);
+        params.minLUSDFromSP = _parseParamUint(params.minLUSDFromSP, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
         (uint256 lusdAmount, bytes memory logData) = _cbRedeem(params);
@@ -68,10 +58,8 @@ contract CBRedeem is ActionBase, LiquityHelper {
 
         _params.bLUSDAmount = BLUSD_ADDRESS.pullTokensIfNeeded(_params.from, _params.bLUSDAmount);
 
-        (uint256 lusdFromBAMMSPVault, uint256 yTokensFromCurveVault) = CBManager.redeem(
-            _params.bLUSDAmount,
-            _params.minLUSDFromSP
-        );
+        (uint256 lusdFromBAMMSPVault, uint256 yTokensFromCurveVault) =
+            CBManager.redeem(_params.bLUSDAmount, _params.minLUSDFromSP);
 
         // Send LUSD to the redeemer
         if (lusdFromBAMMSPVault > 0) {
@@ -84,11 +72,7 @@ contract CBRedeem is ActionBase, LiquityHelper {
         }
 
         bytes memory logData = abi.encode(
-            lusdFromBAMMSPVault,
-            yTokensFromCurveVault,
-            _params.bLUSDAmount,
-            _params.minLUSDFromSP,
-            _params.to
+            lusdFromBAMMSPVault, yTokensFromCurveVault, _params.bLUSDAmount, _params.minLUSDFromSP, _params.to
         );
         return (lusdFromBAMMSPVault, logData);
     }

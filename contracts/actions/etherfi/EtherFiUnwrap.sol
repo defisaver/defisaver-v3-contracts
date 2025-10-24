@@ -55,7 +55,10 @@ contract EtherFiUnwrap is ActionBase, EtherFiHelper {
     /*//////////////////////////////////////////////////////////////
                             ACTION LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _etherFiUnwrap(Params memory _inputData) internal returns (uint256 eEthReceivedAmount, bytes memory logData){
+    function _etherFiUnwrap(Params memory _inputData)
+        internal
+        returns (uint256 eEthReceivedAmount, bytes memory logData)
+    {
         _inputData.amount = WEETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
 
         eEthReceivedAmount = IWeEth(WEETH_ADDR).unwrap(_inputData.amount);

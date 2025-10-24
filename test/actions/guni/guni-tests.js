@@ -18,8 +18,8 @@ const guniDepositTest = async () => {
     describe('GUNI deposit', function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -75,8 +75,8 @@ const guniWithdrawTest = async () => {
     describe('GUNI Withdraw', function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -139,7 +139,7 @@ const guniWithdrawTest = async () => {
     });
 };
 const guniDeployContracts = async () => {
-    const balance = await balanceOf(ETH_ADDR, ((await hre.ethers.getSigners())[0]).address);
+    const balance = await balanceOf(ETH_ADDR, (await hre.ethers.getSigners())[0].address);
     console.log(balance.toString());
     await redeploy('GUniDeposit');
     await redeploy('GUniWithdraw');

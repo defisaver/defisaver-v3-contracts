@@ -16,7 +16,6 @@ import { SmartWallet } from "../utils/SmartWallet.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -27,7 +26,7 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     SmartWallet wallet;
     address safeWalletAddr;
-    
+
     address strategyExecutorAddr;
     address safeModulePermissionAddr;
     address recipeExecutorAddr;
@@ -92,7 +91,7 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
         actionsCalldata[0] = sumInputsEncode(1, 2);
 
         bytes4[] memory ids = new bytes4[](1);
-        ids[0] = bytes4(keccak256("SumInputs")); 
+        ids[0] = bytes4(keccak256("SumInputs"));
 
         uint8[][] memory paramsMap = new uint8[][](1);
         paramsMap[0] = new uint8[](2);
@@ -123,7 +122,7 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
         actionsCalldata[0] = flActionEncode(Addresses.WETH_ADDR, 1000, FLSource.BALANCER);
 
         bytes4[] memory ids = new bytes4[](1);
-        ids[0] = bytes4(keccak256("FLAction")); 
+        ids[0] = bytes4(keccak256("FLAction"));
 
         StrategyModel.Recipe memory recipe = StrategyModel.Recipe({
             name: "TestRecipe",

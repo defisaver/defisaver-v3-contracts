@@ -14,8 +14,14 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     using TokenUtils for address;
     using DFSLib for uint256;
 
-    enum CollActionType { SUPPLY, WITHDRAW }
-    enum DebtActionType { PAYBACK, BORROW }
+    enum CollActionType {
+        SUPPLY,
+        WITHDRAW
+    }
+    enum DebtActionType {
+        PAYBACK,
+        BORROW
+    }
 
     /// @param vault Address of the Fluid Vault T1
     /// @param nftId ID of the NFT representing the position
@@ -77,18 +83,12 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
         params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[3], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[5], _subData, _returnValues);
-        params.sendWrappedEth = _parseParamUint(
-            params.sendWrappedEth ? 1 : 0,
-            _paramMapping[6],
-            _subData,
-            _returnValues
-        ) == 1;
-        params.collAction = CollActionType(
-            _parseParamUint(uint8(params.collAction), _paramMapping[7], _subData, _returnValues)
-        );
-        params.debtAction = DebtActionType(
-            _parseParamUint(uint8(params.debtAction), _paramMapping[8], _subData, _returnValues)
-        );
+        params.sendWrappedEth =
+            _parseParamUint(params.sendWrappedEth ? 1 : 0, _paramMapping[6], _subData, _returnValues) == 1;
+        params.collAction =
+            CollActionType(_parseParamUint(uint8(params.collAction), _paramMapping[7], _subData, _returnValues));
+        params.debtAction =
+            DebtActionType(_parseParamUint(uint8(params.debtAction), _paramMapping[8], _subData, _returnValues));
 
         (uint256 debtAmount, bytes memory logData) = _adjust(params);
         emit ActionEvent("FluidVaultT1Adjust", logData);
@@ -115,17 +115,11 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
 
         AdjustLocalVars memory vars;
 
-        vars.sendWithdrawnEthAsWrapped =
-            _params.sendWrappedEth && 
-            _params.collAction == CollActionType.WITHDRAW &&
-            constants.supplyToken == TokenUtils.ETH_ADDR &&
-            _params.collAmount > 0;
+        vars.sendWithdrawnEthAsWrapped = _params.sendWrappedEth && _params.collAction == CollActionType.WITHDRAW
+            && constants.supplyToken == TokenUtils.ETH_ADDR && _params.collAmount > 0;
 
-        vars.sendBorrowedEthAsWrapped =
-            _params.sendWrappedEth && 
-            _params.debtAction == DebtActionType.BORROW &&
-            constants.borrowToken == TokenUtils.ETH_ADDR &&
-            _params.debtAmount > 0;
+        vars.sendBorrowedEthAsWrapped = _params.sendWrappedEth && _params.debtAction == DebtActionType.BORROW
+            && constants.borrowToken == TokenUtils.ETH_ADDR && _params.debtAmount > 0;
 
         if (_params.collAction == CollActionType.SUPPLY) {
             (vars.supplyTokenAmount, vars.msgValue) = _handleSupply(_params, constants.supplyToken);
@@ -137,27 +131,21 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
 
         MaxPaybackSnapshot memory paybackSnapshot;
         if (_params.debtAction == DebtActionType.PAYBACK) {
-            (paybackSnapshot, vars.msgValue, vars.borrowTokenAmount) = _handlePayback(
-                _params,
-                constants.borrowToken,
-                vars.msgValue
-            );
+            (paybackSnapshot, vars.msgValue, vars.borrowTokenAmount) =
+                _handlePayback(_params, constants.borrowToken, vars.msgValue);
         }
 
         if (_params.debtAction == DebtActionType.BORROW) {
             vars.borrowTokenAmount = _handleBorrow(_params);
         }
 
-        vars.sendTokensTo = (vars.sendWithdrawnEthAsWrapped || vars.sendBorrowedEthAsWrapped) 
-            ? address(this)
-            : _params.to;
+        vars.sendTokensTo =
+            (vars.sendWithdrawnEthAsWrapped || vars.sendBorrowedEthAsWrapped) ? address(this) : _params.to;
 
-        ( , int256 exactCollAmt, int256 exactDebtAmt) = IFluidVaultT1(_params.vault).operate{ value: vars.msgValue }(
-            _params.nftId,
-            vars.supplyTokenAmount,
-            vars.borrowTokenAmount,
-            vars.sendTokensTo
-        );
+        (, int256 exactCollAmt, int256 exactDebtAmt) = IFluidVaultT1(_params.vault)
+        .operate{
+            value: vars.msgValue
+        }(_params.nftId, vars.supplyTokenAmount, vars.borrowTokenAmount, vars.sendTokensTo);
 
         if (vars.sendWithdrawnEthAsWrapped) {
             TokenUtils.depositWeth(uint256(-exactCollAmt));
@@ -181,9 +169,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             _handleMaxPaybackRefund(_params, constants.borrowToken, paybackSnapshot);
         }
 
-        uint256 retVal = _params.debtAction == DebtActionType.BORROW
-            ? uint256(exactDebtAmt)
-            : uint256(-exactDebtAmt);
+        uint256 retVal = _params.debtAction == DebtActionType.BORROW ? uint256(exactDebtAmt) : uint256(-exactDebtAmt);
 
         return (retVal, abi.encode(_params));
     }
@@ -197,10 +183,10 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     /// @param _supplyToken Address of the supply token
     /// @return supplyTokenAmount Amount of supply token to be supplied to Fluid T1 Vault
     /// @return msgValue Amount of ETH to be sent to the vault (if supply token is ETH)
-    function _handleSupply(
-        Params memory _params,
-        address _supplyToken
-    ) internal returns (int256 supplyTokenAmount, uint256 msgValue) {
+    function _handleSupply(Params memory _params, address _supplyToken)
+        internal
+        returns (int256 supplyTokenAmount, uint256 msgValue)
+    {
         if (_params.collAmount == 0) return (0, 0);
 
         if (_supplyToken == TokenUtils.ETH_ADDR) {
@@ -211,7 +197,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             _params.collAmount = _supplyToken.pullTokensIfNeeded(_params.from, _params.collAmount);
             _supplyToken.approveToken(_params.vault, _params.collAmount);
         }
-        
+
         supplyTokenAmount = _params.collAmount.signed256();
     }
 
@@ -221,9 +207,7 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     function _handleWithdraw(Params memory _params) internal pure returns (int256 supplyTokenAmount) {
         if (_params.collAmount == 0) return 0;
 
-        supplyTokenAmount = _params.collAmount == type(uint256).max
-            ? type(int256).min
-            : -_params.collAmount.signed256();
+        supplyTokenAmount = _params.collAmount == type(uint256).max ? type(int256).min : -_params.collAmount.signed256();
     }
 
     /// @dev Helper function to handle borrow action
@@ -240,35 +224,26 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     /// @param _borrowToken Address of the borrow token
     /// @param _currentMsgValue Calculated msg value from previous actions. Updated only if payback is in ETH
     /// @return snapshot MaxPaybackSnapshot - helper struct that holds information about max payback so we can later refund any remainder
-    /// @return msgValue Amount of ETH to be sent to the vault, if payback token is ETH, otherwise it will return _currentMsgValue 
+    /// @return msgValue Amount of ETH to be sent to the vault, if payback token is ETH, otherwise it will return _currentMsgValue
     /// @return borrowTokenAmount Amount of borrow token to be paid back to Fluid T1 Vault
-    function _handlePayback(
-        Params memory _params,
-        address _borrowToken,
-        uint256 _currentMsgValue
-    ) 
+    function _handlePayback(Params memory _params, address _borrowToken, uint256 _currentMsgValue)
         internal
-        returns (
-            MaxPaybackSnapshot memory snapshot,
-            uint256 msgValue,
-            int256 borrowTokenAmount
-        )
+        returns (MaxPaybackSnapshot memory snapshot, uint256 msgValue, int256 borrowTokenAmount)
     {
         // By default, return the current msg value. This will only be changed if payback is in ETH.
         msgValue = _currentMsgValue;
 
         if (_params.debtAmount == 0) return (snapshot, msgValue, 0);
 
-        (IFluidVaultResolver.UserPosition memory userPosition, ) = 
+        (IFluidVaultResolver.UserPosition memory userPosition,) =
             IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_params.nftId);
 
         if (_params.debtAmount > userPosition.borrow) {
             snapshot.maxPayback = true;
             // See comments in FluidVaultT1Payback.sol
-            _params.debtAmount = userPosition.borrow * 10001 / 10000 + 5;
-            snapshot.borrowTokenBalanceBefore = _borrowToken == TokenUtils.ETH_ADDR
-                ? address(this).balance
-                : _borrowToken.getBalance(address(this));
+            _params.debtAmount = userPosition.borrow * 10_001 / 10_000 + 5;
+            snapshot.borrowTokenBalanceBefore =
+                _borrowToken == TokenUtils.ETH_ADDR ? address(this).balance : _borrowToken.getBalance(address(this));
         }
 
         if (_borrowToken == TokenUtils.ETH_ADDR) {
@@ -287,14 +262,11 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     /// @param _params Params struct passed to the action
     /// @param _borrowToken Address of the borrow token
     /// @param _snapshot MaxPaybackSnapshot - helper struct that holds information about max payback
-    function _handleMaxPaybackRefund(
-        Params memory _params,
-        address _borrowToken,
-        MaxPaybackSnapshot memory _snapshot
-    ) internal {
-        uint256 borrowTokenBalanceAfter = _borrowToken == TokenUtils.ETH_ADDR
-            ? address(this).balance
-            : _borrowToken.getBalance(address(this));
+    function _handleMaxPaybackRefund(Params memory _params, address _borrowToken, MaxPaybackSnapshot memory _snapshot)
+        internal
+    {
+        uint256 borrowTokenBalanceAfter =
+            _borrowToken == TokenUtils.ETH_ADDR ? address(this).balance : _borrowToken.getBalance(address(this));
 
         // Sanity check: if we didn't perform a max payback directly from the wallet,
         // the number of borrowed tokens should not decrease.

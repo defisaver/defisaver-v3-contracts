@@ -11,7 +11,6 @@ import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2Exe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2Payback is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -82,18 +81,17 @@ contract TestLiquityV2Payback is LiquityV2ExecuteActions {
     }
 
     function _baseTest(bool _isDirect, bool _isMaxUint256Payback, address _interestBatchManager) public {
-        uint256 collAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
+        uint256 collAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
         uint256 paybackAmountInUSD = 5000;
 
         for (uint256 i = 0; i < markets.length; i++) {
-
             if (_interestBatchManager != address(0)) {
                 vm.startPrank(_interestBatchManager);
                 registerBatchManager(markets[i]);
                 vm.stopPrank();
             }
-            
+
             uint256 troveId = executeLiquityOpenTrove(
                 markets[i],
                 _interestBatchManager,
@@ -107,13 +105,7 @@ contract TestLiquityV2Payback is LiquityV2ExecuteActions {
                 viewContract
             );
 
-            _payback(
-                markets[i],
-                troveId,
-                _isDirect,
-                _isMaxUint256Payback,
-                paybackAmountInUSD
-            );
+            _payback(markets[i], troveId, _isDirect, _isMaxUint256Payback, paybackAmountInUSD);
         }
     }
 
@@ -136,10 +128,7 @@ contract TestLiquityV2Payback is LiquityV2ExecuteActions {
 
         bytes memory executeActionCallData = executeActionCalldata(
             liquityV2PaybackEncode(
-                address(_market),
-                sender,
-                _troveId,
-                _isMaxUint256Payback ? type(uint256).max : paybackAmount
+                address(_market), sender, _troveId, _isMaxUint256Payback ? type(uint256).max : paybackAmount
             ),
             _isDirect
         );

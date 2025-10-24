@@ -166,14 +166,14 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C",
+        "address": "0x5B0B7E38C2a8e46CfAe13c360BC5927570BeEe94",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C"]
     },
     {
         "name": "AaveV3ViewSmall",
@@ -492,9 +492,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x1155BF929D78F1DeF999ACedE1867f79A7C66066"
-        ]
+        "history": ["0x1155BF929D78F1DeF999ACedE1867f79A7C66066"]
     },
     {
         "name": "KyberAggregatorWrapper",
@@ -644,6 +642,39 @@
         "address": "0x04ce4b2a9F524d976a8eD8a49B9313C5a2C3ccAD",
         "id": "0x1de2c822",
         "path": "contracts/actions/fluid/dex/FluidDexPayback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "PendleTokenRedeem",
+        "address": "0xB4c5f33bb5791D0174Df1879b809Bf57eE540B62",
+        "id": "0x3de77432",
+        "path": "contracts/actions/pendle/PendleTokenRedeem.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "PendleWrapper",
+        "address": "0x862E533198C9656B75bB6A5dDF0953F7ED5E8507",
+        "id": "0x42cdd62e",
+        "path": "contracts/exchangeV3/offchainWrappersV3/PendleWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "DFSSellNoFee",
+        "address": "0x45314C4265a378427f204483b3eFb89981129085",
+        "id": "0xebf16d4a",
+        "path": "contracts/actions/exchange/DFSSellNoFee.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",

@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 contract BaseFLAddresses {
-
     address internal constant WETH_ADDR = 0x4200000000000000000000000000000000000006;
     address internal constant DAI_ADDR = 0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb;
 

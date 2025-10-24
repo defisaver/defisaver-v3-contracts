@@ -5,7 +5,6 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
-import { ISubscriptions } from "../../interfaces/ISubscriptions.sol";
 import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
@@ -15,7 +14,10 @@ contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID;
 
-    enum RatioState { OVER, UNDER }
+    enum RatioState {
+        OVER,
+        UNDER
+    }
 
     constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
         REPAY_BUNDLE_ID = _repayBundleId;
@@ -23,7 +25,7 @@ contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     }
 
     /// @dev 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
 
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
@@ -107,17 +109,13 @@ contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     }
 
     /// @notice Deactivates Repay sub and if exists a Boost sub
-    function deactivateSub(
-        uint32 _subId1,
-        uint32 _subId2
-    ) public {
+    function deactivateSub(uint32 _subId1, uint32 _subId2) public {
         SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId1);
 
         if (_subId2 != 0) {
             SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId2);
         }
     }
-
 
     ///////////////////////////////// HELPER FUNCTIONS /////////////////////////////////
 
@@ -136,13 +134,17 @@ contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized comp sub
-    function formatRepaySub(CompSubData memory _subData, address _wallet) public view returns (StrategySub memory repaySub) {
+    function formatRepaySub(CompSubData memory _subData, address _wallet)
+        public
+        view
+        returns (StrategySub memory repaySub)
+    {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
         bytes memory triggerData = abi.encode(_wallet, uint256(_subData.minRatio), uint8(RatioState.UNDER));
-        repaySub.triggerData =  new bytes[](1);
+        repaySub.triggerData = new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
         repaySub.subData = new bytes32[](2);
@@ -151,16 +153,20 @@ contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized comp sub
-    function formatBoostSub(CompSubData memory _subData, address _wallet) public view returns (StrategySub memory boostSub) {
+    function formatBoostSub(CompSubData memory _subData, address _wallet)
+        public
+        view
+        returns (StrategySub memory boostSub)
+    {
         boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
         bytes memory triggerData = abi.encode(_wallet, uint256(_subData.maxRatio), uint8(RatioState.OVER));
-        boostSub.triggerData =  new bytes[](1);
+        boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
-        boostSub.subData =  new bytes32[](3);
+        boostSub.subData = new bytes32[](3);
         boostSub.subData[0] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
         boostSub.subData[1] = bytes32(uint256(0)); // ratioState = boost
         boostSub.subData[2] = bytes32(uint256(1)); // enableAsColl = true

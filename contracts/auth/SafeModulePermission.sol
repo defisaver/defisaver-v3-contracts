@@ -6,7 +6,6 @@ import { ISafe } from "../interfaces/safe/ISafe.sol";
 
 /// @title SafeModulePermission contract which works with Safe modules to give execute permission
 contract SafeModulePermission {
-
     address public constant SENTINEL_MODULES = address(0x1);
 
     error ModuleNotFoundError(address moduleAddr);

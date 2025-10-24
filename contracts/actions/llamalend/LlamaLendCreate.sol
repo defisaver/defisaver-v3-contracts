@@ -68,14 +68,12 @@ contract LlamaLendCreate is ActionBase, LlamaLendHelper {
         _params.collateralAmount = collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);
         collateralAsset.approveToken(_params.controllerAddress, _params.collateralAmount);
 
-        ILlamaLendController(_params.controllerAddress).create_loan(_params.collateralAmount, _params.debtAmount, _params.nBands);
+        ILlamaLendController(_params.controllerAddress)
+            .create_loan(_params.collateralAmount, _params.debtAmount, _params.nBands);
 
         debtAsset.withdrawTokens(_params.to, _params.debtAmount);
 
-        return (
-            _params.debtAmount,
-            abi.encode(_params)
-        );
+        return (_params.debtAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

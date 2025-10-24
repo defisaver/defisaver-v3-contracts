@@ -8,9 +8,9 @@ pragma solidity =0.8.24;
  * @notice Defines the basic interface for a scaled-balance token.
  */
 interface ISparkScaledBalanceToken {
-  /**
-   * @notice Returns the scaled total supply of the scaled balance token. Represents sum(debt/index)
-   * @return The scaled total supply
-   */
-  function scaledTotalSupply() external view returns (uint256);
+    /**
+     * @notice Returns the scaled total supply of the scaled balance token. Represents sum(debt/index)
+     * @return The scaled total supply
+     */
+    function scaledTotalSupply() external view returns (uint256);
 }

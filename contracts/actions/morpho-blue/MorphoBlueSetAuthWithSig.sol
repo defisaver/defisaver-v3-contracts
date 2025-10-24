@@ -8,7 +8,6 @@ import { Authorization, Signature } from "../../interfaces/morpho-blue/IMorphoBl
 
 /// @title Allow or disallow an address to manage MorphoBlue position on user's wallet
 contract MorphoBlueSetAuthWithSig is ActionBase, MorphoBlueHelper {
-    
     /// @param authorization Authorization object
     /// @param signature Signature object
     struct Params {
@@ -17,12 +16,13 @@ contract MorphoBlueSetAuthWithSig is ActionBase, MorphoBlueHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeAction(
-        bytes memory _callData,
-        bytes32[] memory,
-        uint8[] memory,
-        bytes32[] memory
-    ) public payable virtual override returns (bytes32) {
+    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
+        public
+        payable
+        virtual
+        override
+        returns (bytes32)
+    {
         Params memory params = parseInputs(_callData);
         _setAuth(params);
 
@@ -35,7 +35,7 @@ contract MorphoBlueSetAuthWithSig is ActionBase, MorphoBlueHelper {
         Params memory params = parseInputs(_callData);
 
         _setAuth(params);
-        
+
         logger.logActionDirectEvent("MorphoBlueSetAuthWithSig", abi.encode(params));
     }
 

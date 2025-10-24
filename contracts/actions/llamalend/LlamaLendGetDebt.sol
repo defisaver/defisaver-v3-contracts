@@ -6,7 +6,6 @@ import { ILlamaLendController } from "../../interfaces/llamalend/ILlamaLendContr
 
 /// @title Action that returns users llamalend debt on a given market
 contract LlamaLendGetDebt is ActionBase {
-
     /// @param controllerAddress Address of the llamalend market controller
     /// @param debtor Address which owns the llamalend position
     struct Params {
@@ -31,7 +30,7 @@ contract LlamaLendGetDebt is ActionBase {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public override payable {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {

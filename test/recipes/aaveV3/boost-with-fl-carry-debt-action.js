@@ -42,7 +42,9 @@ const aaveV3BoostWithNewFL = async () => {
         let flAaveV3CarryDebtAddress;
         let aaveV3View;
 
-        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => {
+            wallet = isWalletNameDsProxy(w) ? proxy : safe;
+        };
 
         const createAaveV3Position = async (collAmount, debtAmount) => {
             const collAddress = WETH_ADDRESS;
@@ -77,65 +79,71 @@ const aaveV3BoostWithNewFL = async () => {
         };
 
         const actions = {
-            flAaveV3Action: (boostAmount) => new dfs.actions.flashloan.FLAction(
-                new dfs.actions.flashloan.AaveV3FlashLoanAction(
-                    [LUSD_ADDR],
-                    [boostAmount.toString()],
-                    [AAVE_NO_DEBT_MODE],
-                    nullAddress,
+            flAaveV3Action: (boostAmount) =>
+                new dfs.actions.flashloan.FLAction(
+                    new dfs.actions.flashloan.AaveV3FlashLoanAction(
+                        [LUSD_ADDR],
+                        [boostAmount.toString()],
+                        [AAVE_NO_DEBT_MODE],
+                        nullAddress,
+                    ),
                 ),
-            ),
-            flAaveV3CarryDebtAction: (boostAmount) => new dfs.actions.flashloan
-                .AaveV3FlashLoanCarryDebtAction(
+            flAaveV3CarryDebtAction: (boostAmount) =>
+                new dfs.actions.flashloan.AaveV3FlashLoanCarryDebtAction(
                     [LUSD_ADDR],
                     [boostAmount.toString()],
                     [VARIABLE_RATE],
                     wallet.address,
                 ),
-            sellAction: (boostAmount) => new dfs.actions.basic.SellAction(
-                formatExchangeObj(
-                    LUSD_ADDR, // debt address
-                    WETH_ADDRESS, // collateral
-                    boostAmount.toString(), //  boostAmount
-                    UNISWAP_WRAPPER,
+            sellAction: (boostAmount) =>
+                new dfs.actions.basic.SellAction(
+                    formatExchangeObj(
+                        LUSD_ADDR, // debt address
+                        WETH_ADDRESS, // collateral
+                        boostAmount.toString(), //  boostAmount
+                        UNISWAP_WRAPPER,
+                    ),
+                    wallet.address, // from
+                    wallet.address, // to
                 ),
-                wallet.address, // from
-                wallet.address, // to
-            ),
-            feeTakingAction: (gasCost) => new dfs.actions.basic.GasFeeAction(
-                gasCost,
-                WETH_ADDRESS,
-                '$2', // piped from sell action
-            ),
-            aaveV3SupplyAction: () => new dfs.actions.aaveV3.AaveV3SupplyAction(
-                true, // use default market
-                addrs[network].AAVE_MARKET,
-                '$3', // pipe from fee taking action
-                wallet.address,
-                WETH_ADDRESS,
-                WETH_ASSET_ID_IN_AAVE_V3_MARKET,
-                true, // use as collateral
-                false, // use on behalf of
-                nullAddress, // on behalf of
-            ),
-            aaveV3BorrowAction: () => new dfs.actions.aaveV3.AaveV3BorrowAction(
-                true,
-                addrs[network].AAVE_MARKET,
-                '$1', // fl amount
-                flActionAddress,
-                VARIABLE_RATE,
-                LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
-                false,
-                nullAddress,
-            ),
-            delegateCreditOnAaveV3Action: (amount) => new dfs.actions.aaveV3.AaveV3DelegateCredit(
-                true,
-                addrs[network].AAVE_MARKET,
-                amount,
-                VARIABLE_RATE,
-                LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
-                flAaveV3CarryDebtAddress,
-            ),
+            feeTakingAction: (gasCost) =>
+                new dfs.actions.basic.GasFeeAction(
+                    gasCost,
+                    WETH_ADDRESS,
+                    '$2', // piped from sell action
+                ),
+            aaveV3SupplyAction: () =>
+                new dfs.actions.aaveV3.AaveV3SupplyAction(
+                    true, // use default market
+                    addrs[network].AAVE_MARKET,
+                    '$3', // pipe from fee taking action
+                    wallet.address,
+                    WETH_ADDRESS,
+                    WETH_ASSET_ID_IN_AAVE_V3_MARKET,
+                    true, // use as collateral
+                    false, // use on behalf of
+                    nullAddress, // on behalf of
+                ),
+            aaveV3BorrowAction: () =>
+                new dfs.actions.aaveV3.AaveV3BorrowAction(
+                    true,
+                    addrs[network].AAVE_MARKET,
+                    '$1', // fl amount
+                    flActionAddress,
+                    VARIABLE_RATE,
+                    LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
+                    false,
+                    nullAddress,
+                ),
+            delegateCreditOnAaveV3Action: (amount) =>
+                new dfs.actions.aaveV3.AaveV3DelegateCredit(
+                    true,
+                    addrs[network].AAVE_MARKET,
+                    amount,
+                    VARIABLE_RATE,
+                    LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
+                    flAaveV3CarryDebtAddress,
+                ),
         };
 
         before(async () => {
@@ -176,7 +184,8 @@ const aaveV3BoostWithNewFL = async () => {
                 await createAaveV3Position(collAmount, debtAmount);
 
                 const loanDataBeforeBoost = await aaveV3View.getLoanData(
-                    addrs[network].AAVE_MARKET, wallet.address,
+                    addrs[network].AAVE_MARKET,
+                    wallet.address,
                 );
 
                 const boostAmount = debtAmount.div(20);
@@ -193,7 +202,8 @@ const aaveV3BoostWithNewFL = async () => {
                 await executeAction('RecipeExecutor', functionData[1], wallet);
 
                 const loanDataAfterBoost = await aaveV3View.getLoanData(
-                    addrs[network].AAVE_MARKET, wallet.address,
+                    addrs[network].AAVE_MARKET,
+                    wallet.address,
                 );
                 console.log(`Ratio before: ${loanDataBeforeBoost.ratio / 1e16}`);
                 console.log(`Ratio After: ${loanDataAfterBoost.ratio / 1e16}`);
@@ -208,7 +218,8 @@ const aaveV3BoostWithNewFL = async () => {
                 await createAaveV3Position(collAmount, debtAmount);
 
                 const loanDataBeforeBoost = await aaveV3View.getLoanData(
-                    addrs[network].AAVE_MARKET, wallet.address,
+                    addrs[network].AAVE_MARKET,
+                    wallet.address,
                 );
 
                 const boostAmount = debtAmount.div(20);
@@ -225,7 +236,8 @@ const aaveV3BoostWithNewFL = async () => {
                 await executeAction('RecipeExecutor', functionData[1], wallet);
 
                 const loanDataAfterBoost = await aaveV3View.getLoanData(
-                    addrs[network].AAVE_MARKET, wallet.address,
+                    addrs[network].AAVE_MARKET,
+                    wallet.address,
                 );
                 console.log(`Ratio before: ${loanDataBeforeBoost.ratio / 1e16}`);
                 console.log(`Ratio After: ${loanDataAfterBoost.ratio / 1e16}`);
@@ -250,7 +262,8 @@ const aaveV3BoostWithNewFL = async () => {
                 ]);
 
                 const functionData = regularBoostRecipe.encodeForDsProxyCall();
-                await expect(executeAction('RecipeExecutor', functionData[1], wallet)).to.be.reverted;
+                await expect(executeAction('RecipeExecutor', functionData[1], wallet)).to.be
+                    .reverted;
             }).timeout(300000);
 
             it(`... should revert on carry debt fl when using slightly bigger credit delegation allowance and using ${WALLETS[i]} as wallet`, async () => {
@@ -271,7 +284,8 @@ const aaveV3BoostWithNewFL = async () => {
                 ]);
 
                 const functionData = regularBoostRecipe.encodeForDsProxyCall();
-                await expect(executeAction('RecipeExecutor', functionData[1], wallet)).to.be.reverted;
+                await expect(executeAction('RecipeExecutor', functionData[1], wallet)).to.be
+                    .reverted;
             }).timeout(300000);
         }
     });

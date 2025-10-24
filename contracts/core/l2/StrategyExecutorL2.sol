@@ -14,10 +14,9 @@ import { WalletType } from "../../utils/DFSTypes.sol";
 
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, SmartWalletUtils {
-
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    bytes4 constant EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR = 
+    bytes4 constant EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR =
         bytes4(keccak256("executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))"));
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
@@ -84,16 +83,14 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, SmartWallet
         if (walletType == WalletType.DSPROXY) authAddr = PROXY_AUTH_ADDR;
         if (walletType == WalletType.DSAPROXY) authAddr = DSA_AUTH_ADDR;
 
-        IAuth(authAddr).callExecute{value: msg.value}(
+        IAuth(authAddr)
+        .callExecute{
+            value: msg.value
+        }(
             _userWallet,
             registry.getAddr(RECIPE_EXECUTOR_ID),
             abi.encodeWithSelector(
-                EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR,
-                _subId,
-                _actionsCallData,
-                _triggerCallData,
-                _strategyIndex,
-                _sub
+                EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR, _subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub
             )
         );
     }

@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -20,9 +19,7 @@ const {
     addBalancerFlLiquidity,
 } = require('../../utils/utils');
 
-const {
-    addBotCaller,
-} = require('../utils/utils-strategies');
+const { addBotCaller } = require('../utils/utils-strategies');
 const {
     COMP_V3_AUTOMATION_TEST_PAIRS,
     openCompV3ProxyPosition,
@@ -91,7 +88,10 @@ const runBoostTests = () => {
                 );
             } else {
                 /// @dev On mainnet, all bundles are already deployed, including EOA bundles, so here we just test the live state
-                subProxyContract = await hre.ethers.getContractAt('CompV3SubProxy', addrs.mainnet.COMP_V3_SUB_PROXY_ADDR);
+                subProxyContract = await hre.ethers.getContractAt(
+                    'CompV3SubProxy',
+                    addrs.mainnet.COMP_V3_SUB_PROXY_ADDR,
+                );
             }
         });
         beforeEach(async () => {
@@ -101,12 +101,7 @@ const runBoostTests = () => {
             await revertToSnapshot(snapshotId);
         });
 
-        const baseTest = async (
-            collAsset,
-            debtAsset,
-            isEOA,
-            isFLStrategy,
-        ) => {
+        const baseTest = async (collAsset, debtAsset, isEOA, isFLStrategy) => {
             const positionOwner = isEOA ? senderAcc.address : proxy.address;
             if (isEOA) {
                 await addCompV3Manager(senderAcc.address, proxy.address, debtAsset.symbol);
@@ -201,8 +196,14 @@ const runBoostTests = () => {
 
         for (let i = 0; i < COMP_V3_AUTOMATION_TEST_PAIRS[chainIds[network]].length; ++i) {
             const pair = COMP_V3_AUTOMATION_TEST_PAIRS[chainIds[network]][i];
-            const collAsset = getAssetInfo(pair.collSymbol === 'ETH' ? 'WETH' : pair.collSymbol, chainIds[network]);
-            const debtAsset = getAssetInfo(pair.debtSymbol === 'ETH' ? 'WETH' : pair.debtSymbol, chainIds[network]);
+            const collAsset = getAssetInfo(
+                pair.collSymbol === 'ETH' ? 'WETH' : pair.collSymbol,
+                chainIds[network],
+            );
+            const debtAsset = getAssetInfo(
+                pair.debtSymbol === 'ETH' ? 'WETH' : pair.debtSymbol,
+                chainIds[network],
+            );
             it(`... should execute compV3 boost strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = false;
                 const isFLStrategy = false;

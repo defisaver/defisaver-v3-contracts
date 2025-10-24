@@ -5,10 +5,12 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { UniV3Helper } from "./helpers/UniV3Helper.sol";
-import { IUniswapV3NonfungiblePositionManager } from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+import {
+    IUniswapV3NonfungiblePositionManager
+} from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Mints NFT that represents a position in uni v3
-contract UniMintV3 is ActionBase, UniV3Helper{
+contract UniMintV3 is ActionBase, UniV3Helper {
     using TokenUtils for address;
 
     /// @param token0 Address of the first token
@@ -61,18 +63,18 @@ contract UniMintV3 is ActionBase, UniV3Helper{
         (, bytes memory logData) = _uniCreatePosition(uniData);
         logger.logActionDirectEvent("UniMintV3", logData);
     }
-    
+
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
-    
+
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _uniCreatePosition(Params memory _uniData) internal returns (uint256 tokenId, bytes memory logData){
+    function _uniCreatePosition(Params memory _uniData) internal returns (uint256 tokenId, bytes memory logData) {
         // fetch tokens from address;
-        uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);        
-        uint amount1Pulled = _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
+        uint256 amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
+        uint256 amount1Pulled = _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
 
         // approve positionManager so it can pull tokens
         _uniData.token0.approveToken(address(positionManager), amount0Pulled);
@@ -89,7 +91,7 @@ contract UniMintV3 is ActionBase, UniV3Helper{
         //send leftovers
         _uniData.token0.withdrawTokens(_uniData.from, _uniData.amount0Desired - amount0);
         _uniData.token1.withdrawTokens(_uniData.from, _uniData.amount1Desired - amount1);
-        
+
         logData = abi.encode(_uniData, tokenId, liquidity, amount0, amount1);
     }
 
@@ -97,37 +99,26 @@ contract UniMintV3 is ActionBase, UniV3Helper{
     /// @return tokenId of new NFT, how much liquidity it now has and token amounts
     function _uniMint(Params memory _uniData)
         internal
-        returns(
-            uint256 tokenId,
-            uint128 liquidity,
-            uint256 amount0,
-            uint256 amount1
-        )
-    {       
-        IUniswapV3NonfungiblePositionManager.MintParams memory mintParams = 
-                IUniswapV3NonfungiblePositionManager.MintParams({
-                    token0: _uniData.token0,
-                    token1: _uniData.token1,
-                    fee: _uniData.fee,
-                    tickLower: _uniData.tickLower,
-                    tickUpper: _uniData.tickUpper,
-                    amount0Desired: _uniData.amount0Desired,
-                    amount1Desired: _uniData.amount1Desired,
-                    amount0Min: _uniData.amount0Min,
-                    amount1Min: _uniData.amount1Min,
-                    recipient: _uniData.recipient,
-                    deadline: _uniData.deadline
-                });
+        returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)
+    {
+        IUniswapV3NonfungiblePositionManager.MintParams memory mintParams =
+            IUniswapV3NonfungiblePositionManager.MintParams({
+                token0: _uniData.token0,
+                token1: _uniData.token1,
+                fee: _uniData.fee,
+                tickLower: _uniData.tickLower,
+                tickUpper: _uniData.tickUpper,
+                amount0Desired: _uniData.amount0Desired,
+                amount1Desired: _uniData.amount1Desired,
+                amount0Min: _uniData.amount0Min,
+                amount1Min: _uniData.amount1Min,
+                recipient: _uniData.recipient,
+                deadline: _uniData.deadline
+            });
         (tokenId, liquidity, amount0, amount1) = positionManager.mint(mintParams);
     }
 
-    function parseInputs(bytes memory _callData)
-       public
-        pure
-        returns (
-            Params memory uniData
-        )
-    {   
+    function parseInputs(bytes memory _callData) public pure returns (Params memory uniData) {
         uniData = abi.decode(_callData, (Params));
     }
 }

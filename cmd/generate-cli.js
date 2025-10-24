@@ -1,28 +1,10 @@
-/* eslint-disable max-len */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-param-reassign */
-/* eslint-disable import/no-extraneous-dependencies */
 require('dotenv-safe').config();
 
 const { program } = require('commander');
 const { execSync } = require('child_process');
 const ts = require('typescript');
-const {
-    readFileSync,
-    writeFileSync,
-    existsSync,
-    statSync,
-    mkdirSync,
-    readdirSync,
-} = require('fs');
-const {
-    join,
-    basename,
-    relative,
-    sep,
-    dirname,
-} = require('path');
+const { readFileSync, writeFileSync, existsSync, statSync, mkdirSync, readdirSync } = require('fs');
+const { join, basename, relative, sep, dirname } = require('path');
 const { getNameId } = require('../test/utils/utils');
 
 /**
@@ -82,8 +64,10 @@ const genSdkSignatures = (repoPath) => {
         if (!className) return null;
         // For actions, check if it ends with 'Action'
         // For triggers, include all classes in the triggers directory
-        if ((type === 'actions' && !className.endsWith('Action'))
-            || (type === 'triggers' && className.endsWith('Action'))) {
+        if (
+            (type === 'actions' && !className.endsWith('Action')) ||
+            (type === 'triggers' && className.endsWith('Action'))
+        ) {
             return null;
         }
         const params = getSdkConstructorParams(sourceFile);
@@ -157,7 +141,12 @@ const parseStructAndEnumDefinitions = (content) => {
         // Start of enum definition
         if (line.startsWith('enum ')) {
             const enumName = line.match(/enum\s+(\w+)/)[1];
-            const values = line.split('{')[1].split('}')[0].trim().split(',').map((v) => v.trim());
+            const values = line
+                .split('{')[1]
+                .split('}')[0]
+                .trim()
+                .split(',')
+                .map((v) => v.trim());
             currentEnum = {
                 name: enumName,
                 values,
@@ -192,7 +181,10 @@ const parseStructAndEnumDefinitions = (content) => {
         if (currentStruct && (line.endsWith(';') || line.endsWith('// p'))) {
             const isPiped = line.includes('// p');
             // Remove comments and semicolon
-            const cleanLine = line.replace(/\/\/.*$/, '').replace(';', '').trim();
+            const cleanLine = line
+                .replace(/\/\/.*$/, '')
+                .replace(';', '')
+                .trim();
             const [type, name] = cleanLine.split(/\s+/);
 
             currentStruct.fields.push({
@@ -333,11 +325,13 @@ const generateSolidityActionContent = (templateContent, actionName) => {
     const structDefinitions = Object.entries(structs)
         .map(([name, struct]) => {
             const structComments = struct.comments.map((c) => `    /// ${c}`).join('\n');
-            const fields = struct.fields.map((field) => {
-                const comments = field.comments.map((c) => `        /// ${c}`).join('\n');
-                const fieldDef = `        ${field.type} ${field.name};`;
-                return comments ? `${comments}\n${fieldDef}` : fieldDef;
-            }).join('\n');
+            const fields = struct.fields
+                .map((field) => {
+                    const comments = field.comments.map((c) => `        /// ${c}`).join('\n');
+                    const fieldDef = `        ${field.type} ${field.name};`;
+                    return comments ? `${comments}\n${fieldDef}` : fieldDef;
+                })
+                .join('\n');
 
             return `${structComments ? `\n${structComments}` : ''}
     struct ${name} {
@@ -346,7 +340,9 @@ ${fields}
         })
         .join('\n');
 
-    const parameterParsing = pipedFields.map((field, i) => generateParseCode(field.path, field.type, field.isEnum, i)).join('\n');
+    const parameterParsing = pipedFields
+        .map((field, i) => generateParseCode(field.path, field.type, field.isEnum, i))
+        .join('\n');
 
     const template = `// SPDX-License-Identifier: MIT
 
@@ -486,13 +482,15 @@ const generateProtocolSolidityActionsFiles = (templatePath, outputPath) => {
         const solidityCode = generateSolidityActionContent(actionContent, action.name);
 
         // Add TokenUtils import and usage, plus Helper import
-        const modifiedCode = solidityCode.replace(
-            'import { ActionBase } from "./ActionBase.sol";\n',
-            `import { ActionBase } from "./ActionBase.sol";\nimport { TokenUtils } from "../../utils/TokenUtils.sol";\nimport { ${protocolName}Helper } from "./helpers/${protocolName}Helper.sol";\n`,
-        ).replace(
-            `contract ${action.name} is ActionBase {`,
-            `contract ${action.name} is ActionBase, ${protocolName}Helper {\n    using TokenUtils for address;`,
-        );
+        const modifiedCode = solidityCode
+            .replace(
+                'import { ActionBase } from "./ActionBase.sol";\n',
+                `import { ActionBase } from "./ActionBase.sol";\nimport { TokenUtils } from "../../utils/TokenUtils.sol";\nimport { ${protocolName}Helper } from "./helpers/${protocolName}Helper.sol";\n`,
+            )
+            .replace(
+                `contract ${action.name} is ActionBase {`,
+                `contract ${action.name} is ActionBase, ${protocolName}Helper {\n    using TokenUtils for address;`,
+            );
 
         const outputFile = join(protocolDir, `${action.name}.sol`);
         writeFileSync(outputFile, modifiedCode);
@@ -539,12 +537,14 @@ const generateSdkActionContent = (templateContent, actionName) => {
         const struct = structs[field.type];
         if (!struct) return `'${field.type}'`;
 
-        return `[${struct.fields.map((f) => {
-            if (structs[f.type]) {
-                return generateNestedTypeArray(f, structs);
-            }
-            return `'${f.type}'`;
-        }).join(', ')}]`;
+        return `[${struct.fields
+            .map((f) => {
+                if (structs[f.type]) {
+                    return generateNestedTypeArray(f, structs);
+                }
+                return `'${f.type}'`;
+            })
+            .join(', ')}]`;
     }
 
     function solToTsType(solType, enums, structs) {
@@ -643,9 +643,7 @@ const generateSdkActionContent = (templateContent, actionName) => {
     }
 
     function generateArgsArray(struct) {
-        return struct.fields
-            .map((field) => field.name)
-            .join(', ');
+        return struct.fields.map((field) => field.name).join(', ');
     }
 
     function findPipedFieldsInStruct(field, structs, prefix = '', index = '') {
@@ -669,9 +667,7 @@ const generateSdkActionContent = (templateContent, actionName) => {
             return field.isPiped ? [`this.args[${i}]`] : [];
         });
 
-        return mappableArgs
-            .map((arg) => `      ${arg},`)
-            .join('\n');
+        return mappableArgs.map((arg) => `      ${arg},`).join('\n');
     }
 
     const { structs, enums } = parseStructAndEnumDefinitions(templateContent);
@@ -690,10 +686,12 @@ const generateSdkActionContent = (templateContent, actionName) => {
         return field.isPiped;
     });
 
-    const mappableArgsSection = hasPipedFields ? `
+    const mappableArgsSection = hasPipedFields
+        ? `
     this.mappableArgs = [
 ${generateMappableArgs(structs.Params, structs)}
-    ];` : '';
+    ];`
+        : '';
 
     const template = `import { Action } from '../../Action';
 import { getAddr } from '../../addresses';
@@ -784,9 +782,7 @@ const generateProtocolSdkActionsFiles = (templatePath, outputPath) => {
     });
 
     // Generate index.ts
-    const indexContent = actionNames
-        .map((name) => `export * from './${name}Action';`)
-        .join('\n');
+    const indexContent = actionNames.map((name) => `export * from './${name}Action';`).join('\n');
     writeFileSync(join(protocolDir, 'index.ts'), indexContent);
     console.log(`Generated index.ts in ${protocolDir}`);
 };
@@ -815,7 +811,10 @@ const findSdkActionSignatureFromTemplateFile = (actionName) => {
         // Convert action name to camelCase for matching
         const camelCaseName = actionName[0].toLowerCase() + actionName.slice(1);
         // Look for the signature block
-        const regex = new RegExp(`const ${camelCaseName}Action = new dfs\\.actions\\.[\\w.]+\\([\\s\\S]+?\\);`, 'g');
+        const regex = new RegExp(
+            `const ${camelCaseName}Action = new dfs\\.actions\\.[\\w.]+\\([\\s\\S]+?\\);`,
+            'g',
+        );
         const match = signatures.match(regex);
         if (match && match[0]) {
             return match[0];
@@ -870,7 +869,9 @@ const extractNatSpec = (content) => {
 const findContractFile = (contractName) => {
     try {
         // Use find command to locate the contract file
-        const result = execSync(`find contracts -type f -name "${contractName}.sol"`, { encoding: 'utf8' });
+        const result = execSync(`find contracts -type f -name "${contractName}.sol"`, {
+            encoding: 'utf8',
+        });
         const files = result.trim().split('\n');
         if (!files[0]) {
             throw new Error(`Contract ${contractName} not found`);
@@ -954,7 +955,8 @@ const generateActionMdFile = (contractName, outputPath = 'gen/md/actions') => {
 
         // Get the struct content and format it
         const structContent = structMatch[1].trim();
-        const params = structContent.split('\n')
+        const params = structContent
+            .split('\n')
             .map((line) => line.trim())
             .filter((line) => line.endsWith(';'));
 
@@ -982,7 +984,9 @@ const generateActionMdFile = (contractName, outputPath = 'gen/md/actions') => {
             lines.push(`logger.logActionDirectEvent("${logDirectMatch[1]}", logData);`);
         }
         if (lines.length) {
-            lines.push(`bytes memory logData = abi.encode(${contractName.endsWith('Check') ? 'currRatio' : 'params'});`);
+            lines.push(
+                `bytes memory logData = abi.encode(${contractName.endsWith('Check') ? 'currRatio' : 'params'});`,
+            );
             return `\`\`\`solidity
 ${lines.join('\n')}
 \`\`\``;
@@ -1125,7 +1129,10 @@ const findSdkTriggerSignaturesFromTemplateFile = (triggerName) => {
         // Convert trigger name to camelCase for matching
         const camelCaseName = triggerName[0].toLowerCase() + triggerName.slice(1);
         // Look for the signature block
-        const regex = new RegExp(`const ${camelCaseName} = new dfs\\.triggers\\.[\\w.]+\\([\\s\\S]+?\\);`, 'g');
+        const regex = new RegExp(
+            `const ${camelCaseName} = new dfs\\.triggers\\.[\\w.]+\\([\\s\\S]+?\\);`,
+            'g',
+        );
         const match = signatures.match(regex);
         if (match && match[0]) {
             return match[0];
@@ -1194,7 +1201,10 @@ const generateTriggerMdFile = (triggerName, outputPath = 'gen/md/triggers') => {
 
     const findStructWithComments = (sourceContent, structName) => {
         // Look for all comments and the struct definition
-        const pattern = new RegExp(`(?:(?:///[^\\n]*\\n)+\\s*)*struct\\s+${structName}\\s*{[^}]+}`, 'gs');
+        const pattern = new RegExp(
+            `(?:(?:///[^\\n]*\\n)+\\s*)*struct\\s+${structName}\\s*{[^}]+}`,
+            'gs',
+        );
         const match = sourceContent.match(pattern);
         if (!match) return null;
 
@@ -1208,21 +1218,19 @@ const generateTriggerMdFile = (triggerName, outputPath = 'gen/md/triggers') => {
             .map((line) => line.trim());
 
         const structPart = fullMatch.substring(structStart);
-        const structLines = structPart.split('\n')
-            .map((line) => {
-                line = line.trim();
-                if (line.match(/^\w+\s+\w+;/)) {
-                    return `    ${line}`;
-                }
-                return line;
-            });
+        const structLines = structPart.split('\n').map((line) => {
+            line = line.trim();
+            if (line.match(/^\w+\s+\w+;/)) {
+                return `    ${line}`;
+            }
+            return line;
+        });
 
-        return [...comments, ...structLines]
-            .filter((line) => line.length > 0)
-            .join('\n');
+        return [...comments, ...structLines].filter((line) => line.length > 0).join('\n');
     };
 
-    const subParamsContent = findStructWithComments(content, 'SubParams') || 'No SubParams struct found';
+    const subParamsContent =
+        findStructWithComments(content, 'SubParams') || 'No SubParams struct found';
     const callParamsContent = findStructWithComments(content, 'CallParams') || 'None';
 
     if (!existsSync(outputPath)) {
@@ -1327,10 +1335,17 @@ const generateMultipleTriggersMdFiles = (outputPath = 'gen/md/triggers') => {
     program
         .command('genActionSol <contractName>')
         .description('Generate a Solidity action file from a template')
-        .option('-t, --template <path>', 'Template file path (defaults to templates/solSdk/action/template.sol)')
-        .option('-o, --output <path>', 'Output path for the generated Solidity file (defaults to gen/sol/<actionName>.sol)')
+        .option(
+            '-t, --template <path>',
+            'Template file path (defaults to templates/solSdk/action/template.sol)',
+        )
+        .option(
+            '-o, --output <path>',
+            'Output path for the generated Solidity file (defaults to gen/sol/<actionName>.sol)',
+        )
         .action((contractName, options) => {
-            const templatePath = options.template || join(process.cwd(), 'templates/solSdk/action/template.sol');
+            const templatePath =
+                options.template || join(process.cwd(), 'templates/solSdk/action/template.sol');
             const outputPath = options.output || join(process.cwd(), `gen/sol/${contractName}.sol`);
             generateSingleSolidityActionFile(templatePath, contractName, outputPath);
             process.exit(0);
@@ -1339,10 +1354,17 @@ const generateMultipleTriggersMdFiles = (outputPath = 'gen/md/triggers') => {
     program
         .command('genProtocolSol')
         .description('Generate multiple Solidity action files from a protocol template')
-        .option('-t, --template <path>', 'Template file path (defaults to templates/solSdk/protocol/template.sol)')
-        .option('-o, --output <path>', 'Output directory for the generated files (defaults to gen/sol/)')
+        .option(
+            '-t, --template <path>',
+            'Template file path (defaults to templates/solSdk/protocol/template.sol)',
+        )
+        .option(
+            '-o, --output <path>',
+            'Output directory for the generated files (defaults to gen/sol/)',
+        )
         .action((options) => {
-            const templatePath = options.template || join(process.cwd(), 'templates/solSdk/protocol/template.sol');
+            const templatePath =
+                options.template || join(process.cwd(), 'templates/solSdk/protocol/template.sol');
             const outputPath = options.output || join(process.cwd(), 'gen/sol/');
             generateProtocolSolidityActionsFiles(templatePath, outputPath);
             process.exit(0);
@@ -1351,11 +1373,19 @@ const generateMultipleTriggersMdFiles = (outputPath = 'gen/md/triggers') => {
     program
         .command('genActionSdk <contractName>')
         .description('Generate a TypeScript SDK action file from a template')
-        .option('-t, --template <path>', 'Template file path (defaults to templates/solSdk/action/template.sol)')
-        .option('-o, --output <path>', 'Output path for the generated TypeScript file (defaults to gen/sdk/<actionName>Action.ts)')
+        .option(
+            '-t, --template <path>',
+            'Template file path (defaults to templates/solSdk/action/template.sol)',
+        )
+        .option(
+            '-o, --output <path>',
+            'Output path for the generated TypeScript file (defaults to gen/sdk/<actionName>Action.ts)',
+        )
         .action((contractName, options) => {
-            const templatePath = options.template || join(process.cwd(), 'templates/solSdk/action/template.sol');
-            const outputPath = options.output || join(process.cwd(), `gen/sdk/${contractName}Action.ts`);
+            const templatePath =
+                options.template || join(process.cwd(), 'templates/solSdk/action/template.sol');
+            const outputPath =
+                options.output || join(process.cwd(), `gen/sdk/${contractName}Action.ts`);
             generateSingleSdkActionFile(templatePath, contractName, outputPath);
             process.exit(0);
         });
@@ -1363,10 +1393,17 @@ const generateMultipleTriggersMdFiles = (outputPath = 'gen/md/triggers') => {
     program
         .command('genProtocolSdk')
         .description('Generate TypeScript SDK action files from a protocol template')
-        .option('-t, --template <path>', 'Template file path (defaults to templates/solSdk/protocol/template.sol)')
-        .option('-o, --output <path>', 'Output directory for the generated files (defaults to gen/sdk)')
+        .option(
+            '-t, --template <path>',
+            'Template file path (defaults to templates/solSdk/protocol/template.sol)',
+        )
+        .option(
+            '-o, --output <path>',
+            'Output directory for the generated files (defaults to gen/sdk)',
+        )
         .action((options) => {
-            const templatePath = options.template || join(process.cwd(), 'templates/solSdk/protocol/template.sol');
+            const templatePath =
+                options.template || join(process.cwd(), 'templates/solSdk/protocol/template.sol');
             const outputPath = options.output || join(process.cwd(), 'gen/sdk');
             generateProtocolSdkActionsFiles(templatePath, outputPath);
             process.exit(0);
@@ -1375,7 +1412,10 @@ const generateMultipleTriggersMdFiles = (outputPath = 'gen/md/triggers') => {
     program
         .command('genActionDoc <contractName>')
         .description('Generate documentation for a contract action')
-        .option('-o, --output <path>', 'Output directory for documentation (defaults to gen/md/actions)')
+        .option(
+            '-o, --output <path>',
+            'Output directory for documentation (defaults to gen/md/actions)',
+        )
         .action((contractName, options) => {
             const outputPath = options.output || join(process.cwd(), 'gen/md/actions');
             generateActionMdFile(contractName, outputPath);
@@ -1384,8 +1424,13 @@ const generateMultipleTriggersMdFiles = (outputPath = 'gen/md/triggers') => {
 
     program
         .command('genActionsDocs')
-        .description('Generate documentation for all actions sdk signatures found in templates/md/action/template.txt')
-        .option('-o, --output <path>', 'Output directory for documentation (defaults to gen/md/actions)')
+        .description(
+            'Generate documentation for all actions sdk signatures found in templates/md/action/template.txt',
+        )
+        .option(
+            '-o, --output <path>',
+            'Output directory for documentation (defaults to gen/md/actions)',
+        )
         .action((options) => {
             const outputPath = options.output || join(process.cwd(), 'gen/md/actions');
             generateMultipleActionsMdFiles(outputPath);
@@ -1395,7 +1440,10 @@ const generateMultipleTriggersMdFiles = (outputPath = 'gen/md/triggers') => {
     program
         .command('genTriggerDoc <triggerName>')
         .description('Generate documentation from a trigger contract source file')
-        .option('-o, --output <path>', 'Output directory for documentation (defaults to gen/md/triggers)')
+        .option(
+            '-o, --output <path>',
+            'Output directory for documentation (defaults to gen/md/triggers)',
+        )
         .action((triggerName, options) => {
             const outputPath = options.output || join(process.cwd(), 'gen/md/triggers');
             generateTriggerMdFile(triggerName, outputPath);
@@ -1404,8 +1452,13 @@ const generateMultipleTriggersMdFiles = (outputPath = 'gen/md/triggers') => {
 
     program
         .command('genTriggersDocs')
-        .description('Generate documentation for all triggers found in templates/md/action/template.txt')
-        .option('-o, --output <path>', 'Output directory for documentation (defaults to gen/md/triggers)')
+        .description(
+            'Generate documentation for all triggers found in templates/md/action/template.txt',
+        )
+        .option(
+            '-o, --output <path>',
+            'Output directory for documentation (defaults to gen/md/triggers)',
+        )
         .action((options) => {
             const outputPath = options.output || join(process.cwd(), 'gen/md/triggers');
             generateMultipleTriggersMdFiles(outputPath);

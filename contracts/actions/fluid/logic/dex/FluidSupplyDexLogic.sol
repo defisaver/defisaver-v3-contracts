@@ -13,7 +13,7 @@ import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidSupplyDexLogic - Implements the supplying of tokens to Fluid DEX
 /// @dev Used only for vaults with smart collateral (T2 and T4)
-library FluidSupplyDexLogic  {
+library FluidSupplyDexLogic {
     using TokenUtils for address;
     using DFSLib for uint256;
     using FluidVaultTypes for uint256;
@@ -23,26 +23,25 @@ library FluidSupplyDexLogic  {
     /// @param _tokens Tokens data
     /// @return nftId NFT ID of the position
     /// @return collShares Amount of collateral shares minted.
-    function supplyVariable(
-        FluidDexModel.SupplyDexData memory _data,
-        IFluidVault.Tokens memory _tokens
-    ) internal returns (uint256 nftId, uint256 collShares) {
+    function supplyVariable(FluidDexModel.SupplyDexData memory _data, IFluidVault.Tokens memory _tokens)
+        internal
+        returns (uint256 nftId, uint256 collShares)
+    {
         _data.vaultType.requireSmartCollateral();
 
         FluidDexTokensUtils.PulledTokensData memory vars = FluidDexTokensUtils.pullTokensIfNeededWithApproval(
-            _tokens,
-            _data.from,
-            _data.vault,
-            _data.variableData.collAmount0,
-            _data.variableData.collAmount1
+            _tokens, _data.from, _data.vault, _data.variableData.collAmount0, _data.variableData.collAmount1
         );
 
         uint256 msgValue = vars.isToken0Native ? vars.amount0 : (vars.isToken1Native ? vars.amount1 : 0);
 
         int256 exactCollSharesMinted;
 
-        (nftId, exactCollSharesMinted, ) = _data.vaultType.isT2Vault()
-            ? IFluidVaultT2(_data.vault).operate{ value: msgValue }(
+        (nftId, exactCollSharesMinted,) = _data.vaultType.isT2Vault()
+            ? IFluidVaultT2(_data.vault)
+            .operate{
+                value: msgValue
+            }(
                 _data.nftId,
                 vars.amount0.signed256(),
                 vars.amount1.signed256(),
@@ -50,7 +49,10 @@ library FluidSupplyDexLogic  {
                 0, /* debtAmount */
                 address(0) /* to */
             )
-            : IFluidVaultT4(_data.vault).operate{ value: msgValue }(
+            : IFluidVaultT4(_data.vault)
+            .operate{
+                value: msgValue
+            }(
                 _data.nftId,
                 vars.amount0.signed256(),
                 vars.amount1.signed256(),

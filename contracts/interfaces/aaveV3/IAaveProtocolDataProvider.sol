@@ -16,11 +16,9 @@ interface IAaveProtocolDataProvider {
      * @return stableRateLastUpdated The timestamp of the last update of the user stable rate
      * @return usageAsCollateralEnabled True if the user is using the asset as collateral, false
      *         otherwise
-     **/
-    function getUserReserveData(
-        address asset,
-        address user
-    )
+     *
+     */
+    function getUserReserveData(address asset, address user)
         external
         view
         returns (
@@ -41,7 +39,8 @@ interface IAaveProtocolDataProvider {
      * @notice Returns if the pool is paused
      * @param asset The address of the underlying asset of the reserve
      * @return isPaused True if the pool is paused, false otherwise
-     **/
+     *
+     */
     function getPaused(address asset) external view returns (bool isPaused);
 
     /**
@@ -59,9 +58,7 @@ interface IAaveProtocolDataProvider {
      * @return isActive True if it is active, false otherwise
      * @return isFrozen True if it is frozen, false otherwise
      */
-    function getReserveConfigurationData(
-        address asset
-    )
+    function getReserveConfigurationData(address asset)
         external
         view
         returns (
@@ -93,9 +90,7 @@ interface IAaveProtocolDataProvider {
      * @return variableBorrowIndex The variable borrow index of the reserve
      * @return lastUpdateTimestamp The timestamp of the last update of the reserve
      */
-    function getReserveData(
-        address asset
-    )
+    function getReserveData(address asset)
         external
         view
         returns (

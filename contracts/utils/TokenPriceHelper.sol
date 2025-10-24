@@ -13,7 +13,6 @@ import { IAggregatorV3 } from "../interfaces/chainlink/IAggregatorV3.sol";
 
 /// @title TokenPriceHelper Fetches prices from chainlink/aave and formats tokens properly
 contract TokenPriceHelper is DSMath, UtilHelper {
-
     address internal constant BOLD_ADDR = 0x6440f144b7e50D6a8439336510312d2F54beB01D;
 
     IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
@@ -30,9 +29,9 @@ contract TokenPriceHelper is DSMath, UtilHelper {
 
         /// @dev Price staleness not checked, the risk has been deemed acceptable
         if (_roundId == 0) {
-            (, price, , updateTimestamp, ) = aggregator.latestRoundData();
+            (, price,, updateTimestamp,) = aggregator.latestRoundData();
         } else {
-            (, price, , updateTimestamp, ) = aggregator.getRoundData(_roundId);
+            (, price,, updateTimestamp,) = aggregator.getRoundData(_roundId);
         }
 
         // no price for wsteth, can calculate from steth
@@ -65,16 +64,16 @@ contract TokenPriceHelper is DSMath, UtilHelper {
 
         int256 price;
         price = getChainlinkPriceInUSD(chainlinkTokenAddr, true);
-        if (price == 0){
+        if (price == 0) {
             price = int256(getAaveTokenPriceInUSD(_inputTokenAddr));
         }
-        if (price == 0){
+        if (price == 0) {
             price = int256(getAaveV3TokenPriceInUSD(_inputTokenAddr));
         }
-        if (price == 0){
+        if (price == 0) {
             price = int256(getSparkTokenPriceInUSD(_inputTokenAddr));
         }
-        if (price == 0){
+        if (price == 0) {
             return 0;
         }
 
@@ -93,7 +92,7 @@ contract TokenPriceHelper is DSMath, UtilHelper {
         address chainlinkTokenAddr = getAddrForChainlinkOracle(_inputTokenAddr);
 
         uint256 chainlinkPriceInUSD = uint256(getChainlinkPriceInUSD(chainlinkTokenAddr, false));
-        if (chainlinkPriceInUSD != 0){
+        if (chainlinkPriceInUSD != 0) {
             uint256 chainlinkETHPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
             uint256 priceInEth = wdiv(chainlinkPriceInUSD, chainlinkETHPriceInUSD);
             if (_inputTokenAddr == WSTETH_ADDR) return uint256(getWStEthPrice(int256(priceInEth)));
@@ -112,17 +111,23 @@ contract TokenPriceHelper is DSMath, UtilHelper {
 
         uint256 sparkPriceInETH = getSparkTokenPriceInETH(_inputTokenAddr);
         if (sparkPriceInETH != 0) return sparkPriceInETH;
-        
+
         return 0;
     }
 
     /// @dev If there's no USD price feed can fallback to ETH price feed, if there's no USD or ETH price feed return 0
-    function getChainlinkPriceInUSD(address _inputTokenAddr, bool _useFallback) public view returns (int256 chainlinkPriceInUSD) {
-        if (_inputTokenAddr == BOLD_ADDR) return 100000000;
-        try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.USD) returns (uint80, int256 answer, uint256, uint256, uint80){
+    function getChainlinkPriceInUSD(address _inputTokenAddr, bool _useFallback)
+        public
+        view
+        returns (int256 chainlinkPriceInUSD)
+    {
+        if (_inputTokenAddr == BOLD_ADDR) return 100_000_000;
+        try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.USD) returns (
+            uint80, int256 answer, uint256, uint256, uint80
+        ) {
             chainlinkPriceInUSD = answer;
         } catch {
-            if (_useFallback){
+            if (_useFallback) {
                 uint256 chainlinkPriceInETH = uint256(getChainlinkPriceInETH(_inputTokenAddr));
                 uint256 chainlinkETHPriceInUSD = uint256(getChainlinkPriceInUSD(ETH_ADDR, false));
                 chainlinkPriceInUSD = int256(wmul(chainlinkPriceInETH, chainlinkETHPriceInUSD));
@@ -134,15 +139,17 @@ contract TokenPriceHelper is DSMath, UtilHelper {
 
     /// @dev If there's no ETH price feed returns 0
     function getChainlinkPriceInETH(address _inputTokenAddr) public view returns (int256 chainlinkPriceInETH) {
-        try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.ETH) returns (uint80, int256 answer, uint256, uint256, uint80){
+        try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.ETH) returns (
+            uint80, int256 answer, uint256, uint256, uint80
+        ) {
             chainlinkPriceInETH = answer;
         } catch {
             chainlinkPriceInETH = 0;
         }
     }
-    
+
     /// @dev chainlink uses different addresses for WBTC and ETH
-    /// @dev there is only STETH price feed so we use that for WSTETH and handle later 
+    /// @dev there is only STETH price feed so we use that for WSTETH and handle later
     function getAddrForChainlinkOracle(address _inputTokenAddr)
         public
         pure
@@ -164,7 +171,7 @@ contract TokenPriceHelper is DSMath, UtilHelper {
     }
 
     function getWBtcPrice(int256 _btcPrice) public view returns (int256 wBtcPrice) {
-        (, int256 wBtcPriceToPeg, , , ) = feedRegistry.latestRoundData(WBTC_ADDR, CHAINLINK_WBTC_ADDR);
+        (, int256 wBtcPriceToPeg,,,) = feedRegistry.latestRoundData(WBTC_ADDR, CHAINLINK_WBTC_ADDR);
         wBtcPrice = (_btcPrice * wBtcPriceToPeg + 1e8 / 2) / 1e8;
     }
 
@@ -172,7 +179,7 @@ contract TokenPriceHelper is DSMath, UtilHelper {
     function getAaveTokenPriceInETH(address _tokenAddr) public view returns (uint256 price) {
         address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_MARKET).getPriceOracle();
 
-        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (uint256 tokenPrice){
+        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (uint256 tokenPrice) {
             price = tokenPrice;
         } catch {
             price = 0;

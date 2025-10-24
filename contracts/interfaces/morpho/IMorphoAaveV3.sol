@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity =0.8.24;
 
-import {Types} from "./MorphoTypesAaveV3.sol";
+import { Types } from "./MorphoTypesAaveV3.sol";
 
 interface IMorphoGetters {
     function DOMAIN_SEPARATOR() external view returns (bytes32);
@@ -87,9 +87,7 @@ interface IMorphoAaveV3 is IMorphoGetters, IMorphoSetters {
         uint256 deadline,
         Types.Signature calldata signature
     ) external returns (uint256 supplied);
-    function supplyCollateral(address underlying, uint256 amount, address onBehalf)
-        external
-        returns (uint256 supplied);
+    function supplyCollateral(address underlying, uint256 amount, address onBehalf) external returns (uint256 supplied);
     function supplyCollateralWithPermit(
         address underlying,
         uint256 amount,
@@ -128,7 +126,7 @@ interface IMorphoAaveV3 is IMorphoGetters, IMorphoSetters {
         Types.Signature calldata signature
     ) external;
 
-    function isManagedBy(address delegator, address manager) external view returns(bool);
+    function isManagedBy(address delegator, address manager) external view returns (bool);
 
     function liquidate(address underlyingBorrowed, address underlyingCollateral, address user, uint256 amount)
         external

@@ -70,24 +70,25 @@ contract LSVView is
     }
 
     uint256 public constant NUMBER_OF_SUPPORTED_PROTOCOLS = 12;
-    
+
     using TokenUtils for address;
 
-    function getAllPositionForLSVUser(
-        address _user,
-        address[] memory _collTokens
-    ) public view returns (address[] memory proxies, Position[] memory positions) {
+    function getAllPositionForLSVUser(address _user, address[] memory _collTokens)
+        public
+        view
+        returns (address[] memory proxies, Position[] memory positions)
+    {
         proxies = LSVProxyRegistry(LSV_PROXY_REGISTRY_ADDRESS).getProxies(_user);
         positions = _getPositions(_collTokens, proxies);
     }
 
-    function getAllPositionForDFSUser(
-        address _user,
-        address[] memory _collTokens
-    ) public view returns (address[] memory proxies, Position[] memory positions) {
-        (address mcdProxy, address[] memory additionalProxies) = DFSProxyRegistry(
-            DFS_PROXY_REGISTRY_ADDR
-        ).getAllProxies(_user);
+    function getAllPositionForDFSUser(address _user, address[] memory _collTokens)
+        public
+        view
+        returns (address[] memory proxies, Position[] memory positions)
+    {
+        (address mcdProxy, address[] memory additionalProxies) =
+            DFSProxyRegistry(DFS_PROXY_REGISTRY_ADDR).getAllProxies(_user);
 
         if (mcdProxy == address(0)) {
             proxies = new address[](additionalProxies.length);
@@ -105,10 +106,11 @@ contract LSVView is
         positions = _getPositions(_collTokens, proxies);
     }
 
-    function getAllPositionForEOA(
-        address _user,
-        address[] memory _collTokens
-    ) public view returns (address[] memory proxies, Position[] memory positions) {
+    function getAllPositionForEOA(address _user, address[] memory _collTokens)
+        public
+        view
+        returns (address[] memory proxies, Position[] memory positions)
+    {
         address[] memory users = new address[](1);
         users[0] = _user;
 
@@ -121,7 +123,11 @@ contract LSVView is
         }
     }
 
-    function _getPositions(address[] memory _collTokens, address[] memory _users) internal view returns (Position[] memory positions) {
+    function _getPositions(address[] memory _collTokens, address[] memory _users)
+        internal
+        view
+        returns (Position[] memory positions)
+    {
         Position[] memory tempPositions = new Position[](_users.length * NUMBER_OF_SUPPORTED_PROTOCOLS);
         uint256 positionCounter;
 
@@ -133,7 +139,7 @@ contract LSVView is
             positionCounter = _getMorphoBluePositions(_users[i], tempPositions, positionCounter);
             positionCounter = _getAaveLidoPositions(_collTokens, _users[i], tempPositions, positionCounter);
         }
-        
+
         positions = new Position[](positionCounter);
         for (uint256 i = 0; i < positionCounter; i++) {
             positions[i] = tempPositions[i];
@@ -147,25 +153,17 @@ contract LSVView is
         uint256 _counter
     ) internal view returns (uint256 counter) {
         counter = _counter;
+        // TODO -> hardcoding DEFAULT_AAVE_MARKET
         IPoolV3 lendingPool = getLendingPool(DEFAULT_AAVE_MARKET);
-        DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
-            TokenUtils.WETH_ADDR
-        );
+        DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(TokenUtils.WETH_ADDR);
         for (uint256 j = 0; j < _collTokens.length; j++) {
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
-                _collTokens[j]
-            );
+            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_collTokens[j]);
             if (reserveData.aTokenAddress != address(0)) {
                 uint256 collBalance = reserveData.aTokenAddress.getBalance(_user);
                 if (collBalance > 0) {
                     uint256 debtBalance = wethReserveData.variableDebtTokenAddress.getBalance(_user);
                     _positions[counter++] = Position(
-                        uint8(Protocol.AAVE_V3),
-                        _user,
-                        _collTokens[j],
-                        TokenUtils.WETH_ADDR,
-                        collBalance,
-                        debtBalance
+                        uint8(Protocol.AAVE_V3), _user, _collTokens[j], TokenUtils.WETH_ADDR, collBalance, debtBalance
                     );
                     j = _collTokens.length;
                 }
@@ -182,15 +180,9 @@ contract LSVView is
         counter = _counter;
         address morphoAddr = getMorphoAddressByEmode(1);
         for (uint256 j = 0; j < _collTokens.length; j++) {
-            uint256 collBalance = IMorphoAaveV3(morphoAddr).collateralBalance(
-                _collTokens[j],
-                _user
-            );
+            uint256 collBalance = IMorphoAaveV3(morphoAddr).collateralBalance(_collTokens[j], _user);
             if (collBalance > 0) {
-                uint256 debtBalance = IMorphoAaveV3(morphoAddr).borrowBalance(
-                    TokenUtils.WETH_ADDR,
-                    _user
-                );
+                uint256 debtBalance = IMorphoAaveV3(morphoAddr).borrowBalance(TokenUtils.WETH_ADDR, _user);
                 _positions[counter++] = Position(
                     uint8(Protocol.MORPHO_AAVE_V3),
                     _user,
@@ -217,19 +209,18 @@ contract LSVView is
             if (collBalance > 0) {
                 uint256 debtBalance = comet.borrowBalanceOf(_user);
                 _positions[counter++] = Position(
-                    uint8(Protocol.COMPOUND_V3),
-                    _user,
-                    _collTokens[j],
-                    TokenUtils.WETH_ADDR,
-                    collBalance,
-                    debtBalance
+                    uint8(Protocol.COMPOUND_V3), _user, _collTokens[j], TokenUtils.WETH_ADDR, collBalance, debtBalance
                 );
                 j = _collTokens.length;
             }
         }
     }
 
-    function _getMorphoBluePositions(address _user, Position[] memory _positions, uint256 _counter) internal view returns (uint256 counter) {
+    function _getMorphoBluePositions(address _user, Position[] memory _positions, uint256 _counter)
+        internal
+        view
+        returns (uint256 counter)
+    {
         counter = _counter;
 
         uint256 marketSize = 7;
@@ -258,13 +249,13 @@ contract LSVView is
         }
     }
 
-    function _getMorphoBlueWethPosition(
-        MarketParams memory _marketParams,
-        address _user,
-        Protocol _protocol
-    ) internal view returns (Position memory position) {
+    function _getMorphoBlueWethPosition(MarketParams memory _marketParams, address _user, Protocol _protocol)
+        internal
+        view
+        returns (Position memory position)
+    {
         Id marketId = MarketParamsLib.id(_marketParams);
-        if (MorphoLib.collateral(morphoBlue, marketId, _user) > 0){
+        if (MorphoLib.collateral(morphoBlue, marketId, _user) > 0) {
             position = Position(
                 uint8(_protocol),
                 _user,
@@ -284,24 +275,15 @@ contract LSVView is
     ) internal view returns (uint256 counter) {
         counter = _counter;
         ISparkPool lendingPool = getSparkLendingPool(DEFAULT_SPARK_MARKET);
-        SparkDataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
-            TokenUtils.WETH_ADDR
-        );
+        SparkDataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(TokenUtils.WETH_ADDR);
         for (uint256 j = 0; j < _collTokens.length; j++) {
-            SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
-                _collTokens[j]
-            );
+            SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_collTokens[j]);
             if (reserveData.aTokenAddress != address(0)) {
                 uint256 collBalance = reserveData.aTokenAddress.getBalance(_user);
                 if (collBalance > 0) {
                     uint256 debtBalance = wethReserveData.variableDebtTokenAddress.getBalance(_user);
                     _positions[counter++] = Position(
-                        uint8(Protocol.SPARK),
-                        _user,
-                        _collTokens[j],
-                        TokenUtils.WETH_ADDR,
-                        collBalance,
-                        debtBalance
+                        uint8(Protocol.SPARK), _user, _collTokens[j], TokenUtils.WETH_ADDR, collBalance, debtBalance
                     );
                     j = _collTokens.length;
                 }
@@ -311,19 +293,15 @@ contract LSVView is
 
     function _getAaveLidoPositions(
         address[] memory _collTokens,
-        address _user, 
+        address _user,
         Position[] memory _positions,
         uint256 _counter
     ) internal view returns (uint256 counter) {
         counter = _counter;
         IPoolV3 lendingPool = getLendingPool(0xcfBf336fe147D643B9Cb705648500e101504B16d);
-        DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
-            TokenUtils.WETH_ADDR
-        );
+        DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(TokenUtils.WETH_ADDR);
         for (uint256 j = 0; j < _collTokens.length; j++) {
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
-                _collTokens[j]
-            );
+            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_collTokens[j]);
             if (reserveData.aTokenAddress != address(0)) {
                 uint256 collBalance = reserveData.aTokenAddress.getBalance(_user);
                 if (collBalance > 0) {
@@ -342,49 +320,73 @@ contract LSVView is
         }
     }
 
-    function getInfoForLSVPosition(uint8 _protocol, address _lsvProxy, address[] memory _collTokens) public view returns (uint256 netWorth, int256 unrealisedProfit) {
+    function getInfoForLSVPosition(uint8 _protocol, address _lsvProxy, address[] memory _collTokens)
+        public
+        view
+        returns (uint256 netWorth, int256 unrealisedProfit)
+    {
         unrealisedProfit = LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS).unrealisedProfit(_protocol, _lsvProxy);
-        (uint256 collBalance, uint256 ethDebtBalance, address collToken) = findCollAndDebtBalance(_protocol, _lsvProxy, _collTokens);
+        (uint256 collBalance, uint256 ethDebtBalance, address collToken) =
+            findCollAndDebtBalance(_protocol, _lsvProxy, _collTokens);
         uint256 collBalanceInETH = getAmountInETHFromLST(collToken, collBalance);
-        if (collBalanceInETH >= ethDebtBalance){
-            netWorth = collBalanceInETH  - ethDebtBalance;
+        if (collBalanceInETH >= ethDebtBalance) {
+            netWorth = collBalanceInETH - ethDebtBalance;
         } else {
-            return (0,0);
+            return (0, 0);
         }
     }
-    
-    function findCollAndDebtBalance(uint8 protocol, address _user, address[] memory _collTokens) public view returns (uint256, uint256, address){
+
+    function findCollAndDebtBalance(uint8 protocol, address _user, address[] memory _collTokens)
+        public
+        view
+        returns (uint256, uint256, address)
+    {
         if (protocol == uint8(Protocol.AAVE_V3)) return findCollAndDebtForAaveV3Position(_user, _collTokens);
-        if (protocol == uint8(Protocol.MORPHO_AAVE_V3)) return findCollAndDebtForMorphoAaveV3Position(_user, _collTokens);
+        if (protocol == uint8(Protocol.MORPHO_AAVE_V3)) {
+            return findCollAndDebtForMorphoAaveV3Position(_user, _collTokens);
+        }
         if (protocol == uint8(Protocol.COMPOUND_V3)) return findCollAndDebtForCompV3Position(_user, _collTokens);
         if (protocol == uint8(Protocol.SPARK)) return findCollAndDebtForSparkPosition(_user, _collTokens);
-        if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH_MARKET_RATE)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
-        if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_945)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
-        if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_965)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
-        if (protocol == uint8(Protocol.AAVE_V3_LIDO_INSTANCE)) return findCollAndDebtForAaveV3LidoPosition(_user, _collTokens);
-        if (protocol == uint8(Protocol.MORPHO_BLUE_WEETH_RATE_945)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
-        if (protocol == uint8(Protocol.MORPHO_BLUE_WEETH_RATE_86)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
-        if (protocol == uint8(Protocol.MORPHO_BLUE_EZETH_945)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
-        if (protocol == uint8(Protocol.MORPHO_BLUE_EZETH_86)) return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
-        
+        if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH_MARKET_RATE)) {
+            return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
+        }
+        if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_945)) {
+            return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
+        }
+        if (protocol == uint8(Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_965)) {
+            return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
+        }
+        if (protocol == uint8(Protocol.AAVE_V3_LIDO_INSTANCE)) {
+            return findCollAndDebtForAaveV3LidoPosition(_user, _collTokens);
+        }
+        if (protocol == uint8(Protocol.MORPHO_BLUE_WEETH_RATE_945)) {
+            return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
+        }
+        if (protocol == uint8(Protocol.MORPHO_BLUE_WEETH_RATE_86)) {
+            return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
+        }
+        if (protocol == uint8(Protocol.MORPHO_BLUE_EZETH_945)) {
+            return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
+        }
+        if (protocol == uint8(Protocol.MORPHO_BLUE_EZETH_86)) {
+            return findCollAndDebtForMorphoBlueWstethPosition(_user, Protocol(protocol));
+        }
+
         return (0, 0, address(0));
     }
 
     /// @dev we assume it only has one LST token as collateral, and only ETH as debt
-    function findCollAndDebtForAaveV3Position(
-        address _user,
-        address[] memory _collTokens
-    ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) 
-        {
+    function findCollAndDebtForAaveV3Position(address _user, address[] memory _collTokens)
+        public
+        view
+        returns (uint256 collAmount, uint256 debtAmount, address collToken)
+    {
+        // TODO -> Hardcoded DEFAULT_AAVE_MARKET
         IPoolV3 lendingPool = getLendingPool(DEFAULT_AAVE_MARKET);
-        DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
-            TokenUtils.WETH_ADDR
-        );
+        DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(TokenUtils.WETH_ADDR);
         uint256 ethDebtAmount = wethReserveData.variableDebtTokenAddress.getBalance(_user);
         for (uint256 j = 0; j < _collTokens.length; j++) {
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
-                _collTokens[j]
-            );
+            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_collTokens[j]);
             if (reserveData.aTokenAddress != address(0)) {
                 uint256 lstCollAmount = reserveData.aTokenAddress.getBalance(_user);
                 if (lstCollAmount > 0) {
@@ -397,20 +399,16 @@ contract LSVView is
     }
 
     /// @dev we assume it only has one LST token as collateral, and only ETH as debt
-    function findCollAndDebtForAaveV3LidoPosition(
-        address _user,
-        address[] memory _collTokens
-    ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) 
-        {
+    function findCollAndDebtForAaveV3LidoPosition(address _user, address[] memory _collTokens)
+        public
+        view
+        returns (uint256 collAmount, uint256 debtAmount, address collToken)
+    {
         IPoolV3 lendingPool = getLendingPool(0xcfBf336fe147D643B9Cb705648500e101504B16d);
-        DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
-            TokenUtils.WETH_ADDR
-        );
+        DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(TokenUtils.WETH_ADDR);
         uint256 ethDebtAmount = wethReserveData.variableDebtTokenAddress.getBalance(_user);
         for (uint256 j = 0; j < _collTokens.length; j++) {
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
-                _collTokens[j]
-            );
+            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_collTokens[j]);
             if (reserveData.aTokenAddress != address(0)) {
                 uint256 lstCollAmount = reserveData.aTokenAddress.getBalance(_user);
                 if (lstCollAmount > 0) {
@@ -423,19 +421,16 @@ contract LSVView is
     }
 
     /// @dev we assume it only has one LST token as collateral, and only ETH as debt
-    function findCollAndDebtForSparkPosition(
-        address _user,
-        address[] memory _collTokens
-    ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) {
+    function findCollAndDebtForSparkPosition(address _user, address[] memory _collTokens)
+        public
+        view
+        returns (uint256 collAmount, uint256 debtAmount, address collToken)
+    {
         ISparkPool lendingPool = getSparkLendingPool(DEFAULT_SPARK_MARKET);
-        SparkDataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(
-            TokenUtils.WETH_ADDR
-        );
+        SparkDataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(TokenUtils.WETH_ADDR);
         uint256 ethDebtAmount = wethReserveData.variableDebtTokenAddress.getBalance(_user);
         for (uint256 j = 0; j < _collTokens.length; j++) {
-            SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(
-                _collTokens[j]
-            );
+            SparkDataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_collTokens[j]);
             if (reserveData.aTokenAddress != address(0)) {
                 uint256 lstCollAmount = reserveData.aTokenAddress.getBalance(_user);
                 if (lstCollAmount > 0) {
@@ -448,21 +443,16 @@ contract LSVView is
     }
 
     /// @dev we assume it only has one LST token as collateral, and only ETH as debt
-    function findCollAndDebtForMorphoAaveV3Position(
-        address _user,
-        address[] memory _collTokens
-    ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) {
+    function findCollAndDebtForMorphoAaveV3Position(address _user, address[] memory _collTokens)
+        public
+        view
+        returns (uint256 collAmount, uint256 debtAmount, address collToken)
+    {
         address morphoAddr = getMorphoAddressByEmode(1);
-        uint256 debtBalance = IMorphoAaveV3(morphoAddr).borrowBalance(
-            TokenUtils.WETH_ADDR,
-            _user
-        );
+        uint256 debtBalance = IMorphoAaveV3(morphoAddr).borrowBalance(TokenUtils.WETH_ADDR, _user);
 
         for (uint256 j = 0; j < _collTokens.length; j++) {
-            uint256 collBalance = IMorphoAaveV3(morphoAddr).collateralBalance(
-                _collTokens[j],
-                _user
-            );
+            uint256 collBalance = IMorphoAaveV3(morphoAddr).collateralBalance(_collTokens[j], _user);
             if (collBalance > 0) {
                 collAmount = collBalance;
                 debtAmount = debtBalance;
@@ -472,10 +462,11 @@ contract LSVView is
     }
 
     /// @dev we assume it only has one LST token as collateral, and only ETH as debt
-    function findCollAndDebtForCompV3Position(
-        address _user,
-        address[] memory _collTokens
-    ) public view returns (uint256 collAmount, uint256 debtAmount, address collToken) {
+    function findCollAndDebtForCompV3Position(address _user, address[] memory _collTokens)
+        public
+        view
+        returns (uint256 collAmount, uint256 debtAmount, address collToken)
+    {
         IComet comet = IComet(COMP_ETH_COMET);
 
         uint256 debtBalance = comet.borrowBalanceOf(_user);
@@ -489,7 +480,12 @@ contract LSVView is
         }
     }
     /// @dev we assume it only has one LST token as collateral, and only ETH as debt
-    function findCollAndDebtForMorphoBlueWstethPosition(address _user, Protocol protocol) public view returns (uint256, uint256, address) {
+
+    function findCollAndDebtForMorphoBlueWstethPosition(address _user, Protocol protocol)
+        public
+        view
+        returns (uint256, uint256, address)
+    {
         MarketParams memory marketParams;
         if (protocol == Protocol.MORPHO_BLUE_WSTETH_MARKET_RATE) marketParams = _morphoBlueWstEthMarketRate();
         else if (protocol == Protocol.MORPHO_BLUE_WSTETH_LIDO_RATE_945) marketParams = _morphoBlueWstEthLidoRate945();
@@ -511,61 +507,67 @@ contract LSVView is
             collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
             oracle: 0x2a01EB9496094dA03c4E364Def50f5aD1280AD72,
             irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
-            lltv: 945000000000000000
+            lltv: 945_000_000_000_000_000
         });
     }
+
     function _morphoBlueWstEthLidoRate945() internal pure returns (MarketParams memory marketParams) {
         marketParams = MarketParams({
             loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
             collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
             oracle: 0xbD60A6770b27E084E8617335ddE769241B0e71D8,
             irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
-            lltv: 945000000000000000
+            lltv: 945_000_000_000_000_000
         });
     }
+
     function _morphoBlueWstEthLidoRate965() internal pure returns (MarketParams memory marketParams) {
         marketParams = MarketParams({
             loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
             collateralToken: 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0,
             oracle: 0xbD60A6770b27E084E8617335ddE769241B0e71D8,
             irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
-            lltv: 965000000000000000
+            lltv: 965_000_000_000_000_000
         });
     }
-     function _morphoBlueWeEth945() internal pure returns (MarketParams memory marketParams) {
+
+    function _morphoBlueWeEth945() internal pure returns (MarketParams memory marketParams) {
         marketParams = MarketParams({
             loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
             collateralToken: 0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee,
             oracle: 0xbDd2F2D473E8D63d1BFb0185B5bDB8046ca48a72,
             irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
-            lltv: 945000000000000000
+            lltv: 945_000_000_000_000_000
         });
     }
+
     function _morphoBlueWeEth86() internal pure returns (MarketParams memory marketParams) {
         marketParams = MarketParams({
             loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
             collateralToken: 0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee,
             oracle: 0x3fa58b74e9a8eA8768eb33c8453e9C2Ed089A40a,
             irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
-            lltv: 860000000000000000
+            lltv: 860_000_000_000_000_000
         });
     }
+
     function _morphoBlueEzEth945() internal pure returns (MarketParams memory marketParams) {
         marketParams = MarketParams({
             loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
             collateralToken: 0xbf5495Efe5DB9ce00f80364C8B423567e58d2110,
             oracle: 0x94f93f1eADb8a2f73C415AD4C19cB791e6D0192b,
             irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
-            lltv: 945000000000000000
+            lltv: 945_000_000_000_000_000
         });
     }
+
     function _morphoBlueEzEth86() internal pure returns (MarketParams memory marketParams) {
         marketParams = MarketParams({
             loanToken: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,
             collateralToken: 0xbf5495Efe5DB9ce00f80364C8B423567e58d2110,
             oracle: 0x61025e2B0122ac8bE4e37365A4003d87ad888Cc3,
             irm: 0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC,
-            lltv: 860000000000000000
+            lltv: 860_000_000_000_000_000
         });
     }
 }

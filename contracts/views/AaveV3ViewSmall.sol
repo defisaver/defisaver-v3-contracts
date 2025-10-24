@@ -7,7 +7,6 @@ import { TokenUtils } from "../utils/TokenUtils.sol";
 import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
 import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
 
-
 contract AaveV3ViewSmall is AaveV3Helper {
     using TokenUtils for address;
 
@@ -19,7 +18,11 @@ contract AaveV3ViewSmall is AaveV3Helper {
         uint256 currentEmodeId;
     }
 
-    function getMiniUserPositionData(address _market, address _user) public view returns (MiniUserPositionData memory data) {
+    function getMiniUserPositionData(address _market, address _user)
+        public
+        view
+        returns (MiniUserPositionData memory data)
+    {
         IPoolV3 lendingPool = getLendingPool(_market);
 
         data.tokenAddresses = lendingPool.getReservesList();

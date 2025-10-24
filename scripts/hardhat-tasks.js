@@ -11,36 +11,46 @@ const {
 
 task('fladepver', 'Deploys and verifies contract(s) on etherscan')
     .addPositionalParam('gas', 'The price (in gwei) per unit of gas')
-    .addVariadicPositionalParam('contractNames', 'The names of the contracts to flatten, deploy and verify', [], types.string)
+    .addVariadicPositionalParam(
+        'contractNames',
+        'The names of the contracts to flatten, deploy and verify',
+        [],
+        types.string,
+    )
     .addFlag('nonce', 'Use this flag to specify nonce: --nonce NUMBER')
     .setAction(async (args) => {
         const newArgs = { ...args };
         const contracts = args.contractNames;
 
         if (contracts.length === 0) {
-            throw new Error('At least one contract name is required. Usage: npx hardhat fladepver GAS_PRICE Contract1 Contract2 ... [--nonce NUMBER]');
+            throw new Error(
+                'At least one contract name is required. Usage: npx hardhat fladepver GAS_PRICE Contract1 Contract2 ... [--nonce NUMBER]',
+            );
         }
 
         // Fla - Flatten
-        await Promise.all(contracts.map(async (contractName) => {
-            const path = await findPathByContractName(contractName);
-            await flatten(path);
-        }));
+        await Promise.all(
+            contracts.map(async (contractName) => {
+                const path = await findPathByContractName(contractName);
+                await flatten(path);
+            }),
+        );
 
         // Dep - Deploy
         const deployedAddresses = await deployContract(contracts, newArgs);
 
         // Ver - Verify
         console.log('\nStarting contract verification...');
-        const verificationPromises = Object.entries(deployedAddresses)
-            .map(async ([contractName, contractAddress]) => {
+        const verificationPromises = Object.entries(deployedAddresses).map(
+            async ([contractName, contractAddress]) => {
                 try {
                     await verifyContract(contractAddress, contractName);
                     console.log(`✓ ${contractName} verified successfully`);
                 } catch (error) {
                     console.log(`✗ Failed to verify ${contractName}: ${error.message}`);
                 }
-            });
+            },
+        );
         await Promise.all(verificationPromises);
     });
 
@@ -57,13 +67,17 @@ task('customFlatten', 'Flattens for our DFS team')
         await flatten(await findPathByContractName(args.contractName));
     });
 
-task('encryptPrivateKey', 'Encrypt private key')
-    .setAction(async () => {
-        encryptPrivateKey();
-    });
+task('encryptPrivateKey', 'Encrypt private key').setAction(async () => {
+    encryptPrivateKey();
+});
 
 task('deployOnFork', 'Deploys contracts on an existing fork')
-    .addVariadicPositionalParam('contractNames', 'The names of the contracts to deploy', [], types.string)
+    .addVariadicPositionalParam(
+        'contractNames',
+        'The names of the contracts to deploy',
+        [],
+        types.string,
+    )
     .setAction(async (args) => {
         const contractNames = args.contractNames.join(' ');
         const cmd = `CONTRACTS="${contractNames}" npx hardhat run ./scripts/utils/deploy-on-fork.js --network fork`;

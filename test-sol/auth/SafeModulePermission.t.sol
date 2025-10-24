@@ -6,10 +6,8 @@ import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
-import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_SafeModulePermission is MockSafeModulePermission, BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -148,17 +146,17 @@ contract TestCore_SafeModulePermission is MockSafeModulePermission, BaseTest {
     function test_should_revert_when_disabling_module_that_is_not_one_of_the_ten_last_modules() public {
         // this module can't be disabled because it's not one of the last 10 modules
         _enable_safe_module(address(0xff));
-        
+
         // enable 10 modules
         _enable_safe_module(address(0x11));
-        _enable_safe_module(address(0x22));        
-        _enable_safe_module(address(0x33));        
-        _enable_safe_module(address(0x44));        
-        _enable_safe_module(address(0x55));        
-        _enable_safe_module(address(0x66));        
-        _enable_safe_module(address(0x77));        
-        _enable_safe_module(address(0x88));        
-        _enable_safe_module(address(0x99));        
+        _enable_safe_module(address(0x22));
+        _enable_safe_module(address(0x33));
+        _enable_safe_module(address(0x44));
+        _enable_safe_module(address(0x55));
+        _enable_safe_module(address(0x66));
+        _enable_safe_module(address(0x77));
+        _enable_safe_module(address(0x88));
+        _enable_safe_module(address(0x99));
         _enable_safe_module(address(0xaa));
 
         // try to disable first module added

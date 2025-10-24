@@ -118,7 +118,7 @@ import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
-contract RecipeExecutor is 
+contract RecipeExecutor is
     StrategyModel,
     Permission,
     AdminAuth,
@@ -130,7 +130,7 @@ contract RecipeExecutor is
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     /// @dev Function sig of ActionBase.executeAction()
-    bytes4 public constant EXECUTE_ACTION_SELECTOR = 
+    bytes4 public constant EXECUTE_ACTION_SELECTOR =
         bytes4(keccak256("executeAction(bytes,bytes32[],uint8[],bytes32[])"));
 
     using TokenUtils for address;
@@ -154,10 +154,10 @@ contract RecipeExecutor is
     /// @notice Called by TxSaverExecutor through safe wallet
     /// @param _currRecipe Recipe to be executed
     /// @param _txSaverData TxSaver data signed by user
-    function executeRecipeFromTxSaver(
-        Recipe calldata _currRecipe,
-        TxSaverSignedData calldata _txSaverData
-    ) public payable {
+    function executeRecipeFromTxSaver(Recipe calldata _currRecipe, TxSaverSignedData calldata _txSaverData)
+        public
+        payable
+    {
         address txSaverExecutorAddr = registry.getAddr(TX_SAVER_EXECUTOR_ID);
 
         // only TxSaverExecutor can call this function
@@ -170,10 +170,10 @@ contract RecipeExecutor is
             _executeActions(_currRecipe);
             return;
         }
-        
+
         // when taking fee from EOA/wallet
         // first read gas estimation set by TxSaverExecutor
-        (uint256 estimatedGasUsed, uint256 l1GasCostInEth, ) = abi.decode(
+        (uint256 estimatedGasUsed, uint256 l1GasCostInEth,) = abi.decode(
             ITxSaverBytesTransientStorage(txSaverExecutorAddr).getBytesTransiently(),
             (uint256, uint256, DFSExchangeData.InjectedExchangeData)
         );
@@ -188,10 +188,7 @@ contract RecipeExecutor is
 
         // calculate gas cost using gas estimation and signed token price
         uint256 gasCost = calcGasCostUsingInjectedPrice(
-            estimatedGasUsed,
-            _txSaverData.feeToken,
-            _txSaverData.tokenPriceInEth,
-            l1GasCostInEth
+            estimatedGasUsed, _txSaverData.feeToken, _txSaverData.tokenPriceInEth, l1GasCostInEth
         );
 
         // revert if gas cost is higher than max cost signed by user
@@ -225,7 +222,8 @@ contract RecipeExecutor is
     ) public payable {
         Strategy memory strategy;
 
-        {   // to handle stack too deep
+        {
+            // to handle stack too deep
             uint256 strategyId = _sub.strategyOrBundleId;
 
             // fetch strategy if inside of bundle
@@ -237,9 +235,8 @@ contract RecipeExecutor is
         }
 
         // check if all the triggers are true
-        (bool triggered, uint256 errIndex) 
-            = _checkTriggers(strategy, _sub, _triggerCallData, _subId, SUB_STORAGE_ADDR);
-        
+        (bool triggered, uint256 errIndex) = _checkTriggers(strategy, _sub, _triggerCallData, _subId, SUB_STORAGE_ADDR);
+
         if (!triggered) {
             revert TriggerNotActiveError(errIndex);
         }
@@ -278,10 +275,7 @@ contract RecipeExecutor is
         for (i = 0; i < triggerIds.length; ++i) {
             triggerAddr = registry.getAddr(triggerIds[i]);
 
-            isTriggered = ITrigger(triggerAddr).isTriggered(
-                _triggerCallData[i],
-                _sub.triggerData[i]
-            );
+            isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i]);
 
             if (!isTriggered) return (false, i);
 
@@ -318,7 +312,7 @@ contract RecipeExecutor is
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
 
         if (isFL(firstActionAddr)) {
-             _parseFLAndExecute(_currRecipe, firstActionAddr, returnValues);
+            _parseFLAndExecute(_currRecipe, firstActionAddr, returnValues);
         } else {
             for (uint256 i = 0; i < _currRecipe.actionIds.length; ++i) {
                 returnValues[i] = _executeAction(_currRecipe, i, returnValues);
@@ -334,16 +328,14 @@ contract RecipeExecutor is
     /// @param _currRecipe Recipe to be executed
     /// @param _index Index of the action in the recipe array
     /// @param _returnValues Return values from previous actions
-    function _executeAction(
-        Recipe memory _currRecipe,
-        uint256 _index,
-        bytes32[] memory _returnValues
-    ) internal returns (bytes32 response) {
-
+    function _executeAction(Recipe memory _currRecipe, uint256 _index, bytes32[] memory _returnValues)
+        internal
+        returns (bytes32 response)
+    {
         address actionAddr = registry.getAddr(_currRecipe.actionIds[_index]);
 
         response = delegateCallAndReturnBytes32(
-            actionAddr, 
+            actionAddr,
             abi.encodeWithSelector(
                 EXECUTE_ACTION_SELECTOR,
                 _currRecipe.callData[_index],
@@ -371,20 +363,14 @@ contract RecipeExecutor is
 
         // encode data for FL
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
-        IFlashLoanBase.FlashLoanParams memory params = abi.decode(
-            _currRecipe.callData[0],
-            (IFlashLoanBase.FlashLoanParams)
-        );
+        IFlashLoanBase.FlashLoanParams memory params =
+            abi.decode(_currRecipe.callData[0], (IFlashLoanBase.FlashLoanParams));
         params.recipeData = recipeData;
         _currRecipe.callData[0] = abi.encode(params);
 
         /// @dev FL action is called directly so that we can check who the msg.sender of FL is
-        ActionBase(_flActionAddr).executeAction(
-            _currRecipe.callData[0],
-            _currRecipe.subData,
-            _currRecipe.paramMapping[0],
-            _returnValues
-        );
+        ActionBase(_flActionAddr)
+            .executeAction(_currRecipe.callData[0], _currRecipe.subData, _currRecipe.paramMapping[0], _returnValues);
 
         _removePermissionFrom(walletType, _flActionAddr);
     }
@@ -397,16 +383,10 @@ contract RecipeExecutor is
 
     function delegateCallAndReturnBytes32(address _target, bytes memory _data) internal returns (bytes32 response) {
         require(_target != address(0));
-
-        // call contract in current context
         assembly {
             let succeeded := delegatecall(sub(gas(), 5000), _target, add(_data, 0x20), mload(_data), 0, 32)
-            
-            // load delegatecall output
             response := mload(0)
-            
-            // throw if delegatecall failed
-            if eq(succeeded, 0) {
+            if iszero(succeeded) {
                 revert(0, 0)
             }
         }

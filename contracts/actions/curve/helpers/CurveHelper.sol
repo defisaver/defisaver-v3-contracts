@@ -51,14 +51,11 @@ contract CurveHelper is MainnetCurveAddresses {
         flags |= (removeOneCoin ? 1 : 0) << 4;
     }
 
-    function parseFlags(
-        uint8 flags
-    ) public pure returns (
-        DepositTargetType depositTargetType,
-        bool explicitUnderlying,
-        bool removeOneCoin,
-        bool withdrawExact
-    ) {
+    function parseFlags(uint8 flags)
+        public
+        pure
+        returns (DepositTargetType depositTargetType, bool explicitUnderlying, bool removeOneCoin, bool withdrawExact)
+    {
         depositTargetType = DepositTargetType(flags & 3);
         explicitUnderlying = flags & (1 << 2) > 0;
         withdrawExact = flags & (1 << 3) > 0;
@@ -74,9 +71,11 @@ contract CurveHelper is MainnetCurveAddresses {
         return IRegistry(AddressProvider.get_registry());
     }
 
-    function _getPoolInfo(address _depositTargetOrPool, DepositTargetType _depositTargetType, bool _explicitUnderlying) internal view returns (
-        CurveCache memory cache
-    ) {
+    function _getPoolInfo(address _depositTargetOrPool, DepositTargetType _depositTargetType, bool _explicitUnderlying)
+        internal
+        view
+        returns (CurveCache memory cache)
+    {
         bool underlying = false;
         cache.depositTarget = _depositTargetOrPool;
 
@@ -117,19 +116,23 @@ contract CurveHelper is MainnetCurveAddresses {
             if (underlying || _explicitUnderlying) {
                 cache.tokens = poolRegistry.get_underlying_coins(cache.pool);
             } else {
-                cache.tokens =  poolRegistry.get_coins(cache.pool);
+                cache.tokens = poolRegistry.get_coins(cache.pool);
             }
         }
     }
 
     /// @dev small optimisation when looping over token balance checks in CurveWithdraw
-    function _getFirstAndLastTokenIndex(uint256[] memory _amounts, bool _removeOneCoin, bool _withdrawExact) internal pure returns (uint256 firstIndex, uint256 lastIndex) {
+    function _getFirstAndLastTokenIndex(uint256[] memory _amounts, bool _removeOneCoin, bool _withdrawExact)
+        internal
+        pure
+        returns (uint256 firstIndex, uint256 lastIndex)
+    {
         if (!_removeOneCoin && !_withdrawExact) {
             return (0, _amounts.length - 1);
         }
 
         bool firstIndexSet;
-        for (uint256 i;  i < _amounts.length; i++) {
+        for (uint256 i; i < _amounts.length; i++) {
             if (_amounts[i] != 0) {
                 lastIndex = i;
                 if (!firstIndexSet) {

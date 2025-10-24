@@ -1,8 +1,4 @@
-const {
-    redeploy,
-    DAI_ADDR,
-    USDC_ADDR,
-} = require('../utils/utils');
+const { redeploy, DAI_ADDR, USDC_ADDR } = require('../utils/utils');
 
 const rariFundProxyDai = '0x7C332FeA58056D1EF6aB2B2016ce4900773DC399';
 const rariFundControllerDai = '0xaFD2AaDE64E6Ea690173F6DE59Fc09F5C9190d74';

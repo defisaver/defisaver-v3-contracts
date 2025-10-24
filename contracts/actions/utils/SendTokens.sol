@@ -6,7 +6,6 @@ import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to send tokens to the specified addresses
 contract SendTokens is ActionBase {
-
     using TokenUtils for address;
 
     /// @param tokens list of tokens to send
@@ -24,15 +23,19 @@ contract SendTokens is ActionBase {
         bytes32[] memory _subData,
         uint8[] memory _paramMapping,
         bytes32[] memory _returnValues
-    ) public virtual payable override returns (bytes32) {
+    ) public payable virtual override returns (bytes32) {
         (Params memory inputData, uint256 arrayLength) = parseInputs(_callData);
-        
+
         for (uint256 i = 0; i < arrayLength;) {
             inputData.tokens[i] = _parseParamAddr(inputData.tokens[i], _paramMapping[i], _subData, _returnValues);
-            inputData.receivers[i] = _parseParamAddr(inputData.receivers[i], _paramMapping[arrayLength + i], _subData, _returnValues);
-            inputData.amounts[i] = _parseParamUint(inputData.amounts[i], _paramMapping[2 * arrayLength + i], _subData, _returnValues);
+            inputData.receivers[i] =
+                _parseParamAddr(inputData.receivers[i], _paramMapping[arrayLength + i], _subData, _returnValues);
+            inputData.amounts[i] =
+                _parseParamUint(inputData.amounts[i], _paramMapping[2 * arrayLength + i], _subData, _returnValues);
 
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
 
         _sendTokens(inputData, arrayLength);
@@ -48,10 +51,9 @@ contract SendTokens is ActionBase {
     }
 
     /// @inheritdoc ActionBase
-    function actionType() public virtual override pure returns (uint8) {
+    function actionType() public pure virtual override returns (uint8) {
         return uint8(ActionType.STANDARD_ACTION);
     }
-
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
@@ -60,7 +62,9 @@ contract SendTokens is ActionBase {
         for (uint256 i = 0; i < arrayLength;) {
             _inputData.tokens[i].withdrawTokens(_inputData.receivers[i], _inputData.amounts[i]);
 
-            unchecked { ++i; }
+            unchecked {
+                ++i;
+            }
         }
     }
 

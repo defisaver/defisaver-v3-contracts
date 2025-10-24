@@ -12,7 +12,6 @@ import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 
 contract TestPendleTokenRedeem is BaseTest, ActionsUtils {
-
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -52,16 +51,18 @@ contract TestPendleTokenRedeem is BaseTest, ActionsUtils {
         cut = new PendleTokenRedeem();
 
         // PT eUSDE 29May2025
-        markets.push(PendleMarketInfo({
-            market: 0x85667e484a32d884010Cf16427D90049CCf46e97,
-            underlyingToken: Addresses.EUSDE_ADDR
-        }));
+        markets.push(
+            PendleMarketInfo({
+                market: 0x85667e484a32d884010Cf16427D90049CCf46e97, underlyingToken: Addresses.EUSDE_ADDR
+            })
+        );
 
         // PT sUSDE  29May2025
-        markets.push(PendleMarketInfo({
-            market: 0xB162B764044697cf03617C2EFbcB1f42e31E4766,
-            underlyingToken: Addresses.SUSDE_ADDR
-        }));
+        markets.push(
+            PendleMarketInfo({
+                market: 0xB162B764044697cf03617C2EFbcB1f42e31E4766, underlyingToken: Addresses.SUSDE_ADDR
+            })
+        );
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -70,31 +71,33 @@ contract TestPendleTokenRedeem is BaseTest, ActionsUtils {
     function test_pendle_redeem() public {
         for (uint256 i = 0; i < markets.length; i++) {
             uint256 underlyingDecimals = IERC20(markets[i].underlyingToken).decimals();
-            _baseTest(TestConfig({
-                market: markets[i].market,
-                underlyingToken: markets[i].underlyingToken,
-                ptAmount: 1043240 * 10 ** underlyingDecimals,
-                isDirect: false
-            }));
+            _baseTest(
+                TestConfig({
+                    market: markets[i].market,
+                    underlyingToken: markets[i].underlyingToken,
+                    ptAmount: 1_043_240 * 10 ** underlyingDecimals,
+                    isDirect: false
+                })
+            );
         }
     }
 
     function test_pendle_redeem_action_direct() public {
         for (uint256 i = 0; i < markets.length; i++) {
             uint256 underlyingDecimals = IERC20(markets[i].underlyingToken).decimals();
-            _baseTest(TestConfig({
-                market: markets[i].market,
-                underlyingToken: markets[i].underlyingToken,
-                ptAmount: 1043240 * 10 ** underlyingDecimals,
-                isDirect: true
-            }));
+            _baseTest(
+                TestConfig({
+                    market: markets[i].market,
+                    underlyingToken: markets[i].underlyingToken,
+                    ptAmount: 1_043_240 * 10 ** underlyingDecimals,
+                    isDirect: true
+                })
+            );
         }
     }
 
-    function _baseTest(
-        TestConfig memory _config
-    ) internal {
-        (, address ptToken, ) = IPendleMarket(_config.market).readTokens();
+    function _baseTest(TestConfig memory _config) internal {
+        (, address ptToken,) = IPendleMarket(_config.market).readTokens();
 
         give(ptToken, sender, _config.ptAmount);
         approveAsSender(sender, ptToken, walletAddr, _config.ptAmount);
@@ -109,12 +112,7 @@ contract TestPendleTokenRedeem is BaseTest, ActionsUtils {
 
         bytes memory callData = executeActionCalldata(
             pendleTokenRedeemEncode(
-                _config.market,
-                _config.underlyingToken,
-                sender,
-                sender,
-                _config.ptAmount,
-                minAmountOut
+                _config.market, _config.underlyingToken, sender, sender, _config.ptAmount, minAmountOut
             ),
             _config.isDirect
         );

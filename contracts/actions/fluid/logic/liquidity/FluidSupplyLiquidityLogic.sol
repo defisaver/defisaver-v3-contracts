@@ -20,9 +20,10 @@ library FluidSupplyLiquidityLogic {
     /// @param _data Supply data
     /// @return nftId NFT id of the position. Used when opening a new position
     /// @return supplyAmount Amount of tokens supplied. Will be the same as the input amount
-    function supply(
-        FluidLiquidityModel.SupplyData memory _data
-    ) internal returns (uint256 nftId, uint256 supplyAmount) {
+    function supply(FluidLiquidityModel.SupplyData memory _data)
+        internal
+        returns (uint256 nftId, uint256 supplyAmount)
+    {
         _data.vaultType.requireLiquidityCollateral();
 
         uint256 msgValue;
@@ -36,14 +37,20 @@ library FluidSupplyLiquidityLogic {
             _data.supplyToken.approveToken(_data.vault, _data.amount);
         }
 
-        (nftId , , ) = _data.vaultType.isT1Vault()
-            ? IFluidVaultT1(_data.vault).operate{ value: msgValue }(
+        (nftId,,) = _data.vaultType.isT1Vault()
+            ? IFluidVaultT1(_data.vault)
+            .operate{
+                value: msgValue
+            }(
                 _data.nftId,
                 _data.amount.signed256(),
                 _data.debtAmount.signed256(), // used during opening of new position. See FluidVaultT1Open
                 _data.debtTo // used during opening of new position. See FluidVaultT1Open
             )
-            : IFluidVaultT3(_data.vault).operate{ value: msgValue }(
+            : IFluidVaultT3(_data.vault)
+            .operate{
+                value: msgValue
+            }(
                 _data.nftId,
                 _data.amount.signed256(),
                 0, /* newDebtToken0_ */

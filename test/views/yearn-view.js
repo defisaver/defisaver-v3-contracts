@@ -36,13 +36,7 @@ describe('Yearn-view', function () {
         await depositToWeth(wethAmount);
         await approve(WETH_ADDRESS, proxy.address);
 
-        await yearnSupply(
-            WETH_ADDRESS,
-            wethAmount,
-            senderAcc.address,
-            senderAcc.address,
-            proxy,
-        );
+        await yearnSupply(WETH_ADDRESS, wethAmount, senderAcc.address, senderAcc.address, proxy);
 
         const wethBalance = await yearnView.getUnderlyingBalanceInVault(senderAcc.address, yWeth);
 
@@ -54,13 +48,7 @@ describe('Yearn-view', function () {
 
         await approve(yWeth, proxy.address);
 
-        await yearnWithdraw(
-            yWeth,
-            yTokenAmount,
-            senderAcc.address,
-            senderAcc.address,
-            proxy,
-        );
+        await yearnWithdraw(yWeth, yTokenAmount, senderAcc.address, senderAcc.address, proxy);
 
         const balanceAfter = await balanceOf(WETH_ADDRESS, senderAcc.address);
 

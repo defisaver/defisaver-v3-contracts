@@ -14,7 +14,10 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     uint64 public immutable REPAY_BUNDLE_ID; 
     uint64 public immutable BOOST_BUNDLE_ID;
 
-    enum RatioState { OVER, UNDER }
+    enum RatioState {
+        OVER,
+        UNDER
+    }
 
     constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
         REPAY_BUNDLE_ID = _repayBundleId;
@@ -22,7 +25,7 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     }
 
     /// @dev 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50000000000000000;
+    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
 
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
@@ -51,7 +54,6 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     ) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
-        
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
@@ -105,6 +107,7 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     ) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
+        
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
 
         if (_subId2 != 0) {
@@ -113,17 +116,13 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     }
 
     /// @notice Deactivates Repay sub and if exists a Boost sub
-    function deactivateSub(
-        uint32 _subId1,
-        uint32 _subId2
-    ) public {
+    function deactivateSub(uint32 _subId1, uint32 _subId2) public {
         SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId1);
 
         if (_subId2 != 0) {
             SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId2);
         }
     }
-
 
     ///////////////////////////////// HELPER FUNCTIONS /////////////////////////////////
 
@@ -142,13 +141,17 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized aave sub
-    function formatRepaySub(AaveSubData memory _subData, address _wallet) public view returns (StrategySub memory repaySub) {
+    function formatRepaySub(AaveSubData memory _subData, address _wallet)
+        public
+        view
+        returns (StrategySub memory repaySub)
+    {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
         bytes memory triggerData = abi.encode(_wallet, AAVE_MARKET, uint256(_subData.minRatio), uint8(RatioState.UNDER));
-        repaySub.triggerData =  new bytes[](1);
+        repaySub.triggerData = new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
         repaySub.subData = new bytes32[](3);
@@ -158,17 +161,21 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized aave sub
-    function formatBoostSub(AaveSubData memory _subData, address _wallet) public view returns (StrategySub memory boostSub) {
+    function formatBoostSub(AaveSubData memory _subData, address _wallet)
+        public
+        view
+        returns (StrategySub memory boostSub)
+    {
         boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
         bytes memory triggerData = abi.encode(_wallet, AAVE_MARKET, uint256(_subData.maxRatio), uint8(RatioState.OVER));
-        boostSub.triggerData =  new bytes[](1);
+        boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
         boostSub.subData = new bytes32[](4);
-        boostSub.subData[0] = bytes32(uint256(uint160(AAVE_MARKET)));  // market
+        boostSub.subData[0] = bytes32(uint256(uint160(AAVE_MARKET))); // market
         boostSub.subData[1] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
         boostSub.subData[2] = bytes32(uint256(0)); // ratioState = boost
         boostSub.subData[3] = bytes32(uint256(1)); // enableAsColl = true

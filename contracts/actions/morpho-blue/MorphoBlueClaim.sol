@@ -53,12 +53,8 @@ contract MorphoBlueClaim is ActionBase {
     }
 
     function _claim(Params memory _params) internal returns (uint256, bytes memory) {
-        uint256 claimed = IUniversalRewardsDistributor(_params.distributor).claim(
-            address(this),
-            _params.token,
-            _params.claimable,
-            _params.merkleProof
-        );
+        uint256 claimed = IUniversalRewardsDistributor(_params.distributor)
+            .claim(address(this), _params.token, _params.claimable, _params.merkleProof);
 
         _params.token.withdrawTokens(_params.to, claimed);
 

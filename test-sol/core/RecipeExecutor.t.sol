@@ -11,7 +11,6 @@ import {ActionsUtils} from '../utils/ActionsUtils.sol';
 import {SmartWallet} from '../utils/SmartWallet.sol';
 import {Addresses} from '../utils/Addresses.sol';
 import {DSAProxyTestUtils} from '../utils/dsa/DSAProxyTestUtils.sol';
-import {console} from 'forge-std/console.sol';
 
 /// @dev Recipe execution from strategy is already tested in StrategyExecutor tests
 /// @dev Here, we just test direct recipe execution with and without flash loan
@@ -52,12 +51,12 @@ contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
 
         cut = new RecipeExecutor();
 
-        redeploy('RecipeExecutor', address(cut));
-        redeploy('PullToken', address(new PullToken()));
-        redeploy('SendToken', address(new SendToken()));
+        redeploy("RecipeExecutor", address(cut));
+        redeploy("PullToken", address(new PullToken()));
+        redeploy("SendToken", address(new SendToken()));
 
         flAddress = address(new FLAction());
-        redeploy('FLAction', flAddress);
+        redeploy("FLAction", flAddress);
     }
 
     /*//////////////////////////////////////////////////////////////////////////

@@ -1,22 +1,16 @@
-/* eslint-disable max-len */
 const { expect } = require('chai');
 const hre = require('hardhat');
 
 const { getAssetInfo } = require('@defisaver/tokens');
 
-const {
-    getAaveDataProvider,
-    VARIABLE_RATE,
-    getPriceOracle,
-} = require('../../utils/aave');
+const { getAaveDataProvider, VARIABLE_RATE, getPriceOracle } = require('../../utils/aave');
 
+const { supplyAave, borrowAave, paybackAave } = require('../../utils/actions');
 const {
-    supplyAave,
-    borrowAave,
-    paybackAave,
-} = require('../../utils/actions');
-const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy,
+    takeSnapshot,
+    revertToSnapshot,
+    getProxy,
+    redeploy,
     fetchAmountinUSDPrice,
     AAVE_MARKET,
     setBalance,
@@ -53,24 +47,31 @@ const aaveV2ApyAfterValuesTest = async () => {
                 const collAsset = getAssetInfo(collateralTokens[i]);
                 const debtAsset = getAssetInfo(debtTokens[j]);
                 if (collAsset.symbol === debtAsset.symbol) {
-                    // eslint-disable-next-line no-continue
                     continue;
                 }
                 it(`... should estimate supply and borrow rates for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]`, async () => {
-                    const supplyReserveConfiguration = await dataProvider
-                        .getReserveConfigurationData(collAsset.address);
-                    const borrowReserveConfiguration = await dataProvider
-                        .getReserveConfigurationData(debtAsset.address);
+                    const supplyReserveConfiguration =
+                        await dataProvider.getReserveConfigurationData(collAsset.address);
+                    const borrowReserveConfiguration =
+                        await dataProvider.getReserveConfigurationData(debtAsset.address);
 
-                    if (!supplyReserveConfiguration.isActive || supplyReserveConfiguration.isFrozen) {
-                        console.log(`skipping test case for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]. Collateral reserve is not active or it is frozen`);
-                        // eslint-disable-next-line no-unused-expressions
+                    if (
+                        !supplyReserveConfiguration.isActive ||
+                        supplyReserveConfiguration.isFrozen
+                    ) {
+                        console.log(
+                            `skipping test case for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]. Collateral reserve is not active or it is frozen`,
+                        );
                         expect(true).to.be.true;
                         return;
                     }
-                    if (!borrowReserveConfiguration.borrowingEnabled || !borrowReserveConfiguration.isActive) {
-                        console.log(`skipping test case for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]. Borrow reserve is not active or borrowing is not enabled`);
-                        // eslint-disable-next-line no-unused-expressions
+                    if (
+                        !borrowReserveConfiguration.borrowingEnabled ||
+                        !borrowReserveConfiguration.isActive
+                    ) {
+                        console.log(
+                            `skipping test case for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]. Borrow reserve is not active or borrowing is not enabled`,
+                        );
                         expect(true).to.be.true;
                         return;
                     }

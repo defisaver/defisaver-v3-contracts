@@ -22,8 +22,12 @@ contract MockExchangeWrapperUsdFeed is IExchangeV3, TokenPriceHelper {
         address _destAddr,
         uint256 _srcAmount,
         bytes calldata /*_additionalData*/
-    ) external override returns (uint256) {    
-        IERC20(_srcAddr).transfer(address(this), _srcAmount);
+    )
+        external
+        override
+        returns (uint256)
+    {
+        IERC20(_srcAddr).safeTransfer(address(this), _srcAmount);
 
         uint256 srcTokenPriceInUSD = getPriceInUSD(_srcAddr);
         uint256 srcTokenDec = IERC20(_srcAddr).decimals();
@@ -31,8 +35,8 @@ contract MockExchangeWrapperUsdFeed is IExchangeV3, TokenPriceHelper {
         uint256 destTokenPriceInUSD = getPriceInUSD(_destAddr);
         uint256 destTokenDec = IERC20(_destAddr).decimals();
 
-         uint256 amountOut = _srcAmount * srcTokenPriceInUSD * (10 ** destTokenDec) / 
-                             ((10 ** srcTokenDec) * destTokenPriceInUSD);
+        uint256 amountOut =
+            _srcAmount * srcTokenPriceInUSD * (10 ** destTokenDec) / ((10 ** srcTokenDec) * destTokenPriceInUSD);
 
         _destAddr.withdrawTokens(msg.sender, amountOut);
 
@@ -46,5 +50,5 @@ contract MockExchangeWrapperUsdFeed is IExchangeV3, TokenPriceHelper {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external payable {}
+    receive() external payable { }
 }

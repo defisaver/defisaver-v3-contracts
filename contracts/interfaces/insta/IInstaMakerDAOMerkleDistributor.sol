@@ -11,13 +11,9 @@ interface IInstaMakerDAOMerkleDistributor {
         uint256 networthAmount,
         bytes32[] calldata merkleProof
     ) external;
-    
-    function getPosition(
-        uint256 id,
-        uint256 rewardAmount,
-        uint256 networthAmount
-    ) external view returns (
-        uint256 claimableRewardAmount,
-        uint256 claimableNetworth
-    );
+
+    function getPosition(uint256 id, uint256 rewardAmount, uint256 networthAmount)
+        external
+        view
+        returns (uint256 claimableRewardAmount, uint256 claimableNetworth);
 }

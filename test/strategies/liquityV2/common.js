@@ -2,7 +2,9 @@ const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { topUp } = require('../../../scripts/utils/fork');
 const {
-    getProxy, addrs, getContractFromRegistry,
+    getProxy,
+    addrs,
+    getContractFromRegistry,
     getOwnerAddr,
     setBalance,
     BOLD_ADDR,
@@ -56,7 +58,10 @@ class BaseLiquityV2StrategyTest {
     }
 
     async setUpContracts() {
-        const strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[network].STRATEGY_EXECUTOR_ADDR);
+        const strategyExecutor = await hre.ethers.getContractAt(
+            'StrategyExecutor',
+            addrs[network].STRATEGY_EXECUTOR_ADDR,
+        );
         this.contracts.strategyExecutor = strategyExecutor.connect(this.botAcc);
         this.contracts.flAction = await getContractFromRegistry('FLAction', this.isFork);
         this.contracts.view = await redeploy('LiquityV2View', this.isFork);
@@ -72,7 +77,10 @@ class BaseLiquityV2StrategyTest {
         await redeploy('LiquityV2Payback', this.isFork);
         await redeploy('LiquityV2AdjustInterestRate', this.isFork);
         */
-        this.contracts.trigger = await redeploy('LiquityV2AdjustRateDebtInFrontTrigger', this.isFork);
+        this.contracts.trigger = await redeploy(
+            'LiquityV2AdjustRateDebtInFrontTrigger',
+            this.isFork,
+        );
         await redeploy('LiquityV2NewInterestRateChecker', this.isFork);
     }
 

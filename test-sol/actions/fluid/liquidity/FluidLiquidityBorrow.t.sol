@@ -2,8 +2,6 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT1.sol";
-import { IFluidVaultT2 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT2.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
@@ -15,7 +13,6 @@ import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 
 contract TestFluidLiquidityBorrow is FluidTestBase {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACTS UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -61,8 +58,8 @@ contract TestFluidLiquidityBorrow is FluidTestBase {
     ////////////////////////////////////////////////////////////////////////*/
     function test_should_borrow() public {
         bool isDirect = false;
-        uint256 initialSupplyAmountUSD = 50000;
-        uint256 borrowAmountUSD = 30000;
+        uint256 initialSupplyAmountUSD = 50_000;
+        uint256 borrowAmountUSD = 30_000;
         bool wrapBorrowedEth = false;
 
         _baseTest(isDirect, initialSupplyAmountUSD, borrowAmountUSD, wrapBorrowedEth, true);
@@ -71,20 +68,20 @@ contract TestFluidLiquidityBorrow is FluidTestBase {
 
     function test_should_borrow_action_direct() public {
         bool isDirect = true;
-        uint256 initialSupplyAmountUSD = 50000;
-        uint256 borrowAmountUSD = 30000;
+        uint256 initialSupplyAmountUSD = 50_000;
+        uint256 borrowAmountUSD = 30_000;
         bool wrapBorrowedEth = false;
-        
+
         _baseTest(isDirect, initialSupplyAmountUSD, borrowAmountUSD, wrapBorrowedEth, true);
         _baseTest(isDirect, initialSupplyAmountUSD, borrowAmountUSD, wrapBorrowedEth, false);
     }
 
     function test_should_borrow_with_eth_wrap() public {
         bool isDirect = false;
-        uint256 initialSupplyAmountUSD = 50000;
-        uint256 borrowAmountUSD = 30000;
+        uint256 initialSupplyAmountUSD = 50_000;
+        uint256 borrowAmountUSD = 30_000;
         bool wrapBorrowedEth = true;
-        
+
         _baseTest(isDirect, initialSupplyAmountUSD, borrowAmountUSD, wrapBorrowedEth, true);
         _baseTest(isDirect, initialSupplyAmountUSD, borrowAmountUSD, wrapBorrowedEth, false);
     }
@@ -99,15 +96,8 @@ contract TestFluidLiquidityBorrow is FluidTestBase {
         address[] memory vaults = _t1VaultsSelected ? t1Vaults : t2Vaults;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
-
             uint256 nftId = _t1VaultsSelected
-                ? executeFluidVaultT1Open(
-                    vaults[i],
-                    _initialSupplyAmountUSD,
-                    0,
-                    wallet,
-                    address(t1OpenContract)
-                )
+                ? executeFluidVaultT1Open(vaults[i], _initialSupplyAmountUSD, 0, wallet, address(t1OpenContract))
                 : executeFluidVaultT2Open(
                     vaults[i],
                     _initialSupplyAmountUSD, /* initial coll amount 0 in usd */
@@ -116,7 +106,7 @@ contract TestFluidLiquidityBorrow is FluidTestBase {
                     wallet,
                     address(t2OpenContract)
                 );
-            
+
             if (!_t1VaultsSelected && nftId == 0) {
                 logSkipTestBecauseOfOpen(vaults[i]);
                 continue;
@@ -125,42 +115,31 @@ contract TestFluidLiquidityBorrow is FluidTestBase {
             FluidTestBase.TokensData memory tokens = getTokens(vaults[i], _t1VaultsSelected);
 
             bool isNativeBorrow = tokens.borrow0 == TokenUtils.ETH_ADDR;
-            uint256 borrowAmount = amountInUSDPrice(
-                isNativeBorrow ? TokenUtils.WETH_ADDR : tokens.borrow0,
-                _borrowAmountUSD
-            );
+            uint256 borrowAmount =
+                amountInUSDPrice(isNativeBorrow ? TokenUtils.WETH_ADDR : tokens.borrow0, _borrowAmountUSD);
 
             bytes memory executeActionCallData = executeActionCalldata(
                 _t1VaultsSelected
-                    ? fluidVaultT1BorrowEncode(
-                        vaults[i],
-                        nftId,
-                        borrowAmount,
-                        sender,
-                        _wrapBorrowedEth
-                    )
+                    ? fluidVaultT1BorrowEncode(vaults[i], nftId, borrowAmount, sender, _wrapBorrowedEth)
                     : fluidDexBorrowEncode(
-                        vaults[i],
-                        sender,
-                        nftId,
-                        borrowAmount,
-                        FluidDexModel.BorrowVariableData(0, 0, 0),
-                        _wrapBorrowedEth
-                    ),
+                            vaults[i],
+                            sender,
+                            nftId,
+                            borrowAmount,
+                            FluidDexModel.BorrowVariableData(0, 0, 0),
+                            _wrapBorrowedEth
+                        ),
                 _isDirect
             );
 
             IFluidVaultResolver.UserPosition memory userPositionBefore = fetchPositionByNftId(nftId);
 
-            uint256 senderBorrowTokenBalanceBefore = isNativeBorrow 
-                ? (
-                    _wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance
-                )
+            uint256 senderBorrowTokenBalanceBefore = isNativeBorrow
+                ? (_wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance)
                 : balanceOf(tokens.borrow0, sender);
 
-            uint256 walletBorrowTokenBalanceBefore = isNativeBorrow 
-                ? address(walletAddr).balance 
-                : balanceOf(tokens.borrow0, walletAddr);
+            uint256 walletBorrowTokenBalanceBefore =
+                isNativeBorrow ? address(walletAddr).balance : balanceOf(tokens.borrow0, walletAddr);
 
             wallet.execute(
                 _t1VaultsSelected ? address(cut_FluidVaultT1Borrow) : address(cut_FluidDexBorrow),
@@ -168,15 +147,12 @@ contract TestFluidLiquidityBorrow is FluidTestBase {
                 0
             );
 
-            uint256 senderBorrowTokenBalanceAfter = isNativeBorrow 
-                ? (
-                    _wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance
-                ) 
+            uint256 senderBorrowTokenBalanceAfter = isNativeBorrow
+                ? (_wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance)
                 : balanceOf(tokens.borrow0, sender);
 
-            uint256 walletBorrowTokenBalanceAfter = isNativeBorrow 
-                ? address(walletAddr).balance 
-                : balanceOf(tokens.borrow0, walletAddr);
+            uint256 walletBorrowTokenBalanceAfter =
+                isNativeBorrow ? address(walletAddr).balance : balanceOf(tokens.borrow0, walletAddr);
 
             IFluidVaultResolver.UserPosition memory userPositionAfter = fetchPositionByNftId(nftId);
 

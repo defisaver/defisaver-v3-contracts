@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import {ActionBase} from "../ActionBase.sol";
-import {SkyHelper} from "./helpers/SkyHelper.sol";
-import {ILockstakeEngine} from "../../interfaces/sky/ILockstakeEngine.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { SkyHelper } from "./helpers/SkyHelper.sol";
+import { ILockstakeEngine } from "../../interfaces/sky/ILockstakeEngine.sol";
 
 /// @title Claim rewards earned by staking SKY in Staking Engine
 contract SkyStakingEngineClaimRewards is ActionBase, SkyHelper {
@@ -54,9 +54,8 @@ contract SkyStakingEngineClaimRewards is ActionBase, SkyHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _skyStakingEngineClaimRewards(Params memory _inputData) internal returns (uint256, bytes memory logData) {
-        uint256 amount = ILockstakeEngine(_inputData.stakingContract).getReward(
-            address(this), _inputData.index, _inputData.farm, _inputData.to
-        );
+        uint256 amount = ILockstakeEngine(_inputData.stakingContract)
+            .getReward(address(this), _inputData.index, _inputData.farm, _inputData.to);
 
         return (amount, abi.encode(_inputData));
     }

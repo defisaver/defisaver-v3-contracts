@@ -10,11 +10,16 @@ const {
     redeploy,
     addrs,
     formatExchangeObj,
-    getOwnerAddr, getAddrFromRegistry,
+    getOwnerAddr,
+    getAddrFromRegistry,
     network,
 } = require('../../utils/utils');
 const { topUp } = require('../../../scripts/utils/fork');
-const { getEulerV2TestPairs, eulerV2CreatePosition, getAccountRatio } = require('../../utils/eulerV2');
+const {
+    getEulerV2TestPairs,
+    eulerV2CreatePosition,
+    getAccountRatio,
+} = require('../../utils/eulerV2');
 const { executeAction } = require('../../utils/actions');
 
 const eulerV2RepayTest = async (testPairs) => {
@@ -134,10 +139,7 @@ const eulerV2RepayTest = async (testPairs) => {
                 // 2. Then execute flashloan repay
                 const repayAmount = supplyAmount.div(10);
                 const flashLoanAction = new dfs.actions.flashloan.FLAction(
-                    new dfs.actions.flashloan.BalancerFlashLoanAction(
-                        [supplyToken],
-                        [repayAmount],
-                    ),
+                    new dfs.actions.flashloan.BalancerFlashLoanAction([supplyToken], [repayAmount]),
                 );
                 const sellAction = new dfs.actions.basic.SellAction(
                     formatExchangeObj(

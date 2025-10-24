@@ -6,36 +6,34 @@ import { ImAsset } from "contracts/interfaces/mstable/ImAsset.sol";
 
 contract MStableView {
     function getMintOutput(address _mAsset, address _input, uint256 _inputQuantity)
-    external
-    view
-    returns (uint256 mintOutput) {
+        external
+        view
+        returns (uint256 mintOutput)
+    {
         return ImAsset(_mAsset).getMintOutput(_input, _inputQuantity);
     }
 
     function getRedeemOutput(address _mAsset, address _output, uint256 _mAssetQuantity)
-    external
-    view
-    returns (uint256 bAssetOutput) {
+        external
+        view
+        returns (uint256 bAssetOutput)
+    {
         return ImAsset(_mAsset).getRedeemOutput(_output, _mAssetQuantity);
     }
-    
+
     function rawBalanceOf(address _vault, address _account) external view returns (uint256) {
         return IBoostedVaultWithLockup(_vault).rawBalanceOf(_account);
     }
 
     function unclaimedRewards(address _vault, address _account)
-    public view returns (
-        uint256 amount,
-        uint256 first,
-        uint256 last
-    ) {
+        public
+        view
+        returns (uint256 amount, uint256 first, uint256 last)
+    {
         return IBoostedVaultWithLockup(_vault).unclaimedRewards(_account);
     }
 
-    function earned(address _vault, address _account)
-    public view returns (
-        uint256 amount
-    ) {
+    function earned(address _vault, address _account) public view returns (uint256 amount) {
         return IBoostedVaultWithLockup(_vault).earned(_account);
     }
 }

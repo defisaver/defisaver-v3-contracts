@@ -1,6 +1,3 @@
-/* eslint-disable no-unused-expressions */
-/* eslint-disable camelcase */
-/* eslint-disable max-len */
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const hre = require('hardhat');
@@ -931,23 +928,23 @@ const pendleRouterTest = async () => {
         const testSwaps = [
             {
                 sellToken: DAI_ADDR,
-                buyToken: '0x50d2c7992b802eef16c04feadab310f31866a545', // PT_MAY25_eUSDe
-                pendleMarket: '0x85667e484a32d884010cf16427d90049ccf46e97',
+                buyToken: '0x62c6e813b9589c3631ba0cdb013acdb8544038b7', // PT USDe Nov
+                pendleMarket: '0x4eaa571eafcd96f51728756bd7f396459bb9b869',
             },
             {
                 buyToken: DAI_ADDR,
-                sellToken: '0x50d2c7992b802eef16c04feadab310f31866a545', // PT_MAY25_eUSDe
-                pendleMarket: '0x85667e484a32d884010cf16427d90049ccf46e97',
+                sellToken: '0x62c6e813b9589c3631ba0cdb013acdb8544038b7', // PT USDe Nov
+                pendleMarket: '0x4eaa571eafcd96f51728756bd7f396459bb9b869',
             },
             {
                 sellToken: DAI_ADDR,
-                buyToken: '0xb7de5dfcb74d25c2f21841fbd6230355c50d9308', // PT_MAY25_sUSDe
-                pendleMarket: '0xb162b764044697cf03617c2efbcb1f42e31e4766',
+                buyToken: '0xe6a934089bbee34f832060ce98848359883749b3', // PT sUSDe Nov
+                pendleMarket: '0xb6ac3d5da138918ac4e84441e924a20daa60dbdd',
             },
             {
                 buyToken: DAI_ADDR,
-                sellToken: '0xb7de5dfcb74d25c2f21841fbd6230355c50d9308', // PT_MAY25_sUSDe
-                pendleMarket: '0xb162b764044697cf03617c2efbcb1f42e31e4766',
+                sellToken: '0xe6a934089bbee34f832060ce98848359883749b3', // PT sUSDe Nov
+                pendleMarket: '0xb6ac3d5da138918ac4e84441e924a20daa60dbdd',
             },
         ];
 
@@ -1019,8 +1016,8 @@ const pendleRouterTest = async () => {
 
                 const options = {
                     method: 'GET',
-                    baseURL: `https://api-v2.pendle.finance/core/v1/sdk/${chainId}/`,
-                    url: `markets/${testSwap.pendleMarket}/swap?receiver=${receiver}&slippage=${slippage}&enableAggregator=${enableAggregator}&tokenIn=${tokenIn}&tokenOut=${tokenOut}&amountIn=${amountIn}`,
+                    baseURL: `https://api-v2.pendle.finance/core/v2/sdk/${chainId}/`,
+                    url: `convert?receiver=${receiver}&slippage=${slippage}&enableAggregator=${enableAggregator}&tokensIn=${tokenIn}&tokensOut=${tokenOut}&amountsIn=${amountIn}`,
                 };
                 const res = await axios(options);
 
@@ -1033,7 +1030,7 @@ const pendleRouterTest = async () => {
                     allowanceTarget,
                     price,
                     protocolFee,
-                    res.data.tx.data /* calldata */,
+                    res.data.routes[0].tx.data /* calldata */,
                 );
 
                 const sellActionNoFee = new dfs.actions.basic.SellNoFeeAction(
@@ -1074,8 +1071,8 @@ const pendleRouterTest = async () => {
 
                 const options = {
                     method: 'GET',
-                    baseURL: `https://api-v2.pendle.finance/core/v1/sdk/${chainId}/`,
-                    url: `markets/${testSwap.pendleMarket}/swap?receiver=${receiver}&slippage=${slippage}&enableAggregator=${enableAggregator}&tokenIn=${tokenIn}&tokenOut=${tokenOut}&amountIn=${amountIn}`,
+                    baseURL: `https://api-v2.pendle.finance/core/v2/sdk/${chainId}/`,
+                    url: `convert?receiver=${receiver}&slippage=${slippage}&enableAggregator=${enableAggregator}&tokensIn=${tokenIn}&tokensOut=${tokenOut}&amountsIn=${amountIn}`,
                 };
                 const res = await axios(options);
 
@@ -1088,7 +1085,7 @@ const pendleRouterTest = async () => {
                     allowanceTarget,
                     price,
                     protocolFee,
-                    res.data.tx.data /* calldata */,
+                    res.data.routes[0].tx.data /* calldata */,
                 );
 
                 const sellRecipe = new dfs.Recipe('SellRecipeNoFee', [

@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 interface IWeEth {
     function wrap(uint256 _eETHAmount) external returns (uint256);
-	function unwrap(uint256 _weETHAmount) external returns (uint256);
+    function unwrap(uint256 _weETHAmount) external returns (uint256);
 
     /// @notice Fetches the amount of weEth respective to the amount of eEth sent in
     function getWeETHByeETH(uint256 _eETHAmount) external view returns (uint256);

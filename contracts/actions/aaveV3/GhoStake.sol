@@ -52,9 +52,7 @@ contract GhoStake is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _stake(
-        Params memory _params
-    ) internal returns (uint256 stkTokensReceived, bytes memory logData) {
+    function _stake(Params memory _params) internal returns (uint256 stkTokensReceived, bytes memory logData) {
         require(_params.to != address(0));
 
         address stakeToken = IStkAave(STAKED_GHO_TOKEN).STAKED_TOKEN();

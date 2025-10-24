@@ -13,7 +13,6 @@ import { SmartWallet } from "../utils/SmartWallet.sol";
 import { WalletType } from "../../contracts/utils/DFSTypes.sol";
 
 contract TestCore_Permission is AuthHelper, BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -41,7 +40,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
 
         safeWallet = new SmartWallet(bob);
         safeAddr = safeWallet.createSafe();
-        
+
         dsProxyWallet = new SmartWallet(alice);
         dsProxyAddr = dsProxyWallet.createDSProxy();
 
@@ -167,4 +166,4 @@ contract TestCore_Permission is AuthHelper, BaseTest {
             return dsaProxyWallet;
         }
     }
-} 
+}

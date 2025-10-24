@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import {ActionBase} from "../ActionBase.sol";
-import { TransientStorageCancun } from "../../utils/TransientStorageCancun.sol";   
+import { ActionBase } from "../ActionBase.sol";
+import { TransientStorageCancun } from "../../utils/TransientStorageCancun.sol";
 import { IAddressesRegistry } from "../../interfaces/liquityV2/IAddressesRegistry.sol";
 import { ITroveManager } from "../../interfaces/liquityV2/ITroveManager.sol";
 
@@ -14,7 +14,6 @@ import { ITroveManager } from "../../interfaces/liquityV2/ITroveManager.sol";
 ///      and compares it with the current trove interest rate.
 /// @author DeFi Saver
 contract LiquityV2NewInterestRateChecker is ActionBase {
-
     /// @notice Transient storage contract for storing temporary data during execution
     TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
@@ -52,14 +51,15 @@ contract LiquityV2NewInterestRateChecker is ActionBase {
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.troveId = _parseParamUint(params.troveId, _paramMapping[1], _subData, _returnValues);
-        params.interestRateChange = _parseParamUint(params.interestRateChange, _paramMapping[2], _subData, _returnValues);
+        params.interestRateChange =
+            _parseParamUint(params.interestRateChange, _paramMapping[2], _subData, _returnValues);
 
         uint256 startInterestRate = uint256(tempStorage.getBytes32("LIQUITY_V2_INTEREST_RATE"));
 
         IAddressesRegistry market = IAddressesRegistry(params.market);
         ITroveManager troveManager = ITroveManager(market.troveManager());
         ITroveManager.LatestTroveData memory troveData = troveManager.getLatestTroveData(params.troveId);
-        
+
         if (troveData.annualInterestRate != (startInterestRate + params.interestRateChange)) {
             revert BadAfterRate(startInterestRate, troveData.annualInterestRate);
         }
@@ -70,7 +70,7 @@ contract LiquityV2NewInterestRateChecker is ActionBase {
 
     /// @notice Direct execution of the action (not implemented for checker actions)
     /// @param _callData Encoded call data
-    function executeActionDirect(bytes memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @notice Returns the action type for this contract
     /// @return uint8 The action type (CHECK_ACTION)

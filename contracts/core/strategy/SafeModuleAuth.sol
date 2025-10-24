@@ -32,6 +32,6 @@ contract SafeModuleAuth is WalletAuth {
        // Execute from module does not revert on failure so we explicitly revert if it fails
        if (!success) {
             revert SafeExecutionError();
-       }
+        }
     }
 }

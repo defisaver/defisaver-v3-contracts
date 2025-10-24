@@ -4,7 +4,6 @@ pragma solidity =0.8.24;
 
 /// @title Helper methods for MCDSaverProxy
 contract MainnetReflexerAddresses {
-
     address internal constant RAI_ADDRESS = 0x03ab458634910AaD20eF5f1C8ee96F1D6ac54919;
     address internal constant RAI_ADAPTER_ADDRESS = 0x0A5653CCa4DB1B6E265F47CAf6969e64f1CFdC45;
     address internal constant SAFE_ENGINE_ADDRESS = 0xCC88a9d330da1133Df3A7bD823B95e52511A6962;

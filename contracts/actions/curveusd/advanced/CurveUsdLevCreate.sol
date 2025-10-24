@@ -79,29 +79,20 @@ contract CurveUsdLevCreate is ActionBase, CurveUsdHelper {
 
         // get swapData formatted and write part of curve path in storage for use in curveUsdSwapper
         address curveUsdSwapper = registry.getAddr(CURVE_SWAPPER_ID);
-        uint256[] memory swapData =
-             _setupCurvePath(
-                curveUsdSwapper,
-                _params.additionalData,
-                _params.debtAmount,
-                _params.minAmount,
-                _params.gasUsed,
-                _params.dfsFeeDivider
-        );
-        
-        // create loan
-        ICrvUsdController(_params.controllerAddress).create_loan_extended(
-            _params.collAmount,
-            _params.debtAmount,
-            _params.nBands,
+        uint256[] memory swapData = _setupCurvePath(
             curveUsdSwapper,
-            swapData
+            _params.additionalData,
+            _params.debtAmount,
+            _params.minAmount,
+            _params.gasUsed,
+            _params.dfsFeeDivider
         );
 
-        return (
-            _params.debtAmount,
-            abi.encode(_params)
-        );
+        // create loan
+        ICrvUsdController(_params.controllerAddress)
+            .create_loan_extended(_params.collAmount, _params.debtAmount, _params.nBands, curveUsdSwapper, swapData);
+
+        return (_params.debtAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

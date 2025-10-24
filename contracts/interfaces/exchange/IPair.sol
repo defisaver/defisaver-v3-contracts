@@ -5,10 +5,10 @@ pragma solidity =0.8.24;
 import { IERC20 } from "../IERC20.sol";
 
 abstract contract IPair is IERC20 {
-    function token0() external virtual view returns (address);
-    function token1() external virtual view returns (address);
-    function getReserves() external virtual view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
-    function price0CumulativeLast() external virtual view returns (uint);
-    function price1CumulativeLast() external virtual view returns (uint);
-    function kLast() external virtual view returns (uint);
+    function token0() external view virtual returns (address);
+    function token1() external view virtual returns (address);
+    function getReserves() external view virtual returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
+    function price0CumulativeLast() external view virtual returns (uint256);
+    function price1CumulativeLast() external view virtual returns (uint256);
+    function kLast() external view virtual returns (uint256);
 }

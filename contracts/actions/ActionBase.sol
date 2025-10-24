@@ -14,16 +14,11 @@ import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
 abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
-    event ActionEvent(
-        string indexed logName,
-        bytes data
-    );
+    event ActionEvent(string indexed logName, bytes data);
 
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
-    DefisaverLogger public constant logger = DefisaverLogger(
-        DFS_LOGGER_ADDR
-    );
+    DefisaverLogger public constant logger = DefisaverLogger(DFS_LOGGER_ADDR);
 
     //Wrong sub index value
     error SubIndexValueError();
@@ -42,7 +37,13 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
     uint8 public constant NO_PARAM_MAPPING = 0;
 
     /// @dev We need to parse Flash loan actions in a different way
-    enum ActionType { FL_ACTION, STANDARD_ACTION, FEE_ACTION, CHECK_ACTION, CUSTOM_ACTION }
+    enum ActionType {
+        FL_ACTION,
+        STANDARD_ACTION,
+        FEE_ACTION,
+        CHECK_ACTION,
+        CUSTOM_ACTION
+    }
 
     /// @notice Parses inputs and runs the implemented action through a user wallet
     /// @dev Is called by the RecipeExecutor chaining actions together
@@ -60,11 +61,10 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
 
     /// @notice Parses inputs and runs the single implemented action through a user wallet
     /// @dev Used to save gas when executing a single action directly
-    function executeActionDirect(bytes memory _callData) public virtual payable;
+    function executeActionDirect(bytes memory _callData) public payable virtual;
 
     /// @notice Returns the type of action we are implementing
     function actionType() public pure virtual returns (uint8);
-
 
     //////////////////////////// HELPER METHODS ////////////////////////////
 
@@ -73,15 +73,14 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
     /// @param _mapType Indicated the type of the input in paramMapping
     /// @param _subData Array of subscription data we can replace the input value with
     /// @param _returnValues Array of subscription data we can replace the input value with
-    function _parseParamUint(
-        uint _param,
-        uint8 _mapType,
-        bytes32[] memory _subData,
-        bytes32[] memory _returnValues
-    ) internal pure returns (uint) {
+    function _parseParamUint(uint256 _param, uint8 _mapType, bytes32[] memory _subData, bytes32[] memory _returnValues)
+        internal
+        pure
+        returns (uint256)
+    {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
-                _param = uint(_returnValues[getReturnIndex(_mapType)]);
+                _param = uint256(_returnValues[getReturnIndex(_mapType)]);
             } else {
                 _param = uint256(_subData[getSubIndex(_mapType)]);
             }
@@ -90,18 +89,16 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
         return _param;
     }
 
-
     /// @notice Given an addr input, injects return/sub values if specified
     /// @param _param The original input value
     /// @param _mapType Indicated the type of the input in paramMapping
     /// @param _subData Array of subscription data we can replace the input value with
     /// @param _returnValues Array of subscription data we can replace the input value with
-    function _parseParamAddr(
-        address _param,
-        uint8 _mapType,
-        bytes32[] memory _subData,
-        bytes32[] memory _returnValues
-    ) internal view returns (address) {
+    function _parseParamAddr(address _param, uint8 _mapType, bytes32[] memory _subData, bytes32[] memory _returnValues)
+        internal
+        view
+        returns (address)
+    {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = address(bytes20((_returnValues[getReturnIndex(_mapType)])));
@@ -154,7 +151,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
     /// @notice Transforms the paramMapping value to the index in return array value
     /// @param _type Indicated the type of the input
     function getReturnIndex(uint8 _type) internal pure returns (uint8) {
-        if (!(isReturnInjection(_type))){
+        if (!(isReturnInjection(_type))) {
             revert SubIndexValueError();
         }
 
@@ -164,7 +161,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
     /// @notice Transforms the paramMapping value to the index in sub array value
     /// @param _type Indicated the type of the input
     function getSubIndex(uint8 _type) internal pure returns (uint8) {
-        if (_type < SUB_MIN_INDEX_VALUE){
+        if (_type < SUB_MIN_INDEX_VALUE) {
             revert ReturnIndexValueError();
         }
         return (_type - SUB_MIN_INDEX_VALUE);

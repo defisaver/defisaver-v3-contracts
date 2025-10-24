@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import {ITrigger} from "../interfaces/ITrigger.sol";
-import {IAddressesRegistry} from "../interfaces/liquityV2/IAddressesRegistry.sol";
-import {ITroveManager} from "../interfaces/liquityV2/ITroveManager.sol";
-import {IBorrowerOperations} from "../interfaces/liquityV2/IBorrowerOperations.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { IAddressesRegistry } from "../interfaces/liquityV2/IAddressesRegistry.sol";
+import { ITroveManager } from "../interfaces/liquityV2/ITroveManager.sol";
+import { IBorrowerOperations } from "../interfaces/liquityV2/IBorrowerOperations.sol";
 
-import {TriggerHelper} from "./helpers/TriggerHelper.sol";
-import {AdminAuth} from "../auth/AdminAuth.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
 
 /// @title Trigger contract that verifies if current LiquityV2 position adjust time for interest rate has passed.
 /// @dev If the trove has an interest batch manager, the trigger will not be triggered.
@@ -54,7 +54,7 @@ contract LiquityV2AdjustTimeTrigger is ITrigger, AdminAuth, TriggerHelper {
         params = abi.decode(_subData, (SubParams));
     }
 
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
 
     function isChangeable() public pure override returns (bool) {
         return false;

@@ -155,14 +155,14 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x5b0b7e38c2a8e46cfae13c360bc5927570beee94",
+        "address": "0x1420f4977E7B71AFddccBFc6F6e1505CefdF99F0",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0x5b0b7e38c2a8e46cfae13c360bc5927570beee94"]
     },
     {
         "name": "ZeroxWrapper",

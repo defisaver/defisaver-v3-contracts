@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-
 interface ICrvUsdController {
     function create_loan(uint256 _collateralAmount, uint256 _debtAmount, uint256 _nBands) external payable;
-    function create_loan_extended(uint256 _collateralAmount, uint256 _debtAmount, uint256 _nBands, address _callbacker, uint256[] memory _callbackArgs) external payable;
+    function create_loan_extended(
+        uint256 _collateralAmount,
+        uint256 _debtAmount,
+        uint256 _nBands,
+        address _callbacker,
+        uint256[] memory _callbackArgs
+    ) external payable;
 
     /// @dev all functions below: if _collateralAmount is 0 will just return
     function add_collateral(uint256 _collateralAmount) external payable;
@@ -27,8 +32,14 @@ interface ICrvUsdController {
 
     function liquidate(address user, uint256 min_x) external;
     function liquidate(address user, uint256 min_x, bool _useEth) external;
-    function liquidate_extended(address user, uint256 min_x, uint256 frac, bool use_eth, address callbacker, uint256[] memory _callbackArgs) external;
-
+    function liquidate_extended(
+        address user,
+        uint256 min_x,
+        uint256 frac,
+        bool use_eth,
+        address callbacker,
+        uint256[] memory _callbackArgs
+    ) external;
 
     /// GETTERS
     function amm() external view returns (address);
@@ -54,7 +65,7 @@ interface ICrvUsdController {
 }
 
 interface ICrvUsdControllerFactory {
-    function get_controller(address) external view returns (address); 
+    function get_controller(address) external view returns (address);
     function debt_ceiling(address) external view returns (uint256);
 }
 
@@ -87,7 +98,7 @@ interface IAGG {
     function rate0() external view returns (uint256);
     function target_debt_fraction() external view returns (uint256);
     function sigma() external view returns (int256);
-    function peg_keepers(uint256) external view returns (address); 
+    function peg_keepers(uint256) external view returns (address);
 }
 
 interface IPegKeeper {
@@ -95,6 +106,9 @@ interface IPegKeeper {
 }
 
 interface ICurveUsdSwapper {
-    function encodeSwapParams(uint256[5][5] memory swapParams,  uint32 gasUsed, uint24 dfsFeeDivider) external pure returns (uint256 encoded);
+    function encodeSwapParams(uint256[5][5] memory swapParams, uint32 gasUsed, uint24 dfsFeeDivider)
+        external
+        pure
+        returns (uint256 encoded);
     function setAdditionalRoutes(address[8] memory _additionalRoutes, address[5] memory _swapZapPools) external;
 }

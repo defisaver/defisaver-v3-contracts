@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import {Tokens} from "../../utils/Tokens.sol";
+import { Tokens } from "../../utils/Tokens.sol";
 
 contract LiquityV2Utils is Tokens {
     function _simulateCollGain(

@@ -1,24 +1,42 @@
-/* eslint-disable no-await-in-loop */
 const hre = require('hardhat');
 const { expect } = require('chai');
 const dfs = require('@defisaver/sdk');
 const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy,
-    setBalance, approve, nullAddress, fetchAmountinUSDPrice,
-    formatMockExchangeObj, setNewExchangeWrapper, getAddrFromRegistry,
+    takeSnapshot,
+    revertToSnapshot,
+    getProxy,
+    redeploy,
+    setBalance,
+    approve,
+    nullAddress,
+    fetchAmountinUSDPrice,
+    formatMockExchangeObj,
+    setNewExchangeWrapper,
+    getAddrFromRegistry,
 } = require('../../utils/utils');
 const {
-    getMarkets, collateralSupplyAmountInUsd, supplyToMarket, borrowAmountInUsd,
+    getMarkets,
+    collateralSupplyAmountInUsd,
+    supplyToMarket,
+    borrowAmountInUsd,
 } = require('../../utils/morpho-blue');
-const { morphoBlueSupplyCollateral, morphoBlueBorrow, executeAction } = require('../../utils/actions');
+const {
+    morphoBlueSupplyCollateral,
+    morphoBlueBorrow,
+    executeAction,
+} = require('../../utils/actions');
 
 describe('Morpho-Blue-Repay', function () {
     this.timeout(80000);
 
     const markets = getMarkets();
 
-    let senderAcc; let proxy; let snapshot; let view; let mockWrapper;
+    let senderAcc;
+    let proxy;
+    let snapshot;
+    let view;
+    let mockWrapper;
     let supplyAmountInWei;
 
     before(async () => {
@@ -40,22 +58,27 @@ describe('Morpho-Blue-Repay', function () {
 
             await supplyToMarket(marketParams);
             const supplyAmount = fetchAmountinUSDPrice(
-                collToken.symbol, collateralSupplyAmountInUsd,
+                collToken.symbol,
+                collateralSupplyAmountInUsd,
             );
-            supplyAmountInWei = hre.ethers.utils.parseUnits(
-                supplyAmount, collToken.decimals,
-            );
+            supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, collToken.decimals);
             await setBalance(collToken.address, senderAcc.address, supplyAmountInWei);
             await approve(collToken.address, proxy.address, senderAcc);
             await morphoBlueSupplyCollateral(
-                proxy, marketParams, supplyAmountInWei, senderAcc.address, nullAddress,
+                proxy,
+                marketParams,
+                supplyAmountInWei,
+                senderAcc.address,
+                nullAddress,
             );
             const borrowAmount = fetchAmountinUSDPrice(loanToken.symbol, borrowAmountInUsd);
-            const borrowAmountInWei = hre.ethers.utils.parseUnits(
-                borrowAmount, loanToken.decimals,
-            );
+            const borrowAmountInWei = hre.ethers.utils.parseUnits(borrowAmount, loanToken.decimals);
             await morphoBlueBorrow(
-                proxy, marketParams, borrowAmountInWei, nullAddress, senderAcc.address,
+                proxy,
+                marketParams,
+                borrowAmountInWei,
+                nullAddress,
+                senderAcc.address,
             );
         }
     });
@@ -83,11 +106,7 @@ describe('Morpho-Blue-Repay', function () {
                 proxy.address,
             );
             const sellAction = new dfs.actions.basic.SellAction(
-                await formatMockExchangeObj(
-                    collToken,
-                    loanToken,
-                    repayAmount,
-                ),
+                await formatMockExchangeObj(collToken, loanToken, repayAmount),
                 proxy.address,
                 proxy.address,
             );
@@ -127,11 +146,7 @@ describe('Morpho-Blue-Repay', function () {
                 ),
             );
             const sellAction = new dfs.actions.basic.SellAction(
-                await formatMockExchangeObj(
-                    collToken,
-                    loanToken,
-                    repayAmount,
-                ),
+                await formatMockExchangeObj(collToken, loanToken, repayAmount),
                 proxy.address,
                 proxy.address,
             );

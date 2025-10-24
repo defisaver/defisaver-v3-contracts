@@ -11,7 +11,6 @@ import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -59,10 +58,10 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 from: walletAddr,
                 account: walletAddr,
                 isDirect: false,
-                accountSupplyAmountInUsd: 100000,
-                accountBorrowAmountInUsd: 50000,
-                fromSupplyAmountInUsd: 40000,
-                paybackAmountInUsd: 20000
+                accountSupplyAmountInUsd: 100_000,
+                accountBorrowAmountInUsd: 50_000,
+                fromSupplyAmountInUsd: 40_000,
+                paybackAmountInUsd: 20_000
             })
         );
     }
@@ -73,10 +72,10 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 from: address(0),
                 account: address(0),
                 isDirect: false,
-                accountSupplyAmountInUsd: 100000,
-                accountBorrowAmountInUsd: 50000,
-                fromSupplyAmountInUsd: 49000,
-                paybackAmountInUsd: 48999
+                accountSupplyAmountInUsd: 100_000,
+                accountBorrowAmountInUsd: 50_000,
+                fromSupplyAmountInUsd: 49_000,
+                paybackAmountInUsd: 48_999
             })
         );
     }
@@ -87,8 +86,8 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 from: walletAddr,
                 account: walletAddr,
                 isDirect: true,
-                accountSupplyAmountInUsd: 100000,
-                accountBorrowAmountInUsd: 60000,
+                accountSupplyAmountInUsd: 100_000,
+                accountBorrowAmountInUsd: 60_000,
                 fromSupplyAmountInUsd: 299,
                 paybackAmountInUsd: 100
             })
@@ -101,9 +100,9 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 from: getSubAccount(walletAddr, 0x01),
                 account: walletAddr,
                 isDirect: false,
-                accountSupplyAmountInUsd: 20000,
+                accountSupplyAmountInUsd: 20_000,
                 accountBorrowAmountInUsd: 5000,
-                fromSupplyAmountInUsd: 30000,
+                fromSupplyAmountInUsd: 30_000,
                 paybackAmountInUsd: type(uint256).max
             })
         );
@@ -115,9 +114,9 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 from: getSubAccount(walletAddr, 0x05),
                 account: getSubAccount(walletAddr, 0x09),
                 isDirect: false,
-                accountSupplyAmountInUsd: 20000,
+                accountSupplyAmountInUsd: 20_000,
                 accountBorrowAmountInUsd: 5000,
-                fromSupplyAmountInUsd: 30000,
+                fromSupplyAmountInUsd: 30_000,
                 paybackAmountInUsd: 4500
             })
         );
@@ -129,19 +128,17 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
                 from: walletAddr,
                 account: getSubAccount(walletAddr, 0x01),
                 isDirect: false,
-                accountSupplyAmountInUsd: 20000,
-                accountBorrowAmountInUsd: 11111,
-                fromSupplyAmountInUsd: 11112,
+                accountSupplyAmountInUsd: 20_000,
+                accountBorrowAmountInUsd: 11_111,
+                fromSupplyAmountInUsd: 11_112,
                 paybackAmountInUsd: type(uint256).max
             })
         );
     }
 
-    function _baseTest(
-        TestConfig memory _config
-    ) internal {
+    function _baseTest(TestConfig memory _config) internal {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory testPair = testPairs[i];
             address supplyVault = testPair.supplyAsset;
@@ -178,26 +175,17 @@ contract TestEulerV2PaybackWithShares is EulerV2TestHelper {
             // - Burn borrow vault dTokens for 'account'
             _paybackWithShares(_config, borrowVault);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 
-    function _paybackWithShares(
-        TestConfig memory _config,
-        address _vault
-    ) internal {
+    function _paybackWithShares(TestConfig memory _config, address _vault) internal {
         uint256 paybackAmount = _config.paybackAmountInUsd == type(uint256).max
             ? type(uint256).max
             : amountInUSDPrice(IEVault(_vault).asset(), _config.paybackAmountInUsd);
 
         bytes memory callData = executeActionCalldata(
-            eulerV2PaybackWithSharesEncode(
-                _vault,
-                _config.from,
-                _config.account,
-                paybackAmount
-            ),
-            _config.isDirect
+            eulerV2PaybackWithSharesEncode(_vault, _config.from, _config.account, paybackAmount), _config.isDirect
         );
 
         address account = _config.account == address(0) ? walletAddr : _config.account;

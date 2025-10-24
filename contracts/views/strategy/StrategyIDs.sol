@@ -3,13 +3,12 @@ pragma solidity =0.8.24;
 
 /// @title Helper library to query some common strategies inside DFS Strategy System
 library StrategyIDs {
-
     function isLimitOrderStrategy(uint256 _strategyID) internal view returns (bool) {
         if (block.chainid == 1 && _strategyID == 51) {
-           return true;
+            return true;
         }
 
-        if ((block.chainid == 42161 || block.chainid == 10 || block.chainid == 8453) && _strategyID == 9) {
+        if ((block.chainid == 42_161 || block.chainid == 10 || block.chainid == 8453) && _strategyID == 9) {
             return true;
         }
 
@@ -21,7 +20,7 @@ library StrategyIDs {
             return true;
         }
 
-        if ((block.chainid == 42161 || block.chainid == 10 || block.chainid == 8453) && _strategyID == 8) {
+        if ((block.chainid == 42_161 || block.chainid == 10 || block.chainid == 8453) && _strategyID == 8) {
             return true;
         }
 
@@ -38,8 +37,8 @@ library StrategyIDs {
         }
 
         if (
-            (block.chainid == 42161 || block.chainid == 10 || block.chainid == 8453) &&
-            (_strategyID == 0 || _strategyID == 1)
+            (block.chainid == 42_161 || block.chainid == 10 || block.chainid == 8453)
+                && (_strategyID == 0 || _strategyID == 1)
         ) {
             return true;
         }
@@ -53,8 +52,8 @@ library StrategyIDs {
         }
 
         if (
-            (block.chainid == 42161 || block.chainid == 10 || block.chainid == 8453) &&
-            (_strategyID == 2 || _strategyID == 3)
+            (block.chainid == 42_161 || block.chainid == 10 || block.chainid == 8453)
+                && (_strategyID == 2 || _strategyID == 3)
         ) {
             return true;
         }
@@ -63,16 +62,13 @@ library StrategyIDs {
     }
 
     function isAaveV3CloseStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (
-            block.chainid == 1 &&
-            (_strategyID == 71 || _strategyID == 72 || _strategyID == 73 || _strategyID == 74)
-        ) {
+        if (block.chainid == 1 && (_strategyID == 71 || _strategyID == 72 || _strategyID == 73 || _strategyID == 74)) {
             return true;
         }
 
         if (
-            (block.chainid == 42161 || block.chainid == 10 || block.chainid == 8453) &&
-            (_strategyID == 4 || _strategyID == 5 || _strategyID == 6 || _strategyID == 7)
+            (block.chainid == 42_161 || block.chainid == 10 || block.chainid == 8453)
+                && (_strategyID == 4 || _strategyID == 5 || _strategyID == 6 || _strategyID == 7)
         ) {
             return true;
         }

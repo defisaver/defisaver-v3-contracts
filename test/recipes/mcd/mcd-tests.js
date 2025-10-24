@@ -36,7 +36,10 @@ const BigNumber = hre.ethers.BigNumber;
 const SUPPLY_AMOUNT_IN_USD = '150000';
 const GENERATE_AMOUNT_IN_USD = '50000';
 const {
-    openVaultForExactAmountInDecimals, gUniDeposit, openVault, executeAction,
+    openVaultForExactAmountInDecimals,
+    gUniDeposit,
+    openVault,
+    executeAction,
 } = require('../../utils/actions');
 
 const McdPaybackAction = dfs.actions.maker.MakerPaybackAction;
@@ -401,7 +404,6 @@ const mcdCloseTest = async () => {
             it(`... should close a ${ilkData.ilkLabel} Vault and return Dai`, async () => {
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -409,12 +411,7 @@ const mcdCloseTest = async () => {
                 const vaultColl = fetchAmountinUSDPrice('WETH', SUPPLY_AMOUNT_IN_USD);
 
                 const amountDai = (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString();
-                const vaultId = await openVault(
-                    proxy,
-                    ilkData.ilkLabel,
-                    vaultColl,
-                    amountDai,
-                );
+                const vaultId = await openVault(proxy, ilkData.ilkLabel, vaultColl, amountDai);
 
                 const daiAddr = makerAddresses.MCD_DAI;
 
@@ -477,7 +474,6 @@ const mcdCloseTest = async () => {
                 const canGenerate = await canGenerateDebt(ilkData);
 
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -485,12 +481,7 @@ const mcdCloseTest = async () => {
                 const amountDai = (parseInt(GENERATE_AMOUNT_IN_USD, 10) + 200).toString();
                 const amountColl = fetchAmountinUSDPrice(tokenData.symbol, SUPPLY_AMOUNT_IN_USD);
 
-                const vaultId = await openVault(
-                    proxy,
-                    ilkData.ilkLabel,
-                    amountColl,
-                    amountDai,
-                );
+                const vaultId = await openVault(proxy, ilkData.ilkLabel, amountColl, amountDai);
 
                 // Vault debt + 1 dai to handle stability fee
                 let flAmount = (parseFloat(amountDai) + 1).toString();
@@ -598,7 +589,6 @@ const mcdCreateTest = async () => {
             it(`... should create a ${ilkData.ilkLabel} Vault and generate Dai`, async () => {
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -656,7 +646,6 @@ const mcdCreateTest = async () => {
             it(`... should create a leveraged ${ilkData.ilkLabel} Vault and generate Dai`, async () => {
                 const canGenerate = await canGenerateDebt(ilkData);
                 if (!canGenerate) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -686,7 +675,6 @@ const mcdCreateTest = async () => {
                 );
 
                 const createVaultRecipe = new dfs.Recipe('CreateVaultRecipe', [
-                    // eslint-disable-next-line max-len
                     // new dfs.actions.flashloan.AaveV2FlashLoanAction([daiAmount], [daiAddr], [0], nullAddress, nullAddress, []),
                     new dfs.actions.flashloan.DyDxFlashLoanAction(
                         daiAmount,

@@ -10,11 +10,13 @@ import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger that triggers when the ratio of a user's position in a Spark market is over or under a certain ratio.
 contract SparkRatioTrigger is ITrigger, AdminAuth, SparkRatioHelper, TriggerHelper {
-
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
-    enum RatioState { OVER, UNDER }
-    
+    enum RatioState {
+        OVER,
+        UNDER
+    }
+
     /// @param user address of the user whose position we check
     /// @param market spark market address
     /// @param ratio ratio that represents the triggerable point
@@ -25,12 +27,8 @@ contract SparkRatioTrigger is ITrigger, AdminAuth, SparkRatioHelper, TriggerHelp
         uint256 ratio;
         uint8 state;
     }
-    
-    function isTriggered(bytes memory, bytes memory _subData)
-        public
-        override
-        returns (bool)
-    {   
+
+    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 currRatio = getSafetyRatio(triggerSubData.market, triggerSubData.user);
@@ -53,11 +51,10 @@ contract SparkRatioTrigger is ITrigger, AdminAuth, SparkRatioHelper, TriggerHelp
     function parseSubInputs(bytes memory _subData) public pure returns (SubParams memory params) {
         params = abi.decode(_subData, (SubParams));
     }
-    
-    function changedSubData(bytes memory _subData) public pure override  returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
+
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 }

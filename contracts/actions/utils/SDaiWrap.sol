@@ -59,9 +59,7 @@ contract SDaiWrap is ActionBase, SparkHelper, UtilHelper {
         IsDAI(SDAI_ADDR).deposit(_params.amount, _params.to);
 
         shares = SDAI_ADDR.getBalance(_params.to) - shares;
-        logData = abi.encode(
-            _params, shares
-        );
+        logData = abi.encode(_params, shares);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

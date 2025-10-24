@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity =0.8.24;
+
 import { DSMath } from "../DS/DSMath.sol";
 
 import { McdHelper } from "../actions/mcd/helpers/McdHelper.sol";
@@ -23,11 +24,7 @@ contract McdView is DSMath, McdHelper {
     /// @param _managerAddr Address of the McdManger or Cropper contract
     /// @param _vaultId Id of the Vaults
     /// @param _ilk Ilk of the Vault
-    function getVaultInfo(
-        address _managerAddr,
-        uint256 _vaultId,
-        bytes32 _ilk
-    ) public view returns (uint256, uint256) {
+    function getVaultInfo(address _managerAddr, uint256 _vaultId, bytes32 _ilk) public view returns (uint256, uint256) {
         address urn;
         if (_managerAddr == CROPPER) {
             address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
@@ -37,14 +34,16 @@ contract McdView is DSMath, McdHelper {
         }
 
         (uint256 collateral, uint256 debt) = vat.urns(_ilk, urn);
-        (, uint256 rate, , , ) = vat.ilks(_ilk);
+        (, uint256 rate,,,) = vat.ilks(_ilk);
 
         return (collateral, rmul(debt, rate));
     }
 
-    function getCdpInfo(uint _cdpId) external view
-        returns (address urn, address owner, address userAddr, bytes32 ilk, uint collateral, uint debt) {
-
+    function getCdpInfo(uint256 _cdpId)
+        external
+        view
+        returns (address urn, address owner, address userAddr, bytes32 ilk, uint256 collateral, uint256 debt)
+    {
         IManager manager = IManager(MCD_MANAGER);
         owner = manager.owns(_cdpId);
 
@@ -58,9 +57,9 @@ contract McdView is DSMath, McdHelper {
             ilk = ICdpRegistry(CDP_REGISTRY).ilks(_cdpId);
         }
 
-         try this._getProxyOwner(owner) returns (address user) {
-                userAddr = user;
-            } catch {}
+        try this._getProxyOwner(owner) returns (address user) {
+            userAddr = user;
+        } catch { }
 
         (collateral, debt) = vat.urns(ilk, urn);
     }
@@ -74,9 +73,9 @@ contract McdView is DSMath, McdHelper {
     /// @notice Address that owns the CDP, might be DSProxy, Safe or EOA
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP
-    function getOwner(IManager _manager, uint _cdpId) public view returns (address) {
+    function getOwner(IManager _manager, uint256 _cdpId) public view returns (address) {
         address owner;
-        
+
         if (address(_manager) == CROPPER) {
             owner = ICdpRegistry(CDP_REGISTRY).owns(_cdpId);
         } else {
@@ -90,7 +89,7 @@ contract McdView is DSMath, McdHelper {
     /// @param _ilk Ilk of the Vault
     function getPrice(bytes32 _ilk) public view returns (uint256) {
         (, uint256 mat) = spotter.ilks(_ilk);
-        (, , uint256 spot, , ) = vat.ilks(_ilk);
+        (,, uint256 spot,,) = vat.ilks(_ilk);
 
         return rmul(rmul(spot, spotter.par()), mat);
     }
@@ -106,20 +105,16 @@ contract McdView is DSMath, McdHelper {
 
         if (debt == 0) return 0;
 
-        return rdiv(wmul(collateral, price), debt) / (10**18);
+        return rdiv(wmul(collateral, price), debt) / (10 ** 18);
     }
 
     function getCropJoinCdps(bytes32[] memory _ilks, address _user)
         public
         view
-        returns (
-            uint256[] memory ids,
-            address[] memory urns,
-            bytes32[] memory ilks
-        )
+        returns (uint256[] memory ids, address[] memory urns, bytes32[] memory ilks)
     {
         uint256 count = _ilks.length;
-        ids = new uint[](count);
+        ids = new uint256[](count);
         urns = new address[](count);
         ilks = new bytes32[](count);
 

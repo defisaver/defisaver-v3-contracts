@@ -8,7 +8,7 @@ interface IFluidDexT1 {
     /// @notice used to simulate swap to find the output amount
     error FluidDexSwapResult(uint256 amountOut);
 
-    error FluidDexPerfectLiquidityOutput(uint256 token0Amt, uint token1Amt);
+    error FluidDexPerfectLiquidityOutput(uint256 token0Amt, uint256 token1Amt);
 
     error FluidDexSingleTokenOutput(uint256 tokenAmt);
 
@@ -48,54 +48,54 @@ interface IFluidDexT1 {
     }
 
     struct ConstantViews2 {
-        uint token0NumeratorPrecision;
-        uint token0DenominatorPrecision;
-        uint token1NumeratorPrecision;
-        uint token1DenominatorPrecision;
+        uint256 token0NumeratorPrecision;
+        uint256 token0DenominatorPrecision;
+        uint256 token1NumeratorPrecision;
+        uint256 token1DenominatorPrecision;
     }
 
     struct PricesAndExchangePrice {
-        uint lastStoredPrice; // last stored price in 1e27 decimals
-        uint centerPrice; // last stored price in 1e27 decimals
-        uint upperRange; // price at upper range in 1e27 decimals
-        uint lowerRange; // price at lower range in 1e27 decimals
-        uint geometricMean; // geometric mean of upper range & lower range in 1e27 decimals
-        uint supplyToken0ExchangePrice;
-        uint borrowToken0ExchangePrice;
-        uint supplyToken1ExchangePrice;
-        uint borrowToken1ExchangePrice;
+        uint256 lastStoredPrice; // last stored price in 1e27 decimals
+        uint256 centerPrice; // last stored price in 1e27 decimals
+        uint256 upperRange; // price at upper range in 1e27 decimals
+        uint256 lowerRange; // price at lower range in 1e27 decimals
+        uint256 geometricMean; // geometric mean of upper range & lower range in 1e27 decimals
+        uint256 supplyToken0ExchangePrice;
+        uint256 borrowToken0ExchangePrice;
+        uint256 supplyToken1ExchangePrice;
+        uint256 borrowToken1ExchangePrice;
     }
 
     struct CollateralReserves {
-        uint token0RealReserves;
-        uint token1RealReserves;
-        uint token0ImaginaryReserves;
-        uint token1ImaginaryReserves;
+        uint256 token0RealReserves;
+        uint256 token1RealReserves;
+        uint256 token0ImaginaryReserves;
+        uint256 token1ImaginaryReserves;
     }
 
     struct DebtReserves {
-        uint token0Debt;
-        uint token1Debt;
-        uint token0RealReserves;
-        uint token1RealReserves;
-        uint token0ImaginaryReserves;
-        uint token1ImaginaryReserves;
+        uint256 token0Debt;
+        uint256 token1Debt;
+        uint256 token0RealReserves;
+        uint256 token1RealReserves;
+        uint256 token0ImaginaryReserves;
+        uint256 token1ImaginaryReserves;
     }
 
     function getCollateralReserves(
-        uint geometricMean_,
-        uint upperRange_,
-        uint lowerRange_,
-        uint token0SupplyExchangePrice_,
-        uint token1SupplyExchangePrice_
+        uint256 geometricMean_,
+        uint256 upperRange_,
+        uint256 lowerRange_,
+        uint256 token0SupplyExchangePrice_,
+        uint256 token1SupplyExchangePrice_
     ) external view returns (CollateralReserves memory c_);
 
     function getDebtReserves(
-        uint geometricMean_,
-        uint upperRange_,
-        uint lowerRange_,
-        uint token0BorrowExchangePrice_,
-        uint token1BorrowExchangePrice_
+        uint256 geometricMean_,
+        uint256 upperRange_,
+        uint256 lowerRange_,
+        uint256 token0BorrowExchangePrice_,
+        uint256 token1BorrowExchangePrice_
     ) external view returns (DebtReserves memory d_);
 
     // reverts with FluidDexPricesAndExchangeRates(pex_);
@@ -106,12 +106,12 @@ interface IFluidDexT1 {
     function constantsView2() external view returns (ConstantViews2 memory constantsView2_);
 
     struct Oracle {
-        uint twap1by0; // TWAP price
-        uint lowestPrice1by0; // lowest price point
-        uint highestPrice1by0; // highest price point
-        uint twap0by1; // TWAP price
-        uint lowestPrice0by1; // lowest price point
-        uint highestPrice0by1; // highest price point
+        uint256 twap1by0; // TWAP price
+        uint256 lowestPrice1by0; // lowest price point
+        uint256 highestPrice1by0; // highest price point
+        uint256 twap0by1; // TWAP price
+        uint256 lowestPrice0by1; // lowest price point
+        uint256 highestPrice0by1; // highest price point
     }
 
     /// @dev This function allows users to swap a specific amount of input tokens for output tokens
@@ -120,12 +120,10 @@ interface IFluidDexT1 {
     /// @param amountOutMin_ The minimum amount of output tokens the user is willing to accept
     /// @param to_ Recipient of swapped tokens. If to_ == address(0) then out tokens will be sent to msg.sender. If to_ == ADDRESS_DEAD then function will revert with amountOut_
     /// @return amountOut_ The amount of output tokens received from the swap
-    function swapIn(
-        bool swap0to1_,
-        uint256 amountIn_,
-        uint256 amountOutMin_,
-        address to_
-    ) external payable returns (uint256 amountOut_);
+    function swapIn(bool swap0to1_, uint256 amountIn_, uint256 amountOutMin_, address to_)
+        external
+        payable
+        returns (uint256 amountOut_);
 
     /// @dev Swap tokens with perfect amount out
     /// @param swap0to1_ Direction of swap. If true, swaps token0 for token1; if false, swaps token1 for token0
@@ -133,12 +131,10 @@ interface IFluidDexT1 {
     /// @param amountInMax_ Maximum amount of tokens to swap in
     /// @param to_ Recipient of swapped tokens. If to_ == address(0) then out tokens will be sent to msg.sender. If to_ == ADDRESS_DEAD then function will revert with amountIn_
     /// @return amountIn_ The amount of input tokens used for the swap
-    function swapOut(
-        bool swap0to1_,
-        uint256 amountOut_,
-        uint256 amountInMax_,
-        address to_
-    ) external payable returns (uint256 amountIn_);
+    function swapOut(bool swap0to1_, uint256 amountOut_, uint256 amountInMax_, address to_)
+        external
+        payable
+        returns (uint256 amountIn_);
 
     /// @dev Deposit tokens in equal proportion to the current pool ratio
     /// @param shares_ The number of shares to mint
@@ -147,12 +143,10 @@ interface IFluidDexT1 {
     /// @param estimate_ If true, function will revert with estimated deposit amounts without executing the deposit
     /// @return token0Amt_ Amount of token0 deposited
     /// @return token1Amt_ Amount of token1 deposited
-    function depositPerfect(
-        uint shares_,
-        uint maxToken0Deposit_,
-        uint maxToken1Deposit_,
-        bool estimate_
-    ) external payable returns (uint token0Amt_, uint token1Amt_);
+    function depositPerfect(uint256 shares_, uint256 maxToken0Deposit_, uint256 maxToken1Deposit_, bool estimate_)
+        external
+        payable
+        returns (uint256 token0Amt_, uint256 token1Amt_);
 
     /// @dev This function allows users to withdraw a perfect amount of collateral liquidity
     /// @param shares_ The number of shares to withdraw
@@ -161,12 +155,9 @@ interface IFluidDexT1 {
     /// @param to_ Recipient of swapped tokens. If to_ == address(0) then out tokens will be sent to msg.sender. If to_ == ADDRESS_DEAD then function will revert with token0Amt_ & token1Amt_
     /// @return token0Amt_ The amount of token0 withdrawn
     /// @return token1Amt_ The amount of token1 withdrawn
-    function withdrawPerfect(
-        uint shares_,
-        uint minToken0Withdraw_,
-        uint minToken1Withdraw_,
-        address to_
-    ) external returns (uint token0Amt_, uint token1Amt_);
+    function withdrawPerfect(uint256 shares_, uint256 minToken0Withdraw_, uint256 minToken1Withdraw_, address to_)
+        external
+        returns (uint256 token0Amt_, uint256 token1Amt_);
 
     /// @dev This function allows users to borrow tokens in equal proportion to the current debt pool ratio
     /// @param shares_ The number of shares to borrow
@@ -175,12 +166,9 @@ interface IFluidDexT1 {
     /// @param to_ Recipient of swapped tokens. If to_ == address(0) then out tokens will be sent to msg.sender. If to_ == ADDRESS_DEAD then function will revert with token0Amt_ & token1Amt_
     /// @return token0Amt_ Amount of token0 borrowed
     /// @return token1Amt_ Amount of token1 borrowed
-    function borrowPerfect(
-        uint shares_,
-        uint minToken0Borrow_,
-        uint minToken1Borrow_,
-        address to_
-    ) external returns (uint token0Amt_, uint token1Amt_);
+    function borrowPerfect(uint256 shares_, uint256 minToken0Borrow_, uint256 minToken1Borrow_, address to_)
+        external
+        returns (uint256 token0Amt_, uint256 token1Amt_);
 
     /// @dev This function allows users to pay back borrowed tokens in equal proportion to the current debt pool ratio
     /// @param shares_ The number of shares to pay back
@@ -189,12 +177,10 @@ interface IFluidDexT1 {
     /// @param estimate_ If true, function will revert with estimated payback amounts without executing the payback
     /// @return token0Amt_ Amount of token0 paid back
     /// @return token1Amt_ Amount of token1 paid back
-    function paybackPerfect(
-        uint shares_,
-        uint maxToken0Payback_,
-        uint maxToken1Payback_,
-        bool estimate_
-    ) external payable returns (uint token0Amt_, uint token1Amt_);
+    function paybackPerfect(uint256 shares_, uint256 maxToken0Payback_, uint256 maxToken1Payback_, bool estimate_)
+        external
+        payable
+        returns (uint256 token0Amt_, uint256 token1Amt_);
 
     /// @dev This function allows users to deposit tokens in any proportion into the col pool
     /// @param token0Amt_ The amount of token0 to deposit
@@ -202,12 +188,10 @@ interface IFluidDexT1 {
     /// @param minSharesAmt_ The minimum amount of shares the user expects to receive
     /// @param estimate_ If true, function will revert with estimated shares without executing the deposit
     /// @return shares_ The amount of shares minted for the deposit
-    function deposit(
-        uint token0Amt_,
-        uint token1Amt_,
-        uint minSharesAmt_,
-        bool estimate_
-    ) external payable returns (uint shares_);
+    function deposit(uint256 token0Amt_, uint256 token1Amt_, uint256 minSharesAmt_, bool estimate_)
+        external
+        payable
+        returns (uint256 shares_);
 
     /// @dev This function allows users to withdraw tokens in any proportion from the col pool
     /// @param token0Amt_ The amount of token0 to withdraw
@@ -215,12 +199,9 @@ interface IFluidDexT1 {
     /// @param maxSharesAmt_ The maximum number of shares the user is willing to burn
     /// @param to_ Recipient of swapped tokens. If to_ == address(0) then out tokens will be sent to msg.sender. If to_ == ADDRESS_DEAD then function will revert with shares_
     /// @return shares_ The number of shares burned for the withdrawal
-    function withdraw(
-        uint token0Amt_,
-        uint token1Amt_,
-        uint maxSharesAmt_,
-        address to_
-    ) external returns (uint shares_);
+    function withdraw(uint256 token0Amt_, uint256 token1Amt_, uint256 maxSharesAmt_, address to_)
+        external
+        returns (uint256 shares_);
 
     /// @dev This function allows users to borrow tokens in any proportion from the debt pool
     /// @param token0Amt_ The amount of token0 to borrow
@@ -228,12 +209,9 @@ interface IFluidDexT1 {
     /// @param maxSharesAmt_ The maximum amount of shares the user is willing to receive
     /// @param to_ Recipient of swapped tokens. If to_ == address(0) then out tokens will be sent to msg.sender. If to_ == ADDRESS_DEAD then function will revert with shares_
     /// @return shares_ The amount of borrow shares minted to represent the borrowed amount
-    function borrow(
-        uint token0Amt_,
-        uint token1Amt_,
-        uint maxSharesAmt_,
-        address to_
-    ) external returns (uint shares_);
+    function borrow(uint256 token0Amt_, uint256 token1Amt_, uint256 maxSharesAmt_, address to_)
+        external
+        returns (uint256 shares_);
 
     /// @dev This function allows users to payback tokens in any proportion to the debt pool
     /// @param token0Amt_ The amount of token0 to payback
@@ -241,12 +219,10 @@ interface IFluidDexT1 {
     /// @param minSharesAmt_ The minimum amount of shares the user expects to burn
     /// @param estimate_ If true, function will revert with estimated shares without executing the payback
     /// @return shares_ The amount of borrow shares burned for the payback
-    function payback(
-        uint token0Amt_,
-        uint token1Amt_,
-        uint minSharesAmt_,
-        bool estimate_
-    ) external payable returns (uint shares_);
+    function payback(uint256 token0Amt_, uint256 token1Amt_, uint256 minSharesAmt_, bool estimate_)
+        external
+        payable
+        returns (uint256 shares_);
 
     /// @dev This function allows users to withdraw their collateral with perfect shares in one token
     /// @param shares_ The number of shares to burn for withdrawal
@@ -254,14 +230,9 @@ interface IFluidDexT1 {
     /// @param minToken1_ The minimum amount of token1 the user expects to receive (set to 0 if withdrawing in token0)
     /// @param to_ Recipient of swapped tokens. If to_ == address(0) then out tokens will be sent to msg.sender. If to_ == ADDRESS_DEAD then function will revert with withdrawAmt_
     /// @return withdrawAmt_ The amount of tokens withdrawn in the chosen token
-    function withdrawPerfectInOneToken(
-        uint shares_,
-        uint minToken0_,
-        uint minToken1_,
-        address to_
-    ) external returns (
-        uint withdrawAmt_
-    );
+    function withdrawPerfectInOneToken(uint256 shares_, uint256 minToken0_, uint256 minToken1_, address to_)
+        external
+        returns (uint256 withdrawAmt_);
 
     /// @dev This function allows users to payback their debt with perfect shares in one token
     /// @param shares_ The number of shares to burn for payback
@@ -269,14 +240,10 @@ interface IFluidDexT1 {
     /// @param maxToken1_ The maximum amount of token1 the user is willing to pay (set to 0 if paying back in token0)
     /// @param estimate_ If true, the function will revert with the estimated payback amount without executing the payback
     /// @return paybackAmt_ The amount of tokens paid back in the chosen token
-    function paybackPerfectInOneToken(
-        uint shares_,
-        uint maxToken0_,
-        uint maxToken1_,
-        bool estimate_
-    ) external payable returns (
-        uint paybackAmt_
-    );
+    function paybackPerfectInOneToken(uint256 shares_, uint256 maxToken0_, uint256 maxToken1_, bool estimate_)
+        external
+        payable
+        returns (uint256 paybackAmt_);
 
     /// @dev the oracle assumes last set price of pool till the next swap happens.
     /// There's a possibility that during that time some interest is generated hence the last stored price is not the 100% correct price for the whole duration
@@ -286,10 +253,8 @@ interface IFluidDexT1 {
     /// @param secondsAgos_ array of seconds ago for which TWAP is needed. If user sends [10, 30, 60] then twaps_ will return [10-0, 30-10, 60-30]
     /// @return twaps_ twap price, lowest price (aka minima) & highest price (aka maxima) between secondsAgo checkpoints
     /// @return currentPrice_ price of pool after the most recent swap
-    function oraclePrice(
-        uint[] memory secondsAgos_
-    ) external view returns (
-        Oracle[] memory twaps_,
-        uint currentPrice_
-    );
+    function oraclePrice(uint256[] memory secondsAgos_)
+        external
+        view
+        returns (Oracle[] memory twaps_, uint256 currentPrice_);
 }

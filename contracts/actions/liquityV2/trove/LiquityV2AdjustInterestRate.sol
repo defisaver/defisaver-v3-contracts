@@ -10,7 +10,6 @@ import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Adjust the interest rate of a LiquityV2 trove on a specific market
 contract LiquityV2AdjustInterestRate is ActionBase, LiquityV2Helper {
-
     /// @param market The address of the LiquityV2 market (collateral branch)
     /// @param troveId The ID of the trove to adjust the interest rate of
     /// @param newAnnualInterestRate The new annual interest rate for the trove
@@ -38,7 +37,8 @@ contract LiquityV2AdjustInterestRate is ActionBase, LiquityV2Helper {
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.troveId = _parseParamUint(params.troveId, _paramMapping[1], _subData, _returnValues);
-        params.newAnnualInterestRate = _parseParamUint(params.newAnnualInterestRate, _paramMapping[2], _subData, _returnValues);
+        params.newAnnualInterestRate =
+            _parseParamUint(params.newAnnualInterestRate, _paramMapping[2], _subData, _returnValues);
         params.upperHint = _parseParamUint(params.upperHint, _paramMapping[3], _subData, _returnValues);
         params.lowerHint = _parseParamUint(params.lowerHint, _paramMapping[4], _subData, _returnValues);
         params.maxUpfrontFee = _parseParamUint(params.maxUpfrontFee, _paramMapping[5], _subData, _returnValues);
@@ -66,13 +66,14 @@ contract LiquityV2AdjustInterestRate is ActionBase, LiquityV2Helper {
     function _adjustInterestRate(Params memory _params) internal returns (uint256, bytes memory) {
         address borrowerOperations = IAddressesRegistry(_params.market).borrowerOperations();
 
-        IBorrowerOperations(borrowerOperations).adjustTroveInterestRate(
-            _params.troveId,
-            _params.newAnnualInterestRate,
-            _params.upperHint,
-            _params.lowerHint,
-            _params.maxUpfrontFee
-        );
+        IBorrowerOperations(borrowerOperations)
+            .adjustTroveInterestRate(
+                _params.troveId,
+                _params.newAnnualInterestRate,
+                _params.upperHint,
+                _params.lowerHint,
+                _params.maxUpfrontFee
+            );
 
         return (_params.newAnnualInterestRate, abi.encode(_params));
     }

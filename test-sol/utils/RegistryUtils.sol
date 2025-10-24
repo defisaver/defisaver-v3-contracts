@@ -13,7 +13,7 @@ contract RegistryUtils is CoreHelper, CheatCodes {
 
         bytes4 actionId = bytes4(keccak256(abi.encodePacked(_actionName)));
 
-        (,uint256 waitPeriod,,,,bool exists) = registry.entries(actionId);
+        (, uint256 waitPeriod,,,, bool exists) = registry.entries(actionId);
 
         address owner = AdminVault(registry.adminVault()).owner();
 

@@ -6,17 +6,15 @@ import { DSMath } from "../../../DS/DSMath.sol";
 import { ISAFEEngine } from "../../../interfaces/reflexer/ISAFEEngine.sol";
 import { ISAFEManager } from "../../../interfaces/reflexer/ISAFEManager.sol";
 import { IBasicTokenAdapters } from "../../../interfaces/reflexer/IBasicTokenAdapters.sol";
-import { ISAFESaviour } from "../../../interfaces/reflexer/ISAFESaviour.sol";
 import { MainnetReflexerAddresses } from "./MainnetReflexerAddresses.sol";
 
 /// @title Helper methods for MCDSaverProxy
 contract ReflexerHelper is DSMath, MainnetReflexerAddresses {
-
     ISAFEEngine public constant safeEngine = ISAFEEngine(SAFE_ENGINE_ADDRESS);
     ISAFEManager public constant safeManager = ISAFEManager(SAFE_MANAGER_ADDRESS);
 
     error IntOverflow();
-    
+
     /// @notice Returns the underlying token address from the adapterAddr
     /// @param _adapterAddr  address to check
     function getTokenFromAdapter(address _adapterAddr) internal view returns (address) {
@@ -35,7 +33,7 @@ contract ReflexerHelper is DSMath, MainnetReflexerAddresses {
     /// @param _x Number to be converted
     function toPositiveInt(uint256 _x) internal pure returns (int256 y) {
         y = int256(_x);
-        if (y < 0){
+        if (y < 0) {
             revert IntOverflow();
         }
     }

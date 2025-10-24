@@ -1,7 +1,5 @@
 const { ilks } = require('@defisaver/tokens');
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require('../../utils/utils');
 
 const { mcdMergeTest } = require('./mcd-tests');
 

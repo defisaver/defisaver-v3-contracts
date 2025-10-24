@@ -22,7 +22,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
     error TargetRatioMiss(uint256, uint256);
 
     /// @dev 2% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 20000000000000000;
+    uint256 internal constant RATIO_OFFSET = 20_000_000_000_000_000;
 
     /// @param vaultId Id of the vault
     /// @param joinAddr Collateral join address
@@ -52,46 +52,19 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
     ) public payable virtual override(ActionBase, DFSSell, GasFeeTaker) returns (bytes32) {
         RepayParams memory repayParams = parseCompositeParams(_callData);
 
-        repayParams.vaultId = _parseParamUint(
-            repayParams.vaultId,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
+        repayParams.vaultId = _parseParamUint(repayParams.vaultId, _paramMapping[0], _subData, _returnValues);
 
-        repayParams.joinAddr = _parseParamAddr(
-            repayParams.joinAddr,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
+        repayParams.joinAddr = _parseParamAddr(repayParams.joinAddr, _paramMapping[1], _subData, _returnValues);
 
-        repayParams.flAmount = _parseParamUint(
-            repayParams.flAmount,
-            _paramMapping[2],
-            _subData,
-            _returnValues
-        );
+        repayParams.flAmount = _parseParamUint(repayParams.flAmount, _paramMapping[2], _subData, _returnValues);
 
-        repayParams.exchangeData.srcAddr = _parseParamAddr(
-            repayParams.exchangeData.srcAddr,
-            _paramMapping[3],
-            _subData,
-            _returnValues
-        );
-        repayParams.exchangeData.destAddr = _parseParamAddr(
-            repayParams.exchangeData.destAddr,
-            _paramMapping[4],
-            _subData,
-            _returnValues
-        );
+        repayParams.exchangeData.srcAddr =
+            _parseParamAddr(repayParams.exchangeData.srcAddr, _paramMapping[3], _subData, _returnValues);
+        repayParams.exchangeData.destAddr =
+            _parseParamAddr(repayParams.exchangeData.destAddr, _paramMapping[4], _subData, _returnValues);
 
-        repayParams.exchangeData.srcAmount = _parseParamUint(
-            repayParams.exchangeData.srcAmount,
-            _paramMapping[5],
-            _subData,
-            _returnValues
-        );
+        repayParams.exchangeData.srcAmount =
+            _parseParamUint(repayParams.exchangeData.srcAmount, _paramMapping[5], _subData, _returnValues);
 
         (bytes memory logData, uint256 paybackAmount) = _repay(repayParams);
         emit ActionEvent("McdRepayComposite", logData);
@@ -107,7 +80,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         override(ActionBase, DFSSell, GasFeeTaker)
     {
         RepayParams memory repayParams = parseCompositeParams(_callData);
-        (bytes memory logData, ) = _repay(repayParams);
+        (bytes memory logData,) = _repay(repayParams);
         logger.logActionDirectEvent("McdRepayComposite", logData);
     }
 
@@ -115,7 +88,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         if (_repayParams.exchangeData.destAddr != DAI_ADDR) {
             revert WrongAsset(_repayParams.exchangeData.destAddr);
         }
-    
+
         uint256 ratioBefore;
         // is part of strategy so check before ratio
         if (_repayParams.gasUsed != 0) {
@@ -130,18 +103,11 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         }
 
         // Sell collateral asset for debt asset
-        (uint256 exchangedAmount, ) = _dfsSell(
-            _repayParams.exchangeData,
-            address(this),
-            address(this),
-            false
-        );
+        (uint256 exchangedAmount,) = _dfsSell(_repayParams.exchangeData, address(this), address(this), false);
 
         // Take gas fee if part of strategy
         if (_repayParams.gasUsed != 0) {
-            paybackAmount = _takeFee(
-                GasFeeTakerParams(_repayParams.gasUsed, DAI_ADDR, exchangedAmount, MAX_DFS_FEE)
-            );
+            paybackAmount = _takeFee(GasFeeTakerParams(_repayParams.gasUsed, DAI_ADDR, exchangedAmount, MAX_DFS_FEE));
         } else {
             paybackAmount = exchangedAmount;
         }
@@ -160,12 +126,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
             DAI_ADDR.approveToken(DAI_JOIN_ADDR, paybackAmount);
             IDaiJoin(DAI_JOIN_ADDR).join(urn, paybackAmount);
             uint256 daiVatBalance = vat.dai(urn);
-            int256 paybackAmountNormalized = normalizePaybackAmount(
-                address(vat),
-                daiVatBalance,
-                urn,
-                ilk
-            );
+            int256 paybackAmountNormalized = normalizePaybackAmount(address(vat), daiVatBalance, urn, ilk);
 
             IManager(MCD_MANAGER_ADDR).frob(_repayParams.vaultId, 0, paybackAmountNormalized);
         }
@@ -177,7 +138,7 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
         }
 
         // is part of strategy so check after ratio
-        if (_repayParams.gasUsed != 0) {    
+        if (_repayParams.gasUsed != 0) {
             uint256 ratioAfter = getRatio(_repayParams.vaultId, _repayParams.nextPrice);
 
             // ratio worst off than before
@@ -203,21 +164,11 @@ contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRa
     }
 
     /// @inheritdoc ActionBase
-    function actionType()
-        public
-        pure
-        virtual
-        override(ActionBase, DFSSell, GasFeeTaker)
-        returns (uint8)
-    {
+    function actionType() public pure virtual override(ActionBase, DFSSell, GasFeeTaker) returns (uint8) {
         return uint8(ActionType.CUSTOM_ACTION);
     }
 
-    function parseCompositeParams(bytes memory _calldata)
-        public
-        pure
-        returns (RepayParams memory params)
-    {
+    function parseCompositeParams(bytes memory _calldata) public pure returns (RepayParams memory params) {
         params = abi.decode(_calldata, (RepayParams));
     }
 }

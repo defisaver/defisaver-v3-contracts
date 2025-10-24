@@ -6,7 +6,6 @@ import { IComet } from "../interfaces/compoundV3/IComet.sol";
 
 // Utility functions taken from the CompoundV3 contracts
 contract CompV3PortedFunctions {
-
     /// @dev The scale for factors
     uint64 internal constant FACTOR_SCALE = 1e18;
 
@@ -16,7 +15,11 @@ contract CompV3PortedFunctions {
     /**
      * @dev The change in principal broken into withdraw and borrow amounts
      */
-    function withdrawAndBorrowAmount(int104 oldPrincipal, int104 newPrincipal) internal pure returns (uint104, uint104) {
+    function withdrawAndBorrowAmount(int104 oldPrincipal, int104 newPrincipal)
+        internal
+        pure
+        returns (uint104, uint104)
+    {
         // If the new principal is greater than the old principal, then no amount has been withdrawn or borrowed
         if (newPrincipal > oldPrincipal) return (0, 0);
 
@@ -48,7 +51,11 @@ contract CompV3PortedFunctions {
     /**
      * @dev The positive present supply balance if positive or the negative borrow balance if negative
      */
-    function presentValue(int104 principalValue_, uint64 _baseSupplyIndex, uint64 _baseBorrowIndex) internal pure returns (int256) {
+    function presentValue(int104 principalValue_, uint64 _baseSupplyIndex, uint64 _baseBorrowIndex)
+        internal
+        pure
+        returns (int256)
+    {
         if (principalValue_ >= 0) {
             return signed256(presentValueSupply(_baseSupplyIndex, uint104(principalValue_)));
         } else {
@@ -56,7 +63,7 @@ contract CompV3PortedFunctions {
         }
     }
 
-     /**
+    /**
      * @dev The principal amount projected forward by the supply index
      */
     function presentValueSupply(uint64 baseSupplyIndex_, uint104 principalValue_) internal pure returns (uint256) {
@@ -73,7 +80,11 @@ contract CompV3PortedFunctions {
     /**
      * @dev The positive principal if positive or the negative principal if negative
      */
-    function principalValue(int256 presentValue_, uint64 baseSupplyIndex_, uint64 baseBorrowIndex_) internal pure returns (int104) {
+    function principalValue(int256 presentValue_, uint64 baseSupplyIndex_, uint64 baseBorrowIndex_)
+        internal
+        pure
+        returns (int104)
+    {
         if (presentValue_ >= 0) {
             return signed104(principalValueSupply(baseSupplyIndex_, uint256(presentValue_)));
         } else {
@@ -101,12 +112,9 @@ contract CompV3PortedFunctions {
      * @dev Note: Does not accrue interest first
      * @return The utilization rate of the base asset
      */
-    function getUtilization(
-        IComet.TotalsBasic memory totals
-    ) public pure returns (uint) 
-    {
-        uint totalSupply_ = presentValueSupply(totals.baseSupplyIndex, totals.totalSupplyBase);
-        uint totalBorrow_ = presentValueBorrow(totals.baseBorrowIndex, totals.totalBorrowBase);
+    function getUtilization(IComet.TotalsBasic memory totals) public pure returns (uint256) {
+        uint256 totalSupply_ = presentValueSupply(totals.baseSupplyIndex, totals.totalSupplyBase);
+        uint256 totalBorrow_ = presentValueBorrow(totals.baseBorrowIndex, totals.totalBorrowBase);
         if (totalSupply_ == 0) {
             return 0;
         } else {
@@ -117,7 +125,7 @@ contract CompV3PortedFunctions {
     /**
      * @dev Multiply a number by a factor
      */
-    function mulFactor(uint n, uint factor) internal pure returns (uint) {
+    function mulFactor(uint256 n, uint256 factor) internal pure returns (uint256) {
         return n * factor / FACTOR_SCALE;
     }
 
@@ -131,12 +139,12 @@ contract CompV3PortedFunctions {
         return int104(n);
     }
 
-     function safe104(uint n) internal pure returns (uint104) {
+    function safe104(uint256 n) internal pure returns (uint104) {
         if (n > type(uint104).max) revert("invalid uint104");
         return uint104(n);
     }
 
-    function safe64(uint n) internal pure returns (uint64) {
+    function safe64(uint256 n) internal pure returns (uint64) {
         if (n > type(uint64).max) revert("invalid uint64");
         return uint64(n);
     }

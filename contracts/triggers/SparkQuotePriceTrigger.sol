@@ -4,14 +4,12 @@ pragma solidity =0.8.24;
 
 import { ITrigger } from "../interfaces/ITrigger.sol";
 import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import { IWStEth } from "../interfaces/lido/IWStEth.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { DSMath } from "../DS/DSMath.sol";
 import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
 contract SparkQuotePriceTrigger is ITrigger, AdminAuth, DSMath, SparkRatioHelper {
-
     enum PriceState {
         OVER,
         UNDER
@@ -28,8 +26,7 @@ contract SparkQuotePriceTrigger is ITrigger, AdminAuth, DSMath, SparkRatioHelper
         uint8 state;
     }
 
-    IAaveV3Oracle public constant aaveOracleV3 =
-        IAaveV3Oracle(SPARK_ORACLE_V3);
+    IAaveV3Oracle public constant aaveOracleV3 = IAaveV3Oracle(SPARK_ORACLE_V3);
 
     /// @dev checks chainlink oracle for current prices and triggers if it's in a correct state
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
@@ -53,19 +50,16 @@ contract SparkQuotePriceTrigger is ITrigger, AdminAuth, DSMath, SparkRatioHelper
         address[] memory assets = new address[](2);
         assets[0] = _baseTokenAddr;
         assets[1] = _quoteTokenAddr;
-        uint256[] memory assetPrices = aaveOracleV3.getAssetsPrices(
-            assets
-        );
+        uint256[] memory assetPrices = aaveOracleV3.getAssetsPrices(assets);
 
         price = assetPrices[0] * 1e8 / assetPrices[1];
 
         return uint256(price);
     }
-    
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
+
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 

@@ -4,10 +4,10 @@ pragma solidity =0.8.24;
 
 abstract contract ICat {
     struct Ilk {
-        address flip;  // Liquidator
-        uint256 chop;  // Liquidation Penalty   [ray]
-        uint256 lump;  // Liquidation Quantity  [wad]
+        address flip; // Liquidator
+        uint256 chop; // Liquidation Penalty   [ray]
+        uint256 lump; // Liquidation Quantity  [wad]
     }
 
-    mapping (bytes32 => Ilk) public ilks;
+    mapping(bytes32 => Ilk) public ilks;
 }

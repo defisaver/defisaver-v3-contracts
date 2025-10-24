@@ -56,14 +56,11 @@ contract MorphoAaveV2Payback is ActionBase, MorphoAaveV2Helper {
             _params.onBehalf = address(this);
         }
 
-        (address aTokenAddress,,) = IAaveProtocolDataProviderV2(
-            DEFAULT_MARKET_DATA_PROVIDER
-        ).getReserveTokensAddresses(_params.tokenAddr);
+        (address aTokenAddress,,) =
+            IAaveProtocolDataProviderV2(DEFAULT_MARKET_DATA_PROVIDER).getReserveTokensAddresses(_params.tokenAddr);
 
-        (
-            uint256 borrowBalanceInP2P,
-            uint256 borrowBalanceOnPool,
-        ) =  IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentBorrowBalanceInOf(aTokenAddress, _params.onBehalf);
+        (uint256 borrowBalanceInP2P, uint256 borrowBalanceOnPool,) =
+            IMorphoAaveV2Lens(MORPHO_AAVEV2_LENS_ADDR).getCurrentBorrowBalanceInOf(aTokenAddress, _params.onBehalf);
 
         uint256 totalDebt = borrowBalanceInP2P + borrowBalanceOnPool;
         if (_params.amount > totalDebt) _params.amount = totalDebt;

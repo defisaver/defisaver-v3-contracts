@@ -107,9 +107,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0xD90Ebd5E551d7451FA289b033755e74588230063"
-        ]
+        "history": ["0xD90Ebd5E551d7451FA289b033755e74588230063"]
     },
     {
         "name": "OneInchWrapper",
@@ -120,9 +118,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x6aB5ee6758235a3aBf6F32578EC2Cb655f2A94a8"
-        ]
+        "history": ["0x6aB5ee6758235a3aBf6F32578EC2Cb655f2A94a8"]
     },
     {
         "name": "OdosWrapper",
@@ -210,9 +206,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0xeDac92a2cF88fF9178D461d152D5C7Cb85a2eF3B"
-        ]
+        "history": ["0xeDac92a2cF88fF9178D461d152D5C7Cb85a2eF3B"]
     },
     {
         "name": "DefisaverLogger",
@@ -274,9 +268,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0xa34452B833fCEfA71E1555d1f654e54eBFFD6022"
-        ]
+        "history": ["0xa34452B833fCEfA71E1555d1f654e54eBFFD6022"]
     },
     {
         "name": "DFSPrices",
@@ -351,25 +343,26 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x5c278b10b839e5ec0a80bcfa8923bae11613c67d",
+        "address": "0xB67979842Ec9B462e18834Aee7426ef37938A5Dd",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.11",
+        "version": "1.0.12",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
-          "0xb099119B6B713614a589D078b4655DFdB75BCef6",
-          "0xD313cdea0F3e759d8Aa0130F768895BDBd371b1d",
-          "0xe2171e5503558ee8723e69807f9f1eb654943a3e",
-          "0xf56a2a8fa68d2e608ed7060be55e96e008dcc3ca",
-          "0xF83052a8d9ec5c705B4D7A1C252A6C24A692e91C",
-          "0x5075c6a7251485CC3FcbB4Ba59d6E6EF26a69d45",
-          "0xB6aF2C91E3eBB250615aaa33Bb955f7a7f21AD17",
-          "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
-          "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
-          "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc",
-          "0x1BD33a66791ef6278f6d88503F1e65bEbAED59da"
+            "0x5c278b10b839e5ec0a80bcfa8923bae11613c67d",
+            "0xb099119B6B713614a589D078b4655DFdB75BCef6",
+            "0xD313cdea0F3e759d8Aa0130F768895BDBd371b1d",
+            "0xe2171e5503558ee8723e69807f9f1eb654943a3e",
+            "0xf56a2a8fa68d2e608ed7060be55e96e008dcc3ca",
+            "0xF83052a8d9ec5c705B4D7A1C252A6C24A692e91C",
+            "0x5075c6a7251485CC3FcbB4Ba59d6E6EF26a69d45",
+            "0xB6aF2C91E3eBB250615aaa33Bb955f7a7f21AD17",
+            "0x05f8Ba4Db7F7C65a61881297D86Aea3c83C26304",
+            "0xcd5380201fdc29Bc417C8aFB926Df60aacc0C0F4",
+            "0xC20fA40Dd4f0D3f7431Eb4B6bc0614F36932F6Dc",
+            "0x1BD33a66791ef6278f6d88503F1e65bEbAED59da"
         ]
     },
     {
@@ -488,9 +481,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xdAd9f0aE49F8E769D45d8639e5F11CA1bCa23487"
-        ]
+        "history": ["0xdAd9f0aE49F8E769D45d8639e5F11CA1bCa23487"]
     },
     {
         "name": "ChangeProxyOwner",
@@ -561,9 +552,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x4d3F58460aE2bC71fFaeb33838BFA3b5610083Db"
-        ]
+        "history": ["0x4d3F58460aE2bC71fFaeb33838BFA3b5610083Db"]
     },
     {
         "name": "AaveV3CollateralSwitch",
@@ -585,9 +574,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x09DC201A6380882752bCdC7bC721D384f716A5a4"
-        ]
+        "history": ["0x09DC201A6380882752bCdC7bC721D384f716A5a4"]
     },
     {
         "name": "AaveV3SetEMode",
@@ -620,9 +607,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xD0130ecB810C6F8d58e60DC417357F6048Ea32e7"
-        ]
+        "history": ["0xD0130ecB810C6F8d58e60DC417357F6048Ea32e7"]
     },
     {
         "name": "AaveV3QuotePriceTrigger",
@@ -644,9 +629,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xE1d1c35f8c60001096964A0260b88F6B1c606b68"
-        ]
+        "history": ["0xE1d1c35f8c60001096964A0260b88F6B1c606b68"]
     },
     {
         "name": "FLAaveV3",
@@ -657,9 +640,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x352D4a1622f2DC34c738F542934372855f219F05"
-        ]
+        "history": ["0x352D4a1622f2DC34c738F542934372855f219F05"]
     },
     {
         "name": "FLAaveV3WithFee",
@@ -739,9 +720,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x7dba2b04c6efaE74D5076248666B86a9C551da5e"
-        ]
+        "history": ["0x7dba2b04c6efaE74D5076248666B86a9C551da5e"]
     },
     {
         "name": "ProxyAuth",
@@ -829,9 +808,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x392579E020a688068422A925c85f28bFD12a7EBB"
-        ]
+        "history": ["0x392579E020a688068422A925c85f28bFD12a7EBB"]
     },
     {
         "name": "SendTokenAndUnwrap",
@@ -842,9 +819,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x8000174366066923D554cb466e190258A6FF3b1f"
-        ]
+        "history": ["0x8000174366066923D554cb466e190258A6FF3b1f"]
     },
     {
         "name": "GasFeeTakerL2",
@@ -871,20 +846,18 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xB76e3f7694589D0f34ba43b17AD0D15350Ab5f85"
-        ]
+        "history": ["0xB76e3f7694589D0f34ba43b17AD0D15350Ab5f85"]
     },
     {
         "name": "AaveV3RatioCheck",
-        "address": "0x7A36779a7b5F1128B28932604057d5b63361297c",
+        "address": "0x6272515E2cC68DE4Eae333A8B2e277C54a9024da",
         "id": "0x71ef3d4e",
         "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x7A36779a7b5F1128B28932604057d5b63361297c"]
     },
     {
         "name": "FLActionL2",
@@ -905,9 +878,7 @@
         "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
-        "history": [
-            "0x988C5C24AE6348404196267e19962f36961CAc29"
-        ]
+        "history": ["0x988C5C24AE6348404196267e19962f36961CAc29"]
     },
     {
         "name": "UniCollectV3",
@@ -995,9 +966,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x3e0512Fac6Ad430eCE9b560861826d4e66D131F7"
-        ]
+        "history": ["0x3e0512Fac6Ad430eCE9b560861826d4e66D131F7"]
     },
     {
         "name": "TokenBalance",
@@ -1019,9 +988,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x38255CD752c56b5dF093Bc56f4411eeb5831d334"
-        ]
+        "history": ["0x38255CD752c56b5dF093Bc56f4411eeb5831d334"]
     },
     {
         "name": "FLBalancer",
@@ -1167,9 +1134,7 @@
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0xd18daaf5601c021B8f6D51829B68B6984A3Abb6A"
-        ]
+        "history": ["0xd18daaf5601c021B8f6D51829B68B6984A3Abb6A"]
     },
     {
         "name": "BotAuthForTxSaver",
@@ -1184,14 +1149,15 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0xAF5D3604B1bE08fadD239b2A7353F01786cE4b0e",
+        "address": "0x64bfC6d69a43E999728C63EBBA188D2c198ee66B",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xAF5D3604B1bE08fadD239b2A7353F01786cE4b0e",
             "0xA41baFAE6832D6D059eEcac0eBB46c4D8c16c248"
         ]
     },
@@ -1228,7 +1194,7 @@
         "registryIds": [],
         "history": []
     },
-    { 
+    {
         "name": "ExecuteCall",
         "address": "0xfd5ac928aac40d490bcf1a83038d58aa90ea39a7",
         "id": "0xd82327eb",
@@ -1244,6 +1210,39 @@
         "address": "0x2daED8030BFC87B3d27c02E2f044B9CF4841Ff3e",
         "id": "0xf41e543f",
         "path": "contracts/actions/utils/CreateSub.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3QuotePriceRangeTrigger",
+        "address": "0xBE079FE994102BfA790aAb1fF09F30ebB9Ef9f67",
+        "id": "0x1b12e080",
+        "path": "contracts/triggers/AaveV3QuotePriceRangeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SendTokensAndUnwrap",
+        "address": "0x975e18C2E4968e129BA2984Eb50b39381c2EaeA4",
+        "id": "0x13bc5bc1",
+        "path": "contracts/actions/utils/SendTokensAndUnwrap.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "UpdateSub",
+        "address": "0xAe6ea1d13dF2bE60dC7933DB56067Cb89d6A2cDe",
+        "id": "0xa985d903",
+        "path": "contracts/actions/utils/UpdateSub.sol",
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",

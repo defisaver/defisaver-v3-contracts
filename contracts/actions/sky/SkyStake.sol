@@ -31,14 +31,10 @@ contract SkyStake is ActionBase, SkyHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.stakingContract = _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
+        inputData.stakingContract =
+            _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
         inputData.stakingToken = _parseParamAddr(inputData.stakingToken, _paramMapping[1], _subData, _returnValues);
-        inputData.amount = _parseParamUint(
-            inputData.amount,
-            _paramMapping[2],
-            _subData,
-            _returnValues
-        );
+        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[3], _subData, _returnValues);
 
         (uint256 amountStaked, bytes memory logData) = _skyStake(inputData);

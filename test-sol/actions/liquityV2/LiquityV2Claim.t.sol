@@ -3,18 +3,14 @@
 pragma solidity =0.8.24;
 
 import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IPriceFeed } from "../../../contracts/interfaces/liquityV2/IPriceFeed.sol";
 import { ITroveManager } from "../../../contracts/interfaces/liquityV2/ITroveManager.sol";
 import { ICollSurplusPool } from "../../../contracts/interfaces/liquityV2/ICollSurplusPool.sol";
-import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
-import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 import { LiquityV2Claim } from "../../../contracts/actions/liquityV2/trove/LiquityV2Claim.sol";
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2Claim is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -70,7 +66,7 @@ contract TestLiquityV2Claim is LiquityV2ExecuteActions {
         ICollSurplusPool collSurplusPool = ICollSurplusPool(_market.collSurplusPool());
         address collToken = _market.collToken();
 
-        uint256 claimableColl = 10000;
+        uint256 claimableColl = 10_000;
 
         // simulate collateral claim from liquidation
         vm.startPrank(address(troveManager));
@@ -78,10 +74,8 @@ contract TestLiquityV2Claim is LiquityV2ExecuteActions {
         vm.stopPrank();
         give(collToken, address(collSurplusPool), claimableColl);
 
-        bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2ClaimEncode(address(_market), sender),
-            _isDirect
-        );
+        bytes memory executeActionCallData =
+            executeActionCalldata(liquityV2ClaimEncode(address(_market), sender), _isDirect);
 
         uint256 senderCollBalanceBefore = balanceOf(collToken, sender);
         wallet.execute(address(cut), executeActionCallData, 0);

@@ -13,7 +13,6 @@ import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2Exe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2Supply is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -84,18 +83,17 @@ contract TestLiquityV2Supply is LiquityV2ExecuteActions {
     }
 
     function _baseTest(bool _isDirect, bool _isMaxUint256Supply, address _interestBatchManager) public {
-        uint256 collAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
-        uint256 supplyAmountInUSD = 20000;
+        uint256 collAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
+        uint256 supplyAmountInUSD = 20_000;
 
         for (uint256 i = 0; i < markets.length; i++) {
-
             if (_interestBatchManager != address(0)) {
                 vm.startPrank(_interestBatchManager);
                 registerBatchManager(markets[i]);
                 vm.stopPrank();
             }
-            
+
             uint256 troveId = executeLiquityOpenTrove(
                 markets[i],
                 _interestBatchManager,
@@ -109,13 +107,7 @@ contract TestLiquityV2Supply is LiquityV2ExecuteActions {
                 viewContract
             );
 
-            _supply(
-                markets[i],
-                troveId,
-                _isDirect,
-                _isMaxUint256Supply,
-                supplyAmountInUSD
-            );
+            _supply(markets[i], troveId, _isDirect, _isMaxUint256Supply, supplyAmountInUSD);
         }
     }
 
@@ -139,10 +131,7 @@ contract TestLiquityV2Supply is LiquityV2ExecuteActions {
 
         bytes memory executeActionCallData = executeActionCalldata(
             liquityV2SupplyEncode(
-                address(_market),
-                sender,
-                _troveId,
-                _isMaxUint256Supply ? type(uint256).max : supplyAmount
+                address(_market), sender, _troveId, _isMaxUint256Supply ? type(uint256).max : supplyAmount
             ),
             _isDirect
         );

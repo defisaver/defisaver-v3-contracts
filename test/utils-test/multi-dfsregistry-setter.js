@@ -31,7 +31,10 @@ describe('Multi-DFSRegistry-Setter', function () {
     const exampleID2 = getNameId(exampleName2);
 
     before(async () => {
-        dfsRegistry = await hre.ethers.getContractAt('DFSRegistry', addrs[hre.network.config.name].REGISTRY_ADDR);
+        dfsRegistry = await hre.ethers.getContractAt(
+            'DFSRegistry',
+            addrs[hre.network.config.name].REGISTRY_ADDR,
+        );
         multiDFSRegistrySetter = await deployAsOwner('MultiDFSRegistrySetter');
 
         // change owner of dfsRegistry
@@ -120,8 +123,9 @@ describe('Multi-DFSRegistry-Setter', function () {
 
         multiDFSRegistrySetter = multiDFSRegistrySetter.connect(callerAcc);
 
-        // eslint-disable-next-line max-len
-        await multiDFSRegistrySetter.approveMultipleContractChanges([exampleID, exampleID2], { gasLimit: 3000000 });
+        await multiDFSRegistrySetter.approveMultipleContractChanges([exampleID, exampleID2], {
+            gasLimit: 3000000,
+        });
 
         const addr = await getAddrFromRegistry(exampleName);
         const addr2 = await getAddrFromRegistry(exampleName2);

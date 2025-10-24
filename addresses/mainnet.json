@@ -1384,9 +1384,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xcC6838d8a61a4b29Ea565d39C38b830f1491cb29"
-        ]
+        "history": ["0xcC6838d8a61a4b29Ea565d39C38b830f1491cb29"]
     },
     {
         "name": "ReflexerGenerate",
@@ -1951,9 +1949,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x3E2C366065bA0f6f9936C2C6A802D72F250b27AA"
-        ]
+        "history": ["0x3E2C366065bA0f6f9936C2C6A802D72F250b27AA"]
     },
     {
         "name": "AaveV3ClaimRewards",
@@ -2177,14 +2173,14 @@
     },
     {
         "name": "AaveV3RatioCheck",
-        "address": "0x8a975A9fB0d77b8d9e7E1694CC868e704D0Ef0fD",
+        "address": "0x6BF59F87046820eFce460a8AdCDeD8fc0ca90898",
         "id": "0x71ef3d4e",
         "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": ["0x8a975A9fB0d77b8d9e7E1694CC868e704D0Ef0fD"]
     },
     {
         "name": "SparkRatioCheck",
@@ -2199,14 +2195,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xe5b2f8d31b47f09400d8afb599e0f239179de6b6",
+        "address": "0xB63565026194672f1db42473CB470B570bba78ce",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.11",
+        "version": "1.0.12",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xe5b2f8d31b47f09400d8afb599e0f239179de6b6",
             "0x5BAD7F432e22BcF1937C8361933c9C804179aEDf",
             "0x0CB0170F3413e54405F64d3C23BA3A1D8Bb96D99",
             "0xFe3BfD9E4d102275AC223704B7c470759E5C883b",
@@ -3531,9 +3528,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x160225c24300bD9fAA03Bc007D5e72bDbbcA9257"
-        ]
+        "history": ["0x160225c24300bD9fAA03Bc007D5e72bDbbcA9257"]
     },
     {
         "name": "CurveWithdraw",
@@ -3704,15 +3699,13 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x8ACCaf4e0054AD73789A3ebF344c3061804c29D8"
-        ]
+        "history": ["0x8ACCaf4e0054AD73789A3ebF344c3061804c29D8"]
     },
     {
         "name": "CompV3SubProxy",
         "address": "0x2f62a2ec44ed48dd5f2d56b308558ac065e8b794",
         "id": "0x8c896d4c",
-        "path": "contracts/triggers/CompV3RatioTrigger.sol",
+        "path": "contracts/actions/compoundV3/CompV3SubProxy.sol",
         "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
@@ -3761,9 +3754,7 @@
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
-        "history": [
-            "0x984c00DC098c98bed1CDfe2Ed786Fe1443da6671"
-        ]
+        "history": ["0x984c00DC098c98bed1CDfe2Ed786Fe1443da6671"]
     },
     {
         "name": "LSVBorrow",
@@ -3785,9 +3776,7 @@
         "inRegistry": true,
         "changeTime": 86400,
         "registryIds": [],
-        "history": [
-            "0x0A4Ef5ADf759064b546441a50109eCbC2528A455"
-        ]
+        "history": ["0x0A4Ef5ADf759064b546441a50109eCbC2528A455"]
     },
     {
         "name": "LSVPayback",
@@ -3877,14 +3866,15 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0x7449c0830B10cbd1BaD1Aa4427Ccb41Fd5C75be5",
+        "address": "0x4100c55Ee98aB045a8cF31Ae84f878B0A3b4F290",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x7449c0830B10cbd1BaD1Aa4427Ccb41Fd5C75be5",
             "0xaFD184d6E048c3C8D18356ef4E9adA024E6fb31c"
         ]
     },
@@ -3963,9 +3953,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x25eCA04532C085F77Ea6CE92C94E9e69896686E6"
-        ]
+        "history": ["0x25eCA04532C085F77Ea6CE92C94E9e69896686E6"]
     },
     {
         "name": "GhoUnstake",
@@ -4152,9 +4140,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x6CEdC0317A9236CdFD800e6a6F41074f01d8229F"
-        ]
+        "history": ["0x6CEdC0317A9236CdFD800e6a6F41074f01d8229F"]
     },
     {
         "name": "LiquityV2Close",
@@ -4198,9 +4184,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x092afc8AB25C6d5A2cE8CeAc4801fd8B1eFa5759"
-        ]
+        "history": ["0x092afc8AB25C6d5A2cE8CeAc4801fd8B1eFa5759"]
     },
     {
         "name": "LiquityV2Payback",
@@ -4233,9 +4217,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x6063CaD05DBf1c15f643C0F483bc5ce749501d3C"
-        ]
+        "history": ["0x6063CaD05DBf1c15f643C0F483bc5ce749501d3C"]
     },
     {
         "name": "LiquityV2AdjustZombieTrove",
@@ -4246,9 +4228,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xDaB6aA000B0EBAa653A2715cb3847976bf614272"
-        ]
+        "history": ["0xDaB6aA000B0EBAa653A2715cb3847976bf614272"]
     },
     {
         "name": "LiquityV2AdjustInterestRate",
@@ -4270,9 +4250,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x1556711572a53c89912AE185f3a6Dba9FF365Bf3"
-        ]
+        "history": ["0x1556711572a53c89912AE185f3a6Dba9FF365Bf3"]
     },
     {
         "name": "LiquityV2SPWithdraw",
@@ -4283,9 +4261,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x237eaB8D7f9bBeaF8D27dB9797EB835e4062B8C2"
-        ]
+        "history": ["0x237eaB8D7f9bBeaF8D27dB9797EB835e4062B8C2"]
     },
     {
         "name": "LiquityV2SPClaimColl",
@@ -4392,9 +4368,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x372404335C05C2493Ff156Ef60cC0B286f6f2971"
-        ]
+        "history": ["0x372404335C05C2493Ff156Ef60cC0B286f6f2971"]
     },
     {
         "name": "FluidVaultT1Supply",
@@ -4405,9 +4379,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x0c6100209D8A0bb14CC7d18e45dA1bd1E7a3a187"
-        ]
+        "history": ["0x0c6100209D8A0bb14CC7d18e45dA1bd1E7a3a187"]
     },
     {
         "name": "FluidVaultT1Withdraw",
@@ -4418,9 +4390,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x5673b9ab4A035C5C7474C344664Be91DaFafa17E"
-        ]
+        "history": ["0x5673b9ab4A035C5C7474C344664Be91DaFafa17E"]
     },
     {
         "name": "FluidVaultT1Borrow",
@@ -4431,9 +4401,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x36AF0cE762a016e8b4a80c70Af406DFcBc1FCbD4"
-        ]
+        "history": ["0x36AF0cE762a016e8b4a80c70Af406DFcBc1FCbD4"]
     },
     {
         "name": "FluidVaultT1Payback",
@@ -4458,9 +4426,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x792D40CAE821905A2B57522BF8a77347e7BB0c0a"
-        ]
+        "history": ["0x792D40CAE821905A2B57522BF8a77347e7BB0c0a"]
     },
     {
         "name": "FluidRatioTrigger",
@@ -4471,9 +4437,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x42EC8D99a10f213D5B891331659C65a93eaF8feC"
-        ]
+        "history": ["0x42EC8D99a10f213D5B891331659C65a93eaF8feC"]
     },
     {
         "name": "FluidRatioCheck",
@@ -4484,9 +4448,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0x82392FAa69528BbFE3610a5914534A6E1505e680"
-        ]
+        "history": ["0x82392FAa69528BbFE3610a5914534A6E1505e680"]
     },
     {
         "name": "FluidView",
@@ -4774,6 +4736,17 @@
         "history": []
     },
     {
+        "name": "AaveV3QuotePriceRangeTrigger",
+        "address": "0x0EEFD00c28A847a1EB536Bb955c20E9C158a4915",
+        "id": "0x1b12e080",
+        "path": "contracts/triggers/AaveV3QuotePriceRangeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "LiquityV2AdjustTimeTrigger",
         "address": "0xDAC16ee91E5407214B75FB1871AaDf356010a939",
         "id": "0x91d52698",
@@ -4818,9 +4791,7 @@
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": [
-            "0xF80C54C53AfE8c09c62D270F535d41A71A1c485D"
-        ]
+        "history": ["0xF80C54C53AfE8c09c62D270F535d41A71A1c485D"]
     },
     {
         "name": "SkyStakingEngineClaimRewards",
@@ -4879,14 +4850,16 @@
     },
     {
         "name": "SkyView",
-        "address": "0x0b2621aE77952606A3b95d06E31b10132C51C860",
+        "address": "0xCC3DA103AD79319A2fA68327bDFA27DB4489caDf",
         "id": "0x6431452a",
         "path": "contracts/views/SkyView.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x0b2621aE77952606A3b95d06E31b10132C51C860"
+        ]
     },
     {
         "name": "DSAAuth",

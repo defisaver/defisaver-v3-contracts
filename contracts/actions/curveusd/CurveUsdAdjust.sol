@@ -62,7 +62,6 @@ contract CurveUsdAdjust is ActionBase, CurveUsdHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _curveUsdAdjust(Params memory _params) internal returns (uint256, bytes memory) {
-
         if (_params.borrowAmount == 0) revert ZeroAmountBorrowed();
         /// @dev see ICrvUsdController natspec
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
@@ -74,10 +73,7 @@ contract CurveUsdAdjust is ActionBase, CurveUsdHelper {
 
         CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, _params.borrowAmount);
 
-        return (
-            _params.borrowAmount,
-            abi.encode(_params)
-        );
+        return (_params.borrowAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

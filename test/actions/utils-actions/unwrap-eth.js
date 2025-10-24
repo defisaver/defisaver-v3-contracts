@@ -1,6 +1,4 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require('../../utils/utils');
 const { unwrapEthTest } = require('./utils-actions-tests');
 
 describe('Unwrap-Eth', function () {

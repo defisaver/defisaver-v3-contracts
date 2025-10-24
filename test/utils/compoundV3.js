@@ -1,6 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable import/no-extraneous-dependencies */
 const hre = require('hardhat');
 const { getAssetInfo } = require('@defisaver/tokens');
 const dfs = require('@defisaver/sdk');
@@ -126,11 +123,19 @@ const deployCompV3BoostBundle = async (isEOA) => {
     const isFork = isNetworkFork();
     await openStrategyAndBundleStorage(isFork);
     const boostStrategy = isEOA
-        ? (isL2 ? createCompV3EOABoostL2Strategy() : createCompV3EOABoostStrategy())
-        : (isL2 ? createCompV3BoostL2Strategy() : createCompV3BoostStrategy());
+        ? isL2
+            ? createCompV3EOABoostL2Strategy()
+            : createCompV3EOABoostStrategy()
+        : isL2
+          ? createCompV3BoostL2Strategy()
+          : createCompV3BoostStrategy();
     const flBoostStrategy = isEOA
-        ? (isL2 ? createCompV3EOAFlBoostL2Strategy() : createCompV3EOAFlBoostStrategy())
-        : (isL2 ? createCompV3FLBoostL2Strategy() : createCompV3FlBoostStrategy());
+        ? isL2
+            ? createCompV3EOAFlBoostL2Strategy()
+            : createCompV3EOAFlBoostStrategy()
+        : isL2
+          ? createCompV3FLBoostL2Strategy()
+          : createCompV3FlBoostStrategy();
     const continuous = true;
     const boostStrategyId = await createStrategy(...boostStrategy, continuous);
     const flBoostStrategyId = await createStrategy(...flBoostStrategy, continuous);
@@ -143,11 +148,19 @@ const deployCompV3RepayBundle = async (isEOA) => {
     const isFork = isNetworkFork();
     await openStrategyAndBundleStorage(isFork);
     const repayStrategy = isEOA
-        ? (isL2 ? createCompV3EOARepayL2Strategy() : createCompV3EOARepayStrategy())
-        : (isL2 ? createCompV3RepayL2Strategy() : createCompV3RepayStrategy());
+        ? isL2
+            ? createCompV3EOARepayL2Strategy()
+            : createCompV3EOARepayStrategy()
+        : isL2
+          ? createCompV3RepayL2Strategy()
+          : createCompV3RepayStrategy();
     const flRepayStrategy = isEOA
-        ? (isL2 ? createCompV3EOAFlRepayL2Strategy() : createCompV3EOAFlRepayStrategy())
-        : (isL2 ? createCompV3FLRepayL2Strategy() : createCompV3FlRepayStrategy());
+        ? isL2
+            ? createCompV3EOAFlRepayL2Strategy()
+            : createCompV3EOAFlRepayStrategy()
+        : isL2
+          ? createCompV3FLRepayL2Strategy()
+          : createCompV3FlRepayStrategy();
     const continuous = true;
     const repayStrategyId = await createStrategy(...repayStrategy, continuous);
     const flRepayStrategyId = await createStrategy(...flRepayStrategy, continuous);
@@ -159,8 +172,12 @@ const deployCompV3BoostOnPriceBundle = async () => {
     const isL2 = network !== 'mainnet';
     const isFork = isNetworkFork();
     await openStrategyAndBundleStorage(isFork);
-    const boostOnPriceStrategy = isL2 ? createCompV3BoostOnPriceL2Strategy() : createCompV3BoostOnPriceStrategy();
-    const flBoostOnPriceStrategy = isL2 ? createCompV3FLBoostOnPriceL2Strategy() : createCompV3FLBoostOnPriceStrategy();
+    const boostOnPriceStrategy = isL2
+        ? createCompV3BoostOnPriceL2Strategy()
+        : createCompV3BoostOnPriceStrategy();
+    const flBoostOnPriceStrategy = isL2
+        ? createCompV3FLBoostOnPriceL2Strategy()
+        : createCompV3FLBoostOnPriceStrategy();
     const continuous = false;
     const boostOnPriceStrategyId = await createStrategy(...boostOnPriceStrategy, continuous);
     const flBoostOnPriceStrategyId = await createStrategy(...flBoostOnPriceStrategy, continuous);
@@ -172,8 +189,12 @@ const deployCompV3RepayOnPriceBundle = async () => {
     const isL2 = network !== 'mainnet';
     const isFork = isNetworkFork();
     await openStrategyAndBundleStorage(isFork);
-    const repayOnPriceStrategy = isL2 ? createCompV3RepayOnPriceL2Strategy() : createCompV3RepayOnPriceStrategy();
-    const flRepayOnPriceStrategy = isL2 ? createCompV3FLRepayOnPriceL2Strategy() : createCompV3FLRepayOnPriceStrategy();
+    const repayOnPriceStrategy = isL2
+        ? createCompV3RepayOnPriceL2Strategy()
+        : createCompV3RepayOnPriceStrategy();
+    const flRepayOnPriceStrategy = isL2
+        ? createCompV3FLRepayOnPriceL2Strategy()
+        : createCompV3FLRepayOnPriceStrategy();
     const continuous = false;
     const repayOnPriceStrategyId = await createStrategy(...repayOnPriceStrategy, continuous);
     const flRepayOnPriceStrategyId = await createStrategy(...flRepayOnPriceStrategy, continuous);
@@ -185,8 +206,12 @@ const deployCompV3CloseBundle = async () => {
     const isL2 = network !== 'mainnet';
     const isFork = isNetworkFork();
     await openStrategyAndBundleStorage(isFork);
-    const flCloseToDebtStrategy = isL2 ? createCompV3FLCloseToDebtL2Strategy() : createCompV3FLCloseToDebtStrategy();
-    const flCloseToCollStrategy = isL2 ? createCompV3FLCloseToCollL2Strategy() : createCompV3FLCloseToCollStrategy();
+    const flCloseToDebtStrategy = isL2
+        ? createCompV3FLCloseToDebtL2Strategy()
+        : createCompV3FLCloseToDebtStrategy();
+    const flCloseToCollStrategy = isL2
+        ? createCompV3FLCloseToCollL2Strategy()
+        : createCompV3FLCloseToCollStrategy();
     const continuous = false;
     const flCloseToDebtStrategyId = await createStrategy(...flCloseToDebtStrategy, continuous);
     const flCloseToCollStrategyId = await createStrategy(...flCloseToCollStrategy, continuous);
@@ -208,8 +233,14 @@ const openCompV3ProxyPosition = async (
     const marketAddr = COMP_V3_MARKETS[chainIds[network]][marketSymbol];
 
     const collAsset = getAssetInfo(collSymbol === 'ETH' ? 'WETH' : collSymbol, chainIds[network]);
-    const collAmount = await fetchAmountInUSDPrice(collSymbol === 'ETH' ? 'WETH' : collSymbol, collAmountInUSD);
-    const debtAmount = await fetchAmountInUSDPrice(marketSymbol === 'ETH' ? 'WETH' : marketSymbol, debtAmountInUSD);
+    const collAmount = await fetchAmountInUSDPrice(
+        collSymbol === 'ETH' ? 'WETH' : collSymbol,
+        collAmountInUSD,
+    );
+    const debtAmount = await fetchAmountInUSDPrice(
+        marketSymbol === 'ETH' ? 'WETH' : marketSymbol,
+        debtAmountInUSD,
+    );
 
     await setBalance(collAsset.address, eoaAddr, collAmount);
     await approve(collAsset.address, proxyAddr, eoaSigner);
@@ -249,7 +280,10 @@ const openCompV3EOAPosition = async (
     const marketAddr = COMP_V3_MARKETS[chainIds[network]][marketSymbol];
 
     const collAsset = getAssetInfo(collSymbol === 'ETH' ? 'WETH' : collSymbol, chainIds[network]);
-    const borrowAsset = getAssetInfo(marketSymbol === 'ETH' ? 'WETH' : marketSymbol, chainIds[network]);
+    const borrowAsset = getAssetInfo(
+        marketSymbol === 'ETH' ? 'WETH' : marketSymbol,
+        chainIds[network],
+    );
 
     const collAmount = await fetchAmountInUSDPrice(collAsset.symbol, collAmountInUSD);
     const debtAmount = await fetchAmountInUSDPrice(borrowAsset.symbol, debtAmountInUSD);
@@ -263,11 +297,7 @@ const openCompV3EOAPosition = async (
     await cometContract.withdrawFrom(eoaAddr, eoaAddr, borrowAsset.address, debtAmount.toString());
 };
 
-const addCompV3Manager = async (
-    eoaAddr,
-    managerToAdd,
-    marketSymbol,
-) => {
+const addCompV3Manager = async (eoaAddr, managerToAdd, marketSymbol) => {
     const eoaSigner = await hre.ethers.getSigner(eoaAddr);
 
     const marketAddr = COMP_V3_MARKETS[chainIds[network]][marketSymbol];
@@ -276,10 +306,7 @@ const addCompV3Manager = async (
     await cometContract.allow(managerToAdd, true);
 };
 
-const getCompV3PositionRatio = async (
-    marketSymbol,
-    userAddr,
-) => {
+const getCompV3PositionRatio = async (marketSymbol, userAddr) => {
     const compV3RatioTrigger = await getContractFromRegistry('CompV3RatioTrigger', isNetworkFork());
     const triggerAddr = compV3RatioTrigger.address;
     const ratioHelper = await hre.ethers.getContractAt('CompV3RatioHelper', triggerAddr);

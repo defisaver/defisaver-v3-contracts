@@ -12,7 +12,6 @@ import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Called through user wallet, handles auth and calls subscription contract
 contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
-
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     /// @notice Gives wallet permission if needed and registers a new sub
@@ -29,10 +28,7 @@ contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWall
     /// @notice Calls SubStorage to update the users subscription data
     /// @param _subId Id of the subscription to update
     /// @param _sub Subscription struct of the user (needs whole struct so we can hash it)
-    function updateSubData(
-        uint256 _subId,
-        StrategySub calldata _sub
-    ) public {
+    function updateSubData(uint256 _subId, StrategySub calldata _sub) public {
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_subId, _sub);
     }
 
@@ -46,7 +42,6 @@ contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWall
         _giveAuthContractPermission(_getWalletType(address(this)));
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId);
     }
-
 
     /// @notice Updates subscription and enables the subscription for execution
     /// @dev Must own the sub. to be able to enable it
@@ -64,9 +59,7 @@ contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWall
     /// @notice Disables the subscription (will not be able to execute the strategy for the user)
     /// @dev Must own the sub. to be able to disable it
     /// @param _subId Id of subscription to disable
-    function deactivateSub(
-        uint _subId
-    ) public {
+    function deactivateSub(uint256 _subId) public {
         SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
     }
 }

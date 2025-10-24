@@ -2,8 +2,15 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy,
-    setBalance, approve, nullAddress, fetchAmountinUSDPrice, balanceOf,
+    takeSnapshot,
+    revertToSnapshot,
+    getProxy,
+    redeploy,
+    setBalance,
+    approve,
+    nullAddress,
+    fetchAmountinUSDPrice,
+    balanceOf,
 } = require('../../utils/utils');
 const { getMarkets, loanTokenSupplyAmountInUsd } = require('../../utils/morpho-blue');
 const { morphoBlueSupply, morphoBlueWithdraw } = require('../../utils/actions');
@@ -14,7 +21,10 @@ describe('Morpho-Blue-Withdraw', function () {
     const markets = getMarkets();
     const supplyAmountInUsd = loanTokenSupplyAmountInUsd;
 
-    let senderAcc; let proxy; let snapshot; let view;
+    let senderAcc;
+    let proxy;
+    let snapshot;
+    let view;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -36,14 +46,16 @@ describe('Morpho-Blue-Withdraw', function () {
         const collToken = getAssetInfoByAddress(marketParams[1]);
         it(`should partially and fully withdraw ${supplyAmountInUsd}$ of ${loanToken.symbol} to MorphoBlue ${collToken.symbol}/${loanToken.symbol} market`, async () => {
             const supplyAmount = fetchAmountinUSDPrice(loanToken.symbol, supplyAmountInUsd);
-            const supplyAmountInWei = hre.ethers.utils.parseUnits(
-                supplyAmount, loanToken.decimals,
-            );
+            const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, loanToken.decimals);
 
             await setBalance(marketParams[0], senderAcc.address, supplyAmountInWei);
             await approve(marketParams[0], proxy.address, senderAcc);
             await morphoBlueSupply(
-                proxy, marketParams, supplyAmountInWei, senderAcc.address, nullAddress,
+                proxy,
+                marketParams,
+                supplyAmountInWei,
+                senderAcc.address,
+                nullAddress,
             );
             let positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
             console.log(positionInfo.suppliedInAssets);
@@ -51,11 +63,16 @@ describe('Morpho-Blue-Withdraw', function () {
             // loanToken supplied
             const withdrawAmount = (supplyAmount / 3).toFixed(loanToken.decimals);
             const withdrawAmountInWei = hre.ethers.utils.parseUnits(
-                withdrawAmount.toString(), loanToken.decimals,
+                withdrawAmount.toString(),
+                loanToken.decimals,
             );
             await setBalance(marketParams[0], senderAcc.address, hre.ethers.utils.parseUnits('0'));
             await morphoBlueWithdraw(
-                proxy, marketParams, withdrawAmountInWei, nullAddress, senderAcc.address,
+                proxy,
+                marketParams,
+                withdrawAmountInWei,
+                nullAddress,
+                senderAcc.address,
             );
             positionInfo = await view.callStatic.getUserInfo(marketParams, proxy.address);
             let userBalance = await balanceOf(marketParams[0], senderAcc.address);

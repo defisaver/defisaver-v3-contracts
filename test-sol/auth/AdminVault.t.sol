@@ -5,7 +5,6 @@ import { AdminVault } from "../../contracts/auth/AdminVault.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 
 contract TestCore_AdminVault is AdminVault, BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/

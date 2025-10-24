@@ -9,12 +9,10 @@ import { IL2PoolV3 } from "../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
 import { IAaveProtocolDataProvider } from "../../../contracts/interfaces/aaveV3/IAaveProtocolDataProvider.sol";
 import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
 
-import {Addresses } from "../../utils/Addresses.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 
 contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -37,7 +35,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
     function setUp() public override {
         forkMainnet("AaveV3Withdraw");
         initTestPairs("AaveV3");
-        
+
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
@@ -87,33 +85,16 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         }
     }
 
-    function testFuzz_encode_decode_no_market(
-        uint16 _assetId,
-        uint256 _amount,
-        address _to
-    ) public view {
+    function testFuzz_encode_decode_no_market(uint16 _assetId, uint256 _amount, address _to) public view {
         AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
-            assetId: _assetId,
-            useDefaultMarket: true,
-            amount: _amount,
-            to: _to,
-            market: DEFAULT_AAVE_MARKET
+            assetId: _assetId, useDefaultMarket: true, amount: _amount, to: _to, market: DEFAULT_AAVE_MARKET
         });
         _assertParams(params);
     }
 
-    function testFuzz_encode_decode(
-        uint16 _assetId,
-        uint256 _amount,
-        address _to,
-        address _market
-    ) public view {
+    function testFuzz_encode_decode(uint16 _assetId, uint256 _amount, address _to, address _market) public view {
         AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
-            assetId: _assetId,
-            useDefaultMarket: false,
-            amount: _amount,
-            to: _to,
-            market: _market
+            assetId: _assetId, useDefaultMarket: false, amount: _amount, to: _to, market: _market
         });
         _assertParams(params);
     }
@@ -124,7 +105,7 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
     function _assertParams(AaveV3Withdraw.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3Withdraw.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
-        
+
         assertEq(_params.assetId, decodedParams.assetId);
         assertEq(_params.useDefaultMarket, decodedParams.useDefaultMarket);
         assertEq(_params.amount, decodedParams.amount);
@@ -140,29 +121,14 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
 
         if (_isL2Direct) {
             AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
-                assetId: tokenData.id,
-                useDefaultMarket: true,
-                amount: _amount,
-                to: sender,
-                market: address(0)
+                assetId: tokenData.id, useDefaultMarket: true, amount: _amount, to: sender, market: address(0)
             });
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
-        }
-        else {
-            bytes memory paramsCalldata = aaveV3WithdrawEncode(
-                tokenData.id,
-                true,
-                _amount,
-                sender,
-                address(0)
-            );
+        } else {
+            bytes memory paramsCalldata = aaveV3WithdrawEncode(tokenData.id, true, _amount, sender, address(0));
 
             bytes memory _calldata = abi.encodeWithSelector(
-                AaveV3Withdraw.executeAction.selector,
-                paramsCalldata,
-                subData,
-                paramMapping,
-                returnValues
+                AaveV3Withdraw.executeAction.selector, paramsCalldata, subData, paramMapping, returnValues
             );
 
             wallet.execute(address(cut), _calldata, 0);
@@ -174,12 +140,14 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         uint256 maxATokenIncreaseTolerance = 10 wei;
 
         if (_amount == type(uint256).max) {
-            assertApproxEqAbs(senderBalanceAfter, senderBalanceBefore + walletATokenBalanceBefore, maxATokenIncreaseTolerance);
+            assertApproxEqAbs(
+                senderBalanceAfter, senderBalanceBefore + walletATokenBalanceBefore, maxATokenIncreaseTolerance
+            );
             assertEq(walletATokenBalanceAfter, 0);
         } else {
             assertEq(senderBalanceAfter, senderBalanceBefore + _amount);
             assertLt(walletATokenBalanceAfter, walletATokenBalanceBefore);
-            assertApproxEqAbs(walletATokenBalanceAfter, walletATokenBalanceBefore - _amount, maxATokenIncreaseTolerance);    
+            assertApproxEqAbs(walletATokenBalanceAfter, walletATokenBalanceBefore - _amount, maxATokenIncreaseTolerance);
         }
     }
 

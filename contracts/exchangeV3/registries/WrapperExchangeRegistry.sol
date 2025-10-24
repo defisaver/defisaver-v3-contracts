@@ -4,23 +4,23 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 
 contract WrapperExchangeRegistry is AdminAuth {
-	mapping(address => bool) private wrappers;
+    mapping(address => bool) private wrappers;
 
-	error EmptyAddrError();
+    error EmptyAddrError();
 
-	function addWrapper(address _wrapper) public onlyOwner {
-		if(_wrapper == address(0)) {
-			revert EmptyAddrError();
-		}
+    function addWrapper(address _wrapper) public onlyOwner {
+        if (_wrapper == address(0)) {
+            revert EmptyAddrError();
+        }
 
-		wrappers[_wrapper] = true;
-	}
+        wrappers[_wrapper] = true;
+    }
 
-	function removeWrapper(address _wrapper) public onlyOwner {
-		wrappers[_wrapper] = false;
-	}
+    function removeWrapper(address _wrapper) public onlyOwner {
+        wrappers[_wrapper] = false;
+    }
 
-	function isWrapper(address _wrapper) public view returns(bool) {
-		return wrappers[_wrapper];
-	}
+    function isWrapper(address _wrapper) public view returns (bool) {
+        return wrappers[_wrapper];
+    }
 }
