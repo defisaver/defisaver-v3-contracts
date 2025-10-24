@@ -11,11 +11,18 @@ import { SkyHelper } from "../../contracts/actions/sky/helpers/SkyHelper.sol";
 
 contract SkyView is SkyHelper {
     struct UrnInfo {
+        uint256 urnIndex;
         address urnAddr;
         address selectedFarm;
         address farmRewardToken;
         uint256 amountStaked;
         uint256 amountBorrowed;
+        AmountEarnedPerFarm[] amountsEarned;
+    }
+
+    struct AmountEarnedPerFarm {
+        address farm;
+        address rewardToken;
         uint256 amountEarned;
     }
 
@@ -27,35 +34,52 @@ contract SkyView is SkyHelper {
         uint256 totalSkyLockedInSparkFarm;
     }
 
-    function getUserInfo(address _user) public view returns (UrnInfo[] memory) {
+    function getUserInfo(address _user, address[] calldata _farms) public view returns (UrnInfo[] memory) {
         uint256 numOfUrns = ILockstakeEngine(STAKING_ENGINE).ownerUrnsCount(_user);
         UrnInfo[] memory urns = new UrnInfo[](numOfUrns);
 
         for (uint256 i = 0; i < numOfUrns; ++i) {
-            urns[i] = getUrnInfo(_user, i);
+            urns[i] = getUrnInfo(_user, i, _farms);
         }
 
         return urns;
     }
 
-    function getUrnInfo(address _user, uint256 _index) public view returns (UrnInfo memory) {
+    function getUrnInfo(address _user, uint256 _index, address[] calldata _farms)
+        public
+        view
+        returns (UrnInfo memory)
+    {
         ILockstakeEngine engine = ILockstakeEngine(STAKING_ENGINE);
         address urnAddr = engine.ownerUrns(_user, _index);
-        address selectedFarm = engine.urnFarms(urnAddr);
-        address farmRewardToken = IStakingRewards(selectedFarm).rewardsToken();
-
         IVat.Urn memory urn = IVat(engine.vat()).urns(engine.ilk(), urnAddr);
         uint256 amountStaked = urn.ink;
         uint256 amountBorrowed = urn.art;
-        uint256 amountEarned = IStakingRewards(selectedFarm).earned(urnAddr);
+
+        address selectedFarm = engine.urnFarms(urnAddr);
+        address farmRewardToken;
+        AmountEarnedPerFarm[] memory amountsEarned = new AmountEarnedPerFarm[](_farms.length);
+
+        if (selectedFarm != address(0)) {
+            farmRewardToken = IStakingRewards(selectedFarm).rewardsToken();
+        }
+
+        for (uint256 i = 0; i < _farms.length; ++i) {
+            amountsEarned[i] = AmountEarnedPerFarm({
+                farm: _farms[i],
+                rewardToken: IStakingRewards(_farms[i]).rewardsToken(),
+                amountEarned: IStakingRewards(_farms[i]).earned(urnAddr)
+            });
+        }
 
         return UrnInfo({
+            urnIndex: _index,
             urnAddr: urnAddr,
             selectedFarm: selectedFarm,
             farmRewardToken: farmRewardToken,
             amountStaked: amountStaked,
             amountBorrowed: amountBorrowed,
-            amountEarned: amountEarned
+            amountsEarned: amountsEarned
         });
     }
 

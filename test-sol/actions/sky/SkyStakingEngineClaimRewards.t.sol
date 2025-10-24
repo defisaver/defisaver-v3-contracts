@@ -4,10 +4,11 @@ pragma solidity =0.8.24;
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
-import { SkyStakingEngineOpen } from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
-import { SkyStakingEngineStake } from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
-import { SkyStakingEngineClaimRewards } from "../../../contracts/actions/sky/SkyStakingEngineClaimRewards.sol";
-import { SkyStakingEngineSelectFarm } from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
+import {SkyStakingEngineOpen} from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
+import {SkyStakingEngineStake} from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
+import {SkyStakingEngineClaimRewards} from "../../../contracts/actions/sky/SkyStakingEngineClaimRewards.sol";
+import {SkyStakingEngineSelectFarm} from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
+import {SkyView} from "../../../contracts/views/SkyView.sol";
 
 import { ILockstakeEngine } from "../../../contracts/interfaces/sky/ILockstakeEngine.sol";
 import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
@@ -19,6 +20,7 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
     SkyStakingEngineClaimRewards cut;
+    SkyView skyView;
 
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
@@ -43,6 +45,7 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
         walletAddr = wallet.walletAddr();
 
         cut = new SkyStakingEngineClaimRewards();
+        skyView = new SkyView();
         open = new SkyStakingEngineOpen();
         stake = new SkyStakingEngineStake();
         selectFarm = new SkyStakingEngineSelectFarm();
@@ -83,6 +86,15 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
 
         skip(365 days);
 
+        // Check amountEarned BEFORE claiming
+        address[] memory farms = new address[](1);
+        farms[0] = _farm;
+
+        SkyView.UrnInfo[] memory urnsInfoBeforeClaim = skyView.getUserInfo(walletAddr, farms);
+        uint256 amountEarnedBeforeClaim = urnsInfoBeforeClaim[index].amountsEarned[0].amountEarned;
+
+        assertGt(amountEarnedBeforeClaim, 0, "Should have earned rewards before claiming");
+
         //  Execution logic of claiming rewards
         bytes memory executeActionCallData =
             executeActionCalldata(skyStakingEngineClaimRewardsEncode(STAKING_ENGINE, index, _farm, sender), _isDirect);
@@ -92,5 +104,11 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
 
         uint256 amountAfter = IERC20(_rewardToken).balanceOf(sender);
         assertGt(amountAfter, amountBefore);
+
+        // Check amountEarned AFTER claiming
+        SkyView.UrnInfo[] memory urnsInfoAfterClaim = skyView.getUserInfo(walletAddr, farms);
+        uint256 amountEarnedAfterClaim = urnsInfoAfterClaim[index].amountsEarned[0].amountEarned;
+
+        assertEq(amountEarnedAfterClaim, 0, "amountEarned should reset to 0 after claiming");
     }
 }

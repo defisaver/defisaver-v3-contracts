@@ -515,5 +515,170 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "FluidView",
+        "address": "0x27C0BAe2338cE28097122393faF90375B9395dd1",
+        "id": "0xae75a797",
+        "path": "contracts/views/FluidView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidVaultT1Open",
+        "address": "0x491cc4AFbE0081C3464DeF1114ba27BE114b2401",
+        "id": "0x35b25e65",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidVaultT1Supply",
+        "address": "0x54D1b51d2d68CD0Dc877296527780CA6aff68a39",
+        "id": "0xaf5b03c0",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Supply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidVaultT1Withdraw",
+        "address": "0xcF91546046F16B3c38b890CC508E280BEffa66b9",
+        "id": "0xf304b35f",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidVaultT1Borrow",
+        "address": "0x95a8665Ba58aa13A58c60B0803572772cda153dB",
+        "id": "0x237b3650",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Borrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidVaultT1Payback",
+        "address": "0x1420f4977E7B71AFddccBFc6F6e1505CefdF99F0",
+        "id": "0x101b4845",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Payback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidVaultT1Adjust",
+        "address": "0xD37d4DB98E67305ef92f34886B25500500E04Aed",
+        "id": "0xce25def6",
+        "path": "contracts/actions/fluid/vaultT1/FluidVaultT1Adjust.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexOpen",
+        "address": "0xF32d5d8D81f2662A02955CE537537088DF29daf5",
+        "id": "0x7d4e6bb2",
+        "path": "contracts/actions/fluid/dex/FluidDexOpen.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexSupply",
+        "address": "0x903F7C93FFC4AAbaBB096a7A722F1f057816B399",
+        "id": "0x3cf3e466",
+        "path": "contracts/actions/fluid/dex/FluidDexSupply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexWithdraw",
+        "address": "0x17B4ecd173b3Df2F5cB02c53Df8AA34e23Bcb92E",
+        "id": "0x4f1673fd",
+        "path": "contracts/actions/fluid/dex/FluidDexWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexBorrow",
+        "address": "0xa2A878a09639D1ab3AF544566c0CA4D0FeAEE65E",
+        "id": "0x81fb1de1",
+        "path": "contracts/actions/fluid/dex/FluidDexBorrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "FluidDexPayback",
+        "address": "0x04ce4b2a9F524d976a8eD8a49B9313C5a2C3ccAD",
+        "id": "0x1de2c822",
+        "path": "contracts/actions/fluid/dex/FluidDexPayback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "PendleTokenRedeem",
+        "address": "0xB4c5f33bb5791D0174Df1879b809Bf57eE540B62",
+        "id": "0x3de77432",
+        "path": "contracts/actions/pendle/PendleTokenRedeem.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "PendleWrapper",
+        "address": "0x862E533198C9656B75bB6A5dDF0953F7ED5E8507",
+        "id": "0x42cdd62e",
+        "path": "contracts/exchangeV3/offchainWrappersV3/PendleWrapper.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "DFSSellNoFee",
+        "address": "0x45314C4265a378427f204483b3eFb89981129085",
+        "id": "0xebf16d4a",
+        "path": "contracts/actions/exchange/DFSSellNoFee.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]

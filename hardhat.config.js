@@ -198,16 +198,6 @@ module.exports = {
     },
     etherscan: {
         apiKey: process.env.ETHERSCAN_API_KEY,
-        customChains: [
-            {
-                network: 'plasma',
-                chainId: 9745,
-                urls: {
-                    apiURL: 'https://api.routescan.io/v2/network/mainnet/evm/9745/etherscan',
-                    browserURL: 'https://plasmascan.io',
-                },
-            },
-        ],
     },
     tenderly: {
         username: process.env.TENDERLY_USERNAME,
