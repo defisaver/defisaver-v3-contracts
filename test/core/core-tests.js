@@ -84,7 +84,9 @@ const addPlaceholderStrategy = async (proxy, maxGasPrice) => {
     dummyStrategy.addSubSlot('&amount', 'uint256');
 
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-        addrs[network].WETH_ADDRESS, '&eoa', '&amount',
+        addrs[network].WETH_ADDRESS,
+        '&eoa',
+        '&amount',
     );
 
     dummyStrategy.addTrigger(new dfs.triggers.GasPriceTrigger(0));
@@ -630,7 +632,8 @@ const proxyAuthTest = async () => {
 
         it('...should callExecute when auth is given to proxyAuth and StrategyExecutor set', async () => {
             // give proxy permission to ProxyAuth
-            const MockDSProxyPermission = await hre.ethers.getContractFactory('MockDSProxyPermission');
+            const MockDSProxyPermission =
+                await hre.ethers.getContractFactory('MockDSProxyPermission');
             const functionData = MockDSProxyPermission.interface.encodeFunctionData(
                 'giveProxyPermission',
                 [proxyAuth.address],
@@ -717,11 +720,12 @@ const safeModuleAuthTest = async () => {
 
         it('... should callExecute when auth is given to safeModuleAuth and StrategyExecutor is set', async () => {
             // give safe module permission to SafeModuleAuth
-            const SafeModulePermission = await hre.ethers.getContractFactory('MockSafeModulePermission');
-            const functionData = SafeModulePermission.interface.encodeFunctionData(
-                'enableModule',
-                [safeModuleAuth.address],
+            const SafeModulePermission = await hre.ethers.getContractFactory(
+                'MockSafeModulePermission',
             );
+            const functionData = SafeModulePermission.interface.encodeFunctionData('enableModule', [
+                safeModuleAuth.address,
+            ]);
 
             await executeSafeTx(
                 senderAcc.address,
@@ -766,11 +770,12 @@ const safeModuleAuthTest = async () => {
         });
 
         it('... should fail when safeModuleAuth is paused', async () => {
-            const SafeModulePermission = await hre.ethers.getContractFactory('MockSafeModulePermission');
-            const functionData = SafeModulePermission.interface.encodeFunctionData(
-                'enableModule',
-                [safeModuleAuth.address],
+            const SafeModulePermission = await hre.ethers.getContractFactory(
+                'MockSafeModulePermission',
             );
+            const functionData = SafeModulePermission.interface.encodeFunctionData('enableModule', [
+                safeModuleAuth.address,
+            ]);
             await executeSafeTx(
                 senderAcc.address,
                 safe,
@@ -851,9 +856,10 @@ const recipeExecutorTest = async () => {
             await redeploy('GasPriceTrigger');
             await redeploy('RecipeExecutor');
 
-            strategyExecutor = network === 'mainnet'
-                ? await redeploy('StrategyExecutor')
-                : await redeploy('StrategyExecutorL2');
+            strategyExecutor =
+                network === 'mainnet'
+                    ? await redeploy('StrategyExecutor')
+                    : await redeploy('StrategyExecutorL2');
             const flActionContract = await redeploy('FLAction');
             flAddr = flActionContract.address;
 
@@ -868,7 +874,11 @@ const recipeExecutorTest = async () => {
             dsaProxy = await createDsaProxy(senderAcc.address, hre.config.dsaProxyVersion);
 
             // Init test data.
-            actionData = (new dfs.actions.basic.PullTokenAction(addrs[network].WETH_ADDRESS, placeHolderAddr, 0)).encodeForRecipe()[0];
+            actionData = new dfs.actions.basic.PullTokenAction(
+                addrs[network].WETH_ADDRESS,
+                placeHolderAddr,
+                0,
+            ).encodeForRecipe()[0];
             triggerData = abiCoder.encode(['uint256'], [0]);
 
             await openStrategyAndBundleStorage();
@@ -964,43 +974,64 @@ const recipeExecutorTest = async () => {
 
             it(`...should execute basic placeholder recipe through ${WALLETS[i]}`, async () => {
                 setupWallet(WALLETS[i]);
-                const beforeBalance = await balanceOf(addrs[network].WETH_ADDRESS, senderAcc.address);
+                const beforeBalance = await balanceOf(
+                    addrs[network].WETH_ADDRESS,
+                    senderAcc.address,
+                );
 
                 await depositToWeth(pullAmount);
                 await approve(addrs[network].WETH_ADDRESS, wallet.address);
 
                 const dummyRecipe = new dfs.Recipe('DummyRecipe', [
                     new dfs.actions.basic.PullTokenAction(
-                        addrs[network].WETH_ADDRESS, senderAcc.address, pullAmount,
+                        addrs[network].WETH_ADDRESS,
+                        senderAcc.address,
+                        pullAmount,
                     ),
                     new dfs.actions.basic.SendTokenAction(
-                        addrs[network].WETH_ADDRESS, senderAcc.address, pullAmount,
+                        addrs[network].WETH_ADDRESS,
+                        senderAcc.address,
+                        pullAmount,
                     ),
                 ]);
 
                 const functionData = dummyRecipe.encodeForDsProxyCall()[1];
                 await executeAction('RecipeExecutor', functionData, wallet);
 
-                const afterBalance = await balanceOf(addrs[network].WETH_ADDRESS, senderAcc.address);
+                const afterBalance = await balanceOf(
+                    addrs[network].WETH_ADDRESS,
+                    senderAcc.address,
+                );
                 expect(beforeBalance.add(pullAmount)).to.be.eq(afterBalance);
             });
 
             it(`...should execute basic recipe with FL through ${WALLETS[i]}`, async () => {
                 setupWallet(WALLETS[i]);
-                const beforeBalance = await balanceOf(addrs[network].WETH_ADDRESS, senderAcc.address);
+                const beforeBalance = await balanceOf(
+                    addrs[network].WETH_ADDRESS,
+                    senderAcc.address,
+                );
                 const dummyRecipeWithFL = new dfs.Recipe('DummyRecipeWithFl', [
                     new dfs.actions.flashloan.FLAction(
                         new dfs.actions.flashloan.BalancerFlashLoanAction(
-                            [addrs[network].WETH_ADDRESS], [pullAmount],
+                            [addrs[network].WETH_ADDRESS],
+                            [pullAmount],
                         ),
                     ),
-                    new dfs.actions.basic.SendTokenAction(addrs[network].WETH_ADDRESS, flAddr, pullAmount),
+                    new dfs.actions.basic.SendTokenAction(
+                        addrs[network].WETH_ADDRESS,
+                        flAddr,
+                        pullAmount,
+                    ),
                 ]);
 
                 const functionData = dummyRecipeWithFL.encodeForDsProxyCall()[1];
                 await executeAction('RecipeExecutor', functionData, wallet);
 
-                const afterBalance = await balanceOf(addrs[network].WETH_ADDRESS, senderAcc.address);
+                const afterBalance = await balanceOf(
+                    addrs[network].WETH_ADDRESS,
+                    senderAcc.address,
+                );
                 expect(beforeBalance).to.be.eq(afterBalance);
             });
         }
@@ -1043,7 +1074,9 @@ const strategyExecutorTest = async () => {
             ({ strategySub, strategyId, subId } = await addPlaceholderStrategy(proxy, maxGasPrice));
 
             const pullTokenAction = new dfs.actions.basic.PullTokenAction(
-                addrs[network].WETH_ADDRESS, placeHolderAddr, 0,
+                addrs[network].WETH_ADDRESS,
+                placeHolderAddr,
+                0,
             );
 
             actionData = pullTokenAction.encodeForRecipe()[0];

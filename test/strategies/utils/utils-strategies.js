@@ -113,10 +113,9 @@ const subToStrategy = async (proxy, strategySub) => {
     } else {
         const SubProxyAddr = addrs[network].SubProxy;
         const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
-        const functionData = SubProxyProxy.interface.encodeFunctionData(
-            'subscribeToStrategy',
-            [strategySub],
-        );
+        const functionData = SubProxyProxy.interface.encodeFunctionData('subscribeToStrategy', [
+            strategySub,
+        ]);
         receipt = await executeTxFromProxy(proxy, SubProxyAddr, functionData);
     }
 

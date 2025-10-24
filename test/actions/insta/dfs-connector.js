@@ -29,13 +29,21 @@ const dfsConnectorTest = async () => {
         before(async () => {
             // Determine test data to use based on dsa proxy version
             const isV1DSAProxy = hre.config.dsaProxyVersion === 1;
-            owner = isV1DSAProxy ? '0x4b180783Bf8Ca2094498faf050f64F17d20D8A7f' : '0xF6Da9e9D73d7893223578D32a95d6d7de5522767';
-            dsaAddress = isV1DSAProxy ? '0x084405249d814795F3aFF6B3b34754d1d651D029' : '0x4C6Cd7b623e7E7741C20bdAF3452269277534eF8';
+            owner = isV1DSAProxy
+                ? '0x4b180783Bf8Ca2094498faf050f64F17d20D8A7f'
+                : '0xF6Da9e9D73d7893223578D32a95d6d7de5522767';
+            dsaAddress = isV1DSAProxy
+                ? '0x084405249d814795F3aFF6B3b34754d1d651D029'
+                : '0x4C6Cd7b623e7E7741C20bdAF3452269277534eF8';
 
             dfsConnector = await redeploy('DefiSaverConnector');
             dsaSigner = hre.ethers.provider.getSigner(owner);
             dsaSigner.address = owner;
-            dsaContract = await hre.ethers.getContractAt(isV1DSAProxy ? 'IInstaAccountV1' : 'IInstaAccountV2', dsaAddress, dsaSigner);
+            dsaContract = await hre.ethers.getContractAt(
+                isV1DSAProxy ? 'IInstaAccountV1' : 'IInstaAccountV2',
+                dsaAddress,
+                dsaSigner,
+            );
 
             // Fund dsa account owner
             const zeroAddress = hre.ethers.constants.AddressZero;
@@ -67,10 +75,7 @@ const dfsConnectorTest = async () => {
                 owner,
                 amount,
             );
-            const basicRecipe = new dfs.Recipe('BasicRecipe', [
-                pullTokenAction,
-                sendTokenAction,
-            ]);
+            const basicRecipe = new dfs.Recipe('BasicRecipe', [pullTokenAction, sendTokenAction]);
             const functionData = basicRecipe.encodeForDsProxyCall()[1];
 
             const balanceBefore = await balanceOf(WETH_ADDRESS, owner);
@@ -86,16 +91,9 @@ const dfsConnectorTest = async () => {
 
             const basicRecipe = new dfs.Recipe('BasicRecipe', [
                 new dfs.actions.flashloan.FLAction(
-                    new dfs.actions.flashloan.BalancerFlashLoanAction(
-                        [WETH_ADDRESS],
-                        [amount],
-                    ),
+                    new dfs.actions.flashloan.BalancerFlashLoanAction([WETH_ADDRESS], [amount]),
                 ),
-                new dfs.actions.basic.SendTokenAction(
-                    WETH_ADDRESS,
-                    flContract.address,
-                    amount,
-                ),
+                new dfs.actions.basic.SendTokenAction(WETH_ADDRESS, flContract.address, amount),
             ]);
 
             const functionData = basicRecipe.encodeForDsProxyCall()[1];

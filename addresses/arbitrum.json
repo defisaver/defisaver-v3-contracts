@@ -1588,9 +1588,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0xB52AD7dDD5BbE47b4e4e0147557D50745c06c635"
-        ]
+        "history": ["0xB52AD7dDD5BbE47b4e4e0147557D50745c06c635"]
     },
     {
         "name": "AaveV3QuotePriceRangeTrigger",

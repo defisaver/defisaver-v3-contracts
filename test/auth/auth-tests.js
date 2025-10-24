@@ -167,7 +167,8 @@ const dsProxyPermissionTest = async () => {
         });
 
         it('... should through DSProxy give contract permission', async () => {
-            const MockDSProxyPermission = await hre.ethers.getContractFactory('MockDSProxyPermission');
+            const MockDSProxyPermission =
+                await hre.ethers.getContractFactory('MockDSProxyPermission');
             const functionData = MockDSProxyPermission.interface.encodeFunctionData(
                 'giveProxyPermission',
                 [ownerAcc2.address],
@@ -182,7 +183,8 @@ const dsProxyPermissionTest = async () => {
         });
 
         it('... should through DSProxy remove contract permission', async () => {
-            const MockDSProxyPermission = await hre.ethers.getContractFactory('MockDSProxyPermission');
+            const MockDSProxyPermission =
+                await hre.ethers.getContractFactory('MockDSProxyPermission');
             const functionData = MockDSProxyPermission.interface.encodeFunctionData(
                 'removeProxyPermission',
                 [ownerAcc2.address],

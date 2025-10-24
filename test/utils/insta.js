@@ -2,11 +2,18 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
 const {
-    impersonateAccount, stopImpersonatingAccount, sendEther, addrs, network,
+    impersonateAccount,
+    stopImpersonatingAccount,
+    sendEther,
+    addrs,
+    network,
 } = require('./utils');
 
 const addDefiSaverConnector = async (dfsConnectorAddress, version = 2) => {
-    const instaIndex = await hre.ethers.getContractAt('IInstaIndex', addrs[network].INSTADAPP_INDEX);
+    const instaIndex = await hre.ethers.getContractAt(
+        'IInstaIndex',
+        addrs[network].INSTADAPP_INDEX,
+    );
     const masterAddr = await instaIndex.master();
     const masterSigner = await hre.ethers.getSigner(masterAddr);
 
@@ -24,7 +31,9 @@ const addDefiSaverConnector = async (dfsConnectorAddress, version = 2) => {
             masterSigner,
         );
 
-        const isConnectorAlreadyAdded = await instaConnectorsV2Contract.isConnectors(['DefiSaverConnector']);
+        const isConnectorAlreadyAdded = await instaConnectorsV2Contract.isConnectors([
+            'DefiSaverConnector',
+        ]);
         if (isConnectorAlreadyAdded.isOk) {
             return;
         }
@@ -48,7 +57,9 @@ const addDefiSaverConnector = async (dfsConnectorAddress, version = 2) => {
             masterSigner,
         );
 
-        const isConnectorAlreadyAdded = await instaConnectorsV1Contract.isConnector([dfsConnectorAddress]);
+        const isConnectorAlreadyAdded = await instaConnectorsV1Contract.isConnector([
+            dfsConnectorAddress,
+        ]);
         if (isConnectorAlreadyAdded) {
             return;
         }

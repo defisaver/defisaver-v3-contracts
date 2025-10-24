@@ -690,7 +690,10 @@ const getProxyWithSigner = async (signer, addr) => {
 };
 
 const createDsaProxy = async (acc, version = 2) => {
-    const instaIndex = await hre.ethers.getContractAt('IInstaIndex', addrs[network].INSTADAPP_INDEX);
+    const instaIndex = await hre.ethers.getContractAt(
+        'IInstaIndex',
+        addrs[network].INSTADAPP_INDEX,
+    );
     let receipt = await instaIndex.build(acc, version, hre.ethers.constants.AddressZero);
     receipt = await receipt.wait();
 
@@ -712,7 +715,10 @@ const getProxy = async (acc, isSafe = false) => {
     }
 
     // Else create DS Proxy
-    const proxyRegistry = await hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
+    const proxyRegistry = await hre.ethers.getContractAt(
+        'IProxyRegistry',
+        addrs[network].PROXY_REGISTRY,
+    );
     let proxyAddr = await proxyRegistry.proxies(acc);
 
     if (proxyAddr === nullAddress) {
@@ -1567,15 +1573,25 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
 
             if (version.eq(1)) {
                 const target = await getAddrFromRegistry('DefiSaverConnector');
-                receipt = await proxy['cast(address[],bytes[],address)']([target], [callData], nullAddress, {
-                    gasLimit: 10000000,
-                    value: ethValue,
-                });
+                receipt = await proxy['cast(address[],bytes[],address)'](
+                    [target],
+                    [callData],
+                    nullAddress,
+                    {
+                        gasLimit: 10000000,
+                        value: ethValue,
+                    },
+                );
             } else {
-                receipt = await proxy['cast(string[],bytes[],address)'](['DefiSaverConnector'], [callData], nullAddress, {
-                    gasLimit: 10000000,
-                    value: ethValue,
-                });
+                receipt = await proxy['cast(string[],bytes[],address)'](
+                    ['DefiSaverConnector'],
+                    [callData],
+                    nullAddress,
+                    {
+                        gasLimit: 10000000,
+                        value: ethValue,
+                    },
+                );
             }
 
             await stopImpersonatingAccount(proxy.signer.address);

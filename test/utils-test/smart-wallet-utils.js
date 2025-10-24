@@ -1,8 +1,6 @@
 const { expect } = require('chai');
 const hre = require('hardhat');
-const {
-    getProxy,
-} = require('../utils/utils');
+const { getProxy } = require('../utils/utils');
 const { createSafe } = require('../utils/safe');
 
 describe('SmartWalletUtils', () => {
