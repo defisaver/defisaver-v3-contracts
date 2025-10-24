@@ -7,18 +7,15 @@ import { StrategyExecutor } from "../../contracts/core/strategy/StrategyExecutor
 import { RecipeExecutor } from "../../contracts/core/RecipeExecutor.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { Pausable } from "../../contracts/auth/Pausable.sol";
-import { DefiSaverConnector } from "../../contracts/actions/insta/DefiSaverConnector.sol";
-import { IInstaConnectorsV2 } from "../../contracts/interfaces/insta/IInstaConnectorsV2.sol";
 
-import { RegistryUtils } from "../utils/RegistryUtils.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
-import { DSAProxyUtils } from "../utils/dsa/DSAProxyUtils.sol";
+import { DSAProxyTestUtils } from "../utils/dsa/DSAProxyTestUtils.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { HandleAuth } from "../../contracts/actions/utils/HandleAuth.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 
-contract TestCore_DSAAuth is RegistryUtils, ActionsUtils, DSAProxyUtils, BaseTest {
+contract TestCore_DSAAuth is ActionsUtils, DSAProxyTestUtils, BaseTest {
     
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST

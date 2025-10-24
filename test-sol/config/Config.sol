@@ -9,6 +9,7 @@ import { Tokens } from "../utils/Tokens.sol";
 contract Config is Tokens {
 
     string internal constant IS_SMART_WALLET_SAFE = "$.isSmartWalletSafe";
+    string internal constant USE_VERSION_1_DSA_PROXY = "$.useVersion1DSAProxy";
     string internal constant BLOCK_NUMBER = "$.blockNumber";
 
     using stdJson for string;
@@ -45,6 +46,10 @@ contract Config is Tokens {
 
     function isSmartWalletSafe() internal view returns (bool) {
         return configData.json.readBool(IS_SMART_WALLET_SAFE);
+    }
+
+    function useVersion1DSAProxy() internal view returns (bool) {
+        return configData.json.readBool(USE_VERSION_1_DSA_PROXY);
     }
 
     function getBlockNumber() public view returns (uint256) {

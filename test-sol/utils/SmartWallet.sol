@@ -4,13 +4,12 @@ pragma solidity =0.8.24;
 
 import { BaseTest } from "./BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
-
 import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterface.sol";
 import { DSProxy } from "../../contracts/DS/DSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
 import { IInstaIndex } from "../../contracts/interfaces/insta/IInstaIndex.sol";
-import { IInstaAccountV2 } from "../../contracts/interfaces/insta/IInstaAccountV2.sol";
+import { DSAUtils } from "../../contracts/utils/DSAUtils.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract SmartWallet is BaseTest {
@@ -53,7 +52,8 @@ contract SmartWallet is BaseTest {
     }
 
     function createDSAProxy() public ownerAsSender() returns(address payable) {
-        walletAddr = payable(IInstaIndex(Addresses.INSTADAPP_INDEX_V2).build(owner, 2, address(0)));
+        uint256 version = useVersion1DSAProxy() ? 1 : 2;
+        walletAddr = payable(IInstaIndex(Addresses.INSTADAPP_INDEX).build(owner, version, address(0)));
         isSafe = false;
         isDSA = true;
         isDSProxy = false;
@@ -116,14 +116,21 @@ contract SmartWallet is BaseTest {
                 revert SafeTxFailed();
             }
         } else if (isDSProxy) {
-            DSProxy(walletAddr).execute(_target, _calldata);
+            DSProxy(walletAddr).execute{value: _value}(_target, _calldata);
         } else if (isDSA) {
-            // Always execute cast, regardless of the target
-            string[] memory connectorNames = new string[](1);
-            connectorNames[0] = "DefiSaverConnector";
-            bytes[] memory connectorData = new bytes[](1);
-            connectorData[0] = _calldata;
-            IInstaAccountV2(walletAddr).cast(connectorNames, connectorData, owner);
+            // Fix for [FAIL: vm.startPrank: cannot overwrite a prank until it is applied at least once]
+            consumePrank();
+            vm.startPrank(owner);
+
+            DSAUtils.cast(
+                walletAddr,
+                Addresses.DFS_REGISTRY,
+                owner,
+                _calldata,
+                _value
+            );
+
+            vm.stopPrank();
         } else {
             revert UnsupportedWalletType();
         }

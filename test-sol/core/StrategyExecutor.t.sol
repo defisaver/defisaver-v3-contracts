@@ -14,16 +14,13 @@ import {ToggleSub} from '../../contracts/actions/utils/ToggleSub.sol';
 import {GasPriceTrigger} from '../../contracts/triggers/GasPriceTrigger.sol';
 import {PullToken} from "../../contracts/actions/utils/PullToken.sol";
 import {BaseTest} from '../utils/BaseTest.sol';
-import {RegistryUtils} from '../utils/RegistryUtils.sol';
 import {ActionsUtils} from '../utils/ActionsUtils.sol';
 import {SmartWallet} from '../utils/SmartWallet.sol';
 import {Addresses} from '../utils/Addresses.sol';
 import {StrategyBuilder} from '../utils/StrategyBuilder.sol';
-import {DefiSaverConnector} from '../../contracts/actions/insta/DefiSaverConnector.sol';
-import {IInstaConnectorsV2} from '../../contracts/interfaces/insta/IInstaConnectorsV2.sol';
-import {DSAProxyUtils} from '../utils/dsa/DSAProxyUtils.sol';
+import {DSAProxyTestUtils} from '../utils/dsa/DSAProxyTestUtils.sol';
 
-contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, DSAProxyUtils, BaseTest {
+contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/

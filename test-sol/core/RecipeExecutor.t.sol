@@ -1,23 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import {IInstaConnectorsV2} from '../../contracts/interfaces/insta/IInstaConnectorsV2.sol';
-import {DefiSaverConnector} from '../../contracts/actions/insta/DefiSaverConnector.sol';
 import {RecipeExecutor} from '../../contracts/core/RecipeExecutor.sol';
 import {StrategyModel} from '../../contracts/core/strategy/StrategyModel.sol';
 import {PullToken} from "../../contracts/actions/utils/PullToken.sol";
 import {SendToken} from "../../contracts/actions/utils/SendToken.sol";
 import {FLAction} from "../../contracts/actions/flashloan/FLAction.sol";
 import {BaseTest} from '../utils/BaseTest.sol';
-import {RegistryUtils} from '../utils/RegistryUtils.sol';
 import {ActionsUtils} from '../utils/ActionsUtils.sol';
 import {SmartWallet} from '../utils/SmartWallet.sol';
 import {Addresses} from '../utils/Addresses.sol';
-import {DSAProxyUtils} from '../utils/dsa/DSAProxyUtils.sol';
+import {DSAProxyTestUtils} from '../utils/dsa/DSAProxyTestUtils.sol';
+import {console} from 'forge-std/console.sol';
 
 /// @dev Recipe execution from strategy is already tested in StrategyExecutor tests
 /// @dev Here, we just test direct recipe execution with and without flash loan
-contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, DSAProxyUtils, BaseTest {
+contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
