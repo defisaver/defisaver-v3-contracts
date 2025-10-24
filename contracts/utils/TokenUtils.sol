@@ -13,11 +13,7 @@ library TokenUtils {
     address public constant ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     /// @dev Only approves the amount if allowance is lower than amount, does not decrease allowance
-    function approveToken(
-        address _tokenAddr,
-        address _to,
-        uint256 _amount
-    ) internal {
+    function approveToken(address _tokenAddr, address _to, uint256 _amount) internal {
         if (_tokenAddr == ETH_ADDR) return;
 
         if (IERC20(_tokenAddr).allowance(address(this), _to) < _amount) {
@@ -25,11 +21,7 @@ library TokenUtils {
         }
     }
 
-    function pullTokensIfNeeded(
-        address _token,
-        address _from,
-        uint256 _amount
-    ) internal returns (uint256) {
+    function pullTokensIfNeeded(address _token, address _from, uint256 _amount) internal returns (uint256) {
         // handle max uint amount
         if (_amount == type(uint256).max) {
             _amount = getBalance(_token, _from);
@@ -42,11 +34,7 @@ library TokenUtils {
         return _amount;
     }
 
-    function withdrawTokens(
-        address _token,
-        address _to,
-        uint256 _amount
-    ) internal returns (uint256) {
+    function withdrawTokens(address _token, address _to, uint256 _amount) internal returns (uint256) {
         if (_amount == type(uint256).max) {
             _amount = getBalance(_token, address(this));
         }
@@ -55,7 +43,7 @@ library TokenUtils {
             if (_token != ETH_ADDR) {
                 IERC20(_token).safeTransfer(_to, _amount);
             } else {
-                (bool success, ) = _to.call{value: _amount}("");
+                (bool success,) = _to.call{ value: _amount }("");
                 require(success, "Eth send fail");
             }
         }
@@ -64,7 +52,7 @@ library TokenUtils {
     }
 
     function depositWeth(uint256 _amount) internal {
-        IWETH(WETH_ADDR).deposit{value: _amount}();
+        IWETH(WETH_ADDR).deposit{ value: _amount }();
     }
 
     function withdrawWeth(uint256 _amount) internal {

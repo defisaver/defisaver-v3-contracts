@@ -1,5 +1,3 @@
-/* eslint-disable array-callback-return */
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -47,10 +45,7 @@ const {
 
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
 
-const aaveV2assetsDefaultMarket = [
-    'ETH', 'DAI', 'SUSD', 'USDC', 'USDT', 'WBTC',
-    'CRV', 'AAVE',
-];
+const aaveV2assetsDefaultMarket = ['ETH', 'DAI', 'SUSD', 'USDC', 'USDT', 'WBTC', 'CRV', 'AAVE'];
 
 const AAVE_MARKET_DATA_ADDR = '0x057835Ad21a177dbdd3090bB1CAE03EaCF78Fc6d';
 const LENDING_POOL_ADDRESS_PROVIDER_V2 = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5';
@@ -529,19 +524,28 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY = {
 };
 
 const getAaveDataProvider = async () => {
-    const dataProvider = await hre.ethers.getContractAt('IAaveProtocolDataProviderV2', AAVE_MARKET_DATA_ADDR);
+    const dataProvider = await hre.ethers.getContractAt(
+        'IAaveProtocolDataProviderV2',
+        AAVE_MARKET_DATA_ADDR,
+    );
     return dataProvider;
 };
 
 const getAaveLendingPoolV2 = async () => {
-    const lendingPoolAddressProvider = await hre.ethers.getContractAt('ILendingPoolAddressesProviderV2', LENDING_POOL_ADDRESS_PROVIDER_V2);
+    const lendingPoolAddressProvider = await hre.ethers.getContractAt(
+        'ILendingPoolAddressesProviderV2',
+        LENDING_POOL_ADDRESS_PROVIDER_V2,
+    );
     const lendingPoolAddress = await lendingPoolAddressProvider.getLendingPool();
     const lendingPool = await hre.ethers.getContractAt('ILendingPoolV2', lendingPoolAddress);
     return lendingPool;
 };
 
 const getPriceOracle = async () => {
-    const lendingPoolAddressProvider = await hre.ethers.getContractAt('ILendingPoolAddressesProviderV2', LENDING_POOL_ADDRESS_PROVIDER_V2);
+    const lendingPoolAddressProvider = await hre.ethers.getContractAt(
+        'ILendingPoolAddressesProviderV2',
+        LENDING_POOL_ADDRESS_PROVIDER_V2,
+    );
     return lendingPoolAddressProvider.getPriceOracle();
 };
 
@@ -561,7 +565,10 @@ const getAaveReserveData = async (dataProvider, tokenAddr) => {
 };
 
 const getEstimatedTotalLiquidityForToken = async (tokenAddr) => {
-    const dataProvider = await hre.ethers.getContractAt('IAaveProtocolDataProvider', addrs[network].AAVE_V3_POOL_DATA_PROVIDER);
+    const dataProvider = await hre.ethers.getContractAt(
+        'IAaveProtocolDataProvider',
+        addrs[network].AAVE_V3_POOL_DATA_PROVIDER,
+    );
     const reserveData = await getAaveReserveData(dataProvider, tokenAddr);
     const totalAToken = reserveData.totalAToken;
     const totalDebt = reserveData.totalVariableDebt;
@@ -569,11 +576,14 @@ const getEstimatedTotalLiquidityForToken = async (tokenAddr) => {
 };
 
 const isAssetBorrowableV3 = async (dataProviderAddr, tokenAddr, checkStableBorrow = false) => {
-    const protocolDataProvider = await hre.ethers.getContractAt('IAaveProtocolDataProvider', dataProviderAddr);
+    const protocolDataProvider = await hre.ethers.getContractAt(
+        'IAaveProtocolDataProvider',
+        dataProviderAddr,
+    );
 
     const isPausedAsset = await protocolDataProvider.getPaused(tokenAddr);
-    const { isActive, isFrozen, stableBorrowRateEnabled } = await protocolDataProvider
-        .getReserveConfigurationData(tokenAddr);
+    const { isActive, isFrozen, stableBorrowRateEnabled } =
+        await protocolDataProvider.getReserveConfigurationData(tokenAddr);
 
     const canBorrow = !isPausedAsset && isActive && !isFrozen;
 
@@ -586,7 +596,9 @@ const isAssetBorrowableV3 = async (dataProviderAddr, tokenAddr, checkStableBorro
 
 const getAaveV3PositionInfo = async (user, aaveV3View) => {
     const market = addrs[network].AAVE_MARKET;
-    const pool = await hre.ethers.getContractAt('IPoolAddressesProvider', market).then((c) => hre.ethers.getContractAt('IPoolV3', c.getPool()));
+    const pool = await hre.ethers
+        .getContractAt('IPoolAddressesProvider', market)
+        .then((c) => hre.ethers.getContractAt('IPoolV3', c.getPool()));
     const {
         eMode: emodeCategoryId,
         collAddr,
@@ -598,40 +610,41 @@ const getAaveV3PositionInfo = async (user, aaveV3View) => {
     const useAsCollateralFlags = enabledAsColl.slice(0, collTokenAddresses.length);
     const debtTokenAddresses = borrowAddr.filter((e) => e !== nullAddress);
 
-    const {
-        collAssetIds,
-        collATokenAddresses,
-    } = await Promise.all(
+    const { collAssetIds, collATokenAddresses } = await Promise.all(
         collTokenAddresses.map(async (c) => getAaveReserveData(pool, c)),
-    ).then((arr) => arr.reduce((acc, { id, aTokenAddress }) => ({
-        collAssetIds: [...acc.collAssetIds, id],
-        collATokenAddresses: [...acc.collATokenAddresses, aTokenAddress],
-    }), ({
-        collAssetIds: [],
-        collATokenAddresses: [],
-    })));
+    ).then((arr) =>
+        arr.reduce(
+            (acc, { id, aTokenAddress }) => ({
+                collAssetIds: [...acc.collAssetIds, id],
+                collATokenAddresses: [...acc.collATokenAddresses, aTokenAddress],
+            }),
+            {
+                collAssetIds: [],
+                collATokenAddresses: [],
+            },
+        ),
+    );
 
-    const {
-        debtAssetIds,
-    } = await Promise.all(
+    const { debtAssetIds } = await Promise.all(
         debtTokenAddresses.map(async (c) => getAaveReserveData(pool, c)),
-    ).then((arr) => arr.reduce((acc, { id }) => ({
-        debtAssetIds: [...acc.debtAssetIds, id],
-    }), ({
-        debtAssetIds: [],
-    })));
+    ).then((arr) =>
+        arr.reduce(
+            (acc, { id }) => ({
+                debtAssetIds: [...acc.debtAssetIds, id],
+            }),
+            {
+                debtAssetIds: [],
+            },
+        ),
+    );
 
-    const debtAmounts = await aaveV3View.getTokenBalances(
-        market,
-        user,
-        debtTokenAddresses,
-    ).then((r) => r.map(({ borrowsVariable }) => borrowsVariable));
+    const debtAmounts = await aaveV3View
+        .getTokenBalances(market, user, debtTokenAddresses)
+        .then((r) => r.map(({ borrowsVariable }) => borrowsVariable));
 
-    const collAmounts = await aaveV3View.getTokenBalances(
-        market,
-        user,
-        collTokenAddresses,
-    ).then((r) => r.map(({ balance }) => balance));
+    const collAmounts = await aaveV3View
+        .getTokenBalances(market, user, collTokenAddresses)
+        .then((r) => r.map(({ balance }) => balance));
 
     return {
         collAssetIds,
@@ -649,9 +662,15 @@ const getAaveV3PositionInfo = async (user, aaveV3View) => {
 const expectTwoAaveV3PositionsToBeEqual = (oldPosition, newPosition) => {
     expect(oldPosition.emodeCategoryId).to.be.eq(newPosition.emodeCategoryId);
     oldPosition.collAssetIds.map((e, i) => expect(e).to.be.eq(newPosition.collAssetIds[i]));
-    oldPosition.collATokenAddresses.map((e, i) => expect(e).to.be.eq(newPosition.collATokenAddresses[i]));
-    oldPosition.useAsCollateralFlags.map((e, i) => expect(e).to.be.eq(newPosition.useAsCollateralFlags[i]));
-    oldPosition.debtTokenAddresses.map((e, i) => expect(e).to.be.eq(newPosition.debtTokenAddresses[i]));
+    oldPosition.collATokenAddresses.map((e, i) =>
+        expect(e).to.be.eq(newPosition.collATokenAddresses[i]),
+    );
+    oldPosition.useAsCollateralFlags.map((e, i) =>
+        expect(e).to.be.eq(newPosition.useAsCollateralFlags[i]),
+    );
+    oldPosition.debtTokenAddresses.map((e, i) =>
+        expect(e).to.be.eq(newPosition.debtTokenAddresses[i]),
+    );
     oldPosition.debtAssetIds.map((e, i) => expect(e).to.be.eq(newPosition.debtAssetIds[i]));
 
     oldPosition.collAmounts.map((e, i) => {
@@ -688,10 +707,7 @@ const openAaveV3ProxyPosition = async (
 
     // Get asset IDs from the pool
     const marketAddr = marketAddress || addrs[network].AAVE_MARKET;
-    const aaveMarketContract = await hre.ethers.getContractAt(
-        'IPoolAddressesProvider',
-        marketAddr,
-    );
+    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', marketAddr);
     const poolAddress = await aaveMarketContract.getPool();
     const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
     const poolContract = await hre.ethers.getContractAt(poolContractName, poolAddress);
@@ -720,10 +736,7 @@ const openAaveV3ProxyPosition = async (
         true, // useOnBehalf
         proxyAddr, // onBehalfAddr
     );
-    const recipe = new dfs.Recipe('CreateAaveV3ProxyPositionRecipe', [
-        supplyAction,
-        borrowAction,
-    ]);
+    const recipe = new dfs.Recipe('CreateAaveV3ProxyPositionRecipe', [supplyAction, borrowAction]);
 
     const functionData = recipe.encodeForDsProxyCall()[1];
 
@@ -751,10 +764,7 @@ const openAaveV3EOAPosition = async (
 
     // Use the passed market address or fall back to default
     const marketAddr = marketAddress || addrs[network].AAVE_MARKET;
-    const aaveMarketContract = await hre.ethers.getContractAt(
-        'IPoolAddressesProvider',
-        marketAddr,
-    );
+    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', marketAddr);
     const poolAddress = await aaveMarketContract.getPool();
 
     // Use the appropriate interface based on network
@@ -768,7 +778,11 @@ const openAaveV3EOAPosition = async (
     await approve(collAsset.address, proxyAddr, eoaSigner);
 
     // Approve variable debt token delegation to proxy
-    const debtTokenContract = await hre.ethers.getContractAt('IDebtToken', debtReserveData.variableDebtTokenAddress, eoaSigner);
+    const debtTokenContract = await hre.ethers.getContractAt(
+        'IDebtToken',
+        debtReserveData.variableDebtTokenAddress,
+        eoaSigner,
+    );
     await debtTokenContract.approveDelegation(proxyAddr, debtAmount);
     console.log('Debt token approved for delegation');
 
@@ -794,10 +808,7 @@ const openAaveV3EOAPosition = async (
         true, // useOnBehalf
         eoaAddr, // onBehalf
     );
-    const recipe = new dfs.Recipe('CreateAaveV3EOAPositionRecipe', [
-        supplyAction,
-        borrowAction,
-    ]);
+    const recipe = new dfs.Recipe('CreateAaveV3EOAPositionRecipe', [supplyAction, borrowAction]);
 
     const functionData = recipe.encodeForDsProxyCall()[1];
 
@@ -913,8 +924,12 @@ const deployAaveV3CloseGenericBundle = async () => {
     const isL2 = network !== 'mainnet';
     const isFork = isNetworkFork();
     await openStrategyAndBundleStorage(isFork);
-    const flCloseToDebtStrategy = isL2 ? createAaveV3GenericFLCloseToDebtL2Strategy() : createAaveV3GenericFLCloseToDebtStrategy();
-    const flCloseToCollStrategy = isL2 ? createAaveV3GenericFLCloseToCollL2Strategy() : createAaveV3GenericFLCloseToCollStrategy();
+    const flCloseToDebtStrategy = isL2
+        ? createAaveV3GenericFLCloseToDebtL2Strategy()
+        : createAaveV3GenericFLCloseToDebtStrategy();
+    const flCloseToCollStrategy = isL2
+        ? createAaveV3GenericFLCloseToCollL2Strategy()
+        : createAaveV3GenericFLCloseToCollStrategy();
     const continuous = false;
     const flCloseToDebtStrategyId = await createStrategy(...flCloseToDebtStrategy, continuous);
     const flCloseToCollStrategyId = await createStrategy(...flCloseToCollStrategy, continuous);
@@ -922,7 +937,13 @@ const deployAaveV3CloseGenericBundle = async () => {
     return bundleId;
 };
 
-const setupAaveV3EOAPermissions = async (userAddress, smartWalletAddress, collTokenAddr, debtTokenAddr, marketAddress = null) => {
+const setupAaveV3EOAPermissions = async (
+    userAddress,
+    smartWalletAddress,
+    collTokenAddr,
+    debtTokenAddr,
+    marketAddress = null,
+) => {
     console.log('Setting up AaveV3 EOA permissions...');
     console.log(`  - Collateral token: ${collTokenAddr}`);
     console.log(`  - Debt token: ${debtTokenAddr}`);
@@ -938,7 +959,10 @@ const setupAaveV3EOAPermissions = async (userAddress, smartWalletAddress, collTo
         await approve(collTokenAddr, smartWalletAddress, userSigner);
 
         // Get aToken address and approve it for Smart Wallet (needed for PullTokenAction in repay strategies)
-        const poolAddressesProvider = await hre.ethers.getContractAt('IPoolAddressesProvider', marketAddr);
+        const poolAddressesProvider = await hre.ethers.getContractAt(
+            'IPoolAddressesProvider',
+            marketAddr,
+        );
         const poolAddress = await poolAddressesProvider.getPool();
         const lendingPool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
         const collReserveData = await lendingPool.getReserveData(collTokenAddr);
@@ -961,7 +985,9 @@ const setupAaveV3EOAPermissions = async (userAddress, smartWalletAddress, collTo
 
         // Delegate debt token to Smart Wallet
         const debtToken = await hre.ethers.getContractAt('IDebtToken', variableDebtTokenAddress);
-        console.log(`  - Delegating variable debt token ${variableDebtTokenAddress} to Smart Wallet`);
+        console.log(
+            `  - Delegating variable debt token ${variableDebtTokenAddress} to Smart Wallet`,
+        );
         console.log(`  - Debt token address: ${debtTokenAddr}`);
         console.log(`  - Variable debt token address: ${variableDebtTokenAddress}`);
         console.log(`  - User address: ${userAddress}`);
@@ -969,20 +995,34 @@ const setupAaveV3EOAPermissions = async (userAddress, smartWalletAddress, collTo
 
         // Check current allowance
         const currentAllowance = await debtToken.borrowAllowance(userAddress, smartWalletAddress);
-        console.log(`  - Current debt delegation allowance: ${hre.ethers.utils.formatEther(currentAllowance)}`);
+        console.log(
+            `  - Current debt delegation allowance: ${hre.ethers.utils.formatEther(currentAllowance)}`,
+        );
 
         if (currentAllowance.lt(hre.ethers.constants.MaxUint256.div(2))) {
-            const delegateTx = await debtToken.connect(userSigner).approveDelegation(smartWalletAddress, hre.ethers.constants.MaxUint256);
+            const delegateTx = await debtToken
+                .connect(userSigner)
+                .approveDelegation(smartWalletAddress, hre.ethers.constants.MaxUint256);
             await delegateTx.wait();
 
             // Verify the delegation worked
             const newAllowance = await debtToken.borrowAllowance(userAddress, smartWalletAddress);
-            console.log(`  - New debt delegation allowance: ${hre.ethers.utils.formatEther(newAllowance)}`);
+            console.log(
+                `  - New debt delegation allowance: ${hre.ethers.utils.formatEther(newAllowance)}`,
+            );
 
             // Double-check with a fresh contract instance
-            const freshDebtToken = await hre.ethers.getContractAt('IDebtToken', variableDebtTokenAddress);
-            const verifyAllowance = await freshDebtToken.borrowAllowance(userAddress, smartWalletAddress);
-            console.log(`  - Verified debt delegation allowance: ${hre.ethers.utils.formatEther(verifyAllowance)}`);
+            const freshDebtToken = await hre.ethers.getContractAt(
+                'IDebtToken',
+                variableDebtTokenAddress,
+            );
+            const verifyAllowance = await freshDebtToken.borrowAllowance(
+                userAddress,
+                smartWalletAddress,
+            );
+            console.log(
+                `  - Verified debt delegation allowance: ${hre.ethers.utils.formatEther(verifyAllowance)}`,
+            );
         }
 
         // Revoke collateral token approval (only aToken approval needed)

@@ -1,10 +1,5 @@
-/* eslint-disable max-len */
 const hre = require('hardhat');
-const {
-    getOwnerAddr,
-    getProxy,
-    setBalance,
-} = require('../../utils/utils');
+const { getOwnerAddr, getProxy, setBalance } = require('../../utils/utils');
 const { topUp } = require('../../../scripts/utils/fork');
 const { uniV3CreatePool } = require('../../utils/actions');
 

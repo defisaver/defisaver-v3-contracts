@@ -43,7 +43,8 @@ contract LlamaLendPayback is ActionBase, LlamaLendHelper {
         params.onBehalfOf = _parseParamAddr(params.onBehalfOf, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
         params.paybackAmount = _parseParamUint(params.paybackAmount, _paramMapping[4], _subData, _returnValues);
-        params.maxActiveBand = int256(_parseParamUint(uint256(params.maxActiveBand), _paramMapping[5], _subData, _returnValues));
+        params.maxActiveBand =
+            int256(_parseParamUint(uint256(params.maxActiveBand), _paramMapping[5], _subData, _returnValues));
 
         (uint256 paybackAmount, bytes memory logData) = _llamaLendPayback(params);
         emit ActionEvent("LlamaLendPayback", logData);
@@ -83,11 +84,10 @@ contract LlamaLendPayback is ActionBase, LlamaLendHelper {
         address debtAsset = ILlamaLendController(_params.controllerAddress).borrowed_token();
 
         _params.paybackAmount = debtAsset.pullTokensIfNeeded(_params.from, _params.paybackAmount);
-        
+
         debtAsset.approveToken(_params.controllerAddress, _params.paybackAmount);
 
         address collateralAsset = ILlamaLendController(_params.controllerAddress).collateral_token();
-
 
         uint256 startingBaseCollBalance;
         uint256 startingDebtAssetBalanceWithoutDebt;
@@ -96,9 +96,11 @@ contract LlamaLendPayback is ActionBase, LlamaLendHelper {
             startingDebtAssetBalanceWithoutDebt = debtAsset.getBalance(address(this)) - debt;
         }
         if (_params.controllerAddress == OLD_WETH_CONTROLLER && block.chainid == 1) {
-            ILlamaLendController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false);
+            ILlamaLendController(_params.controllerAddress)
+                .repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false);
         } else {
-            ILlamaLendController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand);
+            ILlamaLendController(_params.controllerAddress)
+                .repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand);
         }
         uint256 baseReceivedFromColl;
         uint256 debtAssetReceivedFromColl;
@@ -110,10 +112,7 @@ contract LlamaLendPayback is ActionBase, LlamaLendHelper {
             debtAsset.withdrawTokens(_params.to, debtAssetReceivedFromColl);
         }
 
-        return (
-            _params.paybackAmount,
-            abi.encode(_params, baseReceivedFromColl, debtAssetReceivedFromColl)
-        );
+        return (_params.paybackAmount, abi.encode(_params, baseReceivedFromColl, debtAssetReceivedFromColl));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

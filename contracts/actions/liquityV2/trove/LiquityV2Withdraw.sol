@@ -62,10 +62,7 @@ contract LiquityV2Withdraw is ActionBase, LiquityV2Helper {
         address collToken = IAddressesRegistry(_params.market).collToken();
         address borrowerOperations = IAddressesRegistry(_params.market).borrowerOperations();
 
-        IBorrowerOperations(borrowerOperations).withdrawColl(
-            _params.troveId,
-            _params.amount
-        );
+        IBorrowerOperations(borrowerOperations).withdrawColl(_params.troveId, _params.amount);
 
         collToken.withdrawTokens(_params.to, _params.amount);
 

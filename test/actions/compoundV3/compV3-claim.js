@@ -1,6 +1,4 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require('../../utils/utils');
 const { compV3ClaimTest } = require('./compV3-tests');
 
 describe('CompV3-Claim', function () {

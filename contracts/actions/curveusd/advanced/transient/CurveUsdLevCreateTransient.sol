@@ -78,19 +78,13 @@ contract CurveUsdLevCreateTransient is ActionBase, CurveUsdHelper {
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
         collAddr.approveToken(_params.controllerAddress, _params.collAmount);
-        
-        ICrvUsdController(_params.controllerAddress).create_loan_extended(
-            _params.collAmount,
-            _params.exData.srcAmount,
-            _params.nBands,
-            curveUsdTransientSwapper,
-            info
-        );
 
-        return (
-            _params.exData.srcAmount,
-            abi.encode(_params)
-        );
+        ICrvUsdController(_params.controllerAddress)
+            .create_loan_extended(
+                _params.collAmount, _params.exData.srcAmount, _params.nBands, curveUsdTransientSwapper, info
+            );
+
+        return (_params.exData.srcAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

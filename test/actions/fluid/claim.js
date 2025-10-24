@@ -54,14 +54,19 @@ describe('Claim FLUID token rewards', function () {
         const thresholdSlot = toBytes32(hre.ethers.utils.parseUnits('4', 0)).toString();
         const thresholdValue = toBytes32(hre.ethers.utils.parseUnits('1', 0)).toString();
 
-        await hre.ethers.provider.send(
-            isFork ? 'tenderly_setStorageAt' : 'hardhat_setStorageAt',
-            [safeMultisigAddr, thresholdSlot, thresholdValue],
-        );
+        await hre.ethers.provider.send(isFork ? 'tenderly_setStorageAt' : 'hardhat_setStorageAt', [
+            safeMultisigAddr,
+            thresholdSlot,
+            thresholdValue,
+        ]);
     });
 
-    beforeEach(async () => { snapshotId = await takeSnapshot(); });
-    afterEach(async () => { await revertToSnapshot(snapshotId); });
+    beforeEach(async () => {
+        snapshotId = await takeSnapshot();
+    });
+    afterEach(async () => {
+        await revertToSnapshot(snapshotId);
+    });
 
     it('... should claim FLUID token from safe to eoa', async () => {
         const fluidMerkleDistributorAddr = '0x7060FE0Dd3E31be01EFAc6B28C8D38018fD163B0';
@@ -101,10 +106,13 @@ describe('Claim FLUID token rewards', function () {
         );
         const balanceAfter = await balanceOf(fluidToken, safeOwner);
 
-        const fluidMerkleDistributor = await hre.ethers.getContractAt('IFluidMerkleDistributor', fluidMerkleDistributorAddr);
+        const fluidMerkleDistributor = await hre.ethers.getContractAt(
+            'IFluidMerkleDistributor',
+            fluidMerkleDistributorAddr,
+        );
         const alreadyClaimed = await fluidMerkleDistributor.claimed(safeOwner, positionIdPadded);
-        const expectedAmountLeftToClaim = hre.ethers.BigNumber.from(cumulativeAmountWei)
-            .sub(alreadyClaimed);
+        const expectedAmountLeftToClaim =
+            hre.ethers.BigNumber.from(cumulativeAmountWei).sub(alreadyClaimed);
 
         const actualAmountClaimed = balanceAfter.sub(balanceBefore);
 

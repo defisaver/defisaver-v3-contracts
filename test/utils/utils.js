@@ -1,8 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable max-len */
-/* eslint-disable no-else-return */
-/* eslint-disable import/no-unresolved */
-/* eslint-disable no-await-in-loop */
 // const { default: curve } = require('@curvefi/api');
 const curve = import('@curvefi/api');
 const fs = require('fs');
@@ -19,13 +14,20 @@ const { deployAsOwner, deployContract } = require('../../scripts/utils/deployer'
 
 const { createSafe, executeSafeTx } = require('./safe');
 
-const strategyStorageBytecode = require('../../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
-const subStorageBytecode = require('../../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
-const subStorageBytecodeL2 = require('../../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
-const bundleStorageBytecode = require('../../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
-const recipeExecutorBytecode = require('../../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
-const proxyAuthBytecode = require('../../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
-const mockChainlinkFeedRegistryBytecode = require('../../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
+const strategyStorageBytecode =
+    require('../../artifacts/contracts/core/strategy/StrategyStorage.sol/StrategyStorage.json').deployedBytecode;
+const subStorageBytecode =
+    require('../../artifacts/contracts/core/strategy/SubStorage.sol/SubStorage.json').deployedBytecode;
+const subStorageBytecodeL2 =
+    require('../../artifacts/contracts/core/l2/SubStorageL2.sol/SubStorageL2.json').deployedBytecode;
+const bundleStorageBytecode =
+    require('../../artifacts/contracts/core/strategy/BundleStorage.sol/BundleStorage.json').deployedBytecode;
+const recipeExecutorBytecode =
+    require('../../artifacts/contracts/core/RecipeExecutor.sol/RecipeExecutor.json').deployedBytecode;
+const proxyAuthBytecode =
+    require('../../artifacts/contracts/core/strategy/ProxyAuth.sol/ProxyAuth.json').deployedBytecode;
+const mockChainlinkFeedRegistryBytecode =
+    require('../../artifacts/contracts/mocks/MockChainlinkFeedRegistry.sol/MockChainlinkFeedRegistry.json').deployedBytecode;
 
 const addrs = {
     mainnet: {
@@ -324,7 +326,8 @@ const MIN_VAULT_RAI_AMOUNT = '3000'; // TODO: can we fetch this dynamically
 
 const getSparkFLFee = async () => {
     console.log(network, addrs[network].SPARK_MARKET);
-    return hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET)
+    return hre.ethers
+        .getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET)
         .then((addressProvider) => addressProvider.getPool())
         .then((poolAddr) => hre.ethers.getContractAt('IPoolV3', poolAddr))
         .then((pool) => pool.FLASHLOAN_PREMIUM_TOTAL());
@@ -440,10 +443,7 @@ async function findBalancesSlot(tokenAddress) {
     const account = hre.ethers.constants.AddressZero;
     const probeA = encode(['uint'], [1]);
     const probeB = encode(['uint'], [2]);
-    const token = await hre.ethers.getContractAt(
-        'IERC20',
-        tokenAddress,
-    );
+    const token = await hre.ethers.getContractAt('IERC20', tokenAddress);
     let setStorageMethod;
     if (hre.network.config.isAnvil) {
         setStorageMethod = 'anvil_setStorageAt';
@@ -455,31 +455,24 @@ async function findBalancesSlot(tokenAddress) {
 
     for (let i = 0; i < 100; i++) {
         {
-            let probedSlot = hre.ethers.utils.keccak256(
-                encode(['address', 'uint'], [account, i]),
-            );
+            let probedSlot = hre.ethers.utils.keccak256(encode(['address', 'uint'], [account, i]));
             // remove padding for JSON RPC
-            while (probedSlot.startsWith('0x0')) { probedSlot = `0x${probedSlot.slice(3)}`; }
-            const prev = await hre.ethers.provider.send(
-                'eth_getStorageAt',
-                [tokenAddress, probedSlot, 'latest'],
-            );
+            while (probedSlot.startsWith('0x0')) {
+                probedSlot = `0x${probedSlot.slice(3)}`;
+            }
+            const prev = await hre.ethers.provider.send('eth_getStorageAt', [
+                tokenAddress,
+                probedSlot,
+                'latest',
+            ]);
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
 
-            await hre.ethers.provider.send(setStorageMethod, [
-                tokenAddress,
-                probedSlot,
-                probe,
-            ]);
+            await hre.ethers.provider.send(setStorageMethod, [tokenAddress, probedSlot, probe]);
 
             const balance = await token.balanceOf(account);
             // reset to previous value
-            await hre.ethers.provider.send(setStorageMethod, [
-                tokenAddress,
-                probedSlot,
-                prev,
-            ]);
+            await hre.ethers.provider.send(setStorageMethod, [tokenAddress, probedSlot, prev]);
             if (balance.eq(hre.ethers.BigNumber.from(probe))) {
                 const result = { isVyper: false, num: i };
                 storageSlots[tokenAddress] = result;
@@ -489,31 +482,24 @@ async function findBalancesSlot(tokenAddress) {
             }
         }
         {
-            let probedSlot = hre.ethers.utils.keccak256(
-                encode(['uint', 'address'], [i, account]),
-            );
+            let probedSlot = hre.ethers.utils.keccak256(encode(['uint', 'address'], [i, account]));
             // remove padding for JSON RPC
-            while (probedSlot.startsWith('0x0')) { probedSlot = `0x${probedSlot.slice(3)}`; }
-            const prev = await hre.ethers.provider.send(
-                'eth_getStorageAt',
-                [tokenAddress, probedSlot, 'latest'],
-            );
+            while (probedSlot.startsWith('0x0')) {
+                probedSlot = `0x${probedSlot.slice(3)}`;
+            }
+            const prev = await hre.ethers.provider.send('eth_getStorageAt', [
+                tokenAddress,
+                probedSlot,
+                'latest',
+            ]);
             // make sure the probe will change the slot value
             const probe = prev === probeA ? probeB : probeA;
 
-            await hre.ethers.provider.send(setStorageMethod, [
-                tokenAddress,
-                probedSlot,
-                probe,
-            ]);
+            await hre.ethers.provider.send(setStorageMethod, [tokenAddress, probedSlot, probe]);
 
             const balance = await token.balanceOf(account);
             // reset to previous value
-            await hre.ethers.provider.send(setStorageMethod, [
-                tokenAddress,
-                probedSlot,
-                prev,
-            ]);
+            await hre.ethers.provider.send(setStorageMethod, [tokenAddress, probedSlot, prev]);
             if (balance.eq(hre.ethers.BigNumber.from(probe))) {
                 const result = { isVyper: true, num: i };
                 storageSlots[tokenAddress] = result;
@@ -561,10 +547,9 @@ const setBalance = async (tokenAddr, userAddr, value) => {
 
         tokenContract = await hre.ethers.getContractAt('IProxyERC20', newTokenAddr);
         const tokenState = await tokenContract.callStatic.tokenState();
-        // eslint-disable-next-line no-param-reassign
         tokenAddr = tokenState;
-    // eslint-disable-next-line no-empty
     } catch (error) {
+        console.log(error);
     }
     const slotInfo = await findBalancesSlot(tokenAddr);
     let index;
@@ -579,13 +564,11 @@ const setBalance = async (tokenAddr, userAddr, value) => {
             [userAddr, slotInfo.num], // key, slot
         );
     }
-    while (index.startsWith('0x0')) { index = `0x${index.slice(3)}`; }
+    while (index.startsWith('0x0')) {
+        index = `0x${index.slice(3)}`;
+    }
 
-    await setStorageAt(
-        tokenAddr,
-        index.toString(),
-        toBytes32(value).toString(),
-    );
+    await setStorageAt(tokenAddr, index.toString(), toBytes32(value).toString());
 };
 
 let cachedTokenPrices = {};
@@ -672,15 +655,15 @@ const getAddrFromRegistry = async (name) => {
     // if (name === 'SubProxy') {
     //     return addrs[network].SubProxy;
     // }
-    const addr = await registry.getAddr(
-        getNameId(name),
-    );
+    const addr = await registry.getAddr(getNameId(name));
     return addr;
 };
 
 const getProxyWithSigner = async (signer, addr) => {
-    const proxyRegistry = await
-    hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
+    const proxyRegistry = await hre.ethers.getContractAt(
+        'IProxyRegistry',
+        addrs[network].PROXY_REGISTRY,
+    );
 
     let proxyAddr = await proxyRegistry.proxies(addr);
 
@@ -696,8 +679,10 @@ const getProxyWithSigner = async (signer, addr) => {
 
 const getProxy = async (acc, isSafe = false) => {
     if (isSafe === false) {
-        const proxyRegistry = await
-        hre.ethers.getContractAt('IProxyRegistry', addrs[network].PROXY_REGISTRY);
+        const proxyRegistry = await hre.ethers.getContractAt(
+            'IProxyRegistry',
+            addrs[network].PROXY_REGISTRY,
+        );
         let proxyAddr = await proxyRegistry.proxies(acc);
 
         if (proxyAddr === nullAddress) {
@@ -730,7 +715,9 @@ const sendEther = async (signer, toAddress, amount) => {
 const redeploy = async (name, isFork = false, ...args) => {
     const regAddr = addrs[network].REGISTRY_ADDR;
     if (!isFork) {
-        const setBalanceMethod = hre.network.config.isAnvil ? 'anvil_setBalance' : 'hardhat_setBalance';
+        const setBalanceMethod = hre.network.config.isAnvil
+            ? 'anvil_setBalance'
+            : 'hardhat_setBalance';
         await hre.network.provider.send(setBalanceMethod, [
             getOwnerAddr(),
             '0xC9F2C9CD04674EDEA40000000',
@@ -750,7 +737,10 @@ const redeploy = async (name, isFork = false, ...args) => {
     }
 
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
+    const registryInstance = await hre.ethers.getContractFactory(
+        'contracts/core/DFSRegistry.sol:DFSRegistry',
+        signer,
+    );
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);
@@ -796,7 +786,10 @@ const redeploy = async (name, isFork = false, ...args) => {
 
 const approveContractInRegistry = async (name, regAddr = addrs[network].REGISTRY_ADDR) => {
     const signer = await hre.ethers.provider.getSigner(getOwnerAddr());
-    const registryInstance = await hre.ethers.getContractFactory('contracts/core/DFSRegistry.sol:DFSRegistry', signer);
+    const registryInstance = await hre.ethers.getContractFactory(
+        'contracts/core/DFSRegistry.sol:DFSRegistry',
+        signer,
+    );
     let registry = await registryInstance.attach(regAddr);
 
     registry = registry.connect(signer);
@@ -816,11 +809,7 @@ const approveContractInRegistry = async (name, regAddr = addrs[network].REGISTRY
     }
 };
 
-const getContractFromRegistry = async (
-    name,
-    isFork = false,
-    ...args
-) => {
+const getContractFromRegistry = async (name, isFork = false, ...args) => {
     const contractAddr = await getAddrFromRegistry(name);
     if (contractAddr !== nullAddress) return hre.ethers.getContractAt(name, contractAddr);
     return redeploy(name, isFork, ...args);
@@ -886,8 +875,9 @@ const approve = async (tokenAddr, to, signer) => {
     if (allowance.toString() === '0') {
         if (signer) {
             const tokenContractSigner = tokenContract.connect(signer);
-            // eslint-disable-next-line max-len
-            await tokenContractSigner.approve(to, hre.ethers.constants.MaxUint256, { gasLimit: 1000000 });
+            await tokenContractSigner.approve(to, hre.ethers.constants.MaxUint256, {
+                gasLimit: 1000000,
+            });
         } else {
             await tokenContract.approve(to, hre.ethers.constants.MaxUint256, { gasLimit: 1000000 });
         }
@@ -936,24 +926,20 @@ const formatMockExchangeObj = async (
     wrapper = undefined,
 ) => {
     if (!wrapper) {
-        // eslint-disable-next-line no-param-reassign
         wrapper = await getContractFromRegistry('MockExchangeWrapper');
     }
 
     const rateDecimals = 18 + destTokenInfo.decimals - srcTokenInfo.decimals;
     const rate = Float2BN(
-        (getLocalTokenPrice(srcTokenInfo.symbol)
-        / getLocalTokenPrice(destTokenInfo.symbol)).toFixed(rateDecimals),
+        (
+            getLocalTokenPrice(srcTokenInfo.symbol) / getLocalTokenPrice(destTokenInfo.symbol)
+        ).toFixed(rateDecimals),
         rateDecimals,
     );
 
     const expectedOutput = hre.ethers.constants.MaxInt256;
 
-    await setBalance(
-        destTokenInfo.addresses[chainIds[network]],
-        wrapper.address,
-        expectedOutput,
-    );
+    await setBalance(destTokenInfo.addresses[chainIds[network]], wrapper.address, expectedOutput);
 
     return [
         srcTokenInfo.addresses[chainIds[network]],
@@ -979,8 +965,12 @@ const formatMockExchangeObjUsdFeed = async (
     amountUsedWhenSrcAmountIsPiped = 0,
 ) => {
     const tokenHelper = await getTokenHelperContract();
-    const srcTokenPriceInUSD = await tokenHelper.getPriceInUSD(srcTokenInfo.addresses[chainIds[network]]);
-    const destTokenPriceInUSD = await tokenHelper.getPriceInUSD(destTokenInfo.addresses[chainIds[network]]);
+    const srcTokenPriceInUSD = await tokenHelper.getPriceInUSD(
+        srcTokenInfo.addresses[chainIds[network]],
+    );
+    const destTokenPriceInUSD = await tokenHelper.getPriceInUSD(
+        destTokenInfo.addresses[chainIds[network]],
+    );
 
     const srcTokenPriceInUsdBN = BigNumber.from(srcTokenPriceInUSD);
     const destTokenPriceInUsdBN = BigNumber.from(destTokenPriceInUSD);
@@ -1017,8 +1007,15 @@ const formatMockExchangeObjUsdFeed = async (
     ];
 };
 
-// eslint-disable-next-line max-len
-const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, uniV3fee, minPrice = 0) => {
+const formatExchangeObj = (
+    srcAddr,
+    destAddr,
+    amount,
+    wrapper,
+    destAmount = 0,
+    uniV3fee,
+    minPrice = 0,
+) => {
     const abiCoder = new hre.ethers.utils.AbiCoder();
 
     let firstPath = srcAddr;
@@ -1041,9 +1038,15 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
     let path = abiCoder.encode(['address[]'], [[firstPath, secondPath]]);
     if (uniV3fee > 0) {
         if (destAmount > 0) {
-            path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [secondPath, uniV3fee, firstPath]);
+            path = hre.ethers.utils.solidityPack(
+                ['address', 'uint24', 'address'],
+                [secondPath, uniV3fee, firstPath],
+            );
         } else {
-            path = hre.ethers.utils.solidityPack(['address', 'uint24', 'address'], [firstPath, uniV3fee, secondPath]);
+            path = hre.ethers.utils.solidityPack(
+                ['address', 'uint24', 'address'],
+                [firstPath, uniV3fee, secondPath],
+            );
         }
     }
     return [
@@ -1060,11 +1063,10 @@ const formatExchangeObj = (srcAddr, destAddr, amount, wrapper, destAmount = 0, u
     ];
 };
 
-// eslint-disable-next-line no-underscore-dangle
 let _curveObj;
 const curveApiInit = async () => {
     if (!_curveObj) {
-        _curveObj = ((await curve).default);
+        _curveObj = (await curve).default;
         await _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
         // Fetch factory pools
         await _curveObj.factory.fetchPools(true);
@@ -1076,12 +1078,7 @@ const curveApiInit = async () => {
     return _curveObj;
 };
 
-const formatExchangeObjCurve = async (
-    srcAddr,
-    destAddr,
-    amount,
-    wrapper,
-) => {
+const formatExchangeObjCurve = async (srcAddr, destAddr, amount, wrapper) => {
     const curveObj = await curveApiInit();
 
     const { route: sdkRoute } = await curveObj.router.getBestRouteAndOutput(
@@ -1093,7 +1090,6 @@ const formatExchangeObjCurve = async (
 
     const exchangeData = hre.ethers.utils.defaultAbiCoder.encode(
         ['address[11]', 'uint256[5][5]', 'address[5]'],
-        // eslint-disable-next-line no-underscore-dangle
         [args._route, args._swapParams, args._pools],
     );
     if (exchangeData.toString().includes('5e74c9036fb86bd7ecdcb084a0673efc32ea31cb')) {
@@ -1121,15 +1117,15 @@ const formatExchangeObjCurve = async (
 
 // TODO[LiquityV2] remove bold 'boldSrc' and 'boldDest' once deployed. This is only used for temporary testing
 const formatExchangeObjSdk = async (
-    srcAddr, destAddr, amount, wrapper, boldSrc = false, boldDest = false,
+    srcAddr,
+    destAddr,
+    amount,
+    wrapper,
+    boldSrc = false,
+    boldDest = false,
 ) => {
     const { AlphaRouter, SwapType } = await import('@uniswap/smart-order-router');
-    const {
-        CurrencyAmount,
-        Token,
-        TradeType,
-        Percent,
-    } = await import('@uniswap/sdk-core');
+    const { CurrencyAmount, Token, TradeType, Percent } = await import('@uniswap/sdk-core');
     const chainId = chainIds[network];
     const boldInfo = { decimals: 18, symbol: 'Bold', name: 'Bold Stablecoin' };
     const srcTokenInfo = boldSrc ? boldInfo : getAssetInfoByAddress(srcAddr, chainId);
@@ -1151,19 +1147,26 @@ const formatExchangeObjSdk = async (
     const swapAmount = CurrencyAmount.fromRawAmount(srcToken, amount.toString());
 
     const router = new AlphaRouter({ chainId, provider: hre.ethers.provider });
-    const { path } = await router.route(
-        swapAmount, destToken, TradeType.EXACT_INPUT,
-        {
-            type: SwapType.SWAP_ROUTER_02,
-            slippageTolerance: new Percent(5, 100),
-        },
-        {
-            maxSplits: 0,
-        },
-    ).then(({ methodParameters }) => hre.ethers.utils.defaultAbiCoder.decode(
-        ['(bytes path,address,uint256,uint256)'],
-        `0x${methodParameters.calldata.slice(10)}`,
-    )[0]);
+    const { path } = await router
+        .route(
+            swapAmount,
+            destToken,
+            TradeType.EXACT_INPUT,
+            {
+                type: SwapType.SWAP_ROUTER_02,
+                slippageTolerance: new Percent(5, 100),
+            },
+            {
+                maxSplits: 0,
+            },
+        )
+        .then(
+            ({ methodParameters }) =>
+                hre.ethers.utils.defaultAbiCoder.decode(
+                    ['(bytes path,address,uint256,uint256)'],
+                    `0x${methodParameters.calldata.slice(10)}`,
+                )[0],
+        );
 
     console.log({ path });
 
@@ -1182,8 +1185,9 @@ const formatExchangeObjSdk = async (
 };
 
 const isEth = (tokenAddr) => {
-    if (tokenAddr.toLowerCase() === ETH_ADDR.toLowerCase()
-    || tokenAddr.toLowerCase() === addrs[network].WETH_ADDRESS.toLowerCase()
+    if (
+        tokenAddr.toLowerCase() === ETH_ADDR.toLowerCase() ||
+        tokenAddr.toLowerCase() === addrs[network].WETH_ADDRESS.toLowerCase()
     ) {
         return true;
     }
@@ -1276,7 +1280,9 @@ const addToExchangeAggregatorRegistry = async (acc, newAddr, isFork = false) => 
     const signer = hre.ethers.provider.getSigner(ownerAddr);
 
     const registry = await hre.ethers.getContractAt(
-        'ExchangeAggregatorRegistry', addrs[network].EXCHANGE_AGGREGATOR_REGISTRY_ADDR, signer,
+        'ExchangeAggregatorRegistry',
+        addrs[network].EXCHANGE_AGGREGATOR_REGISTRY_ADDR,
+        signer,
     );
 
     await registry.setExchangeTargetAddr(newAddr, true);
@@ -1294,7 +1300,6 @@ const getGasUsed = async (receipt) => {
 
 const callDataCost = (calldata) => {
     if (calldata.slice(0, 2) === '0x') {
-        // eslint-disable-next-line no-param-reassign
         calldata = calldata.slice(2);
     }
 
@@ -1312,7 +1317,6 @@ const callDataCost = (calldata) => {
 
 const calcGasToUSD = (gasUsed, gasPriceInGwei = 0, callData = 0) => {
     if (gasPriceInGwei === 0) {
-        // eslint-disable-next-line no-param-reassign
         gasPriceInGwei = addrs[network].AVG_GAS_PRICE;
     }
 
@@ -1321,12 +1325,12 @@ const calcGasToUSD = (gasUsed, gasPriceInGwei = 0, callData = 0) => {
     if (callData !== 0) {
         const l1GasCost = callDataCost(callData);
 
-        extraCost = ((l1GasCost) * addrs.mainnet.AVG_GAS_PRICE * 1000000000) / 1e18;
+        extraCost = (l1GasCost * addrs.mainnet.AVG_GAS_PRICE * 1000000000) / 1e18;
 
         console.log('L1 gas cost:', extraCost);
     }
 
-    let ethSpent = ((gasUsed) * gasPriceInGwei * 1000000000) / 1e18;
+    let ethSpent = (gasUsed * gasPriceInGwei * 1000000000) / 1e18;
     ethSpent += extraCost;
 
     console.log('Eth gas cost: ', ethSpent);
@@ -1348,17 +1352,17 @@ const cacheChainlinkPrice = async (tokenSymbol, tokenAddr) => {
     try {
         if (cachedTokenPrices[tokenSymbol]) return cachedTokenPrices[tokenSymbol];
 
-        // eslint-disable-next-line no-param-reassign
         if (tokenAddr.toLowerCase() === WBTC_ADDR.toLowerCase()) tokenAddr = BTC_ADDR;
 
         let wstethMultiplier = '1';
         if (tokenAddr.toLowerCase() === WSTETH_ADDRESS.toLowerCase()) {
-            // eslint-disable-next-line no-param-reassign
             tokenAddr = STETH_ADDRESS;
-            wstethMultiplier = BN2Float(await hre.ethers.provider.call({
-                to: WSTETH_ADDRESS,
-                data: hre.ethers.utils.id('stEthPerToken()').slice(0, 10),
-            }));
+            wstethMultiplier = BN2Float(
+                await hre.ethers.provider.call({
+                    to: WSTETH_ADDRESS,
+                    data: hre.ethers.utils.id('stEthPerToken()').slice(0, 10),
+                }),
+            );
         }
 
         let tokenPrice = BN2Float(await getChainLinkPrice(tokenAddr), 8);
@@ -1373,14 +1377,16 @@ const cacheChainlinkPrice = async (tokenSymbol, tokenAddr) => {
     }
 };
 
-const takeSnapshot = async () => hre.network.provider.request({
-    method: 'evm_snapshot',
-});
+const takeSnapshot = async () =>
+    hre.network.provider.request({
+        method: 'evm_snapshot',
+    });
 
-const revertToSnapshot = async (snapshotId) => hre.network.provider.request({
-    method: 'evm_revert',
-    params: [snapshotId],
-});
+const revertToSnapshot = async (snapshotId) =>
+    hre.network.provider.request({
+        method: 'evm_revert',
+        params: [snapshotId],
+    });
 
 const getWeth = () => addrs[network].WETH_ADDRESS;
 
@@ -1417,10 +1423,7 @@ async function setForkForTesting() {
         senderAcc.address,
         '0xC9F2C9CD04674EDEA40000000',
     ]);
-    await hre.network.provider.send(setBalanceMethod, [
-        OWNER_ACC,
-        '0xC9F2C9CD04674EDEA40000000',
-    ]);
+    await hre.network.provider.send(setBalanceMethod, [OWNER_ACC, '0xC9F2C9CD04674EDEA40000000']);
 
     const setNextBlockBaseFeeMethod = hre.network.config.isAnvil
         ? 'anvil_setNextBlockBaseFeePerGas'
@@ -1511,7 +1514,6 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
     if (isProxySafe(proxy)) {
         // If signer is not set, try setting it with _address
         if (!proxy.signer.address) {
-            // eslint-disable-next-line no-underscore-dangle
             proxy.signer.address = proxy.signer._address;
         }
         receipt = await executeSafeTx(
@@ -1580,13 +1582,15 @@ const expectError = (errString, expectedErrSig) => {
 const getStrategyExecutorContract = async () => {
     const strategyContractName = network === 'mainnet' ? 'StrategyExecutor' : 'StrategyExecutorL2';
     const strategyExecutor = await hre.ethers.getContractAt(
-        strategyContractName, addrs[network].STRATEGY_EXECUTOR_ADDR,
+        strategyContractName,
+        addrs[network].STRATEGY_EXECUTOR_ADDR,
     );
     return strategyExecutor;
 };
 
 const getAndSetMockExchangeWrapper = async (acc, newAddr, isFork = false) => {
-    const mockExchangeName = network === 'mainnet' ? 'MockExchangeWrapperUsdFeed' : 'MockExchangeWrapperUsdFeedL2';
+    const mockExchangeName =
+        network === 'mainnet' ? 'MockExchangeWrapperUsdFeed' : 'MockExchangeWrapperUsdFeedL2';
     const mockWrapper = await redeploy(mockExchangeName, isFork);
     await setNewExchangeWrapper(acc, mockWrapper.address);
     return mockWrapper;

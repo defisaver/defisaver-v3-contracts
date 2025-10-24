@@ -4,12 +4,10 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
-import { LlamaLendSwapper } from "./LlamaLendSwapper.sol";
-import { IBytesTransientStorage } from "../../../interfaces/IBytesTransientStorage.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
 import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
 
-/// @title LlamaLendLevCreate 
+/// @title LlamaLendLevCreate
 contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
     using TokenUtils for address;
 
@@ -78,21 +76,12 @@ contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
 
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
-
         collAddr.approveToken(_params.controllerAddress, _params.collAmount);
         // create loan
-        ILlamaLendController(_params.controllerAddress).create_loan_extended(
-            _params.collAmount,
-            _params.exData.srcAmount,
-            _params.nBands,
-            llamalendSwapper,
-            info
-        );
+        ILlamaLendController(_params.controllerAddress)
+            .create_loan_extended(_params.collAmount, _params.exData.srcAmount, _params.nBands, llamalendSwapper, info);
 
-        return (
-            _params.exData.srcAmount,
-            abi.encode(_params)
-        );
+        return (_params.exData.srcAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

@@ -1,18 +1,16 @@
-/* eslint-disable max-len */
 const { expect } = require('chai');
 const hre = require('hardhat');
 
 const { getAssetInfo } = require('@defisaver/tokens');
 
-const {
-    aaveV3Supply,
-    aaveV3Borrow,
-    aaveV3Payback,
-} = require('../../utils/actions');
+const { aaveV3Supply, aaveV3Borrow, aaveV3Payback } = require('../../utils/actions');
 
 const { isAssetBorrowableV3, VARIABLE_RATE } = require('../../utils/aave');
 const {
-    getProxy, redeploy, takeSnapshot, revertToSnapshot,
+    getProxy,
+    redeploy,
+    takeSnapshot,
+    revertToSnapshot,
     addrs,
     network,
     fetchAmountinUSDPrice,
@@ -53,7 +51,6 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                 const collAsset = getAssetInfo(collateralTokens[i]);
                 const debtAsset = getAssetInfo(debtTokens[j]);
                 if (collAsset.symbol === debtAsset.symbol) {
-                    // eslint-disable-next-line no-continue
                     continue;
                 }
                 it(`... should estimate supply and borrow rates for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]`, async () => {
@@ -67,17 +64,16 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                     );
 
                     const isAssetBorrowable = await isAssetBorrowableV3(
-                        addrs[network].AAVE_V3_POOL_DATA_PROVIDER, debtAsset.address,
+                        addrs[network].AAVE_V3_POOL_DATA_PROVIDER,
+                        debtAsset.address,
                     );
                     if (!isAssetBorrowable) {
                         console.log('Borrow asset is paused, inactive or frozen. Skipping test');
-                        // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }
                     if (!collTokenInfoFull.usageAsCollateralEnabled) {
                         console.log('Collateral asset cant be used as collateral. Skipping test');
-                        // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }
@@ -184,10 +180,22 @@ const aaveV3ApyAfterValuesTest = async (isFork) => {
                     // rate is scaled by 1e27. We want first 7 digits to be the same
                     const precision = hre.ethers.BigNumber.from(10).pow(27 - 7);
 
-                    expect(estimatedStateAfter.collAssetSupplyRate).to.be.closeTo(stateAfter.collAssetSupplyRate, precision);
-                    expect(estimatedStateAfter.collAssetVariableBorrowRate).to.be.closeTo(stateAfter.collAssetVariableBorrowRate, precision);
-                    expect(estimatedStateAfter.debtAssetSupplyRate).to.be.closeTo(stateAfter.debtAssetSupplyRate, precision);
-                    expect(estimatedStateAfter.debtAssetVariableBorrowRate).to.be.closeTo(stateAfter.debtAssetVariableBorrowRate, precision);
+                    expect(estimatedStateAfter.collAssetSupplyRate).to.be.closeTo(
+                        stateAfter.collAssetSupplyRate,
+                        precision,
+                    );
+                    expect(estimatedStateAfter.collAssetVariableBorrowRate).to.be.closeTo(
+                        stateAfter.collAssetVariableBorrowRate,
+                        precision,
+                    );
+                    expect(estimatedStateAfter.debtAssetSupplyRate).to.be.closeTo(
+                        stateAfter.debtAssetSupplyRate,
+                        precision,
+                    );
+                    expect(estimatedStateAfter.debtAssetVariableBorrowRate).to.be.closeTo(
+                        stateAfter.debtAssetVariableBorrowRate,
+                        precision,
+                    );
                 });
             }
         }

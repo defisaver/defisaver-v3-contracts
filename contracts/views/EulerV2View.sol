@@ -13,7 +13,6 @@ import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
 
 /// @title EulerV2View - aggregate various information about Euler vaults and users
 contract EulerV2View is EulerV2Helper, TokenPriceHelper {
-
     /*//////////////////////////////////////////////////////////////
                                CONSTANTS
     //////////////////////////////////////////////////////////////*/
@@ -21,7 +20,7 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
     // When flag is set, debt socialization during liquidation is disabled
     uint32 constant CFG_DONT_SOCIALIZE_DEBT = 1 << 0;
     // max interest rate accepted from IRM. 1,000,000% APY: floor(((1000000 / 100 + 1)**(1/(86400*365.2425)) - 1) * 1e27)
-    uint256 constant MAX_ALLOWED_INTEREST_RATE = 291867278914945094175;
+    uint256 constant MAX_ALLOWED_INTEREST_RATE = 291_867_278_914_945_094_175;
 
     address public constant USD = address(840);
 
@@ -33,90 +32,89 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
 
     /// @notice Collateral information
     struct CollateralInfo {
-        address vaultAddr;                  // Address of the Euler vault
-        address assetAddr;                  // Address of the underlying asset
-        string vaultSymbol;                 // Vault symbol
-        string name;                        // Vault name
-        address governorAdmin;              // Address of the governor admin of the vault, or address zero if escrow vault for example
-        bool isEscrowed;                    // Flag indicating whether the vault is escrowed meaning there is no borrow functionality
-        uint256 decimals;                   // Decimals, the same as the asset's or 18 if the asset doesn't implement `decimals()`
-        uint256 sharePriceInUnit;           // Price of one share in the unit of account. Scaled by 1e18
-        uint256 assetPriceInUnit;           // Price of one asset in the unit of account. Scaled by 1e18
-        uint256 cash;                       // Balance of vault assets as tracked by deposits/withdrawals and borrows/repays
-        uint256 totalBorrows;               // Sum of all outstanding debts, in underlying units (increases as interest is accrued)
-        uint256 supplyCap;                  // Maximum total amount of assets that can be supplied to the vault
-        uint16 borrowLTV;                   // The current value of borrow LTV for originating positions
-        uint16 liquidationLTV;              // The value of fully converged liquidation LTV
-        uint16 initialLiquidationLTV;       // The initial value of the liquidation LTV, when the ramp began
-        uint48 targetTimestamp;             // The timestamp when the liquidation LTV is considered fully converged
-        uint32 rampDuration;                // The time it takes for the liquidation LTV to converge from the initial value to the fully converged value
-        uint256 interestFee;                // Interest that is redirected as a fee, as a fraction scaled by 1e4
-        uint256 interestRate;               // Current borrow interest rate for an asset in yield-per-second, scaled by 10**27
+        address vaultAddr; // Address of the Euler vault
+        address assetAddr; // Address of the underlying asset
+        string vaultSymbol; // Vault symbol
+        string name; // Vault name
+        address governorAdmin; // Address of the governor admin of the vault, or address zero if escrow vault for example
+        bool isEscrowed; // Flag indicating whether the vault is escrowed meaning there is no borrow functionality
+        uint256 decimals; // Decimals, the same as the asset's or 18 if the asset doesn't implement `decimals()`
+        uint256 sharePriceInUnit; // Price of one share in the unit of account. Scaled by 1e18
+        uint256 assetPriceInUnit; // Price of one asset in the unit of account. Scaled by 1e18
+        uint256 cash; // Balance of vault assets as tracked by deposits/withdrawals and borrows/repays
+        uint256 totalBorrows; // Sum of all outstanding debts, in underlying units (increases as interest is accrued)
+        uint256 supplyCap; // Maximum total amount of assets that can be supplied to the vault
+        uint16 borrowLTV; // The current value of borrow LTV for originating positions
+        uint16 liquidationLTV; // The value of fully converged liquidation LTV
+        uint16 initialLiquidationLTV; // The initial value of the liquidation LTV, when the ramp began
+        uint48 targetTimestamp; // The timestamp when the liquidation LTV is considered fully converged
+        uint32 rampDuration; // The time it takes for the liquidation LTV to converge from the initial value to the fully converged value
+        uint256 interestFee; // Interest that is redirected as a fee, as a fraction scaled by 1e4
+        uint256 interestRate; // Current borrow interest rate for an asset in yield-per-second, scaled by 10**27
     }
 
     /// @notice Full information about a vault
     struct VaultInfoFull {
-        address vaultAddr;                  // Address of the Euler vault
-        address assetAddr;                  // Address of the underlying asset 
-        string name;                        // Vault name
-        string symbol;                      // Vault symbol
-        uint256 decimals;                   // Decimals, the same as the asset's or 18 if the asset doesn't implement `decimals()`
-        uint256 totalSupplyShares;          // Total supply shares. Sum of all eTokens balances
-        uint256 cash;                       // Balance of vault assets as tracked by deposits/withdrawals and borrows/repays
-        uint256 totalBorrows;               // Sum of all outstanding debts, in underlying units (increases as interest is accrued)
-        uint256 totalAssets;                // Total amount of managed assets, cash + borrows
-        uint256 supplyCap;                  // Maximum total amount of assets that can be supplied to the vault
-        uint256 borrowCap;                  // Maximum total amount of assets that can be borrowed from the vault
-        CollateralInfo[] collaterals;       // Supported collateral assets with their LTV configurations
-        uint16 maxLiquidationDiscount;      // The maximum liquidation discount in 1e4 scale
-        uint256 liquidationCoolOffTime;     // Liquidation cool-off time, which must elapse after successful account status check before
-        bool badDebtSocializationEnabled;   // Flag indicating whether bad debt socialization is enabled
-        address unitOfAccount;              // Reference asset used for liquidity calculations
-        uint256 unitOfAccountInUsd;         // If unit of account is not USD, fetch its price in USD from chainlink in 1e8 scale
-        address oracle;                     // Address of the oracle contract
-        uint256 assetPriceInUnit;           // Price of one asset in the unit of account, scaled by 1e18
-        uint256 sharePriceInUnit;           // Price of one share in the unit of account, scaled by 1e18
-        uint256 interestRate;               // Current borrow interest rate for an asset in yield-per-second, scaled by 10**27
-        address irm;                        // Address of the interest rate contract or address zero to indicate 0% interest
-        address balanceTrackerAddress;      // Retrieve the address of rewards contract, tracking changes in account's balances
-        address creator;                    // Address of the creator of the vault
-        address governorAdmin;              // Address of the governor admin of the vault, or address zero if escrow vault for example
-        uint256 interestFee;                // Interest that is redirected as a fee, as a fraction scaled by 1e4
+        address vaultAddr; // Address of the Euler vault
+        address assetAddr; // Address of the underlying asset
+        string name; // Vault name
+        string symbol; // Vault symbol
+        uint256 decimals; // Decimals, the same as the asset's or 18 if the asset doesn't implement `decimals()`
+        uint256 totalSupplyShares; // Total supply shares. Sum of all eTokens balances
+        uint256 cash; // Balance of vault assets as tracked by deposits/withdrawals and borrows/repays
+        uint256 totalBorrows; // Sum of all outstanding debts, in underlying units (increases as interest is accrued)
+        uint256 totalAssets; // Total amount of managed assets, cash + borrows
+        uint256 supplyCap; // Maximum total amount of assets that can be supplied to the vault
+        uint256 borrowCap; // Maximum total amount of assets that can be borrowed from the vault
+        CollateralInfo[] collaterals; // Supported collateral assets with their LTV configurations
+        uint16 maxLiquidationDiscount; // The maximum liquidation discount in 1e4 scale
+        uint256 liquidationCoolOffTime; // Liquidation cool-off time, which must elapse after successful account status check before
+        bool badDebtSocializationEnabled; // Flag indicating whether bad debt socialization is enabled
+        address unitOfAccount; // Reference asset used for liquidity calculations
+        uint256 unitOfAccountInUsd; // If unit of account is not USD, fetch its price in USD from chainlink in 1e8 scale
+        address oracle; // Address of the oracle contract
+        uint256 assetPriceInUnit; // Price of one asset in the unit of account, scaled by 1e18
+        uint256 sharePriceInUnit; // Price of one share in the unit of account, scaled by 1e18
+        uint256 interestRate; // Current borrow interest rate for an asset in yield-per-second, scaled by 10**27
+        address irm; // Address of the interest rate contract or address zero to indicate 0% interest
+        address balanceTrackerAddress; // Retrieve the address of rewards contract, tracking changes in account's balances
+        address creator; // Address of the creator of the vault
+        address governorAdmin; // Address of the governor admin of the vault, or address zero if escrow vault for example
+        uint256 interestFee; // Interest that is redirected as a fee, as a fraction scaled by 1e4
     }
 
-    /// @notice User collateral information   
+    /// @notice User collateral information
     struct UserCollateralInfo {
-        address collateralVault;            // Address of the collateral vault
-        bool usedInBorrow;                  // Flag indicating whether the collateral is used by the current user controller (if one exists)
-        uint256 collateralAmountInUnit;     // Amount of collateral in unit of account. If coll is NOT supported by the borrow vault, returns 0
-        uint256 collateralAmountInAsset;    // Amount of collateral in asset's decimals
-
-        uint256 collateralAmountInUSD;      // Amount of collateral in USD, in 18 decimals
-                                            // If collateralAmountInUnit is present AND unit of account is USD, this will be the same as collateralAmountInUnit
-                                            // If collateralAmountInUnit is present AND unit of account is not USD, this will return chainlink price in USD
-                                            // If collateralAmountInUnit is NOT present, this will return chainlink price in USD
+        address collateralVault; // Address of the collateral vault
+        bool usedInBorrow; // Flag indicating whether the collateral is used by the current user controller (if one exists)
+        uint256 collateralAmountInUnit; // Amount of collateral in unit of account. If coll is NOT supported by the borrow vault, returns 0
+        uint256 collateralAmountInAsset; // Amount of collateral in asset's decimals
+        uint256 collateralAmountInUSD; // Amount of collateral in USD, in 18 decimals
+        // If collateralAmountInUnit is present AND unit of account is USD, this will be the same as collateralAmountInUnit
+        // If collateralAmountInUnit is present AND unit of account is not USD, this will return chainlink price in USD
+        // If collateralAmountInUnit is NOT present, this will return chainlink price in USD
     }
 
     /// @notice User data with loan information
     struct UserData {
-        address user;                       // Address of the user
-        address owner;                      // Address of the owner address space. Same as user if user is not a sub-account
-        bool inLockDownMode;                // Flag indicating whether the account is in lockdown mode
-        bool inPermitDisabledMode;          // Flag indicating whether the account is in permit disabled mode
-        address borrowVault;                // Address of the borrow vault (aka controller)
-        uint256 borrowAmountInUnit;         // Amount of borrowed assets in the unit of account
-        uint256 borrowAmountInAsset;        // Amount of borrowed assets in the asset's decimals
-        UserCollateralInfo[] collaterals;   // Collaterals information
+        address user; // Address of the user
+        address owner; // Address of the owner address space. Same as user if user is not a sub-account
+        bool inLockDownMode; // Flag indicating whether the account is in lockdown mode
+        bool inPermitDisabledMode; // Flag indicating whether the account is in permit disabled mode
+        address borrowVault; // Address of the borrow vault (aka controller)
+        uint256 borrowAmountInUnit; // Amount of borrowed assets in the unit of account
+        uint256 borrowAmountInAsset; // Amount of borrowed assets in the asset's decimals
+        UserCollateralInfo[] collaterals; // Collaterals information
     }
 
     /// @notice Used for borrow rate estimation
     /// @notice if isBorrowOperation => (liquidityAdded = repay, liquidityRemoved = borrow)
     /// @notice if not, look at it as supply/withdraw operation => (liquidityAdded = supply, liquidityRemoved = withdraw)
     struct LiquidityChangeParams {
-        address vault;                      // Address of the Euler vault          
-        bool isBorrowOperation;             // Flag indicating whether the operation is a borrow operation (repay/borrow), otherwise supply/withdraw
-        uint256 liquidityAdded;             // Amount of liquidity added to the vault
-        uint256 liquidityRemoved;           // Amount of liquidity removed from the vault
+        address vault; // Address of the Euler vault
+        bool isBorrowOperation; // Flag indicating whether the operation is a borrow operation (repay/borrow), otherwise supply/withdraw
+        uint256 liquidityAdded; // Amount of liquidity added to the vault
+        uint256 liquidityRemoved; // Amount of liquidity removed from the vault
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -150,21 +148,12 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
             oracle = IEVault(controller).oracle();
             borrowAmountInAsset = IEVault(controller).debtOf(_user);
             borrowAmountInUnit = _getOracleAmountInUnitOfAccount(
-                oracle,
-                IEVault(controller).asset(),
-                unitOfAccount,
-                borrowAmountInAsset
+                oracle, IEVault(controller).asset(), unitOfAccount, borrowAmountInAsset
             );
         }
 
         for (uint256 i = 0; i < collaterals.length; ++i) {
-            collateralsInfo[i] = _getUserCollateralInfo(
-                _user,
-                collaterals[i],
-                controller,
-                unitOfAccount,
-                oracle
-            );
+            collateralsInfo[i] = _getUserCollateralInfo(_user, collaterals[i], controller, unitOfAccount, oracle);
         }
 
         data = UserData({
@@ -237,13 +226,10 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
     }
 
     /// @notice Fetches used accounts, including sub-accounts
-    function fetchUsedAccounts(address _account, uint256 _page, uint256 _perPage) 
+    function fetchUsedAccounts(address _account, uint256 _page, uint256 _perPage)
         external
         view
-        returns (
-            address owner,
-            address[] memory accounts
-        ) 
+        returns (address owner, address[] memory accounts)
     {
         require(_perPage >= 1 && _perPage <= MAX_ACCOUNTS_SIZE);
 
@@ -278,8 +264,9 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
 
     /// @notice Get borrow rate estimation after liquidity change
     /// @dev Should be called with staticcall
-    function getApyAfterValuesEstimation(LiquidityChangeParams[] memory params) 
-        public returns (uint256[] memory estimatedBorrowRates) 
+    function getApyAfterValuesEstimation(LiquidityChangeParams[] memory params)
+        public
+        returns (uint256[] memory estimatedBorrowRates)
     {
         estimatedBorrowRates = new uint256[](params.length);
         for (uint256 i = 0; i < params.length; ++i) {
@@ -295,7 +282,7 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
             uint256 oldInterestRate = v.interestRate();
             uint256 cash = v.cash();
             uint256 totalBorrows = v.totalBorrows();
-            
+
             if (params[i].isBorrowOperation) {
                 // when repaying
                 if (params[i].liquidityAdded > 0) {
@@ -318,12 +305,8 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
                 }
             }
 
-            (bool success, bytes memory data) = irm.staticcall(
-                abi.encodeCall(
-                    IIRM.computeInterestRateView,
-                    (address(this), cash, totalBorrows)
-                )
-            );
+            (bool success, bytes memory data) =
+                irm.staticcall(abi.encodeCall(IIRM.computeInterestRateView, (address(this), cash, totalBorrows)));
 
             if (success && data.length >= 32) {
                 uint256 newInterestRate = abi.decode(data, (uint256));
@@ -348,24 +331,19 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         address _unitOfAccount,
         address _oracle
     ) internal view returns (UserCollateralInfo memory data) {
-
         uint256 collateralAmountInUnit;
 
         if (_controller != address(0)) {
             uint16 borrowLTV = IEVault(_controller).LTVBorrow(_collateral);
             if (borrowLTV != 0) {
                 uint256 userCollBalance = IEVault(_collateral).balanceOf(_user);
-                collateralAmountInUnit = _getOracleAmountInUnitOfAccount(
-                    _oracle,
-                    _collateral,
-                    _unitOfAccount,
-                    userCollBalance
-                );
+                collateralAmountInUnit =
+                    _getOracleAmountInUnitOfAccount(_oracle, _collateral, _unitOfAccount, userCollBalance);
             }
         }
-        
+
         IEVault collVault = IEVault(_collateral);
-        
+
         data.collateralVault = _collateral;
         data.collateralAmountInUnit = collateralAmountInUnit;
         data.usedInBorrow = collateralAmountInUnit != 0;
@@ -379,7 +357,7 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
                 uint256 collAmountUnitWAD = dec > 18
                     ? data.collateralAmountInUnit / 10 ** (dec - 18)
                     : data.collateralAmountInUnit * 10 ** (18 - dec);
-                uint256 unitPriceWAD = getPriceInUSD(_unitOfAccount) * 1e10; 
+                uint256 unitPriceWAD = getPriceInUSD(_unitOfAccount) * 1e10;
                 data.collateralAmountInUSD = wmul(collAmountUnitWAD, unitPriceWAD);
             }
         } else {
@@ -392,10 +370,14 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         }
     }
 
-    function _getVaultCollaterals(address _vault, address _unitOfAccount, address _oracle) internal view returns (CollateralInfo[] memory collateralsInfo) {
+    function _getVaultCollaterals(address _vault, address _unitOfAccount, address _oracle)
+        internal
+        view
+        returns (CollateralInfo[] memory collateralsInfo)
+    {
         address[] memory collaterals = IEVault(_vault).LTVList();
         collateralsInfo = new CollateralInfo[](collaterals.length);
-        
+
         for (uint256 i = 0; i < collaterals.length; ++i) {
             (
                 collateralsInfo[i].borrowLTV,
@@ -404,7 +386,7 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
                 collateralsInfo[i].targetTimestamp,
                 collateralsInfo[i].rampDuration
             ) = IEVault(_vault).LTVFull(collaterals[i]);
-            
+
             collateralsInfo[i].vaultAddr = collaterals[i];
             collateralsInfo[i].name = IEVault(collaterals[i]).name();
             collateralsInfo[i].governorAdmin = IEVault(collaterals[i]).governorAdmin();
@@ -413,17 +395,11 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
             collateralsInfo[i].vaultSymbol = IEVault(collaterals[i]).symbol();
             collateralsInfo[i].decimals = IEVault(collaterals[i]).decimals();
 
-            collateralsInfo[i].sharePriceInUnit = _getOraclePriceInUnitOfAccount(
-                _oracle,
-                collaterals[i],
-                _unitOfAccount
-            );
+            collateralsInfo[i].sharePriceInUnit =
+                _getOraclePriceInUnitOfAccount(_oracle, collaterals[i], _unitOfAccount);
 
-            collateralsInfo[i].assetPriceInUnit = _getOraclePriceInUnitOfAccount(
-                _oracle,
-                collateralsInfo[i].assetAddr,
-                _unitOfAccount
-            );
+            collateralsInfo[i].assetPriceInUnit =
+                _getOraclePriceInUnitOfAccount(_oracle, collateralsInfo[i].assetAddr, _unitOfAccount);
 
             collateralsInfo[i].cash = IEVault(collaterals[i]).cash();
             collateralsInfo[i].totalBorrows = IEVault(collaterals[i]).totalBorrows();
@@ -436,14 +412,14 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         }
     }
 
-    function _getOraclePriceInUnitOfAccount(
-        address _oracle,
-        address _token,
-        address _unitOfAccount
-    ) internal view returns (uint256 price) {
+    function _getOraclePriceInUnitOfAccount(address _oracle, address _token, address _unitOfAccount)
+        internal
+        view
+        returns (uint256 price)
+    {
         uint256 decimals = IEVault(_token).decimals();
         uint256 inAmount = 10 ** decimals;
-        
+
         if (_oracle != address(0)) {
             try IPriceOracle(_oracle).getQuote(inAmount, _token, _unitOfAccount) returns (uint256 quote) {
                 return quote;
@@ -453,12 +429,11 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         }
     }
 
-    function _getOracleAmountInUnitOfAccount(
-        address _oracle,
-        address _token,
-        address _unitOfAccount,
-        uint256 _amount
-    ) internal view returns (uint256 price) {
+    function _getOracleAmountInUnitOfAccount(address _oracle, address _token, address _unitOfAccount, uint256 _amount)
+        internal
+        view
+        returns (uint256 price)
+    {
         if (_oracle != address(0)) {
             try IPriceOracle(_oracle).getQuote(_amount, _token, _unitOfAccount) returns (uint256 quote) {
                 return quote;

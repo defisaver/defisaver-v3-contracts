@@ -12,8 +12,7 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { SafeERC20 } from "../../utils/SafeERC20.sol";
 import { IERC20 } from "../../interfaces/IERC20.sol";
 
-contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, CoreHelper{
-
+contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, CoreHelper {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
@@ -22,13 +21,12 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
 
     /// @notice Takes order from Kyberswap and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    function takeOrder(
-        ExchangeData memory _exData
-    ) override public payable returns (bool success, uint256) {
+    function takeOrder(ExchangeData memory _exData) public payable override returns (bool success, uint256) {
         address scalingHelperAddr = registry.getAddr(SCALING_HELPER_ID);
-        (bool isScalingSuccess, bytes memory scaledCalldata) = IKyberScaleHelper(scalingHelperAddr).getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);
-        
-        if (!isScalingSuccess){
+        (bool isScalingSuccess, bytes memory scaledCalldata) =
+            IKyberScaleHelper(scalingHelperAddr).getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);
+
+        if (!isScalingSuccess) {
             // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)
             sendLeftover(_exData.srcAddr, _exData.destAddr, payable(msg.sender));
             return (false, 0);
@@ -40,14 +38,14 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
 
         /// @dev the amount of tokens received is checked in DFSExchangeCore
         /// @dev Exchange wrapper contracts should not be used on their own
-        (success, ) = _exData.offchainData.exchangeAddr.call(scaledCalldata);
+        (success,) = _exData.offchainData.exchangeAddr.call(scaledCalldata);
 
         uint256 tokensSwapped = 0;
 
         if (success) {
             // get the current balance of the swapped tokens
             tokensSwapped = _exData.destAddr.getBalance(address(this)) - tokensBefore;
-            if (tokensSwapped == 0){
+            if (tokensSwapped == 0) {
                 revert ZeroTokensSwapped();
             }
         }
@@ -59,5 +57,5 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAut
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external virtual payable {}
+    receive() external payable virtual { }
 }

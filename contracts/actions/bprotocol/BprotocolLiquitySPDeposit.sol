@@ -6,7 +6,6 @@ import { ActionBase } from "../ActionBase.sol";
 import { BprotocolLiquitySPHelper } from "./helpers/BprotocolLiquitySPHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
-
 /// @title BprotocolLiquitySPDeposit - Action that deposits LUSD into Bprotocol
 /// @dev LQTY rewards accrue over time and are paid out each time the user interacts with the protocol
 /// @dev Deposit amount must be greater than zero, for LQTY only claim use BprotocolLiquitySPWithdraw
@@ -63,10 +62,7 @@ contract BprotocolLiquitySPDeposit is ActionBase, BprotocolLiquitySPHelper {
 
         LQTY_TOKEN_ADDRESS.withdrawTokens(_params.lqtyTo, lqtyRewarded);
 
-        return (
-            sharesMinted,
-            abi.encode(_params, sharesMinted, lqtyRewarded)
-        );
+        return (sharesMinted, abi.encode(_params, sharesMinted, lqtyRewarded));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory _params) {

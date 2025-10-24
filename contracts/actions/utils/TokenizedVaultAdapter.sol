@@ -5,7 +5,6 @@ import { IERC4626 } from "../../interfaces/IERC4626.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 
-
 /// @notice Action that handles ERC4626 vault operations
 /// @dev MAXUINT amount is possible for DEPOSIT and REDEEM operations
 contract TokenizedVaultAdapter is ActionBase {
@@ -52,7 +51,8 @@ contract TokenizedVaultAdapter is ActionBase {
         params.vaultAddress = _parseParamAddr(params.vaultAddress, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
-        params.operationId = OperationId(_parseParamUint(uint8(params.operationId), _paramMapping[5], _subData, _returnValues));
+        params.operationId =
+            OperationId(_parseParamUint(uint8(params.operationId), _paramMapping[5], _subData, _returnValues));
 
         (bytes memory logData, uint256 returnAmount) = _executeOperation(params);
         emit ActionEvent("TokenizedVaultAdapter", logData);
@@ -61,7 +61,7 @@ contract TokenizedVaultAdapter is ActionBase {
 
     function executeActionDirect(bytes memory _callData) public payable virtual override {
         Params memory params = parseInputs(_callData);
-        (bytes memory logData, ) = _executeOperation(params);
+        (bytes memory logData,) = _executeOperation(params);
         logger.logActionDirectEvent("TokenizedVaultAdapter", logData);
     }
 
@@ -100,13 +100,12 @@ contract TokenizedVaultAdapter is ActionBase {
             assetAddress.approveToken(address(vault), _params.amount);
             uint256 sharesMinted;
 
-            if (address(vault) == SKY_STAKED_USDS && block.chainid == 1){
+            if (address(vault) == SKY_STAKED_USDS && block.chainid == 1) {
                 sharesMinted = vault.deposit(_params.amount, _params.to, SKY_REFERRAL_CODE);
             } else {
                 sharesMinted = vault.deposit(_params.amount, _params.to);
             }
-            
-            
+
             if (sharesMinted < _params.minOutOrMaxIn) revert TokenizedVaultSlippageHit(_params, sharesMinted);
             logData = abi.encode(_params, sharesMinted);
             return (logData, sharesMinted);
@@ -120,12 +119,12 @@ contract TokenizedVaultAdapter is ActionBase {
             assetAddress.approveToken(address(vault), pulledAssetAmount);
 
             uint256 assetsDeposited;
-            if (address(vault) == SKY_STAKED_USDS && block.chainid == 1){
+            if (address(vault) == SKY_STAKED_USDS && block.chainid == 1) {
                 assetsDeposited = vault.mint(_params.amount, _params.to, SKY_REFERRAL_CODE);
             } else {
                 assetsDeposited = vault.mint(_params.amount, _params.to);
             }
-        
+
             if (pulledAssetAmount > assetsDeposited) {
                 assetAddress.withdrawTokens(_params.to, pulledAssetAmount - assetsDeposited);
             }

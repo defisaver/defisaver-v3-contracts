@@ -6,7 +6,7 @@ pragma solidity =0.8.24;
 /// This mock will be added inside the registry on the place of real TxSaverExecutor.
 /// Zero fee type will turn off tx saver feature.
 contract MockTxSaverExecutor {
-    function getFeeType() external view returns (uint256){
+    function getFeeType() external view returns (uint256) {
         return 0;
     }
 }

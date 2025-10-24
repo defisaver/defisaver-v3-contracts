@@ -2,24 +2,21 @@
 
 pragma solidity =0.8.24;
 
-import {IDebtToken} from "../../contracts/interfaces/aaveV3/IDebtToken.sol";
-import {IPoolV3} from "../../contracts/interfaces/aaveV3/IPoolV3.sol";
-import {IPoolAddressesProvider} from "../../contracts/interfaces/aaveV3/IPoolAddressesProvider.sol";
-import {IAaveProtocolDataProvider} from "../../contracts/interfaces/aaveV3/IAaveProtocolDataProvider.sol";
-import {IERC20} from "../../contracts/interfaces/IERC20.sol";
-import {DataTypes} from "../../contracts/interfaces/aaveV3/DataTypes.sol";
-import {SafeERC20} from "../../contracts/utils/SafeERC20.sol";
+import { IDebtToken } from "../../contracts/interfaces/aaveV3/IDebtToken.sol";
+import { IPoolV3 } from "../../contracts/interfaces/aaveV3/IPoolV3.sol";
+import { IERC20 } from "../../contracts/interfaces/IERC20.sol";
+import { DataTypes } from "../../contracts/interfaces/aaveV3/DataTypes.sol";
+import { SafeERC20 } from "../../contracts/utils/SafeERC20.sol";
 
-import {BaseTest} from "../utils/BaseTest.sol";
-import {SmartWallet} from "../utils/SmartWallet.sol";
-import {ActionsUtils} from "../utils/ActionsUtils.sol";
-import {Addresses} from "../utils/Addresses.sol";
-import {AaveV3Supply} from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
-import {AaveV3Borrow} from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
+import { BaseTest } from "../utils/BaseTest.sol";
+import { SmartWallet } from "../utils/SmartWallet.sol";
+import { ActionsUtils } from "../utils/ActionsUtils.sol";
+import { Addresses } from "../utils/Addresses.sol";
+import { AaveV3Supply } from "../../contracts/actions/aaveV3/AaveV3Supply.sol";
+import { AaveV3Borrow } from "../../contracts/actions/aaveV3/AaveV3Borrow.sol";
 
-import {AaveV3View} from "../../contracts/views/AaveV3View.sol";
-import {AaveV3Helper} from "../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
-import "forge-std/console.sol";
+import { AaveV3View } from "../../contracts/views/AaveV3View.sol";
+import { AaveV3Helper } from "../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 
 contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
     /*//////////////////////////////////////////////////////////////////////////

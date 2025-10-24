@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import {ITrigger} from "../interfaces/ITrigger.sol";
-import {IAaveV3Oracle} from "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import {AdminAuth} from "../auth/AdminAuth.sol";
-import {DSMath} from "../DS/DSMath.sol";
-import {AaveV3RatioHelper} from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
+import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
+import { DSMath } from "../DS/DSMath.sol";
+import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is outside of given range specified during subscription
 /// @dev Uses the Aave V3 oracle, which provides asset prices in a shared base currency.
@@ -51,7 +51,7 @@ contract AaveV3QuotePriceRangeTrigger is ITrigger, AdminAuth, DSMath, AaveV3Rati
         return uint256(price);
     }
 
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
 
     function isChangeable() public pure override returns (bool) {
         return false;

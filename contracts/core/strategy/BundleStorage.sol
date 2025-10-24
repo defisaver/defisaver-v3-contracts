@@ -10,18 +10,17 @@ import { CoreHelper } from "../helpers/CoreHelper.sol";
 
 /// @title BundleStorage - Record of all the Bundles created
 contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
-
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     StrategyBundle[] public bundles;
     bool public openToPublic = false;
 
-    error NoAuthToCreateBundle(address,bool);
+    error NoAuthToCreateBundle(address, bool);
     error DiffTriggersInBundle(uint64[]);
 
     event BundleCreated(uint256 indexed bundleId);
 
-    modifier onlyAuthCreators {
+    modifier onlyAuthCreators() {
         if (adminVault.owner() != msg.sender && openToPublic == false) {
             revert NoAuthToCreateBundle(msg.sender, openToPublic);
         }
@@ -53,14 +52,13 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
     /// @dev Can only be called by auth addresses if it's not open to public
     /// @dev Strategies need to have the same number of triggers and ids exists
     /// @param _strategyIds Array of strategyIds that go into a bundle
-    function createBundle(
-        uint64[] memory _strategyIds
-    ) public onlyAuthCreators sameTriggers(_strategyIds) returns (uint256) {
-
-        bundles.push(StrategyBundle({
-            creator: msg.sender,
-            strategyIds: _strategyIds
-        }));
+    function createBundle(uint64[] memory _strategyIds)
+        public
+        onlyAuthCreators
+        sameTriggers(_strategyIds)
+        returns (uint256)
+    {
+        bundles.push(StrategyBundle({ creator: msg.sender, strategyIds: _strategyIds }));
 
         emit BundleCreated(bundles.length - 1);
 
@@ -80,27 +78,27 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
         return bundles[_bundleId].strategyIds[_strategyIndex];
     }
 
-    function getBundle(uint _bundleId) public view returns (StrategyBundle memory) {
+    function getBundle(uint256 _bundleId) public view returns (StrategyBundle memory) {
         return bundles[_bundleId];
     }
+
     function getBundleCount() public view returns (uint256) {
         return bundles.length;
     }
 
-    function getPaginatedBundles(uint _page, uint _perPage) public view returns (StrategyBundle[] memory) {
+    function getPaginatedBundles(uint256 _page, uint256 _perPage) public view returns (StrategyBundle[] memory) {
         StrategyBundle[] memory bundlesPerPage = new StrategyBundle[](_perPage);
-        uint start = _page * _perPage;
-        uint end = start + _perPage;
+        uint256 start = _page * _perPage;
+        uint256 end = start + _perPage;
 
         end = (end > bundles.length) ? bundles.length : end;
 
-        uint count = 0;
-        for (uint i = start; i < end; i++) {
+        uint256 count = 0;
+        for (uint256 i = start; i < end; i++) {
             bundlesPerPage[count] = bundles[i];
             count++;
         }
 
         return bundlesPerPage;
     }
-
 }

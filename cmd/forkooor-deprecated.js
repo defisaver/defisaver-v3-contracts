@@ -1,7 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable no-shadow */
-/* eslint-disable no-use-before-define */
-/* eslint-disable import/no-extraneous-dependencies */
 /*
  *
  *
@@ -32,7 +28,11 @@ const { spawnSync } = require('child_process');
 const hre = require('hardhat');
 require('dotenv-safe').config();
 const {
-    getAssetInfo, ilks, assets, set, utils: { compare },
+    getAssetInfo,
+    ilks,
+    assets,
+    set,
+    utils: { compare },
 } = require('@defisaver/tokens');
 const { configure } = require('@defisaver/sdk');
 const automationSdk = require('@defisaver/automation-sdk');
@@ -40,14 +40,9 @@ const dfs = require('@defisaver/sdk');
 
 const { program } = require('commander');
 
-const {
-    parse,
-    stringify,
-} = require('envfile');
+const { parse, stringify } = require('envfile');
 
-const {
-    createFork, topUp, chainIds,
-} = require('../scripts/utils/fork');
+const { createFork, topUp, chainIds } = require('../scripts/utils/fork');
 
 const {
     getProxy,
@@ -84,12 +79,7 @@ const {
     createAaveFLV3BoostL2Strategy,
 } = require('../strategies-spec/l2');
 
-const {
-    getVaultsForUser,
-    getRatio,
-    getVaultInfo,
-    MCD_MANAGER_ADDR,
-} = require('../test/utils/mcd');
+const { getVaultsForUser, getRatio, getVaultInfo, MCD_MANAGER_ADDR } = require('../test/utils/mcd');
 
 const {
     sell,
@@ -107,7 +97,11 @@ const {
     morphoAaveV2Borrow,
 } = require('../test/utils/actions');
 
-const { subAaveV3L2AutomationStrategy, updateAaveV3L2AutomationStrategy, subAaveV3CloseBundle } = require('../test/strategies/utils/l2-strategy-subs');
+const {
+    subAaveV3L2AutomationStrategy,
+    updateAaveV3L2AutomationStrategy,
+    subAaveV3CloseBundle,
+} = require('../test/strategies/utils/l2-strategy-subs');
 
 const { deployContract } = require('../scripts/utils/deployer');
 
@@ -179,7 +173,10 @@ const {
     RATIO_STATE_UNDER,
 } = require('../test/strategies/utils/triggers');
 // const { deployCloseToDebtBundle, deployCloseToCollBundle } = require('../test/strategies-spec/l2/l2-tests');
-const { deployCloseToCollWithMaximumGasPriceBundle, deployCloseToDebtWithMaximumGasPriceBundle } = require('../test/strategies/aaveV3/gasprice/aaveV3-tests');
+const {
+    deployCloseToCollWithMaximumGasPriceBundle,
+    deployCloseToDebtWithMaximumGasPriceBundle,
+} = require('../test/strategies/aaveV3/gasprice/aaveV3-tests');
 const { createRepayBundle, createBoostBundle } = require('../test/strategies/mcd/mcd-tests');
 
 const {
@@ -191,7 +188,6 @@ const {
 program.version('0.0.1');
 // let forkedAddresses = '';
 try {
-    // eslint-disable-next-line global-require
     // forkedAddresses = require('../forked-addr.json');
 } catch (err) {
     console.log('No forked registry set yet, please run deploy');
@@ -207,7 +203,6 @@ function setEnv(key, value) {
     const result = parse(data);
     result[key] = value;
 
-    // eslint-disable-next-line consistent-return
     fs.writeFileSync(pathToEnv, stringify(result));
 }
 
@@ -216,7 +211,6 @@ const forkSetup = async (sender) => {
 
     if (sender) {
         senderAcc = hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -248,7 +242,6 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -281,13 +274,7 @@ const supplyInSS = async (protocol, daiAmount, sender) => {
 
     try {
         if (protocol === 'yearn') {
-            await yearnSupply(
-                DAI_ADDR,
-                daiAmountWei,
-                senderAcc.address,
-                proxy.address,
-                proxy,
-            );
+            await yearnSupply(DAI_ADDR, daiAmountWei, senderAcc.address, proxy.address, proxy);
         }
 
         console.log(`Deposited to ${protocol} ${daiAmount} Dai`);
@@ -301,7 +288,6 @@ const updateMcdCloseStrategySub = async (subId, vaultId, type, price, priceState
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -340,7 +326,7 @@ const updateMcdCloseStrategySub = async (subId, vaultId, type, price, priceState
     const daiEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
     const mcdManagerEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
 
-    const strategyId = (await getLatestStrategyId());
+    const strategyId = await getLatestStrategyId();
     const isBundle = false;
 
     const strategySub = [vaultIdEncoded, daiEncoded, mcdManagerEncoded];
@@ -349,7 +335,10 @@ const updateMcdCloseStrategySub = async (subId, vaultId, type, price, priceState
 
     const hashToSet = getSubHash(updatedSubData);
 
-    const functionData = subProxy.interface.encodeFunctionData('updateSubData', [subId, updatedSubData]);
+    const functionData = subProxy.interface.encodeFunctionData('updateSubData', [
+        subId,
+        updatedSubData,
+    ]);
 
     try {
         await proxy['execute(address,bytes)'](subProxy.address, functionData, {
@@ -374,7 +363,6 @@ const updateMcdCloseToCollStrategySub = async (subId, vaultId, type, price, pric
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -415,7 +403,7 @@ const updateMcdCloseToCollStrategySub = async (subId, vaultId, type, price, pric
     const daiEncoded = abiCoder.encode(['address'], [DAI_ADDR]);
     const mcdManagerEncoded = abiCoder.encode(['address'], [MCD_MANAGER_ADDR]);
 
-    const strategyId = (await getLatestStrategyId());
+    const strategyId = await getLatestStrategyId();
     const isBundle = false;
 
     const strategySub = [vaultIdEncoded, collEncoded, daiEncoded, mcdManagerEncoded];
@@ -424,7 +412,10 @@ const updateMcdCloseToCollStrategySub = async (subId, vaultId, type, price, pric
 
     const hashToSet = getSubHash(updatedSubData);
 
-    const functionData = subProxy.interface.encodeFunctionData('updateSubData', [subId, updatedSubData]);
+    const functionData = subProxy.interface.encodeFunctionData('updateSubData', [
+        subId,
+        updatedSubData,
+    ]);
 
     try {
         await proxy['execute(address,bytes)'](subProxy.address, functionData, {
@@ -449,7 +440,6 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio,
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -459,7 +449,11 @@ const smartSavingsStrategySub = async (protocol, vaultId, minRatio, targetRatio,
     const bundleId = 0;
 
     const { subId } = await subRepayFromSavingsStrategy(
-        proxy, bundleId, vaultId, minRatio, targetRatio,
+        proxy,
+        bundleId,
+        vaultId,
+        minRatio,
+        targetRatio,
     );
 
     console.log(`Subscribed to ${protocol} bundle with sub id #${subId}`);
@@ -470,7 +464,6 @@ const mcdCloseStrategySub = async (vaultId, type, price, priceState, sender) => 
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -509,7 +502,6 @@ const cbRebondSub = async (bondId, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -546,14 +538,17 @@ const liqCBPaybackSub = async (sourceId, sourceType, triggerRatio, triggerState,
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     const { subId } = await subLiquityCBPaybackStrategy(
-        proxy, sourceId, formattedSourceType, triggerRatio, formattedPriceState,
+        proxy,
+        sourceId,
+        formattedSourceType,
+        triggerRatio,
+        formattedPriceState,
     );
 
     console.log(`Sub created #${subId}!`);
@@ -566,7 +561,6 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -578,17 +572,20 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
     let oracleDataAddress = ilkObj.assetAddress;
 
     switch (oracleDataAddress.toLowerCase()) {
-    case '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'.toLowerCase():
-        oracleDataAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-        break;
-    case '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'.toLowerCase():
-        oracleDataAddress = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
-        break;
-    default:
-        break;
+        case '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'.toLowerCase():
+            oracleDataAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+            break;
+        case '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'.toLowerCase():
+            oracleDataAddress = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
+            break;
+        default:
+            break;
     }
 
-    const priceOracle = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
+    const priceOracle = await hre.ethers.getContractAt(
+        'MockChainlinkFeedRegistry',
+        MOCK_CHAINLINK_ORACLE,
+    );
 
     const USD_QUOTE = '0x0000000000000000000000000000000000000348';
     const oracleData = await priceOracle.latestRoundData(oracleDataAddress, USD_QUOTE);
@@ -605,7 +602,9 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
             oracleData.roundId,
         );
 
-        console.log(`Subscribed to trailing mcd close to dai strategy with sub id #${subInfo.subId}`);
+        console.log(
+            `Subscribed to trailing mcd close to dai strategy with sub id #${subInfo.subId}`,
+        );
     } else {
         subInfo = await subMcdTrailingCloseToCollStrategy(
             vaultId,
@@ -615,7 +614,9 @@ const mcdTrailingCloseStrategySub = async (vaultId, type, percentage, isToDai, s
             oracleData.roundId,
         );
 
-        console.log(`Subscribed to trailing mcd close to coll strategy with sub id #${subInfo.subId}`);
+        console.log(
+            `Subscribed to trailing mcd close to coll strategy with sub id #${subInfo.subId}`,
+        );
     }
 };
 
@@ -624,7 +625,6 @@ const mcdCloseToCollStrategySub = async (vaultId, type, price, priceState, sende
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -666,16 +666,23 @@ const mcdBoostRepaySub = async ({
 
     if (senderAddr) {
         senderAcc = hre.ethers.provider.getSigner(senderAddr.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
     let proxy = await getProxy(senderAcc.address);
     proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
 
-    { // deploy if not live
-        const registry = await hre.ethers.getContractAt('DFSRegistry', addrs[network].REGISTRY_ADDR);
-        if (await registry.isRegistered(hre.ethers.utils.id('McdSubProxy').slice(0, 10)).then((e) => !e)) {
+    {
+        // deploy if not live
+        const registry = await hre.ethers.getContractAt(
+            'DFSRegistry',
+            addrs[network].REGISTRY_ADDR,
+        );
+        if (
+            await registry
+                .isRegistered(hre.ethers.utils.id('McdSubProxy').slice(0, 10))
+                .then((e) => !e)
+        ) {
             const repayBundleId = await createRepayBundle(proxy, true);
             const boostBundleId = await createBoostBundle(proxy, true);
             await redeploy('McdSubProxy', true, repayBundleId, boostBundleId);
@@ -683,17 +690,18 @@ const mcdBoostRepaySub = async ({
         }
     }
 
-    const encodeSub = (sub) => hre.ethers.utils.defaultAbiCoder.encode(
-        [
-            `(
+    const encodeSub = (sub) =>
+        hre.ethers.utils.defaultAbiCoder.encode(
+            [
+                `(
                 uint64 strategyOrBundleId,
                 bool isBundle,
                 bytes[] triggerData,
                 bytes32[] subData
             )`,
-        ],
-        [sub],
-    );
+            ],
+            [sub],
+        );
 
     const subData = automationSdk.strategySubService.makerEncode.leverageManagement(
         vaultId,
@@ -704,9 +712,7 @@ const mcdBoostRepaySub = async ({
         maxRatio > 0,
     );
 
-    const {
-        repaySubId, boostSubId, repaySub, boostSub,
-    } = await subToMcdProxy(proxy, subData);
+    const { repaySubId, boostSubId, repaySub, boostSub } = await subToMcdProxy(proxy, subData);
 
     console.log({
         repaySubEncoded: encodeSub(repaySub),
@@ -728,16 +734,23 @@ const aaveAutomationSub = async ({
 
     if (senderAddr) {
         senderAcc = hre.ethers.provider.getSigner(senderAddr.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
     let proxy = await getProxy(senderAcc.address);
     proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
 
-    { // deploy if not live
-        const registry = await hre.ethers.getContractAt('DFSRegistry', addrs[network].REGISTRY_ADDR);
-        if (await registry.isRegistered(hre.ethers.utils.id('AaveSubProxy').slice(0, 10)).then((e) => !e)) {
+    {
+        // deploy if not live
+        const registry = await hre.ethers.getContractAt(
+            'DFSRegistry',
+            addrs[network].REGISTRY_ADDR,
+        );
+        if (
+            await registry
+                .isRegistered(hre.ethers.utils.id('AaveSubProxy').slice(0, 10))
+                .then((e) => !e)
+        ) {
             const repayAaveStrategyEncoded = createAaveV2RepayStrategy();
             const repayFLAaveStrategyEncoded = createAaveFLV2RepayStrategy();
 
@@ -752,13 +765,9 @@ const aaveAutomationSub = async ({
             const boostId1 = await createStrategy(...boostAaveStrategyEncoded, true);
             const boostId2 = await createStrategy(...boostFLAaveStrategyEncoded, true);
 
-            const repayBundleId = await createBundle(
-                [repayId1, repayId2],
-            );
+            const repayBundleId = await createBundle([repayId1, repayId2]);
 
-            const boostBundleId = await createBundle(
-                [boostId1, boostId2],
-            );
+            const boostBundleId = await createBundle([boostId1, boostId2]);
             await redeploy('AaveSubProxy', true, repayBundleId, boostBundleId);
             console.log({ repayBundleId, boostBundleId });
 
@@ -791,16 +800,23 @@ const compAutomationSub = async ({
 
     if (senderAddr) {
         senderAcc = hre.ethers.provider.getSigner(senderAddr.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
     let proxy = await getProxy(senderAcc.address);
     proxy = senderAddr ? proxy.connect(senderAcc) : proxy;
 
-    { // deploy if not live
-        const registry = await hre.ethers.getContractAt('DFSRegistry', addrs[network].REGISTRY_ADDR);
-        if (await registry.isRegistered(hre.ethers.utils.id('CompSubProxy').slice(0, 10)).then((e) => !e)) {
+    {
+        // deploy if not live
+        const registry = await hre.ethers.getContractAt(
+            'DFSRegistry',
+            addrs[network].REGISTRY_ADDR,
+        );
+        if (
+            await registry
+                .isRegistered(hre.ethers.utils.id('CompSubProxy').slice(0, 10))
+                .then((e) => !e)
+        ) {
             const repayCompStrategyEncoded = createCompV2RepayStrategy();
             const repayFLCompStrategyEncoded = createCompFLV2RepayStrategy();
 
@@ -815,13 +831,9 @@ const compAutomationSub = async ({
             const boostId1 = await createStrategy(...boostCompStrategyEncoded, true);
             const boostId2 = await createStrategy(...boostFLCompStrategyEncoded, true);
 
-            const repayBundleId = await createBundle(
-                [repayId1, repayId2],
-            );
+            const repayBundleId = await createBundle([repayId1, repayId2]);
 
-            const boostBundleId = await createBundle(
-                [boostId1, boostId2],
-            );
+            const boostBundleId = await createBundle([boostId1, boostId2]);
             await redeploy('CompSubProxy', true, repayBundleId, boostBundleId);
             console.log({ repayBundleId, boostBundleId });
 
@@ -850,7 +862,6 @@ const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -858,12 +869,17 @@ const liquityTrailingCloseToCollStrategySub = async (percentage, sender) => {
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
     // grab latest roundId from chainlink
-    const priceOracle = await hre.ethers.getContractAt('MockChainlinkFeedRegistry', MOCK_CHAINLINK_ORACLE);
+    const priceOracle = await hre.ethers.getContractAt(
+        'MockChainlinkFeedRegistry',
+        MOCK_CHAINLINK_ORACLE,
+    );
 
     const USD_QUOTE = '0x0000000000000000000000000000000000000348';
     const oracleData = await priceOracle.latestRoundData(ETH_ADDR, USD_QUOTE);
 
-    console.log(`Current price of time of sub $${oracleData.answer / 1e8} at roundId ${oracleData.roundId}`);
+    console.log(
+        `Current price of time of sub $${oracleData.answer / 1e8} at roundId ${oracleData.roundId}`,
+    );
 
     const subInfo = await subLiquityTrailingCloseToCollStrategy(
         proxy,
@@ -879,7 +895,6 @@ const liquityCloseToCollStrategySub = async (price, priceState, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -902,24 +917,25 @@ const liquityCloseToCollStrategySub = async (price, priceState, sender) => {
         formattedPriceState = 1;
     }
 
-    const { subId } = await subLiquityCloseToCollStrategy(
-        proxy,
-        price,
-        formattedPriceState,
-    );
+    const { subId } = await subLiquityCloseToCollStrategy(proxy, price, formattedPriceState);
 
     console.log(`Subscribed to liquity close strategy with sub id #${subId}`);
 };
 
-// eslint-disable-next-line max-len
-const updateSmartSavingsStrategySub = async (protocol, subId, vaultId, minRatio, targetRatio, sender) => {
+const updateSmartSavingsStrategySub = async (
+    protocol,
+    subId,
+    vaultId,
+    minRatio,
+    targetRatio,
+    sender,
+) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
     const bundleId = 0;
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -953,7 +969,10 @@ const updateSmartSavingsStrategySub = async (protocol, subId, vaultId, minRatio,
 
     const hashToSet = getSubHash(updatedSubData);
 
-    const functionData = subProxy.interface.encodeFunctionData('updateSubData', [subId, updatedSubData]);
+    const functionData = subProxy.interface.encodeFunctionData('updateSubData', [
+        subId,
+        updatedSubData,
+    ]);
 
     try {
         await proxy['execute(address,bytes)'](subProxy.address, functionData, {
@@ -978,7 +997,6 @@ const activateSub = async (subId, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1016,7 +1034,6 @@ const deactivateSub = async (subId, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1054,7 +1071,6 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1103,7 +1119,10 @@ const createLiquityTrove = async (coll, debt, sender) => {
 
         const troveInfo = await getTroveInfo(proxy.address);
 
-        console.log('Trove ratio: ', troveInfo.collAmount.mul(troveInfo.collPrice).div(troveInfo.debtAmount) / 1e16);
+        console.log(
+            'Trove ratio: ',
+            troveInfo.collAmount.mul(troveInfo.collPrice).div(troveInfo.debtAmount) / 1e16,
+        );
 
         console.log('DebtInFront ', debtInFront.debt / 1e18);
     } catch (err) {
@@ -1117,13 +1136,11 @@ const createLiquityTrove = async (coll, debt, sender) => {
     }
 };
 
-// eslint-disable-next-line consistent-return
 const createMcdVault = async (type, coll, debt, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1167,14 +1184,27 @@ const createMcdVault = async (type, coll, debt, sender) => {
 
     const createVaultRecipe = new dfs.Recipe('CreateVaultRecipe', [
         new dfs.actions.maker.MakerOpenVaultAction(ilkObj.join, MCD_MANAGER_ADDR),
-        new dfs.actions.maker.MakerSupplyAction('$1', amountColl, ilkObj.join, senderAcc.address, MCD_MANAGER_ADDR),
-        new dfs.actions.maker.MakerGenerateAction('$1', amountDai, senderAcc.address, MCD_MANAGER_ADDR),
+        new dfs.actions.maker.MakerSupplyAction(
+            '$1',
+            amountColl,
+            ilkObj.join,
+            senderAcc.address,
+            MCD_MANAGER_ADDR,
+        ),
+        new dfs.actions.maker.MakerGenerateAction(
+            '$1',
+            amountDai,
+            senderAcc.address,
+            MCD_MANAGER_ADDR,
+        ),
     ]);
 
     const functionData = createVaultRecipe.encodeForDsProxyCall();
 
     try {
-        await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], { gasLimit: 3000000 });
+        await proxy['execute(address,bytes)'](recipeExecutorAddr, functionData[1], {
+            gasLimit: 3000000,
+        });
 
         const vaultsAfter = await getVaultsForUser(proxy.address);
         console.log(vaultsAfter);
@@ -1192,7 +1222,6 @@ const createCB = async (lusdAmount, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1246,7 +1275,9 @@ const getBalanceCall = async (account, tokenLabel) => {
 
     const balance = await balanceOf(token.address, account);
 
-    console.log(`Balance: ${balance.toString()} | ${hre.ethers.utils.formatUnits(balance, token.decimals)}`);
+    console.log(
+        `Balance: ${balance.toString()} | ${hre.ethers.utils.formatUnits(balance, token.decimals)}`,
+    );
 };
 
 const getCdp = async (cdpId, type) => {
@@ -1268,7 +1299,6 @@ const getTrove = async (acc) => {
         const senderAcc = (await hre.ethers.getSigners())[0];
 
         const proxy = await getProxy(senderAcc.address);
-        // eslint-disable-next-line no-param-reassign
         acc = proxy.address;
     }
 
@@ -1289,7 +1319,6 @@ const callSell = async (srcTokenLabel, destTokenLabel, srcAmount, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1329,7 +1358,6 @@ const supplyCdp = async (type, cdpId, amount, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1370,7 +1398,6 @@ const withdrawLiquity = async (collAmount, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1383,11 +1410,7 @@ const withdrawLiquity = async (collAmount, sender) => {
     const collAmountWei = hre.ethers.utils.parseUnits(collAmount, 18);
 
     try {
-        const tx = await liquityWithdraw(
-            proxy,
-            collAmountWei,
-            senderAcc.address,
-        );
+        const tx = await liquityWithdraw(proxy, collAmountWei, senderAcc.address);
 
         await tx.wait();
 
@@ -1408,7 +1431,6 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1428,13 +1450,7 @@ const withdrawCdp = async (type, cdpId, amount, sender) => {
     );
 
     try {
-        await withdrawMcd(
-            proxy,
-            cdpId,
-            amountInWei,
-            ilkObj.join,
-            senderAcc.address,
-        );
+        await withdrawMcd(proxy, cdpId, amountInWei, ilkObj.join, senderAcc.address);
 
         console.log(`Withdraw from cdp ${cdpId}`);
         await getCdp(cdpId, type);
@@ -1449,7 +1465,6 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1474,7 +1489,10 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+    const aaveMarketContract = await hre.ethers.getContractAt(
+        'IPoolAddressesProvider',
+        addrs[network].AAVE_MARKET,
+    );
     const poolAddress = await aaveMarketContract.getPool();
 
     const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
@@ -1484,7 +1502,8 @@ const createAavePosition = async (collSymbol, debtSymbol, collAmount, debtAmount
     } else {
         try {
             const sellAmount = (
-                (collAmount * 1.1 * getLocalTokenPrice(collSymbol)) / getLocalTokenPrice('WETH')
+                (collAmount * 1.1 * getLocalTokenPrice(collSymbol)) /
+                getLocalTokenPrice('WETH')
             ).toFixed(18);
             console.log(`selling ${sellAmount} WETH for ${collSymbol}`);
 
@@ -1564,7 +1583,8 @@ const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmou
     } else {
         try {
             const sellAmount = (
-                (collAmount * 1.1 * getLocalTokenPrice(collSymbol)) / getLocalTokenPrice('WETH')
+                (collAmount * 1.1 * getLocalTokenPrice(collSymbol)) /
+                getLocalTokenPrice('WETH')
             ).toFixed(18);
             console.log(`selling ${sellAmount} WETH for ${collSymbol}`);
 
@@ -1606,9 +1626,9 @@ const createMorphoPosition = async (collSymbol, debtSymbol, collAmount, debtAmou
     );
 
     console.log(`Position of ${proxy.address}`);
-    const userInfo = await view.getUserInfo(
-        proxy.address,
-    ).then((userInfo) => filterEthersObject(userInfo));
+    const userInfo = await view
+        .getUserInfo(proxy.address)
+        .then((userInfo) => filterEthersObject(userInfo));
 
     console.dir(userInfo, { depth: null });
 };
@@ -1626,7 +1646,6 @@ const subAaveAutomation = async (
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1658,7 +1677,9 @@ const subAaveAutomation = async (
         maxRatio > 0,
     );
 
-    console.log(`Aave position subbed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+    console.log(
+        `Aave position subbed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`,
+    );
 };
 
 const subAaveV3MainnetAutomation = async (
@@ -1675,7 +1696,6 @@ const subAaveV3MainnetAutomation = async (
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1728,7 +1748,9 @@ const subAaveV3MainnetAutomation = async (
         boostEnabled,
     );
 
-    console.log(`Aave position subbed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+    console.log(
+        `Aave position subbed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`,
+    );
 };
 
 const subAaveClose = async (
@@ -1757,7 +1779,6 @@ const subAaveClose = async (
     let senderAcc = (await hre.ethers.getSigners())[0];
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
     proxy = await getProxy(senderAcc.address);
@@ -1768,7 +1789,10 @@ const subAaveClose = async (
 
     const rateMode = 2;
 
-    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+    const aaveMarketContract = await hre.ethers.getContractAt(
+        'IPoolAddressesProvider',
+        addrs[network].AAVE_MARKET,
+    );
     const poolAddress = await aaveMarketContract.getPool();
     const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
 
@@ -1838,7 +1862,6 @@ const subAaveCloseWithMaximumGasPrice = async (
     let senderAcc = (await hre.ethers.getSigners())[0];
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
     proxy = await getProxy(senderAcc.address);
@@ -1847,7 +1870,10 @@ const subAaveCloseWithMaximumGasPrice = async (
     await topUp(getOwnerAddr());
     await topUp(senderAcc.address);
 
-    const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+    const aaveMarketContract = await hre.ethers.getContractAt(
+        'IPoolAddressesProvider',
+        addrs[network].AAVE_MARKET,
+    );
     const poolAddress = await aaveMarketContract.getPool();
     const pool = await hre.ethers.getContractAt('IPoolV3', poolAddress);
 
@@ -1909,7 +1935,6 @@ const subSparkAutomation = async (
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -1932,9 +1957,10 @@ const subSparkAutomation = async (
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    if (await getLatestBundleId() < 18) {
-        await deploySparkBundles(proxy, true)
-            .then(({ repayBundleId, boostBundleId }) => console.log({ repayBundleId, boostBundleId }));
+    if ((await getLatestBundleId()) < 18) {
+        await deploySparkBundles(proxy, true).then(({ repayBundleId, boostBundleId }) =>
+            console.log({ repayBundleId, boostBundleId }),
+        );
 
         const closeToCollId = await deploySparkCloseToCollBundle(proxy, true);
         const closeToDebtId = await deploySparkCloseToDebtBundle(proxy, true);
@@ -1951,7 +1977,9 @@ const subSparkAutomation = async (
         boostEnabled,
     );
 
-    console.log(`Spark position subbed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`);
+    console.log(
+        `Spark position subbed, repaySubId ${subIds.firstSub} , boostSubId ${subIds.secondSub}`,
+    );
 };
 
 const subSparkClose = async (
@@ -1980,7 +2008,6 @@ const subSparkClose = async (
     let senderAcc = (await hre.ethers.getSigners())[0];
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
     proxy = await getProxy(senderAcc.address);
@@ -1989,7 +2016,10 @@ const subSparkClose = async (
     await topUp(getOwnerAddr());
     await topUp(senderAcc.address);
 
-    const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET);
+    const sparkMarketContract = await hre.ethers.getContractAt(
+        'IPoolAddressesProvider',
+        addrs[network].SPARK_MARKET,
+    );
     const poolAddress = await sparkMarketContract.getPool();
     const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
 
@@ -2002,9 +2032,10 @@ const subSparkClose = async (
     const collAssetId = collReserveData.id;
     const debtAssetId = debtReserveData.id;
 
-    if (await getLatestBundleId() < 18) {
-        await deploySparkBundles(proxy, true)
-            .then(({ repayBundleId, boostBundleId }) => console.log({ repayBundleId, boostBundleId }));
+    if ((await getLatestBundleId()) < 18) {
+        await deploySparkBundles(proxy, true).then(({ repayBundleId, boostBundleId }) =>
+            console.log({ repayBundleId, boostBundleId }),
+        );
 
         const closeToCollId = await deploySparkCloseToCollBundle(proxy, true);
         const closeToDebtId = await deploySparkCloseToDebtBundle(proxy, true);
@@ -2043,7 +2074,6 @@ const subLimitOrder = async (
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2072,12 +2102,8 @@ const subLimitOrder = async (
     await redeploy('OffchainPriceTrigger', true);
 
     console.log(network);
-    // eslint-disable-next-line no-unused-expressions
-    network === 'mainnet'
-        ? (await redeploy('LimitSell', true))
-        : (await redeploy('LimitSellL2', true));
+    network === 'mainnet' ? await redeploy('LimitSell', true) : await redeploy('LimitSellL2', true);
 
-    // eslint-disable-next-line max-len
     // const strategyData = network === 'mainnet' ? createLimitOrderStrategy() : createLimitOrderL2Strategy();
     await openStrategyAndBundleStorage(true);
 
@@ -2160,16 +2186,12 @@ const subMorphoAaveV2Automation = async (
         }
 
         await deployMorphoContracts();
-        await getContractFromRegistry(
-            'MorphoAaveV2SubProxy', true, repayBundleId, boostBundleId,
-        );
+        await getContractFromRegistry('MorphoAaveV2SubProxy', true, repayBundleId, boostBundleId);
     }
 
     console.log({ repayBundleId, boostBundleId });
 
-    const {
-        repaySubId, boostSubId,
-    } = await subMorphoAaveV2AutomationStrategy(
+    const { repaySubId, boostSubId } = await subMorphoAaveV2AutomationStrategy(
         proxy,
         minRatio,
         maxRatio,
@@ -2230,18 +2252,13 @@ const updateSubDataAaveV2 = async (
     const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
     const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
 
-    await updateToAaveV2Proxy(
-        proxy,
-        subIdRepay.toString(),
-        subIdBoost.toString(),
-        [
-            minRatioFormatted.toString(),
-            maxRatioFormatted.toString(),
-            optimalRatioBoostFormatted.toString(),
-            optimalRatioRepayFormatted.toString(),
-            maxRatio > 0,
-        ],
-    );
+    await updateToAaveV2Proxy(proxy, subIdRepay.toString(), subIdBoost.toString(), [
+        minRatioFormatted.toString(),
+        maxRatioFormatted.toString(),
+        optimalRatioBoostFormatted.toString(),
+        optimalRatioRepayFormatted.toString(),
+        maxRatio > 0,
+    ]);
 
     console.log('AaveV2 position sub updated');
 };
@@ -2264,18 +2281,13 @@ const updateSubDataCompV2 = async (
     const optimalRatioBoostFormatted = hre.ethers.utils.parseUnits(optimalRatioBoost, '16');
     const optimalRatioRepayFormatted = hre.ethers.utils.parseUnits(optimalRatioRepay, '16');
 
-    await updateToCompV2Proxy(
-        proxy,
-        subIdRepay.toString(),
-        subIdBoost.toString(),
-        [
-            minRatioFormatted.toString(),
-            maxRatioFormatted.toString(),
-            optimalRatioBoostFormatted.toString(),
-            optimalRatioRepayFormatted.toString(),
-            maxRatio > 0,
-        ],
-    );
+    await updateToCompV2Proxy(proxy, subIdRepay.toString(), subIdBoost.toString(), [
+        minRatioFormatted.toString(),
+        maxRatioFormatted.toString(),
+        optimalRatioBoostFormatted.toString(),
+        optimalRatioRepayFormatted.toString(),
+        maxRatio > 0,
+    ]);
 
     console.log('CompV2 position sub updated');
 };
@@ -2290,11 +2302,7 @@ const deployLiquityContracts = async () => {
     await getContractFromRegistry('LiquityRatioCheck', true);
 };
 
-const liqDebtInFrontRepaySub = async (
-    maxDebtInFront,
-    ratioIncrease,
-    sender,
-) => {
+const liqDebtInFrontRepaySub = async (maxDebtInFront, ratioIncrease, sender) => {
     const { proxy } = await forkSetup(sender);
 
     const { subId } = await subLiquityDebtInFrontRepayStrategy(
@@ -2344,16 +2352,12 @@ const subLiquityAutomation = async (
         }
 
         await deployLiquityContracts();
-        await getContractFromRegistry(
-            'LiquitySubProxy', true, repayBundleId, boostBundleId,
-        );
+        await getContractFromRegistry('LiquitySubProxy', true, repayBundleId, boostBundleId);
     }
 
     console.log({ repayBundleId, boostBundleId });
 
-    const {
-        repaySubId, boostSubId,
-    } = await subLiquityAutomationStrategy(
+    const { repaySubId, boostSubId } = await subLiquityAutomationStrategy(
         proxy,
         minRatio,
         maxRatio,
@@ -2397,16 +2401,13 @@ const updateLiquity = async (
     console.log('Liquity position sub updated');
 };
 
-const getAavePos = async (
-    sender,
-) => {
+const getAavePos = async (sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
     await topUp(senderAcc.address);
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2437,8 +2438,9 @@ const getAavePos = async (
         if (!amount.eq(0)) {
             console.log(aaveInfo.collAddr[i]);
             const collAssetInfo = assets.find(
-                // eslint-disable-next-line max-len
-                (a) => a.addresses[chainIds[network]].toLocaleLowerCase() === aaveInfo.collAddr[i].toLowerCase(),
+                (a) =>
+                    a.addresses[chainIds[network]].toLocaleLowerCase() ===
+                    aaveInfo.collAddr[i].toLowerCase(),
             );
 
             console.log(`Collateral ${collAssetInfo.symbol}, amount: $${amount / 1e8}`);
@@ -2466,16 +2468,13 @@ const getAavePos = async (
     });
 };
 
-const getCompV3Pos = async (
-    isEOA, sender,
-) => {
+const getCompV3Pos = async (isEOA, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
     await topUp(senderAcc.address);
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2495,7 +2494,10 @@ const getCompV3Pos = async (
     let proxy = await getProxy(senderAcc.address);
     proxy = sender ? proxy.connect(senderAcc) : proxy;
 
-    const compV3View = await hre.ethers.getContractAt('CompV3View', '0x5e07E953dac1d7c19091c3b493579ba7283572a4');
+    const compV3View = await hre.ethers.getContractAt(
+        'CompV3View',
+        '0x5e07E953dac1d7c19091c3b493579ba7283572a4',
+    );
 
     const user = isEOA ? senderAcc.address : proxy.address;
 
@@ -2504,11 +2506,14 @@ const getCompV3Pos = async (
     compInfo.collAmounts.forEach((amount, i) => {
         if (!amount.eq(0)) {
             const collAssetInfo = assets.find(
-                // eslint-disable-next-line max-len
-                (a) => a.addresses[chainIds[network]].toLocaleLowerCase() === compInfo.collAddr[i].toLowerCase(),
+                (a) =>
+                    a.addresses[chainIds[network]].toLocaleLowerCase() ===
+                    compInfo.collAddr[i].toLowerCase(),
             );
 
-            console.log(`Collateral ${amount / 10 ** collAssetInfo.decimals} ${collAssetInfo.symbol}`);
+            console.log(
+                `Collateral ${amount / 10 ** collAssetInfo.decimals} ${collAssetInfo.symbol}`,
+            );
         }
     });
 
@@ -2530,7 +2535,6 @@ const updateAaveV3AutomationSub = async (
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2620,17 +2624,16 @@ const setMockChainlinkPrice = async (tokenLabel, price) => {
 
     const oracleData = await c.latestRoundData(srcToken.address, USD_QUOTE);
 
-    console.log(`Current price for token ${tokenLabel} at ${new Date(oracleData.updatedAt * 1000).toLocaleTimeString('en-US')} is $${oracleData.answer / 1e8}`);
+    console.log(
+        `Current price for token ${tokenLabel} at ${new Date(oracleData.updatedAt * 1000).toLocaleTimeString('en-US')} is $${oracleData.answer / 1e8}`,
+    );
 };
 
-const createCompV3Position = async (
-    collType, collAmount, debtAmount, isEOA, sender,
-) => {
+const createCompV3Position = async (collType, collAmount, debtAmount, isEOA, sender) => {
     let senderAcc = (await hre.ethers.getSigners())[0];
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2729,7 +2732,6 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2768,11 +2770,13 @@ const dcaStrategySub = async (srcTokenLabel, destTokenLabel, amount, interval, s
 
     const amountInDecimals = hre.ethers.utils.parseUnits(amount, srcToken.decimals);
 
-    console.log(srcToken.address,
+    console.log(
+        srcToken.address,
         destToken.address,
         amountInDecimals,
         intervalInSeconds,
-        lastTimestamp);
+        lastTimestamp,
+    );
 
     const sub = await subDcaStrategy(
         proxy,
@@ -2795,7 +2799,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
 
     if (sender) {
         senderAcc = await hre.ethers.provider.getSigner(sender.toString());
-        // eslint-disable-next-line no-underscore-dangle
         senderAcc.address = senderAcc._address;
     }
 
@@ -2832,7 +2835,9 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
     console.log(`Price before swap ${beforePrice / 1e18}`);
 
     try {
-        await llammaExchange.exchange(sellId, buyId, swapAmountWei, minAmount, { gasLimit: 5000000 });
+        await llammaExchange.exchange(sellId, buyId, swapAmountWei, minAmount, {
+            gasLimit: 5000000,
+        });
     } catch (err) {
         console.log(err);
     }
@@ -2849,7 +2854,9 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .action(async (network, options) => {
             const forkId = await createFork(network);
 
-            hre.ethers.provider = hre.ethers.getDefaultProvider(`https://rpc.tenderly.co/fork/${forkId}`);
+            hre.ethers.provider = hre.ethers.getDefaultProvider(
+                `https://rpc.tenderly.co/fork/${forkId}`,
+            );
             process.env.FORK_ID = forkId;
 
             setEnv('FORK_ID', forkId);
@@ -2864,9 +2871,7 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 // setting this so we can do topUp and addBotCaller from this script
                 for (let i = 0; i < options.bots.length; i++) {
                     const botAddr = options.bots[i];
-                    // eslint-disable-next-line no-await-in-loop
                     await topUp(botAddr);
-                    // eslint-disable-next-line no-await-in-loop
                     await addBotCaller(botAddr, true);
                 }
             }
@@ -2880,12 +2885,11 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .action(async () => {
             console.log('This might take a few minutes do not stop the process');
 
-            await spawnSync('npm run deploy fork deploy-on-fork',
-                {
-                    shell: true,
-                    stdio: [process.stdin, process.stdout, process.stderr],
-                    encoding: 'utf-8',
-                });
+            await spawnSync('npm run deploy fork deploy-on-fork', {
+                shell: true,
+                stdio: [process.stdin, process.stdout, process.stderr],
+                encoding: 'utf-8',
+            });
 
             process.exit(0);
         });
@@ -2907,7 +2911,9 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         });
 
     program
-        .command('create-aave-position <collType> <debtType> <collAmount> <debtAmount> [senderAddr]')
+        .command(
+            'create-aave-position <collType> <debtType> <collAmount> <debtAmount> [senderAddr]',
+        )
         .description('Creates Aave position ')
         .action(async (collSymbol, debtSymbol, collAmount, debtAmount, senderAddr) => {
             await createAavePosition(collSymbol, debtSymbol, collAmount, debtAmount, senderAddr);
@@ -2923,7 +2929,9 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         });
 
     program
-        .command('create-morpho-position <collType> <debtType> <collAmount> <debtAmount> [senderAddr]')
+        .command(
+            'create-morpho-position <collType> <debtType> <collAmount> <debtAmount> [senderAddr]',
+        )
         .description('Creates Morpho-AaveV2 position ')
         .action(async (collSymbol, debtSymbol, collAmount, debtAmount, senderAddr) => {
             await createMorphoPosition(collSymbol, debtSymbol, collAmount, debtAmount, senderAddr);
@@ -2939,37 +2947,30 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         });
 
     program
-        .command('sub-mcd-automation <vaultId> <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]')
+        .command(
+            'sub-mcd-automation <vaultId> <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]',
+        )
         .description('Subscribes to Maker repay and (optionally) boost bundles')
-        .action(async (
-            vaultId,
-            minRatio,
-            maxRatio,
-            targetRatioBoost,
-            targetRatioRepay,
-            senderAddr,
-        ) => {
-            await mcdBoostRepaySub({
-                vaultId,
-                minRatio,
-                maxRatio,
-                targetRatioBoost,
-                targetRatioRepay,
-                senderAddr,
-            });
-            process.exit(0);
-        });
+        .action(
+            async (vaultId, minRatio, maxRatio, targetRatioBoost, targetRatioRepay, senderAddr) => {
+                await mcdBoostRepaySub({
+                    vaultId,
+                    minRatio,
+                    maxRatio,
+                    targetRatioBoost,
+                    targetRatioRepay,
+                    senderAddr,
+                });
+                process.exit(0);
+            },
+        );
 
     program
-        .command('sub-aaveV2-automation <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]')
+        .command(
+            'sub-aaveV2-automation <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]',
+        )
         .description('Subscribes to AaveV2 repay and (optionally) boost bundles')
-        .action(async (
-            minRatio,
-            maxRatio,
-            targetRatioBoost,
-            targetRatioRepay,
-            senderAddr,
-        ) => {
+        .action(async (minRatio, maxRatio, targetRatioBoost, targetRatioRepay, senderAddr) => {
             await aaveAutomationSub({
                 minRatio,
                 maxRatio,
@@ -2981,15 +2982,11 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         });
 
     program
-        .command('sub-compV2-automation <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]')
+        .command(
+            'sub-compV2-automation <minRatio> <maxRatio> <targetRatioBoost> <targetRatioRepay> [senderAddr]',
+        )
         .description('Subscribes to CompoundV2 repay and (optionally) boost bundles')
-        .action(async (
-            minRatio,
-            maxRatio,
-            targetRatioBoost,
-            targetRatioRepay,
-            senderAddr,
-        ) => {
+        .action(async (minRatio, maxRatio, targetRatioBoost, targetRatioRepay, senderAddr) => {
             await compAutomationSub({
                 minRatio,
                 maxRatio,
@@ -3004,7 +3001,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-ss <protocol> <vaultId> <minRatio> <targetRatio> [senderAddr]')
         .description('Subscribes to a Smart Savings strategy')
         .action(async (protocol, vaultId, minRatio, targetRatio, senderAddr) => {
-            // eslint-disable-next-line max-len
             await smartSavingsStrategySub(protocol, vaultId, minRatio, targetRatio, senderAddr);
             process.exit(0);
         });
@@ -3013,7 +3009,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-mcd-close <vaultId> <type> <price> <priceState> [senderAddr]')
         .description('Subscribes to a Mcd close to dai strategy')
         .action(async (vaultId, type, price, priceState, senderAddr) => {
-            // eslint-disable-next-line max-len
             await mcdCloseStrategySub(vaultId, type, price, priceState, senderAddr);
             process.exit(0);
         });
@@ -3022,13 +3017,14 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-cb-rebond <bondId> [senderAddr]')
         .description('Subscribes a bond to the rebonding strategy')
         .action(async (bondId, senderAddr) => {
-            // eslint-disable-next-line max-len
             await cbRebondSub(bondId, senderAddr);
             process.exit(0);
         });
 
     program
-        .command('sub-liquity-cb-payback <sourceId> <sourceType> <triggerRatio> <triggerState> [senderAddr]')
+        .command(
+            'sub-liquity-cb-payback <sourceId> <sourceType> <triggerRatio> <triggerState> [senderAddr]',
+        )
         .description('Subscribes a bond to the rebonding strategy')
         .action(async (sourceId, sourceType, triggerRatio, triggerState, senderAddr) => {
             // sourceId : Id of the bond or of strategy sub
@@ -3036,7 +3032,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             // triggerRatio should be [110 - 1000] (in that format)
             // triggerState : over/under
             // When executing strategy from bundle, ChickenIn strategy index is 0, ChickenOut is 1
-            // eslint-disable-next-line max-len
             await liqCBPaybackSub(sourceId, sourceType, triggerRatio, triggerState, senderAddr);
             process.exit(0);
         });
@@ -3053,7 +3048,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-mcd-trailing-close-to-coll <vaultId> <type> <percentage> [senderAddr]')
         .description('Subscribes to a Trailing Mcd close to coll strategy')
         .action(async (vaultId, type, percentage, senderAddr) => {
-            // eslint-disable-next-line max-len
             await mcdTrailingCloseStrategySub(vaultId, type, percentage, false, senderAddr);
             process.exit(0);
         });
@@ -3062,7 +3056,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-mcd-trailing-close-to-dai <vaultId> <type> <percentage> [senderAddr]')
         .description('Subscribes to a Trailing Mcd close to dai strategy')
         .action(async (vaultId, percentage, senderAddr) => {
-            // eslint-disable-next-line max-len
             await mcdTrailingCloseStrategySub(vaultId, percentage, true, senderAddr);
             process.exit(0);
         });
@@ -3072,25 +3065,16 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             'sub-aave-automation <minRatio> <maxRatio> <optimalRatioBoost> <optimalRatioRepay> [senderAddr]',
         )
         .description('Subscribes to aave automation can be both b/r')
-        .action(
-            async (
+        .action(async (minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, senderAcc) => {
+            await subAaveAutomation(
                 minRatio,
                 maxRatio,
                 optimalRatioBoost,
                 optimalRatioRepay,
                 senderAcc,
-            ) => {
-                // eslint-disable-next-line max-len
-                await subAaveAutomation(
-                    minRatio,
-                    maxRatio,
-                    optimalRatioBoost,
-                    optimalRatioRepay,
-                    senderAcc,
-                );
-                process.exit(0);
-            },
-        );
+            );
+            process.exit(0);
+        });
 
     program
         .command(
@@ -3106,7 +3090,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line max-len
                 await subAaveV3MainnetAutomation(
                     minRatio,
                     maxRatio,
@@ -3120,106 +3103,122 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         );
 
     program
-        .command('sub-aave-close-to-debt <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
+        .command(
+            'sub-aave-close-to-debt <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]',
+        )
         .description('Subscribes to AaveV3 close to debt bundle')
-        .action(async (
-            collSymbol,
-            debtSymbol,
-            triggerBaseSymbol,
-            triggerQuoteSymbol,
-            triggerTargetPrice,
-            triggerState,
-            senderAddr,
-        ) => {
-            await subAaveClose(
+        .action(
+            async (
                 collSymbol,
                 debtSymbol,
                 triggerBaseSymbol,
                 triggerQuoteSymbol,
                 triggerTargetPrice,
-                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                triggerState,
                 senderAddr,
-            );
-            process.exit(0);
-        });
+            ) => {
+                await subAaveClose(
+                    collSymbol,
+                    debtSymbol,
+                    triggerBaseSymbol,
+                    triggerQuoteSymbol,
+                    triggerTargetPrice,
+                    triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                    senderAddr,
+                );
+                process.exit(0);
+            },
+        );
 
     program
-        .command('sub-aave-close-to-debt-with-max-gasprice <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> <maximumGasPrice> [senderAddr]')
+        .command(
+            'sub-aave-close-to-debt-with-max-gasprice <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> <maximumGasPrice> [senderAddr]',
+        )
         .description('Subscribes to AaveV3 close to debt with maximum gas price bundle')
-        .action(async (
-            collSymbol,
-            debtSymbol,
-            triggerBaseSymbol,
-            triggerQuoteSymbol,
-            triggerTargetPrice,
-            triggerState,
-            maximumGasPrice,
-            senderAddr,
-        ) => {
-            await subAaveCloseWithMaximumGasPrice(
+        .action(
+            async (
                 collSymbol,
                 debtSymbol,
                 triggerBaseSymbol,
                 triggerQuoteSymbol,
                 triggerTargetPrice,
-                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                triggerState,
                 maximumGasPrice,
                 senderAddr,
-            );
-            process.exit(0);
-        });
+            ) => {
+                await subAaveCloseWithMaximumGasPrice(
+                    collSymbol,
+                    debtSymbol,
+                    triggerBaseSymbol,
+                    triggerQuoteSymbol,
+                    triggerTargetPrice,
+                    triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                    maximumGasPrice,
+                    senderAddr,
+                );
+                process.exit(0);
+            },
+        );
 
     program
-        .command('sub-aave-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
+        .command(
+            'sub-aave-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]',
+        )
         .description('Subscribes to AaveV3 close to collateral bundle')
-        .action(async (
-            collSymbol,
-            debtSymbol,
-            triggerBaseSymbol,
-            triggerQuoteSymbol,
-            triggerTargetPrice,
-            triggerState,
-            senderAddr,
-        ) => {
-            await subAaveClose(
+        .action(
+            async (
                 collSymbol,
                 debtSymbol,
                 triggerBaseSymbol,
                 triggerQuoteSymbol,
                 triggerTargetPrice,
-                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                triggerState,
                 senderAddr,
-                true,
-            );
-            process.exit(0);
-        });
+            ) => {
+                await subAaveClose(
+                    collSymbol,
+                    debtSymbol,
+                    triggerBaseSymbol,
+                    triggerQuoteSymbol,
+                    triggerTargetPrice,
+                    triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                    senderAddr,
+                    true,
+                );
+                process.exit(0);
+            },
+        );
 
     program
-        .command('sub-aave-close-to-coll-with-max-gasprice <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> <maximumGasPrice> [senderAddr]')
+        .command(
+            'sub-aave-close-to-coll-with-max-gasprice <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> <maximumGasPrice> [senderAddr]',
+        )
         .description('Subscribes to AaveV3 close to collateral with maximum gasprice bundle')
-        .action(async (
-            collSymbol,
-            debtSymbol,
-            triggerBaseSymbol,
-            triggerQuoteSymbol,
-            triggerTargetPrice,
-            triggerState,
-            maximumGasPrice,
-            senderAddr,
-        ) => {
-            await subAaveCloseWithMaximumGasPrice(
+        .action(
+            async (
                 collSymbol,
                 debtSymbol,
                 triggerBaseSymbol,
                 triggerQuoteSymbol,
                 triggerTargetPrice,
-                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                triggerState,
                 maximumGasPrice,
                 senderAddr,
-                true,
-            );
-            process.exit(0);
-        });
+            ) => {
+                await subAaveCloseWithMaximumGasPrice(
+                    collSymbol,
+                    debtSymbol,
+                    triggerBaseSymbol,
+                    triggerQuoteSymbol,
+                    triggerTargetPrice,
+                    triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                    maximumGasPrice,
+                    senderAddr,
+                    true,
+                );
+                process.exit(0);
+            },
+        );
 
     program
         .command(
@@ -3235,7 +3234,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line max-len
                 await subSparkAutomation(
                     minRatio,
                     maxRatio,
@@ -3249,53 +3247,61 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         );
 
     program
-        .command('sub-spark-close-to-debt <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
+        .command(
+            'sub-spark-close-to-debt <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]',
+        )
         .description('Subscribes to Spark close to debt bundle')
-        .action(async (
-            collSymbol,
-            debtSymbol,
-            triggerBaseSymbol,
-            triggerQuoteSymbol,
-            triggerTargetPrice,
-            triggerState,
-            senderAddr,
-        ) => {
-            await subSparkClose(
+        .action(
+            async (
                 collSymbol,
                 debtSymbol,
                 triggerBaseSymbol,
                 triggerQuoteSymbol,
                 triggerTargetPrice,
-                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                triggerState,
                 senderAddr,
-            );
-            process.exit(0);
-        });
+            ) => {
+                await subSparkClose(
+                    collSymbol,
+                    debtSymbol,
+                    triggerBaseSymbol,
+                    triggerQuoteSymbol,
+                    triggerTargetPrice,
+                    triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                    senderAddr,
+                );
+                process.exit(0);
+            },
+        );
 
     program
-        .command('sub-spark-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]')
+        .command(
+            'sub-spark-close-to-coll <collSymbol> <debtSymbol> <triggerBaseSymbol> <triggerQuoteSymbol> <triggerTargetPrice> <triggerState> [senderAddr]',
+        )
         .description('Subscribes to Spark close to collateral bundle')
-        .action(async (
-            collSymbol,
-            debtSymbol,
-            triggerBaseSymbol,
-            triggerQuoteSymbol,
-            triggerTargetPrice,
-            triggerState,
-            senderAddr,
-        ) => {
-            await subSparkClose(
+        .action(
+            async (
                 collSymbol,
                 debtSymbol,
                 triggerBaseSymbol,
                 triggerQuoteSymbol,
                 triggerTargetPrice,
-                triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                triggerState,
                 senderAddr,
-                true,
-            );
-            process.exit(0);
-        });
+            ) => {
+                await subSparkClose(
+                    collSymbol,
+                    debtSymbol,
+                    triggerBaseSymbol,
+                    triggerQuoteSymbol,
+                    triggerTargetPrice,
+                    triggerState.toLowerCase() === 'over' ? RATIO_STATE_OVER : RATIO_STATE_UNDER,
+                    senderAddr,
+                    true,
+                );
+                process.exit(0);
+            },
+        );
 
     program
         .command(
@@ -3311,7 +3317,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line no-param-reassign
                 boostEnabled = boostEnabled === 'true';
                 await subMorphoAaveV2Automation(
                     minRatio,
@@ -3328,7 +3333,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-mcd-close-to-coll <vaultId> <type> <price> <priceState> [senderAddr]')
         .description('Subscribes to a Mcd close to coll strategy')
         .action(async (vaultId, type, price, priceState, senderAddr) => {
-            // eslint-disable-next-line max-len
             await mcdCloseToCollStrategySub(vaultId, type, price, priceState, senderAddr);
             process.exit(0);
         });
@@ -3337,7 +3341,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-trailing-liquity-close <percentage> [senderAddr]')
         .description('Subscribes to a trailing liquity to coll strategy')
         .action(async (percentage, senderAddr) => {
-            // eslint-disable-next-line max-len
             await liquityTrailingCloseToCollStrategySub(percentage, senderAddr);
             process.exit(0);
         });
@@ -3346,7 +3349,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('sub-liquity-close-to-coll <price> <priceState> [senderAddr]')
         .description('Subscribes to a Liquity to coll strategy')
         .action(async (price, priceState, senderAddr) => {
-            // eslint-disable-next-line max-len
             await liquityCloseToCollStrategySub(price, priceState, senderAddr);
             process.exit(0);
         });
@@ -3365,7 +3367,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line no-param-reassign
                 boostEnabled = boostEnabled === 'true';
                 await subLiquityAutomation(
                     minRatio,
@@ -3380,13 +3381,31 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         );
 
     program
-        .command('sub-limit-order <srcTokenLabel> <destTokenLabel> <srcAmount> <targetPrice> <expireDays> <orderType> [senderAddr]')
+        .command(
+            'sub-limit-order <srcTokenLabel> <destTokenLabel> <srcAmount> <targetPrice> <expireDays> <orderType> [senderAddr]',
+        )
         .description('Subscribes to a limit order')
-        // eslint-disable-next-line max-len
-        .action(async (srcTokenLabel, destTokenLabel, srcAmount, targetPrice, expireDays, orderType, senderAddr) => {
-            // eslint-disable-next-line max-len
-            await subLimitOrder(srcTokenLabel, destTokenLabel, srcAmount, targetPrice, expireDays, orderType, senderAddr);
-        });
+        .action(
+            async (
+                srcTokenLabel,
+                destTokenLabel,
+                srcAmount,
+                targetPrice,
+                expireDays,
+                orderType,
+                senderAddr,
+            ) => {
+                await subLimitOrder(
+                    srcTokenLabel,
+                    destTokenLabel,
+                    srcAmount,
+                    targetPrice,
+                    expireDays,
+                    orderType,
+                    senderAddr,
+                );
+            },
+        );
 
     program
         .command('sub-dca <srcTokenLabel> <buyTokenLabel> <amount> <interval> [senderAddr]')
@@ -3405,11 +3424,19 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         });
 
     program
-        .command('update-mcd-close-to-coll <subId> <vaultId> <type> <price> <priceState> [senderAddr]')
+        .command(
+            'update-mcd-close-to-coll <subId> <vaultId> <type> <price> <priceState> [senderAddr]',
+        )
         .description('Updates mcd close to coll strategy')
         .action(async (subId, vaultId, type, price, priceState, senderAddr) => {
-            // eslint-disable-next-line max-len
-            await updateMcdCloseToCollStrategySub(subId, vaultId, type, price, priceState, senderAddr);
+            await updateMcdCloseToCollStrategySub(
+                subId,
+                vaultId,
+                type,
+                price,
+                priceState,
+                senderAddr,
+            );
             process.exit(0);
         });
 
@@ -3428,7 +3455,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 optimalRatioRepay,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line max-len
                 await updateAaveV3AutomationSub(
                     subIdRepay,
                     subIdBoost,
@@ -3458,7 +3484,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line no-param-reassign
                 boostEnabled = boostEnabled === 'true';
                 await updateSubDataMorphoAaveV2(
                     subIdRepay,
@@ -3489,7 +3514,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 optimalRatioRepay,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line no-param-reassign
                 await updateSubDataAaveV2(
                     subIdRepay,
                     subIdBoost,
@@ -3518,7 +3542,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 optimalRatioRepay,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line no-param-reassign
                 await updateSubDataCompV2(
                     subIdRepay,
                     subIdBoost,
@@ -3548,7 +3571,6 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 boostEnabled,
                 senderAcc,
             ) => {
-                // eslint-disable-next-line no-param-reassign
                 boostEnabled = boostEnabled === 'true';
                 await updateLiquity(
                     subIdRepay,
@@ -3568,8 +3590,14 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .command('update-ss <protocol> <subId> <vaultId> <minRatio> <targetRatio> [senderAddr]')
         .description('Updates to a Smart Savings strategy')
         .action(async (protocol, subId, vaultId, minRatio, targetRatio, senderAddr) => {
-            // eslint-disable-next-line max-len
-            await updateSmartSavingsStrategySub(protocol, subId, vaultId, minRatio, targetRatio, senderAddr);
+            await updateSmartSavingsStrategySub(
+                protocol,
+                subId,
+                vaultId,
+                minRatio,
+                targetRatio,
+                senderAddr,
+            );
             process.exit(0);
         });
 
@@ -3704,9 +3732,9 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
             const user = compare(isEOA, 'false') ? proxy.address : senderAcc.address;
             console.log(`Fetching position for ${user}`);
 
-            const userInfo = await view.getUserInfo(
-                user,
-            ).then((userInfo) => filterEthersObject(userInfo));
+            const userInfo = await view
+                .getUserInfo(user)
+                .then((userInfo) => filterEthersObject(userInfo));
 
             console.dir(userInfo, { depth: null });
             process.exit(0);
@@ -3770,7 +3798,13 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
                 'SparkQuotePriceTrigger',
             ];
 
-            const deployments = await sparkContracts.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, true).then((c) => c.address) }), {});
+            const deployments = await sparkContracts.reduce(
+                async (acc, name) => ({
+                    ...(await acc),
+                    [name]: await redeploy(name, true).then((c) => c.address),
+                }),
+                {},
+            );
             console.log(deployments);
 
             process.exit(0);
@@ -3781,11 +3815,15 @@ const llammaSell = async (controllerAddress, swapAmount, sellCrvUsd, sender) => 
         .action(async () => {
             if (latestStrategyId >= 70) return;
 
-            const contractsToDeploy = [
-                'McdView',
-            ];
+            const contractsToDeploy = ['McdView'];
 
-            const deployments = await contractsToDeploy.reduce(async (acc, name) => ({ ...(await acc), [name]: await redeploy(name, true).then((c) => c.address) }), {});
+            const deployments = await contractsToDeploy.reduce(
+                async (acc, name) => ({
+                    ...(await acc),
+                    [name]: await redeploy(name, true).then((c) => c.address),
+                }),
+                {},
+            );
             console.log(deployments);
 
             const latestStrategyId = await getLatestStrategyId();

@@ -8,8 +8,9 @@ abstract contract IOracleRelayer {
         uint256 safetyCRatio;
     }
 
-    mapping (bytes32 => CollateralType) public collateralTypes;
+    mapping(bytes32 => CollateralType) public collateralTypes;
 
     function redemptionPrice() public virtual returns (uint256);
+
     uint256 public redemptionRate;
 }

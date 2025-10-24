@@ -11,8 +11,7 @@ import { IERC20 } from "../interfaces/IERC20.sol";
 contract FeeReceiver is UtilHelper {
     using SafeERC20 for IERC20;
 
-
-    modifier onlyAdmin {
+    modifier onlyAdmin() {
         require(msg.sender == FEE_RECEIVER_ADMIN_ADDR, "Only Admin");
 
         _;
@@ -38,7 +37,7 @@ contract FeeReceiver is UtilHelper {
             _amount = address(this).balance;
         }
 
-        (bool success, ) = _to.call{value: _amount}("");
+        (bool success,) = _to.call{ value: _amount }("");
         require(success, "Eth send failed");
     }
 
@@ -52,6 +51,6 @@ contract FeeReceiver is UtilHelper {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external payable {}
-    fallback() external payable {}
+    receive() external payable { }
+    fallback() external payable { }
 }

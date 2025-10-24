@@ -4,13 +4,11 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
-import { LlamaLendSwapper } from "./LlamaLendSwapper.sol";
-import { IBytesTransientStorage } from "../../../interfaces/IBytesTransientStorage.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
 import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
 
 /// @title LlamaLendBoost
-contract LlamaLendBoost is ActionBase, LlamaLendHelper{
+contract LlamaLendBoost is ActionBase, LlamaLendHelper {
     using TokenUtils for address;
 
     /// @param controllerAddress Address of the llamalend market controller
@@ -60,19 +58,17 @@ contract LlamaLendBoost is ActionBase, LlamaLendHelper{
         if (!isControllerValid(_params.controllerAddress, _params.controllerId)) revert InvalidLlamaLendController();
 
         address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
-       
+
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
         info[1] = _params.controllerId;
 
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
-        ILlamaLendController(_params.controllerAddress).borrow_more_extended(0, _params.exData.srcAmount, llamalendSwapper, info);
+        ILlamaLendController(_params.controllerAddress)
+            .borrow_more_extended(0, _params.exData.srcAmount, llamalendSwapper, info);
 
-        return (
-            _params.exData.srcAmount,
-            abi.encode(_params)
-        );
+        return (_params.exData.srcAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

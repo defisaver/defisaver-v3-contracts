@@ -11,7 +11,6 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 
 contract TestCore_Permission is AuthHelper, BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -37,7 +36,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
 
         safeWallet = new SmartWallet(bob);
         safeAddr = safeWallet.createSafe();
-        
+
         dsProxyWallet = new SmartWallet(alice);
         dsProxyAddr = dsProxyWallet.createDSProxy();
     }
@@ -63,7 +62,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
             Permission.giveWalletPermission.selector,
             true /* isDSProxy */
         );
-        
+
         dsProxyWallet.execute(address(cut), givePermCalldata, 0);
     }
 
@@ -72,22 +71,16 @@ contract TestCore_Permission is AuthHelper, BaseTest {
             Permission.giveWalletPermission.selector,
             false /* isDSProxy */
         );
-        
+
         safeWallet.execute(address(cut), givePermCalldata, 0);
     }
 
     function _verifyProxyPermission() internal view {
         DSAuthority authority = DSAuthority(DSAuth(dsProxyAddr).authority());
-        assertTrue(
-            authority.canCall(
-                PROXY_AUTH_ADDRESS,
-                dsProxyAddr,
-                EXECUTE_SELECTOR
-            )
-        );
+        assertTrue(authority.canCall(PROXY_AUTH_ADDRESS, dsProxyAddr, EXECUTE_SELECTOR));
     }
 
     function _verifySafePermission() internal view {
         assertTrue(ISafe(safeAddr).isModuleEnabled(MODULE_AUTH_ADDRESS));
     }
-} 
+}

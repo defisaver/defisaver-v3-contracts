@@ -2,21 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import {ITrigger} from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/ITrigger.sol";
 
-import {LiquityV2Helper} from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
-import {TriggerHelper} from "./helpers/TriggerHelper.sol";
-import {AdminAuth} from "../auth/AdminAuth.sol";
+import { LiquityV2Helper } from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
+import { TriggerHelper } from "./helpers/TriggerHelper.sol";
+import { AdminAuth } from "../auth/AdminAuth.sol";
 
 /// @title Trigger contract that triggers if calculated debt in front of a trove is below a certain threshold
 /// @notice This trigger takes all the branches into account
-contract LiquityV2DebtInFrontTrigger is
-    ITrigger,
-    AdminAuth,
-    TriggerHelper,
-    LiquityV2Helper
-{
-
+contract LiquityV2DebtInFrontTrigger is ITrigger, AdminAuth, TriggerHelper, LiquityV2Helper {
     /// @param market address of the market
     /// @param troveId id of the trove
     /// @param debtInFrontMin minimum debt in front, below which the trigger will be triggered
@@ -41,7 +35,7 @@ contract LiquityV2DebtInFrontTrigger is
         params = abi.decode(_subData, (SubParams));
     }
 
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
 
     function isChangeable() public pure override returns (bool) {
         return false;

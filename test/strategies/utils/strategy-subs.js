@@ -1,6 +1,4 @@
-/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-unused-vars */
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const automationSdk = require('@defisaver/automation-sdk');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -52,8 +50,15 @@ const { COMP_V3_MARKETS } = require('../../utils/compoundV3');
 
 const abiCoder = new hre.ethers.utils.AbiCoder();
 
-// eslint-disable-next-line max-len
-const subUniContinuousCollectStrategy = async (proxy, strategyId, tokenId, recipient, timestamp, maxGasPrice, interval) => {
+const subUniContinuousCollectStrategy = async (
+    proxy,
+    strategyId,
+    tokenId,
+    recipient,
+    timestamp,
+    maxGasPrice,
+    interval,
+) => {
     const isBundle = false;
 
     const tokenIdEncoded = abiCoder.encode(['uint256'], [tokenId.toString()]);
@@ -61,7 +66,12 @@ const subUniContinuousCollectStrategy = async (proxy, strategyId, tokenId, recip
 
     const timestampTriggerData = await createTimestampTrigger(timestamp, interval);
     const gasTriggerData = await createGasPriceTrigger(maxGasPrice);
-    const strategySub = [strategyId, isBundle, [timestampTriggerData, gasTriggerData], [tokenIdEncoded, recipientEncoded]];
+    const strategySub = [
+        strategyId,
+        isBundle,
+        [timestampTriggerData, gasTriggerData],
+        [tokenIdEncoded, recipientEncoded],
+    ];
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
@@ -96,7 +106,6 @@ const subUniV3RangeOrderStrategy = async (proxy, tokenId, state, recipient, stra
 
     const triggerData = await createUniV3RangeOrderTrigger(tokenId, state);
     const strategySub = [strategyId, isBundle, [triggerData], [tokenIdEncoded, recipientEncoded]];
-    // eslint-disable-next-line max-len
     const subId = await subToStrategy(proxy, strategySub);
 
     return { subId, strategySub };
@@ -114,10 +123,18 @@ const subRepayFromSavingsStrategy = async (proxy, bundleId, vaultId, rationUnder
     return { subId, strategySub };
 };
 
-const subMcdCloseToDaiStrategy = async (vaultId, proxy, targetPrice, chainlinkCollAddress, tokenState) => {
+const subMcdCloseToDaiStrategy = async (
+    vaultId,
+    proxy,
+    targetPrice,
+    chainlinkCollAddress,
+    tokenState,
+) => {
     const strategySub = automationSdk.strategySubService.makerEncode.closeOnPrice(
         vaultId,
-        tokenState === 1 ? automationSdk.enums.RatioState.UNDER : automationSdk.enums.RatioState.OVER,
+        tokenState === 1
+            ? automationSdk.enums.RatioState.UNDER
+            : automationSdk.enums.RatioState.OVER,
         targetPrice.toString(),
         DAI_ADDR,
         chainlinkCollAddress,
@@ -127,7 +144,13 @@ const subMcdCloseToDaiStrategy = async (vaultId, proxy, targetPrice, chainlinkCo
     return { subId, strategySub };
 };
 
-const subMcdTrailingCloseToDaiStrategy = async (vaultId, proxy, tokenAddress, percentage, roundId) => {
+const subMcdTrailingCloseToDaiStrategy = async (
+    vaultId,
+    proxy,
+    tokenAddress,
+    percentage,
+    roundId,
+) => {
     let chainlinkTokenAddr = tokenAddress;
     if (tokenAddress.toLowerCase() === WBTC_ADDR.toLowerCase()) {
         chainlinkTokenAddr = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
@@ -151,7 +174,9 @@ const subMcdCloseToCollStrategy = async (vaultId, proxy, targetPrice, tokenAddre
     }
     const strategySub = automationSdk.strategySubService.makerEncode.closeOnPrice(
         vaultId,
-        ratioState === 1 ? automationSdk.enums.RatioState.UNDER : automationSdk.enums.RatioState.OVER,
+        ratioState === 1
+            ? automationSdk.enums.RatioState.UNDER
+            : automationSdk.enums.RatioState.OVER,
         targetPrice.toString(),
         tokenAddress,
         chainlinkTokenAddr,
@@ -161,7 +186,13 @@ const subMcdCloseToCollStrategy = async (vaultId, proxy, targetPrice, tokenAddre
     return { subId, strategySub };
 };
 
-const subMcdTrailingCloseToCollStrategy = async (vaultId, proxy, tokenAddress, percentage, roundId) => {
+const subMcdTrailingCloseToCollStrategy = async (
+    vaultId,
+    proxy,
+    tokenAddress,
+    percentage,
+    roundId,
+) => {
     let chainlinkTokenAddr = tokenAddress;
     if (tokenAddress.toLowerCase() === WBTC_ADDR.toLowerCase()) {
         chainlinkTokenAddr = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB';
@@ -180,7 +211,9 @@ const subMcdTrailingCloseToCollStrategy = async (vaultId, proxy, tokenAddress, p
 
 const subLiquityCloseToCollStrategy = async (proxy, targetPrice, tokenState) => {
     const strategySub = automationSdk.strategySubService.liquityEncode.closeOnPrice(
-        tokenState === 1 ? automationSdk.enums.RatioState.UNDER : automationSdk.enums.RatioState.OVER,
+        tokenState === 1
+            ? automationSdk.enums.RatioState.UNDER
+            : automationSdk.enums.RatioState.OVER,
         targetPrice,
         WETH_ADDRESS,
         WETH_ADDRESS,
@@ -203,8 +236,15 @@ const subLiquityTrailingCloseToCollStrategy = async (proxy, percentage, roundId)
     return { subId, strategySub };
 };
 
-// eslint-disable-next-line max-len
-const subLimitOrderStrategy = async (proxy, tokenAddrSell, tokenAddrBuy, amount, targetPrice, goodUntilDuration, orderType) => {
+const subLimitOrderStrategy = async (
+    proxy,
+    tokenAddrSell,
+    tokenAddrBuy,
+    amount,
+    targetPrice,
+    goodUntilDuration,
+    orderType,
+) => {
     const subInput = automationSdk.strategySubService.exchangeEncode.limitOrder(
         tokenAddrSell,
         tokenAddrBuy,
@@ -360,18 +400,19 @@ const subAaveV3LeverageManagementOnPriceGeneric = async (
     priceState,
     bundleId,
 ) => {
-    const strategySub = automationSdk.strategySubService.aaveV3Encode.leverageManagementOnPriceGeneric(
-        bundleId,
-        triggerPrice,
-        priceState,
-        collAsset,
-        collAssetId,
-        debtAsset,
-        debtAssetId,
-        marketAddr,
-        targetRatio,
-        user,
-    );
+    const strategySub =
+        automationSdk.strategySubService.aaveV3Encode.leverageManagementOnPriceGeneric(
+            bundleId,
+            triggerPrice,
+            priceState,
+            collAsset,
+            collAssetId,
+            debtAsset,
+            debtAssetId,
+            marketAddr,
+            targetRatio,
+            user,
+        );
 
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
@@ -459,19 +500,33 @@ const subCbRebondStrategy = async (proxy, bondID, strategyId) => {
 
     const triggerData = automationSdk.triggerService.cBondsRebondTrigger.encode(bondID);
 
-    const strategySub = [strategyId, isBundle, triggerData, [subIDEncoded, bondIDEncoded, bLusdTokenEncoded, lusdTokenEncoded]];
+    const strategySub = [
+        strategyId,
+        isBundle,
+        triggerData,
+        [subIDEncoded, bondIDEncoded, bLusdTokenEncoded, lusdTokenEncoded],
+    ];
 
     return { subId, strategySub };
 };
 
-const subLiquityCBPaybackStrategy = async (proxy, sourceId, sourceType, triggerRatio, triggerState) => {
-    const strategySub = automationSdk.strategySubService.liquityEncode.paybackFromChickenBondStrategySub(
-        proxy.address,
-        triggerRatio,
-        sourceId,
-        sourceType,
-        triggerState === 1 ? automationSdk.enums.RatioState.UNDER : automationSdk.enums.RatioState.OVER,
-    );
+const subLiquityCBPaybackStrategy = async (
+    proxy,
+    sourceId,
+    sourceType,
+    triggerRatio,
+    triggerState,
+) => {
+    const strategySub =
+        automationSdk.strategySubService.liquityEncode.paybackFromChickenBondStrategySub(
+            proxy.address,
+            triggerRatio,
+            sourceId,
+            sourceType,
+            triggerState === 1
+                ? automationSdk.enums.RatioState.UNDER
+                : automationSdk.enums.RatioState.OVER,
+        );
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
@@ -491,7 +546,11 @@ const subMorphoAaveV2AutomationStrategy = async (
         optimalRatioRepay,
         boostEnabled,
     );
-    const { latestSubId: subId, repaySub, boostSub } = await subToMorphoAaveV2Proxy(proxy, [subInput]);
+    const {
+        latestSubId: subId,
+        repaySub,
+        boostSub,
+    } = await subToMorphoAaveV2Proxy(proxy, [subInput]);
 
     let repaySubId = '0';
     let boostSubId = '0';
@@ -565,9 +624,7 @@ const subSparkAutomationStrategy = async (
         boostEnabled,
     );
 
-    const { latestSubId: subId, boostSub, repaySub } = await subToSparkProxy(
-        proxy, subInput,
-    );
+    const { latestSubId: subId, boostSub, repaySub } = await subToSparkProxy(proxy, subInput);
 
     let subId1 = '0';
     let subId2 = '0';
@@ -583,7 +640,10 @@ const subSparkAutomationStrategy = async (
     console.log('Subs: ', subId1, subId2);
 
     return {
-        firstSub: subId1, secondSub: subId2, boostSub, repaySub,
+        firstSub: subId1,
+        secondSub: subId2,
+        boostSub,
+        repaySub,
     };
 };
 
@@ -614,33 +674,43 @@ const updateSparkAutomationStrategy = async (
     const subId = await updateSparkProxy(proxy, subInput);
 
     if (subId2 === '0' && boostEnabled === true) {
-        // eslint-disable-next-line no-param-reassign
         subId2 = subId;
     }
 
     const sparkSubProxyAddr = await getContractFromRegistry('SparkSubProxy').then((e) => e.address);
-    const { repaySub, boostSub } = await hre.ethers.getContractAt('SparkSubProxy', sparkSubProxyAddr)
+    const { repaySub, boostSub } = await hre.ethers
+        .getContractAt('SparkSubProxy', sparkSubProxyAddr)
         .then((c) => [c, c.parseSubData('0x'.concat(subInput.slice(18)))])
         .then(async ([c, subData]) => {
-            // eslint-disable-next-line no-param-reassign
             subData = await subData;
 
-            return ({
+            return {
                 repaySub: await c.formatRepaySub(subData).then((s) => {
-                    const triggerData = [s.triggerData[0]
-                        .replace(sparkSubProxyAddr.slice(2).toLowerCase(), proxy.address.slice(2))];
+                    const triggerData = [
+                        s.triggerData[0].replace(
+                            sparkSubProxyAddr.slice(2).toLowerCase(),
+                            proxy.address.slice(2),
+                        ),
+                    ];
                     return { ...s, triggerData, 2: triggerData };
                 }),
                 boostSub: await c.formatBoostSub(subData).then((s) => {
-                    const triggerData = [s.triggerData[0]
-                        .replace(sparkSubProxyAddr.slice(2).toLowerCase(), proxy.address.slice(2))];
+                    const triggerData = [
+                        s.triggerData[0].replace(
+                            sparkSubProxyAddr.slice(2).toLowerCase(),
+                            proxy.address.slice(2),
+                        ),
+                    ];
                     return { ...s, triggerData, 2: triggerData };
                 }),
-            });
+            };
         });
 
     return {
-        firstSub: subId1, secondSub: subId2, boostSub, repaySub,
+        firstSub: subId1,
+        secondSub: subId2,
+        boostSub,
+        repaySub,
     };
 };
 
@@ -660,7 +730,10 @@ const subSparkCloseBundle = async (
         baseTokenAddress: triggerBaseAsset,
         quoteTokenAddress: triggerQuoteAsset,
         price: targetPrice,
-        ratioState: (priceState === 1) ? automationSdk.enums.RatioState.UNDER : automationSdk.enums.RatioState.OVER,
+        ratioState:
+            priceState === 1
+                ? automationSdk.enums.RatioState.UNDER
+                : automationSdk.enums.RatioState.OVER,
     };
     const subData = {
         collAsset: _collAsset,
@@ -678,9 +751,7 @@ const subSparkCloseBundle = async (
     return { subId, strategySub };
 };
 
-const subLiquityDsrPaybackStrategy = async ({
-    proxy, triggerRatio, targetRatio,
-}) => {
+const subLiquityDsrPaybackStrategy = async ({ proxy, triggerRatio, targetRatio }) => {
     const strategySub = automationSdk.strategySubService.liquityEncode.dsrPayback(
         proxy.address,
         triggerRatio,
@@ -690,9 +761,7 @@ const subLiquityDsrPaybackStrategy = async ({
     return { subId, strategySub };
 };
 
-const subLiquityDebtInFrontRepayStrategy = async (
-    proxy, debtInFront, targetRatioIncrease,
-) => {
+const subLiquityDebtInFrontRepayStrategy = async (proxy, debtInFront, targetRatioIncrease) => {
     const strategySub = automationSdk.strategySubService.liquityEncode.debtInFrontRepay(
         proxy.address,
         debtInFront.toString(),
@@ -703,9 +772,7 @@ const subLiquityDebtInFrontRepayStrategy = async (
     return { subId, strategySub };
 };
 
-const subLiquityDsrSupplyStrategy = async ({
-    proxy, triggerRatio, targetRatio,
-}) => {
+const subLiquityDsrSupplyStrategy = async ({ proxy, triggerRatio, targetRatio }) => {
     const strategySub = automationSdk.strategySubService.liquityEncode.dsrSupply(
         proxy.address,
         triggerRatio,
@@ -733,7 +800,10 @@ const subAaveV3CloseWithMaximumGasPriceBundle = async (
         baseTokenAddress: triggerBaseAsset,
         quoteTokenAddress: triggerQuoteAsset,
         price: targetPrice,
-        ratioState: (priceState === 1) ? automationSdk.enums.RatioState.UNDER : automationSdk.enums.RatioState.OVER,
+        ratioState:
+            priceState === 1
+                ? automationSdk.enums.RatioState.UNDER
+                : automationSdk.enums.RatioState.OVER,
         maximumGasPrice: gasPrice,
     };
     const subData = {
@@ -742,17 +812,23 @@ const subAaveV3CloseWithMaximumGasPriceBundle = async (
         debtAsset: _debtAsset,
         debtAssetId: _debtAssetId,
     };
-    const strategySub = automationSdk.strategySubService.aaveV3Encode.closeToAssetWithMaximumGasPrice(
-        bundleId,
-        true,
-        triggerData,
-        subData,
-    );
+    const strategySub =
+        automationSdk.strategySubService.aaveV3Encode.closeToAssetWithMaximumGasPrice(
+            bundleId,
+            true,
+            triggerData,
+            subData,
+        );
     const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
 const subCurveUsdRepayBundle = async (
-    proxy, controllerAddr, minRatio, targetRatio, collTokenAddress, crvUsdAddress,
+    proxy,
+    controllerAddr,
+    minRatio,
+    targetRatio,
+    collTokenAddress,
+    crvUsdAddress,
 ) => {
     const strategySub = automationSdk.strategySubService.crvUSDEncode.leverageManagement(
         proxy.address,
@@ -791,7 +867,12 @@ const subCurveUsdPaybackStrategy = async (
 };
 
 const subCurveUsdBoostBundle = async (
-    proxy, controllerAddr, maxRatio, targetRatio, collTokenAddress, crvUsdAddress,
+    proxy,
+    controllerAddr,
+    maxRatio,
+    targetRatio,
+    collTokenAddress,
+    crvUsdAddress,
 ) => {
     const strategySub = automationSdk.strategySubService.crvUSDEncode.leverageManagement(
         proxy.address,
@@ -808,9 +889,20 @@ const subCurveUsdBoostBundle = async (
     return { subId, strategySub };
 };
 const subMorphoBlueRepayBundle = async (
-    proxy, bundleId, marketParams, marketId, minRatio, targetRatio, user,
+    proxy,
+    bundleId,
+    marketParams,
+    marketId,
+    minRatio,
+    targetRatio,
+    user,
 ) => {
-    const triggerData = await createMorphoBlueRatioTrigger(marketId, user, minRatio, RATIO_STATE_UNDER);
+    const triggerData = await createMorphoBlueRatioTrigger(
+        marketId,
+        user,
+        minRatio,
+        RATIO_STATE_UNDER,
+    );
     const loanTokenEncoded = abiCoder.encode(['address'], [marketParams[0]]);
     const collateralTokenEncoded = abiCoder.encode(['address'], [marketParams[1]]);
     const oracleEncoded = abiCoder.encode(['address'], [marketParams[2]]);
@@ -819,7 +911,10 @@ const subMorphoBlueRepayBundle = async (
     const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_REPAY]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
     const userEncoded = abiCoder.encode(['address'], [user]);
-    const strategySub = [bundleId, true, [triggerData],
+    const strategySub = [
+        bundleId,
+        true,
+        [triggerData],
         [
             loanTokenEncoded,
             collateralTokenEncoded,
@@ -836,9 +931,20 @@ const subMorphoBlueRepayBundle = async (
     return { subId, strategySub };
 };
 const subMorphoBlueBoostBundle = async (
-    proxy, bundleId, marketParams, marketId, maxRatio, targetRatio, user,
+    proxy,
+    bundleId,
+    marketParams,
+    marketId,
+    maxRatio,
+    targetRatio,
+    user,
 ) => {
-    const triggerData = await createMorphoBlueRatioTrigger(marketId, user, maxRatio, RATIO_STATE_OVER);
+    const triggerData = await createMorphoBlueRatioTrigger(
+        marketId,
+        user,
+        maxRatio,
+        RATIO_STATE_OVER,
+    );
     const loanTokenEncoded = abiCoder.encode(['address'], [marketParams[0]]);
     const collateralTokenEncoded = abiCoder.encode(['address'], [marketParams[1]]);
     const oracleEncoded = abiCoder.encode(['address'], [marketParams[2]]);
@@ -847,7 +953,10 @@ const subMorphoBlueBoostBundle = async (
     const ratioStateEncoded = abiCoder.encode(['uint8'], [IN_BOOST]);
     const targetRatioEncoded = abiCoder.encode(['uint256'], [targetRatio.toString()]);
     const userEncoded = abiCoder.encode(['address'], [user]);
-    const strategySub = [bundleId, true, [triggerData],
+    const strategySub = [
+        bundleId,
+        true,
+        [triggerData],
         [
             loanTokenEncoded,
             collateralTokenEncoded,
@@ -864,7 +973,16 @@ const subMorphoBlueBoostBundle = async (
     return { subId, strategySub };
 };
 const subAaveV3OpenOrder = async (
-    proxy, strategyOrBundleId, collAsset, collAssetId, debtAsset, debtAssetId, marketAddr, targetRatio, triggerPrice, isBundle = true,
+    proxy,
+    strategyOrBundleId,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    targetRatio,
+    triggerPrice,
+    isBundle = true,
 ) => {
     const strategySub = automationSdk.strategySubService.aaveV3Encode.openOrder(
         strategyOrBundleId,
@@ -890,7 +1008,13 @@ const subAaveV3OpenOrder = async (
     return { subId, strategySub };
 };
 const subLiquityV2RepayBundle = async (
-    proxy, market, troveId, collToken, minRatio, targetRatio, bundleId,
+    proxy,
+    market,
+    troveId,
+    collToken,
+    minRatio,
+    targetRatio,
+    bundleId,
 ) => {
     const strategySub = automationSdk.strategySubService.liquityV2Encode.leverageManagement(
         market,
@@ -906,7 +1030,13 @@ const subLiquityV2RepayBundle = async (
     return { subId, strategySub };
 };
 const subLiquityV2BoostBundle = async (
-    proxy, market, troveId, collToken, maxRatio, targetRatio, bundleId,
+    proxy,
+    market,
+    troveId,
+    collToken,
+    maxRatio,
+    targetRatio,
+    bundleId,
 ) => {
     const strategySub = automationSdk.strategySubService.liquityV2Encode.leverageManagement(
         market,
@@ -922,7 +1052,15 @@ const subLiquityV2BoostBundle = async (
     return { subId, strategySub };
 };
 const subLiquityV2CloseBundle = async (
-    proxy, market, troveId, collToken, stopLossPrice, stopLossType, takeProfitPrice, takeProfitType, bundleId,
+    proxy,
+    market,
+    troveId,
+    collToken,
+    stopLossPrice,
+    stopLossType,
+    takeProfitPrice,
+    takeProfitType,
+    bundleId,
 ) => {
     const strategySub = automationSdk.strategySubService.liquityV2Encode.closeOnPrice(
         bundleId,
@@ -940,7 +1078,12 @@ const subLiquityV2CloseBundle = async (
 };
 
 const subLiquityV2InterestRateAdjustmentBundle = async (
-    proxy, market, troveId, criticalDebtInFrontLimit, nonCriticalDebtInFrontLimit, interestRateChange,
+    proxy,
+    market,
+    troveId,
+    criticalDebtInFrontLimit,
+    nonCriticalDebtInFrontLimit,
+    interestRateChange,
 ) => {
     const strategySub = automationSdk.strategySubService.liquityV2Encode.interestRateAdjustment(
         market,
@@ -954,7 +1097,14 @@ const subLiquityV2InterestRateAdjustmentBundle = async (
 };
 
 const subMorphoBlueLeverageManagementOnPrice = async (
-    proxy, strategyOrBundleId, marketParams, user, targetRatio, price, priceState, isBundle = true,
+    proxy,
+    strategyOrBundleId,
+    marketParams,
+    user,
+    targetRatio,
+    price,
+    priceState,
+    isBundle = true,
 ) => {
     const strategySub = automationSdk.strategySubService.morphoBlueEncode.leverageManagementOnPrice(
         strategyOrBundleId,
@@ -973,7 +1123,12 @@ const subMorphoBlueLeverageManagementOnPrice = async (
     return { subId, strategySub };
 };
 const subFluidVaultT1RepayBundle = async (
-    proxy, bundleId, nftId, vault, targetRatio, triggerRatio,
+    proxy,
+    bundleId,
+    nftId,
+    vault,
+    targetRatio,
+    triggerRatio,
 ) => {
     const strategySub = automationSdk.strategySubService.fluidEncode.leverageManagement(
         nftId,
@@ -987,7 +1142,12 @@ const subFluidVaultT1RepayBundle = async (
     return { subId, strategySub };
 };
 const subFluidVaultT1BoostBundle = async (
-    proxy, bundleId, nftId, vault, targetRatio, triggerRatio,
+    proxy,
+    bundleId,
+    nftId,
+    vault,
+    targetRatio,
+    triggerRatio,
 ) => {
     const strategySub = automationSdk.strategySubService.fluidEncode.leverageManagement(
         nftId,
@@ -1017,7 +1177,10 @@ const subCompV3LeverageManagement = async (
     subProxyContractAddr,
 ) => {
     const marketAddr = COMP_V3_MARKETS[chainIds[network]][marketSymbol];
-    const debtAsset = getAssetInfo(marketSymbol === 'ETH' ? 'WETH' : marketSymbol, chainIds[network]);
+    const debtAsset = getAssetInfo(
+        marketSymbol === 'ETH' ? 'WETH' : marketSymbol,
+        chainIds[network],
+    );
 
     const isL2 = network !== 'mainnet';
 
@@ -1038,13 +1201,17 @@ const subCompV3LeverageManagement = async (
 
     const subProxyName = isL2 ? 'CompV3SubProxyL2' : 'CompV3SubProxy';
     const CompV3SubProxy = await hre.ethers.getContractFactory(subProxyName);
-    const functionData = CompV3SubProxy.interface.encodeFunctionData('subToCompV3Automation', [subInput]);
+    const functionData = CompV3SubProxy.interface.encodeFunctionData('subToCompV3Automation', [
+        subInput,
+    ]);
 
     const receipt = await executeTxFromProxy(proxy, subProxyContractAddr, functionData);
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-    console.log(`GasUsed subToCompV3Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`);
+    console.log(
+        `GasUsed subToCompV3Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
 
     const subId = await getLatestSubId();
 
@@ -1077,7 +1244,10 @@ const _subCompV3LeverageManagementOnPrice = async (
     const marketAddr = COMP_V3_MARKETS[chainIds[network]][marketSymbol];
 
     const collAsset = getAssetInfo(collSymbol === 'ETH' ? 'WETH' : collSymbol, chainIds[network]);
-    const debtAsset = getAssetInfo(marketSymbol === 'ETH' ? 'WETH' : marketSymbol, chainIds[network]);
+    const debtAsset = getAssetInfo(
+        marketSymbol === 'ETH' ? 'WETH' : marketSymbol,
+        chainIds[network],
+    );
 
     const user = isEOA ? eoaAddr : proxy.address;
 
@@ -1106,9 +1276,19 @@ const subCompV3RepayOnPriceBundle = async (
     price,
     priceState,
     isEOA,
-) => _subCompV3LeverageManagementOnPrice(
-    proxy, eoaAddr, bundleId, marketSymbol, collSymbol, targetRatio, price, priceState, isEOA, automationSdk.enums.RatioState.UNDER,
-);
+) =>
+    _subCompV3LeverageManagementOnPrice(
+        proxy,
+        eoaAddr,
+        bundleId,
+        marketSymbol,
+        collSymbol,
+        targetRatio,
+        price,
+        priceState,
+        isEOA,
+        automationSdk.enums.RatioState.UNDER,
+    );
 
 const subCompV3BoostOnPriceBundle = async (
     proxy,
@@ -1120,9 +1300,19 @@ const subCompV3BoostOnPriceBundle = async (
     price,
     priceState,
     isEOA,
-) => _subCompV3LeverageManagementOnPrice(
-    proxy, eoaAddr, bundleId, marketSymbol, collSymbol, targetRatio, price, priceState, isEOA, automationSdk.enums.RatioState.OVER,
-);
+) =>
+    _subCompV3LeverageManagementOnPrice(
+        proxy,
+        eoaAddr,
+        bundleId,
+        marketSymbol,
+        collSymbol,
+        targetRatio,
+        price,
+        priceState,
+        isEOA,
+        automationSdk.enums.RatioState.OVER,
+    );
 
 const subCompV3CloseOnPriceBundle = async (
     proxy,
@@ -1137,7 +1327,10 @@ const subCompV3CloseOnPriceBundle = async (
 ) => {
     const marketAddr = COMP_V3_MARKETS[chainIds[network]][marketSymbol];
     const collAsset = getAssetInfo(collSymbol === 'ETH' ? 'WETH' : collSymbol, chainIds[network]);
-    const debtAsset = getAssetInfo(marketSymbol === 'ETH' ? 'WETH' : marketSymbol, chainIds[network]);
+    const debtAsset = getAssetInfo(
+        marketSymbol === 'ETH' ? 'WETH' : marketSymbol,
+        chainIds[network],
+    );
     const strategySub = automationSdk.strategySubService.compoundV3Encode.closeOnPrice(
         bundleId,
         marketAddr,

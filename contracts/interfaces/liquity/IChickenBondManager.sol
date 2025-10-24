@@ -2,7 +2,6 @@
 
 pragma solidity =0.8.24;
 
-
 interface IChickenBondManager {
     // Valid values for `status` returned by `getBondData()`
     enum BondStatus {
@@ -34,14 +33,9 @@ interface IChickenBondManager {
     function CHICKEN_IN_AMM_FEE() external view returns (uint256);
 
     function createBond(uint256 _lusdAmount) external returns (uint256);
-    function createBondWithPermit(
-        address owner, 
-        uint256 amount, 
-        uint256 deadline, 
-        uint8 v, 
-        bytes32 r, 
-        bytes32 s
-    ) external  returns (uint256);
+    function createBondWithPermit(address owner, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+        external
+        returns (uint256);
     function chickenOut(uint256 _bondID, uint256 _minLUSD) external;
     function chickenIn(uint256 _bondID) external;
     function redeem(uint256 _bLUSDToRedeem, uint256 _minLUSDFromBAMMSPVault) external returns (uint256, uint256);
@@ -69,9 +63,5 @@ interface IChickenBondManager {
     function getTreasury()
         external
         view
-        returns (
-            uint256 _pendingLUSD,
-            uint256 _totalAcquiredLUSD,
-            uint256 _permanentLUSD
-        );
+        returns (uint256 _pendingLUSD, uint256 _totalAcquiredLUSD, uint256 _permanentLUSD);
 }

@@ -30,30 +30,14 @@ abstract contract UserWallet {
         owners[0] = address(this);
 
         bytes memory setupData = abi.encodeWithSelector(
-            ISafe.setup.selector,
-            owners,
-            1,
-            address(0),
-            bytes(""),
-            address(0),
-            address(0),
-            0,
-            payable(address(0))
+            ISafe.setup.selector, owners, 1, address(0), bytes(""), address(0), address(0), 0, payable(address(0))
         );
-        safeAddr = ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY).createProxyWithNonce(
-            Addresses.SAFE_SINGLETON,
-            setupData,
-            saltNonce
-        );
+        safeAddr = ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY)
+            .createProxyWithNonce(Addresses.SAFE_SINGLETON, setupData, saltNonce);
         safe = ISafe(safeAddr);
     }
 
-    function executeWithWallet(
-        bool _isSafe,
-        address _target,
-        bytes memory _calldata,
-        uint256 _value
-    ) internal {
+    function executeWithWallet(bool _isSafe, address _target, bytes memory _calldata, uint256 _value) internal {
         bytes memory signatures = bytes.concat(abi.encode(address(this), bytes32(0)), bytes1(0x01));
         if (_isSafe) {
             bool success = safe.execTransaction(

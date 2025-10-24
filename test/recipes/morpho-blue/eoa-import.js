@@ -1,15 +1,24 @@
-/* eslint-disable no-await-in-loop */
 const hre = require('hardhat');
 const { expect } = require('chai');
 const dfs = require('@defisaver/sdk');
 const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy,
-    setBalance, approve, nullAddress, fetchAmountinUSDPrice,
+    takeSnapshot,
+    revertToSnapshot,
+    getProxy,
+    redeploy,
+    setBalance,
+    approve,
+    nullAddress,
+    fetchAmountinUSDPrice,
     getAddrFromRegistry,
 } = require('../../utils/utils');
 const {
-    getMarkets, collateralSupplyAmountInUsd, supplyToMarket, borrowAmountInUsd, MORPHO_BLUE_ADDRESS,
+    getMarkets,
+    collateralSupplyAmountInUsd,
+    supplyToMarket,
+    borrowAmountInUsd,
+    MORPHO_BLUE_ADDRESS,
 } = require('../../utils/morpho-blue');
 const { executeAction } = require('../../utils/actions');
 
@@ -18,8 +27,12 @@ describe('Morpho-Blue-Import', function () {
 
     const markets = getMarkets();
 
-    let senderAcc; let proxy; let snapshot; let view;
-    let supplyAmountInWei; let morphoBlue;
+    let senderAcc;
+    let proxy;
+    let snapshot;
+    let view;
+    let supplyAmountInWei;
+    let morphoBlue;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -39,23 +52,29 @@ describe('Morpho-Blue-Import', function () {
 
             await supplyToMarket(marketParams);
             const supplyAmount = fetchAmountinUSDPrice(
-                collToken.symbol, collateralSupplyAmountInUsd,
+                collToken.symbol,
+                collateralSupplyAmountInUsd,
             );
-            supplyAmountInWei = hre.ethers.utils.parseUnits(
-                supplyAmount, collToken.decimals,
-            );
+            supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, collToken.decimals);
             await setBalance(collToken.address, senderAcc.address, supplyAmountInWei);
             await approve(collToken.address, morphoBlue.address, senderAcc);
             await morphoBlue.supplyCollateral(
-                marketParams, supplyAmountInWei, senderAcc.address, [],
+                marketParams,
+                supplyAmountInWei,
+                senderAcc.address,
+                [],
             );
 
             const borrowAmount = fetchAmountinUSDPrice(loanToken.symbol, borrowAmountInUsd);
-            const borrowAmountInWei = hre.ethers.utils.parseUnits(
-                borrowAmount, loanToken.decimals,
-            );
+            const borrowAmountInWei = hre.ethers.utils.parseUnits(borrowAmount, loanToken.decimals);
 
-            await morphoBlue.borrow(marketParams, borrowAmountInWei, '0', senderAcc.address, senderAcc.address);
+            await morphoBlue.borrow(
+                marketParams,
+                borrowAmountInWei,
+                '0',
+                senderAcc.address,
+                senderAcc.address,
+            );
         }
         await morphoBlue.setAuthorization(proxy.address, true);
     });
@@ -71,14 +90,12 @@ describe('Morpho-Blue-Import', function () {
         const collToken = getAssetInfoByAddress(marketParams[1]);
         it(`should import MorphoBlue ${collToken.symbol}/${loanToken.symbol} position`, async () => {
             let positionInfoEoa = await view.callStatic.getUserInfo(
-                marketParams, senderAcc.address,
+                marketParams,
+                senderAcc.address,
             );
             const flAmount = positionInfoEoa.borrowedInAssets.mul('101').div('100');
             const flashloanAction = new dfs.actions.flashloan.FLAction(
-                new dfs.actions.flashloan.BalancerFlashLoanAction(
-                    [loanToken.address],
-                    [flAmount],
-                ),
+                new dfs.actions.flashloan.BalancerFlashLoanAction([loanToken.address], [flAmount]),
             );
             const paybackAction = new dfs.actions.morphoblue.MorphoBluePaybackAction(
                 marketParams[0],

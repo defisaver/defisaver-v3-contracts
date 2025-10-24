@@ -7,31 +7,32 @@ import { IERC20 } from "../IERC20.sol";
 
 abstract contract ICToken is IERC20 {
     function mint(uint256 mintAmount) external virtual returns (uint256);
-    function mint() external virtual payable;
+    function mint() external payable virtual;
 
-    function accrueInterest() public virtual returns (uint);
+    function accrueInterest() public virtual returns (uint256);
 
     function redeem(uint256 redeemTokens) external virtual returns (uint256);
 
     function redeemUnderlying(uint256 redeemAmount) external virtual returns (uint256);
 
     function borrow(uint256 borrowAmount) external virtual returns (uint256);
-    function borrowIndex() public view virtual returns (uint);
-    function borrowBalanceStored(address) public view virtual returns(uint);
+    function borrowIndex() public view virtual returns (uint256);
+    function borrowBalanceStored(address) public view virtual returns (uint256);
 
     function repayBorrow(uint256 repayAmount) external virtual returns (uint256);
 
-    function repayBorrow() external virtual payable;
+    function repayBorrow() external payable virtual;
 
     function repayBorrowBehalf(address borrower, uint256 repayAmount) external virtual returns (uint256);
 
-    function repayBorrowBehalf(address borrower) external virtual payable;
+    function repayBorrowBehalf(address borrower) external payable virtual;
 
     function liquidateBorrow(address borrower, uint256 repayAmount, address cTokenCollateral)
-        external virtual
+        external
+        virtual
         returns (uint256);
 
-    function liquidateBorrow(address borrower, address cTokenCollateral) external virtual payable;
+    function liquidateBorrow(address borrower, address cTokenCollateral) external payable virtual;
 
     function exchangeRateCurrent() external virtual returns (uint256);
 
@@ -53,7 +54,7 @@ abstract contract ICToken is IERC20 {
 
     function underlying() external virtual returns (address);
 
-    function getAccountSnapshot(address account) external virtual view returns (uint, uint, uint, uint);
+    function getAccountSnapshot(address account) external view virtual returns (uint256, uint256, uint256, uint256);
 
     function interestRateModel() external virtual returns (InterestRateModel);
 }

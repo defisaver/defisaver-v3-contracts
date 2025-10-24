@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IConvexToken } from "../../../interfaces/convex/IConvexToken.sol";
-import { IConvexToken } from "../../../interfaces/convex/IConvexToken.sol";
 import { IBRewardPool } from "../../../interfaces/convex/IBRewardPool.sol";
 import { IRewardPool } from "../../../interfaces/convex/IRewardPool.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
@@ -37,7 +35,7 @@ contract ConvexHelper is MainnetConvexAddresses {
     /// @dev taken from Cvx.mint()
     function _cvxMintAmount(uint256 _amount) internal view returns (uint256) {
         uint256 supply = IERC20(CVX_ADDR).totalSupply();
-        
+
         //use current supply to gauge cliff
         //this will cause a bit of overflow into the next cliff range
         //but should be within reasonable levels.
@@ -45,7 +43,7 @@ contract ConvexHelper is MainnetConvexAddresses {
         uint256 cliff = supply / CVX_REDUCTION_PER_CLIFF;
         //mint if below total cliffs
         uint256 totalCliffs = CVX_TOTAL_CLIFFS;
-        if(cliff < totalCliffs){
+        if (cliff < totalCliffs) {
             //for reduction% take inverse of current cliff
             uint256 reduction = totalCliffs - cliff;
             //reduce
@@ -53,7 +51,7 @@ contract ConvexHelper is MainnetConvexAddresses {
 
             //supply cap check
             uint256 amtTillMax = CVX_MAX_SUPPLY - (supply);
-            if(_amount > amtTillMax){
+            if (_amount > amtTillMax) {
                 _amount = amtTillMax;
             }
         }
@@ -66,12 +64,10 @@ contract ConvexHelper is MainnetConvexAddresses {
     /// @dev CRV and CVX are always base rewards and are located at indices 0 and 1 respectively
     /// @dev some pools have CRV or CVX as extra rewards and their earned amounts are added to base rewards earned amounts
     /// @dev in these cases the return array will have empty elements
-    function _earnedRewards(address _account, address _rewardContract) internal view returns (
-        Reward[] memory rewards
-    ) {
+    function _earnedRewards(address _account, address _rewardContract) internal view returns (Reward[] memory rewards) {
         uint256 crvEarned = IBRewardPool(_rewardContract).earned(_account);
         uint256 cvxEarned = _cvxMintAmount(crvEarned);
-    
+
         uint256 extraRewardsLength = IBRewardPool(_rewardContract).extraRewardsLength();
         rewards = new Reward[](extraRewardsLength + 2);
 
@@ -95,17 +91,13 @@ contract ConvexHelper is MainnetConvexAddresses {
         rewards[1] = Reward(CVX_ADDR, cvxEarned);
     }
 
-    function _transferRewards(
-        address _from,
-        address _to,
-        Reward[] memory _rewards
-    ) internal returns (uint256) {
+    function _transferRewards(address _from, address _to, Reward[] memory _rewards) internal returns (uint256) {
         if (_from != _to) {
             for (uint256 i = 0; i < _rewards.length; i++) {
                 address token = _rewards[i].token;
                 if (token == address(0)) break;
                 uint256 earned = _rewards[i].earned;
-                earned = token.pullTokensIfNeeded(_from,earned);
+                earned = token.pullTokensIfNeeded(_from, earned);
                 token.withdrawTokens(_to, earned);
             }
         }

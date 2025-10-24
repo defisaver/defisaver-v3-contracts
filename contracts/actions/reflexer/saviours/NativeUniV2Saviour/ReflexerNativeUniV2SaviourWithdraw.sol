@@ -26,12 +26,7 @@ contract ReflexerNativeUniV2SaviourWithdraw is ActionBase, ReflexerHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[0], _subData, _returnValues);
-        inputData.lpTokenAmount = _parseParamUint(
-            inputData.lpTokenAmount,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
+        inputData.lpTokenAmount = _parseParamUint(inputData.lpTokenAmount, _paramMapping[1], _subData, _returnValues);
 
         bytes memory logData = _reflexerSaviourWithdraw(inputData);
         emit ActionEvent("ReflexerNativeUniV2SaviourWithdraw", logData);
@@ -54,11 +49,8 @@ contract ReflexerNativeUniV2SaviourWithdraw is ActionBase, ReflexerHelper {
 
     function _reflexerSaviourWithdraw(Params memory _inputData) internal returns (bytes memory logData) {
         require(_inputData.to != address(0), "Can't send to 0x0");
-        ISAFESaviour(NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS).withdraw(
-            _inputData.safeId,
-            _inputData.lpTokenAmount,
-            _inputData.to
-        );
+        ISAFESaviour(NATIVE_UNDERLYING_UNI_V_TWO_SAVIOUR_ADDRESS)
+            .withdraw(_inputData.safeId, _inputData.lpTokenAmount, _inputData.to);
 
         logData = abi.encode(_inputData);
     }

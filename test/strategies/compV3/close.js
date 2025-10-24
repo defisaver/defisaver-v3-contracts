@@ -1,5 +1,3 @@
-/* eslint-disable no-mixed-operators */
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -23,9 +21,7 @@ const {
     addBalancerFlLiquidity,
 } = require('../../utils/utils');
 
-const {
-    addBotCaller,
-} = require('../utils/utils-strategies');
+const { addBotCaller } = require('../utils/utils-strategies');
 const {
     COMP_V3_AUTOMATION_TEST_PAIRS,
     openCompV3ProxyPosition,
@@ -35,7 +31,10 @@ const {
     COMP_V3_MARKETS,
 } = require('../../utils/compoundV3');
 const { subCompV3CloseOnPriceBundle } = require('../utils/strategy-subs');
-const { callCompV3FLCloseToDebtStrategy, callCompV3FLCloseToCollStrategy } = require('../utils/strategy-calls');
+const {
+    callCompV3FLCloseToDebtStrategy,
+    callCompV3FLCloseToCollStrategy,
+} = require('../utils/strategy-calls');
 
 const COLL_AMOUNT_IN_USD = '40000';
 const DEBT_AMOUNT_IN_USD = '15000';
@@ -127,7 +126,10 @@ const runCloseTests = () => {
             await addBalancerFlLiquidity(collAsset.address);
 
             if (closeToDebt) {
-                const sellAmount = await fetchAmountInUSDPrice(collAsset.symbol, COLL_AMOUNT_IN_USD);
+                const sellAmount = await fetchAmountInUSDPrice(
+                    collAsset.symbol,
+                    COLL_AMOUNT_IN_USD,
+                );
                 const exchangeObject = await formatMockExchangeObjUsdFeed(
                     collAsset,
                     debtAsset,
@@ -135,7 +137,8 @@ const runCloseTests = () => {
                     mockWrapper,
                 );
                 const flAmount = (await fetchAmountInUSDPrice(debtAsset.symbol, DEBT_AMOUNT_IN_USD))
-                    .mul(hre.ethers.BigNumber.from(100)).div(hre.ethers.BigNumber.from(99));
+                    .mul(hre.ethers.BigNumber.from(100))
+                    .div(hre.ethers.BigNumber.from(99));
                 await callCompV3FLCloseToDebtStrategy(
                     strategyExecutor,
                     0,
@@ -148,7 +151,8 @@ const runCloseTests = () => {
                 );
             } else {
                 const flAmount = (await fetchAmountInUSDPrice(collAsset.symbol, DEBT_AMOUNT_IN_USD))
-                    .mul(hre.ethers.BigNumber.from(100)).div(hre.ethers.BigNumber.from(99));
+                    .mul(hre.ethers.BigNumber.from(100))
+                    .div(hre.ethers.BigNumber.from(99));
                 const exchangeObject = await formatMockExchangeObjUsdFeed(
                     collAsset,
                     debtAsset,
@@ -182,8 +186,14 @@ const runCloseTests = () => {
 
         for (let i = 0; i < COMP_V3_AUTOMATION_TEST_PAIRS[chainIds[network]].length; ++i) {
             const pair = COMP_V3_AUTOMATION_TEST_PAIRS[chainIds[network]][i];
-            const collAsset = getAssetInfo(pair.collSymbol === 'ETH' ? 'WETH' : pair.collSymbol, chainIds[network]);
-            const debtAsset = getAssetInfo(pair.debtSymbol === 'ETH' ? 'WETH' : pair.debtSymbol, chainIds[network]);
+            const collAsset = getAssetInfo(
+                pair.collSymbol === 'ETH' ? 'WETH' : pair.collSymbol,
+                chainIds[network],
+            );
+            const debtAsset = getAssetInfo(
+                pair.debtSymbol === 'ETH' ? 'WETH' : pair.debtSymbol,
+                chainIds[network],
+            );
             it(`... should execute compV3 FL close to debt strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = false;
                 const closeToDebt = true;
@@ -191,7 +201,16 @@ const runCloseTests = () => {
                 const takeProfitPrice = 0; // not set
                 const stopLossType = automationSdk.enums.CloseStrategyType.STOP_LOSS_IN_DEBT;
                 const takeProfitType = 0; // not set
-                await baseTest(collAsset, debtAsset, isEOA, closeToDebt, stopLossPrice, takeProfitPrice, stopLossType, takeProfitType);
+                await baseTest(
+                    collAsset,
+                    debtAsset,
+                    isEOA,
+                    closeToDebt,
+                    stopLossPrice,
+                    takeProfitPrice,
+                    stopLossType,
+                    takeProfitType,
+                );
             });
             it(`... should execute compV3 FL close to coll strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = false;
@@ -199,8 +218,18 @@ const runCloseTests = () => {
                 const stopLossPrice = 0; // not set
                 const takeProfitPrice = TAKE_PROFIT_PRICE;
                 const stopLossType = 0; // not set
-                const takeProfitType = automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_COLLATERAL;
-                await baseTest(collAsset, debtAsset, isEOA, closeToDebt, stopLossPrice, takeProfitPrice, stopLossType, takeProfitType);
+                const takeProfitType =
+                    automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_COLLATERAL;
+                await baseTest(
+                    collAsset,
+                    debtAsset,
+                    isEOA,
+                    closeToDebt,
+                    stopLossPrice,
+                    takeProfitPrice,
+                    stopLossType,
+                    takeProfitType,
+                );
             });
             it(`... should execute compV3 EOA FL close to debt strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = true;
@@ -209,7 +238,16 @@ const runCloseTests = () => {
                 const takeProfitPrice = TAKE_PROFIT_PRICE;
                 const stopLossType = automationSdk.enums.CloseStrategyType.STOP_LOSS_IN_DEBT;
                 const takeProfitType = automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_DEBT;
-                await baseTest(collAsset, debtAsset, isEOA, closeToDebt, stopLossPrice, takeProfitPrice, stopLossType, takeProfitType);
+                await baseTest(
+                    collAsset,
+                    debtAsset,
+                    isEOA,
+                    closeToDebt,
+                    stopLossPrice,
+                    takeProfitPrice,
+                    stopLossType,
+                    takeProfitType,
+                );
             });
             it(`... should execute compV3 EOA FL close to coll strategy for ${pair.collSymbol} / ${pair.debtSymbol} pair`, async () => {
                 const isEOA = true;
@@ -217,8 +255,18 @@ const runCloseTests = () => {
                 const stopLossPrice = STOP_LOSS_PRICE;
                 const takeProfitPrice = TAKE_PROFIT_PRICE;
                 const stopLossType = automationSdk.enums.CloseStrategyType.STOP_LOSS_IN_COLLATERAL;
-                const takeProfitType = automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_COLLATERAL;
-                await baseTest(collAsset, debtAsset, isEOA, closeToDebt, stopLossPrice, takeProfitPrice, stopLossType, takeProfitType);
+                const takeProfitType =
+                    automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_COLLATERAL;
+                await baseTest(
+                    collAsset,
+                    debtAsset,
+                    isEOA,
+                    closeToDebt,
+                    stopLossPrice,
+                    takeProfitPrice,
+                    stopLossType,
+                    takeProfitType,
+                );
             });
         }
     });

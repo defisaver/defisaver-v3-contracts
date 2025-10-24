@@ -33,7 +33,7 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, To
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 currPrice = getPriceInUSD(triggerSubData.tokenAddr);
-        
+
         /// @dev if currPrice is 0, we failed fetching the price
         if (currPrice == 0) return false;
 
@@ -48,12 +48,9 @@ contract ChainLinkPriceTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, To
         return false;
     }
 
-    
-    
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 

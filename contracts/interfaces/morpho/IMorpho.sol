@@ -4,17 +4,15 @@ pragma solidity ^0.8.0;
 import { MorphoTypes } from "./MorphoTypes.sol";
 
 interface IMorpho {
-
     /// STORAGE ///
-
-    function NO_REFERRAL_CODE() external view returns(uint8);
-    function VARIABLE_INTEREST_MODE() external view returns(uint8);
-    function MAX_BASIS_POINTS() external view returns(uint16);
-    function DEFAULT_LIQUIDATION_CLOSE_FACTOR() external view returns(uint16);
-    function HEALTH_FACTOR_LIQUIDATION_THRESHOLD() external view returns(uint256);
-    function MAX_NB_OF_MARKETS() external view returns(uint256);
-    function BORROWING_MASK() external view returns(bytes32);
-    function ONE() external view returns(bytes32);
+    function NO_REFERRAL_CODE() external view returns (uint8);
+    function VARIABLE_INTEREST_MODE() external view returns (uint8);
+    function MAX_BASIS_POINTS() external view returns (uint16);
+    function DEFAULT_LIQUIDATION_CLOSE_FACTOR() external view returns (uint16);
+    function HEALTH_FACTOR_LIQUIDATION_THRESHOLD() external view returns (uint256);
+    function MAX_NB_OF_MARKETS() external view returns (uint256);
+    function BORROWING_MASK() external view returns (bytes32);
+    function ONE() external view returns (bytes32);
 
     function isClaimRewardsPaused() external view returns (bool);
     function defaultMaxGasForMatching() external view returns (MorphoTypes.MaxGasForMatching memory);
@@ -46,7 +44,10 @@ interface IMorpho {
 
     function getMarketsCreated() external view returns (address[] memory marketsCreated_);
     function getHead(address _poolToken, MorphoTypes.PositionType _positionType) external view returns (address head);
-    function getNext(address _poolToken, MorphoTypes.PositionType _positionType, address _user) external view returns (address next);
+    function getNext(address _poolToken, MorphoTypes.PositionType _positionType, address _user)
+        external
+        view
+        returns (address next);
 
     /// GOVERNANCE ///
 
@@ -79,6 +80,9 @@ interface IMorpho {
     function withdraw(address _poolToken, uint256 _amount, address _receiver) external;
     function repay(address _poolToken, uint256 _amount) external;
     function repay(address _poolToken, address _onBehalf, uint256 _amount) external;
-    function liquidate(address _poolTokenBorrowed, address _poolTokenCollateral, address _borrower, uint256 _amount) external;
-    function claimRewards(address[] calldata _assets, bool _tradeForMorphoToken) external returns (uint256 claimedAmount);
+    function liquidate(address _poolTokenBorrowed, address _poolTokenCollateral, address _borrower, uint256 _amount)
+        external;
+    function claimRewards(address[] calldata _assets, bool _tradeForMorphoToken)
+        external
+        returns (uint256 claimedAmount);
 }

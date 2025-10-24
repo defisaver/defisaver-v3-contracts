@@ -10,10 +10,12 @@ import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if current Liquity position ratio went over/under the subbed ratio
 contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper, TriggerHelper {
-
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
-    enum RatioState { OVER, UNDER }
+    enum RatioState {
+        OVER,
+        UNDER
+    }
 
     /// @param troveOwner address of the user whose position we check
     /// @param ratio ratio that represents the triggerable point
@@ -24,19 +26,16 @@ contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper, Trigger
         uint8 state;
     }
     /// @dev checks current ratio of a Liquity trove and triggers if it's in a correct state
-    function isTriggered(bytes memory, bytes memory _subData)
-        public
-        override
-        returns (bool)
-    {   
+
+    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         (uint256 currRatio, bool isActive) = getRatio(triggerSubData.troveOwner);
-        
+
         if (isActive == false || currRatio == 0) return false;
 
         tempStorage.setBytes32("LIQUITY_RATIO", bytes32(currRatio));
-        
+
         if (RatioState(triggerSubData.state) == RatioState.OVER) {
             if (currRatio > triggerSubData.ratio) return true;
         }
@@ -52,10 +51,9 @@ contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper, Trigger
         params = abi.decode(_subData, (SubParams));
     }
 
-    function changedSubData(bytes memory _subData) public pure override  returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 }

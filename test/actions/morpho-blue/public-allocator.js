@@ -1,11 +1,5 @@
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable max-len */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-mixed-operators */
-/* eslint-disable no-undef */
-
 /// @dev Data fetching adapted from 'https://github.com/morpho-org/public-allocator-scripts'
+/* eslint-disable no-undef */
 
 const hre = require('hardhat');
 const { expect } = require('chai');
@@ -16,7 +10,6 @@ const {
     chainIds,
     network,
     isNetworkFork,
-    addrs,
     getOwnerAddr,
     setBalance,
     approve,
@@ -100,13 +93,7 @@ const abiCoder = new hre.ethers.utils.AbiCoder();
 const getMarketId = (market) => {
     const encodedMarket = abiCoder.encode(
         ['address', 'address', 'address', 'address', 'uint256'],
-        [
-            market[0],
-            market[1],
-            market[2],
-            market[3],
-            market[4],
-        ],
+        [market[0], market[1], market[2], market[3], market[4]],
     );
     return hre.ethers.utils.keccak256(encodedMarket);
 };
@@ -129,17 +116,14 @@ const fetchMarketData = async () => {
 
 const getAllocations = async (marketData, liquidity) => {
     const maxToAllocate = BigInt(marketData.reallocatableLiquidityAssets);
-    const liquidityToAllocate = liquidity > maxToAllocate ? (maxToAllocate / 2n) : liquidity;
+    const liquidityToAllocate = liquidity > maxToAllocate ? maxToAllocate / 2n : liquidity;
 
     // First, group and sum assets by vault
-    const vaultTotalAssets = marketData.publicAllocatorSharedLiquidity.reduce(
-        (acc, item) => {
-            const vaultAddress = item.vault.address;
-            acc[vaultAddress] = (acc[vaultAddress] || 0n) + BigInt(item.assets);
-            return acc;
-        },
-        {},
-    );
+    const vaultTotalAssets = marketData.publicAllocatorSharedLiquidity.reduce((acc, item) => {
+        const vaultAddress = item.vault.address;
+        acc[vaultAddress] = (acc[vaultAddress] || 0n) + BigInt(item.assets);
+        return acc;
+    }, {});
     // Sort vaults by total assets (descending)
     const sortedVaults = Object.entries(vaultTotalAssets).sort(
         ([, a], [, b]) => Number(b) - Number(a),
@@ -164,7 +148,8 @@ const getAllocations = async (marketData, liquidity) => {
             const withdrawal = [
                 [
                     item.allocationMarket.loanAsset.address,
-                    item.allocationMarket.collateralAsset?.address || hre.ethers.constants.AddressZero,
+                    item.allocationMarket.collateralAsset?.address ||
+                        hre.ethers.constants.AddressZero,
                     item.allocationMarket.oracle?.address || hre.ethers.constants.AddressZero,
                     item.allocationMarket.irmAddress,
                     BigInt(item.allocationMarket.lltv),
@@ -179,9 +164,9 @@ const getAllocations = async (marketData, liquidity) => {
     }
 
     const vaults = Object.keys(withdrawalsPerVault);
-    const withdrawals = vaults.map(
-        (vaultAddress) => withdrawalsPerVault[vaultAddress].sort(
-            (a, b) => getMarketId(a[0]).localeCompare(getMarketId(b[0])),
+    const withdrawals = vaults.map((vaultAddress) =>
+        withdrawalsPerVault[vaultAddress].sort((a, b) =>
+            getMarketId(a[0]).localeCompare(getMarketId(b[0])),
         ),
     );
 
@@ -215,11 +200,18 @@ const morphoBlueReallocateLiquidityTest = async (isFork) => {
             }
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             allocateContract = await redeploy('MorphoBlueReallocateLiquidity', isFork);
-            console.log('Deployed MorphoBlueReallocateLiquidity to address:', allocateContract.address);
+            console.log(
+                'Deployed MorphoBlueReallocateLiquidity to address:',
+                allocateContract.address,
+            );
             view = await redeploy('MorphoBlueView', isFork);
         });
-        beforeEach(async () => { snapshotId = await takeSnapshot(); });
-        afterEach(async () => { await revertToSnapshot(snapshotId); });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
 
         it('... test MorphoBlue reallocate direct', async () => {
             const marketData = await fetchMarketData();
@@ -236,7 +228,7 @@ const morphoBlueReallocateLiquidityTest = async (isFork) => {
                 withdrawals,
             );
             const functionData = action.encodeForDsProxyCall()[1];
-            const tx = await executeAction('MorphoBlueReallocateLiquidity', functionData, proxy);
+            await executeAction('MorphoBlueReallocateLiquidity', functionData, proxy);
         });
         it('... test MorphoBlue reallocate with borrow inside recipe', async () => {
             const marketData = await fetchMarketData();
@@ -245,13 +237,18 @@ const morphoBlueReallocateLiquidityTest = async (isFork) => {
 
             const additionalLiquidityNeeded = maxToAllocate / 2n;
             const amountToBorrow = currentlyAvailableLiquidity + additionalLiquidityNeeded;
-            const {
-                vaults, withdrawals, totalReallocated,
-            } = await getAllocations(marketData, additionalLiquidityNeeded);
+            const { vaults, withdrawals, totalReallocated } = await getAllocations(
+                marketData,
+                additionalLiquidityNeeded,
+            );
 
             const collToken = MARKET_PARAMS[1];
             const supplyAmount = amountToBorrow * 10n;
-            await setBalance(collToken, senderAcc.address, hre.ethers.BigNumber.from(supplyAmount.toString()));
+            await setBalance(
+                collToken,
+                senderAcc.address,
+                hre.ethers.BigNumber.from(supplyAmount.toString()),
+            );
             await approve(collToken, proxy.address, senderAcc);
 
             let marketInfo = await view.callStatic.getMarketInfo(MARKET_PARAMS);

@@ -10,7 +10,6 @@ import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestEulerV2Supply is EulerV2TestHelper {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -116,20 +115,13 @@ contract TestEulerV2Supply is EulerV2TestHelper {
 
         for (uint256 i = 0; i < accounts.length; ++i) {
             _supplyToVault(
-                TestConfig(
-                    E_WSTETH_2_GOVERNED,
-                    accounts[i],
-                    enableAsColl,
-                    isDirect,
-                    isEscrowed,
-                    takeMaxUint256
-                )
+                TestConfig(E_WSTETH_2_GOVERNED, accounts[i], enableAsColl, isDirect, isEscrowed, takeMaxUint256)
             );
         }
     }
 
     function test_should_supply_to_escrowed_vault() public {
-        uint256 snapshotId = vm.snapshot();
+        uint256 snapshotId = vm.snapshotState();
 
         address vault = E_WSTETH_1_ESCROWED;
         address account = walletAddr;
@@ -138,30 +130,16 @@ contract TestEulerV2Supply is EulerV2TestHelper {
         bool isEscrowed = true;
         bool takeMaxUint256 = false;
 
-        _supplyToVault(
-            TestConfig(
-                vault,
-                account,
-                enableAsColl,
-                isDirect,
-                isEscrowed,
-                takeMaxUint256
-            )
-        );
+        _supplyToVault(TestConfig(vault, account, enableAsColl, isDirect, isEscrowed, takeMaxUint256));
 
-        vm.revertTo(snapshotId);
+        vm.revertToState(snapshotId);
     }
 
-    function _baseTest(
-        address _account,
-        bool _enableAsColl,
-        bool _isDirect,
-        bool _takeMaxUint256
-    ) internal {
+    function _baseTest(address _account, bool _enableAsColl, bool _isDirect, bool _takeMaxUint256) internal {
         bool isEscrowed = false;
 
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory testPair = testPairs[i];
             address vault = testPair.supplyAsset;
@@ -177,13 +155,13 @@ contract TestEulerV2Supply is EulerV2TestHelper {
                 })
             );
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 
     function _supplyToVault(TestConfig memory _config) internal {
         address assetToken = IEVault(_config.vault).asset();
-        uint256 supplyAmount = amountInUSDPrice(assetToken, 100000);
+        uint256 supplyAmount = amountInUSDPrice(assetToken, 100_000);
 
         give(assetToken, sender, supplyAmount);
         approveAsSender(sender, assetToken, walletAddr, supplyAmount);

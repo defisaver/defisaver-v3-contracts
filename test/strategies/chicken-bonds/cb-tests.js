@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
 const automationSdk = require('@defisaver/automation-sdk');
@@ -17,9 +16,7 @@ const {
     resetForkToBlock,
 } = require('../../utils/utils');
 
-const {
-    getRebondTime,
-} = require('../../utils/cb');
+const { getRebondTime } = require('../../utils/cb');
 
 const { createChickenBond } = require('../../utils/actions');
 
@@ -74,7 +71,10 @@ const cbRebondStrategyTest = async () => {
             await redeploy('CBRebondSubProxy');
             await redeploy('CBUpdateRebondSub');
 
-            await setContractAt({ name: 'WrapperExchangeRegistry', address: addrs.mainnet.WRAPPER_EXCHANGE_REGISTRY });
+            await setContractAt({
+                name: 'WrapperExchangeRegistry',
+                address: addrs.mainnet.WRAPPER_EXCHANGE_REGISTRY,
+            });
 
             const { address: mockWrapperAddr } = await redeploy('MockExchangeWrapper');
 
@@ -98,7 +98,6 @@ const cbRebondStrategyTest = async () => {
         });
 
         it('... should make a Chicken Bond Rebond strategy and subscribe', async () => {
-            // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subCbRebondStrategy(proxy, bondID, strategyId));
             const smallBondObject = await subCbRebondStrategy(proxy, smallBondId, strategyId);
             smallBondSubId = smallBondObject.subId;
@@ -119,7 +118,10 @@ const cbRebondStrategyTest = async () => {
                 const bonds = await chickenBondsView.getUsersBonds(proxy.address);
                 bondIDNew = bonds[bonds.length - 1].bondID.toString();
 
-                newLusdAmount = hre.ethers.utils.formatUnits(bonds[bonds.length - 1].lusdAmount, 18);
+                newLusdAmount = hre.ethers.utils.formatUnits(
+                    bonds[bonds.length - 1].lusdAmount,
+                    18,
+                );
 
                 expect(bonds[bonds.length - 1].lusdAmount).to.be.gt(lusdAmountWei);
                 expect(+bondIDNew).to.be.eq(+bondID + 1);
@@ -136,14 +138,19 @@ const cbRebondStrategyTest = async () => {
             } else {
                 const time = await getRebondTime(chickenBondsView, rebondTrigger, newLusdAmount);
 
-                const triggerData = automationSdk.triggerService.cBondsRebondTrigger.encode(bondIDNew);
+                const triggerData =
+                    automationSdk.triggerService.cBondsRebondTrigger.encode(bondIDNew);
 
                 const subIdEncoded = abiCoder.encode(['uint256'], [subId.toString()]);
                 const bondIDNewEncoded = abiCoder.encode(['uint256'], [bondIDNew.toString()]);
                 const bLusdTokenEncoded = abiCoder.encode(['address'], [BLUSD_ADDR]);
                 const lusdTokenEncoded = abiCoder.encode(['address'], [LUSD_ADDR]);
-                strategySub = [strategyId, false,
-                    triggerData, [subIdEncoded, bondIDNewEncoded, bLusdTokenEncoded, lusdTokenEncoded]];
+                strategySub = [
+                    strategyId,
+                    false,
+                    triggerData,
+                    [subIdEncoded, bondIDNewEncoded, bLusdTokenEncoded, lusdTokenEncoded],
+                ];
 
                 await timeTravel(time);
 
@@ -167,7 +174,14 @@ const cbRebondStrategyTest = async () => {
                 expect(true).to.be.eq(true);
             } else {
                 await timeTravel(time);
-                await expect(callCbRebondStrategy(botAcc, strategyExecutor, smallBondSubId, smallBondStrategySub)).to.be.reverted;
+                await expect(
+                    callCbRebondStrategy(
+                        botAcc,
+                        strategyExecutor,
+                        smallBondSubId,
+                        smallBondStrategySub,
+                    ),
+                ).to.be.reverted;
             }
         });
     });

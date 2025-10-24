@@ -1,6 +1,4 @@
-const {
-    redeploy,
-} = require('../utils/utils');
+const { redeploy } = require('../utils/utils');
 const { tokenPriceHelperTest } = require('./utils-tests');
 
 describe('Token-Price-Helper', function () {

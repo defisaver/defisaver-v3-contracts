@@ -12,7 +12,6 @@ import { DSAuth } from "../DS/DSAuth.sol";
 
 /// @title Registry of proxies related to LSV
 contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper, DSProxyFactoryHelper {
-
     /// @dev List of proxies a user owns
     mapping(address => address[]) public proxies;
 
@@ -41,7 +40,7 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper, DSProxyFa
 
         // remove proxy from oldOwners proxies
         uint256 oldOwnersProxyCount = proxies[_oldOwner].length;
-        if (oldOwnersProxyCount > 1 && _indexNumInOldOwnerProxiesArr < (oldOwnersProxyCount - 1))  {
+        if (oldOwnersProxyCount > 1 && _indexNumInOldOwnerProxiesArr < (oldOwnersProxyCount - 1)) {
             proxies[_oldOwner][_indexNumInOldOwnerProxiesArr] = proxies[_oldOwner][oldOwnersProxyCount - 1];
         }
         proxies[_oldOwner].pop();
@@ -59,14 +58,14 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper, DSProxyFa
     }
 
     /// @notice helper function to get all users proxies
-    function getProxies(address _user) public view returns (address[] memory){
+    function getProxies(address _user) public view returns (address[] memory) {
         address[] memory resultProxies = new address[](proxies[_user].length);
-        for (uint256 i = 0; i < proxies[_user].length; i++){
+        for (uint256 i = 0; i < proxies[_user].length; i++) {
             resultProxies[i] = proxies[_user][i];
         }
         return resultProxies;
     }
-    
+
     /// @notice helper function to check how many proxies are there in the proxy pool for cheaper user onboarding
     function getProxyPoolCount() public view returns (uint256) {
         return proxyPool.length;
@@ -77,7 +76,7 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper, DSProxyFa
         if (proxyPool.length > 0) {
             address newProxy = proxyPool[proxyPool.length - 1];
             proxyPool.pop();
-            
+
             DSAuth(newProxy).setOwner(_user);
             return newProxy;
         } else {
@@ -85,5 +84,4 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper, DSProxyFa
             return address(newProxy);
         }
     }
-    
 }

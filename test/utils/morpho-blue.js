@@ -47,13 +47,11 @@ const supplyToMarket = async (marketParams) => {
     const loanToken = getAssetInfoByAddress(marketParams[0]);
     const supplyAmount = fetchAmountinUSDPrice(loanToken.symbol, loanTokenSupplyAmountInUsd);
     const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, loanToken.decimals);
-    await setBalance(
-        loanToken.address,
-        wallet.address,
-        supplyAmountInWei,
-    );
+    await setBalance(loanToken.address, wallet.address, supplyAmountInWei);
     await approve(loanToken.address, MORPHO_BLUE_ADDRESS, wallet);
-    await morphoBlue.supply(marketParams, supplyAmountInWei, '0', wallet.address, [], { gasLimit: 3000000 });
+    await morphoBlue.supply(marketParams, supplyAmountInWei, '0', wallet.address, [], {
+        gasLimit: 3000000,
+    });
 };
 
 module.exports = {

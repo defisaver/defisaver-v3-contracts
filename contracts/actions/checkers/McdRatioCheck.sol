@@ -8,7 +8,7 @@ import { McdRatioHelper } from "../mcd/helpers/McdRatioHelper.sol";
 /// @title Action to check the ratio of the Maker position after strategy execution.
 contract McdRatioCheck is ActionBase, McdRatioHelper {
     /// @notice 2% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 20000000000000000;
+    uint256 internal constant RATIO_OFFSET = 20_000_000_000_000_000;
 
     enum RatioState {
         SHOULD_BE_LOWER,
@@ -19,7 +19,7 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
     /// @param checkTarget Whether to check if the ratio is in the target range.
     /// @param ratioTarget Target ratio.
     /// @param vaultId Vault ID.
-    /// @param startRatioIndex Index in returnValues where ratio before actions is stored   
+    /// @param startRatioIndex Index in returnValues where ratio before actions is stored
     struct Params {
         RatioState ratioState;
         bool checkTarget;
@@ -44,7 +44,8 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
         uint256 ratioState = _parseParamUint(uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues);
         inputData.ratioTarget = _parseParamUint(inputData.ratioTarget, _paramMapping[1], _subData, _returnValues);
         inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[2], _subData, _returnValues);
-        inputData.startRatioIndex = _parseParamUint(inputData.startRatioIndex, _paramMapping[3], _subData, _returnValues);
+        inputData.startRatioIndex =
+            _parseParamUint(inputData.startRatioIndex, _paramMapping[3], _subData, _returnValues);
 
         uint256 currRatio = getRatio(inputData.vaultId, 0);
         uint256 beforeRatio = uint256(_returnValues[inputData.startRatioIndex]);
@@ -61,7 +62,7 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
 
         // if ratio target is sent check on it
         if (inputData.checkTarget) {
-            if(!inAcceptableRange(currRatio, inputData.ratioTarget)) {
+            if (!inAcceptableRange(currRatio, inputData.ratioTarget)) {
                 revert RatioOutsideTargetRange(currRatio, inputData.ratioTarget);
             }
         }
@@ -72,7 +73,7 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
 
     /// @inheritdoc ActionBase
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {

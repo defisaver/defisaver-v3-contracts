@@ -23,9 +23,10 @@ interface ISparkV3Oracle {
     function getFallbackOracle() external view returns (address);
 
     /**
-    * @notice Returns the asset price in the base currency
-    * @param asset The address of the asset
-    * @return The price of the asset
-    **/
+     * @notice Returns the asset price in the base currency
+     * @param asset The address of the asset
+     * @return The price of the asset
+     *
+     */
     function getAssetPrice(address asset) external view returns (uint256);
 }

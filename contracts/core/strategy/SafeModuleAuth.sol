@@ -19,10 +19,10 @@ contract SafeModuleAuth is Pausable, CoreHelper, IAuth {
     /// Revert if execution fails when using safe wallet
     error SafeExecutionError();
 
-    modifier onlyExecutor {
+    modifier onlyExecutor() {
         address executorAddr = registry.getAddr(STRATEGY_EXECUTOR_ID);
 
-        if (msg.sender != executorAddr){
+        if (msg.sender != executorAddr) {
             revert SenderNotExecutorError(msg.sender, executorAddr);
         }
 
@@ -34,16 +34,18 @@ contract SafeModuleAuth is Pausable, CoreHelper, IAuth {
     /// @param _safeAddr Address of the users Safe
     /// @param _recipeExecutorAddr Address of the recipe executor supplied by StrategyExecutor
     /// @param _callData Call data of the function to be called
-    function callExecute(
-        address _safeAddr,
-        address _recipeExecutorAddr,
-        bytes memory _callData
-    ) external payable onlyExecutor notPaused {
-       // execute from module does not revert on failure 
-       bool success = ISafe(_safeAddr).execTransactionFromModule(_recipeExecutorAddr, msg.value, _callData, ISafe.Operation.DelegateCall);
+    function callExecute(address _safeAddr, address _recipeExecutorAddr, bytes memory _callData)
+        external
+        payable
+        onlyExecutor
+        notPaused
+    {
+        // execute from module does not revert on failure
+        bool success = ISafe(_safeAddr)
+            .execTransactionFromModule(_recipeExecutorAddr, msg.value, _callData, ISafe.Operation.DelegateCall);
 
-       if (!success) {
+        if (!success) {
             revert SafeExecutionError();
-       }
+        }
     }
 }

@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 contract BaseFLAddresses {
-
     address internal constant WETH_ADDR = 0x4200000000000000000000000000000000000006;
     address internal constant DAI_ADDR = 0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb;
 
@@ -18,7 +17,7 @@ contract BaseFLAddresses {
     address internal constant UNI_V3_FACTORY = 0x33128a8fC17869897dcE68Ed026d694621f6FDfD;
 
     address internal constant MORPHO_BLUE_ADDR = 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb;
-    
+
     address internal constant RECIPE_EXECUTOR_ADDR = 0xd0Ae279e330f98C399375f80968C8bf860202766;
 
     ////////// NOT USED

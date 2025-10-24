@@ -1,14 +1,21 @@
 const hre = require('hardhat');
 const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy,
-    setBalance, approve, fetchAmountinUSDPrice,
+    takeSnapshot,
+    revertToSnapshot,
+    getProxy,
+    redeploy,
+    setBalance,
+    approve,
+    fetchAmountinUSDPrice,
     formatMockExchangeObj,
     setNewExchangeWrapper,
     chainIds,
 } = require('../../utils/utils');
 const {
-    getControllers, collateralSupplyAmountInUsd, supplyToMarket,
+    getControllers,
+    collateralSupplyAmountInUsd,
+    supplyToMarket,
     borrowAmountInUsd,
 } = require('../../utils/llamalend');
 const { llamalendCreate, llamalendSelfLiquidateWithColl } = require('../../utils/actions');
@@ -19,7 +26,11 @@ describe('LlamaLend-Self-Liq-With-Coll', function () {
     const chainId = chainIds[network];
     const controllers = getControllers(chainId);
 
-    let senderAcc; let proxy; let snapshot; let view; let mockWrapper;
+    let senderAcc;
+    let proxy;
+    let snapshot;
+    let view;
+    let mockWrapper;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -42,47 +53,52 @@ describe('LlamaLend-Self-Liq-With-Coll', function () {
     for (let i = 0; i < controllers.length; i++) {
         const controllerAddr = controllers[i];
         it(`should create a Llamalend position in ${controllerAddr} Llamalend market and then self liquidate it with coll when it's in soft liq`, async () => {
-            const controller = await hre.ethers.getContractAt('ILlamaLendController', controllerAddr);
+            const controller = await hre.ethers.getContractAt(
+                'ILlamaLendController',
+                controllerAddr,
+            );
             const collTokenAddr = await controller.collateral_token();
             const debtTokenAddr = await controller.borrowed_token();
             const collToken = getAssetInfoByAddress(collTokenAddr, chainId);
             const debtToken = getAssetInfoByAddress(debtTokenAddr, chainId);
             await supplyToMarket(controllerAddr, chainId);
             const supplyAmount = fetchAmountinUSDPrice(
-                collToken.symbol, collateralSupplyAmountInUsd,
+                collToken.symbol,
+                collateralSupplyAmountInUsd,
             );
-            const borrowAmount = fetchAmountinUSDPrice(
-                debtToken.symbol, borrowAmountInUsd,
-            );
+            const borrowAmount = fetchAmountinUSDPrice(debtToken.symbol, borrowAmountInUsd);
             if (supplyAmount === 'Infinity') return;
             if (borrowAmount === 'Infinity') return;
-            const supplyAmountInWei = hre.ethers.utils.parseUnits(
-                supplyAmount, collToken.decimals,
-            );
-            const borrowAmountWei = hre.ethers.utils.parseUnits(
-                borrowAmount, debtToken.decimals,
-            );
+            const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, collToken.decimals);
+            const borrowAmountWei = hre.ethers.utils.parseUnits(borrowAmount, debtToken.decimals);
             await setBalance(collTokenAddr, senderAcc.address, supplyAmountInWei);
 
             await approve(collTokenAddr, proxy.address, senderAcc);
             console.log(supplyAmountInWei);
             console.log(borrowAmountWei);
             await llamalendCreate(
-                proxy, controllerAddr, senderAcc.address, senderAcc.address,
-                supplyAmountInWei, borrowAmountWei, 10,
+                proxy,
+                controllerAddr,
+                senderAcc.address,
+                senderAcc.address,
+                supplyAmountInWei,
+                borrowAmountWei,
+                10,
             );
 
             const llammaAddress = await controller.amm();
-            const llamaSwapAmount = fetchAmountinUSDPrice(
-                debtToken.symbol, '2000000',
-            );
+            const llamaSwapAmount = fetchAmountinUSDPrice(debtToken.symbol, '2000000');
             const llamaSwapAmountInWei = hre.ethers.utils.parseUnits(
-                llamaSwapAmount, debtToken.decimals,
+                llamaSwapAmount,
+                debtToken.decimals,
             );
 
             await setBalance(debtTokenAddr, senderAcc.address, llamaSwapAmountInWei);
             await approve(debtTokenAddr, llammaAddress);
-            const llammaExchange = await hre.ethers.getContractAt('contracts/interfaces/llamalend/ILLAMA.sol:ILLAMMA', llammaAddress);
+            const llammaExchange = await hre.ethers.getContractAt(
+                'contracts/interfaces/llamalend/ILLAMA.sol:ILLAMMA',
+                llammaAddress,
+            );
             await llammaExchange.exchange(0, 1, llamaSwapAmountInWei, 1, { gasLimit: 5000000 });
 
             const exchangeData = await formatMockExchangeObj(

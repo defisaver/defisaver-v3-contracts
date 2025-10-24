@@ -162,9 +162,7 @@
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": [
-            "0x5b0b7e38c2a8e46cfae13c360bc5927570beee94"
-        ]
+        "history": ["0x5b0b7e38c2a8e46cfae13c360bc5927570beee94"]
     },
     {
         "name": "ZeroxWrapper",

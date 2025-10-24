@@ -5,7 +5,6 @@ import { MorphoTypes } from "./MorphoTypes.sol";
 
 interface IMorphoAaveV2Lens {
     /// STORAGE ///
-
     function DEFAULT_LIQUIDATION_CLOSE_FACTOR() external view returns (uint16);
 
     function HEALTH_FACTOR_LIQUIDATION_THRESHOLD() external view returns (uint256);
@@ -25,20 +24,12 @@ interface IMorphoAaveV2Lens {
     function getTotalSupply()
         external
         view
-        returns (
-            uint256 p2pSupplyAmount,
-            uint256 poolSupplyAmount,
-            uint256 totalSupplyAmount
-        );
+        returns (uint256 p2pSupplyAmount, uint256 poolSupplyAmount, uint256 totalSupplyAmount);
 
     function getTotalBorrow()
         external
         view
-        returns (
-            uint256 p2pBorrowAmount,
-            uint256 poolBorrowAmount,
-            uint256 totalBorrowAmount
-        );
+        returns (uint256 p2pBorrowAmount, uint256 poolBorrowAmount, uint256 totalBorrowAmount);
 
     /// MARKETS ///
 
@@ -48,10 +39,7 @@ interface IMorphoAaveV2Lens {
     function isMarketCreatedAndNotPaused(address _poolToken) external view returns (bool);
 
     /// @dev Deprecated.
-    function isMarketCreatedAndNotPausedNorPartiallyPaused(address _poolToken)
-        external
-        view
-        returns (bool);
+    function isMarketCreatedAndNotPausedNorPartiallyPaused(address _poolToken) external view returns (bool);
 
     function getAllMarkets() external view returns (address[] memory marketsCreated_);
 
@@ -94,10 +82,7 @@ interface IMorphoAaveV2Lens {
             uint256 decimals
         );
 
-    function getMarketPauseStatus(address _poolToken)
-        external
-        view
-        returns (MorphoTypes.MarketPauseStatus memory);
+    function getMarketPauseStatus(address _poolToken) external view returns (MorphoTypes.MarketPauseStatus memory);
 
     function getTotalMarketSupply(address _poolToken)
         external
@@ -119,35 +104,21 @@ interface IMorphoAaveV2Lens {
 
     /// USERS ///
 
-    function getEnteredMarkets(address _user)
-        external
-        view
-        returns (address[] memory enteredMarkets);
+    function getEnteredMarkets(address _user) external view returns (address[] memory enteredMarkets);
 
     function getUserHealthFactor(address _user) external view returns (uint256 healthFactor);
 
-    function getUserBalanceStates(address _user)
-        external
-        view
-        returns (MorphoTypes.LiquidityData memory assetData);
+    function getUserBalanceStates(address _user) external view returns (MorphoTypes.LiquidityData memory assetData);
 
     function getCurrentSupplyBalanceInOf(address _poolToken, address _user)
         external
         view
-        returns (
-            uint256 balanceInP2P,
-            uint256 balanceOnPool,
-            uint256 totalBalance
-        );
+        returns (uint256 balanceInP2P, uint256 balanceOnPool, uint256 totalBalance);
 
     function getCurrentBorrowBalanceInOf(address _poolToken, address _user)
         external
         view
-        returns (
-            uint256 balanceInP2P,
-            uint256 balanceOnPool,
-            uint256 totalBalance
-        );
+        returns (uint256 balanceInP2P, uint256 balanceOnPool, uint256 totalBalance);
 
     function getUserMaxCapacitiesForAsset(address _user, address _poolToken)
         external
@@ -168,87 +139,48 @@ interface IMorphoAaveV2Lens {
         uint256 _borrowedAmount
     ) external view returns (uint256 healthFactor);
 
-    function getUserLiquidityDataForAsset(
-        address _user,
-        address _poolToken,
-        address _oracle
-    ) external view returns (MorphoTypes.AssetLiquidityData memory assetData);
+    function getUserLiquidityDataForAsset(address _user, address _poolToken, address _oracle)
+        external
+        view
+        returns (MorphoTypes.AssetLiquidityData memory assetData);
 
     function isLiquidatable(address _user) external view returns (bool);
 
     function isLiquidatable(address _user, address _poolToken) external view returns (bool);
 
-    function computeLiquidationRepayAmount(
-        address _user,
-        address _poolTokenBorrowed,
-        address _poolTokenCollateral
-    ) external view returns (uint256 toRepay);
+    function computeLiquidationRepayAmount(address _user, address _poolTokenBorrowed, address _poolTokenCollateral)
+        external
+        view
+        returns (uint256 toRepay);
 
     /// RATES ///
 
-    function getNextUserSupplyRatePerYear(
-        address _poolToken,
-        address _user,
-        uint256 _amount
-    )
+    function getNextUserSupplyRatePerYear(address _poolToken, address _user, uint256 _amount)
         external
         view
-        returns (
-            uint256 nextSupplyRatePerYear,
-            uint256 balanceInP2P,
-            uint256 balanceOnPool,
-            uint256 totalBalance
-        );
+        returns (uint256 nextSupplyRatePerYear, uint256 balanceInP2P, uint256 balanceOnPool, uint256 totalBalance);
 
-    function getNextUserBorrowRatePerYear(
-        address _poolToken,
-        address _user,
-        uint256 _amount
-    )
+    function getNextUserBorrowRatePerYear(address _poolToken, address _user, uint256 _amount)
         external
         view
-        returns (
-            uint256 nextBorrowRatePerYear,
-            uint256 balanceInP2P,
-            uint256 balanceOnPool,
-            uint256 totalBalance
-        );
+        returns (uint256 nextBorrowRatePerYear, uint256 balanceInP2P, uint256 balanceOnPool, uint256 totalBalance);
 
-    function getCurrentUserSupplyRatePerYear(address _poolToken, address _user)
-        external
-        view
-        returns (uint256);
+    function getCurrentUserSupplyRatePerYear(address _poolToken, address _user) external view returns (uint256);
 
-    function getCurrentUserBorrowRatePerYear(address _poolToken, address _user)
-        external
-        view
-        returns (uint256);
+    function getCurrentUserBorrowRatePerYear(address _poolToken, address _user) external view returns (uint256);
 
     function getAverageSupplyRatePerYear(address _poolToken)
         external
         view
-        returns (
-            uint256 avgSupplyRatePerYear,
-            uint256 p2pSupplyAmount,
-            uint256 poolSupplyAmount
-        );
+        returns (uint256 avgSupplyRatePerYear, uint256 p2pSupplyAmount, uint256 poolSupplyAmount);
 
     function getAverageBorrowRatePerYear(address _poolToken)
         external
         view
-        returns (
-            uint256 avgBorrowRatePerYear,
-            uint256 p2pBorrowAmount,
-            uint256 poolBorrowAmount
-        );
+        returns (uint256 avgBorrowRatePerYear, uint256 p2pBorrowAmount, uint256 poolBorrowAmount);
 
     function getRatesPerYear(address _poolToken)
         external
         view
-        returns (
-            uint256 p2pSupplyRate,
-            uint256 p2pBorrowRate,
-            uint256 poolSupplyRate,
-            uint256 poolBorrowRate
-        );
+        returns (uint256 p2pSupplyRate, uint256 p2pBorrowRate, uint256 poolSupplyRate, uint256 poolBorrowRate);
 }

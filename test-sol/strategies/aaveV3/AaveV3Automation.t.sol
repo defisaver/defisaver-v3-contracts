@@ -11,7 +11,6 @@ import { DFSSell } from "../../../contracts/actions/exchange/DFSSell.sol";
 import { GasFeeTaker } from "../../../contracts/actions/fee/GasFeeTaker.sol";
 import { FLAction } from "../../../contracts/actions/flashloan/FLAction.sol";
 import { RecipeExecutor } from "../../../contracts/core/RecipeExecutor.sol";
-import { MainnetCoreAddresses } from "../../../contracts/core/helpers/MainnetCoreAddresses.sol";
 import { SafeModuleAuth } from "../../../contracts/core/strategy/SafeModuleAuth.sol";
 import { StrategyExecutor } from "../../../contracts/core/strategy/StrategyExecutor.sol";
 import { StrategyModel } from "../../../contracts/core/strategy/StrategyModel.sol";
@@ -31,10 +30,9 @@ import { AaveV3User } from "../../utils/aaveV3/AaveV3User.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 
 contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
-
     /*//////////////////////////////////////////////////////////////////////////
                                      VARIABLES
-    //////////////////////////////////////////////////////////////////////////*/ 
+    //////////////////////////////////////////////////////////////////////////*/
     address internal constant AAVE_MARKET = 0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
 
     uint256 internal REPAY_AMOUNT_WETH;
@@ -72,7 +70,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
 
     FLAction internal flAction;
     StrategyExecutor internal executor;
-    AaveV3RatioTrigger internal  trigger;
+    AaveV3RatioTrigger internal trigger;
 
     StrategyModel.StrategySub internal repaySub;
     uint256 internal repaySubId;
@@ -88,7 +86,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     function setUp() public override {
         forkMainnetLatest();
 
-        REPAY_AMOUNT_WETH = amountInUSDPrice(Addresses.WETH_ADDR, 1_000);
+        REPAY_AMOUNT_WETH = amountInUSDPrice(Addresses.WETH_ADDR, 1000);
         INITIAL_COLLATERAL_WETH_AMOUNT = amountInUSDPrice(Addresses.WETH_ADDR, 15_000);
 
         poolAddressesProvider = IPoolAddressesProvider(AAVE_MARKET);
@@ -172,12 +170,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         AaveV3SubProxy subProxy = new AaveV3SubProxy(repayBundleId, boostBundleId);
 
         AaveV3SubProxy.AaveSubData memory params = user.subToAutomationBundles(
-            _isSafe,
-            address(subProxy),
-            MIN_RATIO,
-            MAX_RATIO,
-            TARGET_RATIO_BOOST,
-            TARGET_RATIO_REPAY
+            _isSafe, address(subProxy), MIN_RATIO, MAX_RATIO, TARGET_RATIO_BOOST, TARGET_RATIO_REPAY
         );
 
         repaySubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount() - 2;
@@ -219,7 +212,7 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     function _testAaveV3RepayStrategy(bool _isSafe) internal {
         _walletSetUpBeforeEachTest(_isSafe);
 
-        uint beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
+        uint256 beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
         uint256 borrowAmountBefore = IERC20(debtAsset.variableDebtTokenAddress).balanceOf(wallet);
 
@@ -229,20 +222,21 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
 
         bytes[] memory _actionsCallData = new bytes[](5);
         _actionsCallData[0] = aaveV3WithdrawEncode(collateralAsset.id, true, REPAY_AMOUNT_WETH, wallet, address(0));
-        _actionsCallData[1] = sellEncode(Addresses.WETH_ADDR, Addresses.DAI_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER);
+        _actionsCallData[1] =
+            sellEncode(Addresses.WETH_ADDR, Addresses.DAI_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER);
         _actionsCallData[2] = gasFeeEncode(REPAY_GAS_COST, Addresses.DAI_ADDR);
-        _actionsCallData[3] = aaveV3PaybackEncode(0, wallet, 2, debtAsset.id,true, false, address(0), address(0));
+        _actionsCallData[3] = aaveV3PaybackEncode(0, wallet, 2, debtAsset.id, true, false, address(0), address(0));
         _actionsCallData[4] = aaveV3RatioCheckEncode(0, 0, AAVE_MARKET, wallet);
 
         executor.executeStrategy(repaySubId, INDEX_REPAY, _triggerCallData, _actionsCallData, repaySub);
 
-        uint afterRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
+        uint256 afterRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
         uint256 borrowAmountAfter = IERC20(debtAsset.variableDebtTokenAddress).balanceOf(wallet);
 
         uint256 txFeeBalanceAfter = IERC20(Addresses.WETH_ADDR).balanceOf(Addresses.FEE_RECEIVER);
 
-        uint amountAfterFee = REPAY_AMOUNT_WETH - (REPAY_AMOUNT_WETH / 400);
+        uint256 amountAfterFee = REPAY_AMOUNT_WETH - (REPAY_AMOUNT_WETH / 400);
 
         assertEq(REPAY_AMOUNT_WETH - amountAfterFee, txFeeBalanceAfter - txFeeBalanceBefore);
         assertGt(borrowAmountBefore, borrowAmountAfter);
@@ -256,17 +250,19 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
 
         bytes[] memory _actionsCallData = new bytes[](6);
         _actionsCallData[0] = flActionEncode(Addresses.WETH_ADDR, REPAY_AMOUNT_WETH, FLSource.BALANCER);
-        _actionsCallData[1] = sellEncode(Addresses.WETH_ADDR, Addresses.DAI_ADDR, REPAY_AMOUNT_WETH, wallet, wallet, Addresses.UNI_V2_WRAPPER);
+        _actionsCallData[1] = sellEncode(
+            Addresses.WETH_ADDR, Addresses.DAI_ADDR, REPAY_AMOUNT_WETH, wallet, wallet, Addresses.UNI_V2_WRAPPER
+        );
         _actionsCallData[2] = gasFeeEncode(REPAY_FL_GAS_COST, Addresses.DAI_ADDR);
-        _actionsCallData[3] = aaveV3PaybackEncode(0, wallet, 2, debtAsset.id,true, false, address(0), address(0));
+        _actionsCallData[3] = aaveV3PaybackEncode(0, wallet, 2, debtAsset.id, true, false, address(0), address(0));
         _actionsCallData[4] = aaveV3WithdrawEncode(collateralAsset.id, true, 0, address(flAction), address(0));
         _actionsCallData[5] = aaveV3RatioCheckEncode(0, 0, AAVE_MARKET, wallet);
 
-        uint beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
+        uint256 beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
         executor.executeStrategy(repaySubId, INDEX_REPAY_FL, _triggerCallData, _actionsCallData, repaySub);
 
-        uint afterRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
+        uint256 afterRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
         assertGt(afterRatio, beforeRatio);
     }
@@ -279,16 +275,18 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
         bytes[] memory _triggerCallData = new bytes[](1);
 
         bytes[] memory _actionsCallData = new bytes[](5);
-        _actionsCallData[0] = aaveV3BorrowEncode(BOOST_AMOUNT_DAI, address(0), 2, debtAsset.id, true, false, address(0), address(0));
-        _actionsCallData[1] = sellEncode(Addresses.DAI_ADDR, Addresses.WETH_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER);
+        _actionsCallData[0] =
+            aaveV3BorrowEncode(BOOST_AMOUNT_DAI, address(0), 2, debtAsset.id, true, false, address(0), address(0));
+        _actionsCallData[1] =
+            sellEncode(Addresses.DAI_ADDR, Addresses.WETH_ADDR, 0, wallet, wallet, Addresses.UNI_V2_WRAPPER);
         _actionsCallData[2] = gasFeeEncode(BOOST_GAS_COST, Addresses.WETH_ADDR);
         _actionsCallData[3] = aaveV3SupplyEncode(0, wallet, collateralAsset.id, true, false, address(0), address(0));
         _actionsCallData[4] = aaveV3RatioCheckEncode(0, 0, AAVE_MARKET, wallet);
 
-        uint beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
+        uint256 beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
         executor.executeStrategy(boostSubId, INDEX_BOOST, _triggerCallData, _actionsCallData, boostSub);
-        uint afterRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
+        uint256 afterRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
         assertGt(beforeRatio, afterRatio);
     }
@@ -302,17 +300,20 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
 
         bytes[] memory _actionsCallData = new bytes[](6);
         _actionsCallData[0] = flActionEncode(Addresses.DAI_ADDR, BOOST_AMOUNT_DAI, FLSource.BALANCER);
-        _actionsCallData[1] = sellEncode(Addresses.DAI_ADDR, Addresses.WETH_ADDR, BOOST_AMOUNT_DAI, wallet, wallet, Addresses.UNI_V2_WRAPPER);
+        _actionsCallData[1] = sellEncode(
+            Addresses.DAI_ADDR, Addresses.WETH_ADDR, BOOST_AMOUNT_DAI, wallet, wallet, Addresses.UNI_V2_WRAPPER
+        );
         _actionsCallData[2] = gasFeeEncode(BOOST_FL_GAS_COST, Addresses.WETH_ADDR);
         _actionsCallData[3] = aaveV3SupplyEncode(0, wallet, collateralAsset.id, true, false, address(0), address(0));
-        _actionsCallData[4] = aaveV3BorrowEncode(0, address(flAction), 2, debtAsset.id, true, false, address(0), address(0));
+        _actionsCallData[4] =
+            aaveV3BorrowEncode(0, address(flAction), 2, debtAsset.id, true, false, address(0), address(0));
         _actionsCallData[5] = aaveV3RatioCheckEncode(0, 0, AAVE_MARKET, wallet);
 
-        uint beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
+        uint256 beforeRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
         executor.executeStrategy(boostSubId, INDEX_BOOST_FL, _triggerCallData, _actionsCallData, boostSub);
 
-        uint afterRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
+        uint256 afterRatio = trigger.getSafetyRatio(AAVE_MARKET, wallet);
 
         assertGt(beforeRatio, afterRatio);
     }
@@ -320,30 +321,40 @@ contract TestAaveV3Automation is BaseTest, RegistryUtils, ActionsUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _formatRepaySub(AaveV3SubProxy.AaveSubData memory _user) public view returns (StrategyModel.StrategySub memory sub) {
+    function _formatRepaySub(AaveV3SubProxy.AaveSubData memory _user)
+        public
+        view
+        returns (StrategyModel.StrategySub memory sub)
+    {
         sub.strategyOrBundleId = repayBundleId;
         sub.isBundle = true;
 
-        bytes memory triggerData = abi.encode(wallet, AAVE_MARKET, uint256(_user.minRatio), uint8(AaveV3SubProxy.RatioState.UNDER));
-        sub.triggerData =  new bytes[](1);
+        bytes memory triggerData =
+            abi.encode(wallet, AAVE_MARKET, uint256(_user.minRatio), uint8(AaveV3SubProxy.RatioState.UNDER));
+        sub.triggerData = new bytes[](1);
         sub.triggerData[0] = triggerData;
 
-        sub.subData =  new bytes32[](4);
+        sub.subData = new bytes32[](4);
         sub.subData[0] = bytes32(uint256(_user.targetRatioRepay)); // targetRatio
         sub.subData[1] = bytes32(uint256(1)); // ratioState = repay
         sub.subData[2] = bytes32(uint256(1)); // useDefaultMarket = true
         sub.subData[3] = bytes32(uint256(0)); // onBehalfOf = false
     }
 
-    function _formatBoostSub(AaveV3SubProxy.AaveSubData memory _user) public view returns (StrategyModel.StrategySub memory sub) {
+    function _formatBoostSub(AaveV3SubProxy.AaveSubData memory _user)
+        public
+        view
+        returns (StrategyModel.StrategySub memory sub)
+    {
         sub.strategyOrBundleId = boostBundleId;
         sub.isBundle = true;
 
-        bytes memory triggerData = abi.encode(wallet, AAVE_MARKET, uint256(_user.maxRatio), uint8(AaveV3SubProxy.RatioState.OVER));
+        bytes memory triggerData =
+            abi.encode(wallet, AAVE_MARKET, uint256(_user.maxRatio), uint8(AaveV3SubProxy.RatioState.OVER));
         sub.triggerData = new bytes[](1);
         sub.triggerData[0] = triggerData;
 
-        sub.subData =  new bytes32[](5);
+        sub.subData = new bytes32[](5);
         sub.subData[0] = bytes32(uint256(_user.targetRatioBoost)); // targetRatio
         sub.subData[1] = bytes32(uint256(0)); // ratioState = boost
         sub.subData[2] = bytes32(uint256(1)); // useDefaultMarket = true

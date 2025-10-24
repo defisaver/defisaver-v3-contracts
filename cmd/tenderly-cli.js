@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable import/no-extraneous-dependencies */
 require('dotenv-safe').config();
 const fs = require('fs');
 const path = require('path');
@@ -53,7 +51,8 @@ const getContractsFromTenderly = async (networkId) => {
 };
 
 const sendContractsToTenderly = async (formattedContractsToSend) => {
-    const url = 'https://api.tenderly.co/api/v2/accounts/defisaver-v2/projects/Strategies/contracts';
+    const url =
+        'https://api.tenderly.co/api/v2/accounts/defisaver-v2/projects/Strategies/contracts';
     const headersParams = {
         'Content-Type': 'application/json',
         'X-Access-Key': process.env.TENDERLY_ACCESS_KEY,
@@ -99,10 +98,11 @@ const sync = async (idOrNameOrAddress, options) => {
     const contracts = readContractsFromJson(network);
 
     const found = contracts.find(
-        (c) => c.name === idOrNameOrAddress
-        || c.address === idOrNameOrAddress
-        || c.id === idOrNameOrAddress
-        || c.history.includes(idOrNameOrAddress),
+        (c) =>
+            c.name === idOrNameOrAddress ||
+            c.address === idOrNameOrAddress ||
+            c.id === idOrNameOrAddress ||
+            c.history.includes(idOrNameOrAddress),
     );
 
     if (!found) {
@@ -156,7 +156,9 @@ const syncAll = async (options) => {
     const contractsFromJson = readContractsFromJson(network);
 
     const contractsToSync = findContractsToSync(
-        contractsFromJson, contractsFromTenderly, networkId,
+        contractsFromJson,
+        contractsFromTenderly,
+        networkId,
     );
 
     if (contractsToSync.length === 0) {

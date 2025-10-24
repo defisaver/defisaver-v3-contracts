@@ -5,7 +5,6 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
-import { ISubscriptions } from "../../interfaces/ISubscriptions.sol";
 import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
@@ -13,18 +12,21 @@ import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies for Maker
 contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHelper, CheckWalletType {
-    uint64 public immutable REPAY_BUNDLE_ID; 
-    uint64 public immutable BOOST_BUNDLE_ID; 
+    uint64 public immutable REPAY_BUNDLE_ID;
+    uint64 public immutable BOOST_BUNDLE_ID;
 
     constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
         REPAY_BUNDLE_ID = _repayBundleId;
         BOOST_BUNDLE_ID = _boostBundleId;
     }
 
-    enum RatioState { OVER, UNDER }
+    enum RatioState {
+        OVER,
+        UNDER
+    }
 
     /// @dev 2% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 20000000000000000;
+    uint256 internal constant RATIO_OFFSET = 20_000_000_000_000_000;
 
     error WrongSubParams(uint256 minRatio, uint256 maxRatio);
     error RangeTooClose(uint256 ratio, uint256 targetRatio);
@@ -46,8 +48,10 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
     function subToMcdAutomation(
         McdSubData calldata _subData,
         bool // _shouldLegacyUnsub no longer needed, kept to keep the function sig the same
-    ) public {
-         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
+    )
+        public
+    {
+        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission(isDSProxy(address(this)));
 
         StrategySub memory repaySub = formatRepaySub(_subData);
@@ -64,11 +68,7 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
     /// @notice Calls SubStorage to update the users subscription data
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId send as 0
-    function updateSubData(
-        uint32 _subId1,
-        uint32 _subId2,
-        McdSubData calldata _subData
-    ) public {
+    function updateSubData(uint32 _subId1, uint32 _subId2, McdSubData calldata _subData) public {
         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission(isDSProxy(address(this)));
         // update repay as we must have a subId, it's ok if it's the same data
@@ -96,10 +96,7 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
     }
 
     /// @notice Activates Repay sub and if exists a Boost sub
-    function activateSub(
-        uint32 _subId1,
-        uint32 _subId2
-    ) public {
+    function activateSub(uint32 _subId1, uint32 _subId2) public {
         /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
         giveWalletPermission(isDSProxy(address(this)));
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
@@ -110,17 +107,13 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
     }
 
     /// @notice Deactivates Repay sub and if exists a Boost sub
-    function deactivateSub(
-        uint32 _subId1,
-        uint32 _subId2
-    ) public {
+    function deactivateSub(uint32 _subId1, uint32 _subId2) public {
         SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId1);
 
         if (_subId2 != 0) {
             SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId2);
         }
     }
-
 
     ///////////////////////////////// HELPER FUNCTIONS /////////////////////////////////
 
@@ -145,10 +138,10 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
 
         // format data for ratio trigger if currRatio < minRatio = true
         bytes memory triggerData = abi.encode(_user.vaultId, uint256(_user.minRatio), uint8(RatioState.UNDER));
-        repaySub.triggerData =  new bytes[](1);
+        repaySub.triggerData = new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
-        repaySub.subData =  new bytes32[](3);
+        repaySub.subData = new bytes32[](3);
         repaySub.subData[0] = bytes32(_user.vaultId);
         repaySub.subData[1] = bytes32(uint256(_user.targetRatioRepay));
         repaySub.subData[2] = bytes32(uint256(uint160(DAI_ADDR)));
@@ -161,10 +154,10 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
 
         // format data for ratio trigger if currRatio > maxRatio = true
         bytes memory triggerData = abi.encode(_user.vaultId, uint256(_user.maxRatio), uint8(RatioState.OVER));
-        boostSub.triggerData =  new bytes[](1);
+        boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
-        boostSub.subData =  new bytes32[](3);
+        boostSub.subData = new bytes32[](3);
         boostSub.subData[0] = bytes32(uint256(_user.vaultId));
         boostSub.subData[1] = bytes32(uint256(_user.targetRatioBoost));
         boostSub.subData[2] = bytes32(uint256(uint160(DAI_ADDR)));

@@ -78,15 +78,15 @@ contract CompV3Supply is ActionBase, CompV3Helper {
         _params.tokenAddr.approveToken(_params.market, _params.amount);
 
         // if the user has baseToken debt, use payback
-        if(_params.tokenAddr == IComet(_params.market).baseToken()) {
+        if (_params.tokenAddr == IComet(_params.market).baseToken()) {
             uint256 debt = IComet(_params.market).borrowBalanceOf(_params.onBehalf);
-            if(debt > 0) {
+            if (debt > 0) {
                 revert CompV3SupplyWithDebtError();
             }
         }
-        
+
         IComet(_params.market).supplyTo(_params.onBehalf, _params.tokenAddr, _params.amount);
-        
+
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);
     }

@@ -2,19 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT2 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT2.sol";
-import { IFluidVaultT4 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT4.sol";
 import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidView } from "../../../../contracts/views/FluidView.sol";
 import { FluidDexSupply } from "../../../../contracts/actions/fluid/dex/FluidDexSupply.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
 contract TestFluidDexSupply is FluidTestBase {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -48,23 +44,19 @@ contract TestFluidDexSupply is FluidTestBase {
         uint256 collAmount0;
         uint256 collAmount1;
         bytes executeActionCallData;
-
         uint256 senderCollToken0BalanceBefore;
         uint256 senderCollToken1BalanceBefore;
         uint256 senderCollToken0BalanceAfter;
         uint256 senderCollToken1BalanceAfter;
-
         uint256 walletCollToken0BalanceBefore;
         uint256 walletCollToken1BalanceBefore;
         uint256 walletEthBalanceBefore;
         uint256 walletCollToken0BalanceAfter;
         uint256 walletCollToken1BalanceAfter;
         uint256 walletEthBalanceAfter;
-
         FluidView.VaultData vaultData;
         IFluidVaultResolver.UserPosition userPositionBefore;
         IFluidVaultResolver.UserPosition userPositionAfter;
-
         FluidDexModel.SupplyVariableData shareVariableData;
         uint256 shares;
     }
@@ -99,7 +91,7 @@ contract TestFluidDexSupply is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    collAmount0InUSD: 30000,
+                    collAmount0InUSD: 30_000,
                     collAmount1InUSD: 0,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: false,
@@ -115,7 +107,7 @@ contract TestFluidDexSupply is FluidTestBase {
             _baseTest(
                 TestConfig({
                     collAmount0InUSD: 0,
-                    collAmount1InUSD: 30000,
+                    collAmount1InUSD: 30_000,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: false,
                     isDirect: false
@@ -129,8 +121,8 @@ contract TestFluidDexSupply is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    collAmount0InUSD: 30000,
-                    collAmount1InUSD: 20000,
+                    collAmount0InUSD: 30_000,
+                    collAmount1InUSD: 20_000,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: false,
                     isDirect: false
@@ -144,7 +136,7 @@ contract TestFluidDexSupply is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    collAmount0InUSD: 11000,
+                    collAmount0InUSD: 11_000,
                     collAmount1InUSD: 5000,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: false,
@@ -159,7 +151,7 @@ contract TestFluidDexSupply is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    collAmount0InUSD: 30000,
+                    collAmount0InUSD: 30_000,
                     collAmount1InUSD: 0,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: false,
@@ -174,7 +166,7 @@ contract TestFluidDexSupply is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    collAmount0InUSD: 30000,
+                    collAmount0InUSD: 30_000,
                     collAmount1InUSD: 0,
                     takeMaxUint256CollAmount0: true,
                     takeMaxUint256CollAmount1: false,
@@ -189,8 +181,8 @@ contract TestFluidDexSupply is FluidTestBase {
         for (uint256 i = 0; i < t2VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    collAmount0InUSD: 30000,
-                    collAmount1InUSD: 25000,
+                    collAmount0InUSD: 30_000,
+                    collAmount1InUSD: 25_000,
                     takeMaxUint256CollAmount0: false,
                     takeMaxUint256CollAmount1: true,
                     isDirect: false
@@ -200,27 +192,23 @@ contract TestFluidDexSupply is FluidTestBase {
         }
     }
 
-    function _baseTest(
-        TestConfig memory _config,
-        bool _t2VaultsSelected
-    ) internal {
+    function _baseTest(TestConfig memory _config, bool _t2VaultsSelected) internal {
         address[] memory vaults = _t2VaultsSelected ? t2Vaults : t4Vaults;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
-
-            uint256 nftId = _t2VaultsSelected ? 
-                executeFluidVaultT2Open(
+            uint256 nftId = _t2VaultsSelected
+                ? executeFluidVaultT2Open(
                     vaults[i],
-                    20000, /* initial coll amount 0 in usd */
-                    10000, /* initial coll amount 1 in usd */
+                    20_000, /* initial coll amount 0 in usd */
+                    10_000, /* initial coll amount 1 in usd */
                     0, /* initial borrow amount in usd */
                     wallet,
                     address(fluidDexOpen)
-                ) : 
-                executeFluidVaultT4Open(
+                )
+                : executeFluidVaultT4Open(
                     vaults[i],
-                    20000, /* initial coll amount 0 in usd */
-                    10000, /* initial coll amount 1 in usd */
+                    20_000, /* initial coll amount 0 in usd */
+                    10_000, /* initial coll amount 1 in usd */
                     0, /* initial borrow amount 0 in usd */
                     0, /* initial borrow amount 1 in usd */
                     wallet,
@@ -235,13 +223,11 @@ contract TestFluidDexSupply is FluidTestBase {
             FluidView.VaultData memory vaultData = fluidView.getVaultData(address(vaults[i]));
             LocalVars memory vars;
 
-            (vaultData.supplyToken0, vars.collAmount0) = giveAndApproveToken(
-                vaultData.supplyToken0, sender, walletAddr, _config.collAmount0InUSD
-            );
+            (vaultData.supplyToken0, vars.collAmount0) =
+                giveAndApproveToken(vaultData.supplyToken0, sender, walletAddr, _config.collAmount0InUSD);
 
-            (vaultData.supplyToken1, vars.collAmount1) = giveAndApproveToken(
-                vaultData.supplyToken1, sender, walletAddr, _config.collAmount1InUSD
-            );
+            (vaultData.supplyToken1, vars.collAmount1) =
+                giveAndApproveToken(vaultData.supplyToken1, sender, walletAddr, _config.collAmount1InUSD);
 
             vars.shares = estimateDepositShares(vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1);
 
@@ -278,7 +264,7 @@ contract TestFluidDexSupply is FluidTestBase {
 
             // Execute action.
             wallet.execute(address(cut), vars.executeActionCallData, 0);
-            
+
             // Take snapshot after action execution.
             vars.senderCollToken0BalanceAfter = balanceOf(vaultData.supplyToken0, sender);
             vars.senderCollToken1BalanceAfter = balanceOf(vaultData.supplyToken1, sender);
@@ -286,7 +272,7 @@ contract TestFluidDexSupply is FluidTestBase {
             vars.walletCollToken1BalanceAfter = balanceOf(vaultData.supplyToken1, walletAddr);
             vars.walletEthBalanceAfter = address(walletAddr).balance;
             vars.userPositionAfter = fetchPositionByNftId(nftId);
-            
+
             // Assertions.
             // Verify no dust left on wallet.
             assertEq(vars.walletCollToken0BalanceAfter, vars.walletCollToken0BalanceBefore);
@@ -294,7 +280,7 @@ contract TestFluidDexSupply is FluidTestBase {
             assertEq(vars.walletEthBalanceAfter, vars.walletEthBalanceBefore);
 
             assertEq(vars.senderCollToken0BalanceAfter, vars.senderCollToken0BalanceBefore - vars.collAmount0);
-            assertEq(vars.senderCollToken1BalanceAfter, vars.senderCollToken1BalanceBefore - vars.collAmount1);    
+            assertEq(vars.senderCollToken1BalanceAfter, vars.senderCollToken1BalanceBefore - vars.collAmount1);
 
             assertEq(vars.userPositionAfter.owner, walletAddr);
             assertEq(vars.userPositionAfter.isLiquidated, false);

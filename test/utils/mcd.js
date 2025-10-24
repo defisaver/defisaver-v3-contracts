@@ -10,9 +10,7 @@ const CROPPER_ADDR = '0x8377CD01a5834a6EaD3b7efb482f678f2092b77e';
 const LDO_ADDR = '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32';
 
 // TODO: fetch from sdk later
-const cropJoinIlks = [
-    '0x435256563145544853544554482d410000000000000000000000000000000000',
-];
+const cropJoinIlks = ['0x435256563145544853544554482d410000000000000000000000000000000000'];
 
 const cropData = {
     ilk: '0x435256563145544853544554482d410000000000000000000000000000000000',
@@ -21,14 +19,16 @@ const cropData = {
 };
 
 const canGenerateDebt = async (ilkInfo) => {
-    const vat = await
-    hre.ethers.getContractAt('IVat', '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B');
+    const vat = await hre.ethers.getContractAt(
+        'IVat',
+        '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
+    );
 
     const ilkData = await vat.ilks(ilkInfo.ilkBytes);
     const debtCeiling = Math.round(ilkData.line / 1e45);
     const debt = (ilkData.Art / 1e18) * (ilkData.rate / 1e27);
 
-    return debtCeiling > (debt + 40_0000);
+    return debtCeiling > debt + 40_0000;
 };
 
 const fetchMakerAddresses = async (version = makerVersion, params = {}) => {
@@ -40,8 +40,7 @@ const fetchMakerAddresses = async (version = makerVersion, params = {}) => {
 };
 
 const getVaultsForUser = async (user) => {
-    const GetCdps = await
-    hre.ethers.getContractAt('IGetCdps', GET_CDPS_ADDR);
+    const GetCdps = await hre.ethers.getContractAt('IGetCdps', GET_CDPS_ADDR);
 
     const vaults = await GetCdps.getCdpsAsc(MCD_MANAGER_ADDR, user);
 
@@ -116,15 +115,22 @@ const castSpell = async (spellAddr) => {
     // cast spell
     await dssSpell.cast({ gasLimit: 3_000_000 });
 
-    const pip = await hre.ethers.getContractAt('IPipInterface', '0x70098F537EE8D0E00882585b7B02C45cd6AB3186');
+    const pip = await hre.ethers.getContractAt(
+        'IPipInterface',
+        '0x70098F537EE8D0E00882585b7B02C45cd6AB3186',
+    );
 
-    const HOUR_IN_MILISECONDS = (60 * 60 * 1000);
+    const HOUR_IN_MILISECONDS = 60 * 60 * 1000;
     await pip.poke({ gasLimit: 3_000_000 });
-    await hre.network.provider.send('evm_setNextBlockTimestamp', [parseFloat(castTime.toString()) + HOUR_IN_MILISECONDS]);
+    await hre.network.provider.send('evm_setNextBlockTimestamp', [
+        parseFloat(castTime.toString()) + HOUR_IN_MILISECONDS,
+    ]);
 
     await pip.poke({ gasLimit: 3_000_000 });
 
-    await hre.network.provider.send('evm_setNextBlockTimestamp', [parseFloat(castTime.toString()) + HOUR_IN_MILISECONDS * 2]);
+    await hre.network.provider.send('evm_setNextBlockTimestamp', [
+        parseFloat(castTime.toString()) + HOUR_IN_MILISECONDS * 2,
+    ]);
 
     await pip.poke({ gasLimit: 3_000_000 });
 };

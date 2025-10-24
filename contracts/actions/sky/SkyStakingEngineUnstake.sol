@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import {ActionBase} from "../ActionBase.sol";
-import {ILockstakeEngine} from "../../interfaces/sky/ILockstakeEngine.sol";
+import { ActionBase } from "../ActionBase.sol";
+import { ILockstakeEngine } from "../../interfaces/sky/ILockstakeEngine.sol";
 
 /// @title Unstake SKY tokens from previously staked position
 contract SkyStakingEngineUnstake is ActionBase {
@@ -53,9 +53,8 @@ contract SkyStakingEngineUnstake is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _skyUnstakeFromStakingEngine(Params memory _inputData) internal returns (uint256, bytes memory logData) {
-        uint256 freed = ILockstakeEngine(_inputData.stakingContract).free(
-            address(this), _inputData.index, _inputData.to, _inputData.amount
-        );
+        uint256 freed = ILockstakeEngine(_inputData.stakingContract)
+            .free(address(this), _inputData.index, _inputData.to, _inputData.amount);
         return (freed, abi.encode(_inputData));
     }
 

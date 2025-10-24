@@ -29,7 +29,6 @@ async function checkPriceFeedAddresses() {
         const registry = registryData.find((e) => e.name === 'PriceFeedRegistry');
         if (!registry) {
             console.warn(`No PriceFeedRegistry found for ${l2}`);
-            // eslint-disable-next-line no-continue
             continue;
         }
 
@@ -40,12 +39,10 @@ async function checkPriceFeedAddresses() {
         for (let j = 0; j < priceFeeds.length; j++) {
             const { name, base, quote, feedAddress } = priceFeeds[j];
 
-            // eslint-disable-next-line no-await-in-loop
             const onChainFeed = await contract.getFeed(base, quote);
             const feed = new ethers.Contract(onChainFeed, AggregatorABI, provider);
 
             try {
-                // eslint-disable-next-line no-await-in-loop
                 const latestData = await feed.latestRoundData();
                 const currTimestamp = Math.floor(Date.now() / 1000);
                 const lastUpdatedTimestamp = latestData.updatedAt;

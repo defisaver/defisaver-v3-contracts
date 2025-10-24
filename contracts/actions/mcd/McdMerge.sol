@@ -8,7 +8,6 @@ import { McdHelper } from "./helpers/McdHelper.sol";
 
 /// @title Merge two vaults that are of the same type, first into second
 contract McdMerge is ActionBase, McdHelper {
-
     /// @param srcVaultId Id of the source vault
     /// @param destVaultId Id of the destination vault
     /// @param mcdManager Manager address
@@ -54,11 +53,10 @@ contract McdMerge is ActionBase, McdHelper {
     /// @param _srcVaultId Vault we are merging
     /// @param _destVaultId Destination vault
     /// @param _mcdManager Mcd manager
-    function _mcdMerge(
-        uint256 _srcVaultId,
-        uint256 _destVaultId,
-        address _mcdManager
-    ) internal returns (bytes memory logData) {
+    function _mcdMerge(uint256 _srcVaultId, uint256 _destVaultId, address _mcdManager)
+        internal
+        returns (bytes memory logData)
+    {
         IManager(_mcdManager).shift(_srcVaultId, _destVaultId);
         logData = abi.encode(_srcVaultId, _destVaultId, _mcdManager);
     }

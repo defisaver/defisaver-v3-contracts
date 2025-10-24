@@ -13,8 +13,8 @@ import { SafeERC20 } from "../../utils/SafeERC20.sol";
 import { IERC20 } from "../../interfaces/IERC20.sol";
 
 contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExchangeHelper {
-
     error WrongDestAmountError(uint256, uint256);
+
     using SafeERC20 for IERC20;
 
     /// @notice Sells a _srcAmount of tokens at Kyber
@@ -22,7 +22,11 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExc
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return uint Destination amount
-    function sell(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory) external override returns (uint) {
+    function sell(address _srcAddr, address _destAddr, uint256 _srcAmount, bytes memory)
+        external
+        override
+        returns (uint256)
+    {
         IERC20 srcToken = IERC20(_srcAddr);
         IERC20 destToken = IERC20(_destAddr);
 
@@ -32,13 +36,14 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExc
 
         /// @dev the amount of tokens received is checked in DFSExchangeCore
         /// @dev Exchange wrapper contracts should not be used on their own
-        uint destAmount = kyberNetworkProxy.trade(
+        uint256 destAmount = kyberNetworkProxy.trade(
             srcToken,
             _srcAmount,
             destToken,
             msg.sender,
-            type(uint).max,
-            0, /// @dev DFSExchangeCore contains slippage check instead of writing it here
+            type(uint256).max,
+            0,
+            /// @dev DFSExchangeCore contains slippage check instead of writing it here
             WALLET_ID
         );
 
@@ -53,8 +58,13 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExc
     /// @param _destAddr To token
     /// @param _srcAmount From amount
     /// @return rate Rate
-    function getSellRate(address _srcAddr, address _destAddr, uint _srcAmount, bytes memory) public override view returns (uint rate) {
-        (rate, ) = KyberNetworkProxyInterface(KYBER_INTERFACE)
+    function getSellRate(address _srcAddr, address _destAddr, uint256 _srcAmount, bytes memory)
+        public
+        view
+        override
+        returns (uint256 rate)
+    {
+        (rate,) = KyberNetworkProxyInterface(KYBER_INTERFACE)
             .getExpectedRate(IERC20(_srcAddr), IERC20(_destAddr), _srcAmount);
 
         // multiply with decimal difference in src token
@@ -64,7 +74,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExc
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() payable external {}
+    receive() external payable { }
 
     function getDecimals(address _token) internal view returns (uint256) {
         if (_token == TokenUtils.ETH_ADDR) return 18;

@@ -1,14 +1,9 @@
-/* eslint-disable max-len */
 const { expect } = require('chai');
 const hre = require('hardhat');
 
 const { getAssetInfo } = require('@defisaver/tokens');
 
-const {
-    sparkSupply,
-    sparkBorrow,
-    sparkPayback,
-} = require('../../utils/actions');
+const { sparkSupply, sparkBorrow, sparkPayback } = require('../../utils/actions');
 const { VARIABLE_RATE } = require('../../utils/aave');
 
 const {
@@ -49,7 +44,6 @@ const sparkApyAfterValuesTest = async () => {
                 const collAsset = getAssetInfo(collateralTokens[i]);
                 const debtAsset = getAssetInfo(debtTokens[j]);
                 if (collAsset.symbol === debtAsset.symbol) {
-                    // eslint-disable-next-line no-continue
                     continue;
                 }
                 it(`... should estimate supply and borrow rates for [coll: ${collAsset.symbol}, debt: ${debtAsset.symbol}]`, async () => {
@@ -64,7 +58,6 @@ const sparkApyAfterValuesTest = async () => {
 
                     if (!collTokenInfoFull.usageAsCollateralEnabled) {
                         console.log('Collateral asset cant be used as collateral. Skipping test');
-                        // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }

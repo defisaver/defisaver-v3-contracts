@@ -8,10 +8,8 @@ import { MockChainlinkAggregator } from "../../contracts/mocks/MockChainlinkAggr
 import { TrailingStopTrigger } from "../../contracts/triggers/TrailingStopTrigger.sol";
 import { DSMath } from "../../contracts/DS/DSMath.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
-import { console } from "forge-std/console.sol";
 
 contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -72,7 +70,7 @@ contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
     }
 
     function testExactPercentageDiffWithFixedWbtcPrices() public view {
-        uint256 currPrice = 21999_978 * 10 ** 5; // 21,999.978
+        uint256 currPrice = 21_999_978 * 10 ** 5; // 21,999.978
         uint256 maxPrice = 22_022 * 10 ** 8; // 21,999.978
         uint256 percentage = 1 * 10 ** 7; // 0.1%
 
@@ -117,26 +115,19 @@ contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
     function testIsTriggeredToPass() public {
         uint80 startRoundId = 1;
         uint80 maxRoundId = 2;
-        uint256 percentage = 10 * 10**8;
+        uint256 percentage = 10 * 10 ** 8;
         bytes memory callData = abi.encode(maxRoundId);
         bytes memory subData = abi.encode(ETH_ADDR, percentage, startRoundId);
 
-        MockChainlinkAggregator.MockRoundData[]
-            memory mockRounds = new MockChainlinkAggregator.MockRoundData[](3);
+        MockChainlinkAggregator.MockRoundData[] memory mockRounds = new MockChainlinkAggregator.MockRoundData[](3);
         mockRounds[0] = MockChainlinkAggregator.MockRoundData({
-            roundId: startRoundId,
-            answer: 10_000,
-            updatedAt: block.timestamp
+            roundId: startRoundId, answer: 10_000, updatedAt: block.timestamp
         });
         mockRounds[1] = MockChainlinkAggregator.MockRoundData({
-            roundId: maxRoundId,
-            answer: 15_000,
-            updatedAt: block.timestamp + 60*60
+            roundId: maxRoundId, answer: 15_000, updatedAt: block.timestamp + 60 * 60
         });
         mockRounds[2] = MockChainlinkAggregator.MockRoundData({
-            roundId: maxRoundId + 1,
-            answer: 12_000,
-            updatedAt: block.timestamp + 60*60*2
+            roundId: maxRoundId + 1, answer: 12_000, updatedAt: block.timestamp + 60 * 60 * 2
         });
         mockAggregator.setMockRounds(mockRounds);
 
@@ -148,25 +139,18 @@ contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
     function testIsTriggeredTimestampInPast() public {
         uint80 startRoundId = 1;
         uint80 maxRoundId = 2;
-        uint256 percentage = 10 * 10**8;
+        uint256 percentage = 10 * 10 ** 8;
         bytes memory callData = abi.encode(maxRoundId);
 
-        MockChainlinkAggregator.MockRoundData[]
-            memory mockRounds = new MockChainlinkAggregator.MockRoundData[](3);
+        MockChainlinkAggregator.MockRoundData[] memory mockRounds = new MockChainlinkAggregator.MockRoundData[](3);
         mockRounds[0] = MockChainlinkAggregator.MockRoundData({
-            roundId: startRoundId,
-            answer: 10_000,
-            updatedAt: block.timestamp
+            roundId: startRoundId, answer: 10_000, updatedAt: block.timestamp
         });
         mockRounds[1] = MockChainlinkAggregator.MockRoundData({
-            roundId: maxRoundId,
-            answer: 15_000,
-            updatedAt: block.timestamp + 60*60
+            roundId: maxRoundId, answer: 15_000, updatedAt: block.timestamp + 60 * 60
         });
         mockRounds[2] = MockChainlinkAggregator.MockRoundData({
-            roundId: maxRoundId + 1,
-            answer: 12_000,
-            updatedAt: block.timestamp + 60*60*2
+            roundId: maxRoundId + 1, answer: 12_000, updatedAt: block.timestamp + 60 * 60 * 2
         });
         mockAggregator.setMockRounds(mockRounds);
 
@@ -181,13 +165,9 @@ contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
     function setRound(uint80 _roundId, int256 _answer, uint256 _updatedAt) public {
-        MockChainlinkAggregator.MockRoundData[]
-            memory mockRounds = new MockChainlinkAggregator.MockRoundData[](1);
-        mockRounds[0] = MockChainlinkAggregator.MockRoundData({
-            roundId: _roundId,
-            answer: _answer,
-            updatedAt: _updatedAt
-        });
+        MockChainlinkAggregator.MockRoundData[] memory mockRounds = new MockChainlinkAggregator.MockRoundData[](1);
+        mockRounds[0] =
+            MockChainlinkAggregator.MockRoundData({ roundId: _roundId, answer: _answer, updatedAt: _updatedAt });
         mockAggregator.setMockRounds(mockRounds);
     }
 }

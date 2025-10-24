@@ -56,11 +56,7 @@ contract DyDxWithdraw is ActionBase, DyDxHelper {
     /// @param _tokenAddr The address of the token to be withdrawn
     /// @param _amount Amount of tokens to be withdrawn -> send type(uint).max for whole amount
     /// @param _to Where the withdrawn tokens will be sent
-    function _withdraw(
-        address _tokenAddr,
-        uint256 _amount,
-        address _to
-    ) internal returns (uint256, bytes memory) {
+    function _withdraw(address _tokenAddr, uint256 _amount, address _to) internal returns (uint256, bytes memory) {
         uint256 marketId = getMarketIdFromTokenAddress(_tokenAddr);
 
         // take max balance of the user
@@ -72,13 +68,9 @@ contract DyDxWithdraw is ActionBase, DyDxHelper {
         accounts[0] = getAccount(address(this), 0);
 
         Actions.ActionArgs[] memory actions = new Actions.ActionArgs[](1);
-        Types.AssetAmount memory amount =
-            Types.AssetAmount({
-                sign: false,
-                denomination: Types.AssetDenomination.Wei,
-                ref: Types.AssetReference.Delta,
-                value: _amount
-            });
+        Types.AssetAmount memory amount = Types.AssetAmount({
+            sign: false, denomination: Types.AssetDenomination.Wei, ref: Types.AssetReference.Delta, value: _amount
+        });
 
         actions[0] = Actions.ActionArgs({
             actionType: Actions.ActionType.Withdraw,

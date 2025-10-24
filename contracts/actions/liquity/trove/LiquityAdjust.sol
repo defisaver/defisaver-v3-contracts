@@ -10,8 +10,14 @@ import { ActionBase } from "../../ActionBase.sol";
 contract LiquityAdjust is ActionBase, LiquityHelper {
     using TokenUtils for address;
 
-    enum CollChange { SUPPLY, WITHDRAW }
-    enum DebtChange { PAYBACK, BORROW }
+    enum CollChange {
+        SUPPLY,
+        WITHDRAW
+    }
+    enum DebtChange {
+        PAYBACK,
+        BORROW
+    }
 
     /// @param maxFeePercentage Highest borrowing fee to accept, ranges between 0.5 and 5%
     /// @param collAmount Amount of ETH to supply/withdraw
@@ -23,13 +29,13 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
     /// @param upperHint Upper hint for finding a Trove in linked list
     /// @param lowerHint Lower hint for finding a Trove in linked list
     struct Params {
-        uint256 maxFeePercentage;   
-        uint256 collAmount;         
-        uint256 lusdAmount;         
+        uint256 maxFeePercentage;
+        uint256 collAmount;
+        uint256 lusdAmount;
         CollChange collChange;
-        DebtChange debtChange;       
-        address from;               
-        address to;          
+        DebtChange debtChange;
+        address from;
+        address to;
         address upperHint;
         address lowerHint;
     }
@@ -43,30 +49,12 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.collAmount = _parseParamUint(
-            params.collAmount,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
-        params.lusdAmount = _parseParamUint(
-            params.lusdAmount,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
-        params.collChange = CollChange(_parseParamUint(
-            uint8(params.collChange),
-            _paramMapping[2],
-            _subData,
-            _returnValues
-        ));
-        params.debtChange = DebtChange(_parseParamUint(
-            uint8(params.debtChange),
-            _paramMapping[3],
-            _subData,
-            _returnValues
-        ));
+        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[0], _subData, _returnValues);
+        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[1], _subData, _returnValues);
+        params.collChange =
+            CollChange(_parseParamUint(uint8(params.collChange), _paramMapping[2], _subData, _returnValues));
+        params.debtChange =
+            DebtChange(_parseParamUint(uint8(params.debtChange), _paramMapping[3], _subData, _returnValues));
         params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[5], _subData, _returnValues);
 
@@ -90,7 +78,7 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _liquityAdjust(Params memory _params) internal returns (uint256, bytes memory) {
-        uint supplyAmount = 0;
+        uint256 supplyAmount = 0;
 
         if (_params.collChange == CollChange.SUPPLY) {
             // max.uint handled in pull tokens
@@ -116,7 +104,9 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
             LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
         }
 
-        BorrowerOperations.adjustTrove{value: supplyAmount}(
+        BorrowerOperations.adjustTrove{
+            value: supplyAmount
+        }(
             _params.maxFeePercentage,
             _params.collAmount,
             _params.lusdAmount,

@@ -37,7 +37,8 @@ contract AaveWithdraw is ActionBase, AaveHelper {
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
 
-        (uint256 withdrawnAmount, bytes memory logData) = _withdraw(params.market, params.tokenAddr, params.amount, params.to);
+        (uint256 withdrawnAmount, bytes memory logData) =
+            _withdraw(params.market, params.tokenAddr, params.amount, params.to);
         emit ActionEvent("AaveWithdraw", logData);
         return bytes32(withdrawnAmount);
     }
@@ -61,12 +62,10 @@ contract AaveWithdraw is ActionBase, AaveHelper {
     /// @param _tokenAddr The address of the token to be withdrawn
     /// @param _amount Amount of tokens to be withdrawn -> send type(uint).max for whole amount
     /// @param _to Where the withdrawn tokens will be sent
-    function _withdraw(
-        address _market,
-        address _tokenAddr,
-        uint256 _amount,
-        address _to
-    ) internal returns (uint256, bytes memory) {
+    function _withdraw(address _market, address _tokenAddr, uint256 _amount, address _to)
+        internal
+        returns (uint256, bytes memory)
+    {
         ILendingPoolV2 lendingPool = getLendingPool(_market);
         uint256 tokenBefore;
         uint256 amountToWithdraw = _amount;

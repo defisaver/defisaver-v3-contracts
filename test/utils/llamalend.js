@@ -56,19 +56,22 @@ const supplyToMarket = async (controllerAddr, chainId) => {
     const loanToken = getAssetInfoByAddress(loanTokenAddress, chainId);
     const supplyAmount = fetchAmountinUSDPrice(loanToken.symbol, loanTokenSupplyAmountInUsd);
     const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, loanToken.decimals);
-    await setBalance(
-        loanToken.address,
-        wallet.address,
-        supplyAmountInWei,
-    );
+    await setBalance(loanToken.address, wallet.address, supplyAmountInWei);
     await approve(loanToken.address, vaultAddr, wallet);
-    const vaultContract = await hre.ethers.getContractAt('contracts/interfaces/IERC4626.sol:IERC4626', vaultAddr);
+    const vaultContract = await hre.ethers.getContractAt(
+        'contracts/interfaces/IERC4626.sol:IERC4626',
+        vaultAddr,
+    );
     await vaultContract.deposit(supplyAmountInWei, wallet.address, { gasLimit: 3000000 });
 };
 
 const getActiveBand = async (controllerAddress) => {
-    const llammaAddress = await hre.ethers.getContractAt('ILlamaLendController', controllerAddress).then((c) => c.amm());
-    const activeBand = await hre.ethers.getContractAt('contracts/interfaces/llamalend/ILLAMA.sol:ILLAMMA', llammaAddress).then((c) => c.active_band_with_skip());
+    const llammaAddress = await hre.ethers
+        .getContractAt('ILlamaLendController', controllerAddress)
+        .then((c) => c.amm());
+    const activeBand = await hre.ethers
+        .getContractAt('contracts/interfaces/llamalend/ILLAMA.sol:ILLAMMA', llammaAddress)
+        .then((c) => c.active_band_with_skip());
 
     return activeBand;
 };

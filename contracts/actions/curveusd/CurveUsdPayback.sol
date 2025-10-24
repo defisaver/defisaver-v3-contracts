@@ -43,7 +43,8 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
         params.onBehalfOf = _parseParamAddr(params.onBehalfOf, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
         params.paybackAmount = _parseParamUint(params.paybackAmount, _paramMapping[4], _subData, _returnValues);
-        params.maxActiveBand = int256(_parseParamUint(uint256(params.maxActiveBand), _paramMapping[5], _subData, _returnValues));
+        params.maxActiveBand =
+            int256(_parseParamUint(uint256(params.maxActiveBand), _paramMapping[5], _subData, _returnValues));
 
         (uint256 paybackAmount, bytes memory logData) = _curveUsdPayback(params);
         emit ActionEvent("CurveUsdPayback", logData);
@@ -68,7 +69,7 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
     function _curveUsdPayback(Params memory _params) internal returns (uint256, bytes memory) {
         /// @dev see ICrvUsdController natspec
         if (_params.paybackAmount == 0) revert ZeroAmountPayback();
-        
+
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
         if (_params.onBehalfOf == address(0)) _params.onBehalfOf = address(this);
@@ -77,7 +78,7 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
         /// @dev this also closes the position
         bool isClose;
         uint256 debt = ICrvUsdController(_params.controllerAddress).debt(_params.onBehalfOf);
-        
+
         if (_params.paybackAmount >= debt) {
             _params.paybackAmount = debt;
             isClose = true;
@@ -88,7 +89,6 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
 
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
 
-
         uint256 startingBaseCollBalance;
         uint256 startingCrvUsdBalanceWithoutDebt;
         if (isClose) {
@@ -96,8 +96,9 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
             startingCrvUsdBalanceWithoutDebt = CRVUSD_TOKEN_ADDR.getBalance(address(this)) - debt;
         }
 
-        ICrvUsdController(_params.controllerAddress).repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false);
-        
+        ICrvUsdController(_params.controllerAddress)
+            .repay(_params.paybackAmount, _params.onBehalfOf, _params.maxActiveBand, false);
+
         uint256 baseReceivedFromColl;
         uint256 crvUsdReceivedFromColl;
         if (isClose) {
@@ -108,10 +109,7 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
             CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, crvUsdReceivedFromColl);
         }
 
-        return (
-            _params.paybackAmount,
-            abi.encode(_params, baseReceivedFromColl, crvUsdReceivedFromColl)
-        );
+        return (_params.paybackAmount, abi.encode(_params, baseReceivedFromColl, crvUsdReceivedFromColl));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

@@ -8,7 +8,7 @@ import { UtilHelper } from "./helpers/UtilHelper.sol";
 
 contract TxSaverGasCostCalc is DSMath, UtilHelper {
     using TokenUtils for address;
-    
+
     // only support token with decimals <= 18
     error TokenDecimalsTooHigh(uint256 decimals);
     // when injecting price, price must be greater than 0
@@ -26,7 +26,7 @@ contract TxSaverGasCostCalc is DSMath, UtilHelper {
         }
 
         // calc gas used
-        txCost = (_gasUsed * tx.gasprice) + _l1GasCostInEth;    
+        txCost = (_gasUsed * tx.gasprice) + _l1GasCostInEth;
 
         // convert to token amount
         if (_feeToken != TokenUtils.WETH_ADDR) {
@@ -36,7 +36,7 @@ contract TxSaverGasCostCalc is DSMath, UtilHelper {
 
             if (_tokenPriceInEth == 0) revert ZeroTokenPriceInEthError();
 
-            txCost = wdiv(txCost, _tokenPriceInEth) / (10**(18 - tokenDecimals));
+            txCost = wdiv(txCost, _tokenPriceInEth) / (10 ** (18 - tokenDecimals));
         }
     }
 }

@@ -7,7 +7,6 @@ import { IMorphoAaveV3 } from "../../../interfaces/morpho/IMorphoAaveV3.sol";
 
 /// @title Borrow a token from Morpho
 contract MorphoAaveV3Borrow is ActionBase, MorphoAaveV3Helper {
-
     /// @param emodeId Type of emode we are entering in, each one is different deployment on Morpho
     /// @param tokenAddr The address of the token to be borrowed
     /// @param amount Amount of tokens to be borrowed
@@ -32,12 +31,7 @@ contract MorphoAaveV3Borrow is ActionBase, MorphoAaveV3Helper {
         Params memory params = parseInputs(_callData);
 
         params.emodeId = _parseParamUint(params.emodeId, _paramMapping[0], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(
-            params.tokenAddr,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
+        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
         params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
@@ -65,13 +59,8 @@ contract MorphoAaveV3Borrow is ActionBase, MorphoAaveV3Helper {
             _params.onBehalf = address(this);
         }
 
-        IMorphoAaveV3(morphoAddress).borrow(
-            _params.tokenAddr,
-            _params.amount,
-            _params.onBehalf,
-            _params.to,
-            _params.maxIterations
-        );
+        IMorphoAaveV3(morphoAddress)
+            .borrow(_params.tokenAddr, _params.amount, _params.onBehalf, _params.to, _params.maxIterations);
 
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);

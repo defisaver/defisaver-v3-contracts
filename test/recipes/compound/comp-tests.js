@@ -1,9 +1,7 @@
 const { assert } = require('chai');
 const hre = require('hardhat');
 
-const {
-    getAssetInfo, assetAmountInEth, assetAmountInWei,
-} = require('@defisaver/tokens');
+const { getAssetInfo, assetAmountInEth, assetAmountInWei } = require('@defisaver/tokens');
 const dfs = require('@defisaver/sdk');
 
 const {
@@ -20,14 +18,9 @@ const {
     fetchAmountinUSDPrice,
 } = require('../../utils/utils');
 
-const {
-    supplyComp, executeAction,
-} = require('../../utils/actions');
+const { supplyComp, executeAction } = require('../../utils/actions');
 
-const {
-    getBorrowBalance,
-    getSupplyBalance,
-} = require('../../utils/compound');
+const { getBorrowBalance, getSupplyBalance } = require('../../utils/compound');
 
 const compBoostRecipeTest = async () => {
     describe('Compound: Boost', function () {
@@ -59,14 +52,24 @@ const compBoostRecipeTest = async () => {
 
             await setNewExchangeWrapper(senderAcc, uniWrapper.address);
 
-            const supplyBalance = await getSupplyBalance(compView, proxy.address, getAssetInfo('cETH').address);
+            const supplyBalance = await getSupplyBalance(
+                compView,
+                proxy.address,
+                getAssetInfo('cETH').address,
+            );
             if (supplyBalance.lt(assetAmountInWei('5', 'ETH'))) {
                 console.log('Supplying 5 ETH');
                 const initialCollAmount = assetAmountInWei('5', 'ETH');
                 const initialCollAmountParsed = hre.ethers.utils.parseUnits(initialCollAmount, 1);
                 await approve(getAssetInfo('WETH').address, proxy.address);
                 await depositToWeth(initialCollAmount);
-                await supplyComp(proxy, getAssetInfo('cETH').address, getAssetInfo('WETH').address, initialCollAmountParsed, senderAcc.address);
+                await supplyComp(
+                    proxy,
+                    getAssetInfo('cETH').address,
+                    getAssetInfo('WETH').address,
+                    initialCollAmountParsed,
+                    senderAcc.address,
+                );
             }
         });
 
@@ -81,8 +84,16 @@ const compBoostRecipeTest = async () => {
                         getAssetInfo(debtAsset).address,
                         senderAcc.address,
                     );
-                    const borrowBalanceBefore = await getBorrowBalance(compView, proxy.address, getAssetInfo(`c${debtAsset}`).address);
-                    const supplyBalanceBefore = await getSupplyBalance(compView, proxy.address, getAssetInfo(`c${collAsset}`).address);
+                    const borrowBalanceBefore = await getBorrowBalance(
+                        compView,
+                        proxy.address,
+                        getAssetInfo(`c${debtAsset}`).address,
+                    );
+                    const supplyBalanceBefore = await getSupplyBalance(
+                        compView,
+                        proxy.address,
+                        getAssetInfo(`c${collAsset}`).address,
+                    );
 
                     const recipe = new dfs.Recipe('Compound Boost', [
                         new dfs.actions.compound.CompoundBorrowAction(
@@ -117,18 +128,46 @@ const compBoostRecipeTest = async () => {
                         getAssetInfo(debtAsset).address,
                         senderAcc.address,
                     );
-                    const borrowBalanceAfter = await getBorrowBalance(compView, proxy.address, getAssetInfo(`c${debtAsset}`).address);
-                    const supplyBalanceAfter = await getSupplyBalance(compView, proxy.address, getAssetInfo(`c${collAsset}`).address);
+                    const borrowBalanceAfter = await getBorrowBalance(
+                        compView,
+                        proxy.address,
+                        getAssetInfo(`c${debtAsset}`).address,
+                    );
+                    const supplyBalanceAfter = await getSupplyBalance(
+                        compView,
+                        proxy.address,
+                        getAssetInfo(`c${collAsset}`).address,
+                    );
 
-                    assert.equal(+assetAmountInEth(collBalanceBefore, collAsset), +assetAmountInEth(collBalanceAfter, collAsset), 'Coll asset balance');
-                    assert.equal(+assetAmountInEth(debtBalanceBefore, debtAsset), +assetAmountInEth(debtBalanceAfter, debtAsset), 'Debt asset balance');
-                    assert.isBelow(+assetAmountInEth(supplyBalanceBefore, collAsset), +assetAmountInEth(supplyBalanceAfter, collAsset), 'Supply balance');
-                    assert.isBelow(+assetAmountInEth(borrowBalanceBefore, debtAsset), +assetAmountInEth(borrowBalanceAfter, debtAsset), 'Borrow balance');
-                    const collDelta = assetAmountInEth(supplyBalanceAfter, collAsset)
-                    - assetAmountInEth(supplyBalanceBefore, collAsset);
-                    const debtDelta = assetAmountInEth(borrowBalanceAfter, debtAsset)
-                    - assetAmountInEth(borrowBalanceBefore, debtAsset);
-                    console.log(`Supplied ${collDelta} ${collAsset} and created ${debtDelta} ${debtAsset} debt`);
+                    assert.equal(
+                        +assetAmountInEth(collBalanceBefore, collAsset),
+                        +assetAmountInEth(collBalanceAfter, collAsset),
+                        'Coll asset balance',
+                    );
+                    assert.equal(
+                        +assetAmountInEth(debtBalanceBefore, debtAsset),
+                        +assetAmountInEth(debtBalanceAfter, debtAsset),
+                        'Debt asset balance',
+                    );
+                    assert.isBelow(
+                        +assetAmountInEth(supplyBalanceBefore, collAsset),
+                        +assetAmountInEth(supplyBalanceAfter, collAsset),
+                        'Supply balance',
+                    );
+                    assert.isBelow(
+                        +assetAmountInEth(borrowBalanceBefore, debtAsset),
+                        +assetAmountInEth(borrowBalanceAfter, debtAsset),
+                        'Borrow balance',
+                    );
+                    const collDelta =
+                        assetAmountInEth(supplyBalanceAfter, collAsset) -
+                        assetAmountInEth(supplyBalanceBefore, collAsset);
+                    const debtDelta =
+                        assetAmountInEth(borrowBalanceAfter, debtAsset) -
+                        assetAmountInEth(borrowBalanceBefore, debtAsset);
+                    console.log(
+                        `Supplied ${collDelta} ${collAsset} and created ${debtDelta} ${debtAsset} debt`,
+                    );
                 });
             });
         });
@@ -144,11 +183,19 @@ const compBoostRecipeTest = async () => {
                 getAssetInfo(debtAsset).address,
                 senderAcc.address,
             );
-            const borrowBalanceBefore = await getBorrowBalance(compView, proxy.address, getAssetInfo(`c${debtAsset}`).address);
-            const supplyBalanceBefore = await getSupplyBalance(compView, proxy.address, getAssetInfo(`c${collAsset}`).address);
+            const borrowBalanceBefore = await getBorrowBalance(
+                compView,
+                proxy.address,
+                getAssetInfo(`c${debtAsset}`).address,
+            );
+            const supplyBalanceBefore = await getSupplyBalance(
+                compView,
+                proxy.address,
+                getAssetInfo(`c${collAsset}`).address,
+            );
 
             const recipe = new dfs.Recipe('Compound FL Boost', [
-            // Flashloan DAI
+                // Flashloan DAI
                 new dfs.actions.flashloan.DyDxFlashLoanAction(
                     assetAmountInWei(debtAmount, debtAsset),
                     getAssetInfo(debtAsset).address,
@@ -195,18 +242,46 @@ const compBoostRecipeTest = async () => {
                 getAssetInfo(debtAsset).address,
                 senderAcc.address,
             );
-            const borrowBalanceAfter = await getBorrowBalance(compView, proxy.address, getAssetInfo(`c${debtAsset}`).address);
-            const supplyBalanceAfter = await getSupplyBalance(compView, proxy.address, getAssetInfo(`c${collAsset}`).address);
+            const borrowBalanceAfter = await getBorrowBalance(
+                compView,
+                proxy.address,
+                getAssetInfo(`c${debtAsset}`).address,
+            );
+            const supplyBalanceAfter = await getSupplyBalance(
+                compView,
+                proxy.address,
+                getAssetInfo(`c${collAsset}`).address,
+            );
 
-            assert.equal(+assetAmountInEth(collBalanceBefore, collAsset), +assetAmountInEth(collBalanceAfter, collAsset), 'Coll asset balance');
-            assert.equal(+assetAmountInEth(debtBalanceBefore, debtAsset), +assetAmountInEth(debtBalanceAfter, debtAsset), 'Debt asset balance');
-            assert.isBelow(+assetAmountInEth(supplyBalanceBefore, collAsset), +assetAmountInEth(supplyBalanceAfter, collAsset), 'Supply balance');
-            assert.isBelow(+assetAmountInEth(borrowBalanceBefore, debtAsset), +assetAmountInEth(borrowBalanceAfter, debtAsset), 'Borrow balance');
-            const collDelta = assetAmountInEth(supplyBalanceAfter, collAsset)
-            - assetAmountInEth(supplyBalanceBefore, collAsset);
-            const debtDelta = assetAmountInEth(borrowBalanceAfter, debtAsset)
-            - assetAmountInEth(borrowBalanceBefore, debtAsset);
-            console.log(`Supplied ${collDelta} ${collAsset} and created ${debtDelta} ${debtAsset} debt`);
+            assert.equal(
+                +assetAmountInEth(collBalanceBefore, collAsset),
+                +assetAmountInEth(collBalanceAfter, collAsset),
+                'Coll asset balance',
+            );
+            assert.equal(
+                +assetAmountInEth(debtBalanceBefore, debtAsset),
+                +assetAmountInEth(debtBalanceAfter, debtAsset),
+                'Debt asset balance',
+            );
+            assert.isBelow(
+                +assetAmountInEth(supplyBalanceBefore, collAsset),
+                +assetAmountInEth(supplyBalanceAfter, collAsset),
+                'Supply balance',
+            );
+            assert.isBelow(
+                +assetAmountInEth(borrowBalanceBefore, debtAsset),
+                +assetAmountInEth(borrowBalanceAfter, debtAsset),
+                'Borrow balance',
+            );
+            const collDelta =
+                assetAmountInEth(supplyBalanceAfter, collAsset) -
+                assetAmountInEth(supplyBalanceBefore, collAsset);
+            const debtDelta =
+                assetAmountInEth(borrowBalanceAfter, debtAsset) -
+                assetAmountInEth(borrowBalanceBefore, debtAsset);
+            console.log(
+                `Supplied ${collDelta} ${collAsset} and created ${debtDelta} ${debtAsset} debt`,
+            );
         });
 
         it('...Boost 500 BAT for ETH using Aave FL', async () => {
@@ -220,10 +295,18 @@ const compBoostRecipeTest = async () => {
                 getAssetInfo(debtAsset).address,
                 senderAcc.address,
             );
-            const borrowBalanceBefore = await getBorrowBalance(compView, proxy.address, getAssetInfo(`c${debtAsset}`).address);
-            const supplyBalanceBefore = await getSupplyBalance(compView, proxy.address, getAssetInfo(`c${collAsset}`).address);
+            const borrowBalanceBefore = await getBorrowBalance(
+                compView,
+                proxy.address,
+                getAssetInfo(`c${debtAsset}`).address,
+            );
+            const supplyBalanceBefore = await getSupplyBalance(
+                compView,
+                proxy.address,
+                getAssetInfo(`c${collAsset}`).address,
+            );
             const recipe = new dfs.Recipe('Compound FL Boost', [
-            // Flashloan BAT
+                // Flashloan BAT
                 new dfs.actions.flashloan.AaveV2FlashLoanAction(
                     [getAssetInfo(debtAsset).address],
                     [assetAmountInWei(debtAmount, debtAsset)],
@@ -266,18 +349,46 @@ const compBoostRecipeTest = async () => {
                 getAssetInfo(debtAsset).address,
                 senderAcc.address,
             );
-            const borrowBalanceAfter = await getBorrowBalance(compView, proxy.address, getAssetInfo(`c${debtAsset}`).address);
-            const supplyBalanceAfter = await getSupplyBalance(compView, proxy.address, getAssetInfo(`c${collAsset}`).address);
+            const borrowBalanceAfter = await getBorrowBalance(
+                compView,
+                proxy.address,
+                getAssetInfo(`c${debtAsset}`).address,
+            );
+            const supplyBalanceAfter = await getSupplyBalance(
+                compView,
+                proxy.address,
+                getAssetInfo(`c${collAsset}`).address,
+            );
 
-            assert.equal(+assetAmountInEth(collBalanceBefore, collAsset), +assetAmountInEth(collBalanceAfter, collAsset), 'Coll asset balance');
-            assert.equal(+assetAmountInEth(debtBalanceBefore, debtAsset), +assetAmountInEth(debtBalanceAfter, debtAsset), 'Debt asset balance');
-            assert.isBelow(+assetAmountInEth(supplyBalanceBefore, collAsset), +assetAmountInEth(supplyBalanceAfter, collAsset), 'Supply balance');
-            assert.isBelow(+assetAmountInEth(borrowBalanceBefore, debtAsset), +assetAmountInEth(borrowBalanceAfter, debtAsset), 'Borrow balance');
-            const collDelta = assetAmountInEth(supplyBalanceAfter, collAsset)
-            - assetAmountInEth(supplyBalanceBefore, collAsset);
-            const debtDelta = assetAmountInEth(borrowBalanceAfter, debtAsset)
-            - assetAmountInEth(borrowBalanceBefore, debtAsset);
-            console.log(`Supplied ${collDelta} ${collAsset} and created ${debtDelta} ${debtAsset} debt`);
+            assert.equal(
+                +assetAmountInEth(collBalanceBefore, collAsset),
+                +assetAmountInEth(collBalanceAfter, collAsset),
+                'Coll asset balance',
+            );
+            assert.equal(
+                +assetAmountInEth(debtBalanceBefore, debtAsset),
+                +assetAmountInEth(debtBalanceAfter, debtAsset),
+                'Debt asset balance',
+            );
+            assert.isBelow(
+                +assetAmountInEth(supplyBalanceBefore, collAsset),
+                +assetAmountInEth(supplyBalanceAfter, collAsset),
+                'Supply balance',
+            );
+            assert.isBelow(
+                +assetAmountInEth(borrowBalanceBefore, debtAsset),
+                +assetAmountInEth(borrowBalanceAfter, debtAsset),
+                'Borrow balance',
+            );
+            const collDelta =
+                assetAmountInEth(supplyBalanceAfter, collAsset) -
+                assetAmountInEth(supplyBalanceBefore, collAsset);
+            const debtDelta =
+                assetAmountInEth(borrowBalanceAfter, debtAsset) -
+                assetAmountInEth(borrowBalanceBefore, debtAsset);
+            console.log(
+                `Supplied ${collDelta} ${collAsset} and created ${debtDelta} ${debtAsset} debt`,
+            );
         });
     });
 };
@@ -326,7 +437,11 @@ const compCreateRecipeTest = async () => {
                         getAssetInfo(debtAsset).address,
                         senderAcc.address,
                     );
-                    const borrowBalanceBefore = await getBorrowBalance(compView, proxy.address, getAssetInfo(`c${debtAsset}`).address);
+                    const borrowBalanceBefore = await getBorrowBalance(
+                        compView,
+                        proxy.address,
+                        getAssetInfo(`c${debtAsset}`).address,
+                    );
 
                     await approve(collAddress, proxy.address);
 
@@ -353,11 +468,30 @@ const compCreateRecipeTest = async () => {
                         getAssetInfo(debtAsset).address,
                         senderAcc.address,
                     );
-                    const borrowBalanceAfter = await getBorrowBalance(compView, proxy.address, getAssetInfo(`c${debtAsset}`).address);
+                    const borrowBalanceAfter = await getBorrowBalance(
+                        compView,
+                        proxy.address,
+                        getAssetInfo(`c${debtAsset}`).address,
+                    );
 
-                    assert.closeTo(+assetAmountInEth(collBalanceBefore, collAsset) - fetchedAmount, +assetAmountInEth(collBalanceAfter, collAsset), 0.005, 'Coll asset balance');
-                    assert.closeTo(+assetAmountInEth(debtBalanceBefore, debtAsset) + debtAmount, +assetAmountInEth(debtBalanceAfter, debtAsset), 0.005, 'Debt asset balance');
-                    assert.closeTo(+assetAmountInEth(borrowBalanceBefore, debtAsset) + debtAmount, +assetAmountInEth(borrowBalanceAfter, debtAsset), 0.005, 'Borrow balance');
+                    assert.closeTo(
+                        +assetAmountInEth(collBalanceBefore, collAsset) - fetchedAmount,
+                        +assetAmountInEth(collBalanceAfter, collAsset),
+                        0.005,
+                        'Coll asset balance',
+                    );
+                    assert.closeTo(
+                        +assetAmountInEth(debtBalanceBefore, debtAsset) + debtAmount,
+                        +assetAmountInEth(debtBalanceAfter, debtAsset),
+                        0.005,
+                        'Debt asset balance',
+                    );
+                    assert.closeTo(
+                        +assetAmountInEth(borrowBalanceBefore, debtAsset) + debtAmount,
+                        +assetAmountInEth(borrowBalanceAfter, debtAsset),
+                        0.005,
+                        'Borrow balance',
+                    );
                 });
             });
         });
@@ -378,8 +512,16 @@ const compCreateRecipeTest = async () => {
                 getAssetInfo(debtAsset).address,
                 senderAcc.address,
             );
-            const borrowBalanceBefore = await getBorrowBalance(compView, proxy.address, getAssetInfo(`c${debtAsset}`).address);
-            const supplyBalanceBefore = await getSupplyBalance(compView, proxy.address, getAssetInfo(`c${collAsset}`).address);
+            const borrowBalanceBefore = await getBorrowBalance(
+                compView,
+                proxy.address,
+                getAssetInfo(`c${debtAsset}`).address,
+            );
+            const supplyBalanceBefore = await getSupplyBalance(
+                compView,
+                proxy.address,
+                getAssetInfo(`c${collAsset}`).address,
+            );
 
             await approve(collAddress, proxy.address);
 
@@ -439,18 +581,49 @@ const compCreateRecipeTest = async () => {
                 getAssetInfo(debtAsset).address,
                 senderAcc.address,
             );
-            const borrowBalanceAfter = await getBorrowBalance(compView, proxy.address, getAssetInfo(`c${debtAsset}`).address);
-            const supplyBalanceAfter = await getSupplyBalance(compView, proxy.address, getAssetInfo(`c${collAsset}`).address);
+            const borrowBalanceAfter = await getBorrowBalance(
+                compView,
+                proxy.address,
+                getAssetInfo(`c${debtAsset}`).address,
+            );
+            const supplyBalanceAfter = await getSupplyBalance(
+                compView,
+                proxy.address,
+                getAssetInfo(`c${collAsset}`).address,
+            );
 
-            assert.closeTo(+assetAmountInEth(collBalanceBefore, collAsset) - fetchedAmount, +assetAmountInEth(collBalanceAfter, collAsset), 0.005, 'Coll asset balance');
-            assert.closeTo(+assetAmountInEth(debtBalanceBefore, debtAsset), +assetAmountInEth(debtBalanceAfter, debtAsset), 0.005, 'Debt asset balance');
-            assert.closeTo(+assetAmountInEth(borrowBalanceBefore, debtAsset) + 500, +assetAmountInEth(borrowBalanceAfter, debtAsset), 0.005, 'Borrow balance');
-            assert.isBelow(+assetAmountInEth(supplyBalanceBefore, debtAsset) + parseFloat(fetchedAmount), +assetAmountInEth(supplyBalanceAfter, debtAsset), 'Supply balance');
-            const collDelta = assetAmountInEth(supplyBalanceAfter, debtAsset)
-                - assetAmountInEth(supplyBalanceBefore, debtAsset);
-            const debtDelta = assetAmountInEth(borrowBalanceAfter, debtAsset)
-                - assetAmountInEth(borrowBalanceBefore, debtAsset);
-            console.log(`Supplied ${collDelta} ${collAsset} (${fetchedAmount} ${collAsset} from wallet) and created ${debtDelta} ${debtAsset} debt`);
+            assert.closeTo(
+                +assetAmountInEth(collBalanceBefore, collAsset) - fetchedAmount,
+                +assetAmountInEth(collBalanceAfter, collAsset),
+                0.005,
+                'Coll asset balance',
+            );
+            assert.closeTo(
+                +assetAmountInEth(debtBalanceBefore, debtAsset),
+                +assetAmountInEth(debtBalanceAfter, debtAsset),
+                0.005,
+                'Debt asset balance',
+            );
+            assert.closeTo(
+                +assetAmountInEth(borrowBalanceBefore, debtAsset) + 500,
+                +assetAmountInEth(borrowBalanceAfter, debtAsset),
+                0.005,
+                'Borrow balance',
+            );
+            assert.isBelow(
+                +assetAmountInEth(supplyBalanceBefore, debtAsset) + parseFloat(fetchedAmount),
+                +assetAmountInEth(supplyBalanceAfter, debtAsset),
+                'Supply balance',
+            );
+            const collDelta =
+                assetAmountInEth(supplyBalanceAfter, debtAsset) -
+                assetAmountInEth(supplyBalanceBefore, debtAsset);
+            const debtDelta =
+                assetAmountInEth(borrowBalanceAfter, debtAsset) -
+                assetAmountInEth(borrowBalanceBefore, debtAsset);
+            console.log(
+                `Supplied ${collDelta} ${collAsset} (${fetchedAmount} ${collAsset} from wallet) and created ${debtDelta} ${debtAsset} debt`,
+            );
         });
     });
 };
