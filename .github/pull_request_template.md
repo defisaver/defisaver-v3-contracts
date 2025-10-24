@@ -4,14 +4,22 @@ _Briefly describe what this change introduces._
 
 ### Type of change
 
-- [ ] Breaking Change - A change that is not backward-compatible.
 - [ ] New Feature - A change that adds functionality.
-- [ ] Tweak - A change that modifies existing features.
 - [ ] Bugfix - A change that resolves an issue.
+- [ ] Tweak - A change that modifies existing features.
+- [ ] Refactor - Code improvements without changing behavior.
+- [ ] Performance - Optimizations for gas or execution efficiency.
+- [ ] Documentation - Updates to docs, comments, or NatSpec.
+- [ ] Tests - Adding or updating test coverage.
+- [ ] Chore - Maintenance, dependencies, CI/CD, deployments or tooling updates.
 
 ### Details
 
 _Provide any additional details if needed._
+
+### References
+
+_Link any existing PRs, such as SDK PRs related to this PR, or any additional references._
 
 ### Checks
 
@@ -36,7 +44,3 @@ _Provide any additional details if needed._
 
 - [ ] Are new tests added for the strategy?
 - [ ] Is the strategy deployed and added to the JSON file?
-
-### References
-
-_Link any existing PRs, such as SDK PRs related to this PR, or any additional references._
