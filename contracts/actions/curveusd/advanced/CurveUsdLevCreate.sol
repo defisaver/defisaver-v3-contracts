@@ -89,8 +89,9 @@ contract CurveUsdLevCreate is ActionBase, CurveUsdHelper {
         );
 
         // create loan
-        ICrvUsdController(_params.controllerAddress)
-            .create_loan_extended(_params.collAmount, _params.debtAmount, _params.nBands, curveUsdSwapper, swapData);
+        ICrvUsdController(_params.controllerAddress).create_loan_extended(
+            _params.collAmount, _params.debtAmount, _params.nBands, curveUsdSwapper, swapData
+        );
 
         return (_params.debtAmount, abi.encode(_params));
     }

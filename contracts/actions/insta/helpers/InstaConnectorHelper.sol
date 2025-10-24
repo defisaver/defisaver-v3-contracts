@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import {MainnetInstaConnectorAddresses} from "./MainnetInstaConnectorAddresses.sol";
-import {IDFSRegistry} from "../../../interfaces/IDFSRegistry.sol";
+import { MainnetInstaConnectorAddresses } from "./MainnetInstaConnectorAddresses.sol";
+import { IDFSRegistry } from "../../../interfaces/IDFSRegistry.sol";
 
 contract InstaConnectorHelper is MainnetInstaConnectorAddresses {
     IDFSRegistry internal constant dfsRegistry = IDFSRegistry(DEFISAVER_REGISTRY_ADDR);

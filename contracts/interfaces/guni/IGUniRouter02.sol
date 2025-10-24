@@ -1,15 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity =0.8.24;
 
-
 interface IGUniRouter02 {
-    function removeLiquidity(
-        address pool,
-        uint256 burnAmount,
-        uint256 amount0Min,
-        uint256 amount1Min,
-        address receiver
-    ) external returns (uint256 amount0, uint256 amount1, uint128 liquidityBurned);
+    function removeLiquidity(address pool, uint256 burnAmount, uint256 amount0Min, uint256 amount1Min, address receiver)
+        external
+        returns (uint256 amount0, uint256 amount1, uint128 liquidityBurned);
 
     function rebalanceAndAddLiquidity(
         address pool,

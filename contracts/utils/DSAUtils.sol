@@ -25,13 +25,9 @@ library DSAUtils {
     /// @param _eventOrigin Address of the event origin
     /// @param _data Call data
     /// @param _value Value to send with the call
-    function cast(
-        address _dsaProxy,
-        address _dfsRegistry,
-        address _eventOrigin,
-        bytes memory _data,
-        uint256 _value
-    ) internal {
+    function cast(address _dsaProxy, address _dfsRegistry, address _eventOrigin, bytes memory _data, uint256 _value)
+        internal
+    {
         // V1 and V2 versions have different interfaces, so we support both.
         uint256 version = IInstaAccount(_dsaProxy).version();
 
@@ -44,11 +40,7 @@ library DSAUtils {
             address[] memory targets = new address[](1);
             targets[0] = IDFSRegistry(_dfsRegistry).getAddr(DEFISAVER_CONNECTOR_ID);
 
-            IInstaAccountV1(_dsaProxy).cast{ value: _value }(
-                targets,
-                connectorsData,
-                _eventOrigin
-            );
+            IInstaAccountV1(_dsaProxy).cast{ value: _value }(targets, connectorsData, _eventOrigin);
             return;
         }
 
@@ -60,10 +52,6 @@ library DSAUtils {
         string[] memory connectors = new string[](1);
         connectors[0] = DEFISAVER_CONNECTOR_NAME;
 
-        IInstaAccountV2(_dsaProxy).cast{ value: _value }(
-            connectors,
-            connectorsData,
-            _eventOrigin
-        );
-    }    
+        IInstaAccountV2(_dsaProxy).cast{ value: _value }(connectors, connectorsData, _eventOrigin);
+    }
 }

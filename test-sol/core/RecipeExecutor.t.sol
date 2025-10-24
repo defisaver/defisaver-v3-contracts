@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import {RecipeExecutor} from '../../contracts/core/RecipeExecutor.sol';
-import {StrategyModel} from '../../contracts/core/strategy/StrategyModel.sol';
-import {PullToken} from "../../contracts/actions/utils/PullToken.sol";
-import {SendToken} from "../../contracts/actions/utils/SendToken.sol";
-import {FLAction} from "../../contracts/actions/flashloan/FLAction.sol";
-import {BaseTest} from '../utils/BaseTest.sol';
-import {ActionsUtils} from '../utils/ActionsUtils.sol';
-import {SmartWallet} from '../utils/SmartWallet.sol';
-import {Addresses} from '../utils/Addresses.sol';
-import {DSAProxyTestUtils} from '../utils/dsa/DSAProxyTestUtils.sol';
+import { RecipeExecutor } from "../../contracts/core/RecipeExecutor.sol";
+import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
+import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
+import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
+import { FLAction } from "../../contracts/actions/flashloan/FLAction.sol";
+import { BaseTest } from "../utils/BaseTest.sol";
+import { ActionsUtils } from "../utils/ActionsUtils.sol";
+import { SmartWallet } from "../utils/SmartWallet.sol";
+import { Addresses } from "../utils/Addresses.sol";
+import { DSAProxyTestUtils } from "../utils/dsa/DSAProxyTestUtils.sol";
 
 /// @dev Recipe execution from strategy is already tested in StrategyExecutor tests
 /// @dev Here, we just test direct recipe execution with and without flash loan
@@ -32,7 +32,7 @@ contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnetLatest();
-        
+
         SmartWallet safeWallet = new SmartWallet(bob);
 
         SmartWallet dsProxyWallet = new SmartWallet(alice);
@@ -74,17 +74,11 @@ contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
             bytes4[] memory ids = new bytes4[](2);
             ids[0] = bytes4(keccak256("PullToken"));
             ids[1] = bytes4(keccak256("SendToken"));
-            
-            StrategyModel.Recipe memory recipe = _create_placeholder_recipe(
-                "TestRecipeWithoutFlashloan",
-                actionsCalldata,
-                ids
-            );
 
-            bytes memory _calldata = abi.encodeWithSelector(
-                RecipeExecutor.executeRecipe.selector,
-                recipe
-            );
+            StrategyModel.Recipe memory recipe =
+                _create_placeholder_recipe("TestRecipeWithoutFlashloan", actionsCalldata, ids);
+
+            bytes memory _calldata = abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
             give(tokenAddr, wallets[i].owner(), amount);
             approveAsSender(wallets[i].owner(), tokenAddr, wallets[i].walletAddr(), amount);
@@ -110,16 +104,10 @@ contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
             ids[0] = bytes4(keccak256("FLAction"));
             ids[1] = bytes4(keccak256("SendToken"));
 
-            StrategyModel.Recipe memory recipe = _create_placeholder_recipe(
-                "TestRecipeWithFlashloan",
-                actionsCalldata,
-                ids
-            );
+            StrategyModel.Recipe memory recipe =
+                _create_placeholder_recipe("TestRecipeWithFlashloan", actionsCalldata, ids);
 
-            bytes memory _calldata = abi.encodeWithSelector(
-                RecipeExecutor.executeRecipe.selector,
-                recipe
-            );
+            bytes memory _calldata = abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
             uint256 senderBalanceBefore = balanceOf(tokenAddr, wallets[i].owner());
             uint256 walletBalanceBefore = balanceOf(tokenAddr, wallets[i].walletAddr());

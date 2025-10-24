@@ -36,10 +36,7 @@ contract StarknetClaim is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _starknetClaim(Params memory _params) internal {
-        IStarknet(0xc662c410C0ECf747543f5bA90660f6ABeBD9C8c4)
-        .sendMessageToL2{
-            value: 4000 * _params.gasPrice
-        }(
+        IStarknet(0xc662c410C0ECf747543f5bA90660f6ABeBD9C8c4).sendMessageToL2{ value: 4000 * _params.gasPrice }(
             uint256(0x026942155437167f8a18c2602637e30d636f0ce7a88d5ed465f8d1f08f1ea015),
             uint256(0x00828430c65c40cba334d4723a4c5c02a62f612d73d564a1c7dc146f1d0053f9),
             _params.payload

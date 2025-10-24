@@ -104,7 +104,10 @@ contract SFApproveTokens is ActionBase, SFHelper {
                 IExecutable.execute.selector,
                 abi.encode(
                     SFSetApprovalData({
-                        asset: tokenAddr, delegate: params.spender, amount: allowance, sumAmounts: false
+                        asset: tokenAddr,
+                        delegate: params.spender,
+                        amount: allowance,
+                        sumAmounts: false
                     })
                 ),
                 emptyParamMap
@@ -137,11 +140,10 @@ contract SFApproveTokens is ActionBase, SFHelper {
     }
 
     function _sfExecute(address sfProxy, Call[] memory calls) internal returns (bytes32) {
-        return IDSProxy(sfProxy)
-            .execute(
-                SF_OPERATION_EXECUTOR,
-                abi.encodeWithSelector(IOperationExecutor.executeOp.selector, calls, SF_OPERATION_NAME)
-            );
+        return IDSProxy(sfProxy).execute(
+            SF_OPERATION_EXECUTOR,
+            abi.encodeWithSelector(IOperationExecutor.executeOp.selector, calls, SF_OPERATION_NAME)
+        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

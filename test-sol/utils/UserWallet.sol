@@ -32,8 +32,9 @@ abstract contract UserWallet {
         bytes memory setupData = abi.encodeWithSelector(
             ISafe.setup.selector, owners, 1, address(0), bytes(""), address(0), address(0), 0, payable(address(0))
         );
-        safeAddr = ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY)
-            .createProxyWithNonce(Addresses.SAFE_SINGLETON, setupData, saltNonce);
+        safeAddr = ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY).createProxyWithNonce(
+            Addresses.SAFE_SINGLETON, setupData, saltNonce
+        );
         safe = ISafe(safeAddr);
     }
 

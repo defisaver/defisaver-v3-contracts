@@ -10,7 +10,6 @@ import { WalletType } from "../utils/DFSTypes.sol";
 /// @title Permission contract to give execute permission on Smart Wallets
 /// @dev Called from the context of the wallet
 contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermission {
-
     /// @notice Gives permission to Auth contract used by dfs automation
     function _giveAuthContractPermission(WalletType _walletType) internal {
         _givePermissionTo(_walletType, _getAuthContractAddress(_walletType));

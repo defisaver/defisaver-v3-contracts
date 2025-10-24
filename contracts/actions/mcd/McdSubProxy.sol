@@ -12,8 +12,8 @@ import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies for Maker
 contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHelper, SmartWalletUtils {
-    uint64 public immutable REPAY_BUNDLE_ID; 
-    uint64 public immutable BOOST_BUNDLE_ID; 
+    uint64 public immutable REPAY_BUNDLE_ID;
+    uint64 public immutable BOOST_BUNDLE_ID;
 
     constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
         REPAY_BUNDLE_ID = _repayBundleId;
@@ -49,7 +49,7 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
         McdSubData calldata _subData,
         bool // _shouldLegacyUnsub no longer needed, kept to keep the function sig the same
     ) public {
-         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
 
         StrategySub memory repaySub = formatRepaySub(_subData);
@@ -66,11 +66,7 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
     /// @notice Calls SubStorage to update the users subscription data
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId send as 0
-    function updateSubData(
-        uint32 _subId1,
-        uint32 _subId2,
-        McdSubData calldata _subData
-    ) public {
+    function updateSubData(uint32 _subId1, uint32 _subId2, McdSubData calldata _subData) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
         // update repay as we must have a subId, it's ok if it's the same data
@@ -98,10 +94,7 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHe
     }
 
     /// @notice Activates Repay sub and if exists a Boost sub
-    function activateSub(
-        uint32 _subId1,
-        uint32 _subId2
-    ) public {
+    function activateSub(uint32 _subId1, uint32 _subId2) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);

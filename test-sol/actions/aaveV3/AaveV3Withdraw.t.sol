@@ -87,14 +87,22 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
 
     function testFuzz_encode_decode_no_market(uint16 _assetId, uint256 _amount, address _to) public view {
         AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
-            assetId: _assetId, useDefaultMarket: true, amount: _amount, to: _to, market: DEFAULT_AAVE_MARKET
+            assetId: _assetId,
+            useDefaultMarket: true,
+            amount: _amount,
+            to: _to,
+            market: DEFAULT_AAVE_MARKET
         });
         _assertParams(params);
     }
 
     function testFuzz_encode_decode(uint16 _assetId, uint256 _amount, address _to, address _market) public view {
         AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
-            assetId: _assetId, useDefaultMarket: false, amount: _amount, to: _to, market: _market
+            assetId: _assetId,
+            useDefaultMarket: false,
+            amount: _amount,
+            to: _to,
+            market: _market
         });
         _assertParams(params);
     }
@@ -121,7 +129,11 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
 
         if (_isL2Direct) {
             AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
-                assetId: tokenData.id, useDefaultMarket: true, amount: _amount, to: sender, market: address(0)
+                assetId: tokenData.id,
+                useDefaultMarket: true,
+                amount: _amount,
+                to: sender,
+                market: address(0)
             });
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {

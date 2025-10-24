@@ -14,7 +14,7 @@ contract SafeModulePermission {
     /// @param _moduleAddr Address of module which will be authorized
     /// @dev Can't enable the same module twice
     function _enableModule(address _moduleAddr) internal {
-        if(!ISafe(address(this)).isModuleEnabled(_moduleAddr)) {
+        if (!ISafe(address(this)).isModuleEnabled(_moduleAddr)) {
             ISafe(address(this)).enableModule(_moduleAddr);
         }
     }

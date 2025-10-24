@@ -55,11 +55,7 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_fail_to_call_execute_when_sender_is_not_executor() public {
         vm.expectRevert(
-            abi.encodeWithSelector(
-                WalletAuth.SenderNotExecutorError.selector,
-                address(this),
-                strategyExecutorAddr
-            )
+            abi.encodeWithSelector(WalletAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr)
         );
         cut.callExecute(dsProxyAddr, recipeExecutorAddr, bytes("0x"));
     }
@@ -72,9 +68,8 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
 
     function test_should_execute_tx() public {
         // first approve auth contract to call execute from dsProxy
-        bytes memory permissionCalldata = abi.encodeWithSelector(
-            MockDSProxyPermission.giveProxyPermission.selector, address(cut)
-        );
+        bytes memory permissionCalldata =
+            abi.encodeWithSelector(MockDSProxyPermission.giveProxyPermission.selector, address(cut));
         wallet.execute(dsProxyPermissionAddr, permissionCalldata, 0);
 
         // create recipe

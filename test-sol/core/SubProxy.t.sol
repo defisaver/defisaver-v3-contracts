@@ -45,7 +45,10 @@ contract TestCore_SubProxy is SubStorage, BaseTest {
         subStorage = SubStorage(SUB_STORAGE_ADDR);
 
         sub = StrategyModel.StrategySub({
-            strategyOrBundleId: 1, isBundle: false, triggerData: new bytes[](0), subData: new bytes32[](0)
+            strategyOrBundleId: 1,
+            isBundle: false,
+            triggerData: new bytes[](0),
+            subData: new bytes32[](0)
         });
     }
 

@@ -31,7 +31,10 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
 
         storedStrategies.push(
             StrategySub({
-                strategyOrBundleId: 0, isBundle: false, triggerData: new bytes[](0), subData: new bytes32[](0)
+                strategyOrBundleId: 0,
+                isBundle: false,
+                triggerData: new bytes[](0),
+                subData: new bytes32[](0)
             })
         );
     }

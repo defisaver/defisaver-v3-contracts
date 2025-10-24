@@ -21,12 +21,7 @@ import { WalletType } from "../../utils/DFSTypes.sol";
 
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
-contract StrategyTriggerViewNoRevert is
-    StrategyModel,
-    CoreHelper,
-    SmartWalletUtils,
-    AaveV3Helper
-{
+contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUtils, AaveV3Helper {
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     address internal constant DEFAULT_SPARK_MARKET_MAINNET = 0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
@@ -200,7 +195,7 @@ contract StrategyTriggerViewNoRevert is
 
     /*//////////////////////////////////////////////////////////////
                                 HELPERS
-    //////////////////////////////////////////////////////////////*/    
+    //////////////////////////////////////////////////////////////*/
     function _hasEnoughMinDebtInUSD(uint256 _userDebtInUSD) internal view returns (bool) {
         if (block.chainid == 1) {
             return _userDebtInUSD >= MIN_DEBT_IN_USD_MAINNET;

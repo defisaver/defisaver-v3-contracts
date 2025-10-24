@@ -57,11 +57,7 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_fail_to_call_execute_when_sender_is_not_executor() public {
         vm.expectRevert(
-            abi.encodeWithSelector(
-                WalletAuth.SenderNotExecutorError.selector,
-                address(this),
-                strategyExecutorAddr
-            )
+            abi.encodeWithSelector(WalletAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr)
         );
         cut.callExecute(safeWalletAddr, recipeExecutorAddr, bytes("0x"));
     }
@@ -83,7 +79,8 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
 
     function test_should_execute_safe_tx() public {
         // first approve auth contract to call execute from safe
-        bytes memory enableCalldata = abi.encodeWithSelector(MockSafeModulePermission.enableModule.selector, address(cut));
+        bytes memory enableCalldata =
+            abi.encodeWithSelector(MockSafeModulePermission.enableModule.selector, address(cut));
         wallet.execute(safeModulePermissionAddr, enableCalldata, 0);
 
         // create recipe
@@ -114,7 +111,8 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
 
     function test_should_revert_when_safe_tx_execution_fails() public {
         // first approve auth contract to call execute from safe
-        bytes memory enableCalldata = abi.encodeWithSelector(MockSafeModulePermission.enableModule.selector, address(cut));
+        bytes memory enableCalldata =
+            abi.encodeWithSelector(MockSafeModulePermission.enableModule.selector, address(cut));
         wallet.execute(safeModulePermissionAddr, enableCalldata, 0);
 
         // create recipe

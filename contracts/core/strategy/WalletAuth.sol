@@ -16,10 +16,10 @@ abstract contract WalletAuth is Pausable, CoreHelper, IAuth {
     /// Only callable by the executor
     error SenderNotExecutorError(address, address);
 
-    modifier onlyExecutor {
+    modifier onlyExecutor() {
         address executorAddr = registry.getAddr(STRATEGY_EXECUTOR_ID);
 
-        if (msg.sender != executorAddr){
+        if (msg.sender != executorAddr) {
             revert SenderNotExecutorError(msg.sender, executorAddr);
         }
 

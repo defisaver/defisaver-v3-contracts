@@ -58,8 +58,9 @@ contract PermitToken is ActionBase {
 
     function _permitToken(Params memory _params) internal {
         uint256 startingNonce = IERC20Permit(_params.tokenAddr).nonces(_params.owner);
-        IERC20Permit(_params.tokenAddr)
-            .permit(_params.owner, _params.spender, _params.value, _params.deadline, _params.v, _params.r, _params.s);
+        IERC20Permit(_params.tokenAddr).permit(
+            _params.owner, _params.spender, _params.value, _params.deadline, _params.v, _params.r, _params.s
+        );
         /// @notice Every successful call to permit increases owners nonce by one.
         require(IERC20Permit(_params.tokenAddr).nonces(_params.owner) == startingNonce + 1);
     }

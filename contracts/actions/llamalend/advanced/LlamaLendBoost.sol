@@ -65,8 +65,9 @@ contract LlamaLendBoost is ActionBase, LlamaLendHelper {
 
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
-        ILlamaLendController(_params.controllerAddress)
-            .borrow_more_extended(0, _params.exData.srcAmount, llamalendSwapper, info);
+        ILlamaLendController(_params.controllerAddress).borrow_more_extended(
+            0, _params.exData.srcAmount, llamalendSwapper, info
+        );
 
         return (_params.exData.srcAmount, abi.encode(_params));
     }

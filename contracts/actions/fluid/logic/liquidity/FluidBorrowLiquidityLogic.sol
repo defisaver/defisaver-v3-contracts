@@ -27,24 +27,22 @@ library FluidBorrowLiquidityLogic {
         address sendTokensTo = shouldWrapBorrowedEth ? address(this) : _data.to;
 
         if (_data.vaultType.isT1Vault()) {
-            IFluidVaultT1(_data.vault)
-                .operate(
-                    _data.nftId,
-                    0,
-                    /* newColl_ */
-                    _data.amount.signed256(),
-                    sendTokensTo
-                );
+            IFluidVaultT1(_data.vault).operate(
+                _data.nftId,
+                0,
+                /* newColl_ */
+                _data.amount.signed256(),
+                sendTokensTo
+            );
         } else {
-            IFluidVaultT2(_data.vault)
-                .operate(
-                    _data.nftId,
-                    0, /* newColToken0_ */
-                    0, /* newColToken1_ */
-                    0, /* colSharesMinMax_ */
-                    _data.amount.signed256(),
-                    sendTokensTo
-                );
+            IFluidVaultT2(_data.vault).operate(
+                _data.nftId,
+                0, /* newColToken0_ */
+                0, /* newColToken1_ */
+                0, /* colSharesMinMax_ */
+                _data.amount.signed256(),
+                sendTokensTo
+            );
         }
 
         if (shouldWrapBorrowedEth) {

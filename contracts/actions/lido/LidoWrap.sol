@@ -54,7 +54,10 @@ contract LidoWrap is ActionBase, DSMath, LidoHelper {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-    function _lidoWrap(Params memory _inputData) internal returns (uint256 wStEthReceivedAmount, bytes memory logData) {
+    function _lidoWrap(Params memory _inputData)
+        internal
+        returns (uint256 wStEthReceivedAmount, bytes memory logData)
+    {
         require(_inputData.to != address(0), "Can't be sent to burn address");
         require(_inputData.amount > 0, "Amount to wrap can't be 0");
         if (_inputData.useWeth) {

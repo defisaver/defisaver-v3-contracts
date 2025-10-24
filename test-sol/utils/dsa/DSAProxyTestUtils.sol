@@ -10,10 +10,9 @@ import { RegistryUtils } from "../RegistryUtils.sol";
 import { DSAUtils } from "../../../contracts/utils/DSAUtils.sol";
 
 contract DSAProxyTestUtils is CheatCodes, RegistryUtils {
-
     function _addDefiSaverConnector() internal {
         address defiSaverConnector = address(new DefiSaverConnector());
-        redeploy('DefiSaverConnector', defiSaverConnector);
+        redeploy("DefiSaverConnector", defiSaverConnector);
         cheats.label(defiSaverConnector, "DefiSaverConnector");
 
         address[] memory connectors = new address[](1);
@@ -38,13 +37,13 @@ contract DSAProxyTestUtils is CheatCodes, RegistryUtils {
             string[] memory connectorNames = new string[](1);
             connectorNames[0] = DSAUtils.DEFISAVER_CONNECTOR_NAME;
 
-            (bool alreadyAdded, ) = connector.isConnectors(connectorNames);
+            (bool alreadyAdded,) = connector.isConnectors(connectorNames);
             if (alreadyAdded) return;
 
             cheats.prank(Addresses.INSTADAPP_MASTER_ACCOUNT);
             connector.addConnectors(connectorNames, connectors);
-            
-            (bool isOk, ) = connector.isConnectors(connectorNames);
+
+            (bool isOk,) = connector.isConnectors(connectorNames);
             assert(isOk);
         }
     }

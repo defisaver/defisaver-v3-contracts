@@ -24,7 +24,10 @@ contract EulerV2PositionCreator is EulerV2ExecuteActions, CommonPositionCreator 
         });
 
         EulerV2Borrow.Params memory borrowParams = EulerV2Borrow.Params({
-            vault: _params.debtAddr, account: account, receiver: _wallet.owner(), amount: _params.debtAmount
+            vault: _params.debtAddr,
+            account: account,
+            receiver: _wallet.owner(),
+            amount: _params.debtAmount
         });
 
         executeEulerV2Supply(supplyParams, _wallet, false, address(new EulerV2Supply()));

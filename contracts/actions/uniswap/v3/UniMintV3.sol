@@ -5,9 +5,8 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { UniV3Helper } from "./helpers/UniV3Helper.sol";
-import {
-    IUniswapV3NonfungiblePositionManager
-} from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+import { IUniswapV3NonfungiblePositionManager } from
+    "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Mints NFT that represents a position in uni v3
 contract UniMintV3 is ActionBase, UniV3Helper {
@@ -101,20 +100,20 @@ contract UniMintV3 is ActionBase, UniV3Helper {
         internal
         returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)
     {
-        IUniswapV3NonfungiblePositionManager.MintParams memory mintParams =
-            IUniswapV3NonfungiblePositionManager.MintParams({
-                token0: _uniData.token0,
-                token1: _uniData.token1,
-                fee: _uniData.fee,
-                tickLower: _uniData.tickLower,
-                tickUpper: _uniData.tickUpper,
-                amount0Desired: _uniData.amount0Desired,
-                amount1Desired: _uniData.amount1Desired,
-                amount0Min: _uniData.amount0Min,
-                amount1Min: _uniData.amount1Min,
-                recipient: _uniData.recipient,
-                deadline: _uniData.deadline
-            });
+        IUniswapV3NonfungiblePositionManager.MintParams memory mintParams = IUniswapV3NonfungiblePositionManager
+            .MintParams({
+            token0: _uniData.token0,
+            token1: _uniData.token1,
+            fee: _uniData.fee,
+            tickLower: _uniData.tickLower,
+            tickUpper: _uniData.tickUpper,
+            amount0Desired: _uniData.amount0Desired,
+            amount1Desired: _uniData.amount1Desired,
+            amount0Min: _uniData.amount0Min,
+            amount1Min: _uniData.amount1Min,
+            recipient: _uniData.recipient,
+            deadline: _uniData.deadline
+        });
         (tokenId, liquidity, amount0, amount1) = positionManager.mint(mintParams);
     }
 

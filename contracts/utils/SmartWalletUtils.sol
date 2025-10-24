@@ -13,7 +13,6 @@ import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title SmartWalletUtils - Helper contract with utility functions for smart wallets
 contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
-
     /// @notice Determine the type of wallet an address represents
     function _getWalletType(address _wallet) internal view returns (WalletType) {
         if (_isDSProxy(_wallet)) {

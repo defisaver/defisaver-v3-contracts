@@ -59,8 +59,9 @@ contract SkyStakingEngineStake is ActionBase, SkyHelper {
     function _skyStakeInStakingEngine(Params memory _inputData) internal returns (uint256, bytes memory logData) {
         _inputData.amount = SKY_ADDRESS.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         SKY_ADDRESS.approveToken(_inputData.stakingContract, _inputData.amount);
-        ILockstakeEngine(_inputData.stakingContract)
-            .lock(address(this), _inputData.index, _inputData.amount, SKY_REFERRAL_CODE);
+        ILockstakeEngine(_inputData.stakingContract).lock(
+            address(this), _inputData.index, _inputData.amount, SKY_REFERRAL_CODE
+        );
 
         return (_inputData.amount, abi.encode(_inputData));
     }

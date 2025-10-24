@@ -83,10 +83,7 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, SmartWallet
         if (walletType == WalletType.DSPROXY) authAddr = PROXY_AUTH_ADDR;
         if (walletType == WalletType.DSAPROXY) authAddr = DSA_AUTH_ADDR;
 
-        IAuth(authAddr)
-        .callExecute{
-            value: msg.value
-        }(
+        IAuth(authAddr).callExecute{ value: msg.value }(
             _userWallet,
             registry.getAddr(RECIPE_EXECUTOR_ID),
             abi.encodeWithSelector(

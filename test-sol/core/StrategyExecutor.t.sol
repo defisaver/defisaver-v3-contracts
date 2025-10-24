@@ -1,24 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import {SafeModuleAuth} from "../../contracts/core/strategy/SafeModuleAuth.sol";
-import {ProxyAuth} from '../../contracts/core/strategy/ProxyAuth.sol';
-import {DSAAuth} from '../../contracts/core/strategy/DSAAuth.sol';
-import {BotAuth} from '../../contracts/core/strategy/BotAuth.sol';
-import {StrategyExecutor} from '../../contracts/core/strategy/StrategyExecutor.sol';
-import {RecipeExecutor} from '../../contracts/core/RecipeExecutor.sol';
-import {SubStorage} from '../../contracts/core/strategy/SubStorage.sol';
-import {StrategyModel} from '../../contracts/core/strategy/StrategyModel.sol';
-import {CreateSub} from '../../contracts/actions/utils/CreateSub.sol';
-import {ToggleSub} from '../../contracts/actions/utils/ToggleSub.sol';
-import {GasPriceTrigger} from '../../contracts/triggers/GasPriceTrigger.sol';
-import {PullToken} from "../../contracts/actions/utils/PullToken.sol";
-import {BaseTest} from '../utils/BaseTest.sol';
-import {ActionsUtils} from '../utils/ActionsUtils.sol';
-import {SmartWallet} from '../utils/SmartWallet.sol';
-import {Addresses} from '../utils/Addresses.sol';
-import {StrategyBuilder} from '../utils/StrategyBuilder.sol';
-import {DSAProxyTestUtils} from '../utils/dsa/DSAProxyTestUtils.sol';
+import { SafeModuleAuth } from "../../contracts/core/strategy/SafeModuleAuth.sol";
+import { ProxyAuth } from "../../contracts/core/strategy/ProxyAuth.sol";
+import { DSAAuth } from "../../contracts/core/strategy/DSAAuth.sol";
+import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
+import { StrategyExecutor } from "../../contracts/core/strategy/StrategyExecutor.sol";
+import { RecipeExecutor } from "../../contracts/core/RecipeExecutor.sol";
+import { SubStorage } from "../../contracts/core/strategy/SubStorage.sol";
+import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
+import { CreateSub } from "../../contracts/actions/utils/CreateSub.sol";
+import { ToggleSub } from "../../contracts/actions/utils/ToggleSub.sol";
+import { GasPriceTrigger } from "../../contracts/triggers/GasPriceTrigger.sol";
+import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
+import { BaseTest } from "../utils/BaseTest.sol";
+import { ActionsUtils } from "../utils/ActionsUtils.sol";
+import { SmartWallet } from "../utils/SmartWallet.sol";
+import { Addresses } from "../utils/Addresses.sol";
+import { StrategyBuilder } from "../utils/StrategyBuilder.sol";
+import { DSAProxyTestUtils } from "../utils/dsa/DSAProxyTestUtils.sol";
 
 contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
@@ -63,14 +63,14 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
 
         botAuthAddr = address(new BotAuth());
 
-        redeploy('StrategyExecutorID', address(cut));
-        redeploy('PullToken', address(new PullToken()));
-        redeploy('GasPriceTrigger', address(new GasPriceTrigger()));
+        redeploy("StrategyExecutorID", address(cut));
+        redeploy("PullToken", address(new PullToken()));
+        redeploy("GasPriceTrigger", address(new GasPriceTrigger()));
         recipeExecutorAddr = address(new RecipeExecutor());
-        redeploy('RecipeExecutor', recipeExecutorAddr);
-        redeploy('CreateSub', address(new CreateSub()));
-        redeploy('ToggleSub', address(new ToggleSub()));
-        redeploy('BotAuth', botAuthAddr);
+        redeploy("RecipeExecutor", recipeExecutorAddr);
+        redeploy("CreateSub", address(new CreateSub()));
+        redeploy("ToggleSub", address(new ToggleSub()));
+        redeploy("BotAuth", botAuthAddr);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -130,7 +130,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
         sender = wallet.owner();
 
         _addDefiSaverConnector();
-        
+
         _callStrategyBaseTest();
     }
 
@@ -222,7 +222,10 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
         subDataEncoded[1] = bytes32(uint256(_subData.amount));
 
         sub = StrategyModel.StrategySub({
-            strategyOrBundleId: uint64(strategyId), isBundle: false, triggerData: _triggerData, subData: subDataEncoded
+            strategyOrBundleId: uint64(strategyId),
+            isBundle: false,
+            triggerData: _triggerData,
+            subData: subDataEncoded
         });
 
         subId = subStorage.getSubsCount();
@@ -242,11 +245,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
             paramMapping: paramMapping
         });
 
-        wallet.execute(
-            recipeExecutorAddr,
-            abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe),
-            0
-        );
+        wallet.execute(recipeExecutorAddr, abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe), 0);
     }
 
     function _disable_sub(uint256 _subId, StrategyModel.StrategySub memory _sub) internal {

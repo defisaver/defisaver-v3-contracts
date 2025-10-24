@@ -57,15 +57,14 @@ contract SparkSPKClaim is ActionBase {
     }
 
     function _claim(Params memory _params) internal returns (uint256 claimedAmount, bytes memory logData) {
-        claimedAmount = ISparkRewards(_params.rewardContract)
-            .claim(
-                _params.epoch,
-                _params.account,
-                _params.token,
-                _params.cumulativeAmount,
-                _params.expectedMerkleRoot,
-                _params.merkleProof
-            );
+        claimedAmount = ISparkRewards(_params.rewardContract).claim(
+            _params.epoch,
+            _params.account,
+            _params.token,
+            _params.cumulativeAmount,
+            _params.expectedMerkleRoot,
+            _params.merkleProof
+        );
 
         _params.token.withdrawTokens(_params.to, claimedAmount);
 

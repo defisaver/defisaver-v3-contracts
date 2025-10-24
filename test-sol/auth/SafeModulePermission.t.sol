@@ -168,12 +168,14 @@ contract TestCore_SafeModulePermission is MockSafeModulePermission, BaseTest {
                                       HELPERS
     //////////////////////////////////////////////////////////////////////////*/
     function _enable_safe_module(address _moduleAddr) internal {
-        bytes memory enableCalldata = abi.encodeWithSelector(MockSafeModulePermission.enableModule.selector, (_moduleAddr));
+        bytes memory enableCalldata =
+            abi.encodeWithSelector(MockSafeModulePermission.enableModule.selector, (_moduleAddr));
         wallet.execute(address(cut), enableCalldata, 0);
     }
 
     function _disable_module(address _moduleAddr) internal {
-        bytes memory disableCalldata = abi.encodeWithSelector(MockSafeModulePermission.disableModule.selector, (_moduleAddr));
+        bytes memory disableCalldata =
+            abi.encodeWithSelector(MockSafeModulePermission.disableModule.selector, (_moduleAddr));
         wallet.execute(address(cut), disableCalldata, 0);
     }
 }

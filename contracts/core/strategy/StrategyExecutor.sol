@@ -14,7 +14,6 @@ import { WalletType } from "../../utils/DFSTypes.sol";
 
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, SmartWalletUtils {
-
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR =
@@ -94,10 +93,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, SmartWalletUt
         if (walletType == WalletType.DSPROXY) authAddr = PROXY_AUTH_ADDR;
         if (walletType == WalletType.DSAPROXY) authAddr = DSA_AUTH_ADDR;
 
-        IAuth(authAddr)
-        .callExecute{
-            value: msg.value
-        }(
+        IAuth(authAddr).callExecute{ value: msg.value }(
             _userWallet,
             registry.getAddr(RECIPE_EXECUTOR_ID),
             abi.encodeWithSelector(

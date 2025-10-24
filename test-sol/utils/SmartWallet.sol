@@ -50,7 +50,7 @@ contract SmartWallet is BaseTest {
         return walletAddr;
     }
 
-    function createDSAProxy() public ownerAsSender() returns(address payable) {
+    function createDSAProxy() public ownerAsSender returns (address payable) {
         uint256 version = useVersion1DSAProxy() ? 1 : 2;
         walletAddr = payable(IInstaIndex(Addresses.INSTADAPP_INDEX).build(owner, version, address(0)));
         isSafe = false;
@@ -70,8 +70,11 @@ contract SmartWallet is BaseTest {
             ISafe.setup.selector, owners, 1, address(0), bytes(""), address(0), address(0), 0, payable(address(0))
         );
 
-        walletAddr = payable(ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY)
-                .createProxyWithNonce(Addresses.SAFE_SINGLETON, setupData, saltNonce));
+        walletAddr = payable(
+            ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY).createProxyWithNonce(
+                Addresses.SAFE_SINGLETON, setupData, saltNonce
+            )
+        );
 
         isSafe = true;
         isDSA = false;
@@ -84,36 +87,29 @@ contract SmartWallet is BaseTest {
     function execute(address _target, bytes memory _calldata, uint256 _value) public ownerAsSender {
         if (isSafe) {
             bytes memory signatures = bytes.concat(abi.encode(owner, bytes32(0)), bytes1(0x01));
-            bool success = ISafe(walletAddr)
-                .execTransaction(
-                    _target, // to
-                    _value, // eth value
-                    _calldata, // action calldata
-                    ISafe.Operation.DelegateCall, // operation
-                    0, // safeTxGas
-                    0, // baseGas
-                    0, // gasPrice
-                    address(0), // gasToken
-                    payable(0), // refundReceiver
-                    signatures // packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
-                );
+            bool success = ISafe(walletAddr).execTransaction(
+                _target, // to
+                _value, // eth value
+                _calldata, // action calldata
+                ISafe.Operation.DelegateCall, // operation
+                0, // safeTxGas
+                0, // baseGas
+                0, // gasPrice
+                address(0), // gasToken
+                payable(0), // refundReceiver
+                signatures // packed signature data ({bytes32 r}{bytes32 s}{uint8 v})
+            );
             if (!success) {
                 revert SafeTxFailed();
             }
         } else if (isDSProxy) {
-            DSProxy(walletAddr).execute{value: _value}(_target, _calldata);
+            DSProxy(walletAddr).execute{ value: _value }(_target, _calldata);
         } else if (isDSA) {
             // Fix for [FAIL: vm.startPrank: cannot overwrite a prank until it is applied at least once]
             consumePrank();
             vm.startPrank(owner);
 
-            DSAUtils.cast(
-                walletAddr,
-                Addresses.DFS_REGISTRY,
-                owner,
-                _calldata,
-                _value
-            );
+            DSAUtils.cast(walletAddr, Addresses.DFS_REGISTRY, owner, _calldata, _value);
 
             vm.stopPrank();
         } else {

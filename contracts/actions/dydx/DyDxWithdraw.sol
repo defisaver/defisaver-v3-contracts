@@ -69,7 +69,10 @@ contract DyDxWithdraw is ActionBase, DyDxHelper {
 
         Actions.ActionArgs[] memory actions = new Actions.ActionArgs[](1);
         Types.AssetAmount memory amount = Types.AssetAmount({
-            sign: false, denomination: Types.AssetDenomination.Wei, ref: Types.AssetReference.Delta, value: _amount
+            sign: false,
+            denomination: Types.AssetDenomination.Wei,
+            ref: Types.AssetReference.Delta,
+            value: _amount
         });
 
         actions[0] = Actions.ActionArgs({
@@ -81,7 +84,7 @@ contract DyDxWithdraw is ActionBase, DyDxHelper {
             secondaryMarketId: 0, // not used
             otherAccountId: 0, // not used
             data: "" // not used
-        });
+         });
 
         soloMargin.operate(accounts, actions);
 

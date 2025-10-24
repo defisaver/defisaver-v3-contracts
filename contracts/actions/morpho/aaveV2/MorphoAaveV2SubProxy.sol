@@ -41,10 +41,8 @@ contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permissio
     /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
-    function subToMorphoAaveV2Automation(
-        MorphoAaveV2SubData calldata _subData
-    ) public {
-         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+    function subToMorphoAaveV2Automation(MorphoAaveV2SubData calldata _subData) public {
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
 
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
@@ -61,11 +59,7 @@ contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permissio
     /// @notice Calls SubStorage to update the users subscription data
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId send as 0
-    function updateSubData(
-        uint32 _subId1,
-        uint32 _subId2,
-        MorphoAaveV2SubData calldata _subData
-    ) public {
+    function updateSubData(uint32 _subId1, uint32 _subId2, MorphoAaveV2SubData calldata _subData) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
 
@@ -94,10 +88,7 @@ contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permissio
     }
 
     /// @notice Activates Repay sub and if exists a Boost sub
-    function activateSub(
-        uint32 _subId1,
-        uint32 _subId2
-    ) public {
+    function activateSub(uint32 _subId1, uint32 _subId2) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);

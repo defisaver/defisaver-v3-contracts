@@ -168,7 +168,10 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
 
             _borrowFromVault(
                 TestConfig({
-                    vault: borrowVault, account: _account, borrowAmountInUsd: _borrowAmountInUsd, isDirect: _isDirect
+                    vault: borrowVault,
+                    account: _account,
+                    borrowAmountInUsd: _borrowAmountInUsd,
+                    isDirect: _isDirect
                 })
             );
 
@@ -204,7 +207,11 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         uint256 supplyAmount = amountInUSDPrice(assetToken, _supplyAmountInUsd);
 
         EulerV2Supply.Params memory supplyParams = EulerV2Supply.Params({
-            vault: _vault, account: _account, from: sender, amount: supplyAmount, enableAsColl: true
+            vault: _vault,
+            account: _account,
+            from: sender,
+            amount: supplyAmount,
+            enableAsColl: true
         });
 
         executeEulerV2Supply(supplyParams, wallet, false, address(eulerV2Supply));

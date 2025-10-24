@@ -35,7 +35,7 @@ contract LimitOrderSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission,
     }
 
     function subToLimitOrder(LimitOrderSub memory _subData) external {
-         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
 
         _validateData(_subData);
@@ -45,7 +45,11 @@ contract LimitOrderSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission,
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(limitOrderSub);
     }
 
-    function formatLimitOrderSub(LimitOrderSub memory _subData) public view returns (StrategySub memory limitOrderSub) {
+    function formatLimitOrderSub(LimitOrderSub memory _subData)
+        public
+        view
+        returns (StrategySub memory limitOrderSub)
+    {
         limitOrderSub.strategyOrBundleId = LIMIT_ORDER_ID;
         limitOrderSub.isBundle = false;
 

@@ -53,14 +53,16 @@ contract TestPendleTokenRedeem is BaseTest, ActionsUtils {
         // PT eUSDE 29May2025
         markets.push(
             PendleMarketInfo({
-                market: 0x85667e484a32d884010Cf16427D90049CCf46e97, underlyingToken: Addresses.EUSDE_ADDR
+                market: 0x85667e484a32d884010Cf16427D90049CCf46e97,
+                underlyingToken: Addresses.EUSDE_ADDR
             })
         );
 
         // PT sUSDE  29May2025
         markets.push(
             PendleMarketInfo({
-                market: 0xB162B764044697cf03617C2EFbcB1f42e31E4766, underlyingToken: Addresses.SUSDE_ADDR
+                market: 0xB162B764044697cf03617C2EFbcB1f42e31E4766,
+                underlyingToken: Addresses.SUSDE_ADDR
             })
         );
     }

@@ -504,8 +504,10 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     /// @return isBorrowAllowed True if borrow is allowed
     function isBorrowAllowed(address _market) public view returns (bool) {
         address priceOracleSentinelAddress = IPoolAddressesProvider(_market).getPriceOracleSentinel();
-        return (priceOracleSentinelAddress == address(0)
-                || IPriceOracleSentinel(priceOracleSentinelAddress).isBorrowAllowed());
+        return (
+            priceOracleSentinelAddress == address(0)
+                || IPriceOracleSentinel(priceOracleSentinelAddress).isBorrowAllowed()
+        );
     }
 
     /// @notice Fetches the apy after values estimation
@@ -523,8 +525,9 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             address asset = _reserveParams[i].reserveAddress;
             DataTypes.ReserveData memory reserve = lendingPool.getReserveData(asset);
 
-            uint256 totalVarDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply()
-                .rayMul(_getNextVariableBorrowIndex(reserve));
+            uint256 totalVarDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledTotalSupply().rayMul(
+                _getNextVariableBorrowIndex(reserve)
+            );
 
             if (_reserveParams[i].isDebtAsset) {
                 totalVarDebt += _reserveParams[i].liquidityTaken;
@@ -534,23 +537,24 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             }
 
             (uint256 estimatedSupplyRate, uint256 estimatedVariableBorrowRate) = IReserveInterestRateStrategy(
-                    lendingPool.RESERVE_INTEREST_RATE_STRATEGY()
-                )
-                .calculateInterestRates(
-                    DataTypes.CalculateInterestRatesParams({
-                        unbacked: lendingPool.getReserveDeficit(asset),
-                        liquidityAdded: _reserveParams[i].liquidityAdded,
-                        liquidityTaken: _reserveParams[i].liquidityTaken,
-                        totalDebt: totalVarDebt,
-                        reserveFactor: getReserveFactor(reserve.configuration),
-                        reserve: asset,
-                        usingVirtualBalance: true,
-                        virtualUnderlyingBalance: lendingPool.getVirtualUnderlyingBalance(asset)
-                    })
-                );
+                lendingPool.RESERVE_INTEREST_RATE_STRATEGY()
+            ).calculateInterestRates(
+                DataTypes.CalculateInterestRatesParams({
+                    unbacked: lendingPool.getReserveDeficit(asset),
+                    liquidityAdded: _reserveParams[i].liquidityAdded,
+                    liquidityTaken: _reserveParams[i].liquidityTaken,
+                    totalDebt: totalVarDebt,
+                    reserveFactor: getReserveFactor(reserve.configuration),
+                    reserve: asset,
+                    usingVirtualBalance: true,
+                    virtualUnderlyingBalance: lendingPool.getVirtualUnderlyingBalance(asset)
+                })
+            );
 
             estimatedRates[i] = EstimatedRates({
-                reserveAddress: asset, supplyRate: estimatedSupplyRate, variableBorrowRate: estimatedVariableBorrowRate
+                reserveAddress: asset,
+                supplyRate: estimatedSupplyRate,
+                variableBorrowRate: estimatedVariableBorrowRate
             });
         }
 

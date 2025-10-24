@@ -55,20 +55,14 @@ library FluidPaybackLiquidityLogic {
 
         // Execute payback operation.
         (,, int256 exactPaybackAmount) = _data.vaultType.isT1Vault()
-            ? IFluidVaultT1(_data.vault)
-            .operate{
-                value: msgValue
-            }(
+            ? IFluidVaultT1(_data.vault).operate{ value: msgValue }(
                 _data.nftId,
                 0,
                 /* newColl_ */
                 paybackAmount,
                 address(0) /* to_ */
             )
-            : IFluidVaultT2(_data.vault)
-            .operate{
-                value: msgValue
-            }(
+            : IFluidVaultT2(_data.vault).operate{ value: msgValue }(
                 _data.nftId,
                 0, /* newColToken0_ */
                 0, /* newColToken1_ */

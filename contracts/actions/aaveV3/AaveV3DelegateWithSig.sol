@@ -61,10 +61,9 @@ contract AaveV3DelegateWithSig is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _delegate(Params memory _params) internal returns (bytes memory logData) {
-        IDebtToken(_params.debtToken)
-            .delegationWithSig(
-                _params.delegator, _params.delegatee, _params.value, _params.deadline, _params.v, _params.r, _params.s
-            );
+        IDebtToken(_params.debtToken).delegationWithSig(
+            _params.delegator, _params.delegatee, _params.value, _params.deadline, _params.v, _params.r, _params.s
+        );
         logData = abi.encode(_params);
     }
 

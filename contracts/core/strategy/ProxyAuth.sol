@@ -7,7 +7,6 @@ import { WalletAuth } from "./WalletAuth.sol";
 /// @title ProxyAuth Gets DSProxy auth from users and is callable by StrategyExecutor
 /// @notice Current version does not support pausing because of backwards compatibility
 contract ProxyAuth is WalletAuth {
-
     /// @notice Calls the .execute() method of the specified users DSProxy
     /// @dev Contract gets the authority from the user to call it
     /// @dev Only callable by StrategyExecutor

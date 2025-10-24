@@ -93,16 +93,15 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     /// @notice Gets a Fl from Aave and returns back the execution to the action address
     /// @param _flParams All the amounts/tokens and related aave fl data
     function _flAaveV2(FlashLoanParams memory _flParams) internal {
-        ILendingPoolV2(AAVE_LENDING_POOL)
-            .flashLoan(
-                address(this),
-                _flParams.tokens,
-                _flParams.amounts,
-                _flParams.modes,
-                _flParams.onBehalfOf,
-                _flParams.recipeData,
-                AAVE_REFERRAL_CODE
-            );
+        ILendingPoolV2(AAVE_LENDING_POOL).flashLoan(
+            address(this),
+            _flParams.tokens,
+            _flParams.amounts,
+            _flParams.modes,
+            _flParams.onBehalfOf,
+            _flParams.recipeData,
+            AAVE_REFERRAL_CODE
+        );
 
         emit ActionEvent(
             "FLAction", abi.encode("AAVEV2", _flParams.tokens, _flParams.amounts, _flParams.modes, _flParams.onBehalfOf)
@@ -112,16 +111,15 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     /// @notice Gets a Fl from Aave V3 and returns back the execution to the action address
     /// @param _flParams All the amounts/tokens and related aave fl data
     function _flAaveV3(FlashLoanParams memory _flParams) internal {
-        ILendingPoolV2(AAVE_V3_LENDING_POOL)
-            .flashLoan(
-                address(this),
-                _flParams.tokens,
-                _flParams.amounts,
-                _flParams.modes,
-                _flParams.onBehalfOf,
-                _flParams.recipeData,
-                AAVE_REFERRAL_CODE
-            );
+        ILendingPoolV2(AAVE_V3_LENDING_POOL).flashLoan(
+            address(this),
+            _flParams.tokens,
+            _flParams.amounts,
+            _flParams.modes,
+            _flParams.onBehalfOf,
+            _flParams.recipeData,
+            AAVE_REFERRAL_CODE
+        );
 
         emit ActionEvent(
             "FLAction", abi.encode("AAVEV3", _flParams.tokens, _flParams.amounts, _flParams.modes, _flParams.onBehalfOf)
@@ -137,8 +135,9 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
 
     /// @notice Gets a GHO FL from Gho Flash Minter
     function _flGho(FlashLoanParams memory _flParams) internal {
-        IERC3156FlashLender(GHO_FLASH_MINTER_ADDR)
-            .flashLoan(IERC3156FlashBorrower(address(this)), GHO_ADDR, _flParams.amounts[0], _flParams.recipeData);
+        IERC3156FlashLender(GHO_FLASH_MINTER_ADDR).flashLoan(
+            IERC3156FlashBorrower(address(this)), GHO_ADDR, _flParams.amounts[0], _flParams.recipeData
+        );
 
         emit ActionEvent("FLAction", abi.encode("GHO", _flParams.amounts[0]));
     }
@@ -146,8 +145,9 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
     /// @notice Gets a DAI flash loan from Maker and returns back the execution to the action address
     /// @param _flParams All the amounts/tokens and related aave fl data
     function _flMaker(FlashLoanParams memory _flParams) internal {
-        IERC3156FlashLender(DSS_FLASH_ADDR)
-            .flashLoan(IERC3156FlashBorrower(address(this)), DAI_ADDR, _flParams.amounts[0], _flParams.recipeData);
+        IERC3156FlashLender(DSS_FLASH_ADDR).flashLoan(
+            IERC3156FlashBorrower(address(this)), DAI_ADDR, _flParams.amounts[0], _flParams.recipeData
+        );
 
         emit ActionEvent("FLAction", abi.encode("MAKER", _flParams.amounts[0]));
     }
@@ -159,39 +159,41 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         _flParams.modes[1] = _flParams.amounts[1] > 0 ? _flParams.tokens[1].getBalance(address(this)) : 0;
 
         /// @dev FlashLoanParams.tokens, first two array indexes contain tokens, third index contains pool address
-        IUniswapV3Pool(_flParams.tokens[2])
-            .flash(address(this), _flParams.amounts[0], _flParams.amounts[1], abi.encode(_flParams));
+        IUniswapV3Pool(_flParams.tokens[2]).flash(
+            address(this), _flParams.amounts[0], _flParams.amounts[1], abi.encode(_flParams)
+        );
 
         emit ActionEvent("FLAction", abi.encode("UNIV3", _flParams.amounts[0]));
     }
 
     /// @notice Gets a Fl from Spark and returns back the execution to the action address
     function _flSpark(FlashLoanParams memory _flParams) internal {
-        ILendingPoolV2(SPARK_LENDING_POOL)
-            .flashLoan(
-                address(this),
-                _flParams.tokens,
-                _flParams.amounts,
-                _flParams.modes,
-                _flParams.onBehalfOf,
-                _flParams.recipeData,
-                SPARK_REFERRAL_CODE
-            );
+        ILendingPoolV2(SPARK_LENDING_POOL).flashLoan(
+            address(this),
+            _flParams.tokens,
+            _flParams.amounts,
+            _flParams.modes,
+            _flParams.onBehalfOf,
+            _flParams.recipeData,
+            SPARK_REFERRAL_CODE
+        );
 
         emit ActionEvent("FLAction", abi.encode("SPARK", _flParams.amounts[0]));
     }
 
     /// @notice Gets a FL from Morpho blue and returns back the execution to the action address
     function _flMorphoBlue(FlashLoanParams memory _params) internal {
-        IMorphoBlue(MORPHO_BLUE_ADDR)
-            .flashLoan(_params.tokens[0], _params.amounts[0], abi.encode(_params.recipeData, _params.tokens[0]));
+        IMorphoBlue(MORPHO_BLUE_ADDR).flashLoan(
+            _params.tokens[0], _params.amounts[0], abi.encode(_params.recipeData, _params.tokens[0])
+        );
 
         emit ActionEvent("FLAction", abi.encode("MORPHOBLUE", _params.amounts[0]));
     }
 
     function _flCurveUSD(FlashLoanParams memory _params) internal {
-        IERC3156FlashLender(CURVEUSD_FLASH_ADDR)
-            .flashLoan(IERC3156FlashBorrower(address(this)), CURVEUSD_ADDR, _params.amounts[0], _params.recipeData);
+        IERC3156FlashLender(CURVEUSD_FLASH_ADDR).flashLoan(
+            IERC3156FlashBorrower(address(this)), CURVEUSD_ADDR, _params.amounts[0], _params.recipeData
+        );
 
         emit ActionEvent("FLAction", abi.encode("CURVEUSD", _params.amounts[0]));
     }
@@ -261,7 +263,7 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         }
 
         _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _amounts[0] + _feeAmounts[0]);
-        
+
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i] + (_feeAmounts[i]);
 

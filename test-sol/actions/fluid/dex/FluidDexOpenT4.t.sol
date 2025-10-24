@@ -483,9 +483,7 @@ contract TestFluidDexOpenT4 is FluidTestBase {
 
         if (
             ((_vars.isNativeSupply0 || _vars.isNativeSupply1) && _vars.isNativeBorrow0 && !_wrapBorrowedEth)
-                || (!_vars.isNativeSupply0
-                    && !_vars.isNativeSupply1
-                    && _vaultData.supplyToken0 != _vaultData.borrowToken0)
+                || (!_vars.isNativeSupply0 && !_vars.isNativeSupply1 && _vaultData.supplyToken0 != _vaultData.borrowToken0)
         ) {
             assertEq(_vars.senderBorrowToken0BalanceAfter, _vars.senderBorrowToken0BalanceBefore + _vars.borrowAmount0);
         }
@@ -500,9 +498,7 @@ contract TestFluidDexOpenT4 is FluidTestBase {
 
         if (
             ((_vars.isNativeSupply1 || _vars.isNativeSupply0) && _vars.isNativeBorrow1 && !_wrapBorrowedEth)
-                || (!_vars.isNativeSupply1
-                    && !_vars.isNativeSupply0
-                    && _vaultData.supplyToken1 != _vaultData.borrowToken1)
+                || (!_vars.isNativeSupply1 && !_vars.isNativeSupply0 && _vaultData.supplyToken1 != _vaultData.borrowToken1)
         ) {
             assertEq(_vars.senderBorrowToken1BalanceAfter, _vars.senderBorrowToken1BalanceBefore + _vars.borrowAmount1);
         }

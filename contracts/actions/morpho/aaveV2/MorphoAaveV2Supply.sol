@@ -66,8 +66,9 @@ contract MorphoAaveV2Supply is ActionBase, MorphoAaveV2Helper {
         if (_params.maxGasForMatching == 0) {
             IMorpho(MORPHO_AAVEV2_ADDR).supply(aTokenAddress, _params.onBehalf, _params.amount);
         } else {
-            IMorpho(MORPHO_AAVEV2_ADDR)
-                .supply(aTokenAddress, _params.onBehalf, _params.amount, _params.maxGasForMatching);
+            IMorpho(MORPHO_AAVEV2_ADDR).supply(
+                aTokenAddress, _params.onBehalf, _params.amount, _params.maxGasForMatching
+            );
         }
 
         bytes memory logData = abi.encode(_params);

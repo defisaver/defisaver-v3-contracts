@@ -9,7 +9,6 @@ import { SmartWallet } from "../utils/SmartWallet.sol";
 import { WalletType } from "../../contracts/utils/DFSTypes.sol";
 
 contract TestCore_SmartWalletUtils is BaseTest {
-
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/

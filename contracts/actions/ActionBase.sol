@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-
 import { ISafe } from "../interfaces/safe/ISafe.sol";
 import { IInstaList } from "../interfaces/insta/IInstaList.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";

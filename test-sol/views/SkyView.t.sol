@@ -2,16 +2,16 @@
 
 pragma solidity =0.8.24;
 
-import {SmartWallet} from "../utils/SmartWallet.sol";
-import {SkyStakingEngineStake} from "../../contracts/actions/sky/SkyStakingEngineStake.sol";
-import {SkyStakingEngineOpen} from "../../contracts/actions/sky/SkyStakingEngineOpen.sol";
-import {SkyStakingEngineSelectFarm} from "../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
-import {SkyView} from "../../contracts/views/SkyView.sol";
+import { SmartWallet } from "../utils/SmartWallet.sol";
+import { SkyStakingEngineStake } from "../../contracts/actions/sky/SkyStakingEngineStake.sol";
+import { SkyStakingEngineOpen } from "../../contracts/actions/sky/SkyStakingEngineOpen.sol";
+import { SkyStakingEngineSelectFarm } from "../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
+import { SkyView } from "../../contracts/views/SkyView.sol";
 
-import {ILockstakeEngine} from "../../contracts/interfaces/sky/ILockstakeEngine.sol";
-import {IStakingRewards} from "../../contracts/interfaces/sky/IStakingRewards.sol";
+import { ILockstakeEngine } from "../../contracts/interfaces/sky/ILockstakeEngine.sol";
+import { IStakingRewards } from "../../contracts/interfaces/sky/IStakingRewards.sol";
 
-import {SkyExecuteActions} from "../utils/executeActions/SkyExecuteActions.sol";
+import { SkyExecuteActions } from "../utils/executeActions/SkyExecuteActions.sol";
 
 contract TestSkyView is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////

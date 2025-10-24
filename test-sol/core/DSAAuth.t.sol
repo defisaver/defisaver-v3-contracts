@@ -16,7 +16,6 @@ import { HandleAuth } from "../../contracts/actions/utils/HandleAuth.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 
 contract TestCore_DSAAuth is ActionsUtils, DSAProxyTestUtils, BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -27,7 +26,7 @@ contract TestCore_DSAAuth is ActionsUtils, DSAProxyTestUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     SmartWallet wallet;
     address dsaProxyAddr;
-    
+
     address strategyExecutorAddr;
     address recipeExecutorAddr;
 
@@ -58,11 +57,7 @@ contract TestCore_DSAAuth is ActionsUtils, DSAProxyTestUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_fail_to_call_execute_when_sender_is_not_executor() public {
         vm.expectRevert(
-            abi.encodeWithSelector(
-                WalletAuth.SenderNotExecutorError.selector,
-                address(this),
-                strategyExecutorAddr
-            )
+            abi.encodeWithSelector(WalletAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr)
         );
         cut.callExecute(dsaProxyAddr, recipeExecutorAddr, bytes("0x"));
     }
@@ -104,11 +99,7 @@ contract TestCore_DSAAuth is ActionsUtils, DSAProxyTestUtils, BaseTest {
                 paramMapping: paramMapping
             });
 
-            wallet.execute(
-                recipeExecutorAddr,
-                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe),
-                0
-            );
+            wallet.execute(recipeExecutorAddr, abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe), 0);
         }
 
         // 3. Execute recipe once we have auth contract permission
@@ -117,7 +108,7 @@ contract TestCore_DSAAuth is ActionsUtils, DSAProxyTestUtils, BaseTest {
             bytes[] memory actionsCalldata = new bytes[](1);
             actionsCalldata[0] = sumInputsEncode(1, 2);
             bytes4[] memory ids = new bytes4[](1);
-            ids[0] = bytes4(keccak256("SumInputs")); 
+            ids[0] = bytes4(keccak256("SumInputs"));
             uint8[][] memory paramsMap = new uint8[][](1);
             paramsMap[0] = new uint8[](2);
 

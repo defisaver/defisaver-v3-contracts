@@ -60,26 +60,24 @@ library FluidWithdrawDexLogic {
     ) internal returns (uint256 exactToken0Withdrawn) {
         // type(int256).min will trigger max withdrawal inside the vault
         (, int256[] memory retVals) = _data.vaultType.isT2Vault()
-            ? IFluidVaultT2(_data.vault)
-                .operatePerfect(
-                    _data.nftId,
-                    type(int256).min, /* perfectColShares_ */
-                    -_data.variableData.minCollToWithdraw.signed256(),
-                    0, /* colToken1MinMax_ */
-                    0, /* newDebt_ */
-                    _sendTokensTo
-                )
-            : IFluidVaultT4(_data.vault)
-                .operatePerfect(
-                    _data.nftId,
-                    type(int256).min, /* perfectColShares_ */
-                    -_data.variableData.minCollToWithdraw.signed256(),
-                    0, /* colToken1MinMax_ */
-                    0, /* perfectDebtShares_ */
-                    0, /* debtToken0MinMax_ */
-                    0, /* debtToken1MinMax_ */
-                    _sendTokensTo
-                );
+            ? IFluidVaultT2(_data.vault).operatePerfect(
+                _data.nftId,
+                type(int256).min, /* perfectColShares_ */
+                -_data.variableData.minCollToWithdraw.signed256(),
+                0, /* colToken1MinMax_ */
+                0, /* newDebt_ */
+                _sendTokensTo
+            )
+            : IFluidVaultT4(_data.vault).operatePerfect(
+                _data.nftId,
+                type(int256).min, /* perfectColShares_ */
+                -_data.variableData.minCollToWithdraw.signed256(),
+                0, /* colToken1MinMax_ */
+                0, /* perfectDebtShares_ */
+                0, /* debtToken0MinMax_ */
+                0, /* debtToken1MinMax_ */
+                _sendTokensTo
+            );
 
         // See IFluidVaultT2:operatePerfect and IFluidVaultT4:operatePerfect for return values indexing.
         exactToken0Withdrawn = uint256(-retVals[1]);
@@ -105,26 +103,24 @@ library FluidWithdrawDexLogic {
     ) internal returns (uint256 exactToken1Withdrawn) {
         // type(int256).min will trigger max withdrawal inside the vault
         (, int256[] memory retVals) = _data.vaultType.isT2Vault()
-            ? IFluidVaultT2(_data.vault)
-                .operatePerfect(
-                    _data.nftId,
-                    type(int256).min, /* perfectColShares_ */
-                    0, /* colToken0MinMax_ */
-                    -_data.variableData.minCollToWithdraw.signed256(),
-                    0, /* newDebt_ */
-                    _sendTokensTo
-                )
-            : IFluidVaultT4(_data.vault)
-                .operatePerfect(
-                    _data.nftId,
-                    type(int256).min, /* perfectColShares_ */
-                    0, /* colToken0MinMax_ */
-                    -_data.variableData.minCollToWithdraw.signed256(),
-                    0, /* perfectDebtShares_ */
-                    0, /* debtToken0MinMax_ */
-                    0, /* debtToken1MinMax_ */
-                    _sendTokensTo
-                );
+            ? IFluidVaultT2(_data.vault).operatePerfect(
+                _data.nftId,
+                type(int256).min, /* perfectColShares_ */
+                0, /* colToken0MinMax_ */
+                -_data.variableData.minCollToWithdraw.signed256(),
+                0, /* newDebt_ */
+                _sendTokensTo
+            )
+            : IFluidVaultT4(_data.vault).operatePerfect(
+                _data.nftId,
+                type(int256).min, /* perfectColShares_ */
+                0, /* colToken0MinMax_ */
+                -_data.variableData.minCollToWithdraw.signed256(),
+                0, /* perfectDebtShares_ */
+                0, /* debtToken0MinMax_ */
+                0, /* debtToken1MinMax_ */
+                _sendTokensTo
+            );
 
         // See IFluidVaultT2:operatePerfect and IFluidVaultT4:operatePerfect for return values indexing.
         exactToken1Withdrawn = uint256(-retVals[2]);
@@ -150,26 +146,24 @@ library FluidWithdrawDexLogic {
         bool _sendColl1AsWrapped
     ) internal returns (uint256 sharesBurnedOrTokenWithdrawn) {
         (, int256 exactCollSharesBurned,) = _data.vaultType.isT2Vault()
-            ? IFluidVaultT2(_data.vault)
-                .operate(
-                    _data.nftId,
-                    -_data.variableData.collAmount0.signed256(),
-                    -_data.variableData.collAmount1.signed256(),
-                    -_data.variableData.maxCollShares.signed256(),
-                    0, /* newDebt_ */
-                    _sendTokensTo
-                )
-            : IFluidVaultT4(_data.vault)
-                .operate(
-                    _data.nftId,
-                    -_data.variableData.collAmount0.signed256(),
-                    -_data.variableData.collAmount1.signed256(),
-                    -_data.variableData.maxCollShares.signed256(),
-                    0, /* newDebtToken0_ */
-                    0, /* newDebtToken1_ */
-                    0, /* debtSharesMinMax_ */
-                    _sendTokensTo
-                );
+            ? IFluidVaultT2(_data.vault).operate(
+                _data.nftId,
+                -_data.variableData.collAmount0.signed256(),
+                -_data.variableData.collAmount1.signed256(),
+                -_data.variableData.maxCollShares.signed256(),
+                0, /* newDebt_ */
+                _sendTokensTo
+            )
+            : IFluidVaultT4(_data.vault).operate(
+                _data.nftId,
+                -_data.variableData.collAmount0.signed256(),
+                -_data.variableData.collAmount1.signed256(),
+                -_data.variableData.maxCollShares.signed256(),
+                0, /* newDebtToken0_ */
+                0, /* newDebtToken1_ */
+                0, /* debtSharesMinMax_ */
+                _sendTokensTo
+            );
 
         sharesBurnedOrTokenWithdrawn = uint256(-exactCollSharesBurned);
 

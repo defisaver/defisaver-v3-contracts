@@ -12,8 +12,8 @@ import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
 contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils, AaveV3Helper {
-    uint64 public immutable REPAY_BUNDLE_ID; 
-    uint64 public immutable BOOST_BUNDLE_ID; 
+    uint64 public immutable REPAY_BUNDLE_ID;
+    uint64 public immutable BOOST_BUNDLE_ID;
 
     constructor(uint64 _repayBundleId, uint64 _boostBundleId) {
         REPAY_BUNDLE_ID = _repayBundleId;
@@ -44,10 +44,8 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sma
     /// @dev Gives wallet permission if needed and registers a new sub
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
-    function subToAaveAutomation(
-        bytes calldata _encodedInput
-    ) public {
-         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+    function subToAaveAutomation(bytes calldata _encodedInput) public {
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
 
         AaveSubData memory subData = parseSubData(_encodedInput);
@@ -66,9 +64,7 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sma
     /// @notice Calls SubStorageL2 to update the users subscription data
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId send as 0
-    function updateSubData(
-        bytes calldata _encodedInput
-    ) public {
+    function updateSubData(bytes calldata _encodedInput) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
@@ -100,9 +96,7 @@ contract AaveV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sma
     }
 
     /// @notice Activates Repay sub and if exists a Boost sub
-    function activateSub(
-        bytes calldata _encodedInput
-    ) public {
+    function activateSub(bytes calldata _encodedInput) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
         _giveAuthContractPermission(_getWalletType(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);

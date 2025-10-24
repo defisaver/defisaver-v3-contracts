@@ -99,9 +99,8 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc {
             (estimatedGas, l1GasCostInEth, injectedExchangeData) =
                 abi.decode(_tStorage.getBytesTransiently(), (uint256, uint256, InjectedExchangeData));
         } else {
-            (estimatedGas, l1GasCostInEth, txSaverData, injectedExchangeData) = abi.decode(
-                _tStorage.getBytesTransiently(), (uint256, uint256, TxSaverSignedData, InjectedExchangeData)
-            );
+            (estimatedGas, l1GasCostInEth, txSaverData, injectedExchangeData) =
+                abi.decode(_tStorage.getBytesTransiently(), (uint256, uint256, TxSaverSignedData, InjectedExchangeData));
         }
     }
 
@@ -115,9 +114,8 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc {
         if (_estimatedGas == 0) return;
 
         // calculate gas cost in src token
-        uint256 txCostInSrcToken = calcGasCostUsingInjectedPrice(
-            _estimatedGas, _exData.srcAddr, _txSaverData.tokenPriceInEth, _l1GasCostInEth
-        );
+        uint256 txCostInSrcToken =
+            calcGasCostUsingInjectedPrice(_estimatedGas, _exData.srcAddr, _txSaverData.tokenPriceInEth, _l1GasCostInEth);
 
         // revert if tx cost is higher than max value set by user
         if (txCostInSrcToken > _txSaverData.maxTxCostInFeeToken) {

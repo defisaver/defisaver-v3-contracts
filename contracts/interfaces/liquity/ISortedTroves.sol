@@ -41,5 +41,8 @@ interface ISortedTroves {
 
     function validInsertPosition(uint256 _ICR, address _prevId, address _nextId) external view returns (bool);
 
-    function findInsertPosition(uint256 _ICR, address _prevId, address _nextId) external view returns (address, address);
+    function findInsertPosition(uint256 _ICR, address _prevId, address _nextId)
+        external
+        view
+        returns (address, address);
 }

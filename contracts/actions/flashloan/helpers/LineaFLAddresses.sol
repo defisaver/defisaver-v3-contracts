@@ -11,7 +11,7 @@ contract LineaFLAddresses {
     address internal constant AAVE_LENDING_POOL_ADDRESS_PROVIDER = 0x89502c3731F69DDC95B65753708A07F8Cd0373F4;
     address internal constant AAVE_V3_LENDING_POOL = 0xc47b8C00b0f69a36fa203Ffeac0334874574a8Ac;
     address internal constant AAVE_V3_LENDING_POOL_ADDRESS_PROVIDER = 0x89502c3731F69DDC95B65753708A07F8Cd0373F4;
-    
+
     address internal constant DFS_REGISTRY_ADDR = 0x09fBeC68D216667C3262211D2E5609578951dCE0;
     ////////// NOT USED
     address internal constant VAULT_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

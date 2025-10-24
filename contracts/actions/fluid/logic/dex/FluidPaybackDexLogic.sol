@@ -52,11 +52,7 @@ library FluidPaybackDexLogic {
     {
         // We always pull maximum amount of token 0 that user allowed and refund any dust amount later
         FluidDexTokensUtils.PulledTokensData memory vars = FluidDexTokensUtils.pullTokensIfNeededWithApproval(
-            _tokens,
-            _data.from,
-            _data.vault,
-            _data.variableData.maxAmountToPull,
-            0 /* amount1 */
+            _tokens, _data.from, _data.vault, _data.variableData.maxAmountToPull, 0 /* amount1 */
         );
 
         uint256 msgValue = vars.isToken0Native ? vars.amount0 : 0;
@@ -65,10 +61,7 @@ library FluidPaybackDexLogic {
 
         // type(int256).min will trigger max payback inside the vault
         (, int256[] memory retVals) = isT3Vault
-            ? IFluidVaultT3(_data.vault)
-            .operatePerfect{
-                value: msgValue
-            }(
+            ? IFluidVaultT3(_data.vault).operatePerfect{ value: msgValue }(
                 _data.nftId,
                 0, /* newCol_ */
                 type(int256).min, /* perfectDebtShares_ */
@@ -76,10 +69,7 @@ library FluidPaybackDexLogic {
                 0, /* debtToken1MinMax_ */
                 address(0) /* to */
             )
-            : IFluidVaultT4(_data.vault)
-            .operatePerfect{
-                value: msgValue
-            }(
+            : IFluidVaultT4(_data.vault).operatePerfect{ value: msgValue }(
                 _data.nftId,
                 0, /* perfectColShares_ */
                 0, /* colToken0MinMax_ */
@@ -130,10 +120,7 @@ library FluidPaybackDexLogic {
 
         // type(int256).min will trigger max payback inside the vault
         (, int256[] memory retVals) = isT3Vault
-            ? IFluidVaultT3(_data.vault)
-            .operatePerfect{
-                value: msgValue
-            }(
+            ? IFluidVaultT3(_data.vault).operatePerfect{ value: msgValue }(
                 _data.nftId,
                 0, /* newCol_ */
                 type(int256).min, /* perfectDebtShares_ */
@@ -141,10 +128,7 @@ library FluidPaybackDexLogic {
                 -vars.amount1.signed256(),
                 address(0) /* to */
             )
-            : IFluidVaultT4(_data.vault)
-            .operatePerfect{
-                value: msgValue
-            }(
+            : IFluidVaultT4(_data.vault).operatePerfect{ value: msgValue }(
                 _data.nftId,
                 0, /* perfectColShares_ */
                 0, /* colToken0MinMax_ */
@@ -186,10 +170,7 @@ library FluidPaybackDexLogic {
         uint256 msgValue = vars.isToken0Native ? vars.amount0 : (vars.isToken1Native ? vars.amount1 : 0);
 
         (,, int256 exactBorrowSharesBurned) = _data.vaultType.isT3Vault()
-            ? IFluidVaultT3(_data.vault)
-            .operate{
-                value: msgValue
-            }(
+            ? IFluidVaultT3(_data.vault).operate{ value: msgValue }(
                 _data.nftId,
                 0, /* newCol_ */
                 -vars.amount0.signed256(),
@@ -197,10 +178,7 @@ library FluidPaybackDexLogic {
                 -_data.variableData.minDebtShares.signed256(),
                 address(0) /* to */
             )
-            : IFluidVaultT4(_data.vault)
-            .operate{
-                value: msgValue
-            }(
+            : IFluidVaultT4(_data.vault).operate{ value: msgValue }(
                 _data.nftId,
                 0, /* newColToken0_ */
                 0, /* newColToken1_ */

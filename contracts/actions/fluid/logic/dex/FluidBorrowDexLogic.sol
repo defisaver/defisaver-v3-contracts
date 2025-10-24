@@ -35,26 +35,24 @@ library FluidBorrowDexLogic {
         address sendTokensTo = (sendDebt0AsWrapped || sendDebt1AsWrapped) ? address(this) : _data.to;
 
         (,, int256 exactDebtShares) = _data.vaultType.isT3Vault()
-            ? IFluidVaultT3(_data.vault)
-                .operate(
-                    _data.nftId,
-                    0, /* newCol_ */
-                    _data.variableData.debtAmount0.signed256(),
-                    _data.variableData.debtAmount1.signed256(),
-                    _data.variableData.maxDebtShares.signed256(),
-                    sendTokensTo
-                )
-            : IFluidVaultT4(_data.vault)
-                .operate(
-                    _data.nftId,
-                    0, /* newColToken0_ */
-                    0, /* newColToken1_ */
-                    0, /* colSharesMinMax_ */
-                    _data.variableData.debtAmount0.signed256(),
-                    _data.variableData.debtAmount1.signed256(),
-                    _data.variableData.maxDebtShares.signed256(),
-                    sendTokensTo
-                );
+            ? IFluidVaultT3(_data.vault).operate(
+                _data.nftId,
+                0, /* newCol_ */
+                _data.variableData.debtAmount0.signed256(),
+                _data.variableData.debtAmount1.signed256(),
+                _data.variableData.maxDebtShares.signed256(),
+                sendTokensTo
+            )
+            : IFluidVaultT4(_data.vault).operate(
+                _data.nftId,
+                0, /* newColToken0_ */
+                0, /* newColToken1_ */
+                0, /* colSharesMinMax_ */
+                _data.variableData.debtAmount0.signed256(),
+                _data.variableData.debtAmount1.signed256(),
+                _data.variableData.maxDebtShares.signed256(),
+                sendTokensTo
+            );
 
         // If one of tokens should be wrapped, re-send them to the recipient
         FluidDexTokensUtils.sendTokens(

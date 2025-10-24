@@ -135,9 +135,8 @@ contract TestEulerV2ReorderCollaterals is EulerV2TestHelper {
         address[] memory _expectedOrderedCollaterals,
         bool _isDirect
     ) internal {
-        bytes memory executeActionCallData = executeActionCalldata(
-            eulerV2ReorderCollaterals(_account, _indexes), _isDirect
-        );
+        bytes memory executeActionCallData =
+            executeActionCalldata(eulerV2ReorderCollaterals(_account, _indexes), _isDirect);
 
         address account = _account == address(0) ? walletAddr : _account;
 
