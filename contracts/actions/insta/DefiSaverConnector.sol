@@ -33,7 +33,7 @@ contract DefiSaverConnector is AdminAuth, InstaConnectorHelper, IConnectorInterf
     /// @return _type Type of the connector. Unused, always returned as 1
     /// @return _id ID of the connector, representing (totalConnectors + 1) at the time this connector was added
     function connectorID() external override pure returns (uint256 _type, uint256 _id) {
-        return (1, 103);
+        return (1, CONNECTOR_ID);
     }
 
     /// @notice Revert on plain ether transfer
