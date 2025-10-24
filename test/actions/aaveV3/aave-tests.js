@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 const { expect } = require('chai');
 
 const hre = require('hardhat');
@@ -36,7 +37,7 @@ const aaveV3SupplyTest = async () => {
         before(async () => {
             console.log('NETWORK:', network);
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
             const poolAddress = await aaveMarketContract.getPool();
@@ -107,18 +108,19 @@ const aaveV3BorrowTest = async () => {
         const network = hre.network.config.name;
         this.timeout(150000);
         let senderAcc; let proxy; let pool; let snapshotId;
-        let WETH_ADDRESS; let aWETH; let BORROW_ASSET_ADDR;
+        let WETH_ADDRESS; let aWETH; let BORROW_ASSET_ADDR; let BORROW_ASSET_DECIMALS;
 
         before(async function () {
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
             const poolAddress = await aaveMarketContract.getPool();
 
             const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
             pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
-            BORROW_ASSET_ADDR = addrs[network].DAI_ADDRESS;
+            BORROW_ASSET_ADDR = network === 'plasma' ? addrs[network].USDT0_ADDR : addrs[network].DAI_ADDRESS;
+            BORROW_ASSET_DECIMALS = network === 'plasma' ? 6 : 18; // USDT0 is 6 decimals, DAI is 18 decimals
 
             const isAssetBorrowable = await isAssetBorrowableV3(
                 addrs[network].AAVE_V3_POOL_DATA_PROVIDER, BORROW_ASSET_ADDR,
@@ -138,7 +140,7 @@ const aaveV3BorrowTest = async () => {
             await revertToSnapshot(snapshotId);
         });
 
-        it(`... should supply WETH and borrow DAI on Aave V3 ${network}`, async () => {
+        it(`... should supply WETH and borrow asset on Aave V3 ${network}`, async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -159,20 +161,20 @@ const aaveV3BorrowTest = async () => {
             const balanceAfter = await balanceOf(aWETH, proxy.address);
             console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
 
-            const reserveDataDAI = await pool.getReserveData(BORROW_ASSET_ADDR);
-            const amountDai = hre.ethers.utils.parseUnits('1000', 18);
+            const reserveDataBorrowAsset = await pool.getReserveData(BORROW_ASSET_ADDR);
+            const borrowAmount = hre.ethers.utils.parseUnits('1000', BORROW_ASSET_DECIMALS);
 
-            const daiBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
+            const borrowAssetBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA before borrow: ${borrowAssetBalanceBefore.toString()}`);
             await aaveV3Borrow(
-                proxy, addrs[network].AAVE_MARKET, amountDai, to, 2, reserveDataDAI.id,
+                proxy, addrs[network].AAVE_MARKET, borrowAmount, to, 2, reserveDataBorrowAsset.id,
             );
 
-            const daiBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
-            expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
+            const borrowAssetBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA after borrow: ${borrowAssetBalanceAfter.toString()}`);
+            expect(borrowAssetBalanceAfter).to.be.gt(borrowAssetBalanceBefore);
         });
-        it(`... should supply WETH and borrow DAI on Aave V3 ${network} using optimised calldata`, async () => {
+        it(`... should supply WETH and borrow asset on Aave V3 ${network} using optimised calldata`, async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -193,18 +195,18 @@ const aaveV3BorrowTest = async () => {
             const balanceAfter = await balanceOf(aWETH, proxy.address);
             console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
 
-            const reserveDataDAI = await pool.getReserveData(BORROW_ASSET_ADDR);
-            const amountDai = hre.ethers.utils.parseUnits('1000', 18);
+            const reserveDataBorrowAsset = await pool.getReserveData(BORROW_ASSET_ADDR);
+            const borrowAmount = hre.ethers.utils.parseUnits('1000', BORROW_ASSET_DECIMALS);
 
-            const daiBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
+            const borrowAssetBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA before borrow: ${borrowAssetBalanceBefore.toString()}`);
             await aaveV3BorrowCalldataOptimised(
-                proxy, addrs[network].AAVE_MARKET, amountDai, to, 2, reserveDataDAI.id,
+                proxy, addrs[network].AAVE_MARKET, borrowAmount, to, 2, reserveDataBorrowAsset.id,
             );
 
-            const daiBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
-            expect(daiBalanceAfter).to.be.gt(daiBalanceBefore);
+            const borrowAssetBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA after borrow: ${borrowAssetBalanceAfter.toString()}`);
+            expect(borrowAssetBalanceAfter).to.be.gt(borrowAssetBalanceBefore);
         });
     });
 };
@@ -218,7 +220,7 @@ const aaveV3WithdrawTest = async () => {
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
             const poolAddress = await aaveMarketContract.getPool();
 
@@ -315,18 +317,19 @@ const aaveV3PaybackTest = async () => {
         this.timeout(150000);
         const network = hre.network.config.name;
         let senderAcc; let proxy; let pool; let snapshotId;
-        let WETH_ADDRESS; let aWETH; let BORROW_ASSET_ADDR;
+        let WETH_ADDRESS; let aWETH; let BORROW_ASSET_ADDR; let BORROW_ASSET_DECIMALS;
 
         before(async function () {
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
             const poolAddress = await aaveMarketContract.getPool();
 
             const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
             pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
-            BORROW_ASSET_ADDR = addrs[network].DAI_ADDRESS;
+            BORROW_ASSET_ADDR = network === 'plasma' ? addrs[network].USDT0_ADDR : addrs[network].DAI_ADDRESS;
+            BORROW_ASSET_DECIMALS = network === 'plasma' ? 6 : 18; // USDT0 is 6 decimals, DAI is 18 decimals
 
             const isAssetBorrowable = await isAssetBorrowableV3(
                 addrs[network].AAVE_V3_POOL_DATA_PROVIDER, BORROW_ASSET_ADDR,
@@ -346,7 +349,7 @@ const aaveV3PaybackTest = async () => {
             await revertToSnapshot(snapshotId);
         });
 
-        it(`... should supply WETH and borrow DAI then repay the debt to Aave V3 on ${network}`, async () => {
+        it(`... should supply WETH and borrow asset then repay the debt to Aave V3 on ${network}`, async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -367,36 +370,38 @@ const aaveV3PaybackTest = async () => {
             const balanceAfter = await balanceOf(aWETH, proxy.address);
             console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
 
-            const reserveDataDAI = await pool.getReserveData(BORROW_ASSET_ADDR);
-            const amountDai = hre.ethers.utils.parseUnits('1000', 18);
+            const reserveDataBorrowAsset = await pool.getReserveData(BORROW_ASSET_ADDR);
+            const borrowAmount = hre.ethers.utils.parseUnits('1000', BORROW_ASSET_DECIMALS);
 
-            const daiBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
+            const borrowAssetBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA before borrow: ${borrowAssetBalanceBefore.toString()}`);
             await aaveV3Borrow(
-                proxy, addrs[network].AAVE_MARKET, amountDai, to, 2, reserveDataDAI.id,
+                proxy, addrs[network].AAVE_MARKET, borrowAmount, to, 2, reserveDataBorrowAsset.id,
             );
 
-            const daiBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
+            const borrowAssetBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA after borrow: ${borrowAssetBalanceAfter.toString()}`);
             await approve(BORROW_ASSET_ADDR, proxy.address);
 
-            const daiVariableTokenDebt = reserveDataDAI.variableDebtTokenAddress;
-            const debtAmountBefore = await balanceOf(daiVariableTokenDebt, proxy.address);
+            const borrowAssetVariableTokenDebt = reserveDataBorrowAsset.variableDebtTokenAddress;
+            const debtAmountBefore = await balanceOf(borrowAssetVariableTokenDebt, proxy.address);
             console.log(`Debt before payback ${debtAmountBefore.toString()}`);
 
             await aaveV3Payback(
-                proxy, addrs[network].AAVE_MARKET, amountDai, from, 2, reserveDataDAI.id,
+                proxy, addrs[network].AAVE_MARKET, borrowAmount, from, 2, reserveDataBorrowAsset.id,
                 BORROW_ASSET_ADDR,
             );
 
-            const daiBalanceAfterPayback = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA after payback:${daiBalanceAfterPayback.toString()}`);
+            const borrowAssetBalanceAfterPayback = await balanceOf(
+                BORROW_ASSET_ADDR, senderAcc.address,
+            );
+            console.log(`Borrow asset on EOA after payback:${borrowAssetBalanceAfterPayback.toString()}`);
 
-            const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
+            const debtAmountAfter = await balanceOf(borrowAssetVariableTokenDebt, proxy.address);
             console.log(`Debt after payback ${debtAmountAfter.toString()}`);
             expect(debtAmountAfter).to.be.lt(debtAmountBefore);
         });
-        it(`... should supply WETH and borrow DAI then repay the debt to Aave V3 on ${network} using optimised calldata`, async () => {
+        it(`... should supply WETH and borrow asset then repay the debt to Aave V3 on ${network} using optimised calldata`, async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -417,37 +422,39 @@ const aaveV3PaybackTest = async () => {
             const balanceAfter = await balanceOf(aWETH, proxy.address);
             console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
 
-            const reserveDataDAI = await pool.getReserveData(BORROW_ASSET_ADDR);
-            const amountDai = hre.ethers.utils.parseUnits('1000', 18);
+            const reserveDataBorrowAsset = await pool.getReserveData(BORROW_ASSET_ADDR);
+            const borrowAmount = hre.ethers.utils.parseUnits('1000', BORROW_ASSET_DECIMALS);
 
-            const daiBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
+            const borrowAssetBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA before borrow: ${borrowAssetBalanceBefore.toString()}`);
             await aaveV3Borrow(
-                proxy, addrs[network].AAVE_MARKET, amountDai, to, 2, reserveDataDAI.id,
+                proxy, addrs[network].AAVE_MARKET, borrowAmount, to, 2, reserveDataBorrowAsset.id,
             );
 
-            const daiBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
+            const borrowAssetBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA after borrow: ${borrowAssetBalanceAfter.toString()}`);
             await approve(BORROW_ASSET_ADDR, proxy.address);
 
-            const daiVariableTokenDebt = reserveDataDAI.variableDebtTokenAddress;
-            const debtAmountBefore = await balanceOf(daiVariableTokenDebt, proxy.address);
+            const borrowAssetVariableTokenDebt = reserveDataBorrowAsset.variableDebtTokenAddress;
+            const debtAmountBefore = await balanceOf(borrowAssetVariableTokenDebt, proxy.address);
             console.log(`Debt before payback ${debtAmountBefore.toString()}`);
 
             await aaveV3Payback(
-                proxy, addrs[network].AAVE_MARKET, amountDai, from, 2, reserveDataDAI.id,
+                proxy, addrs[network].AAVE_MARKET, borrowAmount, from, 2, reserveDataBorrowAsset.id,
                 BORROW_ASSET_ADDR,
             );
 
-            const daiBalanceAfterPayback = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA after payback:${daiBalanceAfterPayback.toString()}`);
+            const borrowAssetBalanceAfterPayback = await balanceOf(
+                BORROW_ASSET_ADDR, senderAcc.address,
+            );
+            console.log(`Borrow asset on EOA after payback:${borrowAssetBalanceAfterPayback.toString()}`);
 
-            const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
+            const debtAmountAfter = await balanceOf(borrowAssetVariableTokenDebt, proxy.address);
             console.log(`Debt after payback ${debtAmountAfter.toString()}`);
 
             expect(debtAmountAfter).to.be.lt(debtAmountBefore);
         });
-        it(`... should supply WETH and borrow DAI then repay uint(-1) ALL debt to Aave V3 on ${network} using optimised calldata`, async () => {
+        it(`... should supply WETH and borrow asset then repay uint(-1) ALL debt to Aave V3 on ${network} using optimised calldata`, async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -468,22 +475,22 @@ const aaveV3PaybackTest = async () => {
             const balanceAfter = await balanceOf(aWETH, proxy.address);
             console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
 
-            const reserveDataDAI = await pool.getReserveData(BORROW_ASSET_ADDR);
-            const amountDai = hre.ethers.utils.parseUnits('1000', 18);
+            const reserveDataBorrowAsset = await pool.getReserveData(BORROW_ASSET_ADDR);
+            const borrowAmount = hre.ethers.utils.parseUnits('1000', BORROW_ASSET_DECIMALS);
 
-            const daiBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
+            const borrowAssetBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA before borrow: ${borrowAssetBalanceBefore.toString()}`);
             await aaveV3Borrow(
-                proxy, addrs[network].AAVE_MARKET, amountDai, to, 2, reserveDataDAI.id,
+                proxy, addrs[network].AAVE_MARKET, borrowAmount, to, 2, reserveDataBorrowAsset.id,
             );
 
-            const daiBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
-            await setBalance(BORROW_ASSET_ADDR, senderAcc.address, amountDai.mul(2));
+            const borrowAssetBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA after borrow: ${borrowAssetBalanceAfter.toString()}`);
+            await setBalance(BORROW_ASSET_ADDR, senderAcc.address, borrowAmount.mul(2));
             await approve(BORROW_ASSET_ADDR, proxy.address);
 
-            const daiVariableTokenDebt = reserveDataDAI.variableDebtTokenAddress;
-            const debtAmountBefore = await balanceOf(daiVariableTokenDebt, proxy.address);
+            const borrowAssetVariableTokenDebt = reserveDataBorrowAsset.variableDebtTokenAddress;
+            const debtAmountBefore = await balanceOf(borrowAssetVariableTokenDebt, proxy.address);
             console.log(`Debt before payback ${debtAmountBefore.toString()}`);
 
             await aaveV3PaybackCalldataOptimised(
@@ -492,14 +499,16 @@ const aaveV3PaybackTest = async () => {
                 hre.ethers.constants.MaxUint256,
                 from,
                 2,
-                reserveDataDAI.id,
+                reserveDataBorrowAsset.id,
                 BORROW_ASSET_ADDR,
             );
 
-            const daiBalanceAfterPayback = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA after payback:${daiBalanceAfterPayback.toString()}`);
+            const borrowAssetBalanceAfterPayback = await balanceOf(
+                BORROW_ASSET_ADDR, senderAcc.address,
+            );
+            console.log(`Borrow asset on EOA after payback:${borrowAssetBalanceAfterPayback.toString()}`);
 
-            const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
+            const debtAmountAfter = await balanceOf(borrowAssetVariableTokenDebt, proxy.address);
             console.log(`Debt after payback ${debtAmountAfter.toString()}`);
 
             expect(debtAmountAfter).to.be.lt(debtAmountBefore);
@@ -517,7 +526,7 @@ const aaveV3SetEModeTest = async () => {
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
             const poolAddress = await aaveMarketContract.getPool();
 
@@ -604,28 +613,30 @@ const aaveV3CollSwitchTest = async () => {
         this.timeout(150000);
         const network = hre.network.config.name;
         let senderAcc; let proxy; let pool; let snapshotId;
-        let WETH_ADDRESS; let aWETH; let DAI_ADDRESS; let aDAI;
+        let WETH_ADDRESS; let aWETH;
+        let BORROW_ASSET_ADDR; let A_BORROW_ASSET; let BORROW_ASSET_DECIMALS;
 
         before(async function () {
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
             const poolAddress = await aaveMarketContract.getPool();
 
             const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
             pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
-            DAI_ADDRESS = addrs[network].DAI_ADDRESS;
+            BORROW_ASSET_ADDR = network === 'plasma' ? addrs[network].USDT0_ADDR : addrs[network].DAI_ADDRESS;
+            BORROW_ASSET_DECIMALS = network === 'plasma' ? 6 : 18;
 
             const isAssetBorrowable = await isAssetBorrowableV3(
-                addrs[network].AAVE_V3_POOL_DATA_PROVIDER, DAI_ADDRESS,
+                addrs[network].AAVE_V3_POOL_DATA_PROVIDER, BORROW_ASSET_ADDR,
             );
             if (!isAssetBorrowable) {
                 console.log('Borrow asset not borrowable. Skipping aaveV3CollSwitchTest');
                 this.skip();
             }
             aWETH = (await pool.getReserveData(WETH_ADDRESS)).aTokenAddress;
-            aDAI = (await pool.getReserveData(DAI_ADDRESS)).aTokenAddress;
+            A_BORROW_ASSET = (await pool.getReserveData(BORROW_ASSET_ADDR)).aTokenAddress;
         });
 
         beforeEach(async () => {
@@ -636,7 +647,7 @@ const aaveV3CollSwitchTest = async () => {
             await revertToSnapshot(snapshotId);
         });
 
-        it(`... should supply WETH and DAI to Aave V3 ${network} then turn off collateral for them`, async () => {
+        it(`... should supply WETH and borrow asset to Aave V3 ${network} then turn off collateral for them`, async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -656,30 +667,37 @@ const aaveV3CollSwitchTest = async () => {
             const balanceAfter = await balanceOf(aWETH, proxy.address);
             console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
 
-            const amountDai = hre.ethers.utils.parseUnits('1000', 18);
-            await setBalance(DAI_ADDRESS, senderAcc.address, amountDai);
+            const borrowAmount = hre.ethers.utils.parseUnits('1000', BORROW_ASSET_DECIMALS);
+            await setBalance(BORROW_ASSET_ADDR, senderAcc.address, borrowAmount);
 
-            const daiBalanceBefore = await balanceOf(DAI_ADDRESS, senderAcc.address);
-            console.log(`DAI on eoa: ${daiBalanceBefore.toString()}`);
+            const borrowAssetBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on eoa: ${borrowAssetBalanceBefore.toString()}`);
 
-            const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
-            const daiAssetId = reserveDataDAI.id;
+            const reserveDataBorrowAsset = await pool.getReserveData(BORROW_ASSET_ADDR);
+            const borrowAssetId = reserveDataBorrowAsset.id;
 
-            const balanceBeforeADAI = await balanceOf(aDAI, proxy.address);
-            console.log(`aDAI on proxy before: ${balanceBeforeADAI.toString()}`);
+            const balanceBeforeABorrowAsset = await balanceOf(A_BORROW_ASSET, proxy.address);
+            console.log(`aBORROW_ASSET on proxy before: ${balanceBeforeABorrowAsset.toString()}`);
+            const supplyBorrowTokenAmount = borrowAmount.mul(2);
+            await setBalance(BORROW_ASSET_ADDR, senderAcc.address, supplyBorrowTokenAmount);
             await aaveV3Supply(
-                proxy, addrs[network].AAVE_MARKET, amount, DAI_ADDRESS, daiAssetId, from,
+                proxy,
+                addrs[network].AAVE_MARKET,
+                supplyBorrowTokenAmount,
+                BORROW_ASSET_ADDR,
+                borrowAssetId,
+                from,
             );
 
-            const balanceAfterADAI = await balanceOf(aDAI, proxy.address);
-            console.log(`aDAI on proxy after: ${balanceAfterADAI.toString()}`);
+            const balanceAfterABorrowAsset = await balanceOf(A_BORROW_ASSET, proxy.address);
+            console.log(`aBORROW_ASSET on proxy after: ${balanceAfterABorrowAsset.toString()}`);
 
             //-----------------------------------------------------
             await aaveV3SwitchCollateral(
-                proxy, addrs[network].AAVE_MARKET, 2, [assetId, daiAssetId], [false, false],
+                proxy, addrs[network].AAVE_MARKET, 2, [assetId, borrowAssetId], [false, false],
             );
         });
-        it(`... should supply WETH and DAI to Aave V3 ${network} then turn off collateral for them`, async () => {
+        it(`... should supply WETH and borrow asset to Aave V3 ${network} then turn off collateral for them`, async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -699,27 +717,34 @@ const aaveV3CollSwitchTest = async () => {
             const balanceAfter = await balanceOf(aWETH, proxy.address);
             console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
 
-            const amountDai = hre.ethers.utils.parseUnits('1000', 18);
-            await setBalance(DAI_ADDRESS, senderAcc.address, amountDai);
+            const borrowAmount = hre.ethers.utils.parseUnits('1000', BORROW_ASSET_DECIMALS);
+            await setBalance(BORROW_ASSET_ADDR, senderAcc.address, borrowAmount);
 
-            const daiBalanceBefore = await balanceOf(DAI_ADDRESS, senderAcc.address);
-            console.log(`DAI on eoa: ${daiBalanceBefore.toString()}`);
+            const borrowAssetBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on eoa: ${borrowAssetBalanceBefore.toString()}`);
 
-            const reserveDataDAI = await pool.getReserveData(DAI_ADDRESS);
-            const daiAssetId = reserveDataDAI.id;
+            const reserveDataBorrowAsset = await pool.getReserveData(BORROW_ASSET_ADDR);
+            const borrowAssetId = reserveDataBorrowAsset.id;
 
-            const balanceBeforeADAI = await balanceOf(aDAI, proxy.address);
-            console.log(`aDAI on proxy before: ${balanceBeforeADAI.toString()}`);
+            const balanceBeforeABorrowAsset = await balanceOf(A_BORROW_ASSET, proxy.address);
+            console.log(`aBORROW_ASSET on proxy before: ${balanceBeforeABorrowAsset.toString()}`);
+            const supplyBorrowTokenAmount = borrowAmount.mul(2);
+            await setBalance(BORROW_ASSET_ADDR, senderAcc.address, supplyBorrowTokenAmount);
             await aaveV3Supply(
-                proxy, addrs[network].AAVE_MARKET, amount, DAI_ADDRESS, daiAssetId, from,
+                proxy,
+                addrs[network].AAVE_MARKET,
+                supplyBorrowTokenAmount,
+                BORROW_ASSET_ADDR,
+                borrowAssetId,
+                from,
             );
 
-            const balanceAfterADAI = await balanceOf(aDAI, proxy.address);
-            console.log(`aDAI on proxy after: ${balanceAfterADAI.toString()}`);
+            const balanceAfterABorrowAsset = await balanceOf(A_BORROW_ASSET, proxy.address);
+            console.log(`aBORROW_ASSET on proxy after: ${balanceAfterABorrowAsset.toString()}`);
 
             //-----------------------------------------------------
             await aaveV3SwitchCollateralCallDataOptimised(
-                proxy, addrs[network].AAVE_MARKET, 2, [assetId, daiAssetId], [false, false],
+                proxy, addrs[network].AAVE_MARKET, 2, [assetId, borrowAssetId], [false, false],
             );
         });
     });
@@ -730,18 +755,19 @@ const aaveV3ATokenPaybackTest = async () => {
         this.timeout(150000);
         const network = hre.network.config.name;
         let senderAcc; let proxy; let pool; let snapshotId;
-        let WETH_ADDRESS; let aWETH; let BORROW_ASSET_ADDR;
+        let WETH_ADDRESS; let aWETH; let BORROW_ASSET_ADDR; let BORROW_ASSET_DECIMALS;
 
         before(async function () {
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
             const poolAddress = await aaveMarketContract.getPool();
 
             const poolContractName = network !== 'mainnet' ? 'IL2PoolV3' : 'IPoolV3';
             pool = await hre.ethers.getContractAt(poolContractName, poolAddress);
             WETH_ADDRESS = addrs[network].WETH_ADDRESS;
-            BORROW_ASSET_ADDR = addrs[network].DAI_ADDRESS;
+            BORROW_ASSET_ADDR = network === 'plasma' ? addrs[network].USDT0_ADDR : addrs[network].DAI_ADDRESS;
+            BORROW_ASSET_DECIMALS = network === 'plasma' ? 6 : 18;
 
             const isAssetBorrowable = await isAssetBorrowableV3(
                 addrs[network].AAVE_V3_POOL_DATA_PROVIDER, BORROW_ASSET_ADDR,
@@ -760,7 +786,7 @@ const aaveV3ATokenPaybackTest = async () => {
             await revertToSnapshot(snapshotId);
         });
 
-        it(`... should supply WETH and borrow DAI then repay part of debt using aDAI on Aave V3 on ${network}`, async () => {
+        it(`... should supply WETH and borrow borrow asset then repay part of debt using aBORROW_ASSET on Aave V3 on ${network}`, async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -781,44 +807,50 @@ const aaveV3ATokenPaybackTest = async () => {
             const balanceAfter = await balanceOf(aWETH, proxy.address);
             console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
 
-            const reserveDataDAI = await pool.getReserveData(BORROW_ASSET_ADDR);
-            const amountDai = hre.ethers.utils.parseUnits('1000', 18);
+            const reserveDataBorrowAsset = await pool.getReserveData(BORROW_ASSET_ADDR);
+            const borrowAmount = hre.ethers.utils.parseUnits('1000', BORROW_ASSET_DECIMALS);
 
-            const daiBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
+            const borrowAssetBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA before borrow: ${borrowAssetBalanceBefore.toString()}`);
             await aaveV3Borrow(
-                proxy, addrs[network].AAVE_MARKET, amountDai, to, 2, reserveDataDAI.id,
+                proxy, addrs[network].AAVE_MARKET, borrowAmount, to, 2, reserveDataBorrowAsset.id,
             );
 
-            const daiBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
+            const borrowAssetBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA after borrow: ${borrowAssetBalanceAfter.toString()}`);
 
-            const aDAI = reserveDataDAI.aTokenAddress;
+            const aBORROW_ASSET = reserveDataBorrowAsset.aTokenAddress;
 
-            const daiVariableTokenDebt = reserveDataDAI.variableDebtTokenAddress;
-            const debtAmountBefore = await balanceOf(daiVariableTokenDebt, proxy.address);
+            const borrowAssetVariableTokenDebt = reserveDataBorrowAsset.variableDebtTokenAddress;
+            const debtAmountBefore = await balanceOf(borrowAssetVariableTokenDebt, proxy.address);
             console.log(`Debt before payback ${debtAmountBefore.toString()}`);
 
             const paybackAmount = hre.ethers.utils.parseUnits('500', 18);
 
-            await setBalance(aDAI, from, paybackAmount);
+            await setBalance(aBORROW_ASSET, from, paybackAmount);
 
-            await approve(aDAI, proxy.address);
-            const aDaiBalanceBefore = await balanceOf(aDAI, senderAcc.address);
-            console.log(`aDAI on EOA before ATokenPayback: ${aDaiBalanceBefore.toString()}`);
+            await approve(aBORROW_ASSET, proxy.address);
+            const aBorrowAssetBalanceBefore = await balanceOf(aBORROW_ASSET, senderAcc.address);
+            console.log(`aBORROW_ASSET on EOA before ATokenPayback: ${aBorrowAssetBalanceBefore.toString()}`);
             await aaveV3ATokenPayback(
-                proxy, addrs[network].AAVE_MARKET, paybackAmount, from, 2, reserveDataDAI.id, aDAI,
+                proxy,
+                addrs[network].AAVE_MARKET,
+                paybackAmount,
+                from,
+                2,
+                reserveDataBorrowAsset.id,
+                aBORROW_ASSET,
             );
 
-            const aDaiBalanceAfter = await balanceOf(aDAI, senderAcc.address);
-            console.log(`aDAI on EOA after ATokenPayback: ${aDaiBalanceAfter.toString()}`);
+            const aBorrowAssetBalanceAfter = await balanceOf(aBORROW_ASSET, senderAcc.address);
+            console.log(`aBORROW_ASSET on EOA after ATokenPayback: ${aBorrowAssetBalanceAfter.toString()}`);
 
-            const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
+            const debtAmountAfter = await balanceOf(borrowAssetVariableTokenDebt, proxy.address);
             console.log(`Debt after payback ${debtAmountAfter.toString()}`);
             expect(debtAmountAfter).to.be.lt(debtAmountBefore);
         });
 
-        it(`... should supply WETH and borrow DAI then repay part of debt using aDAI on Aave V3 on ${network} using optimised calldata`, async () => {
+        it(`... should supply WETH and borrow borrow asset then repay part of debt using aBORROW_ASSET on Aave V3 on ${network} using optimised calldata`, async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -839,44 +871,50 @@ const aaveV3ATokenPaybackTest = async () => {
             const balanceAfter = await balanceOf(aWETH, proxy.address);
             console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
 
-            const reserveDataDAI = await pool.getReserveData(BORROW_ASSET_ADDR);
-            const amountDai = hre.ethers.utils.parseUnits('1000', 18);
+            const reserveDataBorrowAsset = await pool.getReserveData(BORROW_ASSET_ADDR);
+            const borrowAmount = hre.ethers.utils.parseUnits('1000', BORROW_ASSET_DECIMALS);
 
-            const daiBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
+            const borrowAssetBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA before borrow: ${borrowAssetBalanceBefore.toString()}`);
             await aaveV3Borrow(
-                proxy, addrs[network].AAVE_MARKET, amountDai, to, 2, reserveDataDAI.id,
+                proxy, addrs[network].AAVE_MARKET, borrowAmount, to, 2, reserveDataBorrowAsset.id,
             );
 
-            const daiBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
+            const borrowAssetBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA after borrow: ${borrowAssetBalanceAfter.toString()}`);
 
-            const aDAI = reserveDataDAI.aTokenAddress;
+            const aBORROW_ASSET = reserveDataBorrowAsset.aTokenAddress;
 
-            const daiVariableTokenDebt = reserveDataDAI.variableDebtTokenAddress;
-            const debtAmountBefore = await balanceOf(daiVariableTokenDebt, proxy.address);
+            const borrowAssetVariableTokenDebt = reserveDataBorrowAsset.variableDebtTokenAddress;
+            const debtAmountBefore = await balanceOf(borrowAssetVariableTokenDebt, proxy.address);
             console.log(`Debt before payback ${debtAmountBefore.toString()}`);
 
             const paybackAmount = hre.ethers.utils.parseUnits('500', 18);
 
-            await setBalance(aDAI, from, paybackAmount);
+            await setBalance(aBORROW_ASSET, from, paybackAmount);
 
-            await approve(aDAI, proxy.address);
-            const aDaiBalanceBefore = await balanceOf(aDAI, senderAcc.address);
-            console.log(`aDAI on EOA before ATokenPayback: ${aDaiBalanceBefore.toString()}`);
+            await approve(aBORROW_ASSET, proxy.address);
+            const aBorrowAssetBalanceBefore = await balanceOf(aBORROW_ASSET, senderAcc.address);
+            console.log(`aBORROW_ASSET on EOA before ATokenPayback: ${aBorrowAssetBalanceBefore.toString()}`);
             await aaveV3ATokenPaybackCalldataOptimised(
-                proxy, addrs[network].AAVE_MARKET, paybackAmount, from, 2, reserveDataDAI.id, aDAI,
+                proxy,
+                addrs[network].AAVE_MARKET,
+                paybackAmount,
+                from,
+                2,
+                reserveDataBorrowAsset.id,
+                aBORROW_ASSET,
             );
 
-            const aDaiBalanceAfter = await balanceOf(aDAI, senderAcc.address);
-            console.log(`aDAI on EOA after ATokenPayback: ${aDaiBalanceAfter.toString()}`);
+            const aBorrowAssetBalanceAfter = await balanceOf(aBORROW_ASSET, senderAcc.address);
+            console.log(`aBORROW_ASSET on EOA after ATokenPayback: ${aBorrowAssetBalanceAfter.toString()}`);
 
-            const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
+            const debtAmountAfter = await balanceOf(borrowAssetVariableTokenDebt, proxy.address);
             console.log(`Debt after payback ${debtAmountAfter.toString()}`);
 
             expect(debtAmountAfter).to.be.lt(debtAmountBefore);
         });
-        it(`... should supply WETH and borrow DAI then repay ALL debt using aDAI on Aave V3 on ${network} using optimised calldata`, async () => {
+        it(`... should supply WETH and borrow borrow asset then repay ALL debt using aBORROW_ASSET on Aave V3 on ${network} using optimised calldata`, async () => {
             const amount = hre.ethers.utils.parseUnits('10', 18);
             await setBalance(WETH_ADDRESS, senderAcc.address, amount);
 
@@ -897,39 +935,45 @@ const aaveV3ATokenPaybackTest = async () => {
             const balanceAfter = await balanceOf(aWETH, proxy.address);
             console.log(`aWETH on proxy after: ${balanceAfter.toString()}`);
 
-            const reserveDataDAI = await pool.getReserveData(BORROW_ASSET_ADDR);
-            const amountDai = hre.ethers.utils.parseUnits('1000', 18);
+            const reserveDataBorrowAsset = await pool.getReserveData(BORROW_ASSET_ADDR);
+            const borrowAmount = hre.ethers.utils.parseUnits('1000', BORROW_ASSET_DECIMALS);
 
-            const daiBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA before borrow: ${daiBalanceBefore.toString()}`);
+            const borrowAssetBalanceBefore = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA before borrow: ${borrowAssetBalanceBefore.toString()}`);
             await aaveV3Borrow(
-                proxy, addrs[network].AAVE_MARKET, amountDai, to, 2, reserveDataDAI.id,
+                proxy, addrs[network].AAVE_MARKET, borrowAmount, to, 2, reserveDataBorrowAsset.id,
             );
 
-            const daiBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
-            console.log(`DAI on EOA after borrow: ${daiBalanceAfter.toString()}`);
+            const borrowAssetBalanceAfter = await balanceOf(BORROW_ASSET_ADDR, senderAcc.address);
+            console.log(`Borrow asset on EOA after borrow: ${borrowAssetBalanceAfter.toString()}`);
 
-            const aDAI = reserveDataDAI.aTokenAddress;
+            const aBORROW_ASSET = reserveDataBorrowAsset.aTokenAddress;
 
-            const daiVariableTokenDebt = reserveDataDAI.variableDebtTokenAddress;
-            const debtAmountBefore = await balanceOf(daiVariableTokenDebt, proxy.address);
+            const borrowAssetVariableTokenDebt = reserveDataBorrowAsset.variableDebtTokenAddress;
+            const debtAmountBefore = await balanceOf(borrowAssetVariableTokenDebt, proxy.address);
             console.log(`Debt before payback ${debtAmountBefore.toString()}`);
 
             const paybackAmount = hre.ethers.utils.parseUnits('1500', 18);
 
-            await setBalance(aDAI, from, paybackAmount);
+            await setBalance(aBORROW_ASSET, from, paybackAmount);
 
-            await approve(aDAI, proxy.address);
-            const aDaiBalanceBefore = await balanceOf(aDAI, senderAcc.address);
-            console.log(`aDAI on EOA before ATokenPayback: ${aDaiBalanceBefore.toString()}`);
+            await approve(aBORROW_ASSET, proxy.address);
+            const aBorrowAssetBalanceBefore = await balanceOf(aBORROW_ASSET, senderAcc.address);
+            console.log(`aBORROW_ASSET on EOA before ATokenPayback: ${aBorrowAssetBalanceBefore.toString()}`);
             await aaveV3ATokenPaybackCalldataOptimised(
-                proxy, addrs[network].AAVE_MARKET, paybackAmount, from, 2, reserveDataDAI.id,
+                proxy,
+                addrs[network].AAVE_MARKET,
+                paybackAmount,
+                from,
+                2,
+                reserveDataBorrowAsset.id,
+                aBORROW_ASSET,
             );
 
-            const aDaiBalanceAfter = await balanceOf(aDAI, senderAcc.address);
-            console.log(`aDAI on EOA after ATokenPayback: ${aDaiBalanceAfter.toString()}`);
+            const aBorrowAssetBalanceAfter = await balanceOf(aBORROW_ASSET, senderAcc.address);
+            console.log(`aBORROW_ASSET on EOA after ATokenPayback: ${aBorrowAssetBalanceAfter.toString()}`);
 
-            const debtAmountAfter = await balanceOf(daiVariableTokenDebt, proxy.address);
+            const debtAmountAfter = await balanceOf(borrowAssetVariableTokenDebt, proxy.address);
             console.log(`Debt after payback ${debtAmountAfter.toString()}`);
 
             expect(debtAmountAfter).to.be.lt(debtAmountBefore);
@@ -960,7 +1004,7 @@ const aaveV3ClaimRewardsTest = async () => {
             }
 
             const ownerAcc = '0xEA57Dc30959eb17c506E4dA095fa9181f3E0Ac6D';
-            let proxy = await getProxy(ownerAcc);
+            let proxy = await getProxy(ownerAcc, hre.config.isWalletSafe);
             await impersonateAccount(ownerAcc);
             proxy = proxy.connect(await hre.ethers.provider.getSigner(ownerAcc));
             const aWBTC = '0x078f358208685046a11C85e8ad32895DED33A249';
@@ -1003,7 +1047,7 @@ const aaveV3DelegateCreditTest = async () => {
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         });
 
         it('... delegate credit on AaveV3', async () => {
@@ -1039,7 +1083,7 @@ const aaveV3DelegateCreditWithSigTest = async () => {
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
         });
 
         it('... delegate credit on AaveV3', async () => {
@@ -1147,7 +1191,7 @@ const ghoUnstakeTest = async () => {
             await redeploy('GhoUnstake');
             stkGhoContract = await hre.ethers.getContractAt('IStkAave', stkGHO);
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address);
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
             snapshot = await takeSnapshot();
         });
 
@@ -1178,11 +1222,11 @@ const ghoUnstakeTest = async () => {
 const aaveV3DeployContracts = async () => {
     await redeploy('AaveV3Supply');
     await redeploy('AaveV3Borrow');
-    await redeploy('AaveV3ATokenPayback');
-    await redeploy('AaveV3CollateralSwitch');
+    await redeploy('AaveV3Withdraw');
     await redeploy('AaveV3Payback');
     await redeploy('AaveV3SetEMode');
-    await redeploy('AaveV3Withdraw');
+    await redeploy('AaveV3ATokenPayback');
+    await redeploy('AaveV3CollateralSwitch');
     await redeploy('AaveV3DelegateCredit');
 };
 

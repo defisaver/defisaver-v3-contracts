@@ -22,6 +22,10 @@ const {
     balanceOf,
     BN2Float,
     takeSnapshot,
+    isNetworkFork,
+    sendEther,
+    getStrategyExecutorContract,
+    getContractFromRegistry,
     revertToSnapshot,
     ETH_ADDR,
     BLOCKS_PER_6H,
@@ -57,11 +61,10 @@ const {
     subAaveV3CloseBundle,
 } = require('../utils/l2-strategy-subs');
 
+const { subAaveV3AutomationStrategy } = require('../utils/strategy-subs');
 const {
     callAaveV3RepayL2Strategy,
     callAaveFLV3RepayL2Strategy,
-    callAaveV3BoostL2Strategy,
-    callAaveFLV3BoostL2Strategy,
     callAaveCloseToCollL2Strategy,
     callAaveCloseToDebtL2Strategy,
     callAaveFLCloseToDebtL2Strategy,
@@ -73,6 +76,8 @@ const {
     callAaveFLCloseToCollStrategy,
     callAaveCloseToDebtStrategy,
     callAaveFLCloseToDebtStrategy,
+    callAaveV3BoostStrategy,
+    callAaveV3FLBoostStrategy,
 } = require('../utils/strategy-calls');
 
 const {
@@ -355,43 +360,42 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
         let collAssetId;
         let debtAssetId;
         let flAction;
+        let flAddr;
+        let aaveV3SubProxy;
 
         before(async () => {
             console.log(`Network: ${network}`);
 
-            await resetForkToBlock();
-
-            configure({
-                chainId: chainIds[network],
-                testMode: true,
-            });
+            const isFork = isNetworkFork();
 
             senderAcc = (await hre.ethers.getSigners())[0];
-            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+            botAcc = (await hre.ethers.getSigners())[1];
+            await sendEther(senderAcc, addrs[network].OWNER_ACC, '10');
+            proxy = await getProxy(senderAcc.address);
             proxyAddr = proxy.address;
+            await addBotCaller(botAcc.address, isFork);
+            strategyExecutor = (await getStrategyExecutorContract()).connect(botAcc);
 
-            console.log('proxyAddr: ', proxyAddr);
+            flAction = await getContractFromRegistry('FLAction', isFork);
+            flAddr = flAction.address;
 
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].AAVE_MARKET);
+            const aaveMarketContract = await hre.ethers.getContractAt(
+                'IPoolAddressesProvider',
+                addrs[network].AAVE_MARKET,
+            );
             const poolAddress = await aaveMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
 
-            strategyExecutor = await redeployCore(true);
-
-            await redeploy('BotAuth');
-            await redeploy('AaveV3RatioTrigger');
-            await redeploy('GasFeeTakerL2');
-            await redeploy('DFSSell');
-            await redeploy('AaveV3Supply');
-            await redeploy('AaveV3Borrow');
-            await redeploy('AaveV3RatioCheck');
-            flAction = await redeploy('FLAction');
-
-            aaveView = await redeploy('AaveV3View');
-
-            botAcc = (await hre.ethers.getSigners())[1];
-            await addBotCaller(botAcc.address);
+            await redeploy('AaveV3RatioTrigger', isFork);
+            await redeploy('GasFeeTaker', isFork);
+            await redeploy('DFSSell', isFork);
+            await redeploy('AaveV3Supply', isFork);
+            await redeploy('AaveV3Borrow', isFork);
+            await redeploy('AaveV3RatioCheck', isFork);
+            aaveV3SubProxy = await redeploy('AaveV3SubProxy', isFork, 8, 9);
+            aaveView = await redeploy('AaveV3View', isFork);
+            // flAction = await redeploy('FLAction', true);
         });
 
         for (let i = 0; i < numTestPairs; ++i) {
@@ -436,23 +440,25 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
                     debtAssetId,
                 );
 
-                await deployBundles();
-
                 const targetRatio = 150;
                 const ratioOver = 170;
 
-                subIds = await subAaveV3L2AutomationStrategy(
+                subIds = await subAaveV3AutomationStrategy(
                     proxy,
                     0,
                     ratioOver,
                     targetRatio,
                     0,
                     true,
+                    aaveV3SubProxy.address,
                 );
             });
 
             it('... should call AaveV3 Boost strategy', async () => {
-                const ratioBefore = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
+                const ratioBefore = await aaveView.getSafetyRatio(
+                    addrs[network].AAVE_MARKET,
+                    proxyAddr,
+                );
                 console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
                 const boostAmount = hre.ethers.utils.parseUnits(
@@ -460,66 +466,59 @@ const aaveV3BoostStrategyTest = async (numTestPairs) => {
                     debtAssetInfo.decimals,
                 );
 
-                await callAaveV3BoostL2Strategy(
-                    botAcc,
+                await callAaveV3BoostStrategy(
                     strategyExecutor,
-                    subIds.secondSub,
+                    subIds.boostSubId,
                     collAddr,
                     debtAddr,
                     collAssetId,
                     debtAssetId,
                     boostAmount,
                     0, // strategyIndex
+                    subIds.boostSub,
                 );
 
-                const ratioAfter = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
+                // eslint-disable-next-line max-len
+                const ratioAfter = await aaveView.getSafetyRatio(
+                    addrs[network].AAVE_MARKET,
+                    proxyAddr,
+                );
                 console.log(`Aave position ratio: ${ratioAfter / 1e16}%`);
                 expect(ratioAfter).to.be.lt(ratioBefore);
             });
 
             it('... should call AaveV3 With FL Boost strategy', async () => {
-                const ratioBefore = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
-                console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
-
-                const targetRatio = hre.ethers.utils.parseUnits('1.5', '18');
-                const ratioOver = hre.ethers.utils.parseUnits('1.7', '18');
-
-                // update
-                subIds = await updateAaveV3L2AutomationStrategy(
-                    proxy,
-                    subIds.firstSub,
-                    subIds.secondSub,
-                    '0',
-                    ratioOver.toHexString().slice(2),
-                    targetRatio.toHexString().slice(2),
-                    '0',
-                    true,
+                const ratioBefore = await aaveView.getSafetyRatio(
+                    addrs[network].AAVE_MARKET,
+                    proxyAddr,
                 );
+                console.log(`Aave position ratio: ${ratioBefore / 1e16}%`);
 
                 const boostAmount = hre.ethers.utils.parseUnits(
                     fetchAmountinUSDPrice(testPairs[i].debtAsset, '1000'),
                     debtAssetInfo.decimals,
                 );
 
-                try {
-                    await callAaveFLV3BoostL2Strategy(
-                        botAcc,
-                        strategyExecutor,
-                        subIds.secondSub,
-                        collAddr,
-                        debtAddr,
-                        collAssetId,
-                        debtAssetId,
-                        boostAmount,
-                        flAction.address,
-                        1, // strategyIndex
-                    );
-                } catch (error) {
-                    console.log(error);
-                    throw error;
-                }
+                console.log('boostAmount (debt):', boostAmount.toString());
 
-                const ratioAfter = await aaveView.getRatio(addrs[network].AAVE_MARKET, proxyAddr);
+                await callAaveV3FLBoostStrategy(
+                    strategyExecutor,
+                    subIds.boostSubId,
+                    collAddr,
+                    debtAddr,
+                    collAssetId,
+                    debtAssetId,
+                    boostAmount,
+                    0, // strategyIndex
+                    subIds.boostSub,
+                    flAddr,
+                );
+
+                // eslint-disable-next-line max-len
+                const ratioAfter = await aaveView.getSafetyRatio(
+                    addrs[network].AAVE_MARKET,
+                    proxyAddr,
+                );
                 console.log(`Aave position ratio: ${ratioAfter / 1e16}%`);
                 expect(ratioAfter).to.be.lt(ratioBefore);
             });

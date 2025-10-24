@@ -2123,14 +2123,16 @@
     },
     {
         "name": "AaveV3RatioCheck",
-        "address": "0x8a975A9fB0d77b8d9e7E1694CC868e704D0Ef0fD",
+        "address": "0x6BF59F87046820eFce460a8AdCDeD8fc0ca90898",
         "id": "0x71ef3d4e",
         "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x8a975A9fB0d77b8d9e7E1694CC868e704D0Ef0fD"
+        ]
     },
     {
         "name": "SparkRatioCheck",
@@ -2145,14 +2147,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xe5b2f8d31b47f09400d8afb599e0f239179de6b6",
+        "address": "0xB63565026194672f1db42473CB470B570bba78ce",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.11",
+        "version": "1.0.12",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xe5b2f8d31b47f09400d8afb599e0f239179de6b6",
             "0x5BAD7F432e22BcF1937C8361933c9C804179aEDf",
             "0x0CB0170F3413e54405F64d3C23BA3A1D8Bb96D99",
             "0xFe3BfD9E4d102275AC223704B7c470759E5C883b",
@@ -3593,7 +3596,7 @@
         "name": "CompV3SubProxy",
         "address": "0x2f62a2ec44ed48dd5f2d56b308558ac065e8b794",
         "id": "0x8c896d4c",
-        "path": "contracts/triggers/CompV3RatioTrigger.sol",
+        "path": "contracts/actions/compoundV3/CompV3SubProxy.sol",
         "version": "1.0.4",
         "inRegistry": false,
         "changeTime": 0,
@@ -3756,14 +3759,15 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0x7449c0830B10cbd1BaD1Aa4427Ccb41Fd5C75be5",
+        "address": "0x4100c55Ee98aB045a8cF31Ae84f878B0A3b4F290",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x7449c0830B10cbd1BaD1Aa4427Ccb41Fd5C75be5",
             "0xaFD184d6E048c3C8D18356ef4E9adA024E6fb31c"
         ]
     },
@@ -4644,6 +4648,17 @@
         "path": "contracts/actions/utils/ExecuteCall.sol",
         "version": "1.0.0",
         "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3QuotePriceRangeTrigger",
+        "address": "0x0EEFD00c28A847a1EB536Bb955c20E9C158a4915",
+        "id": "0x1b12e080",
+        "path": "contracts/triggers/AaveV3QuotePriceRangeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
         "changeTime": "0",
         "registryIds": [],
         "history": []

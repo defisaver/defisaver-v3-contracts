@@ -164,6 +164,15 @@ module.exports = {
             blockExplorer: 'etherscan',
             contractVerification: true,
         },
+        plasma: {
+            url: process.env.PLASMA_NODE,
+            accounts: [process.env.PRIV_KEY_PLASMA],
+            chainId: 9745,
+            name: 'plasma',
+            txType: 2,
+            blockExplorer: 'plasmascan',
+            contractVerification: false,
+        },
     },
     solidity: {
         compilers: [
@@ -188,6 +197,16 @@ module.exports = {
     },
     etherscan: {
         apiKey: process.env.ETHERSCAN_API_KEY,
+        customChains: [
+            {
+                network: 'plasma',
+                chainId: 9745,
+                urls: {
+                    apiURL: 'https://api.routescan.io/v2/network/mainnet/evm/9745/etherscan',
+                    browserURL: 'https://plasmascan.io',
+                },
+            },
+        ],
     },
     tenderly: {
         username: process.env.TENDERLY_USERNAME,
@@ -203,6 +222,7 @@ module.exports = {
         Optimism: '0x4200000000000000000000000000000000000006',
         Base: '0x4200000000000000000000000000000000000006',
         Linea: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
+        Plasma: '0x6100E367285b01F48D07953803A2d8dCA5D19873',
     },
 };
 

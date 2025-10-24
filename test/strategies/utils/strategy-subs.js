@@ -33,6 +33,7 @@ const {
 } = require('./triggers');
 
 const {
+    addrs,
     DAI_ADDR,
     WBTC_ADDR,
     WETH_ADDRESS,
@@ -42,7 +43,6 @@ const {
     chainIds,
     BOLD_ADDR,
     network,
-    getAddrFromRegistry,
     executeTxFromProxy,
     getGasUsed,
     calcGasToUSD,
@@ -288,30 +288,26 @@ const subAaveV3AutomationStrategy = async (
     optimalRatioBoost,
     optimalRatioRepay,
     boostEnabled,
+    subProxy,
 ) => {
-    const minRatioBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(minRatio), 16);
-    const maxRatioBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(maxRatio), 16);
-    const optimalRatioBoostBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(optimalRatioBoost), 16);
-    const optimalRatioRepayBytes = hre.ethers.utils.zeroPad(hre.ethers.BigNumber.from(optimalRatioRepay), 16);
-    const boostEnabledBytes = boostEnabled ? '0x01' : '0x00';
-    const subInput = hre.ethers.utils.concat([
-        minRatioBytes,
-        maxRatioBytes,
-        optimalRatioBoostBytes,
-        optimalRatioRepayBytes,
-        boostEnabledBytes,
-    ]);
+    const subInput = automationSdk.strategySubService.aaveV3Encode.leverageManagement(
+        minRatio,
+        maxRatio,
+        optimalRatioBoost,
+        optimalRatioRepay,
+        boostEnabled,
+    );
 
-    const subData = await subToAaveV3Proxy(proxy, subInput);
+    const subData = await subToAaveV3Proxy(proxy, subInput, subProxy);
 
     let subId1 = '0';
     let subId2 = '0';
 
     if (boostEnabled) {
-        subId1 = (parseInt(subData.subId, 10) - 1).toString();
-        subId2 = subData.subId;
+        subId1 = (parseInt(subData.latestSubId, 10) - 1).toString();
+        subId2 = subData.latestSubId;
     } else {
-        subId1 = subData.subId;
+        subId1 = subData.latestSubId;
         subId2 = '0';
     }
 
@@ -321,6 +317,96 @@ const subAaveV3AutomationStrategy = async (
         repaySub: subData.repaySub,
         boostSub: subData.boostSub,
     };
+};
+
+const subAaveV3LeverageManagementGeneric = async (
+    bundleId,
+    proxy,
+    eoaAddr,
+    marketAddr,
+    ratioState,
+    targetRatio,
+    triggerRatio,
+    isEOA,
+) => {
+    const encoder = automationSdk.strategySubService.aaveV3Encode;
+
+    const user = isEOA ? eoaAddr : proxy.address;
+
+    const strategySub = encoder.leverageManagementWithoutSubProxy(
+        bundleId, // strategyOrBundleId
+        marketAddr, // marketAddr
+        user, // user - EOA / SW, depending if it is EOA strategy
+        ratioState, // ratioState -> 0 for boost, 1 for repay
+        targetRatio, // targetRatio
+        triggerRatio, // for trigger
+        true, // isGeneric
+    );
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
+const subAaveV3LeverageManagementOnPriceGeneric = async (
+    proxy,
+    user,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    targetRatio,
+    triggerPrice,
+    priceState,
+    bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.leverageManagementOnPriceGeneric(
+        bundleId,
+        triggerPrice,
+        priceState,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        targetRatio,
+        user,
+    );
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
+const subAaveV3CloseGeneric = async (
+    proxy,
+    user,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    stopLossPrice,
+    stopLossType,
+    takeProfitPrice,
+    takeProfitType,
+    bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.closeOnPriceGeneric(
+        bundleId,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        user,
+        stopLossPrice,
+        stopLossType,
+        takeProfitPrice,
+        takeProfitType,
+    );
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
 };
 
 const subCompV2AutomationStrategy = async (
@@ -1087,6 +1173,9 @@ module.exports = {
     subLiquityAutomationStrategy,
     subAaveV2AutomationStrategy,
     subAaveV3AutomationStrategy,
+    subAaveV3LeverageManagementGeneric,
+    subAaveV3LeverageManagementOnPriceGeneric,
+    subAaveV3CloseGeneric,
     subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,

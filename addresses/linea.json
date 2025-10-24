@@ -155,14 +155,16 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x5b0b7e38c2a8e46cfae13c360bc5927570beee94",
+        "address": "0x1420f4977E7B71AFddccBFc6F6e1505CefdF99F0",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": [
+            "0x5b0b7e38c2a8e46cfae13c360bc5927570beee94"
+        ]
     },
     {
         "name": "ZeroxWrapper",
@@ -501,6 +503,28 @@
         "path": "contracts/utils/DFSSafeFactory.sol",
         "version": "1.0.0",
         "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3ViewSmall",
+        "address": "0xc9D6EfA6e08B66a5Cdc516Bcd5807c2fa69E0f2A",
+        "id": "0xbac9c32d",
+        "path": "contracts/views/AaveV3ViewSmall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "TxSaverExecutor",
+        "address": "0xa4673229241Fb5fAaCFd849375DCb8fc8d07e826",
+        "id": "0x91bfbd87",
+        "path": "contracts/tx-saver/MockTxSaverExecutor.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
         "history": []

@@ -15,6 +15,7 @@ import { IERC4626 } from "../interfaces/IERC4626.sol";
 import { IERC4626StakeToken } from "../interfaces/aaveV3/IERC4626StakeToken.sol";
 import { IUmbrellaRewardsController } from "../interfaces/aaveV3/IUmbrellaRewardsController.sol";
 import { IStaticATokenV2 } from "../interfaces/aaveV3/IStaticATokenV2.sol";
+import { IDebtToken } from "../interfaces/aaveV3/IDebtToken.sol";
 
 import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
 import { WadRayMath } from "../utils/math/WadRayMath.sol";
@@ -164,6 +165,19 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         uint256 userCooldownAmount; // amount of shares available to redeem
         uint256 userEndOfCooldown; // timestamp after which funds will be unlocked for withdrawal
         uint256 userWithdrawalWindow; // period of time to withdraw funds after end of cooldown
+    }
+
+    /// @notice EOA approval and balance data for a specific asset
+    struct EOAApprovalData {
+        address asset; // underlying asset address
+        address aToken; // aToken address
+        address variableDebtToken; // variable debt token address
+        uint256 assetApproval; // EOA approval to SW for underlying asset
+        uint256 aTokenApproval; // EOA approval to SW for aToken
+        uint256 variableDebtDelegation; // EOA debt delegation to SW for variable debt
+        uint256 borrowedVariableAmount; // amount EOA has borrowed (variable)
+        uint256 eoaBalance; // EOA's underlying asset balance
+        uint256 aTokenBalance; // EOA's aToken balance
     }
 
     /**
@@ -450,7 +464,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     function getLoanDataArr(address _market, address[] memory _users) public view returns (LoanData[] memory loans) {
         loans = new LoanData[](_users.length);
 
-        for (uint i = 0; i < _users.length; ++i) {
+        for (uint256 i = 0; i < _users.length; ++i) {
             loans[i] = getLoanData(_market, _users[i]);
         }
     }
@@ -565,6 +579,57 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         for (uint256 i = 0; i < stkTokens.length; ++i) {
             retVal[i] = _fetchStkTokenData(stkTokens[i], _user);
         }
+    }
+
+    /// @notice Fetches EOA balances and approvals towards proxy for all assets in a market
+    /// @param _eoa Address of the EOA
+    /// @param _proxy Address of the proxy/smart wallet
+    /// @param _market Address of the Aave market
+    /// @return approvalData Array of EOAApprovalData for all assets
+    function getEOAApprovalsAndBalancesForAllTokens(address _eoa, address _proxy, address _market)
+        public
+        view
+        returns (EOAApprovalData[] memory approvalData)
+    {
+        IPoolV3 lendingPool = getLendingPool(_market);
+        address[] memory reserveList = lendingPool.getReservesList();
+        approvalData = new EOAApprovalData[](reserveList.length);
+
+        for (uint256 i = 0; i < reserveList.length; i++) {
+            approvalData[i] = getEOAApprovalsAndBalances(reserveList[i], _eoa, _proxy, _market);
+        }
+    }
+
+    /// @notice Fetches `_eoa` balances and approvals towards `_proxy` for `_assets` in a `_market`
+    /// @param _eoa Address of the EOA
+    /// @param _proxy Address of the smart wallet
+    /// @param _market Address of the Aave market
+    /// @return approvalData EOAApprovalData for selected params
+    function getEOAApprovalsAndBalances(address _asset, address _eoa, address _proxy, address _market)
+        public
+        view
+        returns (EOAApprovalData memory approvalData)
+    {
+        IPoolV3 lendingPool = getLendingPool(_market);
+        IAaveProtocolDataProvider dataProvider = getDataProvider(_market);
+
+        DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_asset);
+
+        // Get user data from protocol data provider
+        (uint256 currentATokenBalance,, uint256 currentVariableDebt,,,,,,) =
+            dataProvider.getUserReserveData(_asset, _eoa);
+
+        approvalData = EOAApprovalData({
+            asset: _asset,
+            aToken: reserveData.aTokenAddress,
+            variableDebtToken: reserveData.variableDebtTokenAddress,
+            assetApproval: IERC20(_asset).allowance(_eoa, _proxy),
+            aTokenApproval: IERC20(reserveData.aTokenAddress).allowance(_eoa, _proxy),
+            variableDebtDelegation: IDebtToken(reserveData.variableDebtTokenAddress).borrowAllowance(_eoa, _proxy),
+            borrowedVariableAmount: currentVariableDebt,
+            eoaBalance: IERC20(_asset).balanceOf(_eoa),
+            aTokenBalance: currentATokenBalance
+        });
     }
 
     /**

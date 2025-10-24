@@ -519,14 +519,16 @@
     },
     {
         "name": "AaveV3RatioCheck",
-        "address": "0xfF4d02d551b863575feBA12a2947448Fc96984e7",
+        "address": "0xc50e101E830503f9561f58C87AD0aB2d8175C5dc",
         "id": "0x71ef3d4e",
         "path": "contracts/actions/checkers/AaveV3RatioCheck.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xfF4d02d551b863575feBA12a2947448Fc96984e7"
+        ]
     },
     {
         "name": "CompV3Allow",
@@ -869,14 +871,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xfbd5be40ae3e86068066023f2631f1d9321f157e",
+        "address": "0x723eE7B9D3Fc685Ebac5Ec87F4E5E20513DF975F",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.11",
+        "version": "1.0.8",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xfbd5be40ae3e86068066023f2631f1d9321f157e",
             "0x5269913CE50409910FC5bE03CD768D3630D518F3",
             "0xf140B2904beb743C2f17e0b5f766074212a7e243",
             "0x5410BBB107B490f7A5789CfdB3667D2AbdE9c0eC",
@@ -1291,14 +1294,15 @@
     },
     {
         "name": "AaveV3OpenRatioCheck",
-        "address": "0x9da74c3C4e2d79e04cfaD434fB679a97613fae7E",
+        "address": "0xD99D466087eb9b0A5a37C3dfdC2F2cFc1F59B8B2",
         "id": "0x72b17abf",
         "path": "contracts/actions/checkers/AaveV3OpenRatioCheck.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x9da74c3C4e2d79e04cfaD434fB679a97613fae7E",
             "0xFaC6148cf103BcAf3E90f6EB52373a231861Df18"
         ]
     },
@@ -1527,6 +1531,28 @@
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "AaveV3QuotePriceRangeTrigger",
+        "address": "0x427a2F399B5c7d6Ab380AFa90fc8B4C44015E210",
+        "id": "0x1b12e080",
+        "path": "contracts/triggers/AaveV3QuotePriceRangeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SendTokensAndUnwrap",
+        "address": "0x727690115C5Ca3a96bDc42d9Ab2739512D3E697c",
+        "id": "0x13bc5bc1",
+        "path": "contracts/actions/utils/SendTokensAndUnwrap.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     }

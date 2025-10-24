@@ -13,7 +13,7 @@ const storageSlots = require('../storageSlots.json');
 
 const { BigNumber } = hre.ethers;
 
-const { getAllFiles } = require('../../scripts/hardhat-tasks-functions');
+const { findAllFiles } = require('../../scripts/hardhat-tasks-functions');
 
 const { deployAsOwner, deployContract } = require('../../scripts/utils/deployer');
 
@@ -53,6 +53,7 @@ const addrs = {
         COMP_ADDR: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
         CHICKEN_BONDS_VIEW: '0x809a93fd4a0d7d7906Ef6176f0b5518b418Da08f',
         AAVE_MARKET: '0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e',
+        AAVE_V3_PRIME_MARKET: '0xcfBf336fe147D643B9Cb705648500e101504B16d',
         SPARK_MARKET: '0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE',
         AAVE_V3_VIEW: '0xf4B715BB788cC4071061bd67dC8B56681460A2fF',
         ZRX_ALLOWLIST_ADDR: '0x4BA1f38427b33B8ab7Bb0490200dAE1F1C36823F',
@@ -206,6 +207,28 @@ const addrs = {
         AVG_GAS_PRICE: 0.001,
         ZEROX_WRAPPER: '0x49658e0cf3883c338397c7257619b280df581057',
     },
+    plasma: {
+        REGISTRY_ADDR: '0x44e98bB58d725F2eF93a195F518b335dCB784c78',
+        OWNER_ACC: '0x13fa3D42C09E5E15153F08bb90A79A3Bd63E289D',
+        WETH_ADDRESS: '0x9895D81bB462A195b4922ED7De0e3ACD007c32CB', // Real Wrapped ETH on Plasma, this is NOT wrapped native coin, for that, use WXPL_ADDRESS
+        WXPL_ADDRESS: '0x6100E367285b01F48D07953803A2d8dCA5D19873', // WXPL on Plasma. This is WETH inside DFS contracts
+        DAI_ADDRESS: '', // No deployment on Plasma
+        USDC_ADDR: '', // No deployment on Plasma
+        WRAPPER_EXCHANGE_REGISTRY: '0xef86E36CbbDAdA9F5318Df5D6908760cfF226B54',
+        FEE_RECEIVER: '0x4C0607dAD18c0DE19f6d7b25c0B0f1990818e9d7',
+        FEE_RECIPIENT_ADDR: '0x4C0607dAD18c0DE19f6d7b25c0B0f1990818e9d7',
+        TOKEN_GROUP_REGISTRY: '0x09fBeC68D216667C3262211D2E5609578951dCE0',
+        AAVE_MARKET: '0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9',
+        AAVE_V3_VIEW: '0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C',
+        ETH_ADDR: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        ADMIN_VAULT: '0x6AB90ff536f0E2a880DbCdef1bB665C2acC0eDdC',
+        ADMIN_ACC: '0x7CF4F485e3a7fDa831e0579465881C51F3912A28',
+        EXCHANGE_AGGREGATOR_REGISTRY_ADDR: '0xe40178A2f521FDdF0410d87AE853aDf04500502f',
+        AVG_GAS_PRICE: 0.001,
+        ZEROX_WRAPPER: '0x16c9de87215D2198614dbC5419658eAdf4465025',
+        USDT0_ADDR: '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb',
+        AAVE_V3_POOL_DATA_PROVIDER: '0xf2D6E38B407e31E7E7e4a16E6769728b76c7419F',
+    },
 };
 
 const REGISTRY_ADDR = '0x287778F121F134C66212FB16c9b53eC991D32f5b';
@@ -291,6 +314,7 @@ const chainIds = {
     arbitrum: 42161,
     base: 8453,
     linea: 59144,
+    plasma: 9745,
 };
 
 const AAVE_FL_FEE = 0.09; // TODO: can we fetch this dynamically
@@ -1513,7 +1537,7 @@ const isWalletNameDsProxy = (w) => w === 'DS_PROXY';
 
 const generateIds = () => {
     const idsMap = {};
-    const files = getAllFiles('./contracts');
+    const files = findAllFiles('./contracts');
 
     // add extra non-contract name ids
     files.push('/StrategyExecutorID.sol');

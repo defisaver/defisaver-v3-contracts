@@ -5,21 +5,43 @@ const {
     flatten,
     verifyContract,
     deployContract,
-    sleep,
     findPathByContractName,
     encryptPrivateKey,
-    changeNetworkNameForAddresses,
 } = require('./hardhat-tasks-functions');
 
-task('fladepver', 'Deploys and verifies contract on etherscan')
-    .addOptionalPositionalParam('contractName', 'The name of the contract to flatten, deploy and verify')
-    .addOptionalPositionalParam('gas', 'The price (in gwei) per unit of gas')
-    .addOptionalPositionalParam('nonce', 'The nonce to use in the transaction')
+task('fladepver', 'Deploys and verifies contract(s) on etherscan')
+    .addPositionalParam('gas', 'The price (in gwei) per unit of gas')
+    .addVariadicPositionalParam('contractNames', 'The names of the contracts to flatten, deploy and verify', [], types.string)
+    .addFlag('nonce', 'Use this flag to specify nonce: --nonce NUMBER')
     .setAction(async (args) => {
-        await flatten(await findPathByContractName(args.contractName));
-        const contractAddress = await deployContract(args.contractName, args);
-        await sleep(30000);
-        await verifyContract(contractAddress, args.contractName);
+        const newArgs = { ...args };
+        const contracts = args.contractNames;
+
+        if (contracts.length === 0) {
+            throw new Error('At least one contract name is required. Usage: npx hardhat fladepver GAS_PRICE Contract1 Contract2 ... [--nonce NUMBER]');
+        }
+
+        // Fla - Flatten
+        await Promise.all(contracts.map(async (contractName) => {
+            const path = await findPathByContractName(contractName);
+            await flatten(path);
+        }));
+
+        // Dep - Deploy
+        const deployedAddresses = await deployContract(contracts, newArgs);
+
+        // Ver - Verify
+        console.log('\nStarting contract verification...');
+        const verificationPromises = Object.entries(deployedAddresses)
+            .map(async ([contractName, contractAddress]) => {
+                try {
+                    await verifyContract(contractAddress, contractName);
+                    console.log(`✓ ${contractName} verified successfully`);
+                } catch (error) {
+                    console.log(`✗ Failed to verify ${contractName}: ${error.message}`);
+                }
+            });
+        await Promise.all(verificationPromises);
     });
 
 task('customVerify', 'Verifies a contract on etherscan')
@@ -33,14 +55,6 @@ task('customFlatten', 'Flattens for our DFS team')
     .addOptionalPositionalParam('contractName', 'The contract to flatten')
     .setAction(async (args) => {
         await flatten(await findPathByContractName(args.contractName));
-    });
-
-// DEPRECATED. This will be removed in future. Use 'node scripts/change-repo-network.js' instead.
-task('changeRepoNetwork', 'Changes addresses in helper files')
-    .addOptionalPositionalParam('oldNetworkName', 'Name of the network that replaces old')
-    .addOptionalPositionalParam('newNetworkName', 'Name of the network that replaces old')
-    .setAction(async (args) => {
-        await changeNetworkNameForAddresses(args.oldNetworkName, args.newNetworkName);
     });
 
 task('encryptPrivateKey', 'Encrypt private key')
