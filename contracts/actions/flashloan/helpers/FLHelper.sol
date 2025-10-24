@@ -5,9 +5,8 @@ pragma solidity =0.8.24;
 
 import { ISafe } from "../../../interfaces/safe/ISafe.sol";
 import { IDSProxy } from "../../../interfaces/IDSProxy.sol";
-import { IInstaAccountV2 } from "../../../interfaces/insta/IInstaAccountV2.sol";
 import { IDFSRegistry } from "../../../interfaces/IDFSRegistry.sol";
-
+import { DSAUtils } from "../../../utils/DSAUtils.sol";
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
 import { FLFeeFaucet } from "../../../utils/FLFeeFaucet.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
@@ -31,9 +30,6 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
     /// @dev Id of the RecipeExecutor contract
     bytes4 private constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
-    /// @dev Used for DSA Proxy Accounts
-    string private constant DEFISAVER_CONNECTOR_NAME = "DefiSaverConnector";
-
     // Revert if execution fails when using safe wallet
     error SafeExecutionError();
 
@@ -52,25 +48,22 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
         bytes memory data = abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount);
 
         if (_walletType == WalletType.DSPROXY) {
+            
             IDSProxy(_wallet).execute{ value: address(this).balance }(target, data);
+            
             return;
         }
         
         if (_walletType == WalletType.DSAPROXY) {
-            string[] memory connectors = new string[](1);
-            connectors[0] = DEFISAVER_CONNECTOR_NAME;
-
-            bytes[] memory connectorsData = new bytes[](1);
-            connectorsData[0] = data;
-
-            // Origin will only be used for event logging, so here we will set it to the FL contract
-            address origin = address(this);
-
-            IInstaAccountV2(_wallet).cast{value: address(this).balance}(
-                connectors,
-                connectorsData,
-                origin
+            
+            DSAUtils.cast(
+                _wallet,
+                DFS_REGISTRY_ADDR,
+                address(this), // Only used for event logging, so here we will set it to the FL contract
+                data,
+                address(this).balance
             );
+
             return;
         }
         
