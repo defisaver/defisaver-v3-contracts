@@ -1647,13 +1647,15 @@
     },
     {
         "name": "DSAAuth",
-        "address": "0xB52AD7dDD5BbE47b4e4e0147557D50745c06c635",
+        "address": "0x936afD8BD91F07D40821653843523C6E9Cb61Cdd",
         "id": "0x0432b62c",
         "path": "contracts/core/strategy/DSAAuth.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": [
+            "0xB52AD7dDD5BbE47b4e4e0147557D50745c06c635"
+        ]
     }
 ]

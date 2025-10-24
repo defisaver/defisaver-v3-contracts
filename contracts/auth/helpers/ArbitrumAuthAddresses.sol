@@ -8,5 +8,5 @@ contract ArbitrumAuthAddresses {
     address internal constant ADMIN_ADDR = 0x6AFEA85cFAB61e3a55Ad2e4537252Ec05796BEfa;
     address internal constant PROXY_AUTH_ADDRESS = 0xF3A8479538319756e100C386b3E60BF783680d8f;
     address internal constant MODULE_AUTH_ADDRESS = 0xb3D6b7F561C1F250bF7f0F00eFD19FAE6cE533dd;
-    address internal constant DSA_AUTH_ADDRESS = 0xB52AD7dDD5BbE47b4e4e0147557D50745c06c635;
+    address internal constant DSA_AUTH_ADDRESS = 0x936afD8BD91F07D40821653843523C6E9Cb61Cdd;
 }
