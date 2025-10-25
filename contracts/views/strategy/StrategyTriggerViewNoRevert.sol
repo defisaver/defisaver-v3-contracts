@@ -8,7 +8,7 @@ import { ISafe } from "../../interfaces/protocols/safe/ISafe.sol";
 import { ITrigger } from "../../interfaces/core/ITrigger.sol";
 import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
-import { DSProxy } from "../../DS/DSProxy.sol";
+import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { DFSRegistry } from "../../core/DFSRegistry.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
@@ -196,7 +196,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     //////////////////////////////////////////////////////////////*/
     function _fetchTokenHolder(address _subWallet) internal view returns (address) {
         if (isDSProxy(_subWallet)) {
-            return DSProxy(payable(_subWallet)).owner();
+            return IDSProxy(payable(_subWallet)).owner();
         }
         // if not DSProxy, we assume we are in context of Safe
         address[] memory owners = ISafe(_subWallet).getOwners();

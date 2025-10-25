@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
-import { DSProxy } from "../DS/DSProxy.sol";
+import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { ActionsUtilHelper } from "./utils/helpers/ActionsUtilHelper.sol";
 import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
@@ -166,7 +166,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
 
     function fetchOwnersOrWallet() internal view returns (address) {
         if (isDSProxy(address(this))) {
-            return DSProxy(payable(address(this))).owner();
+            return IDSProxy(payable(address(this))).owner();
         }
 
         // if not DSProxy, we assume we are in context of Safe

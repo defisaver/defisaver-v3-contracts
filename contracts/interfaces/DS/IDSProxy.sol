@@ -3,11 +3,7 @@
 pragma solidity =0.8.24;
 
 abstract contract IDSProxy {
-    // function execute(bytes memory _code, bytes memory _data)
-    //     public
-    //     payable
-    //     virtual
-    //     returns (address, bytes32);
+    function execute(bytes memory _code, bytes memory _data) public payable virtual returns (address, bytes32);
 
     function execute(address _target, bytes memory _data) public payable virtual returns (bytes32);
 

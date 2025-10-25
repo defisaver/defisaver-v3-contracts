@@ -5,10 +5,10 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { UtilHelper } from "../utils/helpers/UtilHelper.sol";
 import { ActionsUtilHelper } from "../actions/utils/helpers/ActionsUtilHelper.sol";
-import { DSProxyFactoryInterface } from "../DS/DSProxyFactoryInterface.sol";
+import { IDSProxyFactory } from "../interfaces/DS/IDSProxyFactory.sol";
 import { DSProxyFactoryHelper } from "../utils/ds-proxy-factory/DSProxyFactoryHelper.sol";
-import { DSProxy } from "../DS/DSProxy.sol";
-import { DSAuth } from "../DS/DSAuth.sol";
+import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
+import { IDSAuth } from "../interfaces/DS/IDSAuth.sol";
 
 /// @title Registry of proxies related to LSV
 contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper, DSProxyFactoryHelper {
@@ -33,7 +33,7 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper, DSProxyFa
 
     function updateRegistry(address _proxyAddr, address _oldOwner, uint256 _indexNumInOldOwnerProxiesArr) public {
         // check if msg.sender is the owner of proxy in question
-        require(DSProxy(payable(_proxyAddr)).owner() == msg.sender);
+        require(IDSProxy(payable(_proxyAddr)).owner() == msg.sender);
 
         // check if oldOwner really was the owner of proxy in question
         require(proxies[_oldOwner][_indexNumInOldOwnerProxiesArr] == _proxyAddr);
@@ -52,7 +52,7 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper, DSProxyFa
     /// @notice Adds proxies to pool for users to later claim and save on gas
     function addToPool(uint256 _numNewProxies) public {
         for (uint256 i = 0; i < _numNewProxies; ++i) {
-            DSProxy newProxy = DSProxyFactoryInterface(PROXY_FACTORY_ADDR).build();
+            IDSProxy newProxy = IDSProxyFactory(PROXY_FACTORY_ADDR).build();
             proxyPool.push(address(newProxy));
         }
     }
@@ -77,10 +77,10 @@ contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper, DSProxyFa
             address newProxy = proxyPool[proxyPool.length - 1];
             proxyPool.pop();
 
-            DSAuth(newProxy).setOwner(_user);
+            IDSAuth(newProxy).setOwner(_user);
             return newProxy;
         } else {
-            DSProxy newProxy = DSProxyFactoryInterface(PROXY_FACTORY_ADDR).build(_user);
+            IDSProxy newProxy = IDSProxyFactory(PROXY_FACTORY_ADDR).build(_user);
             return address(newProxy);
         }
     }

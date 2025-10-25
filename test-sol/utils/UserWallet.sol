@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterface.sol";
-import { DSProxy } from "../../contracts/DS/DSProxy.sol";
+import { IDSProxyFactory } from "../../contracts/interfaces/DS/IDSProxyFactory.sol";
+import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
 abstract contract UserWallet {
-    DSProxy public proxy;
+    IDSProxy public proxy;
     address public proxyAddr;
 
     ISafe public safe;
@@ -20,7 +20,7 @@ abstract contract UserWallet {
     }
 
     function createDSProxy() internal {
-        proxy = DSProxyFactoryInterface(Addresses.DS_PROXY_FACTORY).build();
+        proxy = IDSProxyFactory(Addresses.DS_PROXY_FACTORY).build();
         proxyAddr = address(proxy);
     }
 

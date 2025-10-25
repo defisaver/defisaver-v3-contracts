@@ -28,7 +28,7 @@ ignore = ["deprecated/**"]
 
 
 # Linting -> https://getfoundry.sh/config/reference/linter
-[profile.lint]
+[lint]
 exclude_lints = [
     # "unaliased-plain-import",
     # "unused-import",

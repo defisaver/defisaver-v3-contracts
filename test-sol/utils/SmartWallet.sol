@@ -5,8 +5,8 @@ pragma solidity =0.8.24;
 import { BaseTest } from "./BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
-import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterface.sol";
-import { DSProxy } from "../../contracts/DS/DSProxy.sol";
+import { IDSProxyFactory } from "../../contracts/interfaces/DS/IDSProxyFactory.sol";
+import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { console2 } from "forge-std/console2.sol";
@@ -39,7 +39,7 @@ contract SmartWallet is BaseTest {
     }
 
     function createDSProxy() public ownerAsSender returns (address payable) {
-        walletAddr = payable(address(DSProxyFactoryInterface(Addresses.DS_PROXY_FACTORY).build()));
+        walletAddr = payable(address(IDSProxyFactory(Addresses.DS_PROXY_FACTORY).build()));
         isSafe = false;
         return walletAddr;
     }
@@ -84,7 +84,7 @@ contract SmartWallet is BaseTest {
                 revert SafeTxFailed();
             }
         } else {
-            DSProxy(walletAddr).execute(_target, _calldata);
+            IDSProxy(walletAddr).execute(_target, _calldata);
         }
     }
 

@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { DSProxyFactoryInterface } from "../DS/DSProxyFactoryInterface.sol";
+import { IDSProxyFactory } from "../interfaces/DS/IDSProxyFactory.sol";
 import { DSProxyFactoryHelper } from "./../utils/ds-proxy-factory/DSProxyFactoryHelper.sol";
-import { DSProxy } from "../DS/DSProxy.sol";
-import { DSAuth } from "../DS/DSAuth.sol";
+import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
+import { IDSAuth } from "../interfaces/DS/IDSAuth.sol";
 
 import { DFSProxyRegistry } from "./DFSProxyRegistry.sol";
 import { AdminAuth } from "./../auth/AdminAuth.sol";
@@ -41,7 +41,7 @@ contract DFSProxyRegistryController is AdminAuth, UtilHelper, DSProxyFactoryHelp
     /// @notice Adds proxies to pool for users to later claim and save on gas
     function addToPool(uint256 _numNewProxies) public {
         for (uint256 i = 0; i < _numNewProxies; ++i) {
-            DSProxy newProxy = DSProxyFactoryInterface(PROXY_FACTORY_ADDR).build();
+            IDSProxy newProxy = IDSProxyFactory(PROXY_FACTORY_ADDR).build();
             proxyPool.push(address(newProxy));
         }
     }
@@ -52,11 +52,11 @@ contract DFSProxyRegistryController is AdminAuth, UtilHelper, DSProxyFactoryHelp
             address newProxy = proxyPool[proxyPool.length - 1];
             proxyPool.pop();
 
-            DSAuth(newProxy).setOwner(_user);
+            IDSAuth(newProxy).setOwner(_user);
 
             return newProxy;
         } else {
-            DSProxy newProxy = DSProxyFactoryInterface(PROXY_FACTORY_ADDR).build(_user);
+            IDSProxy newProxy = IDSProxyFactory(PROXY_FACTORY_ADDR).build(_user);
             return address(newProxy);
         }
     }

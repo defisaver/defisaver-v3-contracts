@@ -7,8 +7,8 @@ import { SubStorage } from "../../contracts/core/strategy/SubStorage.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 
 import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
-import { DSAuth } from "../../contracts/DS/DSAuth.sol";
-import { DSAuthority } from "../../contracts/DS/DSAuthority.sol";
+import { IDSAuth } from "../../contracts/interfaces/DS/IDSAuth.sol";
+import { IDSAuthority } from "../../contracts/interfaces/DS/IDSAuthority.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
@@ -64,7 +64,7 @@ contract TestCore_SubProxy is SubStorage, BaseTest {
         if (wallet.isSafe()) {
             assertTrue(ISafe(walletAddr).isModuleEnabled(MODULE_AUTH_ADDRESS));
         } else {
-            DSAuthority authority = DSAuthority(DSAuth(walletAddr).authority());
+            IDSAuthority authority = IDSAuthority(IDSAuth(walletAddr).authority());
             assertTrue(authority.canCall(PROXY_AUTH_ADDRESS, walletAddr, EXECUTE_SELECTOR));
         }
     }
