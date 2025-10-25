@@ -2,17 +2,17 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../_vendor/DS/DSMath.sol";
-import { IWStEth } from "../interfaces/protocols/lido/IWStEth.sol";
-import { UtilHelper } from "./helpers/UtilHelper.sol";
-import { IFeedRegistry } from "../interfaces/protocols/chainlink/IFeedRegistry.sol";
-import { Denominations } from "./Denominations.sol";
-import { ILendingPoolAddressesProviderV2 } from "../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
-import { IPriceOracleGetterAave } from "../interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
-import { IAggregatorV3 } from "../interfaces/protocols/chainlink/IAggregatorV3.sol";
+import { DSMath } from "../../_vendor/DS/DSMath.sol";
+import { IWStEth } from "../../interfaces/protocols/lido/IWStEth.sol";
+import { UtilAddresses } from "../addresses/UtilAddresses.sol";
+import { IFeedRegistry } from "../../interfaces/protocols/chainlink/IFeedRegistry.sol";
+import { Denominations } from "../Denominations.sol";
+import { ILendingPoolAddressesProviderV2 } from "../../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import { IPriceOracleGetterAave } from "../../interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
+import { IAggregatorV3 } from "../../interfaces/protocols/chainlink/IAggregatorV3.sol";
 
 /// @title TokenPriceHelper Fetches prices from chainlink/aave and formats tokens properly
-contract TokenPriceHelper is DSMath, UtilHelper {
+contract TokenPriceHelper is DSMath, UtilAddresses {
     address internal constant BOLD_ADDR = 0x6440f144b7e50D6a8439336510312d2F54beB01D;
 
     IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);

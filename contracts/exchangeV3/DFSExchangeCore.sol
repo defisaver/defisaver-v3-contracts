@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 import { IExchangeV3 } from "../interfaces/exchange/IExchangeV3.sol";
 import { DFSExchangeData } from "./DFSExchangeData.sol";
 import { Discount } from "../utils/Discount.sol";
-import { FeeRecipient } from "../utils/FeeRecipient.sol";
+import { FeeRecipient } from "../utils/fee/FeeRecipient.sol";
 import { DFSExchangeHelper } from "./DFSExchangeHelper.sol";
 import { ExchangeAggregatorRegistry } from "./registries/ExchangeAggregatorRegistry.sol";
 import { WrapperExchangeRegistry } from "./registries/WrapperExchangeRegistry.sol";
@@ -13,7 +13,7 @@ import { ExchangeHelper } from "./helpers/ExchangeHelper.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../interfaces/token/IERC20.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
 
 contract DFSExchangeCore is DSMath, DFSExchangeHelper, DFSExchangeData, ExchangeHelper, StrategyModel {

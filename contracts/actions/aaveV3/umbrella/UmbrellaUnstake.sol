@@ -7,7 +7,7 @@ import { IERC4626StakeToken } from "../../../interfaces/protocols/aaveV3/IERC462
 import { IStaticATokenV2 } from "../../../interfaces/protocols/aaveV3/IStaticATokenV2.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { AaveV3Helper } from "../helpers/AaveV3Helper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title UmbrellaUnstake - Unstake aTokens/underlying or GHO tokens using Umbrella Stake Token
 /// @notice This action will always unwrap waTokens to aTokens/underlying after unstaking.

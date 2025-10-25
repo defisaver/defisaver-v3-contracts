@@ -2,14 +2,14 @@
 
 pragma solidity =0.8.24;
 
-abstract contract IDSProxy {
-    function execute(bytes memory _code, bytes memory _data) public payable virtual returns (address, bytes32);
+interface IDSProxy {
+    function execute(bytes memory _code, bytes memory _data) external payable returns (address, bytes32);
 
-    function execute(address _target, bytes memory _data) public payable virtual returns (bytes32);
+    function execute(address _target, bytes memory _data) external payable returns (bytes32);
 
-    function setCache(address _cacheAddr) public payable virtual returns (bool);
+    function setCache(address _cacheAddr) external payable returns (bool);
 
-    function owner() public view virtual returns (address);
+    function owner() external view returns (address);
 
-    function guard() public view virtual returns (address);
+    function guard() external view returns (address);
 }

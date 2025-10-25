@@ -8,7 +8,7 @@ import { ICollSurplusPool } from "../../../interfaces/protocols/liquityV2/ICollS
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Claims the caller’s accumulated collateral from their liquidated Troves after collateral seizure at liquidation
 /// @notice This action will revert on zero claimable collateral

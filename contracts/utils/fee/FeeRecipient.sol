@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { AdminAuth } from "../auth/AdminAuth.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
 
 /// @title Stores the fee recipient address and allows the owner to change it
 contract FeeRecipient is AdminAuth {

@@ -7,7 +7,7 @@ import { FluidSupplyLiquidityLogic } from "../logic/liquidity/FluidSupplyLiquidi
 import { FluidLiquidityModel } from "../helpers/FluidLiquidityModel.sol";
 import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Open position on Fluid Vault T1 (1_col:1_debt)
 contract FluidVaultT1Open is ActionBase {

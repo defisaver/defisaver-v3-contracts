@@ -6,7 +6,7 @@ import { AdminAuth } from "../auth/AdminAuth.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { FluidRatioHelper } from "../actions/fluid/helpers/FluidRatioHelper.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
+import { TransientStorage } from "../utils/transient/TransientStorage.sol";
 
 /// @title Trigger contract that verifies if current fluid position ratio went over/under the subbed ratio
 contract FluidRatioTrigger is ITrigger, AdminAuth, FluidRatioHelper, TriggerHelper {
@@ -27,7 +27,7 @@ contract FluidRatioTrigger is ITrigger, AdminAuth, FluidRatioHelper, TriggerHelp
     }
 
     /// @dev checks current ratio of a fluid position and triggers if it's in a correct state
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 currRatio = getRatio(triggerSubData.nftId);

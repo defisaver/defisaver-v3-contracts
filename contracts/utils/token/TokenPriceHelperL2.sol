@@ -2,16 +2,16 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../_vendor/DS/DSMath.sol";
-import { UtilHelper } from "./helpers/UtilHelper.sol";
-import { IFeedRegistry } from "../interfaces/protocols/chainlink/IFeedRegistry.sol";
-import { Denominations } from "./Denominations.sol";
-import { ILendingPoolAddressesProviderV2 } from "../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
-import { IPriceOracleGetterAave } from "../interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
-import { IAggregatorV3 } from "../interfaces/protocols/chainlink/IAggregatorV3.sol";
+import { DSMath } from "../../_vendor/DS/DSMath.sol";
+import { UtilAddresses } from "../addresses/UtilAddresses.sol";
+import { IFeedRegistry } from "../../interfaces/protocols/chainlink/IFeedRegistry.sol";
+import { Denominations } from "../Denominations.sol";
+import { ILendingPoolAddressesProviderV2 } from "../../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import { IPriceOracleGetterAave } from "../../interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
+import { IAggregatorV3 } from "../../interfaces/protocols/chainlink/IAggregatorV3.sol";
 
 /// @title TokenPriceHelperL2 Fetches prices from chainlink/aave and formats tokens properly on L2
-contract TokenPriceHelperL2 is DSMath, UtilHelper {
+contract TokenPriceHelperL2 is DSMath, UtilAddresses {
     IFeedRegistry public constant feedRegistry = IFeedRegistry(CHAINLINK_FEED_REGISTRY);
 
     /// @dev Helper function that returns chainlink price data

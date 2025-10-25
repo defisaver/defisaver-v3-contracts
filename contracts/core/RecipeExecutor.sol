@@ -104,8 +104,8 @@ import { BundleStorage } from "../core/strategy/BundleStorage.sol";
 import { SubStorage } from "../core/strategy/SubStorage.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { TxSaverGasCostCalc } from "../utils/TxSaverGasCostCalc.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { TxSaverGasCostCalc } from "../tx-saver/TxSaverGasCostCalc.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 

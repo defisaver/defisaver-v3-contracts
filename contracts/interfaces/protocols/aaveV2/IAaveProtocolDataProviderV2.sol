@@ -2,20 +2,19 @@
 
 pragma solidity =0.8.24;
 
-abstract contract IAaveProtocolDataProviderV2 {
+interface IAaveProtocolDataProviderV2 {
     struct TokenData {
         string symbol;
         address tokenAddress;
     }
 
-    function getAllReservesTokens() external view virtual returns (TokenData[] memory);
+    function getAllReservesTokens() external view returns (TokenData[] memory);
 
-    function getAllATokens() external view virtual returns (TokenData[] memory);
+    function getAllATokens() external view returns (TokenData[] memory);
 
     function getReserveConfigurationData(address asset)
         external
         view
-        virtual
         returns (
             uint256 decimals,
             uint256 ltv,
@@ -32,7 +31,6 @@ abstract contract IAaveProtocolDataProviderV2 {
     function getReserveData(address asset)
         external
         view
-        virtual
         returns (
             uint256 availableLiquidity,
             uint256 totalStableDebt,
@@ -49,7 +47,6 @@ abstract contract IAaveProtocolDataProviderV2 {
     function getUserReserveData(address asset, address user)
         external
         view
-        virtual
         returns (
             uint256 currentATokenBalance,
             uint256 currentStableDebt,
@@ -65,6 +62,5 @@ abstract contract IAaveProtocolDataProviderV2 {
     function getReserveTokensAddresses(address asset)
         external
         view
-        virtual
         returns (address aTokenAddress, address stableDebtTokenAddress, address variableDebtTokenAddress);
 }

@@ -6,7 +6,7 @@ import { ActionBase } from "../ActionBase.sol";
 import { IPot } from "../../interfaces/protocols/mcd/IPot.sol";
 import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Action for withdrawing DAI from Maker DSR
 contract McdDsrWithdraw is McdHelper, ActionBase {

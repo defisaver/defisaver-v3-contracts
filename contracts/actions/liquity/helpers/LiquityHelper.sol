@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ITroveManager } from "../../../interfaces/protocols/liquity/ITroveManager.sol";
 import { IBorrowerOperations } from "../../../interfaces/protocols/liquity/IBorrowerOperations.sol";
 import { IPriceFeed } from "../../../interfaces/protocols/liquity/IPriceFeed.sol";

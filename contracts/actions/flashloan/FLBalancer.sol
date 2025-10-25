@@ -7,7 +7,7 @@ import { IFlashLoanRecipient } from "../../interfaces/protocols/balancer/IFlashL
 import { IFlashLoans } from "../../interfaces/protocols/balancer/IFlashLoans.sol";
 import { IFLParamGetter } from "../../interfaces/flashloan/IFLParamGetter.sol";
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ReentrancyGuard } from "../../_vendor/openzeppelin/ReentrancyGuard.sol";
 
 import { FLHelper } from "./helpers/FLHelper.sol";

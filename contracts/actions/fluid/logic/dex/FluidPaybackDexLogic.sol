@@ -8,7 +8,7 @@ import { IFluidVaultT4 } from "../../../../interfaces/protocols/fluid/vaults/IFl
 import { FluidDexModel } from "../../helpers/FluidDexModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
 import { FluidDexTokensUtils } from "../../helpers/FluidDexTokensUtils.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidPaybackDexLogic - Implements the payback of tokens to Fluid DEX

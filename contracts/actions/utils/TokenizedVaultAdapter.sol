@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import { IERC4626 } from "../../interfaces/token/IERC4626.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 
 /// @notice Action that handles ERC4626 vault operations

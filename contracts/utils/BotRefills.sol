@@ -4,13 +4,13 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { IBotRegistry } from "../interfaces/core/IBotRegistry.sol";
-import { TokenUtils } from "./TokenUtils.sol";
-import { UtilHelper } from "./helpers/UtilHelper.sol";
+import { TokenUtils } from "./token/TokenUtils.sol";
+import { UtilAddresses } from "./addresses/UtilAddresses.sol";
 import { IERC20 } from "../interfaces/token/IERC20.sol";
-import { FeeRecipient } from "./FeeRecipient.sol";
+import { FeeRecipient } from "./fee/FeeRecipient.sol";
 
 /// @title Contract used to refill tx sending bots when they are low on eth
-contract BotRefills is AdminAuth, UtilHelper {
+contract BotRefills is AdminAuth, UtilAddresses {
     using TokenUtils for address;
 
     error WrongRefillCallerError(address caller);

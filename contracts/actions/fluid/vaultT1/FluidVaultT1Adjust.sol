@@ -7,7 +7,7 @@ import { IFluidVaultResolver } from "../../../interfaces/protocols/fluid/resolve
 import { FluidHelper } from "../helpers/FluidHelper.sol";
 import { DFSLib } from "../../../utils/DFSLib.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Adjust position on Fluid Vault T1 (1_col:1_debt)
 contract FluidVaultT1Adjust is ActionBase, FluidHelper {

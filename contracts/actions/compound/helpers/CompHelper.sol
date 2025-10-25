@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { IComptroller } from "../../../interfaces/protocols/compound/IComptroller.sol";
 import { ICToken } from "../../../interfaces/protocols/compound/ICToken.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { MainnetCompAddresses } from "./MainnetCompAddresses.sol";
 
 /// @title Utility functions and data used in Compound actions

@@ -12,7 +12,7 @@ import { FluidBorrowLiquidityLogic } from "../logic/liquidity/FluidBorrowLiquidi
 import { FluidBorrowDexLogic } from "../logic/dex/FluidBorrowDexLogic.sol";
 import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Open position on Fluid DEX vault (T2, T3, T4)
 contract FluidDexOpen is ActionBase, FluidHelper {

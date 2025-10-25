@@ -3,12 +3,12 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "../spark/helpers/SparkHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { IsDAI } from "../../interfaces/protocols/spark/IsDAI.sol";
-import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
+import { UtilAddresses } from "../../utils/addresses/UtilAddresses.sol";
 
 /// @title Action that redeems sDai for dai.
-contract SDaiUnwrap is ActionBase, SparkHelper, UtilHelper {
+contract SDaiUnwrap is ActionBase, SparkHelper, UtilAddresses {
     using TokenUtils for address;
 
     /// @param amount - Amount of sDai to redeem

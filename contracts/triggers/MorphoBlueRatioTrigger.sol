@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
+import { TransientStorage } from "../utils/transient/TransientStorage.sol";
 import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
@@ -30,7 +30,7 @@ contract MorphoBlueRatioTrigger is ITrigger, AdminAuth, MorphoBlueHelper, Trigge
     }
 
     /// @dev checks current safety ratio of a MorphoBlue position and triggers if it's in a correct state
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
         uint256 currRatio = getRatioUsingId(triggerSubData.marketId, triggerSubData.user);
 

@@ -22,7 +22,7 @@ import { WadRayMath } from "../_vendor/aave/WadRayMath.sol";
 import { MathUtils } from "../_vendor/aave/MathUtils.sol";
 import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
 
 /// @title Helper contract to aggregate data from AaveV3 protocol
 contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {

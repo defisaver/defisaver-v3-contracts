@@ -7,7 +7,7 @@ import { IStabilityPool } from "../../../interfaces/protocols/liquityV2/IStabili
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Withdraws a token from the LiquityV2 Stability Pool
 contract LiquityV2SPWithdraw is ActionBase, LiquityV2Helper {

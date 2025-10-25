@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TransientStorageCancun } from "../../utils/TransientStorageCancun.sol";
+import { TransientStorageCancun } from "../../utils/transient/TransientStorageCancun.sol";
 import { IAddressesRegistry } from "../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
 import { ITroveManager } from "../../interfaces/protocols/liquityV2/ITroveManager.sol";
 

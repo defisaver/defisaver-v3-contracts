@@ -7,7 +7,7 @@ import { IBorrowerOperations } from "../../../interfaces/protocols/liquityV2/IBo
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Opens a LiquityV2 trove on a specific market
 /// @notice Opening a trove requires fixed fee of 0.0375 WETH on LiquityV2, regardless of market used.

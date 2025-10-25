@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { IStkAave } from "../../interfaces/protocols/aave/IStkAave.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveHelper } from "./helpers/AaveHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Action to unstake stkAave tokens
 contract AaveUnstake is ActionBase, AaveHelper {

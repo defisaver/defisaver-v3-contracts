@@ -2,17 +2,18 @@
 
 pragma solidity =0.8.24;
 
-import { AdminAuth } from "../../auth/AdminAuth.sol";
-import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
 import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
 import { IKyberScaleHelper } from "../../interfaces/exchange/IKyberScaleHelper.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
+import { DFSExchangeData } from "../DFSExchangeData.sol";
 import { DFSRegistry } from "../../core/DFSRegistry.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
-contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, CoreHelper {
+contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData, AdminAuth, CoreHelper {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 

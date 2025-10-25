@@ -3,10 +3,10 @@
 pragma solidity =0.8.24;
 
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
 import { GasFeeHelperL2 } from "../fee/helpers/GasFeeHelperL2.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title A special Limit Sell L2 action used as a part of the limit order strategy
 /// @dev Adds different gas fee calculation on top of regular LimitSell action

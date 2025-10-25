@@ -10,7 +10,7 @@ import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
 import { IFLParamGetter } from "../../interfaces/flashloan/IFLParamGetter.sol";
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 import { FLHelper } from "./helpers/FLHelper.sol";
 

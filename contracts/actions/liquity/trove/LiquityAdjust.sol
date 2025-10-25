@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { LiquityHelper } from "../helpers/LiquityHelper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Adjusts a Trove by depositing or withdrawing collateral and borrowing or repaying debt.

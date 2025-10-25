@@ -2,10 +2,9 @@
 
 pragma solidity =0.8.24;
 
-abstract contract IFLParamGetter {
+interface IFLParamGetter {
     function getFlashLoanParams(bytes memory _data)
-        public
+        external
         view
-        virtual
         returns (address[] memory tokens, uint256[] memory amount, uint256[] memory modes);
 }

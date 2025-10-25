@@ -7,7 +7,7 @@ import { ISparkDebtToken } from "../../interfaces/protocols/spark/ISparkDebtToke
 import { SparkDataTypes } from "../../interfaces/protocols/spark/SparkDataTypes.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 

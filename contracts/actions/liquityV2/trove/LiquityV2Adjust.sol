@@ -8,7 +8,7 @@ import { ITroveManager } from "../../../interfaces/protocols/liquityV2/ITroveMan
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Adjusts a LiquityV2 trove on a specific market
 contract LiquityV2Adjust is ActionBase, LiquityV2Helper {

@@ -3,11 +3,11 @@ pragma solidity =0.8.24;
 
 import { SafeERC20 } from "../../../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../../../interfaces/token/IERC20.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { AdminAuth } from "../../../../auth/AdminAuth.sol";
 import { DFSExchangeWithTxSaver } from "../../../../exchangeV3/DFSExchangeWithTxSaver.sol";
 import { DFSExchangeData } from "../../../../exchangeV3/DFSExchangeData.sol";
-import { FeeRecipient } from "../../../../utils/FeeRecipient.sol";
+import { FeeRecipient } from "../../../../utils/fee/FeeRecipient.sol";
 import { ActionsUtilHelper } from "../../../utils/helpers/ActionsUtilHelper.sol";
 import { DFSRegistry } from "../../../../core/DFSRegistry.sol";
 import { GasFeeHelper } from "../../../../actions/fee/helpers/GasFeeHelper.sol";

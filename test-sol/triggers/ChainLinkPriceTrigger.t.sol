@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import { ChainLinkPriceTrigger } from "../../contracts/triggers/ChainLinkPriceTrigger.sol";
-import { TokenPriceHelper } from "../../contracts/utils/TokenPriceHelper.sol";
+import { TokenPriceHelper } from "../../contracts/utils/token/TokenPriceHelper.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { console } from "forge-std/console.sol";

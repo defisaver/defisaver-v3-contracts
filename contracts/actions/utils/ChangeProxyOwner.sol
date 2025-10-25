@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { IDSAuth } from "../../interfaces/DS/IDSAuth.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { DFSProxyRegistryController } from "../../utils/DFSProxyRegistryController.sol";
+import { DFSProxyRegistryController } from "../../utils/proxyRegistry/DFSProxyRegistryController.sol";
 
 /// @title Changes the owner of the DSProxy and updated the DFSRegistry
 contract ChangeProxyOwner is ActionBase {

@@ -13,7 +13,7 @@ import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { DFSRegistry } from "../../core/DFSRegistry.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { StrategyIDs } from "./StrategyIDs.sol";
 import { AaveV3Helper } from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
 

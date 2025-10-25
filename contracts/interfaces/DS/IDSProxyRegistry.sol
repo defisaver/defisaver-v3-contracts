@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-abstract contract IDSProxyRegistry {
-    function proxies(address _owner) public view virtual returns (address);
-    function build(address) public virtual returns (address);
+interface IDSProxyRegistry {
+    function proxies(address _owner) external view returns (address);
+    function build(address) external returns (address);
 }

@@ -6,7 +6,7 @@ import { McdHelper } from "./helpers/McdHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { IMkrSkyConverter } from "../../interfaces/protocols/mcd/IMkrSkyConverter.sol";
 import { IDaiUSDSConverter } from "../../interfaces/protocols/mcd/IDaiUSDSConverter.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Convert MKR -> SKY and DAI <-> USDS
 contract McdTokenConverter is ActionBase, McdHelper {

@@ -3,9 +3,9 @@ pragma solidity =0.8.24;
 
 import { DFSExchangeCore } from "./DFSExchangeCore.sol";
 import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { IERC20 } from "../interfaces/token/IERC20.sol";
-import { TxSaverGasCostCalc } from "../utils/TxSaverGasCostCalc.sol";
+import { TxSaverGasCostCalc } from "../tx-saver/TxSaverGasCostCalc.sol";
 import { ITxSaverBytesTransientStorage } from "../interfaces/core/ITxSaverBytesTransientStorage.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
 

@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { IStkAave } from "../../interfaces/protocols/aave/IStkAave.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Action to claim AAVE rewards from stkGHO token
 /// @notice After AaveV3 Umbrella upgrade, stkGHO token is no longer eligible for AAVE rewards so this action will only be used for old rewards.

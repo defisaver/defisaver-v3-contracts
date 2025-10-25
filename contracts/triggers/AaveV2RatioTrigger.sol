@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { AaveRatioHelper } from "../actions/aave/helpers/AaveRatioHelper.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
+import { TransientStorage } from "../utils/transient/TransientStorage.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger that triggers when the ratio of a user's position in aaveV2 market is over or under a certain ratio
@@ -28,7 +28,7 @@ contract AaveV2RatioTrigger is ITrigger, AdminAuth, AaveRatioHelper, TriggerHelp
         uint8 state;
     }
 
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 currRatio = getSafetyRatio(triggerSubData.market, triggerSubData.user);

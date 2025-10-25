@@ -7,7 +7,7 @@ import { IStabilityPool } from "../../../interfaces/protocols/liquityV2/IStabili
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title This action is only needed in the case a user has no deposit but still has remaining stashed Coll gains.
 contract LiquityV2SPClaimColl is ActionBase, LiquityV2Helper {

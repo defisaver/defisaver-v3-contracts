@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { LSVUtilHelper } from "./helpers/LSVUtilHelper.sol";
-import { LSVProfitTracker } from "../../utils/LSVProfitTracker.sol";
+import { LSVProfitTracker } from "../../utils/lsv/LSVProfitTracker.sol";
 
 /// @title action for tracking users borrowings within the LSV ecosystem
 contract LSVBorrow is ActionBase, LSVUtilHelper {

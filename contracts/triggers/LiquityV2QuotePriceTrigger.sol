@@ -25,7 +25,7 @@ contract LiquityV2QuotePriceTrigger is ITrigger, AdminAuth, TriggerHelper {
     }
 
     /// @dev checks current price of collateral in a LiquityV2 market and triggers if it's in a correct state
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
         IAddressesRegistry market = IAddressesRegistry(triggerSubData.market);
 

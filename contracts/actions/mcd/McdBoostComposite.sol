@@ -12,7 +12,7 @@ import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
 
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { McdRatioHelper } from "./helpers/McdRatioHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Single mcd boost action can use flashloan or not
 contract McdBoostComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRatioHelper {

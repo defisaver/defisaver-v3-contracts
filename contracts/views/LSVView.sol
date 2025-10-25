@@ -3,13 +3,13 @@
 pragma solidity =0.8.24;
 
 // GENERAL IMPORTS
-import { LSVProxyRegistry } from "../utils/LSVProxyRegistry.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { DFSProxyRegistry } from "../utils/DFSProxyRegistry.sol";
+import { LSVProxyRegistry } from "../utils/lsv/LSVProxyRegistry.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { DFSProxyRegistry } from "../utils/proxyRegistry/DFSProxyRegistry.sol";
 import { ActionsUtilHelper } from "../actions/utils/helpers/ActionsUtilHelper.sol";
-import { UtilHelper } from "../utils/helpers/UtilHelper.sol";
+import { UtilAddresses } from "../utils/addresses/UtilAddresses.sol";
 import { LSVUtilHelper } from "../actions/lsv/helpers/LSVUtilHelper.sol";
-import { LSVProfitTracker } from "../utils/LSVProfitTracker.sol";
+import { LSVProfitTracker } from "../utils/lsv/LSVProfitTracker.sol";
 
 // AAVE V3 IMPORTS
 import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
@@ -41,7 +41,7 @@ struct Position {
 
 contract LSVView is
     ActionsUtilHelper,
-    UtilHelper,
+    UtilAddresses,
     AaveV3Helper,
     CompV3Helper,
     SparkHelper,

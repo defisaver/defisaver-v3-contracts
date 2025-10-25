@@ -2,17 +2,17 @@
 
 pragma solidity =0.8.24;
 
-import { IDSProxyFactory } from "../interfaces/DS/IDSProxyFactory.sol";
-import { DSProxyFactoryHelper } from "./../utils/ds-proxy-factory/DSProxyFactoryHelper.sol";
-import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
-import { IDSAuth } from "../interfaces/DS/IDSAuth.sol";
+import { IDSProxyFactory } from "../../interfaces/DS/IDSProxyFactory.sol";
+import { DSProxyFactoryHelper } from "../addresses/dsProxyFactory/DSProxyFactoryHelper.sol";
+import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
+import { IDSAuth } from "../../interfaces/DS/IDSAuth.sol";
 
 import { DFSProxyRegistry } from "./DFSProxyRegistry.sol";
-import { AdminAuth } from "./../auth/AdminAuth.sol";
-import { UtilHelper } from "./helpers/UtilHelper.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { UtilAddresses } from "../addresses/UtilAddresses.sol";
 
 /// @title User facing contract to manage new proxies (is owner of DFSProxyRegistry)
-contract DFSProxyRegistryController is AdminAuth, UtilHelper, DSProxyFactoryHelper {
+contract DFSProxyRegistryController is AdminAuth, UtilAddresses, DSProxyFactoryHelper {
     /// @dev List of prebuilt proxies the users can claim to save gas
     address[] public proxyPool;
 

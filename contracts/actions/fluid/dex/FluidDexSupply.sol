@@ -10,7 +10,7 @@ import { FluidSupplyLiquidityLogic } from "../logic/liquidity/FluidSupplyLiquidi
 import { FluidSupplyDexLogic } from "../logic/dex/FluidSupplyDexLogic.sol";
 import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Supply tokens to Fluid DEX vault (T2, T3, T4)
 contract FluidDexSupply is ActionBase, FluidHelper {

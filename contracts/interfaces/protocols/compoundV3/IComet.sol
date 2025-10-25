@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-abstract contract IComet {
+interface IComet {
     struct AssetInfo {
         uint8 offset;
         address asset;
@@ -43,59 +43,59 @@ abstract contract IComet {
         uint8 pauseFlags;
     }
 
-    function totalsBasic() public view virtual returns (TotalsBasic memory);
+    function totalsBasic() external view returns (TotalsBasic memory);
 
-    function totalsCollateral(address) public virtual returns (TotalsCollateral memory);
+    function totalsCollateral(address) external returns (TotalsCollateral memory);
 
-    function supply(address asset, uint256 amount) external virtual;
-    function supplyTo(address dst, address asset, uint256 amount) external virtual;
-    function supplyFrom(address from, address dst, address asset, uint256 amount) external virtual;
+    function supply(address asset, uint256 amount) external;
+    function supplyTo(address dst, address asset, uint256 amount) external;
+    function supplyFrom(address from, address dst, address asset, uint256 amount) external;
 
-    function transfer(address dst, uint256 amount) external virtual returns (bool);
-    function transferFrom(address src, address dst, uint256 amount) external virtual returns (bool);
+    function transfer(address dst, uint256 amount) external returns (bool);
+    function transferFrom(address src, address dst, uint256 amount) external returns (bool);
 
-    function transferAsset(address dst, address asset, uint256 amount) external virtual;
-    function transferAssetFrom(address src, address dst, address asset, uint256 amount) external virtual;
+    function transferAsset(address dst, address asset, uint256 amount) external;
+    function transferAssetFrom(address src, address dst, address asset, uint256 amount) external;
 
-    function withdraw(address asset, uint256 amount) external virtual;
-    function withdrawTo(address to, address asset, uint256 amount) external virtual;
-    function withdrawFrom(address src, address to, address asset, uint256 amount) external virtual;
+    function withdraw(address asset, uint256 amount) external;
+    function withdrawTo(address to, address asset, uint256 amount) external;
+    function withdrawFrom(address src, address to, address asset, uint256 amount) external;
 
-    function accrueAccount(address account) external virtual;
-    function getSupplyRate(uint256 utilization) public view virtual returns (uint64);
-    function getBorrowRate(uint256 utilization) public view virtual returns (uint64);
-    function getUtilization() public view virtual returns (uint256);
+    function accrueAccount(address account) external;
+    function getSupplyRate(uint256 utilization) external view returns (uint64);
+    function getBorrowRate(uint256 utilization) external view returns (uint64);
+    function getUtilization() external view returns (uint256);
 
-    function governor() external view virtual returns (address);
-    function baseToken() external view virtual returns (address);
-    function baseTokenPriceFeed() external view virtual returns (address);
+    function governor() external view returns (address);
+    function baseToken() external view returns (address);
+    function baseTokenPriceFeed() external view returns (address);
 
-    function balanceOf(address account) public view virtual returns (uint256);
-    function collateralBalanceOf(address account, address asset) external view virtual returns (uint128);
-    function borrowBalanceOf(address account) public view virtual returns (uint256);
-    function totalSupply() external view virtual returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
+    function collateralBalanceOf(address account, address asset) external view returns (uint128);
+    function borrowBalanceOf(address account) external view returns (uint256);
+    function totalSupply() external view returns (uint256);
 
-    function numAssets() public view virtual returns (uint8);
-    function getAssetInfo(uint8 i) public view virtual returns (AssetInfo memory);
-    function getAssetInfoByAddress(address asset) public view virtual returns (AssetInfo memory);
-    function getPrice(address priceFeed) public view virtual returns (uint256);
+    function numAssets() external view returns (uint8);
+    function getAssetInfo(uint8 i) external view returns (AssetInfo memory);
+    function getAssetInfoByAddress(address asset) external view returns (AssetInfo memory);
+    function getPrice(address priceFeed) external view returns (uint256);
 
-    function allow(address manager, bool isAllowed) external virtual;
-    function allowance(address owner, address spender) external view virtual returns (uint256);
+    function allow(address manager, bool isAllowed) external;
+    function allowance(address owner, address spender) external view returns (uint256);
 
-    function isSupplyPaused() external view virtual returns (bool);
-    function isTransferPaused() external view virtual returns (bool);
-    function isWithdrawPaused() external view virtual returns (bool);
-    function isAbsorbPaused() external view virtual returns (bool);
-    function baseIndexScale() external pure virtual returns (uint64);
+    function isSupplyPaused() external view returns (bool);
+    function isTransferPaused() external view returns (bool);
+    function isWithdrawPaused() external view returns (bool);
+    function isAbsorbPaused() external view returns (bool);
+    function baseIndexScale() external pure returns (uint64);
 
-    function userBasic(address) external view virtual returns (UserBasic memory);
-    function userCollateral(address, address) external view virtual returns (UserCollateral memory);
-    function priceScale() external pure virtual returns (uint64);
-    function baseScale() external pure virtual returns (uint256);
-    function factorScale() external pure virtual returns (uint64);
+    function userBasic(address) external view returns (UserBasic memory);
+    function userCollateral(address, address) external view returns (UserCollateral memory);
+    function priceScale() external pure returns (uint64);
+    function baseScale() external pure returns (uint256);
+    function factorScale() external pure returns (uint64);
 
-    function baseBorrowMin() external pure virtual returns (uint256);
-    function baseTrackingBorrowSpeed() external pure virtual returns (uint256);
-    function baseTrackingSupplySpeed() external pure virtual returns (uint256);
+    function baseBorrowMin() external pure returns (uint256);
+    function baseTrackingBorrowSpeed() external pure returns (uint256);
+    function baseTrackingSupplySpeed() external pure returns (uint256);
 }

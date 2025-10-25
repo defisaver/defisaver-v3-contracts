@@ -2,16 +2,16 @@
 
 pragma solidity =0.8.24;
 
-import { AdminAuth } from "../auth/AdminAuth.sol";
-import { UtilHelper } from "../utils/helpers/UtilHelper.sol";
-import { ActionsUtilHelper } from "../actions/utils/helpers/ActionsUtilHelper.sol";
-import { IDSProxyFactory } from "../interfaces/DS/IDSProxyFactory.sol";
-import { DSProxyFactoryHelper } from "../utils/ds-proxy-factory/DSProxyFactoryHelper.sol";
-import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
-import { IDSAuth } from "../interfaces/DS/IDSAuth.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { UtilAddresses } from "../../utils/addresses/UtilAddresses.sol";
+import { ActionsUtilHelper } from "../../actions/utils/helpers/ActionsUtilHelper.sol";
+import { IDSProxyFactory } from "../../interfaces/DS/IDSProxyFactory.sol";
+import { DSProxyFactoryHelper } from "../../utils/addresses/dsProxyFactory/DSProxyFactoryHelper.sol";
+import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
+import { IDSAuth } from "../../interfaces/DS/IDSAuth.sol";
 
 /// @title Registry of proxies related to LSV
-contract LSVProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper, DSProxyFactoryHelper {
+contract LSVProxyRegistry is AdminAuth, UtilAddresses, ActionsUtilHelper, DSProxyFactoryHelper {
     /// @dev List of proxies a user owns
     mapping(address => address[]) public proxies;
 

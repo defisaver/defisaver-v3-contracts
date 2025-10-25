@@ -7,7 +7,7 @@ import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { LiquityHelper } from "../actions/liquity/helpers/LiquityHelper.sol";
 import { LiquityRatioHelper } from "../actions/liquity/helpers/LiquityRatioHelper.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
+import { TransientStorage } from "../utils/transient/TransientStorage.sol";
 
 /// @title Checks if total amount of debt in front of a specified trove is over a limit
 contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatioHelper, TriggerHelper, LiquityHelper {
@@ -23,7 +23,7 @@ contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatio
         uint256 debtInFrontMin;
     }
 
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 debtInFront;

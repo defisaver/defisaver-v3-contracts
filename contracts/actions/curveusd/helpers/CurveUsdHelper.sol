@@ -11,7 +11,7 @@ import {
 import { IERC20 } from "../../../interfaces/token/IERC20.sol";
 import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 import { MainnetCurveUsdAddresses } from "./MainnetCurveUsdAddresses.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { IBytesTransientStorage } from "../../../interfaces/utils/IBytesTransientStorage.sol";
 
 contract CurveUsdHelper is MainnetCurveUsdAddresses, DSMath {

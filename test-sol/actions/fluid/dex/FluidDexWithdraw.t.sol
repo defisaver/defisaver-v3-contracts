@@ -10,7 +10,7 @@ import { FluidDexWithdraw } from "../../../../contracts/actions/fluid/dex/FluidD
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
 contract TestFluidDexWithdraw is FluidTestBase {

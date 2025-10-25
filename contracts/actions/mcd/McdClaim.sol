@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { ICropJoin } from "../../interfaces/protocols/mcd/ICropJoin.sol";
 import { ICropper } from "../../interfaces/protocols/mcd/ICropper.sol";
 import { ICdpRegistry } from "../../interfaces/protocols/mcd/ICdpRegistry.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";

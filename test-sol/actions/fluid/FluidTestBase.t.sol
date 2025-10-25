@@ -10,7 +10,7 @@ import { IFluidVaultT1 } from "../../../contracts/interfaces/protocols/fluid/vau
 import { FluidDexModel } from "../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { FluidView } from "../../../contracts/views/FluidView.sol";
 import { FluidHelper } from "../../../contracts/actions/fluid/helpers/FluidHelper.sol";
-import { TokenUtils } from "../../../contracts/utils/TokenUtils.sol";
+import { TokenUtils } from "../../../contracts/utils/token/TokenUtils.sol";
 import { ExecuteActionsBase } from "../../utils/executeActions/ExecuteActionsBase.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { Vm } from "forge-std/Vm.sol";

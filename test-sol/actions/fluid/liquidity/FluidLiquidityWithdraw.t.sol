@@ -10,7 +10,7 @@ import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOp
 import { FluidVaultT1Withdraw } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw.sol";
 import { FluidDexWithdraw } from "../../../../contracts/actions/fluid/dex/FluidDexWithdraw.sol";
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
-import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 

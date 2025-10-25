@@ -5,14 +5,15 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
 import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { DFSExchangeData } from "../DFSExchangeData.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title Wrapper contract which will be used if offchain exchange used is Pendle Router
 /// @dev Exchange wrapper contracts should not be used on their own
 /// @dev This wrapper is meant to be used with DFSSellNoFee because we are not scaling the source token amount
-contract PendleWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
+contract PendleWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData, AdminAuth {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 

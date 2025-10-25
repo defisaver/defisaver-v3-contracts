@@ -7,10 +7,10 @@ import { ISpotter } from "../../interfaces/protocols/mcd/ISpotter.sol";
 import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
 import { IJug } from "../../interfaces/protocols/mcd/IJug.sol";
 import { ICropper } from "../../interfaces/protocols/mcd/ICropper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ICdpRegistry } from "../../interfaces/protocols/mcd/ICdpRegistry.sol";
 
 /// @title Generate dai from a Maker Vault

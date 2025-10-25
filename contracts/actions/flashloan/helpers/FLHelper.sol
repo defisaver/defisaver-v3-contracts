@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
-import { FLFeeFaucet } from "../../../utils/FLFeeFaucet.sol";
+import { FLFeeFaucet } from "../../../utils/fee/FLFeeFaucet.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { ISafe } from "../../../interfaces/protocols/safe/ISafe.sol";
 import { IDSProxy } from "../../../interfaces/DS/IDSProxy.sol";

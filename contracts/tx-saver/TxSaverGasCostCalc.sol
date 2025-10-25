@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "./TokenUtils.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
-import { UtilHelper } from "./helpers/UtilHelper.sol";
+import { UtilAddresses } from "../utils/addresses/UtilAddresses.sol";
 
-contract TxSaverGasCostCalc is DSMath, UtilHelper {
+contract TxSaverGasCostCalc is DSMath, UtilAddresses {
     using TokenUtils for address;
 
     // only support token with decimals <= 18

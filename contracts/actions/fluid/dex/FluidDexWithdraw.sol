@@ -10,7 +10,7 @@ import { FluidWithdrawLiquidityLogic } from "../logic/liquidity/FluidWithdrawLiq
 import { FluidWithdrawDexLogic } from "../logic/dex/FluidWithdrawDexLogic.sol";
 import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Withdraw tokens from Fluid DEX vault (T2, T3, T4)
 contract FluidDexWithdraw is ActionBase, FluidHelper {

@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { LiquityRatioHelper } from "../actions/liquity/helpers/LiquityRatioHelper.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
+import { TransientStorage } from "../utils/transient/TransientStorage.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if current Liquity position ratio went over/under the subbed ratio
@@ -27,7 +27,7 @@ contract LiquityRatioTrigger is ITrigger, AdminAuth, LiquityRatioHelper, Trigger
     }
     /// @dev checks current ratio of a Liquity trove and triggers if it's in a correct state
 
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         (uint256 currRatio, bool isActive) = getRatio(triggerSubData.troveOwner);

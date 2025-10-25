@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { GasFeeHelperL2 } from "./helpers/GasFeeHelperL2.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Helper action to take gas fee from the user's wallet on L2 and send it to the fee recipient.
 contract GasFeeTakerL2 is ActionBase, GasFeeHelperL2 {

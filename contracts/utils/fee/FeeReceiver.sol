@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
-import { UtilHelper } from "./helpers/UtilHelper.sol";
-import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
+import { UtilAddresses } from "../addresses/UtilAddresses.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// DO NOT DEPLOY ON L2s WITHOUT FEE_RECEIVER_ADMIN_ADDR SET
 /// @title Contract that receivers fees and can be withdrawn from with the admin
-contract FeeReceiver is UtilHelper {
+contract FeeReceiver is UtilAddresses {
     using SafeERC20 for IERC20;
 
     modifier onlyAdmin() {

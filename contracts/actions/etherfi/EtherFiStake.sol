@@ -6,7 +6,7 @@ import { ILiquidityPool } from "../../interfaces/protocols/etherFi/ILiquidityPoo
 import { IWeEth } from "../../interfaces/protocols/etherFi/IWeEth.sol";
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { EtherFiHelper } from "./helpers/EtherFiHelper.sol";
 
 /// @title Supplies ETH (action receives WETH) to EtherFi for ETH2 Staking. Receives eETH in return or weETH in case of wrapping

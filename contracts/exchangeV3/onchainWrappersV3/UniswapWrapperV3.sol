@@ -6,7 +6,7 @@ import { IUniswapRouter } from "../../interfaces/exchange/IUniswapRouter.sol";
 import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { WrapperHelper } from "./helpers/WrapperHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
 

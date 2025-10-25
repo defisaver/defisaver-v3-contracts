@@ -7,7 +7,7 @@ import { IFluidMerkleDistributor } from "../../interfaces/protocols/fluid/IFluid
 import { FluidHelper } from "./helpers/FluidHelper.sol";
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Claim rewards from Fluid protocol
 contract FluidClaim is ActionBase, FluidHelper {

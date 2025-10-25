@@ -7,7 +7,7 @@ import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { LiquityV2Helper } from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { TransientStorageCancun } from "../utils/TransientStorageCancun.sol";
+import { TransientStorageCancun } from "../utils/transient/TransientStorageCancun.sol";
 import { IAddressesRegistry } from "../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
 import { ITroveManager } from "../interfaces/protocols/liquityV2/ITroveManager.sol";
 import { IBorrowerOperations } from "../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
@@ -42,7 +42,7 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is ITrigger, AdminAuth, TriggerHe
     ///      3. Whether adjustment fees are zero (affects which threshold to use)
     /// @param _subData Encoded SubParams struct containing market, troveId, and threshold limits
     /// @return bool True if the strategy should be triggered, false otherwise
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         (bool isAdjustmentFeeZero, uint256 interestRate, bool shouldExecuteStrategy) =

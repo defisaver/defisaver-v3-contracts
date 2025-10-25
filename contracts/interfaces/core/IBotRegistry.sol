@@ -2,6 +2,6 @@
 
 pragma solidity =0.8.24;
 
-abstract contract IBotRegistry {
-    function botList(address) public view virtual returns (bool);
+interface IBotRegistry {
+    function botList(address) external view returns (bool);
 }

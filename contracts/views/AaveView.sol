@@ -13,7 +13,7 @@ import { IPriceOracleGetterAave } from "../interfaces/protocols/aaveV2/IPriceOra
 import { IAaveProtocolDataProviderV2 } from "../interfaces/protocols/aaveV2/IAaveProtocolDataProviderV2.sol";
 import { ILendingPoolV2, DataTypes } from "../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
 import { ILendingPoolAddressesProviderV2 } from "../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 contract AaveView is AaveHelper, DSMath {

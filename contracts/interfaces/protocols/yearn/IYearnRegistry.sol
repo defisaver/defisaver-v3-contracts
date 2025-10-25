@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-abstract contract IYearnRegistry {
-    function latestVault(address) external view virtual returns (address);
-    function numVaults(address) external view virtual returns (uint256);
-    function vaults(address, uint256) external view virtual returns (address);
+interface IYearnRegistry {
+    function latestVault(address) external view returns (address);
+    function numVaults(address) external view returns (uint256);
+    function vaults(address, uint256) external view returns (address);
 }

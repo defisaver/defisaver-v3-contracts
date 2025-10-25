@@ -9,7 +9,7 @@ import { IEVC } from "../interfaces/protocols/eulerV2/IEVC.sol";
 import { IIRM } from "../interfaces/protocols/eulerV2/IIRM.sol";
 
 import { EulerV2Helper } from "../actions/eulerV2/helpers/EulerV2Helper.sol";
-import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
+import { TokenPriceHelper } from "../utils/token/TokenPriceHelper.sol";
 
 /// @title EulerV2View - aggregate various information about Euler vaults and users
 contract EulerV2View is EulerV2Helper, TokenPriceHelper {

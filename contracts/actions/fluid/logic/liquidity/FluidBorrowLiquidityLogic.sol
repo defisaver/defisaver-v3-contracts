@@ -6,7 +6,7 @@ import { IFluidVaultT1 } from "../../../../interfaces/protocols/fluid/vaults/IFl
 import { IFluidVaultT2 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT2.sol";
 import { FluidLiquidityModel } from "../../helpers/FluidLiquidityModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidBorrowLiquidityLogic - Implements the borrowing of tokens from Fluid liquidity layer

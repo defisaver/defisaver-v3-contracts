@@ -11,7 +11,7 @@ import { FluidPaybackLiquidityLogic } from "../logic/liquidity/FluidPaybackLiqui
 import { FluidPaybackDexLogic } from "../logic/dex/FluidPaybackDexLogic.sol";
 import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Payback debt on Fluid DEX vault (T2, T3, T4)
 contract FluidDexPayback is ActionBase, FluidHelper {

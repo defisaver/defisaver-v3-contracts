@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { CompV3RatioHelper } from "../compoundV3/helpers/CompV3RatioHelper.sol";
-import { TransientStorageCancun } from "../../utils/TransientStorageCancun.sol";
+import { TransientStorageCancun } from "../../utils/transient/TransientStorageCancun.sol";
 
 /// @title Action to check the ratio of the Compound V3 position after strategy execution.
 contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {

@@ -5,9 +5,9 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
-import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
+import { TokenPriceHelper } from "../utils/token/TokenPriceHelper.sol";
 
 /// @title Trigger contract that verifies if current token price is over/under the price specified during subscription
 /// @notice If there's no chainlink oracle available for the token, price will be fetched from AaveV2, Spark and AaveV3 (in that order).

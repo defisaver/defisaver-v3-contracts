@@ -8,7 +8,7 @@ import { ITroveManager } from "../../../interfaces/protocols/liquityV2/ITroveMan
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Closes a LiquityV2 trove on a specific market
 /// @notice Upon closing a trove on LiquityV2, fixed fee of 0.0375 WETH during opening is returned to the user

@@ -2,16 +2,16 @@
 
 pragma solidity =0.8.24;
 
-abstract contract IDFSRegistry {
-    function getAddr(bytes4 _id) public view virtual returns (address);
+interface IDFSRegistry {
+    function getAddr(bytes4 _id) external view returns (address);
 
-    function addNewContract(bytes32 _id, address _contractAddr, uint256 _waitPeriod) public virtual;
+    function addNewContract(bytes32 _id, address _contractAddr, uint256 _waitPeriod) external;
 
-    function startContractChange(bytes32 _id, address _newContractAddr) public virtual;
+    function startContractChange(bytes32 _id, address _newContractAddr) external;
 
-    function approveContractChange(bytes32 _id) public virtual;
+    function approveContractChange(bytes32 _id) external;
 
-    function cancelContractChange(bytes32 _id) public virtual;
+    function cancelContractChange(bytes32 _id) external;
 
-    function changeWaitPeriod(bytes32 _id, uint256 _newWaitPeriod) public virtual;
+    function changeWaitPeriod(bytes32 _id, uint256 _newWaitPeriod) external;
 }

@@ -7,7 +7,7 @@ import { IERC4626StakeToken } from "../../../interfaces/protocols/aaveV3/IERC462
 import { IStaticATokenV2 } from "../../../interfaces/protocols/aaveV3/IStaticATokenV2.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { AaveV3Helper } from "../helpers/AaveV3Helper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title UmbrellaStake - Stake aTokens/underlying or GHO tokens using Umbrella Stake Token
 /// @notice This action will always pull aTokens or underlying for non GHO staking and wrap them into waTokens for staking.

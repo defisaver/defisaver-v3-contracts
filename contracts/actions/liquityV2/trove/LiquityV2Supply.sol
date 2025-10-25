@@ -7,7 +7,7 @@ import { IBorrowerOperations } from "../../../interfaces/protocols/liquityV2/IBo
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Supplies a token to a LiquityV2 trove on a specific market
 contract LiquityV2Supply is ActionBase, LiquityV2Helper {

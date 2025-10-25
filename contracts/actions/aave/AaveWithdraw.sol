@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveHelper } from "./helpers/AaveHelper.sol";
-import { FLFeeFaucet } from "../../utils/FLFeeFaucet.sol";
+import { FLFeeFaucet } from "../../utils/fee/FLFeeFaucet.sol";
 import { ILendingPoolV2 } from "../../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
 
 /// @title Withdraw a token from an Aave market

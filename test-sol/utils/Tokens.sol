@@ -5,8 +5,8 @@ import { Test } from "forge-std/Test.sol";
 import { StdStorage, stdStorage } from "forge-std/StdStorage.sol";
 import { IUniswapRouter } from "../../contracts/interfaces/exchange/IUniswapRouter.sol";
 import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
-import { TokenPriceHelper } from "../../contracts/utils/TokenPriceHelper.sol";
-import { TokenUtils } from "../../contracts/utils/TokenUtils.sol";
+import { TokenPriceHelper } from "../../contracts/utils/token/TokenPriceHelper.sol";
+import { TokenUtils } from "../../contracts/utils/token/TokenUtils.sol";
 
 import { Addresses } from "../utils/Addresses.sol";
 

@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { MerklHelper } from "./helpers/MerklHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Claims Merkl rewards
 /// @notice You can claim Merkl rewards for anyone, but distinctTokens array should be empty in that case

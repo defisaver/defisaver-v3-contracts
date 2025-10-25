@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { LiquityRatioHelper } from "../liquity/helpers/LiquityRatioHelper.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
 
 /// @title Action to check if ratio of the Liquity position after strategy execution is greater than the target ratio.
 contract LiquityRatioIncreaseCheck is ActionBase, LiquityRatioHelper {

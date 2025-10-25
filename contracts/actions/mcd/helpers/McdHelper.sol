@@ -7,7 +7,7 @@ import { IManager } from "../../../interfaces/protocols/mcd/IManager.sol";
 import { IJoin } from "../../../interfaces/protocols/mcd/IJoin.sol";
 import { IVat } from "../../../interfaces/protocols/mcd/IVat.sol";
 import { ICropper } from "../../../interfaces/protocols/mcd/ICropper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ICdpRegistry } from "../../../interfaces/protocols/mcd/ICdpRegistry.sol";
 import { MainnetMcdAddresses } from "./MainnetMcdAddresses.sol";
 

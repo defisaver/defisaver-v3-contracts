@@ -9,7 +9,7 @@ import { GasFeeTaker } from "../fee/GasFeeTaker.sol";
 
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { McdRatioHelper } from "./helpers/McdRatioHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
 import { IJoin } from "../../interfaces/protocols/mcd/IJoin.sol";
 

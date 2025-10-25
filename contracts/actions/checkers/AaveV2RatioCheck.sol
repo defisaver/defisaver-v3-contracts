@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { AaveRatioHelper } from "../aave/helpers/AaveRatioHelper.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
 
 /// @title Action to check the ratio of the Aave V2 position after strategy execution.
 contract AaveV2RatioCheck is ActionBase, AaveRatioHelper {
