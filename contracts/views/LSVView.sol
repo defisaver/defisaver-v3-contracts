@@ -21,10 +21,6 @@ import { SparkHelper } from "../actions/spark/helpers/SparkHelper.sol";
 import { ISparkPool } from "../interfaces/spark/ISparkPool.sol";
 import { SparkDataTypes } from "../interfaces/spark/SparkDataTypes.sol";
 
-// MORPHO OPTIMIZER IMPORTS
-import { IMorphoAaveV3 } from "../interfaces/morpho/IMorphoAaveV3.sol";
-import { MorphoAaveV3Helper } from "../actions/morpho/aaveV3/helpers/MorphoAaveV3Helper.sol";
-
 // COMPOUND V3 IMPORTS
 import { IComet } from "../interfaces/compoundV3/IComet.sol";
 import { CompV3Helper } from "../actions/compoundV3/helpers/CompV3Helper.sol";
@@ -43,12 +39,10 @@ struct Position {
     uint256 debt;
 }
 
-// TODO: On next deployment (assuming Aave v3.3.0 is live at that point), use 'getReserveAToken' and 'getReserveVariableDebtToken' directly on Pool, instead of fetching reserveData
 contract LSVView is
     ActionsUtilHelper,
     UtilHelper,
     AaveV3Helper,
-    MorphoAaveV3Helper,
     CompV3Helper,
     SparkHelper,
     MorphoBlueHelper,
@@ -56,7 +50,7 @@ contract LSVView is
 {
     enum Protocol {
         AAVE_V3,
-        MORPHO_AAVE_V3,
+        MORPHO_AAVE_V3, // deprecated
         COMPOUND_V3,
         SPARK,
         MORPHO_BLUE_WSTETH_MARKET_RATE,
@@ -133,7 +127,6 @@ contract LSVView is
 
         for (uint256 i = 0; i < _users.length; i++) {
             positionCounter = _getAaveV3Positions(_collTokens, _users[i], tempPositions, positionCounter);
-            positionCounter = _getMorphoAavePositions(_collTokens, _users[i], tempPositions, positionCounter);
             positionCounter = _getCompoundV3Positions(_collTokens, _users[i], tempPositions, positionCounter);
             positionCounter = _getSparkPositions(_collTokens, _users[i], tempPositions, positionCounter);
             positionCounter = _getMorphoBluePositions(_users[i], tempPositions, positionCounter);
@@ -155,6 +148,7 @@ contract LSVView is
         counter = _counter;
         // TODO -> hardcoding DEFAULT_AAVE_MARKET
         IPoolV3 lendingPool = getLendingPool(DEFAULT_AAVE_MARKET);
+        // TODO -> use getReserveAToken and getReserveVariableDebtToken directly on Pool, instead of fetching reserveData
         DataTypes.ReserveData memory wethReserveData = lendingPool.getReserveData(TokenUtils.WETH_ADDR);
         for (uint256 j = 0; j < _collTokens.length; j++) {
             DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(_collTokens[j]);
@@ -167,31 +161,6 @@ contract LSVView is
                     );
                     j = _collTokens.length;
                 }
-            }
-        }
-    }
-
-    function _getMorphoAavePositions(
-        address[] memory _collTokens,
-        address _user,
-        Position[] memory _positions,
-        uint256 _counter
-    ) internal view returns (uint256 counter) {
-        counter = _counter;
-        address morphoAddr = getMorphoAddressByEmode(1);
-        for (uint256 j = 0; j < _collTokens.length; j++) {
-            uint256 collBalance = IMorphoAaveV3(morphoAddr).collateralBalance(_collTokens[j], _user);
-            if (collBalance > 0) {
-                uint256 debtBalance = IMorphoAaveV3(morphoAddr).borrowBalance(TokenUtils.WETH_ADDR, _user);
-                _positions[counter++] = Position(
-                    uint8(Protocol.MORPHO_AAVE_V3),
-                    _user,
-                    _collTokens[j],
-                    TokenUtils.WETH_ADDR,
-                    collBalance,
-                    debtBalance
-                );
-                j = _collTokens.length;
             }
         }
     }
@@ -343,7 +312,7 @@ contract LSVView is
     {
         if (protocol == uint8(Protocol.AAVE_V3)) return findCollAndDebtForAaveV3Position(_user, _collTokens);
         if (protocol == uint8(Protocol.MORPHO_AAVE_V3)) {
-            return findCollAndDebtForMorphoAaveV3Position(_user, _collTokens);
+            return (0, 0, address(0));
         }
         if (protocol == uint8(Protocol.COMPOUND_V3)) return findCollAndDebtForCompV3Position(_user, _collTokens);
         if (protocol == uint8(Protocol.SPARK)) return findCollAndDebtForSparkPosition(_user, _collTokens);
@@ -438,25 +407,6 @@ contract LSVView is
                     debtAmount = ethDebtAmount;
                     collToken = _collTokens[j];
                 }
-            }
-        }
-    }
-
-    /// @dev we assume it only has one LST token as collateral, and only ETH as debt
-    function findCollAndDebtForMorphoAaveV3Position(address _user, address[] memory _collTokens)
-        public
-        view
-        returns (uint256 collAmount, uint256 debtAmount, address collToken)
-    {
-        address morphoAddr = getMorphoAddressByEmode(1);
-        uint256 debtBalance = IMorphoAaveV3(morphoAddr).borrowBalance(TokenUtils.WETH_ADDR, _user);
-
-        for (uint256 j = 0; j < _collTokens.length; j++) {
-            uint256 collBalance = IMorphoAaveV3(morphoAddr).collateralBalance(_collTokens[j], _user);
-            if (collBalance > 0) {
-                collAmount = collBalance;
-                debtAmount = debtBalance;
-                collToken = _collTokens[j];
             }
         }
     }

@@ -12,3 +12,4 @@ broadcast
 .env
 out
 dist
+deprecated

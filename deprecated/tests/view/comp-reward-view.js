@@ -1,16 +1,18 @@
 const { redeploy } = require('../utils/utils');
 
+const user = '0x7d790D3fca1232e6D7D7643cAD2b27951E20378A';
+
 describe('Comp-view', function () {
     this.timeout(80000);
 
-    let compView;
+    let compRewardView;
 
     before(async () => {
-        compView = await redeploy('CompView');
+        compRewardView = await redeploy('CompRewardView');
     });
 
-    it('... should get comp getFullTokensInfo', async () => {
-        const res = await compView.callStatic.getFullTokensInfo([
+    it('... should get comp balance', async () => {
+        const res = await compRewardView.callStatic.getBalance(user, [
             '0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5',
             '0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643',
             '0x6c8c6b02e7b2be14d4fa6022dfd6d75921d90e4e',
@@ -23,6 +25,6 @@ describe('Comp-view', function () {
             '0x70e36f6bf80a52b3b46b3af8e106cc0ed743e8e4',
         ]);
 
-        console.log(res);
+        console.log(res.toString());
     });
 });
