@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { MainnetLiquityAddresses } from "./MainnetLiquityAddresses.sol";
 import { ISwaps } from "../../../interfaces/protocols/curve/ISwaps.sol";
 import { Sqrt } from "../../../utils/math/Sqrt.sol";
-import { DSMath } from "../../../DS/DSMath.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { IChickenBondManager } from "../../../interfaces/protocols/liquity/IChickenBondManager.sol";
 import { IERC20 } from "../../../interfaces/token/IERC20.sol";

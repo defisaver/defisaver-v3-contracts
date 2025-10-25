@@ -6,7 +6,7 @@ import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
 import { IAggregatorV3 } from "../interfaces/protocols/chainlink/IAggregatorV3.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { DSMath } from "../DS/DSMath.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
 import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";

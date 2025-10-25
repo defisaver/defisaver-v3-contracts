@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { TokenUtils } from "../utils/TokenUtils.sol";
-import { SafeERC20 } from "../utils/SafeERC20.sol";
+import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 contract DFSExchangeHelper {

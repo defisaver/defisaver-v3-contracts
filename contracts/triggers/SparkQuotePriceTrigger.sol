@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { DSMath } from "../DS/DSMath.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription

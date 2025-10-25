@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../DS/DSMath.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 
 import { McdHelper } from "../actions/mcd/helpers/McdHelper.sol";
 import { IManager } from "../interfaces/protocols/mcd/IManager.sol";

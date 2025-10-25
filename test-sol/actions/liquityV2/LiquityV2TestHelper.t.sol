@@ -7,7 +7,7 @@ import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 import { IAddressesRegistry } from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
 import { ISortedTroves } from "../../../contracts/interfaces/protocols/liquityV2/ISortedTroves.sol";
 import { IBorrowerOperations } from "../../../contracts/interfaces/protocols/liquityV2/IBorrowerOperations.sol";
-import { Sqrt } from "../../../contracts/utils/math/Sqrt.sol";
+import { Sqrt } from "../../../contracts/_vendor/uniswap/Sqrt.sol";
 
 contract LiquityV2TestHelper is LiquityV2Helper {
     using Sqrt for uint256;

@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { TokenUtils } from "./TokenUtils.sol";
-import { DSMath } from "../DS/DSMath.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { UtilHelper } from "./helpers/UtilHelper.sol";
 
 contract TxSaverGasCostCalc is DSMath, UtilHelper {

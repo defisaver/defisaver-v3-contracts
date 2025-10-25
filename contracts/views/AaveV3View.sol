@@ -18,8 +18,8 @@ import { IStaticATokenV2 } from "../interfaces/protocols/aaveV3/IStaticATokenV2.
 import { IDebtToken } from "../interfaces/protocols/aaveV3/IDebtToken.sol";
 
 import { DataTypes } from "../interfaces/protocols/aaveV3/DataTypes.sol";
-import { WadRayMath } from "../utils/math/WadRayMath.sol";
-import { MathUtils } from "../utils/math/MathUtils.sol";
+import { WadRayMath } from "../_vendor/aave/WadRayMath.sol";
+import { MathUtils } from "../_vendor/aave/MathUtils.sol";
 import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";

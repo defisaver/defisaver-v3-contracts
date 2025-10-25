@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { SafeERC20 } from "./SafeERC20.sol";
+import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
 import { UtilHelper } from "./helpers/UtilHelper.sol";
 import { IERC20 } from "../interfaces/token/IERC20.sol";
 

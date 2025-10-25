@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../DS/DSMath.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { UtilHelper } from "./helpers/UtilHelper.sol";
 import { IFeedRegistry } from "../interfaces/protocols/chainlink/IFeedRegistry.sol";
 import { Denominations } from "./Denominations.sol";

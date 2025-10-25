@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../../../DS/DSMath.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { FeeRecipient } from "../../../utils/FeeRecipient.sol";
 import { TokenPriceHelperL2 } from "../../../utils/TokenPriceHelperL2.sol";

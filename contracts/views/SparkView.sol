@@ -15,8 +15,8 @@ import { SparkHelper } from "../actions/spark/helpers/SparkHelper.sol";
 import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol";
 
 import { TokenUtils } from "../utils/TokenUtils.sol";
-import { WadRayMath } from "../utils/math/WadRayMath.sol";
-import { MathUtils } from "../utils/math/MathUtils.sol";
+import { WadRayMath } from "../_vendor/aave/WadRayMath.sol";
+import { MathUtils } from "../_vendor/aave/MathUtils.sol";
 
 contract SparkView is SparkHelper, SparkRatioHelper {
     uint256 internal constant BORROW_CAP_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore

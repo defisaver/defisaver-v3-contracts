@@ -3,11 +3,11 @@ pragma solidity =0.8.24;
 
 import { IExchangeV3 } from "../../interfaces/exchange/IExchangeV3.sol";
 import { ISwapRouterNG } from "../../interfaces/protocols/curve/ISwapRouterNG.sol";
-import { DSMath } from "../../DS/DSMath.sol";
+import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { WrapperHelper } from "./helpers/WrapperHelper.sol";
-import { SafeERC20 } from "../../utils/SafeERC20.sol";
+import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title DFS exchange wrapper for Curve

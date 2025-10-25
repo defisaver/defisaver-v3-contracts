@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { SafeERC20 } from "../../../../utils/SafeERC20.sol";
+import { SafeERC20 } from "../../../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../../../interfaces/token/IERC20.sol";
 import { TokenUtils } from "../../../../utils/TokenUtils.sol";
 import { AdminAuth } from "../../../../auth/AdminAuth.sol";
@@ -11,7 +11,7 @@ import { FeeRecipient } from "../../../../utils/FeeRecipient.sol";
 import { ActionsUtilHelper } from "../../../utils/helpers/ActionsUtilHelper.sol";
 import { DFSRegistry } from "../../../../core/DFSRegistry.sol";
 import { GasFeeHelper } from "../../../../actions/fee/helpers/GasFeeHelper.sol";
-import { ReentrancyGuardTransient } from "../../../../utils/ReentrancyGuardTransient.sol";
+import { ReentrancyGuardTransient } from "../../../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
 import { ICrvUsdController } from "../../../../interfaces/protocols/curveusd/ICurveUsd.sol";

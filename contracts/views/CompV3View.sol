@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { CompV3Helper } from "../actions/compoundV3/helpers/CompV3Helper.sol";
-import { CompV3PortedFunctions } from "../utils/CompV3PortedFunctions.sol";
-import { DSMath } from "../DS/DSMath.sol";
-import { Exponential } from "../utils/math/Exponential.sol";
+import { CompV3PortedFunctions } from "../_vendor/compound/CompV3PortedFunctions.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
+import { Exponential } from "../_vendor/compound/Exponential.sol";
 import { IComet } from "../interfaces/protocols/compoundV3/IComet.sol";
 import { ICometExt } from "../interfaces/protocols/compoundV3/ICometExt.sol";
 import { ICometRewards } from "../interfaces/protocols/compoundV3/ICometRewards.sol";

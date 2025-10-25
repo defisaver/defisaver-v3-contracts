@@ -8,7 +8,7 @@ import { IBorrowerOperations } from "../../../interfaces/protocols/liquityV2/IBo
 import { IStabilityPool } from "../../../interfaces/protocols/liquityV2/IStabilityPool.sol";
 import { ISortedTroves } from "../../../interfaces/protocols/liquityV2/ISortedTroves.sol";
 import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
-import { DSMath } from "../../../DS/DSMath.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 
 contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
     /// @notice Cooldown period for interest rate adjustments (7 days)

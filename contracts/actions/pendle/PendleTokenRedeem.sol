@@ -6,7 +6,7 @@ import { IPendleYieldToken } from "../../interfaces/protocols/pendle/IPendleYiel
 import { ISyToken } from "../../interfaces/protocols/pendle/ISyToken.sol";
 import { IPendleMarket } from "../../interfaces/protocols/pendle/IPendleMarket.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
-import { SafeERC20 } from "../../utils/SafeERC20.sol";
+import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 

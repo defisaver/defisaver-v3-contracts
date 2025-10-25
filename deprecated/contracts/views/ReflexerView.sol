@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { DSMath } from "../DS/DSMath.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { IGetSafes } from "../interfaces/protocols/reflexer/IGetSafes.sol";
 import { ISAFEEngine } from "../interfaces/protocols/reflexer/ISAFEEngine.sol";
 import { ISAFEManager } from "../interfaces/protocols/reflexer/ISAFEManager.sol";

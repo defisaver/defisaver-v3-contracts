@@ -10,7 +10,7 @@ import { IWstETH } from "../../../interfaces//LSTs/IWstETH.sol";
 import { IWeEth } from "../../../interfaces/protocols/etherFi/IWeEth.sol";
 import { IRestakeManager } from "../../../interfaces/protocols/renzo/IRestakeManager.sol";
 import { IRenzoOracle } from "../../../interfaces/protocols/renzo/IRenzoOracle.sol";
-import { DSMath } from "../../../DS/DSMath.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 
 contract LSVUtilHelper is DSMath, LSVUtilMainnetAddresses {
     function getAmountInETHFromLST(address lstAddress, uint256 lstAmount) public view returns (uint256 ethAmount) {

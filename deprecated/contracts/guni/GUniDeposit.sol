@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "./../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { DSMath } from "../../DS/DSMath.sol";
+import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { GUniHelper } from "./helpers/GUniHelper.sol";
 
 /// @title Action that adds liquidity to G-UNI pool of interest (mints G-UNI LP tokens)

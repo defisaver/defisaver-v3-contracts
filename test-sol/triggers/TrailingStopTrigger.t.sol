@@ -6,7 +6,7 @@ import { MainnetUtilAddresses } from "../../contracts/utils/helpers/MainnetUtilA
 import { MockChainlinkFeedRegistry } from "../../contracts/mocks/MockChainlinkFeedRegistry.sol";
 import { MockChainlinkAggregator } from "../../contracts/mocks/MockChainlinkAggregator.sol";
 import { TrailingStopTrigger } from "../../contracts/triggers/TrailingStopTrigger.sol";
-import { DSMath } from "../../contracts/DS/DSMath.sol";
+import { DSMath } from "../../contracts/_vendor/DS/DSMath.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 
 contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {

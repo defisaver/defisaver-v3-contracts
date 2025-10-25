@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { DSMath } from "../DS/DSMath.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";

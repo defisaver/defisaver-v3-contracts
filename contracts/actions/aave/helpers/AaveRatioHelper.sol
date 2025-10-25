@@ -6,7 +6,7 @@ import { ILendingPoolV2 } from "../../../interfaces/protocols/aaveV2/ILendingPoo
 import {
     ILendingPoolAddressesProviderV2
 } from "../../../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
-import { DSMath } from "../../../DS/DSMath.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 import { MainnetAaveAddresses } from "./MainnetAaveAddresses.sol";
 
 contract AaveRatioHelper is DSMath, MainnetAaveAddresses {

@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../../../DS/DSMath.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 import { IManager } from "../../../interfaces/protocols/mcd/IManager.sol";
 import { IJoin } from "../../../interfaces/protocols/mcd/IJoin.sol";
 import { IVat } from "../../../interfaces/protocols/mcd/IVat.sol";

@@ -4,12 +4,12 @@ pragma solidity =0.8.24;
 
 import { KyberNetworkProxyInterface } from "../../interfaces//exchange/IKyberNetworkProxy.sol";
 import { IExchangeV3 } from "../../interfaces/exchange/IExchangeV3.sol";
-import { DSMath } from "../../DS/DSMath.sol";
+import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { WrapperHelper } from "./helpers/WrapperHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
-import { SafeERC20 } from "../../utils/SafeERC20.sol";
+import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExchangeHelper {

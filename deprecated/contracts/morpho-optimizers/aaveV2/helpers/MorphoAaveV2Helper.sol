@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { IMorphoAaveV2Lens } from "../../../../interfaces/protocols/morpho/IMorphoAaveV2Lens.sol";
 import { MorphoTypes } from "../../../../interfaces/protocols/morpho/MorphoTypes.sol";
-import { DSMath } from "../../../../DS/DSMath.sol";
+import { DSMath } from "../../../../_vendor/DS/DSMath.sol";
 import { MainnetMorphoAaveV2Addresses } from "./MainnetMorphoAaveV2Addresses.sol";
 
 contract MorphoAaveV2Helper is MainnetMorphoAaveV2Addresses, DSMath {

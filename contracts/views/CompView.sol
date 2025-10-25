@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { InterestRateModel } from "../interfaces/protocols/compound/InterestRateModel.sol";
-import { DSMath } from "../DS/DSMath.sol";
-import { Exponential } from "../utils/math/Exponential.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
+import { Exponential } from "../_vendor/compound/Exponential.sol";
 import { IComptroller } from "../interfaces/protocols/compound/IComptroller.sol";
 import { ICToken } from "../interfaces/protocols/compound/ICToken.sol";
 import { ICompoundOracle } from "../interfaces/protocols/compound/ICompoundOracle.sol";

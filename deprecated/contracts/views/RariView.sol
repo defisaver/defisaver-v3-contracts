@@ -5,7 +5,7 @@ import { IERC20 } from "../interfaces/token/IERC20.sol";
 import { IFundProxy } from "../interfaces/protocols/rari/IFundProxy.sol";
 import { IFundController } from "../interfaces/protocols/rari/IFundController.sol";
 import { IFuseAsset } from "../interfaces/protocols/rari/IFuseAsset.sol";
-import { DSMath } from "../DS/DSMath.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 
 contract RariView is DSMath {
     /// @dev Not set as view because it calls some non view methods

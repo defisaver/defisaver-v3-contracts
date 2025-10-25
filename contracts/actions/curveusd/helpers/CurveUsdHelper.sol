@@ -9,7 +9,7 @@ import {
 } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 import { IERC20 } from "../../../interfaces/token/IERC20.sol";
-import { DSMath } from "../../../DS/DSMath.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 import { MainnetCurveUsdAddresses } from "./MainnetCurveUsdAddresses.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { IBytesTransientStorage } from "../../../interfaces/utils/IBytesTransientStorage.sol";

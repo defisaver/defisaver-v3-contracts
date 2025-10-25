@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { DSMath } from "../../../../DS/DSMath.sol";
+import { DSMath } from "../../../../_vendor/DS/DSMath.sol";
 import { MainnetMorphoAaveV3Addresses } from "./MainnetMorphoAaveV3Addresses.sol";
 import { MorphoMarketStorage } from "../../../../utils/MorphoMarketStorage.sol";
 import { IMorphoAaveV3 } from "../../../../interfaces/protocols/morpho/IMorphoAaveV3.sol";

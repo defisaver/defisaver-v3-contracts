@@ -6,7 +6,7 @@ import { IDebtToken } from "../../contracts/interfaces/protocols/aaveV3/IDebtTok
 import { IPoolV3 } from "../../contracts/interfaces/protocols/aaveV3/IPoolV3.sol";
 import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
 import { DataTypes } from "../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
-import { SafeERC20 } from "../../contracts/utils/SafeERC20.sol";
+import { SafeERC20 } from "../../contracts/_vendor/openzeppelin/SafeERC20.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";

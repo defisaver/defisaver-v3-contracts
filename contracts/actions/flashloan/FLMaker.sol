@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
+import { ReentrancyGuard } from "../../_vendor/openzeppelin/ReentrancyGuard.sol";
 import { IERC3156FlashBorrower } from "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
 import { IERC3156FlashLender } from "../../interfaces/flashloan/IERC3156FlashLender.sol";
 

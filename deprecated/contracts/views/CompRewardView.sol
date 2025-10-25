@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { IComptroller } from "../interfaces/protocols/compound/IComptroller.sol";
 import { IERC20 } from "../interfaces/token/IERC20.sol";
-import { Exponential } from "../utils/math/Exponential.sol";
+import { Exponential } from "../../contracts/_vendor/compound/Exponential.sol";
 
 contract CompRewardView is Exponential {
     IComptroller public constant comp = IComptroller(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);

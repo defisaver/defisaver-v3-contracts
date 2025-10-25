@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../../../DS/DSMath.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
 import { ITroveManager } from "../../../interfaces/protocols/liquityV2/ITroveManager.sol";
 import { IPriceFeed } from "../../../interfaces/protocols/liquityV2/IPriceFeed.sol";

@@ -13,7 +13,7 @@ import { TokenGroupRegistry } from "../../../exchangeV3/registries/TokenGroupReg
 import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { IERC20 } from "../../../interfaces/token/IERC20.sol";
-import { SafeERC20 } from "../../../utils/SafeERC20.sol";
+import { SafeERC20 } from "../../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title CurveUsdSwapper Callback contract for CurveUsd extended actions, swaps directly on curve
 contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminAuth {

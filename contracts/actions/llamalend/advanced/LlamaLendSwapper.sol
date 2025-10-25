@@ -6,14 +6,14 @@ import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
 import { DFSExchangeWithTxSaver } from "../../../exchangeV3/DFSExchangeWithTxSaver.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
 import { FeeRecipient } from "../../../utils/FeeRecipient.sol";
-import { SafeERC20 } from "../../../utils/SafeERC20.sol";
+import { SafeERC20 } from "../../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../../interfaces/token/IERC20.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ILlamaLendController } from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 import { ActionsUtilHelper } from "../../utils/helpers/ActionsUtilHelper.sol";
 import { DFSRegistry } from "../../../core/DFSRegistry.sol";
 import { GasFeeHelper } from "../../fee/helpers/GasFeeHelper.sol";
-import { ReentrancyGuardTransient } from "../../../utils/ReentrancyGuardTransient.sol";
+import { ReentrancyGuardTransient } from "../../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 
 /// @title LlamaLendSwapper Callback contract for Llamalend extended actions
 contract LlamaLendSwapper is

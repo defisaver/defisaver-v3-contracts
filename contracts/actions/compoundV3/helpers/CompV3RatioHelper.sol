@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../../../DS/DSMath.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 import { IComet } from "../../../interfaces/protocols/compoundV3/IComet.sol";
 import { MainnetCompV3Addresses } from "./MainnetCompV3Addresses.sol";
 
