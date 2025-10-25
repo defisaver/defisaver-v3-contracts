@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IPriceFeed } from "../interfaces/liquityV2/IPriceFeed.sol";
+import { IPriceFeed } from "../interfaces/protocols/liquityV2/IPriceFeed.sol";
 
 contract MockLiquityV2PriceFeed is IPriceFeed {
     uint256 private PRICE;

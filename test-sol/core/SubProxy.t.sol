@@ -6,7 +6,7 @@ import { SubProxy } from "../../contracts/core/strategy/SubProxy.sol";
 import { SubStorage } from "../../contracts/core/strategy/SubStorage.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 
-import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { DSAuth } from "../../contracts/DS/DSAuth.sol";
 import { DSAuthority } from "../../contracts/DS/DSAuthority.sol";
 

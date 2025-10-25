@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVault } from "../../../interfaces/fluid/vaults/IFluidVault.sol";
+import { IFluidVault } from "../../../interfaces/protocols/fluid/vaults/IFluidVault.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
 /// @title Helper library that simplifies token transfers for fluid dex actions

@@ -5,7 +5,7 @@ import { ActionBase } from "../../ActionBase.sol";
 import { CurveHelper } from "../helpers/CurveHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
-import { ILiquidityGauge } from "../../../interfaces/curve/ILiquidityGauge.sol";
+import { ILiquidityGauge } from "../../../interfaces/protocols/curve/ILiquidityGauge.sol";
 
 /// @title Action that deposits LP tokens into a Liquidity Gauge.
 contract CurveGaugeDeposit is ActionBase, CurveHelper {

@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { IYVault } from "../../interfaces/yearn/IYVault.sol";
+import { IYVault } from "../../interfaces/protocols/yearn/IYVault.sol";
 
 /// @title Burns yTokens and receive underlying tokens in return
 /// @notice yTokens need to be approved for user's wallet to pull them (yToken address)

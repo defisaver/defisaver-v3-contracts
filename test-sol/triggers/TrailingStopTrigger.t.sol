@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IWStEth } from "../../contracts/interfaces/lido/IWStEth.sol";
+import { IWStEth } from "../../contracts/interfaces/protocols/lido/IWStEth.sol";
 import { MainnetUtilAddresses } from "../../contracts/utils/helpers/MainnetUtilAddresses.sol";
 import { MockChainlinkFeedRegistry } from "../../contracts/mocks/MockChainlinkFeedRegistry.sol";
 import { MockChainlinkAggregator } from "../../contracts/mocks/MockChainlinkAggregator.sol";

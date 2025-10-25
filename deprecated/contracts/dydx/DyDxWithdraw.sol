@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { DyDxHelper } from "./helpers/DyDxHelper.sol";
-import { Account, Actions, Types } from "../../interfaces/dydx/ISoloMargin.sol";
+import { Account, Actions, Types } from "../../interfaces/protocols/dydx/ISoloMargin.sol";
 
 /// @title Withdraw tokens from DyDx
 contract DyDxWithdraw is ActionBase, DyDxHelper {

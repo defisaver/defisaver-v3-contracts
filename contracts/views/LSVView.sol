@@ -13,21 +13,21 @@ import { LSVProfitTracker } from "../utils/LSVProfitTracker.sol";
 
 // AAVE V3 IMPORTS
 import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
-import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
-import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
+import { IPoolV3 } from "../interfaces/protocols/aaveV3/IPoolV3.sol";
+import { DataTypes } from "../interfaces/protocols/aaveV3/DataTypes.sol";
 
 // SPARK IMPORTS
 import { SparkHelper } from "../actions/spark/helpers/SparkHelper.sol";
-import { ISparkPool } from "../interfaces/spark/ISparkPool.sol";
-import { SparkDataTypes } from "../interfaces/spark/SparkDataTypes.sol";
+import { ISparkPool } from "../interfaces/protocols/spark/ISparkPool.sol";
+import { SparkDataTypes } from "../interfaces/protocols/spark/SparkDataTypes.sol";
 
 // COMPOUND V3 IMPORTS
-import { IComet } from "../interfaces/compoundV3/IComet.sol";
+import { IComet } from "../interfaces/protocols/compoundV3/IComet.sol";
 import { CompV3Helper } from "../actions/compoundV3/helpers/CompV3Helper.sol";
 
 // MORPHO BLUE IMPORTS
 import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
-import { MarketParams, Id } from "../interfaces/morpho-blue/IMorphoBlue.sol";
+import { MarketParams, Id } from "../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 import { MarketParamsLib, MorphoLib, MorphoBalancesLib } from "../actions/morpho-blue/helpers/MorphoBlueLib.sol";
 
 struct Position {

@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { ILendingPoolV2 } from "../../../interfaces/aaveV2/ILendingPoolV2.sol";
-import { ILendingPoolAddressesProviderV2 } from "../../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
-import { IAaveProtocolDataProviderV2 } from "../../../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
-import { IAaveIncentivesController } from "../../../interfaces/aaveV2/IAaveIncentivesController.sol";
-import { IStakedToken } from "../../../interfaces/aaveV2/IStakedToken.sol";
+import { ILendingPoolV2 } from "../../../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
+import {
+    ILendingPoolAddressesProviderV2
+} from "../../../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import { IAaveProtocolDataProviderV2 } from "../../../interfaces/protocols/aaveV2/IAaveProtocolDataProviderV2.sol";
+import { IAaveIncentivesController } from "../../../interfaces/protocols/aaveV2/IAaveIncentivesController.sol";
+import { IStakedToken } from "../../../interfaces/protocols/aaveV2/IStakedToken.sol";
 import { MainnetAaveAddresses } from "./MainnetAaveAddresses.sol";
 
 /// @title Utility functions and data used in AaveV2 actions

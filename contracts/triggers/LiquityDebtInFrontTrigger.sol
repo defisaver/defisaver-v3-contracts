@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { LiquityHelper } from "../actions/liquity/helpers/LiquityHelper.sol";
 
 /// @title Checks if total amount of debt in front of a specified trove is over a limit

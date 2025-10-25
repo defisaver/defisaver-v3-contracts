@@ -3,10 +3,10 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { IBotRegistry } from "../interfaces/IBotRegistry.sol";
+import { IBotRegistry } from "../interfaces/core/IBotRegistry.sol";
 import { TokenUtils } from "./TokenUtils.sol";
 import { UtilHelper } from "./helpers/UtilHelper.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 import { FeeRecipient } from "./FeeRecipient.sol";
 
 /// @title Contract used to refill tx sending bots when they are low on eth

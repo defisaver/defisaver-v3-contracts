@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { DSMath } from "../../../DS/DSMath.sol";
-import { ITroveManager } from "../../../interfaces/liquity/ITroveManager.sol";
-import { IPriceFeed } from "../../../interfaces/liquity/IPriceFeed.sol";
+import { ITroveManager } from "../../../interfaces/protocols/liquity/ITroveManager.sol";
+import { IPriceFeed } from "../../../interfaces/protocols/liquity/IPriceFeed.sol";
 import { MainnetLiquityAddresses } from "./MainnetLiquityAddresses.sol";
 
 /// @title Helper methods for Liquity ratio calc.

@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { MorphoBlueHelper } from "./helpers/MorphoBlueHelper.sol";
-import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
+import { MarketParams } from "../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 
 /// @title Supply a token to Morpho Blue market for interest
 contract MorphoBlueSupply is ActionBase, MorphoBlueHelper {

@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { McdRatioHelper } from "../actions/mcd/helpers/McdRatioHelper.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { IMCDPriceVerifier } from "../interfaces/IMCDPriceVerifier.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { IMCDPriceVerifier } from "../interfaces/utils/IMCDPriceVerifier.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";

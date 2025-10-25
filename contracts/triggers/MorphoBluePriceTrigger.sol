@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { IOracle } from "../interfaces/morpho-blue/IOracle.sol";
+import { IOracle } from "../interfaces/protocols/morpho-blue/IOracle.sol";
 import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
 
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
 /// @notice This uses the Morpho oracle, which returns the price of the collateral token in terms of the loan token.

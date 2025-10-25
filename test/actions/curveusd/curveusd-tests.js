@@ -78,7 +78,10 @@ const getUserInfo = async (controllerAddress, user) => {
         .getContractAt('ICrvUsdController', controllerAddress)
         .then((c) => c.amm());
     const [, collateral] = await ethers
-        .getContractAt('contracts/interfaces/curveusd/ICurveUsd.sol:ILLAMMA', llammaAddress)
+        .getContractAt(
+            'contracts/interfaces/protocols/curveusd/ICurveUsd.sol:ILLAMMA',
+            llammaAddress,
+        )
         .then((c) => c.get_sum_xy(user));
     const debt = await ethers
         .getContractAt('ICrvUsdController', controllerAddress)
@@ -92,7 +95,10 @@ const getActiveBand = async (controllerAddress) => {
         .getContractAt('ICrvUsdController', controllerAddress)
         .then((c) => c.amm());
     const activeBand = await ethers
-        .getContractAt('contracts/interfaces/curveusd/ICurveUsd.sol:ILLAMMA', llammaAddress)
+        .getContractAt(
+            'contracts/interfaces/protocols/curveusd/ICurveUsd.sol:ILLAMMA',
+            llammaAddress,
+        )
         .then((c) => c.active_band_with_skip());
 
     return activeBand;
@@ -604,7 +610,7 @@ const curveUsdWithdrawTest = () =>
                             controllerAddress,
                         );
                         const llamma = await ethers.getContractAt(
-                            'contracts/interfaces/curveusd/ICurveUsd.sol:ILLAMMA',
+                            'contracts/interfaces/protocols/curveusd/ICurveUsd.sol:ILLAMMA',
                             controller.amm(),
                         );
 
@@ -1176,7 +1182,7 @@ const curveUsdSelfLiquidateTest = () =>
                 );
                 llammaAddress = await crvController.amm();
                 llammaExchange = await ethers.getContractAt(
-                    'contracts/interfaces/curveusd/ICurveUsd.sol:ILLAMMA',
+                    'contracts/interfaces/protocols/curveusd/ICurveUsd.sol:ILLAMMA',
                     llammaAddress,
                 );
 

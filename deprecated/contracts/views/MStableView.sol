@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IBoostedVaultWithLockup } from "contracts/interfaces/mstable/IBoostedVaultWithLockup.sol";
-import { ImAsset } from "contracts/interfaces/mstable/ImAsset.sol";
+import { IBoostedVaultWithLockup } from "contracts/interfaces/protocols/mstable/IBoostedVaultWithLockup.sol";
+import { ImAsset } from "contracts/interfaces/protocols/mstable/ImAsset.sol";
 
 contract MStableView {
     function getMintOutput(address _mAsset, address _input, uint256 _inputQuantity)

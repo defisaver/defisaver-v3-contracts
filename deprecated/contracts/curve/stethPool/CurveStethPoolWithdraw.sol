@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { ICurveStethPool } from "../../../interfaces/curve/stethPool/ICurveStethPool.sol";
+import { ICurveStethPool } from "../../../interfaces/protocols/curve/stethPool/ICurveStethPool.sol";
 import { CurveHelper } from "../helpers/CurveHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";

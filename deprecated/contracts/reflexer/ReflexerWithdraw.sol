@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { ReflexerHelper } from "./helpers/ReflexerHelper.sol";
-import { IBasicTokenAdapters } from "../../interfaces/reflexer/IBasicTokenAdapters.sol";
+import { IBasicTokenAdapters } from "../../interfaces/protocols/reflexer/IBasicTokenAdapters.sol";
 
 /// @title Withdraws collateral from a Reflexer safe
 contract ReflexerWithdraw is ActionBase, ReflexerHelper {

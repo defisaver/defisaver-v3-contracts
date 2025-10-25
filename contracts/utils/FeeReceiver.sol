@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { SafeERC20 } from "./SafeERC20.sol";
 import { UtilHelper } from "./helpers/UtilHelper.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 /// DO NOT DEPLOY ON L2s WITHOUT FEE_RECEIVER_ADMIN_ADDR SET
 /// @title Contract that receivers fees and can be withdrawn from with the admin

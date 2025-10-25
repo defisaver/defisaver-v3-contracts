@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IPendleYieldToken } from "../../interfaces/pendle/IPendleYieldToken.sol";
-import { ISyToken } from "../../interfaces/pendle/ISyToken.sol";
-import { IPendleMarket } from "../../interfaces/pendle/IPendleMarket.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { IPendleYieldToken } from "../../interfaces/protocols/pendle/IPendleYieldToken.sol";
+import { ISyToken } from "../../interfaces/protocols/pendle/ISyToken.sol";
+import { IPendleMarket } from "../../interfaces/protocols/pendle/IPendleMarket.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 import { SafeERC20 } from "../../utils/SafeERC20.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";

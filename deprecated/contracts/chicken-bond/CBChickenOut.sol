@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { LiquityHelper } from "../helpers/LiquityHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { IChickenBondManager } from "../../../interfaces/liquity/IChickenBondManager.sol";
+import { IChickenBondManager } from "../../../interfaces/protocols/liquity/IChickenBondManager.sol";
 
 /// @title Withdraws backing lusd from a pending bond
 contract CBChickenOut is ActionBase, LiquityHelper {

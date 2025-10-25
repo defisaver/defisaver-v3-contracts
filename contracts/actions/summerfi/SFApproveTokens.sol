@@ -2,12 +2,12 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
-import { IExecutable } from "../../interfaces/summerfi/IExecutable.sol";
-import { IServiceRegistry } from "../../interfaces/summerfi/IServiceRegistry.sol";
-import { IOperationsRegistry } from "../../interfaces/summerfi/IOperationsRegistry.sol";
-import { IOperationExecutor, Call } from "../../interfaces/summerfi/IOperationExecutor.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
+import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
+import { IExecutable } from "../../interfaces/protocols/summerfi/IExecutable.sol";
+import { IServiceRegistry } from "../../interfaces/protocols/summerfi/IServiceRegistry.sol";
+import { IOperationsRegistry } from "../../interfaces/protocols/summerfi/IOperationsRegistry.sol";
+import { IOperationExecutor, Call } from "../../interfaces/protocols/summerfi/IOperationExecutor.sol";
 import { SFHelper } from "./helpers/SFHelper.sol";
 
 /// @title Approve tokens through Summer.fi proxy

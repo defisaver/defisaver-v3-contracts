@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { EulerV2Helper } from "../../../contracts/actions/eulerV2/helpers/EulerV2Helper.sol";
-import { IPerspective } from "../../../contracts/interfaces/eulerV2/IPerspective.sol";
+import { IPerspective } from "../../../contracts/interfaces/protocols/eulerV2/IPerspective.sol";
 import { EulerV2PositionCreator } from "../../utils/positions/EulerV2PositionCreator.sol";
 
 contract EulerV2TestHelper is EulerV2Helper, EulerV2PositionCreator {

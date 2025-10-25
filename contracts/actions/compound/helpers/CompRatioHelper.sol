@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { DSMath } from "../../../DS/DSMath.sol";
-import { ICompoundOracle } from "../../../interfaces/compound/ICompoundOracle.sol";
-import { IComptroller } from "../../../interfaces/compound/IComptroller.sol";
-import { ICToken } from "../../../interfaces/compound/ICToken.sol";
+import { ICompoundOracle } from "../../../interfaces/protocols/compound/ICompoundOracle.sol";
+import { IComptroller } from "../../../interfaces/protocols/compound/IComptroller.sol";
+import { ICToken } from "../../../interfaces/protocols/compound/ICToken.sol";
 import { Exponential } from "../../../utils/math/Exponential.sol";
 import { MainnetCompAddresses } from "./MainnetCompAddresses.sol";
 

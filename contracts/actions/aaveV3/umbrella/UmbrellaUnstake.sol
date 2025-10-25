@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { IERC4626 } from "../../../interfaces/IERC4626.sol";
-import { IERC4626StakeToken } from "../../../interfaces/aaveV3/IERC4626StakeToken.sol";
-import { IStaticATokenV2 } from "../../../interfaces/aaveV3/IStaticATokenV2.sol";
+import { IERC4626 } from "../../../interfaces/token/IERC4626.sol";
+import { IERC4626StakeToken } from "../../../interfaces/protocols/aaveV3/IERC4626StakeToken.sol";
+import { IStaticATokenV2 } from "../../../interfaces/protocols/aaveV3/IStaticATokenV2.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { AaveV3Helper } from "../helpers/AaveV3Helper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";

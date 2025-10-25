@@ -2,22 +2,22 @@
 
 pragma solidity =0.8.24;
 
-import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import { IPriceOracleSentinel } from "../interfaces/aaveV3/IPriceOracleSentinel.sol";
-import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
-import { IPoolAddressesProvider } from "../interfaces/aaveV3/IPoolAddressesProvider.sol";
-import { IAaveProtocolDataProvider } from "../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
-import { IReserveInterestRateStrategy } from "../interfaces/aaveV3/IReserveInterestRateStrategy.sol";
-import { IScaledBalanceToken } from "../interfaces/aave/IScaledBalanceToken.sol";
-import { IUmbrella } from "../interfaces/aaveV3/IUmbrella.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { IERC4626 } from "../interfaces/IERC4626.sol";
-import { IERC4626StakeToken } from "../interfaces/aaveV3/IERC4626StakeToken.sol";
-import { IUmbrellaRewardsController } from "../interfaces/aaveV3/IUmbrellaRewardsController.sol";
-import { IStaticATokenV2 } from "../interfaces/aaveV3/IStaticATokenV2.sol";
-import { IDebtToken } from "../interfaces/aaveV3/IDebtToken.sol";
+import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
+import { IPriceOracleSentinel } from "../interfaces/protocols/aaveV3/IPriceOracleSentinel.sol";
+import { IPoolV3 } from "../interfaces/protocols/aaveV3/IPoolV3.sol";
+import { IPoolAddressesProvider } from "../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
+import { IAaveProtocolDataProvider } from "../interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
+import { IReserveInterestRateStrategy } from "../interfaces/protocols/aaveV3/IReserveInterestRateStrategy.sol";
+import { IScaledBalanceToken } from "../interfaces/protocols/aave/IScaledBalanceToken.sol";
+import { IUmbrella } from "../interfaces/protocols/aaveV3/IUmbrella.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { IERC4626 } from "../interfaces/token/IERC4626.sol";
+import { IERC4626StakeToken } from "../interfaces/protocols/aaveV3/IERC4626StakeToken.sol";
+import { IUmbrellaRewardsController } from "../interfaces/protocols/aaveV3/IUmbrellaRewardsController.sol";
+import { IStaticATokenV2 } from "../interfaces/protocols/aaveV3/IStaticATokenV2.sol";
+import { IDebtToken } from "../interfaces/protocols/aaveV3/IDebtToken.sol";
 
-import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
+import { DataTypes } from "../interfaces/protocols/aaveV3/DataTypes.sol";
 import { WadRayMath } from "../utils/math/WadRayMath.sol";
 import { MathUtils } from "../utils/math/MathUtils.sol";
 import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";

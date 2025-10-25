@@ -3,10 +3,10 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
-import { IAddressesRegistry } from "../interfaces/liquityV2/IAddressesRegistry.sol";
-import { IPriceFeed } from "../interfaces/liquityV2/IPriceFeed.sol";
+import { IAddressesRegistry } from "../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { IPriceFeed } from "../interfaces/protocols/liquityV2/IPriceFeed.sol";
 
 /// @title Trigger contract that verifies if price of collateral on a chosen LiquityV2 market went over or under a certain threshold
 contract LiquityV2QuotePriceTrigger is ITrigger, AdminAuth, TriggerHelper {

@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { IRewardsController } from "../../interfaces/aaveV3/IRewardsController.sol";
+import { IRewardsController } from "../../interfaces/protocols/aaveV3/IRewardsController.sol";
 
 /// @title Claims single reward type specified by reward for the list of assets. Rewards are received by to address.
 contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {

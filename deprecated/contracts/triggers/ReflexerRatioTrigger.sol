@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { ReflexerRatioHelper } from "../actions/reflexer/helpers/ReflexerRatioHelper.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 
 /// @title Trigger contract that verifies if the Reflexer position went over/under the subbed ratio
 contract ReflexerRatioTrigger is ITrigger, AdminAuth, ReflexerRatioHelper {

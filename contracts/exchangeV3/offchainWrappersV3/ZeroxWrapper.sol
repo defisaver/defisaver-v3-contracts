@@ -7,7 +7,7 @@ import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
 import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { SafeERC20 } from "../../utils/SafeERC20.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 contract ZeroxWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
     using TokenUtils for address;

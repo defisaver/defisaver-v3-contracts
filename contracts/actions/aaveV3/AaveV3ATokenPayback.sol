@@ -5,8 +5,8 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
-import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
+import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
+import { DataTypes } from "../../interfaces/protocols/aaveV3/DataTypes.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.

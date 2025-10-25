@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IERC721Enumerable } from "../IERC721Enumerable.sol";
+import { IERC721Enumerable } from "../../token/IERC721Enumerable.sol";
 
 interface IBondNFT is IERC721Enumerable {
     struct BondExtraData {

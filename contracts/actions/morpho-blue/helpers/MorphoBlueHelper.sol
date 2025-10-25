@@ -8,9 +8,9 @@ import {
     Id,
     Market,
     MorphoBluePosition
-} from "../../../interfaces/morpho-blue/IMorphoBlue.sol";
+} from "../../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 import { MarketParamsLib, MorphoLib, SharesMathLib } from "./MorphoBlueLib.sol";
-import { IOracle } from "../../../interfaces/morpho-blue/IOracle.sol";
+import { IOracle } from "../../../interfaces/protocols/morpho-blue/IOracle.sol";
 
 contract MorphoBlueHelper is MainnetMorphoBlueAddresses {
     IMorphoBlue public constant morphoBlue = IMorphoBlue(MORPHO_BLUE_ADDRESS);

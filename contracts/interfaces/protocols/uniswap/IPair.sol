@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IERC20 } from "../IERC20.sol";
+import { IERC20 } from "../../token/IERC20.sol";
 
 abstract contract IPair is IERC20 {
     function token0() external view virtual returns (address);

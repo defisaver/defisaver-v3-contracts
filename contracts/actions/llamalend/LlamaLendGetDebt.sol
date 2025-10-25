@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { ILlamaLendController } from "../../interfaces/llamalend/ILlamaLendController.sol";
+import { ILlamaLendController } from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 
 /// @title Action that returns users llamalend debt on a given market
 contract LlamaLendGetDebt is ActionBase {

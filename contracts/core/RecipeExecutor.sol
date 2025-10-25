@@ -109,10 +109,10 @@ import { TxSaverGasCostCalc } from "../utils/TxSaverGasCostCalc.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
-import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
+import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
+import { ITxSaverBytesTransientStorage } from "../interfaces/core/ITxSaverBytesTransientStorage.sol";
 
 contract RecipeExecutor is
     StrategyModel,

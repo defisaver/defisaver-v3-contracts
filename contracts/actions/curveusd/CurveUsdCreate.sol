@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CurveUsdHelper } from "./helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Action that creates a curveusd position on behalf of user's wallet
 /// @dev both collateralAmount and debtAmount must be non-zero and can be maxUint

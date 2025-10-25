@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 
 import { LiquityV2Helper } from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";

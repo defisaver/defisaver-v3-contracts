@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { ISoloMargin, Types, Account } from "../../../interfaces/dydx/ISoloMargin.sol";
+import { ISoloMargin, Types, Account } from "../../../interfaces/protocols/dydx/ISoloMargin.sol";
 import { MainnetDyDxAddresses } from "./MainnetDyDxAddresses.sol";
 
 contract DyDxHelper is MainnetDyDxAddresses {

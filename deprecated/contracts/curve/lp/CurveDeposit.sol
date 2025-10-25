@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { CurveHelper } from "../helpers/CurveHelper.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { ICurve3PoolZap } from "../../../interfaces/curve/ICurve3PoolZap.sol";
+import { ICurve3PoolZap } from "../../../interfaces/protocols/curve/ICurve3PoolZap.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Action that deposits tokens into a Curve pool

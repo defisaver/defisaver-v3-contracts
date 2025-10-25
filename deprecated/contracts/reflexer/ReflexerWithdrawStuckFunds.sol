@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { ICoinJoin } from "../../interfaces/reflexer/ICoinJoin.sol";
+import { ICoinJoin } from "../../interfaces/protocols/reflexer/ICoinJoin.sol";
 import { ReflexerHelper } from "./helpers/ReflexerHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";

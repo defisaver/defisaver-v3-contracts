@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
-import { IPoolAddressesProvider } from "../../interfaces/aaveV3/IPoolAddressesProvider.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
-import { ISafe } from "../../interfaces/safe/ISafe.sol";
-import { ITrigger } from "../../interfaces/ITrigger.sol";
+import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
+import { IPoolAddressesProvider } from "../../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
+import { ISafe } from "../../interfaces/protocols/safe/ISafe.sol";
+import { ITrigger } from "../../interfaces/core/ITrigger.sol";
 import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 import { DSProxy } from "../../DS/DSProxy.sol";

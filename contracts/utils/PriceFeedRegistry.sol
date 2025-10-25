@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IAggregatorV3 } from "../interfaces/chainlink/IAggregatorV3.sol";
+import { IAggregatorV3 } from "../interfaces/protocols/chainlink/IAggregatorV3.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 
 contract PriceFeedRegistry is AdminAuth {

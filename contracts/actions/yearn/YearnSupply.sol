@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { IYVault } from "../../interfaces/yearn/IYVault.sol";
+import { IYVault } from "../../interfaces/protocols/yearn/IYVault.sol";
 import { YearnHelper } from "./helpers/YearnHelper.sol";
 
 /// @title Supplies tokens to Yearn vault

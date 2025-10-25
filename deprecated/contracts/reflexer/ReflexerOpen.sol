@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { ReflexerHelper } from "./helpers/ReflexerHelper.sol";
-import { IBasicTokenAdapters } from "../../interfaces/reflexer/IBasicTokenAdapters.sol";
+import { IBasicTokenAdapters } from "../../interfaces/protocols/reflexer/IBasicTokenAdapters.sol";
 
 /// @title Open a new Reflexer safe
 contract ReflexerOpen is ActionBase, ReflexerHelper {

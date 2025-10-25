@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { IPot } from "../../interfaces/mcd/IPot.sol";
-import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
+import { IPot } from "../../interfaces/protocols/mcd/IPot.sol";
+import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 

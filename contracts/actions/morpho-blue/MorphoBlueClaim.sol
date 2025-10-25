@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IUniversalRewardsDistributor } from "../../interfaces/morpho-blue/IUniversalRewardsDistributor.sol";
+import { IUniversalRewardsDistributor } from "../../interfaces/protocols/morpho-blue/IUniversalRewardsDistributor.sol";
 
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";

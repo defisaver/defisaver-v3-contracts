@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IPool } from "../interfaces/balancer/IPool.sol";
-import { IVault } from "../interfaces/balancer/IVault.sol";
+import { IPool } from "../interfaces/protocols/balancer/IPool.sol";
+import { IVault } from "../interfaces/protocols/balancer/IVault.sol";
 
 contract BalancerView {
     function getPoolTokens(address _pool) external view returns (address[] memory tokens, uint256[] memory balances) {

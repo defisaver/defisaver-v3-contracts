@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import { SafeERC20 } from "../../../../utils/SafeERC20.sol";
-import { IERC20 } from "../../../../interfaces/IERC20.sol";
+import { IERC20 } from "../../../../interfaces/token/IERC20.sol";
 import { TokenUtils } from "../../../../utils/TokenUtils.sol";
 import { AdminAuth } from "../../../../auth/AdminAuth.sol";
 import { DFSExchangeWithTxSaver } from "../../../../exchangeV3/DFSExchangeWithTxSaver.sol";
@@ -14,7 +14,7 @@ import { GasFeeHelper } from "../../../../actions/fee/helpers/GasFeeHelper.sol";
 import { ReentrancyGuardTransient } from "../../../../utils/ReentrancyGuardTransient.sol";
 
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title CurveUsdSwapperTransient Callback contract for CurveUsd extended actions with transient storage
 contract CurveUsdSwapperTransient is

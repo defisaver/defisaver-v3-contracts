@@ -2,15 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../interfaces/liquityV2/IAddressesRegistry.sol";
-import { IBorrowerOperations } from "../interfaces/liquityV2/IBorrowerOperations.sol";
-import { ITroveManager } from "../interfaces/liquityV2/ITroveManager.sol";
-import { IStabilityPool } from "../interfaces/liquityV2/IStabilityPool.sol";
-import { ISortedTroves } from "../interfaces/liquityV2/ISortedTroves.sol";
-import { IHintHelpers } from "../interfaces/liquityV2/IHintHelpers.sol";
-import { IPriceFeed } from "../interfaces/liquityV2/IPriceFeed.sol";
-import { ITroveNFT } from "../interfaces/liquityV2/ITroveNFT.sol";
-import { IMultiTroveGetter } from "../interfaces/liquityV2/IMultiTroveGetter.sol";
+import { IAddressesRegistry } from "../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { IBorrowerOperations } from "../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
+import { ITroveManager } from "../interfaces/protocols/liquityV2/ITroveManager.sol";
+import { IStabilityPool } from "../interfaces/protocols/liquityV2/IStabilityPool.sol";
+import { ISortedTroves } from "../interfaces/protocols/liquityV2/ISortedTroves.sol";
+import { IHintHelpers } from "../interfaces/protocols/liquityV2/IHintHelpers.sol";
+import { IPriceFeed } from "../interfaces/protocols/liquityV2/IPriceFeed.sol";
+import { ITroveNFT } from "../interfaces/protocols/liquityV2/ITroveNFT.sol";
+import { IMultiTroveGetter } from "../interfaces/protocols/liquityV2/IMultiTroveGetter.sol";
 import { LiquityV2Helper } from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
 
 contract LiquityV2View is LiquityV2Helper {

@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { AaveRatioHelper } from "../actions/aave/helpers/AaveRatioHelper.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TransientStorage } from "../utils/TransientStorage.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 

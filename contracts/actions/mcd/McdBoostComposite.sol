@@ -5,10 +5,10 @@ import { ActionBase } from "../ActionBase.sol";
 import { DFSSell } from "../exchange/DFSSell.sol";
 import { GasFeeTaker } from "../fee/GasFeeTaker.sol";
 
-import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
-import { IJug } from "../../interfaces/mcd/IJug.sol";
-import { IJoin } from "../../interfaces/mcd/IJoin.sol";
-import { IManager } from "../../interfaces/mcd/IManager.sol";
+import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
+import { IJug } from "../../interfaces/protocols/mcd/IJug.sol";
+import { IJoin } from "../../interfaces/protocols/mcd/IJoin.sol";
+import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
 
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { McdRatioHelper } from "./helpers/McdRatioHelper.sol";

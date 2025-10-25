@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IWeEth } from "../../interfaces/etherFi/IWeEth.sol";
+import { IWeEth } from "../../interfaces/protocols/etherFi/IWeEth.sol";
 
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";

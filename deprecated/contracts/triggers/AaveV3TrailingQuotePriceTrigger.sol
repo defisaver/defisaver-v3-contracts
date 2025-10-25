@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import { IAggregatorV3 } from "../interfaces/chainlink/IAggregatorV3.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
+import { IAggregatorV3 } from "../interfaces/protocols/chainlink/IAggregatorV3.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { DSMath } from "../DS/DSMath.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";

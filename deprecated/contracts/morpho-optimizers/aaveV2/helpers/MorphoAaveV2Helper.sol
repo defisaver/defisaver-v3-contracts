@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IMorphoAaveV2Lens } from "../../../../interfaces/morpho/IMorphoAaveV2Lens.sol";
-import { MorphoTypes } from "../../../../interfaces/morpho/MorphoTypes.sol";
+import { IMorphoAaveV2Lens } from "../../../../interfaces/protocols/morpho/IMorphoAaveV2Lens.sol";
+import { MorphoTypes } from "../../../../interfaces/protocols/morpho/MorphoTypes.sol";
 import { DSMath } from "../../../../DS/DSMath.sol";
 import { MainnetMorphoAaveV2Addresses } from "./MainnetMorphoAaveV2Addresses.sol";
 

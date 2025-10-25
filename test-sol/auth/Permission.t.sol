@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import { Permission } from "../../contracts/auth/Permission.sol";
-import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { DSAuthority } from "../../contracts/DS/DSAuthority.sol";
 import { DSAuth } from "../../contracts/DS/DSAuth.sol";
 import { AuthHelper } from "../../contracts/auth/helpers/AuthHelper.sol";

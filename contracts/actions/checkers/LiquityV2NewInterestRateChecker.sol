@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { TransientStorageCancun } from "../../utils/TransientStorageCancun.sol";
-import { IAddressesRegistry } from "../../interfaces/liquityV2/IAddressesRegistry.sol";
-import { ITroveManager } from "../../interfaces/liquityV2/ITroveManager.sol";
+import { IAddressesRegistry } from "../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { ITroveManager } from "../../interfaces/protocols/liquityV2/ITroveManager.sol";
 
 /// @title LiquityV2 New Interest Rate Checker Action
 /// @notice Validates that the interest rate of a LiquityV2 trove was correctly adjusted after strategy execution.

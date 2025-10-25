@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../../../ActionBase.sol";
 import { ReflexerHelper } from "./../../helpers/ReflexerHelper.sol";
-import { ISAFESaviour } from "../../../../interfaces/reflexer/ISAFESaviour.sol";
+import { ISAFESaviour } from "../../../../interfaces/protocols/reflexer/ISAFESaviour.sol";
 
 /// @title Get back system coins or collateral tokens that were withdrawn from Uniswap and not used to save a specific SAFE
 contract ReflexerNativeUniV2SaviourGetReserves is ActionBase, ReflexerHelper {

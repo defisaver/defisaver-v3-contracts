@@ -2,16 +2,16 @@
 
 pragma solidity =0.8.24;
 
-import { IManager } from "../../interfaces/mcd/IManager.sol";
-import { ISpotter } from "../../interfaces/mcd/ISpotter.sol";
-import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
-import { IJug } from "../../interfaces/mcd/IJug.sol";
-import { ICropper } from "../../interfaces/mcd/ICropper.sol";
+import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
+import { ISpotter } from "../../interfaces/protocols/mcd/ISpotter.sol";
+import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
+import { IJug } from "../../interfaces/protocols/mcd/IJug.sol";
+import { ICropper } from "../../interfaces/protocols/mcd/ICropper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { ICdpRegistry } from "../../interfaces/mcd/ICdpRegistry.sol";
+import { ICdpRegistry } from "../../interfaces/protocols/mcd/ICdpRegistry.sol";
 
 /// @title Generate dai from a Maker Vault
 contract McdGenerate is ActionBase, McdHelper {

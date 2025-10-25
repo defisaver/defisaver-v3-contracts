@@ -12,7 +12,7 @@ import { IOffchainWrapper } from "../interfaces/exchange/IOffchainWrapper.sol";
 import { ExchangeHelper } from "./helpers/ExchangeHelper.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { SafeERC20 } from "../utils/SafeERC20.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 import { TokenUtils } from "../utils/TokenUtils.sol";
 import { DSMath } from "../DS/DSMath.sol";
 

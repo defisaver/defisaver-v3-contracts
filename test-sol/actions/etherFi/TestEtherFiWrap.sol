@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { ILiquidityPool } from "../../../contracts/interfaces/etherFi/ILiquidityPool.sol";
+import { ILiquidityPool } from "../../../contracts/interfaces/protocols/etherFi/ILiquidityPool.sol";
 import { EtherFiWrap } from "../../../contracts/actions/etherfi/EtherFiWrap.sol";
 import { EtherFiHelper } from "../../../contracts/actions/etherfi/helpers/EtherFiHelper.sol";
 

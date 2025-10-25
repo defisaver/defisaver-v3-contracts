@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { MorphoBlueHelper } from "./helpers/MorphoBlueHelper.sol";
-import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
+import { MarketParams } from "../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 
 /// @title Withdraw a token to Morpho Blue market that is collateral
 contract MorphoBlueWithdrawCollateral is ActionBase, MorphoBlueHelper {

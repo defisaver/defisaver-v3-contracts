@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { MainnetGUniAddresses } from "./MainnetGUniAddresses.sol";
-import { IGUniRouter02 } from "../../../interfaces/guni/IGUniRouter02.sol";
+import { IGUniRouter02 } from "../../../interfaces/protocols/guni/IGUniRouter02.sol";
 
 /// @title Utility functions and data used in GUni actions
 contract GUniHelper is MainnetGUniAddresses {

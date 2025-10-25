@@ -3,8 +3,8 @@ pragma solidity =0.8.24;
 
 import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterface.sol";
 import { DSProxy } from "../../contracts/DS/DSProxy.sol";
-import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
-import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
+import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
 abstract contract UserWallet {

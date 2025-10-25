@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { DSMath } from "../../DS/DSMath.sol";
-import { IWStEth } from "../../interfaces/lido/IWStEth.sol";
+import { IWStEth } from "../../interfaces/protocols/lido/IWStEth.sol";
 import { LidoHelper } from "./helpers/LidoHelper.sol";
 
 /// @title Unwrap WStEth and receive StEth

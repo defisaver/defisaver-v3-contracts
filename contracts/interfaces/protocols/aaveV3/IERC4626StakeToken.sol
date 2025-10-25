@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity =0.8.24;
 
-import { IERC4626 } from "../../interfaces/IERC4626.sol";
+import { IERC4626 } from "../../../interfaces/token/IERC4626.sol";
 
 /// @author Aave
 /// @dev Taken from AaveV3 Umbrella Stake Token

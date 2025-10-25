@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../interfaces/liquityV2/IAddressesRegistry.sol";
-import { IStabilityPool } from "../../../interfaces/liquityV2/IStabilityPool.sol";
+import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { IStabilityPool } from "../../../interfaces/protocols/liquityV2/IStabilityPool.sol";
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";

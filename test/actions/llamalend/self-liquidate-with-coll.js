@@ -96,7 +96,7 @@ describe('LlamaLend-Self-Liq-With-Coll', function () {
             await setBalance(debtTokenAddr, senderAcc.address, llamaSwapAmountInWei);
             await approve(debtTokenAddr, llammaAddress);
             const llammaExchange = await hre.ethers.getContractAt(
-                'contracts/interfaces/llamalend/ILLAMA.sol:ILLAMMA',
+                'contracts/interfaces/protocols/llamalend/ILLAMA.sol:ILLAMMA',
                 llammaAddress,
             );
             await llammaExchange.exchange(0, 1, llamaSwapAmountInWei, 1, { gasLimit: 5000000 });

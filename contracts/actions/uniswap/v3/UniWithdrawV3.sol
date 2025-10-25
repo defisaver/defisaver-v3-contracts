@@ -6,7 +6,7 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { UniV3Helper } from "./helpers/UniV3Helper.sol";
 import {
     IUniswapV3NonfungiblePositionManager
-} from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+} from "../../../interfaces/protocols/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Decreases liquidity from a position represented by tokenID, and collects tokensOwed from position to recipient
 contract UniWithdrawV3 is ActionBase, UniV3Helper {

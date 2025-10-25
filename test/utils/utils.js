@@ -661,7 +661,7 @@ const getAddrFromRegistry = async (name) => {
 
 const getProxyWithSigner = async (signer, addr) => {
     const proxyRegistry = await hre.ethers.getContractAt(
-        'IProxyRegistry',
+        'IDSProxyRegistry',
         addrs[network].PROXY_REGISTRY,
     );
 
@@ -680,7 +680,7 @@ const getProxyWithSigner = async (signer, addr) => {
 const getProxy = async (acc, isSafe = false) => {
     if (isSafe === false) {
         const proxyRegistry = await hre.ethers.getContractAt(
-            'IProxyRegistry',
+            'IDSProxyRegistry',
             addrs[network].PROXY_REGISTRY,
         );
         let proxyAddr = await proxyRegistry.proxies(acc);

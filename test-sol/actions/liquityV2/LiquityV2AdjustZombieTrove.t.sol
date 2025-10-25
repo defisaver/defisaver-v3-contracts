@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IPriceFeed } from "../../../contracts/interfaces/liquityV2/IPriceFeed.sol";
-import { IHintHelpers } from "../../../contracts/interfaces/liquityV2/IHintHelpers.sol";
-import { ITroveManager } from "../../../contracts/interfaces/liquityV2/ITroveManager.sol";
-import { ISortedTroves } from "../../../contracts/interfaces/liquityV2/ISortedTroves.sol";
+import { IAddressesRegistry } from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { IPriceFeed } from "../../../contracts/interfaces/protocols/liquityV2/IPriceFeed.sol";
+import { IHintHelpers } from "../../../contracts/interfaces/protocols/liquityV2/IHintHelpers.sol";
+import { ITroveManager } from "../../../contracts/interfaces/protocols/liquityV2/ITroveManager.sol";
+import { ISortedTroves } from "../../../contracts/interfaces/protocols/liquityV2/ISortedTroves.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 import { LiquityV2AdjustZombieTrove } from "../../../contracts/actions/liquityV2/trove/LiquityV2AdjustZombieTrove.sol";

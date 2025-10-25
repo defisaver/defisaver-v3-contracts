@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { LiquityHelper } from "../actions/liquity/helpers/LiquityHelper.sol";
-import { IChickenBondManager } from "../interfaces/liquity/IChickenBondManager.sol";
-import { IBondNFT } from "../interfaces/liquity/IBondNFT.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { IChickenBondManager } from "../interfaces/protocols/liquity/IChickenBondManager.sol";
+import { IBondNFT } from "../interfaces/protocols/liquity/IBondNFT.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 contract ChickenBondsView is LiquityHelper {
     struct BondDataFull {

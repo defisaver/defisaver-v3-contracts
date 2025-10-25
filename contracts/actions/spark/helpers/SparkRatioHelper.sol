@@ -3,8 +3,8 @@ pragma solidity =0.8.24;
 
 import { DSMath } from "../../../DS/DSMath.sol";
 import { MainnetSparkAddresses } from "./MainnetSparkAddresses.sol";
-import { ISparkPool } from "../../../interfaces/spark/ISparkPool.sol";
-import { ISparkPoolAddressesProvider } from "../../../interfaces/spark/ISparkPoolAddressesProvider.sol";
+import { ISparkPool } from "../../../interfaces/protocols/spark/ISparkPool.sol";
+import { ISparkPoolAddressesProvider } from "../../../interfaces/protocols/spark/ISparkPoolAddressesProvider.sol";
 
 contract SparkRatioHelper is DSMath, MainnetSparkAddresses {
     function getSafetyRatio(address _market, address _user) public view returns (uint256) {

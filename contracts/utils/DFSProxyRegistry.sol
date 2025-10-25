@@ -3,15 +3,15 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { IProxyRegistry } from "../interfaces/IProxyRegistry.sol";
-import { IDSProxy } from "../interfaces/IDSProxy.sol";
+import { IDSProxyRegistry } from "../interfaces/DS/IDSProxyRegistry.sol";
+import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
 import { UtilHelper } from "./helpers/UtilHelper.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { ActionsUtilHelper } from "../actions/utils/helpers/ActionsUtilHelper.sol";
 
 /// @title Checks Mcd registry and replaces the proxy addr if owner changed
 contract DFSProxyRegistry is AdminAuth, UtilHelper, ActionsUtilHelper {
-    IProxyRegistry public mcdRegistry = IProxyRegistry(MKR_PROXY_REGISTRY);
+    IDSProxyRegistry public mcdRegistry = IDSProxyRegistry(MKR_PROXY_REGISTRY);
     DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
 
     bytes4 public DFS_PROXY_REGISTRY_CONTROLLER_ID = 0xcbbb53f2;

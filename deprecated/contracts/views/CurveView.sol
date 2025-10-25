@@ -7,10 +7,10 @@ import {
     ICurveFactoryLP,
     ICurveFactoryPool,
     IGaugeController
-} from "../interfaces/curve/ICurveFactory.sol";
-import { ILiquidityGauge } from "../interfaces/curve/ILiquidityGauge.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { IRegistry } from "../interfaces/curve/IRegistry.sol";
+} from "../interfaces/protocols/curve/ICurveFactory.sol";
+import { ILiquidityGauge } from "../interfaces/protocols/curve/ILiquidityGauge.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { IRegistry } from "../interfaces/protocols/curve/IRegistry.sol";
 
 contract CurveView is CurveHelper {
     struct LpBalance {

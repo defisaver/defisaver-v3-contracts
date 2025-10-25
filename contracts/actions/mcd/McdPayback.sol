@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { IManager } from "../../interfaces/mcd/IManager.sol";
-import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
+import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
+import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
-import { ICropper } from "../../interfaces/mcd/ICropper.sol";
-import { ICdpRegistry } from "../../interfaces/mcd/ICdpRegistry.sol";
+import { ICropper } from "../../interfaces/protocols/mcd/ICropper.sol";
+import { ICdpRegistry } from "../../interfaces/protocols/mcd/ICdpRegistry.sol";
 
 /// @title Payback dai debt for a Maker vault
 contract McdPayback is ActionBase, McdHelper {

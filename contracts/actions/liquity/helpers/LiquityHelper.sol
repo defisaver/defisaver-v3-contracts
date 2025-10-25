@@ -3,14 +3,14 @@
 pragma solidity =0.8.24;
 
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { ITroveManager } from "../../../interfaces/liquity/ITroveManager.sol";
-import { IBorrowerOperations } from "../../../interfaces/liquity/IBorrowerOperations.sol";
-import { IPriceFeed } from "../../../interfaces/liquity/IPriceFeed.sol";
-import { IHintHelpersV1 } from "../../../interfaces/liquity/IHintHelpersV1.sol";
-import { ISortedTroves } from "../../../interfaces/liquity/ISortedTroves.sol";
-import { ICollSurplusPool } from "../../../interfaces/liquity/ICollSurplusPool.sol";
-import { IStabilityPool } from "../../../interfaces/liquity/IStabilityPool.sol";
-import { ILQTYStaking } from "../../../interfaces/liquity/ILQTYStaking.sol";
+import { ITroveManager } from "../../../interfaces/protocols/liquity/ITroveManager.sol";
+import { IBorrowerOperations } from "../../../interfaces/protocols/liquity/IBorrowerOperations.sol";
+import { IPriceFeed } from "../../../interfaces/protocols/liquity/IPriceFeed.sol";
+import { IHintHelpersV1 } from "../../../interfaces/protocols/liquity/IHintHelpersV1.sol";
+import { ISortedTroves } from "../../../interfaces/protocols/liquity/ISortedTroves.sol";
+import { ICollSurplusPool } from "../../../interfaces/protocols/liquity/ICollSurplusPool.sol";
+import { IStabilityPool } from "../../../interfaces/protocols/liquity/IStabilityPool.sol";
+import { ILQTYStaking } from "../../../interfaces/protocols/liquity/ILQTYStaking.sol";
 import { MainnetLiquityAddresses } from "./MainnetLiquityAddresses.sol";
 
 contract LiquityHelper is MainnetLiquityAddresses {

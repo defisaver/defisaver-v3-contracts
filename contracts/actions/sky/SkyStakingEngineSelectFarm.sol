@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { ILockstakeEngine } from "../../interfaces/sky/ILockstakeEngine.sol";
+import { ILockstakeEngine } from "../../interfaces/protocols/sky/ILockstakeEngine.sol";
 import { SkyHelper } from "./helpers/SkyHelper.sol";
 
 /// @title Selects a farm for the SKY Staking Engine Position

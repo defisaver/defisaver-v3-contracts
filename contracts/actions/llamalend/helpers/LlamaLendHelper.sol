@@ -2,13 +2,13 @@
 pragma solidity =0.8.24;
 
 import { MainnetLlamaLendAddresses } from "./MainnetLlamaLendAddresses.sol";
-import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
-import { ILlamaLendFactory } from "../../../interfaces/llamalend/ILlamaLendFactory.sol";
-import { ILLAMMA } from "../../../interfaces/llamalend/ILLAMA.sol";
-import { IERC20 } from "../../../interfaces/IERC20.sol";
+import { ILlamaLendController } from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import { ILlamaLendFactory } from "../../../interfaces/protocols/llamalend/ILlamaLendFactory.sol";
+import { ILLAMMA } from "../../../interfaces/protocols/llamalend/ILLAMA.sol";
+import { IERC20 } from "../../../interfaces/token/IERC20.sol";
 import { DSMath } from "../../../DS/DSMath.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { IBytesTransientStorage } from "../../../interfaces/IBytesTransientStorage.sol";
+import { IBytesTransientStorage } from "../../../interfaces/utils/IBytesTransientStorage.sol";
 
 contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
     using TokenUtils for address;

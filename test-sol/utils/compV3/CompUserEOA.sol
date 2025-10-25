@@ -2,8 +2,8 @@
 pragma solidity =0.8.24;
 
 import { CompUserUtils } from "./CompUserUtils.sol";
-import { IComet } from "../../../contracts/interfaces/compoundV3/IComet.sol";
-import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
+import { IComet } from "../../../contracts/interfaces/protocols/compoundV3/IComet.sol";
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 
 contract CompUserEOA is CompUserUtils {
     IComet public comet;

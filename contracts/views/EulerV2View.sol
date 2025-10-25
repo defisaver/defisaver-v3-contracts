@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { IEVault } from "../interfaces/eulerV2/IEVault.sol";
-import { IPriceOracle } from "../interfaces/eulerV2/IPriceOracle.sol";
-import { IEVC } from "../interfaces/eulerV2/IEVC.sol";
-import { IIRM } from "../interfaces/eulerV2/IIRM.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { IEVault } from "../interfaces/protocols/eulerV2/IEVault.sol";
+import { IPriceOracle } from "../interfaces/protocols/eulerV2/IPriceOracle.sol";
+import { IEVC } from "../interfaces/protocols/eulerV2/IEVC.sol";
+import { IIRM } from "../interfaces/protocols/eulerV2/IIRM.sol";
 
 import { EulerV2Helper } from "../actions/eulerV2/helpers/EulerV2Helper.sol";
 import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { ISwapRouterNG } from "../../../interfaces/curve/ISwapRouterNG.sol";
+import { ISwapRouterNG } from "../../../interfaces/protocols/curve/ISwapRouterNG.sol";
 
 import { AdminAuth } from "../../../auth/AdminAuth.sol";
 import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
@@ -10,9 +10,9 @@ import { FeeRecipient } from "../../../utils/FeeRecipient.sol";
 import { GasFeeHelper } from "../../../actions/fee/helpers/GasFeeHelper.sol";
 import { ExchangeHelper } from "../../../exchangeV3/helpers/ExchangeHelper.sol";
 import { TokenGroupRegistry } from "../../../exchangeV3/registries/TokenGroupRegistry.sol";
-import { ICrvUsdController } from "../../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { IERC20 } from "../../../interfaces/IERC20.sol";
+import { IERC20 } from "../../../interfaces/token/IERC20.sol";
 import { SafeERC20 } from "../../../utils/SafeERC20.sol";
 
 /// @title CurveUsdSwapper Callback contract for CurveUsd extended actions, swaps directly on curve

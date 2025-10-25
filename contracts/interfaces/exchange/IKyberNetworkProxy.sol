@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IERC20 } from "../IERC20.sol";
+import { IERC20 } from "../token/IERC20.sol";
 
 abstract contract KyberNetworkProxyInterface {
     function maxGasPrice() external view virtual returns (uint256);

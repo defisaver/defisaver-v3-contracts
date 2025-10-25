@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 interface IConvexToken is IERC20 {
     function reductionPerCliff() external view returns (uint256);

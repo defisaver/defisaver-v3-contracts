@@ -2,8 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { ILendingPoolV2 } from "../../../interfaces/aaveV2/ILendingPoolV2.sol";
-import { ILendingPoolAddressesProviderV2 } from "../../../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import { ILendingPoolV2 } from "../../../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
+import {
+    ILendingPoolAddressesProviderV2
+} from "../../../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
 import { DSMath } from "../../../DS/DSMath.sol";
 import { MainnetAaveAddresses } from "./MainnetAaveAddresses.sol";
 

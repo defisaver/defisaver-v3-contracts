@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IERC4626 } from "../../interfaces/IERC4626.sol";
+import { IERC4626 } from "../../interfaces/token/IERC4626.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 

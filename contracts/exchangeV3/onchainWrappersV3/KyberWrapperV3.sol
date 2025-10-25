@@ -10,7 +10,7 @@ import { WrapperHelper } from "./helpers/WrapperHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
 import { SafeERC20 } from "../../utils/SafeERC20.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExchangeHelper {
     error WrongDestAmountError(uint256, uint256);

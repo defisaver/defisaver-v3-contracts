@@ -6,7 +6,7 @@ import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveHelper } from "./helpers/AaveHelper.sol";
 import { FLFeeFaucet } from "../../utils/FLFeeFaucet.sol";
-import { ILendingPoolV2 } from "../../interfaces/aaveV2/ILendingPoolV2.sol";
+import { ILendingPoolV2 } from "../../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
 
 /// @title Withdraw a token from an Aave market
 contract AaveWithdraw is ActionBase, AaveHelper {

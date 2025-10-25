@@ -5,8 +5,8 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
-import { SparkDataTypes } from "../../interfaces/spark/SparkDataTypes.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
+import { SparkDataTypes } from "../../interfaces/protocols/spark/SparkDataTypes.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Allows user to repay with spTokens of the underlying debt asset eg. Pay DAI debt using spDAI tokens.

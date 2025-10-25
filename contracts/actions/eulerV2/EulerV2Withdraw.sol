@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 
-import { IERC4626 } from "../../interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IERC4626 } from "../../interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
 
 /// @title Withdraws assets from Euler vault

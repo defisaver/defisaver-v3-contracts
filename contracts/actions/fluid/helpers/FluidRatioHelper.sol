@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultResolver } from "../../../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import { IFluidVaultResolver } from "../../../interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidHelper } from "./FluidHelper.sol";
 
 /// @title Helper contract for Fluid ratio calculations.

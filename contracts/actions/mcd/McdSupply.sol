@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IManager } from "../../interfaces/mcd/IManager.sol";
-import { IJoin } from "../../interfaces/mcd/IJoin.sol";
-import { ICropper } from "../../interfaces/mcd/ICropper.sol";
-import { ICdpRegistry } from "../../interfaces/mcd/ICdpRegistry.sol";
+import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
+import { IJoin } from "../../interfaces/protocols/mcd/IJoin.sol";
+import { ICropper } from "../../interfaces/protocols/mcd/ICropper.sol";
+import { ICdpRegistry } from "../../interfaces/protocols/mcd/ICdpRegistry.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";

@@ -8,7 +8,7 @@ import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 import { TxSaverBytesTransientStorage } from "./TxSaverBytesTransientStorage.sol";
 
 /// @title Main entry point for executing TxSaver transactions signed by users through safe wallet

@@ -3,10 +3,10 @@
 pragma solidity =0.8.24;
 
 import { DSMath } from "../../../DS/DSMath.sol";
-import { IOracleRelayer } from "../../../interfaces/reflexer/IOracleRelayer.sol";
-import { ISAFEEngine } from "../../../interfaces/reflexer/ISAFEEngine.sol";
-import { ISAFEManager } from "../../../interfaces/reflexer/ISAFEManager.sol";
-import { IFSMWrapper } from "../../../interfaces/reflexer/IFSMWrapper.sol";
+import { IOracleRelayer } from "../../../interfaces/protocols/reflexer/IOracleRelayer.sol";
+import { ISAFEEngine } from "../../../interfaces/protocols/reflexer/ISAFEEngine.sol";
+import { ISAFEManager } from "../../../interfaces/protocols/reflexer/ISAFEManager.sol";
+import { IFSMWrapper } from "../../../interfaces/protocols/reflexer/IFSMWrapper.sol";
 import { MainnetReflexerAddresses } from "./MainnetReflexerAddresses.sol";
 
 /// @title Helper methods for Liquity ratio calc.

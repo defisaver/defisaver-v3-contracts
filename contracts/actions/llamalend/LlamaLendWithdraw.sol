@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { LlamaLendHelper } from "./helpers/LlamaLendHelper.sol";
-import { ILlamaLendController } from "../../interfaces/llamalend/ILlamaLendController.sol";
+import { ILlamaLendController } from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 
 /// @title Action that withdraws collateral from user's wallet llamalend position
 /// @dev collateralAmount must be non-zero

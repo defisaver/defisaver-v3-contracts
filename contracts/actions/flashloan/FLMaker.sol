@@ -7,7 +7,7 @@ import { IERC3156FlashBorrower } from "../../interfaces/flashloan/IERC3156FlashB
 import { IERC3156FlashLender } from "../../interfaces/flashloan/IERC3156FlashLender.sol";
 
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
-import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
+import { IFLParamGetter } from "../../interfaces/flashloan/IFLParamGetter.sol";
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
 
 import { TokenUtils } from "../../utils/TokenUtils.sol";

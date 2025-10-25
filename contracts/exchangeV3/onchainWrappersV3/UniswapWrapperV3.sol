@@ -8,7 +8,7 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { WrapperHelper } from "./helpers/WrapperHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { SafeERC20 } from "../../utils/SafeERC20.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title DFS exchange wrapper for UniswapV2
 contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {

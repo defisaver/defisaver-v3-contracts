@@ -6,9 +6,9 @@ import { CompV3Helper } from "../actions/compoundV3/helpers/CompV3Helper.sol";
 import { CompV3PortedFunctions } from "../utils/CompV3PortedFunctions.sol";
 import { DSMath } from "../DS/DSMath.sol";
 import { Exponential } from "../utils/math/Exponential.sol";
-import { IComet } from "../interfaces/compoundV3/IComet.sol";
-import { ICometExt } from "../interfaces/compoundV3/ICometExt.sol";
-import { ICometRewards } from "../interfaces/compoundV3/ICometRewards.sol";
+import { IComet } from "../interfaces/protocols/compoundV3/IComet.sol";
+import { ICometExt } from "../interfaces/protocols/compoundV3/ICometExt.sol";
+import { ICometRewards } from "../interfaces/protocols/compoundV3/ICometRewards.sol";
 
 contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions {
     address private constant wUSDM_PRICE_FEED = 0xe3a409eD15CD53aFdEFdd191ad945cEC528A2496;

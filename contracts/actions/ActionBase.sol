@@ -6,7 +6,7 @@ import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { DSProxy } from "../DS/DSProxy.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { ActionsUtilHelper } from "./utils/helpers/ActionsUtilHelper.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 import { CheckWalletType } from "../utils/CheckWalletType.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs

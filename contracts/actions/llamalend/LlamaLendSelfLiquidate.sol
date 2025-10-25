@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { LlamaLendHelper } from "./helpers/LlamaLendHelper.sol";
-import { ILlamaLendController } from "../../interfaces/llamalend/ILlamaLendController.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { ILlamaLendController } from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title LlamaLendSelfLiquidate Closes the users position while he's in soft liquidation
 contract LlamaLendSelfLiquidate is ActionBase, LlamaLendHelper {

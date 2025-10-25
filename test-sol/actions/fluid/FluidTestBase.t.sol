@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultFactory } from "../../../contracts/interfaces/fluid/IFluidVaultFactory.sol";
-import { IFluidVaultResolver } from "../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
-import { IFluidDexResolver } from "../../../contracts/interfaces/fluid/resolvers/IFluidDexResolver.sol";
-import { IFluidVault } from "../../../contracts/interfaces/fluid/vaults/IFluidVault.sol";
-import { IFluidVaultT1 } from "../../../contracts/interfaces/fluid/vaults/IFluidVaultT1.sol";
+import { IFluidVaultFactory } from "../../../contracts/interfaces/protocols/fluid/IFluidVaultFactory.sol";
+import { IFluidVaultResolver } from "../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
+import { IFluidDexResolver } from "../../../contracts/interfaces/protocols/fluid/resolvers/IFluidDexResolver.sol";
+import { IFluidVault } from "../../../contracts/interfaces/protocols/fluid/vaults/IFluidVault.sol";
+import { IFluidVaultT1 } from "../../../contracts/interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
 import { FluidDexModel } from "../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { FluidView } from "../../../contracts/views/FluidView.sol";
 import { FluidHelper } from "../../../contracts/actions/fluid/helpers/FluidHelper.sol";

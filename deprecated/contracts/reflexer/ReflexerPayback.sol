@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { ICoinJoin } from "../../interfaces/reflexer/ICoinJoin.sol";
+import { ICoinJoin } from "../../interfaces/protocols/reflexer/ICoinJoin.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { ReflexerHelper } from "./helpers/ReflexerHelper.sol";
-import { ISAFEEngine } from "../../interfaces/reflexer/ISAFEEngine.sol";
+import { ISAFEEngine } from "../../interfaces/protocols/reflexer/ISAFEEngine.sol";
 
 /// @title Payback rai debt for a reflexer safe
 contract ReflexerPayback is ActionBase, ReflexerHelper {

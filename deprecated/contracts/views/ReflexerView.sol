@@ -2,12 +2,12 @@
 pragma solidity =0.8.24;
 
 import { DSMath } from "../DS/DSMath.sol";
-import { IGetSafes } from "../interfaces/reflexer/IGetSafes.sol";
-import { ISAFEEngine } from "../interfaces/reflexer/ISAFEEngine.sol";
-import { ISAFEManager } from "../interfaces/reflexer/ISAFEManager.sol";
-import { IOracleRelayer } from "../interfaces/reflexer/IOracleRelayer.sol";
-import { IMedianOracle } from "../interfaces/reflexer/IMedianOracle.sol";
-import { ITaxCollector } from "../interfaces/reflexer/ITaxCollector.sol";
+import { IGetSafes } from "../interfaces/protocols/reflexer/IGetSafes.sol";
+import { ISAFEEngine } from "../interfaces/protocols/reflexer/ISAFEEngine.sol";
+import { ISAFEManager } from "../interfaces/protocols/reflexer/ISAFEManager.sol";
+import { IOracleRelayer } from "../interfaces/protocols/reflexer/IOracleRelayer.sol";
+import { IMedianOracle } from "../interfaces/protocols/reflexer/IMedianOracle.sol";
+import { ITaxCollector } from "../interfaces/protocols/reflexer/ITaxCollector.sol";
 
 contract ReflexerView is DSMath {
     // mainnet

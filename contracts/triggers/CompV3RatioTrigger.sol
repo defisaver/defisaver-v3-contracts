@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { TransientStorageCancun } from "../utils/TransientStorageCancun.sol";
 import { CompV3RatioHelper } from "../actions/compoundV3/helpers/CompV3RatioHelper.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if the CompoundV3 position went over/under the subbed ratio

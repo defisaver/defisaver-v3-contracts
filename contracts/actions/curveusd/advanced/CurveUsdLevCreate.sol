@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Creates a new curveusd leveraged position with a given amount of collateral and debt
 /// @notice This action uses internal swapper to create a loan

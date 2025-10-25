@@ -7,7 +7,7 @@ import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { SkyStakingEngineOpen } from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
 import { SkyHelper } from "../../../contracts/actions/sky/helpers/SkyHelper.sol";
 
-import { ILockstakeEngine } from "../../../contracts/interfaces/sky/ILockstakeEngine.sol";
+import { ILockstakeEngine } from "../../../contracts/interfaces/protocols/sky/ILockstakeEngine.sol";
 
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 

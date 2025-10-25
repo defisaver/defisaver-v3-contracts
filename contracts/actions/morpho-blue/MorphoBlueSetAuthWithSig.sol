@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { MorphoBlueHelper } from "./helpers/MorphoBlueHelper.sol";
-import { Authorization, Signature } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
+import { Authorization, Signature } from "../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 
 /// @title Allow or disallow an address to manage MorphoBlue position on user's wallet
 contract MorphoBlueSetAuthWithSig is ActionBase, MorphoBlueHelper {

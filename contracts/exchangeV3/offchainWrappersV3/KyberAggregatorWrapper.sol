@@ -10,7 +10,7 @@ import { DFSRegistry } from "../../core/DFSRegistry.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { SafeERC20 } from "../../utils/SafeERC20.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, CoreHelper {
     using TokenUtils for address;

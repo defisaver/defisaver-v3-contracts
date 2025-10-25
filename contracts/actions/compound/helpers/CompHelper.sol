@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { IComptroller } from "../../../interfaces/compound/IComptroller.sol";
-import { ICToken } from "../../../interfaces/compound/ICToken.sol";
+import { IComptroller } from "../../../interfaces/protocols/compound/IComptroller.sol";
+import { ICToken } from "../../../interfaces/protocols/compound/ICToken.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { MainnetCompAddresses } from "./MainnetCompAddresses.sol";
 

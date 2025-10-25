@@ -9,11 +9,11 @@ import { FLHelper } from "./helpers/FLHelper.sol";
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
 import { IERC3156FlashLender } from "../../interfaces/flashloan/IERC3156FlashLender.sol";
 import { IERC3156FlashBorrower } from "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
-import { ILendingPoolV2 } from "../../interfaces/aaveV2/ILendingPoolV2.sol";
-import { IFlashLoans } from "../../interfaces/balancer/IFlashLoans.sol";
-import { IUniswapV3Pool } from "../../interfaces/uniswap/v3/IUniswapV3Pool.sol";
-import { IUniswapV3Factory } from "../../interfaces/uniswap/v3/IUniswapV3Factory.sol";
-import { IMorphoBlue } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
+import { ILendingPoolV2 } from "../../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
+import { IFlashLoans } from "../../interfaces/protocols/balancer/IFlashLoans.sol";
+import { IUniswapV3Pool } from "../../interfaces/protocols/uniswap/v3/IUniswapV3Pool.sol";
+import { IUniswapV3Factory } from "../../interfaces/protocols/uniswap/v3/IUniswapV3Factory.sol";
+import { IMorphoBlue } from "../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 
 /// @title Action that gets and receives FL from different variety of sources
 contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {

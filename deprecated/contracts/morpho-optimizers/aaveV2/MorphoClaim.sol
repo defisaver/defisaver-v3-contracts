@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IRewardsDistributor } from "../../../interfaces/morpho/IRewardsDistributor.sol";
+import { IRewardsDistributor } from "../../../interfaces/protocols/morpho/IRewardsDistributor.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 import { MorphoAaveV2Helper } from "./helpers/MorphoAaveV2Helper.sol";

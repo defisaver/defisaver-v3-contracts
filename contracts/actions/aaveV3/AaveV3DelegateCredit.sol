@@ -5,9 +5,9 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
-import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
+import { IDebtToken } from "../../interfaces/protocols/aaveV3/IDebtToken.sol";
+import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
+import { DataTypes } from "../../interfaces/protocols/aaveV3/DataTypes.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Delegate credit for someone to borrow on user's wallet behalf

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IComet } from "../../../contracts/interfaces/compoundV3/IComet.sol";
-import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
+import { IComet } from "../../../contracts/interfaces/protocols/compoundV3/IComet.sol";
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 import { StrategyModel } from "../../../contracts/core/strategy/StrategyModel.sol";
 import { StrategyExecutor } from "../../../contracts/core/strategy/StrategyExecutor.sol";
 import { RecipeExecutor } from "../../../contracts/core/RecipeExecutor.sol";

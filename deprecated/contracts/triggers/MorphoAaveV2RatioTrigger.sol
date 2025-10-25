@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { MorphoAaveV2Helper } from "../actions/morpho/aaveV2/helpers/MorphoAaveV2Helper.sol";
 import { TransientStorage } from "../utils/TransientStorage.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";

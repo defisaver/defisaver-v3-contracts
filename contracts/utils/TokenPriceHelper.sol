@@ -3,13 +3,13 @@
 pragma solidity =0.8.24;
 
 import { DSMath } from "../DS/DSMath.sol";
-import { IWStEth } from "../interfaces/lido/IWStEth.sol";
+import { IWStEth } from "../interfaces/protocols/lido/IWStEth.sol";
 import { UtilHelper } from "./helpers/UtilHelper.sol";
-import { IFeedRegistry } from "../interfaces/chainlink/IFeedRegistry.sol";
+import { IFeedRegistry } from "../interfaces/protocols/chainlink/IFeedRegistry.sol";
 import { Denominations } from "./Denominations.sol";
-import { ILendingPoolAddressesProviderV2 } from "../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
-import { IPriceOracleGetterAave } from "../interfaces/aaveV2/IPriceOracleGetterAave.sol";
-import { IAggregatorV3 } from "../interfaces/chainlink/IAggregatorV3.sol";
+import { ILendingPoolAddressesProviderV2 } from "../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import { IPriceOracleGetterAave } from "../interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
+import { IAggregatorV3 } from "../interfaces/protocols/chainlink/IAggregatorV3.sol";
 
 /// @title TokenPriceHelper Fetches prices from chainlink/aave and formats tokens properly
 contract TokenPriceHelper is DSMath, UtilHelper {

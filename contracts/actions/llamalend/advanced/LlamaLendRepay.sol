@@ -6,7 +6,7 @@ import { ActionBase } from "../../ActionBase.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
 import { LlamaLendSwapper } from "./LlamaLendSwapper.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
-import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
+import { ILlamaLendController } from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 
 /// @title LlamaLendRepay
 contract LlamaLendRepay is ActionBase, LlamaLendHelper {

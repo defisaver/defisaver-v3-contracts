@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "../spark/helpers/SparkHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { IsDAI } from "../../interfaces/spark/IsDAI.sol";
+import { IsDAI } from "../../interfaces/protocols/spark/IsDAI.sol";
 import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
 
 /// @title Action that redeems sDai for dai.

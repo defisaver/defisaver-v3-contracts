@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { IEVault } from "../../../contracts/interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../../contracts/interfaces/eulerV2/IEVC.sol";
+import { IEVault } from "../../../contracts/interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../../contracts/interfaces/protocols/eulerV2/IEVC.sol";
 import { EulerV2Supply } from "../../../contracts/actions/eulerV2/EulerV2Supply.sol";
 import { EulerV2Borrow } from "../../../contracts/actions/eulerV2/EulerV2Borrow.sol";
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IBRewardPool } from "../../../interfaces/convex/IBRewardPool.sol";
-import { IRewardPool } from "../../../interfaces/convex/IRewardPool.sol";
+import { IBRewardPool } from "../../../interfaces/protocols/convex/IBRewardPool.sol";
+import { IRewardPool } from "../../../interfaces/protocols/convex/IRewardPool.sol";
 import { TokenUtils } from "../../../utils/TokenUtils.sol";
 
-import { IERC20 } from "../../../interfaces/IERC20.sol";
+import { IERC20 } from "../../../interfaces/token/IERC20.sol";
 import { MainnetConvexAddresses } from "./MainnetConvexAddresses.sol";
 
 contract ConvexHelper is MainnetConvexAddresses {

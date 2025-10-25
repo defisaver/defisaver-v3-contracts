@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 import { Test } from "forge-std/Test.sol";
 import { StdStorage, stdStorage } from "forge-std/StdStorage.sol";
 import { IUniswapRouter } from "../../contracts/interfaces/exchange/IUniswapRouter.sol";
-import { IERC20 } from "../../contracts/interfaces/IERC20.sol";
+import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
 import { TokenPriceHelper } from "../../contracts/utils/TokenPriceHelper.sol";
 import { TokenUtils } from "../../contracts/utils/TokenUtils.sol";
 

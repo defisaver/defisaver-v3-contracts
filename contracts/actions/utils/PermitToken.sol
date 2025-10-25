@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IERC20Permit } from "../../interfaces/IERC20Permit.sol";
+import { IERC20Permit } from "../../interfaces/token/IERC20Permit.sol";
 import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to invoke a permit action signed by a user

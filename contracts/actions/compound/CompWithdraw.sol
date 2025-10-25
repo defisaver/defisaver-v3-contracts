@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { ICToken } from "../../interfaces/compound/ICToken.sol";
+import { ICToken } from "../../interfaces/protocols/compound/ICToken.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompHelper } from "./helpers/CompHelper.sol";

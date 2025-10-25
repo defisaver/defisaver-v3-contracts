@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IPendleMarket } from "../../../contracts/interfaces/pendle/IPendleMarket.sol";
+import { IPendleMarket } from "../../../contracts/interfaces/protocols/pendle/IPendleMarket.sol";
 import { PendleTokenRedeem } from "contracts/actions/pendle/PendleTokenRedeem.sol";
-import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
-import { IERC4626 } from "../../../contracts/interfaces/IERC4626.sol";
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
+import { IERC4626 } from "../../../contracts/interfaces/token/IERC4626.sol";
 import { Addresses } from "../../utils/Addresses.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";

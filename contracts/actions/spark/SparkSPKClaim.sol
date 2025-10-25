@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { ISparkRewards } from "../../interfaces/spark/ISparkRewards.sol";
+import { ISparkRewards } from "../../interfaces/protocols/spark/ISparkRewards.sol";
 
 /// @title Claims SPK token from Spark Rewards contract
 contract SparkSPKClaim is ActionBase {

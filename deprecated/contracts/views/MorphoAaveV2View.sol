@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IAToken } from "../interfaces/aave/IAToken.sol";
-import { IMorpho } from "../interfaces/morpho/IMorpho.sol";
-import { IMorphoAaveV2Lens } from "../interfaces/morpho/IMorphoAaveV2Lens.sol";
-import { IRewardsDistributor } from "../interfaces/morpho/IRewardsDistributor.sol";
+import { IAToken } from "../interfaces/protocols/aave/IAToken.sol";
+import { IMorpho } from "../interfaces/protocols/morpho/IMorpho.sol";
+import { IMorphoAaveV2Lens } from "../interfaces/protocols/morpho/IMorphoAaveV2Lens.sol";
+import { IRewardsDistributor } from "../interfaces/protocols/morpho/IRewardsDistributor.sol";
 import { MorphoAaveV2Helper } from "../actions/morpho/aaveV2/helpers/MorphoAaveV2Helper.sol";
 import { AaveView } from "./AaveView.sol";
-import { MorphoTypes } from "../interfaces/morpho/MorphoTypes.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { MorphoTypes } from "../interfaces/protocols/morpho/MorphoTypes.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 contract MorphoAaveV2View is MorphoAaveV2Helper {
     address public constant AAVE_VIEW_ADDR = 0xEDf1087544a01596b70Da746F861B878F245B08f;

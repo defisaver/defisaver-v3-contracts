@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IAuth } from "../../interfaces/IAuth.sol";
+import { IAuth } from "../../interfaces/core/IAuth.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 import { StrategyModel } from "../strategy/StrategyModel.sol";

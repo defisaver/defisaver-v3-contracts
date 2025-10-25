@@ -7,7 +7,7 @@ import { DFSExchangeData } from "../../../../exchangeV3/DFSExchangeData.sol";
 
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
 import { CurveUsdSwapperTransient } from "./CurveUsdSwapperTransient.sol";
-import { ICrvUsdController } from "../../../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Liquidates a curveusd position with a given percentage of collateral
 /// @notice This action uses internal swapper with transient storage to liquidate the position

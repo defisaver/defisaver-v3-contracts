@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
-import { IComet } from "../../interfaces/compoundV3/IComet.sol";
+import { IComet } from "../../interfaces/protocols/compoundV3/IComet.sol";
 
 /// @title Allow or disallow manager for Compound V3. Manager will be able to perform actions on behalf of the user.
 contract CompV3Allow is ActionBase, CompV3Helper {

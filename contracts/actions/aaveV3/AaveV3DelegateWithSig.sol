@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
+import { IDebtToken } from "../../interfaces/protocols/aaveV3/IDebtToken.sol";
 
 /// @title Delegate credit for someone to borrow on user's wallet behalf with his signature
 contract AaveV3DelegateWithSig is ActionBase {

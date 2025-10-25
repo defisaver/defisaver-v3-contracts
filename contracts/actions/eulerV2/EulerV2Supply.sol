@@ -6,8 +6,8 @@ import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IEVault } from "../../interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IEVault } from "../../interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
 
 /// @title Supply assets to a Euler vault and gets eTokens vault shares
 contract EulerV2Supply is ActionBase, EulerV2Helper {

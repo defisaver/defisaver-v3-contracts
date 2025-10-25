@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";

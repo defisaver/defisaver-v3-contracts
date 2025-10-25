@@ -2,15 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 
 import { LiquityV2Helper } from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { TransientStorageCancun } from "../utils/TransientStorageCancun.sol";
-import { IAddressesRegistry } from "../interfaces/liquityV2/IAddressesRegistry.sol";
-import { ITroveManager } from "../interfaces/liquityV2/ITroveManager.sol";
-import { IBorrowerOperations } from "../interfaces/liquityV2/IBorrowerOperations.sol";
+import { IAddressesRegistry } from "../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { ITroveManager } from "../interfaces/protocols/liquityV2/ITroveManager.sol";
+import { IBorrowerOperations } from "../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
 
 /// @title LiquityV2 Interest Rate Adjustment Debt in Front Trigger
 /// @notice Triggers when the calculated debt in front of a LiquityV2 trove falls below specified thresholds,

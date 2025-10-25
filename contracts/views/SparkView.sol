@@ -2,15 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { ISparkPool } from "../interfaces/spark/ISparkPool.sol";
-import { ISparkPoolAddressesProvider } from "../interfaces/spark/ISparkPoolAddressesProvider.sol";
-import { ISparkProtocolDataProvider } from "../interfaces/spark/ISparkProtocolDataProvider.sol";
-import { ISparkV3Oracle } from "../interfaces/spark/ISparkV3Oracle.sol";
-import { ISparkScaledBalanceToken } from "../interfaces/spark/ISparkScaledBalanceToken.sol";
-import { ISparkStableDebtToken } from "../interfaces/spark/ISparkStableDebtToken.sol";
-import { ISparkReserveInterestRateStrategy } from "../interfaces/spark/ISparkReserveInterestRateStrategy.sol";
-import { SparkDataTypes } from "../interfaces/spark/SparkDataTypes.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { ISparkPool } from "../interfaces/protocols/spark/ISparkPool.sol";
+import { ISparkPoolAddressesProvider } from "../interfaces/protocols/spark/ISparkPoolAddressesProvider.sol";
+import { ISparkProtocolDataProvider } from "../interfaces/protocols/spark/ISparkProtocolDataProvider.sol";
+import { ISparkV3Oracle } from "../interfaces/protocols/spark/ISparkV3Oracle.sol";
+import { ISparkScaledBalanceToken } from "../interfaces/protocols/spark/ISparkScaledBalanceToken.sol";
+import { ISparkStableDebtToken } from "../interfaces/protocols/spark/ISparkStableDebtToken.sol";
+import { ISparkReserveInterestRateStrategy } from "../interfaces/protocols/spark/ISparkReserveInterestRateStrategy.sol";
+import { SparkDataTypes } from "../interfaces/protocols/spark/SparkDataTypes.sol";
 import { SparkHelper } from "../actions/spark/helpers/SparkHelper.sol";
 import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol";
 

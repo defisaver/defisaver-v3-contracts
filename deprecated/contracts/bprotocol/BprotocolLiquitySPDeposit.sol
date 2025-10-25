@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IBAMM } from "../../interfaces/bprotocol/IBAMM.sol";
+import { IBAMM } from "../../interfaces/protocols/bprotocol/IBAMM.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { BprotocolLiquitySPHelper } from "./helpers/BprotocolLiquitySPHelper.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";

@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
 
 /// @title Switch if vault will be used as collateral or not
 contract EulerV2CollateralSwitch is ActionBase, EulerV2Helper {

@@ -2,14 +2,14 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { IFLParamGetter } from "../../interfaces/flashloan/IFLParamGetter.sol";
+import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
 import { FLHelper } from "./helpers/FLHelper.sol";
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
-import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
-import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
+import { IDebtToken } from "../../interfaces/protocols/aaveV3/IDebtToken.sol";
+import { DataTypes } from "../../interfaces/protocols/aaveV3/DataTypes.sol";
 
 /// @title Action that gets and receives a FL from Aave V3 and does not return funds but opens debt position on Aave V3
 /// @dev In order to open debt position, FL action must have credit delegation allowance from onBehalfOf address

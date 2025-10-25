@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { IERC20 } from "../../../../contracts/interfaces/IERC20.sol";
-import { IERC4626 } from "../../../../contracts/interfaces/IERC4626.sol";
-import { IStaticATokenV2 } from "../../../../contracts/interfaces/aaveV3/IStaticATokenV2.sol";
+import { IERC20 } from "../../../../contracts/interfaces/token/IERC20.sol";
+import { IERC4626 } from "../../../../contracts/interfaces/token/IERC4626.sol";
+import { IStaticATokenV2 } from "../../../../contracts/interfaces/protocols/aaveV3/IStaticATokenV2.sol";
 import { UmbrellaStake } from "../../../../contracts/actions/aaveV3/umbrella/UmbrellaStake.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { Addresses } from "../../../utils/Addresses.sol";

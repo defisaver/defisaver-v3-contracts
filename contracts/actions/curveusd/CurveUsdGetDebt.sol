@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Action that returns users crvusd debt on a given market
 contract CurveUsdGetDebt is ActionBase {

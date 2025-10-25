@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IL2PoolV3 } from "../../../interfaces/aaveV3/IL2PoolV3.sol";
-import { IAaveProtocolDataProvider } from "../../../interfaces/aaveV3/IAaveProtocolDataProvider.sol";
-import { IPoolAddressesProvider } from "../../../interfaces/aaveV3/IPoolAddressesProvider.sol";
+import { IL2PoolV3 } from "../../../interfaces/protocols/aaveV3/IL2PoolV3.sol";
+import { IAaveProtocolDataProvider } from "../../../interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
+import { IPoolAddressesProvider } from "../../../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
 import { MainnetAaveV3Addresses } from "./MainnetAaveV3Addresses.sol";
 
 /// @title Utility functions and data used in AaveV3 actions

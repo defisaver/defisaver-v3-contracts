@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
-import { ICometRewards } from "../../interfaces/compoundV3/ICometRewards.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { ICometRewards } from "../../interfaces/protocols/compoundV3/ICometRewards.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title Claims Comp reward for the specified user.
 contract CompV3Claim is ActionBase, CompV3Helper {

@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { LiquityRatioHelper } from "../actions/liquity/helpers/LiquityRatioHelper.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TransientStorage } from "../utils/TransientStorage.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 

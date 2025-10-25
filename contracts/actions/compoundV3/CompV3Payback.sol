@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
-import { IComet } from "../../interfaces/compoundV3/IComet.sol";
+import { IComet } from "../../interfaces/protocols/compoundV3/IComet.sol";
 
 /// @title Payback a token a user borrowed from Compound.
 contract CompV3Payback is ActionBase, CompV3Helper {

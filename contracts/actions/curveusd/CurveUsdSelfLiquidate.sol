@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CurveUsdHelper } from "./helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title CurveUsdSelfLiquidate Closes the users position while he's in soft liquidation
 contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {

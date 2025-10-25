@@ -6,8 +6,8 @@ import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/TokenUtils.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IEVault, IRiskManager } from "../../interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IEVault, IRiskManager } from "../../interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
 
 /// @title Payback debt assets to a Euler vault
 contract EulerV2Payback is ActionBase, EulerV2Helper {

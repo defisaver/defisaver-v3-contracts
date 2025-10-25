@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidMerkleDistributor } from "../../interfaces/fluid/IFluidMerkleDistributor.sol";
+import { IFluidMerkleDistributor } from "../../interfaces/protocols/fluid/IFluidMerkleDistributor.sol";
 
 import { FluidHelper } from "./helpers/FluidHelper.sol";
 
