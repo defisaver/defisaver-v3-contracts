@@ -41,7 +41,7 @@ function getAllFiles(dirPath, arrayOfFiles = []) {
 }
 
 async function changeWethAddress(oldNetwork, newNetwork) {
-    const TokenUtilsContract = 'contracts/utils/TokenUtils.sol';
+    const TokenUtilsContract = 'contracts/utils/token/TokenUtils.sol';
     const tokenUtilsContract = (await fs.readFileSync(TokenUtilsContract)).toString();
 
     fs.writeFileSync(
