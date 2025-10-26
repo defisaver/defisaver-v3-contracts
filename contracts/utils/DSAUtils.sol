@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IInstaAccount } from "../interfaces/insta/IInstaAccount.sol";
-import { IInstaAccountV1 } from "../interfaces/insta/IInstaAccountV1.sol";
-import { IInstaAccountV2 } from "../interfaces/insta/IInstaAccountV2.sol";
-import { IDFSRegistry } from "../interfaces/IDFSRegistry.sol";
+import { IInstaAccount } from "../interfaces/protocols/insta/IInstaAccount.sol";
+import { IInstaAccountV1 } from "../interfaces/protocols/insta/IInstaAccountV1.sol";
+import { IInstaAccountV2 } from "../interfaces/protocols/insta/IInstaAccountV2.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 
 /// @title DSAUtils - Helper library for DSA Proxy Accounts
 library DSAUtils {

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IDFSRegistry } from "../../interfaces/IDFSRegistry.sol";
-import { IAuth } from "../../interfaces/IAuth.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
+import { IAuth } from "../../interfaces/core/IAuth.sol";
 import { Pausable } from "../../auth/Pausable.sol";
 import { CoreHelper } from "./../helpers/CoreHelper.sol";
 

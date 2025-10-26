@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { AuthHelper } from "./helpers/AuthHelper.sol";
-import { IInstaAccount } from "../interfaces/insta/IInstaAccount.sol";
+import { IInstaAccount } from "../interfaces/protocols/insta/IInstaAccount.sol";
 
 /// @title DSAProxyPermission contract which works with DSA proxy account to give/remove auth permission to a contract
 contract DSAProxyPermission is AuthHelper {

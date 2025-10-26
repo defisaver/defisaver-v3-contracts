@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { IDSProxyFactory } from "../interfaces/IDSProxyFactory.sol";
-import { IInstaList } from "../interfaces/insta/IInstaList.sol";
-import { IInstaAccount } from "../interfaces/insta/IInstaAccount.sol";
-import { IDSProxy } from "../interfaces/IDSProxy.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
-import { DSProxyFactoryHelper } from "./ds-proxy-factory/DSProxyFactoryHelper.sol";
-import { DSAProxyFactoryHelper } from "./dsa-proxy-factory/DSAProxyFactoryHelper.sol";
+import { IDSProxyFactory } from "../interfaces/DS/IDSProxyFactory.sol";
+import { IInstaList } from "../interfaces/protocols/insta/IInstaList.sol";
+import { IInstaAccount } from "../interfaces/protocols/insta/IInstaAccount.sol";
+import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
+import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
+import { DSProxyFactoryHelper } from "../utils/addresses/dsProxyFactory/DSProxyFactoryHelper.sol";
+import { DSAProxyFactoryHelper } from "../utils/addresses/dsaProxyFactory/DSAProxyFactoryHelper.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title SmartWalletUtils - Helper contract with utility functions for smart wallets
