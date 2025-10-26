@@ -69,16 +69,6 @@ const adminAuthTest = async () => {
                 expectError(err.toString(), 'SenderNotOwner()');
             }
         });
-
-        it('... non admin should not be able to kill the contract', async () => {
-            try {
-                await adminAuth.kill();
-
-                expect(true).to.be(false);
-            } catch (err) {
-                expectError(err.toString(), 'SenderNotAdmin()');
-            }
-        });
     });
 };
 const adminVaultTest = async () => {

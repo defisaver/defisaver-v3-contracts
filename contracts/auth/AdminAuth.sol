@@ -38,10 +38,4 @@ contract AdminAuth is AuthHelper {
             IERC20(_token).safeTransfer(_receiver, _amount);
         }
     }
-
-    /// @notice Destroy the contract
-    /// @dev Deprecated method, selfdestruct will soon just send eth
-    function kill() public onlyAdmin {
-        selfdestruct(payable(msg.sender));
-    }
 }
