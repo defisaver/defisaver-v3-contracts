@@ -80,7 +80,10 @@ interface IFluidLendingResolver {
     /// - if it's the native token, it should use `NativeUnderlying`
     /// - could be more types available, check `fTokenTypes()`
     /// @return token_      detemrinistic address of the computed token
-    function computeFToken(address asset_, string calldata fTokenType_) external view returns (address);
+    function computeFToken(address asset_, string calldata fTokenType_)
+        external
+        view
+        returns (address);
 
     /// @notice gets all public details for a certain `fToken_`, such as
     /// fToken type, name, symbol, decimals, underlying asset, total amounts, convertTo values, rewards.
@@ -88,7 +91,10 @@ interface IFluidLendingResolver {
     /// To make sure, check for the underlying if it supports EIP-2612 manually.
     /// @param  fToken_     the fToken to get the details for
     /// @return fTokenDetails_  retrieved FTokenDetails struct
-    function getFTokenDetails(address fToken_) external view returns (FTokenDetails memory fTokenDetails_);
+    function getFTokenDetails(address fToken_)
+        external
+        view
+        returns (FTokenDetails memory fTokenDetails_);
 
     /// @notice returns config, rewards and exchange prices data of an fToken.
     /// @param  fToken_ the fToken to get the data for
@@ -123,10 +129,16 @@ interface IFluidLendingResolver {
     /// @notice gets all public details for all itokens, such as
     /// fToken type, name, symbol, decimals, underlying asset, total amounts, convertTo values, rewards
     /// and user position for each token
-    function getUserPositions(address user_) external view returns (FTokenDetailsUserPosition[] memory);
+    function getUserPositions(address user_)
+        external
+        view
+        returns (FTokenDetailsUserPosition[] memory);
 
     /// @notice gets rewards related data: the `rewardsRateModel_` contract and the current `rewardsRate_` for the `fToken_`
-    function getFTokenRewards(address fToken_) external view returns (address rewardsRateModel_, uint256 rewardsRate_);
+    function getFTokenRewards(address fToken_)
+        external
+        view
+        returns (address rewardsRateModel_, uint256 rewardsRate_);
 
     /// @notice gets rewards rate model config constants
     function getFTokenRewardsRateModelConfig(address fToken_)
@@ -144,7 +156,10 @@ interface IFluidLendingResolver {
 
     /// @notice gets a `user_` position for an `fToken_`.
     /// @return userPosition user position struct
-    function getUserPosition(address fToken_, address user_) external view returns (UserPosition memory userPosition);
+    function getUserPosition(address fToken_, address user_)
+        external
+        view
+        returns (UserPosition memory userPosition);
 
     /// @notice gets `fToken_` preview amounts for `assets_` or `shares_`.
     /// @return previewDeposit_ preview for deposit of `assets_`
@@ -154,5 +169,10 @@ interface IFluidLendingResolver {
     function getPreviews(address fToken_, uint256 assets_, uint256 shares_)
         external
         view
-        returns (uint256 previewDeposit_, uint256 previewMint_, uint256 previewWithdraw_, uint256 previewRedeem_);
+        returns (
+            uint256 previewDeposit_,
+            uint256 previewMint_,
+            uint256 previewWithdraw_,
+            uint256 previewRedeem_
+        );
 }

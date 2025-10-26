@@ -71,11 +71,12 @@ contract LiquityV2View is LiquityV2Helper {
         return hintHelpers.getApproxHint(_collIndex, _interestRate, _numTrials, _inputRandomSeed);
     }
 
-    function findInsertPosition(address _market, uint256 _interestRate, uint256 _prevId, uint256 _nextId)
-        public
-        view
-        returns (uint256 prevId, uint256 nextId)
-    {
+    function findInsertPosition(
+        address _market,
+        uint256 _interestRate,
+        uint256 _prevId,
+        uint256 _nextId
+    ) public view returns (uint256 prevId, uint256 nextId) {
         ISortedTroves sortedTroves = ISortedTroves(IAddressesRegistry(_market).sortedTroves());
 
         return sortedTroves.findInsertPosition(_interestRate, _prevId, _nextId);
@@ -88,7 +89,9 @@ contract LiquityV2View is LiquityV2Helper {
         uint256 _numTrials,
         uint256 _inputRandomSeed
     ) external view returns (uint256 prevId, uint256 nextId) {
-        (uint256 hintId,,) = getApproxHint(_market, _collIndex, _interestRate, _numTrials, _inputRandomSeed);
+        (uint256 hintId,,) = getApproxHint(
+            _market, _collIndex, _interestRate, _numTrials, _inputRandomSeed
+        );
         return findInsertPosition(_market, _interestRate, hintId, hintId);
     }
 
@@ -103,7 +106,8 @@ contract LiquityV2View is LiquityV2Helper {
         ISortedTroves sortedTroves = ISortedTroves(IAddressesRegistry(_market).sortedTroves());
         uint256 troveInterestRate = troveManager.getTroveAnnualInterestRate(_troveId);
 
-        (uint256 hintId,,) = getApproxHint(_market, _collIndex, troveInterestRate, _numTrials, _inputRandomSeed);
+        (uint256 hintId,,) =
+            getApproxHint(_market, _collIndex, troveInterestRate, _numTrials, _inputRandomSeed);
 
         (prevId, nextId) = sortedTroves.findInsertPosition(troveInterestRate, hintId, hintId);
 
@@ -111,13 +115,18 @@ contract LiquityV2View is LiquityV2Helper {
         if (nextId == _troveId) nextId = sortedTroves.getNext(_troveId);
     }
 
-    function getTroveInfo(address _market, uint256 _troveId) external returns (TroveData memory trove) {
+    function getTroveInfo(address _market, uint256 _troveId)
+        external
+        returns (TroveData memory trove)
+    {
         ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
         IPriceFeed priceFeed = IPriceFeed(IAddressesRegistry(_market).priceFeed());
-        ITroveManager.LatestTroveData memory latestTroveData = troveManager.getLatestTroveData(_troveId);
+        ITroveManager.LatestTroveData memory latestTroveData =
+            troveManager.getLatestTroveData(_troveId);
         ITroveNFT troveNFT = ITroveNFT(IAddressesRegistry(_market).troveNFT());
 
-        (,,, trove.status,,,,, trove.interestBatchManager, trove.batchDebtShares) = troveManager.Troves(_troveId);
+        (,,, trove.status,,,,, trove.interestBatchManager, trove.batchDebtShares) =
+            troveManager.Troves(_troveId);
 
         trove.troveId = _troveId;
         trove.annualInterestRate = latestTroveData.annualInterestRate;
@@ -172,13 +181,16 @@ contract LiquityV2View is LiquityV2Helper {
                 nextFreeTroveIndex = int256(i);
             } else {
                 // Active or zombie troves are owned by the user
-                if (status == ITroveManager.Status.active || status == ITroveManager.Status.zombie) {
-                    troves[i - _startIndex] =
-                        ExistingTrove({ troveId: troveId, ownedByUser: troveNFT.ownerOf(troveId) == _user });
+                if (status == ITroveManager.Status.active || status == ITroveManager.Status.zombie)
+                {
+                    troves[i - _startIndex] = ExistingTrove({
+                        troveId: troveId, ownedByUser: troveNFT.ownerOf(troveId) == _user
+                    });
                 }
                 // Closed troves are not owned by the user but can't be reused
                 else {
-                    troves[i - _startIndex] = ExistingTrove({ troveId: troveId, ownedByUser: false });
+                    troves[i - _startIndex] =
+                        ExistingTrove({ troveId: troveId, ownedByUser: false });
                 }
             }
         }
@@ -221,7 +233,8 @@ contract LiquityV2View is LiquityV2Helper {
     {
         IStabilityPool stabilityPool = IStabilityPool(IAddressesRegistry(_market).stabilityPool());
         compoundedBOLD = stabilityPool.getCompoundedBoldDeposit(_depositor);
-        collGain = stabilityPool.getDepositorCollGain(_depositor) + stabilityPool.stashedColl(_depositor);
+        collGain =
+            stabilityPool.getDepositorCollGain(_depositor) + stabilityPool.stashedColl(_depositor);
         boldGain = stabilityPool.getDepositorYieldGain(_depositor);
     }
 
@@ -263,7 +276,11 @@ contract LiquityV2View is LiquityV2Helper {
         }
     }
 
-    function getDebtInFrontByTroveNum(address _market, uint256 _numTroves) external view returns (uint256 debt) {
+    function getDebtInFrontByTroveNum(address _market, uint256 _numTroves)
+        external
+        view
+        returns (uint256 debt)
+    {
         ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
         ISortedTroves sortedTroves = ISortedTroves(IAddressesRegistry(_market).sortedTroves());
 
@@ -290,19 +307,25 @@ contract LiquityV2View is LiquityV2Helper {
         }
     }
 
-    function predictAdjustTroveUpfrontFee(address _market, uint256 _collIndex, uint256 _troveId, uint256 _debtIncrease)
-        external
-        view
-        returns (uint256)
-    {
+    function predictAdjustTroveUpfrontFee(
+        address _market,
+        uint256 _collIndex,
+        uint256 _troveId,
+        uint256 _debtIncrease
+    ) external view returns (uint256) {
         IAddressesRegistry market = IAddressesRegistry(_market);
         IHintHelpers hintHelpers = IHintHelpers(market.hintHelpers());
 
         return hintHelpers.predictAdjustTroveUpfrontFee(_collIndex, _troveId, _debtIncrease);
     }
 
-    function _getTroveDebt(ITroveManager _troveManager, uint256 _troveId) internal view returns (uint256 debt) {
-        ITroveManager.LatestTroveData memory latestTroveData = _troveManager.getLatestTroveData(_troveId);
+    function _getTroveDebt(ITroveManager _troveManager, uint256 _troveId)
+        internal
+        view
+        returns (uint256 debt)
+    {
+        ITroveManager.LatestTroveData memory latestTroveData =
+            _troveManager.getLatestTroveData(_troveId);
         debt = latestTroveData.entireDebt;
     }
 
@@ -313,7 +336,8 @@ contract LiquityV2View is LiquityV2Helper {
     {
         uint256 collIndex = _getCollIndexFromMarket(_market);
 
-        troves = IMultiTroveGetter(MULTI_TROVE_GETTER_ADDR).getMultipleSortedTroves(collIndex, _startIdx, _count);
+        troves = IMultiTroveGetter(MULTI_TROVE_GETTER_ADDR)
+            .getMultipleSortedTroves(collIndex, _startIdx, _count);
     }
 
     function getBatchManagerInfo(address _market, address _manager)
@@ -324,7 +348,8 @@ contract LiquityV2View is LiquityV2Helper {
             ITroveManager.LatestBatchData memory batchData
         )
     {
-        IBorrowerOperations borrowOps = IBorrowerOperations(IAddressesRegistry(_market).borrowerOperations());
+        IBorrowerOperations borrowOps =
+            IBorrowerOperations(IAddressesRegistry(_market).borrowerOperations());
         ITroveManager troveManager = ITroveManager(IAddressesRegistry(_market).troveManager());
 
         managerData = borrowOps.getInterestBatchManager(_manager);

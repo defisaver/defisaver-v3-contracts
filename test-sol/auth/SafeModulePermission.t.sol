@@ -143,7 +143,9 @@ contract TestCore_SafeModulePermission is MockSafeModulePermission, BaseTest {
         _disable_module(thirdModule);
     }
 
-    function test_should_revert_when_disabling_module_that_is_not_one_of_the_ten_last_modules() public {
+    function test_should_revert_when_disabling_module_that_is_not_one_of_the_ten_last_modules()
+        public
+    {
         // this module can't be disabled because it's not one of the last 10 modules
         _enable_safe_module(address(0xff));
 

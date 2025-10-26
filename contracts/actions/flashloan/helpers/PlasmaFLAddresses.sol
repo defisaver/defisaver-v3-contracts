@@ -7,9 +7,11 @@ contract PlasmaFLAddresses {
 
     // AAVE_LENDING_POOL == AAVE_V3_LENDING_POOL so current automation doesn't break
     address internal constant AAVE_LENDING_POOL = 0x925a2A7214Ed92428B5b1B090F80b25700095e12;
-    address internal constant AAVE_LENDING_POOL_ADDRESS_PROVIDER = 0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9;
+    address internal constant AAVE_LENDING_POOL_ADDRESS_PROVIDER =
+        0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9;
     address internal constant AAVE_V3_LENDING_POOL = 0x925a2A7214Ed92428B5b1B090F80b25700095e12;
-    address internal constant AAVE_V3_LENDING_POOL_ADDRESS_PROVIDER = 0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9;
+    address internal constant AAVE_V3_LENDING_POOL_ADDRESS_PROVIDER =
+        0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9;
 
     address internal constant DFS_REGISTRY_ADDR = 0x44e98bB58d725F2eF93a195F518b335dCB784c78;
 
@@ -25,7 +27,8 @@ contract PlasmaFLAddresses {
     address internal constant DSS_FLASH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant ST_ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    address internal constant SPARK_LENDING_POOL_ADDRESS_PROVIDER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant SPARK_LENDING_POOL_ADDRESS_PROVIDER =
+        0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant SPARK_LENDING_POOL = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address internal constant GHO_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

@@ -76,8 +76,13 @@ interface IPoolV3 {
      * if he has been given credit delegation allowance
      *
      */
-    function borrow(address asset, uint256 amount, uint256 interestRateMode, uint16 referralCode, address onBehalfOf)
-        external;
+    function borrow(
+        address asset,
+        uint256 amount,
+        uint256 interestRateMode,
+        uint16 referralCode,
+        address onBehalfOf
+    ) external;
 
     /**
      * @notice Repays a borrowed `amount` on a specific reserve, burning the equivalent debt tokens owned
@@ -137,7 +142,9 @@ interface IPoolV3 {
      * @return The final amount repaid
      *
      */
-    function repayWithATokens(address asset, uint256 amount, uint256 interestRateMode) external returns (uint256);
+    function repayWithATokens(address asset, uint256 amount, uint256 interestRateMode)
+        external
+        returns (uint256);
 
     /**
      * @notice Allows a borrower to swap his debt between stable and variable mode, or vice versa
@@ -212,7 +219,10 @@ interface IPoolV3 {
      * @return The configuration of the reserve
      *
      */
-    function getConfiguration(address asset) external view returns (DataTypes.ReserveConfigurationMap memory);
+    function getConfiguration(address asset)
+        external
+        view
+        returns (DataTypes.ReserveConfigurationMap memory);
 
     /**
      * @notice Returns the configuration of the user across all the reserves
@@ -220,7 +230,10 @@ interface IPoolV3 {
      * @return The configuration of the user
      *
      */
-    function getUserConfiguration(address user) external view returns (DataTypes.UserConfigurationMap memory);
+    function getUserConfiguration(address user)
+        external
+        view
+        returns (DataTypes.UserConfigurationMap memory);
 
     /**
      * @notice Returns the state and configuration of the reserve
@@ -250,7 +263,10 @@ interface IPoolV3 {
      * @param id The id of the category
      * @return The configuration data of the category
      */
-    function getEModeCategoryData(uint8 id) external view returns (DataTypes.EModeCategoryLegacy memory);
+    function getEModeCategoryData(uint8 id)
+        external
+        view
+        returns (DataTypes.EModeCategoryLegacy memory);
 
     /**
      * @notice Allows a user to use the protocol in eMode
@@ -284,7 +300,8 @@ interface IPoolV3 {
      *   0 if the action is executed directly by the user, without any middle-man
      *
      */
-    function deposit(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external;
+    function deposit(address asset, uint256 amount, address onBehalfOf, uint16 referralCode)
+        external;
 
     /**
      * @notice Returns the address of the underlying asset of a reserve by the reserve id as stored in the DataTypes.ReserveData struct
@@ -306,7 +323,10 @@ interface IPoolV3 {
      * @param id The id of the category
      * @return The ltv,lt,lb of the category
      */
-    function getEModeCategoryCollateralConfig(uint8 id) external view returns (DataTypes.CollateralConfig memory);
+    function getEModeCategoryCollateralConfig(uint8 id)
+        external
+        view
+        returns (DataTypes.CollateralConfig memory);
 
     /**
      * @notice Returns the collateralBitmap of an eMode category

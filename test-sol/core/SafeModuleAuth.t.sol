@@ -57,7 +57,9 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_fail_to_call_execute_when_sender_is_not_executor() public {
         vm.expectRevert(
-            abi.encodeWithSelector(WalletAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr)
+            abi.encodeWithSelector(
+                WalletAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr
+            )
         );
         cut.callExecute(safeWalletAddr, recipeExecutorAddr, bytes("0x"));
     }
@@ -102,7 +104,8 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
         });
 
         // encode recipe executor call
-        bytes memory recipeExecutorCalldata = abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
+        bytes memory recipeExecutorCalldata =
+            abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
         // execute safe tx
         prank(strategyExecutorAddr);
@@ -131,7 +134,8 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
         });
 
         // encode recipe executor call
-        bytes memory recipeExecutorCalldata = abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
+        bytes memory recipeExecutorCalldata =
+            abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
         // execute safe tx
         /// @dev we expect revert because we are using recipe with flAction without returning funds

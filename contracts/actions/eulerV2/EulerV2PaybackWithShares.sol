@@ -67,7 +67,8 @@ contract EulerV2PaybackWithShares is ActionBase, EulerV2Helper {
         bytes memory repayWithSharesCallData =
             abi.encodeCall(IBorrowing.repayWithShares, (_params.amount, _params.account));
 
-        bytes memory result = IEVC(EVC_ADDR).call(_params.vault, _params.from, 0, repayWithSharesCallData);
+        bytes memory result =
+            IEVC(EVC_ADDR).call(_params.vault, _params.from, 0, repayWithSharesCallData);
 
         (, _params.amount) = abi.decode(result, (uint256, uint256));
 
@@ -78,7 +79,13 @@ contract EulerV2PaybackWithShares is ActionBase, EulerV2Helper {
         if (accountDebtAfter == 0) {
             // Actual EVC function is named `call`, so it is safe to disable rule
             // forge-lint: disable-next-line(unchecked-call)
-            IEVC(EVC_ADDR).call(_params.vault, _params.account, 0, abi.encodeCall(IRiskManager.disableController, ()));
+            IEVC(EVC_ADDR)
+                .call(
+                    _params.vault,
+                    _params.account,
+                    0,
+                    abi.encodeCall(IRiskManager.disableController, ())
+                );
         }
 
         return (_params.amount, abi.encode(_params));

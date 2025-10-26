@@ -27,11 +27,14 @@ contract SendTokens is ActionBase {
         (Params memory inputData, uint256 arrayLength) = parseInputs(_callData);
 
         for (uint256 i = 0; i < arrayLength;) {
-            inputData.tokens[i] = _parseParamAddr(inputData.tokens[i], _paramMapping[i], _subData, _returnValues);
-            inputData.receivers[i] =
-                _parseParamAddr(inputData.receivers[i], _paramMapping[arrayLength + i], _subData, _returnValues);
-            inputData.amounts[i] =
-                _parseParamUint(inputData.amounts[i], _paramMapping[2 * arrayLength + i], _subData, _returnValues);
+            inputData.tokens[i] =
+                _parseParamAddr(inputData.tokens[i], _paramMapping[i], _subData, _returnValues);
+            inputData.receivers[i] = _parseParamAddr(
+                inputData.receivers[i], _paramMapping[arrayLength + i], _subData, _returnValues
+            );
+            inputData.amounts[i] = _parseParamUint(
+                inputData.amounts[i], _paramMapping[2 * arrayLength + i], _subData, _returnValues
+            );
 
             unchecked {
                 ++i;
@@ -68,7 +71,11 @@ contract SendTokens is ActionBase {
         }
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (Params memory params, uint256 arrayLength) {
+    function parseInputs(bytes memory _callData)
+        public
+        pure
+        returns (Params memory params, uint256 arrayLength)
+    {
         params = abi.decode(_callData, (Params));
         require(params.tokens.length == params.receivers.length);
         require(params.tokens.length == params.amounts.length);

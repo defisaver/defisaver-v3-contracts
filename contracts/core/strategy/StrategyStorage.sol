@@ -70,7 +70,12 @@ contract StrategyStorage is StrategyModel, AdminAuth, IStrategyStorage {
         return strategies.length;
     }
 
-    function getPaginatedStrategies(uint256 _page, uint256 _perPage) public view override returns (Strategy[] memory) {
+    function getPaginatedStrategies(uint256 _page, uint256 _perPage)
+        public
+        view
+        override
+        returns (Strategy[] memory)
+    {
         Strategy[] memory strategiesPerPage = new Strategy[](_perPage);
 
         uint256 start = _page * _perPage;

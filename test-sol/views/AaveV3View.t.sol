@@ -70,8 +70,9 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
     function test_Approvals_WithoutPosition() public view {
         DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(Addresses.WETH_ADDR);
 
-        AaveV3View.EOAApprovalData memory approvals =
-            cut.getEOAApprovalsAndBalances(Addresses.WETH_ADDR, sender, walletAddr, DEFAULT_AAVE_MARKET);
+        AaveV3View.EOAApprovalData memory approvals = cut.getEOAApprovalsAndBalances(
+            Addresses.WETH_ADDR, sender, walletAddr, DEFAULT_AAVE_MARKET
+        );
 
         assertEq(approvals.asset, Addresses.WETH_ADDR);
         assertEq(approvals.aToken, reserveData.aTokenAddress);
@@ -102,8 +103,9 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
 
         _createAaveV3Position(false, config);
 
-        AaveV3View.EOAApprovalData memory approvals =
-            cut.getEOAApprovalsAndBalances(config.supplyToken, sender, walletAddr, DEFAULT_AAVE_MARKET);
+        AaveV3View.EOAApprovalData memory approvals = cut.getEOAApprovalsAndBalances(
+            config.supplyToken, sender, walletAddr, DEFAULT_AAVE_MARKET
+        );
 
         bool isWBTC = Addresses.WBTC_ADDR == config.supplyToken;
 
@@ -133,19 +135,22 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         give(config.supplyToken, sender, config.initialBalance);
 
         DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(config.supplyToken);
-        DataTypes.ReserveData memory reserveDataDebt = lendingPool.getReserveData(config.borrowToken);
+        DataTypes.ReserveData memory reserveDataDebt =
+            lendingPool.getReserveData(config.borrowToken);
 
         vm.startPrank(sender);
         SafeERC20.safeApprove(IERC20(config.supplyToken), walletAddr, type(uint256).max);
         SafeERC20.safeApprove(IERC20(reserveData.aTokenAddress), walletAddr, type(uint256).max);
-        IDebtToken(reserveDataDebt.variableDebtTokenAddress).approveDelegation(walletAddr, type(uint256).max);
+        IDebtToken(reserveDataDebt.variableDebtTokenAddress)
+            .approveDelegation(walletAddr, type(uint256).max);
         vm.stopPrank();
 
         _createAaveV3Position(true, config);
 
         // Test supply token approvals
-        AaveV3View.EOAApprovalData memory approvals =
-            cut.getEOAApprovalsAndBalances(config.supplyToken, sender, walletAddr, DEFAULT_AAVE_MARKET);
+        AaveV3View.EOAApprovalData memory approvals = cut.getEOAApprovalsAndBalances(
+            config.supplyToken, sender, walletAddr, DEFAULT_AAVE_MARKET
+        );
 
         bool isWBTC = Addresses.WBTC_ADDR == config.supplyToken;
         assertEq(approvals.asset, config.supplyToken);
@@ -159,43 +164,52 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
         assertApproxEqAbs(approvals.aTokenBalance, config.supplyAmount, 2);
 
         // Test borrow token approvals
-        AaveV3View.EOAApprovalData memory approvalsDebt =
-            cut.getEOAApprovalsAndBalances(config.borrowToken, sender, walletAddr, DEFAULT_AAVE_MARKET);
+        AaveV3View.EOAApprovalData memory approvalsDebt = cut.getEOAApprovalsAndBalances(
+            config.borrowToken, sender, walletAddr, DEFAULT_AAVE_MARKET
+        );
 
         assertEq(approvalsDebt.asset, config.borrowToken);
         assertEq(approvalsDebt.aToken, reserveDataDebt.aTokenAddress);
         assertEq(approvalsDebt.variableDebtToken, reserveDataDebt.variableDebtTokenAddress);
         assertEq(approvalsDebt.assetApproval, 0);
         assertEq(approvalsDebt.aTokenApproval, 0);
-        assertApproxEqAbs(approvalsDebt.variableDebtDelegation, type(uint256).max - config.borrowAmount, 2);
+        assertApproxEqAbs(
+            approvalsDebt.variableDebtDelegation, type(uint256).max - config.borrowAmount, 2
+        );
         assertEq(approvalsDebt.eoaBalance, config.borrowAmount);
         assertApproxEqAbs(approvalsDebt.borrowedVariableAmount, config.borrowAmount, 2);
         assertEq(approvalsDebt.aTokenBalance, 0);
 
         skip(365 days);
 
-        AaveV3View.EOAApprovalData memory approvalsAfter =
-            cut.getEOAApprovalsAndBalances(config.supplyToken, sender, walletAddr, DEFAULT_AAVE_MARKET);
+        AaveV3View.EOAApprovalData memory approvalsAfter = cut.getEOAApprovalsAndBalances(
+            config.supplyToken, sender, walletAddr, DEFAULT_AAVE_MARKET
+        );
 
         assertEq(approvalsAfter.asset, config.supplyToken);
         assertEq(approvalsAfter.aToken, reserveData.aTokenAddress);
         assertEq(approvalsAfter.variableDebtToken, reserveData.variableDebtTokenAddress);
-        assertEq(approvalsAfter.assetApproval, type(uint256).max - (isWBTC ? config.supplyAmount : 0)); // WBTC allowance is being decreased when used, even when it is UINT_MAX approval
+        assertEq(
+            approvalsAfter.assetApproval, type(uint256).max - (isWBTC ? config.supplyAmount : 0)
+        ); // WBTC allowance is being decreased when used, even when it is UINT_MAX approval
         assertEq(approvalsAfter.aTokenApproval, type(uint256).max);
         assertEq(approvalsAfter.variableDebtDelegation, 0);
         assertEq(approvalsAfter.eoaBalance, config.initialBalance - config.supplyAmount);
         assertEq(approvalsAfter.borrowedVariableAmount, 0);
         assertGt(approvalsAfter.aTokenBalance, config.supplyAmount);
 
-        AaveV3View.EOAApprovalData memory approvalsDebtAfter =
-            cut.getEOAApprovalsAndBalances(config.borrowToken, sender, walletAddr, DEFAULT_AAVE_MARKET);
+        AaveV3View.EOAApprovalData memory approvalsDebtAfter = cut.getEOAApprovalsAndBalances(
+            config.borrowToken, sender, walletAddr, DEFAULT_AAVE_MARKET
+        );
 
         assertEq(approvalsDebtAfter.asset, config.borrowToken);
         assertEq(approvalsDebtAfter.aToken, reserveDataDebt.aTokenAddress);
         assertEq(approvalsDebtAfter.variableDebtToken, reserveDataDebt.variableDebtTokenAddress);
         assertEq(approvalsDebtAfter.assetApproval, 0);
         assertEq(approvalsDebtAfter.aTokenApproval, 0);
-        assertApproxEqAbs(approvalsDebtAfter.variableDebtDelegation, type(uint256).max - config.borrowAmount, 2);
+        assertApproxEqAbs(
+            approvalsDebtAfter.variableDebtDelegation, type(uint256).max - config.borrowAmount, 2
+        );
         assertEq(approvalsDebtAfter.eoaBalance, config.borrowAmount);
         assertGt(approvalsDebtAfter.borrowedVariableAmount, config.borrowAmount);
         assertEq(approvalsDebtAfter.aTokenBalance, 0);
@@ -206,8 +220,10 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
     //////////////////////////////////////////////////////////////////////////*/
 
     function _createAaveV3Position(bool _isEOA, TestConfig memory _config) internal {
-        DataTypes.ReserveData memory reserveDataColl = lendingPool.getReserveData(_config.supplyToken);
-        DataTypes.ReserveData memory reserveDataDebt = lendingPool.getReserveData(_config.borrowToken);
+        DataTypes.ReserveData memory reserveDataColl =
+            lendingPool.getReserveData(_config.supplyToken);
+        DataTypes.ReserveData memory reserveDataDebt =
+            lendingPool.getReserveData(_config.borrowToken);
 
         // Execute Supply
         bytes memory supplyParams = aaveV3SupplyEncode(

@@ -119,7 +119,8 @@ contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
         bytes memory callData = abi.encode(maxRoundId);
         bytes memory subData = abi.encode(ETH_ADDR, percentage, startRoundId);
 
-        MockChainlinkAggregator.MockRoundData[] memory mockRounds = new MockChainlinkAggregator.MockRoundData[](3);
+        MockChainlinkAggregator.MockRoundData[] memory mockRounds =
+            new MockChainlinkAggregator.MockRoundData[](3);
         mockRounds[0] = MockChainlinkAggregator.MockRoundData({
             roundId: startRoundId, answer: 10_000, updatedAt: block.timestamp
         });
@@ -142,7 +143,8 @@ contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
         uint256 percentage = 10 * 10 ** 8;
         bytes memory callData = abi.encode(maxRoundId);
 
-        MockChainlinkAggregator.MockRoundData[] memory mockRounds = new MockChainlinkAggregator.MockRoundData[](3);
+        MockChainlinkAggregator.MockRoundData[] memory mockRounds =
+            new MockChainlinkAggregator.MockRoundData[](3);
         mockRounds[0] = MockChainlinkAggregator.MockRoundData({
             roundId: startRoundId, answer: 10_000, updatedAt: block.timestamp
         });
@@ -165,9 +167,11 @@ contract TestTrailingStopTrigger is BaseTest, DSMath, MainnetUtilAddresses {
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
     function setRound(uint80 _roundId, int256 _answer, uint256 _updatedAt) public {
-        MockChainlinkAggregator.MockRoundData[] memory mockRounds = new MockChainlinkAggregator.MockRoundData[](1);
-        mockRounds[0] =
-            MockChainlinkAggregator.MockRoundData({ roundId: _roundId, answer: _answer, updatedAt: _updatedAt });
+        MockChainlinkAggregator.MockRoundData[] memory mockRounds =
+            new MockChainlinkAggregator.MockRoundData[](1);
+        mockRounds[0] = MockChainlinkAggregator.MockRoundData({
+            roundId: _roundId, answer: _answer, updatedAt: _updatedAt
+        });
         mockAggregator.setMockRounds(mockRounds);
     }
 }

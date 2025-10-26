@@ -110,7 +110,8 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function _assertParams(AaveV3DelegateCredit.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
-        AaveV3DelegateCredit.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
+        AaveV3DelegateCredit.Params memory decodedParams =
+            cut.decodeInputs(encodedInputWithoutSelector);
 
         assertEq(_params.amount, decodedParams.amount);
         assertEq(_params.delegatee, decodedParams.delegatee);
@@ -120,11 +121,17 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
         assertEq(_params.market, decodedParams.market);
     }
 
-    function _delegateCredit(address _token, uint256 _amount, address _delegatee, bool _isL2Direct) internal {
+    function _delegateCredit(address _token, uint256 _amount, address _delegatee, bool _isL2Direct)
+        internal
+    {
         DataTypes.ReserveData memory tokenData = pool.getReserveData(_token);
 
         uint256 availableCreditDelegationForDelegateeBefore = cut.getCreditDelegation(
-            DEFAULT_AAVE_MARKET, tokenData.id, uint8(DataTypes.InterestRateMode.VARIABLE), walletAddr, _delegatee
+            DEFAULT_AAVE_MARKET,
+            tokenData.id,
+            uint8(DataTypes.InterestRateMode.VARIABLE),
+            walletAddr,
+            _delegatee
         );
 
         if (_isL2Direct) {
@@ -139,18 +146,31 @@ contract TestAaveV3DelegateCredit is AaveV3Helper, ActionsUtils, BaseTest {
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
             bytes memory paramsCalldata = aaveV3DelegateCreditEncode(
-                _amount, _delegatee, tokenData.id, uint8(DataTypes.InterestRateMode.VARIABLE), true, address(0)
+                _amount,
+                _delegatee,
+                tokenData.id,
+                uint8(DataTypes.InterestRateMode.VARIABLE),
+                true,
+                address(0)
             );
 
             bytes memory _calldata = abi.encodeWithSelector(
-                AaveV3DelegateCredit.executeAction.selector, paramsCalldata, subData, paramMapping, returnValues
+                AaveV3DelegateCredit.executeAction.selector,
+                paramsCalldata,
+                subData,
+                paramMapping,
+                returnValues
             );
 
             wallet.execute(address(cut), _calldata, 0);
         }
 
         uint256 availableCreditDelegationForDelegateeAfter = cut.getCreditDelegation(
-            DEFAULT_AAVE_MARKET, tokenData.id, uint8(DataTypes.InterestRateMode.VARIABLE), walletAddr, _delegatee
+            DEFAULT_AAVE_MARKET,
+            tokenData.id,
+            uint8(DataTypes.InterestRateMode.VARIABLE),
+            walletAddr,
+            _delegatee
         );
 
         assertEq(availableCreditDelegationForDelegateeBefore, 0);

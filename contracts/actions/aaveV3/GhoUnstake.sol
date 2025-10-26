@@ -52,7 +52,10 @@ contract GhoUnstake is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _unstake(Params memory _params) internal returns (uint256 unstakedAmount, bytes memory logData) {
+    function _unstake(Params memory _params)
+        internal
+        returns (uint256 unstakedAmount, bytes memory logData)
+    {
         if (_params.amount == 0) {
             IStkAave(STAKED_GHO_TOKEN).cooldown();
         } else {

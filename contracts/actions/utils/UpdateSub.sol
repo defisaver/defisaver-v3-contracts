@@ -25,11 +25,13 @@ contract UpdateSub is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.subId = _parseParamUint(inputData.subId, _paramMapping[0], _subData, _returnValues);
+        inputData.subId =
+            _parseParamUint(inputData.subId, _paramMapping[0], _subData, _returnValues);
 
         for (uint256 i = 0; i < inputData.sub.subData.length; i++) {
-            inputData.sub.subData[i] =
-                _parseParamABytes32(inputData.sub.subData[i], _paramMapping[1 + i], _subData, _returnValues);
+            inputData.sub.subData[i] = _parseParamABytes32(
+                inputData.sub.subData[i], _paramMapping[1 + i], _subData, _returnValues
+            );
         }
 
         updateSubData(inputData);

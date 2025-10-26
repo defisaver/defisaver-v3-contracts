@@ -32,7 +32,8 @@ contract RenzoStake is ActionBase, RenzoHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
@@ -67,7 +68,8 @@ contract RenzoStake is ActionBase, RenzoHelper {
         internal
         returns (uint256 ezEthReceivedAmount, bytes memory logData)
     {
-        _inputData.amount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
+        _inputData.amount =
+            TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
 
         TokenUtils.withdrawWeth(_inputData.amount);
 

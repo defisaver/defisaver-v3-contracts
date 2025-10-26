@@ -4,7 +4,9 @@ pragma solidity =0.8.24;
 
 import { IDSAuth } from "../../interfaces/DS/IDSAuth.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { DFSProxyRegistryController } from "../../utils/proxyRegistry/DFSProxyRegistryController.sol";
+import {
+    DFSProxyRegistryController
+} from "../../utils/proxyRegistry/DFSProxyRegistryController.sol";
 
 /// @title Changes the owner of the DSProxy and updated the DFSRegistry
 contract ChangeProxyOwner is ActionBase {
@@ -13,7 +15,8 @@ contract ChangeProxyOwner is ActionBase {
         address newOwner;
     }
 
-    DFSProxyRegistryController constant dfsRegController = DFSProxyRegistryController(DFS_REG_CONTROLLER_ADDR);
+    DFSProxyRegistryController constant dfsRegController =
+        DFSProxyRegistryController(DFS_REG_CONTROLLER_ADDR);
 
     /// @inheritdoc ActionBase
     function executeAction(
@@ -24,7 +27,8 @@ contract ChangeProxyOwner is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.newOwner = _parseParamAddr(inputData.newOwner, _paramMapping[0], _subData, _returnValues);
+        inputData.newOwner =
+            _parseParamAddr(inputData.newOwner, _paramMapping[0], _subData, _returnValues);
 
         _changeOwner(inputData.newOwner);
 

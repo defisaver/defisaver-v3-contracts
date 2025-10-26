@@ -54,7 +54,8 @@ contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTr
         DFSExchangeData.InjectedExchangeData calldata _injectedExchangeData
     ) external {
         // only authorized bot can call this function
-        if (!BotAuthForTxSaver(registry.getAddr(DFSIds.BOT_AUTH_FOR_TX_SAVER)).isApproved(msg.sender)) {
+        if (!BotAuthForTxSaver(registry.getAddr(DFSIds.BOT_AUTH_FOR_TX_SAVER))
+                .isApproved(msg.sender)) {
             revert BotNotApproved(msg.sender);
         }
 
@@ -72,7 +73,8 @@ contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTr
             );
         } else {
             setBytesTransiently(
-                abi.encode(_estimatedGas, _l1GasCostInEth, _injectedExchangeData), txSaverData.shouldTakeFeeFromPosition
+                abi.encode(_estimatedGas, _l1GasCostInEth, _injectedExchangeData),
+                txSaverData.shouldTakeFeeFromPosition
             );
         }
 

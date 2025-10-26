@@ -26,9 +26,11 @@ contract PullToken is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.tokenAddr = _parseParamAddr(inputData.tokenAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.tokenAddr =
+            _parseParamAddr(inputData.tokenAddr, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
 
         inputData.amount = _pullToken(inputData.tokenAddr, inputData.from, inputData.amount);
 
@@ -54,7 +56,10 @@ contract PullToken is ActionBase {
     /// @param _tokenAddr Address of token
     /// @param _from From where the tokens are pulled
     /// @param _amount Amount of tokens, can be type(uint).max
-    function _pullToken(address _tokenAddr, address _from, uint256 _amount) internal returns (uint256 amountPulled) {
+    function _pullToken(address _tokenAddr, address _from, uint256 _amount)
+        internal
+        returns (uint256 amountPulled)
+    {
         amountPulled = _tokenAddr.pullTokensIfNeeded(_from, _amount);
     }
 

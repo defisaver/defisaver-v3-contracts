@@ -7,7 +7,9 @@ import {
 } from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
-import { FluidVaultT1Withdraw } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw.sol";
+import {
+    FluidVaultT1Withdraw
+} from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Withdraw.sol";
 import { FluidDexWithdraw } from "../../../../contracts/actions/fluid/dex/FluidDexWithdraw.sol";
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
@@ -153,7 +155,11 @@ contract TestFluidLiquidityWithdraw is FluidTestBase {
         for (uint256 i = 0; i < vaults.length; ++i) {
             uint256 nftId = _t1VaultsSelected
                 ? executeFluidVaultT1Open(
-                    address(vaults[i]), _config.initialSupplyAmountUSD, 0, wallet, address(t1OpenContract)
+                    address(vaults[i]),
+                    _config.initialSupplyAmountUSD,
+                    0,
+                    wallet,
+                    address(t1OpenContract)
                 )
                 : executeFluidVaultT3Open(
                     address(vaults[i]),
@@ -170,12 +176,16 @@ contract TestFluidLiquidityWithdraw is FluidTestBase {
             }
 
             FluidTestBase.TokensData memory tokens = getTokens(vaults[i], _t1VaultsSelected);
-            bool isNativeWithdraw =
-                _t1VaultsSelected ? tokens.supply0 == TokenUtils.ETH_ADDR : tokens.supply0 == TokenUtils.ETH_ADDR;
+            bool isNativeWithdraw = _t1VaultsSelected
+                ? tokens.supply0 == TokenUtils.ETH_ADDR
+                : tokens.supply0 == TokenUtils.ETH_ADDR;
 
             uint256 withdrawAmount = _config.takeMaxUint256
                 ? type(uint256).max
-                : amountInUSDPrice(isNativeWithdraw ? TokenUtils.WETH_ADDR : tokens.supply0, _config.withdrawAmountUSD);
+                : amountInUSDPrice(
+                    isNativeWithdraw ? TokenUtils.WETH_ADDR : tokens.supply0,
+                    _config.withdrawAmountUSD
+                );
 
             bytes memory executeActionCallData = executeActionCalldata(
                 _t1VaultsSelected
@@ -196,22 +206,30 @@ contract TestFluidLiquidityWithdraw is FluidTestBase {
             IFluidVaultResolver.UserPosition memory userPositionBefore = fetchPositionByNftId(nftId);
 
             uint256 senderSupplyTokenBalanceBefore = isNativeWithdraw
-                ? (_config.wrapWithdrawnEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance)
+                ? (_config.wrapWithdrawnEth
+                        ? balanceOf(TokenUtils.WETH_ADDR, sender)
+                        : address(sender).balance)
                 : balanceOf(tokens.supply0, sender);
-            uint256 walletSupplyTokenBalanceBefore =
-                isNativeWithdraw ? address(walletAddr).balance : balanceOf(tokens.supply0, walletAddr);
+            uint256 walletSupplyTokenBalanceBefore = isNativeWithdraw
+                ? address(walletAddr).balance
+                : balanceOf(tokens.supply0, walletAddr);
 
             wallet.execute(
-                _t1VaultsSelected ? address(cut_FluidVaultT1Withdraw) : address(cut_FluidDexWithdraw),
+                _t1VaultsSelected
+                    ? address(cut_FluidVaultT1Withdraw)
+                    : address(cut_FluidDexWithdraw),
                 executeActionCallData,
                 0
             );
 
             uint256 senderSupplyTokenBalanceAfter = isNativeWithdraw
-                ? (_config.wrapWithdrawnEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance)
+                ? (_config.wrapWithdrawnEth
+                        ? balanceOf(TokenUtils.WETH_ADDR, sender)
+                        : address(sender).balance)
                 : balanceOf(tokens.supply0, sender);
-            uint256 walletSupplyTokenBalanceAfter =
-                isNativeWithdraw ? address(walletAddr).balance : balanceOf(tokens.supply0, walletAddr);
+            uint256 walletSupplyTokenBalanceAfter = isNativeWithdraw
+                ? address(walletAddr).balance
+                : balanceOf(tokens.supply0, walletAddr);
 
             IFluidVaultResolver.UserPosition memory userPositionAfter = fetchPositionByNftId(nftId);
 
@@ -224,7 +242,9 @@ contract TestFluidLiquidityWithdraw is FluidTestBase {
                 );
                 assertEq(userPositionAfter.supply, 0);
             } else {
-                assertEq(senderSupplyTokenBalanceAfter, senderSupplyTokenBalanceBefore + withdrawAmount);
+                assertEq(
+                    senderSupplyTokenBalanceAfter, senderSupplyTokenBalanceBefore + withdrawAmount
+                );
                 assertApproxEqRel(
                     userPositionAfter.supply,
                     userPositionBefore.supply - withdrawAmount,

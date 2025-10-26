@@ -2,7 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 import { LiquityV2Payback } from "../../../contracts/actions/liquityV2/trove/LiquityV2Payback.sol";
@@ -80,7 +82,9 @@ contract TestLiquityV2Payback is LiquityV2ExecuteActions {
         _baseTest(isDirect, isMaxUint256Payback, interestBatchManager);
     }
 
-    function _baseTest(bool _isDirect, bool _isMaxUint256Payback, address _interestBatchManager) public {
+    function _baseTest(bool _isDirect, bool _isMaxUint256Payback, address _interestBatchManager)
+        public
+    {
         uint256 collAmountInUSD = 30_000;
         uint256 borrowAmountInUSD = 10_000;
         uint256 paybackAmountInUSD = 5000;
@@ -116,7 +120,8 @@ contract TestLiquityV2Payback is LiquityV2ExecuteActions {
         bool _isMaxUint256Payback,
         uint256 _paybackAmountInUSD
     ) internal {
-        LiquityV2View.TroveData memory troveData = viewContract.getTroveInfo(address(_market), _troveId);
+        LiquityV2View.TroveData memory troveData =
+            viewContract.getTroveInfo(address(_market), _troveId);
         uint256 entireDebt = troveData.debtAmount;
 
         uint256 paybackAmount = _isMaxUint256Payback
@@ -128,7 +133,10 @@ contract TestLiquityV2Payback is LiquityV2ExecuteActions {
 
         bytes memory executeActionCallData = executeActionCalldata(
             liquityV2PaybackEncode(
-                address(_market), sender, _troveId, _isMaxUint256Payback ? type(uint256).max : paybackAmount
+                address(_market),
+                sender,
+                _troveId,
+                _isMaxUint256Payback ? type(uint256).max : paybackAmount
             ),
             _isDirect
         );

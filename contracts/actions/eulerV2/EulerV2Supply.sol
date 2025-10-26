@@ -40,7 +40,8 @@ contract EulerV2Supply is ActionBase, EulerV2Helper {
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
         params.enableAsColl =
-            _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
+            _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[4], _subData, _returnValues)
+                == 1;
 
         (uint256 supplyAmount, bytes memory logData) = _supply(params);
         emit ActionEvent("EulerV2Supply", logData);

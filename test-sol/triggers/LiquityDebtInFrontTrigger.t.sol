@@ -31,8 +31,11 @@ contract TestLiquityDebtInFront is BaseTest, LiquityHelper {
         // fetch head of list, largest TCR
         address lastTrove = SortedTroves.getFirst();
 
-        bytes memory subData =
-            abi.encode(LiquityDebtInFrontTrigger.SubParams({ troveOwner: lastTrove, debtInFrontMin: 500_000 * 1e18 }));
+        bytes memory subData = abi.encode(
+            LiquityDebtInFrontTrigger.SubParams({
+                troveOwner: lastTrove, debtInFrontMin: 500_000 * 1e18
+            })
+        );
 
         bool isTriggered = cut.isTriggered("", subData);
 
@@ -46,7 +49,9 @@ contract TestLiquityDebtInFront is BaseTest, LiquityHelper {
         address lastTrove = SortedTroves.getFirst();
 
         bytes memory subData = abi.encode(
-            LiquityDebtInFrontTrigger.SubParams({ troveOwner: lastTrove, debtInFrontMin: 500_000_000 * 1e18 })
+            LiquityDebtInFrontTrigger.SubParams({
+                troveOwner: lastTrove, debtInFrontMin: 500_000_000 * 1e18
+            })
         );
 
         bool isTriggered = cut.isTriggered("", subData);

@@ -38,12 +38,16 @@ contract FluidVaultT1Open is ActionBase {
         Params memory params = parseInputs(_callData);
 
         params.vault = _parseParamAddr(params.vault, _paramMapping[0], _subData, _returnValues);
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[1], _subData, _returnValues);
-        params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[2], _subData, _returnValues);
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[1], _subData, _returnValues);
+        params.debtAmount =
+            _parseParamUint(params.debtAmount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
         params.wrapBorrowedEth =
-            _parseParamUint(params.wrapBorrowedEth ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
+            _parseParamUint(
+                    params.wrapBorrowedEth ? 1 : 0, _paramMapping[5], _subData, _returnValues
+                ) == 1;
 
         (uint256 nftId, bytes memory logData) = _open(params);
         emit ActionEvent("FluidVaultT1Open", logData);
@@ -68,8 +72,8 @@ contract FluidVaultT1Open is ActionBase {
     function _open(Params memory _params) internal returns (uint256, bytes memory) {
         IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(_params.vault).constantsView();
 
-        bool shouldWrapBorrowedEth =
-            _params.wrapBorrowedEth && _params.debtAmount > 0 && constants.borrowToken == TokenUtils.ETH_ADDR;
+        bool shouldWrapBorrowedEth = _params.wrapBorrowedEth && _params.debtAmount > 0
+            && constants.borrowToken == TokenUtils.ETH_ADDR;
 
         address sendTokensTo = shouldWrapBorrowedEth ? address(this) : _params.to;
 

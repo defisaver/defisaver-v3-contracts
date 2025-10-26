@@ -32,10 +32,12 @@ contract AaveV3ViewSmall is AaveV3Helper {
         data.currentEmodeId = lendingPool.getUserEMode(_user);
 
         for (uint256 i = 0; i < data.tokenAddresses.length; i++) {
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(data.tokenAddresses[i]);
+            DataTypes.ReserveData memory reserveData =
+                lendingPool.getReserveData(data.tokenAddresses[i]);
             data.supplyAmounts[i] = reserveData.aTokenAddress.getBalance(_user);
             data.borrowAmounts[i] = reserveData.variableDebtTokenAddress.getBalance(_user);
-            data.isCollateral[i] = isUsingAsCollateral(lendingPool.getUserConfiguration(_user), reserveData.id);
+            data.isCollateral[i] =
+                isUsingAsCollateral(lendingPool.getUserConfiguration(_user), reserveData.id);
         }
     }
 

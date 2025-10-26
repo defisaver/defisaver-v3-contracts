@@ -8,7 +8,9 @@ import { IInstaAccount } from "../interfaces/protocols/insta/IInstaAccount.sol";
 import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
 import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 import { DSProxyFactoryHelper } from "../utils/addresses/dsProxyFactory/DSProxyFactoryHelper.sol";
-import { DSAProxyFactoryHelper } from "../utils/addresses/dsaProxyFactory/DSAProxyFactoryHelper.sol";
+import {
+    DSAProxyFactoryHelper
+} from "../utils/addresses/dsaProxyFactory/DSAProxyFactoryHelper.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title SmartWalletUtils - Helper contract with utility functions for smart wallets

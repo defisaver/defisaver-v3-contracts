@@ -78,7 +78,8 @@ contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
             StrategyModel.Recipe memory recipe =
                 _create_placeholder_recipe("TestRecipeWithoutFlashloan", actionsCalldata, ids);
 
-            bytes memory _calldata = abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
+            bytes memory _calldata =
+                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
             give(tokenAddr, wallets[i].owner(), amount);
             approveAsSender(wallets[i].owner(), tokenAddr, wallets[i].walletAddr(), amount);
@@ -107,7 +108,8 @@ contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
             StrategyModel.Recipe memory recipe =
                 _create_placeholder_recipe("TestRecipeWithFlashloan", actionsCalldata, ids);
 
-            bytes memory _calldata = abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
+            bytes memory _calldata =
+                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
             uint256 senderBalanceBefore = balanceOf(tokenAddr, wallets[i].owner());
             uint256 walletBalanceBefore = balanceOf(tokenAddr, wallets[i].walletAddr());

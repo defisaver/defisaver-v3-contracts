@@ -57,7 +57,9 @@ contract TestCore_DSAAuth is ActionsUtils, DSAProxyTestUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_fail_to_call_execute_when_sender_is_not_executor() public {
         vm.expectRevert(
-            abi.encodeWithSelector(WalletAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr)
+            abi.encodeWithSelector(
+                WalletAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr
+            )
         );
         cut.callExecute(dsaProxyAddr, recipeExecutorAddr, bytes("0x"));
     }
@@ -99,7 +101,11 @@ contract TestCore_DSAAuth is ActionsUtils, DSAProxyTestUtils, BaseTest {
                 paramMapping: paramMapping
             });
 
-            wallet.execute(recipeExecutorAddr, abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe), 0);
+            wallet.execute(
+                recipeExecutorAddr,
+                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe),
+                0
+            );
         }
 
         // 3. Execute recipe once we have auth contract permission
@@ -121,7 +127,8 @@ contract TestCore_DSAAuth is ActionsUtils, DSAProxyTestUtils, BaseTest {
             });
 
             // encode recipe executor call
-            bytes memory recipeExecutorCalldata = abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
+            bytes memory recipeExecutorCalldata =
+                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
             // execute dsa tx
             prank(strategyExecutorAddr);

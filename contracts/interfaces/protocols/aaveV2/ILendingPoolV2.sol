@@ -65,7 +65,11 @@ interface ILendingPoolV2 {
      *
      */
     event Deposit(
-        address indexed reserve, address user, address indexed onBehalfOf, uint256 amount, uint16 indexed referral
+        address indexed reserve,
+        address user,
+        address indexed onBehalfOf,
+        uint256 amount,
+        uint16 indexed referral
     );
 
     /**
@@ -76,7 +80,9 @@ interface ILendingPoolV2 {
      * @param amount The amount to be withdrawn
      *
      */
-    event Withdraw(address indexed reserve, address indexed user, address indexed to, uint256 amount);
+    event Withdraw(
+        address indexed reserve, address indexed user, address indexed to, uint256 amount
+    );
 
     /**
      * @dev Emitted on borrow() and flashLoan() when debt needs to be opened
@@ -108,7 +114,9 @@ interface ILendingPoolV2 {
      * @param amount The amount repaid
      *
      */
-    event Repay(address indexed reserve, address indexed user, address indexed repayer, uint256 amount);
+    event Repay(
+        address indexed reserve, address indexed user, address indexed repayer, uint256 amount
+    );
 
     /**
      * @dev Emitted on swapBorrowRateMode()
@@ -230,7 +238,8 @@ interface ILendingPoolV2 {
      *   0 if the action is executed directly by the user, without any middle-man
      *
      */
-    function deposit(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external;
+    function deposit(address asset, uint256 amount, address onBehalfOf, uint16 referralCode)
+        external;
 
     /**
      * @dev Withdraws an `amount` of underlying asset from the reserve, burning the equivalent aTokens owned
@@ -261,8 +270,13 @@ interface ILendingPoolV2 {
      * if he has been given credit delegation allowance
      *
      */
-    function borrow(address asset, uint256 amount, uint256 interestRateMode, uint16 referralCode, address onBehalfOf)
-        external;
+    function borrow(
+        address asset,
+        uint256 amount,
+        uint256 interestRateMode,
+        uint16 referralCode,
+        address onBehalfOf
+    ) external;
 
     /**
      * @notice Repays a borrowed `amount` on a specific reserve, burning the equivalent debt tokens owned
@@ -385,7 +399,8 @@ interface ILendingPoolV2 {
         address interestRateStrategyAddress
     ) external;
 
-    function setReserveInterestRateStrategyAddress(address reserve, address rateStrategyAddress) external;
+    function setReserveInterestRateStrategyAddress(address reserve, address rateStrategyAddress)
+        external;
 
     function setConfiguration(address reserve, uint256 configuration) external;
 
@@ -395,7 +410,10 @@ interface ILendingPoolV2 {
      * @return The configuration of the reserve
      *
      */
-    function getConfiguration(address asset) external view returns (DataTypes.ReserveConfigurationMap memory);
+    function getConfiguration(address asset)
+        external
+        view
+        returns (DataTypes.ReserveConfigurationMap memory);
 
     /**
      * @dev Returns the configuration of the user across all the reserves
@@ -403,7 +421,10 @@ interface ILendingPoolV2 {
      * @return The configuration of the user
      *
      */
-    function getUserConfiguration(address user) external view returns (DataTypes.UserConfigurationMap memory);
+    function getUserConfiguration(address user)
+        external
+        view
+        returns (DataTypes.UserConfigurationMap memory);
 
     /**
      * @dev Returns the normalized income normalized income of the reserve

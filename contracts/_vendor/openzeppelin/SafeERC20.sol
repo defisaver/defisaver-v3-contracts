@@ -24,7 +24,9 @@ library SafeERC20 {
      * calling contract. If `token` returns no value, non-reverting calls are assumed to be successful.
      */
     function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
-        _callOptionalReturn(token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
+        _callOptionalReturn(
+            token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value)
+        );
     }
 
     /**
@@ -52,8 +54,12 @@ library SafeERC20 {
         // we're implementing it ourselves. We use {Address-functionCall} to perform this call, which verifies that
         // the target address contains contract code and also asserts for success in the low-level call.
 
-        bytes memory returndata = address(token).functionCall(data, "SafeERC20: low-level call failed");
-        require(returndata.length == 0 || abi.decode(returndata, (bool)), "SafeERC20: ERC20 operation did not succeed");
+        bytes memory returndata =
+            address(token).functionCall(data, "SafeERC20: low-level call failed");
+        require(
+            returndata.length == 0 || abi.decode(returndata, (bool)),
+            "SafeERC20: ERC20 operation did not succeed"
+        );
     }
 
     /**
@@ -70,6 +76,7 @@ library SafeERC20 {
         // and not revert is the subcall reverts.
 
         (bool success, bytes memory returndata) = address(token).call(data);
-        return success && (returndata.length == 0 || abi.decode(returndata, (bool))) && address(token).code.length > 0;
+        return success && (returndata.length == 0 || abi.decode(returndata, (bool)))
+            && address(token).code.length > 0;
     }
 }

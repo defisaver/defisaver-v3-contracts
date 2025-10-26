@@ -52,7 +52,8 @@ contract SmartWallet is BaseTest {
 
     function createDSAProxy() public ownerAsSender returns (address payable) {
         uint256 version = useVersion1DSAProxy() ? 1 : 2;
-        walletAddr = payable(IInstaIndex(Addresses.INSTADAPP_INDEX).build(owner, version, address(0)));
+        walletAddr =
+            payable(IInstaIndex(Addresses.INSTADAPP_INDEX).build(owner, version, address(0)));
         isSafe = false;
         isDSA = true;
         isDSProxy = false;
@@ -67,7 +68,15 @@ contract SmartWallet is BaseTest {
         owners[0] = owner;
 
         bytes memory setupData = abi.encodeWithSelector(
-            ISafe.setup.selector, owners, 1, address(0), bytes(""), address(0), address(0), 0, payable(address(0))
+            ISafe.setup.selector,
+            owners,
+            1,
+            address(0),
+            bytes(""),
+            address(0),
+            address(0),
+            0,
+            payable(address(0))
         );
 
         walletAddr = payable(ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY)

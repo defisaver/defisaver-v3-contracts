@@ -28,15 +28,18 @@ contract DFSSellNoFee is ActionBase, DFSExchangeCore {
 
         params.exchangeData.srcAddr =
             _parseParamAddr(params.exchangeData.srcAddr, _paramMapping[0], _subData, _returnValues);
-        params.exchangeData.destAddr =
-            _parseParamAddr(params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues);
+        params.exchangeData.destAddr = _parseParamAddr(
+            params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues
+        );
 
-        params.exchangeData.srcAmount =
-            _parseParamUint(params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues);
+        params.exchangeData.srcAmount = _parseParamUint(
+            params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues
+        );
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 exchangedAmount, bytes memory logData) = _dfsSellNoFee(params.exchangeData, params.from, params.to);
+        (uint256 exchangedAmount, bytes memory logData) =
+            _dfsSellNoFee(params.exchangeData, params.from, params.to);
 
         emit ActionEvent("DFSSellNoFee", logData);
         return bytes32(exchangedAmount);

@@ -36,14 +36,23 @@ contract McdSupply is ActionBase, McdHelper {
     ) public payable override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
-        inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[2], _subData, _returnValues);
+        inputData.vaultId =
+            _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.joinAddr =
+            _parseParamAddr(inputData.joinAddr, _paramMapping[2], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[3], _subData, _returnValues);
-        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[4], _subData, _returnValues);
+        inputData.mcdManager =
+            _parseParamAddr(inputData.mcdManager, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 returnAmount, bytes memory logData) =
-            _mcdSupply(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.from, inputData.mcdManager);
+        (uint256 returnAmount, bytes memory logData) = _mcdSupply(
+            inputData.vaultId,
+            inputData.amount,
+            inputData.joinAddr,
+            inputData.from,
+            inputData.mcdManager
+        );
         emit ActionEvent("McdSupply", logData);
         return bytes32(returnAmount);
     }
@@ -51,8 +60,13 @@ contract McdSupply is ActionBase, McdHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        (, bytes memory logData) =
-            _mcdSupply(inputData.vaultId, inputData.amount, inputData.joinAddr, inputData.from, inputData.mcdManager);
+        (, bytes memory logData) = _mcdSupply(
+            inputData.vaultId,
+            inputData.amount,
+            inputData.joinAddr,
+            inputData.from,
+            inputData.mcdManager
+        );
         logger.logActionDirectEvent("McdSupply", logData);
     }
 
@@ -68,10 +82,13 @@ contract McdSupply is ActionBase, McdHelper {
     /// @param _joinAddr Join address of the maker collateral
     /// @param _from Address where to pull the collateral from
     /// @param _mcdManager The manager address we are using [mcd, b.protocol]
-    function _mcdSupply(uint256 _vaultId, uint256 _amount, address _joinAddr, address _from, address _mcdManager)
-        internal
-        returns (uint256, bytes memory)
-    {
+    function _mcdSupply(
+        uint256 _vaultId,
+        uint256 _amount,
+        address _joinAddr,
+        address _from,
+        address _mcdManager
+    ) internal returns (uint256, bytes memory) {
         address tokenAddr = getTokenFromJoin(_joinAddr);
 
         // if amount type(uint).max, pull current _from balance
@@ -125,7 +142,14 @@ contract McdSupply is ActionBase, McdHelper {
         IJoin(_joinAddr).join(address(this), _amount);
 
         // Supply to the vault balance
-        vat.frob(mcdManager.ilks(_vaultId), mcdManager.urns(_vaultId), address(this), address(this), _vatAmount, 0);
+        vat.frob(
+            mcdManager.ilks(_vaultId),
+            mcdManager.urns(_vaultId),
+            address(this),
+            address(this),
+            _vatAmount,
+            0
+        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

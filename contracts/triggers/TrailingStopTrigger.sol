@@ -27,7 +27,12 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, Toke
         uint80 maxRoundId;
     }
 
-    function isTriggered(bytes memory _callData, bytes memory _subData) public view override returns (bool) {
+    function isTriggered(bytes memory _callData, bytes memory _subData)
+        public
+        view
+        override
+        returns (bool)
+    {
         SubParams memory triggerSubData = parseSubInputs(_subData);
         CallParams memory triggerCallData = parseCallInputs(_callData);
 
@@ -38,7 +43,8 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, Toke
         (uint256 maxPrice, uint256 maxPriceTimeStamp) =
             getRoundInfo(triggerSubData.tokenAddr, triggerCallData.maxRoundId);
 
-        (, uint256 startTimeStamp) = getRoundInfo(triggerSubData.tokenAddr, triggerSubData.startRoundId);
+        (, uint256 startTimeStamp) =
+            getRoundInfo(triggerSubData.tokenAddr, triggerSubData.startRoundId);
 
         // we can't send a roundId that happened before the users sub
         if (maxPriceTimeStamp < startTimeStamp) {
@@ -69,7 +75,11 @@ contract TrailingStopTrigger is ITrigger, AdminAuth, TriggerHelper, DSMath, Toke
         params = abi.decode(_callData, (SubParams));
     }
 
-    function parseCallInputs(bytes memory _callData) internal pure returns (CallParams memory params) {
+    function parseCallInputs(bytes memory _callData)
+        internal
+        pure
+        returns (CallParams memory params)
+    {
         params = abi.decode(_callData, (CallParams));
     }
 }

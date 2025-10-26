@@ -15,7 +15,8 @@ import { ITroveManager } from "../../interfaces/protocols/liquityV2/ITroveManage
 /// @author DeFi Saver
 contract LiquityV2NewInterestRateChecker is ActionBase {
     /// @notice Transient storage contract for storing temporary data during execution
-    TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
+    TransientStorageCancun public constant tempStorage =
+        TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     /// @notice Error thrown when the interest rate after adjustment doesn't match the expected rate
     /// @param oldRate The original interest rate before adjustment
@@ -58,13 +59,16 @@ contract LiquityV2NewInterestRateChecker is ActionBase {
 
         IAddressesRegistry market = IAddressesRegistry(params.market);
         ITroveManager troveManager = ITroveManager(market.troveManager());
-        ITroveManager.LatestTroveData memory troveData = troveManager.getLatestTroveData(params.troveId);
+        ITroveManager.LatestTroveData memory troveData =
+            troveManager.getLatestTroveData(params.troveId);
 
         if (troveData.annualInterestRate != (startInterestRate + params.interestRateChange)) {
             revert BadAfterRate(startInterestRate, troveData.annualInterestRate);
         }
 
-        emit ActionEvent("LiquityV2NewInterestRateChecker", abi.encode(troveData.annualInterestRate));
+        emit ActionEvent(
+            "LiquityV2NewInterestRateChecker", abi.encode(troveData.annualInterestRate)
+        );
         return bytes32(troveData.annualInterestRate);
     }
 

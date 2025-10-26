@@ -46,7 +46,11 @@ contract SparkQuotePriceTrigger is ITrigger, AdminAuth, DSMath, SparkRatioHelper
     }
 
     /// @dev helper function that returns latest base token price in quote tokens
-    function getPrice(address _baseTokenAddr, address _quoteTokenAddr) public view returns (uint256 price) {
+    function getPrice(address _baseTokenAddr, address _quoteTokenAddr)
+        public
+        view
+        returns (uint256 price)
+    {
         address[] memory assets = new address[](2);
         assets[0] = _baseTokenAddr;
         assets[1] = _quoteTokenAddr;

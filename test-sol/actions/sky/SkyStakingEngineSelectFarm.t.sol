@@ -5,7 +5,9 @@ pragma solidity =0.8.24;
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { SkyStakingEngineOpen } from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
 import { SkyStakingEngineStake } from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
-import { SkyStakingEngineSelectFarm } from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
+import {
+    SkyStakingEngineSelectFarm
+} from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 
 import { ILockstakeEngine } from "../../../contracts/interfaces/protocols/sky/ILockstakeEngine.sol";
 
@@ -74,10 +76,13 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
 
         // stake and select USDS farm
-        executeSkyStakingEngineStake(STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet);
+        executeSkyStakingEngineStake(
+            STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet
+        );
 
-        bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, SPARK_FARM), true);
+        bytes memory executeActionCallData = executeActionCalldata(
+            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, SPARK_FARM), true
+        );
 
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
         emit ILockstakeEngine.SelectFarm(walletAddr, 0, SPARK_FARM, SKY_REFERRAL_CODE);
@@ -89,10 +94,13 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
 
         // stake and select SPARK farm
-        executeSkyStakingEngineStake(STAKING_ENGINE, 0, SPARK_FARM, AMOUNT, sender, open, cut, stake, wallet);
+        executeSkyStakingEngineStake(
+            STAKING_ENGINE, 0, SPARK_FARM, AMOUNT, sender, open, cut, stake, wallet
+        );
 
-        bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, USDS_FARM), true);
+        bytes memory executeActionCallData = executeActionCalldata(
+            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, USDS_FARM), true
+        );
 
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
         emit ILockstakeEngine.SelectFarm(walletAddr, 0, USDS_FARM, SKY_REFERRAL_CODE);
@@ -104,10 +112,13 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
 
         // stake and select USDS farm
-        executeSkyStakingEngineStake(STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet);
+        executeSkyStakingEngineStake(
+            STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet
+        );
 
-        bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, address(0)), true);
+        bytes memory executeActionCallData = executeActionCalldata(
+            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, address(0)), true
+        );
 
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
         emit ILockstakeEngine.SelectFarm(walletAddr, 0, address(0), SKY_REFERRAL_CODE);
@@ -119,10 +130,13 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
 
         // stake and select USDS farm
-        executeSkyStakingEngineStake(STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet);
+        executeSkyStakingEngineStake(
+            STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet
+        );
 
-        bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, USDS_FARM), true);
+        bytes memory executeActionCallData = executeActionCalldata(
+            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, USDS_FARM), true
+        );
 
         vm.expectRevert(); // "LockstakeEngine/same-farm"
         wallet.execute(address(cut), executeActionCallData, 0);
@@ -133,7 +147,9 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
 
         // stake and select USDS farm
-        executeSkyStakingEngineStake(STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet);
+        executeSkyStakingEngineStake(
+            STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet
+        );
 
         bytes memory executeActionCallData =
             executeActionCalldata(skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, bob), true);
@@ -152,8 +168,9 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         uint256 index = 0;
 
         // Execution logic
-        bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineSelectFarmEncode(STAKING_ENGINE, index, _farm), _isDirect);
+        bytes memory executeActionCallData = executeActionCalldata(
+            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, index, _farm), _isDirect
+        );
 
         if (_farm != address(0)) {
             vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));

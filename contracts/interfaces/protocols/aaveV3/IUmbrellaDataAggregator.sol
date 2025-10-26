@@ -79,5 +79,8 @@ interface IUmbrellaDataAggregator {
         view
         returns (StakeTokenData[] memory);
 
-    function getUserAggregatedData(address _umbrella, address _user) external view returns (StakeTokenUserData[] memory);
+    function getUserAggregatedData(address _umbrella, address _user)
+        external
+        view
+        returns (StakeTokenUserData[] memory);
 }

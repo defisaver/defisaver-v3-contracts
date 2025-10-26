@@ -25,7 +25,8 @@ contract CompV3PriceRangeTrigger is ITrigger, AdminAuth {
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerData = parseSubInputs(_subData);
 
-        address priceFeed = IComet(triggerData.market).getAssetInfoByAddress(triggerData.collToken).priceFeed;
+        address priceFeed =
+            IComet(triggerData.market).getAssetInfoByAddress(triggerData.collToken).priceFeed;
 
         // This will return the price of the collateral token in terms of base token scaled by 1e8
         uint256 currPrice = IComet(triggerData.market).getPrice(priceFeed);

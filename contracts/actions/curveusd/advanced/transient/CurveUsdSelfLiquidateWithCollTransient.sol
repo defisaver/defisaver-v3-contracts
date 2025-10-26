@@ -41,9 +41,12 @@ contract CurveUsdSelfLiquidateWithCollTransient is ActionBase, CurveUsdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
-        params.percentage = _parseParamUint(params.percentage, _paramMapping[1], _subData, _returnValues);
-        params.minCrvUsdExpected = _parseParamUint(params.minCrvUsdExpected, _paramMapping[2], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.percentage =
+            _parseParamUint(params.percentage, _paramMapping[1], _subData, _returnValues);
+        params.minCrvUsdExpected =
+            _parseParamUint(params.minCrvUsdExpected, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
 
         (uint256 debtTokenReceived, bytes memory logData) = _liquidate(params);
@@ -86,15 +89,21 @@ contract CurveUsdSelfLiquidateWithCollTransient is ActionBase, CurveUsdHelper {
 
         ICrvUsdController(_params.controllerAddress)
             .liquidate_extended(
-                address(this), _params.minCrvUsdExpected, _params.percentage, false, curveUsdTransientSwapper, info
+                address(this),
+                _params.minCrvUsdExpected,
+                _params.percentage,
+                false,
+                curveUsdTransientSwapper,
+                info
             );
 
         // there shouldn't be any funds left on swapper contract after sell but withdrawing it just in case
         CurveUsdSwapperTransient(curveUsdTransientSwapper).withdrawAll(_params.controllerAddress);
 
         // there will usually be both coll token and debt token, unless we're selling all collateral
-        (, uint256 debtTokenReceived) =
-            _sendLeftoverFundsWithSnapshot(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
+        (, uint256 debtTokenReceived) = _sendLeftoverFundsWithSnapshot(
+            collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to
+        );
 
         return (debtTokenReceived, abi.encode(_params));
     }

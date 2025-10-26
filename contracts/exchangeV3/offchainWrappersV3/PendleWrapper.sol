@@ -19,7 +19,12 @@ contract PendleWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData, 
 
     /// @notice Takes order from Pendle Router and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    function takeOrder(ExchangeData memory _exData) public payable override returns (bool success, uint256) {
+    function takeOrder(ExchangeData memory _exData)
+        public
+        payable
+        override
+        returns (bool success, uint256)
+    {
         // approve Pendle Router allowance contract
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
 

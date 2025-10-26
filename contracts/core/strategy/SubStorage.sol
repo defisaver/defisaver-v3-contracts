@@ -15,7 +15,12 @@ contract SubStorage is StrategyModel, AdminAuth, CoreHelper, ISubStorage {
     error SenderNotSubOwnerError(address, uint256);
     error SubIdOutOfRange(uint256, bool);
 
-    event Subscribe(uint256 indexed subId, address indexed walletAddr, bytes32 indexed subHash, StrategySub subStruct);
+    event Subscribe(
+        uint256 indexed subId,
+        address indexed walletAddr,
+        bytes32 indexed subHash,
+        StrategySub subStruct
+    );
     event UpdateData(uint256 indexed subId, bytes32 indexed subHash, StrategySub subStruct);
     event ActivateSub(uint256 indexed subId);
     event DeactivateSub(uint256 indexed subId);

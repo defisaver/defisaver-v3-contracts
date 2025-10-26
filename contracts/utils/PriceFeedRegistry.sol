@@ -16,7 +16,13 @@ contract PriceFeedRegistry is AdminAuth {
     function latestRoundData(address base, address quote)
         public
         view
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        )
     {
         address aggregator = getFeed(base, quote);
 
@@ -28,8 +34,14 @@ contract PriceFeedRegistry is AdminAuth {
         aggregators[base][quote] = aggregator;
     }
 
-    function setFeeds(address[] memory bases, address[] memory quotes, address[] memory aggregator) public onlyOwner {
-        require(bases.length == quotes.length && quotes.length == aggregator.length, "Invalid input length");
+    function setFeeds(address[] memory bases, address[] memory quotes, address[] memory aggregator)
+        public
+        onlyOwner
+    {
+        require(
+            bases.length == quotes.length && quotes.length == aggregator.length,
+            "Invalid input length"
+        );
         for (uint256 i = 0; i < bases.length; i++) {
             setFeed(bases[i], quotes[i], aggregator[i]);
         }

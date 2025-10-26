@@ -139,7 +139,10 @@ contract TestEulerV2Payback is EulerV2TestHelper {
         address assetToken = IEVault(_config.vault).asset();
 
         bytes memory callData = executeActionCalldata(
-            eulerV2PaybackEncode(_config.vault, _config.account, sender, _config.paybackAmountInUsd), _config.isDirect
+            eulerV2PaybackEncode(
+                _config.vault, _config.account, sender, _config.paybackAmountInUsd
+            ),
+            _config.isDirect
         );
 
         address account = _config.account == address(0) ? walletAddr : _config.account;

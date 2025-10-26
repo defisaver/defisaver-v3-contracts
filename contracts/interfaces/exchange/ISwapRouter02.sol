@@ -13,7 +13,8 @@ interface IUniswapV3SwapCallback {
     /// @param amount1Delta The amount of token1 that was sent (negative) or must be received (positive) by the pool by
     /// the end of the swap. If positive, the callback must send that amount of token1 to the pool.
     /// @param data Any data passed through by the caller via the IUniswapV3PoolActions#swap call
-    function uniswapV3SwapCallback(int256 amount0Delta, int256 amount1Delta, bytes calldata data) external;
+    function uniswapV3SwapCallback(int256 amount0Delta, int256 amount1Delta, bytes calldata data)
+        external;
 }
 
 /// @title Router token swapping functionality
@@ -34,7 +35,10 @@ interface ISwapRouter02 is IUniswapV3SwapCallback {
     /// and swap the entire amount, enabling contracts to send tokens before calling this function.
     /// @param params The parameters necessary for the swap, encoded as `ExactInputSingleParams` in calldata
     /// @return amountOut The amount of the received token
-    function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
+    function exactInputSingle(ExactInputSingleParams calldata params)
+        external
+        payable
+        returns (uint256 amountOut);
 
     struct ExactInputParams {
         bytes path;
@@ -48,7 +52,10 @@ interface ISwapRouter02 is IUniswapV3SwapCallback {
     /// and swap the entire amount, enabling contracts to send tokens before calling this function.
     /// @param params The parameters necessary for the multi-hop swap, encoded as `ExactInputParams` in calldata
     /// @return amountOut The amount of the received token
-    function exactInput(ExactInputParams calldata params) external payable returns (uint256 amountOut);
+    function exactInput(ExactInputParams calldata params)
+        external
+        payable
+        returns (uint256 amountOut);
 
     struct ExactOutputSingleParams {
         address tokenIn;
@@ -64,7 +71,10 @@ interface ISwapRouter02 is IUniswapV3SwapCallback {
     /// that may remain in the router after the swap.
     /// @param params The parameters necessary for the swap, encoded as `ExactOutputSingleParams` in calldata
     /// @return amountIn The amount of the input token
-    function exactOutputSingle(ExactOutputSingleParams calldata params) external payable returns (uint256 amountIn);
+    function exactOutputSingle(ExactOutputSingleParams calldata params)
+        external
+        payable
+        returns (uint256 amountIn);
 
     struct ExactOutputParams {
         bytes path;
@@ -77,5 +87,8 @@ interface ISwapRouter02 is IUniswapV3SwapCallback {
     /// that may remain in the router after the swap.
     /// @param params The parameters necessary for the multi-hop swap, encoded as `ExactOutputParams` in calldata
     /// @return amountIn The amount of the input token
-    function exactOutput(ExactOutputParams calldata params) external payable returns (uint256 amountIn);
+    function exactOutput(ExactOutputParams calldata params)
+        external
+        payable
+        returns (uint256 amountIn);
 }

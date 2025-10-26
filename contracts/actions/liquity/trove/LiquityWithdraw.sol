@@ -30,7 +30,8 @@ contract LiquityWithdraw is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[0], _subData, _returnValues);
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
         (uint256 withdrawnAmount, bytes memory logData) = _liquityWithdraw(params);

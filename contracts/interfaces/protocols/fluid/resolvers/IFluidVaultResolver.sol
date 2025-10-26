@@ -212,7 +212,10 @@ interface IFluidVaultResolver {
 
     function getVaultAddress(uint256 vaultId_) external view returns (address vault_);
 
-    function getVaultEntireData(address vault_) external view returns (VaultEntireData memory vaultData_);
+    function getVaultEntireData(address vault_)
+        external
+        view
+        returns (VaultEntireData memory vaultData_);
 
     function vaultByNftId(uint256 nftId_) external view returns (address vault_);
 }

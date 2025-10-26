@@ -22,7 +22,8 @@ contract LiquityHelper is MainnetLiquityAddresses {
     uint256 public constant MIN_DEBT = 2000e18; // MIN_NET_DEBT (1800e18) + LUSD_GAS_COMP (200e18)
 
     IPriceFeed public constant PriceFeed = IPriceFeed(PRICE_FEED_ADDRESS);
-    IBorrowerOperations public constant BorrowerOperations = IBorrowerOperations(BORROWER_OPERATIONS_ADDRESS);
+    IBorrowerOperations public constant BorrowerOperations =
+        IBorrowerOperations(BORROWER_OPERATIONS_ADDRESS);
     ITroveManager public constant TroveManager = ITroveManager(TROVE_MANAGER_ADDRESS);
     ISortedTroves public constant SortedTroves = ISortedTroves(SORTED_TROVES_ADDRESS);
     IHintHelpersV1 public constant HintHelpers = IHintHelpersV1(HINT_HELPERS_ADDRESS);
@@ -30,7 +31,9 @@ contract LiquityHelper is MainnetLiquityAddresses {
     IStabilityPool public constant StabilityPool = IStabilityPool(STABILITY_POOL_ADDRESS);
     ILQTYStaking public constant LQTYStaking = ILQTYStaking(LQTY_STAKING_ADDRESS);
 
-    function withdrawStaking(uint256 _ethGain, uint256 _lusdGain, address _wethTo, address _lusdTo) internal {
+    function withdrawStaking(uint256 _ethGain, uint256 _lusdGain, address _wethTo, address _lusdTo)
+        internal
+    {
         if (_ethGain > 0) {
             TokenUtils.depositWeth(_ethGain);
             TokenUtils.WETH_ADDR.withdrawTokens(_wethTo, _ethGain);
@@ -40,7 +43,12 @@ contract LiquityHelper is MainnetLiquityAddresses {
         }
     }
 
-    function withdrawStabilityGains(uint256 _ethGain, uint256 _lqtyGain, address _wethTo, address _lqtyTo) internal {
+    function withdrawStabilityGains(
+        uint256 _ethGain,
+        uint256 _lqtyGain,
+        address _wethTo,
+        address _lqtyTo
+    ) internal {
         if (_ethGain > 0) {
             TokenUtils.depositWeth(_ethGain);
             TokenUtils.WETH_ADDR.withdrawTokens(_wethTo, _ethGain);

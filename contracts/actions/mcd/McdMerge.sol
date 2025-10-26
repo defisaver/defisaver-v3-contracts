@@ -26,11 +26,15 @@ contract McdMerge is ActionBase, McdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.srcVaultId = _parseParamUint(inputData.srcVaultId, _paramMapping[0], _subData, _returnValues);
-        inputData.destVaultId = _parseParamUint(inputData.destVaultId, _paramMapping[1], _subData, _returnValues);
-        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[2], _subData, _returnValues);
+        inputData.srcVaultId =
+            _parseParamUint(inputData.srcVaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.destVaultId =
+            _parseParamUint(inputData.destVaultId, _paramMapping[1], _subData, _returnValues);
+        inputData.mcdManager =
+            _parseParamAddr(inputData.mcdManager, _paramMapping[2], _subData, _returnValues);
 
-        bytes memory logData = _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
+        bytes memory logData =
+            _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
         emit ActionEvent("McdMerge", logData);
         return bytes32(inputData.destVaultId);
     }
@@ -38,7 +42,8 @@ contract McdMerge is ActionBase, McdHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        bytes memory logData = _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
+        bytes memory logData =
+            _mcdMerge(inputData.srcVaultId, inputData.destVaultId, inputData.mcdManager);
         logger.logActionDirectEvent("McdMerge", logData);
     }
 

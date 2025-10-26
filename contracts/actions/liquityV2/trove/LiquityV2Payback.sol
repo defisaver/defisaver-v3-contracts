@@ -3,7 +3,9 @@
 pragma solidity =0.8.24;
 
 import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
-import { IBorrowerOperations } from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
+import {
+    IBorrowerOperations
+} from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
 import { ITroveManager } from "../../../interfaces/protocols/liquityV2/ITroveManager.sol";
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
@@ -63,7 +65,8 @@ contract LiquityV2Payback is ActionBase, LiquityV2Helper {
         address troveManager = IAddressesRegistry(_params.market).troveManager();
         address borrowerOperations = IAddressesRegistry(_params.market).borrowerOperations();
 
-        uint256 entireDebt = ITroveManager(troveManager).getLatestTroveData(_params.troveId).entireDebt;
+        uint256 entireDebt =
+            ITroveManager(troveManager).getLatestTroveData(_params.troveId).entireDebt;
 
         uint256 maxRepayment = entireDebt > MIN_DEBT ? entireDebt - MIN_DEBT : 0;
 

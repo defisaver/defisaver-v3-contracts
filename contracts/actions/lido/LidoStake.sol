@@ -29,7 +29,8 @@ contract LidoStake is ActionBase, DSMath, LidoHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
@@ -53,8 +54,12 @@ contract LidoStake is ActionBase, DSMath, LidoHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice pulls weth, transforms it into eth, stakes it with lido, receives stEth and sends it to target address
-    function _lidoStake(Params memory _inputData) internal returns (uint256 stEthReceivedAmount, bytes memory logData) {
-        _inputData.amount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
+    function _lidoStake(Params memory _inputData)
+        internal
+        returns (uint256 stEthReceivedAmount, bytes memory logData)
+    {
+        _inputData.amount =
+            TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         TokenUtils.withdrawWeth(_inputData.amount);
 
         uint256 stEthBalanceBefore = lidoStEth.getBalance(address(this));

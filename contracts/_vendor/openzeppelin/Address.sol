@@ -49,14 +49,21 @@ library Address {
         return _functionCallWithValue(target, data, 0, errorMessage);
     }
 
-    function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {
-        return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
-    }
-
-    function functionCallWithValue(address target, bytes memory data, uint256 value, string memory errorMessage)
+    function functionCallWithValue(address target, bytes memory data, uint256 value)
         internal
         returns (bytes memory)
     {
+        return functionCallWithValue(
+            target, data, value, "Address: low-level call with value failed"
+        );
+    }
+
+    function functionCallWithValue(
+        address target,
+        bytes memory data,
+        uint256 value,
+        string memory errorMessage
+    ) internal returns (bytes memory) {
         uint256 balance = address(this).balance;
         if (balance < value) {
             revert InsufficientBalanceForCall(balance, value);
@@ -64,10 +71,12 @@ library Address {
         return _functionCallWithValue(target, data, value, errorMessage);
     }
 
-    function _functionCallWithValue(address target, bytes memory data, uint256 weiValue, string memory errorMessage)
-        private
-        returns (bytes memory)
-    {
+    function _functionCallWithValue(
+        address target,
+        bytes memory data,
+        uint256 weiValue,
+        string memory errorMessage
+    ) private returns (bytes memory) {
         if (!(isContract(target))) {
             revert NonContractCall();
         }

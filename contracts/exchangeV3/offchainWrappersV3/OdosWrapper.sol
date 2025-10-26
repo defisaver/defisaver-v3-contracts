@@ -23,7 +23,12 @@ contract OdosWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData, Ad
 
     /// @notice Takes order from Odos and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    function takeOrder(ExchangeData memory _exData) public payable override returns (bool success, uint256) {
+    function takeOrder(ExchangeData memory _exData)
+        public
+        payable
+        override
+        returns (bool success, uint256)
+    {
         OdosCalldata memory odosCalldata = abi.decode(_exData.offchainData.callData, (OdosCalldata));
 
         // approve odos allowance contract

@@ -18,7 +18,9 @@ interface ICToken is IERC20 {
     function repayBorrow() external payable;
     function repayBorrowBehalf(address borrower, uint256 repayAmount) external returns (uint256);
     function repayBorrowBehalf(address borrower) external payable;
-    function liquidateBorrow(address borrower, uint256 repayAmount, address cTokenCollateral) external returns (uint256);
+    function liquidateBorrow(address borrower, uint256 repayAmount, address cTokenCollateral)
+        external
+        returns (uint256);
     function liquidateBorrow(address borrower, address cTokenCollateral) external payable;
     function exchangeRateCurrent() external returns (uint256);
     function supplyRatePerBlock() external returns (uint256);
@@ -30,6 +32,9 @@ interface ICToken is IERC20 {
     function getCash() external returns (uint256);
     function balanceOfUnderlying(address owner) external returns (uint256);
     function underlying() external returns (address);
-    function getAccountSnapshot(address account) external view returns (uint256, uint256, uint256, uint256);
+    function getAccountSnapshot(address account)
+        external
+        view
+        returns (uint256, uint256, uint256, uint256);
     function interestRateModel() external returns (InterestRateModel);
 }

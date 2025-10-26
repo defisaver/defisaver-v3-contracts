@@ -14,7 +14,8 @@ import { AdminAuth } from "../auth/AdminAuth.sol";
 /// @notice The trigger expects the price input to be scaled by 1e8.
 /// @notice This trigger also uses the user address to temporarily store the current ratio of user's position.
 contract CompV3PriceTrigger is ITrigger, AdminAuth, CompV3RatioHelper, TriggerHelper {
-    TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
+    TransientStorageCancun public constant tempStorage =
+        TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     enum PriceState {
         OVER,
@@ -40,7 +41,8 @@ contract CompV3PriceTrigger is ITrigger, AdminAuth, CompV3RatioHelper, TriggerHe
         uint256 currRatio = getSafetyRatio(triggerData.market, triggerData.user);
         tempStorage.setBytes32("COMP_RATIO", bytes32(currRatio));
 
-        address priceFeed = IComet(triggerData.market).getAssetInfoByAddress(triggerData.collToken).priceFeed;
+        address priceFeed =
+            IComet(triggerData.market).getAssetInfoByAddress(triggerData.collToken).priceFeed;
 
         // This will return the price of the collateral token in terms of base token scaled by 1e8
         uint256 currPrice = IComet(triggerData.market).getPrice(priceFeed);

@@ -104,7 +104,9 @@ import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
 import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
-import { ITxSaverBytesTransientStorage } from "../interfaces/core/ITxSaverBytesTransientStorage.sol";
+import {
+    ITxSaverBytesTransientStorage
+} from "../interfaces/core/ITxSaverBytesTransientStorage.sol";
 import { IStrategyStorage } from "../interfaces/core/IStrategyStorage.sol";
 import { IBundleStorage } from "../interfaces/core/IBundleStorage.sol";
 import { ISubStorage } from "../interfaces/core/ISubStorage.sol";
@@ -164,11 +166,10 @@ contract RecipeExecutor is
     /// @notice Called by TxSaverExecutor through safe wallet
     /// @param _currRecipe Recipe to be executed
     /// @param _txSaverData TxSaver data signed by user
-    function executeRecipeFromTxSaver(Recipe calldata _currRecipe, TxSaverSignedData calldata _txSaverData)
-        external
-        payable
-        override
-    {
+    function executeRecipeFromTxSaver(
+        Recipe calldata _currRecipe,
+        TxSaverSignedData calldata _txSaverData
+    ) external payable override {
         address txSaverExecutorAddr = registry.getAddr(DFSIds.TX_SAVER_EXECUTOR);
 
         // only TxSaverExecutor can call this function
@@ -239,14 +240,16 @@ contract RecipeExecutor is
 
             // fetch strategy if inside of bundle
             if (_sub.isBundle) {
-                strategyId = IBundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(strategyId, _strategyIndex);
+                strategyId =
+                    IBundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(strategyId, _strategyIndex);
             }
 
             strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
         }
 
         // check if all the triggers are true
-        (bool triggered, uint256 errIndex) = _checkTriggers(strategy, _sub, _triggerCallData, _subId, SUB_STORAGE_ADDR);
+        (bool triggered, uint256 errIndex) =
+            _checkTriggers(strategy, _sub, _triggerCallData, _subId, SUB_STORAGE_ADDR);
 
         if (!triggered) {
             revert TriggerNotActiveError(errIndex);
@@ -273,7 +276,11 @@ contract RecipeExecutor is
     /// @dev FL function must be the first action and repayment is done last
     /// @param _currRecipe Recipe to be executed
     /// @param _flAmount Result value from FL action
-    function executeActionsFromFL(Recipe calldata _currRecipe, bytes32 _flAmount) external payable override {
+    function executeActionsFromFL(Recipe calldata _currRecipe, bytes32 _flAmount)
+        external
+        payable
+        override
+    {
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
         returnValues[0] = _flAmount; // set the flash loan action as first return value
 
@@ -304,7 +311,8 @@ contract RecipeExecutor is
         for (i = 0; i < triggerIds.length; ++i) {
             triggerAddr = registry.getAddr(triggerIds[i]);
 
-            isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i]);
+            isTriggered =
+                ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i]);
 
             if (!isTriggered) return (false, i);
 
@@ -343,10 +351,11 @@ contract RecipeExecutor is
     /// @param _currRecipe Recipe to be executed
     /// @param _index Index of the action in the recipe array
     /// @param _returnValues Return values from previous actions
-    function _executeAction(Recipe memory _currRecipe, uint256 _index, bytes32[] memory _returnValues)
-        internal
-        returns (bytes32 response)
-    {
+    function _executeAction(
+        Recipe memory _currRecipe,
+        uint256 _index,
+        bytes32[] memory _returnValues
+    ) internal returns (bytes32 response) {
         address actionAddr = registry.getAddr(_currRecipe.actionIds[_index]);
 
         response = _delegateCallAndReturnBytes32(
@@ -367,9 +376,11 @@ contract RecipeExecutor is
     /// @param _currRecipe Recipe to be executed
     /// @param _flActionAddr Address of the flash loan action
     /// @param _returnValues An empty array of return values, because it's the first action
-    function _parseFLAndExecute(Recipe memory _currRecipe, address _flActionAddr, bytes32[] memory _returnValues)
-        internal
-    {
+    function _parseFLAndExecute(
+        Recipe memory _currRecipe,
+        address _flActionAddr,
+        bytes32[] memory _returnValues
+    ) internal {
         WalletType walletType = _getWalletType(address(this));
 
         _givePermissionTo(walletType, _flActionAddr);
@@ -383,7 +394,12 @@ contract RecipeExecutor is
 
         /// @dev FL action is called directly so that we can check who the msg.sender of FL is
         ActionBase(_flActionAddr)
-            .executeAction(_currRecipe.callData[0], _currRecipe.subData, _currRecipe.paramMapping[0], _returnValues);
+            .executeAction(
+                _currRecipe.callData[0],
+                _currRecipe.subData,
+                _currRecipe.paramMapping[0],
+                _returnValues
+            );
 
         _removePermissionFrom(walletType, _flActionAddr);
     }
@@ -394,10 +410,14 @@ contract RecipeExecutor is
         return ActionBase(_actionAddr).actionType() == uint8(ActionBase.ActionType.FL_ACTION);
     }
 
-    function _delegateCallAndReturnBytes32(address _target, bytes memory _data) internal returns (bytes32 response) {
+    function _delegateCallAndReturnBytes32(address _target, bytes memory _data)
+        internal
+        returns (bytes32 response)
+    {
         require(_target != address(0));
         assembly {
-            let succeeded := delegatecall(sub(gas(), 5000), _target, add(_data, 0x20), mload(_data), 0, 32)
+            let succeeded :=
+                delegatecall(sub(gas(), 5000), _target, add(_data, 0x20), mload(_data), 0, 32)
             response := mload(0)
             if iszero(succeeded) { revert(0, 0) }
         }

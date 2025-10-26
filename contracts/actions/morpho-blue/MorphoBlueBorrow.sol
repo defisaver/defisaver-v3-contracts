@@ -29,16 +29,22 @@ contract MorphoBlueBorrow is ActionBase, MorphoBlueHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.marketParams.loanToken =
-            _parseParamAddr(params.marketParams.loanToken, _paramMapping[0], _subData, _returnValues);
-        params.marketParams.collateralToken =
-            _parseParamAddr(params.marketParams.collateralToken, _paramMapping[1], _subData, _returnValues);
+        params.marketParams.loanToken = _parseParamAddr(
+            params.marketParams.loanToken, _paramMapping[0], _subData, _returnValues
+        );
+        params.marketParams.collateralToken = _parseParamAddr(
+            params.marketParams.collateralToken, _paramMapping[1], _subData, _returnValues
+        );
         params.marketParams.oracle =
             _parseParamAddr(params.marketParams.oracle, _paramMapping[2], _subData, _returnValues);
-        params.marketParams.irm = _parseParamAddr(params.marketParams.irm, _paramMapping[3], _subData, _returnValues);
-        params.marketParams.lltv = _parseParamUint(params.marketParams.lltv, _paramMapping[4], _subData, _returnValues);
-        params.borrowAmount = _parseParamUint(params.borrowAmount, _paramMapping[5], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[6], _subData, _returnValues);
+        params.marketParams.irm =
+            _parseParamAddr(params.marketParams.irm, _paramMapping[3], _subData, _returnValues);
+        params.marketParams.lltv =
+            _parseParamUint(params.marketParams.lltv, _paramMapping[4], _subData, _returnValues);
+        params.borrowAmount =
+            _parseParamUint(params.borrowAmount, _paramMapping[5], _subData, _returnValues);
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[6], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[7], _subData, _returnValues);
 
         (uint256 amount, bytes memory logData) = _borrow(params);
@@ -62,7 +68,9 @@ contract MorphoBlueBorrow is ActionBase, MorphoBlueHelper {
             _params.onBehalf = address(this);
         }
 
-        morphoBlue.borrow(_params.marketParams, _params.borrowAmount, 0, _params.onBehalf, _params.to);
+        morphoBlue.borrow(
+            _params.marketParams, _params.borrowAmount, 0, _params.onBehalf, _params.to
+        );
 
         bytes memory logData = abi.encode(_params);
 

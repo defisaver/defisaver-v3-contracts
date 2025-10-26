@@ -6,8 +6,12 @@ import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 import { SkyStakingEngineOpen } from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
 import { SkyStakingEngineStake } from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
-import { SkyStakingEngineUnstake } from "../../../contracts/actions/sky/SkyStakingEngineUnstake.sol";
-import { SkyStakingEngineSelectFarm } from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
+import {
+    SkyStakingEngineUnstake
+} from "../../../contracts/actions/sky/SkyStakingEngineUnstake.sol";
+import {
+    SkyStakingEngineSelectFarm
+} from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 
 import { ILockstakeEngine } from "../../../contracts/interfaces/protocols/sky/ILockstakeEngine.sol";
 import { IStakingRewards } from "../../../contracts/interfaces/protocols/sky/IStakingRewards.sol";
@@ -66,8 +70,9 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
 
         uint256 index = 0;
         // Execution logic
-        bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineUnstakeEncode(STAKING_ENGINE, index, AMOUNT, sender), true);
+        bytes memory executeActionCallData = executeActionCalldata(
+            skyStakingEngineUnstakeEncode(STAKING_ENGINE, index, AMOUNT, sender), true
+        );
 
         vm.expectRevert();
         wallet.execute(address(cut), executeActionCallData, 0);
@@ -80,11 +85,14 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
         uint256 index = 0;
 
         // Stake
-        executeSkyStakingEngineStake(STAKING_ENGINE, index, USDS_FARM, AMOUNT, sender, open, selectFarm, stake, wallet);
+        executeSkyStakingEngineStake(
+            STAKING_ENGINE, index, USDS_FARM, AMOUNT, sender, open, selectFarm, stake, wallet
+        );
 
         // Execution logic
-        bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineUnstakeEncode(STAKING_ENGINE, index, AMOUNT * 2, sender), _isDirect);
+        bytes memory executeActionCallData = executeActionCalldata(
+            skyStakingEngineUnstakeEncode(STAKING_ENGINE, index, AMOUNT * 2, sender), _isDirect
+        );
 
         vm.expectRevert();
         wallet.execute(address(cut), executeActionCallData, 0);
@@ -101,7 +109,9 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
         uint256 index = 0;
 
         // Stake
-        executeSkyStakingEngineStake(STAKING_ENGINE, index, USDS_FARM, AMOUNT, sender, open, selectFarm, stake, wallet);
+        executeSkyStakingEngineStake(
+            STAKING_ENGINE, index, USDS_FARM, AMOUNT, sender, open, selectFarm, stake, wallet
+        );
 
         // Variables for checks
         address urnAddr = ILockstakeEngine(STAKING_ENGINE).ownerUrns(walletAddr, index);
@@ -112,8 +122,9 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
         uint256 balanceUrnStakedLSSkyInFarmBefore = IStakingRewards(USDS_FARM).balanceOf(urnAddr); // should have AMOUNT
 
         // Execution logic
-        bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineUnstakeEncode(STAKING_ENGINE, index, AMOUNT, sender), _isDirect);
+        bytes memory executeActionCallData = executeActionCalldata(
+            skyStakingEngineUnstakeEncode(STAKING_ENGINE, index, AMOUNT, sender), _isDirect
+        );
         skip(365 days);
         vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
         emit ILockstakeEngine.Free(walletAddr, index, sender, AMOUNT, AMOUNT);

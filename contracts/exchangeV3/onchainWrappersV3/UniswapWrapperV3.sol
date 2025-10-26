@@ -34,7 +34,8 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
 
         /// @dev DFSExchangeCore contains slippage check instead of writing it here (minOutput = 1)
         /// @dev On-chain wrapper only used for simulations and strategies, in both cases we are ok with setting a dynamic timestamp
-        amounts = router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
+        amounts =
+            router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
 
         // cleanup tokens if anything left after sell
         uint256 amountLeft = IERC20(_srcAddr).balanceOf(address(this));

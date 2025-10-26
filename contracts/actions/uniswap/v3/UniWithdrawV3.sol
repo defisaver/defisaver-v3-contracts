@@ -40,8 +40,10 @@ contract UniWithdrawV3 is ActionBase, UniV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory uniData = parseInputs(_callData);
 
-        uniData.tokenId = _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
-        uniData.liquidity = uint128(_parseParamUint(uniData.liquidity, _paramMapping[1], _subData, _returnValues));
+        uniData.tokenId =
+            _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
+        uniData.liquidity =
+            uint128(_parseParamUint(uniData.liquidity, _paramMapping[1], _subData, _returnValues));
 
         (uint256 amount0,, bytes memory logData) = _uniWithdrawFromPosition(uniData);
         emit ActionEvent("UniWithdrawV3", logData);
@@ -77,8 +79,12 @@ contract UniWithdrawV3 is ActionBase, UniV3Helper {
 
     /// @dev Burns liquidity stated, amount0Min and amount1Min are the least you get for burning that liquidity (else reverted),
     /// @return amount0 returns how much tokens were added to tokensOwed on position
-    function _uniWithdraw(Params memory _uniData) internal returns (uint256 amount0, uint256 amount1) {
-        IUniswapV3NonfungiblePositionManager.DecreaseLiquidityParams memory decreaseLiquidityParams =
+    function _uniWithdraw(Params memory _uniData)
+        internal
+        returns (uint256 amount0, uint256 amount1)
+    {
+        IUniswapV3NonfungiblePositionManager.DecreaseLiquidityParams memory
+            decreaseLiquidityParams =
             IUniswapV3NonfungiblePositionManager.DecreaseLiquidityParams({
                 tokenId: _uniData.tokenId,
                 liquidity: _uniData.liquidity,
@@ -91,14 +97,17 @@ contract UniWithdrawV3 is ActionBase, UniV3Helper {
 
     /// @dev collects from tokensOwed on position, sends to recipient, up to amountMax
     /// @return amount0 amount sent to the recipient
-    function _uniCollect(Params memory _uniData) internal returns (uint256 amount0, uint256 amount1) {
-        IUniswapV3NonfungiblePositionManager.CollectParams memory collectParams =
-            IUniswapV3NonfungiblePositionManager.CollectParams({
-                tokenId: _uniData.tokenId,
-                recipient: _uniData.recipient,
-                amount0Max: _uniData.amount0Max,
-                amount1Max: _uniData.amount1Max
-            });
+    function _uniCollect(Params memory _uniData)
+        internal
+        returns (uint256 amount0, uint256 amount1)
+    {
+        IUniswapV3NonfungiblePositionManager.CollectParams memory
+            collectParams = IUniswapV3NonfungiblePositionManager.CollectParams({
+            tokenId: _uniData.tokenId,
+            recipient: _uniData.recipient,
+            amount0Max: _uniData.amount0Max,
+            amount1Max: _uniData.amount1Max
+        });
         (amount0, amount1) = positionManager.collect(collectParams);
     }
 

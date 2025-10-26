@@ -4,7 +4,9 @@ pragma solidity =0.8.24;
 
 import { MainnetLiquityV2Addresses } from "./MainnetLiquityV2Addresses.sol";
 import { ITroveManager } from "../../../interfaces/protocols/liquityV2/ITroveManager.sol";
-import { IBorrowerOperations } from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
+import {
+    IBorrowerOperations
+} from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
 import { IStabilityPool } from "../../../interfaces/protocols/liquityV2/IStabilityPool.sol";
 import { ISortedTroves } from "../../../interfaces/protocols/liquityV2/ISortedTroves.sol";
 import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
@@ -62,15 +64,23 @@ contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
     /// Where X is the estimated redemption amount for which all debt in front of the trove in its branch will be redeemed.
     function getDebtInFront(address _market, uint256 _trove) public view returns (uint256) {
         (uint256 ethTotalDebt, uint256 ethUnbackedDebt) = _getTotalAndUnbackedDebt(WETH_MARKET_ADDR);
-        (uint256 wstEthTotalDebt, uint256 wstEthUnbackedDebt) = _getTotalAndUnbackedDebt(WSTETH_MARKET_ADDR);
-        (uint256 rEthTotalDebt, uint256 rEthUnbackedDebt) = _getTotalAndUnbackedDebt(RETH_MARKET_ADDR);
+        (uint256 wstEthTotalDebt, uint256 wstEthUnbackedDebt) =
+            _getTotalAndUnbackedDebt(WSTETH_MARKET_ADDR);
+        (uint256 rEthTotalDebt, uint256 rEthUnbackedDebt) =
+            _getTotalAndUnbackedDebt(RETH_MARKET_ADDR);
 
         uint256 totalUnbackedDebt = ethUnbackedDebt + wstEthUnbackedDebt + rEthUnbackedDebt;
         uint256 totalDebt = ethTotalDebt + wstEthTotalDebt + rEthTotalDebt;
         uint256 branchDebtInFront = _getTroveDebtInFrontForCurrentBranch(_market, _trove);
 
         Markets memory markets = _getMarketsData(
-            _market, ethTotalDebt, ethUnbackedDebt, wstEthTotalDebt, wstEthUnbackedDebt, rEthTotalDebt, rEthUnbackedDebt
+            _market,
+            ethTotalDebt,
+            ethUnbackedDebt,
+            wstEthTotalDebt,
+            wstEthUnbackedDebt,
+            rEthTotalDebt,
+            rEthUnbackedDebt
         );
 
         // Sanity check to avoid division by 0. Highly unlikely to ever happen.
@@ -109,13 +119,15 @@ contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
                 markets,
                 false // isTotalUnbacked = false. Proportional to total debt
             );
-            uint256 redeemAmountFromSecondCall = branchDebtInFront + redemptionAmounts[0] + redemptionAmounts[1];
+            uint256 redeemAmountFromSecondCall =
+                branchDebtInFront + redemptionAmounts[0] + redemptionAmounts[1];
 
             return redeemAmountFromFirstCall + redeemAmountFromSecondCall;
         }
 
         // CASE 2: Current branch has unbacked debt
-        estimatedRedemptionAmount = branchDebtInFront * totalUnbackedDebt / markets.current.unbackedDebt;
+        estimatedRedemptionAmount =
+            branchDebtInFront * totalUnbackedDebt / markets.current.unbackedDebt;
         redemptionAmounts = _calculateRedemptionAmounts(
             estimatedRedemptionAmount,
             totalUnbackedDebt,
@@ -136,10 +148,13 @@ contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
     ) internal pure returns (uint256[] memory redemptionAmounts) {
         redemptionAmounts = new uint256[](2);
         for (uint256 i = 0; i < 2; ++i) {
-            uint256 branchProportion =
-                _isTotalUnbacked ? _markets.otherMarkets[i].unbackedDebt : _markets.otherMarkets[i].totalDebt;
-            redemptionAmounts[i] =
-                min(branchProportion * _estimatedRedemptionAmount / _total, _markets.otherMarkets[i].totalDebt);
+            uint256 branchProportion = _isTotalUnbacked
+                ? _markets.otherMarkets[i].unbackedDebt
+                : _markets.otherMarkets[i].totalDebt;
+            redemptionAmounts[i] = min(
+                branchProportion * _estimatedRedemptionAmount / _total,
+                _markets.otherMarkets[i].totalDebt
+            );
         }
     }
 
@@ -171,8 +186,13 @@ contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
         }
     }
 
-    function _getTroveTotalDebt(ITroveManager _troveManager, uint256 _troveId) internal view returns (uint256 debt) {
-        ITroveManager.LatestTroveData memory latestTroveData = _troveManager.getLatestTroveData(_troveId);
+    function _getTroveTotalDebt(ITroveManager _troveManager, uint256 _troveId)
+        internal
+        view
+        returns (uint256 debt)
+    {
+        ITroveManager.LatestTroveData memory latestTroveData =
+            _troveManager.getLatestTroveData(_troveId);
         debt = latestTroveData.entireDebt;
     }
 

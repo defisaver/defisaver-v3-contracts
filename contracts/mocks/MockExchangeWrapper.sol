@@ -18,11 +18,12 @@ contract MockExchangeWrapper is DSMath, IExchangeV3, AdminAuth {
     /// @param _srcAmount From amount
     /// @param _additionalData Route and swap params
     /// @return uint256 amount of tokens received from selling
-    function sell(address _srcAddr, address _destAddr, uint256 _srcAmount, bytes calldata _additionalData)
-        external
-        override
-        returns (uint256)
-    {
+    function sell(
+        address _srcAddr,
+        address _destAddr,
+        uint256 _srcAmount,
+        bytes calldata _additionalData
+    ) external override returns (uint256) {
         IERC20(_srcAddr).safeTransfer(address(this), _srcAmount);
 
         (uint256 rate) = abi.decode(_additionalData, (uint256));

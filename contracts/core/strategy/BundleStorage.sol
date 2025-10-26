@@ -33,12 +33,14 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper, IBundleStorage {
     /// @dev If the caller is not owner we do additional checks, we skip those checks for gas savings
     modifier sameTriggers(uint64[] memory _strategyIds) {
         if (msg.sender != adminVault.owner()) {
-            Strategy memory firstStrategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(_strategyIds[0]);
+            Strategy memory firstStrategy =
+                StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(_strategyIds[0]);
 
             bytes32 firstStrategyTriggerHash = keccak256(abi.encode(firstStrategy.triggerIds));
 
             for (uint256 i = 1; i < _strategyIds.length; ++i) {
-                Strategy memory s = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(_strategyIds[i]);
+                Strategy memory s =
+                    StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(_strategyIds[i]);
 
                 if (firstStrategyTriggerHash != keccak256(abi.encode(s.triggerIds))) {
                     revert DiffTriggersInBundle(_strategyIds);
@@ -76,7 +78,12 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper, IBundleStorage {
 
     ////////////////////////////// VIEW METHODS /////////////////////////////////
 
-    function getStrategyId(uint256 _bundleId, uint256 _strategyIndex) public view override returns (uint256) {
+    function getStrategyId(uint256 _bundleId, uint256 _strategyIndex)
+        public
+        view
+        override
+        returns (uint256)
+    {
         return bundles[_bundleId].strategyIds[_strategyIndex];
     }
 

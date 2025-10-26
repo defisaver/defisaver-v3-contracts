@@ -79,8 +79,13 @@ interface ISparkPool {
      * if he has been given credit delegation allowance
      *
      */
-    function borrow(address asset, uint256 amount, uint256 interestRateMode, uint16 referralCode, address onBehalfOf)
-        external;
+    function borrow(
+        address asset,
+        uint256 amount,
+        uint256 interestRateMode,
+        uint16 referralCode,
+        address onBehalfOf
+    ) external;
 
     /**
      * @notice Repays a borrowed `amount` on a specific reserve, burning the equivalent debt tokens owned
@@ -134,7 +139,9 @@ interface ISparkPool {
      * @return The final amount repaid
      *
      */
-    function repayWithATokens(address asset, uint256 amount, uint256 interestRateMode) external returns (uint256);
+    function repayWithATokens(address asset, uint256 amount, uint256 interestRateMode)
+        external
+        returns (uint256);
 
     /**
      * @notice Allows a borrower to swap his debt between stable and variable mode, or vice versa
@@ -150,7 +157,10 @@ interface ISparkPool {
      * @return The configuration of the reserve
      *
      */
-    function getConfiguration(address asset) external view returns (SparkDataTypes.ReserveConfigurationMap memory);
+    function getConfiguration(address asset)
+        external
+        view
+        returns (SparkDataTypes.ReserveConfigurationMap memory);
 
     /**
      * @notice Returns the configuration of the user across all the reserves
@@ -158,14 +168,20 @@ interface ISparkPool {
      * @return The configuration of the user
      *
      */
-    function getUserConfiguration(address user) external view returns (SparkDataTypes.UserConfigurationMap memory);
+    function getUserConfiguration(address user)
+        external
+        view
+        returns (SparkDataTypes.UserConfigurationMap memory);
 
     /**
      * @notice Returns the data of an eMode category
      * @param id The id of the category
      * @return The configuration data of the category
      */
-    function getEModeCategoryData(uint8 id) external view returns (SparkDataTypes.EModeCategory memory);
+    function getEModeCategoryData(uint8 id)
+        external
+        view
+        returns (SparkDataTypes.EModeCategory memory);
 
     /**
      * @notice Returns the list of the underlying assets of all the initialized reserves

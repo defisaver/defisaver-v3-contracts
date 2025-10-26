@@ -45,17 +45,24 @@ contract FluidDexWithdraw is ActionBase, FluidHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.nftId = _parseParamUint(params.nftId, _paramMapping[2], _subData, _returnValues);
 
-        params.withdrawAmount = _parseParamUint(params.withdrawAmount, _paramMapping[3], _subData, _returnValues);
-        params.withdrawVariableData.collAmount0 =
-            _parseParamUint(params.withdrawVariableData.collAmount0, _paramMapping[4], _subData, _returnValues);
-        params.withdrawVariableData.collAmount1 =
-            _parseParamUint(params.withdrawVariableData.collAmount1, _paramMapping[5], _subData, _returnValues);
-        params.withdrawVariableData.maxCollShares =
-            _parseParamUint(params.withdrawVariableData.maxCollShares, _paramMapping[6], _subData, _returnValues);
-        params.withdrawVariableData.minCollToWithdraw =
-            _parseParamUint(params.withdrawVariableData.minCollToWithdraw, _paramMapping[7], _subData, _returnValues);
+        params.withdrawAmount =
+            _parseParamUint(params.withdrawAmount, _paramMapping[3], _subData, _returnValues);
+        params.withdrawVariableData.collAmount0 = _parseParamUint(
+            params.withdrawVariableData.collAmount0, _paramMapping[4], _subData, _returnValues
+        );
+        params.withdrawVariableData.collAmount1 = _parseParamUint(
+            params.withdrawVariableData.collAmount1, _paramMapping[5], _subData, _returnValues
+        );
+        params.withdrawVariableData.maxCollShares = _parseParamUint(
+            params.withdrawVariableData.maxCollShares, _paramMapping[6], _subData, _returnValues
+        );
+        params.withdrawVariableData.minCollToWithdraw = _parseParamUint(
+            params.withdrawVariableData.minCollToWithdraw, _paramMapping[7], _subData, _returnValues
+        );
         params.wrapWithdrawnEth =
-            _parseParamUint(params.wrapWithdrawnEth ? 1 : 0, _paramMapping[8], _subData, _returnValues) == 1;
+            _parseParamUint(
+                    params.wrapWithdrawnEth ? 1 : 0, _paramMapping[8], _subData, _returnValues
+                ) == 1;
 
         (uint256 sharesBurnedOrTokenWithdrawn, bytes memory logData) = _withdraw(params);
         emit ActionEvent("FluidDexWithdraw", logData);

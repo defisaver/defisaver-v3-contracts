@@ -2,7 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
 import { ITroveManager } from "../../../contracts/interfaces/protocols/liquityV2/ITroveManager.sol";
 import { IHintHelpers } from "../../../contracts/interfaces/protocols/liquityV2/IHintHelpers.sol";
 import { IPriceFeed } from "../../../contracts/interfaces/protocols/liquityV2/IPriceFeed.sol";
@@ -146,17 +148,22 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
             address collToken = market.collToken();
             IHintHelpers hintHelpers = IHintHelpers(market.hintHelpers());
 
-            uint256 interestRate =
-                _config.interestRateManager != address(0) ? uint256(1e18 / 10) : _config.annualInterestRate;
+            uint256 interestRate = _config.interestRateManager != address(0)
+                ? uint256(1e18 / 10)
+                : _config.annualInterestRate;
 
-            (uint256 upperHint, uint256 lowerHint) = getInsertPosition(liquityV2View, markets[i], i, interestRate);
+            (uint256 upperHint, uint256 lowerHint) =
+                getInsertPosition(liquityV2View, markets[i], i, interestRate);
 
             uint256 collPriceWAD = IPriceFeed(market.priceFeed()).lastGoodPrice();
-            uint256 collAmount = amountInUSDPriceMock(collToken, _config.collateralAmountInUSD, collPriceWAD / 1e10);
+            uint256 collAmount =
+                amountInUSDPriceMock(collToken, _config.collateralAmountInUSD, collPriceWAD / 1e10);
             uint256 borrowAmount = amountInUSDPriceMock(BOLD, _config.borrowAmountInUSD, 1e8);
 
             uint256 predictMaxUpfrontFee = _config.interestRateManager != address(0)
-                ? hintHelpers.predictOpenTroveAndJoinBatchUpfrontFee(i, borrowAmount, _config.interestRateManager)
+                ? hintHelpers.predictOpenTroveAndJoinBatchUpfrontFee(
+                    i, borrowAmount, _config.interestRateManager
+                )
                 : hintHelpers.predictOpenTroveUpfrontFee(i, borrowAmount, interestRate);
 
             LiquityV2Open.Params memory params = LiquityV2Open.Params({
@@ -177,7 +184,11 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
         }
     }
 
-    function _open(LiquityV2Open.Params memory _params, TestConfig memory _config, address _collToken) internal {
+    function _open(
+        LiquityV2Open.Params memory _params,
+        TestConfig memory _config,
+        address _collToken
+    ) internal {
         if (_collToken == WETH) {
             if (_config.senderHasEnoughForCollAndGas) {
                 give(WETH, sender, _params.collAmount + ETH_GAS_COMPENSATION);
@@ -227,7 +238,10 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
         uint256 senderCollBalanceAfter = balanceOf(_collToken, sender);
 
         if (_collToken == WETH) {
-            assertEq(senderWethBalanceBefore - senderWethBalanceAfter, _params.collAmount + ETH_GAS_COMPENSATION);
+            assertEq(
+                senderWethBalanceBefore - senderWethBalanceAfter,
+                _params.collAmount + ETH_GAS_COMPENSATION
+            );
         } else {
             assertEq(senderCollBalanceBefore - senderCollBalanceAfter, _params.collAmount);
             assertEq(senderWethBalanceBefore - senderWethBalanceAfter, ETH_GAS_COMPENSATION);
@@ -235,7 +249,8 @@ contract TestLiquityV2Open is BaseTest, LiquityV2TestHelper, ActionsUtils {
 
         uint256 troveId = uint256(keccak256(abi.encode(walletAddr, walletAddr, 0)));
 
-        LiquityV2View.TroveData memory troveData = liquityV2View.getTroveInfo(_params.market, troveId);
+        LiquityV2View.TroveData memory troveData =
+            liquityV2View.getTroveInfo(_params.market, troveId);
 
         assertEq(uint256(troveData.status), uint256(ITroveManager.Status.active));
         assertEq(troveData.collAmount, _params.collAmount);

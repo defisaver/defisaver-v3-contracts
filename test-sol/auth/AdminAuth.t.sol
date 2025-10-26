@@ -30,7 +30,9 @@ contract TestCore_AdminAuth is AdminAuth, BaseTest {
         uint256 balanceBefore = address(this).balance;
 
         prank(Addresses.OWNER_ACC);
-        cut.withdrawStuckFunds(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, address(this), stuckAmount);
+        cut.withdrawStuckFunds(
+            0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, address(this), stuckAmount
+        );
 
         uint256 balanceAfter = address(this).balance;
 

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IMorphoTokenWrapper } from "../../interfaces/protocols/morpho-blue/IMorphoTokenWrapper.sol";
+import {
+    IMorphoTokenWrapper
+} from "../../interfaces/protocols/morpho-blue/IMorphoTokenWrapper.sol";
 
 import { ActionBase } from "../ActionBase.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";

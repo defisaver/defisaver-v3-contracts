@@ -6,8 +6,12 @@ import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { UtilAddresses } from "../addresses/UtilAddresses.sol";
 import { IFeedRegistry } from "../../interfaces/protocols/chainlink/IFeedRegistry.sol";
 import { Denominations } from "../Denominations.sol";
-import { ILendingPoolAddressesProviderV2 } from "../../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
-import { IPriceOracleGetterAave } from "../../interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
+import {
+    ILendingPoolAddressesProviderV2
+} from "../../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import {
+    IPriceOracleGetterAave
+} from "../../interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
 import { IAggregatorV3 } from "../../interfaces/protocols/chainlink/IAggregatorV3.sol";
 
 /// @title TokenPriceHelperL2 Fetches prices from chainlink/aave and formats tokens properly on L2
@@ -41,7 +45,8 @@ contract TokenPriceHelperL2 is DSMath, UtilAddresses {
         view
         returns (uint256, uint256 updateTimestamp)
     {
-        IAggregatorV3 aggregator = IAggregatorV3(feedRegistry.getFeed(_inputTokenAddr, Denominations.USD));
+        IAggregatorV3 aggregator =
+            IAggregatorV3(feedRegistry.getFeed(_inputTokenAddr, Denominations.USD));
 
         return getRoundInfo(_roundId, aggregator);
     }
@@ -107,7 +112,11 @@ contract TokenPriceHelperL2 is DSMath, UtilAddresses {
     }
 
     /// @dev If there's no ETH price feed returns 0
-    function getChainlinkPriceInETH(address _inputTokenAddr) public view returns (int256 chainlinkPriceInETH) {
+    function getChainlinkPriceInETH(address _inputTokenAddr)
+        public
+        view
+        returns (int256 chainlinkPriceInETH)
+    {
         try feedRegistry.latestRoundData(_inputTokenAddr, Denominations.ETH) returns (
             uint80, int256 answer, uint256, uint256, uint80
         ) {
@@ -129,7 +138,9 @@ contract TokenPriceHelperL2 is DSMath, UtilAddresses {
     function getAaveTokenPriceInUSD(address _tokenAddr) public view returns (uint256 price) {
         address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_MARKET).getPriceOracle();
 
-        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (uint256 tokenPrice) {
+        try IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(_tokenAddr) returns (
+            uint256 tokenPrice
+        ) {
             price = tokenPrice;
         } catch {
             price = 0;

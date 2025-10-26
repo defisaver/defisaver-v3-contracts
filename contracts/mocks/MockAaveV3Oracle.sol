@@ -17,7 +17,11 @@ contract MockAaveV3Oracle {
         return tokenFeeds[asset];
     }
 
-    function getAssetsPrices(address[] calldata assets) external view returns (uint256[] memory prices) {
+    function getAssetsPrices(address[] calldata assets)
+        external
+        view
+        returns (uint256[] memory prices)
+    {
         prices = new uint256[](assets.length);
         for (uint256 i = 0; i < assets.length; i++) {
             (, int256 price,,,) = IAggregatorV3(tokenFeeds[assets[i]]).latestRoundData();

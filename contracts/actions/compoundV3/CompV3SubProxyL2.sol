@@ -39,7 +39,12 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, S
         bool isEOA;
     }
 
-    constructor(uint64 _repayBundleId, uint64 _boostBundleId, uint64 _repayBundleEoaId, uint64 _boostBundleEoaId) {
+    constructor(
+        uint64 _repayBundleId,
+        uint64 _boostBundleId,
+        uint64 _repayBundleEoaId,
+        uint64 _boostBundleEoaId
+    ) {
         REPAY_BUNDLE_ID = _repayBundleId;
         BOOST_BUNDLE_ID = _boostBundleId;
         REPAY_BUNDLE_EOA_ID = _repayBundleEoaId;
@@ -177,7 +182,8 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, S
         address user = _subData.isEOA ? _eoa : _wallet;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(user, _subData.market, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData =
+            abi.encode(user, _subData.market, uint256(_subData.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
@@ -188,7 +194,11 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, S
         boostSub.subData[3] = bytes32(uint256(_subData.targetRatioBoost)); // targetRatio
     }
 
-    function parseSubData(bytes calldata _encodedInput) public pure returns (CompV3SubData memory sub) {
+    function parseSubData(bytes calldata _encodedInput)
+        public
+        pure
+        returns (CompV3SubData memory sub)
+    {
         sub.market = address(bytes20(_encodedInput[0:20]));
         sub.baseToken = address(bytes20(_encodedInput[20:40]));
         sub.minRatio = uint128(bytes16(_encodedInput[40:56]));
@@ -199,7 +209,11 @@ contract CompV3SubProxyL2 is StrategyModel, AdminAuth, CoreHelper, Permission, S
         sub.isEOA = (bytes1(_encodedInput[105:106])) != bytes1(0x00); // compare to get bool
     }
 
-    function parseSubIds(bytes calldata _encodedInput) public pure returns (uint32 subId1, uint32 subId2) {
+    function parseSubIds(bytes calldata _encodedInput)
+        public
+        pure
+        returns (uint32 subId1, uint32 subId2)
+    {
         subId1 = uint32(bytes4(_encodedInput[0:4]));
         subId2 = uint32(bytes4(_encodedInput[4:8]));
     }

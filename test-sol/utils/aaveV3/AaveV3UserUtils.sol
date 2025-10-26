@@ -21,7 +21,8 @@ contract AaveV3UserUtils is UserWallet {
             boostEnabled: true
         });
 
-        bytes memory fnData = abi.encodeWithSignature("subToAaveAutomation(bytes)", encodeSubData(params));
+        bytes memory fnData =
+            abi.encodeWithSignature("subToAaveAutomation(bytes)", encodeSubData(params));
 
         executeWithWallet(_isSafe, _subProxy, fnData, 0);
     }
@@ -29,7 +30,11 @@ contract AaveV3UserUtils is UserWallet {
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function encodeSubData(AaveV3SubProxy.AaveSubData memory user) public pure returns (bytes memory) {
+    function encodeSubData(AaveV3SubProxy.AaveSubData memory user)
+        public
+        pure
+        returns (bytes memory)
+    {
         return abi.encodePacked(
             bytes16(uint128(user.minRatio)),
             bytes16(uint128(user.maxRatio)),

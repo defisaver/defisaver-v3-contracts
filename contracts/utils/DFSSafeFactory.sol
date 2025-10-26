@@ -50,10 +50,10 @@ contract DFSSafeFactory {
         }
     }
 
-    function createSafeAndExecute(SafeCreationData memory _creationData, SafeExecutionData memory _executionData)
-        public
-        payable
-    {
+    function createSafeAndExecute(
+        SafeCreationData memory _creationData,
+        SafeExecutionData memory _executionData
+    ) public payable {
         ISafe createdSafe = ISafe(
             safeFactory.createProxyWithNonce(
                 _creationData.singleton, _creationData.initializer, _creationData.saltNonce

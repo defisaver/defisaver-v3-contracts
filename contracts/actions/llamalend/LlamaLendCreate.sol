@@ -4,7 +4,9 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { LlamaLendHelper } from "./helpers/LlamaLendHelper.sol";
-import { ILlamaLendController } from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import {
+    ILlamaLendController
+} from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 
 /// @title Action that creates a llamalend position on behalf of user's wallet
 /// @dev both collateralAmount and debtAmount must be non-zero
@@ -35,11 +37,14 @@ contract LlamaLendCreate is ActionBase, LlamaLendHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
-        params.collateralAmount = _parseParamUint(params.collateralAmount, _paramMapping[3], _subData, _returnValues);
-        params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[4], _subData, _returnValues);
+        params.collateralAmount =
+            _parseParamUint(params.collateralAmount, _paramMapping[3], _subData, _returnValues);
+        params.debtAmount =
+            _parseParamUint(params.debtAmount, _paramMapping[4], _subData, _returnValues);
         params.nBands = _parseParamUint(params.nBands, _paramMapping[5], _subData, _returnValues);
 
         (uint256 generatedAmount, bytes memory logData) = _llamaLendCreate(params);
@@ -65,7 +70,8 @@ contract LlamaLendCreate is ActionBase, LlamaLendHelper {
     function _llamaLendCreate(Params memory _params) internal returns (uint256, bytes memory) {
         address collateralAsset = ILlamaLendController(_params.controllerAddress).collateral_token();
         address debtAsset = ILlamaLendController(_params.controllerAddress).borrowed_token();
-        _params.collateralAmount = collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);
+        _params.collateralAmount =
+            collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);
         collateralAsset.approveToken(_params.controllerAddress, _params.collateralAmount);
 
         ILlamaLendController(_params.controllerAddress)

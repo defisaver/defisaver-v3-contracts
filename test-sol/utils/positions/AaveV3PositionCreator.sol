@@ -53,7 +53,9 @@ contract AaveV3PositionCreator is AaveV3ExecuteActions, AaveV3Helper, CommonPosi
             onBehalf: address(0)
         });
 
-        executeAaveV3Supply(supplyParams, _params.collAddr, _wallet, false, address(new AaveV3Supply()));
+        executeAaveV3Supply(
+            supplyParams, _params.collAddr, _wallet, false, address(new AaveV3Supply())
+        );
         executeAaveV3Borrow(borrowParams, _wallet, false, address(new AaveV3Borrow()));
     }
 }

@@ -4,7 +4,9 @@ pragma solidity =0.8.24;
 
 import { IEVC } from "../../../contracts/interfaces/protocols/eulerV2/IEVC.sol";
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
-import { EulerV2CollateralSwitch } from "../../../contracts/actions/eulerV2/EulerV2CollateralSwitch.sol";
+import {
+    EulerV2CollateralSwitch
+} from "../../../contracts/actions/eulerV2/EulerV2CollateralSwitch.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
@@ -89,9 +91,12 @@ contract TestEulerV2CollateralSwitch is EulerV2TestHelper {
         _baseTest(account, collateralVault, enableAsColl, isDirect);
     }
 
-    function _baseTest(address _account, address _vault, bool _enableAsColl, bool _isDirect) internal {
-        bytes memory executeActionCallData =
-            executeActionCalldata(eulerV2CollateralSwitchEncode(_vault, _account, _enableAsColl), _isDirect);
+    function _baseTest(address _account, address _vault, bool _enableAsColl, bool _isDirect)
+        internal
+    {
+        bytes memory executeActionCallData = executeActionCalldata(
+            eulerV2CollateralSwitchEncode(_vault, _account, _enableAsColl), _isDirect
+        );
 
         address account = _account == address(0) ? walletAddr : _account;
 

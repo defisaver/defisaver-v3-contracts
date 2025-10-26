@@ -33,11 +33,13 @@ contract EtherFiStake is ActionBase, EtherFiHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
         inputData.shouldWrap =
-            _parseParamUint(inputData.shouldWrap ? 1 : 0, _paramMapping[3], _subData, _returnValues) == 1;
+            _parseParamUint(inputData.shouldWrap ? 1 : 0, _paramMapping[3], _subData, _returnValues)
+                == 1;
 
         (uint256 receivedAmount, bytes memory logData) = _etherFiStake(inputData);
         emit ActionEvent("EtherFiStake", logData);
@@ -67,8 +69,12 @@ contract EtherFiStake is ActionBase, EtherFiHelper {
     // 4. Receives eETH
     // 5. If shouldWrap is true, wraps eETH to weETH
     // 6. Sends tokens to target address
-    function _etherFiStake(Params memory _inputData) internal returns (uint256 receivedAmount, bytes memory logData) {
-        _inputData.amount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
+    function _etherFiStake(Params memory _inputData)
+        internal
+        returns (uint256 receivedAmount, bytes memory logData)
+    {
+        _inputData.amount =
+            TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
 
         TokenUtils.withdrawWeth(_inputData.amount);
 

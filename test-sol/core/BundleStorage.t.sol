@@ -57,7 +57,11 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
         address sender = address(this);
         uint64[] memory dummyStrategyIds = new uint64[](2);
 
-        vm.expectRevert(abi.encodeWithSelector(BundleStorage.NoAuthToCreateBundle.selector, sender, openToPublic));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                BundleStorage.NoAuthToCreateBundle.selector, sender, openToPublic
+            )
+        );
         cut.createBundle(dummyStrategyIds);
     }
 
@@ -152,7 +156,10 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _assertBundles(StrategyModel.StrategyBundle[] memory _fetchedBundles, uint256 _realSize) internal pure {
+    function _assertBundles(
+        StrategyModel.StrategyBundle[] memory _fetchedBundles,
+        uint256 _realSize
+    ) internal pure {
         for (uint256 i = 0; i < _realSize; ++i) {
             assertEq(_fetchedBundles[i].creator, Addresses.OWNER_ACC);
             assertEq(_fetchedBundles[i].strategyIds.length, 2);
@@ -201,7 +208,10 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
         cut.changeEditPermission(_isOpenToPublic);
     }
 
-    function _add_dummy_strategies() internal returns (uint256 firstId, uint256 secondId, uint256 thirdId) {
+    function _add_dummy_strategies()
+        internal
+        returns (uint256 firstId, uint256 secondId, uint256 thirdId)
+    {
         bytes4[] memory triggersForFirstAndSecondStrategy = new bytes4[](2);
         triggersForFirstAndSecondStrategy[0] = bytes4(keccak256("First"));
         triggersForFirstAndSecondStrategy[1] = bytes4(keccak256("Second"));
@@ -217,7 +227,9 @@ contract TestCore_BundleStorage is BaseTest, CoreHelper {
         secondId = strategyStorage.createStrategy(
             "Second", triggersForFirstAndSecondStrategy, actionsIds, paramMapping, continuous
         );
-        thirdId = strategyStorage.createStrategy("Third", new bytes4[](0), actionsIds, paramMapping, continuous);
+        thirdId = strategyStorage.createStrategy(
+            "Third", new bytes4[](0), actionsIds, paramMapping, continuous
+        );
         stopPrank();
     }
 }

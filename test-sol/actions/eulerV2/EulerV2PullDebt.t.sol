@@ -237,7 +237,8 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
             : amountInUSDPrice(IEVault(_vault).asset(), _config.pullDebtAmountInUsd);
 
         bytes memory callData = executeActionCalldata(
-            eulerV2PullDebtEncode(_vault, _config.account, _config.from, pullDebtAmount), _config.isDirect
+            eulerV2PullDebtEncode(_vault, _config.account, _config.from, pullDebtAmount),
+            _config.isDirect
         );
 
         address account = _config.account == address(0) ? accountWalletAddr : _config.account;

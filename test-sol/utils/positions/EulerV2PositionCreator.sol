@@ -12,7 +12,11 @@ import { SmartWallet } from "../SmartWallet.sol";
 contract EulerV2PositionCreator is EulerV2ExecuteActions, CommonPositionCreator {
     function setUp() public virtual override { }
 
-    function createEulerV2Position(PositionParams memory _params, SmartWallet _wallet, address eulerAccount) public {
+    function createEulerV2Position(
+        PositionParams memory _params,
+        SmartWallet _wallet,
+        address eulerAccount
+    ) public {
         address account = eulerAccount == address(0) ? _wallet.walletAddr() : eulerAccount;
 
         EulerV2Supply.Params memory supplyParams = EulerV2Supply.Params({
@@ -24,7 +28,10 @@ contract EulerV2PositionCreator is EulerV2ExecuteActions, CommonPositionCreator 
         });
 
         EulerV2Borrow.Params memory borrowParams = EulerV2Borrow.Params({
-            vault: _params.debtAddr, account: account, receiver: _wallet.owner(), amount: _params.debtAmount
+            vault: _params.debtAddr,
+            account: account,
+            receiver: _wallet.owner(),
+            amount: _params.debtAmount
         });
 
         executeEulerV2Supply(supplyParams, _wallet, false, address(new EulerV2Supply()));

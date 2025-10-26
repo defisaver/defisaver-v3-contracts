@@ -18,20 +18,30 @@ interface IBorrowerOperations {
     event LQTYStakingAddressChanged(address _lqtyStakingAddress);
 
     event TroveCreated(address indexed _borrower, uint256 arrayIndex);
-    event TroveUpdated(address indexed _borrower, uint256 _debt, uint256 _coll, uint256 stake, uint8 operation);
+    event TroveUpdated(
+        address indexed _borrower, uint256 _debt, uint256 _coll, uint256 stake, uint8 operation
+    );
     event LUSDBorrowingFeePaid(address indexed _borrower, uint256 _LUSDFee);
 
     // --- Functions ---
 
-    function openTrove(uint256 _maxFee, uint256 _LUSDAmount, address _upperHint, address _lowerHint) external payable;
+    function openTrove(
+        uint256 _maxFee,
+        uint256 _LUSDAmount,
+        address _upperHint,
+        address _lowerHint
+    ) external payable;
 
     function addColl(address _upperHint, address _lowerHint) external payable;
 
-    function moveETHGainToTrove(address _user, address _upperHint, address _lowerHint) external payable;
+    function moveETHGainToTrove(address _user, address _upperHint, address _lowerHint)
+        external
+        payable;
 
     function withdrawColl(uint256 _amount, address _upperHint, address _lowerHint) external;
 
-    function withdrawLUSD(uint256 _maxFee, uint256 _amount, address _upperHint, address _lowerHint) external;
+    function withdrawLUSD(uint256 _maxFee, uint256 _amount, address _upperHint, address _lowerHint)
+        external;
 
     function repayLUSD(uint256 _amount, address _upperHint, address _lowerHint) external;
 

@@ -50,7 +50,10 @@ contract AaveClaimAAVE is ActionBase, AaveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Claims AAVE reward from stkAave token
-    function _aaveClaimAAVE(Params memory _params) internal returns (uint256 claimedAmount, bytes memory logData) {
+    function _aaveClaimAAVE(Params memory _params)
+        internal
+        returns (uint256 claimedAmount, bytes memory logData)
+    {
         uint256 startingBalance = AAVE_TOKEN_ADDR.getBalance(_params.to);
         IStkAave(STAKED_TOKEN_ADDR).claimRewards(_params.to, _params.amount);
         claimedAmount = AAVE_TOKEN_ADDR.getBalance(_params.to) - startingBalance;

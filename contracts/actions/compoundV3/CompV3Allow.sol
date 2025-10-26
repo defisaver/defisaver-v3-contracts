@@ -28,9 +28,12 @@ contract CompV3Allow is ActionBase, CompV3Helper {
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.manager = _parseParamAddr(params.manager, _paramMapping[1], _subData, _returnValues);
-        params.isAllowed = _parseParamUint(params.isAllowed ? 1 : 0, _paramMapping[2], _subData, _returnValues) == 1;
+        params.isAllowed =
+            _parseParamUint(params.isAllowed ? 1 : 0, _paramMapping[2], _subData, _returnValues)
+                == 1;
 
-        (bool isAllowed, bytes memory logData) = _allow(params.market, params.manager, params.isAllowed);
+        (bool isAllowed, bytes memory logData) =
+            _allow(params.market, params.manager, params.isAllowed);
         emit ActionEvent("CompV3Allow", logData);
         return bytes32(uint256(isAllowed ? 1 : 0));
     }
@@ -52,7 +55,10 @@ contract CompV3Allow is ActionBase, CompV3Helper {
     /// @param _market Main Comet proxy contract that is different for each compound market
     /// @param _manager Address of manager
     /// @param _isAllowed True for allow, false for disallow
-    function _allow(address _market, address _manager, bool _isAllowed) internal returns (bool, bytes memory) {
+    function _allow(address _market, address _manager, bool _isAllowed)
+        internal
+        returns (bool, bytes memory)
+    {
         IComet(_market).allow(_manager, _isAllowed);
 
         bytes memory logData = abi.encode(_market, _manager, _isAllowed);

@@ -28,12 +28,16 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
     /// @param _walletType Type of the wallet used
     /// @param _currRecipe Recipe to be executed
     /// @param _paybackAmount Payback flashloan amount including fees
-    function _executeRecipe(address _wallet, WalletType _walletType, Recipe memory _currRecipe, uint256 _paybackAmount)
-        internal
-    {
+    function _executeRecipe(
+        address _wallet,
+        WalletType _walletType,
+        Recipe memory _currRecipe,
+        uint256 _paybackAmount
+    ) internal {
         address target = IDFSRegistry(DFS_REGISTRY_ADDR).getAddr(DFSIds.RECIPE_EXECUTOR);
-        bytes memory data =
-            abi.encodeWithSelector(IRecipeExecutor.executeActionsFromFL.selector, _currRecipe, _paybackAmount);
+        bytes memory data = abi.encodeWithSelector(
+            IRecipeExecutor.executeActionsFromFL.selector, _currRecipe, _paybackAmount
+        );
 
         if (_walletType == WalletType.DSPROXY) {
             IDSProxy(_wallet).execute{ value: address(this).balance }(target, data);
@@ -54,8 +58,10 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
         }
 
         // Otherwise, we assume we are in context of Safe
-        bool success =
-            ISafe(_wallet).execTransactionFromModule(target, address(this).balance, data, ISafe.Operation.DelegateCall);
+        bool success = ISafe(_wallet)
+            .execTransactionFromModule(
+                target, address(this).balance, data, ISafe.Operation.DelegateCall
+            );
 
         if (!success) {
             revert SafeExecutionError();

@@ -29,7 +29,11 @@ contract OffchainPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
 
     TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
 
-    function isTriggered(bytes memory _callData, bytes memory _subData) external override returns (bool) {
+    function isTriggered(bytes memory _callData, bytes memory _subData)
+        external
+        override
+        returns (bool)
+    {
         SubParams memory triggerSubData = parseSubInputs(_subData);
         CallParams memory callParams = parseCallInputs(_callData);
 
@@ -70,7 +74,11 @@ contract OffchainPriceTrigger is ITrigger, AdminAuth, TriggerHelper {
         params = abi.decode(_subData, (SubParams));
     }
 
-    function parseCallInputs(bytes memory _callData) internal pure returns (CallParams memory params) {
+    function parseCallInputs(bytes memory _callData)
+        internal
+        pure
+        returns (CallParams memory params)
+    {
         params = abi.decode(_callData, (CallParams));
     }
 }

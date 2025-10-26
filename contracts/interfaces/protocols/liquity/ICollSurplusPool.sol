@@ -13,8 +13,11 @@ interface ICollSurplusPool {
 
     // --- Contract setters ---
 
-    function setAddresses(address _borrowerOperationsAddress, address _troveManagerAddress, address _activePoolAddress)
-        external;
+    function setAddresses(
+        address _borrowerOperationsAddress,
+        address _troveManagerAddress,
+        address _activePoolAddress
+    ) external;
 
     function getETH() external view returns (uint256);
 

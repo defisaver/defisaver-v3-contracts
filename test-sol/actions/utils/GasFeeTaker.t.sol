@@ -4,7 +4,9 @@ pragma solidity =0.8.24;
 import {
     ILendingPoolAddressesProviderV2
 } from "../../../contracts/interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
-import { IPriceOracleGetterAave } from "../../../contracts/interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
+import {
+    IPriceOracleGetterAave
+} from "../../../contracts/interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
 import { GasFeeTaker } from "../../../contracts/actions/fee/GasFeeTaker.sol";
 
 import { BaseTest } from "../../utils/BaseTest.sol";
@@ -50,7 +52,8 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker {
     function testWBTCPrice() public view {
         uint256 price = cut.getPriceInETH(wbtc);
 
-        address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
+        address priceOracleAddress =
+            ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
 
         uint256 aavePrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(wbtc);
 
@@ -61,7 +64,8 @@ contract TestGasFeeTaker is BaseTest, GasFeeTaker {
     function testDaiPrice() public view {
         uint256 price = cut.getPriceInETH(DAI_ADDR);
 
-        address priceOracleAddress = ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
+        address priceOracleAddress =
+            ILendingPoolAddressesProviderV2(AAVE_V2_MARKET).getPriceOracle();
 
         uint256 aavePrice = IPriceOracleGetterAave(priceOracleAddress).getAssetPrice(DAI_ADDR);
 

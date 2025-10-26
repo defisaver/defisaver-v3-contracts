@@ -119,7 +119,11 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
         return address(IJoin(_joinAddr).gem());
     }
 
-    function getUrnAndIlk(address _mcdManager, uint256 _vaultId) public view returns (address urn, bytes32 ilk) {
+    function getUrnAndIlk(address _mcdManager, uint256 _vaultId)
+        public
+        view
+        returns (address urn, bytes32 ilk)
+    {
         if (_mcdManager == CROPPER) {
             address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
             urn = ICropper(CROPPER).proxy(owner);
@@ -134,7 +138,11 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
-    function getCdpInfo(IManager _manager, uint256 _cdpId, bytes32 _ilk) public view returns (uint256, uint256) {
+    function getCdpInfo(IManager _manager, uint256 _cdpId, bytes32 _ilk)
+        public
+        view
+        returns (uint256, uint256)
+    {
         address urn;
 
         if (address(_manager) == CROPPER) {

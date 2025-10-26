@@ -14,7 +14,12 @@ interface IComptroller {
     function compSupplySpeeds(address) external view returns (uint256);
     function claimComp(address holder) external;
     function claimComp(address holder, address[] memory cTokens) external;
-    function claimComp(address[] memory holders, address[] memory cTokens, bool borrowers, bool suppliers) external;
+    function claimComp(
+        address[] memory holders,
+        address[] memory cTokens,
+        bool borrowers,
+        bool suppliers
+    ) external;
     function compSupplyState(address) external view returns (CompMarketState memory);
     function compSupplierIndex(address, address) external view returns (uint256);
     function compAccrued(address) external view returns (uint256);

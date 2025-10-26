@@ -34,7 +34,12 @@ contract StrategyExecutorL2 is StrategyExecutorCommon {
 
         // execute actions
         _callActions(
-            _subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub, address(storedSubData.walletAddr)
+            _subId,
+            _actionsCallData,
+            _triggerCallData,
+            _strategyIndex,
+            _sub,
+            address(storedSubData.walletAddr)
         );
     }
 }

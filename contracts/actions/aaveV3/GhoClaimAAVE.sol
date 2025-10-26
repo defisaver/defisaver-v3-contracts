@@ -51,7 +51,10 @@ contract GhoClaimAAVE is ActionBase, AaveV3Helper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Claims AAVE reward from stkGHO token.
-    function _ghoClaimAAVE(Params memory _params) internal returns (uint256 claimedAmount, bytes memory logData) {
+    function _ghoClaimAAVE(Params memory _params)
+        internal
+        returns (uint256 claimedAmount, bytes memory logData)
+    {
         uint256 startingBalance = AAVE_GOV_TOKEN.getBalance(_params.to);
         IStkAave(STAKED_GHO_TOKEN).claimRewards(_params.to, _params.amount);
         claimedAmount = AAVE_GOV_TOKEN.getBalance(_params.to) - startingBalance;

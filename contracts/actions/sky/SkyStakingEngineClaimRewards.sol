@@ -30,7 +30,8 @@ contract SkyStakingEngineClaimRewards is ActionBase, SkyHelper {
 
         inputData.stakingContract =
             _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
-        inputData.index = _parseParamUint(inputData.index, _paramMapping[1], _subData, _returnValues);
+        inputData.index =
+            _parseParamUint(inputData.index, _paramMapping[1], _subData, _returnValues);
         inputData.farm = _parseParamAddr(inputData.farm, _paramMapping[2], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[3], _subData, _returnValues);
 
@@ -53,7 +54,10 @@ contract SkyStakingEngineClaimRewards is ActionBase, SkyHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _skyStakingEngineClaimRewards(Params memory _inputData) internal returns (uint256, bytes memory logData) {
+    function _skyStakingEngineClaimRewards(Params memory _inputData)
+        internal
+        returns (uint256, bytes memory logData)
+    {
         uint256 amount = ILockstakeEngine(_inputData.stakingContract)
             .getReward(address(this), _inputData.index, _inputData.farm, _inputData.to);
 

@@ -16,7 +16,13 @@ import { IERC20 } from "../interfaces/token/IERC20.sol";
 import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
 
-contract DFSExchangeCore is DSMath, DFSExchangeHelper, DFSExchangeData, ExchangeHelper, StrategyModel {
+contract DFSExchangeCore is
+    DSMath,
+    DFSExchangeHelper,
+    DFSExchangeData,
+    ExchangeHelper,
+    StrategyModel
+{
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
@@ -25,12 +31,16 @@ contract DFSExchangeCore is DSMath, DFSExchangeHelper, DFSExchangeData, Exchange
 
     ExchangeAggregatorRegistry internal constant exchangeAggRegistry =
         ExchangeAggregatorRegistry(EXCHANGE_AGGREGATOR_REGISTRY_ADDR);
-    WrapperExchangeRegistry internal constant wrapperRegistry = WrapperExchangeRegistry(WRAPPER_EXCHANGE_REGISTRY);
+    WrapperExchangeRegistry internal constant wrapperRegistry =
+        WrapperExchangeRegistry(WRAPPER_EXCHANGE_REGISTRY);
 
     /// @notice Internal method that performs a sell on offchain aggregator/on-chain
     /// @dev Useful for other DFS contract to integrate for exchanging
     /// @param exData Exchange data struct
-    function _sell(ExchangeData memory exData) internal returns (address wrapperAddress, uint256 destAmount) {
+    function _sell(ExchangeData memory exData)
+        internal
+        returns (address wrapperAddress, uint256 destAmount)
+    {
         (wrapperAddress, destAmount,) = _sell(exData, address(this));
     }
 
@@ -38,7 +48,10 @@ contract DFSExchangeCore is DSMath, DFSExchangeHelper, DFSExchangeData, Exchange
     /// @dev Useful for other DFS contract to integrate for exchanging
     /// @param exData Exchange data struct
     /// @return (address, uint, bool) Address of the wrapper used and destAmount and if there was fee
-    function _sell(ExchangeData memory exData, address smartWallet) internal returns (address, uint256, bool) {
+    function _sell(ExchangeData memory exData, address smartWallet)
+        internal
+        returns (address, uint256, bool)
+    {
         uint256 amountWithoutFee = exData.srcAmount;
         uint256 destBalanceBefore = exData.destAddr.getBalance(address(this));
 
@@ -96,8 +109,10 @@ contract DFSExchangeCore is DSMath, DFSExchangeHelper, DFSExchangeData, Exchange
 
     function _takeDfsExchangeFee(ExchangeData memory exData, address smartWallet) internal {
         if (exData.dfsFeeDivider != 0) {
-            exData.srcAmount =
-                sub(exData.srcAmount, getFee(exData.srcAmount, smartWallet, exData.srcAddr, exData.dfsFeeDivider));
+            exData.srcAmount = sub(
+                exData.srcAmount,
+                getFee(exData.srcAmount, smartWallet, exData.srcAddr, exData.dfsFeeDivider)
+            );
         }
     }
 

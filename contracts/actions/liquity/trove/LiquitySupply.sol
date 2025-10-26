@@ -30,7 +30,8 @@ contract LiquitySupply is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[0], _subData, _returnValues);
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
 
         (uint256 suppliedAmount, bytes memory logData) = _liquitySupply(params);
@@ -61,7 +62,9 @@ contract LiquitySupply is ActionBase, LiquityHelper {
         TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.collAmount);
         TokenUtils.withdrawWeth(_params.collAmount);
 
-        BorrowerOperations.addColl{ value: _params.collAmount }(_params.upperHint, _params.lowerHint);
+        BorrowerOperations.addColl{ value: _params.collAmount }(
+            _params.upperHint, _params.lowerHint
+        );
 
         bytes memory logData = abi.encode(_params.collAmount, _params.from);
         return (_params.collAmount, logData);

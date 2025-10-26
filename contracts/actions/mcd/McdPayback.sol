@@ -33,10 +33,13 @@ contract McdPayback is ActionBase, McdHelper {
         bytes32[] memory _returnValues
     ) public payable override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
-        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.vaultId =
+            _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[2], _subData, _returnValues);
-        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[3], _subData, _returnValues);
+        inputData.mcdManager =
+            _parseParamAddr(inputData.mcdManager, _paramMapping[3], _subData, _returnValues);
 
         bytes memory logData = _mcdPayback(inputData);
         emit ActionEvent("McdPayback", logData);
@@ -78,17 +81,25 @@ contract McdPayback is ActionBase, McdHelper {
         logData = abi.encode(_inputData, debt);
     }
 
-    function _mcdManagerPayback(IManager _mcdManager, uint256 _vaultId, address _urn, bytes32 _ilk, uint256 _amount)
-        internal
-    {
+    function _mcdManagerPayback(
+        IManager _mcdManager,
+        uint256 _vaultId,
+        address _urn,
+        bytes32 _ilk,
+        uint256 _amount
+    ) internal {
         IDaiJoin(DAI_JOIN_ADDR).join(_urn, _amount);
 
         uint256 daiVatBalance = vat.dai(_urn);
 
-        _mcdManager.frob(_vaultId, 0, normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk));
+        _mcdManager.frob(
+            _vaultId, 0, normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk)
+        );
     }
 
-    function _cropperPayback(uint256 _vaultId, address _urn, bytes32 _ilk, uint256 _amount) internal {
+    function _cropperPayback(uint256 _vaultId, address _urn, bytes32 _ilk, uint256 _amount)
+        internal
+    {
         address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
         IDaiJoin(DAI_JOIN_ADDR).join(owner, _amount);
 
@@ -98,7 +109,14 @@ contract McdPayback is ActionBase, McdHelper {
         vat.hope(CROPPER);
         // Paybacks debt to the CDP
         ICropper(CROPPER)
-            .frob(_ilk, owner, owner, owner, 0, normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk));
+            .frob(
+                _ilk,
+                owner,
+                owner,
+                owner,
+                0,
+                normalizePaybackAmount(address(vat), daiVatBalance, _urn, _ilk)
+            );
         // Denies cropper to access to proxy"s DAI balance in the vat after execution
         vat.nope(CROPPER);
     }

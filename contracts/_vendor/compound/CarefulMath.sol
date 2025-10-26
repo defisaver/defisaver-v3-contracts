@@ -70,7 +70,11 @@ contract CarefulMath {
     /**
      * @dev add a and b and then subtract c
      */
-    function addThenSubUInt(uint256 a, uint256 b, uint256 c) internal pure returns (MathError, uint256) {
+    function addThenSubUInt(uint256 a, uint256 b, uint256 c)
+        internal
+        pure
+        returns (MathError, uint256)
+    {
         (MathError err0, uint256 sum) = addUInt(a, b);
 
         if (err0 != MathError.NO_ERROR) {

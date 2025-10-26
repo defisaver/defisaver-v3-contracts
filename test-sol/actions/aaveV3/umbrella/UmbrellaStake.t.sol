@@ -4,7 +4,9 @@ pragma solidity =0.8.24;
 
 import { IERC20 } from "../../../../contracts/interfaces/token/IERC20.sol";
 import { IERC4626 } from "../../../../contracts/interfaces/token/IERC4626.sol";
-import { IStaticATokenV2 } from "../../../../contracts/interfaces/protocols/aaveV3/IStaticATokenV2.sol";
+import {
+    IStaticATokenV2
+} from "../../../../contracts/interfaces/protocols/aaveV3/IStaticATokenV2.sol";
 import { UmbrellaStake } from "../../../../contracts/actions/aaveV3/umbrella/UmbrellaStake.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { Addresses } from "../../../utils/Addresses.sol";
@@ -75,7 +77,10 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
             uint256 minSharesOut = getMinSharesOut(stkTokens[i], waTokenOrGHO, amount);
 
             bytes memory executeActionCallData = executeActionCalldata(
-                umbrellaStakeEncode(stkTokens[i], sender, sender, amount, _useATokens, minSharesOut), _isDirect
+                umbrellaStakeEncode(
+                    stkTokens[i], sender, sender, amount, _useATokens, minSharesOut
+                ),
+                _isDirect
             );
 
             Snapshot memory snapshotBefore = takeSnapshot(stkTokens[i], waTokenOrGHO, supplyToken);
@@ -86,15 +91,19 @@ contract TestUmbrellaStake is TestUmbrellaCommon {
         }
     }
 
-    function _assertSnapshot(Snapshot memory _snapshotBefore, Snapshot memory _snapshotAfter, uint256 _amount)
-        internal
-        pure
-    {
+    function _assertSnapshot(
+        Snapshot memory _snapshotBefore,
+        Snapshot memory _snapshotAfter,
+        uint256 _amount
+    ) internal pure {
         assertEq(_snapshotAfter.walletStkTokenBalance, 0);
         assertEq(_snapshotAfter.walletWaTokenBalance, 0);
         assertEq(_snapshotAfter.walletSupplyTokenBalance, 0);
         assertGt(_snapshotAfter.senderStkTokenBalance, _snapshotBefore.senderStkTokenBalance);
         assertEq(_snapshotAfter.senderWaTokenBalance, 0);
-        assertEq(_snapshotAfter.senderSupplyTokenBalance, _snapshotBefore.senderSupplyTokenBalance - _amount);
+        assertEq(
+            _snapshotAfter.senderSupplyTokenBalance,
+            _snapshotBefore.senderSupplyTokenBalance - _amount
+        );
     }
 }

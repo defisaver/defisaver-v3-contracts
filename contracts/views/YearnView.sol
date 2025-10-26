@@ -8,7 +8,11 @@ import { IERC20 } from "../interfaces/token/IERC20.sol";
 import { DSMath } from "../_vendor/DS/DSMath.sol";
 
 contract YearnView is YearnHelper, DSMath {
-    function getUnderlyingBalanceInVault(address _user, address _vault) public view returns (uint256) {
+    function getUnderlyingBalanceInVault(address _user, address _vault)
+        public
+        view
+        returns (uint256)
+    {
         uint256 exchangeRate = rdiv(IYVault(_vault).totalAssets(), IYVault(_vault).totalSupply());
 
         uint256 yTokenBalance = IERC20(_vault).balanceOf(_user);

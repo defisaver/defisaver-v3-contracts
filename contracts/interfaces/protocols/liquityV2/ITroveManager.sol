@@ -60,5 +60,8 @@ interface ITroveManager {
     function getCurrentICR(uint256 _troveId, uint256 _price) external view returns (uint256);
     function getTroveStatus(uint256 _troveId) external view returns (Status);
     function getTroveAnnualInterestRate(uint256 _troveId) external view returns (uint256);
-    function getLatestBatchData(address _batchAddress) external view returns (LatestBatchData memory);
+    function getLatestBatchData(address _batchAddress)
+        external
+        view
+        returns (LatestBatchData memory);
 }

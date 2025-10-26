@@ -44,8 +44,10 @@ contract UniSupply is ActionBase, UniV2Helper {
         uniData.tokenB = _parseParamAddr(uniData.tokenB, _paramMapping[1], _subData, _returnValues);
         uniData.from = _parseParamAddr(uniData.from, _paramMapping[2], _subData, _returnValues);
         uniData.to = _parseParamAddr(uniData.to, _paramMapping[3], _subData, _returnValues);
-        uniData.amountADesired = _parseParamUint(uniData.amountADesired, _paramMapping[4], _subData, _returnValues);
-        uniData.amountBDesired = _parseParamUint(uniData.amountBDesired, _paramMapping[5], _subData, _returnValues);
+        uniData.amountADesired =
+            _parseParamUint(uniData.amountADesired, _paramMapping[4], _subData, _returnValues);
+        uniData.amountBDesired =
+            _parseParamUint(uniData.amountBDesired, _paramMapping[5], _subData, _returnValues);
 
         (uint256 liqAmount, bytes memory logData) = _uniSupply(uniData);
         emit ActionEvent("UniSupply", logData);
@@ -71,8 +73,10 @@ contract UniSupply is ActionBase, UniV2Helper {
     /// @param _uniData All the required data to deposit to uni
     function _uniSupply(UniSupplyData memory _uniData) internal returns (uint256, bytes memory) {
         // fetch tokens from the address
-        uint256 amountAPulled = _uniData.tokenA.pullTokensIfNeeded(_uniData.from, _uniData.amountADesired);
-        uint256 amountBPulled = _uniData.tokenB.pullTokensIfNeeded(_uniData.from, _uniData.amountBDesired);
+        uint256 amountAPulled =
+            _uniData.tokenA.pullTokensIfNeeded(_uniData.from, _uniData.amountADesired);
+        uint256 amountBPulled =
+            _uniData.tokenB.pullTokensIfNeeded(_uniData.from, _uniData.amountBDesired);
 
         // approve router so it can pull tokens
         _uniData.tokenA.approveToken(address(router), amountAPulled);
@@ -108,7 +112,11 @@ contract UniSupply is ActionBase, UniV2Helper {
         );
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (UniSupplyData memory uniData) {
+    function parseInputs(bytes memory _callData)
+        public
+        pure
+        returns (UniSupplyData memory uniData)
+    {
         uniData = abi.decode(_callData, (UniSupplyData));
     }
 }

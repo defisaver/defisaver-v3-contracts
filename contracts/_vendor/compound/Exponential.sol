@@ -72,7 +72,11 @@ contract Exponential is CarefulMath {
     /**
      * @dev Multiply an Exp by a scalar, then truncate to return an unsigned integer.
      */
-    function mulScalarTruncate(Exp memory a, uint256 scalar) internal pure returns (MathError, uint256) {
+    function mulScalarTruncate(Exp memory a, uint256 scalar)
+        internal
+        pure
+        returns (MathError, uint256)
+    {
         (MathError err, Exp memory product) = mulScalar(a, scalar);
         if (err != MathError.NO_ERROR) {
             return (err, 0);
@@ -112,7 +116,11 @@ contract Exponential is CarefulMath {
     /**
      * @dev Divide a scalar by an Exp, returning a new Exp.
      */
-    function divScalarByExp(uint256 scalar, Exp memory divisor) internal pure returns (MathError, Exp memory) {
+    function divScalarByExp(uint256 scalar, Exp memory divisor)
+        internal
+        pure
+        returns (MathError, Exp memory)
+    {
         /*
           We are doing this as:
           getExp(mulUInt(expScale, scalar), divisor.mantissa)
@@ -132,7 +140,11 @@ contract Exponential is CarefulMath {
     /**
      * @dev Divide a scalar by an Exp, then truncate to return an unsigned integer.
      */
-    function divScalarByExpTruncate(uint256 scalar, Exp memory divisor) internal pure returns (MathError, uint256) {
+    function divScalarByExpTruncate(uint256 scalar, Exp memory divisor)
+        internal
+        pure
+        returns (MathError, uint256)
+    {
         (MathError err, Exp memory fraction) = divScalarByExp(scalar, divisor);
         if (err != MathError.NO_ERROR) {
             return (err, 0);
@@ -153,7 +165,8 @@ contract Exponential is CarefulMath {
         // We add half the scale before dividing so that we get rounding instead of truncation.
         //  See "Listing 6" and text above it at https://accu.org/index.php/journals/1717
         // Without this change, a result like 6.6...e-19 will be truncated to 0 instead of being rounded to 1e-18.
-        (MathError err1, uint256 doubleScaledProductWithHalfScale) = addUInt(halfExpScale, doubleScaledProduct);
+        (MathError err1, uint256 doubleScaledProductWithHalfScale) =
+            addUInt(halfExpScale, doubleScaledProduct);
         if (err1 != MathError.NO_ERROR) {
             return (err1, Exp({ mantissa: 0 }));
         }
@@ -175,7 +188,11 @@ contract Exponential is CarefulMath {
     /**
      * @dev Multiplies three exponentials, returning a new exponential.
      */
-    function mulExp3(Exp memory a, Exp memory b, Exp memory c) internal pure returns (MathError, Exp memory) {
+    function mulExp3(Exp memory a, Exp memory b, Exp memory c)
+        internal
+        pure
+        returns (MathError, Exp memory)
+    {
         (MathError err, Exp memory ab) = mulExp(a, b);
         if (err != MathError.NO_ERROR) {
             return (err, ab);
@@ -241,7 +258,11 @@ contract Exponential is CarefulMath {
         return sub_(a, b, "subtraction underflow");
     }
 
-    function sub_(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    function sub_(uint256 a, uint256 b, string memory errorMessage)
+        internal
+        pure
+        returns (uint256)
+    {
         require(b <= a, errorMessage);
         return a - b;
     }
@@ -274,7 +295,11 @@ contract Exponential is CarefulMath {
         return mul_(a, b, "multiplication overflow");
     }
 
-    function mul_(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    function mul_(uint256 a, uint256 b, string memory errorMessage)
+        internal
+        pure
+        returns (uint256)
+    {
         if (a == 0 || b == 0) {
             return 0;
         }
@@ -311,7 +336,11 @@ contract Exponential is CarefulMath {
         return div_(a, b, "divide by zero");
     }
 
-    function div_(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    function div_(uint256 a, uint256 b, string memory errorMessage)
+        internal
+        pure
+        returns (uint256)
+    {
         require(b > 0, errorMessage);
         return a / b;
     }
@@ -328,7 +357,11 @@ contract Exponential is CarefulMath {
         return add_(a, b, "addition overflow");
     }
 
-    function add_(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    function add_(uint256 a, uint256 b, string memory errorMessage)
+        internal
+        pure
+        returns (uint256)
+    {
         uint256 c = a + b;
         require(c >= a, errorMessage);
         return c;

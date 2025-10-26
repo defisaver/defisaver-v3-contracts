@@ -24,8 +24,9 @@ contract CreateSub is ActionBase, Permission {
         Params memory inputData = parseInputs(_callData);
 
         for (uint256 i = 0; i < inputData.sub.subData.length; i++) {
-            inputData.sub.subData[i] =
-                _parseParamABytes32(inputData.sub.subData[i], _paramMapping[i], _subData, _returnValues);
+            inputData.sub.subData[i] = _parseParamABytes32(
+                inputData.sub.subData[i], _paramMapping[i], _subData, _returnValues
+            );
         }
 
         uint256 subId = createSub(inputData);

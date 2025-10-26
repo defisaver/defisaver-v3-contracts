@@ -66,13 +66,16 @@ contract TestEtherFiWrap is BaseTest, ActionsUtils, EtherFiHelper {
         _giveEethTokens(_amount * 2);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            etherFiWrapEncode(_isMaxUint256 ? type(uint256).max : _amount, sender, sender), _isDirect
+            etherFiWrapEncode(_isMaxUint256 ? type(uint256).max : _amount, sender, sender),
+            _isDirect
         );
 
         uint256 senderEethBalanceBefore = balanceOf(EETH_ADDR, sender);
         uint256 senderWeEthBalanceBefore = balanceOf(WEETH_ADDR, sender);
 
-        approveAsSender(sender, EETH_ADDR, walletAddr, _isMaxUint256 ? balanceOf(EETH_ADDR, sender) : _amount);
+        approveAsSender(
+            sender, EETH_ADDR, walletAddr, _isMaxUint256 ? balanceOf(EETH_ADDR, sender) : _amount
+        );
 
         wallet.execute(address(cut), executeActionCallData, 0);
 

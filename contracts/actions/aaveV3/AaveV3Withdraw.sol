@@ -35,9 +35,13 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(callData);
 
-        params.assetId = uint16(_parseParamUint(uint16(params.assetId), _paramMapping[0], _subData, _returnValues));
+        params.assetId = uint16(
+            _parseParamUint(uint16(params.assetId), _paramMapping[0], _subData, _returnValues)
+        );
         params.useDefaultMarket =
-            _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[1], _subData, _returnValues) == 1;
+            _parseParamUint(
+                    params.useDefaultMarket ? 1 : 0, _paramMapping[1], _subData, _returnValues
+                ) == 1;
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
         params.market = _parseParamAddr(params.market, _paramMapping[4], _subData, _returnValues);
@@ -55,13 +59,15 @@ contract AaveV3Withdraw is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _withdraw(params.market, params.assetId, params.amount, params.to);
+        (, bytes memory logData) =
+            _withdraw(params.market, params.assetId, params.amount, params.to);
         logger.logActionDirectEvent("AaveV3Withdraw", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) = _withdraw(params.market, params.assetId, params.amount, params.to);
+        (, bytes memory logData) =
+            _withdraw(params.market, params.assetId, params.amount, params.to);
         logger.logActionDirectEvent("AaveV3Withdraw", logData);
     }
 

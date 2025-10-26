@@ -53,7 +53,8 @@ contract EulerV2ReorderCollaterals is ActionBase, EulerV2Helper {
         }
 
         for (uint256 i = 0; i < _params.indexes.length; i++) {
-            IEVC(EVC_ADDR).reorderCollaterals(_params.account, _params.indexes[i][0], _params.indexes[i][1]);
+            IEVC(EVC_ADDR)
+                .reorderCollaterals(_params.account, _params.indexes[i][0], _params.indexes[i][1]);
         }
 
         return abi.encode(_params);

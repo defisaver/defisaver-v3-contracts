@@ -47,11 +47,14 @@ contract PendleTokenRedeem is ActionBase {
         Params memory params = parseInputs(_callData);
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.underlyingToken = _parseParamAddr(params.underlyingToken, _paramMapping[1], _subData, _returnValues);
+        params.underlyingToken =
+            _parseParamAddr(params.underlyingToken, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
-        params.ptAmount = _parseParamUint(params.ptAmount, _paramMapping[4], _subData, _returnValues);
-        params.minAmountOut = _parseParamUint(params.minAmountOut, _paramMapping[5], _subData, _returnValues);
+        params.ptAmount =
+            _parseParamUint(params.ptAmount, _paramMapping[4], _subData, _returnValues);
+        params.minAmountOut =
+            _parseParamUint(params.minAmountOut, _paramMapping[5], _subData, _returnValues);
 
         (uint256 underlyingAmount, bytes memory logData) = _redeem(params);
         emit ActionEvent("PendleTokenRedeem", logData);
@@ -76,7 +79,8 @@ contract PendleTokenRedeem is ActionBase {
     function _redeem(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.to == address(0)) revert ZeroAddressReceiver();
 
-        (address syToken, address ptToken, address ytToken) = IPendleMarket(_params.market).readTokens();
+        (address syToken, address ptToken, address ytToken) =
+            IPendleMarket(_params.market).readTokens();
 
         // only redeem if the market has expired
         if (!IPendleMarket(_params.market).isExpired()) revert MarketNotExpired();
@@ -90,8 +94,8 @@ contract PendleTokenRedeem is ActionBase {
         uint256 amountSyOut = IPendleYieldToken(ytToken).redeemPY(address(this));
 
         // Redeem SY tokens to underlying tokens
-        uint256 underlyingAmountOut =
-            ISyToken(syToken).redeem(_params.to, amountSyOut, _params.underlyingToken, _params.minAmountOut, false);
+        uint256 underlyingAmountOut = ISyToken(syToken)
+            .redeem(_params.to, amountSyOut, _params.underlyingToken, _params.minAmountOut, false);
 
         return (underlyingAmountOut, abi.encode(_params));
     }

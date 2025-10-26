@@ -4,7 +4,8 @@ pragma solidity =0.8.24;
 
 interface ISortedTroves {
     // -- Mutating functions (permissioned) --
-    function insert(uint256 _id, uint256 _annualInterestRate, uint256 _prevId, uint256 _nextId) external;
+    function insert(uint256 _id, uint256 _annualInterestRate, uint256 _prevId, uint256 _nextId)
+        external;
     function insertIntoBatch(
         uint256 _troveId,
         address _batchId,
@@ -16,8 +17,18 @@ interface ISortedTroves {
     function remove(uint256 _id) external;
     function removeFromBatch(uint256 _id) external;
 
-    function reInsert(uint256 _id, uint256 _newAnnualInterestRate, uint256 _prevId, uint256 _nextId) external;
-    function reInsertBatch(address _id, uint256 _newAnnualInterestRate, uint256 _prevId, uint256 _nextId) external;
+    function reInsert(
+        uint256 _id,
+        uint256 _newAnnualInterestRate,
+        uint256 _prevId,
+        uint256 _nextId
+    ) external;
+    function reInsertBatch(
+        address _id,
+        uint256 _newAnnualInterestRate,
+        uint256 _prevId,
+        uint256 _nextId
+    ) external;
 
     // -- View functions --
 
@@ -44,6 +55,9 @@ interface ISortedTroves {
 
     // Public state variable getters
     function size() external view returns (uint256);
-    function nodes(uint256 _id) external view returns (uint256 nextId, uint256 prevId, address batchId, bool exists);
+    function nodes(uint256 _id)
+        external
+        view
+        returns (uint256 nextId, uint256 prevId, address batchId, bool exists);
     function batches(address _id) external view returns (uint256 head, uint256 tail);
 }

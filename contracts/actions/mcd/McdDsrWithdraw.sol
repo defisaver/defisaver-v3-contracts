@@ -52,7 +52,10 @@ contract McdDsrWithdraw is McdHelper, ActionBase {
         return (x * RAY + y - 1) / y;
     }
 
-    function _withdraw(Params memory _params) internal returns (uint256 withdrawn, bytes memory logData) {
+    function _withdraw(Params memory _params)
+        internal
+        returns (uint256 withdrawn, bytes memory logData)
+    {
         IPot pot = IPot(POT_ADDR);
 
         uint256 chi = (block.timestamp > pot.rho()) ? pot.drip() : pot.chi();

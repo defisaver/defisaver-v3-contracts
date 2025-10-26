@@ -7,7 +7,10 @@ import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
 import { IExecutable } from "../../interfaces/protocols/summerfi/IExecutable.sol";
 import { IServiceRegistry } from "../../interfaces/protocols/summerfi/IServiceRegistry.sol";
 import { IOperationsRegistry } from "../../interfaces/protocols/summerfi/IOperationsRegistry.sol";
-import { IOperationExecutor, Call } from "../../interfaces/protocols/summerfi/IOperationExecutor.sol";
+import {
+    IOperationExecutor,
+    Call
+} from "../../interfaces/protocols/summerfi/IOperationExecutor.sol";
 import { SFHelper } from "./helpers/SFHelper.sol";
 
 /// @title Approve tokens through Summer.fi proxy
@@ -50,13 +53,12 @@ contract SFApproveTokens is ActionBase, SFHelper {
         bool sumAmounts;
     }
 
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        virtual
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
         bytes memory logData = _sfApprove(params);
         emit ActionEvent("SFApproveTokens", logData);
@@ -86,7 +88,8 @@ contract SFApproveTokens is ActionBase, SFHelper {
 
         _requireExactVersionOfSetApprovalActionInRegistry();
 
-        (bytes32[] memory targets,) = IOperationsRegistry(SF_OPERATIONS_REGISTRY).getOperation(SF_OPERATION_NAME);
+        (bytes32[] memory targets,) =
+            IOperationsRegistry(SF_OPERATIONS_REGISTRY).getOperation(SF_OPERATION_NAME);
 
         Call[] memory calls = new Call[](SF_NUM_OF_OPERATION_ACTIONS);
         for (uint256 i; i < SF_NUM_OF_OPERATION_ACTIONS; ++i) {
@@ -104,7 +107,10 @@ contract SFApproveTokens is ActionBase, SFHelper {
                 IExecutable.execute.selector,
                 abi.encode(
                     SFSetApprovalData({
-                        asset: tokenAddr, delegate: params.spender, amount: allowance, sumAmounts: false
+                        asset: tokenAddr,
+                        delegate: params.spender,
+                        amount: allowance,
+                        sumAmounts: false
                     })
                 ),
                 emptyParamMap
@@ -120,16 +126,21 @@ contract SFApproveTokens is ActionBase, SFHelper {
     }
 
     function _requireExactVersionOfSetApprovalActionInRegistry() internal view {
-        address actionStoredInRegistry = IServiceRegistry(SF_SERVICE_REGISTRY).getServiceAddress(SF_SET_APPROVAL_HASH);
+        address actionStoredInRegistry =
+            IServiceRegistry(SF_SERVICE_REGISTRY).getServiceAddress(SF_SET_APPROVAL_HASH);
         if (actionStoredInRegistry != SF_SET_APPROVAL_ADDRESS) {
-            revert InvalidSetApprovalActionInRegistry(SF_SET_APPROVAL_ADDRESS, actionStoredInRegistry);
+            revert InvalidSetApprovalActionInRegistry(
+                SF_SET_APPROVAL_ADDRESS, actionStoredInRegistry
+            );
         }
     }
 
-    function _verifyThatApprovalIsSet(address tokenAddr, address owner, address spender, uint256 expectedAllowance)
-        internal
-        view
-    {
+    function _verifyThatApprovalIsSet(
+        address tokenAddr,
+        address owner,
+        address spender,
+        uint256 expectedAllowance
+    ) internal view {
         uint256 allowanceSet = IERC20(tokenAddr).allowance(owner, spender);
         if (allowanceSet < expectedAllowance) {
             revert SFApproveFailed(spender, owner);
@@ -140,7 +151,9 @@ contract SFApproveTokens is ActionBase, SFHelper {
         return IDSProxy(sfProxy)
             .execute(
                 SF_OPERATION_EXECUTOR,
-                abi.encodeWithSelector(IOperationExecutor.executeOp.selector, calls, SF_OPERATION_NAME)
+                abi.encodeWithSelector(
+                    IOperationExecutor.executeOp.selector, calls, SF_OPERATION_NAME
+                )
             );
     }
 

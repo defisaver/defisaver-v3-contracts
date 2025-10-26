@@ -9,7 +9,9 @@ interface IStaticATokenV2 {
      * @return amountToWithdraw: aToken send to `receiver`, dynamic balance
      *
      */
-    function redeemATokens(uint256 shares, address receiver, address owner) external returns (uint256);
+    function redeemATokens(uint256 shares, address receiver, address owner)
+        external
+        returns (uint256);
 
     /**
      * @notice Deposits aTokens and mints static aTokens to msg.sender

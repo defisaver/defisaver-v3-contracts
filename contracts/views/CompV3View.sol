@@ -21,8 +21,9 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         /// @dev This is a temporary fix for the wUSDM price feed. The recorded price is as of 8/8/2025.
         /// We are okay with this price having a discrepancy with the actual price over time and it is here solely to avoid breaking other calls.
         if (
-            _priceFeed == wUSDM_PRICE_FEED && block.chainid == 1 || _priceFeed == wUSDM_PRICE_FEED_ARBI
-                && block.chainid == 42_161 || _priceFeed == wUSDM_PRICE_FEED_OPTI_ONE && block.chainid == 10
+            _priceFeed == wUSDM_PRICE_FEED && block.chainid == 1
+                || _priceFeed == wUSDM_PRICE_FEED_ARBI && block.chainid == 42_161
+                || _priceFeed == wUSDM_PRICE_FEED_OPTI_ONE && block.chainid == 10
                 || _priceFeed == wUSDM_PRICE_FEED_OPTI_TWO && block.chainid == 10
         ) {
             return wUSDM_PRICE;
@@ -76,7 +77,11 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         bool isAbsorbPaused;
     }
 
-    function isAllowed(address _market, address _owner, address _manager) public view returns (bool) {
+    function isAllowed(address _market, address _owner, address _manager)
+        public
+        view
+        returns (bool)
+    {
         return ICometExt(_market).allowance(_owner, _manager) == 0 ? false : true;
     }
 
@@ -94,7 +99,11 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
     /// @notice Fetches all the collateral/debt address and amounts, denominated in usd
     /// @param _users Addresses of the user
     /// @return loans Array of LoanData information
-    function getLoanDataArr(address _market, address[] memory _users) public view returns (LoanData[] memory loans) {
+    function getLoanDataArr(address _market, address[] memory _users)
+        public
+        view
+        returns (LoanData[] memory loans)
+    {
         loans = new LoanData[](_users.length);
 
         for (uint256 i = 0; i < _users.length; ++i) {
@@ -105,7 +114,11 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
     /// @notice Fetches all the collateral/debt address and amounts, denominated in usd
     /// @param _user Address of the user
     /// @return data LoanData information
-    function getLoanData(address _market, address _user) public view returns (LoanData memory data) {
+    function getLoanData(address _market, address _user)
+        public
+        view
+        returns (LoanData memory data)
+    {
         IComet.AssetInfo[] memory assets = getAssets(_market);
         IComet comet = IComet(_market);
 
@@ -137,14 +150,19 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
 
         address usdcPriceFeed = comet.baseTokenPriceFeed();
         data.borrowAmount = comet.borrowBalanceOf(_user);
-        data.borrowValue = comet.borrowBalanceOf(_user) * cometGetPrice(comet, usdcPriceFeed) / comet.priceScale();
+        data.borrowValue =
+            comet.borrowBalanceOf(_user) * cometGetPrice(comet, usdcPriceFeed) / comet.priceScale();
         data.depositAmount = comet.balanceOf(_user);
-        data.depositValue = comet.balanceOf(_user) * cometGetPrice(comet, usdcPriceFeed) / comet.priceScale();
+        data.depositValue =
+            comet.balanceOf(_user) * cometGetPrice(comet, usdcPriceFeed) / comet.priceScale();
 
         return data;
     }
 
-    function getFullCollInfo(address _market, address _tokenAddr) public returns (CollateralInfoFull memory coll) {
+    function getFullCollInfo(address _market, address _tokenAddr)
+        public
+        returns (CollateralInfoFull memory coll)
+    {
         IComet comet = IComet(_market);
 
         IComet.AssetInfo memory assetInfo = comet.getAssetInfoByAddress(_tokenAddr);
@@ -162,7 +180,11 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         });
     }
 
-    function getFullBaseTokenInfo(address _market) public view returns (BaseTokenInfoFull memory baseToken) {
+    function getFullBaseTokenInfo(address _market)
+        public
+        view
+        returns (BaseTokenInfoFull memory baseToken)
+    {
         IComet comet = IComet(_market);
 
         IComet.TotalsBasic memory basics = comet.totalsBasic();
@@ -203,7 +225,11 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         return cometGetPrice(comet, assetInfo.priceFeed);
     }
 
-    function getGovernanceInfoFull(address _market) public view returns (GovernanceInfoFull memory govInfo) {
+    function getGovernanceInfoFull(address _market)
+        public
+        view
+        returns (GovernanceInfoFull memory govInfo)
+    {
         IComet comet = IComet(_market);
 
         govInfo = GovernanceInfoFull({
@@ -222,10 +248,12 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
     }
 
     /// @dev In compV3, only base asset token is used for apy calculations
-    function getApyAfterValuesEstimation(address _market, address _user, uint256 _supplyAmount, uint256 _borrowAmount)
-        public
-        returns (uint256 utilization, uint256 supplyRate, uint256 borrowRate)
-    {
+    function getApyAfterValuesEstimation(
+        address _market,
+        address _user,
+        uint256 _supplyAmount,
+        uint256 _borrowAmount
+    ) public returns (uint256 utilization, uint256 supplyRate, uint256 borrowRate) {
         utilization = IComet(_market).getUtilization();
         supplyRate = IComet(_market).getSupplyRate(utilization);
         borrowRate = IComet(_market).getBorrowRate(utilization);
@@ -239,10 +267,13 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
         IComet.TotalsBasic memory totals = IComet(_market).totalsBasic();
 
         if (_borrowAmount > 0) {
-            int256 presentValue = presentValue(user.principal, totals.baseSupplyIndex, totals.baseBorrowIndex);
+            int256 presentValue =
+                presentValue(user.principal, totals.baseSupplyIndex, totals.baseBorrowIndex);
             int256 balance = presentValue - signed256(_borrowAmount);
-            int104 principalNew = principalValue(balance, totals.baseSupplyIndex, totals.baseBorrowIndex);
-            (uint104 withdrawAmount, uint104 borrowAmount) = withdrawAndBorrowAmount(user.principal, principalNew);
+            int104 principalNew =
+                principalValue(balance, totals.baseSupplyIndex, totals.baseBorrowIndex);
+            (uint104 withdrawAmount, uint104 borrowAmount) =
+                withdrawAndBorrowAmount(user.principal, principalNew);
 
             totals.totalSupplyBase -= withdrawAmount;
             totals.totalBorrowBase += borrowAmount;
@@ -250,10 +281,13 @@ contract CompV3View is Exponential, DSMath, CompV3Helper, CompV3PortedFunctions 
             user.principal = principalNew;
         }
         if (_supplyAmount > 0) {
-            int256 presentValue = presentValue(user.principal, totals.baseSupplyIndex, totals.baseBorrowIndex);
+            int256 presentValue =
+                presentValue(user.principal, totals.baseSupplyIndex, totals.baseBorrowIndex);
             int256 balance = presentValue + signed256(_supplyAmount);
-            int104 principalNew = principalValue(balance, totals.baseSupplyIndex, totals.baseBorrowIndex);
-            (uint104 repayAmount, uint104 supplyAmount) = repayAndSupplyAmount(user.principal, principalNew);
+            int104 principalNew =
+                principalValue(balance, totals.baseSupplyIndex, totals.baseBorrowIndex);
+            (uint104 repayAmount, uint104 supplyAmount) =
+                repayAndSupplyAmount(user.principal, principalNew);
 
             totals.totalSupplyBase += supplyAmount;
             totals.totalBorrowBase -= repayAmount;

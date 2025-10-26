@@ -37,7 +37,9 @@ contract FluidVaultT1Borrow is ActionBase {
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
         params.wrapBorrowedEth =
-            _parseParamUint(params.wrapBorrowedEth ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
+            _parseParamUint(
+                    params.wrapBorrowedEth ? 1 : 0, _paramMapping[4], _subData, _returnValues
+                ) == 1;
 
         (uint256 amount, bytes memory logData) = _borrow(params);
         emit ActionEvent("FluidVaultT1Borrow", logData);

@@ -20,11 +20,18 @@ contract AaveV3User is AaveV3UserUtils {
             onBehalf: address(0)
         });
 
-        bytes memory fnData = abi.encodeWithSignature("executeActionDirect(bytes)", abi.encode(params));
+        bytes memory fnData =
+            abi.encodeWithSignature("executeActionDirect(bytes)", abi.encode(params));
         executeWithWallet(_isSafe, address(aaveV3Supply), fnData, 0);
     }
 
-    function borrow(bool _isSafe, address _market, uint256 _amount, uint8 _rateMode, uint16 _assetId) public {
+    function borrow(
+        bool _isSafe,
+        address _market,
+        uint256 _amount,
+        uint8 _rateMode,
+        uint16 _assetId
+    ) public {
         AaveV3Borrow aaveV3Borrow = new AaveV3Borrow();
 
         AaveV3Borrow.Params memory params = AaveV3Borrow.Params({
@@ -38,7 +45,8 @@ contract AaveV3User is AaveV3UserUtils {
             onBehalf: address(0)
         });
 
-        bytes memory fnData = abi.encodeWithSignature("executeActionDirect(bytes)", abi.encode(params));
+        bytes memory fnData =
+            abi.encodeWithSignature("executeActionDirect(bytes)", abi.encode(params));
         executeWithWallet(_isSafe, address(aaveV3Borrow), fnData, 0);
     }
 }

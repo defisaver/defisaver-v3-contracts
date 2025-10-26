@@ -2,8 +2,12 @@
 pragma solidity =0.8.24;
 
 import { IL2PoolV3 } from "../../../interfaces/protocols/aaveV3/IL2PoolV3.sol";
-import { IAaveProtocolDataProvider } from "../../../interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
-import { IPoolAddressesProvider } from "../../../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
+import {
+    IAaveProtocolDataProvider
+} from "../../../interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
+import {
+    IPoolAddressesProvider
+} from "../../../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
 import { MainnetAaveV3Addresses } from "./MainnetAaveV3Addresses.sol";
 
 /// @title Utility functions and data used in AaveV3 actions
@@ -20,11 +24,12 @@ contract AaveV3Helper is MainnetAaveV3Addresses {
         return IAaveProtocolDataProvider(IPoolAddressesProvider(_market).getPoolDataProvider());
     }
 
-    function getWholeDebt(address _market, address _tokenAddr, uint256 _borrowType, address _debtOwner)
-        internal
-        view
-        returns (uint256 debt)
-    {
+    function getWholeDebt(
+        address _market,
+        address _tokenAddr,
+        uint256 _borrowType,
+        address _debtOwner
+    ) internal view returns (uint256 debt) {
         uint256 STABLE_ID = 1;
         uint256 VARIABLE_ID = 2;
 

@@ -23,12 +23,20 @@ contract OneInchWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData,
 
     /// @notice Takes order from 1inch and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    function takeOrder(ExchangeData memory _exData) public payable override returns (bool success, uint256) {
-        OneInchCalldata memory oneInchCalldata = abi.decode(_exData.offchainData.callData, (OneInchCalldata));
+    function takeOrder(ExchangeData memory _exData)
+        public
+        payable
+        override
+        returns (bool success, uint256)
+    {
+        OneInchCalldata memory oneInchCalldata =
+            abi.decode(_exData.offchainData.callData, (OneInchCalldata));
 
         // write in the exact amount we are selling/buying in an order
         for (uint256 i; i < oneInchCalldata.offsets.length; i++) {
-            writeUint256(oneInchCalldata.realCalldata, oneInchCalldata.offsets[i], _exData.srcAmount);
+            writeUint256(
+                oneInchCalldata.realCalldata, oneInchCalldata.offsets[i], _exData.srcAmount
+            );
         }
 
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);

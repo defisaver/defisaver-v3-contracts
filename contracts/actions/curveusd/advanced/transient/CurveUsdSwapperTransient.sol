@@ -11,7 +11,9 @@ import { DFSExchangeData } from "../../../../exchangeV3/DFSExchangeData.sol";
 import { FeeRecipient } from "../../../../utils/fee/FeeRecipient.sol";
 import { ActionsUtilHelper } from "../../../utils/helpers/ActionsUtilHelper.sol";
 import { GasFeeHelper } from "../../../../actions/fee/helpers/GasFeeHelper.sol";
-import { ReentrancyGuardTransient } from "../../../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
+import {
+    ReentrancyGuardTransient
+} from "../../../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
 import { ICrvUsdController } from "../../../../interfaces/protocols/curveusd/ICurveUsd.sol";
@@ -53,7 +55,8 @@ contract CurveUsdSwapperTransient is
     {
         uint256 gasUsed = info[0];
 
-        ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
+        ExchangeData memory exData =
+            abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         address collToken = exData.srcAddr;
         address debtToken = exData.destAddr;
 
@@ -81,7 +84,8 @@ contract CurveUsdSwapperTransient is
     {
         uint256 gasUsed = info[0];
 
-        ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
+        ExchangeData memory exData =
+            abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         address collToken = exData.destAddr;
 
         uint256 receivedAmount = _performSell(exData, _user, collToken, gasUsed);
@@ -100,7 +104,8 @@ contract CurveUsdSwapperTransient is
         uint256 gasUsed = info[0];
         bool sellAllCollateral = info[1] == 1 ? true : false;
 
-        ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
+        ExchangeData memory exData =
+            abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         address collToken = exData.srcAddr;
         address debtToken = exData.destAddr;
 
@@ -133,21 +138,26 @@ contract CurveUsdSwapperTransient is
         address _feeToken,
         uint256 _gasUsedForAutomation
     ) internal returns (uint256) {
-        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) =
-            _sellWithTxSaverChoice(_exData, _user, IDFSRegistry(REGISTRY_ADDR));
+        (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) = _sellWithTxSaverChoice(
+            _exData, _user, IDFSRegistry(REGISTRY_ADDR)
+        );
 
         // can't take both automation fee and TxSaver fee
         if (_gasUsedForAutomation > 0 && !txSaverFeeTaken) {
-            receivedAmount -= _takeAutomationFee(receivedAmount, _feeToken, _gasUsedForAutomation, hasFee);
+            receivedAmount -= _takeAutomationFee(
+                receivedAmount, _feeToken, _gasUsedForAutomation, hasFee
+            );
         }
 
         return receivedAmount;
     }
 
-    function _takeAutomationFee(uint256 _destTokenAmount, address _token, uint256 _gasUsed, bool hasFee)
-        internal
-        returns (uint256 feeAmount)
-    {
+    function _takeAutomationFee(
+        uint256 _destTokenAmount,
+        address _token,
+        uint256 _gasUsed,
+        bool hasFee
+    ) internal returns (uint256 feeAmount) {
         // we need to take the fee for tx cost as well, as it's in a strategy
         feeAmount += calcGasCost(_gasUsed, _token, 0);
 

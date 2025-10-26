@@ -38,9 +38,11 @@ contract CurveUsdLevCreateTransient is ActionBase, CurveUsdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[2], _subData, _returnValues);
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[2], _subData, _returnValues);
         params.nBands = _parseParamUint(params.nBands, _paramMapping[3], _subData, _returnValues);
 
         (uint256 debtGeneratedAndSold, bytes memory logData) = _create(params);
@@ -82,7 +84,11 @@ contract CurveUsdLevCreateTransient is ActionBase, CurveUsdHelper {
 
         ICrvUsdController(_params.controllerAddress)
             .create_loan_extended(
-                _params.collAmount, _params.exData.srcAmount, _params.nBands, curveUsdTransientSwapper, info
+                _params.collAmount,
+                _params.exData.srcAmount,
+                _params.nBands,
+                curveUsdTransientSwapper,
+                info
             );
 
         return (_params.exData.srcAmount, abi.encode(_params));

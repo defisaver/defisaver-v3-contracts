@@ -26,7 +26,11 @@ contract CurveUsdSoftLiquidationTrigger is ITrigger, AdminAuth {
         return percentage <= triggerSubData.percentage;
     }
 
-    function calcPercentage(address _market, address _user) public view returns (uint256 percentage) {
+    function calcPercentage(address _market, address _user)
+        public
+        view
+        returns (uint256 percentage)
+    {
         ICrvUsdController ctrl = ICrvUsdController(_market);
         ILLAMMA amm = ILLAMMA(ctrl.amm());
 

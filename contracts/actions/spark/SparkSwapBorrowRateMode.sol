@@ -32,7 +32,8 @@ contract SparkSwapBorrowRateMode is ActionBase, SparkHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.market = _parseParamAddr(inputData.market, _paramMapping[0], _subData, _returnValues);
+        inputData.market =
+            _parseParamAddr(inputData.market, _paramMapping[0], _subData, _returnValues);
 
         (, bytes memory logData) = _swapBorrowRate(inputData);
 

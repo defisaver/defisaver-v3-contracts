@@ -43,13 +43,17 @@ contract FluidDexSupply is ActionBase, FluidHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.nftId = _parseParamUint(params.nftId, _paramMapping[2], _subData, _returnValues);
 
-        params.supplyAmount = _parseParamUint(params.supplyAmount, _paramMapping[3], _subData, _returnValues);
-        params.supplyVariableData.collAmount0 =
-            _parseParamUint(params.supplyVariableData.collAmount0, _paramMapping[4], _subData, _returnValues);
-        params.supplyVariableData.collAmount1 =
-            _parseParamUint(params.supplyVariableData.collAmount1, _paramMapping[5], _subData, _returnValues);
-        params.supplyVariableData.minCollShares =
-            _parseParamUint(params.supplyVariableData.minCollShares, _paramMapping[6], _subData, _returnValues);
+        params.supplyAmount =
+            _parseParamUint(params.supplyAmount, _paramMapping[3], _subData, _returnValues);
+        params.supplyVariableData.collAmount0 = _parseParamUint(
+            params.supplyVariableData.collAmount0, _paramMapping[4], _subData, _returnValues
+        );
+        params.supplyVariableData.collAmount1 = _parseParamUint(
+            params.supplyVariableData.collAmount1, _paramMapping[5], _subData, _returnValues
+        );
+        params.supplyVariableData.minCollShares = _parseParamUint(
+            params.supplyVariableData.minCollShares, _paramMapping[6], _subData, _returnValues
+        );
 
         (uint256 supplyAmountOrShares, bytes memory logData) = _supply(params);
         emit ActionEvent("FluidDexSupply", logData);

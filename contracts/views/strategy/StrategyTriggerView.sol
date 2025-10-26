@@ -11,7 +11,10 @@ import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 contract StrategyTriggerView is StrategyModel, CoreHelper {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
-    function checkTriggers(StrategySub memory _sub, bytes[] calldata _triggerCallData) public returns (bool) {
+    function checkTriggers(StrategySub memory _sub, bytes[] calldata _triggerCallData)
+        public
+        returns (bool)
+    {
         Strategy memory strategy;
 
         {
@@ -19,7 +22,8 @@ contract StrategyTriggerView is StrategyModel, CoreHelper {
             uint256 strategyId = _sub.strategyOrBundleId;
 
             if (_sub.isBundle) {
-                strategyId = BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(_sub.strategyOrBundleId, 0);
+                strategyId =
+                    BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(_sub.strategyOrBundleId, 0);
             }
 
             strategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
@@ -32,7 +36,8 @@ contract StrategyTriggerView is StrategyModel, CoreHelper {
 
         for (uint256 i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
-            isTriggered = ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i]);
+            isTriggered =
+                ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i]);
             if (!isTriggered) return false;
         }
         return true;

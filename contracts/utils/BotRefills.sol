@@ -34,7 +34,11 @@ contract BotRefills is AdminAuth, UtilAddresses {
         _;
     }
 
-    function refill(uint256 _ethAmount, address _botAddress) public isRefillCaller isApprovedBot(_botAddress) {
+    function refill(uint256 _ethAmount, address _botAddress)
+        public
+        isRefillCaller
+        isApprovedBot(_botAddress)
+    {
         address feeAddr = FeeRecipient(FEE_RECIPIENT_ADDR).getFeeAddr();
 
         bool success = IERC20(TokenUtils.WETH_ADDR).transferFrom(feeAddr, address(this), _ethAmount);

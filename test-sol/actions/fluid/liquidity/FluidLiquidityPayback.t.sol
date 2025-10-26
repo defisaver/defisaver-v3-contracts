@@ -2,12 +2,16 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVault } from "../../../../contracts/interfaces/protocols/fluid/vaults/IFluidVault.sol";
+import {
+    IFluidVault
+} from "../../../../contracts/interfaces/protocols/fluid/vaults/IFluidVault.sol";
 import {
     IFluidVaultResolver
 } from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
-import { FluidVaultT1Payback } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Payback.sol";
+import {
+    FluidVaultT1Payback
+} from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Payback.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
 import { FluidDexPayback } from "../../../../contracts/actions/fluid/dex/FluidDexPayback.sol";
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
@@ -219,7 +223,11 @@ contract TestFluidLiquidityPayback is FluidTestBase {
                 _t1VaultsSelected
                     ? fluidVaultT1PaybackEncode(address(vaults[i]), nftId, paybackAmount, sender)
                     : fluidDexPaybackEncode(
-                        address(vaults[i]), sender, nftId, paybackAmount, FluidDexModel.PaybackVariableData(0, 0, 0, 0)
+                        address(vaults[i]),
+                        sender,
+                        nftId,
+                        paybackAmount,
+                        FluidDexModel.PaybackVariableData(0, 0, 0, 0)
                     ),
                 _isDirect
             );
@@ -228,8 +236,9 @@ contract TestFluidLiquidityPayback is FluidTestBase {
 
             vars.senderBorrowTokenBalanceBefore = balanceOf(tokens.borrow0, sender);
             vars.senderEthBalanceBefore = address(sender).balance;
-            vars.walletBorrowTokenBalanceBefore =
-                isNativePayback ? address(walletAddr).balance : balanceOf(tokens.borrow0, walletAddr);
+            vars.walletBorrowTokenBalanceBefore = isNativePayback
+                ? address(walletAddr).balance
+                : balanceOf(tokens.borrow0, walletAddr);
 
             vm.recordLogs();
             wallet.execute(
@@ -241,8 +250,9 @@ contract TestFluidLiquidityPayback is FluidTestBase {
 
             vars.senderBorrowTokenBalanceAfter = balanceOf(tokens.borrow0, sender);
             vars.senderEthBalanceAfter = address(sender).balance;
-            vars.walletBorrowTokenBalanceAfter =
-                isNativePayback ? address(walletAddr).balance : balanceOf(tokens.borrow0, walletAddr);
+            vars.walletBorrowTokenBalanceAfter = isNativePayback
+                ? address(walletAddr).balance
+                : balanceOf(tokens.borrow0, walletAddr);
 
             IFluidVaultResolver.UserPosition memory userPositionAfter = fetchPositionByNftId(nftId);
 
@@ -253,20 +263,24 @@ contract TestFluidLiquidityPayback is FluidTestBase {
                 assertEq(userPositionAfter.borrow, 0);
 
                 if (isNativePayback) {
-                    uint256 pulledWeth = vars.senderBorrowTokenBalanceBefore - vars.senderBorrowTokenBalanceAfter;
+                    uint256 pulledWeth =
+                        vars.senderBorrowTokenBalanceBefore - vars.senderBorrowTokenBalanceAfter;
                     uint256 exactPaybackAmount;
                     // parse logs to find exact payback amount
                     for (uint256 j = 0; i < logs.length; ++j) {
                         if (logs[j].topics[0] == IFluidVault.LogOperate.selector) {
-                            (,,, int256 debtAmt,) =
-                                abi.decode(logs[j].data, (address, uint256, int256, int256, address));
+                            (,,, int256 debtAmt,) = abi.decode(
+                                logs[j].data, (address, uint256, int256, int256, address)
+                            );
                             exactPaybackAmount = uint256(-debtAmt);
                             break;
                         }
                     }
                     assertTrue(exactPaybackAmount > 0);
                     uint256 expectedEthRefund = pulledWeth - exactPaybackAmount;
-                    assertEq(vars.senderEthBalanceAfter - vars.senderEthBalanceBefore, expectedEthRefund);
+                    assertEq(
+                        vars.senderEthBalanceAfter - vars.senderEthBalanceBefore, expectedEthRefund
+                    );
                 } else {
                     assertApproxEqRel(
                         vars.senderBorrowTokenBalanceAfter,
@@ -275,7 +289,10 @@ contract TestFluidLiquidityPayback is FluidTestBase {
                     );
                 }
             } else {
-                assertEq(vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore - paybackAmount);
+                assertEq(
+                    vars.senderBorrowTokenBalanceAfter,
+                    vars.senderBorrowTokenBalanceBefore - paybackAmount
+                );
                 assertApproxEqRel(
                     userPositionAfter.borrow,
                     userPositionBefore.borrow - paybackAmount,

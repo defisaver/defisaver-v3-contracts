@@ -33,7 +33,8 @@ contract CompV3Payback is ActionBase, CompV3Helper {
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
 
         (uint256 withdrawAmount, bytes memory logData) =
             _payback(params.market, params.amount, params.from, params.onBehalf);
@@ -44,7 +45,8 @@ contract CompV3Payback is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _payback(params.market, params.amount, params.from, params.onBehalf);
+        (, bytes memory logData) =
+            _payback(params.market, params.amount, params.from, params.onBehalf);
         logger.logActionDirectEvent("CompV3Payback", logData);
     }
 

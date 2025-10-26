@@ -35,13 +35,17 @@ contract LiquityV2TargetRatioCheck is ActionBase, LiquityV2RatioHelper {
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.troveId = _parseParamUint(params.troveId, _paramMapping[1], _subData, _returnValues);
-        params.targetRatio = _parseParamUint(params.targetRatio, _paramMapping[2], _subData, _returnValues);
+        params.targetRatio =
+            _parseParamUint(params.targetRatio, _paramMapping[2], _subData, _returnValues);
 
         (uint256 currRatio,) = getRatio(params.market, params.troveId);
 
         /// @notice If `targetRatio` is 999% or more then skip `RATIO_OFFSET` check because it is very hard to be precise under 5%.
         if (params.targetRatio < RATIO_LIMIT) {
-            if (currRatio > (params.targetRatio + RATIO_OFFSET) || currRatio < (params.targetRatio - RATIO_OFFSET)) {
+            if (
+                currRatio > (params.targetRatio + RATIO_OFFSET)
+                    || currRatio < (params.targetRatio - RATIO_OFFSET)
+            ) {
                 revert BadAfterRatio(currRatio, params.targetRatio);
             }
         }

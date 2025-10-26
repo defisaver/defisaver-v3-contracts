@@ -125,11 +125,12 @@ contract LiquityView is LiquityHelper, DSMath {
         recoveryMode = TroveManager.checkRecoveryMode(collPrice);
     }
 
-    function getInsertPosition(uint256 _collAmount, uint256 _debtAmount, uint256 _numTrials, uint256 _inputRandomSeed)
-        external
-        view
-        returns (address upperHint, address lowerHint)
-    {
+    function getInsertPosition(
+        uint256 _collAmount,
+        uint256 _debtAmount,
+        uint256 _numTrials,
+        uint256 _inputRandomSeed
+    ) external view returns (address upperHint, address lowerHint) {
         uint256 NICR = _collAmount * 1e20 / _debtAmount;
         (address hintAddress,,) = HintHelpers.getApproxHint(NICR, _numTrials, _inputRandomSeed);
         (upperHint, lowerHint) = SortedTroves.findInsertPosition(NICR, hintAddress, hintAddress);
@@ -153,12 +154,20 @@ contract LiquityView is LiquityHelper, DSMath {
     function getRedemptionHints(uint256 _LUSDamount, uint256 _price, uint256 _maxIterations)
         external
         view
-        returns (address firstRedemptionHint, uint256 partialRedemptionHintNICR, uint256 truncatedLUSDamount)
+        returns (
+            address firstRedemptionHint,
+            uint256 partialRedemptionHintNICR,
+            uint256 truncatedLUSDamount
+        )
     {
         return HintHelpers.getRedemptionHints(_LUSDamount, _price, _maxIterations);
     }
 
-    function getStakeInfo(address _user) external view returns (uint256 stake, uint256 ethGain, uint256 lusdGain) {
+    function getStakeInfo(address _user)
+        external
+        view
+        returns (uint256 stake, uint256 ethGain, uint256 lusdGain)
+    {
         stake = LQTYStaking.stakes(_user);
         ethGain = LQTYStaking.getPendingETHGain(_user);
         lusdGain = LQTYStaking.getPendingLUSDGain(_user);
@@ -200,10 +209,12 @@ contract LiquityView is LiquityHelper, DSMath {
     /// @param _targetRatio Ratio * 1e16
     /// @return next Trove owner address to be used in the subsequent call, address(0) if debtInFront is calculated fully for inputted ratio
     /// @return debt Accumulated debt to be used in the subsequent call
-    function getDebtInFrontByRatio(address _of, uint256 _acc, uint256 _iterations, uint256 _targetRatio)
-        external
-        returns (address next, uint256 debt)
-    {
+    function getDebtInFrontByRatio(
+        address _of,
+        uint256 _acc,
+        uint256 _iterations,
+        uint256 _targetRatio
+    ) external returns (address next, uint256 debt) {
         uint256 collPrice = PriceFeed.fetchPrice();
         if (_of == address(0)) {
             next = SortedTroves.getLast();
@@ -230,11 +241,12 @@ contract LiquityView is LiquityHelper, DSMath {
     /// @param _targetDebtInFront Lusd debt in wei
     /// @return next Trove owner address to be used in the subsequent call
     /// @return numTroves Number of troves below the targetDebtInFront
-    function getNumTrovesForDebtInFront(address _of, uint256 _acc, uint256 _iterations, uint256 _targetDebtInFront)
-        external
-        view
-        returns (address next, uint256 numTroves)
-    {
+    function getNumTrovesForDebtInFront(
+        address _of,
+        uint256 _acc,
+        uint256 _iterations,
+        uint256 _targetDebtInFront
+    ) external view returns (address next, uint256 numTroves) {
         if (_of == address(0)) {
             next = SortedTroves.getLast();
         } else {

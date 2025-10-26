@@ -16,13 +16,12 @@ contract GasFeeCalc is ActionBase, GasFeeHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        virtual
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
         uint256 txCost = calcGasCost(inputData.gasUsed, inputData.feeToken, 0);

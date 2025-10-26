@@ -51,7 +51,10 @@ contract SDaiUnwrap is ActionBase, SparkHelper, UtilAddresses {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    function _unwrap(Params memory _params) internal returns (uint256 daiAmount, bytes memory logData) {
+    function _unwrap(Params memory _params)
+        internal
+        returns (uint256 daiAmount, bytes memory logData)
+    {
         if (_params.from == address(0)) _params.from = address(this);
 
         uint256 sDaiBalance = SDAI_ADDR.getBalance(_params.from);

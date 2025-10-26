@@ -23,17 +23,23 @@ library FluidSupplyDexLogic {
     /// @param _tokens Tokens data
     /// @return nftId NFT ID of the position
     /// @return collShares Amount of collateral shares minted.
-    function supplyVariable(FluidDexModel.SupplyDexData memory _data, IFluidVault.Tokens memory _tokens)
-        internal
-        returns (uint256 nftId, uint256 collShares)
-    {
+    function supplyVariable(
+        FluidDexModel.SupplyDexData memory _data,
+        IFluidVault.Tokens memory _tokens
+    ) internal returns (uint256 nftId, uint256 collShares) {
         _data.vaultType.requireSmartCollateral();
 
-        FluidDexTokensUtils.PulledTokensData memory vars = FluidDexTokensUtils.pullTokensIfNeededWithApproval(
-            _tokens, _data.from, _data.vault, _data.variableData.collAmount0, _data.variableData.collAmount1
-        );
+        FluidDexTokensUtils.PulledTokensData memory vars =
+            FluidDexTokensUtils.pullTokensIfNeededWithApproval(
+                _tokens,
+                _data.from,
+                _data.vault,
+                _data.variableData.collAmount0,
+                _data.variableData.collAmount1
+            );
 
-        uint256 msgValue = vars.isToken0Native ? vars.amount0 : (vars.isToken1Native ? vars.amount1 : 0);
+        uint256 msgValue =
+            vars.isToken0Native ? vars.amount0 : (vars.isToken1Native ? vars.amount1 : 0);
 
         int256 exactCollSharesMinted;
 

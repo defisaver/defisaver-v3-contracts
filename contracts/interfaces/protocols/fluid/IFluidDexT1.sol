@@ -143,10 +143,12 @@ interface IFluidDexT1 {
     /// @param estimate_ If true, function will revert with estimated deposit amounts without executing the deposit
     /// @return token0Amt_ Amount of token0 deposited
     /// @return token1Amt_ Amount of token1 deposited
-    function depositPerfect(uint256 shares_, uint256 maxToken0Deposit_, uint256 maxToken1Deposit_, bool estimate_)
-        external
-        payable
-        returns (uint256 token0Amt_, uint256 token1Amt_);
+    function depositPerfect(
+        uint256 shares_,
+        uint256 maxToken0Deposit_,
+        uint256 maxToken1Deposit_,
+        bool estimate_
+    ) external payable returns (uint256 token0Amt_, uint256 token1Amt_);
 
     /// @dev This function allows users to withdraw a perfect amount of collateral liquidity
     /// @param shares_ The number of shares to withdraw
@@ -155,9 +157,12 @@ interface IFluidDexT1 {
     /// @param to_ Recipient of swapped tokens. If to_ == address(0) then out tokens will be sent to msg.sender. If to_ == ADDRESS_DEAD then function will revert with token0Amt_ & token1Amt_
     /// @return token0Amt_ The amount of token0 withdrawn
     /// @return token1Amt_ The amount of token1 withdrawn
-    function withdrawPerfect(uint256 shares_, uint256 minToken0Withdraw_, uint256 minToken1Withdraw_, address to_)
-        external
-        returns (uint256 token0Amt_, uint256 token1Amt_);
+    function withdrawPerfect(
+        uint256 shares_,
+        uint256 minToken0Withdraw_,
+        uint256 minToken1Withdraw_,
+        address to_
+    ) external returns (uint256 token0Amt_, uint256 token1Amt_);
 
     /// @dev This function allows users to borrow tokens in equal proportion to the current debt pool ratio
     /// @param shares_ The number of shares to borrow
@@ -166,9 +171,12 @@ interface IFluidDexT1 {
     /// @param to_ Recipient of swapped tokens. If to_ == address(0) then out tokens will be sent to msg.sender. If to_ == ADDRESS_DEAD then function will revert with token0Amt_ & token1Amt_
     /// @return token0Amt_ Amount of token0 borrowed
     /// @return token1Amt_ Amount of token1 borrowed
-    function borrowPerfect(uint256 shares_, uint256 minToken0Borrow_, uint256 minToken1Borrow_, address to_)
-        external
-        returns (uint256 token0Amt_, uint256 token1Amt_);
+    function borrowPerfect(
+        uint256 shares_,
+        uint256 minToken0Borrow_,
+        uint256 minToken1Borrow_,
+        address to_
+    ) external returns (uint256 token0Amt_, uint256 token1Amt_);
 
     /// @dev This function allows users to pay back borrowed tokens in equal proportion to the current debt pool ratio
     /// @param shares_ The number of shares to pay back
@@ -177,10 +185,12 @@ interface IFluidDexT1 {
     /// @param estimate_ If true, function will revert with estimated payback amounts without executing the payback
     /// @return token0Amt_ Amount of token0 paid back
     /// @return token1Amt_ Amount of token1 paid back
-    function paybackPerfect(uint256 shares_, uint256 maxToken0Payback_, uint256 maxToken1Payback_, bool estimate_)
-        external
-        payable
-        returns (uint256 token0Amt_, uint256 token1Amt_);
+    function paybackPerfect(
+        uint256 shares_,
+        uint256 maxToken0Payback_,
+        uint256 maxToken1Payback_,
+        bool estimate_
+    ) external payable returns (uint256 token0Amt_, uint256 token1Amt_);
 
     /// @dev This function allows users to deposit tokens in any proportion into the col pool
     /// @param token0Amt_ The amount of token0 to deposit
@@ -230,9 +240,12 @@ interface IFluidDexT1 {
     /// @param minToken1_ The minimum amount of token1 the user expects to receive (set to 0 if withdrawing in token0)
     /// @param to_ Recipient of swapped tokens. If to_ == address(0) then out tokens will be sent to msg.sender. If to_ == ADDRESS_DEAD then function will revert with withdrawAmt_
     /// @return withdrawAmt_ The amount of tokens withdrawn in the chosen token
-    function withdrawPerfectInOneToken(uint256 shares_, uint256 minToken0_, uint256 minToken1_, address to_)
-        external
-        returns (uint256 withdrawAmt_);
+    function withdrawPerfectInOneToken(
+        uint256 shares_,
+        uint256 minToken0_,
+        uint256 minToken1_,
+        address to_
+    ) external returns (uint256 withdrawAmt_);
 
     /// @dev This function allows users to payback their debt with perfect shares in one token
     /// @param shares_ The number of shares to burn for payback
@@ -240,10 +253,12 @@ interface IFluidDexT1 {
     /// @param maxToken1_ The maximum amount of token1 the user is willing to pay (set to 0 if paying back in token0)
     /// @param estimate_ If true, the function will revert with the estimated payback amount without executing the payback
     /// @return paybackAmt_ The amount of tokens paid back in the chosen token
-    function paybackPerfectInOneToken(uint256 shares_, uint256 maxToken0_, uint256 maxToken1_, bool estimate_)
-        external
-        payable
-        returns (uint256 paybackAmt_);
+    function paybackPerfectInOneToken(
+        uint256 shares_,
+        uint256 maxToken0_,
+        uint256 maxToken1_,
+        bool estimate_
+    ) external payable returns (uint256 paybackAmt_);
 
     /// @dev the oracle assumes last set price of pool till the next swap happens.
     /// There's a possibility that during that time some interest is generated hence the last stored price is not the 100% correct price for the whole duration

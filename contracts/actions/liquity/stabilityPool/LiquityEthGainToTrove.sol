@@ -48,7 +48,10 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _liquityEthGainToTrove(Params memory _params) internal returns (uint256 ethGain, bytes memory logData) {
+    function _liquityEthGainToTrove(Params memory _params)
+        internal
+        returns (uint256 ethGain, bytes memory logData)
+    {
         ethGain = StabilityPool.getDepositorETHGain(address(this));
         uint256 lqtyBefore = LQTY_TOKEN_ADDRESS.getBalance(address(this));
 

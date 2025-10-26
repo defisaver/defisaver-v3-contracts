@@ -2,8 +2,12 @@
 pragma solidity =0.8.24;
 
 import { DefiSaverConnector } from "../../../contracts/actions/insta/DefiSaverConnector.sol";
-import { IInstaConnectorsV2 } from "../../../contracts/interfaces/protocols/insta/IInstaConnectorsV2.sol";
-import { IInstaConnectorsV1 } from "../../../contracts/interfaces/protocols/insta/IInstaConnectorsV1.sol";
+import {
+    IInstaConnectorsV2
+} from "../../../contracts/interfaces/protocols/insta/IInstaConnectorsV2.sol";
+import {
+    IInstaConnectorsV1
+} from "../../../contracts/interfaces/protocols/insta/IInstaConnectorsV1.sol";
 import { Addresses } from "../Addresses.sol";
 import { CheatCodes } from "../CheatCodes.sol";
 import { RegistryUtils } from "../RegistryUtils.sol";

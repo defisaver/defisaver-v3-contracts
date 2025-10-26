@@ -10,9 +10,14 @@ import { MarketParams, Market } from "./IMorphoBlue.sol";
 interface IIrm {
     /// @notice Returns the borrow rate of the market `marketParams`.
     /// @dev Assumes that `market` corresponds to `marketParams`.
-    function borrowRate(MarketParams memory marketParams, Market memory market) external returns (uint256);
+    function borrowRate(MarketParams memory marketParams, Market memory market)
+        external
+        returns (uint256);
 
     /// @notice Returns the borrow rate of the market `marketParams` without modifying any storage.
     /// @dev Assumes that `market` corresponds to `marketParams`.
-    function borrowRateView(MarketParams memory marketParams, Market memory market) external view returns (uint256);
+    function borrowRateView(MarketParams memory marketParams, Market memory market)
+        external
+        view
+        returns (uint256);
 }

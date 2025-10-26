@@ -20,5 +20,7 @@ interface IRecipeExecutor {
         StrategyModel.StrategySub memory _sub
     ) external payable;
 
-    function executeActionsFromFL(StrategyModel.Recipe calldata _currRecipe, bytes32 _flAmount) external payable;
+    function executeActionsFromFL(StrategyModel.Recipe calldata _currRecipe, bytes32 _flAmount)
+        external
+        payable;
 }

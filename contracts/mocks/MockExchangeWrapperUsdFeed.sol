@@ -35,8 +35,8 @@ contract MockExchangeWrapperUsdFeed is IExchangeV3, TokenPriceHelper {
         uint256 destTokenPriceInUSD = getPriceInUSD(_destAddr);
         uint256 destTokenDec = IERC20(_destAddr).decimals();
 
-        uint256 amountOut =
-            _srcAmount * srcTokenPriceInUSD * (10 ** destTokenDec) / ((10 ** srcTokenDec) * destTokenPriceInUSD);
+        uint256 amountOut = _srcAmount * srcTokenPriceInUSD * (10 ** destTokenDec)
+            / ((10 ** srcTokenDec) * destTokenPriceInUSD);
 
         _destAddr.withdrawTokens(msg.sender, amountOut);
 
@@ -45,7 +45,12 @@ contract MockExchangeWrapperUsdFeed is IExchangeV3, TokenPriceHelper {
 
     /// @notice Return a rate for which we can sell an amount of tokens
     /// @return uint256 Rate (price)
-    function getSellRate(address, address, uint256, bytes memory) public pure override returns (uint256) {
+    function getSellRate(address, address, uint256, bytes memory)
+        public
+        pure
+        override
+        returns (uint256)
+    {
         revert("Not implemented");
     }
 

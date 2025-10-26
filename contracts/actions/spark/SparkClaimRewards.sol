@@ -2,7 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { ISparkRewardsController } from "../../interfaces/protocols/spark/ISparkRewardsController.sol";
+import {
+    ISparkRewardsController
+} from "../../interfaces/protocols/spark/ISparkRewardsController.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
@@ -64,12 +66,18 @@ contract SparkClaimRewards is ActionBase, SparkHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _claimRewards(Params memory _params) internal returns (uint256 amountReceived, bytes memory) {
+    function _claimRewards(Params memory _params)
+        internal
+        returns (uint256 amountReceived, bytes memory)
+    {
         require(_params.assetsLength == _params.assets.length);
 
-        ISparkRewardsController rewardsController = ISparkRewardsController(SPARK_REWARDS_CONTROLLER_ADDRESS);
+        ISparkRewardsController rewardsController =
+            ISparkRewardsController(SPARK_REWARDS_CONTROLLER_ADDRESS);
 
-        amountReceived = rewardsController.claimRewards(_params.assets, _params.amount, _params.to, _params.reward);
+        amountReceived = rewardsController.claimRewards(
+            _params.assets, _params.amount, _params.to, _params.reward
+        );
 
         bytes memory logData = abi.encode(_params, amountReceived);
         return (amountReceived, logData);

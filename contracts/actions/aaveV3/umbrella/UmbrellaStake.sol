@@ -40,12 +40,16 @@ contract UmbrellaStake is ActionBase, AaveV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.stkToken = _parseParamAddr(params.stkToken, _paramMapping[0], _subData, _returnValues);
+        params.stkToken =
+            _parseParamAddr(params.stkToken, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-        params.useATokens = _parseParamUint(params.useATokens ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
-        params.minSharesOut = _parseParamUint(params.minSharesOut, _paramMapping[5], _subData, _returnValues);
+        params.useATokens =
+            _parseParamUint(params.useATokens ? 1 : 0, _paramMapping[4], _subData, _returnValues)
+                == 1;
+        params.minSharesOut =
+            _parseParamUint(params.minSharesOut, _paramMapping[5], _subData, _returnValues);
 
         (uint256 stkTokenShares, bytes memory logData) = _stake(params);
         emit ActionEvent("UmbrellaStake", logData);
@@ -111,7 +115,10 @@ contract UmbrellaStake is ActionBase, AaveV3Helper {
     /// @param _waToken The wrapped aToken.
     /// @param _amount The amount of aTokens to wrap.
     /// @return The amount of waTokens received.
-    function _wrapATokensToWaTokens(address _aToken, address _waToken, uint256 _amount) internal returns (uint256) {
+    function _wrapATokensToWaTokens(address _aToken, address _waToken, uint256 _amount)
+        internal
+        returns (uint256)
+    {
         _aToken.approveToken(_waToken, _amount);
 
         uint256 waTokenAmount = IStaticATokenV2(_waToken)

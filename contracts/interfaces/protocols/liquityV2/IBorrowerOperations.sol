@@ -96,7 +96,10 @@ interface IBorrowerOperations {
         uint128 maxInterestRate;
     }
 
-    function getInterestIndividualDelegateOf(uint256 _troveId) external view returns (InterestIndividualDelegate memory);
+    function getInterestIndividualDelegateOf(uint256 _troveId)
+        external
+        view
+        returns (InterestIndividualDelegate memory);
     function setInterestIndividualDelegate(
         uint256 _troveId,
         address _delegate,
@@ -132,7 +135,10 @@ interface IBorrowerOperations {
         uint256 _maxUpfrontFee
     ) external;
     function interestBatchManagerOf(uint256 _troveId) external view returns (address);
-    function getInterestBatchManager(address _account) external view returns (InterestBatchManager memory);
+    function getInterestBatchManager(address _account)
+        external
+        view
+        returns (InterestBatchManager memory);
     function setInterestBatchManager(
         uint256 _troveId,
         address _newBatchManager,

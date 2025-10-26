@@ -36,11 +36,13 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
 
         params.exchangeData.srcAddr =
             _parseParamAddr(params.exchangeData.srcAddr, _paramMapping[0], _subData, _returnValues);
-        params.exchangeData.destAddr =
-            _parseParamAddr(params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues);
+        params.exchangeData.destAddr = _parseParamAddr(
+            params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues
+        );
 
-        params.exchangeData.srcAmount =
-            _parseParamUint(params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues);
+        params.exchangeData.srcAmount = _parseParamUint(
+            params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues
+        );
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
@@ -96,7 +98,8 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
         (address wrapper, uint256 exchangedAmount) = _sell(_exchangeData);
 
         {
-            uint256 amountAfterFee = _takeGasFee(_gasUsed, exchangedAmount, _exchangeData.destAddr, _l1GasUsed);
+            uint256 amountAfterFee =
+                _takeGasFee(_gasUsed, exchangedAmount, _exchangeData.destAddr, _l1GasUsed);
 
             address tokenAddr = _exchangeData.destAddr;
             if (tokenAddr == TokenUtils.WETH_ADDR) {
@@ -122,10 +125,12 @@ contract LimitSellL2 is ActionBase, DFSExchangeCore, GasFeeHelperL2 {
         params = abi.decode(_callData, (Params));
     }
 
-    function _takeGasFee(uint256 _gasUsed, uint256 _soldAmount, address _feeToken, uint256 _l1GasUsed)
-        internal
-        returns (uint256 amountAfterFee)
-    {
+    function _takeGasFee(
+        uint256 _gasUsed,
+        uint256 _soldAmount,
+        address _feeToken,
+        uint256 _l1GasUsed
+    ) internal returns (uint256 amountAfterFee) {
         uint256 txCost = calcGasCost(_gasUsed, _feeToken, _l1GasUsed);
 
         // cap at 20% of the max amount
