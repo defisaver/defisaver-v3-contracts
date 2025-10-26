@@ -2,6 +2,7 @@
 pragma solidity =0.8.24;
 
 import { SafeModuleAuth } from "../../contracts/core/strategy/SafeModuleAuth.sol";
+import { StrategyExecutorCommon } from "../../contracts/core/strategy/StrategyExecutorCommon.sol";
 import { ProxyAuth } from "../../contracts/core/strategy/ProxyAuth.sol";
 import { DSAAuth } from "../../contracts/core/strategy/DSAAuth.sol";
 import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
@@ -77,7 +78,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_fail_to_call_execute_when_sender_is_not_authorized_bot() public {
-        vm.expectRevert(abi.encodeWithSelector(StrategyExecutor.BotNotApproved.selector, address(this), 0));
+        vm.expectRevert(abi.encodeWithSelector(StrategyExecutorCommon.BotNotApproved.selector, address(this), 0));
         StrategyModel.StrategySub memory dummySub;
         cut.executeStrategy(0, 0, new bytes[](0), new bytes[](0), dummySub);
     }
@@ -108,7 +109,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
 
         _add_bot_caller();
 
-        vm.expectRevert(abi.encodeWithSelector(StrategyExecutor.SubNotEnabled.selector, subId));
+        vm.expectRevert(abi.encodeWithSelector(StrategyExecutorCommon.SubNotEnabled.selector, subId));
         cut.executeStrategy(subId, 0, new bytes[](0), new bytes[](0), sub);
     }
 
