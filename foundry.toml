@@ -48,6 +48,7 @@ exclude_lints = [
     "screaming-snake-case-immutable",
     "pascal-case-struct",
 ]
-ignore = ["deprecated/**"]
+ignore = ["deprecated/**", "test-sol/**"]
+lint_on_build = false
 
 # https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
