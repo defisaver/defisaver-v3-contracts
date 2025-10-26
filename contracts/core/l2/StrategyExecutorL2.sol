@@ -3,13 +3,14 @@
 pragma solidity =0.8.24;
 
 import { IRecipeExecutor } from "../../interfaces/core/IRecipeExecutor.sol";
+import { ISubStorageL2 } from "../../interfaces/core/ISubStorageL2.sol";
 import { IAuth } from "../../interfaces/core/IAuth.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
+
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../strategy/StrategyModel.sol";
 import { BotAuth } from "../strategy/BotAuth.sol";
-import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
-import { SubStorageL2 } from "./SubStorageL2.sol";
 import { CoreHelper } from "../helpers/CoreHelper.sol";
 import { WalletType } from "../../utils/DFSTypes.sol";
 import { DFSIds } from "../../utils/DFSIds.sol";
@@ -40,8 +41,8 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, SmartWallet
             revert BotNotApproved(msg.sender, _subId);
         }
 
-        StoredSubData memory storedSubData = SubStorageL2(SUB_STORAGE_ADDR).getSub(_subId);
-        StrategySub memory _sub = SubStorageL2(SUB_STORAGE_ADDR).getStrategySub(_subId);
+        StoredSubData memory storedSubData = ISubStorageL2(SUB_STORAGE_ADDR).getSub(_subId);
+        StrategySub memory _sub = ISubStorageL2(SUB_STORAGE_ADDR).getStrategySub(_subId);
 
         // subscription must be enabled
         if (!storedSubData.isEnabled) {

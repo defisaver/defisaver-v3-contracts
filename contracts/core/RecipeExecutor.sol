@@ -105,13 +105,13 @@ import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
 import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 import { ITxSaverBytesTransientStorage } from "../interfaces/core/ITxSaverBytesTransientStorage.sol";
+import { IStrategyStorage } from "../interfaces/core/IStrategyStorage.sol";
+import { IBundleStorage } from "../interfaces/core/IBundleStorage.sol";
+import { ISubStorage } from "../interfaces/core/ISubStorage.sol";
 import { Permission } from "../auth/Permission.sol";
 import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
-import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
-import { BundleStorage } from "../core/strategy/BundleStorage.sol";
-import { SubStorage } from "../core/strategy/SubStorage.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 import { TokenUtils } from "../utils/token/TokenUtils.sol";
@@ -239,10 +239,10 @@ contract RecipeExecutor is
 
             // fetch strategy if inside of bundle
             if (_sub.isBundle) {
-                strategyId = BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(strategyId, _strategyIndex);
+                strategyId = IBundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(strategyId, _strategyIndex);
             }
 
-            strategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
+            strategy = IStrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
         }
 
         // check if all the triggers are true
@@ -254,7 +254,7 @@ contract RecipeExecutor is
 
         // if this is a one time strategy
         if (!strategy.continuous) {
-            SubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
+            ISubStorage(SUB_STORAGE_ADDR).deactivateSub(_subId);
         }
 
         // format recipe from strategy
@@ -311,7 +311,7 @@ contract RecipeExecutor is
             // after execution triggers flag-ed changeable can update their value
             if (ITrigger(triggerAddr).isChangeable()) {
                 _sub.triggerData[i] = ITrigger(triggerAddr).changedSubData(_sub.triggerData[i]);
-                SubStorage(_storageAddr).updateSubData(_subId, _sub);
+                ISubStorage(_storageAddr).updateSubData(_subId, _sub);
             }
         }
 

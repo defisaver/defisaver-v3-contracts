@@ -4,12 +4,12 @@ pragma solidity =0.8.24;
 
 import { IAuth } from "../../interfaces/core/IAuth.sol";
 import { IRecipeExecutor } from "../../interfaces/core/IRecipeExecutor.sol";
+import { ISubStorage } from "../../interfaces/core/ISubStorage.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "./StrategyModel.sol";
 import { BotAuth } from "./BotAuth.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
-import { SubStorage } from "../strategy/SubStorage.sol";
 import { CoreHelper } from "../helpers/CoreHelper.sol";
 import { WalletType } from "../../utils/DFSTypes.sol";
 import { DFSIds } from "../../utils/DFSIds.sol";
@@ -44,7 +44,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, SmartWalletUt
             revert BotNotApproved(msg.sender, _subId);
         }
 
-        StoredSubData memory storedSubData = SubStorage(SUB_STORAGE_ADDR).getSub(_subId);
+        StoredSubData memory storedSubData = ISubStorage(SUB_STORAGE_ADDR).getSub(_subId);
 
         bytes32 subDataHash = keccak256(abi.encode(_sub));
 

@@ -2,6 +2,7 @@
 
 pragma solidity =0.8.24;
 
+import { IBundleStorage } from "../../interfaces/core/IBundleStorage.sol";
 import { StrategyModel } from "./StrategyModel.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
@@ -9,7 +10,7 @@ import { StrategyStorage } from "./StrategyStorage.sol";
 import { CoreHelper } from "../helpers/CoreHelper.sol";
 
 /// @title BundleStorage - Record of all the Bundles created
-contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
+contract BundleStorage is StrategyModel, AdminAuth, CoreHelper, IBundleStorage {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     StrategyBundle[] public bundles;
@@ -54,6 +55,7 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
     /// @param _strategyIds Array of strategyIds that go into a bundle
     function createBundle(uint64[] memory _strategyIds)
         public
+        override
         onlyAuthCreators
         sameTriggers(_strategyIds)
         returns (uint256)
@@ -68,25 +70,30 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
     /// @notice Switch to determine if bundles can be created by anyone
     /// @dev Callable only by the owner
     /// @param _openToPublic Flag if true anyone can create bundles
-    function changeEditPermission(bool _openToPublic) public onlyOwner {
+    function changeEditPermission(bool _openToPublic) public override onlyOwner {
         openToPublic = _openToPublic;
     }
 
     ////////////////////////////// VIEW METHODS /////////////////////////////////
 
-    function getStrategyId(uint256 _bundleId, uint256 _strategyIndex) public view returns (uint256) {
+    function getStrategyId(uint256 _bundleId, uint256 _strategyIndex) public view override returns (uint256) {
         return bundles[_bundleId].strategyIds[_strategyIndex];
     }
 
-    function getBundle(uint256 _bundleId) public view returns (StrategyBundle memory) {
+    function getBundle(uint256 _bundleId) public view override returns (StrategyBundle memory) {
         return bundles[_bundleId];
     }
 
-    function getBundleCount() public view returns (uint256) {
+    function getBundleCount() public view override returns (uint256) {
         return bundles.length;
     }
 
-    function getPaginatedBundles(uint256 _page, uint256 _perPage) public view returns (StrategyBundle[] memory) {
+    function getPaginatedBundles(uint256 _page, uint256 _perPage)
+        public
+        view
+        override
+        returns (StrategyBundle[] memory)
+    {
         StrategyBundle[] memory bundlesPerPage = new StrategyBundle[](_perPage);
         uint256 start = _page * _perPage;
         uint256 end = start + _perPage;
