@@ -59,12 +59,14 @@ contract TestCore_DSProxyPermission is DSProxyPermission, BaseTest {
                                       HELPERS
     //////////////////////////////////////////////////////////////////////////*/
     function _give_proxy_permission(address _addr) internal {
-        bytes memory _calldata = abi.encodeWithSelector(DSProxyPermission.giveProxyPermission.selector, _addr);
+        bytes memory _calldata =
+            abi.encodeWithSelector(DSProxyPermission.giveProxyPermission.selector, _addr);
         wallet.execute(address(cut), _calldata, 0);
     }
 
     function _remove_proxy_permission(address _addr) internal {
-        bytes memory _calldata = abi.encodeWithSelector(DSProxyPermission.removeProxyPermission.selector, _addr);
+        bytes memory _calldata =
+            abi.encodeWithSelector(DSProxyPermission.removeProxyPermission.selector, _addr);
         wallet.execute(address(cut), _calldata, 0);
     }
 

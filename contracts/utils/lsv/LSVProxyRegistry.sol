@@ -6,7 +6,9 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { UtilAddresses } from "../../utils/addresses/UtilAddresses.sol";
 import { ActionsUtilHelper } from "../../actions/utils/helpers/ActionsUtilHelper.sol";
 import { IDSProxyFactory } from "../../interfaces/DS/IDSProxyFactory.sol";
-import { DSProxyFactoryHelper } from "../../utils/addresses/dsProxyFactory/DSProxyFactoryHelper.sol";
+import {
+    DSProxyFactoryHelper
+} from "../../utils/addresses/dsProxyFactory/DSProxyFactoryHelper.sol";
 import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
 import { IDSAuth } from "../../interfaces/DS/IDSAuth.sol";
 
@@ -31,7 +33,11 @@ contract LSVProxyRegistry is AdminAuth, UtilAddresses, ActionsUtilHelper, DSProx
         return newProxy;
     }
 
-    function updateRegistry(address _proxyAddr, address _oldOwner, uint256 _indexNumInOldOwnerProxiesArr) public {
+    function updateRegistry(
+        address _proxyAddr,
+        address _oldOwner,
+        uint256 _indexNumInOldOwnerProxiesArr
+    ) public {
         // check if msg.sender is the owner of proxy in question
         require(IDSProxy(payable(_proxyAddr)).owner() == msg.sender);
 
@@ -41,7 +47,8 @@ contract LSVProxyRegistry is AdminAuth, UtilAddresses, ActionsUtilHelper, DSProx
         // remove proxy from oldOwners proxies
         uint256 oldOwnersProxyCount = proxies[_oldOwner].length;
         if (oldOwnersProxyCount > 1 && _indexNumInOldOwnerProxiesArr < (oldOwnersProxyCount - 1)) {
-            proxies[_oldOwner][_indexNumInOldOwnerProxiesArr] = proxies[_oldOwner][oldOwnersProxyCount - 1];
+            proxies[_oldOwner][_indexNumInOldOwnerProxiesArr] =
+                proxies[_oldOwner][oldOwnersProxyCount - 1];
         }
         proxies[_oldOwner].pop();
 

@@ -35,11 +35,14 @@ contract CurveUsdCreate is ActionBase, CurveUsdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
-        params.collateralAmount = _parseParamUint(params.collateralAmount, _paramMapping[3], _subData, _returnValues);
-        params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[4], _subData, _returnValues);
+        params.collateralAmount =
+            _parseParamUint(params.collateralAmount, _paramMapping[3], _subData, _returnValues);
+        params.debtAmount =
+            _parseParamUint(params.debtAmount, _paramMapping[4], _subData, _returnValues);
         params.nBands = _parseParamUint(params.nBands, _paramMapping[5], _subData, _returnValues);
 
         (uint256 generatedAmount, bytes memory logData) = _curveUsdCreate(params);
@@ -66,7 +69,8 @@ contract CurveUsdCreate is ActionBase, CurveUsdHelper {
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
-        _params.collateralAmount = collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);
+        _params.collateralAmount =
+            collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);
         collateralAsset.approveToken(_params.controllerAddress, _params.collateralAmount);
 
         ICrvUsdController(_params.controllerAddress)

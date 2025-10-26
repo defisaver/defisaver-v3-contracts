@@ -33,8 +33,10 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
-        params.minCrvUsdExpected = _parseParamUint(params.minCrvUsdExpected, _paramMapping[1], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.minCrvUsdExpected =
+            _parseParamUint(params.minCrvUsdExpected, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
 
@@ -59,8 +61,13 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _curveUsdSelfLiquidate(Params memory _params) internal returns (uint256, bytes memory) {
-        if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
+    function _curveUsdSelfLiquidate(Params memory _params)
+        internal
+        returns (uint256, bytes memory)
+    {
+        if (!isControllerValid(_params.controllerAddress)) {
+            revert CurveUsdInvalidController();
+        }
 
         uint256 userWholeDebt = ICrvUsdController(_params.controllerAddress).debt(address(this));
         (uint256 collInCrvUsd, uint256 collInDepositAsset) =
@@ -81,7 +88,8 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
         uint256 collAssetBalancePreLiq = collateralAsset.getBalance(address(this));
         uint256 crvUsdBalancePreLiq = CRVUSD_TOKEN_ADDR.getBalance(address(this));
 
-        ICrvUsdController(_params.controllerAddress).liquidate(address(this), _params.minCrvUsdExpected, false);
+        ICrvUsdController(_params.controllerAddress)
+            .liquidate(address(this), _params.minCrvUsdExpected, false);
 
         uint256 collAssetBalanceAfterLiq = collateralAsset.getBalance(address(this));
         uint256 crvUsdBalanceAfterLiq = CRVUSD_TOKEN_ADDR.getBalance(address(this));
@@ -101,7 +109,10 @@ contract CurveUsdSelfLiquidate is ActionBase, CurveUsdHelper {
             CRVUSD_TOKEN_ADDR.approveToken(_params.controllerAddress, 0);
         }
 
-        return (collAssetReceivedFromLiq, abi.encode(_params, collInCrvUsd, collInDepositAsset, userWholeDebt));
+        return (
+            collAssetReceivedFromLiq,
+            abi.encode(_params, collInCrvUsd, collInDepositAsset, userWholeDebt)
+        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

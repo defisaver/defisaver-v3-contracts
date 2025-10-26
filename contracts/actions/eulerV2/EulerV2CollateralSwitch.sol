@@ -30,7 +30,8 @@ contract EulerV2CollateralSwitch is ActionBase, EulerV2Helper {
         params.vault = _parseParamAddr(params.vault, _paramMapping[0], _subData, _returnValues);
         params.account = _parseParamAddr(params.account, _paramMapping[1], _subData, _returnValues);
         params.enableAsColl =
-            _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[2], _subData, _returnValues) == 1;
+            _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[2], _subData, _returnValues)
+                == 1;
 
         bytes memory logData = _collateralSwitch(params);
         emit ActionEvent("EulerV2CollateralSwitch", logData);

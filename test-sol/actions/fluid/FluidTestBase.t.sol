@@ -2,11 +2,19 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultFactory } from "../../../contracts/interfaces/protocols/fluid/IFluidVaultFactory.sol";
-import { IFluidVaultResolver } from "../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
-import { IFluidDexResolver } from "../../../contracts/interfaces/protocols/fluid/resolvers/IFluidDexResolver.sol";
+import {
+    IFluidVaultFactory
+} from "../../../contracts/interfaces/protocols/fluid/IFluidVaultFactory.sol";
+import {
+    IFluidVaultResolver
+} from "../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
+import {
+    IFluidDexResolver
+} from "../../../contracts/interfaces/protocols/fluid/resolvers/IFluidDexResolver.sol";
 import { IFluidVault } from "../../../contracts/interfaces/protocols/fluid/vaults/IFluidVault.sol";
-import { IFluidVaultT1 } from "../../../contracts/interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
+import {
+    IFluidVaultT1
+} from "../../../contracts/interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
 import { FluidDexModel } from "../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { FluidView } from "../../../contracts/views/FluidView.sol";
 import { FluidHelper } from "../../../contracts/actions/fluid/helpers/FluidHelper.sol";
@@ -76,11 +84,18 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         revert NftNotFound();
     }
 
-    function getTokens(address _vault, bool _isT1Vault) internal view returns (TokensData memory tokens) {
+    function getTokens(address _vault, bool _isT1Vault)
+        internal
+        view
+        returns (TokensData memory tokens)
+    {
         if (_isT1Vault) {
             IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(_vault).constantsView();
             tokens = TokensData({
-                supply0: constants.supplyToken, supply1: address(0), borrow0: constants.borrowToken, borrow1: address(0)
+                supply0: constants.supplyToken,
+                supply1: address(0),
+                borrow0: constants.borrowToken,
+                borrow1: address(0)
             });
         } else {
             IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
@@ -129,10 +144,11 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         shares = shares * 101 / 100;
     }
 
-    function estimateDexPositionCollateralInOneToken(uint256 _nftId, bool _inToken0, FluidView _fluidView)
-        internal
-        returns (uint256 collateral)
-    {
+    function estimateDexPositionCollateralInOneToken(
+        uint256 _nftId,
+        bool _inToken0,
+        FluidView _fluidView
+    ) internal returns (uint256 collateral) {
         uint256 minToken0AmountToAccept = _inToken0 ? 1 : 0;
         uint256 minToken1AmountToAccept = _inToken0 ? 0 : 1;
 
@@ -184,14 +200,17 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         shares = shares * 100 / 101;
     }
 
-    function estimateDexPositionDebtInOneToken(uint256 _nftId, bool _inToken0, FluidView _fluidView)
-        internal
-        returns (uint256 debt)
-    {
+    function estimateDexPositionDebtInOneToken(
+        uint256 _nftId,
+        bool _inToken0,
+        FluidView _fluidView
+    ) internal returns (uint256 debt) {
         uint256 maxToken0AmountToPayback = _inToken0 ? uint256(type(int256).max) : 0;
         uint256 maxToken1AmountToPayback = _inToken0 ? 0 : uint256(type(int256).max);
 
-        debt = _fluidView.estimateDexPositionDebtInOneToken(_nftId, maxToken0AmountToPayback, maxToken1AmountToPayback);
+        debt = _fluidView.estimateDexPositionDebtInOneToken(
+            _nftId, maxToken0AmountToPayback, maxToken1AmountToPayback
+        );
 
         // Slightly increase debt to make sure there is enough for full payback.
         debt = debt * 105 / 100 + 10;
@@ -255,11 +274,16 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         _wallet.ownerApprove(constants.supplyToken, collAmount);
 
         uint256 borrowAmount = _borrowAmountInUSD != 0
-            ? amountInUSDPrice(isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, _borrowAmountInUSD)
+            ? amountInUSDPrice(
+                isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, _borrowAmountInUSD
+            )
             : 0;
 
         bytes memory executeActionCallData = executeActionCalldata(
-            fluidVaultT1OpenEncode(_vault, collAmount, borrowAmount, _wallet.owner(), _wallet.owner(), false), true
+            fluidVaultT1OpenEncode(
+                _vault, collAmount, borrowAmount, _wallet.owner(), _wallet.owner(), false
+            ),
+            true
         );
 
         vm.recordLogs();
@@ -280,22 +304,27 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         FluidView.VaultData memory vaultData = fluidView.getVaultData(address(_vault));
 
         // Setup collateral token 0
-        (, uint256 collAmount0) =
-            giveAndApproveToken(vaultData.supplyToken0, _wallet.owner(), _wallet.walletAddr(), _collAmount0InUSD);
+        (, uint256 collAmount0) = giveAndApproveToken(
+            vaultData.supplyToken0, _wallet.owner(), _wallet.walletAddr(), _collAmount0InUSD
+        );
 
         // Setup collateral token 1
-        (, uint256 collAmount1) =
-            giveAndApproveToken(vaultData.supplyToken1, _wallet.owner(), _wallet.walletAddr(), _collAmount1InUSD);
+        (, uint256 collAmount1) = giveAndApproveToken(
+            vaultData.supplyToken1, _wallet.owner(), _wallet.walletAddr(), _collAmount1InUSD
+        );
 
         // Setup borrow token 0
         uint256 borrowAmount = _borrowAmountInUSD != 0
             ? amountInUSDPrice(
-                vaultData.borrowToken0 == TokenUtils.ETH_ADDR ? TokenUtils.WETH_ADDR : vaultData.borrowToken0,
+                vaultData.borrowToken0 == TokenUtils.ETH_ADDR
+                    ? TokenUtils.WETH_ADDR
+                    : vaultData.borrowToken0,
                 _borrowAmountInUSD
             )
             : 0;
 
-        uint256 estimatedShares = estimateDepositShares(vaultData.dexSupplyData.dexPool, collAmount0, collAmount1);
+        uint256 estimatedShares =
+            estimateDepositShares(vaultData.dexSupplyData.dexPool, collAmount0, collAmount1);
 
         if (supplyLimitReached(vaultData.dexSupplyData, estimatedShares)) {
             return 0;
@@ -346,7 +375,10 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         {
             bool isNativeBorrow0 = vaultData.borrowToken0 == TokenUtils.ETH_ADDR;
             borrowAmount0 = _borrowAmount0InUSD != 0
-                ? amountInUSDPrice(isNativeBorrow0 ? TokenUtils.WETH_ADDR : vaultData.borrowToken0, _borrowAmount0InUSD)
+                ? amountInUSDPrice(
+                    isNativeBorrow0 ? TokenUtils.WETH_ADDR : vaultData.borrowToken0,
+                    _borrowAmount0InUSD
+                )
                 : 0;
         }
 
@@ -354,7 +386,10 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         {
             bool isNativeBorrow1 = vaultData.borrowToken1 == TokenUtils.ETH_ADDR;
             borrowAmount1 = _borrowAmount1InUSD != 0
-                ? amountInUSDPrice(isNativeBorrow1 ? TokenUtils.WETH_ADDR : vaultData.borrowToken1, _borrowAmount1InUSD)
+                ? amountInUSDPrice(
+                    isNativeBorrow1 ? TokenUtils.WETH_ADDR : vaultData.borrowToken1,
+                    _borrowAmount1InUSD
+                )
                 : 0;
         }
 
@@ -427,8 +462,9 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         }
 
         // Estimate collateral shares
-        vars.estimatedCollShares =
-            estimateDepositShares(vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1);
+        vars.estimatedCollShares = estimateDepositShares(
+            vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1
+        );
 
         if (supplyLimitReached(vaultData.dexSupplyData, vars.estimatedCollShares)) {
             return 0;
@@ -438,7 +474,10 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         {
             bool isNativeBorrow0 = vaultData.borrowToken0 == TokenUtils.ETH_ADDR;
             vars.borrowAmount0 = _borrowAmount0InUSD != 0
-                ? amountInUSDPrice(isNativeBorrow0 ? TokenUtils.WETH_ADDR : vaultData.borrowToken0, _borrowAmount0InUSD)
+                ? amountInUSDPrice(
+                    isNativeBorrow0 ? TokenUtils.WETH_ADDR : vaultData.borrowToken0,
+                    _borrowAmount0InUSD
+                )
                 : 0;
         }
 
@@ -446,13 +485,17 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
         {
             bool isNativeBorrow1 = vaultData.borrowToken1 == TokenUtils.ETH_ADDR;
             vars.borrowAmount1 = _borrowAmount1InUSD != 0
-                ? amountInUSDPrice(isNativeBorrow1 ? TokenUtils.WETH_ADDR : vaultData.borrowToken1, _borrowAmount1InUSD)
+                ? amountInUSDPrice(
+                    isNativeBorrow1 ? TokenUtils.WETH_ADDR : vaultData.borrowToken1,
+                    _borrowAmount1InUSD
+                )
                 : 0;
         }
 
         // Estimate debt shares
-        vars.estimatedDebtShares =
-            estimateBorrowShares(vaultData.dexBorrowData.dexPool, vars.borrowAmount0, vars.borrowAmount1);
+        vars.estimatedDebtShares = estimateBorrowShares(
+            vaultData.dexBorrowData.dexPool, vars.borrowAmount0, vars.borrowAmount1
+        );
 
         if (borrowLimitReached(vaultData.dexBorrowData, vars.estimatedDebtShares)) {
             return 0;
@@ -464,9 +507,13 @@ contract FluidTestBase is ExecuteActionsBase, FluidHelper {
                 _wallet.owner(),
                 _wallet.owner(),
                 0, /* supplyAmount - Only used for T3 vaults */
-                FluidDexModel.SupplyVariableData(vars.collAmount0, vars.collAmount1, vars.estimatedCollShares),
+                FluidDexModel.SupplyVariableData(
+                    vars.collAmount0, vars.collAmount1, vars.estimatedCollShares
+                ),
                 0, /* borrowAmount - Only used for T1 and T2 vaults */
-                FluidDexModel.BorrowVariableData(vars.borrowAmount0, vars.borrowAmount1, vars.estimatedDebtShares),
+                FluidDexModel.BorrowVariableData(
+                    vars.borrowAmount0, vars.borrowAmount1, vars.estimatedDebtShares
+                ),
                 true /* wrapBorrowedEth */
             ),
             true

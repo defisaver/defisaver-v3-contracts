@@ -138,13 +138,18 @@ contract CurveUsdView is CurveUsdHelper {
         return Band(n, lama.p_oracle_down(n), lama.p_oracle_up(n), lama.bands_y(n), lama.bands_x(n));
     }
 
-    function getBandsData(address market, int256 from, int256 to) public view returns (Band[] memory) {
+    function getBandsData(address market, int256 from, int256 to)
+        public
+        view
+        returns (Band[] memory)
+    {
         ICrvUsdController ctrl = ICrvUsdController(market);
         ILLAMMA lama = ILLAMMA(ctrl.amm());
         Band[] memory bands = new Band[](uint256(to - from + 1));
         for (int256 i = from; i <= to; i++) {
-            bands[uint256(i - from)] =
-                Band(i, lama.p_oracle_down(i), lama.p_oracle_up(i), lama.bands_y(i), lama.bands_x(i));
+            bands[uint256(i - from)] = Band(
+                i, lama.p_oracle_down(i), lama.p_oracle_up(i), lama.bands_y(i), lama.bands_x(i)
+            );
         }
 
         return bands;
@@ -159,7 +164,9 @@ contract CurveUsdView is CurveUsdHelper {
 
         uint256 collForHealthCalc = collateral;
 
-        int256 health = healthCalculator(market, address(0x00), int256(collForHealthCalc), int256(debt), true, N);
+        int256 health = healthCalculator(
+            market, address(0x00), int256(collForHealthCalc), int256(debt), true, N
+        );
 
         int256 n1 = ctrl.calculate_debt_n1(collateral, debt, N);
         int256 n2 = n1 + int256(N) - 1;
@@ -174,12 +181,20 @@ contract CurveUsdView is CurveUsdHelper {
         });
     }
 
-    function maxBorrow(address market, uint256 collateral, uint256 N) external view returns (uint256) {
+    function maxBorrow(address market, uint256 collateral, uint256 N)
+        external
+        view
+        returns (uint256)
+    {
         ICrvUsdController ctrl = ICrvUsdController(market);
         return ctrl.max_borrowable(collateral, N);
     }
 
-    function minCollateral(address market, uint256 debt, uint256 N) external view returns (uint256) {
+    function minCollateral(address market, uint256 debt, uint256 N)
+        external
+        view
+        returns (uint256)
+    {
         ICrvUsdController ctrl = ICrvUsdController(market);
         return ctrl.min_collateral(debt, N);
     }
@@ -210,7 +225,9 @@ contract CurveUsdView is CurveUsdHelper {
         // handle special health_calc if WBTC is collateral
         if (market == WBTC_MARKET) {
             ICrvUsdController healthZap = ICrvUsdController(WBTC_HEALTH_ZAP);
-            health = healthZap.health_calculator(user, int256(collChange), int256(debtChange), isFull, numBands);
+            health = healthZap.health_calculator(
+                user, int256(collChange), int256(debtChange), isFull, numBands
+            );
         } else {
             health = ctrl.health_calculator(user, collChange, debtChange, isFull, numBands);
         }

@@ -19,10 +19,17 @@ interface ITroveManager {
     event LQTYStakingAddressChanged(address _lqtyStakingAddress);
 
     event Liquidation(
-        uint256 _liquidatedDebt, uint256 _liquidatedColl, uint256 _collGasCompensation, uint256 _LUSDGasCompensation
+        uint256 _liquidatedDebt,
+        uint256 _liquidatedColl,
+        uint256 _collGasCompensation,
+        uint256 _LUSDGasCompensation
     );
-    event Redemption(uint256 _attemptedLUSDAmount, uint256 _actualLUSDAmount, uint256 _ETHSent, uint256 _ETHFee);
-    event TroveUpdated(address indexed _borrower, uint256 _debt, uint256 _coll, uint256 stake, uint8 operation);
+    event Redemption(
+        uint256 _attemptedLUSDAmount, uint256 _actualLUSDAmount, uint256 _ETHSent, uint256 _ETHFee
+    );
+    event TroveUpdated(
+        address indexed _borrower, uint256 _debt, uint256 _coll, uint256 stake, uint8 operation
+    );
     event TroveLiquidated(address indexed _borrower, uint256 _debt, uint256 _coll, uint8 operation);
     event BaseRateUpdated(uint256 _baseRate);
     event LastFeeOpTimeUpdated(uint256 _lastFeeOpTime);
@@ -72,7 +79,12 @@ interface ITroveManager {
     function getEntireDebtAndColl(address _borrower)
         external
         view
-        returns (uint256 debt, uint256 coll, uint256 pendingLUSDDebtReward, uint256 pendingETHReward);
+        returns (
+            uint256 debt,
+            uint256 coll,
+            uint256 pendingLUSDDebtReward,
+            uint256 pendingETHReward
+        );
 
     function closeTrove(address _borrower) external;
 

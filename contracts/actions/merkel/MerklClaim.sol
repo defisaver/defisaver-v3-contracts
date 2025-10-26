@@ -27,13 +27,12 @@ contract MerklClaim is ActionBase, MerklHelper {
         address to;
     }
 
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        virtual
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
         (bytes memory logData) = _claim(params);
@@ -54,7 +53,8 @@ contract MerklClaim is ActionBase, MerklHelper {
     function _claim(Params memory _params) internal returns (bytes memory logData) {
         merklDistributor.claim(_params.users, _params.tokens, _params.amounts, _params.proofs);
         for (uint256 i; i < _params.distinctTokens.length; ++i) {
-            _params.distinctTokens[i].withdrawTokens(_params.to, _params.amountsClaimedPerDistinctToken[i]);
+            _params.distinctTokens[i]
+            .withdrawTokens(_params.to, _params.amountsClaimedPerDistinctToken[i]);
         }
 
         logData = abi.encode(_params.distinctTokens, _params.amountsClaimedPerDistinctToken);

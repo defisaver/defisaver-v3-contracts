@@ -9,5 +9,8 @@ interface IVat {
     }
 
     function urns(bytes32, address) external view returns (Urn memory);
-    function ilks(bytes32 ilk) external view returns (uint256, uint256, uint256, uint256 line, uint256);
+    function ilks(bytes32 ilk)
+        external
+        view
+        returns (uint256, uint256, uint256, uint256 line, uint256);
 }

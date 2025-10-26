@@ -174,10 +174,12 @@ interface IFluidDexResolver {
     /// @param token1Amt_ Amount of token1 to deposit
     /// @param minSharesAmt_ Minimum amount of shares to receive
     /// @return shares_ Estimated amount of shares to be minted
-    function estimateDeposit(address dex_, uint256 token0Amt_, uint256 token1Amt_, uint256 minSharesAmt_)
-        external
-        payable
-        returns (uint256 shares_);
+    function estimateDeposit(
+        address dex_,
+        uint256 token0Amt_,
+        uint256 token1Amt_,
+        uint256 minSharesAmt_
+    ) external payable returns (uint256 shares_);
 
     /// @dev Estimate withdrawal of tokens
     /// @param dex_ The address of the DEX contract
@@ -185,9 +187,12 @@ interface IFluidDexResolver {
     /// @param token1Amt_ Amount of token1 to withdraw
     /// @param maxSharesAmt_ Maximum amount of shares to burn
     /// @return shares_ Estimated amount of shares to be burned
-    function estimateWithdraw(address dex_, uint256 token0Amt_, uint256 token1Amt_, uint256 maxSharesAmt_)
-        external
-        returns (uint256 shares_);
+    function estimateWithdraw(
+        address dex_,
+        uint256 token0Amt_,
+        uint256 token1Amt_,
+        uint256 maxSharesAmt_
+    ) external returns (uint256 shares_);
 
     /// @dev Estimate withdrawal of a perfect amount of collateral liquidity in one token
     /// @param dex_ The address of the DEX contract
@@ -195,9 +200,12 @@ interface IFluidDexResolver {
     /// @param minToken0_ The minimum amount of token0 the user is willing to accept
     /// @param minToken1_ The minimum amount of token1 the user is willing to accept
     /// @return withdrawAmt_ Estimated amount of tokens to be withdrawn
-    function estimateWithdrawPerfectInOneToken(address dex_, uint256 shares_, uint256 minToken0_, uint256 minToken1_)
-        external
-        returns (uint256 withdrawAmt_);
+    function estimateWithdrawPerfectInOneToken(
+        address dex_,
+        uint256 shares_,
+        uint256 minToken0_,
+        uint256 minToken1_
+    ) external returns (uint256 withdrawAmt_);
 
     /// @dev Estimate borrowing of tokens
     /// @param dex_ The address of the DEX contract
@@ -205,9 +213,12 @@ interface IFluidDexResolver {
     /// @param token1Amt_ Amount of token1 to borrow
     /// @param maxSharesAmt_ Maximum amount of shares to mint
     /// @return shares_ Estimated amount of shares to be minted
-    function estimateBorrow(address dex_, uint256 token0Amt_, uint256 token1Amt_, uint256 maxSharesAmt_)
-        external
-        returns (uint256 shares_);
+    function estimateBorrow(
+        address dex_,
+        uint256 token0Amt_,
+        uint256 token1Amt_,
+        uint256 maxSharesAmt_
+    ) external returns (uint256 shares_);
 
     /// @dev Estimate paying back of borrowed tokens
     /// @param dex_ The address of the DEX contract
@@ -215,10 +226,12 @@ interface IFluidDexResolver {
     /// @param token1Amt_ Amount of token1 to pay back
     /// @param minSharesAmt_ Minimum amount of shares to burn
     /// @return shares_ Estimated amount of shares to be burned
-    function estimatePayback(address dex_, uint256 token0Amt_, uint256 token1Amt_, uint256 minSharesAmt_)
-        external
-        payable
-        returns (uint256 shares_);
+    function estimatePayback(
+        address dex_,
+        uint256 token0Amt_,
+        uint256 token1Amt_,
+        uint256 minSharesAmt_
+    ) external payable returns (uint256 shares_);
 
     /// @dev Estimate paying back of a perfect amount of borrowed tokens in one token
     /// @param dex_ The address of the DEX contract
@@ -226,8 +239,10 @@ interface IFluidDexResolver {
     /// @param maxToken0_ Maximum amount of token0 to pay back
     /// @param maxToken1_ Maximum amount of token1 to pay back
     /// @return paybackAmt_ Estimated amount of tokens to be paid back
-    function estimatePaybackPerfectInOneToken(address dex_, uint256 shares_, uint256 maxToken0_, uint256 maxToken1_)
-        external
-        payable
-        returns (uint256 paybackAmt_);
+    function estimatePaybackPerfectInOneToken(
+        address dex_,
+        uint256 shares_,
+        uint256 maxToken0_,
+        uint256 maxToken1_
+    ) external payable returns (uint256 paybackAmt_);
 }

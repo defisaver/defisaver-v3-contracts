@@ -70,11 +70,12 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     /// @param _mapType Indicated the type of the input in paramMapping
     /// @param _subData Array of subscription data we can replace the input value with
     /// @param _returnValues Array of subscription data we can replace the input value with
-    function _parseParamUint(uint256 _param, uint8 _mapType, bytes32[] memory _subData, bytes32[] memory _returnValues)
-        internal
-        pure
-        returns (uint256)
-    {
+    function _parseParamUint(
+        uint256 _param,
+        uint8 _mapType,
+        bytes32[] memory _subData,
+        bytes32[] memory _returnValues
+    ) internal pure returns (uint256) {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = uint256(_returnValues[getReturnIndex(_mapType)]);
@@ -91,11 +92,12 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     /// @param _mapType Indicated the type of the input in paramMapping
     /// @param _subData Array of subscription data we can replace the input value with
     /// @param _returnValues Array of subscription data we can replace the input value with
-    function _parseParamAddr(address _param, uint8 _mapType, bytes32[] memory _subData, bytes32[] memory _returnValues)
-        internal
-        view
-        returns (address)
-    {
+    function _parseParamAddr(
+        address _param,
+        uint8 _mapType,
+        bytes32[] memory _subData,
+        bytes32[] memory _returnValues
+    ) internal view returns (address) {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = address(bytes20((_returnValues[getReturnIndex(_mapType)])));

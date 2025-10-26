@@ -36,14 +36,23 @@ contract AavePayback is ActionBase, AaveHelper {
         Params memory params = parseInputs(_callData);
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
+        params.tokenAddr =
+            _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
-        params.rateMode = _parseParamUint(params.rateMode, _paramMapping[3], _subData, _returnValues);
+        params.rateMode =
+            _parseParamUint(params.rateMode, _paramMapping[3], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[5], _subData, _returnValues);
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[5], _subData, _returnValues);
 
-        (uint256 paybackAmount, bytes memory logData) =
-            _payback(params.market, params.tokenAddr, params.amount, params.rateMode, params.from, params.onBehalf);
+        (uint256 paybackAmount, bytes memory logData) = _payback(
+            params.market,
+            params.tokenAddr,
+            params.amount,
+            params.rateMode,
+            params.from,
+            params.onBehalf
+        );
         emit ActionEvent("AavePayback", logData);
         return bytes32(paybackAmount);
     }
@@ -51,8 +60,14 @@ contract AavePayback is ActionBase, AaveHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) =
-            _payback(params.market, params.tokenAddr, params.amount, params.rateMode, params.from, params.onBehalf);
+        (, bytes memory logData) = _payback(
+            params.market,
+            params.tokenAddr,
+            params.amount,
+            params.rateMode,
+            params.from,
+            params.onBehalf
+        );
         logger.logActionDirectEvent("AavePayback", logData);
     }
 

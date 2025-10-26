@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity =0.8.24;
 
-import { Id, MarketParams, Market, IMorphoBlue } from "../../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
+import {
+    Id,
+    MarketParams,
+    Market,
+    IMorphoBlue
+} from "../../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 import { IIrm } from "../../../interfaces/protocols/morpho-blue/IIrm.sol";
 
 /// @title MorphoStorageLib
@@ -49,11 +54,16 @@ library MorphoStorageLib {
 
     function positionSupplySharesSlot(Id id, address user) internal pure returns (bytes32) {
         return bytes32(
-            uint256(keccak256(abi.encode(user, keccak256(abi.encode(id, POSITION_SLOT))))) + SUPPLY_SHARES_OFFSET
+            uint256(keccak256(abi.encode(user, keccak256(abi.encode(id, POSITION_SLOT)))))
+                + SUPPLY_SHARES_OFFSET
         );
     }
 
-    function positionBorrowSharesAndCollateralSlot(Id id, address user) internal pure returns (bytes32) {
+    function positionBorrowSharesAndCollateralSlot(Id id, address user)
+        internal
+        pure
+        returns (bytes32)
+    {
         return bytes32(
             uint256(keccak256(abi.encode(user, keccak256(abi.encode(id, POSITION_SLOT)))))
                 + BORROW_SHARES_AND_COLLATERAL_OFFSET
@@ -61,11 +71,15 @@ library MorphoStorageLib {
     }
 
     function marketTotalSupplyAssetsAndSharesSlot(Id id) internal pure returns (bytes32) {
-        return bytes32(uint256(keccak256(abi.encode(id, MARKET_SLOT))) + TOTAL_SUPPLY_ASSETS_AND_SHARES_OFFSET);
+        return bytes32(
+            uint256(keccak256(abi.encode(id, MARKET_SLOT))) + TOTAL_SUPPLY_ASSETS_AND_SHARES_OFFSET
+        );
     }
 
     function marketTotalBorrowAssetsAndSharesSlot(Id id) internal pure returns (bytes32) {
-        return bytes32(uint256(keccak256(abi.encode(id, MARKET_SLOT))) + TOTAL_BORROW_ASSETS_AND_SHARES_OFFSET);
+        return bytes32(
+            uint256(keccak256(abi.encode(id, MARKET_SLOT))) + TOTAL_BORROW_ASSETS_AND_SHARES_OFFSET
+        );
     }
 
     function marketLastUpdateAndFeeSlot(Id id) internal pure returns (bytes32) {
@@ -80,8 +94,14 @@ library MorphoStorageLib {
         return keccak256(abi.encode(lltv, IS_LLTV_ENABLED_SLOT));
     }
 
-    function isAuthorizedSlot(address authorizer, address authorizee) internal pure returns (bytes32) {
-        return keccak256(abi.encode(authorizee, keccak256(abi.encode(authorizer, IS_AUTHORIZED_SLOT))));
+    function isAuthorizedSlot(address authorizer, address authorizee)
+        internal
+        pure
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(authorizee, keccak256(abi.encode(authorizer, IS_AUTHORIZED_SLOT)))
+        );
     }
 
     function nonceSlot(address authorizer) internal pure returns (bytes32) {
@@ -89,11 +109,16 @@ library MorphoStorageLib {
     }
 
     function idToLoanTokenSlot(Id id) internal pure returns (bytes32) {
-        return bytes32(uint256(keccak256(abi.encode(id, ID_TO_MARKET_PARAMS_SLOT))) + LOAN_TOKEN_OFFSET);
+        return
+            bytes32(
+                uint256(keccak256(abi.encode(id, ID_TO_MARKET_PARAMS_SLOT))) + LOAN_TOKEN_OFFSET
+            );
     }
 
     function idToCollateralTokenSlot(Id id) internal pure returns (bytes32) {
-        return bytes32(uint256(keccak256(abi.encode(id, ID_TO_MARKET_PARAMS_SLOT))) + COLLATERAL_TOKEN_OFFSET);
+        return bytes32(
+            uint256(keccak256(abi.encode(id, ID_TO_MARKET_PARAMS_SLOT))) + COLLATERAL_TOKEN_OFFSET
+        );
     }
 
     function idToOracleSlot(Id id) internal pure returns (bytes32) {
@@ -121,12 +146,14 @@ library MorphoLib {
     }
 
     function borrowShares(IMorphoBlue morpho, Id id, address user) internal view returns (uint256) {
-        bytes32[] memory slot = _array(MorphoStorageLib.positionBorrowSharesAndCollateralSlot(id, user));
+        bytes32[] memory slot =
+            _array(MorphoStorageLib.positionBorrowSharesAndCollateralSlot(id, user));
         return uint128(uint256(morpho.extSloads(slot)[0]));
     }
 
     function collateral(IMorphoBlue morpho, Id id, address user) internal view returns (uint256) {
-        bytes32[] memory slot = _array(MorphoStorageLib.positionBorrowSharesAndCollateralSlot(id, user));
+        bytes32[] memory slot =
+            _array(MorphoStorageLib.positionBorrowSharesAndCollateralSlot(id, user));
         return uint256(morpho.extSloads(slot)[0] >> 128);
     }
 
@@ -360,22 +387,38 @@ library SharesMathLib {
     uint256 internal constant VIRTUAL_ASSETS = 1;
 
     /// @dev Calculates the value of `assets` quoted in shares, rounding down.
-    function toSharesDown(uint256 assets, uint256 totalAssets, uint256 totalShares) internal pure returns (uint256) {
+    function toSharesDown(uint256 assets, uint256 totalAssets, uint256 totalShares)
+        internal
+        pure
+        returns (uint256)
+    {
         return assets.mulDivDown(totalShares + VIRTUAL_SHARES, totalAssets + VIRTUAL_ASSETS);
     }
 
     /// @dev Calculates the value of `shares` quoted in assets, rounding down.
-    function toAssetsDown(uint256 shares, uint256 totalAssets, uint256 totalShares) internal pure returns (uint256) {
+    function toAssetsDown(uint256 shares, uint256 totalAssets, uint256 totalShares)
+        internal
+        pure
+        returns (uint256)
+    {
         return shares.mulDivDown(totalAssets + VIRTUAL_ASSETS, totalShares + VIRTUAL_SHARES);
     }
 
     /// @dev Calculates the value of `assets` quoted in shares, rounding up.
-    function toSharesUp(uint256 assets, uint256 totalAssets, uint256 totalShares) internal pure returns (uint256) {
+    function toSharesUp(uint256 assets, uint256 totalAssets, uint256 totalShares)
+        internal
+        pure
+        returns (uint256)
+    {
         return assets.mulDivUp(totalShares + VIRTUAL_SHARES, totalAssets + VIRTUAL_ASSETS);
     }
 
     /// @dev Calculates the value of `shares` quoted in assets, rounding up.
-    function toAssetsUp(uint256 shares, uint256 totalAssets, uint256 totalShares) internal pure returns (uint256) {
+    function toAssetsUp(uint256 shares, uint256 totalAssets, uint256 totalShares)
+        internal
+        pure
+        returns (uint256)
+    {
         return shares.mulDivUp(totalAssets + VIRTUAL_ASSETS, totalShares + VIRTUAL_SHARES);
     }
 }
@@ -413,7 +456,8 @@ library MorphoBalancesLib {
         // Skipped if elapsed == 0 or totalBorrowAssets == 0 because interest would be null, or if irm == address(0).
         if (elapsed != 0 && market.totalBorrowAssets != 0 && marketParams.irm != address(0)) {
             uint256 borrowRate = IIrm(marketParams.irm).borrowRateView(marketParams, market);
-            uint256 interest = market.totalBorrowAssets.wMulDown(borrowRate.wTaylorCompounded(elapsed));
+            uint256 interest =
+                market.totalBorrowAssets.wMulDown(borrowRate.wTaylorCompounded(elapsed));
             market.totalBorrowAssets += interest.toUint128();
             market.totalSupplyAssets += interest.toUint128();
 
@@ -421,13 +465,19 @@ library MorphoBalancesLib {
                 uint256 feeAmount = interest.wMulDown(market.fee);
                 // The fee amount is subtracted from the total supply in this calculation to compensate for the fact
                 // that total supply is already updated.
-                uint256 feeShares =
-                    feeAmount.toSharesDown(market.totalSupplyAssets - feeAmount, market.totalSupplyShares);
+                uint256 feeShares = feeAmount.toSharesDown(
+                    market.totalSupplyAssets - feeAmount, market.totalSupplyShares
+                );
                 market.totalSupplyShares += feeShares.toUint128();
             }
         }
 
-        return (market.totalSupplyAssets, market.totalSupplyShares, market.totalBorrowAssets, market.totalBorrowShares);
+        return (
+            market.totalSupplyAssets,
+            market.totalSupplyShares,
+            market.totalBorrowAssets,
+            market.totalBorrowShares
+        );
     }
 
     /// @notice Returns the expected total supply assets of a market after having accrued interest.
@@ -461,14 +511,15 @@ library MorphoBalancesLib {
     /// @dev Warning: Wrong for `feeRecipient` because their supply shares increase is not taken into account.
     /// @dev Warning: Withdrawing using the expected supply assets can lead to a revert due to conversion roundings from
     /// assets to shares.
-    function expectedSupplyAssets(IMorphoBlue morpho, MarketParams memory marketParams, address user)
-        internal
-        view
-        returns (uint256)
-    {
+    function expectedSupplyAssets(
+        IMorphoBlue morpho,
+        MarketParams memory marketParams,
+        address user
+    ) internal view returns (uint256) {
         Id id = marketParams.id();
         uint256 supplyShares = morpho.supplyShares(id, user);
-        (uint256 totalSupplyAssets, uint256 totalSupplyShares,,) = expectedMarketBalances(morpho, marketParams);
+        (uint256 totalSupplyAssets, uint256 totalSupplyShares,,) =
+            expectedMarketBalances(morpho, marketParams);
 
         return supplyShares.toAssetsDown(totalSupplyAssets, totalSupplyShares);
     }
@@ -476,14 +527,15 @@ library MorphoBalancesLib {
     /// @notice Returns the expected borrow assets balance of `user` on a market after having accrued interest.
     /// @dev Warning: The expected balance is rounded up, so it may be greater than the market's expected total borrow
     /// assets.
-    function expectedBorrowAssets(IMorphoBlue morpho, MarketParams memory marketParams, address user)
-        internal
-        view
-        returns (uint256)
-    {
+    function expectedBorrowAssets(
+        IMorphoBlue morpho,
+        MarketParams memory marketParams,
+        address user
+    ) internal view returns (uint256) {
         Id id = marketParams.id();
         uint256 borrowShares = morpho.borrowShares(id, user);
-        (,, uint256 totalBorrowAssets, uint256 totalBorrowShares) = expectedMarketBalances(morpho, marketParams);
+        (,, uint256 totalBorrowAssets, uint256 totalBorrowShares) =
+            expectedMarketBalances(morpho, marketParams);
 
         return borrowShares.toAssetsUp(totalBorrowAssets, totalBorrowShares);
     }

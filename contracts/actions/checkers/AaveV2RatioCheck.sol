@@ -36,8 +36,12 @@ contract AaveV2RatioCheck is ActionBase, AaveRatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 ratioState = _parseParamUint(uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues);
-        uint256 targetRatio = _parseParamUint(uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues);
+        uint256 ratioState = _parseParamUint(
+            uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues
+        );
+        uint256 targetRatio = _parseParamUint(
+            uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues
+        );
 
         uint256 currRatio = getSafetyRatio(DEFAULT_AAVE_V2_MARKET, address(this));
 

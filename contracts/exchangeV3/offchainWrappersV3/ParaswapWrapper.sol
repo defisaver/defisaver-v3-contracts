@@ -23,8 +23,14 @@ contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData
 
     /// @notice Takes order from Paraswap and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    function takeOrder(ExchangeData memory _exData) public payable override returns (bool success, uint256) {
-        ParaswapCalldata memory paraswapCalldata = abi.decode(_exData.offchainData.callData, (ParaswapCalldata));
+    function takeOrder(ExchangeData memory _exData)
+        public
+        payable
+        override
+        returns (bool success, uint256)
+    {
+        ParaswapCalldata memory paraswapCalldata =
+            abi.decode(_exData.offchainData.callData, (ParaswapCalldata));
 
         // approve paraswap allowance contract
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);

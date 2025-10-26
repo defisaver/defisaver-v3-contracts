@@ -3,7 +3,9 @@
 pragma solidity =0.8.24;
 
 import { IFluidVaultT1 } from "../../../interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
-import { IFluidVaultResolver } from "../../../interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
+import {
+    IFluidVaultResolver
+} from "../../../interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidHelper } from "../helpers/FluidHelper.sol";
 import { DFSLib } from "../../../utils/DFSLib.sol";
 import { ActionBase } from "../../ActionBase.sol";
@@ -79,16 +81,22 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
 
         params.vault = _parseParamAddr(params.vault, _paramMapping[0], _subData, _returnValues);
         params.nftId = _parseParamUint(params.nftId, _paramMapping[1], _subData, _returnValues);
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[2], _subData, _returnValues);
-        params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[3], _subData, _returnValues);
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[2], _subData, _returnValues);
+        params.debtAmount =
+            _parseParamUint(params.debtAmount, _paramMapping[3], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[5], _subData, _returnValues);
         params.sendWrappedEth =
-            _parseParamUint(params.sendWrappedEth ? 1 : 0, _paramMapping[6], _subData, _returnValues) == 1;
-        params.collAction =
-            CollActionType(_parseParamUint(uint8(params.collAction), _paramMapping[7], _subData, _returnValues));
-        params.debtAction =
-            DebtActionType(_parseParamUint(uint8(params.debtAction), _paramMapping[8], _subData, _returnValues));
+            _parseParamUint(
+                    params.sendWrappedEth ? 1 : 0, _paramMapping[6], _subData, _returnValues
+                ) == 1;
+        params.collAction = CollActionType(
+            _parseParamUint(uint8(params.collAction), _paramMapping[7], _subData, _returnValues)
+        );
+        params.debtAction = DebtActionType(
+            _parseParamUint(uint8(params.debtAction), _paramMapping[8], _subData, _returnValues)
+        );
 
         (uint256 debtAmount, bytes memory logData) = _adjust(params);
         emit ActionEvent("FluidVaultT1Adjust", logData);
@@ -115,10 +123,12 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
 
         AdjustLocalVars memory vars;
 
-        vars.sendWithdrawnEthAsWrapped = _params.sendWrappedEth && _params.collAction == CollActionType.WITHDRAW
+        vars.sendWithdrawnEthAsWrapped = _params.sendWrappedEth
+            && _params.collAction == CollActionType.WITHDRAW
             && constants.supplyToken == TokenUtils.ETH_ADDR && _params.collAmount > 0;
 
-        vars.sendBorrowedEthAsWrapped = _params.sendWrappedEth && _params.debtAction == DebtActionType.BORROW
+        vars.sendBorrowedEthAsWrapped = _params.sendWrappedEth
+            && _params.debtAction == DebtActionType.BORROW
             && constants.borrowToken == TokenUtils.ETH_ADDR && _params.debtAmount > 0;
 
         if (_params.collAction == CollActionType.SUPPLY) {
@@ -139,10 +149,13 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             vars.borrowTokenAmount = _handleBorrow(_params);
         }
 
-        vars.sendTokensTo =
-            (vars.sendWithdrawnEthAsWrapped || vars.sendBorrowedEthAsWrapped) ? address(this) : _params.to;
+        vars.sendTokensTo = (vars.sendWithdrawnEthAsWrapped || vars.sendBorrowedEthAsWrapped)
+            ? address(this)
+            : _params.to;
 
-        (, int256 exactCollAmt, int256 exactDebtAmt) = IFluidVaultT1(_params.vault).operate{ value: vars.msgValue }(
+        (, int256 exactCollAmt, int256 exactDebtAmt) = IFluidVaultT1(_params.vault).operate{
+            value: vars.msgValue
+        }(
             _params.nftId, vars.supplyTokenAmount, vars.borrowTokenAmount, vars.sendTokensTo
         );
 
@@ -168,7 +181,9 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             _handleMaxPaybackRefund(_params, constants.borrowToken, paybackSnapshot);
         }
 
-        uint256 retVal = _params.debtAction == DebtActionType.BORROW ? uint256(exactDebtAmt) : uint256(-exactDebtAmt);
+        uint256 retVal = _params.debtAction == DebtActionType.BORROW
+            ? uint256(exactDebtAmt)
+            : uint256(-exactDebtAmt);
 
         return (retVal, abi.encode(_params));
     }
@@ -189,7 +204,8 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
         if (_params.collAmount == 0) return (0, 0);
 
         if (_supplyToken == TokenUtils.ETH_ADDR) {
-            _params.collAmount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.collAmount);
+            _params.collAmount =
+                TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.collAmount);
             TokenUtils.withdrawWeth(_params.collAmount);
             msgValue = _params.collAmount;
         } else {
@@ -203,10 +219,16 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     /// @dev Helper function to handle withdraw action
     /// @param _params Params struct passed to the action
     /// @return supplyTokenAmount Amount of supply token to be withdrawn from Fluid T1 Vault. Supports max withdraw.
-    function _handleWithdraw(Params memory _params) internal pure returns (int256 supplyTokenAmount) {
+    function _handleWithdraw(Params memory _params)
+        internal
+        pure
+        returns (int256 supplyTokenAmount)
+    {
         if (_params.collAmount == 0) return 0;
 
-        supplyTokenAmount = _params.collAmount == type(uint256).max ? type(int256).min : -_params.collAmount.signed256();
+        supplyTokenAmount = _params.collAmount == type(uint256).max
+            ? type(int256).min
+            : -_params.collAmount.signed256();
     }
 
     /// @dev Helper function to handle borrow action
@@ -241,12 +263,14 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
             snapshot.maxPayback = true;
             // See comments in FluidVaultT1Payback.sol
             _params.debtAmount = userPosition.borrow * 10_001 / 10_000 + 5;
-            snapshot.borrowTokenBalanceBefore =
-                _borrowToken == TokenUtils.ETH_ADDR ? address(this).balance : _borrowToken.getBalance(address(this));
+            snapshot.borrowTokenBalanceBefore = _borrowToken == TokenUtils.ETH_ADDR
+                ? address(this).balance
+                : _borrowToken.getBalance(address(this));
         }
 
         if (_borrowToken == TokenUtils.ETH_ADDR) {
-            _params.debtAmount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.debtAmount);
+            _params.debtAmount =
+                TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.debtAmount);
             TokenUtils.withdrawWeth(_params.debtAmount);
             msgValue = _params.debtAmount;
         } else {
@@ -261,11 +285,14 @@ contract FluidVaultT1Adjust is ActionBase, FluidHelper {
     /// @param _params Params struct passed to the action
     /// @param _borrowToken Address of the borrow token
     /// @param _snapshot MaxPaybackSnapshot - helper struct that holds information about max payback
-    function _handleMaxPaybackRefund(Params memory _params, address _borrowToken, MaxPaybackSnapshot memory _snapshot)
-        internal
-    {
-        uint256 borrowTokenBalanceAfter =
-            _borrowToken == TokenUtils.ETH_ADDR ? address(this).balance : _borrowToken.getBalance(address(this));
+    function _handleMaxPaybackRefund(
+        Params memory _params,
+        address _borrowToken,
+        MaxPaybackSnapshot memory _snapshot
+    ) internal {
+        uint256 borrowTokenBalanceAfter = _borrowToken == TokenUtils.ETH_ADDR
+            ? address(this).balance
+            : _borrowToken.getBalance(address(this));
 
         // Sanity check: if we didn't perform a max payback directly from the wallet,
         // the number of borrowed tokens should not decrease.

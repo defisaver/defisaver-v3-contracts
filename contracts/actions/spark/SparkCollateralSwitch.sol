@@ -26,13 +26,12 @@ contract SparkCollateralSwitch is ActionBase, SparkHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        virtual
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
         (, bytes memory logData) = _switchAsCollateral(inputData);
 
@@ -60,7 +59,10 @@ contract SparkCollateralSwitch is ActionBase, SparkHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _switchAsCollateral(Params memory _inputData) internal returns (uint256, bytes memory) {
+    function _switchAsCollateral(Params memory _inputData)
+        internal
+        returns (uint256, bytes memory)
+    {
         require(_inputData.arrayLength == _inputData.assetIds.length);
         require(_inputData.arrayLength == _inputData.useAsCollateral.length);
 
@@ -89,7 +91,8 @@ contract SparkCollateralSwitch is ActionBase, SparkHelper {
         encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         for (uint256 i = 0; i < _params.arrayLength; i++) {
             encodedInput = bytes.concat(encodedInput, bytes2(_params.assetIds[i]));
-            encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useAsCollateral[i]));
+            encodedInput =
+                bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useAsCollateral[i]));
         }
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
@@ -111,8 +114,13 @@ contract SparkCollateralSwitch is ActionBase, SparkHelper {
         if (params.useDefaultMarket) {
             params.market = DEFAULT_SPARK_MARKET;
         } else {
-            params.market =
-                address(bytes20(_encodedInput[(5 + (params.arrayLength - 1) * 3):(25 + (params.arrayLength - 1) * 3)]));
+            params.market = address(
+                bytes20(
+                    _encodedInput[
+                        (5 + (params.arrayLength - 1) * 3):(25 + (params.arrayLength - 1) * 3)
+                    ]
+                )
+            );
         }
     }
 }

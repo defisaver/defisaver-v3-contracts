@@ -43,7 +43,10 @@ contract SkyStakingEngineOpen is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _skyOpenInStakingEngine(Params memory _inputData) internal returns (uint256, bytes memory logData) {
+    function _skyOpenInStakingEngine(Params memory _inputData)
+        internal
+        returns (uint256, bytes memory logData)
+    {
         uint256 index = ILockstakeEngine(_inputData.stakingContract).ownerUrnsCount(address(this));
         ILockstakeEngine(_inputData.stakingContract).open(index);
         return (index, abi.encode(_inputData));

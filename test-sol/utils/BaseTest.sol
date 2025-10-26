@@ -76,10 +76,12 @@ contract BaseTest is Config {
         IERC20(_token).safeApprove(_to, _amount);
     }
 
-    function giveTokenAndApproveAsSender(address _sender, address _token, address _to, uint256 _amount)
-        internal
-        executeAsSender(_sender)
-    {
+    function giveTokenAndApproveAsSender(
+        address _sender,
+        address _token,
+        address _to,
+        uint256 _amount
+    ) internal executeAsSender(_sender) {
         give(_token, _sender, _amount);
         IERC20(_token).safeApprove(_to, _amount);
     }

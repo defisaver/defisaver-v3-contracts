@@ -132,11 +132,13 @@ contract TestEulerV2Withdraw is EulerV2TestHelper {
     ) internal {
         address assetToken = IEVault(_vault).asset();
 
-        uint256 withdrawAmount =
-            _takeMaxUint256 ? type(uint256).max : amountInUSDPrice(assetToken, _withdrawAmountInUsd);
+        uint256 withdrawAmount = _takeMaxUint256
+            ? type(uint256).max
+            : amountInUSDPrice(assetToken, _withdrawAmountInUsd);
 
-        bytes memory executeActionCallData =
-            executeActionCalldata(eulerV2WithdrawEncode(_vault, _account, sender, withdrawAmount), _isDirect);
+        bytes memory executeActionCallData = executeActionCalldata(
+            eulerV2WithdrawEncode(_vault, _account, sender, withdrawAmount), _isDirect
+        );
 
         address account = _account == address(0) ? walletAddr : _account;
 

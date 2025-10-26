@@ -34,7 +34,11 @@ contract SkyView is SkyHelper {
         uint256 totalSkyLockedInSparkFarm;
     }
 
-    function getUserInfo(address _user, address[] calldata _farms) public view returns (UrnInfo[] memory) {
+    function getUserInfo(address _user, address[] calldata _farms)
+        public
+        view
+        returns (UrnInfo[] memory)
+    {
         uint256 numOfUrns = ILockstakeEngine(STAKING_ENGINE).ownerUrnsCount(_user);
         UrnInfo[] memory urns = new UrnInfo[](numOfUrns);
 
@@ -45,7 +49,11 @@ contract SkyView is SkyHelper {
         return urns;
     }
 
-    function getUrnInfo(address _user, uint256 _index, address[] calldata _farms) public view returns (UrnInfo memory) {
+    function getUrnInfo(address _user, uint256 _index, address[] calldata _farms)
+        public
+        view
+        returns (UrnInfo memory)
+    {
         ILockstakeEngine engine = ILockstakeEngine(STAKING_ENGINE);
         address urnAddr = engine.ownerUrns(_user, _index);
         IVat.Urn memory urn = IVat(engine.vat()).urns(engine.ilk(), urnAddr);

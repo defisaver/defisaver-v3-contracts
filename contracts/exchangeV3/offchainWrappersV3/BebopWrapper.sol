@@ -23,8 +23,14 @@ contract BebopWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData, A
 
     /// @notice Takes order from Bebop and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    function takeOrder(ExchangeData memory _exData) public payable override returns (bool success, uint256) {
-        BebopCalldata memory bebopCalldata = abi.decode(_exData.offchainData.callData, (BebopCalldata));
+    function takeOrder(ExchangeData memory _exData)
+        public
+        payable
+        override
+        returns (bool success, uint256)
+    {
+        BebopCalldata memory bebopCalldata =
+            abi.decode(_exData.offchainData.callData, (BebopCalldata));
 
         writeUint256(bebopCalldata.realCalldata, bebopCalldata.offset, _exData.srcAmount);
 

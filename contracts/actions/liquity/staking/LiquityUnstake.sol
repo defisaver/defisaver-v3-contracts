@@ -29,7 +29,8 @@ contract LiquityUnstake is ActionBase, LiquityHelper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
-        params.lqtyAmount = _parseParamUint(params.lqtyAmount, _paramMapping[0], _subData, _returnValues);
+        params.lqtyAmount =
+            _parseParamUint(params.lqtyAmount, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.wethTo = _parseParamAddr(params.wethTo, _paramMapping[2], _subData, _returnValues);
         params.lusdTo = _parseParamAddr(params.lusdTo, _paramMapping[3], _subData, _returnValues);

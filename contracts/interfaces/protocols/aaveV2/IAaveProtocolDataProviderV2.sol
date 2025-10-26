@@ -62,5 +62,9 @@ interface IAaveProtocolDataProviderV2 {
     function getReserveTokensAddresses(address asset)
         external
         view
-        returns (address aTokenAddress, address stableDebtTokenAddress, address variableDebtTokenAddress);
+        returns (
+            address aTokenAddress,
+            address stableDebtTokenAddress,
+            address variableDebtTokenAddress
+        );
 }

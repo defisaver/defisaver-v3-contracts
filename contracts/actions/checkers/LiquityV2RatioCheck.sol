@@ -42,9 +42,11 @@ contract LiquityV2RatioCheck is ActionBase, LiquityV2RatioHelper {
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.troveId = _parseParamUint(params.troveId, _paramMapping[1], _subData, _returnValues);
-        params.ratioState =
-            RatioState(_parseParamUint(uint256(params.ratioState), _paramMapping[2], _subData, _returnValues));
-        params.targetRatio = _parseParamUint(params.targetRatio, _paramMapping[3], _subData, _returnValues);
+        params.ratioState = RatioState(
+            _parseParamUint(uint256(params.ratioState), _paramMapping[2], _subData, _returnValues)
+        );
+        params.targetRatio =
+            _parseParamUint(params.targetRatio, _paramMapping[3], _subData, _returnValues);
 
         (uint256 currRatio,) = getRatio(params.market, params.troveId);
         uint256 startRatio = uint256(tempStorage.getBytes32("LIQUITY_V2_RATIO"));

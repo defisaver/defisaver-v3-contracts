@@ -30,7 +30,8 @@ contract EtherFiWrap is ActionBase, EtherFiHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 

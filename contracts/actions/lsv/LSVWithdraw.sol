@@ -37,8 +37,10 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.token = _parseParamAddr(inputData.token, _paramMapping[0], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.token =
+            _parseParamAddr(inputData.token, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
 
         (uint256 remainingAmount, bytes memory logData) = _lsvWithdraw(inputData);
         emit ActionEvent("LSVWithdraw", logData);
@@ -61,7 +63,10 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
 
     /// @notice LSV Withdraw expects users to have withdrawn tokens to the user's wallet, from which we'll pull the performance fee
     /// @notice ProfitTracker will return realisedProfit amount, from which we will calculate fee
-    function _lsvWithdraw(Params memory _inputData) internal returns (uint256 remainingAmount, bytes memory logData) {
+    function _lsvWithdraw(Params memory _inputData)
+        internal
+        returns (uint256 remainingAmount, bytes memory logData)
+    {
         uint256 amountWithdrawnInETH = getAmountInETHFromLST(_inputData.token, _inputData.amount);
 
         uint256 realisedProfitInETH = LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS)

@@ -11,10 +11,16 @@ interface ILockstakeEngine {
 
     // --- Events ---
     event Open(address indexed owner, uint256 indexed index, address urn);
-    event SelectFarm(address indexed owner, uint256 indexed index, address indexed farm, uint16 ref);
+    event SelectFarm(
+        address indexed owner, uint256 indexed index, address indexed farm, uint16 ref
+    );
     event Lock(address indexed owner, uint256 indexed index, uint256 wad, uint16 ref);
-    event Free(address indexed owner, uint256 indexed index, address to, uint256 wad, uint256 freed);
-    event GetReward(address indexed owner, uint256 indexed index, address indexed farm, address to, uint256 amt);
+    event Free(
+        address indexed owner, uint256 indexed index, address to, uint256 wad, uint256 freed
+    );
+    event GetReward(
+        address indexed owner, uint256 indexed index, address indexed farm, address to, uint256 amt
+    );
 
     // --- Read Functions ---
     function ownerUrnsCount(address owner) external view returns (uint256);
@@ -33,8 +39,12 @@ interface ILockstakeEngine {
 
     // --- Write Functions (Staking) ---
     function lock(address owner, uint256 index, uint256 wad, uint16 ref) external;
-    function free(address owner, uint256 index, address to, uint256 wad) external returns (uint256 freed);
+    function free(address owner, uint256 index, address to, uint256 wad)
+        external
+        returns (uint256 freed);
 
     // --- Write Functions (Rewards) ---
-    function getReward(address owner, uint256 index, address farm, address to) external returns (uint256 amt);
+    function getReward(address owner, uint256 index, address farm, address to)
+        external
+        returns (uint256 amt);
 }

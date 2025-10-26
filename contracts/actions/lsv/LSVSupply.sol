@@ -26,8 +26,10 @@ contract LSVSupply is ActionBase, LSVUtilHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.token = _parseParamAddr(inputData.token, _paramMapping[0], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.token =
+            _parseParamAddr(inputData.token, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
 
         (uint256 amountSentToTracker, bytes memory logData) = _lsvSupply(inputData);
         emit ActionEvent("LSVSupply", logData);
@@ -48,9 +50,13 @@ contract LSVSupply is ActionBase, LSVUtilHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _lsvSupply(Params memory _inputData) internal returns (uint256 amountSuppliedInETH, bytes memory logData) {
+    function _lsvSupply(Params memory _inputData)
+        internal
+        returns (uint256 amountSuppliedInETH, bytes memory logData)
+    {
         amountSuppliedInETH = getAmountInETHFromLST(_inputData.token, _inputData.amount);
-        LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS).supply(_inputData.protocol, amountSuppliedInETH);
+        LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS)
+            .supply(_inputData.protocol, amountSuppliedInETH);
 
         logData = abi.encode(_inputData, amountSuppliedInETH);
     }

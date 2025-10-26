@@ -26,13 +26,12 @@ contract PermitToken is ActionBase {
     }
 
     /// @inheritdoc ActionBase
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        virtual
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
         ///@dev nothing will be piped and potentially replaced as we need to have the exact values as signed
@@ -59,7 +58,15 @@ contract PermitToken is ActionBase {
     function _permitToken(Params memory _params) internal {
         uint256 startingNonce = IERC20Permit(_params.tokenAddr).nonces(_params.owner);
         IERC20Permit(_params.tokenAddr)
-            .permit(_params.owner, _params.spender, _params.value, _params.deadline, _params.v, _params.r, _params.s);
+            .permit(
+                _params.owner,
+                _params.spender,
+                _params.value,
+                _params.deadline,
+                _params.v,
+                _params.r,
+                _params.s
+            );
         /// @notice Every successful call to permit increases owners nonce by one.
         require(IERC20Permit(_params.tokenAddr).nonces(_params.owner) == startingNonce + 1);
     }

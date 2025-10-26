@@ -11,7 +11,14 @@ import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies for Maker
-contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilAddresses, CheckWalletType {
+contract McdSubProxy is
+    StrategyModel,
+    AdminAuth,
+    CoreHelper,
+    Permission,
+    UtilAddresses,
+    CheckWalletType
+{
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -132,12 +139,17 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilAd
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the mcd sub
-    function formatRepaySub(McdSubData memory _user) public view returns (StrategySub memory repaySub) {
+    function formatRepaySub(McdSubData memory _user)
+        public
+        view
+        returns (StrategySub memory repaySub)
+    {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData = abi.encode(_user.vaultId, uint256(_user.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData =
+            abi.encode(_user.vaultId, uint256(_user.minRatio), uint8(RatioState.UNDER));
         repaySub.triggerData = new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -148,12 +160,17 @@ contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilAd
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the mcd sub
-    function formatBoostSub(McdSubData memory _user) public view returns (StrategySub memory boostSub) {
+    function formatBoostSub(McdSubData memory _user)
+        public
+        view
+        returns (StrategySub memory boostSub)
+    {
         boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(_user.vaultId, uint256(_user.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData =
+            abi.encode(_user.vaultId, uint256(_user.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 

@@ -22,7 +22,8 @@ library FluidBorrowLiquidityLogic {
     function borrow(FluidLiquidityModel.BorrowData memory _data) internal returns (uint256) {
         _data.vaultType.requireLiquidityDebt();
 
-        bool shouldWrapBorrowedEth = _data.wrapBorrowedEth && _data.borrowToken == TokenUtils.ETH_ADDR;
+        bool shouldWrapBorrowedEth =
+            _data.wrapBorrowedEth && _data.borrowToken == TokenUtils.ETH_ADDR;
 
         address sendTokensTo = shouldWrapBorrowedEth ? address(this) : _data.to;
 

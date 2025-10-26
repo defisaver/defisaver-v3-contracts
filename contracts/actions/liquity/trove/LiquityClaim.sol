@@ -46,7 +46,10 @@ contract LiquityClaim is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Claims remaining collateral from the user's closed Trove
-    function _liquityClaim(address _to) internal returns (uint256 claimableColl, bytes memory logData) {
+    function _liquityClaim(address _to)
+        internal
+        returns (uint256 claimableColl, bytes memory logData)
+    {
         claimableColl = CollSurplusPool.getCollateral(address(this));
 
         BorrowerOperations.claimCollateral(); // Will revert if claimableColl == 0

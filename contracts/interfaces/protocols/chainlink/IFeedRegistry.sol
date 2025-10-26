@@ -35,12 +35,24 @@ interface IFeedRegistry {
     function latestRoundData(address base, address quote)
         external
         view
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        );
 
     function getRoundData(address base, address quote, uint80 _roundId)
         external
         view
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        );
 
     // V2 AggregatorInterface
 
@@ -50,13 +62,22 @@ interface IFeedRegistry {
 
     function latestRound(address base, address quote) external view returns (uint256 roundId);
 
-    function getAnswer(address base, address quote, uint256 roundId) external view returns (int256 answer);
+    function getAnswer(address base, address quote, uint256 roundId)
+        external
+        view
+        returns (int256 answer);
 
-    function getTimestamp(address base, address quote, uint256 roundId) external view returns (uint256 timestamp);
+    function getTimestamp(address base, address quote, uint256 roundId)
+        external
+        view
+        returns (uint256 timestamp);
 
     function isFeedEnabled(address aggregator) external view returns (bool);
 
-    function getPhase(address base, address quote, uint16 phaseId) external view returns (Phase memory phase);
+    function getPhase(address base, address quote, uint16 phaseId)
+        external
+        view
+        returns (Phase memory phase);
 
     // Round helpers
 
@@ -70,7 +91,10 @@ interface IFeedRegistry {
         view
         returns (uint80 previousRoundId);
 
-    function getNextRoundId(address base, address quote, uint80 roundId) external view returns (uint80 nextRoundId);
+    function getNextRoundId(address base, address quote, uint80 roundId)
+        external
+        view
+        returns (uint80 nextRoundId);
 
     // Feed management
 
@@ -83,15 +107,30 @@ interface IFeedRegistry {
     function proposedGetRoundData(address base, address quote, uint80 roundId)
         external
         view
-        returns (uint80 id, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+        returns (
+            uint80 id,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        );
 
     function proposedLatestRoundData(address base, address quote)
         external
         view
-        returns (uint80 id, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+        returns (
+            uint80 id,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        );
 
     // Phases
-    function getCurrentPhaseId(address base, address quote) external view returns (uint16 currentPhaseId);
+    function getCurrentPhaseId(address base, address quote)
+        external
+        view
+        returns (uint16 currentPhaseId);
 
     function getFeed(address base, address quote) external view returns (address);
 }

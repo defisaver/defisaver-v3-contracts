@@ -24,7 +24,8 @@ contract LSVPayback is ActionBase, LSVUtilHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
 
         (bytes memory logData) = _lsvPayback(inputData);
         emit ActionEvent("LSVPayback", logData);

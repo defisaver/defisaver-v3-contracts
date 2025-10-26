@@ -24,8 +24,8 @@ contract CompV3RatioHelper is DSMath, MainnetCompV3Addresses {
         IComet.AssetInfo[] memory assets = getAssets(_market);
         uint16 assetsIn = comet.userBasic(_user).assetsIn;
 
-        uint256 sumBorrow =
-            comet.borrowBalanceOf(_user) * comet.getPrice(comet.baseTokenPriceFeed()) / comet.priceScale();
+        uint256 sumBorrow = comet.borrowBalanceOf(_user)
+            * comet.getPrice(comet.baseTokenPriceFeed()) / comet.priceScale();
         if (sumBorrow == 0) return 0;
 
         uint256 sumCollateral;
@@ -34,8 +34,8 @@ contract CompV3RatioHelper is DSMath, MainnetCompV3Addresses {
                 uint256 tokenBalance = comet.collateralBalanceOf(_user, assets[i].asset);
                 if (tokenBalance != 0) {
                     uint256 collAmountInBaseToken =
-                        (tokenBalance * comet.getPrice(assets[i].priceFeed) * comet.baseScale()) / assets[i].scale
-                            / comet.priceScale();
+                        (tokenBalance * comet.getPrice(assets[i].priceFeed) * comet.baseScale())
+                            / assets[i].scale / comet.priceScale();
                     sumCollateral += collAmountInBaseToken * assets[i].borrowCollateralFactor / 1e18;
                 }
             }

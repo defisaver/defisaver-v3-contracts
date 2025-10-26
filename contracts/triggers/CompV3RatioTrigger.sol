@@ -15,7 +15,8 @@ contract CompV3RatioTrigger is ITrigger, AdminAuth, CompV3RatioHelper, TriggerHe
         UNDER
     }
 
-    TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
+    TransientStorageCancun public constant tempStorage =
+        TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     /// @param user address of the user whose position we check
     /// @param _market Main Comet proxy contract that is different for each compound market

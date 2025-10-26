@@ -32,11 +32,14 @@ contract McdClaim is ActionBase, McdHelper {
     ) public payable override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
-        inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[1], _subData, _returnValues);
+        inputData.vaultId =
+            _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.joinAddr =
+            _parseParamAddr(inputData.joinAddr, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 returnAmount, bytes memory logData) = _mcdClaim(inputData.vaultId, inputData.joinAddr, inputData.to);
+        (uint256 returnAmount, bytes memory logData) =
+            _mcdClaim(inputData.vaultId, inputData.joinAddr, inputData.to);
 
         emit ActionEvent("McdClaim", logData);
 
@@ -62,7 +65,10 @@ contract McdClaim is ActionBase, McdHelper {
     /// @param _vaultId Id of the vault
     /// @param _joinAddr Join address of the maker collateral
     /// @param _to Address where to send the bonus tokens we withdrew
-    function _mcdClaim(uint256 _vaultId, address _joinAddr, address _to) internal returns (uint256, bytes memory) {
+    function _mcdClaim(uint256 _vaultId, address _joinAddr, address _to)
+        internal
+        returns (uint256, bytes memory)
+    {
         address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
         address bonusTokenAddr = address(ICropJoin(_joinAddr).bonus());
 

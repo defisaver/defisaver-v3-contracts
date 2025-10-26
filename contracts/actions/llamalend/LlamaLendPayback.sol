@@ -4,7 +4,9 @@ pragma solidity =0.8.24;
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { LlamaLendHelper } from "./helpers/LlamaLendHelper.sol";
-import { ILlamaLendController } from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import {
+    ILlamaLendController
+} from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 
 /// @title Action that pays back debt asset to a llamalend position
 /// @dev paybackAmount must be non-zero
@@ -38,13 +40,19 @@ contract LlamaLendPayback is ActionBase, LlamaLendHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
-        params.onBehalfOf = _parseParamAddr(params.onBehalfOf, _paramMapping[2], _subData, _returnValues);
+        params.onBehalfOf =
+            _parseParamAddr(params.onBehalfOf, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
-        params.paybackAmount = _parseParamUint(params.paybackAmount, _paramMapping[4], _subData, _returnValues);
-        params.maxActiveBand =
-            int256(_parseParamUint(uint256(params.maxActiveBand), _paramMapping[5], _subData, _returnValues));
+        params.paybackAmount =
+            _parseParamUint(params.paybackAmount, _paramMapping[4], _subData, _returnValues);
+        params.maxActiveBand = int256(
+            _parseParamUint(
+                uint256(params.maxActiveBand), _paramMapping[5], _subData, _returnValues
+            )
+        );
 
         (uint256 paybackAmount, bytes memory logData) = _llamaLendPayback(params);
         emit ActionEvent("LlamaLendPayback", logData);
@@ -105,14 +113,19 @@ contract LlamaLendPayback is ActionBase, LlamaLendHelper {
         uint256 baseReceivedFromColl;
         uint256 debtAssetReceivedFromColl;
         if (isClose) {
-            baseReceivedFromColl = collateralAsset.getBalance(address(this)) - startingBaseCollBalance;
-            debtAssetReceivedFromColl = debtAsset.getBalance(address(this)) - startingDebtAssetBalanceWithoutDebt;
+            baseReceivedFromColl =
+                collateralAsset.getBalance(address(this)) - startingBaseCollBalance;
+            debtAssetReceivedFromColl =
+                debtAsset.getBalance(address(this)) - startingDebtAssetBalanceWithoutDebt;
 
             collateralAsset.withdrawTokens(_params.to, baseReceivedFromColl);
             debtAsset.withdrawTokens(_params.to, debtAssetReceivedFromColl);
         }
 
-        return (_params.paybackAmount, abi.encode(_params, baseReceivedFromColl, debtAssetReceivedFromColl));
+        return (
+            _params.paybackAmount,
+            abi.encode(_params, baseReceivedFromColl, debtAssetReceivedFromColl)
+        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

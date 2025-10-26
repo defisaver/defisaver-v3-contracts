@@ -32,7 +32,8 @@ contract CompRatioHelper is Exponential, DSMath, MainnetCompAddresses {
             Exp memory oraclePrice;
 
             if (cTokenBalance != 0 || borrowBalance != 0) {
-                oraclePrice = Exp({ mantissa: ICompoundOracle(oracleAddr).getUnderlyingPrice(asset) });
+                oraclePrice =
+                    Exp({ mantissa: ICompoundOracle(oracleAddr).getUnderlyingPrice(asset) });
             }
 
             // Sum up collateral in Usd
@@ -44,7 +45,8 @@ contract CompRatioHelper is Exponential, DSMath, MainnetCompAddresses {
 
                 (, Exp memory tokensToUsd) = mulExp3(collateralFactor, exchangeRate, oraclePrice);
 
-                (, sumCollateral) = mulScalarTruncateAddUInt(tokensToUsd, cTokenBalance, sumCollateral);
+                (, sumCollateral) =
+                    mulScalarTruncateAddUInt(tokensToUsd, cTokenBalance, sumCollateral);
             }
 
             // Sum up debt in Usd

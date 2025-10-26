@@ -26,10 +26,13 @@ contract McdOpen is ActionBase, McdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[0], _subData, _returnValues);
-        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[1], _subData, _returnValues);
+        inputData.joinAddr =
+            _parseParamAddr(inputData.joinAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.mcdManager =
+            _parseParamAddr(inputData.mcdManager, _paramMapping[1], _subData, _returnValues);
 
-        (uint256 newVaultId, bytes memory logData) = _mcdOpen(inputData.joinAddr, inputData.mcdManager);
+        (uint256 newVaultId, bytes memory logData) =
+            _mcdOpen(inputData.joinAddr, inputData.mcdManager);
         emit ActionEvent("McdOpen", logData);
         return bytes32(newVaultId);
     }
@@ -50,7 +53,10 @@ contract McdOpen is ActionBase, McdHelper {
 
     /// @param _joinAddr Join address of the maker collateral
     /// @param _mcdManager The manager address we are using
-    function _mcdOpen(address _joinAddr, address _mcdManager) internal returns (uint256 vaultId, bytes memory logData) {
+    function _mcdOpen(address _joinAddr, address _mcdManager)
+        internal
+        returns (uint256 vaultId, bytes memory logData)
+    {
         bytes32 ilk = IJoin(_joinAddr).ilk();
 
         if (_mcdManager == CROPPER) {

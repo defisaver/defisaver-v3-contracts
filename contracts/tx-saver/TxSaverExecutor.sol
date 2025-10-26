@@ -74,7 +74,8 @@ contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTr
             );
         } else {
             setBytesTransiently(
-                abi.encode(_estimatedGas, _l1GasCostInEth, _injectedExchangeData), txSaverData.shouldTakeFeeFromPosition
+                abi.encode(_estimatedGas, _l1GasCostInEth, _injectedExchangeData),
+                txSaverData.shouldTakeFeeFromPosition
             );
         }
 

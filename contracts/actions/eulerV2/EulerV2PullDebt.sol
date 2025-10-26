@@ -60,13 +60,15 @@ contract EulerV2PullDebt is ActionBase, EulerV2Helper {
             _params.account = address(this);
         }
 
-        bool isControllerEnabled = IEVC(EVC_ADDR).isControllerEnabled(_params.account, _params.vault);
+        bool isControllerEnabled =
+            IEVC(EVC_ADDR).isControllerEnabled(_params.account, _params.vault);
 
         if (!isControllerEnabled) {
             IEVC(EVC_ADDR).enableController(_params.account, _params.vault);
         }
 
-        bytes memory pullDebtCallData = abi.encodeCall(IBorrowing.pullDebt, (_params.amount, _params.from));
+        bytes memory pullDebtCallData =
+            abi.encodeCall(IBorrowing.pullDebt, (_params.amount, _params.from));
 
         uint256 accountDebtBefore = IBorrowing(_params.vault).debtOf(_params.account);
 

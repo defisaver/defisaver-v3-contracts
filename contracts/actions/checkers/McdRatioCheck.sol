@@ -41,9 +41,13 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 ratioState = _parseParamUint(uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues);
-        inputData.ratioTarget = _parseParamUint(inputData.ratioTarget, _paramMapping[1], _subData, _returnValues);
-        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[2], _subData, _returnValues);
+        uint256 ratioState = _parseParamUint(
+            uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues
+        );
+        inputData.ratioTarget =
+            _parseParamUint(inputData.ratioTarget, _paramMapping[1], _subData, _returnValues);
+        inputData.vaultId =
+            _parseParamUint(inputData.vaultId, _paramMapping[2], _subData, _returnValues);
         inputData.startRatioIndex =
             _parseParamUint(inputData.startRatioIndex, _paramMapping[3], _subData, _returnValues);
 
@@ -80,7 +84,11 @@ contract McdRatioCheck is ActionBase, McdRatioHelper {
         return uint8(ActionType.CHECK_ACTION);
     }
 
-    function inAcceptableRange(uint256 _currRatio, uint256 _ratioTarget) internal pure returns (bool) {
+    function inAcceptableRange(uint256 _currRatio, uint256 _ratioTarget)
+        internal
+        pure
+        returns (bool)
+    {
         if (_currRatio > _ratioTarget + RATIO_OFFSET) return false;
         if (_currRatio < _ratioTarget - RATIO_OFFSET) return false;
 

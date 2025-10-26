@@ -41,13 +41,22 @@ contract SparkPayback is ActionBase, SparkHelper {
 
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
-        params.rateMode = uint8(_parseParamUint(uint8(params.rateMode), _paramMapping[2], _subData, _returnValues));
-        params.assetId = uint16(_parseParamUint(uint16(params.assetId), _paramMapping[3], _subData, _returnValues));
+        params.rateMode = uint8(
+            _parseParamUint(uint8(params.rateMode), _paramMapping[2], _subData, _returnValues)
+        );
+        params.assetId = uint16(
+            _parseParamUint(uint16(params.assetId), _paramMapping[3], _subData, _returnValues)
+        );
         params.useDefaultMarket =
-            _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
-        params.useOnBehalf = _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
+            _parseParamUint(
+                    params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues
+                ) == 1;
+        params.useOnBehalf =
+            _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues)
+                == 1;
         params.market = _parseParamAddr(params.market, _paramMapping[6], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[7], _subData, _returnValues);
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[7], _subData, _returnValues);
 
         if (params.useDefaultMarket) {
             params.market = DEFAULT_SPARK_MARKET;
@@ -56,8 +65,14 @@ contract SparkPayback is ActionBase, SparkHelper {
             params.onBehalf = address(0);
         }
 
-        (uint256 paybackAmount, bytes memory logData) =
-            _payback(params.market, params.assetId, params.amount, params.rateMode, params.from, params.onBehalf);
+        (uint256 paybackAmount, bytes memory logData) = _payback(
+            params.market,
+            params.assetId,
+            params.amount,
+            params.rateMode,
+            params.from,
+            params.onBehalf
+        );
         emit ActionEvent("SparkPayback", logData);
         return bytes32(paybackAmount);
     }
@@ -65,15 +80,27 @@ contract SparkPayback is ActionBase, SparkHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) =
-            _payback(params.market, params.assetId, params.amount, params.rateMode, params.from, params.onBehalf);
+        (, bytes memory logData) = _payback(
+            params.market,
+            params.assetId,
+            params.amount,
+            params.rateMode,
+            params.from,
+            params.onBehalf
+        );
         logger.logActionDirectEvent("SparkPayback", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) =
-            _payback(params.market, params.assetId, params.amount, params.rateMode, params.from, params.onBehalf);
+        (, bytes memory logData) = _payback(
+            params.market,
+            params.assetId,
+            params.amount,
+            params.rateMode,
+            params.from,
+            params.onBehalf
+        );
         logger.logActionDirectEvent("SparkPayback", logData);
     }
 

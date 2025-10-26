@@ -27,13 +27,12 @@ contract AaveV3DelegateWithSig is ActionBase {
     }
 
     /// @inheritdoc ActionBase
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        virtual
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
         (bytes memory logData) = _delegate(params);
         emit ActionEvent("AaveV3DelegateWithSig", logData);
@@ -63,7 +62,13 @@ contract AaveV3DelegateWithSig is ActionBase {
     function _delegate(Params memory _params) internal returns (bytes memory logData) {
         IDebtToken(_params.debtToken)
             .delegationWithSig(
-                _params.delegator, _params.delegatee, _params.value, _params.deadline, _params.v, _params.r, _params.s
+                _params.delegator,
+                _params.delegatee,
+                _params.value,
+                _params.deadline,
+                _params.v,
+                _params.r,
+                _params.s
             );
         logData = abi.encode(_params);
     }

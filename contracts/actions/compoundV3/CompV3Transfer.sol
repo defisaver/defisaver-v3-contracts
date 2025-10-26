@@ -37,7 +37,8 @@ contract CompV3Transfer is ActionBase, CompV3Helper {
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[3], _subData, _returnValues);
+        params.tokenAddr =
+            _parseParamAddr(params.tokenAddr, _paramMapping[3], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[4], _subData, _returnValues);
 
         (uint256 withdrawAmount, bytes memory logData) =
@@ -49,7 +50,8 @@ contract CompV3Transfer is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _transfer(params.market, params.from, params.to, params.tokenAddr, params.amount);
+        (, bytes memory logData) =
+            _transfer(params.market, params.from, params.to, params.tokenAddr, params.amount);
         logger.logActionDirectEvent("CompV3Transfer", logData);
     }
 
@@ -67,10 +69,13 @@ contract CompV3Transfer is ActionBase, CompV3Helper {
     /// @param _to The address of an account that is the receiver in the transaction
     /// @param _asset The ERC-20 address of the asset that is being sent in the transaction
     /// @param _amount Amount of the specified asset to be transferred
-    function _transfer(address _market, address _from, address _to, address _asset, uint256 _amount)
-        internal
-        returns (uint256, bytes memory)
-    {
+    function _transfer(
+        address _market,
+        address _from,
+        address _to,
+        address _asset,
+        uint256 _amount
+    ) internal returns (uint256, bytes memory) {
         if (_to == address(0)) {
             revert CompV3TransferError();
         }

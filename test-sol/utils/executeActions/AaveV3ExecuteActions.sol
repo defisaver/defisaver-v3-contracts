@@ -25,7 +25,8 @@ contract AaveV3ExecuteActions is ExecuteActionsBase {
             _params.market,
             _params.onBehalf
         );
-        bytes memory _calldata = abi.encodeWithSelector(EXECUTE_ACTION_DIRECT_SELECTOR, paramsCalldata);
+        bytes memory _calldata =
+            abi.encodeWithSelector(EXECUTE_ACTION_DIRECT_SELECTOR, paramsCalldata);
         address target = _useAddressFromDfsRegistry ? getAddr("AaveV3Supply") : _contractAddress;
 
         give(_supplyToken, _wallet.owner(), _params.amount);
@@ -49,7 +50,8 @@ contract AaveV3ExecuteActions is ExecuteActionsBase {
             _params.market,
             _params.onBehalf
         );
-        bytes memory _calldata = abi.encodeWithSelector(EXECUTE_ACTION_DIRECT_SELECTOR, paramsCalldata);
+        bytes memory _calldata =
+            abi.encodeWithSelector(EXECUTE_ACTION_DIRECT_SELECTOR, paramsCalldata);
         address target = _useAddressFromDfsRegistry ? getAddr("AaveV3Borrow") : _contractAddress;
 
         _wallet.execute(target, _calldata, 0);

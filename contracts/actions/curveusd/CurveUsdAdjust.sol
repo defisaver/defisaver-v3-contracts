@@ -35,11 +35,14 @@ contract CurveUsdAdjust is ActionBase, CurveUsdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
-        params.supplyAmount = _parseParamUint(params.supplyAmount, _paramMapping[3], _subData, _returnValues);
-        params.borrowAmount = _parseParamUint(params.borrowAmount, _paramMapping[4], _subData, _returnValues);
+        params.supplyAmount =
+            _parseParamUint(params.supplyAmount, _paramMapping[3], _subData, _returnValues);
+        params.borrowAmount =
+            _parseParamUint(params.borrowAmount, _paramMapping[4], _subData, _returnValues);
 
         (uint256 borrowedAmount, bytes memory logData) = _curveUsdAdjust(params);
         emit ActionEvent("CurveUsdAdjust", logData);
@@ -66,10 +69,12 @@ contract CurveUsdAdjust is ActionBase, CurveUsdHelper {
         /// @dev see ICrvUsdController natspec
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
-        _params.supplyAmount = collateralAsset.pullTokensIfNeeded(_params.from, _params.supplyAmount);
+        _params.supplyAmount =
+            collateralAsset.pullTokensIfNeeded(_params.from, _params.supplyAmount);
 
         collateralAsset.approveToken(_params.controllerAddress, _params.supplyAmount);
-        ICrvUsdController(_params.controllerAddress).borrow_more(_params.supplyAmount, _params.borrowAmount);
+        ICrvUsdController(_params.controllerAddress)
+            .borrow_more(_params.supplyAmount, _params.borrowAmount);
 
         CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, _params.borrowAmount);
 

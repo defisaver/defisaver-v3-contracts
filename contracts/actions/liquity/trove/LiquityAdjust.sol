@@ -49,12 +49,16 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[0], _subData, _returnValues);
-        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[1], _subData, _returnValues);
-        params.collChange =
-            CollChange(_parseParamUint(uint8(params.collChange), _paramMapping[2], _subData, _returnValues));
-        params.debtChange =
-            DebtChange(_parseParamUint(uint8(params.debtChange), _paramMapping[3], _subData, _returnValues));
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[0], _subData, _returnValues);
+        params.lusdAmount =
+            _parseParamUint(params.lusdAmount, _paramMapping[1], _subData, _returnValues);
+        params.collChange = CollChange(
+            _parseParamUint(uint8(params.collChange), _paramMapping[2], _subData, _returnValues)
+        );
+        params.debtChange = DebtChange(
+            _parseParamUint(uint8(params.debtChange), _paramMapping[3], _subData, _returnValues)
+        );
         params.from = _parseParamAddr(params.from, _paramMapping[4], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[5], _subData, _returnValues);
 
@@ -82,7 +86,8 @@ contract LiquityAdjust is ActionBase, LiquityHelper {
 
         if (_params.collChange == CollChange.SUPPLY) {
             // max.uint handled in pull tokens
-            _params.collAmount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.collAmount);
+            _params.collAmount =
+                TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.collAmount);
             TokenUtils.withdrawWeth(_params.collAmount);
 
             supplyAmount = _params.collAmount;

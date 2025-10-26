@@ -13,7 +13,13 @@ import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
-contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData, AdminAuth, CoreHelper {
+contract KyberAggregatorWrapper is
+    IOffchainWrapper,
+    DFSExchangeHelper,
+    DFSExchangeData,
+    AdminAuth,
+    CoreHelper
+{
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
@@ -22,10 +28,15 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExcha
 
     /// @notice Takes order from Kyberswap and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    function takeOrder(ExchangeData memory _exData) public payable override returns (bool success, uint256) {
+    function takeOrder(ExchangeData memory _exData)
+        public
+        payable
+        override
+        returns (bool success, uint256)
+    {
         address scalingHelperAddr = registry.getAddr(SCALING_HELPER_ID);
-        (bool isScalingSuccess, bytes memory scaledCalldata) =
-            IKyberScaleHelper(scalingHelperAddr).getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);
+        (bool isScalingSuccess, bytes memory scaledCalldata) = IKyberScaleHelper(scalingHelperAddr)
+            .getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);
 
         if (!isScalingSuccess) {
             // returns all funds from src addr, dest addr and eth funds (protocol fee leftovers)

@@ -223,8 +223,12 @@ interface IMorphoBase {
     /// @param assets The amount of collateral to supply.
     /// @param onBehalf The address that will own the increased collateral position.
     /// @param data Arbitrary data to pass to the `onMorphoSupplyCollateral` callback. Pass empty data if not needed.
-    function supplyCollateral(MarketParams memory marketParams, uint256 assets, address onBehalf, bytes memory data)
-        external;
+    function supplyCollateral(
+        MarketParams memory marketParams,
+        uint256 assets,
+        address onBehalf,
+        bytes memory data
+    ) external;
 
     /// @notice Withdraws `assets` of collateral on behalf of `onBehalf` to `receiver`.
     /// @dev `msg.sender` must be authorized to manage `onBehalf`'s positions.
@@ -233,8 +237,12 @@ interface IMorphoBase {
     /// @param assets The amount of collateral to withdraw.
     /// @param onBehalf The address of the owner of the collateral position.
     /// @param receiver The address that will receive the collateral assets.
-    function withdrawCollateral(MarketParams memory marketParams, uint256 assets, address onBehalf, address receiver)
-        external;
+    function withdrawCollateral(
+        MarketParams memory marketParams,
+        uint256 assets,
+        address onBehalf,
+        address receiver
+    ) external;
 
     /// @notice Liquidates the given `repaidShares` of debt asset or seize the given `seizedAssets` of collateral on the
     /// given market `marketParams` of the given `borrower`'s position, optionally calling back the caller's
@@ -280,7 +288,10 @@ interface IMorphoBase {
     /// @dev The nonce is passed as argument to be able to revert with a different error message.
     /// @param authorization The `Authorization` struct.
     /// @param signature The signature.
-    function setAuthorizationWithSig(Authorization calldata authorization, Signature calldata signature) external;
+    function setAuthorizationWithSig(
+        Authorization calldata authorization,
+        Signature calldata signature
+    ) external;
 
     /// @notice Accrues interest for the given market `marketParams`.
     function accrueInterest(MarketParams memory marketParams) external;
@@ -323,7 +334,13 @@ interface IMorphoStaticTyping is IMorphoBase {
     function idToMarketParams(Id id)
         external
         view
-        returns (address loanToken, address collateralToken, address oracle, address irm, uint256 lltv);
+        returns (
+            address loanToken,
+            address collateralToken,
+            address oracle,
+            address irm,
+            uint256 lltv
+        );
 }
 
 /// @title IMorpho

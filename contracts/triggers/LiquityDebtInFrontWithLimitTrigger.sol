@@ -10,7 +10,13 @@ import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { TransientStorage } from "../utils/transient/TransientStorage.sol";
 
 /// @title Checks if total amount of debt in front of a specified trove is over a limit
-contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatioHelper, TriggerHelper, LiquityHelper {
+contract LiquityDebtInFrontWithLimitTrigger is
+    ITrigger,
+    AdminAuth,
+    LiquityRatioHelper,
+    TriggerHelper,
+    LiquityHelper
+{
     /// @notice Max number of troves to check is 250.
     uint256 internal constant MAX_ITERATIONS = 250;
 

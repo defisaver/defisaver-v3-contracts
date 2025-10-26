@@ -31,7 +31,8 @@ contract YearnSupply is ActionBase, YearnHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
@@ -54,10 +55,14 @@ contract YearnSupply is ActionBase, YearnHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _yearnSupply(Params memory _inputData) internal returns (uint256 yTokenAmount, bytes memory logData) {
+    function _yearnSupply(Params memory _inputData)
+        internal
+        returns (uint256 yTokenAmount, bytes memory logData)
+    {
         IYVault vault = IYVault(yearnRegistry.latestVault(_inputData.token));
 
-        uint256 amountPulled = _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
+        uint256 amountPulled =
+            _inputData.token.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         _inputData.token.approveToken(address(vault), amountPulled);
         _inputData.amount = amountPulled;
 

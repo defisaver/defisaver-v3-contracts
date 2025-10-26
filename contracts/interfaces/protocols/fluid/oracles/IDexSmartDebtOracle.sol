@@ -54,5 +54,8 @@ interface IDexSmartDebtOracle {
         );
 
     /// @notice Returns Col/Debt Oracle data. Used in T4 vaults
-    function getDexColDebtOracleData() external view returns (address colDebtOracle_, bool colDebtInvert_);
+    function getDexColDebtOracleData()
+        external
+        view
+        returns (address colDebtOracle_, bool colDebtInvert_);
 }

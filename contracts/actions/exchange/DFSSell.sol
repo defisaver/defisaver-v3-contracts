@@ -31,11 +31,13 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
 
         params.exchangeData.srcAddr =
             _parseParamAddr(params.exchangeData.srcAddr, _paramMapping[0], _subData, _returnValues);
-        params.exchangeData.destAddr =
-            _parseParamAddr(params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues);
+        params.exchangeData.destAddr = _parseParamAddr(
+            params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues
+        );
 
-        params.exchangeData.srcAmount =
-            _parseParamUint(params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues);
+        params.exchangeData.srcAmount = _parseParamUint(
+            params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues
+        );
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
@@ -67,10 +69,12 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
     /// @param _from Address from which we'll pull the srcTokens
     /// @param _to Address where we'll send the _to token
     /// @param _isDirect True if it's just one sell action, false if part of recipe
-    function _dfsSell(ExchangeData memory _exchangeData, address _from, address _to, bool _isDirect)
-        internal
-        returns (uint256, bytes memory)
-    {
+    function _dfsSell(
+        ExchangeData memory _exchangeData,
+        address _from,
+        address _to,
+        bool _isDirect
+    ) internal returns (uint256, bytes memory) {
         // if we set srcAmount to max, take the whole user's wallet balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));
@@ -117,7 +121,8 @@ contract DFSSell is ActionBase, DFSExchangeWithTxSaver {
         address wrapper;
         uint256 exchangedAmount;
 
-        (wrapper, exchangedAmount,,) = _sellWithTxSaverChoice(_exchangeData, address(this), registry);
+        (wrapper, exchangedAmount,,) =
+            _sellWithTxSaverChoice(_exchangeData, address(this), registry);
 
         if (isEthDest) {
             TokenUtils.withdrawWeth(exchangedAmount);

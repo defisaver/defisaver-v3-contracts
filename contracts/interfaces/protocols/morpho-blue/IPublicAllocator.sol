@@ -45,7 +45,9 @@ interface IPublicAllocator {
     /// @dev Will revert when `withdrawals` contains a duplicate or is not sorted.
     /// @dev Will revert if `withdrawals` contains the supply market.
     /// @dev Will revert if a withdrawal amount is larger than available liquidity.
-    function reallocateTo(address vault, Withdrawal[] calldata withdrawals, MarketParams calldata supplyMarketParams)
-        external
-        payable;
+    function reallocateTo(
+        address vault,
+        Withdrawal[] calldata withdrawals,
+        MarketParams calldata supplyMarketParams
+    ) external payable;
 }

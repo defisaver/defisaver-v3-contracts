@@ -14,5 +14,6 @@ contract OptimismActionsUtilAddresses {
     address internal constant PROXY_AUTH_ADDR = 0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043;
 
     // not yet implemented
-    address internal constant LSV_PROXY_REGISTRY_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant LSV_PROXY_REGISTRY_ADDRESS =
+        0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 }

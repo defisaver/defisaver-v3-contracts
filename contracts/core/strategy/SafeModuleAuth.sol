@@ -42,7 +42,9 @@ contract SafeModuleAuth is Pausable, CoreHelper, IAuth {
     {
         // execute from module does not revert on failure
         bool success = ISafe(_safeAddr)
-            .execTransactionFromModule(_recipeExecutorAddr, msg.value, _callData, ISafe.Operation.DelegateCall);
+            .execTransactionFromModule(
+                _recipeExecutorAddr, msg.value, _callData, ISafe.Operation.DelegateCall
+            );
 
         if (!success) {
             revert SafeExecutionError();

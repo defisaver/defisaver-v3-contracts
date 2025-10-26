@@ -5,7 +5,9 @@ import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
-import { ILlamaLendController } from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import {
+    ILlamaLendController
+} from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 
 /// @title LlamaLendBoost
 contract LlamaLendBoost is ActionBase, LlamaLendHelper {
@@ -31,7 +33,8 @@ contract LlamaLendBoost is ActionBase, LlamaLendHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
 
         (uint256 generatedAmount, bytes memory logData) = _boost(params);
         emit ActionEvent("LlamaLendBoost", logData);
@@ -55,7 +58,9 @@ contract LlamaLendBoost is ActionBase, LlamaLendHelper {
 
     function _boost(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.exData.srcAmount == 0) revert();
-        if (!isControllerValid(_params.controllerAddress, _params.controllerId)) revert InvalidLlamaLendController();
+        if (!isControllerValid(_params.controllerAddress, _params.controllerId)) {
+            revert InvalidLlamaLendController();
+        }
 
         address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
 

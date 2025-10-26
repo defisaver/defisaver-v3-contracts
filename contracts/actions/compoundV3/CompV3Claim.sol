@@ -30,10 +30,12 @@ contract CompV3Claim is ActionBase, CompV3Helper {
         Params memory params = parseInputs(_callData);
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[1], _subData, _returnValues);
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
         params.shouldAccrue =
-            _parseParamUint(params.shouldAccrue ? 1 : 0, _paramMapping[3], _subData, _returnValues) == 1;
+            _parseParamUint(params.shouldAccrue ? 1 : 0, _paramMapping[3], _subData, _returnValues)
+                == 1;
 
         (uint256 compClaimed, bytes memory logData) =
             _claim(params.market, params.onBehalf, params.to, params.shouldAccrue);
@@ -44,7 +46,8 @@ contract CompV3Claim is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _claim(params.market, params.onBehalf, params.to, params.shouldAccrue);
+        (, bytes memory logData) =
+            _claim(params.market, params.onBehalf, params.to, params.shouldAccrue);
         logger.logActionDirectEvent("CompV3Claim", logData);
     }
 
@@ -70,7 +73,8 @@ contract CompV3Claim is ActionBase, CompV3Helper {
             _onBehalf = address(this);
         }
 
-        ICometRewards.RewardConfig memory rewards = ICometRewards(COMET_REWARDS_ADDR).rewardConfig(_market);
+        ICometRewards.RewardConfig memory rewards =
+            ICometRewards(COMET_REWARDS_ADDR).rewardConfig(_market);
 
         uint256 balanceBefore = IERC20(rewards.token).balanceOf(_to);
 

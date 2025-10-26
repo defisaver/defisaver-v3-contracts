@@ -9,11 +9,15 @@ import { FeeRecipient } from "../../../utils/fee/FeeRecipient.sol";
 import { SafeERC20 } from "../../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../../interfaces/token/IERC20.sol";
 import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
-import { ILlamaLendController } from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import {
+    ILlamaLendController
+} from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 import { ActionsUtilHelper } from "../../utils/helpers/ActionsUtilHelper.sol";
 import { IDFSRegistry } from "../../../interfaces/core/IDFSRegistry.sol";
 import { GasFeeHelper } from "../../fee/helpers/GasFeeHelper.sol";
-import { ReentrancyGuardTransient } from "../../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
+import {
+    ReentrancyGuardTransient
+} from "../../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 
 /// @title LlamaLendSwapper Callback contract for Llamalend extended actions
 contract LlamaLendSwapper is
@@ -46,7 +50,8 @@ contract LlamaLendSwapper is
         uint256 gasUsed = info[0];
         if (!isControllerValid(msg.sender, info[1])) revert InvalidLlamaLendController();
 
-        ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
+        ExchangeData memory exData =
+            abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         address collToken = exData.srcAddr;
         address debtToken = exData.destAddr;
 
@@ -77,7 +82,8 @@ contract LlamaLendSwapper is
     {
         uint256 gasUsed = info[0];
         if (!isControllerValid(msg.sender, info[1])) revert InvalidLlamaLendController();
-        ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
+        ExchangeData memory exData =
+            abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
 
         address collToken = exData.destAddr;
 
@@ -106,7 +112,8 @@ contract LlamaLendSwapper is
         uint256 gasUsed = info[0];
         if (!isControllerValid(msg.sender, info[1])) revert InvalidLlamaLendController();
         bool sellMax = info[2] > 0;
-        ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
+        ExchangeData memory exData =
+            abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
 
         address collToken = exData.srcAddr;
         address debtToken = exData.destAddr;
@@ -138,10 +145,12 @@ contract LlamaLendSwapper is
         collToken.withdrawTokens(msg.sender, type(uint256).max);
     }
 
-    function _takeAutomationFee(uint256 _destTokenAmount, address _token, uint256 _gasUsed, bool hasFee)
-        internal
-        returns (uint256 feeAmount)
-    {
+    function _takeAutomationFee(
+        uint256 _destTokenAmount,
+        address _token,
+        uint256 _gasUsed,
+        bool hasFee
+    ) internal returns (uint256 feeAmount) {
         // we need to take the fee for tx cost as well, as it's in a strategy
         feeAmount += calcGasCost(_gasUsed, _token, 0);
 

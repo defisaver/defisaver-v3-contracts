@@ -15,8 +15,11 @@ import { CoreHelper } from "../helpers/CoreHelper.sol";
 contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWalletType {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
-    bytes4 constant EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR =
-        bytes4(keccak256("executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))"));
+    bytes4 constant EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR = bytes4(
+        keccak256(
+            "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))"
+        )
+    );
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
 
@@ -51,7 +54,14 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
         }
 
         // execute actions
-        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub, address(storedSubData.walletAddr));
+        callActions(
+            _subId,
+            _actionsCallData,
+            _triggerCallData,
+            _strategyIndex,
+            _sub,
+            address(storedSubData.walletAddr)
+        );
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
@@ -81,7 +91,12 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
             _userWallet,
             RECIPE_EXECUTOR_ADDR,
             abi.encodeWithSelector(
-                EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR, _subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub
+                EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR,
+                _subId,
+                _actionsCallData,
+                _triggerCallData,
+                _strategyIndex,
+                _sub
             )
         );
     }

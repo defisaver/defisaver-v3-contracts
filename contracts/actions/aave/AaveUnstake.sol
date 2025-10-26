@@ -48,7 +48,10 @@ contract AaveUnstake is ActionBase, AaveHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _unstake(Params memory _params) internal returns (uint256 unstakedAmount, bytes memory logData) {
+    function _unstake(Params memory _params)
+        internal
+        returns (uint256 unstakedAmount, bytes memory logData)
+    {
         if (_params.amount == 0) {
             IStkAave(STAKED_TOKEN_ADDR).cooldown();
         } else {

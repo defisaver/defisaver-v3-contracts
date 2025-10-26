@@ -64,12 +64,17 @@ contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _claimRewards(Params memory _params) internal returns (uint256 amountReceived, bytes memory) {
+    function _claimRewards(Params memory _params)
+        internal
+        returns (uint256 amountReceived, bytes memory)
+    {
         require(_params.assetsLength == _params.assets.length);
 
         IRewardsController rewardsController = IRewardsController(AAVE_REWARDS_CONTROLLER_ADDRESS);
 
-        amountReceived = rewardsController.claimRewards(_params.assets, _params.amount, _params.to, _params.reward);
+        amountReceived = rewardsController.claimRewards(
+            _params.assets, _params.amount, _params.to, _params.reward
+        );
 
         bytes memory logData = abi.encode(_params, amountReceived);
         return (amountReceived, logData);

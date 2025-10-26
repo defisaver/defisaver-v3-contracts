@@ -22,7 +22,8 @@ contract UniCollectV3 is ActionBase, UniV3Helper {
     ) public payable virtual override returns (bytes32) {
         IUniswapV3NonfungiblePositionManager.CollectParams memory uniData = parseInputs(_callData);
 
-        uniData.tokenId = _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
+        uniData.tokenId =
+            _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
 
         (uint256 amount0,, bytes memory logData) = _uniCollect(uniData);
         emit ActionEvent("UniCollectV3", logData);

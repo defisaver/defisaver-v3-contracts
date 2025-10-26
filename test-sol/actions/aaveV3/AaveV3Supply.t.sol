@@ -109,7 +109,8 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
     function test_should_supply_onBehalfOf() public {
         address onBehalfOf = alice;
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            DataTypes.ReserveData memory supplyTokenData = pool.getReserveData(testPairs[i].supplyAsset);
+            DataTypes.ReserveData memory supplyTokenData =
+                pool.getReserveData(testPairs[i].supplyAsset);
 
             uint256 supplyAmount = amountInUSDPrice(testPairs[i].supplyAsset, 100_000);
 
@@ -122,11 +123,16 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
                 onBehalfOfAddrATokenBalance: balanceOf(supplyTokenData.aTokenAddress, onBehalfOf)
             });
 
-            bytes memory paramsCallData =
-                aaveV3SupplyEncode(supplyAmount, sender, supplyTokenData.id, true, true, address(0), onBehalfOf);
+            bytes memory paramsCallData = aaveV3SupplyEncode(
+                supplyAmount, sender, supplyTokenData.id, true, true, address(0), onBehalfOf
+            );
 
             bytes memory _calldata = abi.encodeWithSelector(
-                AaveV3Supply.executeAction.selector, paramsCallData, subData, paramMapping, returnValues
+                AaveV3Supply.executeAction.selector,
+                paramsCallData,
+                subData,
+                paramMapping,
+                returnValues
             );
 
             wallet.execute(address(cut), _calldata, 0);
@@ -140,7 +146,10 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
             assertEq(dataBefore.senderBalance - supplyAmount, dataAfter.senderBalance);
             assertEq(dataBefore.walletATokenBalance, 0);
             assertEq(dataAfter.walletATokenBalance, 0);
-            assertGe(dataAfter.onBehalfOfAddrATokenBalance, dataBefore.onBehalfOfAddrATokenBalance + supplyAmount);
+            assertGe(
+                dataAfter.onBehalfOfAddrATokenBalance,
+                dataBefore.onBehalfOfAddrATokenBalance + supplyAmount
+            );
 
             (uint256 walletCurrentATokenBalance,,,,,,,,) =
                 dataProvider.getUserReserveData(testPairs[i].supplyAsset, walletAddr);
@@ -151,10 +160,11 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
         }
     }
 
-    function testFuzz_encode_decode_inputs_no_market_no_onbehalf(uint256 _amount, address _from, uint16 _assetId)
-        public
-        view
-    {
+    function testFuzz_encode_decode_inputs_no_market_no_onbehalf(
+        uint256 _amount,
+        address _from,
+        uint16 _assetId
+    ) public view {
         AaveV3Supply.Params memory params = AaveV3Supply.Params({
             amount: _amount,
             from: _from,
@@ -266,11 +276,16 @@ contract TestAaveV3Supply is AaveV3Helper, ActionsUtils, BaseTest {
 
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCallData =
-                aaveV3SupplyEncode(_supplyAmount, sender, supplyTokenData.id, true, false, address(0), address(0));
+            bytes memory paramsCallData = aaveV3SupplyEncode(
+                _supplyAmount, sender, supplyTokenData.id, true, false, address(0), address(0)
+            );
 
             bytes memory _calldata = abi.encodeWithSelector(
-                AaveV3Supply.executeAction.selector, paramsCallData, subData, paramMapping, returnValues
+                AaveV3Supply.executeAction.selector,
+                paramsCallData,
+                subData,
+                paramMapping,
+                returnValues
             );
 
             wallet.execute(address(cut), _calldata, 0);

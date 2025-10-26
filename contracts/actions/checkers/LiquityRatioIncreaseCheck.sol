@@ -29,8 +29,9 @@ contract LiquityRatioIncreaseCheck is ActionBase, LiquityRatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 targetRatioIncrease =
-            _parseParamUint(uint256(inputData.targetRatioIncrease), _paramMapping[0], _subData, _returnValues);
+        uint256 targetRatioIncrease = _parseParamUint(
+            uint256(inputData.targetRatioIncrease), _paramMapping[0], _subData, _returnValues
+        );
 
         address troveOwner = address(this);
 

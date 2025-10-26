@@ -8,9 +8,11 @@ contract LineaFLAddresses {
 
     // AAVE_LENDING_POOL == AAVE_V3_LENDING_POOL so current automation doesn't break
     address internal constant AAVE_LENDING_POOL = 0xc47b8C00b0f69a36fa203Ffeac0334874574a8Ac;
-    address internal constant AAVE_LENDING_POOL_ADDRESS_PROVIDER = 0x89502c3731F69DDC95B65753708A07F8Cd0373F4;
+    address internal constant AAVE_LENDING_POOL_ADDRESS_PROVIDER =
+        0x89502c3731F69DDC95B65753708A07F8Cd0373F4;
     address internal constant AAVE_V3_LENDING_POOL = 0xc47b8C00b0f69a36fa203Ffeac0334874574a8Ac;
-    address internal constant AAVE_V3_LENDING_POOL_ADDRESS_PROVIDER = 0x89502c3731F69DDC95B65753708A07F8Cd0373F4;
+    address internal constant AAVE_V3_LENDING_POOL_ADDRESS_PROVIDER =
+        0x89502c3731F69DDC95B65753708A07F8Cd0373F4;
 
     address internal constant RECIPE_EXECUTOR_ADDR = 0x50bCFC115283dF48Ab6382551B9B93b08E197747;
 
@@ -25,7 +27,8 @@ contract LineaFLAddresses {
     address internal constant DSS_FLASH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant ST_ETH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    address internal constant SPARK_LENDING_POOL_ADDRESS_PROVIDER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant SPARK_LENDING_POOL_ADDRESS_PROVIDER =
+        0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant SPARK_LENDING_POOL = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address internal constant GHO_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;

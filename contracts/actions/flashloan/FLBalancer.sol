@@ -17,17 +17,17 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashL
 
     bytes32 public constant CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable override returns (bytes32) {
         FlashLoanParams memory params = parseInputs(_callData);
 
         if (params.flParamGetterAddr != address(0)) {
-            (params.tokens, params.amounts,) =
-                IFLParamGetter(params.flParamGetterAddr).getFlashLoanParams(params.flParamGetterData);
+            (params.tokens, params.amounts,) = IFLParamGetter(params.flParamGetterAddr)
+                .getFlashLoanParams(params.flParamGetterData);
         }
 
         bytes memory recipeData = params.recipeData;
@@ -45,7 +45,10 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashL
     }
 
     /// @notice Gets a FL from Balancer and returns back the execution to the action address
-    function _flBalancer(FlashLoanParams memory _params, bytes memory _taskData) internal returns (uint256) {
+    function _flBalancer(FlashLoanParams memory _params, bytes memory _taskData)
+        internal
+        returns (uint256)
+    {
         IFlashLoans(VAULT_ADDR).flashLoan(address(this), _params.tokens, _params.amounts, _taskData);
 
         emit ActionEvent("FLBalancer", abi.encode(_params));
@@ -73,13 +76,20 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashL
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i] + _feeAmounts[i];
 
-            require(_tokens[i].getBalance(address(this)) == paybackAmount + balancesBefore[i], "Wrong payback amount");
+            require(
+                _tokens[i].getBalance(address(this)) == paybackAmount + balancesBefore[i],
+                "Wrong payback amount"
+            );
 
             _tokens[i].withdrawTokens(address(VAULT_ADDR), paybackAmount);
         }
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (FlashLoanParams memory params) {
+    function parseInputs(bytes memory _callData)
+        public
+        pure
+        returns (FlashLoanParams memory params)
+    {
         params = abi.decode(_callData, (FlashLoanParams));
     }
 }

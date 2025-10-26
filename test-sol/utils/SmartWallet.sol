@@ -52,7 +52,15 @@ contract SmartWallet is BaseTest {
         owners[0] = owner;
 
         bytes memory setupData = abi.encodeWithSelector(
-            ISafe.setup.selector, owners, 1, address(0), bytes(""), address(0), address(0), 0, payable(address(0))
+            ISafe.setup.selector,
+            owners,
+            1,
+            address(0),
+            bytes(""),
+            address(0),
+            address(0),
+            0,
+            payable(address(0))
         );
 
         walletAddr = payable(ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY)

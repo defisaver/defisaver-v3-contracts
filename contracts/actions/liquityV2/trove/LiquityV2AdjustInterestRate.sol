@@ -3,7 +3,9 @@
 pragma solidity =0.8.24;
 
 import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
-import { IBorrowerOperations } from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
+import {
+    IBorrowerOperations
+} from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
@@ -37,11 +39,15 @@ contract LiquityV2AdjustInterestRate is ActionBase, LiquityV2Helper {
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.troveId = _parseParamUint(params.troveId, _paramMapping[1], _subData, _returnValues);
-        params.newAnnualInterestRate =
-            _parseParamUint(params.newAnnualInterestRate, _paramMapping[2], _subData, _returnValues);
-        params.upperHint = _parseParamUint(params.upperHint, _paramMapping[3], _subData, _returnValues);
-        params.lowerHint = _parseParamUint(params.lowerHint, _paramMapping[4], _subData, _returnValues);
-        params.maxUpfrontFee = _parseParamUint(params.maxUpfrontFee, _paramMapping[5], _subData, _returnValues);
+        params.newAnnualInterestRate = _parseParamUint(
+            params.newAnnualInterestRate, _paramMapping[2], _subData, _returnValues
+        );
+        params.upperHint =
+            _parseParamUint(params.upperHint, _paramMapping[3], _subData, _returnValues);
+        params.lowerHint =
+            _parseParamUint(params.lowerHint, _paramMapping[4], _subData, _returnValues);
+        params.maxUpfrontFee =
+            _parseParamUint(params.maxUpfrontFee, _paramMapping[5], _subData, _returnValues);
 
         (uint256 newInterestRate, bytes memory logData) = _adjustInterestRate(params);
         emit ActionEvent("LiquityV2AdjustInterestRate", logData);

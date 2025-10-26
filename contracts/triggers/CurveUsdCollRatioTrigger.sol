@@ -32,7 +32,8 @@ contract CurveUsdCollRatioTrigger is ITrigger, AdminAuth, CurveUsdHelper, Trigge
     function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
-        (uint256 currRatio, bool isInSoftLiquidation) = getCollateralRatio(triggerSubData.user, triggerSubData.market);
+        (uint256 currRatio, bool isInSoftLiquidation) =
+            getCollateralRatio(triggerSubData.user, triggerSubData.market);
 
         if (currRatio == 0) return false;
         /// @dev this trigger will be used for leverage management strategies which can't be managed while underwater

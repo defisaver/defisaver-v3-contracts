@@ -32,12 +32,14 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
     /// @dev If the caller is not owner we do additional checks, we skip those checks for gas savings
     modifier sameTriggers(uint64[] memory _strategyIds) {
         if (msg.sender != adminVault.owner()) {
-            Strategy memory firstStrategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(_strategyIds[0]);
+            Strategy memory firstStrategy =
+                StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(_strategyIds[0]);
 
             bytes32 firstStrategyTriggerHash = keccak256(abi.encode(firstStrategy.triggerIds));
 
             for (uint256 i = 1; i < _strategyIds.length; ++i) {
-                Strategy memory s = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(_strategyIds[i]);
+                Strategy memory s =
+                    StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(_strategyIds[i]);
 
                 if (firstStrategyTriggerHash != keccak256(abi.encode(s.triggerIds))) {
                     revert DiffTriggersInBundle(_strategyIds);
@@ -74,7 +76,11 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
 
     ////////////////////////////// VIEW METHODS /////////////////////////////////
 
-    function getStrategyId(uint256 _bundleId, uint256 _strategyIndex) public view returns (uint256) {
+    function getStrategyId(uint256 _bundleId, uint256 _strategyIndex)
+        public
+        view
+        returns (uint256)
+    {
         return bundles[_bundleId].strategyIds[_strategyIndex];
     }
 
@@ -86,7 +92,11 @@ contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
         return bundles.length;
     }
 
-    function getPaginatedBundles(uint256 _page, uint256 _perPage) public view returns (StrategyBundle[] memory) {
+    function getPaginatedBundles(uint256 _page, uint256 _perPage)
+        public
+        view
+        returns (StrategyBundle[] memory)
+    {
         StrategyBundle[] memory bundlesPerPage = new StrategyBundle[](_perPage);
         uint256 start = _page * _perPage;
         uint256 end = start + _perPage;

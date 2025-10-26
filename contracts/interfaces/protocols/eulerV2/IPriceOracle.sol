@@ -16,7 +16,10 @@ interface IPriceOracle {
     /// @param base The token that is being priced.
     /// @param quote The token that is the unit of account.
     /// @return outAmount The amount of `quote` that is equivalent to `inAmount` of `base`.
-    function getQuote(uint256 inAmount, address base, address quote) external view returns (uint256 outAmount);
+    function getQuote(uint256 inAmount, address base, address quote)
+        external
+        view
+        returns (uint256 outAmount);
 
     /// @notice Two-sided price: How much quote token you would get/spend for selling/buying inAmount of base token.
     /// @param inAmount The amount of `base` to convert.

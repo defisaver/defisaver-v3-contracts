@@ -21,7 +21,10 @@ library TokenUtils {
         }
     }
 
-    function pullTokensIfNeeded(address _token, address _from, uint256 _amount) internal returns (uint256) {
+    function pullTokensIfNeeded(address _token, address _from, uint256 _amount)
+        internal
+        returns (uint256)
+    {
         // handle max uint amount
         if (_amount == type(uint256).max) {
             _amount = getBalance(_token, _from);
@@ -34,7 +37,10 @@ library TokenUtils {
         return _amount;
     }
 
-    function withdrawTokens(address _token, address _to, uint256 _amount) internal returns (uint256) {
+    function withdrawTokens(address _token, address _to, uint256 _amount)
+        internal
+        returns (uint256)
+    {
         if (_amount == type(uint256).max) {
             _amount = getBalance(_token, address(this));
         }

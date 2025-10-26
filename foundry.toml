@@ -23,7 +23,7 @@ bracket_spacing = true
 number_underscore = "thousands"
 ignore = ["deprecated/**"]
 # int_types = "long"
-# line_length = 120
+line_length = 100
 # tab_width = 4
 
 

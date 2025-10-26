@@ -28,7 +28,9 @@ interface IStabilityPool {
     event DepositSnapshotUpdated(address indexed _depositor, uint256 _P, uint256 _S, uint256 _G);
     event FrontEndSnapshotUpdated(address indexed _frontEnd, uint256 _P, uint256 _G);
     event UserDepositChanged(address indexed _depositor, uint256 _newDeposit);
-    event FrontEndStakeChanged(address indexed _frontEnd, uint256 _newFrontEndStake, address _depositor);
+    event FrontEndStakeChanged(
+        address indexed _frontEnd, uint256 _newFrontEndStake, address _depositor
+    );
 
     event ETHGainWithdrawn(address indexed _depositor, uint256 _ETH, uint256 _LUSDLoss);
     event LQTYPaidToDepositor(address indexed _depositor, uint256 _LQTY);

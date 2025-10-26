@@ -12,5 +12,6 @@ contract PlasmaActionsUtilAddresses {
     address internal constant PROXY_AUTH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // Not needed now, waiting for automation
 
     // not yet implemented
-    address internal constant LSV_PROXY_REGISTRY_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant LSV_PROXY_REGISTRY_ADDRESS =
+        0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 }

@@ -36,9 +36,12 @@ contract LiquityOpen is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.maxFeePercentage = _parseParamUint(params.maxFeePercentage, _paramMapping[0], _subData, _returnValues);
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[1], _subData, _returnValues);
-        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[2], _subData, _returnValues);
+        params.maxFeePercentage =
+            _parseParamUint(params.maxFeePercentage, _paramMapping[0], _subData, _returnValues);
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[1], _subData, _returnValues);
+        params.lusdAmount =
+            _parseParamUint(params.lusdAmount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
@@ -75,8 +78,13 @@ contract LiquityOpen is ActionBase, LiquityHelper {
 
         LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, _params.lusdAmount);
 
-        bytes memory logData =
-            abi.encode(_params.maxFeePercentage, _params.collAmount, _params.lusdAmount, _params.from, _params.to);
+        bytes memory logData = abi.encode(
+            _params.maxFeePercentage,
+            _params.collAmount,
+            _params.lusdAmount,
+            _params.from,
+            _params.to
+        );
         return (_params.collAmount, logData);
     }
 

@@ -14,7 +14,9 @@ contract LiquityV2Utils is Tokens {
         uint256 stashedCollMappingSlot = 9;
         vm.store(_stabilityPool, bytes32(collBalanceStorageSlot), bytes32(_simulatedCollGain));
         vm.store(
-            _stabilityPool, keccak256(abi.encode(_walletAddr, stashedCollMappingSlot)), bytes32(_simulatedCollGain)
+            _stabilityPool,
+            keccak256(abi.encode(_walletAddr, stashedCollMappingSlot)),
+            bytes32(_simulatedCollGain)
         );
         give(_collToken, _stabilityPool, _simulatedCollGain * 2);
     }

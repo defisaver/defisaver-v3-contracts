@@ -122,7 +122,11 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Get list of users load data
-    function getUsersData(address[] calldata _users) external view returns (UserData[] memory data) {
+    function getUsersData(address[] calldata _users)
+        external
+        view
+        returns (UserData[] memory data)
+    {
         data = new UserData[](_users.length);
         for (uint256 i = 0; i < _users.length; ++i) {
             data[i] = getUserData(_users[i]);
@@ -153,7 +157,8 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         }
 
         for (uint256 i = 0; i < collaterals.length; ++i) {
-            collateralsInfo[i] = _getUserCollateralInfo(_user, collaterals[i], controller, unitOfAccount, oracle);
+            collateralsInfo[i] =
+                _getUserCollateralInfo(_user, collaterals[i], controller, unitOfAccount, oracle);
         }
 
         data = UserData({
@@ -169,7 +174,11 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
     }
 
     /// @notice Get list of vaults with full information
-    function getVaultsInfosFull(address[] calldata _vaults) external view returns (VaultInfoFull[] memory data) {
+    function getVaultsInfosFull(address[] calldata _vaults)
+        external
+        view
+        returns (VaultInfoFull[] memory data)
+    {
         data = new VaultInfoFull[](_vaults.length);
         for (uint256 i = 0; i < _vaults.length; ++i) {
             data[i] = getVaultInfoFull(_vaults[i]);
@@ -219,7 +228,11 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
     }
 
     /// @notice Get list of collaterals for a vault
-    function getVaultCollaterals(address _vault) public view returns (CollateralInfo[] memory collateralsInfo) {
+    function getVaultCollaterals(address _vault)
+        public
+        view
+        returns (CollateralInfo[] memory collateralsInfo)
+    {
         address unitOfAccount = IEVault(_vault).unitOfAccount();
         address oracle = IEVault(_vault).oracle();
         collateralsInfo = _getVaultCollaterals(_vault, unitOfAccount, oracle);
@@ -287,7 +300,9 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
                 // when repaying
                 if (params[i].liquidityAdded > 0) {
                     cash += params[i].liquidityAdded;
-                    totalBorrows = totalBorrows > params[i].liquidityAdded ? totalBorrows - params[i].liquidityAdded : 0;
+                    totalBorrows = totalBorrows > params[i].liquidityAdded
+                        ? totalBorrows - params[i].liquidityAdded
+                        : 0;
                 }
                 // when borrowing
                 if (params[i].liquidityRemoved > 0) {
@@ -305,8 +320,9 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
                 }
             }
 
-            (bool success, bytes memory data) =
-                irm.staticcall(abi.encodeCall(IIRM.computeInterestRateView, (address(this), cash, totalBorrows)));
+            (bool success, bytes memory data) = irm.staticcall(
+                abi.encodeCall(IIRM.computeInterestRateView, (address(this), cash, totalBorrows))
+            );
 
             if (success && data.length >= 32) {
                 uint256 newInterestRate = abi.decode(data, (uint256));
@@ -337,8 +353,9 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
             uint16 borrowLTV = IEVault(_controller).LTVBorrow(_collateral);
             if (borrowLTV != 0) {
                 uint256 userCollBalance = IEVault(_collateral).balanceOf(_user);
-                collateralAmountInUnit =
-                    _getOracleAmountInUnitOfAccount(_oracle, _collateral, _unitOfAccount, userCollBalance);
+                collateralAmountInUnit = _getOracleAmountInUnitOfAccount(
+                    _oracle, _collateral, _unitOfAccount, userCollBalance
+                );
             }
         }
 
@@ -398,8 +415,9 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
             collateralsInfo[i].sharePriceInUnit =
                 _getOraclePriceInUnitOfAccount(_oracle, collaterals[i], _unitOfAccount);
 
-            collateralsInfo[i].assetPriceInUnit =
-                _getOraclePriceInUnitOfAccount(_oracle, collateralsInfo[i].assetAddr, _unitOfAccount);
+            collateralsInfo[i].assetPriceInUnit = _getOraclePriceInUnitOfAccount(
+                _oracle, collateralsInfo[i].assetAddr, _unitOfAccount
+            );
 
             collateralsInfo[i].cash = IEVault(collaterals[i]).cash();
             collateralsInfo[i].totalBorrows = IEVault(collaterals[i]).totalBorrows();
@@ -412,16 +430,18 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         }
     }
 
-    function _getOraclePriceInUnitOfAccount(address _oracle, address _token, address _unitOfAccount)
-        internal
-        view
-        returns (uint256 price)
-    {
+    function _getOraclePriceInUnitOfAccount(
+        address _oracle,
+        address _token,
+        address _unitOfAccount
+    ) internal view returns (uint256 price) {
         uint256 decimals = IEVault(_token).decimals();
         uint256 inAmount = 10 ** decimals;
 
         if (_oracle != address(0)) {
-            try IPriceOracle(_oracle).getQuote(inAmount, _token, _unitOfAccount) returns (uint256 quote) {
+            try IPriceOracle(_oracle).getQuote(inAmount, _token, _unitOfAccount) returns (
+                uint256 quote
+            ) {
                 return quote;
             } catch {
                 return 0;
@@ -429,13 +449,16 @@ contract EulerV2View is EulerV2Helper, TokenPriceHelper {
         }
     }
 
-    function _getOracleAmountInUnitOfAccount(address _oracle, address _token, address _unitOfAccount, uint256 _amount)
-        internal
-        view
-        returns (uint256 price)
-    {
+    function _getOracleAmountInUnitOfAccount(
+        address _oracle,
+        address _token,
+        address _unitOfAccount,
+        uint256 _amount
+    ) internal view returns (uint256 price) {
         if (_oracle != address(0)) {
-            try IPriceOracle(_oracle).getQuote(_amount, _token, _unitOfAccount) returns (uint256 quote) {
+            try IPriceOracle(_oracle).getQuote(_amount, _token, _unitOfAccount) returns (
+                uint256 quote
+            ) {
                 return quote;
             } catch {
                 return 0;

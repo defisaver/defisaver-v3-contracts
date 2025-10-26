@@ -19,17 +19,17 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
 
     bytes32 public constant CALLBACK_SUCCESS = keccak256("ERC3156FlashBorrower.onFlashLoan");
 
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable override returns (bytes32) {
         FlashLoanParams memory params = parseInputs(_callData);
 
         if (params.flParamGetterAddr != address(0)) {
-            (, uint256[] memory amounts,) =
-                IFLParamGetter(params.flParamGetterAddr).getFlashLoanParams(params.flParamGetterData);
+            (, uint256[] memory amounts,) = IFLParamGetter(params.flParamGetterAddr)
+                .getFlashLoanParams(params.flParamGetterData);
 
             params.amounts[0] = amounts[0];
         }
@@ -58,12 +58,13 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
     }
 
     /// @notice ERC3156 callback function that formats and calls back RecipeExecutor
-    function onFlashLoan(address _initiator, address _token, uint256 _amount, uint256 _fee, bytes calldata _data)
-        external
-        override
-        nonReentrant
-        returns (bytes32)
-    {
+    function onFlashLoan(
+        address _initiator,
+        address _token,
+        uint256 _amount,
+        uint256 _fee,
+        bytes calldata _data
+    ) external override nonReentrant returns (bytes32) {
         require(msg.sender == address(DSS_FLASH_ADDR), "Untrusted lender");
         require(_initiator == address(this), "Untrusted loan initiator");
 
@@ -75,13 +76,20 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
 
         _executeRecipe(wallet, isDSProxy(wallet), currRecipe, paybackAmount);
 
-        require(_token.getBalance(address(this)) == paybackAmount + balanceBefore, "Wrong payback amount");
+        require(
+            _token.getBalance(address(this)) == paybackAmount + balanceBefore,
+            "Wrong payback amount"
+        );
 
         _token.approveToken(DSS_FLASH_ADDR, paybackAmount);
         return CALLBACK_SUCCESS;
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (FlashLoanParams memory params) {
+    function parseInputs(bytes memory _callData)
+        public
+        pure
+        returns (FlashLoanParams memory params)
+    {
         params = abi.decode(_callData, (FlashLoanParams));
     }
 }

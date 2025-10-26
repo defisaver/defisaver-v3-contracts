@@ -37,7 +37,8 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
 
         // param was added later on, so we check if it's sent
         if (_paramMapping.length == 5) {
-            params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
+            params.onBehalf =
+                _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
         }
 
         (uint256 withdrawAmount, bytes memory logData) = _withdraw(params);
@@ -76,11 +77,13 @@ contract CompV3Withdraw is ActionBase, CompV3Helper {
             if (_params.asset == IComet(_params.market).baseToken()) {
                 _params.amount = IComet(_params.market).balanceOf(_params.onBehalf);
             } else {
-                _params.amount = IComet(_params.market).collateralBalanceOf(_params.onBehalf, _params.asset);
+                _params.amount =
+                    IComet(_params.market).collateralBalanceOf(_params.onBehalf, _params.asset);
             }
         }
 
-        IComet(_params.market).withdrawFrom(_params.onBehalf, _params.to, _params.asset, _params.amount);
+        IComet(_params.market)
+            .withdrawFrom(_params.onBehalf, _params.to, _params.asset, _params.amount);
 
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);

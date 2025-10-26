@@ -32,11 +32,13 @@ contract CompWithdraw is ActionBase, CompHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.cTokenAddr = _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
+        params.cTokenAddr =
+            _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _withdraw(params.cTokenAddr, params.amount, params.to);
+        (uint256 withdrawAmount, bytes memory logData) =
+            _withdraw(params.cTokenAddr, params.amount, params.to);
         emit ActionEvent("CompWithdraw", logData);
         return bytes32(withdrawAmount);
     }
@@ -60,7 +62,10 @@ contract CompWithdraw is ActionBase, CompHelper {
     /// @param _cTokenAddr cToken address
     /// @param _amount Amount of underlying tokens to withdraw
     /// @param _to Address where to send the tokens to (can be left on user's wallet)
-    function _withdraw(address _cTokenAddr, uint256 _amount, address _to) internal returns (uint256, bytes memory) {
+    function _withdraw(address _cTokenAddr, uint256 _amount, address _to)
+        internal
+        returns (uint256, bytes memory)
+    {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         // because comp returns native eth we need to check the balance of that

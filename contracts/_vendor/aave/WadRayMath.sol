@@ -54,7 +54,9 @@ library WadRayMath {
     function wadDiv(uint256 a, uint256 b) internal pure returns (uint256 c) {
         // to avoid overflow, a <= (type(uint256).max - halfB) / WAD
         assembly {
-            if or(iszero(b), iszero(iszero(gt(a, div(sub(not(0), div(b, 2)), WAD))))) { revert(0, 0) }
+            if or(iszero(b), iszero(iszero(gt(a, div(sub(not(0), div(b, 2)), WAD))))) {
+                revert(0, 0)
+            }
 
             c := div(add(mul(a, WAD), div(b, 2)), b)
         }
@@ -86,7 +88,9 @@ library WadRayMath {
     function rayDiv(uint256 a, uint256 b) internal pure returns (uint256 c) {
         // to avoid overflow, a <= (type(uint256).max - halfB) / RAY
         assembly {
-            if or(iszero(b), iszero(iszero(gt(a, div(sub(not(0), div(b, 2)), RAY))))) { revert(0, 0) }
+            if or(iszero(b), iszero(iszero(gt(a, div(sub(not(0), div(b, 2)), RAY))))) {
+                revert(0, 0)
+            }
 
             c := div(add(mul(a, RAY), div(b, 2)), b)
         }

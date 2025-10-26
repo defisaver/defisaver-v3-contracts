@@ -14,7 +14,12 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     error SenderNotSubOwnerError(address, uint256);
     error SubIdOutOfRange(uint256, bool);
 
-    event Subscribe(uint256 indexed subId, address indexed walletAddr, bytes32 indexed subHash, StrategySub subStruct);
+    event Subscribe(
+        uint256 indexed subId,
+        address indexed walletAddr,
+        bytes32 indexed subHash,
+        StrategySub subStruct
+    );
     event UpdateData(uint256 indexed subId, bytes32 indexed subHash, StrategySub subStruct);
     event ActivateSub(uint256 indexed subId);
     event DeactivateSub(uint256 indexed subId);
@@ -27,11 +32,16 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
 
     /// @dev push one empty sub for AaveSubProxy to function correctly
     constructor() {
-        strategiesSubs.push(StoredSubData({ walletAddr: bytes20(0), isEnabled: false, strategySubHash: bytes32(0) }));
+        strategiesSubs.push(
+            StoredSubData({ walletAddr: bytes20(0), isEnabled: false, strategySubHash: bytes32(0) })
+        );
 
         storedStrategies.push(
             StrategySub({
-                strategyOrBundleId: 0, isBundle: false, triggerData: new bytes[](0), subData: new bytes32[](0)
+                strategyOrBundleId: 0,
+                isBundle: false,
+                triggerData: new bytes[](0),
+                subData: new bytes32[](0)
             })
         );
     }

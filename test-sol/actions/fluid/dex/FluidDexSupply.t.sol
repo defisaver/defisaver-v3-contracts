@@ -225,13 +225,17 @@ contract TestFluidDexSupply is FluidTestBase {
             FluidView.VaultData memory vaultData = fluidView.getVaultData(address(vaults[i]));
             LocalVars memory vars;
 
-            (vaultData.supplyToken0, vars.collAmount0) =
-                giveAndApproveToken(vaultData.supplyToken0, sender, walletAddr, _config.collAmount0InUSD);
+            (vaultData.supplyToken0, vars.collAmount0) = giveAndApproveToken(
+                vaultData.supplyToken0, sender, walletAddr, _config.collAmount0InUSD
+            );
 
-            (vaultData.supplyToken1, vars.collAmount1) =
-                giveAndApproveToken(vaultData.supplyToken1, sender, walletAddr, _config.collAmount1InUSD);
+            (vaultData.supplyToken1, vars.collAmount1) = giveAndApproveToken(
+                vaultData.supplyToken1, sender, walletAddr, _config.collAmount1InUSD
+            );
 
-            vars.shares = estimateDepositShares(vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1);
+            vars.shares = estimateDepositShares(
+                vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1
+            );
 
             if (supplyLimitReached(vaultData.dexSupplyData, vars.shares)) {
                 logSupplyLimitReached(address(vaults[i]));
@@ -240,8 +244,12 @@ contract TestFluidDexSupply is FluidTestBase {
 
             // Encode call.
             vars.shareVariableData = FluidDexModel.SupplyVariableData({
-                collAmount0: _config.takeMaxUint256CollAmount0 ? type(uint256).max : vars.collAmount0,
-                collAmount1: _config.takeMaxUint256CollAmount1 ? type(uint256).max : vars.collAmount1,
+                collAmount0: _config.takeMaxUint256CollAmount0
+                    ? type(uint256).max
+                    : vars.collAmount0,
+                collAmount1: _config.takeMaxUint256CollAmount1
+                    ? type(uint256).max
+                    : vars.collAmount1,
                 minCollShares: vars.shares
             });
 
@@ -281,8 +289,14 @@ contract TestFluidDexSupply is FluidTestBase {
             assertEq(vars.walletCollToken1BalanceAfter, vars.walletCollToken1BalanceBefore);
             assertEq(vars.walletEthBalanceAfter, vars.walletEthBalanceBefore);
 
-            assertEq(vars.senderCollToken0BalanceAfter, vars.senderCollToken0BalanceBefore - vars.collAmount0);
-            assertEq(vars.senderCollToken1BalanceAfter, vars.senderCollToken1BalanceBefore - vars.collAmount1);
+            assertEq(
+                vars.senderCollToken0BalanceAfter,
+                vars.senderCollToken0BalanceBefore - vars.collAmount0
+            );
+            assertEq(
+                vars.senderCollToken1BalanceAfter,
+                vars.senderCollToken1BalanceBefore - vars.collAmount1
+            );
 
             assertEq(vars.userPositionAfter.owner, walletAddr);
             assertEq(vars.userPositionAfter.isLiquidated, false);

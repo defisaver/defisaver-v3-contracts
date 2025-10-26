@@ -25,8 +25,10 @@ contract RemoveTokenApproval is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.tokenAddr = _parseParamAddr(inputData.tokenAddr, _paramMapping[0], _subData, _returnValues);
-        inputData.spender = _parseParamAddr(inputData.spender, _paramMapping[1], _subData, _returnValues);
+        inputData.tokenAddr =
+            _parseParamAddr(inputData.tokenAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.spender =
+            _parseParamAddr(inputData.spender, _paramMapping[1], _subData, _returnValues);
 
         _removeApproval(inputData.tokenAddr, inputData.spender);
 

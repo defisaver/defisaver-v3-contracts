@@ -33,7 +33,8 @@ contract KingClaim is ActionBase {
         Params memory inputData = parseInputs(_callData);
 
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[0], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
 
         _claim(inputData);
 
@@ -56,7 +57,8 @@ contract KingClaim is ActionBase {
 
     function _claim(Params memory params) internal {
         uint256 startingBalance = KING_TOKEN.getBalance(address(this));
-        IEtherFiClaim(KING_CLAIM_CONTRACT).claim(address(this), params.amount, params.merkleRoot, params.merkleProof);
+        IEtherFiClaim(KING_CLAIM_CONTRACT)
+            .claim(address(this), params.amount, params.merkleRoot, params.merkleProof);
         uint256 claimedAmount = KING_TOKEN.getBalance(address(this)) - startingBalance;
         KING_TOKEN.withdrawTokens(params.to, claimedAmount);
     }

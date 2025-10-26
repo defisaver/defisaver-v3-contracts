@@ -22,12 +22,14 @@ library FluidWithdrawLiquidityLogic {
     function withdraw(FluidLiquidityModel.WithdrawData memory _data) internal returns (uint256) {
         _data.vaultType.requireLiquidityCollateral();
 
-        bool shouldWrapWithdrawnEth = _data.wrapWithdrawnEth && _data.supplyToken == TokenUtils.ETH_ADDR;
+        bool shouldWrapWithdrawnEth =
+            _data.wrapWithdrawnEth && _data.supplyToken == TokenUtils.ETH_ADDR;
 
         address sendTokensTo = shouldWrapWithdrawnEth ? address(this) : _data.to;
 
         // type(int256).min will trigger max withdrawal inside the vault
-        int256 withdrawAmount = _data.amount == type(uint256).max ? type(int256).min : -_data.amount.signed256();
+        int256 withdrawAmount =
+            _data.amount == type(uint256).max ? type(int256).min : -_data.amount.signed256();
 
         (, withdrawAmount,) = _data.vaultType.isT1Vault()
             ? IFluidVaultT1(_data.vault)

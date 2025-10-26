@@ -17,13 +17,12 @@ contract TokenBalance is ActionBase {
     }
 
     /// @inheritdoc ActionBase
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        virtual
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
         return bytes32(inputData.tokenAddr.getBalance(inputData.holderAddr));

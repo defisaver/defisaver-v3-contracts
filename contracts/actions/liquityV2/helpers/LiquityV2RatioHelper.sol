@@ -12,7 +12,10 @@ contract LiquityV2RatioHelper is DSMath {
     /// @notice Gets Trove CR
     /// @param _market Address of the market where the trove is
     /// @param _troveId id of the trove
-    function getRatio(address _market, uint256 _troveId) public returns (uint256 ratio, bool isActive) {
+    function getRatio(address _market, uint256 _troveId)
+        public
+        returns (uint256 ratio, bool isActive)
+    {
         IAddressesRegistry market = IAddressesRegistry(_market);
         ITroveManager troveManager = ITroveManager(market.troveManager());
         IPriceFeed priceFeed = IPriceFeed(market.priceFeed());

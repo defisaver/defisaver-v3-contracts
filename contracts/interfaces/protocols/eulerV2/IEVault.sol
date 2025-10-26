@@ -247,7 +247,9 @@ interface IBorrowing {
     /// @dev Equivalent to withdrawing and repaying, but no assets are needed to be present in the vault
     /// @dev Contrary to a regular `repay`, if account is unhealthy, the repay amount must bring the account back to
     /// health, or the operation will revert during account status check
-    function repayWithShares(uint256 amount, address receiver) external returns (uint256 shares, uint256 debt);
+    function repayWithShares(uint256 amount, address receiver)
+        external
+        returns (uint256 shares, uint256 debt);
 
     /// @notice Take over debt from another account
     /// @param amount Amount of debt in asset units (use max uint256 for all the account's debt)
@@ -292,7 +294,12 @@ interface ILiquidation {
     /// collateral balance units (shares for vaults).  Meant as slippage check together with `repayAssets`
     /// @dev If `repayAssets` is set to max uint256 it is assumed the caller will perform their own slippage checks to
     /// make sure they are not taking on too much debt. This option is mainly meant for smart contract liquidators
-    function liquidate(address violator, address collateral, uint256 repayAssets, uint256 minYieldBalance) external;
+    function liquidate(
+        address violator,
+        address collateral,
+        uint256 repayAssets,
+        uint256 minYieldBalance
+    ) external;
 }
 
 /// @title IRiskManager
@@ -320,7 +327,11 @@ interface IRiskManager is IEVCVault {
     function accountLiquidityFull(address account, bool liquidation)
         external
         view
-        returns (address[] memory collaterals, uint256[] memory collateralValues, uint256 liabilityValue);
+        returns (
+            address[] memory collaterals,
+            uint256[] memory collateralValues,
+            uint256 liabilityValue
+        );
 
     /// @notice Release control of the account on EVC if no outstanding debt is present
     function disableController() external;
@@ -330,7 +341,10 @@ interface IRiskManager is IEVCVault {
     /// @return magicValue Must return the bytes4 magic value 0xb168c58f (which is a selector of this function) when
     /// account status is valid, or revert otherwise.
     /// @dev Only callable by EVC during status checks
-    function checkAccountStatus(address account, address[] calldata collaterals) external view returns (bytes4);
+    function checkAccountStatus(address account, address[] calldata collaterals)
+        external
+        view
+        returns (bytes4);
 
     /// @notice Checks the status of the vault and reverts if caps are exceeded
     /// @return magicValue Must return the bytes4 magic value 0x4b3d1223 (which is a selector of this function) when
@@ -489,7 +503,12 @@ interface IGovernance {
     /// @param borrowLTV New borrow LTV, for assessing account's health during account status checks, in 1e4 scale
     /// @param liquidationLTV New liquidation LTV after ramp ends in 1e4 scale
     /// @param rampDuration Ramp duration in seconds
-    function setLTV(address collateral, uint16 borrowLTV, uint16 liquidationLTV, uint32 rampDuration) external;
+    function setLTV(
+        address collateral,
+        uint16 borrowLTV,
+        uint16 liquidationLTV,
+        uint32 rampDuration
+    ) external;
 
     /// @notice Set a new maximum liquidation discount
     /// @param newDiscount New maximum liquidation discount in 1e4 scale

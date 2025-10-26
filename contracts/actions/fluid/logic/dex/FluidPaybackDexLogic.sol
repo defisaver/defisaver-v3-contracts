@@ -24,10 +24,10 @@ library FluidPaybackDexLogic {
     /// @return burnedSharesOrFullDebtAmount Supports two cases:
     ///         - For partial payback: Return the amount of debt shares burned.
     ///         - For max payback: Return the exact amount of full payback tokens (either token0 or token1)
-    function paybackVariable(FluidDexModel.PaybackDexData memory _data, IFluidVault.Tokens memory _tokens)
-        internal
-        returns (uint256 burnedSharesOrFullDebtAmount)
-    {
+    function paybackVariable(
+        FluidDexModel.PaybackDexData memory _data,
+        IFluidVault.Tokens memory _tokens
+    ) internal returns (uint256 burnedSharesOrFullDebtAmount) {
         _data.vaultType.requireSmartDebt();
 
         // 1st CASE: Max payback in debt token 0.
@@ -46,18 +46,19 @@ library FluidPaybackDexLogic {
 
     /// @notice Helper function to handle max payback in debt token 0.
     /// @return exactDebtToken0Pulled The full amount of debt represented in token 0.
-    function _maxPaybackInToken0(FluidDexModel.PaybackDexData memory _data, IFluidVault.Tokens memory _tokens)
-        internal
-        returns (uint256 exactDebtToken0Pulled)
-    {
+    function _maxPaybackInToken0(
+        FluidDexModel.PaybackDexData memory _data,
+        IFluidVault.Tokens memory _tokens
+    ) internal returns (uint256 exactDebtToken0Pulled) {
         // We always pull maximum amount of token 0 that user allowed and refund any dust amount later
-        FluidDexTokensUtils.PulledTokensData memory vars = FluidDexTokensUtils.pullTokensIfNeededWithApproval(
-            _tokens,
-            _data.from,
-            _data.vault,
-            _data.variableData.maxAmountToPull,
-            0 /* amount1 */
-        );
+        FluidDexTokensUtils.PulledTokensData memory vars =
+            FluidDexTokensUtils.pullTokensIfNeededWithApproval(
+                _tokens,
+                _data.from,
+                _data.vault,
+                _data.variableData.maxAmountToPull,
+                0 /* amount1 */
+            );
 
         uint256 msgValue = vars.isToken0Native ? vars.amount0 : 0;
 
@@ -104,19 +105,20 @@ library FluidPaybackDexLogic {
 
     /// @notice Helper function to handle max payback in debt token 1.
     /// @return exactDebtToken1Pulled The full amount of debt represented in token 1.
-    function _maxPaybackInToken1(FluidDexModel.PaybackDexData memory _data, IFluidVault.Tokens memory _tokens)
-        internal
-        returns (uint256 exactDebtToken1Pulled)
-    {
+    function _maxPaybackInToken1(
+        FluidDexModel.PaybackDexData memory _data,
+        IFluidVault.Tokens memory _tokens
+    ) internal returns (uint256 exactDebtToken1Pulled) {
         // We always pull maximum amount of token 1 that user allowed and refund any dust amount later
-        FluidDexTokensUtils.PulledTokensData memory vars = FluidDexTokensUtils.pullTokensIfNeededWithApproval(
-            _tokens,
-            _data.from,
-            _data.vault,
-            0,
-            /* amount0 */
-            _data.variableData.maxAmountToPull
-        );
+        FluidDexTokensUtils.PulledTokensData memory vars =
+            FluidDexTokensUtils.pullTokensIfNeededWithApproval(
+                _tokens,
+                _data.from,
+                _data.vault,
+                0,
+                /* amount0 */
+                _data.variableData.maxAmountToPull
+            );
 
         uint256 msgValue = vars.isToken1Native ? vars.amount1 : 0;
 
@@ -163,15 +165,21 @@ library FluidPaybackDexLogic {
 
     /// @notice Helper function to handle partial payback in either one or both debt tokens.
     /// @return burnedDebtShares The amount of debt shares burned.
-    function _partialPayback(FluidDexModel.PaybackDexData memory _data, IFluidVault.Tokens memory _tokens)
-        internal
-        returns (uint256 burnedDebtShares)
-    {
-        FluidDexTokensUtils.PulledTokensData memory vars = FluidDexTokensUtils.pullTokensIfNeededWithApproval(
-            _tokens, _data.from, _data.vault, _data.variableData.debtAmount0, _data.variableData.debtAmount1
-        );
+    function _partialPayback(
+        FluidDexModel.PaybackDexData memory _data,
+        IFluidVault.Tokens memory _tokens
+    ) internal returns (uint256 burnedDebtShares) {
+        FluidDexTokensUtils.PulledTokensData memory vars =
+            FluidDexTokensUtils.pullTokensIfNeededWithApproval(
+                _tokens,
+                _data.from,
+                _data.vault,
+                _data.variableData.debtAmount0,
+                _data.variableData.debtAmount1
+            );
 
-        uint256 msgValue = vars.isToken0Native ? vars.amount0 : (vars.isToken1Native ? vars.amount1 : 0);
+        uint256 msgValue =
+            vars.isToken0Native ? vars.amount0 : (vars.isToken1Native ? vars.amount1 : 0);
 
         (,, int256 exactBorrowSharesBurned) = _data.vaultType.isT3Vault()
             ? IFluidVaultT3(_data.vault).operate{ value: msgValue }(

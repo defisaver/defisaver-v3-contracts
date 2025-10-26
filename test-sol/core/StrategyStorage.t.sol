@@ -52,7 +52,11 @@ contract TestCore_StrategyStorage is BaseTest {
         bool openToPublic = cut.openToPublic();
         address sender = address(this);
 
-        vm.expectRevert(abi.encodeWithSelector(StrategyStorage.NoAuthToCreateStrategy.selector, sender, openToPublic));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StrategyStorage.NoAuthToCreateStrategy.selector, sender, openToPublic
+            )
+        );
         cut.createStrategy("Test", new bytes4[](0), new bytes4[](0), new uint8[][](0), true);
     }
 
@@ -117,14 +121,16 @@ contract TestCore_StrategyStorage is BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _assertStrategies(StrategyModel.Strategy[] memory _fetchedStrategies, uint256 _realSize, uint256 _offset)
-        internal
-        pure
-    {
+    function _assertStrategies(
+        StrategyModel.Strategy[] memory _fetchedStrategies,
+        uint256 _realSize,
+        uint256 _offset
+    ) internal pure {
         for (uint256 i = 0; i < _realSize; ++i) {
             assertTrue(
                 Strings.equal(
-                    _fetchedStrategies[i].name, string(abi.encodePacked("Test", Strings.toString(i + 1 + _offset)))
+                    _fetchedStrategies[i].name,
+                    string(abi.encodePacked("Test", Strings.toString(i + 1 + _offset)))
                 )
             );
             assertEq(_fetchedStrategies[i].creator, Addresses.OWNER_ACC);
@@ -142,7 +148,8 @@ contract TestCore_StrategyStorage is BaseTest {
         vm.expectEmit(true, false, false, false, address(cut));
         emit StrategyCreated(strategyCountBefore);
         startPrank(_sender);
-        uint256 strategyId = cut.createStrategy("Test1", new bytes4[](0), new bytes4[](0), new uint8[][](0), true);
+        uint256 strategyId =
+            cut.createStrategy("Test1", new bytes4[](0), new bytes4[](0), new uint8[][](0), true);
         stopPrank();
 
         uint256 strategyCountAfter = cut.getStrategyCount();

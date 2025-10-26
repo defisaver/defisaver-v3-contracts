@@ -126,7 +126,10 @@ interface IEVC {
     /// @param addressPrefix The address prefix for which the nonce is being retrieved.
     /// @param nonceNamespace The nonce namespace for which the nonce is being retrieved.
     /// @return nonce The current nonce for the given address prefix and nonce namespace.
-    function getNonce(bytes19 addressPrefix, uint256 nonceNamespace) external view returns (uint256 nonce);
+    function getNonce(bytes19 addressPrefix, uint256 nonceNamespace)
+        external
+        view
+        returns (uint256 nonce);
 
     /// @notice Returns the bit field for a given address prefix and operator.
     /// @dev The bit field is used to store information about authorized operators for a given address prefix. Each bit
@@ -138,13 +141,19 @@ interface IEVC {
     /// accounts the operator is authorized for. It is a 256-position binary array like 0...010...0, marking the account
     /// positionally in a uint256. The position in the bit field corresponds to the account ID (0-255), where 0 is the
     /// owner account's ID.
-    function getOperator(bytes19 addressPrefix, address operator) external view returns (uint256 operatorBitField);
+    function getOperator(bytes19 addressPrefix, address operator)
+        external
+        view
+        returns (uint256 operatorBitField);
 
     /// @notice Returns whether a given operator has been authorized for a given account.
     /// @param account The address of the account whose operator is being checked.
     /// @param operator The address of the operator that is being checked.
     /// @return authorized A boolean value that indicates whether the operator is authorized for the account.
-    function isAccountOperatorAuthorized(address account, address operator) external view returns (bool authorized);
+    function isAccountOperatorAuthorized(address account, address operator)
+        external
+        view
+        returns (bool authorized);
 
     /// @notice Enables or disables lockdown mode for a given address prefix.
     /// @dev This function can only be called by the owner of the address prefix. To disable this mode, the EVC
@@ -183,7 +192,9 @@ interface IEVC {
     /// nor an address belonging to the same address prefix.
     /// @param operatorBitField The new bit field for the given address prefix and operator. Reverts if the provided
     /// value is equal to the currently stored value.
-    function setOperator(bytes19 addressPrefix, address operator, uint256 operatorBitField) external payable;
+    function setOperator(bytes19 addressPrefix, address operator, uint256 operatorBitField)
+        external
+        payable;
 
     /// @notice Authorizes or deauthorizes an operator for the account.
     /// @dev Only the owner or authorized operator of the account can call this function. An operator is an address that
@@ -320,10 +331,12 @@ interface IEVC {
     /// balance of the EVC contract will be forwarded.
     /// @param data The encoded data which is called on the target contract.
     /// @return result The result of the call.
-    function call(address targetContract, address onBehalfOfAccount, uint256 value, bytes calldata data)
-        external
-        payable
-        returns (bytes memory result);
+    function call(
+        address targetContract,
+        address onBehalfOfAccount,
+        uint256 value,
+        bytes calldata data
+    ) external payable returns (bytes memory result);
 
     /// @notice For a given account, calls into one of the enabled collateral vaults from the currently enabled
     /// controller vault as per data encoded.
@@ -338,10 +351,12 @@ interface IEVC {
     /// balance of the EVC contract will be forwarded.
     /// @param data The encoded data which is called on the target collateral.
     /// @return result The result of the call.
-    function controlCollateral(address targetCollateral, address onBehalfOfAccount, uint256 value, bytes calldata data)
-        external
-        payable
-        returns (bytes memory result);
+    function controlCollateral(
+        address targetCollateral,
+        address onBehalfOfAccount,
+        uint256 value,
+        bytes calldata data
+    ) external payable returns (bytes memory result);
 
     /// @notice Executes multiple calls into the target contracts while checks deferred as per batch items provided.
     /// @dev This function defers the account and vault status checks (it's a checks-deferrable call). If the outermost

@@ -48,7 +48,10 @@ contract McdDsrDeposit is McdHelper, ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    function _deposit(Params memory _params) internal returns (uint256 deposited, bytes memory logData) {
+    function _deposit(Params memory _params)
+        internal
+        returns (uint256 deposited, bytes memory logData)
+    {
         IPot pot = IPot(POT_ADDR);
 
         _params.amount = DAI_ADDRESS.pullTokensIfNeeded(_params.from, _params.amount);

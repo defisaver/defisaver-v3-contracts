@@ -3,7 +3,9 @@
 pragma solidity =0.8.24;
 
 import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
-import { IBorrowerOperations } from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
+import {
+    IBorrowerOperations
+} from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
@@ -60,14 +62,20 @@ contract LiquityV2Open is ActionBase, LiquityV2Helper {
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
         params.interestBatchManager =
             _parseParamAddr(params.interestBatchManager, _paramMapping[3], _subData, _returnValues);
-        params.ownerIndex = _parseParamUint(params.ownerIndex, _paramMapping[4], _subData, _returnValues);
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[5], _subData, _returnValues);
-        params.boldAmount = _parseParamUint(params.boldAmount, _paramMapping[6], _subData, _returnValues);
-        params.upperHint = _parseParamUint(params.upperHint, _paramMapping[7], _subData, _returnValues);
-        params.lowerHint = _parseParamUint(params.lowerHint, _paramMapping[8], _subData, _returnValues);
+        params.ownerIndex =
+            _parseParamUint(params.ownerIndex, _paramMapping[4], _subData, _returnValues);
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[5], _subData, _returnValues);
+        params.boldAmount =
+            _parseParamUint(params.boldAmount, _paramMapping[6], _subData, _returnValues);
+        params.upperHint =
+            _parseParamUint(params.upperHint, _paramMapping[7], _subData, _returnValues);
+        params.lowerHint =
+            _parseParamUint(params.lowerHint, _paramMapping[8], _subData, _returnValues);
         params.annualInterestRate =
             _parseParamUint(params.annualInterestRate, _paramMapping[9], _subData, _returnValues);
-        params.maxUpfrontFee = _parseParamUint(params.maxUpfrontFee, _paramMapping[10], _subData, _returnValues);
+        params.maxUpfrontFee =
+            _parseParamUint(params.maxUpfrontFee, _paramMapping[10], _subData, _returnValues);
 
         (uint256 collAmount, bytes memory logData) = _liquityOpen(params);
         emit ActionEvent("LiquityV2Open", logData);
@@ -151,7 +159,9 @@ contract LiquityV2Open is ActionBase, LiquityV2Helper {
                 }
                 _params.collAmount -= ETH_GAS_COMPENSATION;
             } else {
-                _collToken.pullTokensIfNeeded(_params.from, _params.collAmount + ETH_GAS_COMPENSATION);
+                _collToken.pullTokensIfNeeded(
+                    _params.from, _params.collAmount + ETH_GAS_COMPENSATION
+                );
             }
         } else {
             _params.collAmount = _collToken.pullTokensIfNeeded(_params.from, _params.collAmount);

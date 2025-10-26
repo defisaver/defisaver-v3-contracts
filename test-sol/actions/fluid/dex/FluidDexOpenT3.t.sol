@@ -179,14 +179,16 @@ contract TestFluidDexOpenT3 is FluidTestBase {
 
             // Handle collateral setup for T3 open
             vars.isNativeSupply = vaultData.supplyToken0 == TokenUtils.ETH_ADDR;
-            (vaultData.supplyToken0, vars.collAmount) =
-                giveAndApproveToken(vaultData.supplyToken0, sender, walletAddr, _config.collAmountInUSD);
+            (vaultData.supplyToken0, vars.collAmount) = giveAndApproveToken(
+                vaultData.supplyToken0, sender, walletAddr, _config.collAmountInUSD
+            );
 
             // Handle borrow token 0 setup
             vars.isNativeBorrow0 = vaultData.borrowToken0 == TokenUtils.ETH_ADDR;
             vars.borrowAmount0 = _config.borrowAmount0InUSD != 0
                 ? amountInUSDPrice(
-                    vars.isNativeBorrow0 ? TokenUtils.WETH_ADDR : vaultData.borrowToken0, _config.borrowAmount0InUSD
+                    vars.isNativeBorrow0 ? TokenUtils.WETH_ADDR : vaultData.borrowToken0,
+                    _config.borrowAmount0InUSD
                 )
                 : 0;
 
@@ -194,13 +196,15 @@ contract TestFluidDexOpenT3 is FluidTestBase {
             vars.isNativeBorrow1 = vaultData.borrowToken1 == TokenUtils.ETH_ADDR;
             vars.borrowAmount1 = _config.borrowAmount1InUSD != 0
                 ? amountInUSDPrice(
-                    vars.isNativeBorrow1 ? TokenUtils.WETH_ADDR : vaultData.borrowToken1, _config.borrowAmount1InUSD
+                    vars.isNativeBorrow1 ? TokenUtils.WETH_ADDR : vaultData.borrowToken1,
+                    _config.borrowAmount1InUSD
                 )
                 : 0;
 
             // Estimate debt shares
-            vars.debtShares =
-                estimateBorrowShares(vaultData.dexBorrowData.dexPool, vars.borrowAmount0, vars.borrowAmount1);
+            vars.debtShares = estimateBorrowShares(
+                vaultData.dexBorrowData.dexPool, vars.borrowAmount0, vars.borrowAmount1
+            );
 
             // Validate borrow limit
             if (borrowLimitReached(vaultData.dexBorrowData, vars.debtShares)) {
@@ -217,7 +221,9 @@ contract TestFluidDexOpenT3 is FluidTestBase {
                     _config.takeMaxUint256CollAmount ? type(uint256).max : vars.collAmount,
                     FluidDexModel.SupplyVariableData(0, 0, 0), /* only used for T2 and T4 vaults */
                     0, /* borrowAmount - Only used for T1 and T2 vaults */
-                    FluidDexModel.BorrowVariableData(vars.borrowAmount0, vars.borrowAmount1, vars.debtShares),
+                    FluidDexModel.BorrowVariableData(
+                        vars.borrowAmount0, vars.borrowAmount1, vars.debtShares
+                    ),
                     _config.wrapBorrowedEth
                 ),
                 _config.isDirect
@@ -226,10 +232,14 @@ contract TestFluidDexOpenT3 is FluidTestBase {
             // Take snapshot before action execution
             vars.senderCollTokenBalanceBefore = balanceOf(vaultData.supplyToken0, sender);
             vars.senderBorrowToken0BalanceBefore = vars.isNativeBorrow0
-                ? (_config.wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance)
+                ? (_config.wrapBorrowedEth
+                        ? balanceOf(TokenUtils.WETH_ADDR, sender)
+                        : address(sender).balance)
                 : balanceOf(vaultData.borrowToken0, sender);
             vars.senderBorrowToken1BalanceBefore = vars.isNativeBorrow1
-                ? (_config.wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance)
+                ? (_config.wrapBorrowedEth
+                        ? balanceOf(TokenUtils.WETH_ADDR, sender)
+                        : address(sender).balance)
                 : balanceOf(vaultData.borrowToken1, sender);
 
             vars.walletCollTokenBalanceBefore = balanceOf(vaultData.supplyToken0, walletAddr);
@@ -250,10 +260,14 @@ contract TestFluidDexOpenT3 is FluidTestBase {
             // Take snapshot after action execution
             vars.senderCollTokenBalanceAfter = balanceOf(vaultData.supplyToken0, sender);
             vars.senderBorrowToken0BalanceAfter = vars.isNativeBorrow0
-                ? (_config.wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance)
+                ? (_config.wrapBorrowedEth
+                        ? balanceOf(TokenUtils.WETH_ADDR, sender)
+                        : address(sender).balance)
                 : balanceOf(vaultData.borrowToken0, sender);
             vars.senderBorrowToken1BalanceAfter = vars.isNativeBorrow1
-                ? (_config.wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance)
+                ? (_config.wrapBorrowedEth
+                        ? balanceOf(TokenUtils.WETH_ADDR, sender)
+                        : address(sender).balance)
                 : balanceOf(vaultData.borrowToken1, sender);
 
             vars.walletCollTokenBalanceAfter = balanceOf(vaultData.supplyToken0, walletAddr);
@@ -277,21 +291,33 @@ contract TestFluidDexOpenT3 is FluidTestBase {
             assertTrue(vars.createdNft != 0);
 
             // Check collateral was taken
-            assertEq(vars.senderCollTokenBalanceAfter, vars.senderCollTokenBalanceBefore - vars.collAmount);
+            assertEq(
+                vars.senderCollTokenBalanceAfter,
+                vars.senderCollTokenBalanceBefore - vars.collAmount
+            );
 
             // Check borrowed funds were received
             if (vars.borrowAmount0 > 0) {
-                assertEq(vars.senderBorrowToken0BalanceAfter, vars.senderBorrowToken0BalanceBefore + vars.borrowAmount0);
+                assertEq(
+                    vars.senderBorrowToken0BalanceAfter,
+                    vars.senderBorrowToken0BalanceBefore + vars.borrowAmount0
+                );
             }
 
             if (vars.borrowAmount1 > 0) {
-                assertEq(vars.senderBorrowToken1BalanceAfter, vars.senderBorrowToken1BalanceBefore + vars.borrowAmount1);
+                assertEq(
+                    vars.senderBorrowToken1BalanceAfter,
+                    vars.senderBorrowToken1BalanceBefore + vars.borrowAmount1
+                );
             }
 
             // Check position data
             assertEq(vars.userPositionAfter.owner, walletAddr);
             assertEq(vars.userPositionAfter.isLiquidated, false);
-            assertEq(vars.userPositionAfter.isSupplyPosition, vars.borrowAmount0 == 0 && vars.borrowAmount1 == 0);
+            assertEq(
+                vars.userPositionAfter.isSupplyPosition,
+                vars.borrowAmount0 == 0 && vars.borrowAmount1 == 0
+            );
 
             emit log_named_uint("createdNftId", vars.createdNft);
             emit log_named_uint("supply", vars.userPositionAfter.supply);

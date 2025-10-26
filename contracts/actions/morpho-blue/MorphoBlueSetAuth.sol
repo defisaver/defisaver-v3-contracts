@@ -25,7 +25,9 @@ contract MorphoBlueSetAuth is ActionBase, MorphoBlueHelper {
 
         params.manager = _parseParamAddr(params.manager, _paramMapping[0], _subData, _returnValues);
         params.newIsAuthorized =
-            _parseParamUint(params.newIsAuthorized ? 1 : 0, _paramMapping[1], _subData, _returnValues) == 1;
+            _parseParamUint(
+                    params.newIsAuthorized ? 1 : 0, _paramMapping[1], _subData, _returnValues
+                ) == 1;
 
         _setAuth(params);
 

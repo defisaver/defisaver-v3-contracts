@@ -31,7 +31,8 @@ contract SkyClaimRewards is ActionBase, SkyHelper {
 
         inputData.stakingContract =
             _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
-        inputData.rewardToken = _parseParamAddr(inputData.rewardToken, _paramMapping[1], _subData, _returnValues);
+        inputData.rewardToken =
+            _parseParamAddr(inputData.rewardToken, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
         (uint256 amountClaimed, bytes memory logData) = _skyClaimRewards(inputData);
@@ -53,7 +54,10 @@ contract SkyClaimRewards is ActionBase, SkyHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _skyClaimRewards(Params memory _inputData) internal returns (uint256, bytes memory logData) {
+    function _skyClaimRewards(Params memory _inputData)
+        internal
+        returns (uint256, bytes memory logData)
+    {
         require(_inputData.rewardToken != address(0));
         uint256 startingBalance = _inputData.rewardToken.getBalance(address(this));
         IStakingRewards(_inputData.stakingContract).getReward();

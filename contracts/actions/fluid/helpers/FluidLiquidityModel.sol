@@ -2,7 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultResolver } from "../../../interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
+import {
+    IFluidVaultResolver
+} from "../../../interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 
 /// @title Helper library containing data structs used for interaction with Fluid liquidity layer
 library FluidLiquidityModel {

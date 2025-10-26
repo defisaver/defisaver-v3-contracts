@@ -21,7 +21,8 @@ contract McdRatio is ActionBase, McdRatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.vaultId =
+            _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
 
         uint256 ratio = getRatio(inputData.vaultId, 0);
 

@@ -3,7 +3,9 @@
 pragma solidity =0.8.24;
 
 import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
-import { IBorrowerOperations } from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
+import {
+    IBorrowerOperations
+} from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
 import { ITroveManager } from "../../../interfaces/protocols/liquityV2/ITroveManager.sol";
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
@@ -65,7 +67,8 @@ contract LiquityV2Close is ActionBase, LiquityV2Helper {
         address borrowerOperations = IAddressesRegistry(_params.market).borrowerOperations();
         address troveManager = IAddressesRegistry(_params.market).troveManager();
 
-        ITroveManager.LatestTroveData memory troveData = ITroveManager(troveManager).getLatestTroveData(_params.troveId);
+        ITroveManager.LatestTroveData memory troveData =
+            ITroveManager(troveManager).getLatestTroveData(_params.troveId);
 
         BOLD_ADDR.pullTokensIfNeeded(_params.from, troveData.entireDebt);
 

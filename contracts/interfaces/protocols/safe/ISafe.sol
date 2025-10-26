@@ -32,11 +32,16 @@ interface ISafe {
         bytes memory signatures
     ) external payable returns (bool success);
 
-    function execTransactionFromModule(address to, uint256 value, bytes memory data, Operation operation)
-        external
-        returns (bool success);
+    function execTransactionFromModule(
+        address to,
+        uint256 value,
+        bytes memory data,
+        Operation operation
+    ) external returns (bool success);
 
-    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures) external view;
+    function checkSignatures(bytes32 dataHash, bytes memory data, bytes memory signatures)
+        external
+        view;
 
     function checkNSignatures(
         address executor,

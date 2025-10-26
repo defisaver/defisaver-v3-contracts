@@ -55,7 +55,10 @@ interface IUniswapV3NonfungiblePositionManager {
         uint128 amount1Max;
     }
 
-    function collect(CollectParams calldata params) external payable returns (uint256 amount0, uint256 amount1);
+    function collect(CollectParams calldata params)
+        external
+        payable
+        returns (uint256 amount0, uint256 amount1);
 
     function positions(uint256 tokenId)
         external
@@ -75,7 +78,10 @@ interface IUniswapV3NonfungiblePositionManager {
             uint128 tokensOwed1
         );
     function balanceOf(address owner) external view returns (uint256 balance);
-    function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256 tokenId);
+    function tokenOfOwnerByIndex(address owner, uint256 index)
+        external
+        view
+        returns (uint256 tokenId);
     function approve(address to, uint256 tokenId) external;
 
     /// @notice Creates a new pool if it does not exist, then initializes if not initialized
@@ -85,8 +91,10 @@ interface IUniswapV3NonfungiblePositionManager {
     /// @param fee The fee amount of the v3 pool for the specified token pair
     /// @param sqrtPriceX96 The initial square root price of the pool as a Q64.96 value
     /// @return pool Returns the pool address based on the pair of tokens and fee, will return the newly created pool address if necessary
-    function createAndInitializePoolIfNecessary(address token0, address token1, uint24 fee, uint160 sqrtPriceX96)
-        external
-        payable
-        returns (address pool);
+    function createAndInitializePoolIfNecessary(
+        address token0,
+        address token1,
+        uint24 fee,
+        uint160 sqrtPriceX96
+    ) external payable returns (address pool);
 }

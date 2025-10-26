@@ -3,9 +3,15 @@
 pragma solidity =0.8.24;
 
 import { MorphoTokenWrap } from "../../../contracts/actions/morpho-blue/MorphoTokenWrap.sol";
-import { MorphoBlueHelper } from "../../../contracts/actions/morpho-blue/helpers/MorphoBlueHelper.sol";
-import { IMorphoTokenWrapper } from "../../../contracts/interfaces/protocols/morpho-blue/IMorphoTokenWrapper.sol";
-import { ILegacyMorphoToken } from "../../../contracts/interfaces/protocols/morpho-blue/ILegacyMorphoToken.sol";
+import {
+    MorphoBlueHelper
+} from "../../../contracts/actions/morpho-blue/helpers/MorphoBlueHelper.sol";
+import {
+    IMorphoTokenWrapper
+} from "../../../contracts/interfaces/protocols/morpho-blue/IMorphoTokenWrapper.sol";
+import {
+    ILegacyMorphoToken
+} from "../../../contracts/interfaces/protocols/morpho-blue/ILegacyMorphoToken.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
@@ -64,7 +70,8 @@ contract TestMorphoTokenWrap is BaseTest, ActionsUtils, MorphoBlueHelper {
     function _baseTest(bool _isDirect, bool _isMaxUint256, uint256 _amount) internal {
         give(LEGACY_MORPHO_TOKEN, walletAddr, _amount);
 
-        bytes memory executeActionCallData = executeActionCalldata(morphoTokenWrapEncode(sender, _amount), _isDirect);
+        bytes memory executeActionCallData =
+            executeActionCalldata(morphoTokenWrapEncode(sender, _amount), _isDirect);
 
         address newMorphoToken = IMorphoTokenWrapper(MORPHO_TOKEN_WRAPPER).NEW_MORPHO();
 
@@ -95,7 +102,9 @@ contract TestMorphoTokenWrap is BaseTest, ActionsUtils, MorphoBlueHelper {
         ILegacyMorphoToken(LEGACY_MORPHO_TOKEN).setUserRole(MORPHO_TOKEN_WRAPPER, role, true);
         // make sure that role can call 'transferFrom' on legacy morpho token
         ILegacyMorphoToken(LEGACY_MORPHO_TOKEN)
-            .setRoleCapability(role, bytes4(keccak256("transferFrom(address,address,uint256)")), true);
+            .setRoleCapability(
+                role, bytes4(keccak256("transferFrom(address,address,uint256)")), true
+            );
         vm.stopPrank();
     }
 }

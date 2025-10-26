@@ -32,8 +32,10 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.maxFeePercentage = _parseParamUint(params.maxFeePercentage, _paramMapping[0], _subData, _returnValues);
-        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[1], _subData, _returnValues);
+        params.maxFeePercentage =
+            _parseParamUint(params.maxFeePercentage, _paramMapping[0], _subData, _returnValues);
+        params.lusdAmount =
+            _parseParamUint(params.lusdAmount, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
         (uint256 borrowedAmount, bytes memory logData) = _liquityBorrow(params);

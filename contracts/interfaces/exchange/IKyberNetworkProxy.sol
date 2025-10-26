@@ -41,12 +41,20 @@ interface IKyberNetworkProxy {
         address walletId
     ) external payable returns (uint256);
 
-    function swapEtherToToken(IERC20 token, uint256 minConversionRate) external payable returns (uint256);
-
-    function swapTokenToEther(IERC20 token, uint256 tokenQty, uint256 minRate) external payable returns (uint256);
-
-    function swapTokenToToken(IERC20 src, uint256 srcAmount, IERC20 dest, uint256 minConversionRate)
+    function swapEtherToToken(IERC20 token, uint256 minConversionRate)
         external
         payable
         returns (uint256);
+
+    function swapTokenToEther(IERC20 token, uint256 tokenQty, uint256 minRate)
+        external
+        payable
+        returns (uint256);
+
+    function swapTokenToToken(
+        IERC20 src,
+        uint256 srcAmount,
+        IERC20 dest,
+        uint256 minConversionRate
+    ) external payable returns (uint256);
 }

@@ -2,7 +2,9 @@
 pragma solidity =0.8.24;
 
 interface ICrvUsdController {
-    function create_loan(uint256 _collateralAmount, uint256 _debtAmount, uint256 _nBands) external payable;
+    function create_loan(uint256 _collateralAmount, uint256 _debtAmount, uint256 _nBands)
+        external
+        payable;
     function create_loan_extended(
         uint256 _collateralAmount,
         uint256 _debtAmount,
@@ -27,7 +29,9 @@ interface ICrvUsdController {
     function repay(uint256 _debtAmount, address _for) external payable;
     /// @param _maxActiveBand Don't allow active band to be higher than this (to prevent front-running the repay)
     function repay(uint256 _debtAmount, address _for, int256 _maxActiveBand) external payable;
-    function repay(uint256 _debtAmount, address _for, int256 _maxActiveBand, bool _useEth) external payable;
+    function repay(uint256 _debtAmount, address _for, int256 _maxActiveBand, bool _useEth)
+        external
+        payable;
     function repay_extended(address _callbacker, uint256[] memory _callbackArgs) external;
 
     function liquidate(address user, uint256 min_x) external;
@@ -47,11 +51,17 @@ interface ICrvUsdController {
     function collateral_token() external view returns (address);
     function debt(address) external view returns (uint256);
     function total_debt() external view returns (uint256);
-    function health_calculator(address, int256, int256, bool, uint256) external view returns (int256);
+    function health_calculator(address, int256, int256, bool, uint256)
+        external
+        view
+        returns (int256);
     function health_calculator(address, int256, int256, bool) external view returns (int256);
     function health(address) external view returns (int256);
     function health(address, bool) external view returns (int256);
-    function max_borrowable(uint256 collateralAmount, uint256 nBands) external view returns (uint256);
+    function max_borrowable(uint256 collateralAmount, uint256 nBands)
+        external
+        view
+        returns (uint256);
     function min_collateral(uint256 debtAmount, uint256 nBands) external view returns (uint256);
     function calculate_debt_n1(uint256, uint256, uint256) external view returns (int256);
     function minted() external view returns (uint256);
@@ -88,7 +98,9 @@ interface ILLAMMA {
     function min_band() external view returns (int256);
     function max_band() external view returns (int256);
     function rate() external view returns (uint256);
-    function exchange(uint256 i, uint256 j, uint256 in_amount, uint256 min_amount) external returns (uint256[2] memory);
+    function exchange(uint256 i, uint256 j, uint256 in_amount, uint256 min_amount)
+        external
+        returns (uint256[2] memory);
     function coins(uint256 i) external view returns (address);
     function user_state(address _user) external view returns (uint256[4] memory);
 }
@@ -106,9 +118,13 @@ interface IPegKeeper {
 }
 
 interface ICurveUsdSwapper {
-    function encodeSwapParams(uint256[5][5] memory swapParams, uint32 gasUsed, uint24 dfsFeeDivider)
-        external
-        pure
-        returns (uint256 encoded);
-    function setAdditionalRoutes(address[8] memory _additionalRoutes, address[5] memory _swapZapPools) external;
+    function encodeSwapParams(
+        uint256[5][5] memory swapParams,
+        uint32 gasUsed,
+        uint24 dfsFeeDivider
+    ) external pure returns (uint256 encoded);
+    function setAdditionalRoutes(
+        address[8] memory _additionalRoutes,
+        address[5] memory _swapZapPools
+    ) external;
 }

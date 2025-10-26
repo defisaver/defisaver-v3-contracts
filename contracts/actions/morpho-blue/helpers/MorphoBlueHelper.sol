@@ -47,7 +47,10 @@ contract MorphoBlueHelper is MainnetMorphoBlueAddresses {
         supplyShares = MorphoLib.supplyShares(morphoBlue, marketId, owner);
     }
 
-    function getRatioUsingParams(MarketParams memory marketParams, address owner) public returns (uint256 ratio) {
+    function getRatioUsingParams(MarketParams memory marketParams, address owner)
+        public
+        returns (uint256 ratio)
+    {
         Id marketId = MarketParamsLib.id(marketParams);
         ratio = getRatio(marketId, marketParams, owner);
     }
@@ -57,7 +60,10 @@ contract MorphoBlueHelper is MainnetMorphoBlueAddresses {
         ratio = getRatio(marketId, marketParams, owner);
     }
 
-    function getRatio(Id marketId, MarketParams memory marketParams, address owner) public returns (uint256 ratio) {
+    function getRatio(Id marketId, MarketParams memory marketParams, address owner)
+        public
+        returns (uint256 ratio)
+    {
         uint256 oraclePrice = IOracle(marketParams.oracle).price();
         morphoBlue.accrueInterest(marketParams);
 
@@ -66,8 +72,9 @@ contract MorphoBlueHelper is MainnetMorphoBlueAddresses {
 
         uint256 collateral = position.collateral;
         if (collateral == 0) return 0;
-        uint256 debt =
-            SharesMathLib.toAssetsUp(position.borrowShares, market.totalBorrowAssets, market.totalBorrowShares);
+        uint256 debt = SharesMathLib.toAssetsUp(
+            position.borrowShares, market.totalBorrowAssets, market.totalBorrowShares
+        );
         if (debt == 0) return 0;
         ratio = collateral * oraclePrice / debt / 1e18;
     }

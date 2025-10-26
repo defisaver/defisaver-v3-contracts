@@ -115,7 +115,14 @@ contract TestEulerV2Supply is EulerV2TestHelper {
 
         for (uint256 i = 0; i < accounts.length; ++i) {
             _supplyToVault(
-                TestConfig(E_WSTETH_2_GOVERNED, accounts[i], enableAsColl, isDirect, isEscrowed, takeMaxUint256)
+                TestConfig(
+                    E_WSTETH_2_GOVERNED,
+                    accounts[i],
+                    enableAsColl,
+                    isDirect,
+                    isEscrowed,
+                    takeMaxUint256
+                )
             );
         }
     }
@@ -130,12 +137,16 @@ contract TestEulerV2Supply is EulerV2TestHelper {
         bool isEscrowed = true;
         bool takeMaxUint256 = false;
 
-        _supplyToVault(TestConfig(vault, account, enableAsColl, isDirect, isEscrowed, takeMaxUint256));
+        _supplyToVault(
+            TestConfig(vault, account, enableAsColl, isDirect, isEscrowed, takeMaxUint256)
+        );
 
         vm.revertToState(snapshotId);
     }
 
-    function _baseTest(address _account, bool _enableAsColl, bool _isDirect, bool _takeMaxUint256) internal {
+    function _baseTest(address _account, bool _enableAsColl, bool _isDirect, bool _takeMaxUint256)
+        internal
+    {
         bool isEscrowed = false;
 
         for (uint256 i = 0; i < testPairs.length; ++i) {

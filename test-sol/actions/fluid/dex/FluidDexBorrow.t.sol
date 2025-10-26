@@ -2,7 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT3 } from "../../../../contracts/interfaces/protocols/fluid/vaults/IFluidVaultT3.sol";
+import {
+    IFluidVaultT3
+} from "../../../../contracts/interfaces/protocols/fluid/vaults/IFluidVaultT3.sol";
 import {
     IFluidVaultResolver
 } from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
@@ -91,7 +93,10 @@ contract TestFluidDexBorrow is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    isDirect: false, wrapBorrowedEth: false, borrowAmount0InUSD: 30_000, borrowAmount1InUSD: 0
+                    isDirect: false,
+                    wrapBorrowedEth: false,
+                    borrowAmount0InUSD: 30_000,
+                    borrowAmount1InUSD: 0
                 }),
                 t3VaultsSelected[i]
             );
@@ -102,7 +107,10 @@ contract TestFluidDexBorrow is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    isDirect: false, wrapBorrowedEth: false, borrowAmount0InUSD: 0, borrowAmount1InUSD: 30_000
+                    isDirect: false,
+                    wrapBorrowedEth: false,
+                    borrowAmount0InUSD: 0,
+                    borrowAmount1InUSD: 30_000
                 }),
                 t3VaultsSelected[i]
             );
@@ -113,7 +121,10 @@ contract TestFluidDexBorrow is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    isDirect: false, wrapBorrowedEth: false, borrowAmount0InUSD: 30_000, borrowAmount1InUSD: 30_000
+                    isDirect: false,
+                    wrapBorrowedEth: false,
+                    borrowAmount0InUSD: 30_000,
+                    borrowAmount1InUSD: 30_000
                 }),
                 t3VaultsSelected[i]
             );
@@ -124,7 +135,10 @@ contract TestFluidDexBorrow is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    isDirect: false, wrapBorrowedEth: true, borrowAmount0InUSD: 30_000, borrowAmount1InUSD: 0
+                    isDirect: false,
+                    wrapBorrowedEth: true,
+                    borrowAmount0InUSD: 30_000,
+                    borrowAmount1InUSD: 0
                 }),
                 t3VaultsSelected[i]
             );
@@ -135,7 +149,10 @@ contract TestFluidDexBorrow is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    isDirect: true, wrapBorrowedEth: false, borrowAmount0InUSD: 30_000, borrowAmount1InUSD: 0
+                    isDirect: true,
+                    wrapBorrowedEth: false,
+                    borrowAmount0InUSD: 30_000,
+                    borrowAmount1InUSD: 0
                 }),
                 t3VaultsSelected[i]
             );
@@ -195,7 +212,9 @@ contract TestFluidDexBorrow is FluidTestBase {
                 : 0;
 
             // -------------------- Estimate debt shares. --------------------
-            vars.shares = estimateBorrowShares(vaultData.dexBorrowData.dexPool, vars.borrowAmount0, vars.borrowAmount1);
+            vars.shares = estimateBorrowShares(
+                vaultData.dexBorrowData.dexPool, vars.borrowAmount0, vars.borrowAmount1
+            );
 
             if (borrowLimitReached(vaultData.dexBorrowData, vars.shares)) {
                 logBorrowLimitReached(vaults[i]);
@@ -209,7 +228,9 @@ contract TestFluidDexBorrow is FluidTestBase {
                     sender,
                     nftId,
                     0, // borrowAmount (not used for T3 or T4 vaults)
-                    FluidDexModel.BorrowVariableData(vars.borrowAmount0, vars.borrowAmount1, vars.shares),
+                    FluidDexModel.BorrowVariableData(
+                        vars.borrowAmount0, vars.borrowAmount1, vars.shares
+                    ),
                     config.wrapBorrowedEth
                 ),
                 config.isDirect
@@ -229,11 +250,15 @@ contract TestFluidDexBorrow is FluidTestBase {
                 : balanceOf(constants.borrowToken.token1, walletAddr);
 
             vars.senderBorrowToken0BalanceBefore = vars.isNativeBorrow0
-                ? config.wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance
+                ? config.wrapBorrowedEth
+                    ? balanceOf(TokenUtils.WETH_ADDR, sender)
+                    : address(sender).balance
                 : balanceOf(constants.borrowToken.token0, sender);
 
             vars.senderBorrowToken1BalanceBefore = vars.isNativeBorrow1
-                ? config.wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance
+                ? config.wrapBorrowedEth
+                    ? balanceOf(TokenUtils.WETH_ADDR, sender)
+                    : address(sender).balance
                 : balanceOf(constants.borrowToken.token1, sender);
 
             // -------------------- Execute action. --------------------
@@ -254,11 +279,15 @@ contract TestFluidDexBorrow is FluidTestBase {
                 : balanceOf(constants.borrowToken.token1, walletAddr);
 
             vars.senderBorrowToken0BalanceAfter = vars.isNativeBorrow0
-                ? config.wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance
+                ? config.wrapBorrowedEth
+                    ? balanceOf(TokenUtils.WETH_ADDR, sender)
+                    : address(sender).balance
                 : balanceOf(constants.borrowToken.token0, sender);
 
             vars.senderBorrowToken1BalanceAfter = vars.isNativeBorrow1
-                ? config.wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance
+                ? config.wrapBorrowedEth
+                    ? balanceOf(TokenUtils.WETH_ADDR, sender)
+                    : address(sender).balance
                 : balanceOf(constants.borrowToken.token1, sender);
 
             // -------------------- Assertions. --------------------
@@ -266,8 +295,14 @@ contract TestFluidDexBorrow is FluidTestBase {
             assertEq(vars.walletEthBalanceAfter, vars.walletEthBalanceBefore);
             assertEq(vars.walletBorrowToken0BalanceAfter, vars.walletBorrowToken0BalanceBefore);
             assertEq(vars.walletBorrowToken1BalanceAfter, vars.walletBorrowToken1BalanceBefore);
-            assertEq(vars.senderBorrowToken0BalanceAfter, vars.senderBorrowToken0BalanceBefore + vars.borrowAmount0);
-            assertEq(vars.senderBorrowToken1BalanceAfter, vars.senderBorrowToken1BalanceBefore + vars.borrowAmount1);
+            assertEq(
+                vars.senderBorrowToken0BalanceAfter,
+                vars.senderBorrowToken0BalanceBefore + vars.borrowAmount0
+            );
+            assertEq(
+                vars.senderBorrowToken1BalanceAfter,
+                vars.senderBorrowToken1BalanceBefore + vars.borrowAmount1
+            );
             assertEq(vars.userPositionAfter.owner, walletAddr);
             assertEq(vars.userPositionAfter.isLiquidated, false);
             assertTrue(vars.userPositionAfter.borrow > vars.userPositionBefore.borrow);
