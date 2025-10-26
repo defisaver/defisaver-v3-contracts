@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { IComet } from "../interfaces/compoundV3/IComet.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { IComet } from "../interfaces/protocols/compoundV3/IComet.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is outside of given range specified during subscription

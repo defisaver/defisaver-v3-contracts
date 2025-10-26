@@ -4,10 +4,10 @@ pragma solidity =0.8.24;
 
 import { LiquityV2Helper } from "../../../contracts/actions/liquityV2/helpers/LiquityV2Helper.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { ISortedTroves } from "../../../contracts/interfaces/liquityV2/ISortedTroves.sol";
-import { IBorrowerOperations } from "../../../contracts/interfaces/liquityV2/IBorrowerOperations.sol";
-import { Sqrt } from "../../../contracts/utils/math/Sqrt.sol";
+import { IAddressesRegistry } from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { ISortedTroves } from "../../../contracts/interfaces/protocols/liquityV2/ISortedTroves.sol";
+import { IBorrowerOperations } from "../../../contracts/interfaces/protocols/liquityV2/IBorrowerOperations.sol";
+import { Sqrt } from "../../../contracts/_vendor/uniswap/Sqrt.sol";
 
 contract LiquityV2TestHelper is LiquityV2Helper {
     using Sqrt for uint256;

@@ -2,8 +2,8 @@
 pragma solidity =0.8.24;
 
 import { MockDSProxyPermission } from "../../contracts/mocks/MockDSProxyPermission.sol";
-import { DSAuth } from "../../contracts/DS/DSAuth.sol";
-import { DSAuthority } from "../../contracts/DS/DSAuthority.sol";
+import { IDSAuth } from "../../contracts/interfaces/DS/IDSAuth.sol";
+import { IDSAuthority } from "../../contracts/interfaces/DS/IDSAuthority.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
@@ -69,7 +69,7 @@ contract TestCore_DSProxyPermission is MockDSProxyPermission, BaseTest {
     }
 
     function _address_has_proxy_permission(address _addr) internal view returns (bool) {
-        DSAuthority authority = DSAuthority(DSAuth(walletAddr).authority());
+        IDSAuthority authority = IDSAuthority(IDSAuth(walletAddr).authority());
         return authority.canCall(_addr, walletAddr, EXECUTE_SELECTOR);
     }
 }

@@ -2,10 +2,10 @@
 pragma solidity =0.8.24;
 
 import { IExchangeV3 } from "../interfaces/exchange/IExchangeV3.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { SafeERC20 } from "../utils/SafeERC20.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { TokenPriceHelperL2 } from "../utils/TokenPriceHelperL2.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { TokenPriceHelperL2 } from "../utils/token/TokenPriceHelperL2.sol";
 
 /// @title DFS exchange wrapper used for mocking in tests
 /// @dev This version calculates the rate of tokens using feeds

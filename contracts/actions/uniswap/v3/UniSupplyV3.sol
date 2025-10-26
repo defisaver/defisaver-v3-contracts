@@ -3,11 +3,11 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { UniV3Helper } from "./helpers/UniV3Helper.sol";
 import {
     IUniswapV3NonfungiblePositionManager
-} from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+} from "../../../interfaces/protocols/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Supplies liquidity to a UniswapV3 position represented by TokenId
 contract UniSupplyV3 is ActionBase, UniV3Helper {

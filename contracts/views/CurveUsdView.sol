@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { ICrvUsdController, ILLAMMA, IAGG } from "../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController, ILLAMMA, IAGG } from "../interfaces/protocols/curveusd/ICurveUsd.sol";
 import { CurveUsdHelper } from "../actions/curveusd/helpers/CurveUsdHelper.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 contract CurveUsdView is CurveUsdHelper {
     struct Band {

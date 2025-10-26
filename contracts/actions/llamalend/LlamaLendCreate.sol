@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { LlamaLendHelper } from "./helpers/LlamaLendHelper.sol";
-import { ILlamaLendController } from "../../interfaces/llamalend/ILlamaLendController.sol";
+import { ILlamaLendController } from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 
 /// @title Action that creates a llamalend position on behalf of user's wallet
 /// @dev both collateralAmount and debtAmount must be non-zero

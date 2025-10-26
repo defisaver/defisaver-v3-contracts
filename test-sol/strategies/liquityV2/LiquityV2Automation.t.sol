@@ -5,9 +5,9 @@ pragma solidity =0.8.24;
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { Addresses } from "../../utils/Addresses.sol";
 
-import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
-import { IStabilityPool } from "../../../contracts/interfaces/liquityV2/IStabilityPool.sol";
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
+import { IStabilityPool } from "../../../contracts/interfaces/protocols/liquityV2/IStabilityPool.sol";
+import { IAddressesRegistry } from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
 
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2SPDeposit } from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";

@@ -70,7 +70,7 @@ const getActiveBand = async (controllerAddress) => {
         .getContractAt('ILlamaLendController', controllerAddress)
         .then((c) => c.amm());
     const activeBand = await hre.ethers
-        .getContractAt('contracts/interfaces/llamalend/ILLAMA.sol:ILLAMMA', llammaAddress)
+        .getContractAt('contracts/interfaces/protocols/llamalend/ILLAMA.sol:ILLAMMA', llammaAddress)
         .then((c) => c.active_band_with_skip());
 
     return activeBand;

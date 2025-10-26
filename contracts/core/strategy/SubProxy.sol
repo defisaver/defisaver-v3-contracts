@@ -6,13 +6,13 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { SubStorage } from "./SubStorage.sol";
-import { DFSRegistry } from "../DFSRegistry.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { StrategyModel } from "./StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Called through user wallet, handles auth and calls subscription contract
 contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// @notice Gives wallet permission if needed and registers a new sub
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)

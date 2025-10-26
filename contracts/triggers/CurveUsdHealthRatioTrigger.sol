@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { ICrvUsdController } from "../interfaces/curveusd/ICurveUsd.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { ICrvUsdController } from "../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Trigger contract that verifies if the CurveUSD position health ratio went under the subbed ratio
 contract CurveUsdHealthRatioTrigger is ITrigger, AdminAuth, TriggerHelper {

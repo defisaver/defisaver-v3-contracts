@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { ISafe } from "../../../interfaces/safe/ISafe.sol";
-import { IDSProxy } from "../../../interfaces/IDSProxy.sol";
-import { IDFSRegistry } from "../../../interfaces/IDFSRegistry.sol";
+import { ISafe } from "../../../interfaces/protocols/safe/ISafe.sol";
+import { IDSProxy } from "../../../interfaces/DS/IDSProxy.sol";
+import { IDFSRegistry } from "../../../interfaces/core/IDFSRegistry.sol";
 import { DSAUtils } from "../../../utils/DSAUtils.sol";
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
-import { FLFeeFaucet } from "../../../utils/FLFeeFaucet.sol";
+import { FLFeeFaucet } from "../../../utils/fee/FLFeeFaucet.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { WalletType } from "../../../utils/DFSTypes.sol";
 

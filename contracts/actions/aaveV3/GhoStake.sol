@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IStkAave } from "../../interfaces/aave/IStkAave.sol";
+import { IStkAave } from "../../interfaces/protocols/aave/IStkAave.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Action to stake GHO tokens.
 contract GhoStake is ActionBase, AaveV3Helper {

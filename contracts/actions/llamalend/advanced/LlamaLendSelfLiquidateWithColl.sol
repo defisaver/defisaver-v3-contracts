@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
 import { LlamaLendSwapper } from "./LlamaLendSwapper.sol";
-import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
+import { ILlamaLendController } from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
 
 /// @title LlamaLendSelfLiquidateWithColl

@@ -5,13 +5,13 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
-import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
+import { UtilAddresses } from "../../utils/addresses/UtilAddresses.sol";
 import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies for Maker
-contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHelper, SmartWalletUtils {
+contract McdSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilAddresses, SmartWalletUtils {
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
 

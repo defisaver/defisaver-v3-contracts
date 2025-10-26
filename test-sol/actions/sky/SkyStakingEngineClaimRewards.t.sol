@@ -10,8 +10,8 @@ import { SkyStakingEngineClaimRewards } from "../../../contracts/actions/sky/Sky
 import { SkyStakingEngineSelectFarm } from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 import { SkyView } from "../../../contracts/views/SkyView.sol";
 
-import { ILockstakeEngine } from "../../../contracts/interfaces/sky/ILockstakeEngine.sol";
-import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
+import { ILockstakeEngine } from "../../../contracts/interfaces/protocols/sky/ILockstakeEngine.sol";
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 
 import { SkyExecuteActions } from "../../utils/executeActions/SkyExecuteActions.sol";
 

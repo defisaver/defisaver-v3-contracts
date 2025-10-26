@@ -2,22 +2,23 @@
 
 pragma solidity =0.8.24;
 
-import { AdminAuth } from "../../auth/AdminAuth.sol";
-import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
 import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
 import { IKyberScaleHelper } from "../../interfaces/exchange/IKyberScaleHelper.sol";
-import { DFSRegistry } from "../../core/DFSRegistry.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
+import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
+import { DFSExchangeData } from "../DFSExchangeData.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { SafeERC20 } from "../../utils/SafeERC20.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
-contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth, CoreHelper {
+contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData, AdminAuth, CoreHelper {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
     bytes4 constant SCALING_HELPER_ID = bytes4(keccak256("KyberInputScalingHelper"));
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// @notice Takes order from Kyberswap and returns bool indicating if it is successful
     /// @param _exData Exchange data

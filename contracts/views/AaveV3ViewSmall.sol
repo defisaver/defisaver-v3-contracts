@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
-import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { IPoolV3 } from "../interfaces/protocols/aaveV3/IPoolV3.sol";
+import { DataTypes } from "../interfaces/protocols/aaveV3/DataTypes.sol";
 
 contract AaveV3ViewSmall is AaveV3Helper {
     using TokenUtils for address;

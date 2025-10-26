@@ -3,12 +3,12 @@
 pragma solidity =0.8.24;
 
 import { LlamaLendHelper } from "../actions/llamalend/helpers/LlamaLendHelper.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { IERC4626 } from "../interfaces/IERC4626.sol";
-import { ILlamaLendVault } from "../interfaces/llamalend/ILlamaLendVault.sol";
-import { ILlamaLendController } from "../interfaces/llamalend/ILlamaLendController.sol";
-import { ILLAMMA } from "../interfaces/llamalend/ILLAMA.sol";
-import { IAGG } from "../interfaces/llamalend/IAGG.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { IERC4626 } from "../interfaces/token/IERC4626.sol";
+import { ILlamaLendVault } from "../interfaces/protocols/llamalend/ILlamaLendVault.sol";
+import { ILlamaLendController } from "../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import { ILLAMMA } from "../interfaces/protocols/llamalend/ILLAMA.sol";
+import { IAGG } from "../interfaces/protocols/llamalend/IAGG.sol";
 
 contract LlamaLendView is LlamaLendHelper {
     struct Band {

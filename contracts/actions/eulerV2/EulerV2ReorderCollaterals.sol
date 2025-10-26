@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
 
 /// @title Reorder account collaterals. Can be used to optimize gas costs when checking account health status
 contract EulerV2ReorderCollaterals is ActionBase, EulerV2Helper {

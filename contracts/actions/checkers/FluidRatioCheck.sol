@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { FluidRatioHelper } from "../fluid/helpers/FluidRatioHelper.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
 
 /// @title Action to check the ratio of the Fluid position after strategy execution.
 contract FluidRatioCheck is ActionBase, FluidRatioHelper {

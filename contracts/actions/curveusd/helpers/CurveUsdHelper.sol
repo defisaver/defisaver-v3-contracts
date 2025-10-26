@@ -6,13 +6,13 @@ import {
     ILLAMMA,
     ICrvUsdControllerFactory,
     ICurveUsdSwapper
-} from "../../../interfaces/curveusd/ICurveUsd.sol";
+} from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
-import { IERC20 } from "../../../interfaces/IERC20.sol";
-import { DSMath } from "../../../DS/DSMath.sol";
+import { IERC20 } from "../../../interfaces/token/IERC20.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 import { MainnetCurveUsdAddresses } from "./MainnetCurveUsdAddresses.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { IBytesTransientStorage } from "../../../interfaces/IBytesTransientStorage.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
+import { IBytesTransientStorage } from "../../../interfaces/utils/IBytesTransientStorage.sol";
 
 contract CurveUsdHelper is MainnetCurveUsdAddresses, DSMath {
     using TokenUtils for address;

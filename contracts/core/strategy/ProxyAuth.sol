@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
+import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
 import { WalletAuth } from "./WalletAuth.sol";
 
 /// @title ProxyAuth Gets DSProxy auth from users and is callable by StrategyExecutor

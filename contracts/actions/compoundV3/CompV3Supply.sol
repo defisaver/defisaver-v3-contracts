@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
-import { IComet } from "../../interfaces/compoundV3/IComet.sol";
+import { IComet } from "../../interfaces/protocols/compoundV3/IComet.sol";
 
 /// @title Supply a token to CompoundV3.
 contract CompV3Supply is ActionBase, CompV3Helper {

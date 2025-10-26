@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { SkyHelper } from "./helpers/SkyHelper.sol";
-import { ILockstakeEngine } from "../../interfaces/sky/ILockstakeEngine.sol";
+import { ILockstakeEngine } from "../../interfaces/protocols/sky/ILockstakeEngine.sol";
 
 /// @title Stake SKY token via SKY protocol for different rewards
 contract SkyStakingEngineStake is ActionBase, SkyHelper {

@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { DSMath } from "../../DS/DSMath.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { LidoHelper } from "./helpers/LidoHelper.sol";
 /// @title Supplies ETH (action receives WETH) to Lido for ETH2 Staking. Receives stETH in return
 

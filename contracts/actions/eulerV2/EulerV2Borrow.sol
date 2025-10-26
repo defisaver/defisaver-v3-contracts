@@ -5,8 +5,8 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IBorrowing } from "../../interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IBorrowing } from "../../interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
 
 /// @title Borrow assets from Euler vault
 contract EulerV2Borrow is ActionBase, EulerV2Helper {

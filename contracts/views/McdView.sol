@@ -2,15 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../DS/DSMath.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 
 import { McdHelper } from "../actions/mcd/helpers/McdHelper.sol";
-import { IManager } from "../interfaces/mcd/IManager.sol";
-import { ICropper } from "../interfaces/mcd/ICropper.sol";
-import { ISpotter } from "../interfaces/mcd/ISpotter.sol";
-import { IPot } from "../interfaces/mcd/IPot.sol";
-import { IDSProxy } from "../interfaces/IDSProxy.sol";
-import { ICdpRegistry } from "../interfaces/mcd/ICdpRegistry.sol";
+import { IManager } from "../interfaces/protocols/mcd/IManager.sol";
+import { ICropper } from "../interfaces/protocols/mcd/ICropper.sol";
+import { ISpotter } from "../interfaces/protocols/mcd/ISpotter.sol";
+import { IPot } from "../interfaces/protocols/mcd/IPot.sol";
+import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
+import { ICdpRegistry } from "../interfaces/protocols/mcd/ICdpRegistry.sol";
 
 /// @title Getter contract for Vault info from Maker protocol
 contract McdView is DSMath, McdHelper {

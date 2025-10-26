@@ -3,12 +3,12 @@ pragma solidity =0.8.24;
 
 import { IExchangeV3 } from "../../interfaces/exchange/IExchangeV3.sol";
 import { IUniswapRouter } from "../../interfaces/exchange/IUniswapRouter.sol";
-import { DSMath } from "../../DS/DSMath.sol";
+import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { WrapperHelper } from "./helpers/WrapperHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { SafeERC20 } from "../../utils/SafeERC20.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title DFS exchange wrapper for UniswapV2
 contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {

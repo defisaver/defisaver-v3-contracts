@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
-import { IComet } from "../../interfaces/compoundV3/IComet.sol";
+import { IComet } from "../../interfaces/protocols/compoundV3/IComet.sol";
 
 /// @title Withdraw a token from CompoundV3.
 contract CompV3Withdraw is ActionBase, CompV3Helper {

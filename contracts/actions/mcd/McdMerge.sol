@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IManager } from "../../interfaces/mcd/IManager.sol";
+import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
 

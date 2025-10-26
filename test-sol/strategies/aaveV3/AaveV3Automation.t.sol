@@ -16,10 +16,10 @@ import { StrategyExecutor } from "../../../contracts/core/strategy/StrategyExecu
 import { StrategyModel } from "../../../contracts/core/strategy/StrategyModel.sol";
 import { SubStorage } from "../../../contracts/core/strategy/SubStorage.sol";
 import { WrapperExchangeRegistry } from "../../../contracts/exchangeV3/registries/WrapperExchangeRegistry.sol";
-import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
-import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
-import { IPoolAddressesProvider } from "../../../contracts/interfaces/aaveV3/IPoolAddressesProvider.sol";
-import { IPoolV3 } from "../../../contracts/interfaces/aaveV3/IPoolV3.sol";
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
+import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
+import { IPoolAddressesProvider } from "../../../contracts/interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
+import { IPoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IPoolV3.sol";
 import { AaveV3RatioTrigger } from "../../../contracts/triggers/AaveV3RatioTrigger.sol";
 import { Addresses } from "../../utils/Addresses.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";

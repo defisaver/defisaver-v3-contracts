@@ -9,9 +9,9 @@ import { SkyStakingEngineStake } from "../../../contracts/actions/sky/SkyStaking
 import { SkyStakingEngineUnstake } from "../../../contracts/actions/sky/SkyStakingEngineUnstake.sol";
 import { SkyStakingEngineSelectFarm } from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 
-import { ILockstakeEngine } from "../../../contracts/interfaces/sky/ILockstakeEngine.sol";
-import { IStakingRewards } from "../../../contracts/interfaces/sky/IStakingRewards.sol";
-import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
+import { ILockstakeEngine } from "../../../contracts/interfaces/protocols/sky/ILockstakeEngine.sol";
+import { IStakingRewards } from "../../../contracts/interfaces/protocols/sky/IStakingRewards.sol";
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 
 import { SkyExecuteActions } from "../../utils/executeActions/SkyExecuteActions.sol";
 

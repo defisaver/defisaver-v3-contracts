@@ -2,19 +2,19 @@
 
 pragma solidity =0.8.24;
 
-import { WadRayMath } from "../utils/math/WadRayMath.sol";
-import { MathUtils } from "../utils/math/MathUtils.sol";
-import { IStableDebtToken } from "../interfaces/aaveV2/IStableDebtToken.sol";
-import { IScaledBalanceToken } from "../interfaces/aave/IScaledBalanceToken.sol";
-import { IReserveInterestRateStrategyV2 } from "../interfaces/aaveV2/IReserveInterestRateStrategyV2.sol";
-import { DSMath } from "../DS/DSMath.sol";
+import { WadRayMath } from "../_vendor/aave/WadRayMath.sol";
+import { MathUtils } from "../_vendor/aave/MathUtils.sol";
+import { IStableDebtToken } from "../interfaces/protocols/aaveV2/IStableDebtToken.sol";
+import { IScaledBalanceToken } from "../interfaces/protocols/aave/IScaledBalanceToken.sol";
+import { IReserveInterestRateStrategyV2 } from "../interfaces/protocols/aaveV2/IReserveInterestRateStrategyV2.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { AaveHelper } from "../actions/aave/helpers/AaveHelper.sol";
-import { IPriceOracleGetterAave } from "../interfaces/aaveV2/IPriceOracleGetterAave.sol";
-import { IAaveProtocolDataProviderV2 } from "../interfaces/aaveV2/IAaveProtocolDataProviderV2.sol";
-import { ILendingPoolV2, DataTypes } from "../interfaces/aaveV2/ILendingPoolV2.sol";
-import { ILendingPoolAddressesProviderV2 } from "../interfaces/aaveV2/ILendingPoolAddressesProviderV2.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { IPriceOracleGetterAave } from "../interfaces/protocols/aaveV2/IPriceOracleGetterAave.sol";
+import { IAaveProtocolDataProviderV2 } from "../interfaces/protocols/aaveV2/IAaveProtocolDataProviderV2.sol";
+import { ILendingPoolV2, DataTypes } from "../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
+import { ILendingPoolAddressesProviderV2 } from "../interfaces/protocols/aaveV2/ILendingPoolAddressesProviderV2.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 contract AaveView is AaveHelper, DSMath {
     uint256 constant RESERVE_FACTOR_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore

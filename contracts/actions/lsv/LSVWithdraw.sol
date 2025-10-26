@@ -4,11 +4,11 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { LSVUtilHelper } from "./helpers/LSVUtilHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { FeeRecipient } from "../../utils/FeeRecipient.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { FeeRecipient } from "../../utils/fee/FeeRecipient.sol";
 import { Discount } from "../../utils/Discount.sol";
 import { ExchangeHelper } from "../../exchangeV3/helpers/ExchangeHelper.sol";
-import { LSVProfitTracker } from "../../utils/LSVProfitTracker.sol";
+import { LSVProfitTracker } from "../../utils/lsv/LSVProfitTracker.sol";
 
 /// @title action for tracking users withdrawals within the LSV ecosystem
 contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {

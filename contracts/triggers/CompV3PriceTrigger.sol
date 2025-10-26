@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IComet } from "../interfaces/compoundV3/IComet.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { IComet } from "../interfaces/protocols/compoundV3/IComet.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
-import { TransientStorageCancun } from "../utils/TransientStorageCancun.sol";
+import { TransientStorageCancun } from "../utils/transient/TransientStorageCancun.sol";
 import { CompV3RatioHelper } from "../actions/compoundV3/helpers/CompV3RatioHelper.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 
@@ -34,7 +34,7 @@ contract CompV3PriceTrigger is ITrigger, AdminAuth, CompV3RatioHelper, TriggerHe
         uint8 state;
     }
 
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerData = parseSubInputs(_subData);
 
         uint256 currRatio = getSafetyRatio(triggerData.market, triggerData.user);

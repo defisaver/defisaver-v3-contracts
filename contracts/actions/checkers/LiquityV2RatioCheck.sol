@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { LiquityV2RatioHelper } from "../liquityV2/helpers/LiquityV2RatioHelper.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
 
 /// @title Action to check the ratio of the Liquity V2 position after strategy execution.
 contract LiquityV2RatioCheck is ActionBase, LiquityV2RatioHelper {

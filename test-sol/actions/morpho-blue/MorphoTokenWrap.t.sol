@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 
 import { MorphoTokenWrap } from "../../../contracts/actions/morpho-blue/MorphoTokenWrap.sol";
 import { MorphoBlueHelper } from "../../../contracts/actions/morpho-blue/helpers/MorphoBlueHelper.sol";
-import { IMorphoTokenWrapper } from "../../../contracts/interfaces/morpho-blue/IMorphoTokenWrapper.sol";
-import { ILegacyMorphoToken } from "../../../contracts/interfaces/morpho-blue/ILegacyMorphoToken.sol";
+import { IMorphoTokenWrapper } from "../../../contracts/interfaces/protocols/morpho-blue/IMorphoTokenWrapper.sol";
+import { ILegacyMorphoToken } from "../../../contracts/interfaces/protocols/morpho-blue/ILegacyMorphoToken.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";

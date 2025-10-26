@@ -360,89 +360,6 @@ const updateToAaveV2Proxy = async (proxy, subIdRepay, subIdBoost, inputData) => 
     return { subId: latestSubId, repaySub, boostSub };
 };
 
-const subToCBRebondProxy = async (proxy, inputData) => {
-    const cbRebondSubProxyAddr = await getAddrFromRegistry('CBRebondSubProxy');
-
-    const CBRebondSubProxy = await hre.ethers.getContractFactory('CBRebondSubProxy');
-    const functionData = CBRebondSubProxy.interface.encodeFunctionData(
-        'subToRebondStrategy',
-        inputData,
-    );
-
-    const receipt = await executeTxFromProxy(proxy, cbRebondSubProxyAddr, functionData);
-
-    const gasUsed = await getGasUsed(receipt);
-    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-    console.log(
-        `GasUsed subToRebondStrategy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
-    );
-
-    const latestSubId = await getLatestSubId();
-
-    return latestSubId;
-};
-
-const subToMorphoAaveV2Proxy = async (proxy, inputData) => {
-    const subProxyAddr = await getAddrFromRegistry('MorphoAaveV2SubProxy');
-
-    const subProxyFactory = await hre.ethers.getContractFactory('MorphoAaveV2SubProxy');
-    const functionData = subProxyFactory.interface.encodeFunctionData(
-        'subToMorphoAaveV2Automation',
-        inputData,
-    );
-
-    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
-
-    const gasUsed = await getGasUsed(receipt);
-    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-    console.log(
-        `GasUsed subToMorphoAaveV2Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
-    );
-
-    const latestSubId = await getLatestSubId();
-    const subProxy = await getContractFromRegistry('MorphoAaveV2SubProxy');
-    const repaySub = await subProxy.formatRepaySub(...inputData, proxy.address);
-    const boostSub = await subProxy.formatBoostSub(...inputData, proxy.address);
-    return { latestSubId, repaySub, boostSub };
-};
-
-const updateSubDataMorphoAaveV2Proxy = async (
-    proxy,
-    subIdRepay,
-    subIdBoost,
-    minRatio,
-    maxRatio,
-    optimalRatioBoost,
-    optimalRatioRepay,
-    boostEnabled,
-) => {
-    const subInput = [minRatio, maxRatio, optimalRatioBoost, optimalRatioRepay, boostEnabled];
-
-    const subProxyAddr = await getAddrFromRegistry('MorphoAaveV2SubProxy');
-
-    const subProxyFactory = await hre.ethers.getContractFactory('MorphoAaveV2SubProxy');
-
-    const functionData = subProxyFactory.interface.encodeFunctionData('updateSubData', [
-        subIdRepay,
-        subIdBoost,
-        subInput,
-    ]);
-
-    const receipt = await executeTxFromProxy(proxy, subProxyAddr, functionData);
-
-    const gasUsed = await getGasUsed(receipt);
-    const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);
-    console.log(
-        `GasUsed updateMorphoAaveV2Proxy; ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
-    );
-
-    const latestSubId = await getLatestSubId();
-    const subProxy = await getContractFromRegistry('MorphoAaveV2SubProxy');
-    const repaySub = await subProxy.formatRepaySub(subInput, proxy.address);
-    const boostSub = await subProxy.formatBoostSub(subInput, proxy.address);
-    return { latestSubId, repaySub, boostSub };
-};
-
 const subToLiquityProxy = async (proxy, inputData) => {
     const subProxyAddr = await getAddrFromRegistry('LiquitySubProxy');
 
@@ -688,10 +605,7 @@ module.exports = {
     addBotCaller,
     setMCDPriceVerifier,
     getSubHash,
-    subToCBRebondProxy,
     getUpdatedStrategySub,
-    subToMorphoAaveV2Proxy,
-    updateSubDataMorphoAaveV2Proxy,
     subToLiquityProxy,
     updateLiquityProxy,
     subToMcdProxy,

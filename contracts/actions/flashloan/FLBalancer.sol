@@ -3,12 +3,12 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 
-import { IFlashLoanRecipient } from "../../interfaces/balancer/IFlashLoanRecipient.sol";
-import { IFlashLoans } from "../../interfaces/balancer/IFlashLoans.sol";
-import { IFLParamGetter } from "../../interfaces/IFLParamGetter.sol";
+import { IFlashLoanRecipient } from "../../interfaces/protocols/balancer/IFlashLoanRecipient.sol";
+import { IFlashLoans } from "../../interfaces/protocols/balancer/IFlashLoans.sol";
+import { IFLParamGetter } from "../../interfaces/flashloan/IFLParamGetter.sol";
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { ReentrancyGuard } from "../../utils/ReentrancyGuard.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ReentrancyGuard } from "../../_vendor/openzeppelin/ReentrancyGuard.sol";
 
 import { FLHelper } from "./helpers/FLHelper.sol";
 

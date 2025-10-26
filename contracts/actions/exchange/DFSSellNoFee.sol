@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 
 /// @title A exchange sell action through the dfs exchange that does not take any fee

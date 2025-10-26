@@ -2,10 +2,10 @@
 pragma solidity =0.8.24;
 
 import { MockPermission } from "../../contracts/mocks/MockPermission.sol";
-import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
-import { IInstaAccount } from "../../contracts/interfaces/insta/IInstaAccount.sol";
-import { DSAuthority } from "../../contracts/DS/DSAuthority.sol";
-import { DSAuth } from "../../contracts/DS/DSAuth.sol";
+import { IInstaAccount } from "../../contracts/interfaces/protocols/insta/IInstaAccount.sol";
+import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
+import { IDSAuthority } from "../../contracts/interfaces/DS/IDSAuthority.sol";
+import { IDSAuth } from "../../contracts/interfaces/DS/IDSAuth.sol";
 import { AuthHelper } from "../../contracts/auth/helpers/AuthHelper.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
@@ -130,7 +130,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
     }
 
     function _verifyDSProxyPermission(address _addr, bool _enabled) internal view {
-        DSAuthority authority = DSAuthority(DSAuth(dsProxyAddr).authority());
+        IDSAuthority authority = IDSAuthority(IDSAuth(dsProxyAddr).authority());
         bool canCall = authority.canCall(_addr, dsProxyAddr, EXECUTE_SELECTOR);
         if (_enabled) {
             assertTrue(canCall);

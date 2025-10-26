@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { TransientStorageCancun } from "../utils/TransientStorageCancun.sol";
+import { TransientStorageCancun } from "../utils/transient/TransientStorageCancun.sol";
 import { CompV3RatioHelper } from "../actions/compoundV3/helpers/CompV3RatioHelper.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if the CompoundV3 position went over/under the subbed ratio
@@ -29,7 +29,7 @@ contract CompV3RatioTrigger is ITrigger, AdminAuth, CompV3RatioHelper, TriggerHe
     }
 
     /// @notice Checks current safety ratio of a CompoundV3 position and triggers if it's in a correct state.
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 currRatio = getSafetyRatio(triggerSubData.market, triggerSubData.user);

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { IEtherFiClaim } from "../../interfaces/etherFi/IEtherFiClaim.sol";
+import { IEtherFiClaim } from "../../interfaces/protocols/etherFi/IEtherFiClaim.sol";
 
 /// @title Action to Claim KING token as EtherFi reward on behalf of smart wallet
 contract KingClaim is ActionBase {

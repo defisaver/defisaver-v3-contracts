@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidMerkleDistributor } from "../../interfaces/fluid/IFluidMerkleDistributor.sol";
+import { IFluidMerkleDistributor } from "../../interfaces/protocols/fluid/IFluidMerkleDistributor.sol";
 
 import { FluidHelper } from "./helpers/FluidHelper.sol";
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Claim rewards from Fluid protocol
 contract FluidClaim is ActionBase, FluidHelper {

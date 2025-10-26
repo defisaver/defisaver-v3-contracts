@@ -3,8 +3,8 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { MorphoBlueHelper } from "./helpers/MorphoBlueHelper.sol";
-import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
-import { Withdrawal, IPublicAllocator } from "../../interfaces/morpho-blue/IPublicAllocator.sol";
+import { MarketParams } from "../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
+import { Withdrawal, IPublicAllocator } from "../../interfaces/protocols/morpho-blue/IPublicAllocator.sol";
 
 /// @title Action that bundles calls to Morpho Blue Public Allocator to reallocate liquidity for additional borrowing
 contract MorphoBlueReallocateLiquidity is ActionBase, MorphoBlueHelper {

@@ -21,13 +21,14 @@ fs_permissions = [{ access = 'read', path = './test-sol/config/' }]
 [fmt]
 bracket_spacing = true
 number_underscore = "thousands"
+ignore = ["deprecated/**"]
 # int_types = "long"
 # line_length = 120
 # tab_width = 4
 
 
 # Linting -> https://getfoundry.sh/config/reference/linter
-[profile.lint]
+[lint]
 exclude_lints = [
     # "unaliased-plain-import",
     # "unused-import",
@@ -47,5 +48,6 @@ exclude_lints = [
     "screaming-snake-case-immutable",
     "pascal-case-struct",
 ]
+ignore = ["deprecated/**"]
 
 # https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

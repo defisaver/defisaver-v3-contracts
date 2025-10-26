@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { CurveUsdHelper } from "../../actions/curveusd/helpers/CurveUsdHelper.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
 
 /// @title Action to check the collateral ratio of the Curve USD position after strategy execution.
 contract CurveUsdCollRatioCheck is ActionBase, CurveUsdHelper {

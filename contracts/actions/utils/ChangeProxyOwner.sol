@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.24;
 
+import { IDSAuth } from "../../interfaces/DS/IDSAuth.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { DFSProxyRegistryController } from "../../utils/DFSProxyRegistryController.sol";
-import { DSAuth } from "../../DS/DSAuth.sol";
+import { DFSProxyRegistryController } from "../../utils/proxyRegistry/DFSProxyRegistryController.sol";
 
 /// @title Changes the owner of the DSProxy and updated the DFSRegistry
 contract ChangeProxyOwner is ActionBase {
@@ -47,7 +47,7 @@ contract ChangeProxyOwner is ActionBase {
     function _changeOwner(address _newOwner) internal {
         require(_newOwner != address(0), "Owner is empty address");
 
-        DSAuth(address(this)).setOwner(_newOwner);
+        IDSAuth(address(this)).setOwner(_newOwner);
 
         dfsRegController.changeOwnerInDFSRegistry(_newOwner);
     }

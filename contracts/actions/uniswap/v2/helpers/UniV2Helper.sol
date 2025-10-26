@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { MainnetUniV2Addresses } from "./MainnetUniV2Addresses.sol";
-import { IUniswapV2Factory } from "../../../../interfaces/uniswap/IUniswapV2Factory.sol";
+import { IUniswapV2Factory } from "../../../../interfaces/protocols/uniswap/IUniswapV2Factory.sol";
 import { IUniswapRouter } from "../../../../interfaces/exchange/IUniswapRouter.sol";
 
 contract UniV2Helper is MainnetUniV2Addresses {

@@ -489,7 +489,7 @@ const generateProtocolSolidityActionsFiles = (templatePath, outputPath) => {
         const modifiedCode = solidityCode
             .replace(
                 'import { ActionBase } from "./ActionBase.sol";\n',
-                `import { ActionBase } from "./ActionBase.sol";\nimport { TokenUtils } from "../../utils/TokenUtils.sol";\nimport { ${protocolName}Helper } from "./helpers/${protocolName}Helper.sol";\n`,
+                `import { ActionBase } from "./ActionBase.sol";\nimport { TokenUtils } from "../../utils/token/TokenUtils.sol";\nimport { ${protocolName}Helper } from "./helpers/${protocolName}Helper.sol";\n`,
             )
             .replace(
                 `contract ${action.name} is ActionBase {`,

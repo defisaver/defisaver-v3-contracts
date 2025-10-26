@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { ICToken } from "../../interfaces/compound/ICToken.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ICToken } from "../../interfaces/protocols/compound/ICToken.sol";
 
 /// @title Action that gets debt amount for a single asset on Compound for debtor.
 contract CompGetDebt is ActionBase {

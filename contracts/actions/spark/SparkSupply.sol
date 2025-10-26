@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Supply a token to an Spark market

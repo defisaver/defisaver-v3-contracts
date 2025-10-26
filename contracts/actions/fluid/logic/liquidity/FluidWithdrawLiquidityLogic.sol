@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../../../interfaces/fluid/vaults/IFluidVaultT1.sol";
-import { IFluidVaultT3 } from "../../../../interfaces/fluid/vaults/IFluidVaultT3.sol";
+import { IFluidVaultT1 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
+import { IFluidVaultT3 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT3.sol";
 import { FluidLiquidityModel } from "../../helpers/FluidLiquidityModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidSupplyLiquidityLogic - Implements the supply of tokens to Fluid liquidity layer

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Borrow a token from AaveV3 market

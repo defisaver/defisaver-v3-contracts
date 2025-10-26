@@ -17,12 +17,6 @@ const createMcdTrigger = async (vaultId, ratio, ratioState) => {
     return param;
 };
 
-const createReflexerTrigger = async (safeId, ratio, ratioState) => {
-    const param = abiCoder.encode(['uint256', 'uint256', 'uint8'], [safeId, ratio, ratioState]);
-
-    return param;
-};
-
 const createLiquityTrigger = async (user, ratio, ratioState) => {
     const param = abiCoder.encode(['address', 'uint256', 'uint8'], [user, ratio, ratioState]);
 
@@ -51,11 +45,6 @@ const createChainLinkPriceTrigger = async (tokenAddr, price, state) => {
     return param;
 };
 
-const createUniV3RangeOrderTrigger = async (tokenId, state) => {
-    const param = abiCoder.encode(['uint256', 'uint8'], [tokenId, state]);
-
-    return param;
-};
 const createTimestampTrigger = async (timestamp, interval) => {
     const param = abiCoder.encode(['uint256', 'uint256'], [timestamp, interval]);
 
@@ -75,12 +64,10 @@ const createCurveUsdHealthRatioTrigger = async (user, controllerAddr, ratio) => 
 };
 
 module.exports = {
-    createUniV3RangeOrderTrigger,
     createMcdTrigger,
     createChainLinkPriceTrigger,
     createTimestampTrigger,
     createGasPriceTrigger,
-    createReflexerTrigger,
     createLiquityTrigger,
     createCurveUsdCollRatioTrigger,
     createMorphoBlueRatioTrigger,

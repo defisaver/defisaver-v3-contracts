@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { AaveV3ATokenPayback } from "../../../contracts/actions/aaveV3/AaveV3ATokenPayback.sol";
 import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/AaveV3RatioHelper.sol";
-import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
+import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3PositionCreator } from "../../utils/positions/AaveV3PositionCreator.sol";

@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
+import { IDSProxyFactory } from "../../contracts/interfaces/DS/IDSProxyFactory.sol";
+import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
+import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
+import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
+import { IInstaIndex } from "../../contracts/interfaces/protocols/insta/IInstaIndex.sol";
 import { BaseTest } from "./BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
-import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterface.sol";
-import { DSProxy } from "../../contracts/DS/DSProxy.sol";
-import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
-import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
-import { IInstaIndex } from "../../contracts/interfaces/insta/IInstaIndex.sol";
 import { DSAUtils } from "../../contracts/utils/DSAUtils.sol";
 import { console2 } from "forge-std/console2.sol";
 
@@ -43,7 +43,7 @@ contract SmartWallet is BaseTest {
     }
 
     function createDSProxy() public ownerAsSender returns (address payable) {
-        walletAddr = payable(address(DSProxyFactoryInterface(Addresses.DS_PROXY_FACTORY).build()));
+        walletAddr = payable(address(IDSProxyFactory(Addresses.DS_PROXY_FACTORY).build()));
         isSafe = false;
         isDSA = false;
         isDSProxy = true;
@@ -101,7 +101,7 @@ contract SmartWallet is BaseTest {
                 revert SafeTxFailed();
             }
         } else if (isDSProxy) {
-            DSProxy(walletAddr).execute{ value: _value }(_target, _calldata);
+            IDSProxy(walletAddr).execute{ value: _value }(_target, _calldata);
         } else if (isDSA) {
             // Fix for [FAIL: vm.startPrank: cannot overwrite a prank until it is applied at least once]
             consumePrank();

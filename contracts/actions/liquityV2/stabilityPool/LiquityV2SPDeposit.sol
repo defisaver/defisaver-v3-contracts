@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../interfaces/liquityV2/IAddressesRegistry.sol";
-import { IStabilityPool } from "../../../interfaces/liquityV2/IStabilityPool.sol";
+import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { IStabilityPool } from "../../../interfaces/protocols/liquityV2/IStabilityPool.sol";
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Deposits a token to the LiquityV2 Stability Pool
 contract LiquityV2SPDeposit is ActionBase, LiquityV2Helper {

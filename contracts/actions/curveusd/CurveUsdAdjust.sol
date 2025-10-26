@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CurveUsdHelper } from "./helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Action that supplies collateral to a curveusd position and borrows more crvUSD
 /// @dev will always adjust only user's wallet position, can't adjust on behalf of someone else

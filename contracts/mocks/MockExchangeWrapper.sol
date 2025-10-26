@@ -2,11 +2,11 @@
 pragma solidity =0.8.24;
 
 import { IExchangeV3 } from "../interfaces/exchange/IExchangeV3.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { DSMath } from "../DS/DSMath.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { SafeERC20 } from "../utils/SafeERC20.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
+import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
 
 /// @title DFS exchange wrapper used for mocking in tests
 contract MockExchangeWrapper is DSMath, IExchangeV3, AdminAuth {

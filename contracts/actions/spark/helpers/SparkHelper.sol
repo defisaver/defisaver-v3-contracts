@@ -3,9 +3,9 @@ pragma solidity =0.8.24;
 
 import { MainnetSparkAddresses } from "./MainnetSparkAddresses.sol";
 
-import { ISparkPool } from "../../../interfaces/spark/ISparkPool.sol";
-import { ISparkProtocolDataProvider } from "../../../interfaces/spark/ISparkProtocolDataProvider.sol";
-import { ISparkPoolAddressesProvider } from "../../../interfaces/spark/ISparkPoolAddressesProvider.sol";
+import { ISparkPool } from "../../../interfaces/protocols/spark/ISparkPool.sol";
+import { ISparkProtocolDataProvider } from "../../../interfaces/protocols/spark/ISparkProtocolDataProvider.sol";
+import { ISparkPoolAddressesProvider } from "../../../interfaces/protocols/spark/ISparkPoolAddressesProvider.sol";
 
 /// @title Utility functions and data used in Spark actions
 contract SparkHelper is MainnetSparkAddresses {

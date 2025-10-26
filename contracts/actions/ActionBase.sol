@@ -1,21 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { ISafe } from "../interfaces/safe/ISafe.sol";
-import { IInstaList } from "../interfaces/insta/IInstaList.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
-import { DSProxy } from "../DS/DSProxy.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { ActionsUtilHelper } from "./utils/helpers/ActionsUtilHelper.sol";
 import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
-import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
 abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
     event ActionEvent(string indexed logName, bytes data);
 
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     DefisaverLogger public constant logger = DefisaverLogger(DFS_LOGGER_ADDR);
 

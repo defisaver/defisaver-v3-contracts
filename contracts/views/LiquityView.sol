@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../utils/TokenUtils.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
 import { LiquityHelper } from "../actions/liquity/helpers/LiquityHelper.sol";
-import { DSMath } from "../DS/DSMath.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 
 contract LiquityView is LiquityHelper, DSMath {
     using TokenUtils for address;

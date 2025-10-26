@@ -2,18 +2,18 @@
 
 pragma solidity =0.8.24;
 
-import { IWStEth } from "../../interfaces/lido/IWStEth.sol";
-import { IWeEth } from "../../interfaces/etherFi/IWeEth.sol";
-import { ILiquidityPool } from "../../interfaces/etherFi/ILiquidityPool.sol";
+import { IWStEth } from "../../interfaces/protocols/lido/IWStEth.sol";
+import { IWeEth } from "../../interfaces/protocols/etherFi/IWeEth.sol";
+import { ILiquidityPool } from "../../interfaces/protocols/etherFi/ILiquidityPool.sol";
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { UtilAddresses } from "../../utils/addresses/UtilAddresses.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title A exchange sell action through the LSV exchange with no fee (used only for ETH Saver)
 /// @dev weth and steth will be transformed into wsteth directly if the rate is better than minPrice
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
-contract LSVSell is ActionBase, UtilHelper, DFSExchangeCore {
+contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
     using TokenUtils for address;
 
     struct Params {

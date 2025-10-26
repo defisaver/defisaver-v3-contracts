@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { CompRatioHelper } from "../actions/compound/helpers/CompRatioHelper.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { TransientStorage } from "../utils/transient/TransientStorage.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if the Compound position went over/under the subbed ratio
@@ -27,7 +27,7 @@ contract CompoundRatioTrigger is ITrigger, AdminAuth, CompRatioHelper, TriggerHe
     }
 
     /// @dev checks current safety ratio of a Compound position and triggers if it's in a correct state
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 currRatio = getSafetyRatio(triggerSubData.user);

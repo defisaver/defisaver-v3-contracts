@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";

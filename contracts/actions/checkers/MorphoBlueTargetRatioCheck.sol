@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { MorphoBlueHelper } from "../../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
-import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
+import { MarketParams } from "../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 import { ActionBase } from "../ActionBase.sol";
 
 /// @title Action to check the ratio of the Morpho Blue position after strategy execution.

@@ -2,12 +2,12 @@
 pragma solidity =0.8.24;
 
 import { DFSExchangeCore } from "./DFSExchangeCore.sol";
-import { SafeERC20 } from "../utils/SafeERC20.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { TxSaverGasCostCalc } from "../utils/TxSaverGasCostCalc.sol";
-import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { TxSaverGasCostCalc } from "../tx-saver/TxSaverGasCostCalc.sol";
+import { ITxSaverBytesTransientStorage } from "../interfaces/core/ITxSaverBytesTransientStorage.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 
 contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc {
     using SafeERC20 for IERC20;
@@ -21,7 +21,7 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc {
 
     error FeeTokenNotSameAsSrcToken(address srcToken, address feeToken);
 
-    function _sellWithTxSaverChoice(ExchangeData memory _exData, address _user, DFSRegistry _registry)
+    function _sellWithTxSaverChoice(ExchangeData memory _exData, address _user, IDFSRegistry _registry)
         internal
         returns (address wrapperAddress, uint256 destAmount, bool hasFee, bool txSaverFeeTaken)
     {

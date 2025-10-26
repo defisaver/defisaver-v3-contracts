@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { ISparkRewardsController } from "../../interfaces/spark/ISparkRewardsController.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ISparkRewardsController } from "../../interfaces/protocols/spark/ISparkRewardsController.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
 

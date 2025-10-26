@@ -97,29 +97,29 @@ pragma solidity =0.8.24;
  *
  *
  */
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
-import { ITxSaverBytesTransientStorage } from "../interfaces/ITxSaverBytesTransientStorage.sol";
+import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
+import { ITxSaverBytesTransientStorage } from "../interfaces/core/ITxSaverBytesTransientStorage.sol";
 import { Permission } from "../auth/Permission.sol";
 import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
 import { BundleStorage } from "../core/strategy/BundleStorage.sol";
 import { SubStorage } from "../core/strategy/SubStorage.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { TxSaverGasCostCalc } from "../utils/TxSaverGasCostCalc.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { TxSaverGasCostCalc } from "../tx-saver/TxSaverGasCostCalc.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
 contract RecipeExecutor is StrategyModel, Permission, AdminAuth, CoreHelper, TxSaverGasCostCalc, SmartWalletUtils {
     bytes4 public constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// @dev Function sig of ActionBase.executeAction()
     bytes4 public constant EXECUTE_ACTION_SELECTOR =

@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { IRestakeManager } from "../../interfaces/renzo/IRestakeManager.sol";
-import { IRenzoOracle } from "../../interfaces/renzo/IRenzoOracle.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { IRestakeManager } from "../../interfaces/protocols/renzo/IRestakeManager.sol";
+import { IRenzoOracle } from "../../interfaces/protocols/renzo/IRenzoOracle.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { RenzoHelper } from "./helpers/RenzoHelper.sol";
 
 /// @title Supplies ETH (action receives WETH) to Renzo for ETH2 Staking. Receives ezETH in return

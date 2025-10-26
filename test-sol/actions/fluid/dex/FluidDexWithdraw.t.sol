@@ -2,13 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import {
+    IFluidVaultResolver
+} from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidView } from "../../../../contracts/views/FluidView.sol";
 import { FluidDexWithdraw } from "../../../../contracts/actions/fluid/dex/FluidDexWithdraw.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
 contract TestFluidDexWithdraw is FluidTestBase {

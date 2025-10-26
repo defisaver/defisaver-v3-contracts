@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
+import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
 
 import { ActionBase } from "../ActionBase.sol";
 import { DFSSell } from "../exchange/DFSSell.sol";
@@ -9,9 +9,9 @@ import { GasFeeTaker } from "../fee/GasFeeTaker.sol";
 
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { McdRatioHelper } from "./helpers/McdRatioHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { IManager } from "../../interfaces/mcd/IManager.sol";
-import { IJoin } from "../../interfaces/mcd/IJoin.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
+import { IJoin } from "../../interfaces/protocols/mcd/IJoin.sol";
 
 /// @title Single mcd repay action can use flashloan or not
 contract McdRepayComposite is ActionBase, DFSSell, GasFeeTaker, McdHelper, McdRatioHelper {

@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { MorphoBlueHelper } from "../../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
-import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
+import { MarketParams } from "../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 
 /// @title Action to check the ratio of the Morpho Blue position after strategy execution.
 contract MorphoBlueRatioCheck is ActionBase, MorphoBlueHelper {

@@ -2,7 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import {
+    IFluidVaultResolver
+} from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidDexPayback } from "../../../../contracts/actions/fluid/dex/FluidDexPayback.sol";
 import { FluidView } from "../../../../contracts/views/FluidView.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";

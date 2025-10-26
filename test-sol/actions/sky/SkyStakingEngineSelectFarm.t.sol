@@ -7,7 +7,7 @@ import { SkyStakingEngineOpen } from "../../../contracts/actions/sky/SkyStakingE
 import { SkyStakingEngineStake } from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
 import { SkyStakingEngineSelectFarm } from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 
-import { ILockstakeEngine } from "../../../contracts/interfaces/sky/ILockstakeEngine.sol";
+import { ILockstakeEngine } from "../../../contracts/interfaces/protocols/sky/ILockstakeEngine.sol";
 
 import { SkyExecuteActions } from "../../utils/executeActions/SkyExecuteActions.sol";
 

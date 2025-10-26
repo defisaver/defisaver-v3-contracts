@@ -2,12 +2,14 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT1.sol";
-import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import { IFluidVaultT1 } from "../../../../contracts/interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
+import {
+    IFluidVaultResolver
+} from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { Vm } from "forge-std/Vm.sol";
 
 contract TestFluidLiquidityOpen is FluidTestBase {

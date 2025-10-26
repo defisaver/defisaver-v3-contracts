@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { ISafe } from "../../interfaces/safe/ISafe.sol";
+import { ISafe } from "../../interfaces/protocols/safe/ISafe.sol";
 import { WalletAuth } from "./WalletAuth.sol";
 
 /// @title SafeModuleAuth Gets safe module auth from users and is callable by StrategyExecutor

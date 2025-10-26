@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
-import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
+import { TokenPriceHelper } from "../utils/token/TokenPriceHelper.sol";
 
 /// @title Trigger contract that verifies if the current price of token is outside of given range
 contract ClosePriceTrigger is ITrigger, AdminAuth, TriggerHelper, TokenPriceHelper {

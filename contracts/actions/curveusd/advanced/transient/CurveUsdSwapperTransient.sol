@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { SafeERC20 } from "../../../../utils/SafeERC20.sol";
-import { IERC20 } from "../../../../interfaces/IERC20.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { SafeERC20 } from "../../../../_vendor/openzeppelin/SafeERC20.sol";
+import { IERC20 } from "../../../../interfaces/token/IERC20.sol";
+import { IDFSRegistry } from "../../../../interfaces/core/IDFSRegistry.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { AdminAuth } from "../../../../auth/AdminAuth.sol";
 import { DFSExchangeWithTxSaver } from "../../../../exchangeV3/DFSExchangeWithTxSaver.sol";
 import { DFSExchangeData } from "../../../../exchangeV3/DFSExchangeData.sol";
-import { FeeRecipient } from "../../../../utils/FeeRecipient.sol";
+import { FeeRecipient } from "../../../../utils/fee/FeeRecipient.sol";
 import { ActionsUtilHelper } from "../../../utils/helpers/ActionsUtilHelper.sol";
-import { DFSRegistry } from "../../../../core/DFSRegistry.sol";
 import { GasFeeHelper } from "../../../../actions/fee/helpers/GasFeeHelper.sol";
-import { ReentrancyGuardTransient } from "../../../../utils/ReentrancyGuardTransient.sol";
+import { ReentrancyGuardTransient } from "../../../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title CurveUsdSwapperTransient Callback contract for CurveUsd extended actions with transient storage
 contract CurveUsdSwapperTransient is
@@ -134,7 +134,7 @@ contract CurveUsdSwapperTransient is
         uint256 _gasUsedForAutomation
     ) internal returns (uint256) {
         (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) =
-            _sellWithTxSaverChoice(_exData, _user, DFSRegistry(REGISTRY_ADDR));
+            _sellWithTxSaverChoice(_exData, _user, IDFSRegistry(REGISTRY_ADDR));
 
         // can't take both automation fee and TxSaver fee
         if (_gasUsedForAutomation > 0 && !txSaverFeeTaken) {

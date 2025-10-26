@@ -3,12 +3,12 @@
 pragma solidity =0.8.24;
 
 import { MainnetLiquityV2Addresses } from "./MainnetLiquityV2Addresses.sol";
-import { ITroveManager } from "../../../interfaces/liquityV2/ITroveManager.sol";
-import { IBorrowerOperations } from "../../../interfaces/liquityV2/IBorrowerOperations.sol";
-import { IStabilityPool } from "../../../interfaces/liquityV2/IStabilityPool.sol";
-import { ISortedTroves } from "../../../interfaces/liquityV2/ISortedTroves.sol";
-import { IAddressesRegistry } from "../../../interfaces/liquityV2/IAddressesRegistry.sol";
-import { DSMath } from "../../../DS/DSMath.sol";
+import { ITroveManager } from "../../../interfaces/protocols/liquityV2/ITroveManager.sol";
+import { IBorrowerOperations } from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
+import { IStabilityPool } from "../../../interfaces/protocols/liquityV2/IStabilityPool.sol";
+import { ISortedTroves } from "../../../interfaces/protocols/liquityV2/ISortedTroves.sol";
+import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 
 contract LiquityV2Helper is MainnetLiquityV2Addresses, DSMath {
     /// @notice Cooldown period for interest rate adjustments (7 days)

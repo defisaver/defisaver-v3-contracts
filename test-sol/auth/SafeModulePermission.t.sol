@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import { MockSafeModulePermission } from "../../contracts/mocks/MockSafeModulePermission.sol";
-import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";

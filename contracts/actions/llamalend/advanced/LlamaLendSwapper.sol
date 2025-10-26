@@ -5,15 +5,15 @@ import { AdminAuth } from "../../../auth/AdminAuth.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
 import { DFSExchangeWithTxSaver } from "../../../exchangeV3/DFSExchangeWithTxSaver.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
-import { FeeRecipient } from "../../../utils/FeeRecipient.sol";
-import { SafeERC20 } from "../../../utils/SafeERC20.sol";
-import { IERC20 } from "../../../interfaces/IERC20.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
+import { FeeRecipient } from "../../../utils/fee/FeeRecipient.sol";
+import { SafeERC20 } from "../../../_vendor/openzeppelin/SafeERC20.sol";
+import { IERC20 } from "../../../interfaces/token/IERC20.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
+import { ILlamaLendController } from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 import { ActionsUtilHelper } from "../../utils/helpers/ActionsUtilHelper.sol";
-import { DFSRegistry } from "../../../core/DFSRegistry.sol";
+import { IDFSRegistry } from "../../../interfaces/core/IDFSRegistry.sol";
 import { GasFeeHelper } from "../../fee/helpers/GasFeeHelper.sol";
-import { ReentrancyGuardTransient } from "../../../utils/ReentrancyGuardTransient.sol";
+import { ReentrancyGuardTransient } from "../../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 
 /// @title LlamaLendSwapper Callback contract for Llamalend extended actions
 contract LlamaLendSwapper is
@@ -51,7 +51,7 @@ contract LlamaLendSwapper is
         address debtToken = exData.destAddr;
 
         (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) =
-            _sellWithTxSaverChoice(exData, _user, DFSRegistry(REGISTRY_ADDR));
+            _sellWithTxSaverChoice(exData, _user, IDFSRegistry(REGISTRY_ADDR));
 
         // can't take both automation fee and TxSaver fee
         if (gasUsed > 0 && !txSaverFeeTaken) {
@@ -82,7 +82,7 @@ contract LlamaLendSwapper is
         address collToken = exData.destAddr;
 
         (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) =
-            _sellWithTxSaverChoice(exData, _user, DFSRegistry(REGISTRY_ADDR));
+            _sellWithTxSaverChoice(exData, _user, IDFSRegistry(REGISTRY_ADDR));
 
         // can't take both automation fee and TxSaver fee
         if (gasUsed > 0 && !txSaverFeeTaken) {
@@ -115,7 +115,7 @@ contract LlamaLendSwapper is
         }
 
         (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) =
-            _sellWithTxSaverChoice(exData, _user, DFSRegistry(REGISTRY_ADDR));
+            _sellWithTxSaverChoice(exData, _user, IDFSRegistry(REGISTRY_ADDR));
 
         // can't take both automation fee and TxSaver fee
         if (gasUsed > 0 && !txSaverFeeTaken) {

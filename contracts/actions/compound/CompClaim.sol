@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompHelper } from "./helpers/CompHelper.sol";
-import { IComptroller } from "../../interfaces/compound/IComptroller.sol";
+import { IComptroller } from "../../interfaces/protocols/compound/IComptroller.sol";
 
 /// @title Claims Comp reward for the specified user.
 contract CompClaim is ActionBase, CompHelper {

@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { GasFeeHelper } from "./helpers/GasFeeHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Calculated the amount of tokens needed for paying the tx fee without sending the amount
 contract GasFeeCalc is ActionBase, GasFeeHelper {

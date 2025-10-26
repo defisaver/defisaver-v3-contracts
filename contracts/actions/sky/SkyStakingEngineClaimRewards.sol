@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { SkyHelper } from "./helpers/SkyHelper.sol";
-import { ILockstakeEngine } from "../../interfaces/sky/ILockstakeEngine.sol";
+import { ILockstakeEngine } from "../../interfaces/protocols/sky/ILockstakeEngine.sol";
 
 /// @title Claim rewards earned by staking SKY in Staking Engine
 contract SkyStakingEngineClaimRewards is ActionBase, SkyHelper {

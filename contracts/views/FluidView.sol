@@ -2,15 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { IDexSmartCollOracle } from "../interfaces/fluid/oracles/IDexSmartCollOracle.sol";
-import { IDexSmartDebtOracle } from "../interfaces/fluid/oracles/IDexSmartDebtOracle.sol";
-import { IFluidVault } from "../interfaces/fluid/vaults/IFluidVault.sol";
-import { IFluidVaultResolver } from "../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
-import { IFluidDexResolver } from "../interfaces/fluid/resolvers/IFluidDexResolver.sol";
-import { IFluidLendingResolver } from "../interfaces/fluid/resolvers/IFluidLendingResolver.sol";
+import { IDexSmartCollOracle } from "../interfaces/protocols/fluid/oracles/IDexSmartCollOracle.sol";
+import { IDexSmartDebtOracle } from "../interfaces/protocols/fluid/oracles/IDexSmartDebtOracle.sol";
+import { IFluidVault } from "../interfaces/protocols/fluid/vaults/IFluidVault.sol";
+import { IFluidVaultResolver } from "../interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
+import { IFluidDexResolver } from "../interfaces/protocols/fluid/resolvers/IFluidDexResolver.sol";
+import { IFluidLendingResolver } from "../interfaces/protocols/fluid/resolvers/IFluidLendingResolver.sol";
 import { FluidRatioHelper } from "../../contracts/actions/fluid/helpers/FluidRatioHelper.sol";
 import { FluidVaultTypes } from "../../contracts/actions/fluid/helpers/FluidVaultTypes.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 /// @title FluidView - aggregate various information about Fluid vaults and users
 contract FluidView is FluidRatioHelper {

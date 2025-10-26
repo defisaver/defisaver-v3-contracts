@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { ExchangeHelper } from "../exchangeV3/helpers/ExchangeHelper.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 contract DFSPricesView is ExchangeHelper {
     error OutOfRangeSlicingError();

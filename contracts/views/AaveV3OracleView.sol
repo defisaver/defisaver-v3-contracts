@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
-import { IAggregatorV3 } from "../interfaces/chainlink/IAggregatorV3.sol";
-import { IPhaseAggregator } from "../interfaces/chainlink/IPhaseAggregator.sol";
+import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
+import { IAggregatorV3 } from "../interfaces/protocols/chainlink/IAggregatorV3.sol";
+import { IPhaseAggregator } from "../interfaces/protocols/chainlink/IPhaseAggregator.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 contract AaveV3OracleView is AaveV3RatioHelper {

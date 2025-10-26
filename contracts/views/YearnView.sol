@@ -2,10 +2,10 @@
 pragma solidity =0.8.24;
 
 import { YearnHelper } from "../actions/yearn/helpers/YearnHelper.sol";
-import { IYVault } from "../interfaces/yearn/IYVault.sol";
-import { IYearnRegistry } from "../interfaces/yearn/IYearnRegistry.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { DSMath } from "../DS/DSMath.sol";
+import { IYVault } from "../interfaces/protocols/yearn/IYVault.sol";
+import { IYearnRegistry } from "../interfaces/protocols/yearn/IYearnRegistry.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 
 contract YearnView is YearnHelper, DSMath {
     function getUnderlyingBalanceInVault(address _user, address _vault) public view returns (uint256) {

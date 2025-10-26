@@ -2,15 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { KyberNetworkProxyInterface } from "../../interfaces//exchange/IKyberNetworkProxy.sol";
+import { IKyberNetworkProxy } from "../../interfaces//exchange/IKyberNetworkProxy.sol";
 import { IExchangeV3 } from "../../interfaces/exchange/IExchangeV3.sol";
-import { DSMath } from "../../DS/DSMath.sol";
+import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { WrapperHelper } from "./helpers/WrapperHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
-import { SafeERC20 } from "../../utils/SafeERC20.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExchangeHelper {
     error WrongDestAmountError(uint256, uint256);
@@ -30,7 +30,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExc
         IERC20 srcToken = IERC20(_srcAddr);
         IERC20 destToken = IERC20(_destAddr);
 
-        KyberNetworkProxyInterface kyberNetworkProxy = KyberNetworkProxyInterface(KYBER_INTERFACE);
+        IKyberNetworkProxy kyberNetworkProxy = IKyberNetworkProxy(KYBER_INTERFACE);
 
         srcToken.safeApprove(address(kyberNetworkProxy), _srcAmount);
 
@@ -64,8 +64,7 @@ contract KyberWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper, DFSExc
         override
         returns (uint256 rate)
     {
-        (rate,) = KyberNetworkProxyInterface(KYBER_INTERFACE)
-            .getExpectedRate(IERC20(_srcAddr), IERC20(_destAddr), _srcAmount);
+        (rate,) = IKyberNetworkProxy(KYBER_INTERFACE).getExpectedRate(IERC20(_srcAddr), IERC20(_destAddr), _srcAmount);
 
         // multiply with decimal difference in src token
         rate = rate * (10 ** (18 - getDecimals(_srcAddr)));

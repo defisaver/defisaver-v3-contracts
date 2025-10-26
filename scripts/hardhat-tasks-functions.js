@@ -128,7 +128,13 @@ async function updateContractsAddressesInJsonFiles(deployedAddresses, contracts,
 
     // Write all changes at once
     try {
-        await fs.writeFile(addressesFilePath, JSON.stringify(addresses, null, 4));
+        let jsonString = JSON.stringify(addresses, null, 4);
+        // Format single-item history arrays inline
+        jsonString = jsonString.replace(
+            /"history":\s*\[\s*\n\s*("[^"]*")\s*\n\s*\]/g,
+            '"history": [$1]',
+        );
+        await fs.writeFile(addressesFilePath, jsonString);
         console.log(`\n✓ Successfully updated ${networkLowercase}.json with all changes`);
     } catch (error) {
         console.log(`\n❌ Error writing to ${networkLowercase}.json:`, error.message);
