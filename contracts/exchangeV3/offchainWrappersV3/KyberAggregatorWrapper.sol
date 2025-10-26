@@ -7,7 +7,7 @@ import { IKyberScaleHelper } from "../../interfaces/exchange/IKyberScaleHelper.s
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
 import { DFSExchangeData } from "../DFSExchangeData.sol";
-import { DFSRegistry } from "../../core/DFSRegistry.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
@@ -18,7 +18,7 @@ contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExcha
     using SafeERC20 for IERC20;
 
     bytes4 constant SCALING_HELPER_ID = bytes4(keccak256("KyberInputScalingHelper"));
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// @notice Takes order from Kyberswap and returns bool indicating if it is successful
     /// @param _exData Exchange data

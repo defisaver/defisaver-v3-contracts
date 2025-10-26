@@ -4,13 +4,13 @@ pragma solidity =0.8.24;
 
 import { StrategyModel } from "./StrategyModel.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
-import { DFSRegistry } from "../DFSRegistry.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { StrategyStorage } from "./StrategyStorage.sol";
 import { CoreHelper } from "../helpers/CoreHelper.sol";
 
 /// @title BundleStorage - Record of all the Bundles created
 contract BundleStorage is StrategyModel, AdminAuth, CoreHelper {
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     StrategyBundle[] public bundles;
     bool public openToPublic = false;

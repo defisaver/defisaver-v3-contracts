@@ -93,11 +93,11 @@ pragma solidity =0.8.24;
  *
  *
  */
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { DSProxyPermission } from "../auth/DSProxyPermission.sol";
 import { SafeModulePermission } from "../auth/SafeModulePermission.sol";
 import { CheckWalletType } from "../utils/CheckWalletType.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
 import { BundleStorage } from "../core/strategy/BundleStorage.sol";
@@ -124,7 +124,7 @@ contract RecipeExecutor is
     CheckWalletType
 {
     bytes4 public constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// @dev Function sig of ActionBase.executeAction()
     bytes4 public constant EXECUTE_ACTION_SELECTOR =

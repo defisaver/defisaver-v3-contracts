@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { ActionsUtilHelper } from "./utils/helpers/ActionsUtilHelper.sol";
@@ -13,7 +13,7 @@ import { CheckWalletType } from "../utils/CheckWalletType.sol";
 abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     event ActionEvent(string indexed logName, bytes data);
 
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     DefisaverLogger public constant logger = DefisaverLogger(DFS_LOGGER_ADDR);
 

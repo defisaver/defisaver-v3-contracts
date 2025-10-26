@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../../auth/AdminAuth.sol";
-import { DFSRegistry } from "../DFSRegistry.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { BundleStorage } from "../strategy/BundleStorage.sol";
 import { StrategyStorage } from "../strategy/StrategyStorage.sol";
 import { StrategyModel } from "../strategy/StrategyModel.sol";
@@ -19,7 +19,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     event ActivateSub(uint256 indexed subId);
     event DeactivateSub(uint256 indexed subId);
 
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     StoredSubData[] public strategiesSubs;
 

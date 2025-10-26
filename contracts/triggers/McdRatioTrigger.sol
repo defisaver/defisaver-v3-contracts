@@ -7,12 +7,12 @@ import { McdRatioHelper } from "../actions/mcd/helpers/McdRatioHelper.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { IMCDPriceVerifier } from "../interfaces/utils/IMCDPriceVerifier.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if current MCD vault ratio is higher or lower than wanted
 contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, TriggerHelper {
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     error WrongNextPrice(uint256);
 

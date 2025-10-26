@@ -10,7 +10,7 @@ import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
-import { DFSRegistry } from "../../core/DFSRegistry.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
@@ -20,7 +20,7 @@ import { AaveV3Helper } from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
 contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletType, AaveV3Helper {
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     address internal constant DEFAULT_SPARK_MARKET_MAINNET = 0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
 

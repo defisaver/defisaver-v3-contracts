@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { BotAuthForTxSaver } from "./BotAuthForTxSaver.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
@@ -16,7 +16,7 @@ contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTr
     bytes4 public constant BOT_AUTH_ID_FOR_TX_SAVER = bytes4(keccak256("BotAuthForTxSaver"));
     bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// Caller must be authorized bot
     error BotNotApproved(address bot);
