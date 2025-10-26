@@ -6,6 +6,7 @@ import { ActionBase } from "../../ActionBase.sol";
 import { LlamaLendHelper } from "../helpers/LlamaLendHelper.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
 import { ILlamaLendController } from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title LlamaLendLevCreate
 contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
@@ -69,7 +70,7 @@ contract LlamaLendLevCreate is ActionBase, LlamaLendHelper {
         address collAddr = ILlamaLendController(_params.controllerAddress).collateral_token();
         _params.collAmount = collAddr.pullTokensIfNeeded(_params.from, _params.collAmount);
 
-        address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
+        address llamalendSwapper = registry.getAddr(DFSIds.LLAMALEND_SWAPPER);
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
         info[1] = _params.controllerId;

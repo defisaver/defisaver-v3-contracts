@@ -24,8 +24,6 @@ contract CurveUsdHelper is MainnetCurveUsdAddresses, DSMath {
     error ZeroAmountError();
 
     IBytesTransientStorage constant transientStorage = IBytesTransientStorage(BYTES_TRANSIENT_STORAGE);
-    bytes4 constant CURVE_SWAPPER_ID = bytes4(keccak256("CurveUsdSwapper"));
-    bytes4 constant CURVE_TRANSIENT_SWAPPER_ID = bytes4(keccak256("CurveUsdSwapperTransient"));
 
     function getCollateralRatio(address _user, address _controllerAddr)
         public

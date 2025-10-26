@@ -12,18 +12,18 @@ import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
+import { DFSIds } from "../../utils/DFSIds.sol";
 
 contract KyberAggregatorWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData, AdminAuth, CoreHelper {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
-    bytes4 constant SCALING_HELPER_ID = bytes4(keccak256("KyberInputScalingHelper"));
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// @notice Takes order from Kyberswap and returns bool indicating if it is successful
     /// @param _exData Exchange data
     function takeOrder(ExchangeData memory _exData) public payable override returns (bool success, uint256) {
-        address scalingHelperAddr = registry.getAddr(SCALING_HELPER_ID);
+        address scalingHelperAddr = registry.getAddr(DFSIds.KYBER_SCALING_HELPER);
         (bool isScalingSuccess, bytes memory scaledCalldata) =
             IKyberScaleHelper(scalingHelperAddr).getScaledInputData(_exData.offchainData.callData, _exData.srcAmount);
 

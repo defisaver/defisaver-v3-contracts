@@ -18,8 +18,6 @@ contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
     IBytesTransientStorage constant transientStorage = IBytesTransientStorage(BYTES_TRANSIENT_STORAGE);
     ILlamaLendFactory constant factory = ILlamaLendFactory(LLAMALEND_FACTORY);
 
-    bytes4 constant LLAMALEND_SWAPPER_ID = bytes4(keccak256("LlamaLendSwapper"));
-
     function isControllerValid(address _controllerAddr, uint256 _controllerId) public view returns (bool) {
         return (factory.controllers(_controllerId) == _controllerAddr);
     }

@@ -6,14 +6,12 @@ import { IInstaAccount } from "../interfaces/protocols/insta/IInstaAccount.sol";
 import { IInstaAccountV1 } from "../interfaces/protocols/insta/IInstaAccountV1.sol";
 import { IInstaAccountV2 } from "../interfaces/protocols/insta/IInstaAccountV2.sol";
 import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
+import { DFSIds } from "./DFSIds.sol";
 
 /// @title DSAUtils - Helper library for DSA Proxy Accounts
 library DSAUtils {
     /// @dev Used for DSA Proxy V2 Accounts
     string public constant DEFISAVER_CONNECTOR_NAME = "DefiSaverConnector";
-
-    /// @dev Id of the DefiSaverConnector contract
-    bytes4 private constant DEFISAVER_CONNECTOR_ID = bytes4(keccak256("DefiSaverConnector"));
 
     /// @dev Used for DSA Proxy Accounts versioning
     uint256 private constant DSA_VERSION_1 = 1;
@@ -38,7 +36,7 @@ library DSAUtils {
         // For V1 version, we are calling connector directly
         if (version == DSA_VERSION_1) {
             address[] memory targets = new address[](1);
-            targets[0] = IDFSRegistry(_dfsRegistry).getAddr(DEFISAVER_CONNECTOR_ID);
+            targets[0] = IDFSRegistry(_dfsRegistry).getAddr(DFSIds.DEFISAVER_CONNECTOR);
 
             IInstaAccountV1(_dsaProxy).cast{ value: _value }(targets, connectorsData, _eventOrigin);
             return;

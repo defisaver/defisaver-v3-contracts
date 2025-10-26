@@ -10,13 +10,11 @@ import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 import { TxSaverBytesTransientStorage } from "./TxSaverBytesTransientStorage.sol";
+import { DFSIds } from "../utils/DFSIds.sol";
 
 /// @title Main entry point for executing TxSaver transactions signed by users through safe wallet
 contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTransientStorage {
-    bytes4 public constant BOT_AUTH_ID_FOR_TX_SAVER = bytes4(keccak256("BotAuthForTxSaver"));
-    bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
-
-    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// Caller must be authorized bot
     error BotNotApproved(address bot);
@@ -56,7 +54,7 @@ contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTr
         DFSExchangeData.InjectedExchangeData calldata _injectedExchangeData
     ) external {
         // only authorized bot can call this function
-        if (!BotAuthForTxSaver(registry.getAddr(BOT_AUTH_ID_FOR_TX_SAVER)).isApproved(msg.sender)) {
+        if (!BotAuthForTxSaver(registry.getAddr(DFSIds.BOT_AUTH_FOR_TX_SAVER)).isApproved(msg.sender)) {
             revert BotNotApproved(msg.sender);
         }
 
@@ -84,7 +82,7 @@ contract TxSaverExecutor is StrategyModel, AdminAuth, CoreHelper, TxSaverBytesTr
     function _executeSafeTx(SafeTxParams memory _params) internal {
         bool success = ISafe(_params.safe)
             .execTransaction(
-                registry.getAddr(RECIPE_EXECUTOR_ID),
+                registry.getAddr(DFSIds.RECIPE_EXECUTOR),
                 0, // value
                 _params.data,
                 ISafe.Operation.DelegateCall,

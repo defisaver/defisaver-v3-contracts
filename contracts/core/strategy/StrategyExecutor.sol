@@ -3,6 +3,7 @@
 pragma solidity =0.8.24;
 
 import { IAuth } from "../../interfaces/core/IAuth.sol";
+import { IRecipeExecutor } from "../../interfaces/core/IRecipeExecutor.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "./StrategyModel.sol";
@@ -11,16 +12,11 @@ import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { SubStorage } from "../strategy/SubStorage.sol";
 import { CoreHelper } from "../helpers/CoreHelper.sol";
 import { WalletType } from "../../utils/DFSTypes.sol";
+import { DFSIds } from "../../utils/DFSIds.sol";
 
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, SmartWalletUtils {
-    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
-
-    bytes4 constant EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR =
-        bytes4(keccak256("executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))"));
-
-    bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
-    bytes4 constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
+    IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /// Caller must be authorized bot
     error BotNotApproved(address, uint256);
@@ -69,7 +65,7 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, SmartWalletUt
     /// @notice Checks if msg.sender has auth, reverts if not
     /// @param _subId Id of the strategy
     function checkCallerAuth(uint256 _subId) internal view returns (bool) {
-        return BotAuth(registry.getAddr(BOT_AUTH_ID)).isApproved(_subId, msg.sender);
+        return BotAuth(registry.getAddr(DFSIds.BOT_AUTH)).isApproved(_subId, msg.sender);
     }
 
     /// @notice Calls auth contract which has the auth from the user wallet which will call RecipeExecutor
@@ -95,9 +91,14 @@ contract StrategyExecutor is StrategyModel, AdminAuth, CoreHelper, SmartWalletUt
 
         IAuth(authAddr).callExecute{ value: msg.value }(
             _userWallet,
-            registry.getAddr(RECIPE_EXECUTOR_ID),
+            registry.getAddr(DFSIds.RECIPE_EXECUTOR),
             abi.encodeWithSelector(
-                EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR, _subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub
+                IRecipeExecutor.executeRecipeFromStrategy.selector,
+                _subId,
+                _actionsCallData,
+                _triggerCallData,
+                _strategyIndex,
+                _sub
             )
         );
     }

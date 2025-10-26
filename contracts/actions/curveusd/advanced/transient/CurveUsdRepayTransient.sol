@@ -8,6 +8,7 @@ import { DFSExchangeData } from "../../../../exchangeV3/DFSExchangeData.sol";
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
 import { ICrvUsdController } from "../../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 import { CurveUsdSwapperTransient } from "./CurveUsdSwapperTransient.sol";
+import { DFSIds } from "../../../../utils/DFSIds.sol";
 
 /// @title Repays a curveusd position with a given amount of collateral
 /// @notice This action uses internal swapper with transient storage to repay debt
@@ -63,7 +64,7 @@ contract CurveUsdRepayTransient is ActionBase, CurveUsdHelper {
 
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
-        address curveUsdTransientSwapper = registry.getAddr(CURVE_TRANSIENT_SWAPPER_ID);
+        address curveUsdTransientSwapper = registry.getAddr(DFSIds.CURVE_TRANSIENT_SWAPPER);
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
 

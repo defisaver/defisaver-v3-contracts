@@ -119,6 +119,7 @@ import { TxSaverGasCostCalc } from "../tx-saver/TxSaverGasCostCalc.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
+import { DFSIds } from "../utils/DFSIds.sol";
 
 contract RecipeExecutor is
     StrategyModel,
@@ -134,7 +135,6 @@ contract RecipeExecutor is
     /*//////////////////////////////////////////////////////////////
                                 CONST
     //////////////////////////////////////////////////////////////*/
-    bytes4 private constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
     IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     /*//////////////////////////////////////////////////////////////
@@ -169,7 +169,7 @@ contract RecipeExecutor is
         payable
         override
     {
-        address txSaverExecutorAddr = registry.getAddr(TX_SAVER_EXECUTOR_ID);
+        address txSaverExecutorAddr = registry.getAddr(DFSIds.TX_SAVER_EXECUTOR);
 
         // only TxSaverExecutor can call this function
         if (msg.sender != txSaverExecutorAddr) {

@@ -2,6 +2,7 @@
 
 pragma solidity =0.8.24;
 
+import { IRecipeExecutor } from "../../../interfaces/core/IRecipeExecutor.sol";
 import { ISafe } from "../../../interfaces/protocols/safe/ISafe.sol";
 import { IDSProxy } from "../../../interfaces/DS/IDSProxy.sol";
 import { IDFSRegistry } from "../../../interfaces/core/IDFSRegistry.sol";
@@ -10,6 +11,7 @@ import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
 import { FLFeeFaucet } from "../../../utils/fee/FLFeeFaucet.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { WalletType } from "../../../utils/DFSTypes.sol";
+import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @notice Helper contract containing common functions for flashloan actions
 contract FLHelper is MainnetFLAddresses, StrategyModel {
@@ -17,13 +19,6 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
     uint16 internal constant SPARK_REFERRAL_CODE = 0;
 
     FLFeeFaucet internal constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
-
-    /// @dev Function sig of RecipeExecutor.executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR =
-        bytes4(keccak256("executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
-
-    /// @dev Id of the RecipeExecutor contract
-    bytes4 private constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
     // Revert if execution fails when using safe wallet
     error SafeExecutionError();
@@ -36,8 +31,9 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
     function _executeRecipe(address _wallet, WalletType _walletType, Recipe memory _currRecipe, uint256 _paybackAmount)
         internal
     {
-        address target = IDFSRegistry(DFS_REGISTRY_ADDR).getAddr(RECIPE_EXECUTOR_ID);
-        bytes memory data = abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount);
+        address target = IDFSRegistry(DFS_REGISTRY_ADDR).getAddr(DFSIds.RECIPE_EXECUTOR);
+        bytes memory data =
+            abi.encodeWithSelector(IRecipeExecutor.executeActionsFromFL.selector, _currRecipe, _paybackAmount);
 
         if (_walletType == WalletType.DSPROXY) {
             IDSProxy(_wallet).execute{ value: address(this).balance }(target, data);

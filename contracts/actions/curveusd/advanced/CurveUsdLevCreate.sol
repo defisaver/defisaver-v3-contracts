@@ -5,6 +5,7 @@ import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
 import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
+import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title Creates a new curveusd leveraged position with a given amount of collateral and debt
 /// @notice This action uses internal swapper to create a loan
@@ -78,7 +79,7 @@ contract CurveUsdLevCreate is ActionBase, CurveUsdHelper {
         collAddr.approveToken(_params.controllerAddress, _params.collAmount);
 
         // get swapData formatted and write part of curve path in storage for use in curveUsdSwapper
-        address curveUsdSwapper = registry.getAddr(CURVE_SWAPPER_ID);
+        address curveUsdSwapper = registry.getAddr(DFSIds.CURVE_SWAPPER);
         uint256[] memory swapData = _setupCurvePath(
             curveUsdSwapper,
             _params.additionalData,
