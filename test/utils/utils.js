@@ -716,7 +716,7 @@ const getProxy = async (acc, isSafe = false) => {
 
     // Else create DS Proxy
     const proxyRegistry = await hre.ethers.getContractAt(
-        'IProxyRegistry',
+        'IDSProxyRegistry',
         addrs[network].PROXY_REGISTRY,
     );
     let proxyAddr = await proxyRegistry.proxies(acc);
