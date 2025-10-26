@@ -74,7 +74,7 @@ pragma solidity =0.8.24;
  *                                        │   parse FL   │   directly call:         │   FL   │      Send borrowed funds to smart wallet          │
  *                                        │     and      │   executeAction()        │ Action │                                                   │
  *                                        │   execute    ├─────────────────────────►│        │                                                   │
- *                                        │              │                          │        │      Call back the _executeActionsFromFL on       │
+ *                                        │              │                          │        │      Call back the executeActionsFromFL on        │
  *                                        │              │                          │        │      RecipeExecutor through Smart Wallet.         │
  *                                        │              │                          │        │      We can call wallet from FL action because    │
  *                                        │              │                          │        │      we gave it approval earlier.                 │
@@ -97,6 +97,9 @@ pragma solidity =0.8.24;
  *
  *
  */
+
+import { IRecipeExecutor } from "../interfaces/core/IRecipeExecutor.sol";
+import { IActionBase } from "../interfaces/action/IActionBase.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { IFlashLoanBase } from "../interfaces/flashloan/IFlashLoanBase.sol";
@@ -117,15 +120,26 @@ import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { DFSExchangeData } from "../exchangeV3/DFSExchangeData.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
-contract RecipeExecutor is StrategyModel, Permission, AdminAuth, CoreHelper, TxSaverGasCostCalc, SmartWalletUtils {
-    bytes4 public constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
-    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
-
-    /// @dev Function sig of ActionBase.executeAction()
-    bytes4 public constant EXECUTE_ACTION_SELECTOR =
-        bytes4(keccak256("executeAction(bytes,bytes32[],uint8[],bytes32[])"));
-
+contract RecipeExecutor is
+    StrategyModel,
+    Permission,
+    AdminAuth,
+    CoreHelper,
+    TxSaverGasCostCalc,
+    SmartWalletUtils,
+    IRecipeExecutor
+{
     using TokenUtils for address;
+
+    /*//////////////////////////////////////////////////////////////
+                                CONST
+    //////////////////////////////////////////////////////////////*/
+    bytes4 private constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
+    IDFSRegistry private constant registry = IDFSRegistry(REGISTRY_ADDR);
+
+    /*//////////////////////////////////////////////////////////////
+                                ERRORS
+    //////////////////////////////////////////////////////////////*/
 
     /// For strategy execution all triggers must be active
     error TriggerNotActiveError(uint256);
@@ -136,10 +150,14 @@ contract RecipeExecutor is StrategyModel, Permission, AdminAuth, CoreHelper, TxS
     /// When calling TxSaver functions, caller has to be TxSaverExecutor
     error TxSaverAuthorizationError(address caller);
 
+    /*//////////////////////////////////////////////////////////////
+                                EXTERNAL
+    //////////////////////////////////////////////////////////////*/
+
     /// @notice Called directly through user wallet to execute a recipe
     /// @dev This is the main entry point for Recipes executed manually
     /// @param _currRecipe Recipe to be executed
-    function executeRecipe(Recipe calldata _currRecipe) public payable {
+    function executeRecipe(Recipe calldata _currRecipe) external payable override {
         _executeActions(_currRecipe);
     }
 
@@ -147,8 +165,9 @@ contract RecipeExecutor is StrategyModel, Permission, AdminAuth, CoreHelper, TxS
     /// @param _currRecipe Recipe to be executed
     /// @param _txSaverData TxSaver data signed by user
     function executeRecipeFromTxSaver(Recipe calldata _currRecipe, TxSaverSignedData calldata _txSaverData)
-        public
+        external
         payable
+        override
     {
         address txSaverExecutorAddr = registry.getAddr(TX_SAVER_EXECUTOR_ID);
 
@@ -211,7 +230,7 @@ contract RecipeExecutor is StrategyModel, Permission, AdminAuth, CoreHelper, TxS
         bytes[] calldata _triggerCallData,
         uint256 _strategyIndex,
         StrategySub memory _sub
-    ) public payable {
+    ) external payable override {
         Strategy memory strategy;
 
         {
@@ -250,6 +269,24 @@ contract RecipeExecutor is StrategyModel, Permission, AdminAuth, CoreHelper, TxS
         _executeActions(currRecipe);
     }
 
+    /// @notice This is the callback function that FL actions call
+    /// @dev FL function must be the first action and repayment is done last
+    /// @param _currRecipe Recipe to be executed
+    /// @param _flAmount Result value from FL action
+    function executeActionsFromFL(Recipe calldata _currRecipe, bytes32 _flAmount) external payable override {
+        bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
+        returnValues[0] = _flAmount; // set the flash loan action as first return value
+
+        // skips the first actions as it was the fl action
+        for (uint256 i = 1; i < _currRecipe.actionIds.length; ++i) {
+            returnValues[i] = _executeAction(_currRecipe, i, returnValues);
+        }
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                INTERNAL
+    //////////////////////////////////////////////////////////////*/
+
     /// @notice Checks if all the triggers are true
     function _checkTriggers(
         Strategy memory strategy,
@@ -281,29 +318,15 @@ contract RecipeExecutor is StrategyModel, Permission, AdminAuth, CoreHelper, TxS
         return (true, i);
     }
 
-    /// @notice This is the callback function that FL actions call
-    /// @dev FL function must be the first action and repayment is done last
-    /// @param _currRecipe Recipe to be executed
-    /// @param _flAmount Result value from FL action
-    function _executeActionsFromFL(Recipe calldata _currRecipe, bytes32 _flAmount) public payable {
-        bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
-        returnValues[0] = _flAmount; // set the flash loan action as first return value
-
-        // skips the first actions as it was the fl action
-        for (uint256 i = 1; i < _currRecipe.actionIds.length; ++i) {
-            returnValues[i] = _executeAction(_currRecipe, i, returnValues);
-        }
-    }
-
     /// @notice Runs all actions from the recipe
-    /// @dev FL action must be first and is parsed separately, execution will go to _executeActionsFromFL
+    /// @dev FL action must be first and is parsed separately, execution will go to executeActionsFromFL
     /// @param _currRecipe Recipe to be executed
     function _executeActions(Recipe memory _currRecipe) internal {
         address firstActionAddr = registry.getAddr(_currRecipe.actionIds[0]);
 
         bytes32[] memory returnValues = new bytes32[](_currRecipe.actionIds.length);
 
-        if (isFL(firstActionAddr)) {
+        if (_isFL(firstActionAddr)) {
             _parseFLAndExecute(_currRecipe, firstActionAddr, returnValues);
         } else {
             for (uint256 i = 0; i < _currRecipe.actionIds.length; ++i) {
@@ -326,10 +349,10 @@ contract RecipeExecutor is StrategyModel, Permission, AdminAuth, CoreHelper, TxS
     {
         address actionAddr = registry.getAddr(_currRecipe.actionIds[_index]);
 
-        response = delegateCallAndReturnBytes32(
+        response = _delegateCallAndReturnBytes32(
             actionAddr,
             abi.encodeWithSelector(
-                EXECUTE_ACTION_SELECTOR,
+                IActionBase.executeAction.selector,
                 _currRecipe.callData[_index],
                 _currRecipe.subData,
                 _currRecipe.paramMapping[_index],
@@ -367,11 +390,11 @@ contract RecipeExecutor is StrategyModel, Permission, AdminAuth, CoreHelper, TxS
 
     /// @notice Checks if the specified address is of FL type action
     /// @param _actionAddr Address of the action
-    function isFL(address _actionAddr) internal pure returns (bool) {
+    function _isFL(address _actionAddr) internal pure returns (bool) {
         return ActionBase(_actionAddr).actionType() == uint8(ActionBase.ActionType.FL_ACTION);
     }
 
-    function delegateCallAndReturnBytes32(address _target, bytes memory _data) internal returns (bytes32 response) {
+    function _delegateCallAndReturnBytes32(address _target, bytes memory _data) internal returns (bytes32 response) {
         require(_target != address(0));
         assembly {
             let succeeded := delegatecall(sub(gas(), 5000), _target, add(_data, 0x20), mload(_data), 0, 32)

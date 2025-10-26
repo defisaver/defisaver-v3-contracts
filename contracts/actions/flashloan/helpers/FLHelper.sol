@@ -18,9 +18,9 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
 
     FLFeeFaucet internal constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
 
-    /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
+    /// @dev Function sig of RecipeExecutor.executeActionsFromFL()
     bytes4 public constant CALLBACK_SELECTOR =
-        bytes4(keccak256("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
+        bytes4(keccak256("executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
 
     /// @dev Id of the RecipeExecutor contract
     bytes4 private constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
