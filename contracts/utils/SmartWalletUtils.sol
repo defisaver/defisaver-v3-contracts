@@ -53,8 +53,9 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
 
         if (walletType == WalletType.DSAPROXY) {
             uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(_wallet);
+            // TODO: Do we always want this?
             address firstOwner = IInstaList(DSA_LIST_ADDR).accountLink(dsaId).first;
-            return IInstaAccount(_wallet).isAuth(firstOwner) ? firstOwner : _wallet;
+            return firstOwner != address(0) ? firstOwner : _wallet;
         }
 
         // Otherwise, we assume we are in context of Safe

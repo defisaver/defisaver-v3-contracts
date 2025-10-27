@@ -77,10 +77,5 @@ contract TestCore_SmartWalletUtils is BaseTest {
         assertTrue(cut.fetchOwnerOrWallet(safeAddress) == bob);
         assertTrue(cut.fetchOwnerOrWallet(dsProxyAddress) == alice);
         assertTrue(cut.fetchOwnerOrWallet(dsaProxyAddress) == charlie);
-
-        // disable auth for dsa owner
-        vm.prank(dsaProxyAddress); // simulate self-call
-        IInstaAccount(dsaProxyAddress).disable(charlie);
-        assertTrue(cut.fetchOwnerOrWallet(dsaProxyAddress) == dsaProxyAddress);
     }
 }
