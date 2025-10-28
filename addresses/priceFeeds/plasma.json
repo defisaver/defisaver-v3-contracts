@@ -31,7 +31,7 @@
     },
     {
         "name": "wrsETH / ETH",
-        "base": "0xd59d17b0503b45F365670bDe9D002B9886EBC02b",
+        "base": "0xe561FE05C39075312Aa9Bc6af79DdaE981461359",
         "quote": "0x9895D81bB462A195b4922ED7De0e3ACD007c32CB",
         "feedAddress": "0xee3d5f65B03fabA5B2bF2eCE893399EA88b18e78"
     },
