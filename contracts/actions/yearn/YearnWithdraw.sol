@@ -2,8 +2,8 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { IYVault } from "../../interfaces/yearn/IYVault.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { IYVault } from "../../interfaces/protocols/yearn/IYVault.sol";
 
 /// @title Burns yTokens and receive underlying tokens in return
 /// @notice yTokens need to be approved for user's wallet to pull them (yToken address)
@@ -30,12 +30,8 @@ contract YearnWithdraw is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.yAmount = _parseParamUint(
-            inputData.yAmount,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
+        inputData.yAmount =
+            _parseParamUint(inputData.yAmount, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 

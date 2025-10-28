@@ -2,22 +2,24 @@
 
 pragma solidity =0.8.24;
 
-import { IAuth } from "../../interfaces/IAuth.sol";
+import { IAuth } from "../../interfaces/core/IAuth.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 import { StrategyModel } from "../strategy/StrategyModel.sol";
 import { BotAuth } from "../strategy/BotAuth.sol";
-import { DFSRegistry } from "../DFSRegistry.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { SubStorageL2 } from "./SubStorageL2.sol";
 import { CoreHelper } from "../helpers/CoreHelper.sol";
 
 /// @title Main entry point for executing automated strategies
 contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWalletType {
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
-
-    bytes4 constant EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR = 
-        bytes4(keccak256("executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))"));
+    bytes4 constant EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR = bytes4(
+        keccak256(
+            "executeRecipeFromStrategy(uint256,bytes[],bytes[],uint256,(uint64,bool,bytes[],bytes32[]))"
+        )
+    );
 
     bytes4 constant BOT_AUTH_ID = bytes4(keccak256("BotAuth"));
 
@@ -52,7 +54,14 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
         }
 
         // execute actions
-        callActions(_subId, _actionsCallData, _triggerCallData, _strategyIndex, _sub, address(storedSubData.walletAddr));
+        callActions(
+            _subId,
+            _actionsCallData,
+            _triggerCallData,
+            _strategyIndex,
+            _sub,
+            address(storedSubData.walletAddr)
+        );
     }
 
     /// @notice Checks if msg.sender has auth, reverts if not
@@ -78,7 +87,7 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
     ) internal {
         address authAddr = isDSProxy(_userWallet) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
 
-        IAuth(authAddr).callExecute{value: msg.value}(
+        IAuth(authAddr).callExecute{ value: msg.value }(
             _userWallet,
             RECIPE_EXECUTOR_ADDR,
             abi.encodeWithSelector(

@@ -2,17 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { IEVault } from "../../../contracts/interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../../contracts/interfaces/eulerV2/IEVC.sol";
+import { IEVault } from "../../../contracts/interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../../contracts/interfaces/protocols/eulerV2/IEVC.sol";
 import { EulerV2PullDebt } from "../../../contracts/actions/eulerV2/EulerV2PullDebt.sol";
 import { EulerV2Supply } from "../../../contracts/actions/eulerV2/EulerV2Supply.sol";
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
-import { console } from "forge-std/console.sol";
 
 contract TestEulerV2PullDebt is EulerV2TestHelper {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -71,7 +69,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 from: fromWalletAddr,
                 account: accountWalletAddr,
                 isDirect: false,
-                fromSupplyAmountInUsd: 10000,
+                fromSupplyAmountInUsd: 10_000,
                 fromBorrowAmountInUsd: 4000,
                 accountSupplyAmountInUsd: 9000,
                 pullDebtAmountInUsd: 2000
@@ -85,10 +83,10 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 from: fromWalletAddr,
                 account: address(0),
                 isDirect: false,
-                fromSupplyAmountInUsd: 100000,
-                fromBorrowAmountInUsd: 60000,
-                accountSupplyAmountInUsd: 97999,
-                pullDebtAmountInUsd: 59995
+                fromSupplyAmountInUsd: 100_000,
+                fromBorrowAmountInUsd: 60_000,
+                accountSupplyAmountInUsd: 97_999,
+                pullDebtAmountInUsd: 59_995
             })
         );
     }
@@ -99,7 +97,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 from: fromWalletAddr,
                 account: accountWalletAddr,
                 isDirect: true,
-                fromSupplyAmountInUsd: 15000,
+                fromSupplyAmountInUsd: 15_000,
                 fromBorrowAmountInUsd: 5000,
                 accountSupplyAmountInUsd: 100,
                 pullDebtAmountInUsd: 10
@@ -113,9 +111,9 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 from: fromWalletAddr,
                 account: accountWalletAddr,
                 isDirect: true,
-                fromSupplyAmountInUsd: 150000,
-                fromBorrowAmountInUsd: 75000,
-                accountSupplyAmountInUsd: 200000,
+                fromSupplyAmountInUsd: 150_000,
+                fromBorrowAmountInUsd: 75_000,
+                accountSupplyAmountInUsd: 200_000,
                 pullDebtAmountInUsd: type(uint256).max
             })
         );
@@ -127,9 +125,9 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 from: fromWalletAddr,
                 account: getSubAccount(accountWalletAddr, 0x01),
                 isDirect: true,
-                fromSupplyAmountInUsd: 150000,
-                fromBorrowAmountInUsd: 75000,
-                accountSupplyAmountInUsd: 200000,
+                fromSupplyAmountInUsd: 150_000,
+                fromBorrowAmountInUsd: 75_000,
+                accountSupplyAmountInUsd: 200_000,
                 pullDebtAmountInUsd: type(uint256).max
             })
         );
@@ -141,10 +139,10 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
                 from: getSubAccount(fromWalletAddr, 0x02),
                 account: getSubAccount(accountWalletAddr, 0x01),
                 isDirect: true,
-                fromSupplyAmountInUsd: 150000,
-                fromBorrowAmountInUsd: 75000,
-                accountSupplyAmountInUsd: 200000,
-                pullDebtAmountInUsd: 65000
+                fromSupplyAmountInUsd: 150_000,
+                fromBorrowAmountInUsd: 75_000,
+                accountSupplyAmountInUsd: 200_000,
+                pullDebtAmountInUsd: 65_000
             })
         );
     }
@@ -154,7 +152,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
             from: fromWalletAddr,
             account: accountWalletAddr,
             isDirect: false,
-            fromSupplyAmountInUsd: 10000,
+            fromSupplyAmountInUsd: 10_000,
             fromBorrowAmountInUsd: 4000,
             accountSupplyAmountInUsd: 9000,
             pullDebtAmountInUsd: 3000
@@ -194,7 +192,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
 
     function _baseTest(TestConfig memory _config) internal {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory testPair = testPairs[i];
             address supplyVault = testPair.supplyAsset;
@@ -229,7 +227,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
             // 3. Pull debt to 'account'
             _pullDebt(_config, borrowVault);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 
@@ -239,12 +237,7 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
             : amountInUSDPrice(IEVault(_vault).asset(), _config.pullDebtAmountInUsd);
 
         bytes memory callData = executeActionCalldata(
-            eulerV2PullDebtEncode(
-                _vault,
-                _config.account,
-                _config.from,
-                pullDebtAmount
-            ),
+            eulerV2PullDebtEncode(_vault, _config.account, _config.from, pullDebtAmount),
             _config.isDirect
         );
 
@@ -264,16 +257,8 @@ contract TestEulerV2PullDebt is EulerV2TestHelper {
             assertEq(fromDebtAfter, 0);
             assertGe(accountDebtAfter, accountDebtBefore + fromDebtBefore);
         } else {
-            assertApproxEqRel(
-                fromDebtAfter,
-                fromDebtBefore - pullDebtAmount,
-                1e16
-            );
-            assertApproxEqRel(
-                accountDebtAfter,
-                accountDebtBefore + pullDebtAmount,
-                1e16
-            );
+            assertApproxEqRel(fromDebtAfter, fromDebtBefore - pullDebtAmount, 1e16);
+            assertApproxEqRel(accountDebtAfter, accountDebtBefore + pullDebtAmount, 1e16);
         }
     }
 }

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Creates a new curveusd leveraged position with a given amount of collateral and debt
 /// @notice This action uses internal swapper to create a loan
@@ -41,10 +41,14 @@ contract CurveUsdLevCreate is ActionBase, CurveUsdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[1], _subData, _returnValues);
-        params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[2], _subData, _returnValues);
-        params.minAmount = _parseParamUint(params.minAmount, _paramMapping[3], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[1], _subData, _returnValues);
+        params.debtAmount =
+            _parseParamUint(params.debtAmount, _paramMapping[2], _subData, _returnValues);
+        params.minAmount =
+            _parseParamUint(params.minAmount, _paramMapping[3], _subData, _returnValues);
         params.nBands = _parseParamUint(params.nBands, _paramMapping[4], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[5], _subData, _returnValues);
 
@@ -79,29 +83,22 @@ contract CurveUsdLevCreate is ActionBase, CurveUsdHelper {
 
         // get swapData formatted and write part of curve path in storage for use in curveUsdSwapper
         address curveUsdSwapper = registry.getAddr(CURVE_SWAPPER_ID);
-        uint256[] memory swapData =
-             _setupCurvePath(
-                curveUsdSwapper,
-                _params.additionalData,
-                _params.debtAmount,
-                _params.minAmount,
-                _params.gasUsed,
-                _params.dfsFeeDivider
-        );
-        
-        // create loan
-        ICrvUsdController(_params.controllerAddress).create_loan_extended(
-            _params.collAmount,
-            _params.debtAmount,
-            _params.nBands,
+        uint256[] memory swapData = _setupCurvePath(
             curveUsdSwapper,
-            swapData
+            _params.additionalData,
+            _params.debtAmount,
+            _params.minAmount,
+            _params.gasUsed,
+            _params.dfsFeeDivider
         );
 
-        return (
-            _params.debtAmount,
-            abi.encode(_params)
-        );
+        // create loan
+        ICrvUsdController(_params.controllerAddress)
+            .create_loan_extended(
+                _params.collAmount, _params.debtAmount, _params.nBands, curveUsdSwapper, swapData
+            );
+
+        return (_params.debtAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

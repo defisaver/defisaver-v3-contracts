@@ -2,12 +2,15 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
-import { IExecutable } from "../../interfaces/summerfi/IExecutable.sol";
-import { IServiceRegistry } from "../../interfaces/summerfi/IServiceRegistry.sol";
-import { IOperationsRegistry } from "../../interfaces/summerfi/IOperationsRegistry.sol";
-import { IOperationExecutor, Call } from "../../interfaces/summerfi/IOperationExecutor.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
+import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
+import { IExecutable } from "../../interfaces/protocols/summerfi/IExecutable.sol";
+import { IServiceRegistry } from "../../interfaces/protocols/summerfi/IServiceRegistry.sol";
+import { IOperationsRegistry } from "../../interfaces/protocols/summerfi/IOperationsRegistry.sol";
+import {
+    IOperationExecutor,
+    Call
+} from "../../interfaces/protocols/summerfi/IOperationExecutor.sol";
 import { SFHelper } from "./helpers/SFHelper.sol";
 
 /// @title Approve tokens through Summer.fi proxy
@@ -85,13 +88,12 @@ contract SFApproveTokens is ActionBase, SFHelper {
 
         _requireExactVersionOfSetApprovalActionInRegistry();
 
-        (bytes32[] memory targets, ) = IOperationsRegistry(SF_OPERATIONS_REGISTRY).getOperation(
-            SF_OPERATION_NAME
-        );
+        (bytes32[] memory targets,) =
+            IOperationsRegistry(SF_OPERATIONS_REGISTRY).getOperation(SF_OPERATION_NAME);
 
         Call[] memory calls = new Call[](SF_NUM_OF_OPERATION_ACTIONS);
         for (uint256 i; i < SF_NUM_OF_OPERATION_ACTIONS; ++i) {
-            calls[i] = Call({target: targets[i], data: new bytes(0), skip: true});
+            calls[i] = Call({ target: targets[i], data: new bytes(0), skip: true });
         }
         calls[OPERATION_SET_APPROVAL_INDEX].target = SF_SET_APPROVAL_HASH;
         calls[OPERATION_SET_APPROVAL_INDEX].skip = false;
@@ -124,9 +126,12 @@ contract SFApproveTokens is ActionBase, SFHelper {
     }
 
     function _requireExactVersionOfSetApprovalActionInRegistry() internal view {
-        address actionStoredInRegistry = IServiceRegistry(SF_SERVICE_REGISTRY).getServiceAddress(SF_SET_APPROVAL_HASH);
+        address actionStoredInRegistry =
+            IServiceRegistry(SF_SERVICE_REGISTRY).getServiceAddress(SF_SET_APPROVAL_HASH);
         if (actionStoredInRegistry != SF_SET_APPROVAL_ADDRESS) {
-            revert InvalidSetApprovalActionInRegistry(SF_SET_APPROVAL_ADDRESS, actionStoredInRegistry);
+            revert InvalidSetApprovalActionInRegistry(
+                SF_SET_APPROVAL_ADDRESS, actionStoredInRegistry
+            );
         }
     }
 
@@ -143,13 +148,11 @@ contract SFApproveTokens is ActionBase, SFHelper {
     }
 
     function _sfExecute(address sfProxy, Call[] memory calls) internal returns (bytes32) {
-        return
-            IDSProxy(sfProxy).execute(
+        return IDSProxy(sfProxy)
+            .execute(
                 SF_OPERATION_EXECUTOR,
                 abi.encodeWithSelector(
-                    IOperationExecutor.executeOp.selector,
-                    calls,
-                    SF_OPERATION_NAME
+                    IOperationExecutor.executeOp.selector, calls, SF_OPERATION_NAME
                 )
             );
     }

@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { DSMath } from "../../DS/DSMath.sol";
-import { IWStEth } from "../../interfaces/lido/IWStEth.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { DSMath } from "../../_vendor/DS/DSMath.sol";
+import { IWStEth } from "../../interfaces/protocols/lido/IWStEth.sol";
 import { LidoHelper } from "./helpers/LidoHelper.sol";
 
 /// @title Unwrap WStEth and receive StEth
@@ -30,15 +30,11 @@ contract LidoUnwrap is ActionBase, DSMath, LidoHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(
-            inputData.amount,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
-        
+
         (uint256 stEthReceivedAmount, bytes memory logData) = _lidoUnwrap(inputData);
         emit ActionEvent("LidoUnwrap", logData);
         return bytes32(stEthReceivedAmount);
@@ -58,15 +54,17 @@ contract LidoUnwrap is ActionBase, DSMath, LidoHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _lidoUnwrap(Params memory _inputData) internal returns (uint256 stEthReceivedAmount, bytes memory logData) {
+    function _lidoUnwrap(Params memory _inputData)
+        internal
+        returns (uint256 stEthReceivedAmount, bytes memory logData)
+    {
         require(_inputData.to != address(0), "Can't send to burn address");
         require(_inputData.amount > 0, "Amount to unwrap can't be 0");
 
-        _inputData.amount =
-            lidoWrappedStEth.pullTokensIfNeeded(_inputData.from, _inputData.amount);
+        _inputData.amount = lidoWrappedStEth.pullTokensIfNeeded(_inputData.from, _inputData.amount);
 
         stEthReceivedAmount = IWStEth(lidoWrappedStEth).unwrap(_inputData.amount);
-        
+
         lidoStEth.withdrawTokens(_inputData.to, stEthReceivedAmount);
 
         logData = abi.encode(_inputData, stEthReceivedAmount);

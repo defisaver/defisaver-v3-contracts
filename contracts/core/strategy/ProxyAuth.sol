@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IDFSRegistry } from "../../interfaces/IDFSRegistry.sol";
-import { IDSProxy } from "../../interfaces/IDSProxy.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
+import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { CoreHelper } from "./../helpers/CoreHelper.sol";
 
@@ -15,10 +15,10 @@ contract ProxyAuth is AdminAuth, CoreHelper {
 
     error SenderNotExecutorError(address, address);
 
-    modifier onlyExecutor {
+    modifier onlyExecutor() {
         address executorAddr = registry.getAddr(STRATEGY_EXECUTOR_ID);
 
-        if (msg.sender != executorAddr){
+        if (msg.sender != executorAddr) {
             revert SenderNotExecutorError(msg.sender, executorAddr);
         }
 
@@ -30,11 +30,11 @@ contract ProxyAuth is AdminAuth, CoreHelper {
     /// @param _proxyAddr Address of the users DSProxy
     /// @param _contractAddr Address of the contract which to execute
     /// @param _callData Call data of the function to be called
-    function callExecute(
-        address _proxyAddr,
-        address _contractAddr,
-        bytes memory _callData
-    ) public payable onlyExecutor {
-        IDSProxy(_proxyAddr).execute{value: msg.value}(_contractAddr, _callData);
+    function callExecute(address _proxyAddr, address _contractAddr, bytes memory _callData)
+        public
+        payable
+        onlyExecutor
+    {
+        IDSProxy(_proxyAddr).execute{ value: msg.value }(_contractAddr, _callData);
     }
 }

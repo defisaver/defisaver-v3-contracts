@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity =0.8.24;
+
 import { LiquityHelper } from "../helpers/LiquityHelper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Action for closing a liquity trove
@@ -50,7 +51,10 @@ contract LiquityClose is ActionBase, LiquityHelper {
 
     /// @param _from Address where to pull the LUSD tokens from
     /// @param _to Address that will receive the collateral
-    function _liquityClose(address _from, address _to) internal returns (uint256 coll, bytes memory logData) {
+    function _liquityClose(address _from, address _to)
+        internal
+        returns (uint256 coll, bytes memory logData)
+    {
         uint256 netDebt = TroveManager.getTroveDebt(address(this)) - LUSD_GAS_COMPENSATION;
         coll = TroveManager.getTroveColl(address(this));
 

@@ -2,13 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../interfaces/liquityV2/IAddressesRegistry.sol";
-import { IBorrowerOperations } from "../../../interfaces/liquityV2/IBorrowerOperations.sol";
-import { ITroveManager } from "../../../interfaces/liquityV2/ITroveManager.sol";
+import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import {
+    IBorrowerOperations
+} from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
+import { ITroveManager } from "../../../interfaces/protocols/liquityV2/ITroveManager.sol";
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Adjusts a zombie trove on a specific market
 /// @dev For this action to work:
@@ -17,8 +19,14 @@ import { TokenUtils } from "../../../utils/TokenUtils.sol";
 contract LiquityV2AdjustZombieTrove is ActionBase, LiquityV2Helper {
     using TokenUtils for address;
 
-    enum CollActionType { SUPPLY, WITHDRAW }
-    enum DebtActionType { PAYBACK, BORROW }
+    enum CollActionType {
+        SUPPLY,
+        WITHDRAW
+    }
+    enum DebtActionType {
+        PAYBACK,
+        BORROW
+    }
 
     /// @param market The address of the LiquityV2 market (collateral branch)
     /// @param from The address to pull the tokens from
@@ -58,13 +66,22 @@ contract LiquityV2AdjustZombieTrove is ActionBase, LiquityV2Helper {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
         params.troveId = _parseParamUint(params.troveId, _paramMapping[3], _subData, _returnValues);
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[4], _subData, _returnValues);
-        params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[5], _subData, _returnValues);
-        params.upperHint = _parseParamUint(params.upperHint, _paramMapping[6], _subData, _returnValues);
-        params.lowerHint = _parseParamUint(params.lowerHint, _paramMapping[7], _subData, _returnValues);
-        params.maxUpfrontFee = _parseParamUint(params.maxUpfrontFee, _paramMapping[8], _subData, _returnValues);
-        params.collAction = CollActionType(_parseParamUint(uint8(params.collAction), _paramMapping[9], _subData, _returnValues));
-        params.debtAction = DebtActionType(_parseParamUint(uint8(params.debtAction), _paramMapping[10], _subData, _returnValues));
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[4], _subData, _returnValues);
+        params.debtAmount =
+            _parseParamUint(params.debtAmount, _paramMapping[5], _subData, _returnValues);
+        params.upperHint =
+            _parseParamUint(params.upperHint, _paramMapping[6], _subData, _returnValues);
+        params.lowerHint =
+            _parseParamUint(params.lowerHint, _paramMapping[7], _subData, _returnValues);
+        params.maxUpfrontFee =
+            _parseParamUint(params.maxUpfrontFee, _paramMapping[8], _subData, _returnValues);
+        params.collAction = CollActionType(
+            _parseParamUint(uint8(params.collAction), _paramMapping[9], _subData, _returnValues)
+        );
+        params.debtAction = DebtActionType(
+            _parseParamUint(uint8(params.debtAction), _paramMapping[10], _subData, _returnValues)
+        );
 
         (uint256 debtAmount, bytes memory logData) = _adjust(params);
         emit ActionEvent("LiquityV2AdjustZombieTrove", logData);
@@ -98,8 +115,8 @@ contract LiquityV2AdjustZombieTrove is ActionBase, LiquityV2Helper {
         if (_params.debtAction == DebtActionType.PAYBACK) {
             address troveManager = IAddressesRegistry(_params.market).troveManager();
 
-            uint256 entireDebt = ITroveManager(troveManager)
-                .getLatestTroveData(_params.troveId).entireDebt;
+            uint256 entireDebt =
+                ITroveManager(troveManager).getLatestTroveData(_params.troveId).entireDebt;
 
             uint256 maxRepayment = entireDebt > MIN_DEBT ? entireDebt - MIN_DEBT : 0;
 
@@ -110,16 +127,17 @@ contract LiquityV2AdjustZombieTrove is ActionBase, LiquityV2Helper {
             BOLD_ADDR.pullTokensIfNeeded(_params.from, _params.debtAmount);
         }
 
-        IBorrowerOperations(borrowerOperations).adjustZombieTrove(
-            _params.troveId,
-            _params.collAmount,
-            _params.collAction == CollActionType.SUPPLY,
-            _params.debtAmount,
-            _params.debtAction == DebtActionType.BORROW,
-            _params.upperHint,
-            _params.lowerHint,
-            _params.maxUpfrontFee
-        );
+        IBorrowerOperations(borrowerOperations)
+            .adjustZombieTrove(
+                _params.troveId,
+                _params.collAmount,
+                _params.collAction == CollActionType.SUPPLY,
+                _params.debtAmount,
+                _params.debtAction == DebtActionType.BORROW,
+                _params.upperHint,
+                _params.lowerHint,
+                _params.maxUpfrontFee
+            );
 
         if (_params.collAction == CollActionType.WITHDRAW) {
             collToken.withdrawTokens(_params.to, _params.collAmount);

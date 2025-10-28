@@ -6,15 +6,14 @@ import { SubProxy } from "../../contracts/core/strategy/SubProxy.sol";
 import { SubStorage } from "../../contracts/core/strategy/SubStorage.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 
-import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
-import { DSAuth } from "../../contracts/DS/DSAuth.sol";
-import { DSAuthority } from "../../contracts/DS/DSAuthority.sol";
+import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
+import { IDSAuth } from "../../contracts/interfaces/DS/IDSAuth.sol";
+import { IDSAuthority } from "../../contracts/interfaces/DS/IDSAuthority.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 
 contract TestCore_SubProxy is SubStorage, BaseTest {
-
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -64,15 +63,13 @@ contract TestCore_SubProxy is SubStorage, BaseTest {
         emit Subscribe(expectedId, walletAddr, expectedHash, sub);
 
         wallet.execute(
-            address(cut),
-            abi.encodeWithSelector(SubProxy.subscribeToStrategy.selector, sub),
-            0
+            address(cut), abi.encodeWithSelector(SubProxy.subscribeToStrategy.selector, sub), 0
         );
 
         if (wallet.isSafe()) {
             assertTrue(ISafe(walletAddr).isModuleEnabled(MODULE_AUTH_ADDRESS));
         } else {
-            DSAuthority authority = DSAuthority(DSAuth(walletAddr).authority());
+            IDSAuthority authority = IDSAuthority(IDSAuth(walletAddr).authority());
             assertTrue(authority.canCall(PROXY_AUTH_ADDRESS, walletAddr, EXECUTE_SELECTOR));
         }
     }
@@ -81,18 +78,14 @@ contract TestCore_SubProxy is SubStorage, BaseTest {
         uint256 subId = subStorage.getSubsCount();
 
         wallet.execute(
-            address(cut),
-            abi.encodeWithSelector(SubProxy.subscribeToStrategy.selector, sub),
-            0
+            address(cut), abi.encodeWithSelector(SubProxy.subscribeToStrategy.selector, sub), 0
         );
 
         vm.expectEmit(true, true, false, true, address(subStorage));
         emit UpdateData(subId, keccak256(abi.encode(sub)), sub);
 
         wallet.execute(
-            address(cut),
-            abi.encodeWithSelector(SubProxy.updateSubData.selector, subId, sub),
-            0
+            address(cut), abi.encodeWithSelector(SubProxy.updateSubData.selector, subId, sub), 0
         );
     }
 
@@ -100,18 +93,14 @@ contract TestCore_SubProxy is SubStorage, BaseTest {
         uint256 subId = subStorage.getSubsCount();
 
         wallet.execute(
-            address(cut),
-            abi.encodeWithSelector(SubProxy.subscribeToStrategy.selector, sub),
-            0
+            address(cut), abi.encodeWithSelector(SubProxy.subscribeToStrategy.selector, sub), 0
         );
 
         vm.expectEmit(true, false, false, false, address(subStorage));
         emit ActivateSub(subId);
 
         wallet.execute(
-            address(cut),
-            abi.encodeWithSelector(SubProxy.activateSub.selector, subId),
-            0
+            address(cut), abi.encodeWithSelector(SubProxy.activateSub.selector, subId), 0
         );
         StrategyModel.StoredSubData memory storedSub = subStorage.getSub(subId);
         assertTrue(storedSub.isEnabled);
@@ -122,9 +111,7 @@ contract TestCore_SubProxy is SubStorage, BaseTest {
         uint256 subId = subStorage.getSubsCount();
 
         wallet.execute(
-            address(cut),
-            abi.encodeWithSelector(SubProxy.subscribeToStrategy.selector, sub),
-            0
+            address(cut), abi.encodeWithSelector(SubProxy.subscribeToStrategy.selector, sub), 0
         );
 
         vm.expectEmit(true, true, false, true, address(subStorage));
@@ -147,18 +134,14 @@ contract TestCore_SubProxy is SubStorage, BaseTest {
         uint256 subId = subStorage.getSubsCount();
 
         wallet.execute(
-            address(cut),
-            abi.encodeWithSelector(SubProxy.subscribeToStrategy.selector, sub),
-            0
+            address(cut), abi.encodeWithSelector(SubProxy.subscribeToStrategy.selector, sub), 0
         );
 
         vm.expectEmit(true, false, false, false, address(subStorage));
         emit DeactivateSub(subId);
 
         wallet.execute(
-            address(cut),
-            abi.encodeWithSelector(SubProxy.deactivateSub.selector, subId),
-            0
+            address(cut), abi.encodeWithSelector(SubProxy.deactivateSub.selector, subId), 0
         );
         StrategyModel.StoredSubData memory storedSub = subStorage.getSub(subId);
         assertFalse(storedSub.isEnabled);

@@ -2,15 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { Test } from "forge-std/Test.sol";
-
-import { IERC20 } from "../../contracts/interfaces/IERC20.sol";
-import { SafeERC20 } from "../../contracts/utils/SafeERC20.sol";
+import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
+import { SafeERC20 } from "../../contracts/_vendor/openzeppelin/SafeERC20.sol";
 import { Config } from "../config/Config.sol";
 
 /// @notice Base test - root contract for all tests
 contract BaseTest is Config {
-
     // EOA USERS
     address internal constant bob = address(0xbb);
     address internal constant alice = address(0xaa);
@@ -28,9 +25,9 @@ contract BaseTest is Config {
     }
 
     modifier revertToSnapshot() {
-        uint256 snapshotId = vm.snapshot();
+        uint256 snapshotId = vm.snapshotState();
         _;
-        vm.revertTo(snapshotId);
+        vm.revertToState(snapshotId);
     }
 
     function setUp() public virtual {
@@ -53,7 +50,7 @@ contract BaseTest is Config {
         uint256 mainnetFork = vm.createFork(mainnetRpc);
         vm.selectFork(mainnetFork);
     }
-    
+
     function forkLocalAnvil() internal {
         string memory anvilRpc = "http://localhost:8545";
         uint256 anvilFork = vm.createFork(anvilRpc);
@@ -72,11 +69,19 @@ contract BaseTest is Config {
         IERC20(_token).safeApprove(_to, _amount);
     }
 
-    function approveAsSender(address _sender, address _token, address _to, uint256 _amount) internal executeAsSender(_sender) {
+    function approveAsSender(address _sender, address _token, address _to, uint256 _amount)
+        internal
+        executeAsSender(_sender)
+    {
         IERC20(_token).safeApprove(_to, _amount);
     }
 
-    function giveTokenAndApproveAsSender(address _sender, address _token, address _to, uint256 _amount) internal executeAsSender(_sender) {
+    function giveTokenAndApproveAsSender(
+        address _sender,
+        address _token,
+        address _to,
+        uint256 _amount
+    ) internal executeAsSender(_sender) {
         give(_token, _sender, _amount);
         IERC20(_token).safeApprove(_to, _amount);
     }
@@ -99,7 +104,7 @@ contract BaseTest is Config {
 
     function removeSelector(bytes memory _data) internal pure returns (bytes memory) {
         bytes memory result = new bytes(_data.length - 4);
-        for (uint i = 4; i < _data.length; i++) {
+        for (uint256 i = 4; i < _data.length; i++) {
             result[i - 4] = _data[i];
         }
         return result;
@@ -114,7 +119,7 @@ contract BaseTest is Config {
 
     function initTestPairs(string memory _protocolName) internal {
         _initConfigIfNeeded();
-        
+
         TestPair[] memory pairs = getTestPairsForProtocol(_protocolName);
         for (uint256 i = 0; i < pairs.length; ++i) {
             testPairs.push(pairs[i]);

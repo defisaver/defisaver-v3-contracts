@@ -3,11 +3,10 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { IDebtToken } from "../../interfaces/aaveV3/IDebtToken.sol";
+import { IDebtToken } from "../../interfaces/protocols/aaveV3/IDebtToken.sol";
 
 /// @title Delegate credit for someone to borrow on user's wallet behalf with his signature
 contract AaveV3DelegateWithSig is ActionBase {
-
     /// @param debtToken Address of the debt token.
     /// @param delegator Address of the user that is delegating the credit.
     /// @param delegatee Address of the user that will be able to borrow on behalf of the delegator.
@@ -60,18 +59,16 @@ contract AaveV3DelegateWithSig is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _delegate(Params memory _params)
-        internal
-        returns (bytes memory logData)
-    {
-        IDebtToken(_params.debtToken).delegationWithSig(
-            _params.delegator, 
-            _params.delegatee,
-            _params.value,
-            _params.deadline, 
-            _params.v, 
-            _params.r, 
-            _params.s
+    function _delegate(Params memory _params) internal returns (bytes memory logData) {
+        IDebtToken(_params.debtToken)
+            .delegationWithSig(
+                _params.delegator,
+                _params.delegatee,
+                _params.value,
+                _params.deadline,
+                _params.v,
+                _params.r,
+                _params.s
             );
         logData = abi.encode(_params);
     }

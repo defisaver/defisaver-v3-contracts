@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -22,39 +21,55 @@ const {
     balanceOf,
 } = require('../../utils/utils');
 
-const {
-    addBotCaller,
-    createStrategy,
-    createBundle,
-} = require('../utils/utils-strategies');
+const { addBotCaller, createStrategy, createBundle } = require('../utils/utils-strategies');
 
-const {
-    aaveV3Supply,
-} = require('../../utils/actions');
+const { aaveV3Supply } = require('../../utils/actions');
 
 const { topUp } = require('../../../scripts/utils/fork');
 const { subAaveV3OpenOrder } = require('../utils/strategy-subs');
-const { callAaveV3OpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromCollStrategy, callAaveV3FLOpenOrderFromDebtStrategy } = require('../utils/strategy-calls');
-const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromDebtStrategy } = require('../../../strategies-spec/mainnet');
-const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromDebtL2Strategy } = require('../../../strategies-spec/l2');
+const {
+    callAaveV3OpenOrderFromCollStrategy,
+    callAaveV3FLOpenOrderFromCollStrategy,
+    callAaveV3FLOpenOrderFromDebtStrategy,
+} = require('../utils/strategy-calls');
+const {
+    createAaveV3OpenOrderFromCollStrategy,
+    createAaveV3FLOpenOrderFromCollStrategy,
+    createAaveV3FLOpenOrderFromDebtStrategy,
+} = require('../../../strategies-spec/mainnet');
+const {
+    createAaveV3OpenOrderFromCollL2Strategy,
+    createAaveV3FLOpenOrderFromCollL2Strategy,
+    createAaveV3FLOpenOrderFromDebtL2Strategy,
+} = require('../../../strategies-spec/l2');
 
 const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const openStrategy = network === 'mainnet' ? createAaveV3OpenOrderFromCollStrategy() : createAaveV3OpenOrderFromCollL2Strategy();
-    const flOpenStrategy = network === 'mainnet' ? createAaveV3FLOpenOrderFromCollStrategy() : createAaveV3FLOpenOrderFromCollL2Strategy();
+    const openStrategy =
+        network === 'mainnet'
+            ? createAaveV3OpenOrderFromCollStrategy()
+            : createAaveV3OpenOrderFromCollL2Strategy();
+    const flOpenStrategy =
+        network === 'mainnet'
+            ? createAaveV3FLOpenOrderFromCollStrategy()
+            : createAaveV3FLOpenOrderFromCollL2Strategy();
     const aaveV3OpenOrderFromCollStrategyId = await createStrategy(...openStrategy, false);
     const aaveV3FLOpenOrderFromCollStrategyId = await createStrategy(...flOpenStrategy, false);
-    const aaveV3OpenOrderFromCollBundleId = await createBundle(
-        [aaveV3OpenOrderFromCollStrategyId, aaveV3FLOpenOrderFromCollStrategyId],
-    );
+    const aaveV3OpenOrderFromCollBundleId = await createBundle([
+        aaveV3OpenOrderFromCollStrategyId,
+        aaveV3FLOpenOrderFromCollStrategyId,
+    ]);
     return aaveV3OpenOrderFromCollBundleId;
 };
 
 const deployOpenOrderFromDebtStrategy = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const openStrategy = network === 'mainnet' ? createAaveV3FLOpenOrderFromDebtStrategy() : createAaveV3FLOpenOrderFromDebtL2Strategy();
+    const openStrategy =
+        network === 'mainnet'
+            ? createAaveV3FLOpenOrderFromDebtStrategy()
+            : createAaveV3FLOpenOrderFromDebtL2Strategy();
     const aaveV3FLOpenOrderFromDebtStrategyId = await createStrategy(...openStrategy, false);
     return aaveV3FLOpenOrderFromDebtStrategyId;
 };
@@ -85,9 +100,15 @@ const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
 
         const setUpContracts = async () => {
             if (network === 'mainnet') {
-                strategyExecutor = await hre.ethers.getContractAt('StrategyExecutor', addrs[network].STRATEGY_EXECUTOR_ADDR);
+                strategyExecutor = await hre.ethers.getContractAt(
+                    'StrategyExecutor',
+                    addrs[network].STRATEGY_EXECUTOR_ADDR,
+                );
             } else {
-                strategyExecutor = await hre.ethers.getContractAt('StrategyExecutorL2', addrs[network].STRATEGY_EXECUTOR_ADDR);
+                strategyExecutor = await hre.ethers.getContractAt(
+                    'StrategyExecutorL2',
+                    addrs[network].STRATEGY_EXECUTOR_ADDR,
+                );
             }
             strategyExecutor = strategyExecutor.connect(botAcc);
             flAction = await getContractFromRegistry('FLAction', isFork);
@@ -98,14 +119,20 @@ const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
                 openOrderFromCollBundleId = await deployOpenOrderFromCollBundle(proxy, isFork);
                 openOrderFromDebtStrategyId = await deployOpenOrderFromDebtStrategy(proxy, isFork);
             } else if (network === 'mainnet') {
-                openOrderFromCollBundleId = automationSdk.enums.Bundles.MainnetIds.AAVE_V3_OPEN_ORDER_FROM_COLLATERAL;
-                openOrderFromDebtStrategyId = automationSdk.enums.Strategies.MainnetIds.AAVE_V3_OPEN_ORDER_FROM_DEBT;
+                openOrderFromCollBundleId =
+                    automationSdk.enums.Bundles.MainnetIds.AAVE_V3_OPEN_ORDER_FROM_COLLATERAL;
+                openOrderFromDebtStrategyId =
+                    automationSdk.enums.Strategies.MainnetIds.AAVE_V3_OPEN_ORDER_FROM_DEBT;
             } else if (network === 'arbitrum') {
-                openOrderFromCollBundleId = automationSdk.enums.Bundles.ArbitrumIds.AAVE_V3_OPEN_ORDER_FROM_COLLATERAL;
-                openOrderFromDebtStrategyId = automationSdk.enums.Strategies.ArbitrumIds.AAVE_V3_OPEN_ORDER_FROM_DEBT;
+                openOrderFromCollBundleId =
+                    automationSdk.enums.Bundles.ArbitrumIds.AAVE_V3_OPEN_ORDER_FROM_COLLATERAL;
+                openOrderFromDebtStrategyId =
+                    automationSdk.enums.Strategies.ArbitrumIds.AAVE_V3_OPEN_ORDER_FROM_DEBT;
             } else if (network === 'optimism') {
-                openOrderFromCollBundleId = automationSdk.enums.Bundles.OptimismIds.AAVE_V3_OPEN_ORDER_FROM_COLLATERAL;
-                openOrderFromDebtStrategyId = automationSdk.enums.Strategies.OptimismIds.AAVE_V3_OPEN_ORDER_FROM_DEBT;
+                openOrderFromCollBundleId =
+                    automationSdk.enums.Bundles.OptimismIds.AAVE_V3_OPEN_ORDER_FROM_COLLATERAL;
+                openOrderFromDebtStrategyId =
+                    automationSdk.enums.Strategies.OptimismIds.AAVE_V3_OPEN_ORDER_FROM_DEBT;
             }
         };
 
@@ -116,16 +143,34 @@ const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
             await deployStrategies();
             await addBotCaller(botAcc.address, isFork);
         });
-        beforeEach(async () => { snapshotId = await takeSnapshot(); });
-        afterEach(async () => { await revertToSnapshot(snapshotId); });
+        beforeEach(async () => {
+            snapshotId = await takeSnapshot();
+        });
+        afterEach(async () => {
+            await revertToSnapshot(snapshotId);
+        });
 
-        const subToBundle = async (supplyAmountInUsd, supplyCollAsset, ratio, collAsset, debtAsset, subForOpenFromColl) => {
+        const subToBundle = async (
+            supplyAmountInUsd,
+            supplyCollAsset,
+            ratio,
+            collAsset,
+            debtAsset,
+            subForOpenFromColl,
+        ) => {
             const market = addrs[network].AAVE_MARKET;
-            const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', market);
+            const aaveMarketContract = await hre.ethers.getContractAt(
+                'IPoolAddressesProvider',
+                market,
+            );
             const poolAddress = await aaveMarketContract.getPool();
             const pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
-            const collReserveData = await pool.getReserveData(collAsset.addresses[chainIds[network]]);
-            const debtReserveData = await pool.getReserveData(debtAsset.addresses[chainIds[network]]);
+            const collReserveData = await pool.getReserveData(
+                collAsset.addresses[chainIds[network]],
+            );
+            const debtReserveData = await pool.getReserveData(
+                debtAsset.addresses[chainIds[network]],
+            );
 
             // 1. Supply coll/debt asset to AaveV3 before subbing
             const supplyAsset = supplyCollAsset ? collAsset : debtAsset;
@@ -146,7 +191,9 @@ const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
             const triggerPrice = currCollPrice.mul(2).div(hre.ethers.BigNumber.from(10).pow(8));
 
             const isBundle = subForOpenFromColl;
-            const strategyOrBundleId = subForOpenFromColl ? openOrderFromCollBundleId : openOrderFromDebtStrategyId;
+            const strategyOrBundleId = subForOpenFromColl
+                ? openOrderFromCollBundleId
+                : openOrderFromDebtStrategyId;
 
             // 2. sub to bundle
             const { subId, strategySub } = await subAaveV3OpenOrder(
@@ -185,7 +232,12 @@ const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
                 subForOpenFromColl,
             );
             const exchangeObject = formatExchangeObj(
-                debtAsset.address, collAsset.address, 0, addrs[network].UNISWAP_V3_WRAPPER, 0, 3000,
+                debtAsset.address,
+                collAsset.address,
+                0,
+                addrs[network].UNISWAP_V3_WRAPPER,
+                0,
+                3000,
             );
             await callAaveV3OpenOrderFromCollStrategy(
                 strategyExecutor,
@@ -214,7 +266,12 @@ const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
                 subForOpenFromColl,
             );
             const exchangeObject = formatExchangeObj(
-                debtAsset.address, collAsset.address, flAmount, addrs[network].UNISWAP_V3_WRAPPER, 0, 3000,
+                debtAsset.address,
+                collAsset.address,
+                flAmount,
+                addrs[network].UNISWAP_V3_WRAPPER,
+                0,
+                3000,
             );
             await callAaveV3FLOpenOrderFromCollStrategy(
                 strategyExecutor,
@@ -251,7 +308,12 @@ const aaveV3OpenOrderStrategyTest = async (isFork, useDeployedStrategies) => {
                 subForOpenFromColl,
             );
             const exchangeObject = formatExchangeObj(
-                debtAsset.address, collAsset.address, 0, addrs[network].UNISWAP_V3_WRAPPER, 0, 3000,
+                debtAsset.address,
+                collAsset.address,
+                0,
+                addrs[network].UNISWAP_V3_WRAPPER,
+                0,
+                3000,
             );
             await callAaveV3FLOpenOrderFromDebtStrategy(
                 strategyExecutor,

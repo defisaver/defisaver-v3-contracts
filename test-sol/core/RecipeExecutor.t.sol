@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import {RecipeExecutor} from '../../contracts/core/RecipeExecutor.sol';
-import {StrategyModel} from '../../contracts/core/strategy/StrategyModel.sol';
+import { RecipeExecutor } from "../../contracts/core/RecipeExecutor.sol";
+import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 
-import {PullToken} from "../../contracts/actions/utils/PullToken.sol";
-import {SendToken} from "../../contracts/actions/utils/SendToken.sol";
-import {FLAction} from "../../contracts/actions/flashloan/FLAction.sol";
+import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
+import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
+import { FLAction } from "../../contracts/actions/flashloan/FLAction.sol";
 
-import {BaseTest} from '../utils/BaseTest.sol';
-import {RegistryUtils} from '../utils/RegistryUtils.sol';
-import {ActionsUtils} from '../utils/ActionsUtils.sol';
-import {SmartWallet} from '../utils/SmartWallet.sol';
-import {Addresses} from '../utils/Addresses.sol';
+import { BaseTest } from "../utils/BaseTest.sol";
+import { RegistryUtils } from "../utils/RegistryUtils.sol";
+import { ActionsUtils } from "../utils/ActionsUtils.sol";
+import { SmartWallet } from "../utils/SmartWallet.sol";
+import { Addresses } from "../utils/Addresses.sol";
 
 /// @dev Recipe execution from strategy is already tested in StrategyExecutor tests
 /// @dev Here, we just test direct recipe execution with and without flash loan
@@ -43,12 +43,12 @@ contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, BaseTest {
 
         cut = new RecipeExecutor();
 
-        redeploy('RecipeExecutor', address(cut));
-        redeploy('PullToken', address(new PullToken()));
-        redeploy('SendToken', address(new SendToken()));
+        redeploy("RecipeExecutor", address(cut));
+        redeploy("PullToken", address(new PullToken()));
+        redeploy("SendToken", address(new SendToken()));
 
         flAddress = address(new FLAction());
-        redeploy('FLAction', flAddress);
+        redeploy("FLAction", flAddress);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -65,17 +65,12 @@ contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, BaseTest {
         bytes4[] memory ids = new bytes4[](2);
         ids[0] = bytes4(keccak256("PullToken"));
         ids[1] = bytes4(keccak256("SendToken"));
-        
-        StrategyModel.Recipe memory recipe = _create_placeholder_recipe(
-            "TestRecipeWithoutFlashloan",
-            actionsCalldata,
-            ids
-        );
 
-        bytes memory _calldata = abi.encodeWithSelector(
-            RecipeExecutor.executeRecipe.selector,
-            recipe
-        );
+        StrategyModel.Recipe memory recipe =
+            _create_placeholder_recipe("TestRecipeWithoutFlashloan", actionsCalldata, ids);
+
+        bytes memory _calldata =
+            abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
         give(tokenAddr, sender, amount);
         approveAsSender(sender, tokenAddr, walletAddr, amount);
@@ -99,16 +94,11 @@ contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, BaseTest {
         ids[0] = bytes4(keccak256("FLAction"));
         ids[1] = bytes4(keccak256("SendToken"));
 
-        StrategyModel.Recipe memory recipe = _create_placeholder_recipe(
-            "TestRecipeWithFlashloan",
-            actionsCalldata,
-            ids
-        );
+        StrategyModel.Recipe memory recipe =
+            _create_placeholder_recipe("TestRecipeWithFlashloan", actionsCalldata, ids);
 
-        bytes memory _calldata = abi.encodeWithSelector(
-            RecipeExecutor.executeRecipe.selector,
-            recipe
-        );
+        bytes memory _calldata =
+            abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
         uint256 senderBalanceBefore = balanceOf(tokenAddr, sender);
         uint256 walletBalanceBefore = balanceOf(tokenAddr, walletAddr);

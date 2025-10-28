@@ -1,6 +1,4 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require('../../utils/utils');
 const { transferNFTTest } = require('./utils-actions-tests');
 
 describe('Transfer-Nft', function () {

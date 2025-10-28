@@ -11,7 +11,6 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_StrategyStorage is BaseTest {
-
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -55,9 +54,7 @@ contract TestCore_StrategyStorage is BaseTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                StrategyStorage.NoAuthToCreateStrategy.selector,
-                sender,
-                openToPublic
+                StrategyStorage.NoAuthToCreateStrategy.selector, sender, openToPublic
             )
         );
         cut.createStrategy("Test", new bytes4[](0), new bytes4[](0), new uint8[][](0), true);
@@ -151,7 +148,8 @@ contract TestCore_StrategyStorage is BaseTest {
         vm.expectEmit(true, false, false, false, address(cut));
         emit StrategyCreated(strategyCountBefore);
         startPrank(_sender);
-        uint256 strategyId = cut.createStrategy("Test1", new bytes4[](0), new bytes4[](0), new uint8[][](0), true);
+        uint256 strategyId =
+            cut.createStrategy("Test1", new bytes4[](0), new bytes4[](0), new uint8[][](0), true);
         stopPrank();
 
         uint256 strategyCountAfter = cut.getStrategyCount();

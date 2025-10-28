@@ -3,14 +3,9 @@ pragma solidity =0.8.24;
 
 import { UserWallet } from "../UserWallet.sol";
 import { Addresses } from "../../utils/Addresses.sol";
-import { IComet } from "../../../contracts/interfaces/compoundV3/IComet.sol";
 import { CompV3SubProxy } from "../../../contracts/actions/compoundV3/CompV3SubProxy.sol";
 
 contract CompUserUtils is UserWallet {
-
-    //solhint-disable-next-line no-empty-blocks
-    constructor() UserWallet() {}
-
     function subToAutomationBundles(
         bool _isSafe,
         address _subProxy,

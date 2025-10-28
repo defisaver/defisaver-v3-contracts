@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
 const { subFluidVaultT1BoostBundle } = require('../utils/strategy-subs');
@@ -51,7 +50,14 @@ class BoostTest extends BaseFluidT1StrategyTest {
         );
 
         return {
-            collAsset, debtAsset, nftId, subId, strategySub, boostAmount, exchangeObject, ratioBefore,
+            collAsset,
+            debtAsset,
+            nftId,
+            subId,
+            strategySub,
+            boostAmount,
+            exchangeObject,
+            ratioBefore,
         };
     }
 
@@ -60,7 +66,13 @@ class BoostTest extends BaseFluidT1StrategyTest {
         this.testPairs.forEach((pair, i) => {
             it('... should call Fluid T1 regular boost strategy', async () => {
                 const {
-                    collAsset, nftId, subId, strategySub, boostAmount, exchangeObject, ratioBefore,
+                    collAsset,
+                    nftId,
+                    subId,
+                    strategySub,
+                    boostAmount,
+                    exchangeObject,
+                    ratioBefore,
                 } = await this.openAndSubscribe(pair);
 
                 await callFluidT1BoostStrategy(
@@ -80,7 +92,14 @@ class BoostTest extends BaseFluidT1StrategyTest {
             });
             it('... should call Fluid T1 FL boost strategy', async () => {
                 const {
-                    collAsset, debtAsset, nftId, subId, strategySub, boostAmount, exchangeObject, ratioBefore,
+                    collAsset,
+                    debtAsset,
+                    nftId,
+                    subId,
+                    strategySub,
+                    boostAmount,
+                    exchangeObject,
+                    ratioBefore,
                 } = await this.openAndSubscribe(pair);
 
                 await callFluidT1FLBoostStrategy(
@@ -110,9 +129,15 @@ module.exports = async function runBoostTests() {
     const boostTest = new BoostTest(testPairs, isFork);
     describe('Fluid Vault T1 Boost Strategy Tests', function () {
         this.timeout(1200000);
-        before(async () => { await boostTest.setUp(); });
-        beforeEach(async () => { await boostTest.takeSnapshot(); });
-        afterEach(async () => { await boostTest.revertToSnapshot(); });
+        before(async () => {
+            await boostTest.setUp();
+        });
+        beforeEach(async () => {
+            await boostTest.takeSnapshot();
+        });
+        afterEach(async () => {
+            await boostTest.revertToSnapshot();
+        });
         boostTest.runTests();
     });
 };

@@ -3,12 +3,7 @@ const hre = require('hardhat');
 
 const { getAssetInfo } = require('@defisaver/tokens');
 
-const {
-    getProxy,
-    redeploy,
-    balanceOf,
-    fetchAmountinUSDPrice,
-} = require('../../../utils/utils');
+const { getProxy, redeploy, balanceOf, fetchAmountinUSDPrice } = require('../../../utils/utils');
 
 const { getPair } = require('../../../utils/uniswap');
 
@@ -18,8 +13,8 @@ const uniSupplyTest = async () => {
     describe('Uni-Supply', function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         const uniPairs = [
             { tokenA: 'WETH', tokenB: 'DAI', amount: fetchAmountinUSDPrice('WETH', '3000') },
@@ -58,7 +53,10 @@ const uniSupplyTest = async () => {
 
                 // TODO: check if we got the correct amount of lp tokens
 
-                expect(lpBalanceAfter).to.be.gt(lpBalanceBefore, 'Check if we got back the lp tokens');
+                expect(lpBalanceAfter).to.be.gt(
+                    lpBalanceBefore,
+                    'Check if we got back the lp tokens',
+                );
             });
         }
     });
@@ -70,8 +68,8 @@ const uniWithdrawTest = async () => {
     describe('Uni-Withdraw', function () {
         this.timeout(80000);
 
-        let senderAcc; let
-            proxy;
+        let senderAcc;
+        let proxy;
 
         const uniPairs = [
             { tokenA: 'WETH', tokenB: 'DAI', amount: fetchAmountinUSDPrice('WETH', '3000') },

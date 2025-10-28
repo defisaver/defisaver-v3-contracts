@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Withdraw a token from an Spark market
@@ -34,18 +34,23 @@ contract SparkWithdraw is ActionBase, SparkHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(callData);
 
-        params.assetId = uint16(_parseParamUint(uint16(params.assetId), _paramMapping[0], _subData, _returnValues));
-        params.useDefaultMarket = _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[1], _subData, _returnValues) == 1;
+        params.assetId = uint16(
+            _parseParamUint(uint16(params.assetId), _paramMapping[0], _subData, _returnValues)
+        );
+        params.useDefaultMarket =
+            _parseParamUint(
+                    params.useDefaultMarket ? 1 : 0, _paramMapping[1], _subData, _returnValues
+                ) == 1;
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
         params.market = _parseParamAddr(params.market, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 withdrawnAmount, bytes memory logData) = _withdraw(
-            params.market,
-            params.assetId,
-            params.amount,
-            params.to
-        );
+        if (params.useDefaultMarket) {
+            params.market = DEFAULT_SPARK_MARKET;
+        }
+
+        (uint256 withdrawnAmount, bytes memory logData) =
+            _withdraw(params.market, params.assetId, params.amount, params.to);
         emit ActionEvent("SparkWithdraw", logData);
         return bytes32(withdrawnAmount);
     }
@@ -53,23 +58,15 @@ contract SparkWithdraw is ActionBase, SparkHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _withdraw(
-            params.market,
-            params.assetId,
-            params.amount,
-            params.to
-        );
+        (, bytes memory logData) =
+            _withdraw(params.market, params.assetId, params.amount, params.to);
         logger.logActionDirectEvent("SparkWithdraw", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) = _withdraw(
-            params.market,
-            params.assetId,
-            params.amount,
-            params.to
-        );
+        (, bytes memory logData) =
+            _withdraw(params.market, params.assetId, params.amount, params.to);
         logger.logActionDirectEvent("SparkWithdraw", logData);
     }
 
@@ -85,12 +82,10 @@ contract SparkWithdraw is ActionBase, SparkHelper {
     /// @param _assetId The id of the token to be deposited
     /// @param _amount Amount of tokens to be withdrawn -> send type(uint).max for whole amount
     /// @param _to Where the withdrawn tokens will be sent
-    function _withdraw(
-        address _market,
-        uint16 _assetId,
-        uint256 _amount,
-        address _to
-    ) internal returns (uint256, bytes memory) {
+    function _withdraw(address _market, uint16 _assetId, uint256 _amount, address _to)
+        internal
+        returns (uint256, bytes memory)
+    {
         ISparkPool lendingPool = getSparkLendingPool(_market);
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
 

@@ -2,18 +2,22 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IStabilityPool } from "../../../contracts/interfaces/liquityV2/IStabilityPool.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
-import { LiquityV2SPDeposit } from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
-import { LiquityV2SPWithdraw } from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPWithdraw.sol";
+import {
+    LiquityV2SPDeposit
+} from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
+import {
+    LiquityV2SPWithdraw
+} from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPWithdraw.sol";
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
-import {LiquityV2Utils} from "../../utils/liquityV2/LiquityV2Utils.sol";
+import { LiquityV2Utils } from "../../utils/liquityV2/LiquityV2Utils.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -97,7 +101,6 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
 
     function _baseTest(bool _isDirect, bool _shouldClaim, bool _isMaxUint256Withdraw) public {
         for (uint256 i = 0; i < markets.length; i++) {
-
             TestSPWithdrawLocalParams memory vars;
 
             // Max withdrawal has to leave at least MIN_BOLD_IN_SP in Stability Pool
@@ -108,19 +111,15 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
 
             _spDeposit(markets[i], vars);
 
-            _spWithdraw(
-                markets[i],
-                _isDirect,
-                _shouldClaim,
-                _isMaxUint256Withdraw,
-                vars
-            );
+            _spWithdraw(markets[i], _isDirect, _shouldClaim, _isMaxUint256Withdraw, vars);
         }
     }
 
-    function _spDeposit(IAddressesRegistry _market, TestSPWithdrawLocalParams memory _vars) internal {
+    function _spDeposit(IAddressesRegistry _market, TestSPWithdrawLocalParams memory _vars)
+        internal
+    {
         _vars.collToken = _market.collToken();
-        _vars.depositAmount = amountInUSDPriceMock(BOLD, 10000, 1e8);
+        _vars.depositAmount = amountInUSDPriceMock(BOLD, 10_000, 1e8);
 
         give(BOLD, sender, _vars.depositAmount);
         approveAsSender(sender, BOLD, walletAddr, _vars.depositAmount);
@@ -130,12 +129,7 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
 
         _vars.executeActionCallData = executeActionCalldata(
             liquityV2SPDepositEncode(
-                address(_market),
-                sender,
-                sender,
-                sender,
-                _vars.depositAmount,
-                shouldClaim
+                address(_market), sender, sender, sender, _vars.depositAmount, shouldClaim
             ),
             isDirect
         );
@@ -143,12 +137,14 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
         wallet.execute(address(spDepositContract), _vars.executeActionCallData, 0);
     }
 
-    function _aliceDeposit(IAddressesRegistry _market, TestSPWithdrawLocalParams memory _vars) internal {
+    function _aliceDeposit(IAddressesRegistry _market, TestSPWithdrawLocalParams memory _vars)
+        internal
+    {
         vm.warp(block.timestamp + 1);
         SmartWallet aliceWallet = new SmartWallet(alice);
 
         _vars.collToken = _market.collToken();
-        _vars.depositAmount = amountInUSDPriceMock(BOLD, 10000, 1e8);
+        _vars.depositAmount = amountInUSDPriceMock(BOLD, 10_000, 1e8);
 
         give(BOLD, aliceWallet.owner(), _vars.depositAmount);
         approveAsSender(aliceWallet.owner(), BOLD, aliceWallet.walletAddr(), _vars.depositAmount);
@@ -167,7 +163,7 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
 
         aliceWallet.execute(address(spDepositContract), _vars.executeActionCallData, 0);
     }
-    
+
     function _spWithdraw(
         IAddressesRegistry _market,
         bool _isDirect,
@@ -177,18 +173,19 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
     ) internal {
         _vars.stabilityPool = _market.stabilityPool();
 
-        _vars.simulatedCollGain = 10000;
+        _vars.simulatedCollGain = 10_000;
 
         _simulateCollGain(_vars.stabilityPool, _vars.simulatedCollGain, _vars.collToken, walletAddr);
 
         _vars.senderCollBalanceBefore = balanceOf(_vars.collToken, sender);
-        
+
         _vars.senderBoldBalanceBefore = balanceOf(BOLD, sender);
 
-        (_vars.compoundedBOLD, _vars.collGain, _vars.boldGain) = viewContract
-            .getDepositorInfo(address(_market), walletAddr);
+        (_vars.compoundedBOLD, _vars.collGain, _vars.boldGain) =
+            viewContract.getDepositorInfo(address(_market), walletAddr);
 
-        _vars.withdrawAmount = _isMaxUint256Withdraw ? _vars.compoundedBOLD : _vars.depositAmount / 2;
+        _vars.withdrawAmount =
+            _isMaxUint256Withdraw ? _vars.compoundedBOLD : _vars.depositAmount / 2;
 
         _vars.executeActionCallData = executeActionCalldata(
             liquityV2SPWithdrawEncode(
@@ -204,11 +201,11 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
         wallet.execute(address(cut), _vars.executeActionCallData, 0);
 
         _vars.senderCollBalanceAfter = balanceOf(_vars.collToken, sender);
-        
+
         _vars.senderBoldBalanceAfter = balanceOf(BOLD, sender);
 
-        (_vars.compoundedBOLDAfter, _vars.collGainAfter, _vars.boldGainAfter) = viewContract
-            .getDepositorInfo(address(_market), walletAddr);
+        (_vars.compoundedBOLDAfter, _vars.collGainAfter, _vars.boldGainAfter) =
+            viewContract.getDepositorInfo(address(_market), walletAddr);
 
         // ################### ASSERTIONS ###################
 
@@ -218,13 +215,17 @@ contract TestLiquityV2SPWithdraw is LiquityV2ExecuteActions, LiquityV2Utils {
             assertGe(_vars.collGainAfter, 0);
             assertGe(_vars.boldGainAfter, 0);
             assertEq(_vars.senderCollBalanceAfter, _vars.senderCollBalanceBefore);
-            assertEq(_vars.senderBoldBalanceAfter, _vars.senderBoldBalanceBefore + _vars.withdrawAmount);
-        } 
-        else {
+            assertEq(
+                _vars.senderBoldBalanceAfter, _vars.senderBoldBalanceBefore + _vars.withdrawAmount
+            );
+        } else {
             assertEq(_vars.senderCollBalanceAfter, _vars.senderCollBalanceBefore + _vars.collGain);
-            assertEq(_vars.senderBoldBalanceAfter, _vars.senderBoldBalanceBefore + _vars.withdrawAmount + _vars.boldGain);
+            assertEq(
+                _vars.senderBoldBalanceAfter,
+                _vars.senderBoldBalanceBefore + _vars.withdrawAmount + _vars.boldGain
+            );
             assertEq(_vars.collGainAfter, 0);
             assertEq(_vars.boldGainAfter, 0);
-        } 
+        }
     }
 }

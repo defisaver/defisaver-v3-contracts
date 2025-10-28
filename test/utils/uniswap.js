@@ -4,7 +4,10 @@ const UNISWAP_FACTORY_ADDR = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
 const UNISWAP_ROUTER = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
 
 const getPair = async (tokenA, tokenB) => {
-    const uniswapFactory = await hre.ethers.getContractAt('IUniswapV2Factory', UNISWAP_FACTORY_ADDR);
+    const uniswapFactory = await hre.ethers.getContractAt(
+        'IUniswapV2Factory',
+        UNISWAP_FACTORY_ADDR,
+    );
 
     const pairAddr = await uniswapFactory.getPair(tokenA, tokenB);
 
@@ -36,9 +39,7 @@ const getSecondTokenAmount = async (tokenA, tokenB, amountTokenA) => {
 
     // pair order can be switched, you send eth/dai but it's dai/eth
     if (pairData.tokenA.toLowerCase() !== tokenA.toLowerCase()) {
-        // eslint-disable-next-line prefer-destructuring
         reserveA = reserves[1];
-        // eslint-disable-next-line prefer-destructuring
         reserveB = reserves[0];
     }
 

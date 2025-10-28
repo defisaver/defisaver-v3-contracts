@@ -2,11 +2,10 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Action that returns users crvusd debt on a given market
 contract CurveUsdGetDebt is ActionBase {
-
     /// @param controllerAddress Address of the curveusd market controller
     /// @param debtor Address which owns the curveusd position
     struct Params {
@@ -23,7 +22,8 @@ contract CurveUsdGetDebt is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.debtor = _parseParamAddr(params.debtor, _paramMapping[1], _subData, _returnValues);
 
         uint256 debt = ICrvUsdController(params.controllerAddress).debt(params.debtor);
@@ -31,7 +31,7 @@ contract CurveUsdGetDebt is ActionBase {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function executeActionDirect(bytes memory _callData) public override payable {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {

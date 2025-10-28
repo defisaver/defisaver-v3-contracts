@@ -3,16 +3,20 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { LiquityHelper } from "../actions/liquity/helpers/LiquityHelper.sol";
 import { LiquityRatioHelper } from "../actions/liquity/helpers/LiquityRatioHelper.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
-
+import { TransientStorage } from "../utils/transient/TransientStorage.sol";
 
 /// @title Checks if total amount of debt in front of a specified trove is over a limit
-contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatioHelper, TriggerHelper, LiquityHelper {
-
+contract LiquityDebtInFrontWithLimitTrigger is
+    ITrigger,
+    AdminAuth,
+    LiquityRatioHelper,
+    TriggerHelper,
+    LiquityHelper
+{
     /// @notice Max number of troves to check is 250.
     uint256 internal constant MAX_ITERATIONS = 250;
 
@@ -25,14 +29,14 @@ contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatio
         uint256 debtInFrontMin;
     }
 
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 debtInFront;
         address next = triggerSubData.troveOwner;
 
         (uint256 currRatio, bool isActive) = getRatio(triggerSubData.troveOwner);
-        
+
         if (isActive == false || currRatio == 0) return false;
 
         /// @dev Needed for LiquityRatioIncreaseCheck later
@@ -59,16 +63,14 @@ contract LiquityDebtInFrontWithLimitTrigger is ITrigger, AdminAuth, LiquityRatio
             if (debtInFront > triggerSubData.debtInFrontMin) {
                 return false;
             }
-
         }
 
         return false;
     }
-    
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {
-    }
-    
-    function isChangeable() public pure override returns (bool){
+
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 

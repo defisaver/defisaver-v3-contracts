@@ -2,8 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../../interfaces/fluid/vaults/IFluidVaultT1.sol";
-import { IFluidVaultResolver } from "../../../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import { IFluidVaultT1 } from "../../../interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
+import {
+    IFluidVaultResolver
+} from "../../../interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidPaybackLiquidityLogic } from "../logic/liquidity/FluidPaybackLiquidityLogic.sol";
 import { FluidLiquidityModel } from "../helpers/FluidLiquidityModel.sol";
 import { FluidHelper } from "../helpers/FluidHelper.sol";
@@ -12,7 +14,6 @@ import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Payback debt to Fluid Vault T1 (1_col:1_debt)
 contract FluidVaultT1Payback is ActionBase, FluidHelper {
-
     /// @param vault The address of the Fluid Vault T1
     /// @param nftId ID of the NFT representing the position
     /// @param amount Amount to payback
@@ -61,7 +62,7 @@ contract FluidVaultT1Payback is ActionBase, FluidHelper {
     function _payback(Params memory _params) internal returns (uint256, bytes memory) {
         IFluidVaultT1.ConstantViews memory constants = IFluidVaultT1(_params.vault).constantsView();
 
-        (IFluidVaultResolver.UserPosition memory userPosition, ) = 
+        (IFluidVaultResolver.UserPosition memory userPosition,) =
             IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_params.nftId);
 
         uint256 exactPaybackAmount = FluidPaybackLiquidityLogic.payback(

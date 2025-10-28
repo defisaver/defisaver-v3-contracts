@@ -1,21 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { SafeERC20 } from "../../../../utils/SafeERC20.sol";
-import { IERC20 } from "../../../../interfaces/IERC20.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { SafeERC20 } from "../../../../_vendor/openzeppelin/SafeERC20.sol";
+import { IERC20 } from "../../../../interfaces/token/IERC20.sol";
+import { IDFSRegistry } from "../../../../interfaces/core/IDFSRegistry.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { AdminAuth } from "../../../../auth/AdminAuth.sol";
 import { DFSExchangeWithTxSaver } from "../../../../exchangeV3/DFSExchangeWithTxSaver.sol";
 import { DFSExchangeData } from "../../../../exchangeV3/DFSExchangeData.sol";
-import { FeeRecipient } from "../../../../utils/FeeRecipient.sol";
+import { FeeRecipient } from "../../../../utils/fee/FeeRecipient.sol";
 import { ActionsUtilHelper } from "../../../utils/helpers/ActionsUtilHelper.sol";
-import { DFSRegistry } from "../../../../core/DFSRegistry.sol";
 import { GasFeeHelper } from "../../../../actions/fee/helpers/GasFeeHelper.sol";
-import { ReentrancyGuardTransient } from "../../../../utils/ReentrancyGuardTransient.sol";
+import {
+    ReentrancyGuardTransient
+} from "../../../../_vendor/openzeppelin/ReentrancyGuardTransient.sol";
 
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../../../interfaces/curveusd/ICurveUsd.sol";
-
+import { ICrvUsdController } from "../../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title CurveUsdSwapperTransient Callback contract for CurveUsd extended actions with transient storage
 contract CurveUsdSwapperTransient is
@@ -47,16 +48,15 @@ contract CurveUsdSwapperTransient is
     /// @dev Called by curveusd controller after 'repay_extended' method
     /// @dev sends all collateral the user has to this contract, we swap a part or all of it
     /// @dev After swapping, position will be recreated on curveusd or closed fully
-    function callback_repay(
-        address _user,
-        uint256,
-        uint256,
-        uint256,
-        uint256[] memory info
-    ) external onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
+    function callback_repay(address _user, uint256, uint256, uint256, uint256[] memory info)
+        external
+        onlyValidCrvUsdController(msg.sender)
+        returns (CallbackData memory cb)
+    {
         uint256 gasUsed = info[0];
 
-        ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
+        ExchangeData memory exData =
+            abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         address collToken = exData.srcAddr;
         address debtToken = exData.destAddr;
 
@@ -77,16 +77,15 @@ contract CurveUsdSwapperTransient is
 
     /// @dev Called by curveusd controller after 'create_loan_extended' and 'borrow_more_extended' methods
     /// @dev sends exData.srcAmount of curveUsd token to this contract for us to sell then pulls received coll token
-    function callback_deposit(
-        address _user,
-        uint256,
-        uint256,
-        uint256,
-        uint256[] memory info
-    ) external onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
+    function callback_deposit(address _user, uint256, uint256, uint256, uint256[] memory info)
+        external
+        onlyValidCrvUsdController(msg.sender)
+        returns (CallbackData memory cb)
+    {
         uint256 gasUsed = info[0];
 
-        ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
+        ExchangeData memory exData =
+            abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         address collToken = exData.destAddr;
 
         uint256 receivedAmount = _performSell(exData, _user, collToken, gasUsed);
@@ -97,17 +96,16 @@ contract CurveUsdSwapperTransient is
         IERC20(collToken).safeApprove(msg.sender, cb.collateral);
     }
 
-    function callback_liquidate(
-        address _user,
-        uint256,
-        uint256,
-        uint256,
-        uint256[] memory info
-    ) external onlyValidCrvUsdController(msg.sender) returns (CallbackData memory cb) {
+    function callback_liquidate(address _user, uint256, uint256, uint256, uint256[] memory info)
+        external
+        onlyValidCrvUsdController(msg.sender)
+        returns (CallbackData memory cb)
+    {
         uint256 gasUsed = info[0];
         bool sellAllCollateral = info[1] == 1 ? true : false;
 
-        ExchangeData memory exData = abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
+        ExchangeData memory exData =
+            abi.decode(transientStorage.getBytesTransiently(), (DFSExchangeData.ExchangeData));
         address collToken = exData.srcAddr;
         address debtToken = exData.destAddr;
 
@@ -141,18 +139,13 @@ contract CurveUsdSwapperTransient is
         uint256 _gasUsedForAutomation
     ) internal returns (uint256) {
         (, uint256 receivedAmount, bool hasFee, bool txSaverFeeTaken) = _sellWithTxSaverChoice(
-            _exData,
-            _user,
-            DFSRegistry(REGISTRY_ADDR)
+            _exData, _user, IDFSRegistry(REGISTRY_ADDR)
         );
 
         // can't take both automation fee and TxSaver fee
         if (_gasUsedForAutomation > 0 && !txSaverFeeTaken) {
             receivedAmount -= _takeAutomationFee(
-                receivedAmount,
-                _feeToken,
-                _gasUsedForAutomation,
-                hasFee
+                receivedAmount, _feeToken, _gasUsedForAutomation, hasFee
             );
         }
 

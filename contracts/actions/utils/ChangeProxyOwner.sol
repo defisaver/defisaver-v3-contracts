@@ -2,13 +2,14 @@
 
 pragma solidity =0.8.24;
 
+import { IDSAuth } from "../../interfaces/DS/IDSAuth.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { DFSProxyRegistryController } from "../../utils/DFSProxyRegistryController.sol";
-import { DSAuth } from "../../DS/DSAuth.sol";
+import {
+    DFSProxyRegistryController
+} from "../../utils/proxyRegistry/DFSProxyRegistryController.sol";
 
 /// @title Changes the owner of the DSProxy and updated the DFSRegistry
 contract ChangeProxyOwner is ActionBase {
-
     /// @param newOwner Address of the new owner
     struct Params {
         address newOwner;
@@ -16,7 +17,7 @@ contract ChangeProxyOwner is ActionBase {
 
     DFSProxyRegistryController constant dfsRegController =
         DFSProxyRegistryController(DFS_REG_CONTROLLER_ADDR);
-    
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -26,7 +27,8 @@ contract ChangeProxyOwner is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.newOwner = _parseParamAddr(inputData.newOwner, _paramMapping[0], _subData, _returnValues);
+        inputData.newOwner =
+            _parseParamAddr(inputData.newOwner, _paramMapping[0], _subData, _returnValues);
 
         _changeOwner(inputData.newOwner);
 
@@ -49,8 +51,8 @@ contract ChangeProxyOwner is ActionBase {
     function _changeOwner(address _newOwner) internal {
         require(_newOwner != address(0), "Owner is empty address");
 
-        DSAuth(address(this)).setOwner(_newOwner);
-        
+        IDSAuth(address(this)).setOwner(_newOwner);
+
         dfsRegController.changeOwnerInDFSRegistry(_newOwner);
     }
 

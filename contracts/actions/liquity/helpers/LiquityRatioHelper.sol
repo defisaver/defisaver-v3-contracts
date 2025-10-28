@@ -2,14 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../../../DS/DSMath.sol";
-import { ITroveManager } from "../../../interfaces/liquity/ITroveManager.sol";
-import { IPriceFeed } from "../../../interfaces/liquity/IPriceFeed.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
+import { ITroveManager } from "../../../interfaces/protocols/liquity/ITroveManager.sol";
+import { IPriceFeed } from "../../../interfaces/protocols/liquity/IPriceFeed.sol";
 import { MainnetLiquityAddresses } from "./MainnetLiquityAddresses.sol";
 
 /// @title Helper methods for Liquity ratio calc.
 contract LiquityRatioHelper is DSMath, MainnetLiquityAddresses {
-
     /// @notice Gets Trove CR
     /// @param _troveOwner Address of the trove owner
     function getRatio(address _troveOwner) public returns (uint256 ratio, bool isActive) {

@@ -2,18 +2,17 @@
 
 pragma solidity =0.8.24;
 
-import { IOracle } from "../interfaces/morpho-blue/IOracle.sol";
+import { IOracle } from "../interfaces/protocols/morpho-blue/IOracle.sol";
 import { MorphoBlueHelper } from "../actions/morpho-blue/helpers/MorphoBlueHelper.sol";
 
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
 /// @notice This uses the Morpho oracle, which returns the price of the collateral token in terms of the loan token.
 /// @notice The trigger expects the price input to be scaled by 1e8.
 contract MorphoBluePriceTrigger is ITrigger, AdminAuth, MorphoBlueHelper {
-
     uint256 internal constant TRIGGER_PRICE_SCALE = 1e8;
 
     enum PriceState {
@@ -24,7 +23,7 @@ contract MorphoBluePriceTrigger is ITrigger, AdminAuth, MorphoBlueHelper {
     /// @param oracle address of the morpho oracle from the market
     /// @param collateralToken address of the collateral token from the market
     /// @param loanToken address of the loan token from the market
-    /// @param price price of the collateral token in terms of the loan token that represents the triggerable point. 
+    /// @param price price of the collateral token in terms of the loan token that represents the triggerable point.
     /// @param state represents if we want the current price to be higher or lower than price param
     struct SubParams {
         address oracle;
@@ -53,9 +52,8 @@ contract MorphoBluePriceTrigger is ITrigger, AdminAuth, MorphoBlueHelper {
         // 3. wstETH/usdc
         // oraclePrice = 4235832459931360140471900072 / 10**(36+6-18) = 4235.83245993136
         // with trigger price scaling = 4235.83245993136 * 1e8 = 423583245
-        uint256 currPrice = 
-            oraclePrice * TRIGGER_PRICE_SCALE /
-            10 ** (ORACLE_PRICE_DECIMALS + loanDecimals - collDecimals);
+        uint256 currPrice = oraclePrice * TRIGGER_PRICE_SCALE / 10
+            ** (ORACLE_PRICE_DECIMALS + loanDecimals - collDecimals);
 
         if (PriceState(triggerData.state) == PriceState.OVER) {
             if (currPrice > triggerData.price) return true;
@@ -69,9 +67,9 @@ contract MorphoBluePriceTrigger is ITrigger, AdminAuth, MorphoBlueHelper {
     }
 
     //solhint-disable-next-line no-empty-blocks
-    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) {}
-    
-    function isChangeable() public pure override returns (bool) { 
+    function changedSubData(bytes memory _subData) public pure override returns (bytes memory) { }
+
+    function isChangeable() public pure override returns (bool) {
         return false;
     }
 

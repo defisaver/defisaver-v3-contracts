@@ -3,12 +3,12 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "../spark/helpers/SparkHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { IsDAI } from "../../interfaces/spark/IsDAI.sol";
-import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { IsDAI } from "../../interfaces/protocols/spark/IsDAI.sol";
+import { UtilAddresses } from "../../utils/addresses/UtilAddresses.sol";
 
 /// @title Action that deposits dai into sDai.
-contract SDaiWrap is ActionBase, SparkHelper, UtilHelper {
+contract SDaiWrap is ActionBase, SparkHelper, UtilAddresses {
     using TokenUtils for address;
 
     /// @param amount - Amount of dai to deposit
@@ -59,9 +59,7 @@ contract SDaiWrap is ActionBase, SparkHelper, UtilHelper {
         IsDAI(SDAI_ADDR).deposit(_params.amount, _params.to);
 
         shares = SDAI_ADDR.getBalance(_params.to) - shares;
-        logData = abi.encode(
-            _params, shares
-        );
+        logData = abi.encode(_params, shares);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

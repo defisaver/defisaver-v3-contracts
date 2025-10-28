@@ -2,9 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IPriceFeed } from "../../../contracts/interfaces/liquityV2/IPriceFeed.sol";
-import { ITroveManager } from "../../../contracts/interfaces/liquityV2/ITroveManager.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { IPriceFeed } from "../../../contracts/interfaces/protocols/liquityV2/IPriceFeed.sol";
+import { ITroveManager } from "../../../contracts/interfaces/protocols/liquityV2/ITroveManager.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 import { LiquityV2Supply } from "../../../contracts/actions/liquityV2/trove/LiquityV2Supply.sol";
@@ -13,7 +15,6 @@ import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2Exe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2Supply is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -83,19 +84,20 @@ contract TestLiquityV2Supply is LiquityV2ExecuteActions {
         _baseTest(isDirect, isMaxUint256Supply, interestBatchManager);
     }
 
-    function _baseTest(bool _isDirect, bool _isMaxUint256Supply, address _interestBatchManager) public {
-        uint256 collAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
-        uint256 supplyAmountInUSD = 20000;
+    function _baseTest(bool _isDirect, bool _isMaxUint256Supply, address _interestBatchManager)
+        public
+    {
+        uint256 collAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
+        uint256 supplyAmountInUSD = 20_000;
 
         for (uint256 i = 0; i < markets.length; i++) {
-
             if (_interestBatchManager != address(0)) {
                 vm.startPrank(_interestBatchManager);
                 registerBatchManager(markets[i]);
                 vm.stopPrank();
             }
-            
+
             uint256 troveId = executeLiquityOpenTrove(
                 markets[i],
                 _interestBatchManager,
@@ -109,13 +111,7 @@ contract TestLiquityV2Supply is LiquityV2ExecuteActions {
                 viewContract
             );
 
-            _supply(
-                markets[i],
-                troveId,
-                _isDirect,
-                _isMaxUint256Supply,
-                supplyAmountInUSD
-            );
+            _supply(markets[i], troveId, _isDirect, _isMaxUint256Supply, supplyAmountInUSD);
         }
     }
 
@@ -128,7 +124,8 @@ contract TestLiquityV2Supply is LiquityV2ExecuteActions {
     ) internal {
         uint256 collPriceWAD = IPriceFeed(_market.priceFeed()).lastGoodPrice();
         address collToken = _market.collToken();
-        uint256 supplyAmount = amountInUSDPriceMock(collToken, supplyAmountInUSD, collPriceWAD / 1e10);
+        uint256 supplyAmount =
+            amountInUSDPriceMock(collToken, supplyAmountInUSD, collPriceWAD / 1e10);
 
         ITroveManager troveManager = ITroveManager(_market.troveManager());
         ITroveManager.LatestTroveData memory troveData = troveManager.getLatestTroveData(_troveId);

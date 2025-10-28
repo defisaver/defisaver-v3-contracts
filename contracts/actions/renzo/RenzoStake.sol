@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { IRestakeManager } from "../../interfaces/renzo/IRestakeManager.sol";
-import { IRenzoOracle } from "../../interfaces/renzo/IRenzoOracle.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { IRestakeManager } from "../../interfaces/protocols/renzo/IRestakeManager.sol";
+import { IRenzoOracle } from "../../interfaces/protocols/renzo/IRenzoOracle.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { RenzoHelper } from "./helpers/RenzoHelper.sol";
 
 /// @title Supplies ETH (action receives WETH) to Renzo for ETH2 Staking. Receives ezETH in return
@@ -32,7 +32,8 @@ contract RenzoStake is ActionBase, RenzoHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
@@ -63,18 +64,17 @@ contract RenzoStake is ActionBase, RenzoHelper {
     // 3. Stakes it with Renzo
     // 4. Receives ezETH
     // 5. Sends tokens to target address
-    function _renzoStake(Params memory _inputData) 
-        internal returns (uint256 ezEthReceivedAmount, bytes memory logData) 
+    function _renzoStake(Params memory _inputData)
+        internal
+        returns (uint256 ezEthReceivedAmount, bytes memory logData)
     {
-        _inputData.amount = TokenUtils.WETH_ADDR.pullTokensIfNeeded(
-            _inputData.from,
-            _inputData.amount
-        );
+        _inputData.amount =
+            TokenUtils.WETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
 
         TokenUtils.withdrawWeth(_inputData.amount);
 
         uint256 ezEthBalanceBefore = EZETH_ADDR.getBalance(address(this));
-        IRestakeManager(RENZO_MANAGER).depositETH{value: _inputData.amount}();
+        IRestakeManager(RENZO_MANAGER).depositETH{ value: _inputData.amount }();
         uint256 ezEthBalanceAfter = EZETH_ADDR.getBalance(address(this));
 
         ezEthReceivedAmount = ezEthBalanceAfter - ezEthBalanceBefore;
@@ -88,14 +88,10 @@ contract RenzoStake is ActionBase, RenzoHelper {
     function ezEthPerEth() external view returns (uint256 ezEthRate) {
         IRestakeManager manager = IRestakeManager(RENZO_MANAGER);
         IRenzoOracle oracle = IRenzoOracle(manager.renzoOracle());
-        (, , uint256 totalTVL) = manager.calculateTVLs();
+        (,, uint256 totalTVL) = manager.calculateTVLs();
         uint256 ezEthTotalSupply = IERC20(EZETH_ADDR).totalSupply();
 
-        ezEthRate = oracle.calculateMintAmount(
-            totalTVL,
-            1 ether,
-            ezEthTotalSupply
-        );
+        ezEthRate = oracle.calculateMintAmount(totalTVL, 1 ether, ezEthTotalSupply);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory inputData) {

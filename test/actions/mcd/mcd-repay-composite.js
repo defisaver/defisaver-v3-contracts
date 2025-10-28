@@ -1,8 +1,6 @@
 const { ilks } = require('@defisaver/tokens');
 
-const {
-    redeploy, resetForkToBlock,
-} = require('../../utils/utils');
+const { redeploy, resetForkToBlock } = require('../../utils/utils');
 const { mcdRepayCompositeTest } = require('./mcd-tests');
 
 describe('Mcd-Repay-Composite', function () {

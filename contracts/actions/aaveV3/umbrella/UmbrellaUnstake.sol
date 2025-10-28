@@ -2,24 +2,21 @@
 
 pragma solidity =0.8.24;
 
-import { IERC4626 } from "../../../interfaces/IERC4626.sol";
-import { IERC4626StakeToken } from "../../../interfaces/aaveV3/IERC4626StakeToken.sol";
-import { IStaticATokenV2 } from "../../../interfaces/aaveV3/IStaticATokenV2.sol";
+import { IERC4626 } from "../../../interfaces/token/IERC4626.sol";
+import { IERC4626StakeToken } from "../../../interfaces/protocols/aaveV3/IERC4626StakeToken.sol";
+import { IStaticATokenV2 } from "../../../interfaces/protocols/aaveV3/IStaticATokenV2.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { AaveV3Helper } from "../helpers/AaveV3Helper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title UmbrellaUnstake - Unstake aTokens/underlying or GHO tokens using Umbrella Stake Token
 /// @notice This action will always unwrap waTokens to aTokens/underlying after unstaking.
 /// @notice Passing zero as amount will start cooldown period.
-contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
+contract UmbrellaUnstake is ActionBase, AaveV3Helper {
     using TokenUtils for address;
 
-    error UmbrellaUnstakeSlippageHit(
-        uint256 minAmountOut,
-        uint256 actualAmountOut
-    );
- 
+    error UmbrellaUnstakeSlippageHit(uint256 minAmountOut, uint256 actualAmountOut);
+
     /// @param stkToken The umbrella stake token.
     /// @param to The address to which the aToken/underlying or GHO will be transferred
     /// @param stkAmount The amount of stkToken shares to burn (max.uint to redeem whole balance, 0 to start cooldown period)
@@ -42,11 +39,16 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.stkToken = _parseParamAddr(params.stkToken, _paramMapping[0], _subData, _returnValues);
+        params.stkToken =
+            _parseParamAddr(params.stkToken, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.stkAmount = _parseParamUint(params.stkAmount, _paramMapping[2], _subData, _returnValues);
-        params.useATokens = _parseParamUint(params.useATokens ? 1 : 0, _paramMapping[3], _subData, _returnValues) == 1;
-        params.minAmountOut = _parseParamUint(params.minAmountOut, _paramMapping[4], _subData, _returnValues);
+        params.stkAmount =
+            _parseParamUint(params.stkAmount, _paramMapping[2], _subData, _returnValues);
+        params.useATokens =
+            _parseParamUint(params.useATokens ? 1 : 0, _paramMapping[3], _subData, _returnValues)
+                == 1;
+        params.minAmountOut =
+            _parseParamUint(params.minAmountOut, _paramMapping[4], _subData, _returnValues);
 
         (uint256 redeemedAmount, bytes memory logData) = _unstake(params);
         emit ActionEvent("UmbrellaUnstake", logData);
@@ -78,28 +80,34 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper  {
             ? _params.stkToken.getBalance(address(this))
             : _params.stkAmount;
 
-        uint256 amountUnstaked = IERC4626StakeToken(_params.stkToken).redeem(
-            stkSharesToBurn,
-            address(this), /* receiver */
-            address(this) /* owner */
-        );
+        uint256 amountUnstaked = IERC4626StakeToken(_params.stkToken)
+            .redeem(
+                stkSharesToBurn,
+                address(this),
+                /* receiver */
+                address(this) /* owner */
+            );
 
         address waTokenOrGHO = IERC4626(_params.stkToken).asset();
         bool isGHOStaking = waTokenOrGHO == GHO_TOKEN;
 
         if (!isGHOStaking) {
             if (_params.useATokens) {
-                amountUnstaked = IStaticATokenV2(waTokenOrGHO).redeemATokens(
-                    amountUnstaked,
-                    address(this), /* receiver */
-                    address(this) /* owner */
-                );
+                amountUnstaked = IStaticATokenV2(waTokenOrGHO)
+                    .redeemATokens(
+                        amountUnstaked,
+                        address(this),
+                        /* receiver */
+                        address(this) /* owner */
+                    );
             } else {
-                amountUnstaked = IERC4626(waTokenOrGHO).redeem(
-                    amountUnstaked,
-                    address(this), /* receiver */
-                    address(this) /* owner */
-                );
+                amountUnstaked = IERC4626(waTokenOrGHO)
+                    .redeem(
+                        amountUnstaked,
+                        address(this),
+                        /* receiver */
+                        address(this) /* owner */
+                    );
             }
         }
 

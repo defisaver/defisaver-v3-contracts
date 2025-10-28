@@ -3,13 +3,12 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "../spark/helpers/SparkHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { IsDAI } from "../../interfaces/spark/IsDAI.sol";
-import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
-
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { IsDAI } from "../../interfaces/protocols/spark/IsDAI.sol";
+import { UtilAddresses } from "../../utils/addresses/UtilAddresses.sol";
 
 /// @title Action that redeems sDai for dai.
-contract SDaiUnwrap is ActionBase, SparkHelper, UtilHelper {
+contract SDaiUnwrap is ActionBase, SparkHelper, UtilAddresses {
     using TokenUtils for address;
 
     /// @param amount - Amount of sDai to redeem
@@ -52,7 +51,10 @@ contract SDaiUnwrap is ActionBase, SparkHelper, UtilHelper {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    function _unwrap(Params memory _params) internal returns (uint256 daiAmount, bytes memory logData) {
+    function _unwrap(Params memory _params)
+        internal
+        returns (uint256 daiAmount, bytes memory logData)
+    {
         if (_params.from == address(0)) _params.from = address(this);
 
         uint256 sDaiBalance = SDAI_ADDR.getBalance(_params.from);
@@ -62,9 +64,7 @@ contract SDaiUnwrap is ActionBase, SparkHelper, UtilHelper {
         IsDAI(SDAI_ADDR).redeem(_params.amount, _params.to, _params.from);
         daiAmount = DAI_ADDR.getBalance(_params.to) - daiAmount;
 
-        logData = abi.encode(
-            _params, daiAmount
-        );
+        logData = abi.encode(_params, daiAmount);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

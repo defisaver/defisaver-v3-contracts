@@ -36,9 +36,7 @@ const {
 
 const { createStrategy, addBotCaller, createBundle } = require('../utils/utils-strategies');
 
-const {
-    getRatio, getHints, LiquityActionIds, getTroveInfo,
-} = require('../../utils/liquity');
+const { getRatio, getHints, LiquityActionIds, getTroveInfo } = require('../../utils/liquity');
 
 const {
     callLiquityBoostStrategy,
@@ -111,7 +109,8 @@ const liquityBoostStrategyTest = async () => {
         let snapshotId;
 
         before(async () => {
-            await ethers.provider.getBlockNumber()
+            await ethers.provider
+                .getBlockNumber()
                 .then((e) => resetForkToBlock(Math.floor(e / BLOCKS_PER_6H) * BLOCKS_PER_6H));
 
             senderAcc = (await ethers.getSigners())[0];
@@ -161,7 +160,6 @@ const liquityBoostStrategyTest = async () => {
 
             const strategyId1 = await createStrategy(...liquityBoostStrategy, true);
             const strategyId2 = await createStrategy(...liquityFLBoostStrategy, true);
-            // eslint-disable-next-line max-len
             const strategyId3 = await createStrategy(...LiquityFLBoostWithCollStrategy, true);
 
             const bundleId = await createBundle([strategyId1, strategyId2, strategyId3]);
@@ -187,8 +185,15 @@ const liquityBoostStrategyTest = async () => {
 
             const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', BOOST_AMOUNT_USD));
 
-            // eslint-disable-next-line max-len
-            await callLiquityBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, MAX_FEE_PERCENTAGE);
+            await callLiquityBoostStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                boostAmount,
+                proxyAddr,
+                MAX_FEE_PERCENTAGE,
+            );
 
             const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
@@ -205,8 +210,16 @@ const liquityBoostStrategyTest = async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
             const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', BOOST_AMOUNT_USD));
 
-            // eslint-disable-next-line max-len
-            await callLiquityFLBoostStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, flAction.address, MAX_FEE_PERCENTAGE);
+            await callLiquityFLBoostStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                boostAmount,
+                proxyAddr,
+                flAction.address,
+                MAX_FEE_PERCENTAGE,
+            );
 
             const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
@@ -222,8 +235,16 @@ const liquityBoostStrategyTest = async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
             const boostAmount = Float2BN(fetchAmountinUSDPrice('LUSD', BOOST_AMOUNT_USD));
 
-            // eslint-disable-next-line max-len
-            await callLiquityFLBoostWithCollStrategy(botAcc, strategyExecutor, subId, strategySub, boostAmount, proxyAddr, flAction.address, MAX_FEE_PERCENTAGE);
+            await callLiquityFLBoostWithCollStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                boostAmount,
+                proxyAddr,
+                flAction.address,
+                MAX_FEE_PERCENTAGE,
+            );
 
             const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
@@ -253,7 +274,8 @@ const liquityRepayStrategyTest = async () => {
         let snapshotId;
 
         before(async () => {
-            await ethers.provider.getBlockNumber()
+            await ethers.provider
+                .getBlockNumber()
                 .then((e) => resetForkToBlock(Math.floor(e / BLOCKS_PER_6H) * BLOCKS_PER_6H));
 
             senderAcc = (await ethers.getSigners())[0];
@@ -326,8 +348,15 @@ const liquityRepayStrategyTest = async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
             const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', REPAY_AMOUNT_USD));
 
-            // eslint-disable-next-line max-len
-            await callLiquityRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount, proxyAddr, MAX_FEE_PERCENTAGE);
+            await callLiquityRepayStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                repayAmount,
+                proxyAddr,
+                MAX_FEE_PERCENTAGE,
+            );
 
             const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
@@ -343,8 +372,16 @@ const liquityRepayStrategyTest = async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
             const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', REPAY_AMOUNT_USD));
 
-            // eslint-disable-next-line max-len
-            await callLiquityFLRepayStrategy(botAcc, strategyExecutor, subId, strategySub, repayAmount, proxyAddr, flAction.address, MAX_FEE_PERCENTAGE);
+            await callLiquityFLRepayStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                repayAmount,
+                proxyAddr,
+                flAction.address,
+                MAX_FEE_PERCENTAGE,
+            );
 
             const { ratio: ratioAfter } = await getRatio(liquityView, proxyAddr);
 
@@ -388,7 +425,8 @@ const liquityCBPaybackTest = async () => {
         // const forkedBlock = 16035000; // doing this to optimize hints fetching
 
         before(async () => {
-            await ethers.provider.getBlockNumber()
+            await ethers.provider
+                .getBlockNumber()
                 .then((e) => resetForkToBlock(Math.floor(e / BLOCKS_PER_6H) * BLOCKS_PER_6H));
             senderAcc = (await ethers.getSigners())[0];
             proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
@@ -477,16 +515,32 @@ const liquityCBPaybackTest = async () => {
             bondId = bonds[bonds.length - 1].bondID.toString();
             const bondAmount = bonds[bonds.length - 1].lusdAmount;
 
-            // eslint-disable-next-line max-len
-            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, bondId, '0', ratioUnder, '1'));
-            let debtBefore; let debtAfter;
-            let lusdEOABefore; let lusdEOAAfter;
+            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(
+                proxy,
+                bondId,
+                '0',
+                ratioUnder,
+                '1',
+            ));
+            let debtBefore;
+            let debtAfter;
+            let lusdEOABefore;
+            let lusdEOAAfter;
             {
                 const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
                 debtBefore = debtAmount;
                 lusdEOABefore = await balanceOf(LUSD_ADDR, senderAcc.address);
             }
-            await callLiquityPaybackChickenOutStrategy(botAcc, strategyExecutor, subId, strategySub, '0', '0', upperHintFull, lowerHintFull);
+            await callLiquityPaybackChickenOutStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                '0',
+                '0',
+                upperHintFull,
+                lowerHintFull,
+            );
 
             {
                 const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
@@ -496,7 +550,11 @@ const liquityCBPaybackTest = async () => {
 
             console.log(`Bond size was ${bondAmount / 1e18}`);
             console.log(`Debt was ${debtBefore / 1e18}`);
-            console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
+            console.log(
+                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${
+                    lusdEOAAfter.sub(lusdEOABefore) / 1e18
+                } LUSD to his eoa`,
+            );
             await revertToSnapshot(snapshot);
         });
         it('... should sub to strategy and trigger ChickenOut from bond with bond < debt - min_debt', async () => {
@@ -508,17 +566,33 @@ const liquityCBPaybackTest = async () => {
             bondId = bonds[bonds.length - 1].bondID.toString();
             const bondAmount = bonds[bonds.length - 1].lusdAmount;
 
-            let debtBefore; let debtAfter;
-            let lusdEOABefore; let lusdEOAAfter;
-            // eslint-disable-next-line max-len
+            let debtBefore;
+            let debtAfter;
+            let lusdEOABefore;
+            let lusdEOAAfter;
 
-            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, bondId, '0', ratioUnder, '1'));
+            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(
+                proxy,
+                bondId,
+                '0',
+                ratioUnder,
+                '1',
+            ));
             {
                 const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
                 debtBefore = debtAmount;
                 lusdEOABefore = await balanceOf(LUSD_ADDR, senderAcc.address);
             }
-            await callLiquityPaybackChickenOutStrategy(botAcc, strategyExecutor, subId, strategySub, '0', '0', upperHintHalf, lowerHintHalf);
+            await callLiquityPaybackChickenOutStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                '0',
+                '0',
+                upperHintHalf,
+                lowerHintHalf,
+            );
 
             {
                 const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
@@ -527,7 +601,11 @@ const liquityCBPaybackTest = async () => {
             }
             console.log(`Bond size was ${bondAmount / 1e18}`);
             console.log(`Debt was ${debtBefore / 1e18}`);
-            console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
+            console.log(
+                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${
+                    lusdEOAAfter.sub(lusdEOABefore) / 1e18
+                } LUSD to his eoa`,
+            );
             await revertToSnapshot(snapshot);
         });
 
@@ -542,16 +620,32 @@ const liquityCBPaybackTest = async () => {
             ({ subId } = await subCbRebondStrategy(proxy, bondId, '31'));
             cbRebondSubId = subId;
 
-            // eslint-disable-next-line max-len
-            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, cbRebondSubId, '1', ratioUnder, '1'));
-            let debtBefore; let debtAfter;
-            let lusdEOABefore; let lusdEOAAfter;
+            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(
+                proxy,
+                cbRebondSubId,
+                '1',
+                ratioUnder,
+                '1',
+            ));
+            let debtBefore;
+            let debtAfter;
+            let lusdEOABefore;
+            let lusdEOAAfter;
             {
                 const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
                 debtBefore = debtAmount;
                 lusdEOABefore = await balanceOf(LUSD_ADDR, senderAcc.address);
             }
-            await callLiquityPaybackChickenOutStrategy(botAcc, strategyExecutor, subId, strategySub, bondId, '0', upperHintFull, lowerHintFull);
+            await callLiquityPaybackChickenOutStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                bondId,
+                '0',
+                upperHintFull,
+                lowerHintFull,
+            );
             {
                 const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
                 debtAfter = debtAmount;
@@ -560,7 +654,11 @@ const liquityCBPaybackTest = async () => {
 
             console.log(`Bond size was ${bondAmount / 1e18}`);
             console.log(`Debt was ${debtBefore / 1e18}`);
-            console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
+            console.log(
+                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${
+                    lusdEOAAfter.sub(lusdEOABefore) / 1e18
+                } LUSD to his eoa`,
+            );
             await revertToSnapshot(snapshot);
         });
         it('... should sub to strategy and trigger ChickenOut from rebond sub with bond < debt - min_debt', async () => {
@@ -574,16 +672,32 @@ const liquityCBPaybackTest = async () => {
             ({ subId } = await subCbRebondStrategy(proxy, bondId, '31'));
             cbRebondSubId = subId;
 
-            // eslint-disable-next-line max-len
-            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, cbRebondSubId, '1', ratioUnder, '1'));
-            let debtBefore; let debtAfter;
-            let lusdEOABefore; let lusdEOAAfter;
+            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(
+                proxy,
+                cbRebondSubId,
+                '1',
+                ratioUnder,
+                '1',
+            ));
+            let debtBefore;
+            let debtAfter;
+            let lusdEOABefore;
+            let lusdEOAAfter;
             {
                 const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
                 debtBefore = debtAmount;
                 lusdEOABefore = await balanceOf(LUSD_ADDR, senderAcc.address);
             }
-            await callLiquityPaybackChickenOutStrategy(botAcc, strategyExecutor, subId, strategySub, bondId, '0', upperHintHalf, lowerHintHalf);
+            await callLiquityPaybackChickenOutStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                bondId,
+                '0',
+                upperHintHalf,
+                lowerHintHalf,
+            );
             {
                 const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
                 debtAfter = debtAmount;
@@ -591,7 +705,11 @@ const liquityCBPaybackTest = async () => {
             }
             console.log(`Bond size was ${bondAmount / 1e18}`);
             console.log(`Debt was ${debtBefore / 1e18}`);
-            console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
+            console.log(
+                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${
+                    lusdEOAAfter.sub(lusdEOABefore) / 1e18
+                } LUSD to his eoa`,
+            );
             await revertToSnapshot(snapshot);
         });
 
@@ -604,17 +722,33 @@ const liquityCBPaybackTest = async () => {
             bondId = bonds[bonds.length - 1].bondID.toString();
             const bondAmount = bonds[bonds.length - 1].lusdAmount;
 
-            // eslint-disable-next-line max-len
-            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, bondId, '0', ratioUnder, '1'));
-            let debtBefore; let debtAfter;
-            let lusdEOABefore; let lusdEOAAfter;
-            await timeTravel(5_260_000);// travel two months
+            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(
+                proxy,
+                bondId,
+                '0',
+                ratioUnder,
+                '1',
+            ));
+            let debtBefore;
+            let debtAfter;
+            let lusdEOABefore;
+            let lusdEOAAfter;
+            await timeTravel(5_260_000); // travel two months
             {
                 const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
                 debtBefore = debtAmount;
                 lusdEOABefore = await balanceOf(LUSD_ADDR, senderAcc.address);
             }
-            await callLiquityPaybackChickenInStrategy(botAcc, strategyExecutor, subId, strategySub, '0', '0', upperHintFull, lowerHintFull);
+            await callLiquityPaybackChickenInStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                '0',
+                '0',
+                upperHintFull,
+                lowerHintFull,
+            );
             {
                 const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
                 debtAfter = debtAmount;
@@ -623,7 +757,11 @@ const liquityCBPaybackTest = async () => {
 
             console.log(`Bond size was ${bondAmount / 1e18}`);
             console.log(`Debt was ${debtBefore / 1e18}`);
-            console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
+            console.log(
+                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${
+                    lusdEOAAfter.sub(lusdEOABefore) / 1e18
+                } LUSD to his eoa`,
+            );
             await revertToSnapshot(snapshot);
         });
 
@@ -638,17 +776,33 @@ const liquityCBPaybackTest = async () => {
             ({ subId } = await subCbRebondStrategy(proxy, bondId, '31'));
             cbRebondSubId = subId;
 
-            // eslint-disable-next-line max-len
-            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(proxy, cbRebondSubId, '1', ratioUnder, '1'));
-            let debtBefore; let debtAfter;
-            let lusdEOABefore; let lusdEOAAfter;
-            await timeTravel(5_260_000);// travel two months
+            ({ subId, strategySub } = await subLiquityCBPaybackStrategy(
+                proxy,
+                cbRebondSubId,
+                '1',
+                ratioUnder,
+                '1',
+            ));
+            let debtBefore;
+            let debtAfter;
+            let lusdEOABefore;
+            let lusdEOAAfter;
+            await timeTravel(5_260_000); // travel two months
             {
                 const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
                 debtBefore = debtAmount;
                 lusdEOABefore = await balanceOf(LUSD_ADDR, senderAcc.address);
             }
-            await callLiquityPaybackChickenInStrategy(botAcc, strategyExecutor, subId, strategySub, bondId, '0', upperHintFull, lowerHintFull);
+            await callLiquityPaybackChickenInStrategy(
+                botAcc,
+                strategyExecutor,
+                subId,
+                strategySub,
+                bondId,
+                '0',
+                upperHintFull,
+                lowerHintFull,
+            );
             {
                 const { debtAmount } = await liquityView['getTroveInfo(address)'](proxyAddr);
                 debtAfter = debtAmount;
@@ -657,7 +811,11 @@ const liquityCBPaybackTest = async () => {
 
             console.log(`Bond size was ${bondAmount / 1e18}`);
             console.log(`Debt was ${debtBefore / 1e18}`);
-            console.log(`Paid back ${(debtBefore.sub(debtAfter)) / 1e18} and user received ${(lusdEOAAfter.sub(lusdEOABefore) / 1e18)} LUSD to his eoa`);
+            console.log(
+                `Paid back ${debtBefore.sub(debtAfter) / 1e18} and user received ${
+                    lusdEOAAfter.sub(lusdEOABefore) / 1e18
+                } LUSD to his eoa`,
+            );
             await revertToSnapshot(snapshot);
         });
     });
@@ -740,7 +898,6 @@ const liquityCloseToCollStrategyTest = async () => {
             const ethPrice = 1500;
             await setMockPrice(mockedPriceFeed, roundId, ETH_ADDR, ethPrice);
 
-            // eslint-disable-next-line max-len
             ({ subId, strategySub } = await subLiquityTrailingCloseToCollStrategy(
                 proxy,
                 percentage,
@@ -811,8 +968,11 @@ const liquityCloseToCollStrategyTest = async () => {
 
             const targetPrice = currPrice - 100; // Target is smaller so we can execute it
 
-            // eslint-disable-next-line max-len
-            ({ subId, strategySub } = await subLiquityCloseToCollStrategy(proxy, targetPrice, RATIO_STATE_OVER));
+            ({ subId, strategySub } = await subLiquityCloseToCollStrategy(
+                proxy,
+                targetPrice,
+                RATIO_STATE_OVER,
+            ));
         });
 
         it('... should trigger a Liquity close to coll strategy', async () => {
@@ -867,169 +1027,178 @@ const liquityCloseToCollStrategyTest = async () => {
     });
 };
 
-const liquityDsrPaybackStrategyTest = () => describe('Liquity-Dsr-Payback', () => {
-    let strategyExecutorByBot;
+const liquityDsrPaybackStrategyTest = () =>
+    describe('Liquity-Dsr-Payback', () => {
+        let strategyExecutorByBot;
 
-    let senderAcc;
-    let proxy;
-    let subId;
-    let strategySub;
+        let senderAcc;
+        let proxy;
+        let subId;
+        let strategySub;
 
-    before(async () => {
-        let botAcc;
-        [senderAcc, botAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+        before(async () => {
+            let botAcc;
+            [senderAcc, botAcc] = await ethers.getSigners();
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
-        await addBotCaller(botAcc.address);
-        const strategyExecutor = await redeployCore();
-        strategyExecutorByBot = await strategyExecutor.connect(botAcc);
+            await addBotCaller(botAcc.address);
+            const strategyExecutor = await redeployCore();
+            strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
-        const wrapper = await getContractFromRegistry('MockExchangeWrapper');
-        await setNewExchangeWrapper(senderAcc, wrapper.address);
+            const wrapper = await getContractFromRegistry('MockExchangeWrapper');
+            await setNewExchangeWrapper(senderAcc, wrapper.address);
 
-        await setContractAt({ name: 'LiquityPayback', address: await getAddrFromRegistry('LiquityPayback') });
-    });
-
-    it('... should open position and subscribe by proxy', async () => {
-        const collOpenAmount = Float2BN(fetchAmountinUSDPrice('WETH', COLL_OPEN_AMOUNT_USD));
-        const debtOpenAmount = Float2BN(DEBT_OPEN_AMOUNT_USD);
-
-        await depositToWeth(collOpenAmount);
-        await approve(WETH_ADDRESS, proxy.address);
-        await liquityOpen(
-            proxy,
-            MAX_FEE_PERCENTAGE,
-            collOpenAmount,
-            debtOpenAmount,
-            senderAcc.address,
-            senderAcc.address,
-        );
-
-        ({ subId, strategySub } = await subLiquityDsrPaybackStrategy({
-            proxy,
-            triggerRatio: MIN_RATIO,
-            targetRatio: TARGET_REPAY,
-        }));
-    });
-    it('... should deposit into dsr then trigger payback strategy', async () => {
-        const { debtAmount: debtBefore } = await getTroveInfo(proxy.address);
-        const feeReceiverDaiBefore = await balanceOf(DAI_ADDR, addrs.mainnet.FEE_RECEIVER);
-        const feeReceiverLusdBefore = await balanceOf(LUSD_ADDR, addrs.mainnet.FEE_RECEIVER);
-
-        const paybackAmount = Float2BN(REPAY_AMOUNT_USD);
-
-        await setBalance(DAI_ADDR, proxy.address, paybackAmount);
-        await mcdDsrDeposit(proxy, paybackAmount, proxy.address);
-        await callLiquityDsrPaybackStrategy({
-            strategyExecutorByBot,
-            subId,
-            sub: strategySub,
-            proxy,
-            daiWithdrawAmount: paybackAmount,
+            await setContractAt({
+                name: 'LiquityPayback',
+                address: await getAddrFromRegistry('LiquityPayback'),
+            });
         });
 
-        const rate = Float2BN(
-            (getLocalTokenPrice('DAI')
-            / getLocalTokenPrice('LUSD')).toFixed(18),
-            18,
-        );
-        const { debtAmount: debtAfter } = await getTroveInfo(proxy.address);
-        const feeReceiverDaiAfter = await balanceOf(DAI_ADDR, addrs.mainnet.FEE_RECEIVER);
-        const feeReceiverLusdAfter = await balanceOf(LUSD_ADDR, addrs.mainnet.FEE_RECEIVER);
+        it('... should open position and subscribe by proxy', async () => {
+            const collOpenAmount = Float2BN(fetchAmountinUSDPrice('WETH', COLL_OPEN_AMOUNT_USD));
+            const debtOpenAmount = Float2BN(DEBT_OPEN_AMOUNT_USD);
 
-        const lusdFee = feeReceiverLusdAfter.sub(feeReceiverLusdBefore);
-        const daiFeeInLusd = feeReceiverDaiAfter.sub(feeReceiverDaiBefore).mul(rate).div(Float2BN('1'));
-        const totalFees = lusdFee.add(daiFeeInLusd);
+            await depositToWeth(collOpenAmount);
+            await approve(WETH_ADDRESS, proxy.address);
+            await liquityOpen(
+                proxy,
+                MAX_FEE_PERCENTAGE,
+                collOpenAmount,
+                debtOpenAmount,
+                senderAcc.address,
+                senderAcc.address,
+            );
 
-        const paybackAmountInLusd = paybackAmount.mul(rate).div(Float2BN('1'));
+            ({ subId, strategySub } = await subLiquityDsrPaybackStrategy({
+                proxy,
+                triggerRatio: MIN_RATIO,
+                targetRatio: TARGET_REPAY,
+            }));
+        });
+        it('... should deposit into dsr then trigger payback strategy', async () => {
+            const { debtAmount: debtBefore } = await getTroveInfo(proxy.address);
+            const feeReceiverDaiBefore = await balanceOf(DAI_ADDR, addrs.mainnet.FEE_RECEIVER);
+            const feeReceiverLusdBefore = await balanceOf(LUSD_ADDR, addrs.mainnet.FEE_RECEIVER);
 
-        expect(await balanceOf(DAI_ADDR, proxy.address)).to.be.eq('0');
-        expect(await balanceOf(LUSD_ADDR, proxy.address)).to.be.eq('0');
-        expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq('0');
-        expect(debtBefore.sub(debtAfter)).to.be.eq(paybackAmountInLusd.sub(totalFees));
+            const paybackAmount = Float2BN(REPAY_AMOUNT_USD);
+
+            await setBalance(DAI_ADDR, proxy.address, paybackAmount);
+            await mcdDsrDeposit(proxy, paybackAmount, proxy.address);
+            await callLiquityDsrPaybackStrategy({
+                strategyExecutorByBot,
+                subId,
+                sub: strategySub,
+                proxy,
+                daiWithdrawAmount: paybackAmount,
+            });
+
+            const rate = Float2BN(
+                (getLocalTokenPrice('DAI') / getLocalTokenPrice('LUSD')).toFixed(18),
+                18,
+            );
+            const { debtAmount: debtAfter } = await getTroveInfo(proxy.address);
+            const feeReceiverDaiAfter = await balanceOf(DAI_ADDR, addrs.mainnet.FEE_RECEIVER);
+            const feeReceiverLusdAfter = await balanceOf(LUSD_ADDR, addrs.mainnet.FEE_RECEIVER);
+
+            const lusdFee = feeReceiverLusdAfter.sub(feeReceiverLusdBefore);
+            const daiFeeInLusd = feeReceiverDaiAfter
+                .sub(feeReceiverDaiBefore)
+                .mul(rate)
+                .div(Float2BN('1'));
+            const totalFees = lusdFee.add(daiFeeInLusd);
+
+            const paybackAmountInLusd = paybackAmount.mul(rate).div(Float2BN('1'));
+
+            expect(await balanceOf(DAI_ADDR, proxy.address)).to.be.eq('0');
+            expect(await balanceOf(LUSD_ADDR, proxy.address)).to.be.eq('0');
+            expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq('0');
+            expect(debtBefore.sub(debtAfter)).to.be.eq(paybackAmountInLusd.sub(totalFees));
+        });
     });
-});
 
-const liquityDsrSupplyStrategyTest = () => describe('Liquity-Dsr-Supply', () => {
-    let strategyExecutorByBot;
+const liquityDsrSupplyStrategyTest = () =>
+    describe('Liquity-Dsr-Supply', () => {
+        let strategyExecutorByBot;
 
-    let senderAcc;
-    let proxy;
-    let subId;
-    let strategySub;
+        let senderAcc;
+        let proxy;
+        let subId;
+        let strategySub;
 
-    before(async () => {
-        let botAcc;
-        [senderAcc, botAcc] = await ethers.getSigners();
-        proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+        before(async () => {
+            let botAcc;
+            [senderAcc, botAcc] = await ethers.getSigners();
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
 
-        await addBotCaller(botAcc.address);
-        const strategyExecutor = await redeployCore();
-        strategyExecutorByBot = await strategyExecutor.connect(botAcc);
+            await addBotCaller(botAcc.address);
+            const strategyExecutor = await redeployCore();
+            strategyExecutorByBot = await strategyExecutor.connect(botAcc);
 
-        const wrapper = await getContractFromRegistry('MockExchangeWrapper');
-        await setNewExchangeWrapper(senderAcc, wrapper.address);
-    });
-
-    it('... should open position and subscribe by proxy', async () => {
-        const collOpenAmount = Float2BN(fetchAmountinUSDPrice('WETH', COLL_OPEN_AMOUNT_USD));
-        const debtOpenAmount = Float2BN(DEBT_OPEN_AMOUNT_USD);
-
-        await depositToWeth(collOpenAmount);
-        await approve(WETH_ADDRESS, proxy.address);
-        await liquityOpen(
-            proxy,
-            MAX_FEE_PERCENTAGE,
-            collOpenAmount,
-            debtOpenAmount,
-            senderAcc.address,
-            senderAcc.address,
-        );
-
-        ({ subId, strategySub } = await subLiquityDsrSupplyStrategy({
-            proxy,
-            triggerRatio: MIN_RATIO,
-            targetRatio: TARGET_REPAY,
-        }));
-    });
-    it('... should deposit into dsr then trigger supply strategy', async () => {
-        const { collAmount: collBefore } = await getTroveInfo(proxy.address);
-        const feeReceiverDaiBefore = await balanceOf(DAI_ADDR, addrs.mainnet.FEE_RECEIVER);
-        const feeReceiverWethBefore = await balanceOf(WETH_ADDRESS, addrs.mainnet.FEE_RECEIVER);
-
-        const supplyAmount = Float2BN(REPAY_AMOUNT_USD);
-
-        await setBalance(DAI_ADDR, proxy.address, supplyAmount);
-        await mcdDsrDeposit(proxy, supplyAmount, proxy.address);
-        await callLiquityDsrSupplyStrategy({
-            strategyExecutorByBot,
-            subId,
-            sub: strategySub,
-            proxy,
-            daiWithdrawAmount: supplyAmount,
+            const wrapper = await getContractFromRegistry('MockExchangeWrapper');
+            await setNewExchangeWrapper(senderAcc, wrapper.address);
         });
 
-        const rate = Float2BN(
-            (getLocalTokenPrice('DAI')
-            / getLocalTokenPrice('WETH')).toFixed(18),
-            18,
-        );
-        const { collAmount: collAfter } = await getTroveInfo(proxy.address);
-        const feeReceiverDaiAfter = await balanceOf(DAI_ADDR, addrs.mainnet.FEE_RECEIVER);
-        const feeReceiverWethAfter = await balanceOf(WETH_ADDRESS, addrs.mainnet.FEE_RECEIVER);
+        it('... should open position and subscribe by proxy', async () => {
+            const collOpenAmount = Float2BN(fetchAmountinUSDPrice('WETH', COLL_OPEN_AMOUNT_USD));
+            const debtOpenAmount = Float2BN(DEBT_OPEN_AMOUNT_USD);
 
-        const lusdFee = feeReceiverWethAfter.sub(feeReceiverWethBefore);
-        const daiFeeInWeth = feeReceiverDaiAfter.sub(feeReceiverDaiBefore).mul(rate).div(Float2BN('1'));
-        const totalFees = lusdFee.add(daiFeeInWeth);
+            await depositToWeth(collOpenAmount);
+            await approve(WETH_ADDRESS, proxy.address);
+            await liquityOpen(
+                proxy,
+                MAX_FEE_PERCENTAGE,
+                collOpenAmount,
+                debtOpenAmount,
+                senderAcc.address,
+                senderAcc.address,
+            );
 
-        const supplyAmountInWeth = supplyAmount.mul(rate).div(Float2BN('1'));
+            ({ subId, strategySub } = await subLiquityDsrSupplyStrategy({
+                proxy,
+                triggerRatio: MIN_RATIO,
+                targetRatio: TARGET_REPAY,
+            }));
+        });
+        it('... should deposit into dsr then trigger supply strategy', async () => {
+            const { collAmount: collBefore } = await getTroveInfo(proxy.address);
+            const feeReceiverDaiBefore = await balanceOf(DAI_ADDR, addrs.mainnet.FEE_RECEIVER);
+            const feeReceiverWethBefore = await balanceOf(WETH_ADDRESS, addrs.mainnet.FEE_RECEIVER);
 
-        expect(await balanceOf(DAI_ADDR, proxy.address)).to.be.eq('0');
-        expect(await balanceOf(LUSD_ADDR, proxy.address)).to.be.eq('0');
-        expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq('0');
-        expect(collAfter.sub(collBefore)).to.be.eq(supplyAmountInWeth.sub(totalFees));
+            const supplyAmount = Float2BN(REPAY_AMOUNT_USD);
+
+            await setBalance(DAI_ADDR, proxy.address, supplyAmount);
+            await mcdDsrDeposit(proxy, supplyAmount, proxy.address);
+            await callLiquityDsrSupplyStrategy({
+                strategyExecutorByBot,
+                subId,
+                sub: strategySub,
+                proxy,
+                daiWithdrawAmount: supplyAmount,
+            });
+
+            const rate = Float2BN(
+                (getLocalTokenPrice('DAI') / getLocalTokenPrice('WETH')).toFixed(18),
+                18,
+            );
+            const { collAmount: collAfter } = await getTroveInfo(proxy.address);
+            const feeReceiverDaiAfter = await balanceOf(DAI_ADDR, addrs.mainnet.FEE_RECEIVER);
+            const feeReceiverWethAfter = await balanceOf(WETH_ADDRESS, addrs.mainnet.FEE_RECEIVER);
+
+            const lusdFee = feeReceiverWethAfter.sub(feeReceiverWethBefore);
+            const daiFeeInWeth = feeReceiverDaiAfter
+                .sub(feeReceiverDaiBefore)
+                .mul(rate)
+                .div(Float2BN('1'));
+            const totalFees = lusdFee.add(daiFeeInWeth);
+
+            const supplyAmountInWeth = supplyAmount.mul(rate).div(Float2BN('1'));
+
+            expect(await balanceOf(DAI_ADDR, proxy.address)).to.be.eq('0');
+            expect(await balanceOf(LUSD_ADDR, proxy.address)).to.be.eq('0');
+            expect(await balanceOf(WETH_ADDRESS, proxy.address)).to.be.eq('0');
+            expect(collAfter.sub(collBefore)).to.be.eq(supplyAmountInWeth.sub(totalFees));
+        });
     });
-});
 
 const liquityDebtInFrontRepayStrategyTest = async () => {
     describe('Liquity-DebtInFront-Repay-Strategy', function () {
@@ -1103,7 +1272,9 @@ const liquityDebtInFrontRepayStrategyTest = async () => {
 
             // sub
             ({ subId, strategySub } = await subLiquityDebtInFrontRepayStrategy(
-                proxy, debtInFront, targetRatioIncrease,
+                proxy,
+                debtInFront,
+                targetRatioIncrease,
             ));
 
             await takeSnapshot();
@@ -1113,7 +1284,6 @@ const liquityDebtInFrontRepayStrategyTest = async () => {
             const { ratio: ratioBefore } = await getRatio(liquityView, proxyAddr);
             const repayAmount = Float2BN(fetchAmountinUSDPrice('WETH', '500'));
 
-            // eslint-disable-next-line max-len
             await callLiquityDebtInFrontRepayStrategy(
                 botAcc,
                 strategyExecutor,

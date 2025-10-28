@@ -2,9 +2,7 @@
 
 pragma solidity =0.8.24;
 
-
 contract MockChainlinkFeedRegistry {
-
     struct PriceData {
         uint80 roundId;
         int256 answer;
@@ -14,7 +12,7 @@ contract MockChainlinkFeedRegistry {
         uint256 index;
     }
 
-    mapping (address => mapping (address => mapping (uint80 => PriceData))) prices;
+    mapping(address => mapping(address => mapping(uint80 => PriceData))) prices;
 
     uint80[] public roundIds;
 
@@ -35,60 +33,51 @@ contract MockChainlinkFeedRegistry {
         latestRoundId = _roundId;
     }
 
-    function latestRoundData(
-        address base,
-        address quote
-    )
+    function latestRoundData(address base, address quote)
         external
         view
         returns (
-        uint80 roundId,
-        int256 answer,
-        uint256 startedAt,
-        uint256 updatedAt,
-        uint80 answeredInRound
-        ) {
-            PriceData memory p = prices[base][quote][latestRoundId];
-            return (p.roundId, p.answer, p.startedAt, p.updatedAt, p.answeredInRound);
-        }
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        )
+    {
+        PriceData memory p = prices[base][quote][latestRoundId];
+        return (p.roundId, p.answer, p.startedAt, p.updatedAt, p.answeredInRound);
+    }
 
-    function getRoundData(
-        address base,
-        address quote,
-        uint80 _roundId
-    )
+    function getRoundData(address base, address quote, uint80 _roundId)
         external
         view
         returns (
-        uint80 roundId,
-        int256 answer,
-        uint256 startedAt,
-        uint256 updatedAt,
-        uint80 answeredInRound
-        ) {
-            if (_roundId == 0) {
-                _roundId = latestRoundId;
-            }
-
-            PriceData memory p = prices[base][quote][_roundId];
-            return (p.roundId, p.answer, p.startedAt, p.updatedAt, p.answeredInRound);
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        )
+    {
+        if (_roundId == 0) {
+            _roundId = latestRoundId;
         }
 
-    function getNextRoundId(
-        address base,
-        address quote,
-        uint80 roundId
-    ) external
+        PriceData memory p = prices[base][quote][_roundId];
+        return (p.roundId, p.answer, p.startedAt, p.updatedAt, p.answeredInRound);
+    }
+
+    function getNextRoundId(address base, address quote, uint80 roundId)
+        external
         view
-        returns (
-        uint80 nextRoundId
-        ) {
-            PriceData memory p = prices[base][quote][roundId];
+        returns (uint80 nextRoundId)
+    {
+        PriceData memory p = prices[base][quote][roundId];
 
-            if (p.index + 1 >= roundIds.length) return 0;
+        if (p.index + 1 >= roundIds.length) return 0;
 
-            return roundIds[p.index + 1];
-        }
+        return roundIds[p.index + 1];
+    }
 
     function getFeed(address, address) public pure returns (address) {
         return 0xE62B71cf983019BFf55bC83B48601ce8419650CC;

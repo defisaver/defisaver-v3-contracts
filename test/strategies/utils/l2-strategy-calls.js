@@ -94,7 +94,6 @@ const callAaveV3RepayL2Strategy = async (
         actionsCallData,
     ]);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -199,7 +198,6 @@ const callAaveFLV3RepayL2Strategy = async (
         actionsCallData,
     ]);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -244,14 +242,7 @@ const callAaveV3BoostL2Strategy = async (
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            debtAddr,
-            collAddr,
-            '0',
-            addrs[network].UNISWAP_V3_WRAPPER,
-            0,
-            3000,
-        ),
+        formatExchangeObj(debtAddr, collAddr, '0', addrs[network].UNISWAP_V3_WRAPPER, 0, 3000),
         placeHolderAddr,
         placeHolderAddr,
     );
@@ -298,7 +289,6 @@ const callAaveV3BoostL2Strategy = async (
         actionsCallData,
     ]);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -406,7 +396,6 @@ const callAaveFLV3BoostL2Strategy = async (
         actionsCallData,
     ]);
 
-    // eslint-disable-next-line max-len
     const receipt = await strategyExecutorByBot.executeStrategy(
         subId,
         strategyIndex,
@@ -426,64 +415,61 @@ const callAaveFLV3BoostL2Strategy = async (
 };
 
 const aaveV3CloseActionsEncoded = {
-    // eslint-disable-next-line max-len
-    flAction: ({ repayAmount, flAsset }) => (new dfs.actions.flashloan.AaveV3FlashLoanAction(
-        [flAsset],
-        [repayAmount],
-        [AAVE_NO_DEBT_MODE],
-        nullAddress,
-    )).encodeForRecipe()[0],
+    flAction: ({ repayAmount, flAsset }) =>
+        new dfs.actions.flashloan.AaveV3FlashLoanAction(
+            [flAsset],
+            [repayAmount],
+            [AAVE_NO_DEBT_MODE],
+            nullAddress,
+        ).encodeForRecipe()[0],
 
-    paybackAction: ({ repayAmount, rateMode = 2 }) => (new dfs.actions.aaveV3.AaveV3PaybackAction(
-        true,
-        nullAddress,
-        repayAmount,
-        placeHolderAddr,
-        rateMode,
-        placeHolderAddr,
-        '0',
-        false,
-        nullAddress,
-    )).encodeForRecipe()[0],
+    paybackAction: ({ repayAmount, rateMode = 2 }) =>
+        new dfs.actions.aaveV3.AaveV3PaybackAction(
+            true,
+            nullAddress,
+            repayAmount,
+            placeHolderAddr,
+            rateMode,
+            placeHolderAddr,
+            '0',
+            false,
+            nullAddress,
+        ).encodeForRecipe()[0],
 
-    withdrawAction: ({ withdrawAmount }) => (new dfs.actions.aaveV3.AaveV3WithdrawAction(
-        true,
-        nullAddress,
-        withdrawAmount,
-        placeHolderAddr,
-        '0',
-    )).encodeForRecipe()[0],
+    withdrawAction: ({ withdrawAmount }) =>
+        new dfs.actions.aaveV3.AaveV3WithdrawAction(
+            true,
+            nullAddress,
+            withdrawAmount,
+            placeHolderAddr,
+            '0',
+        ).encodeForRecipe()[0],
 
-    // eslint-disable-next-line max-len
-    sellAction: async ({ srcTokenInfo, destTokenInfo, swapAmount }) => (new dfs.actions.basic.SellAction(
-        await formatMockExchangeObj(
-            srcTokenInfo,
-            destTokenInfo,
-            swapAmount,
-        ),
-        placeHolderAddr,
-        placeHolderAddr,
-    )).encodeForRecipe()[0],
+    sellAction: async ({ srcTokenInfo, destTokenInfo, swapAmount }) =>
+        new dfs.actions.basic.SellAction(
+            await formatMockExchangeObj(srcTokenInfo, destTokenInfo, swapAmount),
+            placeHolderAddr,
+            placeHolderAddr,
+        ).encodeForRecipe()[0],
 
-    feeTakingAction: ({ closeGasCost }) => (new dfs.actions.basic.GasFeeActionL2(
-        closeGasCost,
-        placeHolderAddr,
-        '0',
-        '0',
-        closeGasCost,
-    )).encodeForRecipe()[0],
+    feeTakingAction: ({ closeGasCost }) =>
+        new dfs.actions.basic.GasFeeActionL2(
+            closeGasCost,
+            placeHolderAddr,
+            '0',
+            '0',
+            closeGasCost,
+        ).encodeForRecipe()[0],
 
-    sendAction: () => (new dfs.actions.basic.SendTokenAndUnwrapAction(
-        placeHolderAddr,
-        placeHolderAddr,
-        MAXUINT,
-    )).encodeForRecipe()[0],
+    sendAction: () =>
+        new dfs.actions.basic.SendTokenAndUnwrapAction(
+            placeHolderAddr,
+            placeHolderAddr,
+            MAXUINT,
+        ).encodeForRecipe()[0],
 
-    sendRepayFL: ({ flAddr }) => (new dfs.actions.basic.SendTokenAction(
-        placeHolderAddr,
-        flAddr,
-        0,
-    )).encodeForRecipe()[0],
+    sendRepayFL: ({ flAddr }) =>
+        new dfs.actions.basic.SendTokenAction(placeHolderAddr, flAddr, 0).encodeForRecipe()[0],
 };
 
 const callAaveCloseToDebtL2Strategy = async (
@@ -498,17 +484,24 @@ const callAaveCloseToDebtL2Strategy = async (
 
     const closeGasCost = '1000000';
 
-    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
-        withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
-    }));
-    // eslint-disable-next-line max-len
-    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
-        srcTokenInfo, destTokenInfo, swapAmount: MAXUINT,
-    }));
+    actionsCallData.push(
+        aaveV3CloseActionsEncoded.withdrawAction({
+            withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
+        }),
+    );
+    actionsCallData.push(
+        await aaveV3CloseActionsEncoded.sellAction({
+            srcTokenInfo,
+            destTokenInfo,
+            swapAmount: MAXUINT,
+        }),
+    );
     actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
-    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
-        repayAmount: partialAmounts?.repayAmount || MAXUINT,
-    }));
+    actionsCallData.push(
+        aaveV3CloseActionsEncoded.paybackAction({
+            repayAmount: partialAmounts?.repayAmount || MAXUINT,
+        }),
+    );
     actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
 
     triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
@@ -525,9 +518,7 @@ const callAaveCloseToDebtL2Strategy = async (
 
     const gasUsed = await getGasUsed(receipt);
 
-    console.log(
-        `GasUsed callAaveCloseToDebtL2Strategy: ${gasUsed}`,
-    );
+    console.log(`GasUsed callAaveCloseToDebtL2Strategy: ${gasUsed}`);
 
     return receipt;
 };
@@ -548,16 +539,23 @@ const callAaveFLCloseToDebtL2Strategy = async (
     const closeGasCost = '1000000';
 
     actionsCallData.push(aaveV3CloseActionsEncoded.flAction({ flAsset, repayAmount }));
-    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
-        repayAmount: withdrawAmount ? repayAmount : MAXUINT,
-    }));
-    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
-        withdrawAmount: withdrawAmount || MAXUINT,
-    }));
-    // eslint-disable-next-line max-len
-    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
-        srcTokenInfo, destTokenInfo, swapAmount: MAXUINT,
-    }));
+    actionsCallData.push(
+        aaveV3CloseActionsEncoded.paybackAction({
+            repayAmount: withdrawAmount ? repayAmount : MAXUINT,
+        }),
+    );
+    actionsCallData.push(
+        aaveV3CloseActionsEncoded.withdrawAction({
+            withdrawAmount: withdrawAmount || MAXUINT,
+        }),
+    );
+    actionsCallData.push(
+        await aaveV3CloseActionsEncoded.sellAction({
+            srcTokenInfo,
+            destTokenInfo,
+            swapAmount: MAXUINT,
+        }),
+    );
     actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
     actionsCallData.push(aaveV3CloseActionsEncoded.sendRepayFL({ flAddr }));
     actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
@@ -576,9 +574,7 @@ const callAaveFLCloseToDebtL2Strategy = async (
 
     const gasUsed = await getGasUsed(receipt);
 
-    console.log(
-        `GasUsed callAaveCloseToDebtL2Strategy: ${gasUsed}`,
-    );
+    console.log(`GasUsed callAaveCloseToDebtL2Strategy: ${gasUsed}`);
 
     return receipt;
 };
@@ -596,16 +592,24 @@ const callAaveCloseToCollL2Strategy = async (
 
     const closeGasCost = '1000000';
 
-    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
-        withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
-    }));
+    actionsCallData.push(
+        aaveV3CloseActionsEncoded.withdrawAction({
+            withdrawAmount: partialAmounts?.withdrawAmount || MAXUINT,
+        }),
+    );
     actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
-    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
-        srcTokenInfo, destTokenInfo, swapAmount: partialAmounts ? MAXUINT : swapAmount,
-    }));
-    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
-        repayAmount: partialAmounts?.repayAmount || MAXUINT,
-    }));
+    actionsCallData.push(
+        await aaveV3CloseActionsEncoded.sellAction({
+            srcTokenInfo,
+            destTokenInfo,
+            swapAmount: partialAmounts ? MAXUINT : swapAmount,
+        }),
+    );
+    actionsCallData.push(
+        aaveV3CloseActionsEncoded.paybackAction({
+            repayAmount: partialAmounts?.repayAmount || MAXUINT,
+        }),
+    );
     actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
     actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
 
@@ -623,9 +627,7 @@ const callAaveCloseToCollL2Strategy = async (
 
     const gasUsed = await getGasUsed(receipt);
 
-    console.log(
-        `GasUsed callAaveCloseToCollL2Strategy: ${gasUsed}`,
-    );
+    console.log(`GasUsed callAaveCloseToCollL2Strategy: ${gasUsed}`);
 
     return receipt;
 };
@@ -647,16 +649,24 @@ const callAaveFLCloseToCollL2Strategy = async (
     const closeGasCost = '1000000';
 
     actionsCallData.push(aaveV3CloseActionsEncoded.flAction({ repayAmount, flAsset }));
-    actionsCallData.push(aaveV3CloseActionsEncoded.paybackAction({
-        repayAmount: withdrawAmount ? repayAmount : MAXUINT,
-    }));
-    actionsCallData.push(aaveV3CloseActionsEncoded.withdrawAction({
-        withdrawAmount: withdrawAmount || MAXUINT,
-    }));
+    actionsCallData.push(
+        aaveV3CloseActionsEncoded.paybackAction({
+            repayAmount: withdrawAmount ? repayAmount : MAXUINT,
+        }),
+    );
+    actionsCallData.push(
+        aaveV3CloseActionsEncoded.withdrawAction({
+            withdrawAmount: withdrawAmount || MAXUINT,
+        }),
+    );
     actionsCallData.push(aaveV3CloseActionsEncoded.feeTakingAction({ closeGasCost }));
-    actionsCallData.push(await aaveV3CloseActionsEncoded.sellAction({
-        srcTokenInfo, destTokenInfo, swapAmount: withdrawAmount ? MAXUINT : swapAmount,
-    }));
+    actionsCallData.push(
+        await aaveV3CloseActionsEncoded.sellAction({
+            srcTokenInfo,
+            destTokenInfo,
+            swapAmount: withdrawAmount ? MAXUINT : swapAmount,
+        }),
+    );
     actionsCallData.push(aaveV3CloseActionsEncoded.sendRepayFL({ flAddr }));
     actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
     actionsCallData.push(aaveV3CloseActionsEncoded.sendAction());
@@ -675,9 +685,7 @@ const callAaveFLCloseToCollL2Strategy = async (
 
     const gasUsed = await getGasUsed(receipt);
 
-    console.log(
-        `GasUsed callAaveCloseToCollL2Strategy: ${gasUsed}`,
-    );
+    console.log(`GasUsed callAaveCloseToCollL2Strategy: ${gasUsed}`);
 
     return receipt;
 };
@@ -920,14 +928,7 @@ const callCompV3FLBoostL2Strategy = async (
     const flBalancer = new dfs.actions.flashloan.BalancerFlashLoanAction([debtAddr], [boostAmount]);
     const flAction = new dfs.actions.flashloan.FLAction(flBalancer);
     const sellAction = new dfs.actions.basic.SellAction(
-        formatExchangeObj(
-            debtAddr,
-            collAddr,
-            boostAmount,
-            exchangeWrapper,
-            0,
-            3000,
-        ),
+        formatExchangeObj(debtAddr, collAddr, boostAmount, exchangeWrapper, 0, 3000),
         proxyAddr,
         proxyAddr,
     );

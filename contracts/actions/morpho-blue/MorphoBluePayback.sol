@@ -2,9 +2,9 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { MorphoBlueHelper } from "./helpers/MorphoBlueHelper.sol";
-import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
+import { MarketParams } from "../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
 
 /// @title Payback a token to Morpho Blue market
 contract MorphoBluePayback is ActionBase, MorphoBlueHelper {
@@ -29,14 +29,23 @@ contract MorphoBluePayback is ActionBase, MorphoBlueHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.marketParams.loanToken = _parseParamAddr(params.marketParams.loanToken , _paramMapping[0], _subData, _returnValues);
-        params.marketParams.collateralToken = _parseParamAddr(params.marketParams.collateralToken , _paramMapping[1], _subData, _returnValues);
-        params.marketParams.oracle = _parseParamAddr(params.marketParams.oracle , _paramMapping[2], _subData, _returnValues);
-        params.marketParams.irm = _parseParamAddr(params.marketParams.irm , _paramMapping[3], _subData, _returnValues);
-        params.marketParams.lltv = _parseParamUint(params.marketParams.lltv, _paramMapping[4], _subData, _returnValues);
-        params.paybackAmount = _parseParamUint(params.paybackAmount, _paramMapping[5], _subData, _returnValues);
+        params.marketParams.loanToken = _parseParamAddr(
+            params.marketParams.loanToken, _paramMapping[0], _subData, _returnValues
+        );
+        params.marketParams.collateralToken = _parseParamAddr(
+            params.marketParams.collateralToken, _paramMapping[1], _subData, _returnValues
+        );
+        params.marketParams.oracle =
+            _parseParamAddr(params.marketParams.oracle, _paramMapping[2], _subData, _returnValues);
+        params.marketParams.irm =
+            _parseParamAddr(params.marketParams.irm, _paramMapping[3], _subData, _returnValues);
+        params.marketParams.lltv =
+            _parseParamUint(params.marketParams.lltv, _paramMapping[4], _subData, _returnValues);
+        params.paybackAmount =
+            _parseParamUint(params.paybackAmount, _paramMapping[5], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[6], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[7], _subData, _returnValues);
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[7], _subData, _returnValues);
 
         (uint256 amount, bytes memory logData) = _payback(params);
         emit ActionEvent("MorphoBluePayback", logData);
@@ -58,17 +67,18 @@ contract MorphoBluePayback is ActionBase, MorphoBlueHelper {
         if (_params.onBehalf == address(0)) {
             _params.onBehalf = address(this);
         }
-        
-        (uint256 currentDebt, uint256 borrowShares) = getCurrentDebt(_params.marketParams, _params.onBehalf);
+
+        (uint256 currentDebt, uint256 borrowShares) =
+            getCurrentDebt(_params.marketParams, _params.onBehalf);
         bool maxPayback;
-        if (_params.paybackAmount > currentDebt){
+        if (_params.paybackAmount > currentDebt) {
             _params.paybackAmount = currentDebt;
             maxPayback = true;
         }
         _params.marketParams.loanToken.pullTokensIfNeeded(_params.from, _params.paybackAmount);
         _params.marketParams.loanToken.approveToken(address(morphoBlue), _params.paybackAmount);
-        
-        if (maxPayback){
+
+        if (maxPayback) {
             morphoBlue.repay(_params.marketParams, 0, borrowShares, _params.onBehalf, "");
         } else {
             morphoBlue.repay(_params.marketParams, _params.paybackAmount, 0, _params.onBehalf, "");

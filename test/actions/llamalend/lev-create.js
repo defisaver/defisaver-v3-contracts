@@ -2,14 +2,23 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfoByAddress } = require('@defisaver/tokens');
 const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy,
-    setBalance, approve, fetchAmountinUSDPrice, balanceOf,
+    takeSnapshot,
+    revertToSnapshot,
+    getProxy,
+    redeploy,
+    setBalance,
+    approve,
+    fetchAmountinUSDPrice,
+    balanceOf,
     formatMockExchangeObj,
     setNewExchangeWrapper,
     chainIds,
 } = require('../../utils/utils');
 const {
-    getControllers, collateralSupplyAmountInUsd, levBorrowAmountInUsd, supplyToMarket,
+    getControllers,
+    collateralSupplyAmountInUsd,
+    levBorrowAmountInUsd,
+    supplyToMarket,
 } = require('../../utils/llamalend');
 const { llamalendLevCreate } = require('../../utils/actions');
 
@@ -20,7 +29,11 @@ describe('LlamaLend-Lev-Create', function () {
 
     const controllers = getControllers(chainId);
 
-    let senderAcc; let proxy; let snapshot; let view; let mockWrapper;
+    let senderAcc;
+    let proxy;
+    let snapshot;
+    let view;
+    let mockWrapper;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];
@@ -41,7 +54,10 @@ describe('LlamaLend-Lev-Create', function () {
     for (let i = 0; i < controllers.length; i++) {
         const controllerAddr = controllers[i];
         it(`should leverage create a Llamalend position in ${controllerAddr} Llamalend market`, async () => {
-            const controller = await hre.ethers.getContractAt('ILlamaLendController', controllerAddr);
+            const controller = await hre.ethers.getContractAt(
+                'ILlamaLendController',
+                controllerAddr,
+            );
             const collTokenAddr = await controller.collateral_token();
             const debtTokenAddr = await controller.borrowed_token();
             const collToken = getAssetInfoByAddress(collTokenAddr, chainId);
@@ -50,31 +66,27 @@ describe('LlamaLend-Lev-Create', function () {
             if (debtToken.symbol === '?') return;
             await supplyToMarket(controllerAddr, chainId);
             const supplyAmount = fetchAmountinUSDPrice(
-                collToken.symbol, collateralSupplyAmountInUsd,
+                collToken.symbol,
+                collateralSupplyAmountInUsd,
             );
-            const borrowAmount = fetchAmountinUSDPrice(
-                debtToken.symbol, levBorrowAmountInUsd,
-            );
+            const borrowAmount = fetchAmountinUSDPrice(debtToken.symbol, levBorrowAmountInUsd);
             if (supplyAmount === 'Infinity') return;
             if (borrowAmount === 'Infinity') return;
-            const supplyAmountInWei = hre.ethers.utils.parseUnits(
-                supplyAmount, collToken.decimals,
-            );
-            const borrowAmountWei = hre.ethers.utils.parseUnits(
-                borrowAmount, debtToken.decimals,
-            );
-            const exchangeData = await formatMockExchangeObj(
-                debtToken,
-                collToken,
-                borrowAmountWei,
-            );
+            const supplyAmountInWei = hre.ethers.utils.parseUnits(supplyAmount, collToken.decimals);
+            const borrowAmountWei = hre.ethers.utils.parseUnits(borrowAmount, debtToken.decimals);
+            const exchangeData = await formatMockExchangeObj(debtToken, collToken, borrowAmountWei);
 
             await setBalance(collTokenAddr, senderAcc.address, supplyAmountInWei);
             await approve(collTokenAddr, proxy.address, senderAcc);
             const debtTokenBalanceBefore = await balanceOf(debtTokenAddr, senderAcc.address);
             await llamalendLevCreate(
-                proxy, controllerAddr, i, senderAcc.address,
-                supplyAmountInWei, exchangeData, 10,
+                proxy,
+                controllerAddr,
+                i,
+                senderAcc.address,
+                supplyAmountInWei,
+                exchangeData,
+                10,
             );
             const debtTokenBalanceAfter = await balanceOf(debtTokenAddr, senderAcc.address);
             expect(debtTokenBalanceAfter.sub(debtTokenBalanceBefore)).to.be.eq(0);

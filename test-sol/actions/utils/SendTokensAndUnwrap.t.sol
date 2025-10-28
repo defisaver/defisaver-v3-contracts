@@ -3,14 +3,13 @@
 pragma solidity =0.8.24;
 
 import { SendTokensAndUnwrap } from "../../../contracts/actions/utils/SendTokensAndUnwrap.sol";
-import {Addresses } from "../../utils/Addresses.sol";
+import { Addresses } from "../../utils/Addresses.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
 
 contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -98,10 +97,8 @@ contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
         receivers[0] = alice;
         amounts[0] = 10 ether;
 
-        bytes memory executeActionCallData = executeActionCalldata(
-            sendTokensAndUnwrapEncode(tokens, receivers, amounts),
-            false
-        );
+        bytes memory executeActionCallData =
+            executeActionCalldata(sendTokensAndUnwrapEncode(tokens, receivers, amounts), false);
 
         vm.expectRevert();
         wallet.execute(address(cut), executeActionCallData, 0);
@@ -143,9 +140,9 @@ contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
 
         for (uint256 i = 0; i < size; ++i) {
             adaptedAmounts[i] = _isMaxUint256[i] ? type(uint256).max : _amounts[i];
-            
+
             give(_tokens[i], walletAddr, _amounts[i]);
-            
+
             walletBalancesBefore[i] = balanceOf(_tokens[i], walletAddr);
 
             receiverBalancesBefore[i] = _tokens[i] == Addresses.WETH_ADDR
@@ -154,8 +151,7 @@ contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
         }
 
         bytes memory executeActionCallData = executeActionCalldata(
-            sendTokensAndUnwrapEncode(_tokens, _receivers, adaptedAmounts),
-            _isDirect
+            sendTokensAndUnwrapEncode(_tokens, _receivers, adaptedAmounts), _isDirect
         );
 
         wallet.execute(address(cut), executeActionCallData, 0);

@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
@@ -11,7 +11,7 @@ import { DFSLib } from "../../utils/DFSLib.sol";
 /// @title Switch if you'll use tokens for collateral on spark for a market
 contract SparkCollateralSwitch is ActionBase, SparkHelper {
     using TokenUtils for address;
-    
+
     /// @param arrayLength Length of the assetIds and useAsCollateral arrays
     /// @param useDefaultMarket Whether to use the default market
     /// @param assetIds Array of asset ids
@@ -63,8 +63,8 @@ contract SparkCollateralSwitch is ActionBase, SparkHelper {
         internal
         returns (uint256, bytes memory)
     {
-        require (_inputData.arrayLength == _inputData.assetIds.length);
-        require (_inputData.arrayLength == _inputData.useAsCollateral.length);
+        require(_inputData.arrayLength == _inputData.assetIds.length);
+        require(_inputData.arrayLength == _inputData.useAsCollateral.length);
 
         ISparkPool lendingPool = getSparkLendingPool(_inputData.market);
         for (uint256 i = 0; i < _inputData.arrayLength; i++) {
@@ -83,15 +83,16 @@ contract SparkCollateralSwitch is ActionBase, SparkHelper {
     }
 
     function encodeInputs(Params memory _params) public pure returns (bytes memory encodedInput) {
-        require (uint256(_params.arrayLength) == _params.assetIds.length);
-        require (uint256(_params.arrayLength) == _params.useAsCollateral.length);
+        require(uint256(_params.arrayLength) == _params.assetIds.length);
+        require(uint256(_params.arrayLength) == _params.useAsCollateral.length);
 
         encodedInput = bytes.concat(this.executeActionDirectL2.selector);
         encodedInput = bytes.concat(encodedInput, bytes1(_params.arrayLength));
         encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         for (uint256 i = 0; i < _params.arrayLength; i++) {
             encodedInput = bytes.concat(encodedInput, bytes2(_params.assetIds[i]));
-            encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useAsCollateral[i]));
+            encodedInput =
+                bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useAsCollateral[i]));
         }
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
@@ -115,9 +116,9 @@ contract SparkCollateralSwitch is ActionBase, SparkHelper {
         } else {
             params.market = address(
                 bytes20(
-                    _encodedInput[(5 + (params.arrayLength - 1) * 3):(25 +
-                        (params.arrayLength - 1) *
-                        3)]
+                    _encodedInput[
+                        (5 + (params.arrayLength - 1) * 3):(25 + (params.arrayLength - 1) * 3)
+                    ]
                 )
             );
         }

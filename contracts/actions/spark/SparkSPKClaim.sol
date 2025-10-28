@@ -2,8 +2,8 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { ISparkRewards } from "../../interfaces/spark/ISparkRewards.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ISparkRewards } from "../../interfaces/protocols/spark/ISparkRewards.sol";
 
 /// @title Claims SPK token from Spark Rewards contract
 contract SparkSPKClaim is ActionBase {
@@ -55,18 +55,22 @@ contract SparkSPKClaim is ActionBase {
         params = abi.decode(_callData, (Params));
     }
 
-    function _claim(Params memory _params) internal returns (uint256 claimedAmount,bytes memory logData) {
-        claimedAmount = ISparkRewards(_params.rewardContract).claim(
-            _params.epoch,
-            _params.account,
-            _params.token,
-            _params.cumulativeAmount,
-            _params.expectedMerkleRoot,
-            _params.merkleProof
-        );
+    function _claim(Params memory _params)
+        internal
+        returns (uint256 claimedAmount, bytes memory logData)
+    {
+        claimedAmount = ISparkRewards(_params.rewardContract)
+            .claim(
+                _params.epoch,
+                _params.account,
+                _params.token,
+                _params.cumulativeAmount,
+                _params.expectedMerkleRoot,
+                _params.merkleProof
+            );
 
         _params.token.withdrawTokens(_params.to, claimedAmount);
 
-        return (claimedAmount, abi.encode(claimedAmount,_params));
+        return (claimedAmount, abi.encode(claimedAmount, _params));
     }
 }

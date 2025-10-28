@@ -5,28 +5,32 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
 import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { SafeERC20 } from "../../utils/SafeERC20.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { DFSExchangeData } from "../DFSExchangeData.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title Wrapper contract which will be used if offchain exchange used is Paraswap
-contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
-
+contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData, AdminAuth {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
     /// @notice offchainData.callData should be this struct encoded
-    struct ParaswapCalldata{
+    struct ParaswapCalldata {
         bytes realCalldata;
         uint256 offset;
     }
 
     /// @notice Takes order from Paraswap and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    function takeOrder(
-        ExchangeData memory _exData
-    ) override public payable returns (bool success, uint256) {
-        ParaswapCalldata memory paraswapCalldata = abi.decode(_exData.offchainData.callData, (ParaswapCalldata));
+    function takeOrder(ExchangeData memory _exData)
+        public
+        payable
+        override
+        returns (bool success, uint256)
+    {
+        ParaswapCalldata memory paraswapCalldata =
+            abi.decode(_exData.offchainData.callData, (ParaswapCalldata));
 
         // approve paraswap allowance contract
         IERC20(_exData.srcAddr).safeApprove(_exData.offchainData.allowanceTarget, _exData.srcAmount);
@@ -38,13 +42,13 @@ contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
 
         /// @dev the amount of tokens received is checked in DFSExchangeCore
         /// @dev Exchange wrapper contracts should not be used on their own
-        (success, ) = _exData.offchainData.exchangeAddr.call(paraswapCalldata.realCalldata);
+        (success,) = _exData.offchainData.exchangeAddr.call(paraswapCalldata.realCalldata);
         uint256 tokensSwapped = 0;
 
         if (success) {
             // get the current balance of the swapped tokens
             tokensSwapped = _exData.destAddr.getBalance(address(this)) - tokensBefore;
-            if (tokensSwapped == 0){
+            if (tokensSwapped == 0) {
                 revert ZeroTokensSwapped();
             }
         }
@@ -56,5 +60,5 @@ contract ParaswapWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external virtual payable {}
+    receive() external payable virtual { }
 }

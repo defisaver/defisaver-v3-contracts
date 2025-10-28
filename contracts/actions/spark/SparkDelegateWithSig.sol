@@ -3,11 +3,10 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { ISparkDebtToken } from "../../interfaces/spark/ISparkDebtToken.sol";
+import { ISparkDebtToken } from "../../interfaces/protocols/spark/ISparkDebtToken.sol";
 
 /// @title Delegate credit for someone to borrow on user's wallet behalf with his signature
 contract SparkDelegateWithSig is ActionBase {
-
     /// @param debtToken Address of the debt token
     /// @param delegator Address of the delegator
     /// @param delegatee Address of the delegatee
@@ -60,19 +59,17 @@ contract SparkDelegateWithSig is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _delegate(Params memory _params)
-        internal
-        returns (bytes memory logData)
-    {
-        ISparkDebtToken(_params.debtToken).delegationWithSig(
-            _params.delegator, 
-            _params.delegatee,
-            _params.value,
-            _params.deadline, 
-            _params.v, 
-            _params.r, 
-            _params.s
-        );
+    function _delegate(Params memory _params) internal returns (bytes memory logData) {
+        ISparkDebtToken(_params.debtToken)
+            .delegationWithSig(
+                _params.delegator,
+                _params.delegatee,
+                _params.value,
+                _params.deadline,
+                _params.v,
+                _params.r,
+                _params.s
+            );
         logData = abi.encode(_params);
     }
 

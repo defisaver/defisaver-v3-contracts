@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-mixed-operators */
 const { getAssetInfo } = require('@defisaver/tokens');
 const hre = require('hardhat');
 const Dec = require('decimal.js');
@@ -38,7 +36,9 @@ const aaveFlTest = async (flActionContract) => {
         let safe;
         let wallet;
         const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC', 'WBTC', 'USDT', 'YFI', 'LINK', 'MKR'];
-        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => {
+            wallet = isWalletNameDsProxy(w) ? proxy : safe;
+        };
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -62,10 +62,7 @@ const aaveFlTest = async (flActionContract) => {
                     await setBalance(assetInfo.address, flActionContract.address, Float2BN('1', 0));
 
                     const amount = fetchAmountinUSDPrice(tokenSymbol, '5000');
-                    const loanAmount = hre.ethers.utils.parseUnits(
-                        amount,
-                        assetInfo.decimals,
-                    );
+                    const loanAmount = hre.ethers.utils.parseUnits(amount, assetInfo.decimals);
                     const feeAmount = new Dec(amount)
                         .mul(AAVE_FL_FEE)
                         .mul(10 ** assetInfo.decimals)
@@ -111,7 +108,11 @@ const aaveFlTest = async (flActionContract) => {
                             );
                         }
                     }
-                    await setBalance(assetInfo.address, wallet.address, hre.ethers.utils.parseUnits('0', 18));
+                    await setBalance(
+                        assetInfo.address,
+                        wallet.address,
+                        hre.ethers.utils.parseUnits('0', 18),
+                    );
                     await send(assetInfo.address, wallet.address, feeAmount);
                     await executeAction('RecipeExecutor', functionData[1], wallet);
                 });
@@ -129,7 +130,9 @@ const aaveV3FlTest = async (flActionContract) => {
         let safe;
         let wallet;
         const FLASHLOAN_TOKENS = ['WETH', 'DAI', 'USDC', 'USDT'];
-        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => {
+            wallet = isWalletNameDsProxy(w) ? proxy : safe;
+        };
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -148,10 +151,7 @@ const aaveV3FlTest = async (flActionContract) => {
                     await setBalance(assetInfo.address, flActionContract.address, Float2BN('1', 0));
 
                     const amount = fetchAmountinUSDPrice(tokenSymbol, '5000');
-                    const loanAmount = hre.ethers.utils.parseUnits(
-                        amount,
-                        assetInfo.decimals,
-                    );
+                    const loanAmount = hre.ethers.utils.parseUnits(amount, assetInfo.decimals);
                     const feeAmount = new Dec(amount)
                         .mul(AAVE_V3_FL_FEE)
                         .mul(10 ** assetInfo.decimals)
@@ -194,7 +194,11 @@ const aaveV3FlTest = async (flActionContract) => {
                             );
                         }
                     }
-                    await setBalance(assetInfo.address, wallet.address, hre.ethers.utils.parseUnits('0', 18));
+                    await setBalance(
+                        assetInfo.address,
+                        wallet.address,
+                        hre.ethers.utils.parseUnits('0', 18),
+                    );
                     await send(assetInfo.address, wallet.address, feeAmount);
                     await executeAction('RecipeExecutor', functionData[1], wallet);
                 });
@@ -213,7 +217,9 @@ const sparkFlTest = async (flActionContract) => {
         let wallet;
         let sparkFlFee;
         const FLASHLOAN_TOKENS = ['WETH', 'wstETH', 'rETH', 'DAI', 'sDAI'];
-        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => {
+            wallet = isWalletNameDsProxy(w) ? proxy : safe;
+        };
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -237,17 +243,17 @@ const sparkFlTest = async (flActionContract) => {
                         amount = fetchAmountinUSDPrice(tokenSymbol, '2000'); // avoid no liquidity reverts
                     } else {
                         const sdaiPrice = await hre.ethers
-                            .getContractAt('IAggregatorV3', '0xb9E6DBFa4De19CCed908BcbFe1d015190678AB5f')
+                            .getContractAt(
+                                'IAggregatorV3',
+                                '0xb9E6DBFa4De19CCed908BcbFe1d015190678AB5f',
+                            )
                             .then((c) => c.latestAnswer())
                             .then((price) => hre.ethers.utils.formatUnits(price, 8));
-                            // chainlink price feed 8 decimals
+                        // chainlink price feed 8 decimals
                         amount = (5000 / sdaiPrice).toFixed();
                     }
 
-                    const loanAmount = hre.ethers.utils.parseUnits(
-                        amount,
-                        assetInfo.decimals,
-                    );
+                    const loanAmount = hre.ethers.utils.parseUnits(amount, assetInfo.decimals);
 
                     const feeAmount = new Dec(amount)
                         .mul(sparkFlFee)
@@ -293,7 +299,11 @@ const sparkFlTest = async (flActionContract) => {
                             );
                         }
                     }
-                    await setBalance(assetInfo.address, wallet.address, hre.ethers.utils.parseUnits('0', 18));
+                    await setBalance(
+                        assetInfo.address,
+                        wallet.address,
+                        hre.ethers.utils.parseUnits('0', 18),
+                    );
                     await send(assetInfo.address, wallet.address, feeAmount);
                     await executeAction('RecipeExecutor', functionData[1], wallet);
                 });
@@ -311,7 +321,9 @@ const balancerFLTest = async (flActionContract) => {
         let safe;
         let wallet;
         let flBalancerContract;
-        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => {
+            wallet = isWalletNameDsProxy(w) ? proxy : safe;
+        };
 
         before(async () => {
             flBalancerContract = await redeploy('FLBalancer');
@@ -395,7 +407,9 @@ const makerFLTest = async (flActionContract) => {
         let safe;
         let wallet;
         let flMakerContract;
-        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => {
+            wallet = isWalletNameDsProxy(w) ? proxy : safe;
+        };
         const tokenSymbol = 'DAI';
 
         before(async () => {
@@ -413,17 +427,10 @@ const makerFLTest = async (flActionContract) => {
                 await setBalance(assetInfo.address, flActionContract.address, Float2BN('1', 0));
 
                 const amount = fetchAmountinUSDPrice(tokenSymbol, '1000');
-                const loanAmount = hre.ethers.utils.parseUnits(
-                    amount,
-                    assetInfo.decimals,
-                );
+                const loanAmount = hre.ethers.utils.parseUnits(amount, assetInfo.decimals);
                 const feeAmount = '0';
                 const flAction = new dfs.actions.flashloan.FLAction(
-                    new dfs.actions.flashloan.MakerFlashLoanAction(
-                        loanAmount,
-                        nullAddress,
-                        [],
-                    ),
+                    new dfs.actions.flashloan.MakerFlashLoanAction(loanAmount, nullAddress, []),
                 );
                 const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
                     flAction,
@@ -464,10 +471,7 @@ const makerFLTest = async (flActionContract) => {
                 await setBalance(assetInfo.address, flMakerContract.address, Float2BN('1', 0));
 
                 const amount = fetchAmountinUSDPrice(tokenSymbol, '1000');
-                const loanAmount = hre.ethers.utils.parseUnits(
-                    amount,
-                    assetInfo.decimals,
-                );
+                const loanAmount = hre.ethers.utils.parseUnits(amount, assetInfo.decimals);
                 const feeAmount = '0';
                 const flAction = new dfs.actions.flashloan.MakerFlashLoanAction(
                     loanAmount,
@@ -517,7 +521,9 @@ const uniswapV3FlashloanTest = async (flActionContract) => {
         let safe;
         let wallet;
         let fullMathLibrary;
-        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => {
+            wallet = isWalletNameDsProxy(w) ? proxy : safe;
+        };
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -530,13 +536,22 @@ const uniswapV3FlashloanTest = async (flActionContract) => {
 
         const uniPoolInfo = [
             {
-                token0: 'DAI', token1: 'USDC', pool: '0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168', fee: 100,
+                token0: 'DAI',
+                token1: 'USDC',
+                pool: '0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168',
+                fee: 100,
             },
             {
-                token0: 'WBTC', token1: 'WETH', pool: '0x4585FE77225b41b697C938B018E2Ac67Ac5a20c0', fee: 500,
+                token0: 'WBTC',
+                token1: 'WETH',
+                pool: '0x4585FE77225b41b697C938B018E2Ac67Ac5a20c0',
+                fee: 500,
             },
             {
-                token0: 'USDC', token1: 'WETH', pool: '0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640', fee: 500,
+                token0: 'USDC',
+                token1: 'WETH',
+                pool: '0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640',
+                fee: 500,
             },
         ];
 
@@ -560,10 +575,14 @@ const uniswapV3FlashloanTest = async (flActionContract) => {
                         ),
                     );
                     const fee0 = await fullMathLibrary.mulDivRoundingUp(
-                        amount0, uniPoolInfo[j].fee, 1e6,
+                        amount0,
+                        uniPoolInfo[j].fee,
+                        1e6,
                     );
                     const fee1 = await fullMathLibrary.mulDivRoundingUp(
-                        amount1, uniPoolInfo[j].fee, 1e6,
+                        amount1,
+                        uniPoolInfo[j].fee,
+                        1e6,
                     );
                     await setBalance(assetInfo0.address, wallet.address, fee0);
                     await setBalance(assetInfo1.address, wallet.address, fee1);
@@ -598,7 +617,9 @@ const uniswapV3FlashloanTest = async (flActionContract) => {
                         ),
                     );
                     const fee0 = await fullMathLibrary.mulDivRoundingUp(
-                        amount0, uniPoolInfo[j].fee, 1e6,
+                        amount0,
+                        uniPoolInfo[j].fee,
+                        1e6,
                     );
                     await setBalance(assetInfo0.address, wallet.address, fee0);
 
@@ -632,7 +653,9 @@ const uniswapV3FlashloanTest = async (flActionContract) => {
                         ),
                     );
                     const fee1 = await fullMathLibrary.mulDivRoundingUp(
-                        amount1, uniPoolInfo[j].fee, 1e6,
+                        amount1,
+                        uniPoolInfo[j].fee,
+                        1e6,
                     );
                     await setBalance(assetInfo1.address, wallet.address, fee1);
 
@@ -662,7 +685,9 @@ const ghoFLTest = async (flActionContract) => {
         let safe;
         let wallet;
         const tokenSymbol = 'GHO';
-        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => {
+            wallet = isWalletNameDsProxy(w) ? proxy : safe;
+        };
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -679,16 +704,9 @@ const ghoFLTest = async (flActionContract) => {
                 await setBalance(assetInfo.address, flActionContract.address, Float2BN('1', 0));
 
                 const amount = '10000';
-                const loanAmount = hre.ethers.utils.parseUnits(
-                    amount,
-                    assetInfo.decimals,
-                );
+                const loanAmount = hre.ethers.utils.parseUnits(amount, assetInfo.decimals);
                 const flAction = new dfs.actions.flashloan.FLAction(
-                    new dfs.actions.flashloan.GhoFlashLoanAction(
-                        loanAmount,
-                        nullAddress,
-                        [],
-                    ),
+                    new dfs.actions.flashloan.GhoFlashLoanAction(loanAmount, nullAddress, []),
                 );
 
                 const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
@@ -715,7 +733,9 @@ const curveUsdFLTest = async (flActionContract) => {
         let safe;
         let wallet;
         const tokenSymbol = 'crvUSD';
-        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => {
+            wallet = isWalletNameDsProxy(w) ? proxy : safe;
+        };
 
         before(async () => {
             senderAcc = (await hre.ethers.getSigners())[0];
@@ -766,12 +786,11 @@ const flMorphoBlueTest = async (flActionContract) => {
             proxy = await getProxy(senderAcc.address);
             safe = await getProxy(senderAcc.address, true);
         });
-        const amountWeth = hre.ethers.utils.parseUnits(
-            '1',
-            18,
-        );
+        const amountWeth = hre.ethers.utils.parseUnits('1', 18);
         const wethAddr = addrs[network].WETH_ADDRESS;
-        const determineActiveWallet = (w) => { wallet = isWalletNameDsProxy(w) ? proxy : safe; };
+        const determineActiveWallet = (w) => {
+            wallet = isWalletNameDsProxy(w) ? proxy : safe;
+        };
 
         for (let i = 0; i < WALLETS.length; ++i) {
             it(`... should get a WETH MorphoBlue flash loan using ${WALLETS[i]}`, async () => {
@@ -780,10 +799,7 @@ const flMorphoBlueTest = async (flActionContract) => {
                 await setBalance(wethAddr, flActionContract.address, Float2BN('1', 0));
 
                 const flAction = new dfs.actions.flashloan.FLAction(
-                    new dfs.actions.flashloan.MorphoBlueFlashLoanAction(
-                        wethAddr,
-                        amountWeth,
-                    ),
+                    new dfs.actions.flashloan.MorphoBlueFlashLoanAction(wethAddr, amountWeth),
                 );
 
                 const basicFLRecipe = new dfs.Recipe('BasicFLRecipe', [
@@ -832,8 +848,16 @@ const balancerV3FLTest = async (flActionContract) => {
                     const assetInfo2 = getAssetInfo(tokenSymbol2, chainIds[network]);
 
                     // test if balance will brick fl action
-                    await setBalance(assetInfo1.address, flActionContract.address, Float2BN('1', 0));
-                    await setBalance(assetInfo2.address, flActionContract.address, Float2BN('1', 0));
+                    await setBalance(
+                        assetInfo1.address,
+                        flActionContract.address,
+                        Float2BN('1', 0),
+                    );
+                    await setBalance(
+                        assetInfo2.address,
+                        flActionContract.address,
+                        Float2BN('1', 0),
+                    );
 
                     const loanAmount1 = hre.ethers.utils.parseUnits('1000000', assetInfo1.decimals);
                     const loanAmount2 = hre.ethers.utils.parseUnits('5', assetInfo2.decimals);

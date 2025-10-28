@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IDFSRegistry } from "../../interfaces/IDFSRegistry.sol";
-import { IAuth } from "../../interfaces/IAuth.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
+import { IAuth } from "../../interfaces/core/IAuth.sol";
 import { Pausable } from "../../auth/Pausable.sol";
 import { CoreHelper } from "./../helpers/CoreHelper.sol";
-import { ISafe } from "../../interfaces/safe/ISafe.sol";
+import { ISafe } from "../../interfaces/protocols/safe/ISafe.sol";
 
 /// @title SafeModuleAuth Gets safe module auth from users and is callable by the Executor
 contract SafeModuleAuth is Pausable, CoreHelper, IAuth {
@@ -19,10 +19,10 @@ contract SafeModuleAuth is Pausable, CoreHelper, IAuth {
     /// Revert if execution fails when using safe wallet
     error SafeExecutionError();
 
-    modifier onlyExecutor {
+    modifier onlyExecutor() {
         address executorAddr = registry.getAddr(STRATEGY_EXECUTOR_ID);
 
-        if (msg.sender != executorAddr){
+        if (msg.sender != executorAddr) {
             revert SenderNotExecutorError(msg.sender, executorAddr);
         }
 
@@ -34,16 +34,20 @@ contract SafeModuleAuth is Pausable, CoreHelper, IAuth {
     /// @param _safeAddr Address of the users Safe
     /// @param _recipeExecutorAddr Address of the recipe executor supplied by StrategyExecutor
     /// @param _callData Call data of the function to be called
-    function callExecute(
-        address _safeAddr,
-        address _recipeExecutorAddr,
-        bytes memory _callData
-    ) external payable onlyExecutor notPaused {
-       // execute from module does not revert on failure 
-       bool success = ISafe(_safeAddr).execTransactionFromModule(_recipeExecutorAddr, msg.value, _callData, ISafe.Operation.DelegateCall);
+    function callExecute(address _safeAddr, address _recipeExecutorAddr, bytes memory _callData)
+        external
+        payable
+        onlyExecutor
+        notPaused
+    {
+        // execute from module does not revert on failure
+        bool success = ISafe(_safeAddr)
+            .execTransactionFromModule(
+                _recipeExecutorAddr, msg.value, _callData, ISafe.Operation.DelegateCall
+            );
 
-       if (!success) {
+        if (!success) {
             revert SafeExecutionError();
-       }
+        }
     }
 }

@@ -1,15 +1,15 @@
 const hre = require('hardhat');
 const { expect } = require('chai');
-const {
-    takeSnapshot, revertToSnapshot, getProxy, redeploy,
-} = require('../../utils/utils');
+const { takeSnapshot, revertToSnapshot, getProxy, redeploy } = require('../../utils/utils');
 const { MORPHO_BLUE_ADDRESS } = require('../../utils/morpho-blue');
 const { morphoBlueSetAuth } = require('../../utils/actions');
 
 describe('Morpho-Blue-SetAuth', function () {
     this.timeout(80000);
 
-    let senderAcc; let proxy; let snapshot;
+    let senderAcc;
+    let proxy;
+    let snapshot;
 
     before(async () => {
         senderAcc = (await hre.ethers.getSigners())[0];

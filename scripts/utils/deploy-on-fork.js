@@ -1,6 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable import/no-extraneous-dependencies */
-
 const hre = require('hardhat');
 const { redeploy, getOwnerAddr } = require('../../test/utils/utils');
 const { topUp } = require('./fork');

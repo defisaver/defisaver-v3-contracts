@@ -13,7 +13,10 @@ const {
 } = require('../../../utils/utils');
 
 const {
-    createChickenBond, chickenOut, chickenIn, chickenRedeem,
+    createChickenBond,
+    chickenOut,
+    chickenIn,
+    chickenRedeem,
 } = require('../../../utils/actions');
 
 const FIFTEEN_DAYS = 1296000;

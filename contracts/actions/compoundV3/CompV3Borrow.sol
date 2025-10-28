@@ -4,11 +4,10 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
-import { IComet } from "../../interfaces/compoundV3/IComet.sol";
+import { IComet } from "../../interfaces/protocols/compoundV3/IComet.sol";
 
 /// @title Borrow base token from CompoundV3.
 contract CompV3Borrow is ActionBase, CompV3Helper {
-
     /// @param market Main Comet proxy contract that is different for each compound market
     /// @param amount Amount of tokens to be borrowed
     /// @param to The address we are sending the borrowed tokens to
@@ -19,7 +18,7 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
         address to;
         address onBehalf;
     }
-    
+
     /// @inheritdoc ActionBase
     function executeAction(
         bytes memory _callData,
@@ -35,7 +34,8 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
 
         // param was added later on so we check if it's sent
         if (_paramMapping.length == 4) {
-            params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
+            params.onBehalf =
+                _parseParamAddr(params.onBehalf, _paramMapping[3], _subData, _returnValues);
         }
 
         (uint256 withdrawAmount, bytes memory logData) = _borrow(params);
@@ -70,7 +70,8 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
 
         address baseTokenAddress = IComet(_params.market).baseToken();
 
-        IComet(_params.market).withdrawFrom(_params.onBehalf, _params.to, baseTokenAddress, _params.amount);
+        IComet(_params.market)
+            .withdrawFrom(_params.onBehalf, _params.to, baseTokenAddress, _params.amount);
 
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);
@@ -79,5 +80,4 @@ contract CompV3Borrow is ActionBase, CompV3Helper {
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {
         params = abi.decode(_callData, (Params));
     }
-
 }

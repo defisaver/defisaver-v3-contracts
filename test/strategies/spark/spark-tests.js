@@ -2,7 +2,7 @@ const hre = require('hardhat');
 const { expect } = require('chai');
 
 const { configure } = require('@defisaver/sdk');
-const { assets, getAssetInfo, utils: { compare } } = require('@defisaver/tokens');
+const { assets, getAssetInfo, compare } = require('@defisaver/tokens');
 
 const {
     getProxy,
@@ -62,9 +62,7 @@ const {
     callSparkFLCloseToCollStrategy,
 } = require('../utils/strategy-calls');
 
-const {
-    sparkSupply, sparkBorrow,
-} = require('../../utils/actions');
+const { sparkSupply, sparkBorrow } = require('../../utils/actions');
 
 const { RATIO_STATE_OVER } = require('../utils/triggers');
 
@@ -92,23 +90,20 @@ const deployBundles = async (proxy, isFork) => {
 const deployCloseToDebtBundle = async (proxy, isFork = undefined, isL1 = true) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const closeStrategy = isL1 ? createSparkCloseToDebtStrategy()
+    const closeStrategy = isL1
+        ? createSparkCloseToDebtStrategy()
         : createSparkCloseToDebtStrategy();
 
-    const flCloseStrategy = isL1 ? createSparkFLCloseToDebtStrategy()
+    const flCloseStrategy = isL1
+        ? createSparkFLCloseToDebtStrategy()
         : createSparkFLCloseToDebtStrategy();
 
-    const sparkCloseToDebtStrategyId = await createStrategy(
-        ...closeStrategy,
-        false,
-    );
-    const sparkFLCloseToDebtStrategyId = await createStrategy(
-        ...flCloseStrategy,
-        false,
-    );
-    const sparkCloseToDebtBundleId = await createBundle(
-        [sparkCloseToDebtStrategyId, sparkFLCloseToDebtStrategyId],
-    );
+    const sparkCloseToDebtStrategyId = await createStrategy(...closeStrategy, false);
+    const sparkFLCloseToDebtStrategyId = await createStrategy(...flCloseStrategy, false);
+    const sparkCloseToDebtBundleId = await createBundle([
+        sparkCloseToDebtStrategyId,
+        sparkFLCloseToDebtStrategyId,
+    ]);
 
     return sparkCloseToDebtBundleId;
 };
@@ -116,23 +111,20 @@ const deployCloseToDebtBundle = async (proxy, isFork = undefined, isL1 = true) =
 const deployCloseToCollBundle = async (proxy, isFork = undefined, isL1 = true) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const closeStrategy = isL1 ? createSparkCloseToCollStrategy()
+    const closeStrategy = isL1
+        ? createSparkCloseToCollStrategy()
         : createSparkCloseToCollStrategy();
 
-    const flCloseStrategy = isL1 ? createSparkFLCloseToCollStrategy()
+    const flCloseStrategy = isL1
+        ? createSparkFLCloseToCollStrategy()
         : createSparkFLCloseToCollStrategy();
 
-    const sparkCloseToCollStrategyId = await createStrategy(
-        ...closeStrategy,
-        false,
-    );
-    const sparkFLCloseToCollStrategyId = await createStrategy(
-        ...flCloseStrategy,
-        false,
-    );
-    const sparkCloseToCollBundleId = await createBundle(
-        [sparkCloseToCollStrategyId, sparkFLCloseToCollStrategyId],
-    );
+    const sparkCloseToCollStrategyId = await createStrategy(...closeStrategy, false);
+    const sparkFLCloseToCollStrategyId = await createStrategy(...flCloseStrategy, false);
+    const sparkCloseToCollBundleId = await createBundle([
+        sparkCloseToCollStrategyId,
+        sparkFLCloseToCollStrategyId,
+    ]);
 
     return sparkCloseToCollBundleId;
 };
@@ -184,7 +176,10 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
 
             console.log('proxyAddr: ', proxyAddr);
 
-            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET);
+            const sparkMarketContract = await hre.ethers.getContractAt(
+                'IPoolAddressesProvider',
+                addrs[network].SPARK_MARKET,
+            );
             const poolAddress = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
@@ -269,8 +264,10 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
             });
 
             it('... should call Spark Repay strategy', async () => {
-                // eslint-disable-next-line max-len
-                const ratioBefore = await sparkView.getRatio(addrs[network].SPARK_MARKET, proxyAddr);
+                const ratioBefore = await sparkView.getRatio(
+                    addrs[network].SPARK_MARKET,
+                    proxyAddr,
+                );
                 console.log(`Spark position ratio: ${ratioBefore / 1e16}%`);
 
                 const repayAmount = hre.ethers.utils.parseUnits(
@@ -297,8 +294,10 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
             });
 
             it('... should call Spark With FL Repay strategy', async () => {
-                // eslint-disable-next-line max-len
-                const ratioBefore = await sparkView.getRatio(addrs[network].SPARK_MARKET, proxyAddr);
+                const ratioBefore = await sparkView.getRatio(
+                    addrs[network].SPARK_MARKET,
+                    proxyAddr,
+                );
                 console.log(`Spark position ratio: ${ratioBefore / 1e16}%`);
 
                 const targetRatio = hre.ethers.utils.parseUnits('2.2', '18');
@@ -320,7 +319,6 @@ const sparkRepayStrategyTest = async (numTestPairs) => {
                     collAssetInfo.decimals,
                 );
 
-                // eslint-disable-next-line max-len
                 await callSparkFLRepayStrategy(
                     botAcc,
                     strategyExecutor,
@@ -375,7 +373,10 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
 
             console.log('proxyAddr: ', proxyAddr);
 
-            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET);
+            const sparkMarketContract = await hre.ethers.getContractAt(
+                'IPoolAddressesProvider',
+                addrs[network].SPARK_MARKET,
+            );
             const poolAddress = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
@@ -459,8 +460,10 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
             });
 
             it('... should call Spark Boost strategy', async () => {
-                // eslint-disable-next-line max-len
-                const ratioBefore = await sparkView.getRatio(addrs[network].SPARK_MARKET, proxyAddr);
+                const ratioBefore = await sparkView.getRatio(
+                    addrs[network].SPARK_MARKET,
+                    proxyAddr,
+                );
                 console.log(`Spark position ratio: ${ratioBefore / 1e16}%`);
 
                 const boostAmount = hre.ethers.utils.parseUnits(
@@ -487,8 +490,10 @@ const sparkBoostStrategyTest = async (numTestPairs) => {
             });
 
             it('... should call Spark With FL Boost strategy', async () => {
-                // eslint-disable-next-line max-len
-                const ratioBefore = await sparkView.getRatio(addrs[network].SPARK_MARKET, proxyAddr);
+                const ratioBefore = await sparkView.getRatio(
+                    addrs[network].SPARK_MARKET,
+                    proxyAddr,
+                );
                 console.log(`Spark position ratio: ${ratioBefore / 1e16}%`);
 
                 const targetRatio = hre.ethers.utils.parseUnits('1.5', '18');
@@ -580,7 +585,10 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
 
-            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET);
+            const sparkMarketContract = await hre.ethers.getContractAt(
+                'IPoolAddressesProvider',
+                addrs[network].SPARK_MARKET,
+            );
             const poolAddress = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
@@ -596,7 +604,8 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
             await redeploy('GasFeeTaker');
             await redeploy('SendTokenAndUnwrap');
 
-            const { address: mockWrapperAddr } = await getContractFromRegistry('MockExchangeWrapper');
+            const { address: mockWrapperAddr } =
+                await getContractFromRegistry('MockExchangeWrapper');
 
             await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
 
@@ -675,7 +684,10 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
-                const triggerPrice = Float2BN(`${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`, 8);
+                const triggerPrice = Float2BN(
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / 10 ** 8).toFixed(8)}`,
+                    8,
+                );
 
                 ({ subId, strategySub: sub } = await subSparkCloseBundle(
                     proxy,
@@ -697,12 +709,16 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
                 snapshotId4partial = await takeSnapshot();
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
                 );
 
@@ -716,28 +732,46 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    collAssetBalance: e.sub(collAssetBalanceBefore),
-                    collAssetBalanceFloat: BN2Float(
-                        e.sub(collAssetBalanceBefore), collAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        collAssetBalance: e.sub(collAssetBalanceBefore),
+                        collAssetBalanceFloat: BN2Float(
+                            e.sub(collAssetBalanceBefore),
+                            collAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    debtAssetBalance: e.sub(debtAssetBalanceBefore),
-                    debtAssetBalanceFloat: BN2Float(
-                        e.sub(debtAssetBalanceBefore), debtAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        debtAssetBalance: e.sub(debtAssetBalanceBefore),
+                        debtAssetBalanceFloat: BN2Float(
+                            e.sub(debtAssetBalanceBefore),
+                            debtAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 console.log('-----sender coll/debt assets after close-----');
-                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
-                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log(
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
+                );
+                console.log(
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
+                );
                 console.log('---------------------------------------------');
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
@@ -747,8 +781,8 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
                     Float2BN(
                         fetchAmountinUSDPrice(
                             debtAssetInfo.symbol,
-                            USD_COLL_OPEN * (1 - ALLOWED_SLIPPAGE)
-                            - USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST),
+                            USD_COLL_OPEN * (1 - ALLOWED_SLIPPAGE) -
+                                USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST),
                         ),
                         debtAssetInfo.decimals,
                     ),
@@ -759,10 +793,7 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
                 await revertToSnapshot(snapshotId4partial);
 
                 const repayAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        debtAssetInfo.symbol,
-                        USD_DEBT_OPEN * PARTIAL_CLOSE,
-                    ),
+                    fetchAmountinUSDPrice(debtAssetInfo.symbol, USD_DEBT_OPEN * PARTIAL_CLOSE),
                     debtAssetInfo.decimals,
                 );
 
@@ -786,22 +817,34 @@ const sparkCloseToDebtStrategyTest = async (numTestPairs) => {
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
                     collAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    collAssetBalance: e,
-                    collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
-                }));
+                ).then((e) =>
+                    Object({
+                        collAssetBalance: e,
+                        collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
+                    }),
+                );
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
                     debtAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    debtAssetBalance: e,
-                    debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
-                }));
+                ).then((e) =>
+                    Object({
+                        debtAssetBalance: e,
+                        debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
+                    }),
+                );
 
                 console.log('-----sender coll/debt assets after close-----');
-                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
-                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log(
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
+                );
+                console.log(
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
+                );
                 console.log('---------------------------------------------');
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
@@ -864,7 +907,10 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
 
-            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET);
+            const sparkMarketContract = await hre.ethers.getContractAt(
+                'IPoolAddressesProvider',
+                addrs[network].SPARK_MARKET,
+            );
             const poolAddress = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
@@ -882,7 +928,8 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
             await redeploy('SendTokenAndUnwrap');
             await redeploy('SendToken');
 
-            const { address: mockWrapperAddr } = await getContractFromRegistry('MockExchangeWrapper');
+            const { address: mockWrapperAddr } =
+                await getContractFromRegistry('MockExchangeWrapper');
 
             await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
 
@@ -929,10 +976,7 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
                 const reserveDataDebt = await pool.getReserveData(debtAddr);
 
                 const amountDebt = Float2BN(
-                    fetchAmountinUSDPrice(
-                        testPairs[i].debtAsset,
-                        USD_DEBT_OPEN,
-                    ),
+                    fetchAmountinUSDPrice(testPairs[i].debtAsset, USD_DEBT_OPEN),
                     debtAssetInfo.decimals,
                 );
                 debtAssetId = reserveDataDebt.id;
@@ -948,7 +992,10 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
-                const triggerPrice = Float2BN(`${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`, 8);
+                const triggerPrice = Float2BN(
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / 10 ** 8).toFixed(8)}`,
+                    8,
+                );
 
                 ({ subId, strategySub: sub } = await subSparkCloseBundle(
                     proxy,
@@ -978,12 +1025,16 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
                 );
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
                 );
 
@@ -1000,28 +1051,46 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    collAssetBalance: e.sub(collAssetBalanceBefore),
-                    collAssetBalanceFloat: BN2Float(
-                        e.sub(collAssetBalanceBefore), collAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        collAssetBalance: e.sub(collAssetBalanceBefore),
+                        collAssetBalanceFloat: BN2Float(
+                            e.sub(collAssetBalanceBefore),
+                            collAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    debtAssetBalance: e.sub(debtAssetBalanceBefore),
-                    debtAssetBalanceFloat: BN2Float(
-                        e.sub(debtAssetBalanceBefore), debtAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        debtAssetBalance: e.sub(debtAssetBalanceBefore),
+                        debtAssetBalanceFloat: BN2Float(
+                            e.sub(debtAssetBalanceBefore),
+                            debtAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 console.log('-----sender coll/debt assets after close-----');
-                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
-                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log(
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
+                );
+                console.log(
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
+                );
                 console.log('---------------------------------------------');
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
@@ -1031,8 +1100,8 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
                     Float2BN(
                         fetchAmountinUSDPrice(
                             debtAssetInfo.symbol,
-                            USD_COLL_OPEN * (1 - ALLOWED_SLIPPAGE)
-                            - USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST),
+                            USD_COLL_OPEN * (1 - ALLOWED_SLIPPAGE) -
+                                USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST),
                         ),
                         debtAssetInfo.decimals,
                     ),
@@ -1043,10 +1112,7 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
                 await revertToSnapshot(snapshotId4partial);
 
                 const repayAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        debtAssetInfo.symbol,
-                        USD_DEBT_OPEN * PARTIAL_CLOSE,
-                    ),
+                    fetchAmountinUSDPrice(debtAssetInfo.symbol, USD_DEBT_OPEN * PARTIAL_CLOSE),
                     debtAssetInfo.decimals,
                 );
 
@@ -1073,22 +1139,34 @@ const sparkFLCloseToDebtStrategyTest = async (numTestPairs) => {
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
                     collAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    collAssetBalance: e,
-                    collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
-                }));
+                ).then((e) =>
+                    Object({
+                        collAssetBalance: e,
+                        collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
+                    }),
+                );
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
                     debtAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    debtAssetBalance: e,
-                    debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
-                }));
+                ).then((e) =>
+                    Object({
+                        debtAssetBalance: e,
+                        debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
+                    }),
+                );
 
                 console.log('-----sender coll/debt assets after close-----');
-                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
-                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log(
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
+                );
+                console.log(
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
+                );
                 console.log('---------------------------------------------');
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
@@ -1151,7 +1229,10 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
 
-            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET);
+            const sparkMarketContract = await hre.ethers.getContractAt(
+                'IPoolAddressesProvider',
+                addrs[network].SPARK_MARKET,
+            );
             const poolAddress = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
@@ -1168,7 +1249,8 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
             await redeploy('SendTokenAndUnwrap');
             await redeploy('SendToken');
 
-            const { address: mockWrapperAddr } = await getContractFromRegistry('MockExchangeWrapper');
+            const { address: mockWrapperAddr } =
+                await getContractFromRegistry('MockExchangeWrapper');
 
             await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
 
@@ -1247,7 +1329,10 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
-                const triggerPrice = Float2BN(`${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`, 8);
+                const triggerPrice = Float2BN(
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / 10 ** 8).toFixed(8)}`,
+                    8,
+                );
 
                 ({ subId, strategySub: sub } = await subSparkCloseBundle(
                     proxy,
@@ -1267,24 +1352,28 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
 
             it('... should call Spark Close strategy', async () => {
                 snapshotId4partial = await takeSnapshot();
-                // eslint-disable-next-line max-len
                 const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        collAssetInfo.symbol,
-                        usdSwapAmount,
-                    ),
+                    fetchAmountinUSDPrice(collAssetInfo.symbol, usdSwapAmount),
                     collAssetInfo.decimals,
                 );
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address, chainIds[network]) ? ETH_ADDR : debtAddr,
+                    compare(
+                        debtAddr,
+                        getAssetInfo('WETH', chainIds[network]).address,
+                        chainIds[network],
+                    )
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
                 );
 
@@ -1299,35 +1388,55 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    collAssetBalance: e.sub(collAssetBalanceBefore),
-                    collAssetBalanceFloat: BN2Float(
-                        e.sub(collAssetBalanceBefore), collAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        collAssetBalance: e.sub(collAssetBalanceBefore),
+                        collAssetBalanceFloat: BN2Float(
+                            e.sub(collAssetBalanceBefore),
+                            collAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address, chainIds[network]) ? ETH_ADDR : debtAddr,
+                    compare(
+                        debtAddr,
+                        getAssetInfo('WETH', chainIds[network]).address,
+                        chainIds[network],
+                    )
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    debtAssetBalance: e.sub(debtAssetBalanceBefore),
-                    debtAssetBalanceFloat: BN2Float(
-                        e.sub(debtAssetBalanceBefore), debtAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        debtAssetBalance: e.sub(debtAssetBalanceBefore),
+                        debtAssetBalanceFloat: BN2Float(
+                            e.sub(debtAssetBalanceBefore),
+                            debtAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 console.log('-----sender coll/debt assets after close-----');
-                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
-                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log(
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
+                );
+                console.log(
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
+                );
                 console.log('---------------------------------------------');
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
                 expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
-                expect(
-                    collAssetBalance,
-                ).to.be.gt(
+                expect(collAssetBalance).to.be.gt(
                     Float2BN(
                         fetchAmountinUSDPrice(
                             collAssetInfo.symbol,
@@ -1352,20 +1461,14 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
 
                 const usdRepayAmount = USD_DEBT_OPEN * PARTIAL_CLOSE;
                 const repayAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        debtAssetInfo.symbol,
-                        usdRepayAmount,
-                    ),
+                    fetchAmountinUSDPrice(debtAssetInfo.symbol, usdRepayAmount),
                     debtAssetInfo.decimals,
                 );
 
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const usdWithdrawAmount = usdSwapAmount * (1 + EXPECTED_MAX_FEE);
                 const withdrawAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        collAssetInfo.symbol,
-                        usdWithdrawAmount,
-                    ),
+                    fetchAmountinUSDPrice(collAssetInfo.symbol, usdWithdrawAmount),
                     collAssetInfo.decimals,
                 );
 
@@ -1382,22 +1485,34 @@ const sparkCloseToCollStrategyTest = async (numTestPairs) => {
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
                     collAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    collAssetBalance: e,
-                    collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
-                }));
+                ).then((e) =>
+                    Object({
+                        collAssetBalance: e,
+                        collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
+                    }),
+                );
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
                     debtAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    debtAssetBalance: e,
-                    debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
-                }));
+                ).then((e) =>
+                    Object({
+                        debtAssetBalance: e,
+                        debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
+                    }),
+                );
 
                 console.log('-----sender coll/debt assets after close-----');
-                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
-                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log(
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
+                );
+                console.log(
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
+                );
                 console.log('---------------------------------------------');
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
@@ -1461,7 +1576,10 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
 
             console.log({ eoa: senderAcc.address, proxy: proxyAddr });
 
-            const sparkMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', addrs[network].SPARK_MARKET);
+            const sparkMarketContract = await hre.ethers.getContractAt(
+                'IPoolAddressesProvider',
+                addrs[network].SPARK_MARKET,
+            );
             const poolAddress = await sparkMarketContract.getPool();
 
             pool = await hre.ethers.getContractAt('IL2PoolV3', poolAddress);
@@ -1478,7 +1596,8 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
             await redeploy('SendTokenAndUnwrap');
             await redeploy('SendToken');
 
-            const { address: mockWrapperAddr } = await getContractFromRegistry('MockExchangeWrapper');
+            const { address: mockWrapperAddr } =
+                await getContractFromRegistry('MockExchangeWrapper');
 
             await setNewExchangeWrapper(senderAcc, mockWrapperAddr);
 
@@ -1505,10 +1624,7 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
                 snapshotId = await takeSnapshot();
 
                 const amount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        testPairs[i].collAsset,
-                        USD_COLL_OPEN,
-                    ),
+                    fetchAmountinUSDPrice(testPairs[i].collAsset, USD_COLL_OPEN),
                     collAssetInfo.decimals,
                 );
                 await setBalance(collAddr, senderAcc.address, amount);
@@ -1527,10 +1643,7 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
 
                 const reserveDataDebt = await pool.getReserveData(debtAddr);
                 const amountDebt = Float2BN(
-                    fetchAmountinUSDPrice(
-                        testPairs[i].debtAsset,
-                        USD_DEBT_OPEN,
-                    ),
+                    fetchAmountinUSDPrice(testPairs[i].debtAsset, USD_DEBT_OPEN),
                     debtAssetInfo.decimals,
                 );
                 debtAssetId = reserveDataDebt.id;
@@ -1546,7 +1659,10 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
 
                 await setBalance(debtAddr, senderAcc.address, Float2BN('0'));
 
-                const triggerPrice = Float2BN(`${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / (10 ** 8)).toFixed(8)}`, 8);
+                const triggerPrice = Float2BN(
+                    `${((getLocalTokenPrice(collAssetInfo.symbol) * 0.8) / 10 ** 8).toFixed(8)}`,
+                    8,
+                );
 
                 ({ subId, strategySub: sub } = await subSparkCloseBundle(
                     proxy,
@@ -1569,30 +1685,27 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
 
                 const usdRepayAmount = USD_DEBT_OPEN * (1 + EXPECTED_MAX_INTEREST);
                 const repayAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        debtAssetInfo.symbol,
-                        usdRepayAmount,
-                    ),
+                    fetchAmountinUSDPrice(debtAssetInfo.symbol, usdRepayAmount),
                     debtAssetInfo.decimals,
                 );
 
-                // eslint-disable-next-line max-len
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const swapAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        collAssetInfo.symbol,
-                        usdSwapAmount,
-                    ),
+                    fetchAmountinUSDPrice(collAssetInfo.symbol, usdSwapAmount),
                     collAssetInfo.decimals,
                 );
 
                 const collAssetBalanceBefore = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
                 );
 
                 const debtAssetBalanceBefore = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
                 );
 
@@ -1610,35 +1723,51 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
                 );
 
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
-                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : collAddr,
+                    compare(collAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : collAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    collAssetBalance: e.sub(collAssetBalanceBefore),
-                    collAssetBalanceFloat: BN2Float(
-                        e.sub(collAssetBalanceBefore), collAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        collAssetBalance: e.sub(collAssetBalanceBefore),
+                        collAssetBalanceFloat: BN2Float(
+                            e.sub(collAssetBalanceBefore),
+                            collAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
-                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address) ? ETH_ADDR : debtAddr,
+                    compare(debtAddr, getAssetInfo('WETH', chainIds[network]).address)
+                        ? ETH_ADDR
+                        : debtAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    debtAssetBalance: e.sub(debtAssetBalanceBefore),
-                    debtAssetBalanceFloat: BN2Float(
-                        e.sub(debtAssetBalanceBefore), debtAssetInfo.decimals,
-                    ),
-                }));
+                ).then((e) =>
+                    Object({
+                        debtAssetBalance: e.sub(debtAssetBalanceBefore),
+                        debtAssetBalanceFloat: BN2Float(
+                            e.sub(debtAssetBalanceBefore),
+                            debtAssetInfo.decimals,
+                        ),
+                    }),
+                );
 
                 console.log('-----sender coll/debt assets after close-----');
-                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
-                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log(
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
+                );
+                console.log(
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
+                );
                 console.log('---------------------------------------------');
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));
                 expect(await balanceOf(debtAddr, proxyAddr)).to.be.eq(Float2BN('0'));
-                expect(
-                    collAssetBalance,
-                ).to.be.gt(
+                expect(collAssetBalance).to.be.gt(
                     Float2BN(
                         fetchAmountinUSDPrice(
                             collAssetInfo.symbol,
@@ -1663,20 +1792,14 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
 
                 const usdRepayAmount = USD_DEBT_OPEN * PARTIAL_CLOSE;
                 const repayAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        debtAssetInfo.symbol,
-                        usdRepayAmount,
-                    ),
+                    fetchAmountinUSDPrice(debtAssetInfo.symbol, usdRepayAmount),
                     debtAssetInfo.decimals,
                 );
 
                 const usdSwapAmount = usdRepayAmount * (1 + ALLOWED_SLIPPAGE);
                 const usdWithdrawAmount = usdSwapAmount * (1 + EXPECTED_MAX_FEE);
                 const withdrawAmount = Float2BN(
-                    fetchAmountinUSDPrice(
-                        collAssetInfo.symbol,
-                        usdWithdrawAmount,
-                    ),
+                    fetchAmountinUSDPrice(collAssetInfo.symbol, usdWithdrawAmount),
                     collAssetInfo.decimals,
                 );
 
@@ -1696,22 +1819,34 @@ const sparkFLCloseToCollStrategyTest = async (numTestPairs) => {
                 const { collAssetBalance, collAssetBalanceFloat } = await balanceOf(
                     collAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    collAssetBalance: e,
-                    collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
-                }));
+                ).then((e) =>
+                    Object({
+                        collAssetBalance: e,
+                        collAssetBalanceFloat: BN2Float(e, collAssetInfo.decimals),
+                    }),
+                );
 
                 const { debtAssetBalance, debtAssetBalanceFloat } = await balanceOf(
                     debtAddr,
                     senderAcc.address,
-                ).then((e) => Object({
-                    debtAssetBalance: e,
-                    debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
-                }));
+                ).then((e) =>
+                    Object({
+                        debtAssetBalance: e,
+                        debtAssetBalanceFloat: BN2Float(e, debtAssetInfo.decimals),
+                    }),
+                );
 
                 console.log('-----sender coll/debt assets after close-----');
-                console.log(`${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`);
-                console.log(`${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`);
+                console.log(
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
+                );
+                console.log(
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
+                );
                 console.log('---------------------------------------------');
 
                 expect(await balanceOf(collAddr, proxyAddr)).to.be.eq(Float2BN('0'));

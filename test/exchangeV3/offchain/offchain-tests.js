@@ -1,6 +1,3 @@
-/* eslint-disable no-unused-expressions */
-/* eslint-disable camelcase */
-/* eslint-disable max-len */
 const { getAssetInfo } = require('@defisaver/tokens');
 const { expect } = require('chai');
 const hre = require('hardhat');
@@ -23,19 +20,25 @@ const {
     network,
     addToRegistry,
     DAI_ADDR,
-    resetForkToBlock,
 } = require('../../utils/utils');
 
 const { executeAction } = require('../../utils/actions');
 
 const trades = [
     {
-        sellToken: 'WETH', buyToken: 'DAI', amount: '1', fee: 3000,
+        sellToken: 'WETH',
+        buyToken: 'DAI',
+        amount: '1',
+        fee: 3000,
     },
     {
-        sellToken: 'DAI', buyToken: 'WBTC', amount: '30000', fee: 3000,
+        sellToken: 'DAI',
+        buyToken: 'WBTC',
+        amount: '30000',
+        fee: 3000,
     },
 ];
+
 const getKyberApiUrlByChainId = (chainId) => {
     if (chainId === 10) {
         return 'https://aggregator-api.kyberswap.com/optimism/api/v1/';
@@ -46,7 +49,178 @@ const getKyberApiUrlByChainId = (chainId) => {
     if (chainId === 8453) {
         return 'https://aggregator-api.kyberswap.com/base/api/v1/';
     }
+    if (chainId === 59144) {
+        return 'https://aggregator-api.kyberswap.com/linea/api/v1/';
+    }
     return 'https://aggregator-api.kyberswap.com/ethereum/api/v1/';
+};
+
+const bebopTestData = [
+    { sellToken: 'WETH', buyToken: 'USDC', rawAmount: '1' },
+    { sellToken: 'WETH', buyToken: 'USDC', rawAmount: '111' },
+    { sellToken: 'USDC', buyToken: 'WBTC', rawAmount: '30000' },
+    { sellToken: 'USDC', buyToken: 'WETH', rawAmount: '30000' },
+];
+
+const getNetworkNameByChainId = (chainId) => {
+    if (chainId === 10) return 'optimism';
+    if (chainId === 42161) return 'arbitrum';
+    if (chainId === 8453) return 'base';
+    if (chainId === 59144) return 'linea';
+    if (chainId === 9745) return 'plasma';
+    return 'ethereum';
+};
+
+const getBebopQuote = async (sellAssetInfo, buyAssetInfo, amount, bebopWrapper, chainId) => {
+    const options = {
+        method: 'GET',
+        baseURL: `https://api.bebop.xyz/pmm/${getNetworkNameByChainId(chainId)}/v3/quote`,
+        params: {
+            buy_tokens: [buyAssetInfo.address].toString(),
+            sell_tokens: [sellAssetInfo.address].toString(),
+            sell_amounts: amount.toString(),
+            taker_address: bebopWrapper.address,
+            skip_validation: true,
+            gasless: false,
+            source: `${process.env.BEBOP_SOURCE}`,
+        },
+        headers: {
+            'source-auth': `${process.env.BEBOP_SOURCE_AUTH}`,
+        },
+    };
+    const response = await axios(options);
+    return response.data;
+};
+
+const bebopTest = async () => {
+    describe('Dfs-Sell-via-Bebop-Aggregator (Parametrized)', function () {
+        this.timeout(400000);
+
+        let senderAcc;
+        let bebopWrapper;
+        let proxy;
+        let snapshot;
+        const chainId = chainIds[network];
+
+        before(async () => {
+            bebopWrapper = await redeploy('BebopWrapper');
+            senderAcc = (await hre.ethers.getSigners())[0];
+            proxy = await getProxy(senderAcc.address, hre.config.isWalletSafe);
+            await setNewExchangeWrapper(senderAcc, bebopWrapper.address);
+        });
+
+        beforeEach(async () => {
+            snapshot = await takeSnapshot();
+        });
+
+        afterEach(async () => {
+            await revertToSnapshot(snapshot);
+        });
+
+        bebopTestData.forEach(({ sellToken, buyToken, rawAmount }) => {
+            describe(`${sellToken} -> ${buyToken} | Amount: ${rawAmount}`, () => {
+                let exchangeObject;
+                let amount;
+                let sellAssetInfo;
+                let buyAssetInfo;
+                let buyBalanceBefore;
+                let sellBalanceBefore;
+
+                beforeEach(async () => {
+                    sellAssetInfo = getAssetInfo(sellToken, chainId);
+                    buyAssetInfo = getAssetInfo(buyToken, chainId);
+                    amount = hre.ethers.utils.parseUnits(rawAmount, sellAssetInfo.decimals);
+
+                    await setBalance(sellAssetInfo.address, senderAcc.address, amount);
+                    await approve(sellAssetInfo.address, proxy.address);
+
+                    buyBalanceBefore = await balanceOf(buyAssetInfo.address, senderAcc.address);
+                    sellBalanceBefore = await balanceOf(sellAssetInfo.address, senderAcc.address);
+
+                    const priceObject = await getBebopQuote(
+                        sellAssetInfo,
+                        buyAssetInfo,
+                        amount,
+                        bebopWrapper,
+                        chainId,
+                    );
+                    const allowanceTarget = priceObject.tx.to;
+                    const price = 1; // just for testing, anything bigger than 0 triggers offchain if
+                    const protocolFee = 0;
+                    const callData = priceObject.tx.data;
+
+                    const partialFillOffset = (10 + priceObject.partialFillOffset * 64) / 2 - 1; //  https://docs.bebop.xyz/bebop/bebop-api-pmm-rfq/rfq-api-endpoints/trade/self-execute-order#partial-fills
+                    const specialCalldata = hre.ethers.utils.defaultAbiCoder.encode(
+                        ['(bytes,uint256)'],
+                        [[callData, partialFillOffset]],
+                    );
+
+                    exchangeObject = formatExchangeObjForOffchain(
+                        sellAssetInfo.address,
+                        buyAssetInfo.address,
+                        amount,
+                        bebopWrapper.address,
+                        allowanceTarget,
+                        allowanceTarget,
+                        price,
+                        protocolFee,
+                        specialCalldata,
+                    );
+
+                    await addToExchangeAggregatorRegistry(senderAcc, allowanceTarget);
+                });
+
+                it(`should sell ${sellToken} for ${buyToken} (single action)`, async () => {
+                    const sellAction = new dfs.actions.basic.SellAction(
+                        exchangeObject,
+                        senderAcc.address,
+                        senderAcc.address,
+                    );
+                    const functionData = sellAction.encodeForDsProxyCall()[1];
+                    await executeAction('DFSSell', functionData, proxy);
+
+                    const buyBalanceAfter = await balanceOf(
+                        buyAssetInfo.address,
+                        senderAcc.address,
+                    );
+                    const sellBalanceAfter = await balanceOf(
+                        sellAssetInfo.address,
+                        senderAcc.address,
+                    );
+                    expect(buyBalanceAfter).to.be.gt(buyBalanceBefore);
+                    expect(sellBalanceAfter).to.be.lt(sellBalanceBefore);
+                });
+
+                it(`should sell ${sellToken} for ${buyToken} (recipe)`, async () => {
+                    const sellRecipe = new dfs.Recipe('SellRecipe', [
+                        new dfs.actions.basic.PullTokenAction(
+                            sellAssetInfo.address,
+                            senderAcc.address,
+                            amount.toString(),
+                        ),
+                        new dfs.actions.basic.SellAction(
+                            exchangeObject,
+                            proxy.address,
+                            senderAcc.address,
+                        ),
+                    ]);
+                    const functionData = sellRecipe.encodeForDsProxyCall()[1];
+                    await executeAction('RecipeExecutor', functionData, proxy, amount);
+
+                    const buyBalanceAfter = await balanceOf(
+                        buyAssetInfo.address,
+                        senderAcc.address,
+                    );
+                    const sellBalanceAfter = await balanceOf(
+                        sellAssetInfo.address,
+                        senderAcc.address,
+                    );
+                    expect(buyBalanceAfter).to.be.gt(buyBalanceBefore);
+                    expect(sellBalanceAfter).to.be.lt(sellBalanceBefore);
+                });
+            });
+        });
+    });
 };
 
 const kyberTest = async () => {
@@ -60,7 +234,10 @@ const kyberTest = async () => {
         let snapshot;
 
         before(async () => {
-            await addToRegistry('KyberInputScalingHelper', '0x2f577A41BeC1BE1152AeEA12e73b7391d15f655D');
+            await addToRegistry(
+                'KyberInputScalingHelper',
+                '0x2f577A41BeC1BE1152AeEA12e73b7391d15f655D',
+            );
             await redeploy('DFSSell');
             await redeploy('RecipeExecutor');
             await redeploy('PullToken');
@@ -99,7 +276,9 @@ const kyberTest = async () => {
                 const options = {
                     method: 'GET',
                     baseURL: baseUrl,
-                    url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${buyAssetInfo.address}&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
+                    url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${
+                        buyAssetInfo.address
+                    }&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
                     headers,
                 };
                 const priceObject = await axios(options).then((response) => response.data.data);
@@ -140,7 +319,9 @@ const kyberTest = async () => {
                 // test single action so no changing of amount
 
                 const sellAction = new dfs.actions.basic.SellAction(
-                    exchangeObject, senderAcc.address, senderAcc.address,
+                    exchangeObject,
+                    senderAcc.address,
+                    senderAcc.address,
                 );
                 const functionData = sellAction.encodeForDsProxyCall()[1];
                 await executeAction('DFSSell', functionData, proxy);
@@ -166,7 +347,9 @@ const kyberTest = async () => {
                 const options = {
                     method: 'GET',
                     baseURL: baseUrl,
-                    url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${buyAssetInfo.address}&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
+                    url: `routes?tokenIn=${sellAssetInfo.address}&tokenOut=${
+                        buyAssetInfo.address
+                    }&amountIn=${amount.toString()}&saveGas=false&gasInclude=true&x-client-id=${clientId}`,
                     headers,
                 };
                 const priceObject = await axios(options).then((response) => response.data.data);
@@ -207,9 +390,15 @@ const kyberTest = async () => {
                 await addToExchangeAggregatorRegistry(senderAcc, priceObject.routerAddress);
                 // test recipe
                 const sellRecipe = new dfs.Recipe('SellRecipe', [
-                    new dfs.actions.basic.PullTokenAction(sellAssetInfo.address, senderAcc.address, amount),
+                    new dfs.actions.basic.PullTokenAction(
+                        sellAssetInfo.address,
+                        senderAcc.address,
+                        amount,
+                    ),
                     new dfs.actions.basic.SellAction(
-                        exchangeObject, proxy.address, senderAcc.address,
+                        exchangeObject,
+                        proxy.address,
+                        senderAcc.address,
                     ),
                 ]);
                 const functionData = sellRecipe.encodeForDsProxyCall()[1];
@@ -287,13 +476,19 @@ const paraswapTest = async () => {
             const protocolFee = 0;
             const callData = resultObject.data;
 
-            let amountInHex = hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [priceObject.srcAmount]);
+            let amountInHex = hre.ethers.utils.defaultAbiCoder.encode(
+                ['uint256'],
+                [priceObject.srcAmount],
+            );
             amountInHex = amountInHex.slice(2);
 
             let offset = callData.toString().indexOf(amountInHex);
             offset = offset / 2 - 1;
 
-            const paraswapSpecialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes,uint256)'], [[callData, offset]]);
+            const paraswapSpecialCalldata = hre.ethers.utils.defaultAbiCoder.encode(
+                ['(bytes,uint256)'],
+                [[callData, offset]],
+            );
 
             exchangeObject = formatExchangeObjForOffchain(
                 sellAssetInfo.address,
@@ -320,7 +515,9 @@ const paraswapTest = async () => {
 
         it('... should try to sell WETH for DAI with offchain calldata (Paraswap)', async () => {
             const sellAction = new dfs.actions.basic.SellAction(
-                exchangeObject, senderAcc.address, senderAcc.address,
+                exchangeObject,
+                senderAcc.address,
+                senderAcc.address,
             );
 
             const functionData = sellAction.encodeForDsProxyCall()[1];
@@ -334,10 +531,12 @@ const paraswapTest = async () => {
         it('... should try to sell WETH for DAI with offchain calldata (Paraswap) in a recipe', async () => {
             // test recipe
             const sellRecipe = new dfs.Recipe('SellRecipe', [
-                new dfs.actions.basic.PullTokenAction(sellAssetInfo.address, senderAcc.address, amount.toString()),
-                new dfs.actions.basic.SellAction(
-                    exchangeObject, proxy.address, senderAcc.address,
+                new dfs.actions.basic.PullTokenAction(
+                    sellAssetInfo.address,
+                    senderAcc.address,
+                    amount.toString(),
                 ),
+                new dfs.actions.basic.SellAction(exchangeObject, proxy.address, senderAcc.address),
             ]);
             const functionData = sellRecipe.encodeForDsProxyCall()[1];
 
@@ -386,12 +585,13 @@ const oneInchTest = async () => {
             const options = {
                 method: 'GET',
                 baseURL: 'https://api.1inch.dev/swap',
-                url: `/v6.0/${chainId}/swap?src=${sellAssetInfo.address}&dst=${buyAssetInfo.address}&amount=${amount}&from=${oneInchWrapper.address}`
-                + '&slippage=1'
-                + '&usePatching=true'
-                + '&disableEstimate=true'
-                + '&allowPartialFill=false'
-                + '&includeProtocols=true',
+                url:
+                    `/v6.0/${chainId}/swap?src=${sellAssetInfo.address}&dst=${buyAssetInfo.address}&amount=${amount}&from=${oneInchWrapper.address}` +
+                    '&slippage=1' +
+                    '&usePatching=true' +
+                    '&disableEstimate=true' +
+                    '&allowPartialFill=false' +
+                    '&includeProtocols=true',
 
                 headers: {
                     Authorization: `Bearer ${process.env.ONE_INCH_KEY}`,
@@ -413,7 +613,9 @@ const oneInchTest = async () => {
 
             const sourceStr = callData;
             const searchStr = amountInHex.toString();
-            const indexes = [...sourceStr.matchAll(new RegExp(searchStr, 'gi'))].map((a) => a.index);
+            const indexes = [...sourceStr.matchAll(new RegExp(searchStr, 'gi'))].map(
+                (a) => a.index,
+            );
 
             const offsets = [];
 
@@ -421,7 +623,10 @@ const oneInchTest = async () => {
                 offsets[i] = indexes[i] / 2 - 1;
             }
 
-            const specialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes,uint256[])'], [[callData, offsets]]);
+            const specialCalldata = hre.ethers.utils.defaultAbiCoder.encode(
+                ['(bytes,uint256[])'],
+                [[callData, offsets]],
+            );
 
             exchangeObject = formatExchangeObjForOffchain(
                 sellAssetInfo.address,
@@ -448,7 +653,9 @@ const oneInchTest = async () => {
 
         it('... should try to sell WETH for DAI with offchain calldata (1inch)', async () => {
             const sellAction = new dfs.actions.basic.SellAction(
-                exchangeObject, senderAcc.address, senderAcc.address,
+                exchangeObject,
+                senderAcc.address,
+                senderAcc.address,
             );
             const functionData = sellAction.encodeForDsProxyCall()[1];
 
@@ -461,10 +668,12 @@ const oneInchTest = async () => {
         it('... should try to sell WETH for DAI with offchain calldata (1inch) in a recipe', async () => {
             // test recipe
             const sellRecipe = new dfs.Recipe('SellRecipe', [
-                new dfs.actions.basic.PullTokenAction(sellAssetInfo.address, senderAcc.address, amount.toString()),
-                new dfs.actions.basic.SellAction(
-                    exchangeObject, proxy.address, senderAcc.address,
+                new dfs.actions.basic.PullTokenAction(
+                    sellAssetInfo.address,
+                    senderAcc.address,
+                    amount.toString(),
                 ),
+                new dfs.actions.basic.SellAction(exchangeObject, proxy.address, senderAcc.address),
             ]);
             const functionData = sellRecipe.encodeForDsProxyCall()[1];
 
@@ -511,7 +720,11 @@ const zeroxTest = async () => {
             const options = {
                 method: 'GET',
                 baseURL: 'https://api.0x.org',
-                url: `/swap/allowance-holder/quote?chainId=${chainId}&sellToken=${sellAssetInfo.address}&buyToken=${buyAssetInfo.address}&sellAmount=${sellAmount.toString()}&taker=${zeroxWrapper}`,
+                url: `/swap/allowance-holder/quote?chainId=${chainId}&sellToken=${
+                    sellAssetInfo.address
+                }&buyToken=${
+                    buyAssetInfo.address
+                }&sellAmount=${sellAmount.toString()}&taker=${zeroxWrapper}`,
                 headers: {
                     '0x-api-key': `${process.env.ZEROX_API_KEY}`,
                     '0x-version': 'v2',
@@ -539,7 +752,9 @@ const zeroxTest = async () => {
             await addToExchangeAggregatorRegistry(senderAcc, allowanceTarget);
 
             const sellAction = new dfs.actions.basic.SellAction(
-                exchangeObject, senderAcc.address, senderAcc.address,
+                exchangeObject,
+                senderAcc.address,
+                senderAcc.address,
             );
 
             const functionData = sellAction.encodeForDsProxyCall()[1];
@@ -643,7 +858,10 @@ const odosTest = async () => {
             let offset = callData.toString().indexOf(amountInHex.toLowerCase());
             offset = offset / 2 - 1;
 
-            const specialCalldata = hre.ethers.utils.defaultAbiCoder.encode(['(bytes,uint256)'], [[callData, offset]]);
+            const specialCalldata = hre.ethers.utils.defaultAbiCoder.encode(
+                ['(bytes,uint256)'],
+                [[callData, offset]],
+            );
 
             exchangeObject = formatExchangeObjForOffchain(
                 sellAssetInfo.address,
@@ -670,7 +888,9 @@ const odosTest = async () => {
 
         it('... should try to sell WETH for DAI with offchain calldata (Odos)', async () => {
             const sellAction = new dfs.actions.basic.SellAction(
-                exchangeObject, senderAcc.address, senderAcc.address,
+                exchangeObject,
+                senderAcc.address,
+                senderAcc.address,
             );
             const functionData = sellAction.encodeForDsProxyCall()[1];
 
@@ -683,10 +903,12 @@ const odosTest = async () => {
         it('... should try to sell WETH for DAI with offchain calldata (Odos) in a recipe', async () => {
             // test recipe
             const sellRecipe = new dfs.Recipe('SellRecipe', [
-                new dfs.actions.basic.PullTokenAction(sellAssetInfo.address, senderAcc.address, amount.toString()),
-                new dfs.actions.basic.SellAction(
-                    exchangeObject, proxy.address, senderAcc.address,
+                new dfs.actions.basic.PullTokenAction(
+                    sellAssetInfo.address,
+                    senderAcc.address,
+                    amount.toString(),
                 ),
+                new dfs.actions.basic.SellAction(exchangeObject, proxy.address, senderAcc.address),
             ]);
             const functionData = sellRecipe.encodeForDsProxyCall()[1];
 
@@ -706,23 +928,23 @@ const pendleRouterTest = async () => {
         const testSwaps = [
             {
                 sellToken: DAI_ADDR,
-                buyToken: '0x50d2c7992b802eef16c04feadab310f31866a545', // PT_MAY25_eUSDe
-                pendleMarket: '0x85667e484a32d884010cf16427d90049ccf46e97',
+                buyToken: '0x62c6e813b9589c3631ba0cdb013acdb8544038b7', // PT USDe Nov
+                pendleMarket: '0x4eaa571eafcd96f51728756bd7f396459bb9b869',
             },
             {
                 buyToken: DAI_ADDR,
-                sellToken: '0x50d2c7992b802eef16c04feadab310f31866a545', // PT_MAY25_eUSDe
-                pendleMarket: '0x85667e484a32d884010cf16427d90049ccf46e97',
+                sellToken: '0x62c6e813b9589c3631ba0cdb013acdb8544038b7', // PT USDe Nov
+                pendleMarket: '0x4eaa571eafcd96f51728756bd7f396459bb9b869',
             },
             {
                 sellToken: DAI_ADDR,
-                buyToken: '0xb7de5dfcb74d25c2f21841fbd6230355c50d9308', // PT_MAY25_sUSDe
-                pendleMarket: '0xb162b764044697cf03617c2efbcb1f42e31e4766',
+                buyToken: '0xe6a934089bbee34f832060ce98848359883749b3', // PT sUSDe Nov
+                pendleMarket: '0xb6ac3d5da138918ac4e84441e924a20daa60dbdd',
             },
             {
                 buyToken: DAI_ADDR,
-                sellToken: '0xb7de5dfcb74d25c2f21841fbd6230355c50d9308', // PT_MAY25_sUSDe
-                pendleMarket: '0xb162b764044697cf03617c2efbcb1f42e31e4766',
+                sellToken: '0xe6a934089bbee34f832060ce98848359883749b3', // PT sUSDe Nov
+                pendleMarket: '0xb6ac3d5da138918ac4e84441e924a20daa60dbdd',
             },
         ];
 
@@ -777,7 +999,10 @@ const pendleRouterTest = async () => {
             const price = 1; // just for testing, anything bigger than 0 triggers offchain if
             const protocolFee = 0;
             it(`... should try to sell ${testSwap.sellToken} for ${testSwap.buyToken} with offchain calldata (Pendle) action direct`, async () => {
-                const pendleMarketContract = await hre.ethers.getContractAt('IPendleMarket', testSwap.pendleMarket);
+                const pendleMarketContract = await hre.ethers.getContractAt(
+                    'IPendleMarket',
+                    testSwap.pendleMarket,
+                );
                 const isExpired = await pendleMarketContract.isExpired();
                 if (isExpired) {
                     console.log('Pendle market is expired. Skipping test...');
@@ -791,8 +1016,8 @@ const pendleRouterTest = async () => {
 
                 const options = {
                     method: 'GET',
-                    baseURL: `https://api-v2.pendle.finance/core/v1/sdk/${chainId}/`,
-                    url: `markets/${testSwap.pendleMarket}/swap?receiver=${receiver}&slippage=${slippage}&enableAggregator=${enableAggregator}&tokenIn=${tokenIn}&tokenOut=${tokenOut}&amountIn=${amountIn}`,
+                    baseURL: `https://api-v2.pendle.finance/core/v2/sdk/${chainId}/`,
+                    url: `convert?receiver=${receiver}&slippage=${slippage}&enableAggregator=${enableAggregator}&tokensIn=${tokenIn}&tokensOut=${tokenOut}&amountsIn=${amountIn}`,
                 };
                 const res = await axios(options);
 
@@ -805,7 +1030,7 @@ const pendleRouterTest = async () => {
                     allowanceTarget,
                     price,
                     protocolFee,
-                    res.data.tx.data, /* calldata */
+                    res.data.routes[0].tx.data /* calldata */,
                 );
 
                 const sellActionNoFee = new dfs.actions.basic.SellNoFeeAction(
@@ -829,7 +1054,10 @@ const pendleRouterTest = async () => {
                 await validateNoTokensLeftOnProxy(sellAsset, buyAsset);
             });
             it(`... should try to sell ${testSwap.sellToken} for ${testSwap.buyToken} with offchain calldata (Pendle) in a recipe`, async () => {
-                const pendleMarketContract = await hre.ethers.getContractAt('IPendleMarket', testSwap.pendleMarket);
+                const pendleMarketContract = await hre.ethers.getContractAt(
+                    'IPendleMarket',
+                    testSwap.pendleMarket,
+                );
                 const isExpired = await pendleMarketContract.isExpired();
                 if (isExpired) {
                     console.log('Pendle market is expired. Skipping test...');
@@ -843,8 +1071,8 @@ const pendleRouterTest = async () => {
 
                 const options = {
                     method: 'GET',
-                    baseURL: `https://api-v2.pendle.finance/core/v1/sdk/${chainId}/`,
-                    url: `markets/${testSwap.pendleMarket}/swap?receiver=${receiver}&slippage=${slippage}&enableAggregator=${enableAggregator}&tokenIn=${tokenIn}&tokenOut=${tokenOut}&amountIn=${amountIn}`,
+                    baseURL: `https://api-v2.pendle.finance/core/v2/sdk/${chainId}/`,
+                    url: `convert?receiver=${receiver}&slippage=${slippage}&enableAggregator=${enableAggregator}&tokensIn=${tokenIn}&tokensOut=${tokenOut}&amountsIn=${amountIn}`,
                 };
                 const res = await axios(options);
 
@@ -857,7 +1085,7 @@ const pendleRouterTest = async () => {
                     allowanceTarget,
                     price,
                     protocolFee,
-                    res.data.tx.data, /* calldata */
+                    res.data.routes[0].tx.data /* calldata */,
                 );
 
                 const sellRecipe = new dfs.Recipe('SellRecipeNoFee', [
@@ -894,6 +1122,7 @@ const offchainExchangeFullTest = async () => {
     await zeroxTest();
     await odosTest();
     await pendleRouterTest();
+    await bebopTest();
 };
 
 module.exports = {
@@ -904,4 +1133,5 @@ module.exports = {
     zeroxTest,
     odosTest,
     pendleRouterTest,
+    bebopTest,
 };

@@ -3,12 +3,12 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "./../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Action for withdrawing tokens from DSA
 contract InstPullTokens is ActionBase {
     using TokenUtils for address;
-    
+
     /// @param dsaAddress address of the DSA
     /// @param tokens array of addresses of the tokens to be withdrawn
     /// @param amounts array of amounts of the tokens to be withdrawn
@@ -49,17 +49,19 @@ contract InstPullTokens is ActionBase {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _pullTokens(Params memory _inputData) internal returns (bytes memory logData) {
-        require (_inputData.to != address(0), "Receiver address can't be burn address");
+        require(_inputData.to != address(0), "Receiver address can't be burn address");
         bytes memory spellData = _createSpell(_inputData);
-        (bool success, ) = _inputData.dsaAddress.call(spellData);
+        (bool success,) = _inputData.dsaAddress.call(spellData);
 
         require(success, "Withdrawing tokens from DSA failed");
-    
+
         logData = abi.encode(_inputData);
     }
 
     function _createSpell(Params memory _inputData) internal view returns (bytes memory) {
-        require(_inputData.amounts.length == _inputData.tokens.length, "Arrays must be of the same size");
+        require(
+            _inputData.amounts.length == _inputData.tokens.length, "Arrays must be of the same size"
+        );
 
         uint256 numOfTokens = _inputData.tokens.length;
 
@@ -68,7 +70,7 @@ contract InstPullTokens is ActionBase {
         address _origin = address(this);
 
         // connects dsaAccount with BASIC connector and transfers all tokens
-        for (uint256 i = 0; i < numOfTokens; i++){
+        for (uint256 i = 0; i < numOfTokens; i++) {
             _targetNames[i] = "BASIC-A";
             _data[i] = abi.encodeWithSignature(
                 "withdraw(address,uint256,address,uint256,uint256)",
@@ -80,7 +82,8 @@ contract InstPullTokens is ActionBase {
             );
         }
 
-        return abi.encodeWithSignature("cast(string[],bytes[],address)", _targetNames, _data, _origin);
+        return
+            abi.encodeWithSignature("cast(string[],bytes[],address)", _targetNames, _data, _origin);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

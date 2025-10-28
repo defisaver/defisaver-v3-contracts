@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 const {
@@ -40,12 +39,14 @@ describe('Safe-Create-Test', () => {
 
                 const tx = await deploySafe(masterCopyAddress, setupArgs, saltNonce);
 
-                const deployedSafe = `0x${tx.logs.find(
-                    (log) => log.topics.includes(SAFE_CONSTANTS.PROXY_CREATED_TOPIC_0),
-                ).topics[1].slice(26)}`;
+                const deployedSafe = `0x${tx.logs
+                    .find((log) => log.topics.includes(SAFE_CONSTANTS.PROXY_CREATED_TOPIC_0))
+                    .topics[1].slice(26)}`;
 
                 expect(deployedSafe).to.be.eq(predictedAddress);
-                const owners = await ethers.getContractAt('ISafe', predictedAddress).then((e) => e.getOwners());
+                const owners = await ethers
+                    .getContractAt('ISafe', predictedAddress)
+                    .then((e) => e.getOwners());
                 expect(owners.length).to.be.eq(1);
                 expect(owners[0]).to.be.eq(signer.address);
 
@@ -55,11 +56,12 @@ describe('Safe-Create-Test', () => {
     });
 
     it('... should fail to copy Safe deployment  the same chain', async () => {
-        await Promise.all(deployedSafes.map(async (safeAddress) => {
-            const { masterCopyAddress, setupArgs, saltNonce } = await getSafeCreationArgs(safeAddress);
-            return expect(
-                deploySafe(masterCopyAddress, setupArgs, saltNonce),
-            ).to.be.reverted;
-        }));
+        await Promise.all(
+            deployedSafes.map(async (safeAddress) => {
+                const { masterCopyAddress, setupArgs, saltNonce } =
+                    await getSafeCreationArgs(safeAddress);
+                return expect(deploySafe(masterCopyAddress, setupArgs, saltNonce)).to.be.reverted;
+            }),
+        );
     });
 });

@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVault } from "../../../../interfaces/fluid/vaults/IFluidVault.sol";
-import { IFluidVaultT3 } from "../../../../interfaces/fluid/vaults/IFluidVaultT3.sol";
-import { IFluidVaultT4 } from "../../../../interfaces/fluid/vaults/IFluidVaultT4.sol";
+import { IFluidVault } from "../../../../interfaces/protocols/fluid/vaults/IFluidVault.sol";
+import { IFluidVaultT3 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT3.sol";
+import { IFluidVaultT4 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT4.sol";
 import { FluidDexModel } from "../../helpers/FluidDexModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
 import { FluidDexTokensUtils } from "../../helpers/FluidDexTokensUtils.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidPaybackDexLogic - Implements the payback of tokens to Fluid DEX
@@ -51,13 +51,14 @@ library FluidPaybackDexLogic {
         IFluidVault.Tokens memory _tokens
     ) internal returns (uint256 exactDebtToken0Pulled) {
         // We always pull maximum amount of token 0 that user allowed and refund any dust amount later
-        FluidDexTokensUtils.PulledTokensData memory vars = FluidDexTokensUtils.pullTokensIfNeededWithApproval(
-            _tokens,
-            _data.from,
-            _data.vault,
-            _data.variableData.maxAmountToPull,
-            0 /* amount1 */
-        );
+        FluidDexTokensUtils.PulledTokensData memory vars =
+            FluidDexTokensUtils.pullTokensIfNeededWithApproval(
+                _tokens,
+                _data.from,
+                _data.vault,
+                _data.variableData.maxAmountToPull,
+                0 /* amount1 */
+            );
 
         uint256 msgValue = vars.isToken0Native ? vars.amount0 : 0;
 
@@ -83,7 +84,7 @@ library FluidPaybackDexLogic {
                 0, /* debtToken1MinMax_ */
                 address(0) /* to */
             );
-        
+
         // See IFluidVaultT3.operatePerfect and IFluidVaultT4.operatePerfect for return values indexing.
         exactDebtToken0Pulled = uint256(-retVals[isT3Vault ? 2 : 4]);
 
@@ -109,13 +110,15 @@ library FluidPaybackDexLogic {
         IFluidVault.Tokens memory _tokens
     ) internal returns (uint256 exactDebtToken1Pulled) {
         // We always pull maximum amount of token 1 that user allowed and refund any dust amount later
-        FluidDexTokensUtils.PulledTokensData memory vars = FluidDexTokensUtils.pullTokensIfNeededWithApproval(
-            _tokens,
-            _data.from,
-            _data.vault,
-            0, /* amount0 */
-            _data.variableData.maxAmountToPull
-        );
+        FluidDexTokensUtils.PulledTokensData memory vars =
+            FluidDexTokensUtils.pullTokensIfNeededWithApproval(
+                _tokens,
+                _data.from,
+                _data.vault,
+                0,
+                /* amount0 */
+                _data.variableData.maxAmountToPull
+            );
 
         uint256 msgValue = vars.isToken1Native ? vars.amount1 : 0;
 
@@ -141,7 +144,7 @@ library FluidPaybackDexLogic {
                 -vars.amount1.signed256(),
                 address(0) /* to */
             );
-        
+
         // See IFluidVaultT3.operatePerfect and IFluidVaultT4.operatePerfect for return values indexing.
         exactDebtToken1Pulled = uint256(-retVals[isT3Vault ? 3 : 5]);
 
@@ -166,17 +169,19 @@ library FluidPaybackDexLogic {
         FluidDexModel.PaybackDexData memory _data,
         IFluidVault.Tokens memory _tokens
     ) internal returns (uint256 burnedDebtShares) {
-        FluidDexTokensUtils.PulledTokensData memory vars = FluidDexTokensUtils.pullTokensIfNeededWithApproval(
-            _tokens,
-            _data.from,
-            _data.vault,
-            _data.variableData.debtAmount0,
-            _data.variableData.debtAmount1
-        );
+        FluidDexTokensUtils.PulledTokensData memory vars =
+            FluidDexTokensUtils.pullTokensIfNeededWithApproval(
+                _tokens,
+                _data.from,
+                _data.vault,
+                _data.variableData.debtAmount0,
+                _data.variableData.debtAmount1
+            );
 
-        uint256 msgValue = vars.isToken0Native ? vars.amount0 : (vars.isToken1Native ? vars.amount1 : 0);
+        uint256 msgValue =
+            vars.isToken0Native ? vars.amount0 : (vars.isToken1Native ? vars.amount1 : 0);
 
-        ( , , int256 exactBorrowSharesBurned) = _data.vaultType.isT3Vault()
+        (,, int256 exactBorrowSharesBurned) = _data.vaultType.isT3Vault()
             ? IFluidVaultT3(_data.vault).operate{ value: msgValue }(
                 _data.nftId,
                 0, /* newCol_ */

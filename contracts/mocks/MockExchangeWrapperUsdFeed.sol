@@ -2,10 +2,10 @@
 pragma solidity =0.8.24;
 
 import { IExchangeV3 } from "../interfaces/exchange/IExchangeV3.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { SafeERC20 } from "../utils/SafeERC20.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { TokenPriceHelper } from "../utils/TokenPriceHelper.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { TokenPriceHelper } from "../utils/token/TokenPriceHelper.sol";
 
 /// @title DFS exchange wrapper used for mocking in tests
 /// @dev This version calculates the rate of tokens using feeds
@@ -22,8 +22,12 @@ contract MockExchangeWrapperUsdFeed is IExchangeV3, TokenPriceHelper {
         address _destAddr,
         uint256 _srcAmount,
         bytes calldata /*_additionalData*/
-    ) external override returns (uint256) {    
-        IERC20(_srcAddr).transfer(address(this), _srcAmount);
+    )
+        external
+        override
+        returns (uint256)
+    {
+        IERC20(_srcAddr).safeTransfer(address(this), _srcAmount);
 
         uint256 srcTokenPriceInUSD = getPriceInUSD(_srcAddr);
         uint256 srcTokenDec = IERC20(_srcAddr).decimals();
@@ -31,8 +35,8 @@ contract MockExchangeWrapperUsdFeed is IExchangeV3, TokenPriceHelper {
         uint256 destTokenPriceInUSD = getPriceInUSD(_destAddr);
         uint256 destTokenDec = IERC20(_destAddr).decimals();
 
-         uint256 amountOut = _srcAmount * srcTokenPriceInUSD * (10 ** destTokenDec) / 
-                             ((10 ** srcTokenDec) * destTokenPriceInUSD);
+        uint256 amountOut = _srcAmount * srcTokenPriceInUSD * (10 ** destTokenDec)
+            / ((10 ** srcTokenDec) * destTokenPriceInUSD);
 
         _destAddr.withdrawTokens(msg.sender, amountOut);
 
@@ -41,10 +45,15 @@ contract MockExchangeWrapperUsdFeed is IExchangeV3, TokenPriceHelper {
 
     /// @notice Return a rate for which we can sell an amount of tokens
     /// @return uint256 Rate (price)
-    function getSellRate(address, address, uint256, bytes memory) public pure override returns (uint256) {
+    function getSellRate(address, address, uint256, bytes memory)
+        public
+        pure
+        override
+        returns (uint256)
+    {
         revert("Not implemented");
     }
 
     // solhint-disable-next-line no-empty-blocks
-    receive() external payable {}
+    receive() external payable { }
 }

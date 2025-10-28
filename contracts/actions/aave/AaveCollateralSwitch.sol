@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveHelper } from "./helpers/AaveHelper.sol";
 
@@ -46,8 +46,10 @@ contract AaveCollateralSwitch is ActionBase, AaveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _switchAsCollateral(Params memory _inputData) internal {
-        for (uint256 i = 0; i < _inputData.tokens.length; i++){
-            enableAsCollateral(_inputData.market, _inputData.tokens[i], _inputData.useAsCollateral[i]);
+        for (uint256 i = 0; i < _inputData.tokens.length; i++) {
+            enableAsCollateral(
+                _inputData.market, _inputData.tokens[i], _inputData.useAsCollateral[i]
+            );
         }
     }
 

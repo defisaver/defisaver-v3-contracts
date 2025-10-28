@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { ISwapRouterNG } from "../../../interfaces/curve/ISwapRouterNG.sol";
+import { ISwapRouterNG } from "../../../interfaces/protocols/curve/ISwapRouterNG.sol";
 
 import { AdminAuth } from "../../../auth/AdminAuth.sol";
 import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
 import { Discount } from "../../../utils/Discount.sol";
-import { FeeRecipient } from "../../../utils/FeeRecipient.sol";
+import { FeeRecipient } from "../../../utils/fee/FeeRecipient.sol";
 import { GasFeeHelper } from "../../../actions/fee/helpers/GasFeeHelper.sol";
 import { ExchangeHelper } from "../../../exchangeV3/helpers/ExchangeHelper.sol";
 import { TokenGroupRegistry } from "../../../exchangeV3/registries/TokenGroupRegistry.sol";
-import { ICrvUsdController } from "../../../interfaces/curveusd/ICurveUsd.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { IERC20 } from "../../../interfaces/IERC20.sol";
-import { SafeERC20 } from "../../../utils/SafeERC20.sol";
+import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
+import { IERC20 } from "../../../interfaces/token/IERC20.sol";
+import { SafeERC20 } from "../../../_vendor/openzeppelin/SafeERC20.sol";
 
 /// @title CurveUsdSwapper Callback contract for CurveUsd extended actions, swaps directly on curve
 contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminAuth {
@@ -52,13 +52,10 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
     address[5] internal swapZapPools;
 
     ///@dev Called by curve controller from repay_extended method, sends collateral tokens to this contract
-    function callback_repay(
-        address _user,
-        uint256,
-        uint256,
-        uint256,
-        uint256[] memory swapData
-    ) external returns (CallbackData memory cb) {
+    function callback_repay(address _user, uint256, uint256, uint256, uint256[] memory swapData)
+        external
+        returns (CallbackData memory cb)
+    {
         address controllerAddr = msg.sender; // this should be a callback from the controller
 
         // check if controller is valid
@@ -80,13 +77,10 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         IERC20(CRVUSD_TOKEN_ADDR).safeApprove(controllerAddr, cb.stablecoins);
     }
 
-    function callback_deposit(
-        address _user,
-        uint256,
-        uint256,
-        uint256,
-        uint256[] memory swapData
-    ) external returns (CallbackData memory cb) {
+    function callback_deposit(address _user, uint256, uint256, uint256, uint256[] memory swapData)
+        external
+        returns (CallbackData memory cb)
+    {
         address controllerAddr = msg.sender; // this should be a callback from the controller
 
         // check if controller is valid
@@ -135,7 +129,10 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
     /// @dev Called by our actions to transiently store curve swap routes and zap pools
     /// @param _additionalRoutes Array of 8 addresses to store in transient storage
     /// @param _swapZapPools Array of 5 addresses to store in transient storage
-    function setAdditionalRoutes(address[8] memory _additionalRoutes, address[5] memory _swapZapPools) external {
+    function setAdditionalRoutes(
+        address[8] memory _additionalRoutes,
+        address[5] memory _swapZapPools
+    ) external {
         additionalRoutes = _additionalRoutes;
         swapZapPools = _swapZapPools;
     }
@@ -163,11 +160,8 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         address srcToken = _collToUsd ? _collToken : CRVUSD_TOKEN_ADDR;
         address destToken = _collToUsd ? CRVUSD_TOKEN_ADDR : _collToken;
 
-        (
-            SwapRoutes memory swapRoutes,
-            uint32 gasUsed,
-            uint24 dfsFeeDivider
-        ) = getSwapPath(_swapData, _collToken, _collToUsd);
+        (SwapRoutes memory swapRoutes, uint32 gasUsed, uint24 dfsFeeDivider) =
+            getSwapPath(_swapData, _collToken, _collToUsd);
 
         // check custom fee if front sends a non standard fee param
         if (dfsFeeDivider != STANDARD_DFS_FEE) {
@@ -177,7 +171,8 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         }
 
         // get dfs fee and update swap amount
-        (uint256 swapFee, uint256 feeDividerForAutomation) = takeSwapFee(swapAmount, _user, srcToken, dfsFeeDivider);
+        (uint256 swapFee, uint256 feeDividerForAutomation) =
+            takeSwapFee(swapAmount, _user, srcToken, dfsFeeDivider);
         swapAmount -= swapFee;
 
         IERC20(srcToken).safeApprove(address(exchangeContract), swapAmount);
@@ -190,8 +185,8 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
             swapRoutes.pools,
             address(this)
         );
-        
-        if (gasUsed > 0){
+
+        if (gasUsed > 0) {
             amountOut -= takeAutomationFee(amountOut, destToken, gasUsed, feeDividerForAutomation);
         }
         // free the storage only needed inside tx as transient storage
@@ -202,11 +197,7 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
     }
 
     /// @dev Unpack the curve swap path from calldata and additionalRoutes
-    function getSwapPath(
-        uint256[] memory swapData,
-        address _collToken,
-        bool _collToUsd
-    )
+    function getSwapPath(uint256[] memory swapData, address _collToken, bool _collToUsd)
         public
         view
         returns (SwapRoutes memory swapRoutes, uint32 gasUsed, uint24 dfsFeeDivider)
@@ -262,14 +253,14 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
         uint256 _dfsFeeDivider
     ) internal returns (uint256 feeAmount) {
         // we need to take the fee for tx cost as well, as it"s in a strategy
-        
+
         feeAmount += calcGasCost(_gasUsed, _token, 0);
-        
+
         // gas fee can't go over 20% of the whole amount
         if (feeAmount > (_destTokenAmount / 5)) {
             feeAmount = _destTokenAmount / 5;
         }
-    
+
         if (_dfsFeeDivider != 0) {
             feeAmount += _destTokenAmount / AUTOMATION_DFS_FEE;
         }
@@ -298,16 +289,10 @@ contract CurveUsdSwapper is CurveUsdHelper, ExchangeHelper, GasFeeHelper, AdminA
     }
 
     /// @dev Decode swapParams from 1 uint256
-    function decodeSwapParams(
-        uint256 swapParamEncoded
-    )
+    function decodeSwapParams(uint256 swapParamEncoded)
         public
         pure
-        returns (
-            uint256[5][5] memory swapParams,
-            uint32 gasUsed,
-            uint24 dfsFeeDivider
-        )
+        returns (uint256[5][5] memory swapParams, uint32 gasUsed, uint24 dfsFeeDivider)
     {
         uint256 maskOffset;
         for (uint256 i; i < 5; i++) {

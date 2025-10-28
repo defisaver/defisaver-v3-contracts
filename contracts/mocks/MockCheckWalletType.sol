@@ -5,7 +5,6 @@ pragma solidity =0.8.24;
 import { CheckWalletType } from "../utils/CheckWalletType.sol";
 
 contract MockCheckWalletType {
-
     address immutable checkWalletType;
 
     constructor(address _checkWalletType) {
