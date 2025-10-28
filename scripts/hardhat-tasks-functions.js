@@ -142,7 +142,7 @@ async function updateContractsAddressesInJsonFiles(deployedAddresses, contracts,
 }
 
 async function changeWethAddress(oldNetworkName, newNetworkName) {
-    const TokenUtilsContract = 'contracts/utils/TokenUtils.sol';
+    const TokenUtilsContract = 'contracts/utils/token/TokenUtils.sol';
     const tokenUtilsContract = (await fs.readFileSync(TokenUtilsContract)).toString();
 
     fs.writeFileSync(
