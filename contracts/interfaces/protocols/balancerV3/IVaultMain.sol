@@ -1,9 +1,8 @@
-// ! https://github.com/balancer/balancer-v3-monorepo/blob/main/pkg/interfaces/contracts/vault/IVaultMain.sol
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 pragma solidity ^0.8.24;
 
-import {IERC20} from "../IERC20.sol";
+import { IERC20 } from "../../token/IERC20.sol";
 
 /**
  * @notice Interface for functions defined on the main Vault contract.
@@ -16,7 +15,6 @@ interface IVaultMain {
      *                           Transient Accounting
      *
      */
-
     /**
      * @notice Creates a context for a sequence of operations (i.e., "unlocks" the Vault).
      * @dev Performs a callback on msg.sender with arguments provided in `data`. The Callback is `transient`,
