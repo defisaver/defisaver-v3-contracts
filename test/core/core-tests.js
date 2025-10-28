@@ -31,6 +31,7 @@ const {
     network,
     addrs,
     createDsaProxy,
+    isProxyDSAProxy,
 } = require('../utils/utils');
 
 const { deployContract } = require('../../scripts/utils/deployer');
@@ -78,14 +79,17 @@ const impersonateStrategyExecutorAsEoa = async (senderAddr) => {
     await stopImpersonatingAccount(getOwnerAddr());
 };
 
-const addPlaceholderStrategy = async (proxy, maxGasPrice) => {
+const addPlaceholderStrategy = async (proxy, owner, maxGasPrice) => {
     const dummyStrategy = new dfs.Strategy('PullTokensStrategy');
 
     dummyStrategy.addSubSlot('&amount', 'uint256');
 
+    // For DSA proxies, we don't rely on '&eoa' flag
+    const isDSAProxy = await isProxyDSAProxy(proxy);
+
     const pullTokenAction = new dfs.actions.basic.PullTokenAction(
         addrs[network].WETH_ADDRESS,
-        '&eoa',
+        isDSAProxy ? owner : '&eoa',
         '&amount',
     );
 
@@ -843,10 +847,6 @@ const recipeExecutorTest = async () => {
         };
 
         before(async () => {
-            // Add connector for DSA Proxy Accounts.
-            const dfsConnector = await redeploy('DefiSaverConnector');
-            await addDefiSaverConnector(dfsConnector.address, hre.config.dsaProxyVersion);
-
             // Redeploy contracts.
             await redeploy('PullToken');
             await redeploy('SendToken');
@@ -855,6 +855,10 @@ const recipeExecutorTest = async () => {
             await redeploy('UpdateSub');
             await redeploy('GasPriceTrigger');
             await redeploy('RecipeExecutor');
+
+            // Add connector for DSA Proxy Accounts.
+            const dfsConnector = await redeploy('DefiSaverConnector');
+            await addDefiSaverConnector(dfsConnector.address, hre.config.dsaProxyVersion);
 
             strategyExecutor =
                 network === 'mainnet'
@@ -876,7 +880,7 @@ const recipeExecutorTest = async () => {
             // Init test data.
             actionData = new dfs.actions.basic.PullTokenAction(
                 addrs[network].WETH_ADDRESS,
-                placeHolderAddr,
+                senderAcc.address,
                 0,
             ).encodeForRecipe()[0];
             triggerData = abiCoder.encode(['uint256'], [0]);
@@ -896,7 +900,11 @@ const recipeExecutorTest = async () => {
         for (let i = 0; i < WALLETS.length; i++) {
             it(`...should fail to execute recipe by strategy through ${WALLETS[i]} because the triggers check is not passing`, async () => {
                 setupWallet(WALLETS[i]);
-                const { strategySub, subId } = await addPlaceholderStrategy(wallet, maxGasPrice);
+                const { strategySub, subId } = await addPlaceholderStrategy(
+                    wallet,
+                    senderAcc.address,
+                    maxGasPrice,
+                );
                 try {
                     if (network === 'mainnet') {
                         await strategyExecutorByBot.executeStrategy(
@@ -929,7 +937,11 @@ const recipeExecutorTest = async () => {
             it(`...should execute recipe by strategy through ${WALLETS[i]}`, async () => {
                 setupWallet(WALLETS[i]);
 
-                const { strategyId, subId } = await addPlaceholderStrategy(wallet, maxGasPrice);
+                const { strategyId, subId } = await addPlaceholderStrategy(
+                    wallet,
+                    senderAcc.address,
+                    maxGasPrice,
+                );
 
                 // update sub data so trigger will pass
                 const amountEncoded = abiCoder.encode(['uint256'], [pullAmount]);
@@ -1071,7 +1083,11 @@ const strategyExecutorTest = async () => {
 
             await openStrategyAndBundleStorage();
 
-            ({ strategySub, strategyId, subId } = await addPlaceholderStrategy(proxy, maxGasPrice));
+            ({ strategySub, strategyId, subId } = await addPlaceholderStrategy(
+                proxy,
+                senderAcc.address,
+                maxGasPrice,
+            ));
 
             const pullTokenAction = new dfs.actions.basic.PullTokenAction(
                 addrs[network].WETH_ADDRESS,

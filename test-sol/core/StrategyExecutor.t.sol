@@ -20,6 +20,8 @@ import { SmartWallet } from "../utils/SmartWallet.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { StrategyBuilder } from "../utils/StrategyBuilder.sol";
 import { DSAProxyTestUtils } from "../utils/dsa/DSAProxyTestUtils.sol";
+import { Strings } from "../utils/Strings.sol";
+import { console } from "forge-std/console.sol";
 
 contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
@@ -38,6 +40,8 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
     address recipeExecutorAddr;
 
     SubStorage subStorage;
+
+    bool isDSAProxy;
 
     struct DummySubData {
         address token;
@@ -138,6 +142,8 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
 
         _addDefiSaverConnector();
 
+        isDSAProxy = true;
+
         _callStrategyBaseTest();
     }
 
@@ -203,14 +209,23 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
         assertEq(senderBalanceAfter, senderBalanceBefore - subData.amount);
     }
 
+    function _add_placeholder_strategy(address _eoa) internal returns (uint256) {
+        return __add_placeholder_strategy_template(Strings.toHexString(_eoa));
+    }
+
     function _add_placeholder_strategy() internal returns (uint256) {
+        string memory eoa = "&eoa";
+        return __add_placeholder_strategy_template(eoa);
+    }
+
+    function __add_placeholder_strategy_template(string memory _eoa) internal returns (uint256) {
         StrategyBuilder strategy = new StrategyBuilder("dummyStrategy", true);
         strategy.addSubMapping("&token");
         strategy.addSubMapping("&amount");
 
         string[] memory pullTokenParams = new string[](3);
         pullTokenParams[0] = "&token";
-        pullTokenParams[1] = "&eoa";
+        pullTokenParams[1] = _eoa;
         pullTokenParams[2] = "&amount";
         strategy.addAction("PullToken", pullTokenParams);
 
@@ -223,7 +238,8 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
         internal
         returns (uint256 subId, StrategyModel.StrategySub memory sub)
     {
-        uint256 strategyId = _add_placeholder_strategy();
+        uint256 strategyId =
+            isDSAProxy ? _add_placeholder_strategy(sender) : _add_placeholder_strategy();
 
         bytes[] memory _triggerData = new bytes[](1);
         _triggerData[0] =

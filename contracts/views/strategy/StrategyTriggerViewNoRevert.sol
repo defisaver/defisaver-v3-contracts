@@ -178,7 +178,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUt
         address sellTokenAddr = address(uint160(uint256(_subData[0])));
         uint256 desiredAmount = uint256(_subData[2]);
 
-        address tokenHolder = _fetchOwnerOrWallet(_smartWallet);
+        address tokenHolder = _fetchOwnerOrWallet(_smartWallet, false);
         bool hasEnoughBalance = sellTokenAddr.getBalance(tokenHolder) >= desiredAmount;
 
         if (tokenHolder != _smartWallet) {

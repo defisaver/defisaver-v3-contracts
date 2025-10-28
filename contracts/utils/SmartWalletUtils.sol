@@ -40,11 +40,19 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
     }
 
     /// @notice Fetch the owner of the smart wallet or the wallet itself
-    /// @dev For 1/1 safe it returns the owner, otherwise it returns the wallet itself
-    /// @dev For DSA Proxy Accounts, it returns the first owner if authorized or the wallet itself
+    /// @dev For 1/1 Safe it returns the owner, otherwise it returns the wallet itself
+    /// @dev For DSA Proxy Accounts:
+    /// 1. If function is used for read only operations it returns the first owner if exists or the wallet itself
+    /// 2. If function is used as part of a strategy or recipe execution it returns the wallet itself
+    ///    because we can't reliably determine whether the first owner is an actual EOA or not
     /// @param _wallet Address of the smart wallet
+    /// @param _usedForExecution Whether the function is used as part of a strategy/recipe execution
     /// @return Address of the owner or wallet
-    function _fetchOwnerOrWallet(address _wallet) internal view returns (address) {
+    function _fetchOwnerOrWallet(address _wallet, bool _usedForExecution)
+        internal
+        view
+        returns (address)
+    {
         WalletType walletType = _getWalletType(_wallet);
 
         if (walletType == WalletType.DSPROXY) {
@@ -52,9 +60,15 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
         }
 
         if (walletType == WalletType.DSAPROXY) {
+            // If function is used as part of a strategy or recipe execution we return the wallet itself
+            if (_usedForExecution) {
+                return _wallet;
+            }
+
             uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(_wallet);
-            // TODO: Do we always want this?
             address firstOwner = IInstaList(DSA_LIST_ADDR).accountLink(dsaId).first;
+
+            // Sanity check. If no owner is found, return the wallet itself
             return firstOwner != address(0) ? firstOwner : _wallet;
         }
 
