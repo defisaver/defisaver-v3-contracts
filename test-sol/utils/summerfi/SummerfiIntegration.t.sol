@@ -105,17 +105,41 @@ contract SummerfiIntegration is BaseTest, ActionsUtils, RegistryUtils, AaveV3Hel
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function testOpenPositionOnBehalfOfEOA() public {
-        _createAaveV3Position(bob);
+        _supplyAndBorrow(bob);
 
         uint256 ratio = getSafetyRatio(DEFAULT_AAVE_MARKET, bob);
         assertGt(ratio, 1e18);
+
+        // Deploy new RecipeExecutor and update registry
+        RecipeExecutor newRecipeExecutor = new RecipeExecutor();
+        redeploy("RecipeExecutor", address(newRecipeExecutor));
+
+        // Should still work with upgraded RecipeExecutor (proxy reads from registry)
+        give(SUPPLY_ASSET, bob, supplyAmount);
+        approveAsSender(bob, SUPPLY_ASSET, summerfiAccount, supplyAmount);
+        _supplyAndBorrow(bob);
+
+        uint256 ratioAfter = getSafetyRatio(DEFAULT_AAVE_MARKET, bob);
+        assertGt(ratioAfter, 1e18);
     }
 
     function testOpenPositionForSSW() public {
-        _createAaveV3Position(summerfiAccount);
+        _supplyAndBorrow(summerfiAccount);
 
         uint256 ratio = getSafetyRatio(DEFAULT_AAVE_MARKET, summerfiAccount);
         assertGt(ratio, 1e18);
+
+        // Deploy new RecipeExecutor and update registry
+        RecipeExecutor newRecipeExecutor = new RecipeExecutor();
+        redeploy("RecipeExecutor", address(newRecipeExecutor));
+
+        // Should still work with upgraded RecipeExecutor (proxy reads from registry)
+        give(SUPPLY_ASSET, bob, supplyAmount);
+        approveAsSender(bob, SUPPLY_ASSET, summerfiAccount, supplyAmount);
+        _supplyAndBorrow(summerfiAccount);
+
+        uint256 ratioAfter = getSafetyRatio(DEFAULT_AAVE_MARKET, summerfiAccount);
+        assertGt(ratioAfter, 1e18);
     }
 
     function test_RevertIf_ExecuteActionDirect_Supply_NotWhitelisted() public {
@@ -169,7 +193,7 @@ contract SummerfiIntegration is BaseTest, ActionsUtils, RegistryUtils, AaveV3Hel
     }
 
     function testFlashLoanRepayPosition() public {
-        _createAaveV3Position(summerfiAccount);
+        _supplyAndBorrow(summerfiAccount);
 
         DataTypes.ReserveData memory borrowReserve = aavePool.getReserveData(BORROW_ASSET);
         uint256 debtBefore = balanceOf(borrowReserve.variableDebtTokenAddress, summerfiAccount);
@@ -181,6 +205,20 @@ contract SummerfiIntegration is BaseTest, ActionsUtils, RegistryUtils, AaveV3Hel
         assertApproxEqAbs(debtBefore - debtAfter, amountInUSDPrice(BORROW_ASSET, 500), 500e6 / 10);
 
         IAccountGuard accountGuard = IAccountGuard(SUMMERFI_GUARD);
+        assertFalse(accountGuard.canCall(summerfiAccount, address(flAction)));
+
+        // Deploy new RecipeExecutor and update registry
+        RecipeExecutor newRecipeExecutor = new RecipeExecutor();
+        redeploy("RecipeExecutor", address(newRecipeExecutor));
+
+        // Should still work with upgraded RecipeExecutor (proxy reads from registry)
+        uint256 debtBeforeSecond = balanceOf(borrowReserve.variableDebtTokenAddress, summerfiAccount);
+        _repayAaveV3PositionWithFL(100);
+
+        uint256 debtAfterSecond = balanceOf(borrowReserve.variableDebtTokenAddress, summerfiAccount);
+        assertLt(debtAfterSecond, debtBeforeSecond);
+        assertApproxEqAbs(debtBeforeSecond - debtAfterSecond, amountInUSDPrice(BORROW_ASSET, 100), 100e6 / 10);
+
         assertFalse(accountGuard.canCall(summerfiAccount, address(flAction)));
     }
 
@@ -233,7 +271,7 @@ contract SummerfiIntegration is BaseTest, ActionsUtils, RegistryUtils, AaveV3Hel
             );
     }
 
-    function _createAaveV3Position(address _onBehalf) internal {
+    function _supplyAndBorrow(address _onBehalf) internal {
         DataTypes.ReserveData memory supplyReserve = aavePool.getReserveData(SUPPLY_ASSET);
         DataTypes.ReserveData memory borrowReserve = aavePool.getReserveData(BORROW_ASSET);
 
