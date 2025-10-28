@@ -117,7 +117,9 @@ contract ActionsUtils {
         AAVEV3,
         UNIV3,
         SPARK,
-        MORPHO_BLUE
+        MORPHO_BLUE,
+        CURVEUSD,
+        BALANCER_V3
     }
 
     function executeActionCalldata(bytes memory _paramsCalldata, bool _isDirect)
