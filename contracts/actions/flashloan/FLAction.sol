@@ -1,11 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { ActionBase } from "../ActionBase.sol";
-import { ReentrancyGuard } from "../../_vendor/openzeppelin/ReentrancyGuard.sol";
-import { TokenUtils } from "../../utils/token/TokenUtils.sol";
-import { FLHelper } from "./helpers/FLHelper.sol";
-
 import { IFlashLoanBase } from "../../interfaces/flashloan/IFlashLoanBase.sol";
 import { IERC3156FlashLender } from "../../interfaces/flashloan/IERC3156FlashLender.sol";
 import { IERC3156FlashBorrower } from "../../interfaces/flashloan/IERC3156FlashBorrower.sol";
@@ -14,6 +9,13 @@ import { IFlashLoans } from "../../interfaces/protocols/balancer/IFlashLoans.sol
 import { IUniswapV3Pool } from "../../interfaces/protocols/uniswap/v3/IUniswapV3Pool.sol";
 import { IUniswapV3Factory } from "../../interfaces/protocols/uniswap/v3/IUniswapV3Factory.sol";
 import { IMorphoBlue } from "../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
+import { IVaultMain } from "../../interfaces/protocols/balancerV3/IVaultMain.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
+
+import { ActionBase } from "../ActionBase.sol";
+import { ReentrancyGuard } from "../../_vendor/openzeppelin/ReentrancyGuard.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { FLHelper } from "./helpers/FLHelper.sol";
 
 /// @title Action that gets and receives FL from different variety of sources
 contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
@@ -38,7 +40,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         UNIV3,
         SPARK,
         MORPHO_BLUE,
-        CURVEUSD
+        CURVEUSD,
+        BALANCER_V3
     }
 
     /// @inheritdoc ActionBase
@@ -85,6 +88,8 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
             _flMorphoBlue(_flParams);
         } else if (_source == FLSource.CURVEUSD) {
             _flCurveUSD(_flParams);
+        } else if (_source == FLSource.BALANCER_V3) {
+            _flBalancerV3(_flParams);
         } else {
             revert NonexistentFLSource();
         }
@@ -140,6 +145,14 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
             .flashLoan(address(this), _flParams.tokens, _flParams.amounts, _flParams.recipeData);
 
         emit ActionEvent("FLAction", abi.encode("BALANCER", _flParams));
+    }
+
+    /// @notice Gets a FL from Balancer V3 and returns back the execution to the action address
+    function _flBalancerV3(FlashLoanParams memory _flParams) internal {
+        IVaultMain(BALANCER_V3_VAULT_ADDR)
+            .unlock(abi.encodeWithSelector(this.receiveFlashLoanBalancerV3.selector, _flParams));
+
+        emit ActionEvent("FLAction", abi.encode("BALANCER_V3", _flParams));
     }
 
     /// @notice Gets a GHO FL from Gho Flash Minter
@@ -271,6 +284,40 @@ contract FLAction is ActionBase, ReentrancyGuard, IFlashLoanBase, FLHelper {
         }
 
         return true;
+    }
+
+    /// @notice Balancer V3 FL callback function that formats and calls back RecipeExecutor
+    /// FLSource == BALANCER_V3
+    function receiveFlashLoanBalancerV3(FlashLoanParams memory _userData) external nonReentrant {
+        if (msg.sender != BALANCER_V3_VAULT_ADDR) {
+            revert UntrustedLender();
+        }
+
+        (Recipe memory currRecipe, address wallet) =
+            abi.decode(_userData.recipeData, (Recipe, address));
+
+        uint256[] memory balancesBefore = new uint256[](_userData.tokens.length);
+        for (uint256 i = 0; i < _userData.tokens.length; i++) {
+            balancesBefore[i] = _userData.tokens[i].getBalance(address(this));
+            // Send token from the vault directly to the wallet
+            IVaultMain(BALANCER_V3_VAULT_ADDR)
+                .sendTo(IERC20(_userData.tokens[i]), wallet, _userData.amounts[i]);
+        }
+
+        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, _userData.amounts[0]);
+
+        for (uint256 i = 0; i < _userData.tokens.length; i++) {
+            uint256 paybackAmount = _userData.amounts[i];
+
+            if (_userData.tokens[i].getBalance(address(this)) != paybackAmount + balancesBefore[i])
+            {
+                revert WrongPaybackAmountError();
+            }
+            // Send tokens back to Balancer V3 Vault - repay the loan
+            _userData.tokens[i].withdrawTokens(BALANCER_V3_VAULT_ADDR, paybackAmount);
+            // Settle the repayment
+            IVaultMain(BALANCER_V3_VAULT_ADDR).settle(IERC20(_userData.tokens[i]), paybackAmount);
+        }
     }
 
     /// @notice Balancer FL callback function that formats and calls back RecipeExecutor
