@@ -36,7 +36,7 @@ contract TestGeneralView is BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_fetchDSAProxyAccounts_oneAccount() public {
+    function test_fetchDSAProxyAccounts_oneAccount() public view {
         address[] memory accounts = cut.fetchDSAProxyAccounts(sender);
         assertEq(accounts.length, 1);
         assertEq(accounts[0], walletAddr);

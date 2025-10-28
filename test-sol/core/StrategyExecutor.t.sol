@@ -21,7 +21,6 @@ import { Addresses } from "../utils/Addresses.sol";
 import { StrategyBuilder } from "../utils/StrategyBuilder.sol";
 import { DSAProxyTestUtils } from "../utils/dsa/DSAProxyTestUtils.sol";
 import { Strings } from "../utils/Strings.sol";
-import { console } from "forge-std/console.sol";
 
 contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
