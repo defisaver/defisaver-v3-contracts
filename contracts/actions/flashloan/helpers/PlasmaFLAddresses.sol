@@ -13,7 +13,7 @@ contract PlasmaFLAddresses {
     address internal constant AAVE_V3_LENDING_POOL_ADDRESS_PROVIDER =
         0x061D8e131F26512348ee5FA42e2DF1bA9d6505E9;
 
-    address internal constant RECIPE_EXECUTOR_ADDR = 0xB8af168883D049FF9C811ab5B5DE179f3e7d6Fb7;
+    address internal constant DFS_REGISTRY_ADDR = 0x44e98bB58d725F2eF93a195F518b335dCB784c78;
 
     ////////// NOT USED
     address internal constant DAI_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // No deployment on Plasma

@@ -142,7 +142,7 @@ async function updateContractsAddressesInJsonFiles(deployedAddresses, contracts,
 }
 
 async function changeWethAddress(oldNetworkName, newNetworkName) {
-    const TokenUtilsContract = 'contracts/utils/TokenUtils.sol';
+    const TokenUtilsContract = 'contracts/utils/token/TokenUtils.sol';
     const tokenUtilsContract = (await fs.readFileSync(TokenUtilsContract)).toString();
 
     fs.writeFileSync(
@@ -440,7 +440,7 @@ async function verifyContract(contractAddress, contractName) {
     if (network === 'linea') {
         params.append('EVMVersion', 'london');
     } else {
-        params.append('EVMVersion', '');
+        params.append('EVMVersion', 'cancun');
     }
     /// @notice : MIT license
     params.append('licenseType', 3);

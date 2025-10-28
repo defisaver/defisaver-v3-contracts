@@ -95,6 +95,10 @@ import {
     SkyStakingEngineSelectFarm
 } from "../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 import { GhoStake } from "../../contracts/actions/aaveV3/GhoStake.sol";
+import { CreateSub } from "../../contracts/actions/utils/CreateSub.sol";
+import { ToggleSub } from "../../contracts/actions/utils/ToggleSub.sol";
+import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
+import { HandleAuth } from "../../contracts/actions/utils/HandleAuth.sol";
 
 contract ActionsUtils {
     // @dev Change this value if we ever need to add more parameters to any action.
@@ -1263,5 +1267,25 @@ contract ActionsUtils {
         returns (bytes memory params)
     {
         params = abi.encode(GhoStake.Params({ from: _from, to: _to, amount: _amount }));
+    }
+
+    function createSubEncode(StrategyModel.StrategySub memory _sub)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(CreateSub.Params({ sub: _sub }));
+    }
+
+    function toggleSubEncode(uint256 _subId, bool _active)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(ToggleSub.Params({ subId: _subId, active: _active }));
+    }
+
+    function handleAuthEncode(bool _enableAuth) public pure returns (bytes memory params) {
+        params = abi.encode(HandleAuth.Params({ enableAuth: _enableAuth }));
     }
 }

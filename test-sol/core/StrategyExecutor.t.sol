@@ -2,25 +2,26 @@
 pragma solidity =0.8.24;
 
 import { SafeModuleAuth } from "../../contracts/core/strategy/SafeModuleAuth.sol";
+import { StrategyExecutorCommon } from "../../contracts/core/strategy/StrategyExecutorCommon.sol";
 import { ProxyAuth } from "../../contracts/core/strategy/ProxyAuth.sol";
+import { DSAAuth } from "../../contracts/core/strategy/DSAAuth.sol";
 import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
 import { StrategyExecutor } from "../../contracts/core/strategy/StrategyExecutor.sol";
 import { RecipeExecutor } from "../../contracts/core/RecipeExecutor.sol";
 import { SubStorage } from "../../contracts/core/strategy/SubStorage.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
-import { SubProxy } from "../../contracts/core/strategy/SubProxy.sol";
-
+import { CreateSub } from "../../contracts/actions/utils/CreateSub.sol";
+import { ToggleSub } from "../../contracts/actions/utils/ToggleSub.sol";
 import { GasPriceTrigger } from "../../contracts/triggers/GasPriceTrigger.sol";
 import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
-
 import { BaseTest } from "../utils/BaseTest.sol";
-import { RegistryUtils } from "../utils/RegistryUtils.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { StrategyBuilder } from "../utils/StrategyBuilder.sol";
+import { DSAProxyTestUtils } from "../utils/dsa/DSAProxyTestUtils.sol";
 
-contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
+contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -33,8 +34,8 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
     address walletAddr;
     address sender;
 
-    address subProxyAddr;
     address botAuthAddr;
+    address recipeExecutorAddr;
 
     SubStorage subStorage;
 
@@ -57,17 +58,19 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
         cut = new StrategyExecutor();
         subStorage = SubStorage(SUB_STORAGE_ADDR);
 
-        vm.etch(RECIPE_EXECUTOR_ADDR, address(new RecipeExecutor()).code);
         vm.etch(MODULE_AUTH_ADDR, address(new SafeModuleAuth()).code);
         vm.etch(PROXY_AUTH_ADDR, address(new ProxyAuth()).code);
+        vm.etch(DSA_AUTH_ADDR, address(new DSAAuth()).code);
 
-        subProxyAddr = address(new SubProxy());
         botAuthAddr = address(new BotAuth());
 
         redeploy("StrategyExecutorID", address(cut));
         redeploy("PullToken", address(new PullToken()));
         redeploy("GasPriceTrigger", address(new GasPriceTrigger()));
-        redeploy("SubProxy", subProxyAddr);
+        recipeExecutorAddr = address(new RecipeExecutor());
+        redeploy("RecipeExecutor", recipeExecutorAddr);
+        redeploy("CreateSub", address(new CreateSub()));
+        redeploy("ToggleSub", address(new ToggleSub()));
         redeploy("BotAuth", botAuthAddr);
     }
 
@@ -76,7 +79,7 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_fail_to_call_execute_when_sender_is_not_authorized_bot() public {
         vm.expectRevert(
-            abi.encodeWithSelector(StrategyExecutor.BotNotApproved.selector, address(this), 0)
+            abi.encodeWithSelector(StrategyExecutorCommon.BotNotApproved.selector, address(this), 0)
         );
         StrategyModel.StrategySub memory dummySub;
         cut.executeStrategy(0, 0, new bytes[](0), new bytes[](0), dummySub);
@@ -106,11 +109,13 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
             DummySubData({ token: Addresses.WETH_ADDR, amount: 1, maxGasPrice: type(uint256).max })
         );
 
-        _disable_sub(subId);
+        _disable_sub(subId, sub);
 
         _add_bot_caller();
 
-        vm.expectRevert(abi.encodeWithSelector(StrategyExecutor.SubNotEnabled.selector, subId));
+        vm.expectRevert(
+            abi.encodeWithSelector(StrategyExecutorCommon.SubNotEnabled.selector, subId)
+        );
         cut.executeStrategy(subId, 0, new bytes[](0), new bytes[](0), sub);
     }
 
@@ -122,6 +127,16 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
         wallet = new SmartWallet(alice);
         walletAddr = wallet.createDSProxy();
         sender = wallet.owner();
+
+        _callStrategyBaseTest();
+    }
+
+    function test_should_call_strategy_for_dsa_proxy_wallet() public {
+        wallet = new SmartWallet(charlie);
+        walletAddr = wallet.createDSAProxy();
+        sender = wallet.owner();
+
+        _addDefiSaverConnector();
 
         _callStrategyBaseTest();
     }
@@ -227,14 +242,48 @@ contract TestCore_StrategyExecutor is RegistryUtils, ActionsUtils, BaseTest {
 
         subId = subStorage.getSubsCount();
 
+        bytes[] memory actionsCalldata = new bytes[](1);
+        actionsCalldata[0] = createSubEncode(sub);
+        bytes4[] memory ids = new bytes4[](1);
+        ids[0] = bytes4(keccak256("CreateSub"));
+        uint8[][] memory paramMapping = new uint8[][](1);
+        paramMapping[0] = new uint8[](sub.subData.length);
+
+        StrategyModel.Recipe memory recipe = StrategyModel.Recipe({
+            name: "CreateSubRecipe",
+            callData: actionsCalldata,
+            subData: new bytes32[](0),
+            actionIds: ids,
+            paramMapping: paramMapping
+        });
+
         wallet.execute(
-            subProxyAddr, abi.encodeWithSelector(SubProxy.subscribeToStrategy.selector, sub), 0
+            recipeExecutorAddr,
+            abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe),
+            0
         );
     }
 
-    function _disable_sub(uint256 _subId) internal {
+    function _disable_sub(uint256 _subId, StrategyModel.StrategySub memory _sub) internal {
+        bytes[] memory actionsCalldata = new bytes[](1);
+        actionsCalldata[0] = toggleSubEncode(_subId, false);
+        bytes4[] memory ids = new bytes4[](1);
+        ids[0] = bytes4(keccak256("ToggleSub"));
+        uint8[][] memory paramMapping = new uint8[][](1);
+        paramMapping[0] = new uint8[](_sub.subData.length);
+
+        StrategyModel.Recipe memory recipe = StrategyModel.Recipe({
+            name: "ToggleSubRecipe",
+            callData: actionsCalldata,
+            subData: new bytes32[](0),
+            actionIds: ids,
+            paramMapping: paramMapping
+        });
+
         wallet.execute(
-            subProxyAddr, abi.encodeWithSelector(SubProxy.deactivateSub.selector, _subId), 0
+            recipeExecutorAddr,
+            abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe),
+            0
         );
     }
 

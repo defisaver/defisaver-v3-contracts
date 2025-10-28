@@ -6,7 +6,7 @@ import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
 import { UtilAddresses } from "../../utils/addresses/UtilAddresses.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
@@ -16,7 +16,7 @@ contract LimitOrderSubProxy is
     CoreHelper,
     Permission,
     UtilAddresses,
-    CheckWalletType
+    SmartWalletUtils
 {
     error InvalidTokenAddresses(address tokenSellAddr, address tokenBuyAddr);
     error InvalidAmount();
@@ -42,8 +42,8 @@ contract LimitOrderSubProxy is
     }
 
     function subToLimitOrder(LimitOrderSub memory _subData) external {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _giveAuthContractPermission(_getWalletType(address(this)));
 
         _validateData(_subData);
 

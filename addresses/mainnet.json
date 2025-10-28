@@ -2840,7 +2840,12 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "604800",
-        "registryIds": [{ "name": "StrategyExecutorID", "id": "0x0c1dc439" }],
+        "registryIds": [
+            {
+                "name": "StrategyExecutorID",
+                "id": "0x0c1dc439"
+            }
+        ],
         "history": []
     },
     {
@@ -3410,7 +3415,12 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
-        "registryIds": [{ "name": "CompPaybackNew", "id": "0x9ea2a2cc" }],
+        "registryIds": [
+            {
+                "name": "CompPaybackNew",
+                "id": "0x9ea2a2cc"
+            }
+        ],
         "history": []
     },
     {
@@ -4736,5 +4746,16 @@
         "changeTime": "0",
         "registryIds": [],
         "history": ["0x0b2621aE77952606A3b95d06E31b10132C51C860"]
+    },
+    {
+        "name": "DSAAuth",
+        "address": "0xA6386AcD1511Bf3781Efed000886436834aFCf65",
+        "id": "0x0432b62c",
+        "path": "contracts/core/strategy/DSAAuth.sol",
+        "version": "1.0.1",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": ["0xfc6f5dDEEC0e6122a501d9Ba8a9b428c74c4640A"]
     }
 ]

@@ -35,5 +35,5 @@ contract MainnetFLAddresses {
     address internal constant CURVEUSD_FLASH_ADDR = 0xA7a4bb50AF91f90b6fEb3388E7f8286aF45b299B;
     address internal constant CURVEUSD_ADDR = 0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E;
 
-    address internal constant RECIPE_EXECUTOR_ADDR = 0x5029336642814bC51a42bA80BF83a6322110035D;
+    address internal constant DFS_REGISTRY_ADDR = 0x287778F121F134C66212FB16c9b53eC991D32f5b;
 }

@@ -2,22 +2,26 @@
 
 pragma solidity =0.8.24;
 
-import { BaseTest } from "./BaseTest.sol";
-import { Addresses } from "../utils/Addresses.sol";
-
 import { IDSProxyFactory } from "../../contracts/interfaces/DS/IDSProxyFactory.sol";
 import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
+import { IInstaIndex } from "../../contracts/interfaces/protocols/insta/IInstaIndex.sol";
+import { BaseTest } from "./BaseTest.sol";
+import { Addresses } from "../utils/Addresses.sol";
+import { DSAUtils } from "../../contracts/utils/DSAUtils.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract SmartWallet is BaseTest {
     address payable public owner;
     address payable public walletAddr;
     bool public isSafe;
+    bool public isDSA;
+    bool public isDSProxy;
     bool private safeInitialized;
 
     error SafeTxFailed();
+    error UnsupportedWalletType();
 
     modifier ownerAsSender() {
         vm.prank(owner);
@@ -41,6 +45,18 @@ contract SmartWallet is BaseTest {
     function createDSProxy() public ownerAsSender returns (address payable) {
         walletAddr = payable(address(IDSProxyFactory(Addresses.DS_PROXY_FACTORY).build()));
         isSafe = false;
+        isDSA = false;
+        isDSProxy = true;
+        return walletAddr;
+    }
+
+    function createDSAProxy() public ownerAsSender returns (address payable) {
+        uint256 version = useVersion1DSAProxy() ? 1 : 2;
+        walletAddr =
+            payable(IInstaIndex(Addresses.INSTADAPP_INDEX).build(owner, version, address(0)));
+        isSafe = false;
+        isDSA = true;
+        isDSProxy = false;
         return walletAddr;
     }
 
@@ -67,6 +83,8 @@ contract SmartWallet is BaseTest {
                 .createProxyWithNonce(Addresses.SAFE_SINGLETON, setupData, saltNonce));
 
         isSafe = true;
+        isDSA = false;
+        isDSProxy = false;
         safeInitialized = true;
 
         return walletAddr;
@@ -91,8 +109,18 @@ contract SmartWallet is BaseTest {
             if (!success) {
                 revert SafeTxFailed();
             }
+        } else if (isDSProxy) {
+            IDSProxy(walletAddr).execute{ value: _value }(_target, _calldata);
+        } else if (isDSA) {
+            // Fix for [FAIL: vm.startPrank: cannot overwrite a prank until it is applied at least once]
+            consumePrank();
+            vm.startPrank(owner);
+
+            DSAUtils.cast(walletAddr, Addresses.DFS_REGISTRY, owner, _calldata, _value);
+
+            vm.stopPrank();
         } else {
-            IDSProxy(walletAddr).execute(_target, _calldata);
+            revert UnsupportedWalletType();
         }
     }
 

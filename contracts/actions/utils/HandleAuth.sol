@@ -37,14 +37,9 @@ contract HandleAuth is ActionBase, Permission {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function handleAuth(Params memory _inputData) internal {
-        bool isDSProxy = isDSProxy(address(this));
-        address authContract = isDSProxy ? PROXY_AUTH_ADDRESS : MODULE_AUTH_ADDRESS;
-
-        if (_inputData.enableAuth) {
-            isDSProxy ? giveProxyPermission(authContract) : enableModule(authContract);
-        } else {
-            isDSProxy ? removeProxyPermission(authContract) : disableModule(authContract);
-        }
+        _inputData.enableAuth
+            ? _giveAuthContractPermission(_getWalletType(address(this)))
+            : _removeAuthContractPermission(_getWalletType(address(this)));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

@@ -21,7 +21,7 @@ contract BaseFLAddresses {
 
     address internal constant MORPHO_BLUE_ADDR = 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb;
 
-    address internal constant RECIPE_EXECUTOR_ADDR = 0xd0Ae279e330f98C399375f80968C8bf860202766;
+    address internal constant DFS_REGISTRY_ADDR = 0x347FB634271F666353F23A3362f3935D96F97476;
 
     ////////// NOT USED
 

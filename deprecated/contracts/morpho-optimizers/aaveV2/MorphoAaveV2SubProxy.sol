@@ -5,11 +5,11 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../../auth/AdminAuth.sol";
 import { Permission } from "../../../auth/Permission.sol";
 import { SubStorage } from "../../../core/strategy/SubStorage.sol";
-import { CheckWalletType } from "../../../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../../core/helpers/CoreHelper.sol";
 
-contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
+contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -42,8 +42,8 @@ contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permissio
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToMorphoAaveV2Automation(MorphoAaveV2SubData calldata _subData) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _giveAuthContractPermission(_getWalletType(address(this)));
 
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
@@ -60,8 +60,8 @@ contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permissio
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId send as 0
     function updateSubData(uint32 _subId1, uint32 _subId2, MorphoAaveV2SubData calldata _subData) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _giveAuthContractPermission(_getWalletType(address(this)));
 
         // update repay as we must have a subId, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
@@ -89,8 +89,8 @@ contract MorphoAaveV2SubProxy is StrategyModel, AdminAuth, CoreHelper, Permissio
 
     /// @notice Activates Repay sub and if exists a Boost sub
     function activateSub(uint32 _subId1, uint32 _subId2) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _giveAuthContractPermission(_getWalletType(address(this)));
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
 
         if (_subId2 != 0) {

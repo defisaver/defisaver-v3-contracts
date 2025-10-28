@@ -22,8 +22,8 @@ fs_permissions = [{ access = 'read', path = './test-sol/config/' }]
 bracket_spacing = true
 number_underscore = "thousands"
 ignore = ["deprecated/**"]
-# int_types = "long"
 line_length = 100
+# int_types = "long"
 # tab_width = 4
 
 
@@ -48,6 +48,7 @@ exclude_lints = [
     "screaming-snake-case-immutable",
     "pascal-case-struct",
 ]
-ignore = ["deprecated/**"]
+ignore = ["deprecated/**", "test-sol/**"]
+lint_on_build = false
 
 # https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

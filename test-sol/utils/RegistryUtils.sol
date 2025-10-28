@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 import { DFSRegistry } from "../../contracts/core/DFSRegistry.sol";
 import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
 import { CoreHelper } from "../../contracts/core/helpers/CoreHelper.sol";
-import { AdminVault } from "../../contracts/auth/AdminAuth.sol";
+import { IAdminVault } from "../../contracts/interfaces/auth/IAdminVault.sol";
 import { CheatCodes } from "./CheatCodes.sol";
 
 contract RegistryUtils is CoreHelper, CheatCodes {
@@ -15,7 +15,7 @@ contract RegistryUtils is CoreHelper, CheatCodes {
 
         (, uint256 waitPeriod,,,, bool exists) = registry.entries(actionId);
 
-        address owner = AdminVault(registry.adminVault()).owner();
+        address owner = IAdminVault(registry.adminVault()).owner();
 
         cheats.startPrank(owner);
 
@@ -42,7 +42,7 @@ contract RegistryUtils is CoreHelper, CheatCodes {
     function addBotCaller(address _newBot) public {
         BotAuth botAuth = BotAuth(getAddr("BotAuth"));
 
-        address owner = AdminVault(botAuth.adminVault()).owner();
+        address owner = IAdminVault(botAuth.adminVault()).owner();
 
         cheats.startPrank(owner);
         botAuth.addCaller(_newBot);
