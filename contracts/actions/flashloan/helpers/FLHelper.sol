@@ -32,6 +32,9 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
     /// @dev Id of the RecipeExecutor contract
     bytes4 public constant RECIPE_EXECUTOR_ID = bytes4(keccak256("RecipeExecutor"));
 
+    /// @dev Id of the RecipeExecutorProxy contract (for Summerfi wallets)
+    bytes4 public constant RECIPE_EXECUTOR_PROXY_ID = bytes4(keccak256("RecipeExecutorProxy"));
+
     /// @dev Used for DSA Proxy Accounts
     string private constant DEFISAVER_CONNECTOR_NAME = "DefiSaverConnector";
 
@@ -69,7 +72,7 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
 
         if (_walletType == WalletType.SUMMERFI) {
             IAccountImplementation(_wallet).execute{value: address(this).balance}(
-                dfsRegistry.getAddr(RECIPE_EXECUTOR_ID),
+                dfsRegistry.getAddr(RECIPE_EXECUTOR_PROXY_ID),
                 data
             );
             return;

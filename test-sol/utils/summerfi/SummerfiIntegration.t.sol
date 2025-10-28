@@ -10,6 +10,7 @@ import {IAccountImplementation} from "../../../contracts/interfaces/summerfi/IAc
 import {IAccountFactory} from "../../../contracts/interfaces/summerfi/IAccountFactory.sol";
 import {IAccountGuard} from "../../../contracts/interfaces/summerfi/IAccountGuard.sol";
 import {RecipeExecutor} from "../../../contracts/core/RecipeExecutor.sol";
+import {RecipeExecutorProxy} from "../../../contracts/core/RecipeExecutorProxy.sol";
 import {StrategyModel} from "../../../contracts/core/strategy/StrategyModel.sol";
 import {AaveV3Supply} from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import {AaveV3Borrow} from "../../../contracts/actions/aaveV3/AaveV3Borrow.sol";
@@ -46,6 +47,7 @@ contract SummerfiIntegration is BaseTest, ActionsUtils, RegistryUtils, AaveV3Hel
     address summerfiAccountOwner;
 
     RecipeExecutor recipeExecutor;
+    RecipeExecutorProxy recipeExecutorProxy;
     IAccountFactory accountFactory;
     AaveV3Supply aaveV3Supply;
     AaveV3Borrow aaveV3Borrow;
@@ -69,6 +71,7 @@ contract SummerfiIntegration is BaseTest, ActionsUtils, RegistryUtils, AaveV3Hel
         accountFactory = IAccountFactory(SUMMERFI_ACCOUNT_FACTORY);
 
         recipeExecutor = new RecipeExecutor();
+        recipeExecutorProxy = new RecipeExecutorProxy();
         aaveV3Supply = new AaveV3Supply();
         aaveV3Borrow = new AaveV3Borrow();
         aaveV3Payback = new AaveV3Payback();
@@ -77,6 +80,7 @@ contract SummerfiIntegration is BaseTest, ActionsUtils, RegistryUtils, AaveV3Hel
         sendToken = new SendToken();
         dfsSell = new DFSSell();
         redeploy("RecipeExecutor", address(recipeExecutor));
+        redeploy("RecipeExecutorProxy", address(recipeExecutorProxy));
         redeploy("AaveV3Supply", address(aaveV3Supply));
         redeploy("AaveV3Borrow", address(aaveV3Borrow));
         redeploy("AaveV3Payback", address(aaveV3Payback));
@@ -87,7 +91,7 @@ contract SummerfiIntegration is BaseTest, ActionsUtils, RegistryUtils, AaveV3Hel
 
         // Create SSW
         createSummerfiSmartWallet();
-        whitelistRecipeExecutor();
+        whitelistRecipeExecutorProxy();
 
         // Convert USD amounts to token amounts
         supplyAmount = amountInUSDPrice(SUPPLY_ASSET, SUPPLY_AMOUNT_USD);
@@ -154,7 +158,9 @@ contract SummerfiIntegration is BaseTest, ActionsUtils, RegistryUtils, AaveV3Hel
 
         vm.prank(summerfiAccountOwner);
         IAccountImplementation(summerfiAccount)
-            .execute(address(recipeExecutor), abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe));
+            .execute(
+                address(recipeExecutorProxy), abi.encodeWithSelector(RecipeExecutorProxy.executeRecipe.selector, recipe)
+            );
 
         assertEq(balanceOf(SUPPLY_ASSET, summerfiAccount), accountWethBefore);
 
@@ -222,7 +228,9 @@ contract SummerfiIntegration is BaseTest, ActionsUtils, RegistryUtils, AaveV3Hel
 
         vm.prank(summerfiAccountOwner);
         IAccountImplementation(summerfiAccount)
-            .execute(address(recipeExecutor), abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe));
+            .execute(
+                address(recipeExecutorProxy), abi.encodeWithSelector(RecipeExecutorProxy.executeRecipe.selector, recipe)
+            );
     }
 
     function _createAaveV3Position(address _onBehalf) internal {
@@ -252,7 +260,9 @@ contract SummerfiIntegration is BaseTest, ActionsUtils, RegistryUtils, AaveV3Hel
 
         vm.prank(summerfiAccountOwner);
         IAccountImplementation(summerfiAccount)
-            .execute(address(recipeExecutor), abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe));
+            .execute(
+                address(recipeExecutorProxy), abi.encodeWithSelector(RecipeExecutorProxy.executeRecipe.selector, recipe)
+            );
 
         assertEq(balanceOf(SUPPLY_ASSET, bob), bobSupplyBefore - supplyAmount);
         assertEq(balanceOf(BORROW_ASSET, bob), bobBorrowBefore + borrowAmount);
@@ -291,14 +301,14 @@ contract SummerfiIntegration is BaseTest, ActionsUtils, RegistryUtils, AaveV3Hel
         vm.label(address(SUMMERFI_GUARD), "AccountGuard");
     }
 
-    /// @dev Whitelist RecipeExecutor in the AccountGuard
-    function whitelistRecipeExecutor() internal {
+    /// @dev Whitelist RecipeExecutorProxy in the AccountGuard
+    function whitelistRecipeExecutorProxy() internal {
         IAccountGuard accountGuard = IAccountGuard(SUMMERFI_GUARD);
         address guardOwner = accountGuard.owner();
 
         vm.prank(guardOwner);
-        accountGuard.setWhitelist(address(recipeExecutor), true);
+        accountGuard.setWhitelist(address(recipeExecutorProxy), true);
 
-        assert(accountGuard.isWhitelisted(address(recipeExecutor)));
+        assert(accountGuard.isWhitelisted(address(recipeExecutorProxy)));
     }
 }
