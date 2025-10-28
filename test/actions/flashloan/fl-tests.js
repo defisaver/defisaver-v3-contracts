@@ -859,7 +859,7 @@ const balancerV3FLTest = async (flActionContract) => {
                         Float2BN('1', 0),
                     );
 
-                    const loanAmount1 = hre.ethers.utils.parseUnits('1000000', assetInfo1.decimals);
+                    const loanAmount1 = hre.ethers.utils.parseUnits('10000', assetInfo1.decimals);
                     const loanAmount2 = hre.ethers.utils.parseUnits('5', assetInfo2.decimals);
 
                     await approve(assetInfo1.address, wallet.address);
