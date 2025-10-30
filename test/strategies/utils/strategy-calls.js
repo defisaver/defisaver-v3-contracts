@@ -7887,6 +7887,88 @@ const callAaveV3FLBoostStrategy = async (
     );
 };
 
+const callAaveV3FLCollateralSwitchStrategy = async (
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    flAmount,
+    exchangeObject,
+    fromAsset,
+    flAddr,
+) => {
+    const isL2 = network !== 'mainnet';
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction([fromAsset], [flAmount]),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, '0');
+    const aaveV3SupplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        false,
+        placeHolderAddr,
+        0,
+        placeHolderAddr,
+        placeHolderAddr,
+        0,
+        true,
+        false,
+        placeHolderAddr,
+    );
+    const aaveV3WithdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        false,
+        placeHolderAddr,
+        0,
+        placeHolderAddr,
+        0,
+    );
+    const returnFLAction = new dfs.actions.basic.SendTokenAction(placeHolderAddr, flAddr, 0);
+    const returnAnyDust = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        hre.ethers.constants.MaxUint256,
+    );
+
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3SupplyAction.encodeForRecipe()[0]);
+    actionsCallData.push(aaveV3WithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(returnFLAction.encodeForRecipe()[0]);
+    actionsCallData.push(returnAnyDust.encodeForRecipe()[0]);
+
+    triggerCallData.push(
+        abiCoder.encode(
+            ['address', 'address', 'uint256', 'uint8'],
+            [placeHolderAddr, placeHolderAddr, 0, 0],
+        ),
+    );
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(
+        `GasUsed callAaveV3FLCollateralSwitchStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
 module.exports = {
     callDcaStrategy,
     callMcdRepayStrategy,
@@ -7991,4 +8073,5 @@ module.exports = {
     callAaveV3GenericFLCloseToDebtStrategy,
     callAaveV3BoostStrategy,
     callAaveV3FLBoostStrategy,
+    callAaveV3FLCollateralSwitchStrategy,
 };
