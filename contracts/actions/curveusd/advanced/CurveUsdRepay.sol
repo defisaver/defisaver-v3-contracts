@@ -6,6 +6,7 @@ import { ActionBase } from "../../ActionBase.sol";
 import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
 import { CurveUsdSwapper } from "./CurveUsdSwapper.sol";
 import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
+import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title Repays a curveusd position with a given amount of collateral
 /// @notice This action uses internal swapper to repay debt
@@ -68,7 +69,7 @@ contract CurveUsdRepay is ActionBase, CurveUsdHelper {
         /// @dev see ICrvUsdController natspec
         if (_params.collAmount == 0) revert();
 
-        address curveUsdSwapper = registry.getAddr(CURVE_SWAPPER_ID);
+        address curveUsdSwapper = registry.getAddr(DFSIds.CURVE_SWAPPER);
         uint256[] memory swapData = _setupCurvePath(
             curveUsdSwapper,
             _params.additionalData,

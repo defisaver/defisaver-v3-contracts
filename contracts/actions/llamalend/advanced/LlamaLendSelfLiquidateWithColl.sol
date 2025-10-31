@@ -9,6 +9,7 @@ import {
     ILlamaLendController
 } from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
+import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title LlamaLendSelfLiquidateWithColl
 /// @dev if current debtToken coll > debt, callback address won't be called -> no swap will be done (any coll token and debt token will be send to params.to)
@@ -75,7 +76,7 @@ contract LlamaLendSelfLiquidateWithColl is ActionBase, LlamaLendHelper {
         if (!isControllerValid(_params.controllerAddress, _params.controllerId)) {
             revert InvalidLlamaLendController();
         }
-        address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
+        address llamalendSwapper = registry.getAddr(DFSIds.LLAMALEND_SWAPPER);
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
         info[1] = _params.controllerId;

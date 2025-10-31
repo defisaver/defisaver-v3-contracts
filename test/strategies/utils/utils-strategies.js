@@ -1,5 +1,6 @@
 /* eslint-disable no-shadow */
 const hre = require('hardhat');
+const dfs = require('@defisaver/sdk');
 const {
     getAddrFromRegistry,
     impersonateAccount,
@@ -12,7 +13,9 @@ const {
     getContractFromRegistry,
     executeTxFromProxy,
     isProxySafe,
+    isProxyDSAProxy,
 } = require('../../utils/utils');
+const { executeAction } = require('../../utils/actions');
 
 const getLatestBundleId = async () => {
     const bundleStorageAddr = await getAddrFromRegistry('BundleStorage');
@@ -97,13 +100,24 @@ const createBundle = async (strategyIds) => {
 };
 
 const subToStrategy = async (proxy, strategySub) => {
-    const SubProxyAddr = addrs[network].SubProxy;
-    const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
-    const functionData = SubProxyProxy.interface.encodeFunctionData('subscribeToStrategy', [
-        strategySub,
-    ]);
+    let receipt;
 
-    const receipt = await executeTxFromProxy(proxy, SubProxyAddr, functionData);
+    // For DSA, subscription is performed inside a Recipe.
+    const isDSAProxy = await isProxyDSAProxy(proxy);
+    if (isDSAProxy) {
+        const createSubRecipe = new dfs.Recipe('CreateSubRecipe', [
+            new dfs.actions.basic.CreateSubAction(strategySub),
+        ]);
+        const functionData = createSubRecipe.encodeForDsProxyCall()[1];
+        receipt = await executeAction('RecipeExecutor', functionData, proxy);
+    } else {
+        const SubProxyAddr = addrs[network].SubProxy;
+        const SubProxyProxy = await hre.ethers.getContractFactory('SubProxy');
+        const functionData = SubProxyProxy.interface.encodeFunctionData('subscribeToStrategy', [
+            strategySub,
+        ]);
+        receipt = await executeTxFromProxy(proxy, SubProxyAddr, functionData);
+    }
 
     const gasUsed = await getGasUsed(receipt);
     const dollarPrice = calcGasToUSD(gasUsed, AVG_GAS_PRICE);

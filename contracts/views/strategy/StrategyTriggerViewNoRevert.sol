@@ -6,13 +6,12 @@ import {
     IPoolAddressesProvider
 } from "../../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
 import { IERC20 } from "../../interfaces/token/IERC20.sol";
-import { ISafe } from "../../interfaces/protocols/safe/ISafe.sol";
 import { ITrigger } from "../../interfaces/core/ITrigger.sol";
-import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
-import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
-import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
+
+import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
+import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
+import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
 import { TokenUtils } from "../../utils/token/TokenUtils.sol";
@@ -21,7 +20,7 @@ import { AaveV3Helper } from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
 
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
-contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletType, AaveV3Helper {
+contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, SmartWalletUtils, AaveV3Helper {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     address internal constant DEFAULT_SPARK_MARKET_MAINNET =
@@ -179,7 +178,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
         address sellTokenAddr = address(uint160(uint256(_subData[0])));
         uint256 desiredAmount = uint256(_subData[2]);
 
-        address tokenHolder = _fetchTokenHolder(_smartWallet);
+        address tokenHolder = _fetchOwnerOrWallet(_smartWallet);
         bool hasEnoughBalance = sellTokenAddr.getBalance(tokenHolder) >= desiredAmount;
 
         if (tokenHolder != _smartWallet) {
@@ -219,15 +218,6 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     /*//////////////////////////////////////////////////////////////
                                 HELPERS
     //////////////////////////////////////////////////////////////*/
-    function _fetchTokenHolder(address _subWallet) internal view returns (address) {
-        if (isDSProxy(_subWallet)) {
-            return IDSProxy(payable(_subWallet)).owner();
-        }
-        // if not DSProxy, we assume we are in context of Safe
-        address[] memory owners = ISafe(_subWallet).getOwners();
-        return owners.length == 1 ? owners[0] : _subWallet;
-    }
-
     function _hasEnoughMinDebtInUSD(uint256 _userDebtInUSD) internal view returns (bool) {
         if (block.chainid == 1) {
             return _userDebtInUSD >= MIN_DEBT_IN_USD_MAINNET;

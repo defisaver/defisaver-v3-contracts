@@ -124,7 +124,7 @@ contract FLAaveV3CarryDebt is ActionBase, ReentrancyGuard, FLHelper, IFlashLoanB
             _assets[i].withdrawTokens(wallet, _amounts[i]);
         }
 
-        _executeRecipe(wallet, isDSProxy(wallet), currRecipe, _amounts[0]);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, _amounts[0]);
 
         return true;
     }

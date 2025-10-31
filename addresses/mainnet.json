@@ -2841,7 +2841,12 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "604800",
-        "registryIds": [{ "name": "StrategyExecutorID", "id": "0x0c1dc439" }],
+        "registryIds": [
+            {
+                "name": "StrategyExecutorID",
+                "id": "0x0c1dc439"
+            }
+        ],
         "history": []
     },
     {
@@ -3411,7 +3416,12 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
-        "registryIds": [{ "name": "CompPaybackNew", "id": "0x9ea2a2cc" }],
+        "registryIds": [
+            {
+                "name": "CompPaybackNew",
+                "id": "0x9ea2a2cc"
+            }
+        ],
         "history": []
     },
     {

@@ -11,6 +11,7 @@ contract BaseTest is Config {
     // EOA USERS
     address internal constant bob = address(0xbb);
     address internal constant alice = address(0xaa);
+    address internal constant charlie = address(0xcc);
 
     using SafeERC20 for IERC20;
 
@@ -100,6 +101,11 @@ contract BaseTest is Config {
 
     function startPrank(address _sender) internal {
         vm.startPrank(_sender);
+    }
+
+    function consumePrank() internal view {
+        (bool success,) = address(0).staticcall("");
+        success; // silence unused variable warning
     }
 
     function removeSelector(bytes memory _data) internal pure returns (bytes memory) {

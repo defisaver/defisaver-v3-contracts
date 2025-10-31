@@ -5,7 +5,7 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
@@ -16,7 +16,7 @@ contract AaveV3SubProxy is
     AdminAuth,
     CoreHelper,
     Permission,
-    CheckWalletType,
+    SmartWalletUtils,
     AaveV3Helper
 {
     uint64 public immutable REPAY_BUNDLE_ID;
@@ -52,8 +52,8 @@ contract AaveV3SubProxy is
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToAaveAutomation(bytes calldata _encodedInput) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
 
         AaveSubData memory subData = parseSubData(_encodedInput);
 
@@ -72,8 +72,8 @@ contract AaveV3SubProxy is
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId send as 0
     function updateSubData(bytes calldata _encodedInput) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         AaveSubData memory subData = parseSubData(_encodedInput[8:]);
@@ -104,8 +104,8 @@ contract AaveV3SubProxy is
 
     /// @notice Activates Repay sub and if exists a Boost sub
     function activateSub(bytes calldata _encodedInput) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);

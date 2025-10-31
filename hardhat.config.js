@@ -40,6 +40,7 @@ module.exports = {
     defaultNetwork: 'hardhat',
     lightTesting: true,
     isWalletSafe: true,
+    dsaProxyVersion: 2,
     gasReporter: {
         currency: 'EUR',
         enabled: false,
