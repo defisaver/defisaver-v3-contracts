@@ -304,6 +304,31 @@ contract SparkView is SparkHelper, SparkRatioHelper {
         }
     }
 
+    /// @notice Fetches all the e-mode categories
+    /// @param _market Address of SparkPoolAddressesProvider for specific market
+    /// @return emodesData Array of e-mode categories
+    function getAllEmodes(address _market) public view returns (SparkDataTypes.EModeCategory[] memory emodesData) {
+        emodesData = new SparkDataTypes.EModeCategory[](256);
+        ISparkPool lendingPool = getSparkLendingPool(_market);
+        for (uint8 i = 1; i < 255; i++) {
+            SparkDataTypes.EModeCategory memory nextEmodeData = getEmodeData(lendingPool, i);
+            if (bytes(nextEmodeData.label).length == 0) break;
+            emodesData[i - 1] = nextEmodeData;
+        }
+    }
+
+    /// @notice Fetches the e-mode data for a specific e-mode category
+    /// @param _lendingPool Address of the lending pool
+    /// @param _id ID of the e-mode category
+    /// @return emodeData E-mode data for the specific category
+    function getEmodeData(ISparkPool _lendingPool, uint8 _id)
+        public
+        view
+        returns (SparkDataTypes.EModeCategory memory emodeData)
+    {
+        emodeData = _lendingPool.getEModeCategoryData(_id);
+    }
+
     /// @notice Fetches all the collateral/debt address and amounts, denominated in ether
     /// @param _market Address of LendingPoolAddressesProvider for specific market
     /// @param _user Address of the user
