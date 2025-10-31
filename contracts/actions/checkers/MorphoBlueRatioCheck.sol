@@ -10,9 +10,9 @@ import { MarketParams } from "../../interfaces/protocols/morpho-blue/IMorphoBlue
 /// @title Action to check the ratio of the Morpho Blue position after strategy execution.
 contract MorphoBlueRatioCheck is ActionBase, MorphoBlueHelper {
     /// @notice 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
+    uint256 internal constant RATIO_OFFSET = 5e16;
 
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
+    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE_CANCUN);
 
     error BadAfterRatio(uint256 startRatio, uint256 currRatio);
 

@@ -16,7 +16,7 @@ contract MorphoBlueRatioTrigger is ITrigger, AdminAuth, MorphoBlueHelper, Trigge
         UNDER
     }
 
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE);
+    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE_CANCUN);
 
     /// @param marketId bytes32 representing a MorphoBlue market
     /// @param user address of the user whose position we check
