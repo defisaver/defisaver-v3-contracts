@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../../../interfaces/fluid/vaults/IFluidVaultT1.sol";
-import { IFluidVaultT3 } from "../../../../interfaces/fluid/vaults/IFluidVaultT3.sol";
+import { IFluidVaultT1 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
+import { IFluidVaultT3 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT3.sol";
 import { FluidLiquidityModel } from "../../helpers/FluidLiquidityModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidSupplyLiquidityLogic - Implements the supply of tokens to Fluid liquidity layer
@@ -22,12 +22,14 @@ library FluidWithdrawLiquidityLogic {
     function withdraw(FluidLiquidityModel.WithdrawData memory _data) internal returns (uint256) {
         _data.vaultType.requireLiquidityCollateral();
 
-        bool shouldWrapWithdrawnEth = _data.wrapWithdrawnEth && _data.supplyToken == TokenUtils.ETH_ADDR;
+        bool shouldWrapWithdrawnEth =
+            _data.wrapWithdrawnEth && _data.supplyToken == TokenUtils.ETH_ADDR;
 
         address sendTokensTo = shouldWrapWithdrawnEth ? address(this) : _data.to;
 
         // type(int256).min will trigger max withdrawal inside the vault
-        int256 withdrawAmount = _data.amount == type(uint256).max ? type(int256).min : -_data.amount.signed256();
+        int256 withdrawAmount =
+            _data.amount == type(uint256).max ? type(int256).min : -_data.amount.signed256();
 
         (, withdrawAmount,) = _data.vaultType.isT1Vault()
             ? IFluidVaultT1(_data.vault)

@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { LlamaLendHelper } from "./helpers/LlamaLendHelper.sol";
-import { ILlamaLendController } from "../../interfaces/llamalend/ILlamaLendController.sol";
+import {
+    ILlamaLendController
+} from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 
 /// @title Action that withdraws collateral from user's wallet llamalend position
 /// @dev collateralAmount must be non-zero
@@ -32,9 +34,11 @@ contract LlamaLendWithdraw is ActionBase, LlamaLendHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.collateralAmount = _parseParamUint(params.collateralAmount, _paramMapping[2], _subData, _returnValues);
+        params.collateralAmount =
+            _parseParamUint(params.collateralAmount, _paramMapping[2], _subData, _returnValues);
 
         (uint256 generatedAmount, bytes memory logData) = _llamaLendWithdraw(params);
         emit ActionEvent("LlamaLendWithdraw", logData);
@@ -67,9 +71,11 @@ contract LlamaLendWithdraw is ActionBase, LlamaLendHelper {
         address collateralAsset = ILlamaLendController(_params.controllerAddress).collateral_token();
 
         if (_params.controllerAddress == OLD_WETH_CONTROLLER && block.chainid == 1) {
-            ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount, false);
+            ILlamaLendController(_params.controllerAddress)
+                .remove_collateral(_params.collateralAmount, false);
         } else {
-            ILlamaLendController(_params.controllerAddress).remove_collateral(_params.collateralAmount);
+            ILlamaLendController(_params.controllerAddress)
+                .remove_collateral(_params.collateralAmount);
         }
 
         collateralAsset.withdrawTokens(_params.to, _params.collateralAmount);

@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IStkAave } from "../../interfaces/aave/IStkAave.sol";
+import { IStkAave } from "../../interfaces/protocols/aave/IStkAave.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Action to stake GHO tokens.
 contract GhoStake is ActionBase, AaveV3Helper {
@@ -52,7 +52,10 @@ contract GhoStake is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _stake(Params memory _params) internal returns (uint256 stkTokensReceived, bytes memory logData) {
+    function _stake(Params memory _params)
+        internal
+        returns (uint256 stkTokensReceived, bytes memory logData)
+    {
         require(_params.to != address(0));
 
         address stakeToken = IStkAave(STAKED_GHO_TOKEN).STAKED_TOKEN();

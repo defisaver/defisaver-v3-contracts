@@ -2,8 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVault } from "../../../interfaces/fluid/vaults/IFluidVault.sol";
-import { IFluidVaultResolver } from "../../../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import { IFluidVault } from "../../../interfaces/protocols/fluid/vaults/IFluidVault.sol";
+import {
+    IFluidVaultResolver
+} from "../../../interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidHelper } from "../helpers/FluidHelper.sol";
 import { FluidDexModel } from "../helpers/FluidDexModel.sol";
 import { FluidLiquidityModel } from "../helpers/FluidLiquidityModel.sol";
@@ -11,7 +13,7 @@ import { FluidPaybackLiquidityLogic } from "../logic/liquidity/FluidPaybackLiqui
 import { FluidPaybackDexLogic } from "../logic/dex/FluidPaybackDexLogic.sol";
 import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Payback debt on Fluid DEX vault (T2, T3, T4)
 contract FluidDexPayback is ActionBase, FluidHelper {
@@ -44,15 +46,20 @@ contract FluidDexPayback is ActionBase, FluidHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.nftId = _parseParamUint(params.nftId, _paramMapping[2], _subData, _returnValues);
 
-        params.paybackAmount = _parseParamUint(params.paybackAmount, _paramMapping[3], _subData, _returnValues);
-        params.paybackVariableData.debtAmount0 =
-            _parseParamUint(params.paybackVariableData.debtAmount0, _paramMapping[4], _subData, _returnValues);
-        params.paybackVariableData.debtAmount1 =
-            _parseParamUint(params.paybackVariableData.debtAmount1, _paramMapping[5], _subData, _returnValues);
-        params.paybackVariableData.minDebtShares =
-            _parseParamUint(params.paybackVariableData.minDebtShares, _paramMapping[6], _subData, _returnValues);
-        params.paybackVariableData.maxAmountToPull =
-            _parseParamUint(params.paybackVariableData.maxAmountToPull, _paramMapping[7], _subData, _returnValues);
+        params.paybackAmount =
+            _parseParamUint(params.paybackAmount, _paramMapping[3], _subData, _returnValues);
+        params.paybackVariableData.debtAmount0 = _parseParamUint(
+            params.paybackVariableData.debtAmount0, _paramMapping[4], _subData, _returnValues
+        );
+        params.paybackVariableData.debtAmount1 = _parseParamUint(
+            params.paybackVariableData.debtAmount1, _paramMapping[5], _subData, _returnValues
+        );
+        params.paybackVariableData.minDebtShares = _parseParamUint(
+            params.paybackVariableData.minDebtShares, _paramMapping[6], _subData, _returnValues
+        );
+        params.paybackVariableData.maxAmountToPull = _parseParamUint(
+            params.paybackVariableData.maxAmountToPull, _paramMapping[7], _subData, _returnValues
+        );
 
         (uint256 paybackAmountOrBurnedShares, bytes memory logData) = _payback(params);
         emit ActionEvent("FluidDexPayback", logData);

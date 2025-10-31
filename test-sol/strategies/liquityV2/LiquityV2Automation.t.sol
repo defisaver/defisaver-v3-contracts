@@ -5,12 +5,18 @@ pragma solidity =0.8.24;
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { Addresses } from "../../utils/Addresses.sol";
 
-import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
-import { IStabilityPool } from "../../../contracts/interfaces/liquityV2/IStabilityPool.sol";
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
+import {
+    IStabilityPool
+} from "../../../contracts/interfaces/protocols/liquityV2/IStabilityPool.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
 
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
-import { LiquityV2SPDeposit } from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
+import {
+    LiquityV2SPDeposit
+} from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
 import { LiquityV2RatioCheck } from "../../../contracts/actions/checkers/LiquityV2RatioCheck.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 import { LiquityV2RatioTrigger } from "../../../contracts/triggers/LiquityV2RatioTrigger.sol";
@@ -134,7 +140,8 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
             (uint256 beforeRatio,) = trigger.getRatio(address(config.market), troveId);
             assertLe(beforeRatio, config.triggerRatio, "TRIGGER MUST BE TRIGGERABLE");
 
-            uint256 depositBOLDInSPAmount = liquityV2View.getTroveInfo(address(config.market), troveId).debtAmount;
+            uint256 depositBOLDInSPAmount =
+                liquityV2View.getTroveInfo(address(config.market), troveId).debtAmount;
             // deposit ALL borrowed amount in SP
             _spDeposit(config.market, depositBOLDInSPAmount);
             _subToPaybackStrategy(config.market, config.triggerRatio, config.targetRatio);
@@ -148,7 +155,8 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
     function _executePaybackStrategy(IAddressesRegistry _market, uint256 _targetRatio) internal {
         (uint256 beforeRatio,) = trigger.getRatio(address(_market), troveId);
 
-        LiquityV2View.TroveData memory troveInfo = liquityV2View.getTroveInfo(address(_market), troveId);
+        LiquityV2View.TroveData memory troveInfo =
+            liquityV2View.getTroveInfo(address(_market), troveId);
         uint256 collAmountBefore = troveInfo.collAmount;
         uint256 borrowAmountBefore = troveInfo.debtAmount;
         uint256 depositedInSPBefore = IStabilityPool(_market.stabilityPool()).deposits(walletAddr);
@@ -167,10 +175,14 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
             );
             _actionsCallData[1] = gasFeeEncode(WITHDRAW_FROM_SP_GAS_COST, address(0));
             _actionsCallData[2] = liquityV2PaybackEncode(address(0), address(0), 11, 0);
-            _actionsCallData[3] = liquityV2RatioCheckEncode(address(0), 11, LiquityV2RatioCheck.RatioState.IN_REPAY, 0);
+            _actionsCallData[3] = liquityV2RatioCheckEncode(
+                address(0), 11, LiquityV2RatioCheck.RatioState.IN_REPAY, 0
+            );
 
             uint256 subId = SubStorage(SUB_STORAGE_ADDR).getSubsCount() - 1;
-            executor.executeStrategy(subId, STRATEGY_OR_BUNDLE_ID, _triggerCallData, _actionsCallData, subscription);
+            executor.executeStrategy(
+                subId, STRATEGY_OR_BUNDLE_ID, _triggerCallData, _actionsCallData, subscription
+            );
         }
 
         // ! Checks ->
@@ -189,7 +201,11 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
         // ! additional checks ->
         assertEq(collAmountAfter, collAmountBefore);
         assertGt(txFeeBalanceAfter, txFeeBalanceBefore, "TX BALANCE BAD ");
-        assertEq(depositedInSPAfter, depositedInSPBefore - amountToWithdrawFromSP - dfsFee, "DEPOSITED IN SP BAD ");
+        assertEq(
+            depositedInSPAfter,
+            depositedInSPBefore - amountToWithdrawFromSP - dfsFee,
+            "DEPOSITED IN SP BAD "
+        );
         assertEq(
             borrowAmountAfter,
             borrowAmountBefore - amountToWithdrawFromSP - dfsFee + feeBalanceDiff,
@@ -201,7 +217,8 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
         internal
         returns (uint256)
     {
-        LiquityV2View.TroveData memory troveInfo = liquityV2View.getTroveInfo(address(_market), troveId);
+        LiquityV2View.TroveData memory troveInfo =
+            liquityV2View.getTroveInfo(address(_market), troveId);
         uint256 collateralAmountInUSD = troveInfo.collAmount * troveInfo.collPrice / 1e18;
         uint256 borrowAmountDesired = collateralAmountInUSD * 1e18 / _targetRatio;
         return troveInfo.debtAmount - borrowAmountDesired;
@@ -210,10 +227,15 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
     /*//////////////////////////////////////////////////////////////////////////
                                 SUBSCRIBE
     //////////////////////////////////////////////////////////////////////////*/
-    function _subToPaybackStrategy(IAddressesRegistry _market, uint256 _triggerRatio, uint256 _targetRatio) internal {
+    function _subToPaybackStrategy(
+        IAddressesRegistry _market,
+        uint256 _triggerRatio,
+        uint256 _targetRatio
+    ) internal {
         SubProxy subProxy = new SubProxy();
         uint8 ratioStateEncoded = 1;
-        bytes memory triggerData = abi.encode(address(_market), troveId, _triggerRatio, ratioStateEncoded);
+        bytes memory triggerData =
+            abi.encode(address(_market), troveId, _triggerRatio, ratioStateEncoded);
         subscription.isBundle = false;
         subscription.strategyOrBundleId = STRATEGY_OR_BUNDLE_ID;
 
@@ -229,7 +251,8 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
         subscription.subData[3] = bytes32(_targetRatio);
         subscription.subData[4] = bytes32(uint256(ratioStateEncoded));
 
-        bytes memory subscribeCallData = abi.encodeWithSelector(subProxy.subscribeToStrategy.selector, subscription);
+        bytes memory subscribeCallData =
+            abi.encodeWithSelector(subProxy.subscribeToStrategy.selector, subscription);
         wallet.execute(address(subProxy), subscribeCallData, 0);
     }
 
@@ -247,7 +270,10 @@ contract TestLiquityV2Automation is LiquityV2ExecuteActions, LiquityV2Utils {
         giveTokenAndApproveAsSender(sender, BOLD_ADDR, walletAddr, vars.depositAmount);
 
         vars.executeActionCallData = executeActionCalldata(
-            liquityV2SPDepositEncode(address(_market), sender, sender, sender, vars.depositAmount, false), true
+            liquityV2SPDepositEncode(
+                address(_market), sender, sender, sender, vars.depositAmount, false
+            ),
+            true
         );
         wallet.execute(address(spDeposit), vars.executeActionCallData, 0);
 

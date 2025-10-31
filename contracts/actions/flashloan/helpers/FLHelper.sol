@@ -3,10 +3,10 @@
 pragma solidity =0.8.24;
 
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
-import { FLFeeFaucet } from "../../../utils/FLFeeFaucet.sol";
+import { FLFeeFaucet } from "../../../utils/fee/FLFeeFaucet.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
-import { ISafe } from "../../../interfaces/safe/ISafe.sol";
-import { IDSProxy } from "../../../interfaces/IDSProxy.sol";
+import { ISafe } from "../../../interfaces/protocols/safe/ISafe.sol";
+import { IDSProxy } from "../../../interfaces/DS/IDSProxy.sol";
 
 contract FLHelper is MainnetFLAddresses, StrategyModel {
     uint16 internal constant AAVE_REFERRAL_CODE = 64;
@@ -15,20 +15,24 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
     FLFeeFaucet public constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
 
     /// @dev Function sig of RecipeExecutor._executeActionsFromFL()
-    bytes4 public constant CALLBACK_SELECTOR =
-        bytes4(keccak256("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)"));
+    bytes4 public constant CALLBACK_SELECTOR = bytes4(
+        keccak256("_executeActionsFromFL((string,bytes[],bytes32[],bytes4[],uint8[][]),bytes32)")
+    );
 
     // Revert if execution fails when using safe wallet
     error SafeExecutionError();
 
-    function _executeRecipe(address _wallet, bool _isDSProxy, Recipe memory _currRecipe, uint256 _paybackAmount)
-        internal
-    {
+    function _executeRecipe(
+        address _wallet,
+        bool _isDSProxy,
+        Recipe memory _currRecipe,
+        uint256 _paybackAmount
+    ) internal {
         if (_isDSProxy) {
-            IDSProxy(_wallet)
-            .execute{
-                value: address(this).balance
-            }(RECIPE_EXECUTOR_ADDR, abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount));
+            IDSProxy(_wallet).execute{ value: address(this).balance }(
+                RECIPE_EXECUTOR_ADDR,
+                abi.encodeWithSelector(CALLBACK_SELECTOR, _currRecipe, _paybackAmount)
+            );
         } else {
             bool success = ISafe(_wallet)
                 .execTransactionFromModule(

@@ -150,8 +150,9 @@ contract TestSendTokensAndUnwrap is BaseTest, ActionsUtils {
                 : balanceOf(_tokens[i], _receivers[i]);
         }
 
-        bytes memory executeActionCallData =
-            executeActionCalldata(sendTokensAndUnwrapEncode(_tokens, _receivers, adaptedAmounts), _isDirect);
+        bytes memory executeActionCallData = executeActionCalldata(
+            sendTokensAndUnwrapEncode(_tokens, _receivers, adaptedAmounts), _isDirect
+        );
 
         wallet.execute(address(cut), executeActionCallData, 0);
 

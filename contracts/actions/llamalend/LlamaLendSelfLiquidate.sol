@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { LlamaLendHelper } from "./helpers/LlamaLendHelper.sol";
-import { ILlamaLendController } from "../../interfaces/llamalend/ILlamaLendController.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import {
+    ILlamaLendController
+} from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title LlamaLendSelfLiquidate Closes the users position while he's in soft liquidation
 contract LlamaLendSelfLiquidate is ActionBase, LlamaLendHelper {
@@ -34,7 +36,8 @@ contract LlamaLendSelfLiquidate is ActionBase, LlamaLendHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.minDebtAssetExpected =
             _parseParamUint(params.minDebtAssetExpected, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
@@ -61,7 +64,10 @@ contract LlamaLendSelfLiquidate is ActionBase, LlamaLendHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _llamaLendSelfLiquidate(Params memory _params) internal returns (uint256, bytes memory) {
+    function _llamaLendSelfLiquidate(Params memory _params)
+        internal
+        returns (uint256, bytes memory)
+    {
         uint256 userWholeDebt = ILlamaLendController(_params.controllerAddress).debt(address(this));
         (uint256 collInDebtAsset, uint256 collInCollateralAsset) =
             getCollAmountsFromAMM(_params.controllerAddress, address(this));
@@ -85,7 +91,8 @@ contract LlamaLendSelfLiquidate is ActionBase, LlamaLendHelper {
             ILlamaLendController(_params.controllerAddress)
                 .liquidate(address(this), _params.minDebtAssetExpected, false);
         } else {
-            ILlamaLendController(_params.controllerAddress).liquidate(address(this), _params.minDebtAssetExpected);
+            ILlamaLendController(_params.controllerAddress)
+                .liquidate(address(this), _params.minDebtAssetExpected);
         }
         uint256 collAssetBalanceAfterLiq = collateralAsset.getBalance(address(this));
 
@@ -99,11 +106,16 @@ contract LlamaLendSelfLiquidate is ActionBase, LlamaLendHelper {
             debtAsset.withdrawTokens(_params.to, debtAssetBalanceAfterLiq - debtAssetBalancePreLiq);
         } else {
             // we return any extra debt asset that was not needed in debt and remove any extra approval
-            debtAsset.withdrawTokens(_params.from, amountToPull - (debtAssetBalancePreLiq - debtAssetBalanceAfterLiq));
+            debtAsset.withdrawTokens(
+                _params.from, amountToPull - (debtAssetBalancePreLiq - debtAssetBalanceAfterLiq)
+            );
             IERC20(debtAsset).approve(_params.controllerAddress, 0);
         }
 
-        return (collAssetReceivedFromLiq, abi.encode(_params, collInDebtAsset, collInCollateralAsset, userWholeDebt));
+        return (
+            collAssetReceivedFromLiq,
+            abi.encode(_params, collInDebtAsset, collInCollateralAsset, userWholeDebt)
+        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

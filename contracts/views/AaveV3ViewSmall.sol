@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { AaveV3Helper } from "../actions/aaveV3/helpers/AaveV3Helper.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { IPoolV3 } from "../interfaces/aaveV3/IPoolV3.sol";
-import { DataTypes } from "../interfaces/aaveV3/DataTypes.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { IPoolV3 } from "../interfaces/protocols/aaveV3/IPoolV3.sol";
+import { DataTypes } from "../interfaces/protocols/aaveV3/DataTypes.sol";
 
 contract AaveV3ViewSmall is AaveV3Helper {
     using TokenUtils for address;
@@ -32,10 +32,12 @@ contract AaveV3ViewSmall is AaveV3Helper {
         data.currentEmodeId = lendingPool.getUserEMode(_user);
 
         for (uint256 i = 0; i < data.tokenAddresses.length; i++) {
-            DataTypes.ReserveData memory reserveData = lendingPool.getReserveData(data.tokenAddresses[i]);
+            DataTypes.ReserveData memory reserveData =
+                lendingPool.getReserveData(data.tokenAddresses[i]);
             data.supplyAmounts[i] = reserveData.aTokenAddress.getBalance(_user);
             data.borrowAmounts[i] = reserveData.variableDebtTokenAddress.getBalance(_user);
-            data.isCollateral[i] = isUsingAsCollateral(lendingPool.getUserConfiguration(_user), reserveData.id);
+            data.isCollateral[i] =
+                isUsingAsCollateral(lendingPool.getUserConfiguration(_user), reserveData.id);
         }
     }
 

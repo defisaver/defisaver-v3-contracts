@@ -2,12 +2,16 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IPriceFeed } from "../../../contracts/interfaces/liquityV2/IPriceFeed.sol";
-import { ITroveManager } from "../../../contracts/interfaces/liquityV2/ITroveManager.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { IPriceFeed } from "../../../contracts/interfaces/protocols/liquityV2/IPriceFeed.sol";
+import { ITroveManager } from "../../../contracts/interfaces/protocols/liquityV2/ITroveManager.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
-import { LiquityV2Withdraw } from "../../../contracts/actions/liquityV2/trove/LiquityV2Withdraw.sol";
+import {
+    LiquityV2Withdraw
+} from "../../../contracts/actions/liquityV2/trove/LiquityV2Withdraw.sol";
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
@@ -101,12 +105,16 @@ contract TestLiquityV2Withdraw is LiquityV2ExecuteActions {
         }
     }
 
-    function _withdraw(IAddressesRegistry _market, uint256 _troveId, bool _isDirect, uint256 _withdrawAmountInUSD)
-        internal
-    {
+    function _withdraw(
+        IAddressesRegistry _market,
+        uint256 _troveId,
+        bool _isDirect,
+        uint256 _withdrawAmountInUSD
+    ) internal {
         uint256 collPriceWAD = IPriceFeed(_market.priceFeed()).lastGoodPrice();
         address collToken = _market.collToken();
-        uint256 withdrawAmount = amountInUSDPriceMock(collToken, _withdrawAmountInUSD, collPriceWAD / 1e10);
+        uint256 withdrawAmount =
+            amountInUSDPriceMock(collToken, _withdrawAmountInUSD, collPriceWAD / 1e10);
 
         ITroveManager troveManager = ITroveManager(_market.troveManager());
         ITroveManager.LatestTroveData memory troveData = troveManager.getLatestTroveData(_troveId);

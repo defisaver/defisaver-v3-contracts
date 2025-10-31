@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Switch action if user wants to use tokens for collateral on aaveV3 market
@@ -26,13 +26,12 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
     }
 
     /// @inheritdoc ActionBase
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        virtual
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
         (, bytes memory logData) = _switchAsCollateral(inputData);
 
@@ -60,7 +59,10 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _switchAsCollateral(Params memory _inputData) internal returns (uint256, bytes memory) {
+    function _switchAsCollateral(Params memory _inputData)
+        internal
+        returns (uint256, bytes memory)
+    {
         require(_inputData.arrayLength == _inputData.assetIds.length);
         require(_inputData.arrayLength == _inputData.useAsCollateral.length);
 
@@ -89,7 +91,8 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
         encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useDefaultMarket));
         for (uint256 i = 0; i < _params.arrayLength; i++) {
             encodedInput = bytes.concat(encodedInput, bytes2(_params.assetIds[i]));
-            encodedInput = bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useAsCollateral[i]));
+            encodedInput =
+                bytes.concat(encodedInput, DFSLib.boolToBytes(_params.useAsCollateral[i]));
         }
         if (!_params.useDefaultMarket) {
             encodedInput = bytes.concat(encodedInput, bytes20(_params.market));
@@ -111,8 +114,13 @@ contract AaveV3CollateralSwitch is ActionBase, AaveV3Helper {
         if (params.useDefaultMarket) {
             params.market = DEFAULT_AAVE_MARKET;
         } else {
-            params.market =
-                address(bytes20(_encodedInput[(5 + (params.arrayLength - 1) * 3):(25 + (params.arrayLength - 1) * 3)]));
+            params.market = address(
+                bytes20(
+                    _encodedInput[
+                        (5 + (params.arrayLength - 1) * 3):(25 + (params.arrayLength - 1) * 3)
+                    ]
+                )
+            );
         }
     }
 }

@@ -5,12 +5,19 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
-import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
+import { UtilAddresses } from "../../utils/addresses/UtilAddresses.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
-contract LimitOrderSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, UtilHelper, CheckWalletType {
+contract LimitOrderSubProxy is
+    StrategyModel,
+    AdminAuth,
+    CoreHelper,
+    Permission,
+    UtilAddresses,
+    CheckWalletType
+{
     error InvalidTokenAddresses(address tokenSellAddr, address tokenBuyAddr);
     error InvalidAmount();
 
@@ -45,13 +52,18 @@ contract LimitOrderSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission,
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(limitOrderSub);
     }
 
-    function formatLimitOrderSub(LimitOrderSub memory _subData) public view returns (StrategySub memory limitOrderSub) {
+    function formatLimitOrderSub(LimitOrderSub memory _subData)
+        public
+        view
+        returns (StrategySub memory limitOrderSub)
+    {
         limitOrderSub.strategyOrBundleId = LIMIT_ORDER_ID;
         limitOrderSub.isBundle = false;
 
         uint256 goodUntilTimestamp = block.timestamp + _subData.goodUntilDuration;
 
-        bytes memory triggerData = abi.encode(_subData.limitPrice, goodUntilTimestamp, _subData.orderType);
+        bytes memory triggerData =
+            abi.encode(_subData.limitPrice, goodUntilTimestamp, _subData.orderType);
         limitOrderSub.triggerData = new bytes[](1);
         limitOrderSub.triggerData[0] = triggerData;
 

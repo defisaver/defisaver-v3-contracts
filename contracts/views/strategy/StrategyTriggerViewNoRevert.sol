@@ -1,28 +1,31 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
-import { IPoolAddressesProvider } from "../../interfaces/aaveV3/IPoolAddressesProvider.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
-import { ISafe } from "../../interfaces/safe/ISafe.sol";
-import { ITrigger } from "../../interfaces/ITrigger.sol";
+import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
+import {
+    IPoolAddressesProvider
+} from "../../interfaces/protocols/aaveV3/IPoolAddressesProvider.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
+import { ISafe } from "../../interfaces/protocols/safe/ISafe.sol";
+import { ITrigger } from "../../interfaces/core/ITrigger.sol";
 import { BundleStorage } from "../../core/strategy/BundleStorage.sol";
 import { CheckWalletType } from "../../utils/CheckWalletType.sol";
-import { DSProxy } from "../../DS/DSProxy.sol";
+import { IDSProxy } from "../../interfaces/DS/IDSProxy.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
-import { DFSRegistry } from "../../core/DFSRegistry.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { StrategyStorage } from "../../core/strategy/StrategyStorage.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { StrategyIDs } from "./StrategyIDs.sol";
 import { AaveV3Helper } from "../../actions/aaveV3/helpers/AaveV3Helper.sol";
 
 /// @title StrategyTriggerViewNoRevert - Helper contract to check whether a trigger is triggered or not for a given sub.
 /// @dev This contract is designed to avoid reverts from checking triggers.
 contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletType, AaveV3Helper {
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
-    address internal constant DEFAULT_SPARK_MARKET_MAINNET = 0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
+    address internal constant DEFAULT_SPARK_MARKET_MAINNET =
+        0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE;
 
     uint256 public constant MIN_DEBT_IN_USD_MAINNET = 5000 * 1e8;
     uint256 public constant MIN_DEBT_IN_USD_L2 = 50 * 1e8;
@@ -45,15 +48,18 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     /// @param triggerCalldata - The calldata to pass to the trigger.
     /// @param triggerSubData - The sub data to pass to the trigger.
     /// @return TriggerStatus - The status of the trigger (FALSE, TRUE, REVERT).
-    function checkSingleTrigger(bytes4 triggerId, bytes memory triggerCalldata, bytes memory triggerSubData)
-        public
-        returns (TriggerStatus)
-    {
+    function checkSingleTrigger(
+        bytes4 triggerId,
+        bytes memory triggerCalldata,
+        bytes memory triggerSubData
+    ) public returns (TriggerStatus) {
         address triggerAddr = registry.getAddr(triggerId);
 
         if (triggerAddr == address(0)) return TriggerStatus.REVERT;
 
-        try ITrigger(triggerAddr).isTriggered(triggerCalldata, triggerSubData) returns (bool isTriggered) {
+        try ITrigger(triggerAddr).isTriggered(triggerCalldata, triggerSubData) returns (
+            bool isTriggered
+        ) {
             if (!isTriggered) {
                 return TriggerStatus.FALSE;
             } else {
@@ -69,7 +75,10 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     /// @param triggerId - The ID of the trigger to check.
     /// @param txData - The calldata to pass to the trigger.
     /// @return TriggerStatus - The status of the trigger (FALSE, TRUE, REVERT).
-    function checkSingleTriggerLowLevel(bytes4 triggerId, bytes memory txData) public returns (TriggerStatus) {
+    function checkSingleTriggerLowLevel(bytes4 triggerId, bytes memory txData)
+        public
+        returns (TriggerStatus)
+    {
         address triggerAddr = registry.getAddr(triggerId);
 
         if (triggerAddr == address(0)) return TriggerStatus.REVERT;
@@ -94,16 +103,18 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     /// @param _triggerCallData - The calldata to pass to the triggers.
     /// @param smartWallet - The smart wallet of the subscription.
     /// @return TriggerStatus - The status of the trigger (FALSE, TRUE, REVERT).
-    function checkTriggers(StrategySub memory _sub, bytes[] calldata _triggerCallData, address smartWallet)
-        public
-        returns (TriggerStatus)
-    {
+    function checkTriggers(
+        StrategySub memory _sub,
+        bytes[] calldata _triggerCallData,
+        address smartWallet
+    ) public returns (TriggerStatus) {
         Strategy memory strategy;
 
         uint256 strategyId = _sub.strategyOrBundleId;
 
         if (_sub.isBundle) {
-            strategyId = BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(_sub.strategyOrBundleId, 0);
+            strategyId =
+                BundleStorage(BUNDLE_STORAGE_ADDR).getStrategyId(_sub.strategyOrBundleId, 0);
         }
 
         strategy = StrategyStorage(STRATEGY_STORAGE_ADDR).getStrategy(strategyId);
@@ -114,7 +125,10 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
 
         for (uint256 i = 0; i < triggerIds.length; i++) {
             triggerAddr = registry.getAddr(triggerIds[i]);
-            try ITrigger(triggerAddr).isTriggered(_triggerCallData[i], _sub.triggerData[i]) returns (bool isTriggered) {
+            try ITrigger(triggerAddr)
+                .isTriggered(_triggerCallData[i], _sub.triggerData[i]) returns (
+                bool isTriggered
+            ) {
                 if (!isTriggered) {
                     return TriggerStatus.FALSE;
                 }
@@ -144,12 +158,13 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     /*//////////////////////////////////////////////////////////////
                               VERIFY LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _tryToVerifyRequiredAmountAndAllowance(address _smartWallet, bytes32[] memory _subData)
-        internal
-        view
-        returns (TriggerStatus)
-    {
-        try this.verifyRequiredAmountAndAllowance(_smartWallet, _subData) returns (TriggerStatus status) {
+    function _tryToVerifyRequiredAmountAndAllowance(
+        address _smartWallet,
+        bytes32[] memory _subData
+    ) internal view returns (TriggerStatus) {
+        try this.verifyRequiredAmountAndAllowance(_smartWallet, _subData) returns (
+            TriggerStatus status
+        ) {
             return status;
         } catch {
             return TriggerStatus.REVERT;
@@ -170,13 +185,18 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
         if (tokenHolder != _smartWallet) {
             uint256 currentAllowance = IERC20(sellTokenAddr).allowance(tokenHolder, _smartWallet);
             bool hasEnoughAllowance = currentAllowance >= desiredAmount;
-            return (hasEnoughBalance && hasEnoughAllowance) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
+            return
+                (hasEnoughBalance && hasEnoughAllowance) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
         }
 
         return hasEnoughBalance ? TriggerStatus.TRUE : TriggerStatus.FALSE;
     }
 
-    function _verifyAaveV3MinDebtPosition(address _smartWallet) internal view returns (TriggerStatus) {
+    function _verifyAaveV3MinDebtPosition(address _smartWallet)
+        internal
+        view
+        returns (TriggerStatus)
+    {
         // TODO -> Hardcoded DEFAULT_AAVE_MARKET
         /// @dev AaveV3 automation only supports Core market at the moment (Default market)
         IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_AAVE_MARKET).getPool());
@@ -184,9 +204,14 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
         return _hasEnoughMinDebtInUSD(totalDebtUSD) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
     }
 
-    function _verifySparkMinDebtPosition(address _smartWallet) internal view returns (TriggerStatus) {
+    function _verifySparkMinDebtPosition(address _smartWallet)
+        internal
+        view
+        returns (TriggerStatus)
+    {
         /// @dev Spark automation is only deployed on Mainnet, so we can hardcode the market address
-        IPoolV3 lendingPool = IPoolV3(IPoolAddressesProvider(DEFAULT_SPARK_MARKET_MAINNET).getPool());
+        IPoolV3 lendingPool =
+            IPoolV3(IPoolAddressesProvider(DEFAULT_SPARK_MARKET_MAINNET).getPool());
         (, uint256 totalDebtUSD,,,,) = lendingPool.getUserAccountData(_smartWallet);
         return _hasEnoughMinDebtInUSD(totalDebtUSD) ? TriggerStatus.TRUE : TriggerStatus.FALSE;
     }
@@ -196,7 +221,7 @@ contract StrategyTriggerViewNoRevert is StrategyModel, CoreHelper, CheckWalletTy
     //////////////////////////////////////////////////////////////*/
     function _fetchTokenHolder(address _subWallet) internal view returns (address) {
         if (isDSProxy(_subWallet)) {
-            return DSProxy(payable(_subWallet)).owner();
+            return IDSProxy(payable(_subWallet)).owner();
         }
         // if not DSProxy, we assume we are in context of Safe
         address[] memory owners = ISafe(_subWallet).getOwners();

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-abstract contract IFlashLoanBase {
+interface IFlashLoanBase {
     struct FlashLoanParams {
         address[] tokens;
         uint256[] amounts;

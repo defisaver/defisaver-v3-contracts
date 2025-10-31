@@ -95,7 +95,13 @@ const tokenizedVaultAdapterTest = () =>
                 );
 
                 console.log(
-                    `- depositing ${(+BN2Float(assetAmount, assetDecimals)).toFixed()} ${assetSymbol} expecting at least ${(+BN2Float(minOutOrMaxIn, shareTokenDecimals)).toFixed()} ${shareTokenSymbol}`,
+                    `- depositing ${(+BN2Float(
+                        assetAmount,
+                        assetDecimals,
+                    )).toFixed()} ${assetSymbol} expecting at least ${(+BN2Float(
+                        minOutOrMaxIn,
+                        shareTokenDecimals,
+                    )).toFixed()} ${shareTokenSymbol}`,
                 );
 
                 await setBalance(assetAddress, senderAddress, assetAmount);
@@ -144,7 +150,13 @@ const tokenizedVaultAdapterTest = () =>
                 );
 
                 console.log(
-                    `- minting ${(+BN2Float(shareAmount, shareTokenDecimals)).toFixed()} ${shareTokenSymbol} depositing at most ${(+BN2Float(minOutOrMaxIn, assetDecimals)).toFixed()} ${assetSymbol}`,
+                    `- minting ${(+BN2Float(
+                        shareAmount,
+                        shareTokenDecimals,
+                    )).toFixed()} ${shareTokenSymbol} depositing at most ${(+BN2Float(
+                        minOutOrMaxIn,
+                        assetDecimals,
+                    )).toFixed()} ${assetSymbol}`,
                 );
 
                 await setBalance(assetAddress, senderAddress, minOutOrMaxIn);
@@ -193,7 +205,13 @@ const tokenizedVaultAdapterTest = () =>
                 const assetAmount = await vault.previewRedeem(minOutOrMaxIn);
 
                 console.log(
-                    `- withdrawing ${(+BN2Float(assetAmount, assetDecimals)).toFixed()} ${assetSymbol} burning at most ${(+BN2Float(minOutOrMaxIn, shareTokenDecimals)).toFixed()} ${shareTokenSymbol}`,
+                    `- withdrawing ${(+BN2Float(
+                        assetAmount,
+                        assetDecimals,
+                    )).toFixed()} ${assetSymbol} burning at most ${(+BN2Float(
+                        minOutOrMaxIn,
+                        shareTokenDecimals,
+                    )).toFixed()} ${shareTokenSymbol}`,
                 );
 
                 await setBalance(shareTokenAddress, senderAddress, minOutOrMaxIn);
@@ -241,7 +259,13 @@ const tokenizedVaultAdapterTest = () =>
                 const minOutOrMaxIn = await vault.previewRedeem(shareAmount);
 
                 console.log(
-                    `- redeeming ${(+BN2Float(shareAmount, shareTokenDecimals)).toFixed()} ${shareTokenSymbol} expecting at least ${(+BN2Float(minOutOrMaxIn, assetDecimals)).toFixed()} ${assetSymbol}`,
+                    `- redeeming ${(+BN2Float(
+                        shareAmount,
+                        shareTokenDecimals,
+                    )).toFixed()} ${shareTokenSymbol} expecting at least ${(+BN2Float(
+                        minOutOrMaxIn,
+                        assetDecimals,
+                    )).toFixed()} ${assetSymbol}`,
                 );
 
                 await setBalance(shareTokenAddress, senderAddress, shareAmount);

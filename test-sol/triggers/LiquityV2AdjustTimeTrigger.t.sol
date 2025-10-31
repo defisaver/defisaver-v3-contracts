@@ -2,13 +2,21 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IBorrowerOperations } from "../../contracts/interfaces/liquityV2/IBorrowerOperations.sol";
-import { IHintHelpers } from "../../contracts/interfaces/liquityV2/IHintHelpers.sol";
+import {
+    IAddressesRegistry
+} from "../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import {
+    IBorrowerOperations
+} from "../../contracts/interfaces/protocols/liquityV2/IBorrowerOperations.sol";
+import { IHintHelpers } from "../../contracts/interfaces/protocols/liquityV2/IHintHelpers.sol";
 import { LiquityV2Open } from "../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../contracts/views/LiquityV2View.sol";
-import { LiquityV2AdjustInterestRate } from "../../contracts/actions/liquityV2/trove/LiquityV2AdjustInterestRate.sol";
-import { LiquityV2AdjustTimeTrigger } from "../../contracts/triggers/LiquityV2AdjustTimeTrigger.sol";
+import {
+    LiquityV2AdjustInterestRate
+} from "../../contracts/actions/liquityV2/trove/LiquityV2AdjustInterestRate.sol";
+import {
+    LiquityV2AdjustTimeTrigger
+} from "../../contracts/triggers/LiquityV2AdjustTimeTrigger.sol";
 import { MockLiquityV2PriceFeed } from "../../contracts/mocks/MockLiquity2PriceFeed.sol";
 import { LiquityV2ExecuteActions } from "../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
@@ -122,7 +130,8 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
             );
 
             // Verify the trove actually has a batch manager
-            IBorrowerOperations borrowerOperations = IBorrowerOperations(markets[i].borrowerOperations());
+            IBorrowerOperations borrowerOperations =
+                IBorrowerOperations(markets[i].borrowerOperations());
             address trovesBatchManager = borrowerOperations.interestBatchManagerOf(troveId);
             assertEq(trovesBatchManager, batchManager, "Trove should have the batch manager set");
 
@@ -134,7 +143,10 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
             vm.warp(block.timestamp + 8 days);
 
             isTriggered = cut.isAdjustmentFeeZero(address(markets[i]), troveId);
-            assertFalse(isTriggered, "Trigger should not be active for trove with batch manager even after cooldown");
+            assertFalse(
+                isTriggered,
+                "Trigger should not be active for trove with batch manager even after cooldown"
+            );
         }
     }
 
@@ -180,7 +192,8 @@ contract TestLiquityV2AdjustTimeTrigger is LiquityV2ExecuteActions {
         uint256 maxUpfrontFee = IHintHelpers(_market.hintHelpers())
             .predictAdjustInterestRateUpfrontFee(_collIndex, _troveId, _newInterestRate);
 
-        (uint256 upperHint, uint256 lowerHint) = getInsertPosition(viewContract, _market, _collIndex, _newInterestRate);
+        (uint256 upperHint, uint256 lowerHint) =
+            getInsertPosition(viewContract, _market, _collIndex, _newInterestRate);
 
         bytes memory executeActionCallData = executeActionCalldata(
             liquityV2AdjustInterestRateEncode(

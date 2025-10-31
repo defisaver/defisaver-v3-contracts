@@ -4,11 +4,11 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { LSVUtilHelper } from "./helpers/LSVUtilHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { FeeRecipient } from "../../utils/FeeRecipient.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { FeeRecipient } from "../../utils/fee/FeeRecipient.sol";
 import { Discount } from "../../utils/Discount.sol";
 import { ExchangeHelper } from "../../exchangeV3/helpers/ExchangeHelper.sol";
-import { LSVProfitTracker } from "../../utils/LSVProfitTracker.sol";
+import { LSVProfitTracker } from "../../utils/lsv/LSVProfitTracker.sol";
 
 /// @title action for tracking users withdrawals within the LSV ecosystem
 contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
@@ -37,8 +37,10 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.token = _parseParamAddr(inputData.token, _paramMapping[0], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.token =
+            _parseParamAddr(inputData.token, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
 
         (uint256 remainingAmount, bytes memory logData) = _lsvWithdraw(inputData);
         emit ActionEvent("LSVWithdraw", logData);
@@ -61,7 +63,10 @@ contract LSVWithdraw is ActionBase, LSVUtilHelper, ExchangeHelper {
 
     /// @notice LSV Withdraw expects users to have withdrawn tokens to the user's wallet, from which we'll pull the performance fee
     /// @notice ProfitTracker will return realisedProfit amount, from which we will calculate fee
-    function _lsvWithdraw(Params memory _inputData) internal returns (uint256 remainingAmount, bytes memory logData) {
+    function _lsvWithdraw(Params memory _inputData)
+        internal
+        returns (uint256 remainingAmount, bytes memory logData)
+    {
         uint256 amountWithdrawnInETH = getAmountInETHFromLST(_inputData.token, _inputData.amount);
 
         uint256 realisedProfitInETH = LSVProfitTracker(LSV_PROFIT_TRACKER_ADDRESS)

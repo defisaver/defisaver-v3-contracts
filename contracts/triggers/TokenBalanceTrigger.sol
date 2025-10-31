@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 /// @title Trigger contract that checks if a certain condition regarding users token amount are true
 contract TokenBalanceTrigger is ITrigger, AdminAuth {

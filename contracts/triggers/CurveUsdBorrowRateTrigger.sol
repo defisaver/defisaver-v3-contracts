@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { ICrvUsdController, ILLAMMA } from "../interfaces/curveusd/ICurveUsd.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { ICrvUsdController, ILLAMMA } from "../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Trigger that triggers when the borrow rate of a CurveUsd market is over or under a certain rate.
 contract CurveUsdBorrowRateTrigger is ITrigger, AdminAuth {

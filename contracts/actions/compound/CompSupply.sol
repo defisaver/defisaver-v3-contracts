@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompHelper } from "./helpers/CompHelper.sol";
-import { ICToken } from "../../interfaces/compound/ICToken.sol";
+import { ICToken } from "../../interfaces/protocols/compound/ICToken.sol";
 
 /// @title Supply a token to Compound.
 contract CompSupply is ActionBase, CompHelper {
@@ -33,7 +33,8 @@ contract CompSupply is ActionBase, CompHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.cTokenAddr = _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
+        params.cTokenAddr =
+            _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
 
@@ -46,7 +47,8 @@ contract CompSupply is ActionBase, CompHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
+        (, bytes memory logData) =
+            _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
         logger.logActionDirectEvent("CompSupply", logData);
     }
 

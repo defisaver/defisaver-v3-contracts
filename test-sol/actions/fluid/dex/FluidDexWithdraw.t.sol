@@ -2,13 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import {
+    IFluidVaultResolver
+} from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidView } from "../../../../contracts/views/FluidView.sol";
 import { FluidDexWithdraw } from "../../../../contracts/actions/fluid/dex/FluidDexWithdraw.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
 contract TestFluidDexWithdraw is FluidTestBase {
@@ -326,8 +328,10 @@ contract TestFluidDexWithdraw is FluidTestBase {
 
             vars.isToken0Native = vaultData.supplyToken0 == TokenUtils.ETH_ADDR;
             vars.isToken1Native = vaultData.supplyToken1 == TokenUtils.ETH_ADDR;
-            vaultData.supplyToken0 = vars.isToken0Native ? TokenUtils.WETH_ADDR : vaultData.supplyToken0;
-            vaultData.supplyToken1 = vars.isToken1Native ? TokenUtils.WETH_ADDR : vaultData.supplyToken1;
+            vaultData.supplyToken0 =
+                vars.isToken0Native ? TokenUtils.WETH_ADDR : vaultData.supplyToken0;
+            vaultData.supplyToken1 =
+                vars.isToken1Native ? TokenUtils.WETH_ADDR : vaultData.supplyToken1;
 
             vars.collAmount0 = _config.withdrawToken0AmountInUSD != 0
                 ? amountInUSDPrice(vaultData.supplyToken0, _config.withdrawToken0AmountInUSD)
@@ -344,7 +348,9 @@ contract TestFluidDexWithdraw is FluidTestBase {
                     continue;
                 }
 
-                emit log_named_address("Capping withdrawal amount for token0", vaultData.supplyToken0);
+                emit log_named_address(
+                    "Capping withdrawal amount for token0", vaultData.supplyToken0
+                );
                 vars.collAmount0 = vaultData.dexSupplyData.supplyToken0Reserves * 90 / 100;
             }
 
@@ -355,7 +361,9 @@ contract TestFluidDexWithdraw is FluidTestBase {
                     continue;
                 }
 
-                emit log_named_address("Capping withdrawal amount for token1", vaultData.supplyToken1);
+                emit log_named_address(
+                    "Capping withdrawal amount for token1", vaultData.supplyToken1
+                );
                 vars.collAmount1 = vaultData.dexSupplyData.supplyToken1Reserves * 90 / 100;
             }
 
@@ -363,8 +371,9 @@ contract TestFluidDexWithdraw is FluidTestBase {
             if (_config.takeMaxUint256CollAmount0 || _config.takeMaxUint256CollAmount1) {
                 vars.minCollToWithdraw = 1; // leave it as 1 for testing purposes
             } else {
-                vars.shares =
-                    estimateWithdrawShares(vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1);
+                vars.shares = estimateWithdrawShares(
+                    vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1
+                );
                 if (vars.shares == 0) {
                     emit log_string("Failed to estimate withdraw shares. Setting it to max and leaving tx to fail for debugging...");
                     vars.shares = uint256(type(int256).max);
@@ -372,8 +381,12 @@ contract TestFluidDexWithdraw is FluidTestBase {
             }
 
             vars.shareVariableData = FluidDexModel.WithdrawVariableData({
-                collAmount0: _config.takeMaxUint256CollAmount0 ? type(uint256).max : vars.collAmount0,
-                collAmount1: _config.takeMaxUint256CollAmount1 ? type(uint256).max : vars.collAmount1,
+                collAmount0: _config.takeMaxUint256CollAmount0
+                    ? type(uint256).max
+                    : vars.collAmount0,
+                collAmount1: _config.takeMaxUint256CollAmount1
+                    ? type(uint256).max
+                    : vars.collAmount1,
                 maxCollShares: vars.shares,
                 minCollToWithdraw: vars.minCollToWithdraw
             });
@@ -457,15 +470,25 @@ contract TestFluidDexWithdraw is FluidTestBase {
                 assertTrue(vars.userPositionAfter.supply < vars.userPositionBefore.supply);
 
                 if (vars.isToken0Native && !_config.wrapWithdrawnEth) {
-                    assertEq(vars.senderEthBalanceAfter, vars.senderEthBalanceBefore + vars.collAmount0);
+                    assertEq(
+                        vars.senderEthBalanceAfter, vars.senderEthBalanceBefore + vars.collAmount0
+                    );
                 } else {
-                    assertEq(vars.senderCollToken0BalanceAfter, vars.senderCollToken0BalanceBefore + vars.collAmount0);
+                    assertEq(
+                        vars.senderCollToken0BalanceAfter,
+                        vars.senderCollToken0BalanceBefore + vars.collAmount0
+                    );
                 }
 
                 if (vars.isToken1Native && !_config.wrapWithdrawnEth) {
-                    assertEq(vars.senderEthBalanceAfter, vars.senderEthBalanceBefore + vars.collAmount1);
+                    assertEq(
+                        vars.senderEthBalanceAfter, vars.senderEthBalanceBefore + vars.collAmount1
+                    );
                 } else {
-                    assertEq(vars.senderCollToken1BalanceAfter, vars.senderCollToken1BalanceBefore + vars.collAmount1);
+                    assertEq(
+                        vars.senderCollToken1BalanceAfter,
+                        vars.senderCollToken1BalanceBefore + vars.collAmount1
+                    );
                 }
             }
         }

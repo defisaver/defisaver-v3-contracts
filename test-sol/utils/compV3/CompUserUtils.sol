@@ -27,7 +27,8 @@ contract CompUserUtils is UserWallet {
         });
 
         bytes memory fnData = abi.encodeWithSignature(
-            "subToCompV3Automation((address,address,uint128,uint128,uint128,uint128,bool,bool))", params
+            "subToCompV3Automation((address,address,uint128,uint128,uint128,uint128,bool,bool))",
+            params
         );
         executeWithWallet(_isSafe, _subProxy, fnData, 0);
     }

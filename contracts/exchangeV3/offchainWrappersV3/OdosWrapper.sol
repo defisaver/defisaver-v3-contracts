@@ -5,12 +5,13 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { DFSExchangeHelper } from "../DFSExchangeHelper.sol";
 import { IOffchainWrapper } from "../../interfaces/exchange/IOffchainWrapper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { SafeERC20 } from "../../utils/SafeERC20.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { DFSExchangeData } from "../DFSExchangeData.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title Wrapper contract which will be used if offchain exchange used is Odos
-contract OdosWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
+contract OdosWrapper is IOffchainWrapper, DFSExchangeHelper, DFSExchangeData, AdminAuth {
     using TokenUtils for address;
     using SafeERC20 for IERC20;
 
@@ -22,7 +23,12 @@ contract OdosWrapper is IOffchainWrapper, DFSExchangeHelper, AdminAuth {
 
     /// @notice Takes order from Odos and returns bool indicating if it is successful
     /// @param _exData Exchange data
-    function takeOrder(ExchangeData memory _exData) public payable override returns (bool success, uint256) {
+    function takeOrder(ExchangeData memory _exData)
+        public
+        payable
+        override
+        returns (bool success, uint256)
+    {
         OdosCalldata memory odosCalldata = abi.decode(_exData.offchainData.callData, (OdosCalldata));
 
         // approve odos allowance contract

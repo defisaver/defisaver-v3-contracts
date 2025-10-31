@@ -3,10 +3,10 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { IPot } from "../../interfaces/mcd/IPot.sol";
-import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
+import { IPot } from "../../interfaces/protocols/mcd/IPot.sol";
+import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Action for depositing DAI into Maker DSR
 contract McdDsrDeposit is McdHelper, ActionBase {
@@ -48,7 +48,10 @@ contract McdDsrDeposit is McdHelper, ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    function _deposit(Params memory _params) internal returns (uint256 deposited, bytes memory logData) {
+    function _deposit(Params memory _params)
+        internal
+        returns (uint256 deposited, bytes memory logData)
+    {
         IPot pot = IPot(POT_ADDR);
 
         _params.amount = DAI_ADDRESS.pullTokensIfNeeded(_params.from, _params.amount);

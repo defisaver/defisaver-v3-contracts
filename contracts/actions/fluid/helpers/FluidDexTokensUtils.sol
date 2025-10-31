@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVault } from "../../../interfaces/fluid/vaults/IFluidVault.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { IFluidVault } from "../../../interfaces/protocols/fluid/vaults/IFluidVault.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Helper library that simplifies token transfers for fluid dex actions
 library FluidDexTokensUtils {
@@ -81,17 +81,20 @@ library FluidDexTokensUtils {
         uint256 _amount0,
         uint256 _amount1
     ) internal returns (PulledTokensData memory vars) {
-        (vars.amount0, vars.isToken0Native) =
-            _pullTokenIfNeededWithApproval(_amount0, _tokens.token0, _from, _approvalTarget);
+        (vars.amount0, vars.isToken0Native) = _pullTokenIfNeededWithApproval(
+            _amount0, _tokens.token0, _from, _approvalTarget
+        );
 
         (vars.amount1, vars.isToken1Native) =
             _pullTokenIfNeededWithApproval(_amount1, _tokens.token1, _from, _approvalTarget);
     }
 
-    function _pullTokenIfNeededWithApproval(uint256 _amount, address _token, address _from, address _approvalTarget)
-        internal
-        returns (uint256 amount, bool isNative)
-    {
+    function _pullTokenIfNeededWithApproval(
+        uint256 _amount,
+        address _token,
+        address _from,
+        address _approvalTarget
+    ) internal returns (uint256 amount, bool isNative) {
         if (_amount == 0) return (0, false);
 
         if (_token == TokenUtils.ETH_ADDR) {

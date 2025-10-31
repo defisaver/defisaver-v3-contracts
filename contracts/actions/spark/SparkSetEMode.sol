@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Set positions eMode
@@ -60,7 +60,10 @@ contract SparkSetEMode is ActionBase, SparkHelper {
     /// @notice User sets EMode for Spark position on user's wallet
     /// @param _market Address provider for specific market
     /// @param _categoryId eMode category id (0 - 255)
-    function _setEmode(address _market, uint8 _categoryId) internal returns (uint256, bytes memory) {
+    function _setEmode(address _market, uint8 _categoryId)
+        internal
+        returns (uint256, bytes memory)
+    {
         ISparkPool lendingPool = getSparkLendingPool(_market);
         lendingPool.setUserEMode(_categoryId);
 

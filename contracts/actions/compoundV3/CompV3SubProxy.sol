@@ -38,7 +38,12 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Che
         bool isEOA;
     }
 
-    constructor(uint64 _repayBundleId, uint64 _boostBundleId, uint64 _repayBundleEoaId, uint64 _boostBundleEoaId) {
+    constructor(
+        uint64 _repayBundleId,
+        uint64 _boostBundleId,
+        uint64 _repayBundleEoaId,
+        uint64 _boostBundleEoaId
+    ) {
         REPAY_BUNDLE_ID = _repayBundleId;
         BOOST_BUNDLE_ID = _boostBundleId;
         REPAY_BUNDLE_EOA_ID = _repayBundleEoaId;
@@ -166,7 +171,8 @@ contract CompV3SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Che
         address user = _subData.isEOA ? _eoa : _wallet;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData = abi.encode(user, _subData.market, uint256(_subData.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData =
+            abi.encode(user, _subData.market, uint256(_subData.maxRatio), uint8(RatioState.OVER));
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 

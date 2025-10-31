@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
+import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Set positions eMode on Aave v3
@@ -60,7 +60,10 @@ contract AaveV3SetEMode is ActionBase, AaveV3Helper {
     /// @notice User sets EMode for Aave position on its wallet
     /// @param _market Address provider for specific market
     /// @param _categoryId eMode category id (0 - 255)
-    function _setEmode(address _market, uint8 _categoryId) internal returns (uint256, bytes memory) {
+    function _setEmode(address _market, uint8 _categoryId)
+        internal
+        returns (uint256, bytes memory)
+    {
         IPoolV3 lendingPool = getLendingPool(_market);
         lendingPool.setUserEMode(_categoryId);
 

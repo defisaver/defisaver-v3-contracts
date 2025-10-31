@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CurveUsdHelper } from "./helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Action that pays back crvUSD to a curveusd position
 /// @dev paybackAmount must be non-zero
@@ -38,13 +38,19 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
-        params.onBehalfOf = _parseParamAddr(params.onBehalfOf, _paramMapping[2], _subData, _returnValues);
+        params.onBehalfOf =
+            _parseParamAddr(params.onBehalfOf, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
-        params.paybackAmount = _parseParamUint(params.paybackAmount, _paramMapping[4], _subData, _returnValues);
-        params.maxActiveBand =
-            int256(_parseParamUint(uint256(params.maxActiveBand), _paramMapping[5], _subData, _returnValues));
+        params.paybackAmount =
+            _parseParamUint(params.paybackAmount, _paramMapping[4], _subData, _returnValues);
+        params.maxActiveBand = int256(
+            _parseParamUint(
+                uint256(params.maxActiveBand), _paramMapping[5], _subData, _returnValues
+            )
+        );
 
         (uint256 paybackAmount, bytes memory logData) = _curveUsdPayback(params);
         emit ActionEvent("CurveUsdPayback", logData);
@@ -84,7 +90,8 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
             isClose = true;
         }
 
-        _params.paybackAmount = CRVUSD_TOKEN_ADDR.pullTokensIfNeeded(_params.from, _params.paybackAmount);
+        _params.paybackAmount =
+            CRVUSD_TOKEN_ADDR.pullTokensIfNeeded(_params.from, _params.paybackAmount);
         CRVUSD_TOKEN_ADDR.approveToken(_params.controllerAddress, _params.paybackAmount);
 
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
@@ -102,14 +109,18 @@ contract CurveUsdPayback is ActionBase, CurveUsdHelper {
         uint256 baseReceivedFromColl;
         uint256 crvUsdReceivedFromColl;
         if (isClose) {
-            baseReceivedFromColl = collateralAsset.getBalance(address(this)) - startingBaseCollBalance;
-            crvUsdReceivedFromColl = CRVUSD_TOKEN_ADDR.getBalance(address(this)) - startingCrvUsdBalanceWithoutDebt;
+            baseReceivedFromColl =
+                collateralAsset.getBalance(address(this)) - startingBaseCollBalance;
+            crvUsdReceivedFromColl =
+                CRVUSD_TOKEN_ADDR.getBalance(address(this)) - startingCrvUsdBalanceWithoutDebt;
 
             collateralAsset.withdrawTokens(_params.to, baseReceivedFromColl);
             CRVUSD_TOKEN_ADDR.withdrawTokens(_params.to, crvUsdReceivedFromColl);
         }
 
-        return (_params.paybackAmount, abi.encode(_params, baseReceivedFromColl, crvUsdReceivedFromColl));
+        return (
+            _params.paybackAmount, abi.encode(_params, baseReceivedFromColl, crvUsdReceivedFromColl)
+        );
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

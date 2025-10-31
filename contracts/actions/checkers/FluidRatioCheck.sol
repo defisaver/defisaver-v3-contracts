@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { FluidRatioHelper } from "../fluid/helpers/FluidRatioHelper.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
 
 /// @title Action to check the ratio of the Fluid position after strategy execution.
 contract FluidRatioCheck is ActionBase, FluidRatioHelper {
@@ -39,9 +39,11 @@ contract FluidRatioCheck is ActionBase, FluidRatioHelper {
         Params memory params = parseInputs(_callData);
 
         params.nftId = _parseParamUint(params.nftId, _paramMapping[0], _subData, _returnValues);
-        params.ratioState =
-            RatioState(_parseParamUint(uint256(params.ratioState), _paramMapping[1], _subData, _returnValues));
-        params.targetRatio = _parseParamUint(params.targetRatio, _paramMapping[2], _subData, _returnValues);
+        params.ratioState = RatioState(
+            _parseParamUint(uint256(params.ratioState), _paramMapping[1], _subData, _returnValues)
+        );
+        params.targetRatio =
+            _parseParamUint(params.targetRatio, _paramMapping[2], _subData, _returnValues);
 
         uint256 currRatio = getRatio(params.nftId);
         uint256 startRatio = uint256(tempStorage.getBytes32("FLUID_RATIO"));

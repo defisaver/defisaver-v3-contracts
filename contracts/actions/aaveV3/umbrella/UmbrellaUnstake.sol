@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { IERC4626 } from "../../../interfaces/IERC4626.sol";
-import { IERC4626StakeToken } from "../../../interfaces/aaveV3/IERC4626StakeToken.sol";
-import { IStaticATokenV2 } from "../../../interfaces/aaveV3/IStaticATokenV2.sol";
+import { IERC4626 } from "../../../interfaces/token/IERC4626.sol";
+import { IERC4626StakeToken } from "../../../interfaces/protocols/aaveV3/IERC4626StakeToken.sol";
+import { IStaticATokenV2 } from "../../../interfaces/protocols/aaveV3/IStaticATokenV2.sol";
 import { ActionBase } from "../../ActionBase.sol";
 import { AaveV3Helper } from "../helpers/AaveV3Helper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title UmbrellaUnstake - Unstake aTokens/underlying or GHO tokens using Umbrella Stake Token
 /// @notice This action will always unwrap waTokens to aTokens/underlying after unstaking.
@@ -39,11 +39,16 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.stkToken = _parseParamAddr(params.stkToken, _paramMapping[0], _subData, _returnValues);
+        params.stkToken =
+            _parseParamAddr(params.stkToken, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
-        params.stkAmount = _parseParamUint(params.stkAmount, _paramMapping[2], _subData, _returnValues);
-        params.useATokens = _parseParamUint(params.useATokens ? 1 : 0, _paramMapping[3], _subData, _returnValues) == 1;
-        params.minAmountOut = _parseParamUint(params.minAmountOut, _paramMapping[4], _subData, _returnValues);
+        params.stkAmount =
+            _parseParamUint(params.stkAmount, _paramMapping[2], _subData, _returnValues);
+        params.useATokens =
+            _parseParamUint(params.useATokens ? 1 : 0, _paramMapping[3], _subData, _returnValues)
+                == 1;
+        params.minAmountOut =
+            _parseParamUint(params.minAmountOut, _paramMapping[4], _subData, _returnValues);
 
         (uint256 redeemedAmount, bytes memory logData) = _unstake(params);
         emit ActionEvent("UmbrellaUnstake", logData);
@@ -71,8 +76,9 @@ contract UmbrellaUnstake is ActionBase, AaveV3Helper {
             return (0, abi.encode(_params, 0));
         }
 
-        uint256 stkSharesToBurn =
-            (_params.stkAmount == type(uint256).max) ? _params.stkToken.getBalance(address(this)) : _params.stkAmount;
+        uint256 stkSharesToBurn = (_params.stkAmount == type(uint256).max)
+            ? _params.stkToken.getBalance(address(this))
+            : _params.stkAmount;
 
         uint256 amountUnstaked = IERC4626StakeToken(_params.stkToken)
             .redeem(

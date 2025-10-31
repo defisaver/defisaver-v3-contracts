@@ -2,13 +2,17 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import {
+    IFluidVaultResolver
+} from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
-import { FluidVaultT1Supply } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Supply.sol";
+import {
+    FluidVaultT1Supply
+} from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Supply.sol";
 import { FluidDexSupply } from "../../../../contracts/actions/fluid/dex/FluidDexSupply.sol";
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
-import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
@@ -83,9 +87,12 @@ contract TestFluidLiquiditySupply is FluidTestBase {
         _baseTest(isDirect, takeMaxUint256, collateralAmountInUSD, false);
     }
 
-    function _baseTest(bool _isDirect, bool _takeMaxUint256, uint256 _collateralAmountInUSD, bool _t1VaultsSelected)
-        internal
-    {
+    function _baseTest(
+        bool _isDirect,
+        bool _takeMaxUint256,
+        uint256 _collateralAmountInUSD,
+        bool _t1VaultsSelected
+    ) internal {
         uint256 initialSupplyOpenAmountUSD = 10_000;
 
         address[] memory vaults = _t1VaultsSelected ? t1Vaults : t3Vaults;
@@ -93,7 +100,11 @@ contract TestFluidLiquiditySupply is FluidTestBase {
         for (uint256 i = 0; i < vaults.length; ++i) {
             uint256 nftId = _t1VaultsSelected
                 ? executeFluidVaultT1Open(
-                    address(vaults[i]), initialSupplyOpenAmountUSD, 0, wallet, address(t1OpenContract)
+                    address(vaults[i]),
+                    initialSupplyOpenAmountUSD,
+                    0,
+                    wallet,
+                    address(t1OpenContract)
                 )
                 : executeFluidVaultT3Open(
                     address(vaults[i]),
@@ -122,7 +133,10 @@ contract TestFluidLiquiditySupply is FluidTestBase {
             bytes memory executeActionCallData = executeActionCalldata(
                 _t1VaultsSelected
                     ? fluidVaultT1SupplyEncode(
-                        address(vaults[i]), nftId, _takeMaxUint256 ? type(uint256).max : supplyAmount, sender
+                        address(vaults[i]),
+                        nftId,
+                        _takeMaxUint256 ? type(uint256).max : supplyAmount,
+                        sender
                     )
                     : fluidDexSupplyEncode(
                         address(vaults[i]),

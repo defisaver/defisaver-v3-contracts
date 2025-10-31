@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { IRewardsController } from "../../interfaces/aaveV3/IRewardsController.sol";
+import { IRewardsController } from "../../interfaces/protocols/aaveV3/IRewardsController.sol";
 
 /// @title Claims single reward type specified by reward for the list of assets. Rewards are received by to address.
 contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
@@ -64,12 +64,17 @@ contract AaveV3ClaimRewards is ActionBase, AaveV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _claimRewards(Params memory _params) internal returns (uint256 amountReceived, bytes memory) {
+    function _claimRewards(Params memory _params)
+        internal
+        returns (uint256 amountReceived, bytes memory)
+    {
         require(_params.assetsLength == _params.assets.length);
 
         IRewardsController rewardsController = IRewardsController(AAVE_REWARDS_CONTROLLER_ADDRESS);
 
-        amountReceived = rewardsController.claimRewards(_params.assets, _params.amount, _params.to, _params.reward);
+        amountReceived = rewardsController.claimRewards(
+            _params.assets, _params.amount, _params.to, _params.reward
+        );
 
         bytes memory logData = abi.encode(_params, amountReceived);
         return (amountReceived, logData);

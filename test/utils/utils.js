@@ -661,7 +661,7 @@ const getAddrFromRegistry = async (name) => {
 
 const getProxyWithSigner = async (signer, addr) => {
     const proxyRegistry = await hre.ethers.getContractAt(
-        'IProxyRegistry',
+        'IDSProxyRegistry',
         addrs[network].PROXY_REGISTRY,
     );
 
@@ -680,7 +680,7 @@ const getProxyWithSigner = async (signer, addr) => {
 const getProxy = async (acc, isSafe = false) => {
     if (isSafe === false) {
         const proxyRegistry = await hre.ethers.getContractAt(
-            'IProxyRegistry',
+            'IDSProxyRegistry',
             addrs[network].PROXY_REGISTRY,
         );
         let proxyAddr = await proxyRegistry.proxies(acc);
@@ -1204,9 +1204,9 @@ const convertToWeth = (tokenAddr) => {
 };
 
 const getProxyAuth = async (proxyAddr, addrWithAuth) => {
-    const dsAuth = await hre.ethers.getContractAt('DSAuth', proxyAddr);
+    const dsAuth = await hre.ethers.getContractAt('IDSAuth', proxyAddr);
     const authorityAddr = await dsAuth.authority();
-    const dsGuard = await hre.ethers.getContractAt('DSAuthority', authorityAddr);
+    const dsGuard = await hre.ethers.getContractAt('IDSAuthority', authorityAddr);
     const selector = '0x1cff79cd'; // execute selector
 
     const hasPermission = await dsGuard.canCall(addrWithAuth, proxyAddr, selector);

@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveHelper } from "./helpers/AaveHelper.sol";
 
@@ -20,13 +20,12 @@ contract AaveCollateralSwitch is ActionBase, AaveHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        virtual
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
         _switchAsCollateral(inputData);
         return bytes32(0);
@@ -48,7 +47,9 @@ contract AaveCollateralSwitch is ActionBase, AaveHelper {
 
     function _switchAsCollateral(Params memory _inputData) internal {
         for (uint256 i = 0; i < _inputData.tokens.length; i++) {
-            enableAsCollateral(_inputData.market, _inputData.tokens[i], _inputData.useAsCollateral[i]);
+            enableAsCollateral(
+                _inputData.market, _inputData.tokens[i], _inputData.useAsCollateral[i]
+            );
         }
     }
 

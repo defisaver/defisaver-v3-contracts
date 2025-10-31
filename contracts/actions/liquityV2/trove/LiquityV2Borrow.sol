@@ -2,12 +2,14 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../interfaces/liquityV2/IAddressesRegistry.sol";
-import { IBorrowerOperations } from "../../../interfaces/liquityV2/IBorrowerOperations.sol";
+import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import {
+    IBorrowerOperations
+} from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Borrows a bold amount from a LiquityV2 trove on a specific market
 contract LiquityV2Borrow is ActionBase, LiquityV2Helper {
@@ -39,7 +41,8 @@ contract LiquityV2Borrow is ActionBase, LiquityV2Helper {
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
         params.troveId = _parseParamUint(params.troveId, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-        params.maxUpfrontFee = _parseParamUint(params.maxUpfrontFee, _paramMapping[4], _subData, _returnValues);
+        params.maxUpfrontFee =
+            _parseParamUint(params.maxUpfrontFee, _paramMapping[4], _subData, _returnValues);
 
         (uint256 amount, bytes memory logData) = _borrow(params);
         emit ActionEvent("LiquityV2Borrow", logData);
@@ -64,7 +67,8 @@ contract LiquityV2Borrow is ActionBase, LiquityV2Helper {
     function _borrow(Params memory _params) internal returns (uint256, bytes memory) {
         address borrowerOperations = IAddressesRegistry(_params.market).borrowerOperations();
 
-        IBorrowerOperations(borrowerOperations).withdrawBold(_params.troveId, _params.amount, _params.maxUpfrontFee);
+        IBorrowerOperations(borrowerOperations)
+            .withdrawBold(_params.troveId, _params.amount, _params.maxUpfrontFee);
 
         BOLD_ADDR.withdrawTokens(_params.to, _params.amount);
 

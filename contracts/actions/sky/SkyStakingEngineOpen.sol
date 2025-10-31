@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { ILockstakeEngine } from "../../interfaces/sky/ILockstakeEngine.sol";
+import { ILockstakeEngine } from "../../interfaces/protocols/sky/ILockstakeEngine.sol";
 
 /// @title Create position via LockstakeEngine
 contract SkyStakingEngineOpen is ActionBase {
@@ -43,7 +43,10 @@ contract SkyStakingEngineOpen is ActionBase {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _skyOpenInStakingEngine(Params memory _inputData) internal returns (uint256, bytes memory logData) {
+    function _skyOpenInStakingEngine(Params memory _inputData)
+        internal
+        returns (uint256, bytes memory logData)
+    {
         uint256 index = ILockstakeEngine(_inputData.stakingContract).ownerUrnsCount(address(this));
         ILockstakeEngine(_inputData.stakingContract).open(index);
         return (index, abi.encode(_inputData));

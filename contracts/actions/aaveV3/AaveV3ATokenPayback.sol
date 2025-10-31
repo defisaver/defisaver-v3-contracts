@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveV3Helper } from "./helpers/AaveV3Helper.sol";
-import { IPoolV3 } from "../../interfaces/aaveV3/IPoolV3.sol";
-import { DataTypes } from "../../interfaces/aaveV3/DataTypes.sol";
+import { IPoolV3 } from "../../interfaces/protocols/aaveV3/IPoolV3.sol";
+import { DataTypes } from "../../interfaces/protocols/aaveV3/DataTypes.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Allows user to repay with aTokens of the underlying debt asset eg. Pay DAI debt using aDAI tokens.
@@ -41,8 +41,9 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.market = _parseParamAddr(params.market, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 paybackAmount, bytes memory logData) =
-            _paybackWithATokens(params.market, params.assetId, params.amount, params.rateMode, params.from);
+        (uint256 paybackAmount, bytes memory logData) = _paybackWithATokens(
+            params.market, params.assetId, params.amount, params.rateMode, params.from
+        );
         emit ActionEvent("AaveV3ATokenPayback", logData);
         return bytes32(paybackAmount);
     }
@@ -50,15 +51,17 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) =
-            _paybackWithATokens(params.market, params.assetId, params.amount, params.rateMode, params.from);
+        (, bytes memory logData) = _paybackWithATokens(
+            params.market, params.assetId, params.amount, params.rateMode, params.from
+        );
         logger.logActionDirectEvent("AaveV3ATokenPayback", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) =
-            _paybackWithATokens(params.market, params.assetId, params.amount, params.rateMode, params.from);
+        (, bytes memory logData) = _paybackWithATokens(
+            params.market, params.assetId, params.amount, params.rateMode, params.from
+        );
         logger.logActionDirectEvent("AaveV3ATokenPayback", logData);
     }
 
@@ -75,10 +78,13 @@ contract AaveV3ATokenPayback is ActionBase, AaveV3Helper {
     /// @param _amount Amount of tokens to be paid back (uint.max for full debt)
     /// @param _rateMode Type of borrow debt [Stable: 1, Variable: 2]
     /// @param _from Where are we pulling the payback aTokens from
-    function _paybackWithATokens(address _market, uint16 _assetId, uint256 _amount, uint256 _rateMode, address _from)
-        internal
-        returns (uint256, bytes memory)
-    {
+    function _paybackWithATokens(
+        address _market,
+        uint16 _assetId,
+        uint256 _amount,
+        uint256 _rateMode,
+        address _from
+    ) internal returns (uint256, bytes memory) {
         IPoolV3 lendingPool = getLendingPool(_market);
 
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);

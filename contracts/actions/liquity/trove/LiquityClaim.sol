@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { LiquityHelper } from "../helpers/LiquityHelper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Action for claiming collateral from Liquity
@@ -46,7 +46,10 @@ contract LiquityClaim is ActionBase, LiquityHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Claims remaining collateral from the user's closed Trove
-    function _liquityClaim(address _to) internal returns (uint256 claimableColl, bytes memory logData) {
+    function _liquityClaim(address _to)
+        internal
+        returns (uint256 claimableColl, bytes memory logData)
+    {
         claimableColl = CollSurplusPool.getCollateral(address(this));
 
         BorrowerOperations.claimCollateral(); // Will revert if claimableColl == 0

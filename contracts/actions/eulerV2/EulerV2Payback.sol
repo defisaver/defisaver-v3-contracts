@@ -3,11 +3,11 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IEVault, IRiskManager } from "../../interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IEVault, IRiskManager } from "../../interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
 
 /// @title Payback debt assets to a Euler vault
 contract EulerV2Payback is ActionBase, EulerV2Helper {
@@ -81,7 +81,13 @@ contract EulerV2Payback is ActionBase, EulerV2Helper {
         if (maxPayback) {
             // Actual EVC function is named `call`, so it is safe to disable rule
             // forge-lint: disable-next-line(unchecked-call)
-            IEVC(EVC_ADDR).call(_params.vault, _params.account, 0, abi.encodeCall(IRiskManager.disableController, ()));
+            IEVC(EVC_ADDR)
+                .call(
+                    _params.vault,
+                    _params.account,
+                    0,
+                    abi.encodeCall(IRiskManager.disableController, ())
+                );
         }
 
         return (_params.amount, abi.encode(_params));

@@ -36,7 +36,13 @@ contract MockChainlinkFeedRegistry {
     function latestRoundData(address base, address quote)
         external
         view
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        )
     {
         PriceData memory p = prices[base][quote][latestRoundId];
         return (p.roundId, p.answer, p.startedAt, p.updatedAt, p.answeredInRound);
@@ -45,7 +51,13 @@ contract MockChainlinkFeedRegistry {
     function getRoundData(address base, address quote, uint80 _roundId)
         external
         view
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        )
     {
         if (_roundId == 0) {
             _roundId = latestRoundId;
@@ -55,7 +67,11 @@ contract MockChainlinkFeedRegistry {
         return (p.roundId, p.answer, p.startedAt, p.updatedAt, p.answeredInRound);
     }
 
-    function getNextRoundId(address base, address quote, uint80 roundId) external view returns (uint80 nextRoundId) {
+    function getNextRoundId(address base, address quote, uint80 roundId)
+        external
+        view
+        returns (uint80 nextRoundId)
+    {
         PriceData memory p = prices[base][quote][roundId];
 
         if (p.index + 1 >= roundIds.length) return 0;

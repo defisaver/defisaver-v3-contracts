@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { TransientStorage } from "../utils/transient/TransientStorage.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { CurveUsdHelper } from "../actions/curveusd/helpers/CurveUsdHelper.sol";
 
@@ -29,10 +29,11 @@ contract CurveUsdCollRatioTrigger is ITrigger, AdminAuth, CurveUsdHelper, Trigge
     }
 
     /// @dev checks current safety ratio of a CurveUsd position and triggers if it's in a correct state
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
-        (uint256 currRatio, bool isInSoftLiquidation) = getCollateralRatio(triggerSubData.user, triggerSubData.market);
+        (uint256 currRatio, bool isInSoftLiquidation) =
+            getCollateralRatio(triggerSubData.user, triggerSubData.market);
 
         if (currRatio == 0) return false;
         /// @dev this trigger will be used for leverage management strategies which can't be managed while underwater

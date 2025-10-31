@@ -4,15 +4,15 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { McdRatioHelper } from "../actions/mcd/helpers/McdRatioHelper.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { IMCDPriceVerifier } from "../interfaces/IMCDPriceVerifier.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { IMCDPriceVerifier } from "../interfaces/utils/IMCDPriceVerifier.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger contract that verifies if current MCD vault ratio is higher or lower than wanted
 contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, TriggerHelper {
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     error WrongNextPrice(uint256);
 
@@ -43,7 +43,12 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
         uint8 state;
     }
 
-    function isTriggered(bytes memory _callData, bytes memory _subData) public view override returns (bool) {
+    function isTriggered(bytes memory _callData, bytes memory _subData)
+        public
+        view
+        override
+        returns (bool)
+    {
         CallParams memory triggerCallData = parseCallInputs(_callData);
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
@@ -60,7 +65,8 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
             // if cdp has 0 ratio don't trigger it
             if (checkedRatio == 0) return false;
 
-            shouldTriggerCurr = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
+            shouldTriggerCurr =
+                shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
         }
 
         if (
@@ -72,7 +78,8 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
             // if cdp has 0 ratio don't trigger it
             if (checkedRatio == 0) return false;
 
-            shouldTriggerNext = shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
+            shouldTriggerNext =
+                shouldTrigger(triggerSubData.state, checkedRatio, triggerSubData.ratio);
 
             // must convert back to wad
             if (triggerCallData.nextPrice != 0) {
@@ -89,7 +96,11 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
         return shouldTriggerCurr || shouldTriggerNext;
     }
 
-    function shouldTrigger(uint8 state, uint256 checkedRatio, uint256 subbedToRatio) internal pure returns (bool) {
+    function shouldTrigger(uint8 state, uint256 checkedRatio, uint256 subbedToRatio)
+        internal
+        pure
+        returns (bool)
+    {
         if (RatioState(state) == RatioState.OVER) {
             if (checkedRatio > subbedToRatio) return true;
         }
@@ -106,7 +117,11 @@ contract McdRatioTrigger is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, Tri
         return false;
     }
 
-    function parseCallInputs(bytes memory _callData) internal pure returns (CallParams memory params) {
+    function parseCallInputs(bytes memory _callData)
+        internal
+        pure
+        returns (CallParams memory params)
+    {
         params = abi.decode(_callData, (CallParams));
     }
 

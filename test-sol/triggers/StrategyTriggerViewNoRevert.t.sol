@@ -5,7 +5,9 @@ pragma solidity =0.8.24;
 import { BaseTest } from "../utils/BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
-import { StrategyTriggerViewNoRevert } from "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
+import {
+    StrategyTriggerViewNoRevert
+} from "../../contracts/views/strategy/StrategyTriggerViewNoRevert.sol";
 
 contract TestStrategyTriggerViewNoRevert is BaseTest, StrategyTriggerViewNoRevert {
     /*//////////////////////////////////////////////////////////////////////////

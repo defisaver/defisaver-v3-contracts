@@ -41,7 +41,7 @@ function getAllFiles(dirPath, arrayOfFiles = []) {
 }
 
 async function changeWethAddress(oldNetwork, newNetwork) {
-    const TokenUtilsContract = 'contracts/utils/TokenUtils.sol';
+    const TokenUtilsContract = 'contracts/utils/token/TokenUtils.sol';
     const tokenUtilsContract = (await fs.readFileSync(TokenUtilsContract)).toString();
 
     fs.writeFileSync(
@@ -98,7 +98,8 @@ async function changeNetworkNameForAddresses(oldNetwork, newNetwork) {
     await Promise.all(
         files.map(async (file) => {
             const helperRegex = 'Helper(.*)sol';
-            if (file.toString().match(helperRegex)) {
+            const utilAddressesRegex = '/UtilAddresses\\.sol$';
+            if (file.toString().match(helperRegex) || file.toString().match(utilAddressesRegex)) {
                 const fileDir = path.dirname(file);
                 const filesInSameDir = getAllFiles(fileDir);
                 let rewrite = false;

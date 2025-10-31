@@ -11,7 +11,14 @@ import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Subscribes users to boost/repay strategies in an L2 gas efficient way
-contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType, SparkHelper {
+contract SparkSubProxy is
+    StrategyModel,
+    AdminAuth,
+    CoreHelper,
+    Permission,
+    CheckWalletType,
+    SparkHelper
+{
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -136,13 +143,18 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
     }
 
     /// @notice Formats a StrategySub struct to a Repay bundle from the input data of the specialized spark sub
-    function formatRepaySub(SparkSubData memory _user) public view returns (StrategySub memory repaySub) {
+    function formatRepaySub(SparkSubData memory _user)
+        public
+        view
+        returns (StrategySub memory repaySub)
+    {
         repaySub.strategyOrBundleId = REPAY_BUNDLE_ID;
         repaySub.isBundle = true;
 
         // format data for ratio trigger if currRatio < minRatio = true
-        bytes memory triggerData =
-            abi.encode(address(this), DEFAULT_SPARK_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER));
+        bytes memory triggerData = abi.encode(
+            address(this), DEFAULT_SPARK_MARKET, uint256(_user.minRatio), uint8(RatioState.UNDER)
+        );
         repaySub.triggerData = new bytes[](1);
         repaySub.triggerData[0] = triggerData;
 
@@ -154,13 +166,18 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
     }
 
     /// @notice Formats a StrategySub struct to a Boost bundle from the input data of the specialized spark sub
-    function formatBoostSub(SparkSubData memory _user) public view returns (StrategySub memory boostSub) {
+    function formatBoostSub(SparkSubData memory _user)
+        public
+        view
+        returns (StrategySub memory boostSub)
+    {
         boostSub.strategyOrBundleId = BOOST_BUNDLE_ID;
         boostSub.isBundle = true;
 
         // format data for ratio trigger if currRatio > maxRatio = true
-        bytes memory triggerData =
-            abi.encode(address(this), DEFAULT_SPARK_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER));
+        bytes memory triggerData = abi.encode(
+            address(this), DEFAULT_SPARK_MARKET, uint256(_user.maxRatio), uint8(RatioState.OVER)
+        );
         boostSub.triggerData = new bytes[](1);
         boostSub.triggerData[0] = triggerData;
 
@@ -172,7 +189,11 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
         boostSub.subData[4] = bytes32(uint256(1)); // enableAsColl = true
     }
 
-    function parseSubData(bytes calldata _encodedInput) public pure returns (SparkSubData memory user) {
+    function parseSubData(bytes calldata _encodedInput)
+        public
+        pure
+        returns (SparkSubData memory user)
+    {
         user.minRatio = uint128(bytes16(_encodedInput[0:16]));
         user.maxRatio = uint128(bytes16(_encodedInput[16:32]));
         user.targetRatioBoost = uint128(bytes16(_encodedInput[32:48]));
@@ -180,7 +201,11 @@ contract SparkSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Chec
         user.boostEnabled = (bytes1(_encodedInput[64:65])) != bytes1(0x00); // compare to get bool
     }
 
-    function parseSubIds(bytes calldata _encodedInput) public pure returns (uint32 subId1, uint32 subId2) {
+    function parseSubIds(bytes calldata _encodedInput)
+        public
+        pure
+        returns (uint32 subId1, uint32 subId2)
+    {
         subId1 = uint32(bytes4(_encodedInput[0:4]));
         subId2 = uint32(bytes4(_encodedInput[4:8]));
     }

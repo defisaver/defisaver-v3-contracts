@@ -2,11 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { AaveV3CollateralSwitch } from "../../../contracts/actions/aaveV3/AaveV3CollateralSwitch.sol";
+import {
+    AaveV3CollateralSwitch
+} from "../../../contracts/actions/aaveV3/AaveV3CollateralSwitch.sol";
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
-import { IL2PoolV3 } from "../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
-import { IAaveProtocolDataProvider } from "../../../contracts/interfaces/aaveV3/IAaveProtocolDataProvider.sol";
+import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
+import {
+    IAaveProtocolDataProvider
+} from "../../../contracts/interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { Addresses } from "../../utils/Addresses.sol";
@@ -52,9 +56,15 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
         dataProvider = getDataProvider(DEFAULT_AAVE_MARKET);
         aaveV3SupplyContractAddr = address(new AaveV3Supply());
 
-        assets[0] = TestAsset({ asset: Addresses.WETH_ADDR, assetId: pool.getReserveData(Addresses.WETH_ADDR).id });
-        assets[1] = TestAsset({ asset: Addresses.DAI_ADDR, assetId: pool.getReserveData(Addresses.DAI_ADDR).id });
-        assets[2] = TestAsset({ asset: Addresses.WBTC_ADDR, assetId: pool.getReserveData(Addresses.WBTC_ADDR).id });
+        assets[0] = TestAsset({
+            asset: Addresses.WETH_ADDR, assetId: pool.getReserveData(Addresses.WETH_ADDR).id
+        });
+        assets[1] = TestAsset({
+            asset: Addresses.DAI_ADDR, assetId: pool.getReserveData(Addresses.DAI_ADDR).id
+        });
+        assets[2] = TestAsset({
+            asset: Addresses.WBTC_ADDR, assetId: pool.getReserveData(Addresses.WBTC_ADDR).id
+        });
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -81,10 +91,10 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
         _assertParams(params);
     }
 
-    function testFuzz_encode_decode_inputs_no_market(uint16[1] memory _assetIds, bool[1] memory _useAsCollateral)
-        public
-        view
-    {
+    function testFuzz_encode_decode_inputs_no_market(
+        uint16[1] memory _assetIds,
+        bool[1] memory _useAsCollateral
+    ) public view {
         uint16[] memory assetIds = new uint16[](1);
         bool[] memory useAsCollateral = new bool[](1);
         assetIds[0] = _assetIds[0];
@@ -127,7 +137,8 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
     //////////////////////////////////////////////////////////////////////////*/
     function _assertParams(AaveV3CollateralSwitch.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
-        AaveV3CollateralSwitch.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
+        AaveV3CollateralSwitch.Params memory decodedParams =
+            cut.decodeInputs(encodedInputWithoutSelector);
 
         assertEq(_params.arrayLength, decodedParams.arrayLength);
         assertEq(_params.useDefaultMarket, decodedParams.useDefaultMarket);
@@ -160,11 +171,16 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
 
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCallData =
-                aaveV3CollateralSwitchEncode(uint8(assets.length), assetIds, newUseAsCollateral, true, address(0));
+            bytes memory paramsCallData = aaveV3CollateralSwitchEncode(
+                uint8(assets.length), assetIds, newUseAsCollateral, true, address(0)
+            );
 
             bytes memory _calldata = abi.encodeWithSelector(
-                AaveV3CollateralSwitch.executeAction.selector, paramsCallData, subData, paramMapping, returnValues
+                AaveV3CollateralSwitch.executeAction.selector,
+                paramsCallData,
+                subData,
+                paramMapping,
+                returnValues
             );
 
             wallet.execute(address(cut), _calldata, 0);
@@ -172,7 +188,8 @@ contract TestAaveV3CollateralSwitch is AaveV3Helper, AaveV3ExecuteActions {
 
         bool[] memory useAsCollateralAfter = new bool[](assets.length);
         for (uint256 i = 0; i < assets.length; i++) {
-            (,,,,,,,, bool useAsCollateral) = dataProvider.getUserReserveData(assets[i].asset, walletAddr);
+            (,,,,,,,, bool useAsCollateral) =
+                dataProvider.getUserReserveData(assets[i].asset, walletAddr);
             useAsCollateralAfter[i] = useAsCollateral;
         }
 

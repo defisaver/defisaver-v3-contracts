@@ -13,5 +13,6 @@ contract ArbitrumActionsUtilAddresses {
     address internal constant PROXY_AUTH_ADDR = 0xF3A8479538319756e100C386b3E60BF783680d8f;
 
     // not yet implemented
-    address internal constant LSV_PROXY_REGISTRY_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant LSV_PROXY_REGISTRY_ADDRESS =
+        0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 }

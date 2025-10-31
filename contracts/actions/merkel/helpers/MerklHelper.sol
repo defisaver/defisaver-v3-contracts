@@ -3,8 +3,9 @@
 pragma solidity =0.8.24;
 
 import { MainnetMerklAddresses } from "./MainnetMerklAddresses.sol";
-import { IMerklDistributor } from "../../../interfaces/merkel/IMerklDistributor.sol";
+import { IMerklDistributor } from "../../../interfaces/protocols/merkel/IMerklDistributor.sol";
 
 contract MerklHelper is MainnetMerklAddresses {
-    IMerklDistributor internal constant merklDistributor = IMerklDistributor(MERKL_DISTRIBUTOR_ADDRESS);
+    IMerklDistributor internal constant merklDistributor =
+        IMerklDistributor(MERKL_DISTRIBUTOR_ADDRESS);
 }

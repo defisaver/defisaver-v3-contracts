@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { InterestRateModel } from "../interfaces/compound/InterestRateModel.sol";
-import { DSMath } from "../DS/DSMath.sol";
-import { Exponential } from "../utils/math/Exponential.sol";
-import { IComptroller } from "../interfaces/compound/IComptroller.sol";
-import { ICToken } from "../interfaces/compound/ICToken.sol";
-import { ICompoundOracle } from "../interfaces/compound/ICompoundOracle.sol";
+import { InterestRateModel } from "../interfaces/protocols/compound/InterestRateModel.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
+import { Exponential } from "../_vendor/compound/Exponential.sol";
+import { IComptroller } from "../interfaces/protocols/compound/IComptroller.sol";
+import { ICToken } from "../interfaces/protocols/compound/ICToken.sol";
+import { ICompoundOracle } from "../interfaces/protocols/compound/ICompoundOracle.sol";
 
 contract CompView is Exponential, DSMath {
     struct LoanData {
@@ -83,7 +83,8 @@ contract CompView is Exponential, DSMath {
             Exp memory oraclePrice;
 
             if (cTokenBalance != 0 || borrowBalance != 0) {
-                oraclePrice = Exp({ mantissa: ICompoundOracle(oracleAddr).getUnderlyingPrice(asset) });
+                oraclePrice =
+                    Exp({ mantissa: ICompoundOracle(oracleAddr).getUnderlyingPrice(asset) });
             }
 
             // Sum up collateral in Usd
@@ -95,7 +96,8 @@ contract CompView is Exponential, DSMath {
 
                 (, Exp memory tokensToUsd) = mulExp3(collateralFactor, exchangeRate, oraclePrice);
 
-                (, sumCollateral) = mulScalarTruncateAddUInt(tokensToUsd, cTokenBalance, sumCollateral);
+                (, sumCollateral) =
+                    mulScalarTruncateAddUInt(tokensToUsd, cTokenBalance, sumCollateral);
             }
 
             // Sum up debt in Usd
@@ -132,7 +134,11 @@ contract CompView is Exponential, DSMath {
     /// @notice Fetches Compound collateral factors for tokens
     /// @param _cTokens Arr. of cTokens for which to get the coll. factors
     /// @return collFactors Array of coll. factors
-    function getCollFactors(address[] memory _cTokens) public view returns (uint256[] memory collFactors) {
+    function getCollFactors(address[] memory _cTokens)
+        public
+        view
+        returns (uint256[] memory collFactors)
+    {
         collFactors = new uint256[](_cTokens.length);
 
         for (uint256 i = 0; i < _cTokens.length; ++i) {
@@ -168,7 +174,8 @@ contract CompView is Exponential, DSMath {
             Exp memory oraclePrice;
 
             if (cTokenBalance != 0 || borrowBalance != 0) {
-                oraclePrice = Exp({ mantissa: ICompoundOracle(oracleAddr).getUnderlyingPrice(asset) });
+                oraclePrice =
+                    Exp({ mantissa: ICompoundOracle(oracleAddr).getUnderlyingPrice(asset) });
             }
 
             // Sum up collateral in Usd
@@ -240,7 +247,10 @@ contract CompView is Exponential, DSMath {
     /// @notice Information about cTokens
     /// @param _cTokenAddresses Array of cTokens addresses
     /// @return tokens Array of cTokens infomartion
-    function getTokensInfo(address[] memory _cTokenAddresses) public returns (TokenInfo[] memory tokens) {
+    function getTokensInfo(address[] memory _cTokenAddresses)
+        public
+        returns (TokenInfo[] memory tokens)
+    {
         tokens = new TokenInfo[](_cTokenAddresses.length);
         address oracleAddr = comp.oracle();
 
@@ -259,7 +269,10 @@ contract CompView is Exponential, DSMath {
     /// @notice Information about cTokens
     /// @param _cTokenAddresses Array of cTokens addresses
     /// @return tokens Array of cTokens infomartion
-    function getFullTokensInfo(address[] memory _cTokenAddresses) public returns (TokenInfoFull[] memory tokens) {
+    function getFullTokensInfo(address[] memory _cTokenAddresses)
+        public
+        returns (TokenInfoFull[] memory tokens)
+    {
         tokens = new TokenInfoFull[](_cTokenAddresses.length);
         address oracleAddr = comp.oracle();
 
@@ -348,7 +361,9 @@ contract CompView is Exponential, DSMath {
             );
 
             retVal[i] = EstimatedRates({
-                cTokenAddr: _params[i].cTokenAddr, supplyRate: estimatedSupplyRate, borrowRate: estimatedBorrowRate
+                cTokenAddr: _params[i].cTokenAddr,
+                supplyRate: estimatedSupplyRate,
+                borrowRate: estimatedBorrowRate
             });
         }
     }
@@ -365,7 +380,11 @@ contract CompView is Exponential, DSMath {
 
         (bool success, bytes memory data) = _interestRateModel.staticcall(
             abi.encodeWithSelector(
-                InterestRateModel.getSupplyRate.selector, _underlying, _borrows, _reserves, _reserveFactor
+                InterestRateModel.getSupplyRate.selector,
+                _underlying,
+                _borrows,
+                _reserves,
+                _reserveFactor
             )
         );
 
@@ -389,7 +408,9 @@ contract CompView is Exponential, DSMath {
         borrowRate = _currBorrowRate;
 
         (bool success, bytes memory data) = _interestRateModel.staticcall(
-            abi.encodeWithSelector(InterestRateModel.getBorrowRate.selector, _underlying, _borrows, _reserves)
+            abi.encodeWithSelector(
+                InterestRateModel.getBorrowRate.selector, _underlying, _borrows, _reserves
+            )
         );
 
         if (!success || data.length == 0) return borrowRate;

@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { LiquityHelper } from "../helpers/LiquityHelper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Action for repaying LUSD tokens to Liquity Trove
@@ -30,7 +30,8 @@ contract LiquityPayback is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[0], _subData, _returnValues);
+        params.lusdAmount =
+            _parseParamUint(params.lusdAmount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
 
         (uint256 repayAmount, bytes memory logData) = _liquityPayback(params);
@@ -56,7 +57,8 @@ contract LiquityPayback is ActionBase, LiquityHelper {
     /// @notice Repays LUSD tokens to the trove
     /// @notice Trove after payback can't have debt less than MIN_DEBT (2000e18)
     function _liquityPayback(Params memory _params) internal returns (uint256, bytes memory) {
-        uint256 lusdAmountPulled = LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
+        uint256 lusdAmountPulled =
+            LUSD_TOKEN_ADDRESS.pullTokensIfNeeded(_params.from, _params.lusdAmount);
         uint256 wholeDebt = TroveManager.getTroveDebt(address(this));
 
         uint256 paybackAmount = lusdAmountPulled;

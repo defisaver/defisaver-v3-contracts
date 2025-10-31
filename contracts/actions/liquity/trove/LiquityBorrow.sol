@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { LiquityHelper } from "../helpers/LiquityHelper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Action for borrowing LUSD tokens from Liquity
@@ -32,8 +32,10 @@ contract LiquityBorrow is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.maxFeePercentage = _parseParamUint(params.maxFeePercentage, _paramMapping[0], _subData, _returnValues);
-        params.lusdAmount = _parseParamUint(params.lusdAmount, _paramMapping[1], _subData, _returnValues);
+        params.maxFeePercentage =
+            _parseParamUint(params.maxFeePercentage, _paramMapping[0], _subData, _returnValues);
+        params.lusdAmount =
+            _parseParamUint(params.lusdAmount, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
         (uint256 borrowedAmount, bytes memory logData) = _liquityBorrow(params);

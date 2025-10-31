@@ -2,10 +2,14 @@
 
 pragma solidity =0.8.24;
 
-import { IEVC } from "../../../contracts/interfaces/eulerV2/IEVC.sol";
+import { IEVC } from "../../../contracts/interfaces/protocols/eulerV2/IEVC.sol";
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
-import { EulerV2CollateralSwitch } from "../../../contracts/actions/eulerV2/EulerV2CollateralSwitch.sol";
-import { EulerV2ReorderCollaterals } from "../../../contracts/actions/eulerV2/EulerV2ReorderCollaterals.sol";
+import {
+    EulerV2CollateralSwitch
+} from "../../../contracts/actions/eulerV2/EulerV2CollateralSwitch.sol";
+import {
+    EulerV2ReorderCollaterals
+} from "../../../contracts/actions/eulerV2/EulerV2ReorderCollaterals.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
@@ -63,7 +67,10 @@ contract TestEulerV2ReorderCollaterals is EulerV2TestHelper {
         _baseTest(account, indexes, expectedOrderedCollaterals, isDirect);
     }
 
-    function test_should_reorder_collaterals_on_default_account_with_action_direct() public revertToSnapshot {
+    function test_should_reorder_collaterals_on_default_account_with_action_direct()
+        public
+        revertToSnapshot
+    {
         address account = address(0);
         bool isDirect = true;
         address firstCollateral = E_USDC_2_GOVERNED;

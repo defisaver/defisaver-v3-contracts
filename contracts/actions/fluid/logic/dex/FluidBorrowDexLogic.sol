@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVault } from "../../../../interfaces/fluid/vaults/IFluidVault.sol";
-import { IFluidVaultT3 } from "../../../../interfaces/fluid/vaults/IFluidVaultT3.sol";
-import { IFluidVaultT4 } from "../../../../interfaces/fluid/vaults/IFluidVaultT4.sol";
+import { IFluidVault } from "../../../../interfaces/protocols/fluid/vaults/IFluidVault.sol";
+import { IFluidVaultT3 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT3.sol";
+import { IFluidVaultT4 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT4.sol";
 import { FluidDexModel } from "../../helpers/FluidDexModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
 import { FluidDexTokensUtils } from "../../helpers/FluidDexTokensUtils.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidBorrowDexLogic - Implements the borrowing of tokens from Fluid DEX
@@ -22,14 +22,17 @@ library FluidBorrowDexLogic {
     /// @param _data Borrow data
     /// @param _tokens Tokens data
     /// @return borrowShares Amount of debt shares minted.
-    function borrowVariable(FluidDexModel.BorrowDexData memory _data, IFluidVault.Tokens memory _tokens)
-        internal
-        returns (uint256 borrowShares)
-    {
+    function borrowVariable(
+        FluidDexModel.BorrowDexData memory _data,
+        IFluidVault.Tokens memory _tokens
+    ) internal returns (uint256 borrowShares) {
         _data.vaultType.requireSmartDebt();
 
         (bool sendDebt0AsWrapped, bool sendDebt1AsWrapped) = FluidDexTokensUtils.shouldSendTokensAsWrapped(
-            _tokens, _data.wrapBorrowedEth, _data.variableData.debtAmount0, _data.variableData.debtAmount1
+            _tokens,
+            _data.wrapBorrowedEth,
+            _data.variableData.debtAmount0,
+            _data.variableData.debtAmount1
         );
 
         address sendTokensTo = (sendDebt0AsWrapped || sendDebt1AsWrapped) ? address(this) : _data.to;

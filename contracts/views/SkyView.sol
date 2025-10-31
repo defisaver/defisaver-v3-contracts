@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { ILockstakeEngine } from "../../contracts/interfaces/sky/ILockstakeEngine.sol";
-import { IStakingRewards } from "../../contracts/interfaces/sky/IStakingRewards.sol";
-import { IVat } from "../../contracts/interfaces/sky/IVat.sol";
-import { IJug } from "../../contracts/interfaces/sky/IJug.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { ILockstakeEngine } from "../../contracts/interfaces/protocols/sky/ILockstakeEngine.sol";
+import { IStakingRewards } from "../../contracts/interfaces/protocols/sky/IStakingRewards.sol";
+import { IVat } from "../../contracts/interfaces/protocols/sky/IVat.sol";
+import { IJug } from "../../contracts/interfaces/protocols/sky/IJug.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 import { SkyHelper } from "../../contracts/actions/sky/helpers/SkyHelper.sol";
 
 contract SkyView is SkyHelper {
@@ -34,7 +34,11 @@ contract SkyView is SkyHelper {
         uint256 totalSkyLockedInSparkFarm;
     }
 
-    function getUserInfo(address _user, address[] calldata _farms) public view returns (UrnInfo[] memory) {
+    function getUserInfo(address _user, address[] calldata _farms)
+        public
+        view
+        returns (UrnInfo[] memory)
+    {
         uint256 numOfUrns = ILockstakeEngine(STAKING_ENGINE).ownerUrnsCount(_user);
         UrnInfo[] memory urns = new UrnInfo[](numOfUrns);
 

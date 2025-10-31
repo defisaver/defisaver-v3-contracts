@@ -120,7 +120,9 @@ const liquityOpenTest = async () => {
             console.log(`\tETH price:\t${BN2Float(collPrice)}`);
         });
 
-        it(`... should open Trove with $${wethAmountTotalValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
+        it(`... should open Trove with $${wethAmountTotalValue} WETH collateral and $${BN2Float(
+            lusdAmountOpen,
+        )} LUSD net debt`, async () => {
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -214,7 +216,9 @@ const liquitySupplyTest = async () => {
             console.log(`\tETH price:\t${BN2Float(collPrice)}`);
         });
 
-        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
+        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(
+            lusdAmountOpen,
+        )} LUSD net debt`, async () => {
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -299,7 +303,9 @@ const liquityWithdrawTest = async () => {
             console.log(`\tETH price:\t${BN2Float(collPrice)}`);
         });
 
-        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
+        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(
+            lusdAmountOpen,
+        )} LUSD net debt`, async () => {
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -372,7 +378,9 @@ const liquityBorrowTest = async () => {
             console.log(`\tETH price:\t${BN2Float(collPrice)}`);
         });
 
-        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD debt`, async () => {
+        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(
+            lusdAmountOpen,
+        )} LUSD debt`, async () => {
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -449,7 +457,9 @@ const liqiutyPaybackTest = async () => {
             console.log(`\tETH price:\t${BN2Float(collPrice)}`);
         });
 
-        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
+        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(
+            lusdAmountOpen,
+        )} LUSD net debt`, async () => {
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -528,7 +538,9 @@ const liquityCloseTest = async () => {
             console.log(`\tETH price:\t${BN2Float(collPrice)}`);
         });
 
-        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
+        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(
+            lusdAmountOpen,
+        )} LUSD net debt`, async () => {
             await liquityOpen(
                 proxy,
                 maxFeePercentage,
@@ -586,7 +598,9 @@ const liquitySPDepositTest = async () => {
             console.log(`\tLQTY gain:\t${BN2Float(lqtyGain)} LQTY`);
         });
 
-        it(`... should deposit ${BN2Float(lusdAmountDeposit)} LUSD to the stability pool`, async () => {
+        it(`... should deposit ${BN2Float(
+            lusdAmountDeposit,
+        )} LUSD to the stability pool`, async () => {
             await liquitySPDeposit(proxy, lusdAmountDeposit, senderAddr, proxyAddr, proxyAddr);
 
             const { compoundedLUSD } = await liquityView['getDepositorInfo(address)'](proxyAddr);
@@ -652,7 +666,9 @@ const liquitySPWithdrawTest = async () => {
             console.log(`\tLQTY gain:\t${BN2Float(lqtyGain)} LQTY`);
         });
 
-        it(`... should deposit ${BN2Float(lusdAmountTotal)} LUSD to the stability pool`, async () => {
+        it(`... should deposit ${BN2Float(
+            lusdAmountTotal,
+        )} LUSD to the stability pool`, async () => {
             await liquitySPDeposit(proxy, lusdAmountTotal, senderAddr, proxyAddr, proxyAddr);
 
             const { compoundedLUSD } = await liquityView['getDepositorInfo(address)'](proxyAddr);
@@ -759,7 +775,9 @@ const liquityEthGainToTroveTest = async () => {
             console.log(`\tLQTY gain:\t${BN2Float(lqtyGain)} LQTY`);
         });
 
-        it(`... should open a Trove with $${wethAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
+        it(`... should open a Trove with $${wethAmountOpenValue} WETH collateral and $${BN2Float(
+            lusdAmountOpen,
+        )} LUSD net debt`, async () => {
             await liquityOpen(
                 proxy,
                 Float2BN('0.05'),
@@ -770,7 +788,9 @@ const liquityEthGainToTroveTest = async () => {
             );
         });
 
-        it(`... should deposit $${BN2Float(lusdAmountOpen)} LUSD to the stability pool`, async () => {
+        it(`... should deposit $${BN2Float(
+            lusdAmountOpen,
+        )} LUSD to the stability pool`, async () => {
             await liquitySPDeposit(proxy, lusdAmountOpen, senderAddr, proxyAddr, proxyAddr);
 
             const { compoundedLUSD } = await liquityView['getDepositorInfo(address)'](proxyAddr);
@@ -832,7 +852,9 @@ const liquityStakeTest = async () => {
             console.log(`\tLUSD gain:\t${BN2Float(lusdGain)} LUSD`);
         });
 
-        it(`... should deposit ${BN2Float(lqtyAmountStake)} LQTY to the staking contract`, async () => {
+        it(`... should deposit ${BN2Float(
+            lqtyAmountStake,
+        )} LQTY to the staking contract`, async () => {
             await liquityStake(proxy, lqtyAmountStake, senderAddr, proxyAddr, proxyAddr);
 
             const { stake } = await liquityView['getStakeInfo(address)'](proxyAddr);
@@ -898,14 +920,18 @@ const liquityUnstakeTest = async () => {
             console.log(`\tLUSD gain:\t${BN2Float(lusdGain)} LUSD`);
         });
 
-        it(`... should deposit ${BN2Float(lqtyAmountStake)} LQTY to the staking contract`, async () => {
+        it(`... should deposit ${BN2Float(
+            lqtyAmountStake,
+        )} LQTY to the staking contract`, async () => {
             await liquityStake(proxy, lqtyAmountStake, senderAddr, proxyAddr, proxyAddr);
 
             const { stake } = await liquityView['getStakeInfo(address)'](proxyAddr);
             expect(stake).to.be.equal(lqtyAmountStake);
         });
 
-        it(`... should withdraw ${BN2Float(lqtyAmountUnstake)} LQTY from the staking contract`, async () => {
+        it(`... should withdraw ${BN2Float(
+            lqtyAmountUnstake,
+        )} LQTY from the staking contract`, async () => {
             const wethBalance = await balanceOf(WETH_ADDRESS, proxyAddr);
             const lusdBalance = await balanceOf(lusdAddr, proxyAddr);
             const { ethGain, lusdGain } = await liquityView['getStakeInfo(address)'](proxyAddr);
@@ -1061,7 +1087,9 @@ const liquityAdjustTest = async () => {
             console.log(`\tETH price:\t${BN2Float(collPrice)}`);
         });
 
-        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(lusdAmountOpen)} LUSD net debt`, async () => {
+        it(`... should open Trove with $${collAmountOpenValue} WETH collateral and $${BN2Float(
+            lusdAmountOpen,
+        )} LUSD net debt`, async () => {
             await liquityOpen(
                 proxy,
                 maxFeePercentage,

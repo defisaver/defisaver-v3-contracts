@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../interfaces/liquityV2/IAddressesRegistry.sol";
-import { IStabilityPool } from "../../../interfaces/liquityV2/IStabilityPool.sol";
+import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { IStabilityPool } from "../../../interfaces/protocols/liquityV2/IStabilityPool.sol";
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Withdraws a token from the LiquityV2 Stability Pool
 contract LiquityV2SPWithdraw is ActionBase, LiquityV2Helper {
@@ -37,9 +37,11 @@ contract LiquityV2SPWithdraw is ActionBase, LiquityV2Helper {
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.boldTo = _parseParamAddr(params.boldTo, _paramMapping[1], _subData, _returnValues);
-        params.collGainTo = _parseParamAddr(params.collGainTo, _paramMapping[2], _subData, _returnValues);
+        params.collGainTo =
+            _parseParamAddr(params.collGainTo, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-        params.doClaim = _parseParamUint(params.doClaim ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
+        params.doClaim =
+            _parseParamUint(params.doClaim ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
 
         (uint256 withdrawnAmount, bytes memory logData) = _spWithdraw(params);
         emit ActionEvent("LiquityV2SPWithdraw", logData);
@@ -66,11 +68,13 @@ contract LiquityV2SPWithdraw is ActionBase, LiquityV2Helper {
 
         uint256 boldGain = _params.doClaim ? pool.getDepositorYieldGain(address(this)) : 0;
 
-        uint256 collGain =
-            _params.doClaim ? pool.getDepositorCollGain(address(this)) + pool.stashedColl(address(this)) : 0;
+        uint256 collGain = _params.doClaim
+            ? pool.getDepositorCollGain(address(this)) + pool.stashedColl(address(this))
+            : 0;
 
         uint256 compoundedBoldDeposit = pool.getCompoundedBoldDeposit(address(this));
-        _params.amount = _params.amount > compoundedBoldDeposit ? compoundedBoldDeposit : _params.amount;
+        _params.amount =
+            _params.amount > compoundedBoldDeposit ? compoundedBoldDeposit : _params.amount;
 
         pool.withdrawFromSP(_params.amount, _params.doClaim);
 

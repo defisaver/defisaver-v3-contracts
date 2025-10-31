@@ -2,15 +2,19 @@
 
 pragma solidity =0.8.24;
 
-import { IDexSmartCollOracle } from "../interfaces/fluid/oracles/IDexSmartCollOracle.sol";
-import { IDexSmartDebtOracle } from "../interfaces/fluid/oracles/IDexSmartDebtOracle.sol";
-import { IFluidVault } from "../interfaces/fluid/vaults/IFluidVault.sol";
-import { IFluidVaultResolver } from "../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
-import { IFluidDexResolver } from "../interfaces/fluid/resolvers/IFluidDexResolver.sol";
-import { IFluidLendingResolver } from "../interfaces/fluid/resolvers/IFluidLendingResolver.sol";
+import { IDexSmartCollOracle } from "../interfaces/protocols/fluid/oracles/IDexSmartCollOracle.sol";
+import { IDexSmartDebtOracle } from "../interfaces/protocols/fluid/oracles/IDexSmartDebtOracle.sol";
+import { IFluidVault } from "../interfaces/protocols/fluid/vaults/IFluidVault.sol";
+import {
+    IFluidVaultResolver
+} from "../interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
+import { IFluidDexResolver } from "../interfaces/protocols/fluid/resolvers/IFluidDexResolver.sol";
+import {
+    IFluidLendingResolver
+} from "../interfaces/protocols/fluid/resolvers/IFluidLendingResolver.sol";
 import { FluidRatioHelper } from "../../contracts/actions/fluid/helpers/FluidRatioHelper.sol";
 import { FluidVaultTypes } from "../../contracts/actions/fluid/helpers/FluidVaultTypes.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 /// @title FluidView - aggregate various information about Fluid vaults and users
 contract FluidView is FluidRatioHelper {
@@ -187,7 +191,8 @@ contract FluidView is FluidRatioHelper {
         external
         returns (UserPosition[] memory positions, VaultData[] memory vaults)
     {
-        uint256[] memory nftIds = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionsNftIdOfUser(_user);
+        uint256[] memory nftIds =
+            IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionsNftIdOfUser(_user);
 
         positions = new UserPosition[](nftIds.length);
         vaults = new VaultData[](nftIds.length);
@@ -205,8 +210,13 @@ contract FluidView is FluidRatioHelper {
     }
 
     /// @notice Get all nftIds with vaultIds for a specific user
-    function getUserNftIdsWithVaultIds(address _user) external view returns (NftWithVault[] memory retVal) {
-        uint256[] memory nftIds = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionsNftIdOfUser(_user);
+    function getUserNftIdsWithVaultIds(address _user)
+        external
+        view
+        returns (NftWithVault[] memory retVal)
+    {
+        uint256[] memory nftIds =
+            IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionsNftIdOfUser(_user);
         retVal = new NftWithVault[](nftIds.length);
 
         for (uint256 i = 0; i < nftIds.length; i++) {
@@ -219,9 +229,14 @@ contract FluidView is FluidRatioHelper {
 
     /// @notice Get position data with vault and dex data for a specific nftId
     /// @dev This should be called with static call.
-    function getPositionByNftId(uint256 _nftId) public returns (UserPosition memory position, VaultData memory vault) {
-        (IFluidVaultResolver.UserPosition memory userPosition, IFluidVaultResolver.VaultEntireData memory vaultData) =
-            IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
+    function getPositionByNftId(uint256 _nftId)
+        public
+        returns (UserPosition memory position, VaultData memory vault)
+    {
+        (
+            IFluidVaultResolver.UserPosition memory userPosition,
+            IFluidVaultResolver.VaultEntireData memory vaultData
+        ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
 
         position = UserPosition({
             nftId: userPosition.nftId,
@@ -262,10 +277,18 @@ contract FluidView is FluidRatioHelper {
             supplyToken1: supplyToken1,
             borrowToken0: borrowToken0,
             borrowToken1: borrowToken1,
-            supplyToken0Decimals: supplyToken0 != NATIVE_TOKEN_ADDR ? IERC20(supplyToken0).decimals() : 18,
-            supplyToken1Decimals: supplyToken1 != address(0) ? (supplyToken1 != NATIVE_TOKEN_ADDR ? IERC20(supplyToken1).decimals() : 18) : 0,
-            borrowToken0Decimals: borrowToken0 != NATIVE_TOKEN_ADDR ? IERC20(borrowToken0).decimals(): 18,
-            borrowToken1Decimals: borrowToken1 != address(0) ? (borrowToken1 != NATIVE_TOKEN_ADDR ? IERC20(borrowToken1).decimals() : 18) : 0,
+            supplyToken0Decimals: supplyToken0 != NATIVE_TOKEN_ADDR
+                ? IERC20(supplyToken0).decimals()
+                : 18,
+            supplyToken1Decimals: supplyToken1 != address(0)
+                ? (supplyToken1 != NATIVE_TOKEN_ADDR ? IERC20(supplyToken1).decimals() : 18)
+                : 0,
+            borrowToken0Decimals: borrowToken0 != NATIVE_TOKEN_ADDR
+                ? IERC20(borrowToken0).decimals()
+                : 18,
+            borrowToken1Decimals: borrowToken1 != address(0)
+                ? (borrowToken1 != NATIVE_TOKEN_ADDR ? IERC20(borrowToken1).decimals() : 18)
+                : 0,
             collateralFactor: data.configs.collateralFactor,
             liquidationThreshold: data.configs.liquidationThreshold,
             liquidationMaxLimit: data.configs.liquidationMaxLimit,
@@ -305,36 +328,43 @@ contract FluidView is FluidRatioHelper {
 
         // smart coll
         if (vaultData.vaultType.isT2Vault()) {
-            IFluidDexResolver.DexEntireData memory dexData =
-                IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(data.constantVariables.supply);
-            vaultData.dexSupplyData = _fillDexSupplyData(dexData, vaultData.oracle, vaultData.withdrawable);
+            IFluidDexResolver.DexEntireData memory dexData = IFluidDexResolver(FLUID_DEX_RESOLVER)
+                .getDexEntireData(data.constantVariables.supply);
+            vaultData.dexSupplyData =
+                _fillDexSupplyData(dexData, vaultData.oracle, vaultData.withdrawable);
         }
 
         // smart debt
         if (vaultData.vaultType.isT3Vault()) {
-            IFluidDexResolver.DexEntireData memory dexData =
-                IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(data.constantVariables.borrow);
-            vaultData.dexBorrowData = _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable);
+            IFluidDexResolver.DexEntireData memory dexData = IFluidDexResolver(FLUID_DEX_RESOLVER)
+                .getDexEntireData(data.constantVariables.borrow);
+            vaultData.dexBorrowData =
+                _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable);
         }
 
         // smart coll and smart debt
         if (vaultData.vaultType.isT4Vault()) {
-            IFluidDexResolver.DexEntireData memory dexData =
-                IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(data.constantVariables.supply);
+            IFluidDexResolver.DexEntireData memory dexData = IFluidDexResolver(FLUID_DEX_RESOLVER)
+                .getDexEntireData(data.constantVariables.supply);
 
-            vaultData.dexSupplyData =
-                _fillDexSupplyData(dexData, _getSmartCollateralDexOracle(vaultData.oracle), vaultData.withdrawable);
+            vaultData.dexSupplyData = _fillDexSupplyData(
+                dexData, _getSmartCollateralDexOracle(vaultData.oracle), vaultData.withdrawable
+            );
 
             // if it's a same dex, no need to fetch again
             if (data.constantVariables.borrow == data.constantVariables.supply) {
-                vaultData.dexBorrowData = _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable);
+                vaultData.dexBorrowData =
+                    _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable);
             } else {
-                dexData = IFluidDexResolver(FLUID_DEX_RESOLVER).getDexEntireData(data.constantVariables.borrow);
-                vaultData.dexBorrowData = _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable);
+                dexData = IFluidDexResolver(FLUID_DEX_RESOLVER)
+                    .getDexEntireData(data.constantVariables.borrow);
+                vaultData.dexBorrowData =
+                    _fillDexBorrowData(dexData, vaultData.oracle, vaultData.borrowable);
             }
 
             // In the case of T4 vaults, quoteTokensPerShare is actually returned as shareTokensPerQuote, so we invert it here.
-            vaultData.dexBorrowData.quoteTokensPerShare = 1e54 / vaultData.dexBorrowData.quoteTokensPerShare;
+            vaultData.dexBorrowData.quoteTokensPerShare =
+                1e54 / vaultData.dexBorrowData.quoteTokensPerShare;
         }
     }
 
@@ -398,11 +428,12 @@ contract FluidView is FluidRatioHelper {
     ///         This value can be set to low value like 1 to just check for minted shares.
     ///         However, it can also be used to check if transaction will revert when sending this amount of shares (Slippage check)
     /// @return shares Amount of shares received
-    function estimateDeposit(address _vault, uint256 _token0Amount, uint256 _token1Amount, uint256 _minSharesAmount)
-        external
-        payable
-        returns (uint256 shares)
-    {
+    function estimateDeposit(
+        address _vault,
+        uint256 _token0Amount,
+        uint256 _token1Amount,
+        uint256 _minSharesAmount
+    ) external payable returns (uint256 shares) {
         IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
 
         shares = IFluidDexResolver(FLUID_DEX_RESOLVER)
@@ -418,10 +449,12 @@ contract FluidView is FluidRatioHelper {
     ///        This value can be set to high value like type(int256).max to just check for burned shares.
     ///        However, it can also be used to check if transaction will revert when sending this amount of shares (Slippage check)
     /// @return shares Amount of shares burned
-    function estimateWithdraw(address _vault, uint256 _token0Amount, uint256 _token1Amount, uint256 _maxSharesAmount)
-        external
-        returns (uint256 shares)
-    {
+    function estimateWithdraw(
+        address _vault,
+        uint256 _token0Amount,
+        uint256 _token1Amount,
+        uint256 _maxSharesAmount
+    ) external returns (uint256 shares) {
         IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
 
         shares = IFluidDexResolver(FLUID_DEX_RESOLVER)
@@ -437,10 +470,12 @@ contract FluidView is FluidRatioHelper {
     ///        This value can be set to high value like type(int256).max to just check for minted shares.
     ///        However, it can also be used to check if transaction will revert when sending this amount of shares (Slippage check)
     /// @return shares Amount of shares received
-    function estimateBorrow(address _vault, uint256 _token0Amount, uint256 _token1Amount, uint256 _maxSharesAmount)
-        external
-        returns (uint256 shares)
-    {
+    function estimateBorrow(
+        address _vault,
+        uint256 _token0Amount,
+        uint256 _token1Amount,
+        uint256 _maxSharesAmount
+    ) external returns (uint256 shares) {
         IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
 
         shares = IFluidDexResolver(FLUID_DEX_RESOLVER)
@@ -456,10 +491,12 @@ contract FluidView is FluidRatioHelper {
     ///         This value can be set to low value like 1 to just check for burned shares.
     ///         However, it can also be used to check if transaction will revert when sending this amount of shares (Slippage check)
     /// @return shares Amount of shares burned
-    function estimatePayback(address _vault, uint256 _token0Amount, uint256 _token1Amount, uint256 _minSharesAmount)
-        external
-        returns (uint256 shares)
-    {
+    function estimatePayback(
+        address _vault,
+        uint256 _token0Amount,
+        uint256 _token1Amount,
+        uint256 _minSharesAmount
+    ) external returns (uint256 shares) {
         IFluidVault.ConstantViews memory constants = IFluidVault(_vault).constantsView();
 
         shares = IFluidDexResolver(FLUID_DEX_RESOLVER)
@@ -493,8 +530,10 @@ contract FluidView is FluidRatioHelper {
             _minToken0AmountToAccept = 0;
         }
 
-        (IFluidVaultResolver.UserPosition memory userPosition, IFluidVaultResolver.VaultEntireData memory vaultData) =
-            IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
+        (
+            IFluidVaultResolver.UserPosition memory userPosition,
+            IFluidVaultResolver.VaultEntireData memory vaultData
+        ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
 
         collateral = IFluidDexResolver(FLUID_DEX_RESOLVER)
             .estimateWithdrawPerfectInOneToken(
@@ -532,8 +571,10 @@ contract FluidView is FluidRatioHelper {
             _maxToken0AmountToPayback = 0;
         }
 
-        (IFluidVaultResolver.UserPosition memory userPosition, IFluidVaultResolver.VaultEntireData memory vaultData) =
-            IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
+        (
+            IFluidVaultResolver.UserPosition memory userPosition,
+            IFluidVaultResolver.VaultEntireData memory vaultData
+        ) = IFluidVaultResolver(FLUID_VAULT_RESOLVER).positionByNftId(_nftId);
 
         debt = IFluidDexResolver(FLUID_DEX_RESOLVER)
             .estimatePaybackPerfectInOneToken(
@@ -562,8 +603,12 @@ contract FluidView is FluidRatioHelper {
         // To lower the gas cost, we cap the gas limit at 9M, ensuring ~140k gas remains for fetching fWETH details
         // and enough gas is left for further operations within the same block.
         // For arbitrum, we don't need to cap as WETH will have EIP-2612 support.
-        if (_fToken == F_WRAPPED_NATIVE_TOKEN_ADDR && block.chainid != 42161) {
-            details = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getFTokenDetails{ gas: 9_000_000 }(_fToken);
+        if (_fToken == F_WRAPPED_NATIVE_TOKEN_ADDR && block.chainid != 42_161) {
+            details = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getFTokenDetails{
+                gas: 9_000_000
+            }(
+                _fToken
+            );
         } else {
             details = IFluidLendingResolver(FLUID_LENDING_RESOLVER).getFTokenDetails(_fToken);
         }
@@ -584,7 +629,11 @@ contract FluidView is FluidRatioHelper {
     }
 
     /// @notice Get user position for a specific fToken address
-    function getUserEarnPosition(address _fToken, address _user) public view returns (UserEarnPosition memory) {
+    function getUserEarnPosition(address _fToken, address _user)
+        public
+        view
+        returns (UserEarnPosition memory)
+    {
         IFluidLendingResolver.UserPosition memory data =
             IFluidLendingResolver(FLUID_LENDING_RESOLVER).getUserPosition(_fToken, _user);
 
@@ -636,7 +685,11 @@ contract FluidView is FluidRatioHelper {
      *
      */
     /// @notice Helper function used for T4 vaults to determine which oracle has to be used for smart collateral DEX.
-    function _getSmartCollateralDexOracle(address _vaultOracle) internal view returns (address smartCollOracle) {
+    function _getSmartCollateralDexOracle(address _vaultOracle)
+        internal
+        view
+        returns (address smartCollOracle)
+    {
         /// @dev Some T4 vaults use main oracles that contain both dexSmartDebtSharesRates and dexSmartCollSharesRates.
         /// But some use only the debt oracle as main and link the collateral oracle with a call to getDexColDebtOracleData.
         try IDexSmartCollOracle(_vaultOracle).dexSmartColSharesRates() returns (uint256, uint256) {
@@ -664,12 +717,16 @@ contract FluidView is FluidRatioHelper {
             fee: _dexData.configs.fee,
             lastStoredPrice: _dexData.dexState.lastStoredPrice,
             centerPrice: _dexData.dexState.centerPrice,
-            token0Utilization: _dexData.limitsAndAvailability.liquidityTokenData0.lastStoredUtilization,
-            token1Utilization: _dexData.limitsAndAvailability.liquidityTokenData1.lastStoredUtilization,
+            token0Utilization: _dexData.limitsAndAvailability.liquidityTokenData0
+            .lastStoredUtilization,
+            token1Utilization: _dexData.limitsAndAvailability.liquidityTokenData1
+                .lastStoredUtilization,
             totalSupplyShares: _dexData.dexState.totalSupplyShares,
             maxSupplyShares: _dexData.configs.maxSupplyShares,
-            token0Supplied: _dexData.dexState.totalSupplyShares * _dexData.dexState.token0PerSupplyShare / 1e18,
-            token1Supplied: _dexData.dexState.totalSupplyShares * _dexData.dexState.token1PerSupplyShare / 1e18,
+            token0Supplied: _dexData.dexState.totalSupplyShares
+                * _dexData.dexState.token0PerSupplyShare / 1e18,
+            token1Supplied: _dexData.dexState.totalSupplyShares
+                * _dexData.dexState.token1PerSupplyShare / 1e18,
             sharesWithdrawable: _sharesWithdrawable,
             token0Withdrawable: _sharesWithdrawable * _dexData.dexState.token0PerSupplyShare / 1e18,
             token1Withdrawable: _sharesWithdrawable * _dexData.dexState.token1PerSupplyShare / 1e18,
@@ -702,12 +759,16 @@ contract FluidView is FluidRatioHelper {
             fee: _dexData.configs.fee,
             lastStoredPrice: _dexData.dexState.lastStoredPrice,
             centerPrice: _dexData.dexState.centerPrice,
-            token0Utilization: _dexData.limitsAndAvailability.liquidityTokenData0.lastStoredUtilization,
-            token1Utilization: _dexData.limitsAndAvailability.liquidityTokenData1.lastStoredUtilization,
+            token0Utilization: _dexData.limitsAndAvailability.liquidityTokenData0
+            .lastStoredUtilization,
+            token1Utilization: _dexData.limitsAndAvailability.liquidityTokenData1
+                .lastStoredUtilization,
             totalBorrowShares: _dexData.dexState.totalBorrowShares,
             maxBorrowShares: _dexData.configs.maxBorrowShares,
-            token0Borrowed: _dexData.dexState.totalBorrowShares * _dexData.dexState.token0PerBorrowShare / 1e18,
-            token1Borrowed: _dexData.dexState.totalBorrowShares * _dexData.dexState.token1PerBorrowShare / 1e18,
+            token0Borrowed: _dexData.dexState.totalBorrowShares
+                * _dexData.dexState.token0PerBorrowShare / 1e18,
+            token1Borrowed: _dexData.dexState.totalBorrowShares
+                * _dexData.dexState.token1PerBorrowShare / 1e18,
             sharesBorrowable: _sharesBorrowable,
             token0Borrowable: _sharesBorrowable * _dexData.dexState.token0PerBorrowShare / 1e18,
             token1Borrowable: _sharesBorrowable * _dexData.dexState.token1PerBorrowShare / 1e18,
@@ -723,7 +784,11 @@ contract FluidView is FluidRatioHelper {
     }
 
     /// @notice Helper function to get information whether the quote token is token0 or token1 in smart collateral dex oracle
-    function _isQuoteInToken0ForSmartCollOracle(address _oracle) internal view returns (bool quoteInToken0) {
+    function _isQuoteInToken0ForSmartCollOracle(address _oracle)
+        internal
+        view
+        returns (bool quoteInToken0)
+    {
         // Try to call the newer function signature first
         try IDexSmartCollOracle(_oracle).dexOracleData() returns (
             address, bool _quoteInToken0, address, uint256, uint256
@@ -736,7 +801,11 @@ contract FluidView is FluidRatioHelper {
     }
 
     /// @notice Helper function to get information whether the quote token is token0 or token1 in smart debt dex oracle
-    function _isQuoteInToken0ForSmartDebtOracle(address _oracle) internal view returns (bool quoteInToken0) {
+    function _isQuoteInToken0ForSmartDebtOracle(address _oracle)
+        internal
+        view
+        returns (bool quoteInToken0)
+    {
         // Try to call the newer function signature first
         try IDexSmartDebtOracle(_oracle).dexOracleData() returns (
             address, bool _quoteInToken0, address, uint256, uint256

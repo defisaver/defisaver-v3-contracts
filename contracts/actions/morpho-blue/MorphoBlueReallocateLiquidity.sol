@@ -3,8 +3,11 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { MorphoBlueHelper } from "./helpers/MorphoBlueHelper.sol";
-import { MarketParams } from "../../interfaces/morpho-blue/IMorphoBlue.sol";
-import { Withdrawal, IPublicAllocator } from "../../interfaces/morpho-blue/IPublicAllocator.sol";
+import { MarketParams } from "../../interfaces/protocols/morpho-blue/IMorphoBlue.sol";
+import {
+    Withdrawal,
+    IPublicAllocator
+} from "../../interfaces/protocols/morpho-blue/IPublicAllocator.sol";
 
 /// @title Action that bundles calls to Morpho Blue Public Allocator to reallocate liquidity for additional borrowing
 contract MorphoBlueReallocateLiquidity is ActionBase, MorphoBlueHelper {
@@ -25,14 +28,18 @@ contract MorphoBlueReallocateLiquidity is ActionBase, MorphoBlueHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.marketParams.loanToken =
-            _parseParamAddr(params.marketParams.loanToken, _paramMapping[0], _subData, _returnValues);
-        params.marketParams.collateralToken =
-            _parseParamAddr(params.marketParams.collateralToken, _paramMapping[1], _subData, _returnValues);
+        params.marketParams.loanToken = _parseParamAddr(
+            params.marketParams.loanToken, _paramMapping[0], _subData, _returnValues
+        );
+        params.marketParams.collateralToken = _parseParamAddr(
+            params.marketParams.collateralToken, _paramMapping[1], _subData, _returnValues
+        );
         params.marketParams.oracle =
             _parseParamAddr(params.marketParams.oracle, _paramMapping[2], _subData, _returnValues);
-        params.marketParams.irm = _parseParamAddr(params.marketParams.irm, _paramMapping[3], _subData, _returnValues);
-        params.marketParams.lltv = _parseParamUint(params.marketParams.lltv, _paramMapping[4], _subData, _returnValues);
+        params.marketParams.irm =
+            _parseParamAddr(params.marketParams.irm, _paramMapping[3], _subData, _returnValues);
+        params.marketParams.lltv =
+            _parseParamUint(params.marketParams.lltv, _paramMapping[4], _subData, _returnValues);
 
         bytes memory logData = _reallocate(params);
         emit ActionEvent("MorphoBlueReallocateLiquidity", logData);

@@ -2,8 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IHintHelpers } from "../../../contracts/interfaces/liquityV2/IHintHelpers.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { IHintHelpers } from "../../../contracts/interfaces/protocols/liquityV2/IHintHelpers.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 import {
@@ -99,7 +101,8 @@ contract TestLiquityV2AdjustInterestRate is LiquityV2ExecuteActions {
         uint256 maxUpfrontFee = IHintHelpers(_market.hintHelpers())
             .predictAdjustInterestRateUpfrontFee(_collIndex, _troveId, _newInterestRate);
 
-        (uint256 upperHint, uint256 lowerHint) = getInsertPosition(viewContract, _market, _collIndex, _newInterestRate);
+        (uint256 upperHint, uint256 lowerHint) =
+            getInsertPosition(viewContract, _market, _collIndex, _newInterestRate);
 
         bytes memory executeActionCallData = executeActionCalldata(
             liquityV2AdjustInterestRateEncode(
@@ -110,7 +113,8 @@ contract TestLiquityV2AdjustInterestRate is LiquityV2ExecuteActions {
 
         wallet.execute(address(cut), executeActionCallData, 0);
 
-        LiquityV2View.TroveData memory troveData = viewContract.getTroveInfo(address(_market), _troveId);
+        LiquityV2View.TroveData memory troveData =
+            viewContract.getTroveInfo(address(_market), _troveId);
         assertEq(troveData.annualInterestRate, _newInterestRate);
     }
 }

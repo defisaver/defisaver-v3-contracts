@@ -17,17 +17,20 @@ contract CompUser is CompUserUtils {
             onBehalf: address(0)
         });
 
-        bytes memory fnData = abi.encodeWithSignature("executeActionDirect(bytes)", abi.encode(params));
+        bytes memory fnData =
+            abi.encodeWithSignature("executeActionDirect(bytes)", abi.encode(params));
         executeWithWallet(_isSafe, address(compV3Supply), fnData, 0);
     }
 
     function borrow(bool _isSafe, address _market, uint256 _amount) public {
         CompV3Borrow compV3Borrow = new CompV3Borrow();
 
-        CompV3Borrow.Params memory params =
-            CompV3Borrow.Params({ market: _market, amount: _amount, to: msg.sender, onBehalf: address(0) });
+        CompV3Borrow.Params memory params = CompV3Borrow.Params({
+            market: _market, amount: _amount, to: msg.sender, onBehalf: address(0)
+        });
 
-        bytes memory fnData = abi.encodeWithSignature("executeActionDirect(bytes)", abi.encode(params));
+        bytes memory fnData =
+            abi.encodeWithSignature("executeActionDirect(bytes)", abi.encode(params));
         executeWithWallet(_isSafe, address(compV3Borrow), fnData, 0);
     }
 }

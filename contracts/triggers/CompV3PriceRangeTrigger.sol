@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { IComet } from "../interfaces/compoundV3/IComet.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { IComet } from "../interfaces/protocols/compoundV3/IComet.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is outside of given range specified during subscription
@@ -25,7 +25,8 @@ contract CompV3PriceRangeTrigger is ITrigger, AdminAuth {
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerData = parseSubInputs(_subData);
 
-        address priceFeed = IComet(triggerData.market).getAssetInfoByAddress(triggerData.collToken).priceFeed;
+        address priceFeed =
+            IComet(triggerData.market).getAssetInfoByAddress(triggerData.collToken).priceFeed;
 
         // This will return the price of the collateral token in terms of base token scaled by 1e8
         uint256 currPrice = IComet(triggerData.market).getPrice(priceFeed);

@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { IAddressesRegistry } from "../interfaces/liquityV2/IAddressesRegistry.sol";
-import { ITroveManager } from "../interfaces/liquityV2/ITroveManager.sol";
-import { IBorrowerOperations } from "../interfaces/liquityV2/IBorrowerOperations.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { IAddressesRegistry } from "../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { ITroveManager } from "../interfaces/protocols/liquityV2/ITroveManager.sol";
+import { IBorrowerOperations } from "../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
 
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";

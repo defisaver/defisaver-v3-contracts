@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { ICToken } from "../../interfaces/compound/ICToken.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ICToken } from "../../interfaces/protocols/compound/ICToken.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompHelper } from "./helpers/CompHelper.sol";
 
@@ -31,11 +31,13 @@ contract CompBorrow is ActionBase, CompHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.cTokenAddr = _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
+        params.cTokenAddr =
+            _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _borrow(params.cTokenAddr, params.amount, params.to);
+        (uint256 withdrawAmount, bytes memory logData) =
+            _borrow(params.cTokenAddr, params.amount, params.to);
         emit ActionEvent("CompBorrow", logData);
         return bytes32(withdrawAmount);
     }
@@ -58,7 +60,10 @@ contract CompBorrow is ActionBase, CompHelper {
     /// @param _cTokenAddr Address of the cToken we are borrowing
     /// @param _amount Amount of tokens to be borrowed
     /// @param _to The address we are sending the borrowed tokens to
-    function _borrow(address _cTokenAddr, uint256 _amount, address _to) internal returns (uint256, bytes memory) {
+    function _borrow(address _cTokenAddr, uint256 _amount, address _to)
+        internal
+        returns (uint256, bytes memory)
+    {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
         // if the tokens are borrowed we need to enter the market
         enterMarket(_cTokenAddr);

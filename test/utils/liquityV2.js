@@ -26,7 +26,7 @@ const getLiquityV2Hints = async (market, collIndex, interestRate, isFork = false
     const marketContract = await hre.ethers.getContractAt('IAddressesRegistry', market);
     const sortedTrovesAddr = await marketContract.sortedTroves();
     const sortedTrovesContract = await hre.ethers.getContractAt(
-        'contracts/interfaces/liquityV2/ISortedTroves.sol:ISortedTroves',
+        'contracts/interfaces/protocols/liquityV2/ISortedTroves.sol:ISortedTroves',
         sortedTrovesAddr,
     );
     const trovesSize = await sortedTrovesContract.getSize();
@@ -58,7 +58,7 @@ const getLiquityV2MaxUpfrontFee = async (
     const marketContract = await hre.ethers.getContractAt('IAddressesRegistry', market);
     const hintHelpersAddr = await marketContract.hintHelpers();
     const hintHelpersContract = await hre.ethers.getContractAt(
-        'contracts/interfaces/liquityV2/IHintHelpers.sol:IHintHelpers',
+        'contracts/interfaces/protocols/liquityV2/IHintHelpers.sol:IHintHelpers',
         hintHelpersAddr,
     );
 
@@ -82,7 +82,7 @@ const getLiquityV2AdjustBorrowMaxUpfrontFee = async (market, collIndex, troveId,
     const marketContract = await hre.ethers.getContractAt('IAddressesRegistry', market);
     const hintHelpersAddr = await marketContract.hintHelpers();
     const hintHelpersContract = await hre.ethers.getContractAt(
-        'contracts/interfaces/liquityV2/IHintHelpers.sol:IHintHelpers',
+        'contracts/interfaces/protocols/liquityV2/IHintHelpers.sol:IHintHelpers',
         hintHelpersAddr,
     );
 

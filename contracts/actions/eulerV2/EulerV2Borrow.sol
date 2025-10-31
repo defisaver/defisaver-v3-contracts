@@ -5,8 +5,8 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IBorrowing } from "../../interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IBorrowing } from "../../interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
 
 /// @title Borrow assets from Euler vault
 contract EulerV2Borrow is ActionBase, EulerV2Helper {
@@ -32,7 +32,8 @@ contract EulerV2Borrow is ActionBase, EulerV2Helper {
 
         params.vault = _parseParamAddr(params.vault, _paramMapping[0], _subData, _returnValues);
         params.account = _parseParamAddr(params.account, _paramMapping[1], _subData, _returnValues);
-        params.receiver = _parseParamAddr(params.receiver, _paramMapping[2], _subData, _returnValues);
+        params.receiver =
+            _parseParamAddr(params.receiver, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
 
         (uint256 borrowAmount, bytes memory logData) = _borrow(params);
@@ -60,13 +61,15 @@ contract EulerV2Borrow is ActionBase, EulerV2Helper {
             _params.account = address(this);
         }
 
-        bool isControllerEnabled = IEVC(EVC_ADDR).isControllerEnabled(_params.account, _params.vault);
+        bool isControllerEnabled =
+            IEVC(EVC_ADDR).isControllerEnabled(_params.account, _params.vault);
 
         if (!isControllerEnabled) {
             IEVC(EVC_ADDR).enableController(_params.account, _params.vault);
         }
 
-        bytes memory borrowCallData = abi.encodeCall(IBorrowing.borrow, (_params.amount, _params.receiver));
+        bytes memory borrowCallData =
+            abi.encodeCall(IBorrowing.borrow, (_params.amount, _params.receiver));
 
         bytes memory result = IEVC(EVC_ADDR).call(_params.vault, _params.account, 0, borrowCallData);
 

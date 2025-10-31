@@ -2,8 +2,8 @@
 pragma solidity =0.8.24;
 
 import { CheckWalletType } from "../utils/CheckWalletType.sol";
-import { IDSProxy } from "../interfaces/IDSProxy.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
+import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 
 contract GeneralView is CheckWalletType {
     enum WalletType {

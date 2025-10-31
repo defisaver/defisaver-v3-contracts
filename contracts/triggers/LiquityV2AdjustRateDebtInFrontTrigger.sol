@@ -2,15 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 
 import { LiquityV2Helper } from "../actions/liquityV2/helpers/LiquityV2Helper.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { TransientStorageCancun } from "../utils/TransientStorageCancun.sol";
-import { IAddressesRegistry } from "../interfaces/liquityV2/IAddressesRegistry.sol";
-import { ITroveManager } from "../interfaces/liquityV2/ITroveManager.sol";
-import { IBorrowerOperations } from "../interfaces/liquityV2/IBorrowerOperations.sol";
+import { TransientStorageCancun } from "../utils/transient/TransientStorageCancun.sol";
+import { IAddressesRegistry } from "../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { ITroveManager } from "../interfaces/protocols/liquityV2/ITroveManager.sol";
+import { IBorrowerOperations } from "../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
 
 /// @title LiquityV2 Interest Rate Adjustment Debt in Front Trigger
 /// @notice Triggers when the calculated debt in front of a LiquityV2 trove falls below specified thresholds,
@@ -19,9 +19,15 @@ import { IBorrowerOperations } from "../interfaces/liquityV2/IBorrowerOperations
 ///      when conditions are met for interest rate adjustment. It considers both critical and non-critical
 ///      debt thresholds, with different logic based on whether adjustment fees are zero.
 /// @author DeFi Saver
-contract LiquityV2AdjustRateDebtInFrontTrigger is ITrigger, AdminAuth, TriggerHelper, LiquityV2Helper {
+contract LiquityV2AdjustRateDebtInFrontTrigger is
+    ITrigger,
+    AdminAuth,
+    TriggerHelper,
+    LiquityV2Helper
+{
     /// @notice Transient storage contract for storing temporary data during execution
-    TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
+    TransientStorageCancun public constant tempStorage =
+        TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     /// @notice Parameters for the LiquityV2 interest rate adjustment trigger
     /// @param market Address of the LiquityV2 market (branch) to monitor
@@ -42,7 +48,7 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is ITrigger, AdminAuth, TriggerHe
     ///      3. Whether adjustment fees are zero (affects which threshold to use)
     /// @param _subData Encoded SubParams struct containing market, troveId, and threshold limits
     /// @return bool True if the strategy should be triggered, false otherwise
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         (bool isAdjustmentFeeZero, uint256 interestRate, bool shouldExecuteStrategy) =
@@ -91,7 +97,8 @@ contract LiquityV2AdjustRateDebtInFrontTrigger is ITrigger, AdminAuth, TriggerHe
 
         ITroveManager.LatestTroveData memory troveData = troveManager.getLatestTroveData(_troveId);
 
-        adjustmentFeeZero = block.timestamp >= troveData.lastInterestRateAdjTime + INTEREST_RATE_ADJ_COOLDOWN;
+        adjustmentFeeZero =
+            block.timestamp >= troveData.lastInterestRateAdjTime + INTEREST_RATE_ADJ_COOLDOWN;
         interestRate = troveData.annualInterestRate;
         shouldExecuteStrategy = true;
     }

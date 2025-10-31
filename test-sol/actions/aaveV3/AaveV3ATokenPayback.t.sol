@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { AaveV3ATokenPayback } from "../../../contracts/actions/aaveV3/AaveV3ATokenPayback.sol";
 import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/AaveV3RatioHelper.sol";
-import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
+import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3PositionCreator } from "../../utils/positions/AaveV3PositionCreator.sol";
@@ -71,17 +71,21 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
 
             createAaveV3Position(positionParams, wallet);
 
-            uint256 paybackAmount = _useMaxUint ? type(uint256).max : amountInUSDPrice(testPairs[i].borrowAsset, 10_000);
+            uint256 paybackAmount = _useMaxUint
+                ? type(uint256).max
+                : amountInUSDPrice(testPairs[i].borrowAsset, 10_000);
             _payback(positionParams, paybackAmount, _isL2Direct);
 
             vm.revertToState(snapshotId);
         }
     }
 
-    function testFuzz_encode_decode_inputs_no_market(uint256 _amount, address _from, uint8 _rateMode, uint16 _assetId)
-        public
-        view
-    {
+    function testFuzz_encode_decode_inputs_no_market(
+        uint256 _amount,
+        address _from,
+        uint8 _rateMode,
+        uint16 _assetId
+    ) public view {
         AaveV3ATokenPayback.Params memory params = AaveV3ATokenPayback.Params({
             amount: _amount,
             from: _from,
@@ -116,7 +120,8 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
     //////////////////////////////////////////////////////////////////////////*/
     function _assertParams(AaveV3ATokenPayback.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
-        AaveV3ATokenPayback.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
+        AaveV3ATokenPayback.Params memory decodedParams =
+            cut.decodeInputs(encodedInputWithoutSelector);
 
         assertEq(_params.amount, decodedParams.amount);
         assertEq(_params.from, decodedParams.from);
@@ -126,7 +131,11 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
         assertEq(_params.market, decodedParams.market);
     }
 
-    function _payback(PositionParams memory _positionParams, uint256 _paybackAmount, bool _isL2Direct) internal {
+    function _payback(
+        PositionParams memory _positionParams,
+        uint256 _paybackAmount,
+        bool _isL2Direct
+    ) internal {
         DataTypes.ReserveData memory reserveData = pool.getReserveData(_positionParams.debtAddr);
         uint16 debtAssetId = reserveData.id;
         address debtVariableTokenAddr = reserveData.variableDebtTokenAddress;
@@ -157,11 +166,20 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
             bytes memory paramsCalldata = aaveV3ATokenPaybackEncode(
-                _paybackAmount, sender, uint8(DataTypes.InterestRateMode.VARIABLE), debtAssetId, true, address(0)
+                _paybackAmount,
+                sender,
+                uint8(DataTypes.InterestRateMode.VARIABLE),
+                debtAssetId,
+                true,
+                address(0)
             );
 
             bytes memory _calldata = abi.encodeWithSelector(
-                AaveV3ATokenPayback.executeAction.selector, paramsCalldata, subData, paramMapping, returnValues
+                AaveV3ATokenPayback.executeAction.selector,
+                paramsCalldata,
+                subData,
+                paramMapping,
+                returnValues
             );
             wallet.execute(address(cut), _calldata, 0);
         }
@@ -174,14 +192,18 @@ contract TestAaveV3ATokenPayback is AaveV3RatioHelper, AaveV3PositionCreator {
 
         if (_paybackAmount == type(uint256).max) {
             assertApproxEqAbs(
-                senderBalanceAfter, senderBalanceBefore - walletVariableDebtBefore, maxATokenIncreaseTolerance
+                senderBalanceAfter,
+                senderBalanceBefore - walletVariableDebtBefore,
+                maxATokenIncreaseTolerance
             );
             assertEq(walletVariableDebtAfter, 0);
             assertEq(walletSafetyRatioAfter, 0);
         } else {
             assertEq(senderBalanceAfter, senderBalanceBefore - _paybackAmount);
             assertApproxEqAbs(
-                walletVariableDebtAfter, walletVariableDebtBefore - _paybackAmount, maxATokenIncreaseTolerance
+                walletVariableDebtAfter,
+                walletVariableDebtBefore - _paybackAmount,
+                maxATokenIncreaseTolerance
             );
             assertGt(walletSafetyRatioAfter, walletSafetyRatioBefore);
         }

@@ -52,7 +52,9 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_fail_to_call_execute_when_sender_is_not_executor() public {
         vm.expectRevert(
-            abi.encodeWithSelector(ProxyAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr)
+            abi.encodeWithSelector(
+                ProxyAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr
+            )
         );
         cut.callExecute(dsProxyAddr, RECIPE_EXECUTOR_ADDR, bytes("0x"));
     }
@@ -88,7 +90,8 @@ contract TestCore_ProxyAuth is RegistryUtils, ActionsUtils, BaseTest {
         });
 
         // encode recipe executor call
-        bytes memory recipeExecutorCalldata = abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
+        bytes memory recipeExecutorCalldata =
+            abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
         // execute tx from auth contract
         prank(strategyExecutorAddr);

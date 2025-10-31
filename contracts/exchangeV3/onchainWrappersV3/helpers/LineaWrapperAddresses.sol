@@ -4,7 +4,8 @@ pragma solidity =0.8.24;
 
 contract LineaWrapperAddresses {
     // address internal constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address payable internal constant WALLET_ID = payable(0x76720aC2574631530eC8163e4085d6F98513fb27);
+    address payable internal constant WALLET_ID =
+        payable(0x76720aC2574631530eC8163e4085d6F98513fb27);
     address internal constant UNI_V3_ROUTER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant UNI_V3_QUOTER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 

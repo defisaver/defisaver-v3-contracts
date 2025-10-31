@@ -2,16 +2,16 @@
 
 pragma solidity =0.8.24;
 
-import { IManager } from "../../interfaces/mcd/IManager.sol";
-import { ISpotter } from "../../interfaces/mcd/ISpotter.sol";
-import { IDaiJoin } from "../../interfaces/mcd/IDaiJoin.sol";
-import { IJug } from "../../interfaces/mcd/IJug.sol";
-import { ICropper } from "../../interfaces/mcd/ICropper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
+import { ISpotter } from "../../interfaces/protocols/mcd/ISpotter.sol";
+import { IDaiJoin } from "../../interfaces/protocols/mcd/IDaiJoin.sol";
+import { IJug } from "../../interfaces/protocols/mcd/IJug.sol";
+import { ICropper } from "../../interfaces/protocols/mcd/ICropper.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { ICdpRegistry } from "../../interfaces/mcd/ICdpRegistry.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ICdpRegistry } from "../../interfaces/protocols/mcd/ICdpRegistry.sol";
 
 /// @title Generate dai from a Maker Vault
 contract McdGenerate is ActionBase, McdHelper {
@@ -39,10 +39,13 @@ contract McdGenerate is ActionBase, McdHelper {
     ) public payable override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
+        inputData.vaultId =
+            _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
-        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[3], _subData, _returnValues);
+        inputData.mcdManager =
+            _parseParamAddr(inputData.mcdManager, _paramMapping[3], _subData, _returnValues);
 
         (uint256 borrowedAmount, bytes memory logData) =
             _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
@@ -53,7 +56,8 @@ contract McdGenerate is ActionBase, McdHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        (, bytes memory logData) = _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
+        (, bytes memory logData) =
+            _mcdGenerate(inputData.vaultId, inputData.amount, inputData.to, inputData.mcdManager);
         logger.logActionDirectEvent("McdGenerate", logData);
     }
 
@@ -108,12 +112,17 @@ contract McdGenerate is ActionBase, McdHelper {
         _mcdManager.move(_vaultId, address(this), toRad(_amount));
     }
 
-    function _cropperGenerate(uint256 _vaultId, bytes32 _ilk, uint256 _amount, uint256 _rate, uint256 _daiVatBalance)
-        internal
-    {
+    function _cropperGenerate(
+        uint256 _vaultId,
+        bytes32 _ilk,
+        uint256 _amount,
+        uint256 _rate,
+        uint256 _daiVatBalance
+    ) internal {
         address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
 
-        ICropper(CROPPER).frob(_ilk, owner, owner, owner, 0, normalizeDrawAmount(_amount, _rate, _daiVatBalance));
+        ICropper(CROPPER)
+            .frob(_ilk, owner, owner, owner, 0, normalizeDrawAmount(_amount, _rate, _daiVatBalance));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

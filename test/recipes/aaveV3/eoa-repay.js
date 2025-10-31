@@ -159,7 +159,9 @@ describe('Aave-EOA-Repay', function () {
         expect(loanDataPre.borrowVariableAmounts[0]).to.be.gt(loanData.borrowVariableAmounts[0]);
         console.log(`Our position currently has ${loanData.collAmounts[0] / 1e8}$ of ETH supplied`);
         console.log(
-            `Our position currently has ${loanData.borrowVariableAmounts[0] / 1e8}$ of DAI borrowed`,
+            `Our position currently has ${
+                loanData.borrowVariableAmounts[0] / 1e8
+            }$ of DAI borrowed`,
         );
     });
 });

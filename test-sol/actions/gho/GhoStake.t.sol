@@ -59,8 +59,9 @@ contract TestGhoStake is BaseTest, ActionsUtils, AaveV3Helper {
         give(GHO_TOKEN, _config.from, _config.amount);
         approveAsSender(_config.from, GHO_TOKEN, walletAddr, _config.amount);
 
-        bytes memory callData =
-            executeActionCalldata(ghoStakeEncode(_config.from, _config.to, _config.amount), _config.isDirect);
+        bytes memory callData = executeActionCalldata(
+            ghoStakeEncode(_config.from, _config.to, _config.amount), _config.isDirect
+        );
 
         uint256 ghoBalanceBefore = balanceOf(GHO_TOKEN, _config.from);
         uint256 stkGhoBalanceBefore = balanceOf(STAKED_GHO_TOKEN, _config.to);

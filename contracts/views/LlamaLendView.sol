@@ -3,12 +3,12 @@
 pragma solidity =0.8.24;
 
 import { LlamaLendHelper } from "../actions/llamalend/helpers/LlamaLendHelper.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { IERC4626 } from "../interfaces/IERC4626.sol";
-import { ILlamaLendVault } from "../interfaces/llamalend/ILlamaLendVault.sol";
-import { ILlamaLendController } from "../interfaces/llamalend/ILlamaLendController.sol";
-import { ILLAMMA } from "../interfaces/llamalend/ILLAMA.sol";
-import { IAGG } from "../interfaces/llamalend/IAGG.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { IERC4626 } from "../interfaces/token/IERC4626.sol";
+import { ILlamaLendVault } from "../interfaces/protocols/llamalend/ILlamaLendVault.sol";
+import { ILlamaLendController } from "../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import { ILLAMMA } from "../interfaces/protocols/llamalend/ILLAMA.sol";
+import { IAGG } from "../interfaces/protocols/llamalend/IAGG.sol";
 
 contract LlamaLendView is LlamaLendHelper {
     struct Band {
@@ -71,7 +71,8 @@ contract LlamaLendView is LlamaLendHelper {
     function userData(address market, address user) external view returns (UserData memory) {
         ILlamaLendController ctrl = ILlamaLendController(market);
         uint256 debtTokenSuppliedShares = IERC20(ctrl.factory()).balanceOf(user);
-        uint256 debtTokenSuppliedAssets = IERC4626(ctrl.factory()).convertToAssets(debtTokenSuppliedShares);
+        uint256 debtTokenSuppliedAssets =
+            IERC4626(ctrl.factory()).convertToAssets(debtTokenSuppliedShares);
         ILLAMMA amm = ILLAMMA(ctrl.amm());
 
         if (!ctrl.loan_exists(user)) {
@@ -160,13 +161,18 @@ contract LlamaLendView is LlamaLendHelper {
         return Band(n, lama.p_oracle_down(n), lama.p_oracle_up(n), lama.bands_y(n), lama.bands_x(n));
     }
 
-    function getBandsData(address market, int256 from, int256 to) public view returns (Band[] memory) {
+    function getBandsData(address market, int256 from, int256 to)
+        public
+        view
+        returns (Band[] memory)
+    {
         ILlamaLendController ctrl = ILlamaLendController(market);
         ILLAMMA lama = ILLAMMA(ctrl.amm());
         Band[] memory bands = new Band[](uint256(to - from + 1));
         for (int256 i = from; i <= to; i++) {
-            bands[uint256(i - from)] =
-                Band(i, lama.p_oracle_down(i), lama.p_oracle_up(i), lama.bands_y(i), lama.bands_x(i));
+            bands[uint256(i - from)] = Band(
+                i, lama.p_oracle_down(i), lama.p_oracle_up(i), lama.bands_y(i), lama.bands_x(i)
+            );
         }
 
         return bands;
@@ -181,7 +187,9 @@ contract LlamaLendView is LlamaLendHelper {
 
         uint256 collForHealthCalc = collateral;
 
-        int256 health = healthCalculator(market, address(0x00), int256(collForHealthCalc), int256(debt), true, N);
+        int256 health = healthCalculator(
+            market, address(0x00), int256(collForHealthCalc), int256(debt), true, N
+        );
 
         int256 n1 = ctrl.calculate_debt_n1(collateral, debt, N);
         int256 n2 = n1 + int256(N) - 1;
@@ -196,12 +204,20 @@ contract LlamaLendView is LlamaLendHelper {
         });
     }
 
-    function maxBorrow(address market, uint256 collateral, uint256 N) external view returns (uint256) {
+    function maxBorrow(address market, uint256 collateral, uint256 N)
+        external
+        view
+        returns (uint256)
+    {
         ILlamaLendController ctrl = ILlamaLendController(market);
         return ctrl.max_borrowable(collateral, N);
     }
 
-    function minCollateral(address market, uint256 debt, uint256 N) external view returns (uint256) {
+    function minCollateral(address market, uint256 debt, uint256 N)
+        external
+        view
+        returns (uint256)
+    {
         ILlamaLendController ctrl = ILlamaLendController(market);
         return ctrl.min_collateral(debt, N);
     }

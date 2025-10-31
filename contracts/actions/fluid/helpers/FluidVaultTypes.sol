@@ -36,7 +36,10 @@ library FluidVaultTypes {
     }
 
     function requireDexVault(uint256 _vaultType) internal pure {
-        if (_vaultType != T2_VAULT_TYPE && _vaultType != T3_VAULT_TYPE && _vaultType != T4_VAULT_TYPE) {
+        if (
+            _vaultType != T2_VAULT_TYPE && _vaultType != T3_VAULT_TYPE
+                && _vaultType != T4_VAULT_TYPE
+        ) {
             revert InvalidVaultType(_vaultType);
         }
     }

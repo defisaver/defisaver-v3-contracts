@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { DFSRegistry } from "../core/DFSRegistry.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { CoreHelper } from "../core/helpers/CoreHelper.sol";
 
 /// @title MultiDFSRegistrySetter Adds multiple entries in DFS Registry
@@ -25,24 +25,27 @@ contract MultiDFSRegistrySetter is CoreHelper {
         address[] calldata _contractAddrs,
         uint256[] calldata _waitPeriods
     ) external onlyOwner {
-        require((_ids.length == _contractAddrs.length) && (_ids.length == _waitPeriods.length), "Arr length not eq");
+        require(
+            (_ids.length == _contractAddrs.length) && (_ids.length == _waitPeriods.length),
+            "Arr length not eq"
+        );
 
         for (uint256 i = 0; i < _ids.length; ++i) {
-            DFSRegistry(REGISTRY_ADDR).addNewContract(_ids[i], _contractAddrs[i], _waitPeriods[i]);
+            IDFSRegistry(REGISTRY_ADDR).addNewContract(_ids[i], _contractAddrs[i], _waitPeriods[i]);
         }
     }
 
     /// @notice Starts multiple entries changes to DFSRegistry
     /// @param _ids Ids used to fetch contract addresses
     /// @param _contractAddrs Array of contract addresses matching the ids
-    function startMultipleContractChanges(bytes4[] calldata _ids, address[] calldata _contractAddrs)
-        external
-        onlyOwner
-    {
+    function startMultipleContractChanges(
+        bytes4[] calldata _ids,
+        address[] calldata _contractAddrs
+    ) external onlyOwner {
         require(_ids.length == _contractAddrs.length, "Arr length not eq");
 
         for (uint256 i = 0; i < _ids.length; ++i) {
-            DFSRegistry(REGISTRY_ADDR).startContractChange(_ids[i], _contractAddrs[i]);
+            IDFSRegistry(REGISTRY_ADDR).startContractChange(_ids[i], _contractAddrs[i]);
         }
     }
 
@@ -51,7 +54,7 @@ contract MultiDFSRegistrySetter is CoreHelper {
     /// @param _ids Ids used to fetch contract addresses
     function approveMultipleContractChanges(bytes4[] calldata _ids) external onlyOwner {
         for (uint256 i = 0; i < _ids.length; ++i) {
-            DFSRegistry(REGISTRY_ADDR).approveContractChange(_ids[i]);
+            IDFSRegistry(REGISTRY_ADDR).approveContractChange(_ids[i]);
         }
     }
 }

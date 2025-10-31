@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../../ActionBase.sol";
 import { DFSExchangeData } from "../../../../exchangeV3/DFSExchangeData.sol";
 
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 import { CurveUsdSwapperTransient } from "./CurveUsdSwapperTransient.sol";
 
 /// @title Repays a curveusd position with a given amount of collateral
@@ -34,7 +34,8 @@ contract CurveUsdRepayTransient is ActionBase, CurveUsdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[1], _subData, _returnValues);
 
         (uint256 debtTokenReceived, bytes memory logData) = _repay(params);
@@ -83,8 +84,9 @@ contract CurveUsdRepayTransient is ActionBase, CurveUsdHelper {
         // that will be sent to the user wallet. In that case, if we also haven't sold 100% of collToken,
         // remaining collateral will be sent to the user wallet as well.
         // When this happens, send all leftover collateral and debt tokens to the user
-        (, uint256 debtTokenReceived) =
-            _sendLeftoverFundsWithSnapshot(collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to);
+        (, uint256 debtTokenReceived) = _sendLeftoverFundsWithSnapshot(
+            collToken, debtToken, collStartingBalance, debtStartingBalance, _params.to
+        );
 
         return (debtTokenReceived, abi.encode(_params));
     }

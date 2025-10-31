@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../../../DS/DSMath.sol";
-import { IManager } from "../../../interfaces/mcd/IManager.sol";
-import { IJoin } from "../../../interfaces/mcd/IJoin.sol";
-import { IVat } from "../../../interfaces/mcd/IVat.sol";
-import { ICropper } from "../../../interfaces/mcd/ICropper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { ICdpRegistry } from "../../../interfaces/mcd/ICdpRegistry.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
+import { IManager } from "../../../interfaces/protocols/mcd/IManager.sol";
+import { IJoin } from "../../../interfaces/protocols/mcd/IJoin.sol";
+import { IVat } from "../../../interfaces/protocols/mcd/IVat.sol";
+import { ICropper } from "../../../interfaces/protocols/mcd/ICropper.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
+import { ICdpRegistry } from "../../../interfaces/protocols/mcd/ICdpRegistry.sol";
 import { MainnetMcdAddresses } from "./MainnetMcdAddresses.sol";
 
 /// @title Helper methods for MCDSaverProxy
@@ -119,7 +119,11 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
         return address(IJoin(_joinAddr).gem());
     }
 
-    function getUrnAndIlk(address _mcdManager, uint256 _vaultId) public view returns (address urn, bytes32 ilk) {
+    function getUrnAndIlk(address _mcdManager, uint256 _vaultId)
+        public
+        view
+        returns (address urn, bytes32 ilk)
+    {
         if (_mcdManager == CROPPER) {
             address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
             urn = ICropper(CROPPER).proxy(owner);
@@ -134,7 +138,11 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
-    function getCdpInfo(IManager _manager, uint256 _cdpId, bytes32 _ilk) public view returns (uint256, uint256) {
+    function getCdpInfo(IManager _manager, uint256 _cdpId, bytes32 _ilk)
+        public
+        view
+        returns (uint256, uint256)
+    {
         address urn;
 
         if (address(_manager) == CROPPER) {
