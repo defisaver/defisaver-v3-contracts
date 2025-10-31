@@ -102,7 +102,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
             } else {
                 /// @dev The last two values are specially reserved for proxy addr and owner addr
                 if (_mapType == 254) return address(this); // wallet address
-                if (_mapType == 255) return _fetchOwnerOrWallet(address(this), true); // owner if 1/1 wallet or the wallet itself
+                if (_mapType == 255) return _fetchOwnerOrWallet(address(this)); // owner if 1/1 wallet or the wallet itself
 
                 _param = address(uint160(uint256(_subData[getSubIndex(_mapType)])));
             }

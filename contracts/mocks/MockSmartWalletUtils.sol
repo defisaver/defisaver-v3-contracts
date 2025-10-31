@@ -18,11 +18,7 @@ contract MockSmartWalletUtils is SmartWalletUtils {
         return super._getWalletType(_proxy);
     }
 
-    function fetchOwnerOrWallet(address _wallet, bool _usedForExecution)
-        public
-        view
-        returns (address)
-    {
-        return super._fetchOwnerOrWallet(_wallet, _usedForExecution);
+    function fetchOwnerOrWallet(address _wallet) public view returns (address) {
+        return super._fetchOwnerOrWallet(_wallet);
     }
 }

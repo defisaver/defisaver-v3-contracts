@@ -70,12 +70,7 @@ contract TestCore_SmartWalletUtils is BaseTest {
         SmartWallet dsProxyWallet = new SmartWallet(alice);
         address dsProxyAddress = dsProxyWallet.createDSProxy();
 
-        SmartWallet dsaProxyWallet = new SmartWallet(charlie);
-        address dsaProxyAddress = dsaProxyWallet.createDSAProxy();
-
-        assertTrue(cut.fetchOwnerOrWallet(safeAddress, false) == bob);
-        assertTrue(cut.fetchOwnerOrWallet(dsProxyAddress, false) == alice);
-        assertTrue(cut.fetchOwnerOrWallet(dsaProxyAddress, false) == charlie);
-        assertTrue(cut.fetchOwnerOrWallet(dsaProxyAddress, true) == dsaProxyAddress);
+        assertTrue(cut.fetchOwnerOrWallet(safeAddress) == bob);
+        assertTrue(cut.fetchOwnerOrWallet(dsProxyAddress) == alice);
     }
 }

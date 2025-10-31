@@ -16,7 +16,7 @@ contract GeneralView is SmartWalletUtils {
         returns (WalletType smartWalletType, address owner)
     {
         smartWalletType = _getWalletType(_smartWalletAddress);
-        owner = _fetchOwnerOrWallet(_smartWalletAddress, false);
+        owner = _fetchOwnerOrWallet(_smartWalletAddress);
     }
 
     /// @notice Fetches the DSA Proxy Accounts for a user
