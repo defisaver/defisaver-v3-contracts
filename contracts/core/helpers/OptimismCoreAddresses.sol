@@ -8,7 +8,6 @@ contract OptimismCoreAddresses {
 
     address internal constant PROXY_AUTH_ADDR = 0xD6ae16A1aF3002D75Cc848f68060dE74Eccc6043;
     address internal constant MODULE_AUTH_ADDR = 0x6D6Bc726955d46AC4EBbEe0f2c3Ed01128E261A6;
-    address internal constant DSA_AUTH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address internal constant SUB_STORAGE_ADDR = 0xb944291Ed31886b20030d0d4C47c7838d1d9eb97;
     address internal constant BUNDLE_STORAGE_ADDR = 0xc98C5312829006b2D4bBd47162d49B1aa6C275Ab;

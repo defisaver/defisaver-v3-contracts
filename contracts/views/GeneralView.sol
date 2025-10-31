@@ -16,7 +16,13 @@ contract GeneralView is SmartWalletUtils {
         returns (WalletType smartWalletType, address owner)
     {
         smartWalletType = _getWalletType(_smartWalletAddress);
-        owner = _fetchOwnerOrWallet(_smartWalletAddress);
+
+        // DSA Proxy accounts are intentionally handled separately from '_fetchOwnerOrWallet'
+        if (smartWalletType == WalletType.DSAPROXY) {
+            owner = _fetchDSAProxyOwner(_smartWalletAddress);
+        } else {
+            owner = _fetchOwnerOrWallet(_smartWalletAddress);
+        }
     }
 
     /// @notice Fetches the DSA Proxy Accounts for a user
@@ -34,5 +40,10 @@ contract GeneralView is SmartWalletUtils {
             accounts[i] = list.accountAddr(currentId);
             currentId = list.userList(_user, currentId).next;
         }
+    }
+
+    function _fetchDSAProxyOwner(address _dsaProxy) internal view returns (address) {
+        uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(_dsaProxy);
+        return IInstaList(DSA_LIST_ADDR).accountLink(dsaId).first;
     }
 }

@@ -4,7 +4,6 @@ pragma solidity =0.8.24;
 import { SafeModuleAuth } from "../../contracts/core/strategy/SafeModuleAuth.sol";
 import { StrategyExecutorCommon } from "../../contracts/core/strategy/StrategyExecutorCommon.sol";
 import { ProxyAuth } from "../../contracts/core/strategy/ProxyAuth.sol";
-import { DSAAuth } from "../../contracts/core/strategy/DSAAuth.sol";
 import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
 import { StrategyExecutor } from "../../contracts/core/strategy/StrategyExecutor.sol";
 import { RecipeExecutor } from "../../contracts/core/RecipeExecutor.sol";
@@ -19,10 +18,9 @@ import { ActionsUtils } from "../utils/ActionsUtils.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { StrategyBuilder } from "../utils/StrategyBuilder.sol";
-import { DSAProxyTestUtils } from "../utils/dsa/DSAProxyTestUtils.sol";
-import { Strings } from "../utils/Strings.sol";
+import { RegistryUtils } from "../utils/RegistryUtils.sol";
 
-contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
+contract TestCore_StrategyExecutor is ActionsUtils, RegistryUtils, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -39,8 +37,6 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
     address recipeExecutorAddr;
 
     SubStorage subStorage;
-
-    bool isDSAProxy;
 
     struct DummySubData {
         address token;
@@ -63,7 +59,6 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
 
         vm.etch(MODULE_AUTH_ADDR, address(new SafeModuleAuth()).code);
         vm.etch(PROXY_AUTH_ADDR, address(new ProxyAuth()).code);
-        vm.etch(DSA_AUTH_ADDR, address(new DSAAuth()).code);
 
         botAuthAddr = address(new BotAuth());
 
@@ -134,18 +129,6 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
         _callStrategyBaseTest();
     }
 
-    function test_should_call_strategy_for_dsa_proxy_wallet() public {
-        wallet = new SmartWallet(charlie);
-        walletAddr = wallet.createDSAProxy();
-        sender = wallet.owner();
-
-        _addDefiSaverConnector();
-
-        isDSAProxy = true;
-
-        _callStrategyBaseTest();
-    }
-
     function test_should_fail_to_execute_strategy_for_inactive_triggers() public {
         DummySubData memory subData =
             DummySubData({ token: Addresses.WETH_ADDR, amount: 1, maxGasPrice: 0 });
@@ -208,23 +191,14 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
         assertEq(senderBalanceAfter, senderBalanceBefore - subData.amount);
     }
 
-    function _add_placeholder_strategy(address _eoa) internal returns (uint256) {
-        return __add_placeholder_strategy_template(Strings.toHexString(_eoa));
-    }
-
     function _add_placeholder_strategy() internal returns (uint256) {
-        string memory eoa = "&eoa";
-        return __add_placeholder_strategy_template(eoa);
-    }
-
-    function __add_placeholder_strategy_template(string memory _eoa) internal returns (uint256) {
         StrategyBuilder strategy = new StrategyBuilder("dummyStrategy", true);
         strategy.addSubMapping("&token");
         strategy.addSubMapping("&amount");
 
         string[] memory pullTokenParams = new string[](3);
         pullTokenParams[0] = "&token";
-        pullTokenParams[1] = _eoa;
+        pullTokenParams[1] = "&eoa";
         pullTokenParams[2] = "&amount";
         strategy.addAction("PullToken", pullTokenParams);
 
@@ -237,8 +211,7 @@ contract TestCore_StrategyExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest 
         internal
         returns (uint256 subId, StrategyModel.StrategySub memory sub)
     {
-        uint256 strategyId =
-            isDSAProxy ? _add_placeholder_strategy(sender) : _add_placeholder_strategy();
+        uint256 strategyId = _add_placeholder_strategy();
 
         bytes[] memory _triggerData = new bytes[](1);
         _triggerData[0] =

@@ -26,7 +26,6 @@ pragma solidity =0.8.24;
  * 2) Execute a recipe as part of a defi saver strategy system
  *
  *                             check:
- *                             check:
  *                             - bot is approved                           check:                 ┌───────────────────────┐
  *                             - sub data hash                             msg.sender =           │  SafeModuleAuth       │
  *                             - sub is enabled                            strategyExecutor       │ - call tx on safe     │
@@ -35,11 +34,9 @@ pragma solidity =0.8.24;
  *  └─────┘  pass params:      └──────────────────┘                        └────────────┘         │  ProxyAuth            │    │
  *          - subId                                                      user gives permission    │ - call execute on     │    │
  *          - strategyIndex                                              to Auth contract to      │   DSProxy             │    │
- *          - triggerCallData[]                                          execute tx through       ├───────────────────────┤    │
- *          - actionsCallData[]                                          smart wallet             │  DSAAuth              │    │
- *          - SubscriptionData                                                                    │ - call execute on     │    │
- *                                                                                                │   DSA proxy           │    │
- *                                                                                                └───────────────────────┘    │
+ *          - triggerCallData[]                                          execute tx through       └───────────────────────┘    │
+ *          - actionsCallData[]                                          smart wallet                                          │
+ *          - SubscriptionData                                                                                                 │
  *                                                                                                                             │
  *                                                                                                                             |
  *                                                                                                ┌────────────────────────┐   │

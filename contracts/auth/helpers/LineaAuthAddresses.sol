@@ -8,5 +8,4 @@ contract LineaAuthAddresses {
     address internal constant ADMIN_ADDR = 0x6271D249271A9bc9E0285D9865c74a812cEF57b0; // USED IN ADMIN VAULT CONSTRUCTOR
     address internal constant PROXY_AUTH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // Not needed now, waiting for automation
     address internal constant MODULE_AUTH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // Not needed now, waiting for automation
-    address internal constant DSA_AUTH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 }

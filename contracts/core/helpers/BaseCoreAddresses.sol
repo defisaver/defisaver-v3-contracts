@@ -8,7 +8,6 @@ contract BaseCoreAddresses {
 
     address internal constant PROXY_AUTH_ADDR = 0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc;
     address internal constant MODULE_AUTH_ADDR = 0xA9BFa0bFCffBb6d375CE61474BF184E879F4D533;
-    address internal constant DSA_AUTH_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address internal constant SUB_STORAGE_ADDR = 0x44e98bB58d725F2eF93a195F518b335dCB784c78;
     address internal constant BUNDLE_STORAGE_ADDR = 0x6AB90ff536f0E2a880DbCdef1bB665C2acC0eDdC;

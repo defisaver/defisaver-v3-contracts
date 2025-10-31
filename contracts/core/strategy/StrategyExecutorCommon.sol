@@ -44,11 +44,7 @@ abstract contract StrategyExecutorCommon is StrategyModel, AdminAuth, CoreHelper
         StrategySub memory _sub,
         address _userWallet
     ) internal {
-        WalletType walletType = _getWalletType(_userWallet);
-
-        address authAddr = MODULE_AUTH_ADDR;
-        if (walletType == WalletType.DSPROXY) authAddr = PROXY_AUTH_ADDR;
-        if (walletType == WalletType.DSAPROXY) authAddr = DSA_AUTH_ADDR;
+        address authAddr = _isDSProxy(_userWallet) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
 
         IAuth(authAddr).callExecute{ value: msg.value }(
             _userWallet,

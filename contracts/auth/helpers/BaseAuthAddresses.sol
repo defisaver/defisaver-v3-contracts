@@ -8,5 +8,4 @@ contract BaseAuthAddresses {
     address internal constant ADMIN_ADDR = 0xF8EC1967A719027A95883a89579e7A77699899e4; // USED IN ADMIN VAULT CONSTRUCTOR
     address internal constant PROXY_AUTH_ADDRESS = 0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc;
     address internal constant MODULE_AUTH_ADDRESS = 0xA9BFa0bFCffBb6d375CE61474BF184E879F4D533;
-    address internal constant DSA_AUTH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 }

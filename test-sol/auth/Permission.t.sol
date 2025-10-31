@@ -52,9 +52,9 @@ contract TestCore_Permission is AuthHelper, BaseTest {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function test_giveAndRemove_dsProxy_authContractPermission() public {
-        _givePermission(WalletType.DSPROXY, true, DSA_AUTH_ADDRESS);
+        _givePermission(WalletType.DSPROXY, true, PROXY_AUTH_ADDRESS);
         _verifyDSProxyPermission(PROXY_AUTH_ADDRESS, true);
-        _removePermission(WalletType.DSPROXY, true, DSA_AUTH_ADDRESS);
+        _removePermission(WalletType.DSPROXY, true, PROXY_AUTH_ADDRESS);
         _verifyDSProxyPermission(PROXY_AUTH_ADDRESS, false);
     }
 

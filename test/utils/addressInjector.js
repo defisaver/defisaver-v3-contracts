@@ -15,13 +15,12 @@ class CoreAddressesInjector {
         this.encoding = 'utf8';
     }
 
-    async inject(proxyAuthAddr, safeModuleAuthAddr, dsaAuthAddr) {
+    async inject(proxyAuthAddr, safeModuleAuthAddr) {
         try {
             this.contentBeforeInjection = fs.readFileSync(this.contractFilePath, this.encoding);
             const newContent = this.contentBeforeInjection
                 .replace(/(PROXY_AUTH_ADDR\s*=\s*)0x[a-fA-F0-9]{40}/, `$1${proxyAuthAddr}`)
-                .replace(/(MODULE_AUTH_ADDR\s*=\s*)0x[a-fA-F0-9]{40}/, `$1${safeModuleAuthAddr}`)
-                .replace(/(DSA_AUTH_ADDR\s*=\s*)0x[a-fA-F0-9]{40}/, `$1${dsaAuthAddr}`);
+                .replace(/(MODULE_AUTH_ADDR\s*=\s*)0x[a-fA-F0-9]{40}/, `$1${safeModuleAuthAddr}`);
             fs.writeFileSync(this.contractFilePath, newContent);
             await execAsync('npx hardhat compile');
         } catch (err) {
