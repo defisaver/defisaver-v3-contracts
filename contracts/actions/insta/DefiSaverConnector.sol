@@ -10,7 +10,6 @@ import { IConnectorInterface } from "../../interfaces/protocols/insta/IConnector
 /// @notice Forward all calls to the RecipeExecutor via delegatecall in context of DSA accounts
 contract DefiSaverConnector is AdminAuth, InstaConnectorHelper, IConnectorInterface {
     /// @notice Forward all calls to the RecipeExecutor
-    // solhint-disable no-complex-fallback
     fallback() external payable {
         address executor = getDfsRecipeExecutor();
         assembly {
@@ -34,8 +33,6 @@ contract DefiSaverConnector is AdminAuth, InstaConnectorHelper, IConnectorInterf
     }
 
     /// @notice Revert on plain ether transfer
-    // solhint-disable reason-string
-    // solhint-disable gas-custom-errors
     receive() external payable {
         revert();
     }

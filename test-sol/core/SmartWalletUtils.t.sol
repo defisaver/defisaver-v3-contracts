@@ -3,7 +3,6 @@
 pragma solidity =0.8.24;
 
 import { MockSmartWalletUtils } from "../../contracts/mocks/MockSmartWalletUtils.sol";
-import { IInstaAccount } from "../../contracts/interfaces/protocols/insta/IInstaAccount.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { WalletType } from "../../contracts/utils/DFSTypes.sol";

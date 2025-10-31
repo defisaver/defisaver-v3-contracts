@@ -4,7 +4,6 @@ pragma solidity =0.8.24;
 
 import { IDSProxyFactory } from "../interfaces/DS/IDSProxyFactory.sol";
 import { IInstaList } from "../interfaces/protocols/insta/IInstaList.sol";
-import { IInstaAccount } from "../interfaces/protocols/insta/IInstaAccount.sol";
 import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
 import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 import { DSProxyFactoryHelper } from "../utils/addresses/dsProxyFactory/DSProxyFactoryHelper.sol";
@@ -46,7 +45,7 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
     /// 2. If function is used as part of a strategy or recipe execution it returns the wallet itself
     ///    because we can't reliably determine whether the first owner is an actual EOA or not
     /// @param _wallet Address of the smart wallet
-    /// @param _usedForExecution Whether the function is used as part of a strategy/recipe execution
+    /// @param _usedForExecution Whether the function is used as part of a strategy/recipe execution. Only used on DSA Proxy Accounts.
     /// @return Address of the owner or wallet
     function _fetchOwnerOrWallet(address _wallet, bool _usedForExecution)
         internal
@@ -56,7 +55,7 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
         WalletType walletType = _getWalletType(_wallet);
 
         if (walletType == WalletType.DSPROXY) {
-            return IDSProxy(payable(_wallet)).owner();
+            return IDSProxy(_wallet).owner();
         }
 
         if (walletType == WalletType.DSAPROXY) {
