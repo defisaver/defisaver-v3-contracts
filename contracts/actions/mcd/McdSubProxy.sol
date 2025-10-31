@@ -59,7 +59,7 @@ contract McdSubProxy is
         public
     {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _givePermissionToAuthContract(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
 
         StrategySub memory repaySub = formatRepaySub(_subData);
 
@@ -77,7 +77,7 @@ contract McdSubProxy is
     /// @dev If we don't have a boost subId send as 0
     function updateSubData(uint32 _subId1, uint32 _subId2, McdSubData calldata _subData) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _givePermissionToAuthContract(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
         // update repay as we must have a subId, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(_subData);
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_subId1, repaySub);
@@ -105,7 +105,7 @@ contract McdSubProxy is
     /// @notice Activates Repay sub and if exists a Boost sub
     function activateSub(uint32 _subId1, uint32 _subId2) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _givePermissionToAuthContract(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
 
         if (_subId2 != 0) {

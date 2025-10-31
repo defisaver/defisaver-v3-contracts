@@ -50,7 +50,7 @@ contract CreateSub is ActionBase, Permission {
     /// @notice Gives user's wallet permission if needed and registers a new sub
     function createSub(Params memory _inputData) internal returns (uint256 subId) {
         /// @dev Give permission to proxy or safe to our auth contract to be able to execute the strategy
-        _givePermissionToAuthContract(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
 
         subId = SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(_inputData.sub);
     }

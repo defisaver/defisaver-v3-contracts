@@ -11,13 +11,17 @@ import { WalletType } from "../utils/DFSTypes.sol";
 /// @dev Called from the context of the wallet
 contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermission {
     /// @notice Gives permission to Auth contract used by dfs automation
-    function _givePermissionToAuthContract(WalletType _walletType) internal {
-        _givePermissionTo(_walletType, _getAuthContractAddress(_walletType));
+    function _givePermissionToAuthContract(bool _isDSProxyWallet) internal {
+        _isDSProxyWallet
+            ? _giveProxyPermission(PROXY_AUTH_ADDRESS)
+            : _enableModule(MODULE_AUTH_ADDRESS);
     }
 
     /// @notice Removes permission for Auth contract used by dfs automation
-    function _removePermissionFromAuthContract(WalletType _walletType) internal {
-        _removePermissionFrom(_walletType, _getAuthContractAddress(_walletType));
+    function _removePermissionFromAuthContract(bool _isDSProxyWallet) internal {
+        _isDSProxyWallet
+            ? _removeProxyPermission(PROXY_AUTH_ADDRESS)
+            : _disableModule(MODULE_AUTH_ADDRESS);
     }
 
     /// @notice Gives permission to an arbitrary contract
@@ -46,13 +50,5 @@ contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermissi
         } else {
             _disableModule(_from);
         }
-    }
-
-    /// @notice Returns the Auth contract address for a given wallet type
-    /// @dev Defaults to Safe Smart Wallet
-    function _getAuthContractAddress(WalletType _walletType) internal pure returns (address) {
-        if (_walletType == WalletType.DSPROXY) return PROXY_AUTH_ADDRESS;
-        if (_walletType == WalletType.DSAPROXY) return DSA_AUTH_ADDRESS;
-        return MODULE_AUTH_ADDRESS;
     }
 }

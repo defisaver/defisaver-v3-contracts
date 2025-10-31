@@ -38,8 +38,8 @@ contract HandleAuth is ActionBase, Permission {
 
     function handleAuth(Params memory _inputData) internal {
         _inputData.enableAuth
-            ? _givePermissionToAuthContract(_getWalletType(address(this)))
-            : _removePermissionFromAuthContract(_getWalletType(address(this)));
+            ? _givePermissionToAuthContract(_isDSProxy(address(this)))
+            : _removePermissionFromAuthContract(_isDSProxy(address(this)));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

@@ -43,7 +43,7 @@ contract LimitOrderSubProxy is
 
     function subToLimitOrder(LimitOrderSub memory _subData) external {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _givePermissionToAuthContract(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
 
         _validateData(_subData);
 

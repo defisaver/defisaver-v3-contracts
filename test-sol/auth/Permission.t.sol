@@ -81,13 +81,6 @@ contract TestCore_Permission is AuthHelper, BaseTest {
         _verifySafePermission(addr, false);
     }
 
-    function test_giveAndRemove_dsaProxy_authContractPermission() public {
-        _giveDsaProxyPermission(DSA_AUTH_ADDRESS);
-        _verifyDsaProxyPermission(DSA_AUTH_ADDRESS, true);
-        _removeDsaProxyPermission(DSA_AUTH_ADDRESS);
-        _verifyDsaProxyPermission(DSA_AUTH_ADDRESS, false);
-    }
-
     function test_giveAndRemove_dsaProxy_arbitraryPermission() public {
         address addr = address(0x111);
         _giveDsaProxyPermission(addr);
@@ -100,8 +93,9 @@ contract TestCore_Permission is AuthHelper, BaseTest {
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
     function _givePermission(WalletType _walletType, bool _isAuthPermission, address _to) internal {
+        bool isDSProxyWallet = _walletType == WalletType.DSPROXY;
         bytes memory givePermCalldata = _isAuthPermission
-            ? abi.encodeCall(MockPermission.givePermissionToAuthContract, (_walletType))
+            ? abi.encodeCall(MockPermission.givePermissionToAuthContract, (isDSProxyWallet))
             : abi.encodeCall(MockPermission.givePermissionTo, (_walletType, _to));
 
         _getWalletByType(_walletType).execute(address(cut), givePermCalldata, 0);
@@ -110,8 +104,9 @@ contract TestCore_Permission is AuthHelper, BaseTest {
     function _removePermission(WalletType _walletType, bool _isAuthPermission, address _from)
         internal
     {
+        bool isDSProxyWallet = _walletType == WalletType.DSPROXY;
         bytes memory removePermCalldata = _isAuthPermission
-            ? abi.encodeCall(MockPermission.removePermissionFromAuthContract, (_walletType))
+            ? abi.encodeCall(MockPermission.removePermissionFromAuthContract, (isDSProxyWallet))
             : abi.encodeCall(MockPermission.removePermissionFrom, (_walletType, _from));
 
         _getWalletByType(_walletType).execute(address(cut), removePermCalldata, 0);
