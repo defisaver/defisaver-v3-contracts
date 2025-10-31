@@ -814,20 +814,16 @@ const recipeExecutorTest = async () => {
         let safe;
         let dsaProxy;
         let useDsProxy;
-        let useDsaProxy;
 
         const setupWallet = async (w) => {
             if (isWalletNameDsProxy(w)) {
                 useDsProxy = true;
-                useDsaProxy = false;
                 wallet = dsProxy;
             } else if (isWalletNameDsaProxy(w)) {
                 useDsProxy = false;
-                useDsaProxy = true;
                 wallet = dsaProxy;
             } else {
                 useDsProxy = false;
-                useDsaProxy = false;
                 wallet = safe;
             }
         };
@@ -839,7 +835,6 @@ const recipeExecutorTest = async () => {
             const functionData = authRecipe.encodeForDsProxyCall()[1];
             await executeAction('RecipeExecutor', functionData, dsProxy);
             await executeAction('RecipeExecutor', functionData, safe);
-            await executeAction('RecipeExecutor', functionData, dsaProxy);
         };
 
         before(async () => {
@@ -919,7 +914,7 @@ const recipeExecutorTest = async () => {
                     }
                     expect(true).to.be.equal(false);
                 } catch (err) {
-                    if (useDsProxy || useDsaProxy) {
+                    if (useDsProxy) {
                         expect(err.toString()).to.have.string('reverted without a reason string');
                     } else {
                         expectError(err.toString(), 'SafeExecutionError()');
