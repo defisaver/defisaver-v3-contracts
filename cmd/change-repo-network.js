@@ -98,7 +98,7 @@ async function changeNetworkNameForAddresses(oldNetwork, newNetwork) {
     await Promise.all(
         files.map(async (file) => {
             const helperRegex = 'Helper(.*)sol';
-            const utilAddressesRegex = 'UtilAddresses(.*)sol';
+            const utilAddressesRegex = '/UtilAddresses\\.sol$';
             if (file.toString().match(helperRegex) || file.toString().match(utilAddressesRegex)) {
                 const fileDir = path.dirname(file);
                 const filesInSameDir = getAllFiles(fileDir);

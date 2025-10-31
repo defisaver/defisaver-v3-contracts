@@ -56,5 +56,5 @@ interface IKyberNetworkProxy {
         uint256 srcAmount,
         IERC20 dest,
         uint256 minConversionRate
-    ) external payable returns (uint256);
+    ) external returns (uint256);
 }
