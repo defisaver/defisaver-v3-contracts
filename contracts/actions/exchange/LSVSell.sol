@@ -2,18 +2,18 @@
 
 pragma solidity =0.8.24;
 
-import { IWStEth } from "../../interfaces/lido/IWStEth.sol";
-import { IWeEth } from "../../interfaces/etherFi/IWeEth.sol";
-import { ILiquidityPool } from "../../interfaces/etherFi/ILiquidityPool.sol";
+import { IWStEth } from "../../interfaces/protocols/lido/IWStEth.sol";
+import { IWeEth } from "../../interfaces/protocols/etherFi/IWeEth.sol";
+import { ILiquidityPool } from "../../interfaces/protocols/etherFi/ILiquidityPool.sol";
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { UtilHelper } from "../../utils/helpers/UtilHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { UtilAddresses } from "../../utils/addresses/UtilAddresses.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title A exchange sell action through the LSV exchange with no fee (used only for ETH Saver)
 /// @dev weth and steth will be transformed into wsteth directly if the rate is better than minPrice
 /// @dev The only action which has wrap/unwrap WETH builtin so we don't have to bundle into a recipe
-contract LSVSell is ActionBase, UtilHelper, DFSExchangeCore {
+contract LSVSell is ActionBase, UtilAddresses, DFSExchangeCore {
     using TokenUtils for address;
 
     struct Params {
@@ -33,15 +33,18 @@ contract LSVSell is ActionBase, UtilHelper, DFSExchangeCore {
 
         params.exchangeData.srcAddr =
             _parseParamAddr(params.exchangeData.srcAddr, _paramMapping[0], _subData, _returnValues);
-        params.exchangeData.destAddr =
-            _parseParamAddr(params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues);
+        params.exchangeData.destAddr = _parseParamAddr(
+            params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues
+        );
 
-        params.exchangeData.srcAmount =
-            _parseParamUint(params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues);
+        params.exchangeData.srcAmount = _parseParamUint(
+            params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues
+        );
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
-        (uint256 exchangedAmount, bytes memory logData) = _lsvSell(params.exchangeData, params.from, params.to);
+        (uint256 exchangedAmount, bytes memory logData) =
+            _lsvSell(params.exchangeData, params.from, params.to);
         emit ActionEvent("LSVSell", logData);
         return bytes32(exchangedAmount);
     }
@@ -108,13 +111,15 @@ contract LSVSell is ActionBase, UtilHelper, DFSExchangeCore {
         uint256 exchangedAmount;
 
         if (_exchangeData.destAddr == WSTETH_ADDR) {
-            (shouldSell, exchangedAmount) =
-                _stakeWithLidoIfBetterRate(_exchangeData.srcAddr, _exchangeData.srcAmount, _exchangeData.minPrice);
+            (shouldSell, exchangedAmount) = _stakeWithLidoIfBetterRate(
+                _exchangeData.srcAddr, _exchangeData.srcAmount, _exchangeData.minPrice
+            );
         }
 
         if (_exchangeData.destAddr == WEETH_ADDR) {
-            (shouldSell, exchangedAmount) =
-                _stakeWithEtherFiIfBetterRate(_exchangeData.srcAddr, _exchangeData.srcAmount, _exchangeData.minPrice);
+            (shouldSell, exchangedAmount) = _stakeWithEtherFiIfBetterRate(
+                _exchangeData.srcAddr, _exchangeData.srcAmount, _exchangeData.minPrice
+            );
         }
 
         if (shouldSell) {
@@ -166,7 +171,10 @@ contract LSVSell is ActionBase, UtilHelper, DFSExchangeCore {
         return (false, exchangedAmount);
     }
 
-    function _lidoStakeAndWrapWETH(uint256 wethAmount) internal returns (uint256 wStEthReceivedAmount) {
+    function _lidoStakeAndWrapWETH(uint256 wethAmount)
+        internal
+        returns (uint256 wStEthReceivedAmount)
+    {
         TokenUtils.withdrawWeth(wethAmount);
 
         uint256 wStEthBalanceBefore = WSTETH_ADDR.getBalance(address(this));

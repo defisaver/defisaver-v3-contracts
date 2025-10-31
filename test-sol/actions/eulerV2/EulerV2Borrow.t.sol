@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { IEVault } from "../../../contracts/interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../../contracts/interfaces/eulerV2/IEVC.sol";
+import { IEVault } from "../../../contracts/interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../../contracts/interfaces/protocols/eulerV2/IEVC.sol";
 import { EulerV2Supply } from "../../../contracts/actions/eulerV2/EulerV2Supply.sol";
 import { EulerV2Borrow } from "../../../contracts/actions/eulerV2/EulerV2Borrow.sol";
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
@@ -154,9 +154,12 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         vm.revertToState(snapshotId);
     }
 
-    function _baseTest(address _account, uint256 _supplyAmountInUsd, uint256 _borrowAmountInUsd, bool _isDirect)
-        internal
-    {
+    function _baseTest(
+        address _account,
+        uint256 _supplyAmountInUsd,
+        uint256 _borrowAmountInUsd,
+        bool _isDirect
+    ) internal {
         for (uint256 i = 0; i < testPairs.length; ++i) {
             uint256 snapshotId = vm.snapshotState();
 
@@ -168,7 +171,10 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
 
             _borrowFromVault(
                 TestConfig({
-                    vault: borrowVault, account: _account, borrowAmountInUsd: _borrowAmountInUsd, isDirect: _isDirect
+                    vault: borrowVault,
+                    account: _account,
+                    borrowAmountInUsd: _borrowAmountInUsd,
+                    isDirect: _isDirect
                 })
             );
 
@@ -181,7 +187,8 @@ contract TestEulerV2Borrow is EulerV2TestHelper {
         uint256 borrowAmount = amountInUSDPrice(assetToken, _config.borrowAmountInUsd);
 
         bytes memory callData = executeActionCalldata(
-            eulerV2BorrowEncode(_config.vault, _config.account, sender, borrowAmount), _config.isDirect
+            eulerV2BorrowEncode(_config.vault, _config.account, sender, borrowAmount),
+            _config.isDirect
         );
 
         address account = _config.account == address(0) ? walletAddr : _config.account;

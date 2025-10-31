@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { AaveHelper } from "./helpers/AaveHelper.sol";
-import { FLFeeFaucet } from "../../utils/FLFeeFaucet.sol";
-import { ILendingPoolV2 } from "../../interfaces/aaveV2/ILendingPoolV2.sol";
+import { FLFeeFaucet } from "../../utils/fee/FLFeeFaucet.sol";
+import { ILendingPoolV2 } from "../../interfaces/protocols/aaveV2/ILendingPoolV2.sol";
 
 /// @title Withdraw a token from an Aave market
 contract AaveWithdraw is ActionBase, AaveHelper {
@@ -33,7 +33,8 @@ contract AaveWithdraw is ActionBase, AaveHelper {
         Params memory params = parseInputs(_callData);
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
+        params.tokenAddr =
+            _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[3], _subData, _returnValues);
 
@@ -46,7 +47,8 @@ contract AaveWithdraw is ActionBase, AaveHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _withdraw(params.market, params.tokenAddr, params.amount, params.to);
+        (, bytes memory logData) =
+            _withdraw(params.market, params.tokenAddr, params.amount, params.to);
         logger.logActionDirectEvent("AaveWithdraw", logData);
     }
 

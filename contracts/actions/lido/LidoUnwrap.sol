@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { DSMath } from "../../DS/DSMath.sol";
-import { IWStEth } from "../../interfaces/lido/IWStEth.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { DSMath } from "../../_vendor/DS/DSMath.sol";
+import { IWStEth } from "../../interfaces/protocols/lido/IWStEth.sol";
 import { LidoHelper } from "./helpers/LidoHelper.sol";
 
 /// @title Unwrap WStEth and receive StEth
@@ -30,7 +30,8 @@ contract LidoUnwrap is ActionBase, DSMath, LidoHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 

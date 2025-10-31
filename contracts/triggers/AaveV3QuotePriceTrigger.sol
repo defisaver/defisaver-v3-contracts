@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { IAaveV3Oracle } from "../interfaces/aaveV3/IAaveV3Oracle.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { IAaveV3Oracle } from "../interfaces/protocols/aaveV3/IAaveV3Oracle.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { DSMath } from "../DS/DSMath.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 import { AaveV3RatioHelper } from "../actions/aaveV3/helpers/AaveV3RatioHelper.sol";
 
 /// @title Trigger contract that verifies if current token price ratio is over/under the price ratio specified during subscription
@@ -46,7 +46,11 @@ contract AaveV3QuotePriceTrigger is ITrigger, AdminAuth, DSMath, AaveV3RatioHelp
     }
 
     /// @dev helper function that returns latest base token price in quote tokens
-    function getPrice(address _baseTokenAddr, address _quoteTokenAddr) public view returns (uint256 price) {
+    function getPrice(address _baseTokenAddr, address _quoteTokenAddr)
+        public
+        view
+        returns (uint256 price)
+    {
         address[] memory assets = new address[](2);
         assets[0] = _baseTokenAddr;
         assets[1] = _quoteTokenAddr;

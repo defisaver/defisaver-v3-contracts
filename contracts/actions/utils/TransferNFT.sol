@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { IERC721 } from "../../interfaces/IERC721.sol";
+import { IERC721 } from "../../interfaces/token/IERC721.sol";
 import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to transfer a NFT token to the specified address.
@@ -26,10 +26,12 @@ contract TransferNFT is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.nftAddr = _parseParamAddr(inputData.nftAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.nftAddr =
+            _parseParamAddr(inputData.nftAddr, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
-        inputData.nftId = _parseParamUint(inputData.nftId, _paramMapping[3], _subData, _returnValues);
+        inputData.nftId =
+            _parseParamUint(inputData.nftId, _paramMapping[3], _subData, _returnValues);
 
         _transferNFT(inputData.nftAddr, inputData.from, inputData.to, inputData.nftId);
 

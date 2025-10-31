@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { SparkRatioHelper } from "../actions/spark/helpers/SparkRatioHelper.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
+import { TransientStorage } from "../utils/transient/TransientStorage.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title Trigger that triggers when the ratio of a user's position in a Spark market is over or under a certain ratio.
@@ -28,7 +28,7 @@ contract SparkRatioTrigger is ITrigger, AdminAuth, SparkRatioHelper, TriggerHelp
         uint8 state;
     }
 
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         uint256 currRatio = getSafetyRatio(triggerSubData.market, triggerSubData.user);

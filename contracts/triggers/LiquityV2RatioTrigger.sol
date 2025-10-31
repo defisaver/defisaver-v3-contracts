@@ -3,10 +3,10 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { LiquityV2RatioHelper } from "../actions/liquityV2/helpers/LiquityV2RatioHelper.sol";
-import { TransientStorage } from "../utils/TransientStorage.sol";
+import { TransientStorage } from "../utils/transient/TransientStorage.sol";
 
 /// @title Trigger contract that verifies if current LiquityV2 position ratio went over/under the subbed ratio
 contract LiquityV2RatioTrigger is ITrigger, AdminAuth, LiquityV2RatioHelper, TriggerHelper {
@@ -29,7 +29,7 @@ contract LiquityV2RatioTrigger is ITrigger, AdminAuth, LiquityV2RatioHelper, Tri
     }
     /// @dev checks current ratio of a LiquityV2 trove and triggers if it's in a correct state
 
-    function isTriggered(bytes memory, bytes memory _subData) public override returns (bool) {
+    function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
         (uint256 currRatio, bool isActive) = getRatio(triggerSubData.market, triggerSubData.troveId);

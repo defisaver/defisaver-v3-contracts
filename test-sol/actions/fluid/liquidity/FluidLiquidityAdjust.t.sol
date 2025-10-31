@@ -2,11 +2,17 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT1.sol";
-import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import {
+    IFluidVaultT1
+} from "../../../../contracts/interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
+import {
+    IFluidVaultResolver
+} from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidVaultT1Open } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Open.sol";
-import { FluidVaultT1Adjust } from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Adjust.sol";
-import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
+import {
+    FluidVaultT1Adjust
+} from "../../../../contracts/actions/fluid/vaultT1/FluidVaultT1Adjust.sol";
+import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 
@@ -433,7 +439,11 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
             TempLocalVars memory vars;
 
             vars.nftId = executeFluidVaultT1Open(
-                vaults[i], _config.openSupplyAmountUsd, _config.openBorrowAmountUsd, wallet, address(openContract)
+                vaults[i],
+                _config.openSupplyAmountUsd,
+                _config.openBorrowAmountUsd,
+                wallet,
+                address(openContract)
             );
 
             vars.isNativeSupply = constants.supplyToken == TokenUtils.ETH_ADDR;
@@ -441,8 +451,12 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
             vars.userPositionBefore = fetchPositionByNftId(vars.nftId);
 
             // .--------- SUPPLY ----------.
-            if (_config.supplyActionType == FluidVaultT1Adjust.CollActionType.SUPPLY && _config.supplyAmountUsd > 0) {
-                address supplyToken = vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken;
+            if (
+                _config.supplyActionType == FluidVaultT1Adjust.CollActionType.SUPPLY
+                    && _config.supplyAmountUsd > 0
+            ) {
+                address supplyToken =
+                    vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken;
                 vars.supplyTokenAmount = amountInUSDPrice(supplyToken, _config.supplyAmountUsd);
                 give(supplyToken, sender, vars.supplyTokenAmount);
                 approveAsSender(sender, supplyToken, walletAddr, 0); // To handle Tether
@@ -450,14 +464,22 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
             }
 
             // .--------- WITHDRAW ----------.
-            if (_config.supplyActionType == FluidVaultT1Adjust.CollActionType.WITHDRAW && _config.supplyAmountUsd > 0) {
-                address supplyToken = vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken;
+            if (
+                _config.supplyActionType == FluidVaultT1Adjust.CollActionType.WITHDRAW
+                    && _config.supplyAmountUsd > 0
+            ) {
+                address supplyToken =
+                    vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken;
                 vars.supplyTokenAmount = amountInUSDPrice(supplyToken, _config.supplyAmountUsd);
             }
 
             // .--------- PAYBACK ----------.
-            if (_config.borrowActionType == FluidVaultT1Adjust.DebtActionType.PAYBACK && _config.borrowAmountUsd > 0) {
-                address borrowToken = vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken;
+            if (
+                _config.borrowActionType == FluidVaultT1Adjust.DebtActionType.PAYBACK
+                    && _config.borrowAmountUsd > 0
+            ) {
+                address borrowToken =
+                    vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken;
 
                 vars.borrowTokenAmount = _config.isMaxBorrowAmount
                     ? vars.userPositionBefore.borrow * 1001 / 1000  // add 0.1% buffer
@@ -469,21 +491,29 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
             }
 
             // .--------- BORROW ----------.
-            if (_config.borrowActionType == FluidVaultT1Adjust.DebtActionType.BORROW && _config.borrowAmountUsd > 0) {
-                address borrowToken = vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken;
+            if (
+                _config.borrowActionType == FluidVaultT1Adjust.DebtActionType.BORROW
+                    && _config.borrowAmountUsd > 0
+            ) {
+                address borrowToken =
+                    vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken;
                 vars.borrowTokenAmount = amountInUSDPrice(borrowToken, _config.borrowAmountUsd);
             }
 
             // .--------- TAKE SNAPSHOTS ----------.
-            vars.senderSupplyTokenBalanceBefore =
-                balanceOf(vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, sender);
-            vars.senderBorrowTokenBalanceBefore =
-                balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, sender);
+            vars.senderSupplyTokenBalanceBefore = balanceOf(
+                vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, sender
+            );
+            vars.senderBorrowTokenBalanceBefore = balanceOf(
+                vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, sender
+            );
             vars.senderEthTokenBalanceBefore = address(sender).balance;
-            vars.walletSupplyTokenBalanceBefore =
-                balanceOf(vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, walletAddr);
-            vars.walletBorrowTokenBalanceBefore =
-                balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, walletAddr);
+            vars.walletSupplyTokenBalanceBefore = balanceOf(
+                vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, walletAddr
+            );
+            vars.walletBorrowTokenBalanceBefore = balanceOf(
+                vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, walletAddr
+            );
             vars.walletWethTokenBalanceBefore = balanceOf(TokenUtils.WETH_ADDR, walletAddr);
             vars.walletEthTokenBalanceBefore = address(walletAddr).balance;
 
@@ -506,15 +536,19 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
             wallet.execute(address(cut), executeActionCallData, 0);
 
             // .--------- TAKE SNAPSHOTS ----------.
-            vars.senderSupplyTokenBalanceAfter =
-                balanceOf(vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, sender);
-            vars.senderBorrowTokenBalanceAfter =
-                balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, sender);
+            vars.senderSupplyTokenBalanceAfter = balanceOf(
+                vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, sender
+            );
+            vars.senderBorrowTokenBalanceAfter = balanceOf(
+                vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, sender
+            );
             vars.senderEthTokenBalanceAfter = address(sender).balance;
-            vars.walletSupplyTokenBalanceAfter =
-                balanceOf(vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, walletAddr);
-            vars.walletBorrowTokenBalanceAfter =
-                balanceOf(vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, walletAddr);
+            vars.walletSupplyTokenBalanceAfter = balanceOf(
+                vars.isNativeSupply ? TokenUtils.WETH_ADDR : constants.supplyToken, walletAddr
+            );
+            vars.walletBorrowTokenBalanceAfter = balanceOf(
+                vars.isNativeBorrow ? TokenUtils.WETH_ADDR : constants.borrowToken, walletAddr
+            );
             vars.walletWethTokenBalanceAfter = balanceOf(TokenUtils.WETH_ADDR, walletAddr);
             vars.walletEthTokenBalanceAfter = address(walletAddr).balance;
             vars.userPositionAfter = fetchPositionByNftId(vars.nftId);
@@ -527,18 +561,25 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
             assertEq(vars.walletWethTokenBalanceAfter, vars.walletWethTokenBalanceBefore);
 
             // .--------- SUPPLY ----------.
-            if (_config.supplyActionType == FluidVaultT1Adjust.CollActionType.SUPPLY && _config.supplyAmountUsd > 0) {
+            if (
+                _config.supplyActionType == FluidVaultT1Adjust.CollActionType.SUPPLY
+                    && _config.supplyAmountUsd > 0
+            ) {
                 if (_config.isMaxSupplyAmount) {
                     assertEq(vars.senderSupplyTokenBalanceAfter, 0);
                 } else {
                     assertEq(
-                        vars.senderSupplyTokenBalanceAfter, vars.senderSupplyTokenBalanceBefore - vars.supplyTokenAmount
+                        vars.senderSupplyTokenBalanceAfter,
+                        vars.senderSupplyTokenBalanceBefore - vars.supplyTokenAmount
                     );
                 }
             }
 
             // .--------- WITHDRAW ----------.
-            if (_config.supplyActionType == FluidVaultT1Adjust.CollActionType.WITHDRAW && _config.supplyAmountUsd > 0) {
+            if (
+                _config.supplyActionType == FluidVaultT1Adjust.CollActionType.WITHDRAW
+                    && _config.supplyAmountUsd > 0
+            ) {
                 if (_config.isMaxSupplyAmount) {
                     assertEq(vars.userPositionAfter.supply, 0);
                     if (vars.isNativeSupply && !_config.sendWrappedEth) {
@@ -557,7 +598,8 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                 } else {
                     if (vars.isNativeSupply && !_config.sendWrappedEth) {
                         assertEq(
-                            vars.senderEthTokenBalanceAfter, vars.senderEthTokenBalanceBefore + vars.supplyTokenAmount
+                            vars.senderEthTokenBalanceAfter,
+                            vars.senderEthTokenBalanceBefore + vars.supplyTokenAmount
                         );
                     } else {
                         assertEq(
@@ -569,7 +611,10 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
             }
 
             // .--------- PAYBACK ----------.
-            if (_config.borrowActionType == FluidVaultT1Adjust.DebtActionType.PAYBACK && _config.borrowAmountUsd > 0) {
+            if (
+                _config.borrowActionType == FluidVaultT1Adjust.DebtActionType.PAYBACK
+                    && _config.borrowAmountUsd > 0
+            ) {
                 if (_config.isMaxBorrowAmount) {
                     assertEq(vars.userPositionAfter.borrow, 0);
                     if (!vars.isNativeBorrow) {
@@ -581,18 +626,26 @@ contract TestFluidLiquidityAdjust is FluidTestBase {
                     }
                 } else {
                     assertEq(
-                        vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore - vars.borrowTokenAmount
+                        vars.senderBorrowTokenBalanceAfter,
+                        vars.senderBorrowTokenBalanceBefore - vars.borrowTokenAmount
                     );
                 }
             }
 
             // .--------- BORROW ----------.
-            if (_config.borrowActionType == FluidVaultT1Adjust.DebtActionType.BORROW && _config.borrowAmountUsd > 0) {
+            if (
+                _config.borrowActionType == FluidVaultT1Adjust.DebtActionType.BORROW
+                    && _config.borrowAmountUsd > 0
+            ) {
                 if (vars.isNativeBorrow && !_config.sendWrappedEth) {
-                    assertEq(vars.senderEthTokenBalanceAfter, vars.senderEthTokenBalanceBefore + vars.borrowTokenAmount);
+                    assertEq(
+                        vars.senderEthTokenBalanceAfter,
+                        vars.senderEthTokenBalanceBefore + vars.borrowTokenAmount
+                    );
                 } else {
                     assertEq(
-                        vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore + vars.borrowTokenAmount
+                        vars.senderBorrowTokenBalanceAfter,
+                        vars.senderBorrowTokenBalanceBefore + vars.borrowTokenAmount
                     );
                 }
             }

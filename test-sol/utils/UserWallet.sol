@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterface.sol";
-import { DSProxy } from "../../contracts/DS/DSProxy.sol";
-import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
-import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { IDSProxyFactory } from "../../contracts/interfaces/DS/IDSProxyFactory.sol";
+import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
+import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
+import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
 abstract contract UserWallet {
-    DSProxy public proxy;
+    IDSProxy public proxy;
     address public proxyAddr;
 
     ISafe public safe;
@@ -20,7 +20,7 @@ abstract contract UserWallet {
     }
 
     function createDSProxy() internal {
-        proxy = DSProxyFactoryInterface(Addresses.DS_PROXY_FACTORY).build();
+        proxy = IDSProxyFactory(Addresses.DS_PROXY_FACTORY).build();
         proxyAddr = address(proxy);
     }
 
@@ -30,14 +30,27 @@ abstract contract UserWallet {
         owners[0] = address(this);
 
         bytes memory setupData = abi.encodeWithSelector(
-            ISafe.setup.selector, owners, 1, address(0), bytes(""), address(0), address(0), 0, payable(address(0))
+            ISafe.setup.selector,
+            owners,
+            1,
+            address(0),
+            bytes(""),
+            address(0),
+            address(0),
+            0,
+            payable(address(0))
         );
         safeAddr = ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY)
             .createProxyWithNonce(Addresses.SAFE_SINGLETON, setupData, saltNonce);
         safe = ISafe(safeAddr);
     }
 
-    function executeWithWallet(bool _isSafe, address _target, bytes memory _calldata, uint256 _value) internal {
+    function executeWithWallet(
+        bool _isSafe,
+        address _target,
+        bytes memory _calldata,
+        uint256 _value
+    ) internal {
         bytes memory signatures = bytes.concat(abi.encode(address(this), bytes32(0)), bytes1(0x01));
         if (_isSafe) {
             bool success = safe.execTransaction(

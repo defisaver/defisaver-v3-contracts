@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVault } from "../../../interfaces/fluid/vaults/IFluidVault.sol";
+import { IFluidVault } from "../../../interfaces/protocols/fluid/vaults/IFluidVault.sol";
 import { FluidHelper } from "../helpers/FluidHelper.sol";
 import { FluidDexModel } from "../helpers/FluidDexModel.sol";
 import { FluidLiquidityModel } from "../helpers/FluidLiquidityModel.sol";
@@ -12,7 +12,7 @@ import { FluidBorrowLiquidityLogic } from "../logic/liquidity/FluidBorrowLiquidi
 import { FluidBorrowDexLogic } from "../logic/dex/FluidBorrowDexLogic.sol";
 import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Open position on Fluid DEX vault (T2, T3, T4)
 contract FluidDexOpen is ActionBase, FluidHelper {
@@ -52,24 +52,34 @@ contract FluidDexOpen is ActionBase, FluidHelper {
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
 
         // SUPPLY DATA piping
-        params.supplyAmount = _parseParamUint(params.supplyAmount, _paramMapping[3], _subData, _returnValues);
-        params.supplyVariableData.collAmount0 =
-            _parseParamUint(params.supplyVariableData.collAmount0, _paramMapping[4], _subData, _returnValues);
-        params.supplyVariableData.collAmount1 =
-            _parseParamUint(params.supplyVariableData.collAmount1, _paramMapping[5], _subData, _returnValues);
-        params.supplyVariableData.minCollShares =
-            _parseParamUint(params.supplyVariableData.minCollShares, _paramMapping[6], _subData, _returnValues);
+        params.supplyAmount =
+            _parseParamUint(params.supplyAmount, _paramMapping[3], _subData, _returnValues);
+        params.supplyVariableData.collAmount0 = _parseParamUint(
+            params.supplyVariableData.collAmount0, _paramMapping[4], _subData, _returnValues
+        );
+        params.supplyVariableData.collAmount1 = _parseParamUint(
+            params.supplyVariableData.collAmount1, _paramMapping[5], _subData, _returnValues
+        );
+        params.supplyVariableData.minCollShares = _parseParamUint(
+            params.supplyVariableData.minCollShares, _paramMapping[6], _subData, _returnValues
+        );
 
         // BORROW DATA piping
-        params.borrowAmount = _parseParamUint(params.borrowAmount, _paramMapping[7], _subData, _returnValues);
-        params.borrowVariableData.debtAmount0 =
-            _parseParamUint(params.borrowVariableData.debtAmount0, _paramMapping[8], _subData, _returnValues);
-        params.borrowVariableData.debtAmount1 =
-            _parseParamUint(params.borrowVariableData.debtAmount1, _paramMapping[9], _subData, _returnValues);
-        params.borrowVariableData.maxDebtShares =
-            _parseParamUint(params.borrowVariableData.maxDebtShares, _paramMapping[10], _subData, _returnValues);
+        params.borrowAmount =
+            _parseParamUint(params.borrowAmount, _paramMapping[7], _subData, _returnValues);
+        params.borrowVariableData.debtAmount0 = _parseParamUint(
+            params.borrowVariableData.debtAmount0, _paramMapping[8], _subData, _returnValues
+        );
+        params.borrowVariableData.debtAmount1 = _parseParamUint(
+            params.borrowVariableData.debtAmount1, _paramMapping[9], _subData, _returnValues
+        );
+        params.borrowVariableData.maxDebtShares = _parseParamUint(
+            params.borrowVariableData.maxDebtShares, _paramMapping[10], _subData, _returnValues
+        );
         params.wrapBorrowedEth =
-            _parseParamUint(params.wrapBorrowedEth ? 1 : 0, _paramMapping[11], _subData, _returnValues) == 1;
+            _parseParamUint(
+                    params.wrapBorrowedEth ? 1 : 0, _paramMapping[11], _subData, _returnValues
+                ) == 1;
 
         (uint256 nftId, bytes memory logData) = _open(params);
         emit ActionEvent("FluidDexOpen", logData);
@@ -134,7 +144,11 @@ contract FluidDexOpen is ActionBase, FluidHelper {
             );
     }
 
-    function _borrow(Params memory _params, IFluidVault.ConstantViews memory _constants, uint256 _nftId) internal {
+    function _borrow(
+        Params memory _params,
+        IFluidVault.ConstantViews memory _constants,
+        uint256 _nftId
+    ) internal {
         if (_constants.vaultType.isT2Vault() && _params.borrowAmount > 0) {
             FluidBorrowLiquidityLogic.borrow(
                 FluidLiquidityModel.BorrowData({
@@ -147,7 +161,9 @@ contract FluidDexOpen is ActionBase, FluidHelper {
                     wrapBorrowedEth: _params.wrapBorrowedEth
                 })
             );
-        } else if (_params.borrowVariableData.debtAmount0 > 0 || _params.borrowVariableData.debtAmount1 > 0) {
+        } else if (
+            _params.borrowVariableData.debtAmount0 > 0 || _params.borrowVariableData.debtAmount1 > 0
+        ) {
             FluidBorrowDexLogic.borrowVariable(
                 FluidDexModel.BorrowDexData({
                     vault: _params.vault,

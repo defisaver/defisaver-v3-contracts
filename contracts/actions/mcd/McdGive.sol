@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IManager } from "../../interfaces/mcd/IManager.sol";
+import { IManager } from "../../interfaces/protocols/mcd/IManager.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
 
@@ -29,11 +29,15 @@ contract McdGive is ActionBase, McdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
-        inputData.newOwner = _parseParamAddr(inputData.newOwner, _paramMapping[1], _subData, _returnValues);
-        inputData.mcdManager = _parseParamAddr(inputData.mcdManager, _paramMapping[2], _subData, _returnValues);
+        inputData.vaultId =
+            _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.newOwner =
+            _parseParamAddr(inputData.newOwner, _paramMapping[1], _subData, _returnValues);
+        inputData.mcdManager =
+            _parseParamAddr(inputData.mcdManager, _paramMapping[2], _subData, _returnValues);
 
-        (address newOwner, bytes memory logData) = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.mcdManager);
+        (address newOwner, bytes memory logData) =
+            _mcdGive(inputData.vaultId, inputData.newOwner, inputData.mcdManager);
         emit ActionEvent("McdGive", logData);
         return bytes32(bytes20(newOwner));
     }
@@ -41,7 +45,8 @@ contract McdGive is ActionBase, McdHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory inputData = parseInputs(_callData);
-        (, bytes memory logData) = _mcdGive(inputData.vaultId, inputData.newOwner, inputData.mcdManager);
+        (, bytes memory logData) =
+            _mcdGive(inputData.vaultId, inputData.newOwner, inputData.mcdManager);
         logger.logActionDirectEvent("McdGive", logData);
     }
 

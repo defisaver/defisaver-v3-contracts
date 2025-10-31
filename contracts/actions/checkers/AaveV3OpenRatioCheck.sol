@@ -33,8 +33,10 @@ contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 targetRatio = _parseParamUint(inputData.targetRatio, _paramMapping[0], _subData, _returnValues);
-        address market = _parseParamAddr(inputData.market, _paramMapping[1], _subData, _returnValues);
+        uint256 targetRatio =
+            _parseParamUint(inputData.targetRatio, _paramMapping[0], _subData, _returnValues);
+        address market =
+            _parseParamAddr(inputData.market, _paramMapping[1], _subData, _returnValues);
 
         address user;
         /// @dev User param is added later, hence the check
@@ -48,7 +50,9 @@ contract AaveV3OpenRatioCheck is ActionBase, AaveV3RatioHelper {
 
         /// @notice If `targetRatio` is 999% or more then skip `RATIO_OFFSET` check because it is very hard to be precise under 5%.
         if (targetRatio < RATIO_LIMIT) {
-            if (currRatio > (targetRatio + RATIO_OFFSET) || currRatio < (targetRatio - RATIO_OFFSET)) {
+            if (
+                currRatio > (targetRatio + RATIO_OFFSET) || currRatio < (targetRatio - RATIO_OFFSET)
+            ) {
                 revert BadAfterRatio(currRatio, targetRatio);
             }
         }

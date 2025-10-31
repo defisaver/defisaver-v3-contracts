@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { LlamaLendHelper } from "./helpers/LlamaLendHelper.sol";
-import { ILlamaLendController } from "../../interfaces/llamalend/ILlamaLendController.sol";
+import {
+    ILlamaLendController
+} from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 
 /// @title Action that supplies collateral to a llamalend position
 /// @dev collateralAmount must be non-zero, can be maxUint
@@ -33,10 +35,13 @@ contract LlamaLendSupply is ActionBase, LlamaLendHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
-        params.onBehalfOf = _parseParamAddr(params.onBehalfOf, _paramMapping[2], _subData, _returnValues);
-        params.collateralAmount = _parseParamUint(params.collateralAmount, _paramMapping[3], _subData, _returnValues);
+        params.onBehalfOf =
+            _parseParamAddr(params.onBehalfOf, _paramMapping[2], _subData, _returnValues);
+        params.collateralAmount =
+            _parseParamUint(params.collateralAmount, _paramMapping[3], _subData, _returnValues);
 
         (uint256 suppliedAmount, bytes memory logData) = _llamaLendSupply(params);
         emit ActionEvent("LlamaLendSupply", logData);
@@ -62,13 +67,15 @@ contract LlamaLendSupply is ActionBase, LlamaLendHelper {
         if (_params.collateralAmount == 0) revert ZeroAmountSupplied();
 
         address collateralAsset = ILlamaLendController(_params.controllerAddress).collateral_token();
-        _params.collateralAmount = collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);
+        _params.collateralAmount =
+            collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);
         collateralAsset.approveToken(_params.controllerAddress, _params.collateralAmount);
 
         if (_params.onBehalfOf == address(0)) {
             ILlamaLendController(_params.controllerAddress).add_collateral(_params.collateralAmount);
         } else {
-            ILlamaLendController(_params.controllerAddress).add_collateral(_params.collateralAmount, _params.onBehalfOf);
+            ILlamaLendController(_params.controllerAddress)
+                .add_collateral(_params.collateralAmount, _params.onBehalfOf);
         }
 
         return (_params.collateralAmount, abi.encode(_params));

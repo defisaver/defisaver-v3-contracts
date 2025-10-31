@@ -69,7 +69,8 @@ contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, BaseTest {
         StrategyModel.Recipe memory recipe =
             _create_placeholder_recipe("TestRecipeWithoutFlashloan", actionsCalldata, ids);
 
-        bytes memory _calldata = abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
+        bytes memory _calldata =
+            abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
         give(tokenAddr, sender, amount);
         approveAsSender(sender, tokenAddr, walletAddr, amount);
@@ -93,9 +94,11 @@ contract TestCore_RecipeExecutor is RegistryUtils, ActionsUtils, BaseTest {
         ids[0] = bytes4(keccak256("FLAction"));
         ids[1] = bytes4(keccak256("SendToken"));
 
-        StrategyModel.Recipe memory recipe = _create_placeholder_recipe("TestRecipeWithFlashloan", actionsCalldata, ids);
+        StrategyModel.Recipe memory recipe =
+            _create_placeholder_recipe("TestRecipeWithFlashloan", actionsCalldata, ids);
 
-        bytes memory _calldata = abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
+        bytes memory _calldata =
+            abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
         uint256 senderBalanceBefore = balanceOf(tokenAddr, sender);
         uint256 walletBalanceBefore = balanceOf(tokenAddr, walletAddr);

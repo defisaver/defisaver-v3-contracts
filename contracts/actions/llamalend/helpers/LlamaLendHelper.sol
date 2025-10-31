@@ -2,25 +2,32 @@
 pragma solidity =0.8.24;
 
 import { MainnetLlamaLendAddresses } from "./MainnetLlamaLendAddresses.sol";
-import { ILlamaLendController } from "../../../interfaces/llamalend/ILlamaLendController.sol";
-import { ILlamaLendFactory } from "../../../interfaces/llamalend/ILlamaLendFactory.sol";
-import { ILLAMMA } from "../../../interfaces/llamalend/ILLAMA.sol";
-import { IERC20 } from "../../../interfaces/IERC20.sol";
-import { DSMath } from "../../../DS/DSMath.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { IBytesTransientStorage } from "../../../interfaces/IBytesTransientStorage.sol";
+import {
+    ILlamaLendController
+} from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import { ILlamaLendFactory } from "../../../interfaces/protocols/llamalend/ILlamaLendFactory.sol";
+import { ILLAMMA } from "../../../interfaces/protocols/llamalend/ILLAMA.sol";
+import { IERC20 } from "../../../interfaces/token/IERC20.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
+import { IBytesTransientStorage } from "../../../interfaces/utils/IBytesTransientStorage.sol";
 
 contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
     using TokenUtils for address;
 
     error InvalidLlamaLendController();
 
-    IBytesTransientStorage constant transientStorage = IBytesTransientStorage(BYTES_TRANSIENT_STORAGE);
+    IBytesTransientStorage constant transientStorage =
+        IBytesTransientStorage(BYTES_TRANSIENT_STORAGE);
     ILlamaLendFactory constant factory = ILlamaLendFactory(LLAMALEND_FACTORY);
 
     bytes4 constant LLAMALEND_SWAPPER_ID = bytes4(keccak256("LlamaLendSwapper"));
 
-    function isControllerValid(address _controllerAddr, uint256 _controllerId) public view returns (bool) {
+    function isControllerValid(address _controllerAddr, uint256 _controllerId)
+        public
+        view
+        returns (bool)
+    {
         return (factory.controllers(_controllerId) == _controllerAddr);
     }
 
@@ -33,7 +40,8 @@ contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
         uint256 debt = ILlamaLendController(_controllerAddr).debt(_user);
         // no position can exist without debt
         if (debt == 0) return (0, false);
-        (uint256 debtAssetCollAmount, uint256 collAmount) = getCollAmountsFromAMM(_controllerAddr, _user);
+        (uint256 debtAssetCollAmount, uint256 collAmount) =
+            getCollAmountsFromAMM(_controllerAddr, _user);
         // if user has debt asset as coll he is currently underwater
         if (debtAssetCollAmount > 0) isInSoftLiquidation = true;
 
@@ -43,8 +51,9 @@ contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
         // calculate collAmount as WAD (18 decimals)
         address collToken = ILlamaLendController(_controllerAddr).collateral_token();
         uint256 assetDec = IERC20(collToken).decimals();
-        uint256 collAmountWAD =
-            assetDec > 18 ? (collAmount / 10 ** (assetDec - 18)) : (collAmount * 10 ** (18 - assetDec));
+        uint256 collAmountWAD = assetDec > 18
+            ? (collAmount / 10 ** (assetDec - 18))
+            : (collAmount * 10 ** (18 - assetDec));
 
         collRatio = wdiv(wmul(collAmountWAD, oraclePrice) + debtAssetCollAmount, debt);
     }
@@ -62,9 +71,14 @@ contract LlamaLendHelper is MainnetLlamaLendAddresses, DSMath {
         _debtToken.withdrawTokens(_to, debtTokenReceived);
     }
 
-    function userMaxWithdraw(address _controllerAddress, address _user) public view returns (uint256 maxWithdraw) {
+    function userMaxWithdraw(address _controllerAddress, address _user)
+        public
+        view
+        returns (uint256 maxWithdraw)
+    {
         uint256[4] memory userState = ILlamaLendController(_controllerAddress).user_state(_user);
-        return userState[0] - ILlamaLendController(_controllerAddress).min_collateral(userState[2], userState[3]);
+        return userState[0]
+            - ILlamaLendController(_controllerAddress).min_collateral(userState[2], userState[3]);
     }
 
     function getCollAmountsFromAMM(address _controllerAddress, address _user)

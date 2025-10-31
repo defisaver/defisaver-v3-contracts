@@ -3,11 +3,11 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { UniV3Helper } from "./helpers/UniV3Helper.sol";
 import {
     IUniswapV3NonfungiblePositionManager
-} from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+} from "../../../interfaces/protocols/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Collects tokensOwed from a position represented by tokenId
 contract UniCollectV3 is ActionBase, UniV3Helper {
@@ -22,7 +22,8 @@ contract UniCollectV3 is ActionBase, UniV3Helper {
     ) public payable virtual override returns (bytes32) {
         IUniswapV3NonfungiblePositionManager.CollectParams memory uniData = parseInputs(_callData);
 
-        uniData.tokenId = _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
+        uniData.tokenId =
+            _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
 
         (uint256 amount0,, bytes memory logData) = _uniCollect(uniData);
         emit ActionEvent("UniCollectV3", logData);

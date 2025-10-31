@@ -5,9 +5,11 @@ pragma solidity =0.8.24;
 import { AaveV3Withdraw } from "../../../contracts/actions/aaveV3/AaveV3Withdraw.sol";
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
-import { IL2PoolV3 } from "../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
-import { IAaveProtocolDataProvider } from "../../../contracts/interfaces/aaveV3/IAaveProtocolDataProvider.sol";
-import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
+import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
+import {
+    IAaveProtocolDataProvider
+} from "../../../contracts/interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
+import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
@@ -85,14 +87,24 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         }
     }
 
-    function testFuzz_encode_decode_no_market(uint16 _assetId, uint256 _amount, address _to) public view {
+    function testFuzz_encode_decode_no_market(uint16 _assetId, uint256 _amount, address _to)
+        public
+        view
+    {
         AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
-            assetId: _assetId, useDefaultMarket: true, amount: _amount, to: _to, market: DEFAULT_AAVE_MARKET
+            assetId: _assetId,
+            useDefaultMarket: true,
+            amount: _amount,
+            to: _to,
+            market: DEFAULT_AAVE_MARKET
         });
         _assertParams(params);
     }
 
-    function testFuzz_encode_decode(uint16 _assetId, uint256 _amount, address _to, address _market) public view {
+    function testFuzz_encode_decode(uint16 _assetId, uint256 _amount, address _to, address _market)
+        public
+        view
+    {
         AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
             assetId: _assetId, useDefaultMarket: false, amount: _amount, to: _to, market: _market
         });
@@ -117,37 +129,54 @@ contract TestAaveV3Withdraw is AaveV3Helper, AaveV3ExecuteActions {
         DataTypes.ReserveData memory tokenData = pool.getReserveData(_token);
 
         uint256 senderBalanceBefore = balanceOf(_token, sender);
-        (uint256 walletATokenBalanceBefore,,,,,,,,) = dataProvider.getUserReserveData(_token, walletAddr);
+        (uint256 walletATokenBalanceBefore,,,,,,,,) =
+            dataProvider.getUserReserveData(_token, walletAddr);
 
         if (_isL2Direct) {
             AaveV3Withdraw.Params memory params = AaveV3Withdraw.Params({
-                assetId: tokenData.id, useDefaultMarket: true, amount: _amount, to: sender, market: address(0)
+                assetId: tokenData.id,
+                useDefaultMarket: true,
+                amount: _amount,
+                to: sender,
+                market: address(0)
             });
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCalldata = aaveV3WithdrawEncode(tokenData.id, true, _amount, sender, address(0));
+            bytes memory paramsCalldata =
+                aaveV3WithdrawEncode(tokenData.id, true, _amount, sender, address(0));
 
             bytes memory _calldata = abi.encodeWithSelector(
-                AaveV3Withdraw.executeAction.selector, paramsCalldata, subData, paramMapping, returnValues
+                AaveV3Withdraw.executeAction.selector,
+                paramsCalldata,
+                subData,
+                paramMapping,
+                returnValues
             );
 
             wallet.execute(address(cut), _calldata, 0);
         }
 
         uint256 senderBalanceAfter = balanceOf(_token, sender);
-        (uint256 walletATokenBalanceAfter,,,,,,,,) = dataProvider.getUserReserveData(_token, walletAddr);
+        (uint256 walletATokenBalanceAfter,,,,,,,,) =
+            dataProvider.getUserReserveData(_token, walletAddr);
 
         uint256 maxATokenIncreaseTolerance = 10 wei;
 
         if (_amount == type(uint256).max) {
             assertApproxEqAbs(
-                senderBalanceAfter, senderBalanceBefore + walletATokenBalanceBefore, maxATokenIncreaseTolerance
+                senderBalanceAfter,
+                senderBalanceBefore + walletATokenBalanceBefore,
+                maxATokenIncreaseTolerance
             );
             assertEq(walletATokenBalanceAfter, 0);
         } else {
             assertEq(senderBalanceAfter, senderBalanceBefore + _amount);
             assertLt(walletATokenBalanceAfter, walletATokenBalanceBefore);
-            assertApproxEqAbs(walletATokenBalanceAfter, walletATokenBalanceBefore - _amount, maxATokenIncreaseTolerance);
+            assertApproxEqAbs(
+                walletATokenBalanceAfter,
+                walletATokenBalanceBefore - _amount,
+                maxATokenIncreaseTolerance
+            );
         }
     }
 

@@ -5,15 +5,19 @@ pragma solidity =0.8.24;
 import { LSVUtilMainnetAddresses } from "./LSVUtilMainnetAddresses.sol";
 import { ICBETH } from "../../../interfaces/LSTs/ICBETH.sol";
 import { IRETH } from "../../../interfaces/LSTs/IRETH.sol";
-import { IERC20 } from "../../../interfaces/IERC20.sol";
-import { IWstETH } from "../../../interfaces/LSTs/IWstETH.sol";
-import { IWeEth } from "../../../interfaces/etherFi/IWeEth.sol";
-import { IRestakeManager } from "../../../interfaces/renzo/IRestakeManager.sol";
-import { IRenzoOracle } from "../../../interfaces/renzo/IRenzoOracle.sol";
-import { DSMath } from "../../../DS/DSMath.sol";
+import { IERC20 } from "../../../interfaces/token/IERC20.sol";
+import { IWstETH } from "../../../interfaces//LSTs/IWstETH.sol";
+import { IWeEth } from "../../../interfaces/protocols/etherFi/IWeEth.sol";
+import { IRestakeManager } from "../../../interfaces/protocols/renzo/IRestakeManager.sol";
+import { IRenzoOracle } from "../../../interfaces/protocols/renzo/IRenzoOracle.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
 
 contract LSVUtilHelper is DSMath, LSVUtilMainnetAddresses {
-    function getAmountInETHFromLST(address lstAddress, uint256 lstAmount) public view returns (uint256 ethAmount) {
+    function getAmountInETHFromLST(address lstAddress, uint256 lstAmount)
+        public
+        view
+        returns (uint256 ethAmount)
+    {
         if (lstAmount == 0) return 0;
 
         if (lstAddress == RETH_ADDRESS) {
@@ -36,7 +40,11 @@ contract LSVUtilHelper is DSMath, LSVUtilMainnetAddresses {
         return lstAmount;
     }
 
-    function getAmountInLSTFromETH(address lstAddress, uint256 ethAmount) public view returns (uint256 lstAmount) {
+    function getAmountInLSTFromETH(address lstAddress, uint256 ethAmount)
+        public
+        view
+        returns (uint256 lstAmount)
+    {
         if (ethAmount == 0) return 0;
 
         if (lstAddress == RETH_ADDRESS) {
@@ -59,7 +67,11 @@ contract LSVUtilHelper is DSMath, LSVUtilMainnetAddresses {
         return ethAmount;
     }
 
-    function getRenzoRate(uint256 _amount, bool _convertFromEthToLst) public view returns (uint256 rate) {
+    function getRenzoRate(uint256 _amount, bool _convertFromEthToLst)
+        public
+        view
+        returns (uint256 rate)
+    {
         IRestakeManager manager = IRestakeManager(RENZO_MANAGER);
         IRenzoOracle oracle = IRenzoOracle(manager.renzoOracle());
         (,, uint256 totalTVL) = manager.calculateTVLs();

@@ -2,9 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
-import { LiquityV2SPDeposit } from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
+import {
+    LiquityV2SPDeposit
+} from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPDeposit.sol";
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { LiquityV2Utils } from "../../utils/liquityV2/LiquityV2Utils.sol";
@@ -99,7 +103,10 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
         approveAsSender(sender, BOLD, walletAddr, vars.depositAmount);
 
         vars.executeActionCallData = executeActionCalldata(
-            liquityV2SPDepositEncode(address(_market), sender, sender, sender, vars.depositAmount, false), _isDirect
+            liquityV2SPDepositEncode(
+                address(_market), sender, sender, sender, vars.depositAmount, false
+            ),
+            _isDirect
         );
 
         wallet.execute(address(cut), vars.executeActionCallData, 0);
@@ -116,7 +123,10 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
             approveAsSender(sender, BOLD, walletAddr, vars.depositAmount);
 
             vars.executeActionCallData = executeActionCalldata(
-                liquityV2SPDepositEncode(address(_market), sender, sender, sender, vars.depositAmount, true), _isDirect
+                liquityV2SPDepositEncode(
+                    address(_market), sender, sender, sender, vars.depositAmount, true
+                ),
+                _isDirect
             );
 
             vars.senderCollBalanceBefore = balanceOf(vars.collToken, sender);
@@ -130,7 +140,10 @@ contract TestLiquityV2SPDeposit is LiquityV2ExecuteActions, LiquityV2Utils {
                 viewContract.getDepositorInfo(address(_market), walletAddr);
 
             assertEq(vars.senderCollBalanceAfter, vars.senderCollBalanceBefore + vars.collGain);
-            assertEq(vars.senderBoldBalanceAfter, vars.senderBoldBalanceBefore - vars.depositAmount + vars.boldGain);
+            assertEq(
+                vars.senderBoldBalanceAfter,
+                vars.senderBoldBalanceBefore - vars.depositAmount + vars.boldGain
+            );
             assertEq(vars.compoundedBOLDAfter, vars.compoundedBOLD + vars.depositAmount);
             assertEq(vars.collGainAfter, 0);
             assertEq(vars.boldGainAfter, 0);

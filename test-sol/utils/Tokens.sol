@@ -4,9 +4,9 @@ pragma solidity =0.8.24;
 import { Test } from "forge-std/Test.sol";
 import { StdStorage, stdStorage } from "forge-std/StdStorage.sol";
 import { IUniswapRouter } from "../../contracts/interfaces/exchange/IUniswapRouter.sol";
-import { IERC20 } from "../../contracts/interfaces/IERC20.sol";
-import { TokenPriceHelper } from "../../contracts/utils/TokenPriceHelper.sol";
-import { TokenUtils } from "../../contracts/utils/TokenUtils.sol";
+import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
+import { TokenPriceHelper } from "../../contracts/utils/token/TokenPriceHelper.sol";
+import { TokenUtils } from "../../contracts/utils/token/TokenUtils.sol";
 
 import { Addresses } from "../utils/Addresses.sol";
 
@@ -68,7 +68,8 @@ contract Tokens is Test {
     }
 
     function gibTokens(address who, address token, uint256 amt) internal {
-        stdstore.target(token).sig(IERC20(token).balanceOf.selector).with_key(who).checked_write(amt);
+        stdstore.target(token).sig(IERC20(token).balanceOf.selector).with_key(who)
+            .checked_write(amt);
     }
 
     function give(address _token, address _to, uint256 _amount) internal {
@@ -81,8 +82,9 @@ contract Tokens is Test {
             path[1] = _token;
 
             vm.prank(_to);
-            uint256[] memory amounts =
-                router.swapETHForExactTokens{ value: type(uint96).max }(_amount, path, _to, block.timestamp);
+            uint256[] memory amounts = router.swapETHForExactTokens{ value: type(uint96).max }(
+                _amount, path, _to, block.timestamp
+            );
             vm.stopPrank();
 
             /// @dev make sure we get exact amount of tokens
@@ -102,11 +104,11 @@ contract Tokens is Test {
         return (_amountUSD * 10 ** (decimals + USD_DECIMALS) / t.getPriceInUSD(_tokenAddr));
     }
 
-    function amountInUSDPriceMock(address _tokenAddr, uint256 _amountUSD, uint256 _priceInUsdIn8Decimals)
-        internal
-        view
-        returns (uint256)
-    {
+    function amountInUSDPriceMock(
+        address _tokenAddr,
+        uint256 _amountUSD,
+        uint256 _priceInUsdIn8Decimals
+    ) internal view returns (uint256) {
         uint256 USD_DECIMALS = 8;
 
         uint256 decimals = IERC20(_tokenAddr).decimals();

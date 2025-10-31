@@ -69,7 +69,11 @@ contract StrategyStorage is StrategyModel, AdminAuth {
         return strategies.length;
     }
 
-    function getPaginatedStrategies(uint256 _page, uint256 _perPage) public view returns (Strategy[] memory) {
+    function getPaginatedStrategies(uint256 _page, uint256 _perPage)
+        public
+        view
+        returns (Strategy[] memory)
+    {
         Strategy[] memory strategiesPerPage = new Strategy[](_perPage);
 
         uint256 start = _page * _perPage;

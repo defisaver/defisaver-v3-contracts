@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { SafeERC20 } from "../../utils/SafeERC20.sol";
+import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title Helper action to remove token approval given to a spender
 contract RemoveTokenApproval is ActionBase {
@@ -25,8 +25,10 @@ contract RemoveTokenApproval is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.tokenAddr = _parseParamAddr(inputData.tokenAddr, _paramMapping[0], _subData, _returnValues);
-        inputData.spender = _parseParamAddr(inputData.spender, _paramMapping[1], _subData, _returnValues);
+        inputData.tokenAddr =
+            _parseParamAddr(inputData.tokenAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.spender =
+            _parseParamAddr(inputData.spender, _paramMapping[1], _subData, _returnValues);
 
         _removeApproval(inputData.tokenAddr, inputData.spender);
 

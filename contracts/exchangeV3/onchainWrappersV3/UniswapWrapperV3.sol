@@ -3,12 +3,12 @@ pragma solidity =0.8.24;
 
 import { IExchangeV3 } from "../../interfaces/exchange/IExchangeV3.sol";
 import { IUniswapRouter } from "../../interfaces/exchange/IUniswapRouter.sol";
-import { DSMath } from "../../DS/DSMath.sol";
+import { DSMath } from "../../_vendor/DS/DSMath.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { WrapperHelper } from "./helpers/WrapperHelper.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { SafeERC20 } from "../../utils/SafeERC20.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { SafeERC20 } from "../../_vendor/openzeppelin/SafeERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title DFS exchange wrapper for UniswapV2
 contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
@@ -34,7 +34,8 @@ contract UniswapWrapperV3 is DSMath, IExchangeV3, AdminAuth, WrapperHelper {
 
         /// @dev DFSExchangeCore contains slippage check instead of writing it here (minOutput = 1)
         /// @dev On-chain wrapper only used for simulations and strategies, in both cases we are ok with setting a dynamic timestamp
-        amounts = router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
+        amounts =
+            router.swapExactTokensForTokens(_srcAmount, 1, path, msg.sender, block.timestamp + 1);
 
         // cleanup tokens if anything left after sell
         uint256 amountLeft = IERC20(_srcAddr).balanceOf(address(this));

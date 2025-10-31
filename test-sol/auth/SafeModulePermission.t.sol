@@ -2,7 +2,7 @@
 pragma solidity =0.8.24;
 
 import { SafeModulePermission } from "../../contracts/auth/SafeModulePermission.sol";
-import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
@@ -143,7 +143,9 @@ contract TestCore_SafeModulePermission is SafeModulePermission, BaseTest {
         _disable_module(thirdModule);
     }
 
-    function test_should_revert_when_disabling_module_that_is_not_one_of_the_ten_last_modules() public {
+    function test_should_revert_when_disabling_module_that_is_not_one_of_the_ten_last_modules()
+        public
+    {
         // this module can't be disabled because it's not one of the last 10 modules
         _enable_safe_module(address(0xff));
 
@@ -168,12 +170,14 @@ contract TestCore_SafeModulePermission is SafeModulePermission, BaseTest {
                                       HELPERS
     //////////////////////////////////////////////////////////////////////////*/
     function _enable_safe_module(address _moduleAddr) internal {
-        bytes memory enableCalldata = abi.encodeWithSelector(SafeModulePermission.enableModule.selector, _moduleAddr);
+        bytes memory enableCalldata =
+            abi.encodeWithSelector(SafeModulePermission.enableModule.selector, _moduleAddr);
         wallet.execute(address(cut), enableCalldata, 0);
     }
 
     function _disable_module(address _moduleAddr) internal {
-        bytes memory disableCalldata = abi.encodeWithSelector(SafeModulePermission.disableModule.selector, _moduleAddr);
+        bytes memory disableCalldata =
+            abi.encodeWithSelector(SafeModulePermission.disableModule.selector, _moduleAddr);
         wallet.execute(address(cut), disableCalldata, 0);
     }
 }

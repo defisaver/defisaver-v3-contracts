@@ -2,8 +2,8 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
-import { ISparkRewards } from "../../interfaces/spark/ISparkRewards.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
+import { ISparkRewards } from "../../interfaces/protocols/spark/ISparkRewards.sol";
 
 /// @title Claims SPK token from Spark Rewards contract
 contract SparkSPKClaim is ActionBase {
@@ -28,13 +28,12 @@ contract SparkSPKClaim is ActionBase {
         bytes32[] merkleProof;
     }
 
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        virtual
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
         (uint256 claimedAmount, bytes memory logData) = _claim(params);
@@ -56,7 +55,10 @@ contract SparkSPKClaim is ActionBase {
         params = abi.decode(_callData, (Params));
     }
 
-    function _claim(Params memory _params) internal returns (uint256 claimedAmount, bytes memory logData) {
+    function _claim(Params memory _params)
+        internal
+        returns (uint256 claimedAmount, bytes memory logData)
+    {
         claimedAmount = ISparkRewards(_params.rewardContract)
             .claim(
                 _params.epoch,

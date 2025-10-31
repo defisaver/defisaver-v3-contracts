@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { SkyHelper } from "./helpers/SkyHelper.sol";
-import { ILockstakeEngine } from "../../interfaces/sky/ILockstakeEngine.sol";
+import { ILockstakeEngine } from "../../interfaces/protocols/sky/ILockstakeEngine.sol";
 
 /// @title Stake SKY token via SKY protocol for different rewards
 contract SkyStakingEngineStake is ActionBase, SkyHelper {
@@ -33,8 +33,10 @@ contract SkyStakingEngineStake is ActionBase, SkyHelper {
 
         inputData.stakingContract =
             _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
-        inputData.index = _parseParamUint(inputData.index, _paramMapping[1], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
+        inputData.index =
+            _parseParamUint(inputData.index, _paramMapping[1], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[2], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[3], _subData, _returnValues);
 
         (uint256 amountStaked, bytes memory logData) = _skyStakeInStakingEngine(inputData);
@@ -56,7 +58,10 @@ contract SkyStakingEngineStake is ActionBase, SkyHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _skyStakeInStakingEngine(Params memory _inputData) internal returns (uint256, bytes memory logData) {
+    function _skyStakeInStakingEngine(Params memory _inputData)
+        internal
+        returns (uint256, bytes memory logData)
+    {
         _inputData.amount = SKY_ADDRESS.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         SKY_ADDRESS.approveToken(_inputData.stakingContract, _inputData.amount);
         ILockstakeEngine(_inputData.stakingContract)

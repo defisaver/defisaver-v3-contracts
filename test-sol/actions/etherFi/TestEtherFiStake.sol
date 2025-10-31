@@ -71,12 +71,17 @@ contract TestEtherFiStake is BaseTest, ActionsUtils, EtherFiHelper {
         _baseTest(isDirect, isMaxUint256, amount, shouldWrap);
     }
 
-    function _baseTest(bool _isDirect, bool _isMaxUint256, uint256 _amount, bool _shouldWrap) internal {
+    function _baseTest(bool _isDirect, bool _isMaxUint256, uint256 _amount, bool _shouldWrap)
+        internal
+    {
         give(Addresses.WETH_ADDR, sender, _amount);
         approveAsSender(sender, Addresses.WETH_ADDR, walletAddr, _amount);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            etherFiStakeEncode(_isMaxUint256 ? type(uint256).max : _amount, sender, sender, _shouldWrap), _isDirect
+            etherFiStakeEncode(
+                _isMaxUint256 ? type(uint256).max : _amount, sender, sender, _shouldWrap
+            ),
+            _isDirect
         );
 
         uint256 senderWethBalanceBefore = balanceOf(Addresses.WETH_ADDR, sender);

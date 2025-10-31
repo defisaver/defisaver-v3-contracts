@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { ILockstakeEngine } from "../../interfaces/sky/ILockstakeEngine.sol";
+import { ILockstakeEngine } from "../../interfaces/protocols/sky/ILockstakeEngine.sol";
 import { SkyHelper } from "./helpers/SkyHelper.sol";
 
 /// @title Selects a farm for the SKY Staking Engine Position
@@ -28,7 +28,8 @@ contract SkyStakingEngineSelectFarm is ActionBase, SkyHelper {
 
         inputData.stakingContract =
             _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
-        inputData.index = _parseParamUint(inputData.index, _paramMapping[1], _subData, _returnValues);
+        inputData.index =
+            _parseParamUint(inputData.index, _paramMapping[1], _subData, _returnValues);
         inputData.farm = _parseParamAddr(inputData.farm, _paramMapping[2], _subData, _returnValues);
 
         (address farm, bytes memory logData) = _skyStakingEngineSelectFarm(inputData);
@@ -50,7 +51,10 @@ contract SkyStakingEngineSelectFarm is ActionBase, SkyHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _skyStakingEngineSelectFarm(Params memory _inputData) internal returns (address, bytes memory logData) {
+    function _skyStakingEngineSelectFarm(Params memory _inputData)
+        internal
+        returns (address, bytes memory logData)
+    {
         ILockstakeEngine(_inputData.stakingContract)
             .selectFarm(address(this), _inputData.index, _inputData.farm, SKY_REFERRAL_CODE);
         return (_inputData.farm, abi.encode(_inputData));

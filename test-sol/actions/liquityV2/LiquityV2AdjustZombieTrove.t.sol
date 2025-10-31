@@ -2,14 +2,18 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IPriceFeed } from "../../../contracts/interfaces/liquityV2/IPriceFeed.sol";
-import { IHintHelpers } from "../../../contracts/interfaces/liquityV2/IHintHelpers.sol";
-import { ITroveManager } from "../../../contracts/interfaces/liquityV2/ITroveManager.sol";
-import { ISortedTroves } from "../../../contracts/interfaces/liquityV2/ISortedTroves.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { IPriceFeed } from "../../../contracts/interfaces/protocols/liquityV2/IPriceFeed.sol";
+import { IHintHelpers } from "../../../contracts/interfaces/protocols/liquityV2/IHintHelpers.sol";
+import { ITroveManager } from "../../../contracts/interfaces/protocols/liquityV2/ITroveManager.sol";
+import { ISortedTroves } from "../../../contracts/interfaces/protocols/liquityV2/ISortedTroves.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
-import { LiquityV2AdjustZombieTrove } from "../../../contracts/actions/liquityV2/trove/LiquityV2AdjustZombieTrove.sol";
+import {
+    LiquityV2AdjustZombieTrove
+} from "../../../contracts/actions/liquityV2/trove/LiquityV2AdjustZombieTrove.sol";
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
@@ -211,10 +215,16 @@ contract TestLiquityV2AdjustZombieTrove is LiquityV2ExecuteActions {
             bytes32 nodeTroveIdPrevIdValue = vm.load(sortedTroves, nodeTroveIdPrevIdSlot);
 
             // --size;
-            vm.store(sortedTroves, bytes32(sizeSlot), bytes32(ISortedTroves(sortedTroves).size() - 1));
+            vm.store(
+                sortedTroves, bytes32(sizeSlot), bytes32(ISortedTroves(sortedTroves).size() - 1)
+            );
 
             // nodes[nodes[_troveId].prevId].nextId = nodes[_troveId].nextId
-            vm.store(sortedTroves, keccak256(abi.encode(nodeTroveIdPrevIdValue, nodesSlot)), nodeTroveIdNextIdValue);
+            vm.store(
+                sortedTroves,
+                keccak256(abi.encode(nodeTroveIdPrevIdValue, nodesSlot)),
+                nodeTroveIdNextIdValue
+            );
 
             // nodes[nodes[_troveId].nextId].prevId = nodes[_troveId].prevId;
             vm.store(
@@ -230,9 +240,12 @@ contract TestLiquityV2AdjustZombieTrove is LiquityV2ExecuteActions {
         }
     }
 
-    function _adjust(IAddressesRegistry _market, uint256 _troveId, TestConfig memory _config, uint256 _collIndex)
-        internal
-    {
+    function _adjust(
+        IAddressesRegistry _market,
+        uint256 _troveId,
+        TestConfig memory _config,
+        uint256 _collIndex
+    ) internal {
         TestAdjustLocalVars memory vars;
 
         vars.troveDataBefore = viewContract.getTroveInfo(address(_market), _troveId);
@@ -240,18 +253,24 @@ contract TestLiquityV2AdjustZombieTrove is LiquityV2ExecuteActions {
         vars.collPriceWAD = IPriceFeed(_market.priceFeed()).lastGoodPrice();
 
         vars.supplyAmount = _config.supplyAmountInUSD > 0
-            ? amountInUSDPriceMock(vars.collToken, _config.supplyAmountInUSD, vars.collPriceWAD / 1e10)
+            ? amountInUSDPriceMock(
+                vars.collToken, _config.supplyAmountInUSD, vars.collPriceWAD / 1e10
+            )
             : 0;
 
-        vars.paybackAmount =
-            _config.paybackAmountInUSD > 0 ? amountInUSDPriceMock(BOLD, _config.paybackAmountInUSD, 1e18) : 0;
+        vars.paybackAmount = _config.paybackAmountInUSD > 0
+            ? amountInUSDPriceMock(BOLD, _config.paybackAmountInUSD, 1e18)
+            : 0;
 
         vars.withdrawAmount = _config.withdrawAmountInUSD > 0
-            ? amountInUSDPriceMock(vars.collToken, _config.withdrawAmountInUSD, vars.collPriceWAD / 1e10)
+            ? amountInUSDPriceMock(
+                vars.collToken, _config.withdrawAmountInUSD, vars.collPriceWAD / 1e10
+            )
             : 0;
 
-        vars.borrowAmount =
-            _config.borrowAmountInUSD > 0 ? amountInUSDPriceMock(BOLD, _config.borrowAmountInUSD, 1e18) : 0;
+        vars.borrowAmount = _config.borrowAmountInUSD > 0
+            ? amountInUSDPriceMock(BOLD, _config.borrowAmountInUSD, 1e18)
+            : 0;
 
         vars.collAmount = vars.supplyAmount > 0 ? vars.supplyAmount : vars.withdrawAmount;
         vars.debtAmount = vars.borrowAmount > 0 ? vars.borrowAmount : vars.paybackAmount;
@@ -276,9 +295,11 @@ contract TestLiquityV2AdjustZombieTrove is LiquityV2ExecuteActions {
 
         vars.maxUpfrontFee = vars.borrowAmount == 0
             ? 0
-            : IHintHelpers(_market.hintHelpers()).predictAdjustTroveUpfrontFee(_collIndex, _troveId, vars.borrowAmount);
+            : IHintHelpers(_market.hintHelpers())
+                .predictAdjustTroveUpfrontFee(_collIndex, _troveId, vars.borrowAmount);
 
-        (vars.upperHint, vars.lowerHint) = getInsertPosition(viewContract, _market, _collIndex, 1e18 / 10);
+        (vars.upperHint, vars.lowerHint) =
+            getInsertPosition(viewContract, _market, _collIndex, 1e18 / 10);
 
         vars.executeActionCallData = executeActionCalldata(
             liquityV2AdjustZombieTroveEncode(
@@ -309,19 +330,30 @@ contract TestLiquityV2AdjustZombieTrove is LiquityV2ExecuteActions {
         assertEq(uint8(vars.troveDataAfter.status), uint8(ITroveManager.Status.active));
 
         if (vars.collAction == LiquityV2AdjustZombieTrove.CollActionType.WITHDRAW) {
-            assertEq(vars.senderCollBalanceAfter, vars.senderCollBalanceBefore + vars.withdrawAmount);
-            assertEq(vars.troveDataAfter.collAmount, vars.troveDataBefore.collAmount - vars.withdrawAmount);
+            assertEq(
+                vars.senderCollBalanceAfter, vars.senderCollBalanceBefore + vars.withdrawAmount
+            );
+            assertEq(
+                vars.troveDataAfter.collAmount,
+                vars.troveDataBefore.collAmount - vars.withdrawAmount
+            );
         } else {
             assertEq(vars.senderCollBalanceAfter, vars.senderCollBalanceBefore - vars.supplyAmount);
-            assertEq(vars.troveDataAfter.collAmount, vars.troveDataBefore.collAmount + vars.supplyAmount);
+            assertEq(
+                vars.troveDataAfter.collAmount, vars.troveDataBefore.collAmount + vars.supplyAmount
+            );
         }
 
         if (vars.debtAction == LiquityV2AdjustZombieTrove.DebtActionType.PAYBACK) {
             assertEq(vars.senderBoldBalanceAfter, vars.senderBoldBalanceBefore - vars.paybackAmount);
-            assertGe(vars.troveDataAfter.debtAmount, vars.troveDataBefore.debtAmount - vars.paybackAmount);
+            assertGe(
+                vars.troveDataAfter.debtAmount, vars.troveDataBefore.debtAmount - vars.paybackAmount
+            );
         } else {
             assertEq(vars.senderBoldBalanceAfter, vars.senderBoldBalanceBefore + vars.borrowAmount);
-            assertGe(vars.troveDataAfter.debtAmount, vars.troveDataBefore.debtAmount + vars.borrowAmount);
+            assertGe(
+                vars.troveDataAfter.debtAmount, vars.troveDataBefore.debtAmount + vars.borrowAmount
+            );
         }
     }
 }

@@ -2,18 +2,18 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { DFSRegistry } from "../core/DFSRegistry.sol";
-import { DSProxy } from "../DS/DSProxy.sol";
+import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
+import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { ActionsUtilHelper } from "./utils/helpers/ActionsUtilHelper.sol";
-import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 import { CheckWalletType } from "../utils/CheckWalletType.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
 abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     event ActionEvent(string indexed logName, bytes data);
 
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     DefisaverLogger public constant logger = DefisaverLogger(DFS_LOGGER_ADDR);
 
@@ -70,11 +70,12 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     /// @param _mapType Indicated the type of the input in paramMapping
     /// @param _subData Array of subscription data we can replace the input value with
     /// @param _returnValues Array of subscription data we can replace the input value with
-    function _parseParamUint(uint256 _param, uint8 _mapType, bytes32[] memory _subData, bytes32[] memory _returnValues)
-        internal
-        pure
-        returns (uint256)
-    {
+    function _parseParamUint(
+        uint256 _param,
+        uint8 _mapType,
+        bytes32[] memory _subData,
+        bytes32[] memory _returnValues
+    ) internal pure returns (uint256) {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = uint256(_returnValues[getReturnIndex(_mapType)]);
@@ -91,11 +92,12 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     /// @param _mapType Indicated the type of the input in paramMapping
     /// @param _subData Array of subscription data we can replace the input value with
     /// @param _returnValues Array of subscription data we can replace the input value with
-    function _parseParamAddr(address _param, uint8 _mapType, bytes32[] memory _subData, bytes32[] memory _returnValues)
-        internal
-        view
-        returns (address)
-    {
+    function _parseParamAddr(
+        address _param,
+        uint8 _mapType,
+        bytes32[] memory _subData,
+        bytes32[] memory _returnValues
+    ) internal view returns (address) {
         if (isReplaceable(_mapType)) {
             if (isReturnInjection(_mapType)) {
                 _param = address(bytes20((_returnValues[getReturnIndex(_mapType)])));
@@ -166,7 +168,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
 
     function fetchOwnersOrWallet() internal view returns (address) {
         if (isDSProxy(address(this))) {
-            return DSProxy(payable(address(this))).owner();
+            return IDSProxy(payable(address(this))).owner();
         }
 
         // if not DSProxy, we assume we are in context of Safe

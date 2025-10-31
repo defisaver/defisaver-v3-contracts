@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { SparkRatioHelper } from "../spark/helpers/SparkRatioHelper.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
 
 /// @title Action to check the ratio of the Spark position after strategy execution.
 contract SparkRatioCheck is ActionBase, SparkRatioHelper {
@@ -36,8 +36,12 @@ contract SparkRatioCheck is ActionBase, SparkRatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 ratioState = _parseParamUint(uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues);
-        uint256 targetRatio = _parseParamUint(uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues);
+        uint256 ratioState = _parseParamUint(
+            uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues
+        );
+        uint256 targetRatio = _parseParamUint(
+            uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues
+        );
 
         uint256 currRatio = getRatio(DEFAULT_SPARK_MARKET, address(this));
 

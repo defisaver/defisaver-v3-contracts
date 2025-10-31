@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TransientStorageCancun } from "../../utils/TransientStorageCancun.sol";
-import { IAddressesRegistry } from "../../interfaces/liquityV2/IAddressesRegistry.sol";
-import { ITroveManager } from "../../interfaces/liquityV2/ITroveManager.sol";
+import { TransientStorageCancun } from "../../utils/transient/TransientStorageCancun.sol";
+import { IAddressesRegistry } from "../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { ITroveManager } from "../../interfaces/protocols/liquityV2/ITroveManager.sol";
 
 /// @title LiquityV2 New Interest Rate Checker Action
 /// @notice Validates that the interest rate of a LiquityV2 trove was correctly adjusted after strategy execution.
@@ -15,7 +15,8 @@ import { ITroveManager } from "../../interfaces/liquityV2/ITroveManager.sol";
 /// @author DeFi Saver
 contract LiquityV2NewInterestRateChecker is ActionBase {
     /// @notice Transient storage contract for storing temporary data during execution
-    TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
+    TransientStorageCancun public constant tempStorage =
+        TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     /// @notice Error thrown when the interest rate after adjustment doesn't match the expected rate
     /// @param oldRate The original interest rate before adjustment
@@ -58,13 +59,16 @@ contract LiquityV2NewInterestRateChecker is ActionBase {
 
         IAddressesRegistry market = IAddressesRegistry(params.market);
         ITroveManager troveManager = ITroveManager(market.troveManager());
-        ITroveManager.LatestTroveData memory troveData = troveManager.getLatestTroveData(params.troveId);
+        ITroveManager.LatestTroveData memory troveData =
+            troveManager.getLatestTroveData(params.troveId);
 
         if (troveData.annualInterestRate != (startInterestRate + params.interestRateChange)) {
             revert BadAfterRate(startInterestRate, troveData.annualInterestRate);
         }
 
-        emit ActionEvent("LiquityV2NewInterestRateChecker", abi.encode(troveData.annualInterestRate));
+        emit ActionEvent(
+            "LiquityV2NewInterestRateChecker", abi.encode(troveData.annualInterestRate)
+        );
         return bytes32(troveData.annualInterestRate);
     }
 

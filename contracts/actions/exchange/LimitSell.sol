@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { DFSExchangeCore } from "../../exchangeV3/DFSExchangeCore.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { GasFeeHelper } from "../fee/helpers/GasFeeHelper.sol";
 
 /// @title A special Limit Sell action used as a part of the limit order strategy
@@ -34,11 +34,13 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
 
         params.exchangeData.srcAddr =
             _parseParamAddr(params.exchangeData.srcAddr, _paramMapping[0], _subData, _returnValues);
-        params.exchangeData.destAddr =
-            _parseParamAddr(params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues);
+        params.exchangeData.destAddr = _parseParamAddr(
+            params.exchangeData.destAddr, _paramMapping[1], _subData, _returnValues
+        );
 
-        params.exchangeData.srcAmount =
-            _parseParamUint(params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues);
+        params.exchangeData.srcAmount = _parseParamUint(
+            params.exchangeData.srcAmount, _paramMapping[2], _subData, _returnValues
+        );
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
@@ -64,10 +66,12 @@ contract LimitSell is ActionBase, DFSExchangeCore, GasFeeHelper {
     /// @param _from Address from which we'll pull the srcTokens
     /// @param _to Address where we'll send the _to token
     /// @param _gasUsed Gas used for this strategy so we can take the fee
-    function _dfsSell(ExchangeData memory _exchangeData, address _from, address _to, uint256 _gasUsed)
-        internal
-        returns (uint256, bytes memory)
-    {
+    function _dfsSell(
+        ExchangeData memory _exchangeData,
+        address _from,
+        address _to,
+        uint256 _gasUsed
+    ) internal returns (uint256, bytes memory) {
         // if we set srcAmount to max, take the whole user's wallet balance
         if (_exchangeData.srcAmount == type(uint256).max) {
             _exchangeData.srcAmount = _exchangeData.srcAddr.getBalance(address(this));

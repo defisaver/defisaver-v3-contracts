@@ -2,7 +2,9 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { ILlamaLendController } from "../../interfaces/llamalend/ILlamaLendController.sol";
+import {
+    ILlamaLendController
+} from "../../interfaces/protocols/llamalend/ILlamaLendController.sol";
 
 /// @title Action that returns users llamalend debt on a given market
 contract LlamaLendGetDebt is ActionBase {
@@ -22,7 +24,8 @@ contract LlamaLendGetDebt is ActionBase {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.debtor = _parseParamAddr(params.debtor, _paramMapping[1], _subData, _returnValues);
 
         uint256 debt = ILlamaLendController(params.controllerAddress).debt(params.debtor);

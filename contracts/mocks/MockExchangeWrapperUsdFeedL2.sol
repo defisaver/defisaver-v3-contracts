@@ -2,10 +2,10 @@
 pragma solidity =0.8.24;
 
 import { IExchangeV3 } from "../interfaces/exchange/IExchangeV3.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
-import { SafeERC20 } from "../utils/SafeERC20.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { TokenPriceHelperL2 } from "../utils/TokenPriceHelperL2.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
+import { SafeERC20 } from "../_vendor/openzeppelin/SafeERC20.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { TokenPriceHelperL2 } from "../utils/token/TokenPriceHelperL2.sol";
 
 /// @title DFS exchange wrapper used for mocking in tests
 /// @dev This version calculates the rate of tokens using feeds
@@ -35,8 +35,8 @@ contract MockExchangeWrapperUsdFeedL2 is IExchangeV3, TokenPriceHelperL2 {
         uint256 destTokenPriceInUSD = getPriceInUSD(_destAddr);
         uint256 destTokenDec = IERC20(_destAddr).decimals();
 
-        uint256 amountOut =
-            _srcAmount * srcTokenPriceInUSD * (10 ** destTokenDec) / ((10 ** srcTokenDec) * destTokenPriceInUSD);
+        uint256 amountOut = _srcAmount * srcTokenPriceInUSD * (10 ** destTokenDec)
+            / ((10 ** srcTokenDec) * destTokenPriceInUSD);
 
         _destAddr.withdrawTokens(msg.sender, amountOut);
 
@@ -45,7 +45,12 @@ contract MockExchangeWrapperUsdFeedL2 is IExchangeV3, TokenPriceHelperL2 {
 
     /// @notice Return a rate for which we can sell an amount of tokens
     /// @return uint256 Rate (price)
-    function getSellRate(address, address, uint256, bytes memory) public pure override returns (uint256) {
+    function getSellRate(address, address, uint256, bytes memory)
+        public
+        pure
+        override
+        returns (uint256)
+    {
         revert("Not implemented");
     }
 

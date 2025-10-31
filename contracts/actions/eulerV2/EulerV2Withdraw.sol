@@ -4,8 +4,8 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 
-import { IERC4626 } from "../../interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IERC4626 } from "../../interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
 
 /// @title Withdraws assets from Euler vault
@@ -32,7 +32,8 @@ contract EulerV2Withdraw is ActionBase, EulerV2Helper {
 
         params.vault = _parseParamAddr(params.vault, _paramMapping[0], _subData, _returnValues);
         params.account = _parseParamAddr(params.account, _paramMapping[1], _subData, _returnValues);
-        params.receiver = _parseParamAddr(params.receiver, _paramMapping[2], _subData, _returnValues);
+        params.receiver =
+            _parseParamAddr(params.receiver, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
 
         (uint256 withdrawAmount, bytes memory logData) = _withdraw(params);
@@ -60,11 +61,13 @@ contract EulerV2Withdraw is ActionBase, EulerV2Helper {
             _params.account = address(this);
         }
 
-        bytes4 vaultActionSelector =
-            _params.amount == type(uint256).max ? IERC4626.redeem.selector : IERC4626.withdraw.selector;
+        bytes4 vaultActionSelector = _params.amount == type(uint256).max
+            ? IERC4626.redeem.selector
+            : IERC4626.withdraw.selector;
 
-        bytes memory vaultCallData =
-            abi.encodeWithSelector(vaultActionSelector, _params.amount, _params.receiver, _params.account);
+        bytes memory vaultCallData = abi.encodeWithSelector(
+            vaultActionSelector, _params.amount, _params.receiver, _params.account
+        );
 
         bytes memory result = IEVC(EVC_ADDR).call(_params.vault, _params.account, 0, vaultCallData);
 

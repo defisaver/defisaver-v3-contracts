@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../../../interfaces/fluid/vaults/IFluidVaultT1.sol";
-import { IFluidVaultT3 } from "../../../../interfaces/fluid/vaults/IFluidVaultT3.sol";
+import { IFluidVaultT1 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
+import { IFluidVaultT3 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT3.sol";
 import { FluidLiquidityModel } from "../../helpers/FluidLiquidityModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidSupplyLiquidityLogic - Implements the supply of tokens to Fluid liquidity layer
@@ -38,19 +38,13 @@ library FluidSupplyLiquidityLogic {
         }
 
         (nftId,,) = _data.vaultType.isT1Vault()
-            ? IFluidVaultT1(_data.vault)
-            .operate{
-                value: msgValue
-            }(
+            ? IFluidVaultT1(_data.vault).operate{ value: msgValue }(
                 _data.nftId,
                 _data.amount.signed256(),
                 _data.debtAmount.signed256(), // used during opening of new position. See FluidVaultT1Open
                 _data.debtTo // used during opening of new position. See FluidVaultT1Open
             )
-            : IFluidVaultT3(_data.vault)
-            .operate{
-                value: msgValue
-            }(
+            : IFluidVaultT3(_data.vault).operate{ value: msgValue }(
                 _data.nftId,
                 _data.amount.signed256(),
                 0, /* newDebtToken0_ */

@@ -54,7 +54,9 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_fail_to_call_execute_when_sender_is_not_executor() public {
         vm.expectRevert(
-            abi.encodeWithSelector(SafeModuleAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr)
+            abi.encodeWithSelector(
+                SafeModuleAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr
+            )
         );
         cut.callExecute(safeWalletAddr, RECIPE_EXECUTOR_ADDR, bytes("0x"));
     }
@@ -76,7 +78,8 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
 
     function test_should_execute_safe_tx() public {
         // first approve auth contract to call execute from safe
-        bytes memory enableCalldata = abi.encodeWithSelector(SafeModulePermission.enableModule.selector, address(cut));
+        bytes memory enableCalldata =
+            abi.encodeWithSelector(SafeModulePermission.enableModule.selector, address(cut));
         wallet.execute(safeModulePermissionAddr, enableCalldata, 0);
 
         // create recipe
@@ -98,7 +101,8 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
         });
 
         // encode recipe executor call
-        bytes memory recipeExecutorCalldata = abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
+        bytes memory recipeExecutorCalldata =
+            abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
         // execute safe tx
         prank(strategyExecutorAddr);
@@ -107,7 +111,8 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
 
     function test_should_revert_when_safe_tx_execution_fails() public {
         // first approve auth contract to call execute from safe
-        bytes memory enableCalldata = abi.encodeWithSelector(SafeModulePermission.enableModule.selector, address(cut));
+        bytes memory enableCalldata =
+            abi.encodeWithSelector(SafeModulePermission.enableModule.selector, address(cut));
         wallet.execute(safeModulePermissionAddr, enableCalldata, 0);
 
         // create recipe
@@ -126,7 +131,8 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
         });
 
         // encode recipe executor call
-        bytes memory recipeExecutorCalldata = abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
+        bytes memory recipeExecutorCalldata =
+            abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe);
 
         // execute safe tx
         /// @dev we expect revert because we are using recipe with flAction without returning funds

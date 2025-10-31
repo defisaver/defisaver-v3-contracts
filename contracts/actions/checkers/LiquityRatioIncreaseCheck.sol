@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { LiquityRatioHelper } from "../liquity/helpers/LiquityRatioHelper.sol";
-import { TransientStorage } from "../../utils/TransientStorage.sol";
+import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
 
 /// @title Action to check if ratio of the Liquity position after strategy execution is greater than the target ratio.
 contract LiquityRatioIncreaseCheck is ActionBase, LiquityRatioHelper {
@@ -29,8 +29,9 @@ contract LiquityRatioIncreaseCheck is ActionBase, LiquityRatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 targetRatioIncrease =
-            _parseParamUint(uint256(inputData.targetRatioIncrease), _paramMapping[0], _subData, _returnValues);
+        uint256 targetRatioIncrease = _parseParamUint(
+            uint256(inputData.targetRatioIncrease), _paramMapping[0], _subData, _returnValues
+        );
 
         address troveOwner = address(this);
 

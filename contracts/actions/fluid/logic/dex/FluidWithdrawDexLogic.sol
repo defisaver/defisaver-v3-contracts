@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVault } from "../../../../interfaces/fluid/vaults/IFluidVault.sol";
-import { IFluidVaultT2 } from "../../../../interfaces/fluid/vaults/IFluidVaultT2.sol";
-import { IFluidVaultT4 } from "../../../../interfaces/fluid/vaults/IFluidVaultT4.sol";
+import { IFluidVault } from "../../../../interfaces/protocols/fluid/vaults/IFluidVault.sol";
+import { IFluidVaultT2 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT2.sol";
+import { IFluidVaultT4 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT4.sol";
 import { FluidDexModel } from "../../helpers/FluidDexModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
 import { FluidDexTokensUtils } from "../../helpers/FluidDexTokensUtils.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidWithdrawDexLogic - Implements the withdrawing of tokens from Fluid DEX
@@ -24,14 +24,17 @@ library FluidWithdrawDexLogic {
     /// @return sharesBurnedOrTokenWithdrawn Supports two cases:
     ///         - For partial withdrawal: Return the amount of collateral shares burned.
     ///         - For max withdrawal: Return the exact amount of full withdrawn tokens (either token0 or token1)
-    function withdrawVariable(FluidDexModel.WithdrawDexData memory _data, IFluidVault.Tokens memory _tokens)
-        internal
-        returns (uint256 sharesBurnedOrTokenWithdrawn)
-    {
+    function withdrawVariable(
+        FluidDexModel.WithdrawDexData memory _data,
+        IFluidVault.Tokens memory _tokens
+    ) internal returns (uint256 sharesBurnedOrTokenWithdrawn) {
         _data.vaultType.requireSmartCollateral();
 
         (bool sendColl0AsWrapped, bool sendColl1AsWrapped) = FluidDexTokensUtils.shouldSendTokensAsWrapped(
-            _tokens, _data.wrapWithdrawnEth, _data.variableData.collAmount0, _data.variableData.collAmount1
+            _tokens,
+            _data.wrapWithdrawnEth,
+            _data.variableData.collAmount0,
+            _data.variableData.collAmount1
         );
 
         address sendTokensTo = (sendColl0AsWrapped || sendColl1AsWrapped) ? address(this) : _data.to;
@@ -47,7 +50,8 @@ library FluidWithdrawDexLogic {
         }
 
         // 3rd CASE: Handle partial withdrawal in either one or both collateral tokens.
-        return _partialWithdrawal(_data, _tokens, sendTokensTo, sendColl0AsWrapped, sendColl1AsWrapped);
+        return
+            _partialWithdrawal(_data, _tokens, sendTokensTo, sendColl0AsWrapped, sendColl1AsWrapped);
     }
 
     /// @notice Helper function to handle max withdrawal in coll token 0.

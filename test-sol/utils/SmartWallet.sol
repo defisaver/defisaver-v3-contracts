@@ -5,10 +5,10 @@ pragma solidity =0.8.24;
 import { BaseTest } from "./BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
-import { DSProxyFactoryInterface } from "../../contracts/DS/DSProxyFactoryInterface.sol";
-import { DSProxy } from "../../contracts/DS/DSProxy.sol";
-import { ISafeProxyFactory } from "../../contracts/interfaces/safe/ISafeProxyFactory.sol";
-import { ISafe } from "../../contracts/interfaces/safe/ISafe.sol";
+import { IDSProxyFactory } from "../../contracts/interfaces/DS/IDSProxyFactory.sol";
+import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
+import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
+import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract SmartWallet is BaseTest {
@@ -39,7 +39,7 @@ contract SmartWallet is BaseTest {
     }
 
     function createDSProxy() public ownerAsSender returns (address payable) {
-        walletAddr = payable(address(DSProxyFactoryInterface(Addresses.DS_PROXY_FACTORY).build()));
+        walletAddr = payable(address(IDSProxyFactory(Addresses.DS_PROXY_FACTORY).build()));
         isSafe = false;
         return walletAddr;
     }
@@ -52,7 +52,15 @@ contract SmartWallet is BaseTest {
         owners[0] = owner;
 
         bytes memory setupData = abi.encodeWithSelector(
-            ISafe.setup.selector, owners, 1, address(0), bytes(""), address(0), address(0), 0, payable(address(0))
+            ISafe.setup.selector,
+            owners,
+            1,
+            address(0),
+            bytes(""),
+            address(0),
+            address(0),
+            0,
+            payable(address(0))
         );
 
         walletAddr = payable(ISafeProxyFactory(Addresses.SAFE_PROXY_FACTORY)
@@ -84,7 +92,7 @@ contract SmartWallet is BaseTest {
                 revert SafeTxFailed();
             }
         } else {
-            DSProxy(walletAddr).execute(_target, _calldata);
+            IDSProxy(walletAddr).execute(_target, _calldata);
         }
     }
 

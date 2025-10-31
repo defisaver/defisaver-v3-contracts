@@ -3,8 +3,8 @@
 pragma solidity =0.8.24;
 
 import { ExchangeHelper } from "../exchangeV3/helpers/ExchangeHelper.sol";
-import { TokenUtils } from "../utils/TokenUtils.sol";
-import { IERC20 } from "../interfaces/IERC20.sol";
+import { TokenUtils } from "../utils/token/TokenUtils.sol";
+import { IERC20 } from "../interfaces/token/IERC20.sol";
 
 contract DFSPricesView is ExchangeHelper {
     error OutOfRangeSlicingError();
@@ -24,7 +24,8 @@ contract DFSPricesView is ExchangeHelper {
     ) public returns (address, uint256) {
         uint256[] memory rates = new uint256[](_wrappers.length);
         for (uint256 i = 0; i < _wrappers.length; i++) {
-            rates[i] = getExpectedRate(_wrappers[i], _srcToken, _destToken, _amount, _additionalData[i]);
+            rates[i] =
+                getExpectedRate(_wrappers[i], _srcToken, _destToken, _amount, _additionalData[i]);
         }
 
         return getBiggestRate(_wrappers, rates);
@@ -48,7 +49,11 @@ contract DFSPricesView is ExchangeHelper {
 
         (success, result) = _wrapper.call(
             abi.encodeWithSignature(
-                "getSellRate(address,address,uint256,bytes)", _srcToken, _destToken, _amount, _additionalData
+                "getSellRate(address,address,uint256,bytes)",
+                _srcToken,
+                _destToken,
+                _amount,
+                _additionalData
             )
         );
 

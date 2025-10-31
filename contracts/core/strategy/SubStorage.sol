@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../../auth/AdminAuth.sol";
-import { DFSRegistry } from "../DFSRegistry.sol";
+import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { BundleStorage } from "./BundleStorage.sol";
 import { StrategyStorage } from "./StrategyStorage.sol";
 import { StrategyModel } from "./StrategyModel.sol";
@@ -14,12 +14,17 @@ contract SubStorage is StrategyModel, AdminAuth, CoreHelper {
     error SenderNotSubOwnerError(address, uint256);
     error SubIdOutOfRange(uint256, bool);
 
-    event Subscribe(uint256 indexed subId, address indexed walletAddr, bytes32 indexed subHash, StrategySub subStruct);
+    event Subscribe(
+        uint256 indexed subId,
+        address indexed walletAddr,
+        bytes32 indexed subHash,
+        StrategySub subStruct
+    );
     event UpdateData(uint256 indexed subId, bytes32 indexed subHash, StrategySub subStruct);
     event ActivateSub(uint256 indexed subId);
     event DeactivateSub(uint256 indexed subId);
 
-    DFSRegistry public constant registry = DFSRegistry(REGISTRY_ADDR);
+    IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     StoredSubData[] public strategiesSubs;
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 
 /// @title Helper action to send tokens to the specified addresses and unwrap for weth address
@@ -29,11 +29,14 @@ contract SendTokensAndUnwrap is ActionBase {
         (Params memory inputData, uint256 arrayLength) = parseInputs(_callData);
 
         for (uint256 i = 0; i < arrayLength; ++i) {
-            inputData.tokens[i] = _parseParamAddr(inputData.tokens[i], _paramMapping[i], _subData, _returnValues);
-            inputData.receivers[i] =
-                _parseParamAddr(inputData.receivers[i], _paramMapping[arrayLength + i], _subData, _returnValues);
-            inputData.amounts[i] =
-                _parseParamUint(inputData.amounts[i], _paramMapping[2 * arrayLength + i], _subData, _returnValues);
+            inputData.tokens[i] =
+                _parseParamAddr(inputData.tokens[i], _paramMapping[i], _subData, _returnValues);
+            inputData.receivers[i] = _parseParamAddr(
+                inputData.receivers[i], _paramMapping[arrayLength + i], _subData, _returnValues
+            );
+            inputData.amounts[i] = _parseParamUint(
+                inputData.amounts[i], _paramMapping[2 * arrayLength + i], _subData, _returnValues
+            );
         }
 
         _sendTokens(inputData, arrayLength);
@@ -72,7 +75,11 @@ contract SendTokensAndUnwrap is ActionBase {
         }
     }
 
-    function parseInputs(bytes memory _callData) public pure returns (Params memory params, uint256 arrayLength) {
+    function parseInputs(bytes memory _callData)
+        public
+        pure
+        returns (Params memory params, uint256 arrayLength)
+    {
         params = abi.decode(_callData, (Params));
         arrayLength = params.tokens.length;
         if (arrayLength != params.receivers.length || arrayLength != params.amounts.length) {

@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { IEVault } from "../../../contracts/interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../../contracts/interfaces/eulerV2/IEVC.sol";
+import { IEVault } from "../../../contracts/interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../../contracts/interfaces/protocols/eulerV2/IEVC.sol";
 import { EulerV2Payback } from "../../../contracts/actions/eulerV2/EulerV2Payback.sol";
 import { EulerV2TestHelper } from "./EulerV2TestHelper.t.sol";
 
@@ -139,7 +139,10 @@ contract TestEulerV2Payback is EulerV2TestHelper {
         address assetToken = IEVault(_config.vault).asset();
 
         bytes memory callData = executeActionCalldata(
-            eulerV2PaybackEncode(_config.vault, _config.account, sender, _config.paybackAmountInUsd), _config.isDirect
+            eulerV2PaybackEncode(
+                _config.vault, _config.account, sender, _config.paybackAmountInUsd
+            ),
+            _config.isDirect
         );
 
         address account = _config.account == address(0) ? walletAddr : _config.account;

@@ -5,8 +5,8 @@ pragma solidity =0.8.24;
 import { ActionBase } from "../ActionBase.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IBorrowing } from "../../interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IBorrowing } from "../../interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
 
 /// @title Pull debt from one Euler account to another
 contract EulerV2PullDebt is ActionBase, EulerV2Helper {
@@ -60,13 +60,15 @@ contract EulerV2PullDebt is ActionBase, EulerV2Helper {
             _params.account = address(this);
         }
 
-        bool isControllerEnabled = IEVC(EVC_ADDR).isControllerEnabled(_params.account, _params.vault);
+        bool isControllerEnabled =
+            IEVC(EVC_ADDR).isControllerEnabled(_params.account, _params.vault);
 
         if (!isControllerEnabled) {
             IEVC(EVC_ADDR).enableController(_params.account, _params.vault);
         }
 
-        bytes memory pullDebtCallData = abi.encodeCall(IBorrowing.pullDebt, (_params.amount, _params.from));
+        bytes memory pullDebtCallData =
+            abi.encodeCall(IBorrowing.pullDebt, (_params.amount, _params.from));
 
         uint256 accountDebtBefore = IBorrowing(_params.vault).debtOf(_params.account);
 

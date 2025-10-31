@@ -2,9 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IERC20 } from "../../../../contracts/interfaces/IERC20.sol";
-import { IERC4626 } from "../../../../contracts/interfaces/IERC4626.sol";
-import { IStaticATokenV2 } from "../../../../contracts/interfaces/aaveV3/IStaticATokenV2.sol";
+import { IERC20 } from "../../../../contracts/interfaces/token/IERC20.sol";
+import { IERC4626 } from "../../../../contracts/interfaces/token/IERC4626.sol";
+import {
+    IStaticATokenV2
+} from "../../../../contracts/interfaces/protocols/aaveV3/IStaticATokenV2.sol";
 import { UmbrellaStake } from "../../../../contracts/actions/aaveV3/umbrella/UmbrellaStake.sol";
 import { UmbrellaUnstake } from "../../../../contracts/actions/aaveV3/umbrella/UmbrellaUnstake.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
@@ -92,22 +94,30 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
 
             bytes memory unstakeCallData = executeActionCalldata(
                 umbrellaUnstakeEncode(
-                    stkTokens[i], sender, _isMaxAmount ? type(uint256).max : unstakeAmount, _useATokens, minAmountOut
+                    stkTokens[i],
+                    sender,
+                    _isMaxAmount ? type(uint256).max : unstakeAmount,
+                    _useATokens,
+                    minAmountOut
                 ),
                 _isDirect
             );
 
             address waTokenOrGHO = IERC4626(stkTokens[i]).asset();
 
-            Snapshot memory snapshotBefore =
-                takeSnapshot(stkTokens[i], waTokenOrGHO, _getSupplyToken(stkTokens[i], _useATokens));
+            Snapshot memory snapshotBefore = takeSnapshot(
+                stkTokens[i], waTokenOrGHO, _getSupplyToken(stkTokens[i], _useATokens)
+            );
 
             wallet.execute(address(cut), unstakeCallData, 0);
 
-            Snapshot memory snapshotAfter =
-                takeSnapshot(stkTokens[i], waTokenOrGHO, _getSupplyToken(stkTokens[i], _useATokens));
+            Snapshot memory snapshotAfter = takeSnapshot(
+                stkTokens[i], waTokenOrGHO, _getSupplyToken(stkTokens[i], _useATokens)
+            );
 
-            _assertSnapshot(snapshotBefore, snapshotAfter, unstakeAmount, _isMaxAmount, waTokenOrGHO);
+            _assertSnapshot(
+                snapshotBefore, snapshotAfter, unstakeAmount, _isMaxAmount, waTokenOrGHO
+            );
         }
     }
 

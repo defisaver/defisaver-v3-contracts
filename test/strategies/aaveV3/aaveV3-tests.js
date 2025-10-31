@@ -754,10 +754,14 @@ const aaveV3CloseToDebtStrategyTest = async (numTestPairs) => {
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -1005,10 +1009,14 @@ const aaveV3FLCloseToDebtStrategyTest = async (numTestPairs) => {
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -1276,10 +1284,14 @@ const aaveV3CloseToCollStrategyTest = async (numTestPairs) => {
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 
@@ -1544,10 +1556,14 @@ const aaveV3FLCloseToCollStrategyTest = async (numTestPairs) => {
 
                 console.log('-----sender coll/debt assets after close-----');
                 console.log(
-                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)})`,
+                    `${collAssetInfo.symbol} balance: ${collAssetBalanceFloat} ($${
+                        collAssetBalanceFloat * getLocalTokenPrice(collAssetInfo.symbol)
+                    })`,
                 );
                 console.log(
-                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)})`,
+                    `${debtAssetInfo.symbol} balance: ${debtAssetBalanceFloat} ($${
+                        debtAssetBalanceFloat * getLocalTokenPrice(debtAssetInfo.symbol)
+                    })`,
                 );
                 console.log('---------------------------------------------');
 

@@ -63,11 +63,15 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
 
         assertEq(cut.groupIds(Addresses.WSTETH_ADDR), uint256(Groups.ETH_BASED));
         assertEq(cut.groupIds(Addresses.STETH_ADDR), uint256(Groups.ETH_BASED));
-        assertEq(cut.getFeeForTokens(Addresses.WSTETH_ADDR, Addresses.STETH_ADDR), STANDARD_FEE_DIVIDER);
+        assertEq(
+            cut.getFeeForTokens(Addresses.WSTETH_ADDR, Addresses.STETH_ADDR), STANDARD_FEE_DIVIDER
+        );
 
         assertEq(cut.groupIds(Addresses.WBTC_ADDR), uint256(Groups.BTC_BASED));
         assertEq(cut.groupIds(Addresses.RENBTC_ADDR), uint256(Groups.BTC_BASED));
-        assertEq(cut.getFeeForTokens(Addresses.WBTC_ADDR, Addresses.RENBTC_ADDR), STANDARD_FEE_DIVIDER);
+        assertEq(
+            cut.getFeeForTokens(Addresses.WBTC_ADDR, Addresses.RENBTC_ADDR), STANDARD_FEE_DIVIDER
+        );
     }
 
     function testAddBannedToken() public {
@@ -178,7 +182,9 @@ contract TestTokenGroupRegistry is BaseTest, TokenGroupRegistry {
         vm.startPrank(Addresses.OWNER_ADDR);
 
         uint256 groupId = 42;
-        vm.expectRevert(abi.encodeWithSelector(TokenGroupRegistry.GroupNonExistent.selector, groupId));
+        vm.expectRevert(
+            abi.encodeWithSelector(TokenGroupRegistry.GroupNonExistent.selector, groupId)
+        );
         cut.addTokenInGroup(Addresses.ETH_ADDR, groupId);
 
         vm.stopPrank();

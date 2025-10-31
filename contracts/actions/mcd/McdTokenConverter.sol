@@ -4,9 +4,9 @@ pragma solidity =0.8.24;
 
 import { McdHelper } from "./helpers/McdHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { IMkrSkyConverter } from "../../interfaces/mcd/IMkrSkyConverter.sol";
-import { IDaiUSDSConverter } from "../../interfaces/mcd/IDaiUSDSConverter.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { IMkrSkyConverter } from "../../interfaces/protocols/mcd/IMkrSkyConverter.sol";
+import { IDaiUSDSConverter } from "../../interfaces/protocols/mcd/IDaiUSDSConverter.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Convert MKR -> SKY and DAI <-> USDS
 contract McdTokenConverter is ActionBase, McdHelper {
@@ -32,10 +32,12 @@ contract McdTokenConverter is ActionBase, McdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.tokenAddr = _parseParamAddr(inputData.tokenAddr, _paramMapping[0], _subData, _returnValues);
+        inputData.tokenAddr =
+            _parseParamAddr(inputData.tokenAddr, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[3], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[3], _subData, _returnValues);
 
         (uint256 newTokenAmount, bytes memory logData) = _mcdConvert(inputData);
         emit ActionEvent("McdTokenConverter", logData);
@@ -57,7 +59,8 @@ contract McdTokenConverter is ActionBase, McdHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _mcdConvert(Params memory _inputData) internal returns (uint256, bytes memory) {
-        _inputData.amount = _inputData.tokenAddr.pullTokensIfNeeded(_inputData.from, _inputData.amount);
+        _inputData.amount =
+            _inputData.tokenAddr.pullTokensIfNeeded(_inputData.from, _inputData.amount);
         uint256 newTokenAmount;
 
         if (_inputData.tokenAddr == USDS_ADDRESS) {

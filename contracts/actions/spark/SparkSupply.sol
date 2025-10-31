@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Supply a token to an Spark market
@@ -42,12 +42,18 @@ contract SparkSupply is ActionBase, SparkHelper {
 
         params.amount = _parseParamUint(params.amount, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
-        params.assetId = uint16(_parseParamUint(params.assetId, _paramMapping[2], _subData, _returnValues));
+        params.assetId =
+            uint16(_parseParamUint(params.assetId, _paramMapping[2], _subData, _returnValues));
         params.useDefaultMarket =
-            _parseParamUint(params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
-        params.useOnBehalf = _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
+            _parseParamUint(
+                    params.useDefaultMarket ? 1 : 0, _paramMapping[4], _subData, _returnValues
+                ) == 1;
+        params.useOnBehalf =
+            _parseParamUint(params.useOnBehalf ? 1 : 0, _paramMapping[5], _subData, _returnValues)
+                == 1;
         params.market = _parseParamAddr(params.market, _paramMapping[6], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[7], _subData, _returnValues);
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[7], _subData, _returnValues);
 
         if (params.useDefaultMarket) {
             params.market = DEFAULT_SPARK_MARKET;
@@ -65,13 +71,15 @@ contract SparkSupply is ActionBase, SparkHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _supply(params.market, params.amount, params.from, params.assetId, params.onBehalf);
+        (, bytes memory logData) =
+            _supply(params.market, params.amount, params.from, params.assetId, params.onBehalf);
         logger.logActionDirectEvent("SparkSupply", logData);
     }
 
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
-        (, bytes memory logData) = _supply(params.market, params.amount, params.from, params.assetId, params.onBehalf);
+        (, bytes memory logData) =
+            _supply(params.market, params.amount, params.from, params.assetId, params.onBehalf);
         logger.logActionDirectEvent("SparkSupply", logData);
     }
 
@@ -89,10 +97,13 @@ contract SparkSupply is ActionBase, SparkHelper {
     /// @param _from Where are we pulling the supply tokens amount from
     /// @param _assetId The id of the token to be deposited
     /// @param _onBehalf For what user we are supplying the tokens, defaults to user's wallet
-    function _supply(address _market, uint256 _amount, address _from, uint16 _assetId, address _onBehalf)
-        internal
-        returns (uint256, bytes memory)
-    {
+    function _supply(
+        address _market,
+        uint256 _amount,
+        address _from,
+        uint16 _assetId,
+        address _onBehalf
+    ) internal returns (uint256, bytes memory) {
         ISparkPool lendingPool = getSparkLendingPool(_market);
         address tokenAddr = lendingPool.getReserveAddressById(_assetId);
 

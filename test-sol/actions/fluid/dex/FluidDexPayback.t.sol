@@ -2,7 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import {
+    IFluidVaultResolver
+} from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidDexPayback } from "../../../../contracts/actions/fluid/dex/FluidDexPayback.sol";
 import { FluidView } from "../../../../contracts/views/FluidView.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
@@ -263,11 +265,13 @@ contract TestFluidDexPayback is FluidTestBase {
             FluidView.VaultData memory vaultData = fluidView.getVaultData(vaults[i]);
             LocalVars memory vars;
 
-            (vaultData.borrowToken0, vars.paybackAmount0) =
-                giveAndApproveToken(vaultData.borrowToken0, sender, walletAddr, _config.paybackToken0AmountUSD);
+            (vaultData.borrowToken0, vars.paybackAmount0) = giveAndApproveToken(
+                vaultData.borrowToken0, sender, walletAddr, _config.paybackToken0AmountUSD
+            );
 
-            (vaultData.borrowToken1, vars.paybackAmount1) =
-                giveAndApproveToken(vaultData.borrowToken1, sender, walletAddr, _config.paybackToken1AmountUSD);
+            (vaultData.borrowToken1, vars.paybackAmount1) = giveAndApproveToken(
+                vaultData.borrowToken1, sender, walletAddr, _config.paybackToken1AmountUSD
+            );
 
             // Calculate shares to burn or debt amount in case of max payback.
             if (_config.maxPaybackToken0) {
@@ -275,8 +279,9 @@ contract TestFluidDexPayback is FluidTestBase {
             } else if (_config.maxPaybackToken1) {
                 vars.maxDebtToPull = estimateDexPositionDebtInOneToken(nftId, false, fluidView);
             } else {
-                vars.estimatedSharesToBurn =
-                    estimatePaybackShares(vaultData.dexBorrowData.dexPool, vars.paybackAmount0, vars.paybackAmount1);
+                vars.estimatedSharesToBurn = estimatePaybackShares(
+                    vaultData.dexBorrowData.dexPool, vars.paybackAmount0, vars.paybackAmount1
+                );
             }
 
             vars.paybackVariableData = FluidDexModel.PaybackVariableData({
@@ -331,23 +336,27 @@ contract TestFluidDexPayback is FluidTestBase {
             if (_config.maxPaybackToken0) {
                 assertEq(vars.userPositionAfter.isLiquidated, false);
                 assertEq(vars.userPositionAfter.borrow, 0);
-                uint256 token0Pulled = vars.senderBorrowToken0BalanceBefore - vars.senderBorrowToken0BalanceAfter;
+                uint256 token0Pulled =
+                    vars.senderBorrowToken0BalanceBefore - vars.senderBorrowToken0BalanceAfter;
                 assertTrue(token0Pulled > 0);
                 assertTrue(token0Pulled <= vars.maxDebtToPull);
             } else if (_config.maxPaybackToken1) {
                 assertEq(vars.userPositionAfter.isLiquidated, false);
                 assertEq(vars.userPositionAfter.borrow, 0);
-                uint256 token1Pulled = vars.senderBorrowToken1BalanceBefore - vars.senderBorrowToken1BalanceAfter;
+                uint256 token1Pulled =
+                    vars.senderBorrowToken1BalanceBefore - vars.senderBorrowToken1BalanceAfter;
                 assertTrue(token1Pulled > 0);
                 assertTrue(token1Pulled <= vars.maxDebtToPull);
             } else {
                 assertEq(vars.userPositionAfter.isLiquidated, false);
                 assertTrue(vars.userPositionAfter.borrow < vars.userPositionBefore.borrow);
                 assertEq(
-                    vars.senderBorrowToken0BalanceAfter, vars.senderBorrowToken0BalanceBefore - vars.paybackAmount0
+                    vars.senderBorrowToken0BalanceAfter,
+                    vars.senderBorrowToken0BalanceBefore - vars.paybackAmount0
                 );
                 assertEq(
-                    vars.senderBorrowToken1BalanceAfter, vars.senderBorrowToken1BalanceBefore - vars.paybackAmount1
+                    vars.senderBorrowToken1BalanceAfter,
+                    vars.senderBorrowToken1BalanceBefore - vars.paybackAmount1
                 );
             }
         }

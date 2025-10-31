@@ -2,15 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../DS/DSMath.sol";
+import { DSMath } from "../_vendor/DS/DSMath.sol";
 
 import { McdHelper } from "../actions/mcd/helpers/McdHelper.sol";
-import { IManager } from "../interfaces/mcd/IManager.sol";
-import { ICropper } from "../interfaces/mcd/ICropper.sol";
-import { ISpotter } from "../interfaces/mcd/ISpotter.sol";
-import { IPot } from "../interfaces/mcd/IPot.sol";
-import { IDSProxy } from "../interfaces/IDSProxy.sol";
-import { ICdpRegistry } from "../interfaces/mcd/ICdpRegistry.sol";
+import { IManager } from "../interfaces/protocols/mcd/IManager.sol";
+import { ICropper } from "../interfaces/protocols/mcd/ICropper.sol";
+import { ISpotter } from "../interfaces/protocols/mcd/ISpotter.sol";
+import { IPot } from "../interfaces/protocols/mcd/IPot.sol";
+import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
+import { ICdpRegistry } from "../interfaces/protocols/mcd/ICdpRegistry.sol";
 
 /// @title Getter contract for Vault info from Maker protocol
 contract McdView is DSMath, McdHelper {
@@ -24,7 +24,11 @@ contract McdView is DSMath, McdHelper {
     /// @param _managerAddr Address of the McdManger or Cropper contract
     /// @param _vaultId Id of the Vaults
     /// @param _ilk Ilk of the Vault
-    function getVaultInfo(address _managerAddr, uint256 _vaultId, bytes32 _ilk) public view returns (uint256, uint256) {
+    function getVaultInfo(address _managerAddr, uint256 _vaultId, bytes32 _ilk)
+        public
+        view
+        returns (uint256, uint256)
+    {
         address urn;
         if (_managerAddr == CROPPER) {
             address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
@@ -42,7 +46,14 @@ contract McdView is DSMath, McdHelper {
     function getCdpInfo(uint256 _cdpId)
         external
         view
-        returns (address urn, address owner, address userAddr, bytes32 ilk, uint256 collateral, uint256 debt)
+        returns (
+            address urn,
+            address owner,
+            address userAddr,
+            bytes32 ilk,
+            uint256 collateral,
+            uint256 debt
+        )
     {
         IManager manager = IManager(MCD_MANAGER);
         owner = manager.owns(_cdpId);

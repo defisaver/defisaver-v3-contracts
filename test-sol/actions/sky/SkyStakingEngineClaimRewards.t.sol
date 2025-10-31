@@ -4,14 +4,18 @@ pragma solidity =0.8.24;
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
-import {SkyStakingEngineOpen} from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
-import {SkyStakingEngineStake} from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
-import {SkyStakingEngineClaimRewards} from "../../../contracts/actions/sky/SkyStakingEngineClaimRewards.sol";
-import {SkyStakingEngineSelectFarm} from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
-import {SkyView} from "../../../contracts/views/SkyView.sol";
+import { SkyStakingEngineOpen } from "../../../contracts/actions/sky/SkyStakingEngineOpen.sol";
+import { SkyStakingEngineStake } from "../../../contracts/actions/sky/SkyStakingEngineStake.sol";
+import {
+    SkyStakingEngineClaimRewards
+} from "../../../contracts/actions/sky/SkyStakingEngineClaimRewards.sol";
+import {
+    SkyStakingEngineSelectFarm
+} from "../../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
+import { SkyView } from "../../../contracts/views/SkyView.sol";
 
-import { ILockstakeEngine } from "../../../contracts/interfaces/sky/ILockstakeEngine.sol";
-import { IERC20 } from "../../../contracts/interfaces/IERC20.sol";
+import { ILockstakeEngine } from "../../../contracts/interfaces/protocols/sky/ILockstakeEngine.sol";
+import { IERC20 } from "../../../contracts/interfaces/token/IERC20.sol";
 
 import { SkyExecuteActions } from "../../utils/executeActions/SkyExecuteActions.sol";
 
@@ -81,7 +85,9 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
         uint256 index = 0;
 
         //  Stake first
-        executeSkyStakingEngineStake(STAKING_ENGINE, index, _farm, AMOUNT, sender, open, selectFarm, stake, wallet);
+        executeSkyStakingEngineStake(
+            STAKING_ENGINE, index, _farm, AMOUNT, sender, open, selectFarm, stake, wallet
+        );
         uint256 amountBefore = IERC20(_rewardToken).balanceOf(sender);
 
         skip(365 days);
@@ -96,8 +102,9 @@ contract TestSkyStakingEngineClaimRewards is SkyExecuteActions {
         assertGt(amountEarnedBeforeClaim, 0, "Should have earned rewards before claiming");
 
         //  Execution logic of claiming rewards
-        bytes memory executeActionCallData =
-            executeActionCalldata(skyStakingEngineClaimRewardsEncode(STAKING_ENGINE, index, _farm, sender), _isDirect);
+        bytes memory executeActionCallData = executeActionCalldata(
+            skyStakingEngineClaimRewardsEncode(STAKING_ENGINE, index, _farm, sender), _isDirect
+        );
         vm.expectEmit(true, true, true, false, address(STAKING_ENGINE));
         emit ILockstakeEngine.GetReward(walletAddr, index, _farm, sender, 0);
         wallet.execute(address(cut), executeActionCallData, 0);

@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "./../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Action for withdrawing tokens from DSA
 contract InstPullTokens is ActionBase {
@@ -21,13 +21,12 @@ contract InstPullTokens is ActionBase {
     }
 
     /// @inheritdoc ActionBase
-    function executeAction(bytes memory _callData, bytes32[] memory, uint8[] memory, bytes32[] memory)
-        public
-        payable
-        virtual
-        override
-        returns (bytes32)
-    {
+    function executeAction(
+        bytes memory _callData,
+        bytes32[] memory,
+        uint8[] memory,
+        bytes32[] memory
+    ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
         bytes memory logData = _pullTokens(inputData);
@@ -60,7 +59,9 @@ contract InstPullTokens is ActionBase {
     }
 
     function _createSpell(Params memory _inputData) internal view returns (bytes memory) {
-        require(_inputData.amounts.length == _inputData.tokens.length, "Arrays must be of the same size");
+        require(
+            _inputData.amounts.length == _inputData.tokens.length, "Arrays must be of the same size"
+        );
 
         uint256 numOfTokens = _inputData.tokens.length;
 
@@ -81,7 +82,8 @@ contract InstPullTokens is ActionBase {
             );
         }
 
-        return abi.encodeWithSignature("cast(string[],bytes[],address)", _targetNames, _data, _origin);
+        return
+            abi.encodeWithSignature("cast(string[],bytes[],address)", _targetNames, _data, _origin);
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

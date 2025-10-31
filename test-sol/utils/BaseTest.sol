@@ -2,8 +2,8 @@
 
 pragma solidity =0.8.24;
 
-import { IERC20 } from "../../contracts/interfaces/IERC20.sol";
-import { SafeERC20 } from "../../contracts/utils/SafeERC20.sol";
+import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
+import { SafeERC20 } from "../../contracts/_vendor/openzeppelin/SafeERC20.sol";
 import { Config } from "../config/Config.sol";
 
 /// @notice Base test - root contract for all tests
@@ -76,10 +76,12 @@ contract BaseTest is Config {
         IERC20(_token).safeApprove(_to, _amount);
     }
 
-    function giveTokenAndApproveAsSender(address _sender, address _token, address _to, uint256 _amount)
-        internal
-        executeAsSender(_sender)
-    {
+    function giveTokenAndApproveAsSender(
+        address _sender,
+        address _token,
+        address _to,
+        uint256 _amount
+    ) internal executeAsSender(_sender) {
         give(_token, _sender, _amount);
         IERC20(_token).safeApprove(_to, _amount);
     }

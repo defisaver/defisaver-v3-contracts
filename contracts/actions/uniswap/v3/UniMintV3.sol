@@ -3,11 +3,11 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { UniV3Helper } from "./helpers/UniV3Helper.sol";
 import {
     IUniswapV3NonfungiblePositionManager
-} from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+} from "../../../interfaces/protocols/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Mints NFT that represents a position in uni v3
 contract UniMintV3 is ActionBase, UniV3Helper {
@@ -49,8 +49,10 @@ contract UniMintV3 is ActionBase, UniV3Helper {
     ) public payable virtual override returns (bytes32) {
         Params memory uniData = parseInputs(_callData);
 
-        uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[0], _subData, _returnValues);
-        uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[1], _subData, _returnValues);
+        uniData.amount0Desired =
+            _parseParamUint(uniData.amount0Desired, _paramMapping[0], _subData, _returnValues);
+        uniData.amount1Desired =
+            _parseParamUint(uniData.amount1Desired, _paramMapping[1], _subData, _returnValues);
 
         (uint256 tokenId, bytes memory logData) = _uniCreatePosition(uniData);
         emit ActionEvent("UniMintV3", logData);
@@ -71,10 +73,15 @@ contract UniMintV3 is ActionBase, UniV3Helper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _uniCreatePosition(Params memory _uniData) internal returns (uint256 tokenId, bytes memory logData) {
+    function _uniCreatePosition(Params memory _uniData)
+        internal
+        returns (uint256 tokenId, bytes memory logData)
+    {
         // fetch tokens from address;
-        uint256 amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
-        uint256 amount1Pulled = _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
+        uint256 amount0Pulled =
+            _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
+        uint256 amount1Pulled =
+            _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
 
         // approve positionManager so it can pull tokens
         _uniData.token0.approveToken(address(positionManager), amount0Pulled);

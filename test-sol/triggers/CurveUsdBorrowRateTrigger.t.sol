@@ -29,13 +29,15 @@ contract TestCurveUsdBorrowRateTrigger is BaseTest {
     function testWstethRateSub() public view {
         uint256 rate = cut.calcBorrowRate(WSTETH_MARKET);
 
-        CurveUsdBorrowRateTrigger.SubParams memory subEqualOverFail = CurveUsdBorrowRateTrigger.SubParams(
-            WSTETH_MARKET, rate, uint8(CurveUsdBorrowRateTrigger.TargetRateState.OVER)
-        );
+        CurveUsdBorrowRateTrigger.SubParams memory subEqualOverFail =
+            CurveUsdBorrowRateTrigger.SubParams(
+                WSTETH_MARKET, rate, uint8(CurveUsdBorrowRateTrigger.TargetRateState.OVER)
+            );
 
-        CurveUsdBorrowRateTrigger.SubParams memory subEqualUnderFail = CurveUsdBorrowRateTrigger.SubParams(
-            WSTETH_MARKET, rate, uint8(CurveUsdBorrowRateTrigger.TargetRateState.UNDER)
-        );
+        CurveUsdBorrowRateTrigger.SubParams memory subEqualUnderFail =
+            CurveUsdBorrowRateTrigger.SubParams(
+                WSTETH_MARKET, rate, uint8(CurveUsdBorrowRateTrigger.TargetRateState.UNDER)
+            );
 
         CurveUsdBorrowRateTrigger.SubParams memory subOver = CurveUsdBorrowRateTrigger.SubParams(
             WSTETH_MARKET, rate - 1, uint8(CurveUsdBorrowRateTrigger.TargetRateState.OVER)

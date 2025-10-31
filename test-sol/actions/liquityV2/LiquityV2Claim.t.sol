@@ -2,9 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { ITroveManager } from "../../../contracts/interfaces/liquityV2/ITroveManager.sol";
-import { ICollSurplusPool } from "../../../contracts/interfaces/liquityV2/ICollSurplusPool.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { ITroveManager } from "../../../contracts/interfaces/protocols/liquityV2/ITroveManager.sol";
+import {
+    ICollSurplusPool
+} from "../../../contracts/interfaces/protocols/liquityV2/ICollSurplusPool.sol";
 import { LiquityV2Claim } from "../../../contracts/actions/liquityV2/trove/LiquityV2Claim.sol";
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";

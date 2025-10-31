@@ -2,13 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../interfaces/liquityV2/IAddressesRegistry.sol";
-import { IBorrowerOperations } from "../../../interfaces/liquityV2/IBorrowerOperations.sol";
-import { ITroveManager } from "../../../interfaces/liquityV2/ITroveManager.sol";
+import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import {
+    IBorrowerOperations
+} from "../../../interfaces/protocols/liquityV2/IBorrowerOperations.sol";
+import { ITroveManager } from "../../../interfaces/protocols/liquityV2/ITroveManager.sol";
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Adjusts a LiquityV2 trove on a specific market
 contract LiquityV2Adjust is ActionBase, LiquityV2Helper {
@@ -57,13 +59,18 @@ contract LiquityV2Adjust is ActionBase, LiquityV2Helper {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
         params.troveId = _parseParamUint(params.troveId, _paramMapping[3], _subData, _returnValues);
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[4], _subData, _returnValues);
-        params.debtAmount = _parseParamUint(params.debtAmount, _paramMapping[5], _subData, _returnValues);
-        params.maxUpfrontFee = _parseParamUint(params.maxUpfrontFee, _paramMapping[6], _subData, _returnValues);
-        params.collAction =
-            CollActionType(_parseParamUint(uint8(params.collAction), _paramMapping[7], _subData, _returnValues));
-        params.debtAction =
-            DebtActionType(_parseParamUint(uint8(params.debtAction), _paramMapping[8], _subData, _returnValues));
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[4], _subData, _returnValues);
+        params.debtAmount =
+            _parseParamUint(params.debtAmount, _paramMapping[5], _subData, _returnValues);
+        params.maxUpfrontFee =
+            _parseParamUint(params.maxUpfrontFee, _paramMapping[6], _subData, _returnValues);
+        params.collAction = CollActionType(
+            _parseParamUint(uint8(params.collAction), _paramMapping[7], _subData, _returnValues)
+        );
+        params.debtAction = DebtActionType(
+            _parseParamUint(uint8(params.debtAction), _paramMapping[8], _subData, _returnValues)
+        );
 
         (uint256 debtAmount, bytes memory logData) = _adjust(params);
         emit ActionEvent("LiquityV2Adjust", logData);
@@ -97,7 +104,8 @@ contract LiquityV2Adjust is ActionBase, LiquityV2Helper {
         if (_params.debtAction == DebtActionType.PAYBACK) {
             address troveManager = IAddressesRegistry(_params.market).troveManager();
 
-            uint256 entireDebt = ITroveManager(troveManager).getLatestTroveData(_params.troveId).entireDebt;
+            uint256 entireDebt =
+                ITroveManager(troveManager).getLatestTroveData(_params.troveId).entireDebt;
 
             uint256 maxRepayment = entireDebt > MIN_DEBT ? entireDebt - MIN_DEBT : 0;
 

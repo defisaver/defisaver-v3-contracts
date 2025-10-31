@@ -4,14 +4,15 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { CompV3RatioHelper } from "../compoundV3/helpers/CompV3RatioHelper.sol";
-import { TransientStorageCancun } from "../../utils/TransientStorageCancun.sol";
+import { TransientStorageCancun } from "../../utils/transient/TransientStorageCancun.sol";
 
 /// @title Action to check the ratio of the Compound V3 position after strategy execution.
 contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
     /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
 
-    TransientStorageCancun public constant tempStorage = TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
+    TransientStorageCancun public constant tempStorage =
+        TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     error BadAfterRatio(uint256 startRatio, uint256 currRatio);
 
@@ -40,13 +41,19 @@ contract CompV3RatioCheck is ActionBase, CompV3RatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        uint256 ratioState = _parseParamUint(uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues);
-        uint256 targetRatio = _parseParamUint(uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues);
-        address market = _parseParamAddr(address(inputData.market), _paramMapping[2], _subData, _returnValues);
+        uint256 ratioState = _parseParamUint(
+            uint256(inputData.ratioState), _paramMapping[0], _subData, _returnValues
+        );
+        uint256 targetRatio = _parseParamUint(
+            uint256(inputData.targetRatio), _paramMapping[1], _subData, _returnValues
+        );
+        address market =
+            _parseParamAddr(address(inputData.market), _paramMapping[2], _subData, _returnValues);
 
         address user;
         if (_paramMapping.length == 4) {
-            user = _parseParamAddr(address(inputData.user), _paramMapping[3], _subData, _returnValues);
+            user =
+                _parseParamAddr(address(inputData.user), _paramMapping[3], _subData, _returnValues);
         }
 
         if (user == address(0)) {

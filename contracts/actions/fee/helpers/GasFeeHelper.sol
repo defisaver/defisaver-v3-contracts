@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../../../DS/DSMath.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { FeeRecipient } from "../../../utils/FeeRecipient.sol";
-import { TokenPriceHelper } from "../../../utils/TokenPriceHelper.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
+import { FeeRecipient } from "../../../utils/fee/FeeRecipient.sol";
+import { TokenPriceHelper } from "../../../utils/token/TokenPriceHelper.sol";
 
 contract GasFeeHelper is DSMath, TokenPriceHelper {
     using TokenUtils for address;

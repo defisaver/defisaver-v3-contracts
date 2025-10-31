@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { ISafe } from "../interfaces/safe/ISafe.sol";
+import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 
 /// @title SafeModulePermission contract which works with Safe modules to give execute permission
 contract SafeModulePermission {

@@ -8,7 +8,10 @@ library StrategyIDs {
             return true;
         }
 
-        if ((block.chainid == 42_161 || block.chainid == 10 || block.chainid == 8453) && _strategyID == 9) {
+        if (
+            (block.chainid == 42_161 || block.chainid == 10 || block.chainid == 8453)
+                && _strategyID == 9
+        ) {
             return true;
         }
 
@@ -20,7 +23,10 @@ library StrategyIDs {
             return true;
         }
 
-        if ((block.chainid == 42_161 || block.chainid == 10 || block.chainid == 8453) && _strategyID == 8) {
+        if (
+            (block.chainid == 42_161 || block.chainid == 10 || block.chainid == 8453)
+                && _strategyID == 8
+        ) {
             return true;
         }
 
@@ -62,7 +68,13 @@ library StrategyIDs {
     }
 
     function isAaveV3CloseStrategy(uint256 _strategyID) internal view returns (bool) {
-        if (block.chainid == 1 && (_strategyID == 71 || _strategyID == 72 || _strategyID == 73 || _strategyID == 74)) {
+        if (
+            block.chainid == 1
+                && (_strategyID == 71
+                    || _strategyID == 72
+                    || _strategyID == 73
+                    || _strategyID == 74)
+        ) {
             return true;
         }
 

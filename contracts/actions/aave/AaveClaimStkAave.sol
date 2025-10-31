@@ -48,10 +48,14 @@ contract AaveClaimStkAave is ActionBase, AaveHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     /// @notice Claims stkAave rewards on the assets of the lending pool
-    function _aaveClaimStkAave(Params memory _params) internal returns (uint256 claimedAmount, bytes memory logData) {
+    function _aaveClaimStkAave(Params memory _params)
+        internal
+        returns (uint256 claimedAmount, bytes memory logData)
+    {
         // amount 0 is safe
         // amount > unclaimedRewards is safe
-        claimedAmount = AaveIncentivesController.claimRewards(_params.assets, _params.amount, _params.to);
+        claimedAmount =
+            AaveIncentivesController.claimRewards(_params.assets, _params.amount, _params.to);
 
         logData = abi.encode(_params, claimedAmount);
     }

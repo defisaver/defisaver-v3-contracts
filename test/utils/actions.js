@@ -95,15 +95,6 @@ const changeProxyOwner = async (proxy, newOwner) => {
     return tx;
 };
 
-const automationV2Unsub = async (proxy, protocol, cdpId = 0) => {
-    const automationV2UnsubAction = new dfs.actions.basic.AutomationV2Unsub(protocol, cdpId);
-
-    const functionData = automationV2UnsubAction.encodeForDsProxyCall()[1];
-
-    const tx = await executeAction('AutomationV2Unsub', functionData, proxy);
-    return tx;
-};
-
 const proxyApproveToken = async (proxy, tokenAddr, spender, amount) => {
     const approveAction = new dfs.actions.basic.ApproveTokenAction(tokenAddr, spender, amount);
     const functionData = approveAction.encodeForDsProxyCall()[1];
@@ -3943,7 +3934,6 @@ module.exports = {
     buyTokenIfNeeded,
     pullTokensInstDSA,
     changeProxyOwner,
-    automationV2Unsub,
     updateSubData,
     proxyApproveToken,
 

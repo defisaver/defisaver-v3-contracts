@@ -2,12 +2,12 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../interfaces/liquityV2/IAddressesRegistry.sol";
-import { IStabilityPool } from "../../../interfaces/liquityV2/IStabilityPool.sol";
+import { IAddressesRegistry } from "../../../interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { IStabilityPool } from "../../../interfaces/protocols/liquityV2/IStabilityPool.sol";
 
 import { LiquityV2Helper } from "../helpers/LiquityV2Helper.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Deposits a token to the LiquityV2 Stability Pool
 contract LiquityV2SPDeposit is ActionBase, LiquityV2Helper {
@@ -33,10 +33,13 @@ contract LiquityV2SPDeposit is ActionBase, LiquityV2Helper {
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
-        params.boldGainTo = _parseParamAddr(params.boldGainTo, _paramMapping[2], _subData, _returnValues);
-        params.collGainTo = _parseParamAddr(params.collGainTo, _paramMapping[3], _subData, _returnValues);
+        params.boldGainTo =
+            _parseParamAddr(params.boldGainTo, _paramMapping[2], _subData, _returnValues);
+        params.collGainTo =
+            _parseParamAddr(params.collGainTo, _paramMapping[3], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[4], _subData, _returnValues);
-        params.doClaim = _parseParamUint(params.doClaim ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
+        params.doClaim =
+            _parseParamUint(params.doClaim ? 1 : 0, _paramMapping[5], _subData, _returnValues) == 1;
 
         (uint256 depositedAmount, bytes memory logData) = _spDeposit(params);
         emit ActionEvent("LiquityV2SPDeposit", logData);
@@ -63,8 +66,9 @@ contract LiquityV2SPDeposit is ActionBase, LiquityV2Helper {
 
         uint256 boldGain = _params.doClaim ? pool.getDepositorYieldGain(address(this)) : 0;
 
-        uint256 collGain =
-            _params.doClaim ? pool.getDepositorCollGain(address(this)) + pool.stashedColl(address(this)) : 0;
+        uint256 collGain = _params.doClaim
+            ? pool.getDepositorCollGain(address(this)) + pool.stashedColl(address(this))
+            : 0;
 
         _params.amount = BOLD_ADDR.pullTokensIfNeeded(_params.from, _params.amount);
         pool.provideToSP(_params.amount, _params.doClaim);

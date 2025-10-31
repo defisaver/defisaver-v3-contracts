@@ -22,5 +22,5 @@
         "no-loop-func": "off", // allow functions inside a loop
         "no-unused-vars": "error"
     },
-    "ignorePatterns": ["gen/sdk/**/*.ts"]
+    "ignorePatterns": ["gen/sdk/**/*.ts", "deprecated/**/*"]
 }

@@ -2,12 +2,14 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidMerkleDistributor } from "../../interfaces/fluid/IFluidMerkleDistributor.sol";
+import {
+    IFluidMerkleDistributor
+} from "../../interfaces/protocols/fluid/IFluidMerkleDistributor.sol";
 
 import { FluidHelper } from "./helpers/FluidHelper.sol";
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Claim rewards from Fluid protocol
 contract FluidClaim is ActionBase, FluidHelper {
@@ -40,9 +42,12 @@ contract FluidClaim is ActionBase, FluidHelper {
         Params memory params = parseInputs(_callData);
 
         params.to = _parseParamAddr(params.to, _paramMapping[0], _subData, _returnValues);
-        params.cumulativeAmount = _parseParamUint(params.cumulativeAmount, _paramMapping[1], _subData, _returnValues);
-        params.positionId = _parseParamABytes32(params.positionId, _paramMapping[2], _subData, _returnValues);
-        params.positionType = uint8(_parseParamUint(params.positionType, _paramMapping[3], _subData, _returnValues));
+        params.cumulativeAmount =
+            _parseParamUint(params.cumulativeAmount, _paramMapping[1], _subData, _returnValues);
+        params.positionId =
+            _parseParamABytes32(params.positionId, _paramMapping[2], _subData, _returnValues);
+        params.positionType =
+            uint8(_parseParamUint(params.positionType, _paramMapping[3], _subData, _returnValues));
         params.cycle = _parseParamUint(params.cycle, _paramMapping[4], _subData, _returnValues);
 
         (uint256 amount, bytes memory logData) = _claim(params);

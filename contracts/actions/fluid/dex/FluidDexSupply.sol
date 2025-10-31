@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVault } from "../../../interfaces/fluid/vaults/IFluidVault.sol";
+import { IFluidVault } from "../../../interfaces/protocols/fluid/vaults/IFluidVault.sol";
 import { FluidHelper } from "../helpers/FluidHelper.sol";
 import { FluidDexModel } from "../helpers/FluidDexModel.sol";
 import { FluidLiquidityModel } from "../helpers/FluidLiquidityModel.sol";
@@ -10,7 +10,7 @@ import { FluidSupplyLiquidityLogic } from "../logic/liquidity/FluidSupplyLiquidi
 import { FluidSupplyDexLogic } from "../logic/dex/FluidSupplyDexLogic.sol";
 import { FluidVaultTypes } from "../helpers/FluidVaultTypes.sol";
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 
 /// @title Supply tokens to Fluid DEX vault (T2, T3, T4)
 contract FluidDexSupply is ActionBase, FluidHelper {
@@ -43,13 +43,17 @@ contract FluidDexSupply is ActionBase, FluidHelper {
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
         params.nftId = _parseParamUint(params.nftId, _paramMapping[2], _subData, _returnValues);
 
-        params.supplyAmount = _parseParamUint(params.supplyAmount, _paramMapping[3], _subData, _returnValues);
-        params.supplyVariableData.collAmount0 =
-            _parseParamUint(params.supplyVariableData.collAmount0, _paramMapping[4], _subData, _returnValues);
-        params.supplyVariableData.collAmount1 =
-            _parseParamUint(params.supplyVariableData.collAmount1, _paramMapping[5], _subData, _returnValues);
-        params.supplyVariableData.minCollShares =
-            _parseParamUint(params.supplyVariableData.minCollShares, _paramMapping[6], _subData, _returnValues);
+        params.supplyAmount =
+            _parseParamUint(params.supplyAmount, _paramMapping[3], _subData, _returnValues);
+        params.supplyVariableData.collAmount0 = _parseParamUint(
+            params.supplyVariableData.collAmount0, _paramMapping[4], _subData, _returnValues
+        );
+        params.supplyVariableData.collAmount1 = _parseParamUint(
+            params.supplyVariableData.collAmount1, _paramMapping[5], _subData, _returnValues
+        );
+        params.supplyVariableData.minCollShares = _parseParamUint(
+            params.supplyVariableData.minCollShares, _paramMapping[6], _subData, _returnValues
+        );
 
         (uint256 supplyAmountOrShares, bytes memory logData) = _supply(params);
         emit ActionEvent("FluidDexSupply", logData);

@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
-import { ITrigger } from "../interfaces/ITrigger.sol";
+import { ITrigger } from "../interfaces/core/ITrigger.sol";
 
 /// @title Trigger contract that verifies if the current gas price of tx is lower than the max allowed gas price
 contract GasPriceTrigger is ITrigger, AdminAuth {
