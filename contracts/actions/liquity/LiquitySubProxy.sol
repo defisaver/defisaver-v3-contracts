@@ -44,7 +44,7 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sm
     /// @dev User can't just sub a boost bundle without repay
     function subToLiquityAutomation(LiquitySubData calldata _subData) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_getWalletType(address(this)));
 
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
@@ -64,7 +64,7 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sm
         public
     {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_getWalletType(address(this)));
 
         // update repay as we must have a subId, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
@@ -93,7 +93,7 @@ contract LiquitySubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Sm
     /// @notice Activates Repay sub and if exists a Boost sub
     function activateSub(uint32 _subId1, uint32 _subId2) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_getWalletType(address(this)));
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
 
         if (_subId2 != 0) {

@@ -6,12 +6,12 @@ import { Permission } from "../auth/Permission.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
 contract MockPermission is Permission {
-    function giveAuthContractPermission(WalletType _walletType) public {
-        super._giveAuthContractPermission(_walletType);
+    function givePermissionToAuthContract(WalletType _walletType) public {
+        super._givePermissionToAuthContract(_walletType);
     }
 
-    function removeAuthContractPermission(WalletType _walletType) public {
-        super._removeAuthContractPermission(_walletType);
+    function removePermissionFromAuthContract(WalletType _walletType) public {
+        super._removePermissionFromAuthContract(_walletType);
     }
 
     function givePermissionTo(WalletType _walletType, address _to) public {

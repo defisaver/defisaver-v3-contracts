@@ -11,12 +11,12 @@ import { WalletType } from "../utils/DFSTypes.sol";
 /// @dev Called from the context of the wallet
 contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermission {
     /// @notice Gives permission to Auth contract used by dfs automation
-    function _giveAuthContractPermission(WalletType _walletType) internal {
+    function _givePermissionToAuthContract(WalletType _walletType) internal {
         _givePermissionTo(_walletType, _getAuthContractAddress(_walletType));
     }
 
     /// @notice Removes permission for Auth contract used by dfs automation
-    function _removeAuthContractPermission(WalletType _walletType) internal {
+    function _removePermissionFromAuthContract(WalletType _walletType) internal {
         _removePermissionFrom(_walletType, _getAuthContractAddress(_walletType));
     }
 

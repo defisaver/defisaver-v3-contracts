@@ -44,7 +44,7 @@ contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     /// @dev User can't just sub a boost bundle without repay
     function subToCompAutomation(CompSubData calldata _subData) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_getWalletType(address(this)));
 
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
@@ -62,7 +62,7 @@ contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     /// @dev If we don't have a boost subId send as 0
     function updateSubData(uint32 _subId1, uint32 _subId2, CompSubData calldata _subData) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_getWalletType(address(this)));
 
         // update repay as we must have a subId, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
@@ -91,7 +91,7 @@ contract CompSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Smart
     /// @notice Activates Repay sub and if exists a Boost sub
     function activateSub(uint32 _subId1, uint32 _subId2) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_getWalletType(address(this)));
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
 
         if (_subId2 != 0) {

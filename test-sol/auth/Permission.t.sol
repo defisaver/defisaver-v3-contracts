@@ -101,7 +101,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function _givePermission(WalletType _walletType, bool _isAuthPermission, address _to) internal {
         bytes memory givePermCalldata = _isAuthPermission
-            ? abi.encodeCall(MockPermission.giveAuthContractPermission, (_walletType))
+            ? abi.encodeCall(MockPermission.givePermissionToAuthContract, (_walletType))
             : abi.encodeCall(MockPermission.givePermissionTo, (_walletType, _to));
 
         _getWalletByType(_walletType).execute(address(cut), givePermCalldata, 0);
@@ -111,7 +111,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
         internal
     {
         bytes memory removePermCalldata = _isAuthPermission
-            ? abi.encodeCall(MockPermission.removeAuthContractPermission, (_walletType))
+            ? abi.encodeCall(MockPermission.removePermissionFromAuthContract, (_walletType))
             : abi.encodeCall(MockPermission.removePermissionFrom, (_walletType, _from));
 
         _getWalletByType(_walletType).execute(address(cut), removePermCalldata, 0);

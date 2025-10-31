@@ -18,7 +18,7 @@ contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWall
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     function subscribeToStrategy(StrategySub calldata _sub) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_getWalletType(address(this)));
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(_sub);
     }
@@ -35,7 +35,7 @@ contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWall
     /// @param _subId Id of subscription to enable
     function activateSub(uint256 _subId) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_getWalletType(address(this)));
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId);
     }
 
@@ -44,7 +44,7 @@ contract SubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWall
     /// @param _sub Subscription struct of the user (needs whole struct so we can hash it)
     function updateAndActivateSub(uint256 _subId, StrategySub calldata _sub) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_getWalletType(address(this)));
         SubStorage(SUB_STORAGE_ADDR).updateSubData(_subId, _sub);
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId);
     }

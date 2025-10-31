@@ -53,7 +53,7 @@ contract SparkSubProxy is
     /// @dev User can't just sub a boost bundle without repay
     function subToSparkAutomation(bytes calldata _encodedInput) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_getWalletType(address(this)));
 
         SparkSubData memory subData = parseSubData(_encodedInput);
 
@@ -73,7 +73,7 @@ contract SparkSubProxy is
     /// @dev If we don't have a boost subId send as 0
     function updateSubData(bytes calldata _encodedInput) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_getWalletType(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SparkSubData memory subData = parseSubData(_encodedInput[8:]);
@@ -105,7 +105,7 @@ contract SparkSubProxy is
     /// @notice Activates Repay sub and if exists a Boost sub
     function activateSub(bytes calldata _encodedInput) public {
         /// @dev Give wallet permission to our auth contract to be able to execute the strategy
-        _giveAuthContractPermission(_getWalletType(address(this)));
+        _givePermissionToAuthContract(_getWalletType(address(this)));
         (uint32 subId1, uint32 subId2) = parseSubIds(_encodedInput[0:8]);
 
         SubStorage(SUB_STORAGE_ADDR).activateSub(subId1);
