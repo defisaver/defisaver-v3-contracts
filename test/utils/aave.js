@@ -28,6 +28,7 @@ const {
     createAaveV3GenericFLRepayOnPriceStrategy,
     createAaveV3GenericFLCloseToDebtStrategy,
     createAaveV3GenericFLCloseToCollStrategy,
+    createAaveV3FLCollateralSwitchStrategy,
 } = require('../../strategies-spec/mainnet');
 
 const {
@@ -41,6 +42,7 @@ const {
     createAaveV3GenericFLRepayOnPriceL2Strategy,
     createAaveV3GenericFLCloseToDebtL2Strategy,
     createAaveV3GenericFLCloseToCollL2Strategy,
+    createAaveV3FLCollateralSwitchL2Strategy,
 } = require('../../strategies-spec/l2');
 
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
@@ -522,6 +524,39 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY = {
         },
     ],
 };
+
+const AAVE_V3_COLL_SWITCH_TEST_PAIRS = [
+    {
+        fromAsset: 'WETH',
+        toAsset: 'USDC',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 40_000,
+        debtAmountInUSD: 15_000,
+        amountToSwitchInUSD: 30_000,
+        priceState: 1, // UNDER
+        price: 100_000, // Trigger when 1 WETH < 100_000 USDC
+    },
+    {
+        fromAsset: 'USDC',
+        toAsset: 'WETH',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: hre.ethers.constants.MaxUint256,
+        priceState: 0, // OVER
+        price: 0.00001, // Trigger when 1 USDC > 0.00001 WETH <=> 1 WETH < 100_000 USDC
+    },
+    {
+        fromAsset: 'WETH',
+        toAsset: 'WBTC',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: 40_000,
+        priceState: 1, // UNDER
+        price: 1, // Trigger when 1 WETH < 1 WBTC
+    },
+];
 
 const getAaveDataProvider = async () => {
     const dataProvider = await hre.ethers.getContractAt(
@@ -1126,6 +1161,21 @@ const getAaveV3CloseStrategyConfigs = (automationSdk) => [
     },
 ];
 
+const deployAaveV3FLCollateralSwitchStrategy = async () => {
+    const isL2 = network !== 'mainnet';
+    const isFork = isNetworkFork();
+    await openStrategyAndBundleStorage(isFork);
+    const flCollateralSwitchStrategy = isL2
+        ? createAaveV3FLCollateralSwitchL2Strategy()
+        : createAaveV3FLCollateralSwitchStrategy();
+    const continuous = false;
+    const flCollateralSwitchStrategyId = await createStrategy(
+        ...flCollateralSwitchStrategy,
+        continuous,
+    );
+    return flCollateralSwitchStrategyId;
+};
+
 module.exports = {
     getAaveDataProvider,
     getAaveLendingPoolV2,
@@ -1147,6 +1197,9 @@ module.exports = {
     deployAaveV3CloseGenericBundle,
     setupAaveV3EOAPermissions,
     getAaveV3ReserveData,
+    getCloseStrategyTypeName,
+    getAaveV3CloseStrategyConfigs,
+    deployAaveV3FLCollateralSwitchStrategy,
     AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST,
     AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY,
     aaveV2assetsDefaultMarket,
@@ -1157,6 +1210,5 @@ module.exports = {
     LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
     WSETH_ASSET_ID_IN_AAVE_V3_MARKET,
     A_WETH_ADDRESS_V3,
-    getCloseStrategyTypeName,
-    getAaveV3CloseStrategyConfigs,
+    AAVE_V3_COLL_SWITCH_TEST_PAIRS,
 };

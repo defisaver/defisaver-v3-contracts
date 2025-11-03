@@ -847,6 +847,36 @@ const subAaveV3OpenOrder = async (
 
     return { subId, strategySub };
 };
+const subAaveV3FLCollateralSwitchStrategy = async (
+    proxy,
+    strategyId,
+    fromAsset,
+    fromAssetId,
+    toAsset,
+    toAssetId,
+    marketAddr,
+    amountToSwitch,
+    baseTokenAddress,
+    quoteTokenAddress,
+    triggerPrice,
+    priceState,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.collateralSwitch(
+        strategyId,
+        fromAsset,
+        fromAssetId,
+        toAsset,
+        toAssetId,
+        marketAddr,
+        amountToSwitch,
+        baseTokenAddress,
+        quoteTokenAddress,
+        triggerPrice,
+        priceState,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
 const subLiquityV2RepayBundle = async (
     proxy,
     market,
@@ -1227,4 +1257,5 @@ module.exports = {
     subCompV3RepayOnPriceBundle,
     subCompV3BoostOnPriceBundle,
     subCompV3CloseOnPriceBundle,
+    subAaveV3FLCollateralSwitchStrategy,
 };
