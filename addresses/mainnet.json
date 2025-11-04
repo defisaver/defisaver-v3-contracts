@@ -4729,14 +4729,15 @@
     },
     {
         "name": "SkyView",
-        "address": "0x7666Dc2D2dD1e62cF7f7Ef00a9d7514391172A62",
+        "address": "0x3D05E4eEe0236BaD328C55B7a0F7596feA2AB612",
         "id": "0x6431452a",
         "path": "contracts/views/SkyView.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
         "history": [
+            "0x7666Dc2D2dD1e62cF7f7Ef00a9d7514391172A62",
             "0xCC3DA103AD79319A2fA68327bDFA27DB4489caDf",
             "0x0b2621aE77952606A3b95d06E31b10132C51C860"
         ]
