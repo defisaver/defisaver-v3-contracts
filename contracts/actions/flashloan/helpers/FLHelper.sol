@@ -16,7 +16,7 @@ import { DFSIds } from "../../../utils/DFSIds.sol";
 /// @notice Helper contract containing common functions for flashloan actions
 contract FLHelper is MainnetFLAddresses, StrategyModel {
     uint16 internal constant AAVE_REFERRAL_CODE = 64;
-    uint16 internal constant SPARK_REFERRAL_CODE = 0;
+    uint16 internal constant SPARK_REFERRAL_CODE = 64;
 
     FLFeeFaucet internal constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
 
