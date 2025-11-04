@@ -53,7 +53,7 @@ contract TestSkyView is SkyExecuteActions {
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
 
-    function test_skyView_GetGeneralInfo() public {
+    function test_skyView_GetGeneralInfo() public view {
         address[] memory farms = new address[](3);
         farms[0] = USDS_FARM;
         farms[1] = SPARK_FARM;
