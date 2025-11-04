@@ -52,6 +52,23 @@ contract TestSkyView is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
+
+    function test_skyView_GetGeneralInfo() public {
+        address[] memory farms = new address[](3);
+        farms[0] = USDS_FARM;
+        farms[1] = SPARK_FARM;
+        farms[2] = SKY_FARM;
+
+        SkyView.GeneralInfo memory info = cut.getGeneralInfo(farms);
+        assertGt(info.debtCeiling, 0);
+        assertGt(info.borrowRatePerSecond, 0);
+        assertEq(
+            info.totalSkyStaked,
+            info.totalSkyLockedInFarms[0] + info.totalSkyLockedInFarms[1]
+                + info.totalSkyLockedInFarms[2]
+        );
+    }
+
     function test_skyView_USDS_FARM() public {
         _baseTest(USDS_FARM);
     }
