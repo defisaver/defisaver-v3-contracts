@@ -60,6 +60,10 @@ contract TestSkyView is SkyExecuteActions {
         _baseTest(SPARK_FARM);
     }
 
+    function test_skyView_SKY_FARM() public {
+        _baseTest(SKY_FARM);
+    }
+
     function test_skyView_NO_FARM() public {
         _baseTest(address(0));
     }
@@ -109,6 +113,7 @@ contract TestSkyView is SkyExecuteActions {
         SkyView.UrnInfo[] memory urnsInfoAfterAYear = cut.getUserInfo(walletAddr, farms);
 
         for (uint256 i = 0; i < urnsInfoAfterAYear[index].amountsEarned.length; i++) {
+            if (_farm == USDS_FARM) continue; // USDS farm is currently not earning any rewards
             if (urnsInfoAfterAYear[index].amountsEarned[i].farm == _farm) {
                 assertGt(
                     urnsInfoAfterAYear[index].amountsEarned[i].amountEarned,

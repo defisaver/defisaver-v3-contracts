@@ -32,6 +32,7 @@ contract SkyView is SkyHelper {
         uint256 borrowRatePerSecond; // in 1e27
         uint256 totalSkyLockedInUSDSFarm;
         uint256 totalSkyLockedInSparkFarm;
+        uint256 totalSkyLockedInSkyFarm;
     }
 
     function getUserInfo(address _user, address[] calldata _farms)
@@ -97,12 +98,14 @@ contract SkyView is SkyHelper {
 
         uint256 totalSkyLockedInUSDSFarm = IERC20(LOCK_STAKE_SKY).balanceOf(USDS_FARM);
         uint256 totalSkyLockedInSparkFarm = IERC20(LOCK_STAKE_SKY).balanceOf(SPARK_FARM);
+        uint256 totalSkyLockedInSkyFarm = IERC20(LOCK_STAKE_SKY).balanceOf(SKY_FARM);
         return GeneralInfo({
             totalSkyStaked: totalSkyStaked,
             debtCeiling: debtCeiling,
             borrowRatePerSecond: borrowRatePerSecond,
             totalSkyLockedInUSDSFarm: totalSkyLockedInUSDSFarm,
-            totalSkyLockedInSparkFarm: totalSkyLockedInSparkFarm
+            totalSkyLockedInSparkFarm: totalSkyLockedInSparkFarm,
+            totalSkyLockedInSkyFarm: totalSkyLockedInSkyFarm
         });
     }
 }
