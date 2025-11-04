@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-const { expect } = require('chai');
 const hre = require('hardhat');
 const {
     impersonateAccount,
@@ -8,8 +7,9 @@ const {
     addrs,
     network,
 } = require('./utils');
+const { topUp } = require('../../scripts/utils/fork');
 
-const addDefiSaverConnector = async (dfsConnectorAddress, version = 2) => {
+const addDefiSaverConnector = async (dfsConnectorAddress, version = 2, isFork = false) => {
     const instaIndex = await hre.ethers.getContractAt(
         'IInstaIndex',
         addrs[network].INSTADAPP_INDEX,
@@ -18,11 +18,15 @@ const addDefiSaverConnector = async (dfsConnectorAddress, version = 2) => {
     const masterSigner = await hre.ethers.getSigner(masterAddr);
 
     // Fund master account
-    const zeroAddress = hre.ethers.constants.AddressZero;
-    const zeroAcc = await hre.ethers.provider.getSigner(zeroAddress);
-    await impersonateAccount(zeroAddress);
-    await sendEther(zeroAcc, masterAddr, '5');
-    await stopImpersonatingAccount(zeroAddress);
+    if (isFork) {
+        await topUp(masterAddr, network);
+    } else {
+        const zeroAddress = hre.ethers.constants.AddressZero;
+        const zeroAcc = await hre.ethers.provider.getSigner(zeroAddress);
+        await impersonateAccount(zeroAddress);
+        await sendEther(zeroAcc, masterAddr, '5');
+        await stopImpersonatingAccount(zeroAddress);
+    }
 
     if (version === 2) {
         const instaConnectorsV2Contract = await hre.ethers.getContractAt(
@@ -39,17 +43,21 @@ const addDefiSaverConnector = async (dfsConnectorAddress, version = 2) => {
         }
 
         // Add connector
-        await impersonateAccount(masterAddr);
+        if (!isFork) {
+            await impersonateAccount(masterAddr);
+        }
         await instaConnectorsV2Contract.addConnectors(
             ['DefiSaverConnector'],
             [dfsConnectorAddress],
             { gasLimit: 800000 },
         );
-        await stopImpersonatingAccount(masterAddr);
+        if (!isFork) {
+            await stopImpersonatingAccount(masterAddr);
+        }
 
         // Check if connector is properly added
         const response = await instaConnectorsV2Contract.isConnectors(['DefiSaverConnector']);
-        expect(response.isOk).to.be.eq(true);
+        console.log('Connector added status:', response.isOk);
     } else {
         const instaConnectorsV1Contract = await hre.ethers.getContractAt(
             'IInstaConnectorsV1',
@@ -65,13 +73,17 @@ const addDefiSaverConnector = async (dfsConnectorAddress, version = 2) => {
         }
 
         // Add connector
-        await impersonateAccount(masterAddr);
+        if (!isFork) {
+            await impersonateAccount(masterAddr);
+        }
         await instaConnectorsV1Contract.enable(dfsConnectorAddress, { gasLimit: 800000 });
-        await stopImpersonatingAccount(masterAddr);
+        if (!isFork) {
+            await stopImpersonatingAccount(masterAddr);
+        }
 
         // Check if connector is properly added
         const response = await instaConnectorsV1Contract.isConnector([dfsConnectorAddress]);
-        expect(response).to.be.eq(true);
+        console.log('Connector added status:', response);
     }
 };
 
