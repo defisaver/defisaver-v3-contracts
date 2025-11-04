@@ -9,10 +9,9 @@ import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3He
 import { BaseTest } from "../../utils/BaseTest.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { ActionsUtils } from "../../utils/ActionsUtils.sol";
- 
+
 /// @notice Testing interaction with mock contract as claiming rewards is deprecated
 contract TestAaveV3ClaimRewards is AaveV3Helper, ActionsUtils, BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -45,7 +44,7 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, ActionsUtils, BaseTest {
     function test_should_execute_claim_rewards() public {
         _claim(false);
     }
-    
+
     function test_should_execute_claim_rewards_direct() public {
         _claim(true);
     }
@@ -61,11 +60,7 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, ActionsUtils, BaseTest {
         assets[1] = _assets[1];
 
         AaveV3ClaimRewards.Params memory params = AaveV3ClaimRewards.Params({
-            amount: _amount,
-            to: _to,
-            reward: _reward,
-            assets: assets,
-            assetsLength: 2
+            amount: _amount, to: _to, reward: _reward, assets: assets, assetsLength: 2
         });
         _assertParams(params);
     }
@@ -75,8 +70,9 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, ActionsUtils, BaseTest {
     //////////////////////////////////////////////////////////////////////////*/
     function _assertParams(AaveV3ClaimRewards.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
-        AaveV3ClaimRewards.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
-        
+        AaveV3ClaimRewards.Params memory decodedParams =
+            cut.decodeInputs(encodedInputWithoutSelector);
+
         assertEq(decodedParams.amount, _params.amount);
         assertEq(decodedParams.to, _params.to);
         assertEq(decodedParams.reward, _params.reward);
@@ -96,16 +92,11 @@ contract TestAaveV3ClaimRewards is AaveV3Helper, ActionsUtils, BaseTest {
                 assets: new address[](0),
                 assetsLength: 0
             });
-            
-            wallet.execute(address(cut), cut.encodeInputs(params), 0);
 
+            wallet.execute(address(cut), cut.encodeInputs(params), 0);
         } else {
-            bytes memory paramsCallData = aaveV3ClaimRewardsEncode(
-                100,
-                sender,
-                address(0),
-                new address[](0)
-            );
+            bytes memory paramsCallData =
+                aaveV3ClaimRewardsEncode(100, sender, address(0), new address[](0));
 
             bytes memory _calldata = abi.encodeWithSelector(
                 AaveV3ClaimRewards.executeAction.selector,

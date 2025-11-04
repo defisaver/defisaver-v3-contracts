@@ -47,7 +47,9 @@ const aaveSupplyTest = async (testLength) => {
     describe('Aave-Supply', function () {
         this.timeout(150000);
 
-        let senderAcc; let proxy; let dataProvider;
+        let senderAcc;
+        let proxy;
+        let dataProvider;
 
         before(async function () {
             const lendingPool = await getAaveLendingPoolV2();
@@ -76,7 +78,6 @@ const aaveSupplyTest = async (testLength) => {
                 const reserveInfo = await getAaveReserveInfo(dataProvider, assetInfo.address);
 
                 if (!reserveInfo.isActive || reserveInfo.isFrozen) {
-                // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -102,7 +103,9 @@ const aaveSupplyTest = async (testLength) => {
 
 const aaveBorrowTest = async (testLength) => {
     describe('Aave-Borrow', () => {
-        let senderAcc; let proxy; let dataProvider;
+        let senderAcc;
+        let proxy;
+        let dataProvider;
         before(async function () {
             const lendingPool = await getAaveLendingPoolV2();
             const isPaused = await lendingPool.paused();
@@ -132,7 +135,6 @@ const aaveBorrowTest = async (testLength) => {
                 const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
                 if (!reserveInfo.borrowingEnabled || !reserveInfo.isActive) {
-                // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -143,13 +145,18 @@ const aaveBorrowTest = async (testLength) => {
                 );
 
                 if (reserveData.availableLiquidity.lt(amount)) {
-                // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
 
                 // eth bada bing bada bum
-                await supplyAave(proxy, AAVE_MARKET, hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '20000'), 18), WETH_ADDRESS, senderAcc.address);
+                await supplyAave(
+                    proxy,
+                    AAVE_MARKET,
+                    hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '20000'), 18),
+                    WETH_ADDRESS,
+                    senderAcc.address,
+                );
 
                 const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
                 const debtBalanceBefore = await balanceOf(
@@ -183,11 +190,10 @@ const aaveBorrowTest = async (testLength) => {
                 const assetInfo = getAssetInfo(tokenSymbol);
 
                 if (assetInfo.symbol === 'ETH') {
-                // can't currently stable borrow if position already has eth
-                // eslint-disable-next-line no-unused-expressions
+                    // can't currently stable borrow if position already has eth
                     expect(true).to.be.true;
                     return;
-                // assetInfo.address = WETH_ADDRESS;
+                    // assetInfo.address = WETH_ADDRESS;
                 }
 
                 const reserveInfo = await getAaveReserveInfo(dataProvider, assetInfo.address);
@@ -195,24 +201,25 @@ const aaveBorrowTest = async (testLength) => {
                 const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
                 if (!reserveInfo.stableBorrowRateEnabled || !reserveInfo.isActive) {
-                // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
 
-                const amount = hre.ethers.utils.parseUnits(
-                    fetchedAmountDiv10,
-                    assetInfo.decimals,
-                );
+                const amount = hre.ethers.utils.parseUnits(fetchedAmountDiv10, assetInfo.decimals);
 
                 if (reserveData.availableLiquidity.lt(amount)) {
-                // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
 
                 // eth bada bing bada bum
-                await supplyAave(proxy, AAVE_MARKET, hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '20000'), 18), WETH_ADDRESS, senderAcc.address);
+                await supplyAave(
+                    proxy,
+                    AAVE_MARKET,
+                    hre.ethers.utils.parseUnits(fetchAmountinUSDPrice('WETH', '20000'), 18),
+                    WETH_ADDRESS,
+                    senderAcc.address,
+                );
 
                 const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
                 const debtBalanceBefore = await balanceOf(
@@ -246,7 +253,9 @@ const aaveWithdrawTest = async (testLength) => {
     describe('Aave-Withdraw', function () {
         this.timeout(150000);
 
-        let senderAcc; let proxy; let dataProvider;
+        let senderAcc;
+        let proxy;
+        let dataProvider;
 
         before(async function () {
             const lendingPool = await getAaveLendingPoolV2();
@@ -286,19 +295,28 @@ const aaveWithdrawTest = async (testLength) => {
                 if (aBalanceBefore.lte(amount)) {
                     const reserveInfo = await getAaveReserveInfo(dataProvider, assetInfo.address);
                     if (reserveInfo.isFrozen || !reserveInfo.isActive) {
-                    // eslint-disable-next-line no-unused-expressions
                         expect(true).to.be.true;
                         return;
                     }
 
-                    // eslint-disable-next-line max-len
-                    await supplyAave(proxy, AAVE_MARKET, amount, assetInfo.address, senderAcc.address);
+                    await supplyAave(
+                        proxy,
+                        AAVE_MARKET,
+                        amount,
+                        assetInfo.address,
+                        senderAcc.address,
+                    );
                 }
 
                 const balanceBefore = await balanceOf(assetInfo.address, senderAcc.address);
 
-                // eslint-disable-next-line max-len
-                await withdrawAave(proxy, AAVE_MARKET, assetInfo.address, amount, senderAcc.address);
+                await withdrawAave(
+                    proxy,
+                    AAVE_MARKET,
+                    assetInfo.address,
+                    amount,
+                    senderAcc.address,
+                );
 
                 const balanceAfter = await balanceOf(assetInfo.address, senderAcc.address);
 
@@ -313,7 +331,9 @@ const aavePaybackTest = async (testLength) => {
     describe('Aave-Payback', function () {
         this.timeout(80000);
 
-        let senderAcc; let proxy; let dataProvider;
+        let senderAcc;
+        let proxy;
+        let dataProvider;
 
         before(async function () {
             const lendingPool = await getAaveLendingPoolV2();
@@ -344,7 +364,6 @@ const aavePaybackTest = async (testLength) => {
                 const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
                 if (!reserveInfo.borrowingEnabled) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -355,7 +374,6 @@ const aavePaybackTest = async (testLength) => {
                 );
 
                 if (reserveData.availableLiquidity.lt(amount)) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -407,7 +425,6 @@ const aavePaybackTest = async (testLength) => {
 
                 if (assetInfo.symbol === 'ETH') {
                     // can't currently stable borrow if position already has eth
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                     // assetInfo.address = WETH_ADDRESS;
@@ -418,7 +435,6 @@ const aavePaybackTest = async (testLength) => {
                 const reserveData = await getAaveReserveData(dataProvider, assetInfo.address);
 
                 if (!reserveInfo.stableBorrowRateEnabled) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -429,7 +445,6 @@ const aavePaybackTest = async (testLength) => {
                 );
 
                 if (reserveData.availableLiquidity.lt(amount)) {
-                    // eslint-disable-next-line no-unused-expressions
                     expect(true).to.be.true;
                     return;
                 }
@@ -486,8 +501,12 @@ const aaveClaimStkAaveTest = async () => {
         const tokenSymbol = 'WETH';
         const assetInfo = getAssetInfo(tokenSymbol);
 
-        let senderAcc; let proxy; let proxyAddr; let dataProvider;
-        let aTokenInfo; let AaveView;
+        let senderAcc;
+        let proxy;
+        let proxyAddr;
+        let dataProvider;
+        let aTokenInfo;
+        let AaveView;
         let accruedRewards;
         let snapshot;
 
@@ -518,21 +537,35 @@ const aaveClaimStkAaveTest = async () => {
         });
 
         it('... should not revert when claiming 0 rewards', async () => {
-        // eslint-disable-next-line max-len
-            await expect(claimStkAave(proxy, [aTokenInfo.aTokenAddress], hre.ethers.constants.Zero, proxyAddr)).to.not.be.reverted;
+            await expect(
+                claimStkAave(
+                    proxy,
+                    [aTokenInfo.aTokenAddress],
+                    hre.ethers.constants.Zero,
+                    proxyAddr,
+                ),
+            ).to.not.be.reverted;
         });
 
         it('... should claim half of all accrued rewards', async () => {
-        // eslint-disable-next-line max-len
             const stkAaveBalanceBefore = await balanceOf(stkAaveAddr, proxyAddr);
-            await claimStkAave(proxy, [aTokenInfo.aTokenAddress], accruedRewards.div('2'), proxyAddr);
+            await claimStkAave(
+                proxy,
+                [aTokenInfo.aTokenAddress],
+                accruedRewards.div('2'),
+                proxyAddr,
+            );
             const stkAaveBalanceAfter = await balanceOf(stkAaveAddr, proxyAddr);
             expect(stkAaveBalanceAfter.sub(stkAaveBalanceBefore)).to.be.eq(accruedRewards.div('2'));
         });
 
         it('... should claim all accrued rewards when amount > unclaimed rewards', async () => {
-        // eslint-disable-next-line max-len
-            await claimStkAave(proxy, [aTokenInfo.aTokenAddress], accruedRewards.div('2').add('1'), proxyAddr);
+            await claimStkAave(
+                proxy,
+                [aTokenInfo.aTokenAddress],
+                accruedRewards.div('2').add('1'),
+                proxyAddr,
+            );
             const stkAaveBalanceAfter = await balanceOf(stkAaveAddr, proxyAddr);
             expect(stkAaveBalanceAfter / 1e18).to.be.closeTo(accruedRewards / 1e18, 0.00001);
             await revertToSnapshot(snapshot);
@@ -544,7 +577,8 @@ const aaveClaimAAVETest = async () => {
     describe('Aave-claim staked aave test', function () {
         this.timeout(150000);
 
-        let senderAcc; let proxy;
+        let senderAcc;
+        let proxy;
         const AAVE_ADDR = '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9';
         const USER_ACC = '0xa6584b95EA4E9018b1F377dad99448EC478a150f';
 
@@ -587,7 +621,11 @@ const aaveUnstakeTest = async () => {
 
         const stkAaveAddr = '0x4da27a545c0c5B758a6BA100e3a049001de870f5';
 
-        let senderAcc; let proxy; let aaveToken; let stkAaveContract; let snapshot;
+        let senderAcc;
+        let proxy;
+        let aaveToken;
+        let stkAaveContract;
+        let snapshot;
         before(async () => {
             stkAaveContract = await hre.ethers.getContractAt('IStkAave', stkAaveAddr);
             aaveToken = await stkAaveContract.REWARD_TOKEN();

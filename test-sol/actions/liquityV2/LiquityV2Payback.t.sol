@@ -2,7 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 import { LiquityV2Payback } from "../../../contracts/actions/liquityV2/trove/LiquityV2Payback.sol";
@@ -11,7 +13,6 @@ import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2Exe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2Payback is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -81,19 +82,20 @@ contract TestLiquityV2Payback is LiquityV2ExecuteActions {
         _baseTest(isDirect, isMaxUint256Payback, interestBatchManager);
     }
 
-    function _baseTest(bool _isDirect, bool _isMaxUint256Payback, address _interestBatchManager) public {
-        uint256 collAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
+    function _baseTest(bool _isDirect, bool _isMaxUint256Payback, address _interestBatchManager)
+        public
+    {
+        uint256 collAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
         uint256 paybackAmountInUSD = 5000;
 
         for (uint256 i = 0; i < markets.length; i++) {
-
             if (_interestBatchManager != address(0)) {
                 vm.startPrank(_interestBatchManager);
                 registerBatchManager(markets[i]);
                 vm.stopPrank();
             }
-            
+
             uint256 troveId = executeLiquityOpenTrove(
                 markets[i],
                 _interestBatchManager,
@@ -107,13 +109,7 @@ contract TestLiquityV2Payback is LiquityV2ExecuteActions {
                 viewContract
             );
 
-            _payback(
-                markets[i],
-                troveId,
-                _isDirect,
-                _isMaxUint256Payback,
-                paybackAmountInUSD
-            );
+            _payback(markets[i], troveId, _isDirect, _isMaxUint256Payback, paybackAmountInUSD);
         }
     }
 
@@ -124,7 +120,8 @@ contract TestLiquityV2Payback is LiquityV2ExecuteActions {
         bool _isMaxUint256Payback,
         uint256 _paybackAmountInUSD
     ) internal {
-        LiquityV2View.TroveData memory troveData = viewContract.getTroveInfo(address(_market), _troveId);
+        LiquityV2View.TroveData memory troveData =
+            viewContract.getTroveInfo(address(_market), _troveId);
         uint256 entireDebt = troveData.debtAmount;
 
         uint256 paybackAmount = _isMaxUint256Payback

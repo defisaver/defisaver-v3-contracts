@@ -2,7 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultResolver } from "../../../interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import {
+    IFluidVaultResolver
+} from "../../../interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidHelper } from "./FluidHelper.sol";
 
 /// @title Helper contract for Fluid ratio calculations.
@@ -21,8 +23,9 @@ contract FluidRatioHelper is FluidHelper {
 
         if (userPosition.borrow == 0 || userPosition.supply == 0) return uint256(0);
 
-        uint256 collAmountInDebtToken = (userPosition.supply * vaultData.configs.oraclePriceOperate) / PRICE_SCALER;
-        
+        uint256 collAmountInDebtToken =
+            (userPosition.supply * vaultData.configs.oraclePriceOperate) / PRICE_SCALER;
+
         ratio = collAmountInDebtToken * WAD / userPosition.borrow;
     }
 }

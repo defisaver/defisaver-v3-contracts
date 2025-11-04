@@ -5,7 +5,6 @@ import { CurveUsdBorrowRateTrigger } from "../../contracts/triggers/CurveUsdBorr
 import { BaseTest } from "../utils/BaseTest.sol";
 
 contract TestCurveUsdBorrowRateTrigger is BaseTest {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -23,47 +22,37 @@ contract TestCurveUsdBorrowRateTrigger is BaseTest {
         forkMainnet("CurveUsdBorrowRateTrigger");
         cut = new CurveUsdBorrowRateTrigger();
     }
-    
+
     /*//////////////////////////////////////////////////////////////////////////
                                       TESTS
     //////////////////////////////////////////////////////////////////////////*/
     function testWstethRateSub() public view {
         uint256 rate = cut.calcBorrowRate(WSTETH_MARKET);
 
-        CurveUsdBorrowRateTrigger.SubParams memory subEqualOverFail = CurveUsdBorrowRateTrigger.SubParams(
-            WSTETH_MARKET,
-            rate,
-            uint8(CurveUsdBorrowRateTrigger.TargetRateState.OVER)
-        );
+        CurveUsdBorrowRateTrigger.SubParams memory subEqualOverFail =
+            CurveUsdBorrowRateTrigger.SubParams(
+                WSTETH_MARKET, rate, uint8(CurveUsdBorrowRateTrigger.TargetRateState.OVER)
+            );
 
-        CurveUsdBorrowRateTrigger.SubParams memory subEqualUnderFail = CurveUsdBorrowRateTrigger.SubParams(
-            WSTETH_MARKET,
-            rate,
-            uint8(CurveUsdBorrowRateTrigger.TargetRateState.UNDER)
-        );
+        CurveUsdBorrowRateTrigger.SubParams memory subEqualUnderFail =
+            CurveUsdBorrowRateTrigger.SubParams(
+                WSTETH_MARKET, rate, uint8(CurveUsdBorrowRateTrigger.TargetRateState.UNDER)
+            );
 
         CurveUsdBorrowRateTrigger.SubParams memory subOver = CurveUsdBorrowRateTrigger.SubParams(
-            WSTETH_MARKET,
-            rate - 1,
-            uint8(CurveUsdBorrowRateTrigger.TargetRateState.OVER)
+            WSTETH_MARKET, rate - 1, uint8(CurveUsdBorrowRateTrigger.TargetRateState.OVER)
         );
 
         CurveUsdBorrowRateTrigger.SubParams memory subOverFail = CurveUsdBorrowRateTrigger.SubParams(
-            WSTETH_MARKET,
-            rate + 1,
-            uint8(CurveUsdBorrowRateTrigger.TargetRateState.OVER)
+            WSTETH_MARKET, rate + 1, uint8(CurveUsdBorrowRateTrigger.TargetRateState.OVER)
         );
 
         CurveUsdBorrowRateTrigger.SubParams memory subUnder = CurveUsdBorrowRateTrigger.SubParams(
-            WSTETH_MARKET,
-            rate + 1,
-            uint8(CurveUsdBorrowRateTrigger.TargetRateState.UNDER)
+            WSTETH_MARKET, rate + 1, uint8(CurveUsdBorrowRateTrigger.TargetRateState.UNDER)
         );
 
         CurveUsdBorrowRateTrigger.SubParams memory subUnderFail = CurveUsdBorrowRateTrigger.SubParams(
-            WSTETH_MARKET,
-            rate - 1,
-            uint8(CurveUsdBorrowRateTrigger.TargetRateState.UNDER)
+            WSTETH_MARKET, rate - 1, uint8(CurveUsdBorrowRateTrigger.TargetRateState.UNDER)
         );
 
         assertTrue(cut.isTriggered(abi.encode(), abi.encode(subEqualOverFail)) == false);

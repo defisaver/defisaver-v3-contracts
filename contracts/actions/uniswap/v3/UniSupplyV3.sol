@@ -3,14 +3,16 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { UniV3Helper } from "./helpers/UniV3Helper.sol";
-import { IUniswapV3NonfungiblePositionManager } from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+import {
+    IUniswapV3NonfungiblePositionManager
+} from "../../../interfaces/protocols/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Supplies liquidity to a UniswapV3 position represented by TokenId
-contract UniSupplyV3 is ActionBase, UniV3Helper{
+contract UniSupplyV3 is ActionBase, UniV3Helper {
     using TokenUtils for address;
-    
+
     /// @param tokenId - The ID of the token for which liquidity is being increased
     /// @param liquidity -The amount by which liquidity will be increased,
     /// @param amount0Desired - The desired amount of token0 that should be supplied,
@@ -41,10 +43,13 @@ contract UniSupplyV3 is ActionBase, UniV3Helper{
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         Params memory uniData = parseInputs(_callData);
-        
-        uniData.tokenId = _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
-        uniData.amount0Desired = _parseParamUint(uniData.amount0Desired, _paramMapping[1], _subData, _returnValues);
-        uniData.amount1Desired = _parseParamUint(uniData.amount1Desired, _paramMapping[2], _subData, _returnValues);
+
+        uniData.tokenId =
+            _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
+        uniData.amount0Desired =
+            _parseParamUint(uniData.amount0Desired, _paramMapping[1], _subData, _returnValues);
+        uniData.amount1Desired =
+            _parseParamUint(uniData.amount1Desired, _paramMapping[2], _subData, _returnValues);
 
         (uint128 liquidity, bytes memory logData) = _uniSupplyPosition(uniData);
         emit ActionEvent("UniSupplyV3", logData);
@@ -67,11 +72,13 @@ contract UniSupplyV3 is ActionBase, UniV3Helper{
 
     function _uniSupplyPosition(Params memory _uniData)
         internal
-        returns(uint128 liquidity, bytes memory logData)
-    {  
+        returns (uint128 liquidity, bytes memory logData)
+    {
         // fetch tokens from address
-        uint amount0Pulled = _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
-        uint amount1Pulled = _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
+        uint256 amount0Pulled =
+            _uniData.token0.pullTokensIfNeeded(_uniData.from, _uniData.amount0Desired);
+        uint256 amount1Pulled =
+            _uniData.token1.pullTokensIfNeeded(_uniData.from, _uniData.amount1Desired);
 
         // approve positionManager so it can pull tokens
         _uniData.token0.approveToken(address(positionManager), amount0Pulled);
@@ -89,18 +96,16 @@ contract UniSupplyV3 is ActionBase, UniV3Helper{
         _uniData.token1.withdrawTokens(_uniData.from, _uniData.amount1Desired - amount1);
 
         logData = abi.encode(_uniData, liquidity, amount0, amount1);
-    }    
+    }
     /// @dev increases liquidity by token amounts desired
     /// @return liquidity new liquidity amount
+
     function _uniSupply(Params memory _uniData)
         internal
-        returns (
-            uint128 liquidity,
-            uint256 amount0,
-            uint256 amount1
-        )
+        returns (uint128 liquidity, uint256 amount0, uint256 amount1)
     {
-        IUniswapV3NonfungiblePositionManager.IncreaseLiquidityParams memory increaseLiquidityParams = 
+        IUniswapV3NonfungiblePositionManager.IncreaseLiquidityParams memory
+            increaseLiquidityParams =
             IUniswapV3NonfungiblePositionManager.IncreaseLiquidityParams({
                 tokenId: _uniData.tokenId,
                 amount0Desired: _uniData.amount0Desired,
@@ -112,13 +117,7 @@ contract UniSupplyV3 is ActionBase, UniV3Helper{
         (liquidity, amount0, amount1) = positionManager.increaseLiquidity(increaseLiquidityParams);
     }
 
-    function parseInputs(bytes memory _callData)
-       public
-        pure
-        returns (
-            Params memory uniData
-        )
-    {
+    function parseInputs(bytes memory _callData) public pure returns (Params memory uniData) {
         uniData = abi.decode(_callData, (Params));
     }
 }

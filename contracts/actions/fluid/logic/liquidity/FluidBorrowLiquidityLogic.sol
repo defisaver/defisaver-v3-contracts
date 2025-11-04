@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT1 } from "../../../../interfaces/fluid/vaults/IFluidVaultT1.sol";
-import { IFluidVaultT2 } from "../../../../interfaces/fluid/vaults/IFluidVaultT2.sol";
+import { IFluidVaultT1 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT1.sol";
+import { IFluidVaultT2 } from "../../../../interfaces/protocols/fluid/vaults/IFluidVaultT2.sol";
 import { FluidLiquidityModel } from "../../helpers/FluidLiquidityModel.sol";
 import { FluidVaultTypes } from "../../helpers/FluidVaultTypes.sol";
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { DFSLib } from "../../../../utils/DFSLib.sol";
 
 /// @title FluidBorrowLiquidityLogic - Implements the borrowing of tokens from Fluid liquidity layer
@@ -19,31 +19,33 @@ library FluidBorrowLiquidityLogic {
     /// @notice Borrows tokens from a Fluid liquidity layer
     /// @param _data Borrow data
     /// @return Amount of tokens borrowed. Will be the same as the input amount
-    function borrow(
-        FluidLiquidityModel.BorrowData memory _data
-    ) internal returns (uint256) {
+    function borrow(FluidLiquidityModel.BorrowData memory _data) internal returns (uint256) {
         _data.vaultType.requireLiquidityDebt();
 
-        bool shouldWrapBorrowedEth = _data.wrapBorrowedEth && _data.borrowToken == TokenUtils.ETH_ADDR;
+        bool shouldWrapBorrowedEth =
+            _data.wrapBorrowedEth && _data.borrowToken == TokenUtils.ETH_ADDR;
 
         address sendTokensTo = shouldWrapBorrowedEth ? address(this) : _data.to;
 
         if (_data.vaultType.isT1Vault()) {
-            IFluidVaultT1(_data.vault).operate(
-                _data.nftId,
-                0, /* newColl_ */
-                _data.amount.signed256(),
-                sendTokensTo
-            );
+            IFluidVaultT1(_data.vault)
+                .operate(
+                    _data.nftId,
+                    0,
+                    /* newColl_ */
+                    _data.amount.signed256(),
+                    sendTokensTo
+                );
         } else {
-            IFluidVaultT2(_data.vault).operate(
-                _data.nftId,
-                0, /* newColToken0_ */
-                0, /* newColToken1_ */
-                0, /* colSharesMinMax_ */
-                _data.amount.signed256(),
-                sendTokensTo
-            );
+            IFluidVaultT2(_data.vault)
+                .operate(
+                    _data.nftId,
+                    0, /* newColToken0_ */
+                    0, /* newColToken1_ */
+                    0, /* colSharesMinMax_ */
+                    _data.amount.signed256(),
+                    sendTokensTo
+                );
         }
 
         if (shouldWrapBorrowedEth) {

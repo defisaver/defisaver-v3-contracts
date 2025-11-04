@@ -102,8 +102,10 @@ const getFluidVaultT4TestPairs = () => t4Vaults[network];
 
 const deployFluidT1RepayBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
-    const repayStrategy = network !== 'mainnet' ? createFluidT1RepayL2Strategy() : createFluidT1RepayStrategy();
-    const flRepayStrategy = network !== 'mainnet' ? createFluidT1FLRepayL2Strategy() : createFluidT1FLRepayStrategy();
+    const repayStrategy =
+        network !== 'mainnet' ? createFluidT1RepayL2Strategy() : createFluidT1RepayStrategy();
+    const flRepayStrategy =
+        network !== 'mainnet' ? createFluidT1FLRepayL2Strategy() : createFluidT1FLRepayStrategy();
     const repayStrategyId = await createStrategy(...repayStrategy, true);
     const flRepayStrategyId = await createStrategy(...flRepayStrategy, true);
     const bundleId = await createBundle([repayStrategyId, flRepayStrategyId]);
@@ -112,21 +114,21 @@ const deployFluidT1RepayBundle = async (proxy, isFork) => {
 
 const deployFluidT1BoostBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
-    const boostStrategy = network !== 'mainnet' ? createFluidT1BoostL2Strategy() : createFluidT1BoostStrategy();
-    const flBoostStrategy = network !== 'mainnet' ? createFluidT1FLBoostL2Strategy() : createFluidT1FLBoostStrategy();
+    const boostStrategy =
+        network !== 'mainnet' ? createFluidT1BoostL2Strategy() : createFluidT1BoostStrategy();
+    const flBoostStrategy =
+        network !== 'mainnet' ? createFluidT1FLBoostL2Strategy() : createFluidT1FLBoostStrategy();
     const boostStrategyId = await createStrategy(...boostStrategy, true);
     const flBoostStrategyId = await createStrategy(...flBoostStrategy, true);
     const bundleId = await createBundle([boostStrategyId, flBoostStrategyId]);
     return bundleId;
 };
 
-const supplyLimitReached = (dexSupplyData, newShares) => (
-    dexSupplyData.maxSupplyShares.lt(dexSupplyData.totalSupplyShares.add(newShares))
-);
+const supplyLimitReached = (dexSupplyData, newShares) =>
+    dexSupplyData.maxSupplyShares.lt(dexSupplyData.totalSupplyShares.add(newShares));
 
-const borrowLimitReached = (dexBorrowData, newShares) => (
-    dexBorrowData.maxBorrowShares.lt(dexBorrowData.totalBorrowShares.add(newShares))
-);
+const borrowLimitReached = (dexBorrowData, newShares) =>
+    dexBorrowData.maxBorrowShares.lt(dexBorrowData.totalBorrowShares.add(newShares));
 
 const openFluidT4Vault = async (
     proxy,

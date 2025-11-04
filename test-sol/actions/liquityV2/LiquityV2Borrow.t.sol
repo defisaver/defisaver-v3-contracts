@@ -2,8 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IHintHelpers } from "../../../contracts/interfaces/liquityV2/IHintHelpers.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { IHintHelpers } from "../../../contracts/interfaces/protocols/liquityV2/IHintHelpers.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 import { LiquityV2Borrow } from "../../../contracts/actions/liquityV2/trove/LiquityV2Borrow.sol";
@@ -12,7 +14,6 @@ import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2Exe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2Borrow is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -73,18 +74,17 @@ contract TestLiquityV2Borrow is LiquityV2ExecuteActions {
     }
 
     function _baseTest(bool _isDirect, address _interestBatchManager) public {
-        uint256 collAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
+        uint256 collAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
         uint256 additionalBorrowAmountInUSD = 5000;
 
         for (uint256 i = 0; i < markets.length; i++) {
-
             if (_interestBatchManager != address(0)) {
                 vm.startPrank(_interestBatchManager);
                 registerBatchManager(markets[i]);
                 vm.stopPrank();
             }
-            
+
             uint256 troveId = executeLiquityOpenTrove(
                 markets[i],
                 _interestBatchManager,
@@ -98,13 +98,7 @@ contract TestLiquityV2Borrow is LiquityV2ExecuteActions {
                 viewContract
             );
 
-            _borrow(
-                markets[i],
-                troveId,
-                _isDirect,
-                additionalBorrowAmountInUSD,
-                i
-            );
+            _borrow(markets[i], troveId, _isDirect, additionalBorrowAmountInUSD, i);
         }
     }
 
@@ -117,23 +111,15 @@ contract TestLiquityV2Borrow is LiquityV2ExecuteActions {
     ) internal {
         uint256 borrowAmount = amountInUSDPriceMock(BOLD, _borrowAmountInUsd, 1e8);
 
-        LiquityV2View.TroveData memory troveData = viewContract.getTroveInfo(address(_market), _troveId);
+        LiquityV2View.TroveData memory troveData =
+            viewContract.getTroveInfo(address(_market), _troveId);
         uint256 entireDebt = troveData.debtAmount;
 
-        uint256 maxUpfrontFee = IHintHelpers(_market.hintHelpers()).predictAdjustTroveUpfrontFee(
-            _collIndex,
-            _troveId,
-            borrowAmount
-        );
+        uint256 maxUpfrontFee = IHintHelpers(_market.hintHelpers())
+            .predictAdjustTroveUpfrontFee(_collIndex, _troveId, borrowAmount);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2BorrowEncode(
-                address(_market),
-                sender,
-                _troveId,
-                borrowAmount,
-                maxUpfrontFee
-            ),
+            liquityV2BorrowEncode(address(_market), sender, _troveId, borrowAmount, maxUpfrontFee),
             _isDirect
         );
 

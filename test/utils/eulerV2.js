@@ -59,10 +59,7 @@ const eulerV2CreatePosition = async (
         senderAcc.address,
         borrowAmount,
     );
-    const createRecipe = new dfs.Recipe('EulerV2Create', [
-        supplyAction,
-        borrowAction,
-    ]);
+    const createRecipe = new dfs.Recipe('EulerV2Create', [supplyAction, borrowAction]);
     const functionData = createRecipe.encodeForDsProxyCall();
 
     await executeAction('RecipeExecutor', functionData[1], proxy);

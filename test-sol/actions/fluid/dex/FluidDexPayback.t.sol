@@ -2,21 +2,17 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVault } from "../../../../contracts/interfaces/fluid/vaults/IFluidVault.sol";
-import { IFluidVaultT3 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT3.sol";
-import { IFluidVaultT4 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT4.sol";
-import { IFluidVaultResolver } from "../../../../contracts/interfaces/fluid/resolvers/IFluidVaultResolver.sol";
+import {
+    IFluidVaultResolver
+} from "../../../../contracts/interfaces/protocols/fluid/resolvers/IFluidVaultResolver.sol";
 import { FluidDexPayback } from "../../../../contracts/actions/fluid/dex/FluidDexPayback.sol";
 import { FluidView } from "../../../../contracts/views/FluidView.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
-import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { Vm } from "forge-std/Vm.sol";
 
 contract TestFluidDexPayback is FluidTestBase {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -53,24 +49,20 @@ contract TestFluidDexPayback is FluidTestBase {
         uint256 paybackAmount1;
         bool isNativePayback0;
         bool isNativePayback1;
-
         uint256 senderBorrowToken0BalanceBefore;
         uint256 senderBorrowToken1BalanceBefore;
         uint256 senderEthBalanceBefore;
         uint256 senderBorrowToken0BalanceAfter;
         uint256 senderBorrowToken1BalanceAfter;
         uint256 senderEthBalanceAfter;
-
         uint256 walletBorrowToken0BalanceBefore;
         uint256 walletBorrowToken1BalanceBefore;
         uint256 walletEthBalanceBefore;
         uint256 walletBorrowToken0BalanceAfter;
         uint256 walletBorrowToken1BalanceAfter;
         uint256 walletEthBalanceAfter;
-
         IFluidVaultResolver.UserPosition userPositionBefore;
         IFluidVaultResolver.UserPosition userPositionAfter;
-
         bytes executeActionCallData;
         FluidDexModel.PaybackVariableData paybackVariableData;
         uint256 estimatedSharesToBurn;
@@ -107,9 +99,9 @@ contract TestFluidDexPayback is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialBorrowToken0AmountUSD: 100000,
+                    initialBorrowToken0AmountUSD: 100_000,
                     initialBorrowToken1AmountUSD: 0,
-                    paybackToken0AmountUSD: 30000,
+                    paybackToken0AmountUSD: 30_000,
                     paybackToken1AmountUSD: 0,
                     maxPaybackToken0: false,
                     maxPaybackToken1: false,
@@ -125,9 +117,9 @@ contract TestFluidDexPayback is FluidTestBase {
             _baseTest(
                 TestConfig({
                     initialBorrowToken0AmountUSD: 0,
-                    initialBorrowToken1AmountUSD: 50000,
+                    initialBorrowToken1AmountUSD: 50_000,
                     paybackToken0AmountUSD: 0,
-                    paybackToken1AmountUSD: 30000,
+                    paybackToken1AmountUSD: 30_000,
                     maxPaybackToken0: false,
                     maxPaybackToken1: false,
                     isDirect: false
@@ -141,9 +133,9 @@ contract TestFluidDexPayback is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialBorrowToken0AmountUSD: 20000,
-                    initialBorrowToken1AmountUSD: 50000,
-                    paybackToken0AmountUSD: 60000,
+                    initialBorrowToken0AmountUSD: 20_000,
+                    initialBorrowToken1AmountUSD: 50_000,
+                    paybackToken0AmountUSD: 60_000,
                     paybackToken1AmountUSD: 0,
                     maxPaybackToken0: false,
                     maxPaybackToken1: false,
@@ -158,10 +150,10 @@ contract TestFluidDexPayback is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialBorrowToken0AmountUSD: 20000,
-                    initialBorrowToken1AmountUSD: 50000,
+                    initialBorrowToken0AmountUSD: 20_000,
+                    initialBorrowToken1AmountUSD: 50_000,
                     paybackToken0AmountUSD: 0,
-                    paybackToken1AmountUSD: 60000,
+                    paybackToken1AmountUSD: 60_000,
                     maxPaybackToken0: false,
                     maxPaybackToken1: false,
                     isDirect: false
@@ -175,10 +167,10 @@ contract TestFluidDexPayback is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialBorrowToken0AmountUSD: 40000,
-                    initialBorrowToken1AmountUSD: 50000,
-                    paybackToken0AmountUSD: 30000,
-                    paybackToken1AmountUSD: 30000,
+                    initialBorrowToken0AmountUSD: 40_000,
+                    initialBorrowToken1AmountUSD: 50_000,
+                    paybackToken0AmountUSD: 30_000,
+                    paybackToken1AmountUSD: 30_000,
                     maxPaybackToken0: false,
                     maxPaybackToken1: false,
                     isDirect: false
@@ -192,9 +184,9 @@ contract TestFluidDexPayback is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialBorrowToken0AmountUSD: 35000,
+                    initialBorrowToken0AmountUSD: 35_000,
                     initialBorrowToken1AmountUSD: 0,
-                    paybackToken0AmountUSD: 30000,
+                    paybackToken0AmountUSD: 30_000,
                     paybackToken1AmountUSD: 0,
                     maxPaybackToken0: false,
                     maxPaybackToken1: false,
@@ -209,9 +201,9 @@ contract TestFluidDexPayback is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialBorrowToken0AmountUSD: 35000,
+                    initialBorrowToken0AmountUSD: 35_000,
                     initialBorrowToken1AmountUSD: 0,
-                    paybackToken0AmountUSD: 450000, // make sure user always has enough debt to pull
+                    paybackToken0AmountUSD: 450_000, // make sure user always has enough debt to pull
                     paybackToken1AmountUSD: 0,
                     maxPaybackToken0: true,
                     maxPaybackToken1: false,
@@ -226,10 +218,10 @@ contract TestFluidDexPayback is FluidTestBase {
         for (uint256 i = 0; i < t3VaultsSelected.length; ++i) {
             _baseTest(
                 TestConfig({
-                    initialBorrowToken0AmountUSD: 10000,
-                    initialBorrowToken1AmountUSD: 35000,
+                    initialBorrowToken0AmountUSD: 10_000,
+                    initialBorrowToken1AmountUSD: 35_000,
                     paybackToken0AmountUSD: 0,
-                    paybackToken1AmountUSD: 55000, // make sure user always has enough debt to pull
+                    paybackToken1AmountUSD: 55_000, // make sure user always has enough debt to pull
                     maxPaybackToken0: false,
                     maxPaybackToken1: true,
                     isDirect: false
@@ -239,26 +231,23 @@ contract TestFluidDexPayback is FluidTestBase {
         }
     }
 
-    function _baseTest(
-        TestConfig memory _config,
-        bool _t3VaultsSelected
-    ) internal {
-        uint256 initialSupplyAmountUSD = 
+    function _baseTest(TestConfig memory _config, bool _t3VaultsSelected) internal {
+        uint256 initialSupplyAmountUSD =
             (_config.initialBorrowToken0AmountUSD + _config.initialBorrowToken1AmountUSD) * 3;
 
         address[] memory vaults = _t3VaultsSelected ? t3Vaults : t4Vaults;
 
         for (uint256 i = 0; i < vaults.length; ++i) {
-            uint256 nftId = _t3VaultsSelected ? 
-                executeFluidVaultT3Open(
+            uint256 nftId = _t3VaultsSelected
+                ? executeFluidVaultT3Open(
                     vaults[i],
                     initialSupplyAmountUSD,
                     _config.initialBorrowToken0AmountUSD,
                     _config.initialBorrowToken1AmountUSD,
                     wallet,
                     address(openContract)
-                ) : 
-                executeFluidVaultT4Open(
+                )
+                : executeFluidVaultT4Open(
                     vaults[i],
                     initialSupplyAmountUSD,
                     0, /* initial supply amount 1 in usd */
@@ -286,22 +275,12 @@ contract TestFluidDexPayback is FluidTestBase {
 
             // Calculate shares to burn or debt amount in case of max payback.
             if (_config.maxPaybackToken0) {
-                vars.maxDebtToPull = estimateDexPositionDebtInOneToken(
-                    nftId,
-                    true,
-                    fluidView
-                );
+                vars.maxDebtToPull = estimateDexPositionDebtInOneToken(nftId, true, fluidView);
             } else if (_config.maxPaybackToken1) {
-                vars.maxDebtToPull = estimateDexPositionDebtInOneToken(
-                    nftId,
-                    false,
-                    fluidView
-                );
+                vars.maxDebtToPull = estimateDexPositionDebtInOneToken(nftId, false, fluidView);
             } else {
                 vars.estimatedSharesToBurn = estimatePaybackShares(
-                    vaultData.dexBorrowData.dexPool,
-                    vars.paybackAmount0,
-                    vars.paybackAmount1
+                    vaultData.dexBorrowData.dexPool, vars.paybackAmount0, vars.paybackAmount1
                 );
             }
 
@@ -311,7 +290,7 @@ contract TestFluidDexPayback is FluidTestBase {
                 minDebtShares: vars.estimatedSharesToBurn,
                 maxAmountToPull: vars.maxDebtToPull
             });
-            
+
             vars.executeActionCallData = executeActionCalldata(
                 fluidDexPaybackEncode(
                     vaults[i],
@@ -357,20 +336,28 @@ contract TestFluidDexPayback is FluidTestBase {
             if (_config.maxPaybackToken0) {
                 assertEq(vars.userPositionAfter.isLiquidated, false);
                 assertEq(vars.userPositionAfter.borrow, 0);
-                uint256 token0Pulled = vars.senderBorrowToken0BalanceBefore - vars.senderBorrowToken0BalanceAfter;
+                uint256 token0Pulled =
+                    vars.senderBorrowToken0BalanceBefore - vars.senderBorrowToken0BalanceAfter;
                 assertTrue(token0Pulled > 0);
                 assertTrue(token0Pulled <= vars.maxDebtToPull);
             } else if (_config.maxPaybackToken1) {
                 assertEq(vars.userPositionAfter.isLiquidated, false);
                 assertEq(vars.userPositionAfter.borrow, 0);
-                uint256 token1Pulled = vars.senderBorrowToken1BalanceBefore - vars.senderBorrowToken1BalanceAfter;
+                uint256 token1Pulled =
+                    vars.senderBorrowToken1BalanceBefore - vars.senderBorrowToken1BalanceAfter;
                 assertTrue(token1Pulled > 0);
                 assertTrue(token1Pulled <= vars.maxDebtToPull);
             } else {
                 assertEq(vars.userPositionAfter.isLiquidated, false);
                 assertTrue(vars.userPositionAfter.borrow < vars.userPositionBefore.borrow);
-                assertEq(vars.senderBorrowToken0BalanceAfter, vars.senderBorrowToken0BalanceBefore - vars.paybackAmount0);
-                assertEq(vars.senderBorrowToken1BalanceAfter, vars.senderBorrowToken1BalanceBefore - vars.paybackAmount1);
+                assertEq(
+                    vars.senderBorrowToken0BalanceAfter,
+                    vars.senderBorrowToken0BalanceBefore - vars.paybackAmount0
+                );
+                assertEq(
+                    vars.senderBorrowToken1BalanceAfter,
+                    vars.senderBorrowToken1BalanceBefore - vars.paybackAmount1
+                );
             }
         }
     }

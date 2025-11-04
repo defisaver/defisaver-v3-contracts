@@ -3,11 +3,11 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 import { EulerV2Helper } from "./helpers/EulerV2Helper.sol";
-import { IEVault } from "../../interfaces/eulerV2/IEVault.sol";
-import { IEVC } from "../../interfaces/eulerV2/IEVC.sol";
+import { IEVault } from "../../interfaces/protocols/eulerV2/IEVault.sol";
+import { IEVC } from "../../interfaces/protocols/eulerV2/IEVC.sol";
 
 /// @title Supply assets to a Euler vault and gets eTokens vault shares
 contract EulerV2Supply is ActionBase, EulerV2Helper {
@@ -39,8 +39,10 @@ contract EulerV2Supply is ActionBase, EulerV2Helper {
         params.account = _parseParamAddr(params.account, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[3], _subData, _returnValues);
-        params.enableAsColl = _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[4], _subData, _returnValues) == 1;
-   
+        params.enableAsColl =
+            _parseParamUint(params.enableAsColl ? 1 : 0, _paramMapping[4], _subData, _returnValues)
+                == 1;
+
         (uint256 supplyAmount, bytes memory logData) = _supply(params);
         emit ActionEvent("EulerV2Supply", logData);
         return bytes32(supplyAmount);

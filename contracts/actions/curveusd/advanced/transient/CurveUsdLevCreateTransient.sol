@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../../ActionBase.sol";
 import { DFSExchangeData } from "../../../../exchangeV3/DFSExchangeData.sol";
 
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Creates a new curveusd leveraged position with a given amount of collateral and debt
 /// @notice This action uses internal swapper with transient storage to create a loan
@@ -37,9 +37,11 @@ contract CurveUsdLevCreateTransient is ActionBase, CurveUsdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
-        params.collAmount = _parseParamUint(params.collAmount, _paramMapping[2], _subData, _returnValues);
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[2], _subData, _returnValues);
         params.nBands = _parseParamUint(params.nBands, _paramMapping[3], _subData, _returnValues);
 
         (uint256 debtGeneratedAndSold, bytes memory logData) = _create(params);
@@ -78,19 +80,17 @@ contract CurveUsdLevCreateTransient is ActionBase, CurveUsdHelper {
         transientStorage.setBytesTransiently(abi.encode(_params.exData));
 
         collAddr.approveToken(_params.controllerAddress, _params.collAmount);
-        
-        ICrvUsdController(_params.controllerAddress).create_loan_extended(
-            _params.collAmount,
-            _params.exData.srcAmount,
-            _params.nBands,
-            curveUsdTransientSwapper,
-            info
-        );
 
-        return (
-            _params.exData.srcAmount,
-            abi.encode(_params)
-        );
+        ICrvUsdController(_params.controllerAddress)
+            .create_loan_extended(
+                _params.collAmount,
+                _params.exData.srcAmount,
+                _params.nBands,
+                curveUsdTransientSwapper,
+                info
+            );
+
+        return (_params.exData.srcAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

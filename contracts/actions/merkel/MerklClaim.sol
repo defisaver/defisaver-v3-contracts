@@ -3,7 +3,7 @@ pragma solidity =0.8.24;
 
 import { MerklHelper } from "./helpers/MerklHelper.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 
 /// @title Claims Merkl rewards
 /// @notice You can claim Merkl rewards for anyone, but distinctTokens array should be empty in that case
@@ -53,7 +53,8 @@ contract MerklClaim is ActionBase, MerklHelper {
     function _claim(Params memory _params) internal returns (bytes memory logData) {
         merklDistributor.claim(_params.users, _params.tokens, _params.amounts, _params.proofs);
         for (uint256 i; i < _params.distinctTokens.length; ++i) {
-            _params.distinctTokens[i].withdrawTokens(_params.to, _params.amountsClaimedPerDistinctToken[i]);
+            _params.distinctTokens[i]
+            .withdrawTokens(_params.to, _params.amountsClaimedPerDistinctToken[i]);
         }
 
         logData = abi.encode(_params.distinctTokens, _params.amountsClaimedPerDistinctToken);

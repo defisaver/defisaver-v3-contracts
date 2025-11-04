@@ -2,7 +2,7 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompHelper } from "./helpers/CompHelper.sol";
 
@@ -44,10 +44,10 @@ contract CompCollateralSwitch is ActionBase, CompHelper {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function _switchAsCollateral(Params memory _inputData) internal {
-        for (uint256 i = 0; i < _inputData.cTokens.length; i++){
-            if (_inputData.useAsCollateral[i]){
+        for (uint256 i = 0; i < _inputData.cTokens.length; i++) {
+            if (_inputData.useAsCollateral[i]) {
                 enterMarket(_inputData.cTokens[i]);
-            }else{
+            } else {
                 exitMarket(_inputData.cTokens[i]);
             }
         }

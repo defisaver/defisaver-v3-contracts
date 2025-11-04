@@ -3,11 +3,10 @@
 pragma solidity =0.8.24;
 
 import { EulerV2Helper } from "../../../contracts/actions/eulerV2/helpers/EulerV2Helper.sol";
-import { IPerspective } from "../../../contracts/interfaces/eulerV2/IPerspective.sol";
-import {EulerV2PositionCreator} from "../../utils/positions/EulerV2PositionCreator.sol";
+import { IPerspective } from "../../../contracts/interfaces/protocols/eulerV2/IPerspective.sol";
+import { EulerV2PositionCreator } from "../../utils/positions/EulerV2PositionCreator.sol";
 
 contract EulerV2TestHelper is EulerV2Helper, EulerV2PositionCreator {
-
     address constant ESCROWED_COLLATERAL_PERSPECTIVE = 0xc68CB3658ACf1d49547Fa8605dc158D876cD5828;
     address constant GOVERNED_PERSPECTIVE = 0xC0121817FF224a018840e4D15a864747d36e6Eb2;
     address constant UNGOVERNED_0X_PERSPECTIVE = 0x5345562eD3Ce537582A1A568d3B06c8382Cd60BD;
@@ -28,10 +27,11 @@ contract EulerV2TestHelper is EulerV2Helper, EulerV2PositionCreator {
         return IPerspective(GOVERNED_PERSPECTIVE).verifiedArray();
     }
 
-    function getSubAccount(
-        address _mainAccount,
-        bytes1 _subAccountNumber
-    ) internal pure returns (address subAccount) {
+    function getSubAccount(address _mainAccount, bytes1 _subAccountNumber)
+        internal
+        pure
+        returns (address subAccount)
+    {
         bytes19 accountPrefix = getAddressPrefixInternal(_mainAccount);
         subAccount = address(uint160(bytes20(abi.encodePacked(accountPrefix, _subAccountNumber))));
     }

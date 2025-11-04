@@ -3,14 +3,17 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../../ActionBase.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { UniV3Helper } from "./helpers/UniV3Helper.sol";
-import { IUniswapV3NonfungiblePositionManager } from "../../../interfaces/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
+import {
+    IUniswapV3NonfungiblePositionManager
+} from "../../../interfaces/protocols/uniswap/v3/IUniswapV3NonfungiblePositionManager.sol";
 
 /// @title Collects tokensOwed from a position represented by tokenId
 contract UniCollectV3 is ActionBase, UniV3Helper {
     using TokenUtils for address;
     /// @inheritdoc ActionBase
+
     function executeAction(
         bytes memory _callData,
         bytes32[] memory _subData,
@@ -18,10 +21,11 @@ contract UniCollectV3 is ActionBase, UniV3Helper {
         bytes32[] memory _returnValues
     ) public payable virtual override returns (bytes32) {
         IUniswapV3NonfungiblePositionManager.CollectParams memory uniData = parseInputs(_callData);
-        
-        uniData.tokenId = _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
-        
-        (uint256 amount0, , bytes memory logData) = _uniCollect(uniData);
+
+        uniData.tokenId =
+            _parseParamUint(uniData.tokenId, _paramMapping[0], _subData, _returnValues);
+
+        (uint256 amount0,, bytes memory logData) = _uniCollect(uniData);
         emit ActionEvent("UniCollectV3", logData);
         return bytes32(amount0);
     }
@@ -29,7 +33,7 @@ contract UniCollectV3 is ActionBase, UniV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         IUniswapV3NonfungiblePositionManager.CollectParams memory uniData = parseInputs(_callData);
-        (, , bytes memory logData) = _uniCollect(uniData);
+        (,, bytes memory logData) = _uniCollect(uniData);
         logger.logActionDirectEvent("UniCollectV3", logData);
     }
 
@@ -39,27 +43,21 @@ contract UniCollectV3 is ActionBase, UniV3Helper {
     }
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
-    
+
     /// @dev collects from tokensOwed on position, sends to recipient, up to amountMax
     /// @return amount0 sent to the recipient
     function _uniCollect(IUniswapV3NonfungiblePositionManager.CollectParams memory _uniData)
         internal
-        returns (
-            uint256 amount0,
-            uint256 amount1,
-            bytes memory logData
-        )
+        returns (uint256 amount0, uint256 amount1, bytes memory logData)
     {
         (amount0, amount1) = positionManager.collect(_uniData);
         logData = abi.encode(_uniData, amount0, amount1);
     }
-        
+
     function parseInputs(bytes memory _callData)
-       public
+        public
         pure
-        returns (
-            IUniswapV3NonfungiblePositionManager.CollectParams memory uniData
-        )
+        returns (IUniswapV3NonfungiblePositionManager.CollectParams memory uniData)
     {
         uniData = abi.decode(_callData, (IUniswapV3NonfungiblePositionManager.CollectParams));
     }

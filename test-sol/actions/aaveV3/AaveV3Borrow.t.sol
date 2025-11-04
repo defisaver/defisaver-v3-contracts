@@ -6,15 +6,16 @@ import { AaveV3Borrow } from "../../../contracts/actions/aaveV3/AaveV3Borrow.sol
 import { AaveV3Supply } from "../../../contracts/actions/aaveV3/AaveV3Supply.sol";
 import { AaveV3Helper } from "../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/AaveV3RatioHelper.sol";
-import { IL2PoolV3 } from "../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
-import { IAaveProtocolDataProvider } from "../../../contracts/interfaces/aaveV3/IAaveProtocolDataProvider.sol";
-import { DataTypes } from "../../../contracts/interfaces/aaveV3/DataTypes.sol";
+import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
+import {
+    IAaveProtocolDataProvider
+} from "../../../contracts/interfaces/protocols/aaveV3/IAaveProtocolDataProvider.sol";
+import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
 
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 import { AaveV3ExecuteActions } from "../../utils/executeActions/AaveV3ExecuteActions.sol";
 
 contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActions {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -37,7 +38,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     function setUp() public override {
         forkMainnet("AaveV3Borrow");
         initTestPairs("AaveV3");
-        
+
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
@@ -53,7 +54,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     //////////////////////////////////////////////////////////////////////////*/
     function test_should_borrow() public {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory pair = testPairs[i];
             uint256 supplyAmount = amountInUSDPrice(pair.supplyAsset, 100_000);
@@ -62,13 +63,13 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
             uint256 borrowAmount = amountInUSDPrice(pair.borrowAsset, 40_000);
             _borrow(borrowAmount, pair.borrowAsset, false);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 
     function test_should_borrow_l2_direct() public {
         for (uint256 i = 0; i < testPairs.length; ++i) {
-            uint256 snapshotId = vm.snapshot();
+            uint256 snapshotId = vm.snapshotState();
 
             TestPair memory pair = testPairs[i];
             uint256 supplyAmount = amountInUSDPrice(pair.supplyAsset, 100_000);
@@ -77,7 +78,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
             uint256 borrowAmount = amountInUSDPrice(pair.borrowAsset, 40_000);
             _borrow(borrowAmount, pair.borrowAsset, true);
 
-            vm.revertTo(snapshotId);
+            vm.revertToState(snapshotId);
         }
     }
 
@@ -167,7 +168,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     function _assertParams(AaveV3Borrow.Params memory _params) private view {
         bytes memory encodedInputWithoutSelector = removeSelector(cut.encodeInputs(_params));
         AaveV3Borrow.Params memory decodedParams = cut.decodeInputs(encodedInputWithoutSelector);
-        
+
         assertEq(_params.amount, decodedParams.amount);
         assertEq(_params.to, decodedParams.to);
         assertEq(_params.rateMode, decodedParams.rateMode);
@@ -179,7 +180,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
     }
 
     function _borrow(uint256 _borrowAmount, address _borrowAsset, bool _isL2Direct) internal {
-        DataTypes.ReserveData memory borrowAssetData = pool.getReserveData(_borrowAsset);        
+        DataTypes.ReserveData memory borrowAssetData = pool.getReserveData(_borrowAsset);
 
         uint256 senderBalanceBefore = balanceOf(_borrowAsset, sender);
         uint256 walletSafetyRatioBefore = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
@@ -196,8 +197,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
                 onBehalf: address(0)
             });
             wallet.execute(address(cut), cut.encodeInputs(params), 0);
-        }
-        else {
+        } else {
             bytes memory paramsCalldata = aaveV3BorrowEncode(
                 _borrowAmount,
                 sender,
@@ -219,7 +219,7 @@ contract TestAaveV3Borrow is AaveV3Helper, AaveV3RatioHelper, AaveV3ExecuteActio
 
             wallet.execute(address(cut), _calldata, 0);
         }
-        
+
         uint256 senderBalanceAfter = balanceOf(_borrowAsset, sender);
         uint256 walletSafetyRatioAfter = getSafetyRatio(DEFAULT_AAVE_MARKET, walletAddr);
 

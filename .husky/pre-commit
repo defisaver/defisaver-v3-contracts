@@ -1,0 +1,24 @@
+# Format and lint staged JS/TS/JSON files
+STAGED_JS=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(js|ts|json)$' || true)
+if [ -n "$STAGED_JS" ]; then
+  echo "Formatting: $STAGED_JS"
+  npx prettier --write $STAGED_JS || exit 1
+  
+  # Lint only .js/.ts (eslint fails on .json)
+  STAGED_JS_ONLY=$(echo "$STAGED_JS" | tr ' ' '\n' | grep -E '\.(js|ts)$' || true)
+  if [ -n "$STAGED_JS_ONLY" ]; then
+    echo "Linting: $STAGED_JS_ONLY"
+    npx eslint --fix $STAGED_JS_ONLY || exit 1
+  fi
+  
+  git add $STAGED_JS
+fi
+
+# Format staged SOL files
+STAGED_SOL=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.sol$' || true)
+if [ -n "$STAGED_SOL" ]; then
+  echo "Formatting and Linting Solidity..."
+  forge fmt
+  forge lint
+  git add $STAGED_SOL
+fi

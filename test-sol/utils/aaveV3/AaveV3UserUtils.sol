@@ -5,10 +5,6 @@ import { AaveV3SubProxy } from "../../../contracts/actions/aaveV3/AaveV3SubProxy
 import { UserWallet } from "../UserWallet.sol";
 
 contract AaveV3UserUtils is UserWallet {
-
-    //solhint-disable-next-line no-empty-blocks
-    constructor() UserWallet() {}
-
     function subToAutomationBundles(
         bool _isSafe,
         address _subProxy,
@@ -25,10 +21,8 @@ contract AaveV3UserUtils is UserWallet {
             boostEnabled: true
         });
 
-        bytes memory fnData = abi.encodeWithSignature(
-            "subToAaveAutomation(bytes)",
-            encodeSubData(params)
-        );
+        bytes memory fnData =
+            abi.encodeWithSignature("subToAaveAutomation(bytes)", encodeSubData(params));
 
         executeWithWallet(_isSafe, _subProxy, fnData, 0);
     }
@@ -36,7 +30,11 @@ contract AaveV3UserUtils is UserWallet {
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function encodeSubData(AaveV3SubProxy.AaveSubData memory user) public pure returns (bytes memory) {
+    function encodeSubData(AaveV3SubProxy.AaveSubData memory user)
+        public
+        pure
+        returns (bytes memory)
+    {
         return abi.encodePacked(
             bytes16(uint128(user.minRatio)),
             bytes16(uint128(user.maxRatio)),

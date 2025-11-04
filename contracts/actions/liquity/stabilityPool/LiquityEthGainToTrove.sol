@@ -3,18 +3,18 @@
 pragma solidity =0.8.24;
 
 import { LiquityHelper } from "../helpers/LiquityHelper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Action for withdrawing ETH gains to Trove
 contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
     using TokenUtils for address;
-    
+
     /// @param lqtyTo Address that will receive LQTY token gains
     /// @param upperHint Upper hint for finding a Trove in linked list
     /// @param lowerHint Lower hint for finding a Trove in linked list
     struct Params {
-        address lqtyTo;     
+        address lqtyTo;
         address upperHint;
         address lowerHint;
     }
@@ -48,10 +48,13 @@ contract LiquityEthGainToTrove is ActionBase, LiquityHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _liquityEthGainToTrove(Params memory _params) internal returns (uint256 ethGain, bytes memory logData) {
+    function _liquityEthGainToTrove(Params memory _params)
+        internal
+        returns (uint256 ethGain, bytes memory logData)
+    {
         ethGain = StabilityPool.getDepositorETHGain(address(this));
         uint256 lqtyBefore = LQTY_TOKEN_ADDRESS.getBalance(address(this));
-        
+
         StabilityPool.withdrawETHGainToTrove(_params.upperHint, _params.lowerHint);
 
         uint256 lqtyGain = LQTY_TOKEN_ADDRESS.getBalance(address(this)) - (lqtyBefore);

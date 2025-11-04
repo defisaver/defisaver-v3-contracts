@@ -7,7 +7,6 @@ import { MorphoBlueHelper } from "./helpers/MorphoBlueHelper.sol";
 
 /// @title Allow or disallow an address to manage MorphoBlue position on user's wallet
 contract MorphoBlueSetAuth is ActionBase, MorphoBlueHelper {
-    
     /// @param manager Address of the manager
     /// @param newIsAuthorized Whether the manager is allowed to manage the position
     struct Params {
@@ -25,7 +24,10 @@ contract MorphoBlueSetAuth is ActionBase, MorphoBlueHelper {
         Params memory params = parseInputs(_callData);
 
         params.manager = _parseParamAddr(params.manager, _paramMapping[0], _subData, _returnValues);
-        params.newIsAuthorized =  _parseParamUint(params.newIsAuthorized ? 1 : 0, _paramMapping[1], _subData, _returnValues) == 1;
+        params.newIsAuthorized =
+            _parseParamUint(
+                    params.newIsAuthorized ? 1 : 0, _paramMapping[1], _subData, _returnValues
+                ) == 1;
 
         _setAuth(params);
 
@@ -38,7 +40,7 @@ contract MorphoBlueSetAuth is ActionBase, MorphoBlueHelper {
         Params memory params = parseInputs(_callData);
 
         _setAuth(params);
-        
+
         logger.logActionDirectEvent("MorphoBlueSetAuth", abi.encode(params));
     }
 

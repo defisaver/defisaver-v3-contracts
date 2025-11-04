@@ -7,7 +7,6 @@ import { ActionBase } from "../ActionBase.sol";
 
 /// @title Returns a ratio for mcd vault
 contract McdRatio is ActionBase, McdRatioHelper {
-
     /// @param vaultId Id of the vault
     struct Params {
         uint256 vaultId;
@@ -22,7 +21,8 @@ contract McdRatio is ActionBase, McdRatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.vaultId =
+            _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
 
         uint256 ratio = getRatio(inputData.vaultId, 0);
 
@@ -30,7 +30,7 @@ contract McdRatio is ActionBase, McdRatioHelper {
     }
 
     /// @inheritdoc ActionBase
-    function executeActionDirect(bytes memory _callData) public payable override {}
+    function executeActionDirect(bytes memory _callData) public payable override { }
 
     /// @inheritdoc ActionBase
     function actionType() public pure virtual override returns (uint8) {

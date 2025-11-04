@@ -1,6 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable no-await-in-loop */
-
 /* //////////////////////////////////////////////////////////////
                         START PARAMS
 ////////////////////////////////////////////////////////////// */
@@ -35,45 +32,50 @@ const {
     setBalance,
 } = require('../../utils/utils');
 
-const {
-    addBotCaller,
-    createBundle,
-    createStrategy,
-} = require('../utils/utils-strategies');
+const { addBotCaller, createBundle, createStrategy } = require('../utils/utils-strategies');
 
 const { topUp } = require('../../../scripts/utils/fork');
 const { subAaveV3OpenOrder } = require('../utils/strategy-subs');
 const { aaveV3Supply, aaveV3Borrow } = require('../../utils/actions');
-const { createAaveV3OpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromCollStrategy, createAaveV3FLOpenOrderFromDebtStrategy } = require('../../../strategies-spec/mainnet');
-const { createAaveV3OpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromCollL2Strategy, createAaveV3FLOpenOrderFromDebtL2Strategy } = require('../../../strategies-spec/l2');
+const {
+    createAaveV3OpenOrderFromCollStrategy,
+    createAaveV3FLOpenOrderFromCollStrategy,
+    createAaveV3FLOpenOrderFromDebtStrategy,
+} = require('../../../strategies-spec/mainnet');
+const {
+    createAaveV3OpenOrderFromCollL2Strategy,
+    createAaveV3FLOpenOrderFromCollL2Strategy,
+    createAaveV3FLOpenOrderFromDebtL2Strategy,
+} = require('../../../strategies-spec/l2');
 
 const deployOpenOrderFromCollBundle = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const openStrategy = network === 'mainnet' ? createAaveV3OpenOrderFromCollStrategy() : createAaveV3OpenOrderFromCollL2Strategy();
-    const flOpenStrategy = network === 'mainnet' ? createAaveV3FLOpenOrderFromCollStrategy() : createAaveV3FLOpenOrderFromCollL2Strategy();
-    const aaveV3OpenOrderFromCollStrategyId = await createStrategy(
-        ...openStrategy,
-        false,
-    );
-    const aaveV3FLOpenOrderFromCollStrategyId = await createStrategy(
-        ...flOpenStrategy,
-        false,
-    );
-    const aaveV3OpenOrderFromCollBundleId = await createBundle(
-        [aaveV3OpenOrderFromCollStrategyId, aaveV3FLOpenOrderFromCollStrategyId],
-    );
+    const openStrategy =
+        network === 'mainnet'
+            ? createAaveV3OpenOrderFromCollStrategy()
+            : createAaveV3OpenOrderFromCollL2Strategy();
+    const flOpenStrategy =
+        network === 'mainnet'
+            ? createAaveV3FLOpenOrderFromCollStrategy()
+            : createAaveV3FLOpenOrderFromCollL2Strategy();
+    const aaveV3OpenOrderFromCollStrategyId = await createStrategy(...openStrategy, false);
+    const aaveV3FLOpenOrderFromCollStrategyId = await createStrategy(...flOpenStrategy, false);
+    const aaveV3OpenOrderFromCollBundleId = await createBundle([
+        aaveV3OpenOrderFromCollStrategyId,
+        aaveV3FLOpenOrderFromCollStrategyId,
+    ]);
     return aaveV3OpenOrderFromCollBundleId;
 };
 
 const deployOpenOrderFromDebtStrategy = async (proxy, isFork) => {
     await openStrategyAndBundleStorage(isFork);
 
-    const openStrategy = network === 'mainnet' ? createAaveV3FLOpenOrderFromDebtStrategy() : createAaveV3FLOpenOrderFromDebtL2Strategy();
-    const aaveV3FLOpenOrderFromDebtStrategyId = await createStrategy(
-        ...openStrategy,
-        false,
-    );
+    const openStrategy =
+        network === 'mainnet'
+            ? createAaveV3FLOpenOrderFromDebtStrategy()
+            : createAaveV3FLOpenOrderFromDebtL2Strategy();
+    const aaveV3FLOpenOrderFromDebtStrategyId = await createStrategy(...openStrategy, false);
     return aaveV3FLOpenOrderFromDebtStrategyId;
 };
 
@@ -96,7 +98,14 @@ describe('Deploy open order strategies on fork', function () {
         proxy = proxy.connect(senderAcc);
     };
 
-    const subToBundle = async (supplyAmount, supplyCollAsset, ratio, collAsset, debtAsset, subForOpenFromColl) => {
+    const subToBundle = async (
+        supplyAmount,
+        supplyCollAsset,
+        ratio,
+        collAsset,
+        debtAsset,
+        subForOpenFromColl,
+    ) => {
         const market = addrs[network].AAVE_MARKET;
         const aaveMarketContract = await hre.ethers.getContractAt('IPoolAddressesProvider', market);
         const poolAddress = await aaveMarketContract.getPool();
@@ -120,7 +129,10 @@ describe('Deploy open order strategies on fork', function () {
 
         const initialTokenAsset = getAssetInfo(INITIAL_DEBT_TOKEN);
         const initialDebtReserveData = await pool.getReserveData(initialTokenAsset.address);
-        const initialBorrowAmount = hre.ethers.utils.parseUnits(INITIAL_DEBT_AMOUNT, initialTokenAsset.decimals);
+        const initialBorrowAmount = hre.ethers.utils.parseUnits(
+            INITIAL_DEBT_AMOUNT,
+            initialTokenAsset.decimals,
+        );
         await aaveV3Borrow(
             proxy,
             market,
@@ -131,7 +143,9 @@ describe('Deploy open order strategies on fork', function () {
         );
 
         const isBundle = subForOpenFromColl;
-        const strategyOrBundleId = subForOpenFromColl ? openOrderFromCollBundleId : openOrderFromDebtStrategyId;
+        const strategyOrBundleId = subForOpenFromColl
+            ? openOrderFromCollBundleId
+            : openOrderFromDebtStrategyId;
 
         // 2. sub to bundle
         const { subId, strategySub } = await subAaveV3OpenOrder(
@@ -155,13 +169,8 @@ describe('Deploy open order strategies on fork', function () {
         const isFork = hre.network.name === 'fork';
         console.log('isFork', isFork);
 
-        [
-            senderAcc1,
-            senderAcc2,
-            senderAcc3,
-            senderAcc4,
-            senderAcc5,
-        ] = await hre.ethers.getSigners();
+        [senderAcc1, senderAcc2, senderAcc3, senderAcc4, senderAcc5] =
+            await hre.ethers.getSigners();
 
         const mainnetBocAccounts = [
             '0x61fe1bdcd91E8612a916f86bA50a3EDF3E5654c4',
@@ -211,7 +220,10 @@ describe('Deploy open order strategies on fork', function () {
             console.log('Proxy:', proxy.address);
             const collAsset = getAssetInfo(COLLATERAL_TOKEN, chainIds[network]);
             const debtAsset = getAssetInfo(DEBT_TOKEN, chainIds[network]);
-            const supplyAmount = hre.ethers.utils.parseUnits(SUPPLY_TOKEN_AMOUNT, SUPPLY_TOKEN_DECIMALS);
+            const supplyAmount = hre.ethers.utils.parseUnits(
+                SUPPLY_TOKEN_AMOUNT,
+                SUPPLY_TOKEN_DECIMALS,
+            );
 
             await subToBundle(
                 supplyAmount,

@@ -1,6 +1,4 @@
-const {
-    redeploy,
-} = require('../../../utils/utils');
+const { redeploy } = require('../../../utils/utils');
 
 const { uniV3MintTest } = require('./univ3-tests');
 

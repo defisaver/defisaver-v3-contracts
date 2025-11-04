@@ -2,11 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { SparkHelper } from "./helpers/SparkHelper.sol";
-import { ISparkPool } from "../../interfaces/spark/ISparkPool.sol";
-import { SparkDataTypes } from "../../interfaces/spark/SparkDataTypes.sol";
+import { ISparkPool } from "../../interfaces/protocols/spark/ISparkPool.sol";
+import { SparkDataTypes } from "../../interfaces/protocols/spark/SparkDataTypes.sol";
 import { DFSLib } from "../../utils/DFSLib.sol";
 
 /// @title Allows user to repay with spTokens of the underlying debt asset eg. Pay DAI debt using spDAI tokens.
@@ -42,11 +42,7 @@ contract SparkSpTokenPayback is ActionBase, SparkHelper {
         params.market = _parseParamAddr(params.market, _paramMapping[2], _subData, _returnValues);
 
         (uint256 paybackAmount, bytes memory logData) = _paybackWithSpTokens(
-            params.market,
-            params.assetId,
-            params.amount,
-            params.rateMode,
-            params.from
+            params.market, params.assetId, params.amount, params.rateMode, params.from
         );
         emit ActionEvent("SparkSpTokenPayback", logData);
         return bytes32(paybackAmount);
@@ -56,11 +52,7 @@ contract SparkSpTokenPayback is ActionBase, SparkHelper {
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
         (, bytes memory logData) = _paybackWithSpTokens(
-            params.market,
-            params.assetId,
-            params.amount,
-            params.rateMode,
-            params.from
+            params.market, params.assetId, params.amount, params.rateMode, params.from
         );
         logger.logActionDirectEvent("SparkSpTokenPayback", logData);
     }
@@ -68,11 +60,7 @@ contract SparkSpTokenPayback is ActionBase, SparkHelper {
     function executeActionDirectL2() public payable {
         Params memory params = decodeInputs(msg.data[4:]);
         (, bytes memory logData) = _paybackWithSpTokens(
-            params.market,
-            params.assetId,
-            params.amount,
-            params.rateMode,
-            params.from
+            params.market, params.assetId, params.amount, params.rateMode, params.from
         );
         logger.logActionDirectEvent("SparkSpTokenPayback", logData);
     }

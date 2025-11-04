@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../../../DS/DSMath.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { FeeRecipient } from "../../../utils/FeeRecipient.sol";
-import { TokenPriceHelper } from "../../../utils/TokenPriceHelper.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
+import { FeeRecipient } from "../../../utils/fee/FeeRecipient.sol";
+import { TokenPriceHelper } from "../../../utils/token/TokenPriceHelper.sol";
 
 contract GasFeeHelper is DSMath, TokenPriceHelper {
     using TokenUtils for address;
@@ -20,7 +20,11 @@ contract GasFeeHelper is DSMath, TokenPriceHelper {
     /// @dev Divider for input amount, 5 bps
     uint256 public constant MAX_DFS_FEE = 2000;
 
-    function calcGasCost(uint256 _gasUsed, address _feeToken, uint256 _l1GasCostInEth) public view returns (uint256 txCost) {
+    function calcGasCost(uint256 _gasUsed, address _feeToken, uint256 _l1GasCostInEth)
+        public
+        view
+        returns (uint256 txCost)
+    {
         uint256 gasPrice = tx.gasprice;
 
         // gas price must be in a reasonable range
@@ -44,12 +48,10 @@ contract GasFeeHelper is DSMath, TokenPriceHelper {
             if (tokenDecimals > 18) revert TokenDecimalsUnsupportedError(tokenDecimals);
 
             if (price > 0) {
-                txCost = wdiv(txCost, uint256(price)) / (10**(18 - tokenDecimals));
+                txCost = wdiv(txCost, uint256(price)) / (10 ** (18 - tokenDecimals));
             } else {
                 txCost = 0;
             }
         }
     }
-
-    
 }

@@ -4,12 +4,11 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
-import { ICometRewards } from "../../interfaces/compoundV3/ICometRewards.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { ICometRewards } from "../../interfaces/protocols/compoundV3/ICometRewards.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title Claims Comp reward for the specified user.
 contract CompV3Claim is ActionBase, CompV3Helper {
-
     /// @param market Main Comet proxy contract that is different for each compound market
     /// @param onBehalf The owner to claim for, defaults to user's wallet
     /// @param to The address to receive the rewards
@@ -31,22 +30,15 @@ contract CompV3Claim is ActionBase, CompV3Helper {
         Params memory params = parseInputs(_callData);
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[1], _subData, _returnValues);
+        params.onBehalf =
+            _parseParamAddr(params.onBehalf, _paramMapping[1], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[2], _subData, _returnValues);
         params.shouldAccrue =
-            _parseParamUint(
-                params.shouldAccrue ? 1 : 0,
-                _paramMapping[3],
-                _subData,
-                _returnValues
-            ) == 1;
-            
-        (uint256 compClaimed, bytes memory logData) = _claim(
-            params.market,
-            params.onBehalf,
-            params.to,
-            params.shouldAccrue
-        );
+            _parseParamUint(params.shouldAccrue ? 1 : 0, _paramMapping[3], _subData, _returnValues)
+                == 1;
+
+        (uint256 compClaimed, bytes memory logData) =
+            _claim(params.market, params.onBehalf, params.to, params.shouldAccrue);
         emit ActionEvent("CompV3Claim", logData);
         return bytes32(compClaimed);
     }
@@ -54,7 +46,8 @@ contract CompV3Claim is ActionBase, CompV3Helper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _claim(params.market, params.onBehalf, params.to, params.shouldAccrue);
+        (, bytes memory logData) =
+            _claim(params.market, params.onBehalf, params.to, params.shouldAccrue);
         logger.logActionDirectEvent("CompV3Claim", logData);
     }
 
@@ -70,20 +63,18 @@ contract CompV3Claim is ActionBase, CompV3Helper {
     /// @param _onBehalf The owner to claim for, defaults to user's wallet
     /// @param _to The address to receive the rewards
     /// @param _shouldAccrue  If true, the protocol will account for the rewards owed to the account as of the current block before transferring
-    function _claim(
-        address _market,
-        address _onBehalf,
-        address _to,
-        bool _shouldAccrue
-    ) internal returns (uint256 compClaimed, bytes memory logData) {
-        
+    function _claim(address _market, address _onBehalf, address _to, bool _shouldAccrue)
+        internal
+        returns (uint256 compClaimed, bytes memory logData)
+    {
         require(_to != address(0), "Receiver can't be 0x0");
         // default to onBehalf of user's wallet
         if (_onBehalf == address(0)) {
             _onBehalf = address(this);
         }
 
-        ICometRewards.RewardConfig memory rewards = ICometRewards(COMET_REWARDS_ADDR).rewardConfig(_market);
+        ICometRewards.RewardConfig memory rewards =
+            ICometRewards(COMET_REWARDS_ADDR).rewardConfig(_market);
 
         uint256 balanceBefore = IERC20(rewards.token).balanceOf(_to);
 

@@ -2,19 +2,17 @@
 
 pragma solidity =0.8.24;
 
-import { DSMath } from "../../../DS/DSMath.sol";
-import { DSProxy } from "../../../DS/DSProxy.sol";
-import { IManager } from "../../../interfaces/mcd/IManager.sol";
-import { IJoin } from "../../../interfaces/mcd/IJoin.sol";
-import { IVat } from "../../../interfaces/mcd/IVat.sol";
-import { ICropper } from "../../../interfaces/mcd/ICropper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
-import { ICdpRegistry } from "../../../interfaces/mcd/ICdpRegistry.sol";
+import { DSMath } from "../../../_vendor/DS/DSMath.sol";
+import { IManager } from "../../../interfaces/protocols/mcd/IManager.sol";
+import { IJoin } from "../../../interfaces/protocols/mcd/IJoin.sol";
+import { IVat } from "../../../interfaces/protocols/mcd/IVat.sol";
+import { ICropper } from "../../../interfaces/protocols/mcd/ICropper.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
+import { ICdpRegistry } from "../../../interfaces/protocols/mcd/ICdpRegistry.sol";
 import { MainnetMcdAddresses } from "./MainnetMcdAddresses.sol";
 
 /// @title Helper methods for MCDSaverProxy
 contract McdHelper is DSMath, MainnetMcdAddresses {
-
     IVat public constant vat = IVat(VAT_ADDR);
 
     error IntOverflow();
@@ -23,16 +21,20 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
     /// @param _amount Amount of dai to be normalized
     /// @param _rate Current rate of the stability fee
     /// @param _daiVatBalance Balance od Dai in the Vat for that CDP
-    function normalizeDrawAmount(uint _amount, uint _rate, uint _daiVatBalance) internal pure returns (int dart) {
+    function normalizeDrawAmount(uint256 _amount, uint256 _rate, uint256 _daiVatBalance)
+        internal
+        pure
+        returns (int256 dart)
+    {
         if (_daiVatBalance < _amount * RAY) {
             dart = toPositiveInt((_amount * RAY - _daiVatBalance) / _rate);
-            dart = uint(dart) * _rate < _amount * RAY ? dart + 1 : dart;
+            dart = uint256(dart) * _rate < _amount * RAY ? dart + 1 : dart;
         }
     }
 
     /// @notice Converts a number to Rad precision
     /// @param _wad The input number in wad precision
-    function toRad(uint _wad) internal pure returns (uint) {
+    function toRad(uint256 _wad) internal pure returns (uint256) {
         return _wad * (10 ** 27);
     }
 
@@ -46,9 +48,9 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
 
     /// @notice Converts a uint to int and checks if positive
     /// @param _x Number to be converted
-    function toPositiveInt(uint _x) internal pure returns (int y) {
-        y = int(_x);
-        if (y < 0){
+    function toPositiveInt(uint256 _x) internal pure returns (int256 y) {
+        y = int256(_x);
+        if (y < 0) {
             revert IntOverflow();
         }
     }
@@ -58,13 +60,16 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
     /// @param _daiBalance Amount of dai in vat contract for that urn
     /// @param _urn Urn of the Cdp
     /// @param _ilk Ilk of the Cdp
-    function normalizePaybackAmount(address _vat, uint256 _daiBalance, address _urn, bytes32 _ilk) internal view returns (int amount) {
-
-        (, uint rate,,,) = IVat(_vat).ilks(_ilk);
-        (, uint art) = IVat(_vat).urns(_ilk, _urn);
+    function normalizePaybackAmount(address _vat, uint256 _daiBalance, address _urn, bytes32 _ilk)
+        internal
+        view
+        returns (int256 amount)
+    {
+        (, uint256 rate,,,) = IVat(_vat).ilks(_ilk);
+        (, uint256 art) = IVat(_vat).urns(_ilk, _urn);
 
         amount = toPositiveInt(_daiBalance / rate);
-        amount = uint(amount) <= art ? - amount : - toPositiveInt(art);
+        amount = uint256(amount) <= art ? -amount : -toPositiveInt(art);
     }
 
     /// @notice Gets the whole debt of the CDP
@@ -72,12 +77,16 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
     /// @param _usr Address of the Dai holder
     /// @param _urn Urn of the Cdp
     /// @param _ilk Ilk of the Cdp
-    function getAllDebt(address _vat, address _usr, address _urn, bytes32 _ilk) internal view returns (uint daiAmount) {
-        (, uint rate,,,) = IVat(_vat).ilks(_ilk);
-        (, uint art) = IVat(_vat).urns(_ilk, _urn);
-        uint dai = IVat(_vat).dai(_usr);
+    function getAllDebt(address _vat, address _usr, address _urn, bytes32 _ilk)
+        internal
+        view
+        returns (uint256 daiAmount)
+    {
+        (, uint256 rate,,,) = IVat(_vat).ilks(_ilk);
+        (, uint256 art) = IVat(_vat).urns(_ilk, _urn);
+        uint256 dai = IVat(_vat).dai(_usr);
 
-        uint rad = art * rate - dai;
+        uint256 rad = art * rate - dai;
         daiAmount = rad / RAY;
 
         // handles precision error (off by 1 wei)
@@ -110,7 +119,11 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
         return address(IJoin(_joinAddr).gem());
     }
 
-    function getUrnAndIlk(address _mcdManager, uint256 _vaultId) public view returns (address urn, bytes32 ilk) {
+    function getUrnAndIlk(address _mcdManager, uint256 _vaultId)
+        public
+        view
+        returns (address urn, bytes32 ilk)
+    {
         if (_mcdManager == CROPPER) {
             address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
             urn = ICropper(CROPPER).proxy(owner);
@@ -125,7 +138,11 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
     /// @param _manager Manager contract
     /// @param _cdpId Id of the CDP
     /// @param _ilk Ilk of the CDP
-    function getCdpInfo(IManager _manager, uint _cdpId, bytes32 _ilk) public view returns (uint, uint) {
+    function getCdpInfo(IManager _manager, uint256 _cdpId, bytes32 _ilk)
+        public
+        view
+        returns (uint256, uint256)
+    {
         address urn;
 
         if (address(_manager) == CROPPER) {
@@ -135,15 +152,19 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
             urn = _manager.urns(_cdpId);
         }
 
-        (uint collateral, uint debt) = vat.urns(_ilk, urn);
-        (,uint rate,,,) = vat.ilks(_ilk);
+        (uint256 collateral, uint256 debt) = vat.urns(_ilk, urn);
+        (, uint256 rate,,,) = vat.ilks(_ilk);
 
         return (collateral, rmul(debt, rate));
     }
 
     /// @notice Returns all the collateral of the vault, formatted in the correct decimal
     /// @dev Will fail if token is over 18 decimals
-    function getAllColl(IManager _mcdManager, address _joinAddr, uint _vaultId) internal view returns (uint amount) {
+    function getAllColl(IManager _mcdManager, address _joinAddr, uint256 _vaultId)
+        internal
+        view
+        returns (uint256 amount)
+    {
         bytes32 ilk;
 
         if (address(_mcdManager) == CROPPER) {
@@ -152,11 +173,7 @@ contract McdHelper is DSMath, MainnetMcdAddresses {
             ilk = _mcdManager.ilks(_vaultId);
         }
 
-        (amount, ) = getCdpInfo(
-            _mcdManager,
-            _vaultId,
-            ilk
-        );
+        (amount,) = getCdpInfo(_mcdManager, _vaultId, ilk);
 
         if (IJoin(_joinAddr).dec() != 18) {
             return div(amount, 10 ** sub(18, IJoin(_joinAddr).dec()));

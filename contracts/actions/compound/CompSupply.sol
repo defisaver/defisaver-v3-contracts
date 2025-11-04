@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompHelper } from "./helpers/CompHelper.sol";
-import { ICToken } from "../../interfaces/compound/ICToken.sol"; 
+import { ICToken } from "../../interfaces/protocols/compound/ICToken.sol";
 
 /// @title Supply a token to Compound.
 contract CompSupply is ActionBase, CompHelper {
@@ -33,11 +33,13 @@ contract CompSupply is ActionBase, CompHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.cTokenAddr = _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
+        params.cTokenAddr =
+            _parseParamAddr(params.cTokenAddr, _paramMapping[0], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[1], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 withdrawAmount, bytes memory logData) = _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
+        (uint256 withdrawAmount, bytes memory logData) =
+            _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
         emit ActionEvent("CompSupply", logData);
         return bytes32(withdrawAmount);
     }
@@ -45,7 +47,8 @@ contract CompSupply is ActionBase, CompHelper {
     /// @inheritdoc ActionBase
     function executeActionDirect(bytes memory _callData) public payable override {
         Params memory params = parseInputs(_callData);
-        (, bytes memory logData) = _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
+        (, bytes memory logData) =
+            _supply(params.cTokenAddr, params.amount, params.from, params.enableAsColl);
         logger.logActionDirectEvent("CompSupply", logData);
     }
 
@@ -61,12 +64,10 @@ contract CompSupply is ActionBase, CompHelper {
     /// @param _amount Amount of the underlying token we are supplying
     /// @param _from Address where we are pulling the underlying tokens from
     /// @param _enableAsColl If the supply asset should be collateral
-    function _supply(
-        address _cTokenAddr,
-        uint256 _amount,
-        address _from,
-        bool _enableAsColl
-    ) internal returns (uint256, bytes memory) {
+    function _supply(address _cTokenAddr, uint256 _amount, address _from, bool _enableAsColl)
+        internal
+        returns (uint256, bytes memory)
+    {
         address tokenAddr = getUnderlyingAddr(_cTokenAddr);
 
         // if amount type(uint256).max, pull current _from balance
@@ -85,12 +86,12 @@ contract CompSupply is ActionBase, CompHelper {
         if (tokenAddr != TokenUtils.WETH_ADDR) {
             tokenAddr.approveToken(_cTokenAddr, _amount);
 
-            if (ICToken(_cTokenAddr).mint(_amount) != NO_ERROR){
+            if (ICToken(_cTokenAddr).mint(_amount) != NO_ERROR) {
                 revert CompSupplyError();
             }
         } else {
             TokenUtils.withdrawWeth(_amount);
-            ICToken(_cTokenAddr).mint{value: _amount}(); // reverts on fail
+            ICToken(_cTokenAddr).mint{ value: _amount }(); // reverts on fail
         }
 
         bytes memory logData = abi.encode(tokenAddr, _amount, _from, _enableAsColl);

@@ -3,7 +3,7 @@
 pragma solidity =0.8.24;
 
 import { LiquityHelper } from "../helpers/LiquityHelper.sol";
-import { TokenUtils } from "../../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../../ActionBase.sol";
 
 /// @title Action for opening a liquity trove
@@ -18,11 +18,11 @@ contract LiquityOpen is ActionBase, LiquityHelper {
     /// @param upperHint Upper hint for finding a Trove in linked list
     /// @param lowerHint Lower hint for finding a Trove in linked list
     struct Params {
-        uint256 maxFeePercentage;   
-        uint256 collAmount;         
-        uint256 lusdAmount;         
-        address from;               
-        address to;                 
+        uint256 maxFeePercentage;
+        uint256 collAmount;
+        uint256 lusdAmount;
+        address from;
+        address to;
         address upperHint;
         address lowerHint;
     }
@@ -36,24 +36,12 @@ contract LiquityOpen is ActionBase, LiquityHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.maxFeePercentage = _parseParamUint(
-            params.maxFeePercentage,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
-        params.collAmount = _parseParamUint(
-            params.collAmount,
-            _paramMapping[1],
-            _subData,
-            _returnValues
-        );
-        params.lusdAmount = _parseParamUint(
-            params.lusdAmount,
-            _paramMapping[2],
-            _subData,
-            _returnValues
-        );
+        params.maxFeePercentage =
+            _parseParamUint(params.maxFeePercentage, _paramMapping[0], _subData, _returnValues);
+        params.collAmount =
+            _parseParamUint(params.collAmount, _paramMapping[1], _subData, _returnValues);
+        params.lusdAmount =
+            _parseParamUint(params.lusdAmount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
         params.to = _parseParamAddr(params.to, _paramMapping[4], _subData, _returnValues);
 
@@ -84,11 +72,8 @@ contract LiquityOpen is ActionBase, LiquityHelper {
         TokenUtils.WETH_ADDR.pullTokensIfNeeded(_params.from, _params.collAmount);
         TokenUtils.withdrawWeth(_params.collAmount);
 
-        BorrowerOperations.openTrove{value: _params.collAmount}(
-            _params.maxFeePercentage,
-            _params.lusdAmount,
-            _params.upperHint,
-            _params.lowerHint
+        BorrowerOperations.openTrove{ value: _params.collAmount }(
+            _params.maxFeePercentage, _params.lusdAmount, _params.upperHint, _params.lowerHint
         );
 
         LUSD_TOKEN_ADDRESS.withdrawTokens(_params.to, _params.lusdAmount);

@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CompV3Helper } from "./helpers/CompV3Helper.sol";
-import { IComet } from "../../interfaces/compoundV3/IComet.sol";
+import { IComet } from "../../interfaces/protocols/compoundV3/IComet.sol";
 
 /// @title Supply a token to CompoundV3.
 contract CompV3Supply is ActionBase, CompV3Helper {
@@ -36,13 +36,15 @@ contract CompV3Supply is ActionBase, CompV3Helper {
         Params memory params = parseInputs(_callData);
 
         params.market = _parseParamAddr(params.market, _paramMapping[0], _subData, _returnValues);
-        params.tokenAddr = _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
+        params.tokenAddr =
+            _parseParamAddr(params.tokenAddr, _paramMapping[1], _subData, _returnValues);
         params.amount = _parseParamUint(params.amount, _paramMapping[2], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[3], _subData, _returnValues);
 
         // param was added later on so we check if it's sent
         if (_paramMapping.length == 5) {
-            params.onBehalf = _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
+            params.onBehalf =
+                _parseParamAddr(params.onBehalf, _paramMapping[4], _subData, _returnValues);
         }
 
         (uint256 withdrawAmount, bytes memory logData) = _supply(params);
@@ -78,15 +80,15 @@ contract CompV3Supply is ActionBase, CompV3Helper {
         _params.tokenAddr.approveToken(_params.market, _params.amount);
 
         // if the user has baseToken debt, use payback
-        if(_params.tokenAddr == IComet(_params.market).baseToken()) {
+        if (_params.tokenAddr == IComet(_params.market).baseToken()) {
             uint256 debt = IComet(_params.market).borrowBalanceOf(_params.onBehalf);
-            if(debt > 0) {
+            if (debt > 0) {
                 revert CompV3SupplyWithDebtError();
             }
         }
-        
+
         IComet(_params.market).supplyTo(_params.onBehalf, _params.tokenAddr, _params.amount);
-        
+
         bytes memory logData = abi.encode(_params);
         return (_params.amount, logData);
     }

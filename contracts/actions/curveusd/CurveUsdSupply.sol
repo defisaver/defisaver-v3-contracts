@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { CurveUsdHelper } from "./helpers/CurveUsdHelper.sol";
-import { ICrvUsdController } from "../../interfaces/curveusd/ICurveUsd.sol";
+import { ICrvUsdController } from "../../interfaces/protocols/curveusd/ICurveUsd.sol";
 
 /// @title Action that supplies collateral to a curveusd position
 /// @dev collateralAmount must be non-zero, can be maxUint
@@ -33,10 +33,13 @@ contract CurveUsdSupply is ActionBase, CurveUsdHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        params.controllerAddress = _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
+        params.controllerAddress =
+            _parseParamAddr(params.controllerAddress, _paramMapping[0], _subData, _returnValues);
         params.from = _parseParamAddr(params.from, _paramMapping[1], _subData, _returnValues);
-        params.onBehalfOf = _parseParamAddr(params.onBehalfOf, _paramMapping[2], _subData, _returnValues);
-        params.collateralAmount = _parseParamUint(params.collateralAmount, _paramMapping[3], _subData, _returnValues);
+        params.onBehalfOf =
+            _parseParamAddr(params.onBehalfOf, _paramMapping[2], _subData, _returnValues);
+        params.collateralAmount =
+            _parseParamUint(params.collateralAmount, _paramMapping[3], _subData, _returnValues);
 
         (uint256 suppliedAmount, bytes memory logData) = _curveUsdSupply(params);
         emit ActionEvent("CurveUsdSupply", logData);
@@ -61,23 +64,22 @@ contract CurveUsdSupply is ActionBase, CurveUsdHelper {
     function _curveUsdSupply(Params memory _params) internal returns (uint256, bytes memory) {
         /// @dev see ICrvUsdController natspec
         if (_params.collateralAmount == 0) revert ZeroAmountSupplied();
-        
+
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
         address collateralAsset = ICrvUsdController(_params.controllerAddress).collateral_token();
-        _params.collateralAmount = collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);
+        _params.collateralAmount =
+            collateralAsset.pullTokensIfNeeded(_params.from, _params.collateralAmount);
         collateralAsset.approveToken(_params.controllerAddress, _params.collateralAmount);
 
         if (_params.onBehalfOf == address(0)) {
             ICrvUsdController(_params.controllerAddress).add_collateral(_params.collateralAmount);
         } else {
-            ICrvUsdController(_params.controllerAddress).add_collateral(_params.collateralAmount, _params.onBehalfOf);
+            ICrvUsdController(_params.controllerAddress)
+                .add_collateral(_params.collateralAmount, _params.onBehalfOf);
         }
 
-        return (
-            _params.collateralAmount,
-            abi.encode(_params)
-        );
+        return (_params.collateralAmount, abi.encode(_params));
     }
 
     function parseInputs(bytes memory _callData) public pure returns (Params memory params) {

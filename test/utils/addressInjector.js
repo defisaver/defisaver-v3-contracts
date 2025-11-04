@@ -7,7 +7,10 @@ const execAsync = promisify(exec);
 
 class CoreAddressesInjector {
     constructor() {
-        this.contractFilePath = path.join(__dirname, '../../contracts/core/helpers/MainnetCoreAddresses.sol');
+        this.contractFilePath = path.join(
+            __dirname,
+            '../../contracts/core/helpers/MainnetCoreAddresses.sol',
+        );
         this.contentBeforeInjection = null;
         this.encoding = 'utf8';
     }
@@ -18,7 +21,10 @@ class CoreAddressesInjector {
             const newContent = this.contentBeforeInjection
                 .replace(/(PROXY_AUTH_ADDR\s*=\s*)0x[a-fA-F0-9]{40}/, `$1${proxyAuthAddr}`)
                 .replace(/(MODULE_AUTH_ADDR\s*=\s*)0x[a-fA-F0-9]{40}/, `$1${safeModuleAuthAddr}`)
-                .replace(/(RECIPE_EXECUTOR_ADDR\s*=\s*)0x[a-fA-F0-9]{40}/, `$1${recipeExecutorAddr}`);
+                .replace(
+                    /(RECIPE_EXECUTOR_ADDR\s*=\s*)0x[a-fA-F0-9]{40}/,
+                    `$1${recipeExecutorAddr}`,
+                );
             fs.writeFileSync(this.contractFilePath, newContent);
             await execAsync('npx hardhat compile');
         } catch (err) {

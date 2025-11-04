@@ -2,10 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IWeEth } from "../../interfaces/etherFi/IWeEth.sol";
+import { IWeEth } from "../../interfaces/protocols/etherFi/IWeEth.sol";
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { EtherFiHelper } from "./helpers/EtherFiHelper.sol";
 
 /// @title Unwrap weETH and receive eETH
@@ -30,7 +30,8 @@ contract EtherFiUnwrap is ActionBase, EtherFiHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
         inputData.from = _parseParamAddr(inputData.from, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
@@ -55,7 +56,10 @@ contract EtherFiUnwrap is ActionBase, EtherFiHelper {
     /*//////////////////////////////////////////////////////////////
                             ACTION LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _etherFiUnwrap(Params memory _inputData) internal returns (uint256 eEthReceivedAmount, bytes memory logData){
+    function _etherFiUnwrap(Params memory _inputData)
+        internal
+        returns (uint256 eEthReceivedAmount, bytes memory logData)
+    {
         _inputData.amount = WEETH_ADDR.pullTokensIfNeeded(_inputData.from, _inputData.amount);
 
         eEthReceivedAmount = IWeEth(WEETH_ADDR).unwrap(_inputData.amount);

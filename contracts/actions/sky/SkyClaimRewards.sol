@@ -3,9 +3,9 @@
 pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { SkyHelper } from "./helpers/SkyHelper.sol";
-import { IStakingRewards } from "../../interfaces/sky/IStakingRewards.sol";
+import { IStakingRewards } from "../../interfaces/protocols/sky/IStakingRewards.sol";
 
 /// @title Claim rewards earned by staking USDS on SKY
 contract SkyClaimRewards is ActionBase, SkyHelper {
@@ -29,8 +29,10 @@ contract SkyClaimRewards is ActionBase, SkyHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.stakingContract = _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
-        inputData.rewardToken = _parseParamAddr(inputData.rewardToken, _paramMapping[1], _subData, _returnValues);
+        inputData.stakingContract =
+            _parseParamAddr(inputData.stakingContract, _paramMapping[0], _subData, _returnValues);
+        inputData.rewardToken =
+            _parseParamAddr(inputData.rewardToken, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
         (uint256 amountClaimed, bytes memory logData) = _skyClaimRewards(inputData);
@@ -52,7 +54,10 @@ contract SkyClaimRewards is ActionBase, SkyHelper {
 
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
-    function _skyClaimRewards(Params memory _inputData) internal returns (uint256, bytes memory logData) {
+    function _skyClaimRewards(Params memory _inputData)
+        internal
+        returns (uint256, bytes memory logData)
+    {
         require(_inputData.rewardToken != address(0));
         uint256 startingBalance = _inputData.rewardToken.getBalance(address(this));
         IStakingRewards(_inputData.stakingContract).getReward();

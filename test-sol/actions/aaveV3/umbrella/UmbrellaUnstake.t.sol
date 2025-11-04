@@ -2,9 +2,11 @@
 
 pragma solidity =0.8.24;
 
-import { IERC20 } from "../../../../contracts/interfaces/IERC20.sol";
-import { IERC4626 } from "../../../../contracts/interfaces/IERC4626.sol";
-import { IStaticATokenV2 } from "../../../../contracts/interfaces/aaveV3/IStaticATokenV2.sol";
+import { IERC20 } from "../../../../contracts/interfaces/token/IERC20.sol";
+import { IERC4626 } from "../../../../contracts/interfaces/token/IERC4626.sol";
+import {
+    IStaticATokenV2
+} from "../../../../contracts/interfaces/protocols/aaveV3/IStaticATokenV2.sol";
 import { UmbrellaStake } from "../../../../contracts/actions/aaveV3/umbrella/UmbrellaStake.sol";
 import { UmbrellaUnstake } from "../../../../contracts/actions/aaveV3/umbrella/UmbrellaUnstake.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
@@ -12,7 +14,6 @@ import { Addresses } from "../../../utils/Addresses.sol";
 import { TestUmbrellaCommon } from "./UmbrellaCommon.t.sol";
 
 contract TestUmbrellaUnstake is TestUmbrellaCommon {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACTS UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -25,13 +26,12 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
 
     UmbrellaStake stakeAction;
 
-
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnet("UmbrellaUnstake");
-        
+
         wallet = new SmartWallet(bob);
         sender = wallet.owner();
         walletAddr = wallet.walletAddr();
@@ -80,14 +80,10 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
         _baseTest(isDirect, isMaxAmount, useATokens);
     }
 
-    function _baseTest(
-        bool _isDirect,
-        bool _isMaxAmount,
-        bool _useATokens
-    ) internal {
+    function _baseTest(bool _isDirect, bool _isMaxAmount, bool _useATokens) internal {
         for (uint256 i = 0; i < stkTokens.length; ++i) {
             uint256 amount = 1000 * 10 ** IERC20(stkTokens[i]).decimals();
-            
+
             _stake(stkTokens[i], amount, _isDirect);
             _startCooldown(stkTokens[i]);
             _passCooldownPeriod();
@@ -95,7 +91,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
             uint256 totalStkShares = IERC4626(stkTokens[i]).balanceOf(walletAddr);
             uint256 unstakeAmount = _isMaxAmount ? totalStkShares : totalStkShares / 2;
             uint256 minAmountOut = _getMinAmountOut(stkTokens[i], unstakeAmount);
-            
+
             bytes memory unstakeCallData = executeActionCalldata(
                 umbrellaUnstakeEncode(
                     stkTokens[i],
@@ -110,40 +106,24 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
             address waTokenOrGHO = IERC4626(stkTokens[i]).asset();
 
             Snapshot memory snapshotBefore = takeSnapshot(
-                stkTokens[i],
-                waTokenOrGHO,
-                _getSupplyToken(stkTokens[i], _useATokens)
+                stkTokens[i], waTokenOrGHO, _getSupplyToken(stkTokens[i], _useATokens)
             );
-            
+
             wallet.execute(address(cut), unstakeCallData, 0);
-            
+
             Snapshot memory snapshotAfter = takeSnapshot(
-                stkTokens[i],
-                waTokenOrGHO,
-                _getSupplyToken(stkTokens[i], _useATokens)
+                stkTokens[i], waTokenOrGHO, _getSupplyToken(stkTokens[i], _useATokens)
             );
-            
+
             _assertSnapshot(
-                snapshotBefore,
-                snapshotAfter,
-                unstakeAmount,
-                _isMaxAmount,
-                waTokenOrGHO
+                snapshotBefore, snapshotAfter, unstakeAmount, _isMaxAmount, waTokenOrGHO
             );
         }
     }
 
     function _startCooldown(address _stkToken) internal {
-        bytes memory startCooldownCallData = executeActionCalldata(
-            umbrellaUnstakeEncode(
-                _stkToken,
-                sender,
-                0,
-                false,
-                0
-            ),
-            true
-        );
+        bytes memory startCooldownCallData =
+            executeActionCalldata(umbrellaUnstakeEncode(_stkToken, sender, 0, false, 0), true);
         wallet.execute(address(cut), startCooldownCallData, 0);
     }
 
@@ -205,7 +185,7 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
         uint256 _unstakeAmount,
         bool _isMaxAmount,
         address _waTokenOrGHO
-    ) internal {
+    ) internal pure {
         assertEq(_snapshotAfter.walletWaTokenBalance, 0, "walletWaTokenBalance should be 0");
         assertEq(_snapshotAfter.walletSupplyTokenBalance, 0, "walletSupplyTokenBalance should be 0");
         if (_waTokenOrGHO != Addresses.GHO_TOKEN) {
@@ -224,4 +204,4 @@ contract TestUmbrellaUnstake is TestUmbrellaCommon {
             assertLt(_snapshotAfter.walletStkTokenBalance, _snapshotBefore.walletStkTokenBalance);
         }
     }
-} 
+}

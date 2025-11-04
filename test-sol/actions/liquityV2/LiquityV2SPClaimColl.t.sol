@@ -2,15 +2,17 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { IStabilityPool } from "../../../contracts/interfaces/liquityV2/IStabilityPool.sol";
-import { LiquityV2SPClaimColl } from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPClaimColl.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import {
+    LiquityV2SPClaimColl
+} from "../../../contracts/actions/liquityV2/stabilityPool/LiquityV2SPClaimColl.sol";
 
 import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2ExecuteActions.sol";
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2SPClaimColl is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -62,15 +64,13 @@ contract TestLiquityV2SPClaimColl is LiquityV2ExecuteActions {
     function _claim(IAddressesRegistry _market, bool _isDirect) internal {
         address collToken = _market.collToken();
         address stabilityPool = _market.stabilityPool();
-        
-        bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2SPClaimCollEncode(address(_market), sender),
-            _isDirect
-        );
+
+        bytes memory executeActionCallData =
+            executeActionCalldata(liquityV2SPClaimCollEncode(address(_market), sender), _isDirect);
 
         uint256 amountToClaim = 1000;
         _simulateClaimAmount(amountToClaim, stabilityPool, collToken);
-     
+
         uint256 senderCollBalanceBefore = balanceOf(collToken, sender);
         wallet.execute(address(cut), executeActionCallData, 0);
         uint256 senderCollBalanceAfter = balanceOf(collToken, sender);
@@ -78,11 +78,15 @@ contract TestLiquityV2SPClaimColl is LiquityV2ExecuteActions {
         assertEq(senderCollBalanceAfter, senderCollBalanceBefore + amountToClaim);
     }
 
-    function _simulateClaimAmount(uint256 _amountToClaim, address _sp, address _collToken) internal {
+    function _simulateClaimAmount(uint256 _amountToClaim, address _sp, address _collToken)
+        internal
+    {
         uint256 collBalanceStorageSlot = 3;
         uint256 stashedCollMappingSlot = 9;
         vm.store(_sp, bytes32(collBalanceStorageSlot), bytes32(_amountToClaim));
-        vm.store(_sp, keccak256(abi.encode(walletAddr, stashedCollMappingSlot)), bytes32(_amountToClaim));
+        vm.store(
+            _sp, keccak256(abi.encode(walletAddr, stashedCollMappingSlot)), bytes32(_amountToClaim)
+        );
         give(_collToken, _sp, _amountToClaim * 2);
     }
 }

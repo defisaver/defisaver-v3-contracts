@@ -2,13 +2,13 @@
 
 pragma solidity =0.8.24;
 
-import { ICropJoin } from "../../interfaces/mcd/ICropJoin.sol";
-import { ICropper } from "../../interfaces/mcd/ICropper.sol";
-import { ICdpRegistry } from "../../interfaces/mcd/ICdpRegistry.sol";
-import { TokenUtils } from "../../utils/TokenUtils.sol";
+import { ICropJoin } from "../../interfaces/protocols/mcd/ICropJoin.sol";
+import { ICropper } from "../../interfaces/protocols/mcd/ICropper.sol";
+import { ICdpRegistry } from "../../interfaces/protocols/mcd/ICdpRegistry.sol";
+import { TokenUtils } from "../../utils/token/TokenUtils.sol";
 import { ActionBase } from "../ActionBase.sol";
 import { McdHelper } from "./helpers/McdHelper.sol";
-import { IERC20 } from "../../interfaces/IERC20.sol";
+import { IERC20 } from "../../interfaces/token/IERC20.sol";
 
 /// @title Claims bonus tokens in CropJoin type vaults
 contract McdClaim is ActionBase, McdHelper {
@@ -32,11 +32,14 @@ contract McdClaim is ActionBase, McdHelper {
     ) public payable override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.vaultId = _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
-        inputData.joinAddr = _parseParamAddr(inputData.joinAddr, _paramMapping[1], _subData, _returnValues);
+        inputData.vaultId =
+            _parseParamUint(inputData.vaultId, _paramMapping[0], _subData, _returnValues);
+        inputData.joinAddr =
+            _parseParamAddr(inputData.joinAddr, _paramMapping[1], _subData, _returnValues);
         inputData.to = _parseParamAddr(inputData.to, _paramMapping[2], _subData, _returnValues);
 
-        (uint256 returnAmount, bytes memory logData) = _mcdClaim(inputData.vaultId, inputData.joinAddr, inputData.to);
+        (uint256 returnAmount, bytes memory logData) =
+            _mcdClaim(inputData.vaultId, inputData.joinAddr, inputData.to);
 
         emit ActionEvent("McdClaim", logData);
 
@@ -62,11 +65,10 @@ contract McdClaim is ActionBase, McdHelper {
     /// @param _vaultId Id of the vault
     /// @param _joinAddr Join address of the maker collateral
     /// @param _to Address where to send the bonus tokens we withdrew
-    function _mcdClaim(
-        uint256 _vaultId,
-        address _joinAddr,
-        address _to
-    ) internal returns (uint256, bytes memory) {
+    function _mcdClaim(uint256 _vaultId, address _joinAddr, address _to)
+        internal
+        returns (uint256, bytes memory)
+    {
         address owner = ICdpRegistry(CDP_REGISTRY).owns(_vaultId);
         address bonusTokenAddr = address(ICropJoin(_joinAddr).bonus());
 
@@ -85,11 +87,7 @@ contract McdClaim is ActionBase, McdHelper {
         return (amount, logData);
     }
 
-    function parseInputs(bytes memory _callData)
-        internal
-        pure
-        returns (Params memory inputData)
-    {
+    function parseInputs(bytes memory _callData) internal pure returns (Params memory inputData) {
         inputData = abi.decode(_callData, (Params));
     }
 }

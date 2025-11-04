@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import {Vm} from "forge-std/Vm.sol";
+import { Vm } from "forge-std/Vm.sol";
 
 // @title CheatCodes - Wrapper for the Vm contract from forge-std
 contract CheatCodes {

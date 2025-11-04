@@ -3,7 +3,13 @@ const dfs = require('@defisaver/sdk');
 const { expect } = require('chai');
 const { executeAction } = require('../../utils/actions');
 const {
-    resetForkToBlock, redeploy, sendEther, impersonateAccount, getProxy, WETH_ADDRESS, balanceOf,
+    resetForkToBlock,
+    redeploy,
+    sendEther,
+    impersonateAccount,
+    getProxy,
+    WETH_ADDRESS,
+    balanceOf,
 } = require('../../utils/utils');
 
 describe('Merkl-Claim', function () {
@@ -48,10 +54,16 @@ describe('Merkl-Claim', function () {
         );
         const eoaBalanceBefore = await balanceOf(WETH_ADDRESS, dfsUser);
         const smartWalletBalanceBefore = await balanceOf(WETH_ADDRESS, proxy.address);
-        await executeAction('MerklClaim', merklClaimAction.encodeForDsProxyCall()[1], impersonatedProxy);
+        await executeAction(
+            'MerklClaim',
+            merklClaimAction.encodeForDsProxyCall()[1],
+            impersonatedProxy,
+        );
         const eoaBalanceAfter = await balanceOf(WETH_ADDRESS, dfsUser);
         const smartWalletBalanceAfter = await balanceOf(WETH_ADDRESS, proxy.address);
         expect(smartWalletBalanceAfter).to.be.eq(smartWalletBalanceBefore);
-        expect(eoaBalanceAfter.sub(eoaBalanceBefore)).to.be.eq(hre.ethers.utils.parseUnits('3218562366892677000', 0));
+        expect(eoaBalanceAfter.sub(eoaBalanceBefore)).to.be.eq(
+            hre.ethers.utils.parseUnits('3218562366892677000', 0),
+        );
     });
 });

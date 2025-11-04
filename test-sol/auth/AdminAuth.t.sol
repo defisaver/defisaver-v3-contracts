@@ -7,7 +7,6 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_AdminAuth is AdminAuth, BaseTest {
-    
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -32,9 +31,7 @@ contract TestCore_AdminAuth is AdminAuth, BaseTest {
 
         prank(Addresses.OWNER_ACC);
         cut.withdrawStuckFunds(
-            0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE,
-            address(this),
-            stuckAmount
+            0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, address(this), stuckAmount
         );
 
         uint256 balanceAfter = address(this).balance;
@@ -75,7 +72,7 @@ contract TestCore_AdminAuth is AdminAuth, BaseTest {
 
         uint256 callerBalanceAfter = caller.balance;
 
-        assertEq(callerBalanceAfter, callerBalanceBefore + cutBalance);        
+        assertEq(callerBalanceAfter, callerBalanceBefore + cutBalance);
     }
 
     function test_kill_contract_when_caller_not_admin() public {
@@ -83,5 +80,5 @@ contract TestCore_AdminAuth is AdminAuth, BaseTest {
         cut.kill();
     }
 
-    receive() external payable {}
+    receive() external payable { }
 }

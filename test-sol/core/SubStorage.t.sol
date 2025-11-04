@@ -4,13 +4,10 @@ pragma solidity =0.8.24;
 
 import { SubStorage } from "../../contracts/core/strategy/SubStorage.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
-import { AdminAuth } from "../../contracts/auth/AdminAuth.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
-import { Addresses } from "../utils/Addresses.sol";
 
 contract TestCore_SubStorage is SubStorage, BaseTest {
-
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -34,7 +31,7 @@ contract TestCore_SubStorage is SubStorage, BaseTest {
 
     function test_should_fail_to_subscribe_with_bundle_id_out_of_range() public {
         bool isBundle = true;
-        _subscribe_with_invalid_strategy_or_bundle_id(isBundle);        
+        _subscribe_with_invalid_strategy_or_bundle_id(isBundle);
     }
 
     function test_should_subscribe_to_strategy() public {
@@ -67,11 +64,7 @@ contract TestCore_SubStorage is SubStorage, BaseTest {
             subData: new bytes32[](0)
         });
         vm.expectRevert(
-            abi.encodeWithSelector(
-                SenderNotSubOwnerError.selector,
-                address(this),
-                subId
-            )
+            abi.encodeWithSelector(SenderNotSubOwnerError.selector, address(this), subId)
         );
         cut.updateSubData(subId, updatedSub);
     }
@@ -101,11 +94,7 @@ contract TestCore_SubStorage is SubStorage, BaseTest {
         uint256 subId = _createDummySub(bob);
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                SenderNotSubOwnerError.selector,
-                address(this),
-                subId
-            )
+            abi.encodeWithSelector(SenderNotSubOwnerError.selector, address(this), subId)
         );
         cut.activateSub(subId);
     }
@@ -114,11 +103,7 @@ contract TestCore_SubStorage is SubStorage, BaseTest {
         uint256 subId = _createDummySub(bob);
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                SenderNotSubOwnerError.selector,
-                address(this),
-                subId
-            )
+            abi.encodeWithSelector(SenderNotSubOwnerError.selector, address(this), subId)
         );
         cut.deactivateSub(subId);
     }
@@ -144,7 +129,7 @@ contract TestCore_SubStorage is SubStorage, BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                        HELPERS
     //////////////////////////////////////////////////////////////////////////*/
-    function _createDummySub(address _sender) internal returns(uint256 subId) {
+    function _createDummySub(address _sender) internal returns (uint256 subId) {
         StrategyModel.StrategySub memory sub = StrategyModel.StrategySub({
             strategyOrBundleId: 0,
             isBundle: true,
@@ -172,7 +157,7 @@ contract TestCore_SubStorage is SubStorage, BaseTest {
         vm.expectEmit(true, true, true, true, address(cut));
         emit Subscribe(subCountBefore, address(this), expectedStoredSubHash, sub);
         uint256 subId = cut.subscribeToStrategy(sub);
-        
+
         uint256 subCountAfter = cut.getSubsCount();
 
         assertEq(subCountBefore + 1, subCountAfter);
@@ -196,9 +181,7 @@ contract TestCore_SubStorage is SubStorage, BaseTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                SubIdOutOfRange.selector,
-                uint256(strategyOrBundleIdOutOfRange),
-                _isBundle
+                SubIdOutOfRange.selector, uint256(strategyOrBundleIdOutOfRange), _isBundle
             )
         );
         cut.subscribeToStrategy(invalidSub);
@@ -215,11 +198,7 @@ contract TestCore_SubStorage is SubStorage, BaseTest {
             subData: new bytes32[](0)
         });
         vm.expectRevert(
-            abi.encodeWithSelector(
-                SubIdOutOfRange.selector,
-                invalidStrategyOrBundleId,
-                _isBundle
-            )
+            abi.encodeWithSelector(SubIdOutOfRange.selector, invalidStrategyOrBundleId, _isBundle)
         );
         cut.updateSubData(subId, updatedSub);
     }

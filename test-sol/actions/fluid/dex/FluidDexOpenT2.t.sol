@@ -2,17 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { IFluidVaultT2 } from "../../../../contracts/interfaces/fluid/vaults/IFluidVaultT2.sol";
 import { FluidView } from "../../../../contracts/views/FluidView.sol";
 import { FluidDexOpen } from "../../../../contracts/actions/fluid/dex/FluidDexOpen.sol";
 import { FluidDexModel } from "../../../../contracts/actions/fluid/helpers/FluidDexModel.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
-import { TokenUtils } from "../../../../contracts/utils/TokenUtils.sol";
+import { TokenUtils } from "../../../../contracts/utils/token/TokenUtils.sol";
 import { Vm } from "forge-std/Vm.sol";
 import { FluidTestBase } from "../FluidTestBase.t.sol";
 
 contract TestFluidDexOpenT2 is FluidTestBase {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -44,14 +42,12 @@ contract TestFluidDexOpenT2 is FluidTestBase {
         uint256 borrowAmount;
         bool isNativeBorrow;
         bytes executeActionCallData;
-
         uint256 senderCollToken0BalanceBefore;
         uint256 senderCollToken1BalanceBefore;
         uint256 senderBorrowTokenBalanceBefore;
         uint256 senderCollToken0BalanceAfter;
         uint256 senderCollToken1BalanceAfter;
         uint256 senderBorrowTokenBalanceAfter;
-
         uint256 walletCollToken0BalanceBefore;
         uint256 walletCollToken1BalanceBefore;
         uint256 walletBorrowTokenBalanceBefore;
@@ -60,14 +56,11 @@ contract TestFluidDexOpenT2 is FluidTestBase {
         uint256 walletCollToken1BalanceAfter;
         uint256 walletBorrowTokenBalanceAfter;
         uint256 walletEthBalanceAfter;
-
         uint256 token0PerShareBefore;
         uint256 token1PerShareBefore;
         uint256 token0PerShareAfter;
         uint256 token1PerShareAfter;
-
         FluidView.UserPosition userPositionAfter;
-
         uint256 createdNft;
         FluidDexModel.SupplyVariableData shareVariableData;
         uint256 shares;
@@ -95,11 +88,11 @@ contract TestFluidDexOpenT2 is FluidTestBase {
     function test_should_open_variable_position_with_coll_0() public {
         _baseTest(
             TestConfig({
-                collAmount0InUSD: 30000,
+                collAmount0InUSD: 30_000,
                 collAmount1InUSD: 0,
                 takeMaxUint256CollAmount0: false,
                 takeMaxUint256CollAmount1: false,
-                borrowAmountInUSD: 10000,
+                borrowAmountInUSD: 10_000,
                 wrapBorrowedEth: false,
                 isDirect: false
             })
@@ -110,10 +103,10 @@ contract TestFluidDexOpenT2 is FluidTestBase {
         _baseTest(
             TestConfig({
                 collAmount0InUSD: 0,
-                collAmount1InUSD: 30000,
+                collAmount1InUSD: 30_000,
                 takeMaxUint256CollAmount0: false,
                 takeMaxUint256CollAmount1: false,
-                borrowAmountInUSD: 10000,
+                borrowAmountInUSD: 10_000,
                 wrapBorrowedEth: false,
                 isDirect: false
             })
@@ -123,11 +116,11 @@ contract TestFluidDexOpenT2 is FluidTestBase {
     function test_should_open_variable_position_with_both_coll() public {
         _baseTest(
             TestConfig({
-                collAmount0InUSD: 30000,
-                collAmount1InUSD: 20000,
+                collAmount0InUSD: 30_000,
+                collAmount1InUSD: 20_000,
                 takeMaxUint256CollAmount0: false,
                 takeMaxUint256CollAmount1: false,
-                borrowAmountInUSD: 12000,
+                borrowAmountInUSD: 12_000,
                 wrapBorrowedEth: false,
                 isDirect: false
             })
@@ -137,7 +130,7 @@ contract TestFluidDexOpenT2 is FluidTestBase {
     function test_should_open_variable_position_only_supply() public {
         _baseTest(
             TestConfig({
-                collAmount0InUSD: 11000,
+                collAmount0InUSD: 11_000,
                 collAmount1InUSD: 5000,
                 takeMaxUint256CollAmount0: false,
                 takeMaxUint256CollAmount1: false,
@@ -151,11 +144,11 @@ contract TestFluidDexOpenT2 is FluidTestBase {
     function test_should_open_variable_position_action_direct() public {
         _baseTest(
             TestConfig({
-                collAmount0InUSD: 30000,
+                collAmount0InUSD: 30_000,
                 collAmount1InUSD: 0,
                 takeMaxUint256CollAmount0: false,
                 takeMaxUint256CollAmount1: false,
-                borrowAmountInUSD: 10000,
+                borrowAmountInUSD: 10_000,
                 wrapBorrowedEth: false,
                 isDirect: true
             })
@@ -165,11 +158,11 @@ contract TestFluidDexOpenT2 is FluidTestBase {
     function test_should_open_variable_position_with_coll_0_maxUint256() public {
         _baseTest(
             TestConfig({
-                collAmount0InUSD: 30000,
+                collAmount0InUSD: 30_000,
                 collAmount1InUSD: 0,
                 takeMaxUint256CollAmount0: true,
                 takeMaxUint256CollAmount1: false,
-                borrowAmountInUSD: 10000,
+                borrowAmountInUSD: 10_000,
                 wrapBorrowedEth: false,
                 isDirect: false
             })
@@ -179,11 +172,11 @@ contract TestFluidDexOpenT2 is FluidTestBase {
     function test_should_open_variable_position_with_coll_1_maxUint256() public {
         _baseTest(
             TestConfig({
-                collAmount0InUSD: 30000,
-                collAmount1InUSD: 25000,
+                collAmount0InUSD: 30_000,
+                collAmount1InUSD: 25_000,
                 takeMaxUint256CollAmount0: false,
                 takeMaxUint256CollAmount1: true,
-                borrowAmountInUSD: 10000,
+                borrowAmountInUSD: 10_000,
                 wrapBorrowedEth: false,
                 isDirect: false
             })
@@ -193,20 +186,18 @@ contract TestFluidDexOpenT2 is FluidTestBase {
     function test_should_open_variable_position_with_borrow_eth_wrap() public {
         _baseTest(
             TestConfig({
-                collAmount0InUSD: 30000,
+                collAmount0InUSD: 30_000,
                 collAmount1InUSD: 0,
                 takeMaxUint256CollAmount0: false,
                 takeMaxUint256CollAmount1: false,
-                borrowAmountInUSD: 10000,
+                borrowAmountInUSD: 10_000,
                 wrapBorrowedEth: true,
                 isDirect: false
             })
         );
     }
 
-    function _baseTest(
-        TestConfig memory _config        
-    ) internal {
+    function _baseTest(TestConfig memory _config) internal {
         for (uint256 i = 0; i < vaults.length; ++i) {
             FluidView.VaultData memory vaultData = fluidView.getVaultData(vaults[i]);
             LocalVars memory vars;
@@ -222,7 +213,9 @@ contract TestFluidDexOpenT2 is FluidTestBase {
             );
 
             // Estimate shares.
-            vars.shares = estimateDepositShares(vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1);
+            vars.shares = estimateDepositShares(
+                vaultData.dexSupplyData.dexPool, vars.collAmount0, vars.collAmount1
+            );
 
             // Validate shares supply limit.
             if (supplyLimitReached(vaultData.dexSupplyData, vars.shares)) {
@@ -234,14 +227,19 @@ contract TestFluidDexOpenT2 is FluidTestBase {
             vars.isNativeBorrow = vaultData.borrowToken0 == TokenUtils.ETH_ADDR;
             vars.borrowAmount = _config.borrowAmountInUSD != 0
                 ? amountInUSDPrice(
-                    vars.isNativeBorrow ? TokenUtils.WETH_ADDR : vaultData.borrowToken0, _config.borrowAmountInUSD
+                    vars.isNativeBorrow ? TokenUtils.WETH_ADDR : vaultData.borrowToken0,
+                    _config.borrowAmountInUSD
                 )
-                : 0;    
+                : 0;
 
             // Encode call.
             vars.shareVariableData = FluidDexModel.SupplyVariableData({
-                collAmount0: _config.takeMaxUint256CollAmount0 ? type(uint256).max : vars.collAmount0,
-                collAmount1: _config.takeMaxUint256CollAmount1 ? type(uint256).max : vars.collAmount1,
+                collAmount0: _config.takeMaxUint256CollAmount0
+                    ? type(uint256).max
+                    : vars.collAmount0,
+                collAmount1: _config.takeMaxUint256CollAmount1
+                    ? type(uint256).max
+                    : vars.collAmount1,
                 minCollShares: vars.shares
             });
 
@@ -262,10 +260,10 @@ contract TestFluidDexOpenT2 is FluidTestBase {
             // Take snapshot before action execution.
             vars.senderCollToken0BalanceBefore = balanceOf(vaultData.supplyToken0, sender);
             vars.senderCollToken1BalanceBefore = balanceOf(vaultData.supplyToken1, sender);
-            vars.senderBorrowTokenBalanceBefore = vars.isNativeBorrow 
-                ? (
-                    _config.wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance
-                )
+            vars.senderBorrowTokenBalanceBefore = vars.isNativeBorrow
+                ? (_config.wrapBorrowedEth
+                        ? balanceOf(TokenUtils.WETH_ADDR, sender)
+                        : address(sender).balance)
                 : balanceOf(vaultData.borrowToken0, sender);
 
             vars.walletCollToken0BalanceBefore = balanceOf(vaultData.supplyToken0, walletAddr);
@@ -287,11 +285,11 @@ contract TestFluidDexOpenT2 is FluidTestBase {
             // Take snapshot after action execution.
             vars.senderCollToken0BalanceAfter = balanceOf(vaultData.supplyToken0, sender);
             vars.senderCollToken1BalanceAfter = balanceOf(vaultData.supplyToken1, sender);
-            vars.senderBorrowTokenBalanceAfter = vars.isNativeBorrow 
-                ? (
-                    _config.wrapBorrowedEth ? balanceOf(TokenUtils.WETH_ADDR, sender) : address(sender).balance 
-                ) 
-                : balanceOf(vaultData.borrowToken0, sender);  
+            vars.senderBorrowTokenBalanceAfter = vars.isNativeBorrow
+                ? (_config.wrapBorrowedEth
+                        ? balanceOf(TokenUtils.WETH_ADDR, sender)
+                        : address(sender).balance)
+                : balanceOf(vaultData.borrowToken0, sender);
 
             vars.walletCollToken0BalanceAfter = balanceOf(vaultData.supplyToken0, walletAddr);
             vars.walletCollToken1BalanceAfter = balanceOf(vaultData.supplyToken1, walletAddr);
@@ -300,9 +298,10 @@ contract TestFluidDexOpenT2 is FluidTestBase {
                 : balanceOf(vaultData.borrowToken0, walletAddr);
             vars.walletEthBalanceAfter = address(walletAddr).balance;
 
-            (vars.token0PerShareAfter, vars.token1PerShareAfter, , ) = fluidView.getDexShareRates(vaults[i]);
+            (vars.token0PerShareAfter, vars.token1PerShareAfter,,) =
+                fluidView.getDexShareRates(vaults[i]);
 
-            (vars.userPositionAfter, ) = fluidView.getPositionByNftId(vars.createdNft);
+            (vars.userPositionAfter,) = fluidView.getPositionByNftId(vars.createdNft);
 
             // Assertions.
             // Verify no dust left on wallet.
@@ -313,10 +312,19 @@ contract TestFluidDexOpenT2 is FluidTestBase {
 
             assertTrue(vars.createdNft != 0);
 
-            assertEq(vars.senderBorrowTokenBalanceAfter, vars.senderBorrowTokenBalanceBefore + vars.borrowAmount);
-            assertEq(vars.senderCollToken0BalanceAfter, vars.senderCollToken0BalanceBefore - vars.collAmount0);
-            assertEq(vars.senderCollToken1BalanceAfter, vars.senderCollToken1BalanceBefore - vars.collAmount1);    
-            
+            assertEq(
+                vars.senderBorrowTokenBalanceAfter,
+                vars.senderBorrowTokenBalanceBefore + vars.borrowAmount
+            );
+            assertEq(
+                vars.senderCollToken0BalanceAfter,
+                vars.senderCollToken0BalanceBefore - vars.collAmount0
+            );
+            assertEq(
+                vars.senderCollToken1BalanceAfter,
+                vars.senderCollToken1BalanceBefore - vars.collAmount1
+            );
+
             assertEq(vars.userPositionAfter.owner, walletAddr);
             assertEq(vars.userPositionAfter.isLiquidated, false);
             assertEq(vars.userPositionAfter.isSupplyPosition, vars.borrowAmount == 0);

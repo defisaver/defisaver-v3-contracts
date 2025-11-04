@@ -4,11 +4,10 @@ pragma solidity =0.8.24;
 
 import { ActionBase } from "../ActionBase.sol";
 import { LSVUtilHelper } from "./helpers/LSVUtilHelper.sol";
-import { LSVProfitTracker } from "../../utils/LSVProfitTracker.sol";
+import { LSVProfitTracker } from "../../utils/lsv/LSVProfitTracker.sol";
 
 /// @title action for tracking users paybacks within the LSV ecosystem
 contract LSVPayback is ActionBase, LSVUtilHelper {
-
     /// @param protocol - an ID representing the protocol in LSVProfitTracker
     /// @param amount - amount of token being paid back
     struct Params {
@@ -25,12 +24,8 @@ contract LSVPayback is ActionBase, LSVUtilHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory inputData = parseInputs(_callData);
 
-        inputData.amount = _parseParamUint(
-            inputData.amount,
-            _paramMapping[0],
-            _subData,
-            _returnValues
-        );
+        inputData.amount =
+            _parseParamUint(inputData.amount, _paramMapping[0], _subData, _returnValues);
 
         (bytes memory logData) = _lsvPayback(inputData);
         emit ActionEvent("LSVPayback", logData);

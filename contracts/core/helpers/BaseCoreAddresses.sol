@@ -13,6 +13,4 @@ contract BaseCoreAddresses {
     address internal constant STRATEGY_STORAGE_ADDR = 0x3Ca96CebC7779Ee86685c67c999d0f03158Ee9cA;
 
     address internal constant PROXY_AUTH_ADDR = 0xD34BBE7398F7F08952b033bbaF2D2C84231dCEdc;
-
-
 }

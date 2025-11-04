@@ -1,6 +1,4 @@
-const {
-    redeploy,
-} = require('../../utils/utils');
+const { redeploy } = require('../../utils/utils');
 const { lidoUnwrapTest } = require('./lido-tests');
 
 describe('Lido WETH staking', function () {

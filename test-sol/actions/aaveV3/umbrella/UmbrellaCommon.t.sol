@@ -2,9 +2,9 @@
 
 pragma solidity =0.8.24;
 
-import { IERC4626 } from "../../../../contracts/interfaces/IERC4626.sol";
-import { IAToken } from "../../../../contracts/interfaces/aave/IAToken.sol";
-import { IL2PoolV3 } from "../../../../contracts/interfaces/aaveV3/IL2PoolV3.sol";
+import { IERC4626 } from "../../../../contracts/interfaces/token/IERC4626.sol";
+import { IAToken } from "../../../../contracts/interfaces/protocols/aave/IAToken.sol";
+import { IL2PoolV3 } from "../../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
 import { AaveV3Helper } from "../../../../contracts/actions/aaveV3/helpers/AaveV3Helper.sol";
 import { SmartWallet } from "../../../utils/SmartWallet.sol";
 import { Addresses } from "../../../utils/Addresses.sol";
@@ -12,7 +12,6 @@ import { ActionsUtils } from "../../../utils/ActionsUtils.sol";
 import { BaseTest } from "../../../utils/BaseTest.sol";
 
 contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
-
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
@@ -22,7 +21,6 @@ contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
     address aaveV3SupplyContractAddr;
     address[] stkTokens;
 
-    
     struct Snapshot {
         uint256 senderSupplyTokenBalance;
         uint256 senderWaTokenBalance;
@@ -32,7 +30,7 @@ contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
         uint256 walletStkTokenBalance;
     }
 
-    function getStkTokens() public view returns (address[] memory) {
+    function getStkTokens() public pure returns (address[] memory) {
         address[] memory tokens = new address[](4);
         tokens[0] = Addresses.STK_WETH_TOKEN;
         tokens[1] = Addresses.STK_USDC_TOKEN;
@@ -41,11 +39,11 @@ contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
         return tokens;
     }
 
-    function takeSnapshot(
-        address _stkToken,
-        address _waTokenOrGHO,
-        address _supplyToken
-    ) public view returns (Snapshot memory snapshot) {
+    function takeSnapshot(address _stkToken, address _waTokenOrGHO, address _supplyToken)
+        public
+        view
+        returns (Snapshot memory snapshot)
+    {
         snapshot.senderSupplyTokenBalance = balanceOf(_supplyToken, sender);
         snapshot.senderStkTokenBalance = balanceOf(_stkToken, sender);
         snapshot.senderWaTokenBalance = balanceOf(_waTokenOrGHO, sender);
@@ -63,11 +61,11 @@ contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
         pool.supply(underlying, _amount, sender, AAVE_REFERRAL_CODE);
     }
 
-    function getMinSharesOut(
-        address _stkToken,
-        address _waTokenOrGHO,
-        uint256 _amount
-    ) public view returns (uint256 minSharesOut) {
+    function getMinSharesOut(address _stkToken, address _waTokenOrGHO, uint256 _amount)
+        public
+        view
+        returns (uint256 minSharesOut)
+    {
         if (_waTokenOrGHO != Addresses.GHO_TOKEN) {
             // we do aToken -> waToken -> stkToken so we need to calculate:
             // estimated waToken amount from aToken -> waToken conversion
@@ -79,5 +77,4 @@ contract TestUmbrellaCommon is AaveV3Helper, ActionsUtils, BaseTest {
         }
         minSharesOut = minSharesOut * 999 / 1000;
     }
-
 }

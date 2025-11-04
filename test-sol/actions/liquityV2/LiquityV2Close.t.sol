@@ -2,9 +2,10 @@
 
 pragma solidity =0.8.24;
 
-import { IAddressesRegistry } from "../../../contracts/interfaces/liquityV2/IAddressesRegistry.sol";
-import { ITroveNFT } from "../../../contracts/interfaces/liquityV2/ITroveNFT.sol";
-import { ITroveManager } from "../../../contracts/interfaces/liquityV2/ITroveManager.sol";
+import {
+    IAddressesRegistry
+} from "../../../contracts/interfaces/protocols/liquityV2/IAddressesRegistry.sol";
+import { ITroveManager } from "../../../contracts/interfaces/protocols/liquityV2/ITroveManager.sol";
 import { LiquityV2Open } from "../../../contracts/actions/liquityV2/trove/LiquityV2Open.sol";
 import { LiquityV2View } from "../../../contracts/views/LiquityV2View.sol";
 import { LiquityV2Close } from "../../../contracts/actions/liquityV2/trove/LiquityV2Close.sol";
@@ -13,7 +14,6 @@ import { LiquityV2ExecuteActions } from "../../utils/executeActions/LiquityV2Exe
 import { SmartWallet } from "../../utils/SmartWallet.sol";
 
 contract TestLiquityV2Close is LiquityV2ExecuteActions {
-
     /*//////////////////////////////////////////////////////////////////////////
                                 CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -58,9 +58,9 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
             executeLiquityOpenTrove(
                 markets[i],
                 address(0),
-                100000,
+                100_000,
                 i,
-                10000,
+                10_000,
                 1e18 / 10,
                 0,
                 testWallet,
@@ -92,8 +92,8 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
     }
 
     function _baseTest(bool _isDirect, address _interestBatchManager) public {
-        uint256 collAmountInUSD = 30000;
-        uint256 borrowAmountInUSD = 10000;
+        uint256 collAmountInUSD = 30_000;
+        uint256 borrowAmountInUSD = 10_000;
 
         for (uint256 i = 0; i < markets.length; i++) {
             if (_interestBatchManager != address(0)) {
@@ -101,7 +101,7 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
                 registerBatchManager(markets[i]);
                 vm.stopPrank();
             }
-            
+
             uint256 troveId = executeLiquityOpenTrove(
                 markets[i],
                 _interestBatchManager,
@@ -132,13 +132,7 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
         approveAsSender(sender, BOLD, walletAddr, entireDebt);
 
         bytes memory executeActionCallData = executeActionCalldata(
-            liquityV2CloseEncode(
-                address(_market),
-                sender,
-                sender,
-                _troveId
-            ),
-            _isDirect
+            liquityV2CloseEncode(address(_market), sender, sender, _troveId), _isDirect
         );
 
         {
@@ -153,7 +147,10 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
             uint256 senderWethBalanceAfter = balanceOf(WETH, sender);
 
             if (collToken == WETH) {
-                assertEq(senderWethBalanceAfter, senderWethBalanceBefore + entireColl + ETH_GAS_COMPENSATION);
+                assertEq(
+                    senderWethBalanceAfter,
+                    senderWethBalanceBefore + entireColl + ETH_GAS_COMPENSATION
+                );
             } else {
                 assertEq(senderWethBalanceAfter, senderWethBalanceBefore + ETH_GAS_COMPENSATION);
                 assertEq(senderCollBalanceAfter, senderCollBalanceBefore + entireColl);
@@ -161,7 +158,8 @@ contract TestLiquityV2Close is LiquityV2ExecuteActions {
             assertEq(senderBoldBalanceAfter, senderBoldBalanceBefore - entireDebt);
         }
 
-        LiquityV2View.TroveData memory closedTroveData = viewContract.getTroveInfo(address(_market), _troveId);
+        LiquityV2View.TroveData memory closedTroveData =
+            viewContract.getTroveInfo(address(_market), _troveId);
         assertEq(uint256(closedTroveData.status), uint256(ITroveManager.Status.closedByOwner));
     }
 }
