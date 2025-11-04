@@ -25,23 +25,6 @@ contract GeneralView is SmartWalletUtils {
         }
     }
 
-    /// @notice Fetches the DSA Proxy Accounts for a user
-    /// @param _user Address of the user
-    /// @return accounts Array of DSA Proxy Accounts
-    function fetchDSAProxyAccounts(address _user) public view returns (address[] memory accounts) {
-        IInstaList list = IInstaList(DSA_LIST_ADDR);
-
-        IInstaList.UserLink memory userLink = list.userLink(_user);
-
-        accounts = new address[](userLink.count);
-
-        uint64 currentId = userLink.first;
-        for (uint64 i = 0; i < userLink.count; i++) {
-            accounts[i] = list.accountAddr(currentId);
-            currentId = list.userList(_user, currentId).next;
-        }
-    }
-
     function _fetchDSAProxyOwner(address _dsaProxy) internal view returns (address) {
         uint64 dsaId = IInstaList(DSA_LIST_ADDR).accountID(_dsaProxy);
         return IInstaList(DSA_LIST_ADDR).accountLink(dsaId).first;
