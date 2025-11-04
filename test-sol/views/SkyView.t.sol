@@ -92,9 +92,10 @@ contract TestSkyView is SkyExecuteActions {
         emit ILockstakeEngine.Lock(walletAddr, index, AMOUNT, SKY_REFERRAL_CODE);
         wallet.execute(address(stake), executeActionCallData, 0);
 
-        address[] memory farms = new address[](2);
+        address[] memory farms = new address[](3);
         farms[0] = USDS_FARM;
         farms[1] = SPARK_FARM;
+        farms[2] = SKY_FARM;
 
         SkyView.UrnInfo[] memory urnsInfo = cut.getUserInfo(walletAddr, farms);
 
