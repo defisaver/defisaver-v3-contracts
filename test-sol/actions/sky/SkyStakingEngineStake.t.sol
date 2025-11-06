@@ -66,6 +66,14 @@ contract TestSkyStakingEngineStake is SkyExecuteActions {
         _baseTest(false, SPARK_FARM);
     }
 
+    function test_skyStakingEngineStake_Direct_SKY_FARM() public {
+        _baseTest(true, SKY_FARM);
+    }
+
+    function test_skyStakingEngineStake_SKY_FARM() public {
+        _baseTest(false, SKY_FARM);
+    }
+
     function test_skyStakingEngineStake_Direct_NO_FARM() public {
         _baseTest(true, address(0));
     }
