@@ -2841,7 +2841,12 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "604800",
-        "registryIds": [{ "name": "StrategyExecutorID", "id": "0x0c1dc439" }],
+        "registryIds": [
+            {
+                "name": "StrategyExecutorID",
+                "id": "0x0c1dc439"
+            }
+        ],
         "history": []
     },
     {
@@ -3411,7 +3416,12 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "0",
-        "registryIds": [{ "name": "CompPaybackNew", "id": "0x9ea2a2cc" }],
+        "registryIds": [
+            {
+                "name": "CompPaybackNew",
+                "id": "0x9ea2a2cc"
+            }
+        ],
         "history": []
     },
     {
@@ -4737,5 +4747,16 @@
         "changeTime": "0",
         "registryIds": [],
         "history": ["0x0b2621aE77952606A3b95d06E31b10132C51C860"]
+    },
+    {
+        "name": "SparkViewSmall",
+        "address": "0xC6917372b7a235F2DC64aDa6eBfD5de60A7be7E4",
+        "id": "0xd96fe862",
+        "path": "contracts/views/SparkViewSmall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]
