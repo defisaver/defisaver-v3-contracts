@@ -123,6 +123,32 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
         }
     }
 
+    function test_SupplyWithoutCollateral() public {
+        TestConfig memory _config = testConfigs[0];
+
+        // Give initial balance for supply token
+        give(_config.supplyToken, sender, _config.initialBalance);
+
+        vm.startPrank(sender);
+        SafeERC20.safeApprove(IERC20(_config.supplyToken), address(lendingPool), type(uint256).max);
+        lendingPool.supply(_config.supplyToken, _config.supplyAmount, sender, 0);
+        lendingPool.setUserUseReserveAsCollateral(_config.supplyToken, false);
+        vm.stopPrank();
+
+        SparkViewSmall.MiniUserPositionData memory userPosition =
+            cut.getMiniUserPositionData(DEFAULT_SPARK_MARKET, sender);
+
+        uint256 lengthOfTokens = lendingPool.getReservesList().length;
+
+        for (uint256 i = 0; i < lengthOfTokens; i++) {
+            assertEq(userPosition.isCollateral[i], false);
+
+            if (_config.supplyToken == userPosition.tokenAddresses[i]) {
+                assertApproxEqAbs(_config.supplyAmount, userPosition.supplyAmounts[i], 1);
+            }
+        }
+    }
+
     function _baseTest(TestConfig memory _config) public {
         // Give initial balance for supply token
         give(_config.supplyToken, sender, _config.initialBalance);
@@ -194,11 +220,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
 
     function _setEMode(uint8 _categoryId, bool _useDefaultMarket, address _market) internal {
         // Execute SparkSetEMode
-        bytes memory setEModeParams = sparkSetEModeEncode(
-            _categoryId,
-            false, // useDefaultMarket
-            DEFAULT_SPARK_MARKET // market (will use default)
-        );
+        bytes memory setEModeParams = sparkSetEModeEncode(_categoryId, _useDefaultMarket, _market);
 
         bytes memory setEModeCalldata =
             abi.encodeWithSelector(bytes4(keccak256("executeActionDirect(bytes)")), setEModeParams);
