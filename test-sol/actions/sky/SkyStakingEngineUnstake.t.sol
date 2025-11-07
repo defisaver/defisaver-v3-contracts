@@ -86,7 +86,7 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
 
         // Stake
         executeSkyStakingEngineStake(
-            STAKING_ENGINE, index, USDS_FARM, AMOUNT, sender, open, selectFarm, stake, wallet
+            STAKING_ENGINE, index, SKY_FARM, AMOUNT, sender, open, selectFarm, stake, wallet
         );
 
         // Execution logic
@@ -110,7 +110,7 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
 
         // Stake
         executeSkyStakingEngineStake(
-            STAKING_ENGINE, index, USDS_FARM, AMOUNT, sender, open, selectFarm, stake, wallet
+            STAKING_ENGINE, index, SKY_FARM, AMOUNT, sender, open, selectFarm, stake, wallet
         );
 
         // Variables for checks
@@ -119,7 +119,7 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
 
         uint256 balanceSenderBefore = skyToken.balanceOf(sender); // should have 0
         uint256 balanceStakingEngineBefore = skyToken.balanceOf(STAKING_ENGINE);
-        uint256 balanceUrnStakedLSSkyInFarmBefore = IStakingRewards(USDS_FARM).balanceOf(urnAddr); // should have AMOUNT
+        uint256 balanceUrnStakedLSSkyInFarmBefore = IStakingRewards(SKY_FARM).balanceOf(urnAddr); // should have AMOUNT
 
         // Execution logic
         bytes memory executeActionCallData = executeActionCalldata(
@@ -132,7 +132,7 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
 
         uint256 balanceSenderAfter = skyToken.balanceOf(sender);
         uint256 balanceStakingEngineAfter = skyToken.balanceOf(STAKING_ENGINE);
-        uint256 balanceUrnStakedLSSkyInFarmAfter = IStakingRewards(USDS_FARM).balanceOf(urnAddr); // should have 0
+        uint256 balanceUrnStakedLSSkyInFarmAfter = IStakingRewards(SKY_FARM).balanceOf(urnAddr); // should have 0
 
         // Checks
         assertEq(balanceSenderBefore, balanceSenderAfter - AMOUNT); // 0 before unstake -> had all staked, 100 after unstake -> unstaked all
@@ -140,6 +140,6 @@ contract TestSkyStakingEngineUnstake is SkyExecuteActions {
         assertEq(balanceUrnStakedLSSkyInFarmBefore, balanceUrnStakedLSSkyInFarmAfter + AMOUNT); // before unstaking, user staked LSSKY in Farm to earn rewards, after unstaking LSSKY he doesnt have that AMOUNT staked in farm
 
         vm.prank(walletAddr);
-        ILockstakeEngine(STAKING_ENGINE).getReward(walletAddr, index, USDS_FARM, sender); // can get rewards after unstaked
+        ILockstakeEngine(STAKING_ENGINE).getReward(walletAddr, index, SKY_FARM, sender); // can get rewards after unstaked
     }
 }

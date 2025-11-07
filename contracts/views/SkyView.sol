@@ -30,8 +30,7 @@ contract SkyView is SkyHelper {
         uint256 totalSkyStaked; // in 1e18
         uint256 debtCeiling; // in 1e45
         uint256 borrowRatePerSecond; // in 1e27
-        uint256 totalSkyLockedInUSDSFarm;
-        uint256 totalSkyLockedInSparkFarm;
+        uint256[] totalSkyLockedInFarms;
     }
 
     function getUserInfo(address _user, address[] calldata _farms)
@@ -87,7 +86,7 @@ contract SkyView is SkyHelper {
         });
     }
 
-    function getGeneralInfo() public view returns (GeneralInfo memory) {
+    function getGeneralInfo(address[] calldata _farms) public view returns (GeneralInfo memory) {
         uint256 totalSkyStaked = IERC20(LOCK_STAKE_SKY).totalSupply();
 
         ILockstakeEngine engine = ILockstakeEngine(STAKING_ENGINE);
@@ -95,14 +94,17 @@ contract SkyView is SkyHelper {
 
         uint256 borrowRatePerSecond = IJug(engine.jug()).ilks(engine.ilk()).duty;
 
-        uint256 totalSkyLockedInUSDSFarm = IERC20(LOCK_STAKE_SKY).balanceOf(USDS_FARM);
-        uint256 totalSkyLockedInSparkFarm = IERC20(LOCK_STAKE_SKY).balanceOf(SPARK_FARM);
+        uint256[] memory totalSkyLockedInFarms = new uint256[](_farms.length);
+
+        for (uint8 i = 0; i < _farms.length; i++) {
+            totalSkyLockedInFarms[i] = IERC20(LOCK_STAKE_SKY).balanceOf(_farms[i]);
+        }
+
         return GeneralInfo({
             totalSkyStaked: totalSkyStaked,
             debtCeiling: debtCeiling,
             borrowRatePerSecond: borrowRatePerSecond,
-            totalSkyLockedInUSDSFarm: totalSkyLockedInUSDSFarm,
-            totalSkyLockedInSparkFarm: totalSkyLockedInSparkFarm
+            totalSkyLockedInFarms: totalSkyLockedInFarms
         });
     }
 }
