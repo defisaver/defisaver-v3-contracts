@@ -95,6 +95,9 @@ import {
     SkyStakingEngineSelectFarm
 } from "../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 import { GhoStake } from "../../contracts/actions/aaveV3/GhoStake.sol";
+import { SparkSupply } from "../../contracts/actions/spark/SparkSupply.sol";
+import { SparkBorrow } from "../../contracts/actions/spark/SparkBorrow.sol";
+import { SparkSetEMode } from "../../contracts/actions/spark/SparkSetEMode.sol";
 
 contract ActionsUtils {
     // @dev Change this value if we ever need to add more parameters to any action.
@@ -1261,5 +1264,65 @@ contract ActionsUtils {
         returns (bytes memory params)
     {
         params = abi.encode(GhoStake.Params({ from: _from, to: _to, amount: _amount }));
+    }
+
+    function sparkSupplyEncode(
+        uint256 _amount,
+        address _from,
+        uint16 _assetId,
+        bool _enableAsColl,
+        bool _useDefaultMarket,
+        bool _useOnBehalf,
+        address _market,
+        address _onBehalf
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SparkSupply.Params({
+                amount: _amount,
+                from: _from,
+                assetId: _assetId,
+                enableAsColl: _enableAsColl,
+                useDefaultMarket: _useDefaultMarket,
+                useOnBehalf: _useOnBehalf,
+                market: _market,
+                onBehalf: _onBehalf
+            })
+        );
+    }
+
+    function sparkBorrowEncode(
+        uint256 _amount,
+        address _to,
+        uint8 _rateMode,
+        uint16 _assetId,
+        bool _useDefaultMarket,
+        bool _useOnBehalf,
+        address _market,
+        address _onBehalf
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SparkBorrow.Params({
+                amount: _amount,
+                to: _to,
+                rateMode: _rateMode,
+                assetId: _assetId,
+                useDefaultMarket: _useDefaultMarket,
+                useOnBehalf: _useOnBehalf,
+                market: _market,
+                onBehalf: _onBehalf
+            })
+        );
+    }
+
+    function sparkSetEModeEncode(uint8 _categoryId, bool _useDefaultMarket, address _market)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(
+            SparkSetEMode.Params({
+                categoryId: _categoryId, useDefaultMarket: _useDefaultMarket, market: _market
+            })
+        );
     }
 }
