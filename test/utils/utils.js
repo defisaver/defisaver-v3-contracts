@@ -80,7 +80,6 @@ const addrs = {
         BOLD_ADDR: '0x6440f144b7e50D6a8439336510312d2F54beB01D',
         INSTADAPP_INDEX: '0x2971AdFa57b20E5a416aE5a708A8655A9c74f723',
         INSTADAPP_CONNECTORS_V2: '0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11',
-        INSTADAPP_CONNECTORS_V1: '0xD6A602C01a023B98Ecfb29Df02FBA380d3B21E0c',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -118,7 +117,6 @@ const addrs = {
         REFILL_CALLER: '0xaFdFC3814921d49AA412d6a22e3F44Cc555dDcC8',
         INSTADAPP_INDEX: '0x6CE3e607C808b4f4C26B7F6aDAeB619e49CAbb25',
         INSTADAPP_CONNECTORS_V2: '0x127d8cD0E2b2E0366D522DeA53A787bfE9002C14',
-        INSTADAPP_CONNECTORS_V1: '0x839c2D3aDe63DF5b0b8F3E57D5e145057Ab41556',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -162,7 +160,6 @@ const addrs = {
         FLUID_VAULT_T1_RESOLVER_ADDR: '0xD6373b375665DE09533478E8859BeCF12427Bb5e',
         INSTADAPP_INDEX: '0x1eE00C305C51Ff3bE60162456A9B533C07cD9288',
         INSTADAPP_CONNECTORS_V2: '0x67fCE99Dd6d8d659eea2a1ac1b8881c57eb6592B',
-        INSTADAPP_CONNECTORS_V1: '0xE1594fd3603EDe6502A1cbC73489a26587Dc68BF',
     },
     base: {
         PROXY_REGISTRY: '0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d',
@@ -200,7 +197,6 @@ const addrs = {
         FLUID_VAULT_T1_RESOLVER_ADDR: '0x79B3102173EB84E6BCa182C7440AfCa5A41aBcF8',
         INSTADAPP_INDEX: '0x6CE3e607C808b4f4C26B7F6aDAeB619e49CAbb25',
         INSTADAPP_CONNECTORS_V2: '0x127d8cD0E2b2E0366D522DeA53A787bfE9002C14',
-        INSTADAPP_CONNECTORS_V1: '0x839c2D3aDe63DF5b0b8F3E57D5e145057Ab41556',
     },
     linea: {
         REGISTRY_ADDR: '0x09fBeC68D216667C3262211D2E5609578951dCE0',
@@ -689,7 +685,8 @@ const getProxyWithSigner = async (signer, addr) => {
     return dsProxy;
 };
 
-const createDsaProxy = async (acc, version = 2) => {
+const createDsaProxy = async (acc) => {
+    const version = 2;
     const instaIndex = await hre.ethers.getContractAt(
         'IInstaIndex',
         addrs[network].INSTADAPP_INDEX,
@@ -699,7 +696,7 @@ const createDsaProxy = async (acc, version = 2) => {
 
     const abiCoder = new hre.ethers.utils.AbiCoder();
     const [dsaProxyAddr] = abiCoder.decode(['address'], receipt.events.reverse()[0].topics[2]);
-    const contractName = version === 1 ? 'IInstaAccountV1' : 'IInstaAccountV2';
+    const contractName = 'IInstaAccountV2';
     const dsaProxy = await hre.ethers.getContractAt(contractName, dsaProxyAddr);
     return dsaProxy;
 };
@@ -1538,7 +1535,7 @@ const isProxySafe = (proxy) => proxy.functions.nonce !== undefined;
 const isProxyDSAProxy = async (proxy) => {
     try {
         const version = await proxy.version();
-        return version.eq(1) || version.eq(2);
+        return version.eq(2);
     } catch (error) {
         return false;
     }
@@ -1567,33 +1564,16 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
         const isDSAProxy = await isProxyDSAProxy(proxy);
 
         if (isDSAProxy) {
-            const version = await proxy.version();
-
             await impersonateAccount(proxy.signer.address);
-
-            if (version.eq(1)) {
-                const target = await getAddrFromRegistry('DefiSaverConnector');
-                receipt = await proxy['cast(address[],bytes[],address)'](
-                    [target],
-                    [callData],
-                    nullAddress,
-                    {
-                        gasLimit: 10000000,
-                        value: ethValue,
-                    },
-                );
-            } else {
-                receipt = await proxy['cast(string[],bytes[],address)'](
-                    ['DefiSaverConnector'],
-                    [callData],
-                    nullAddress,
-                    {
-                        gasLimit: 10000000,
-                        value: ethValue,
-                    },
-                );
-            }
-
+            receipt = await proxy['cast(string[],bytes[],address)'](
+                ['DefiSaverConnector'],
+                [callData],
+                nullAddress,
+                {
+                    gasLimit: 10000000,
+                    value: ethValue,
+                },
+            );
             await stopImpersonatingAccount(proxy.signer.address);
         } else {
             // Default to DSProxy execution

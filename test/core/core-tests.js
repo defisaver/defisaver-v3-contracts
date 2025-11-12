@@ -849,7 +849,7 @@ const recipeExecutorTest = async () => {
 
             // Add connector for DSA Proxy Accounts.
             const dfsConnector = await redeploy('DefiSaverConnector');
-            await addDefiSaverConnector(dfsConnector.address, hre.config.dsaProxyVersion);
+            await addDefiSaverConnector(dfsConnector.address);
 
             strategyExecutor =
                 network === 'mainnet'
@@ -866,7 +866,7 @@ const recipeExecutorTest = async () => {
             // Create smart wallets.
             dsProxy = await getProxy(senderAcc.address, false);
             safe = await getProxy(senderAcc.address, true);
-            dsaProxy = await createDsaProxy(senderAcc.address, hre.config.dsaProxyVersion);
+            dsaProxy = await createDsaProxy(senderAcc.address);
 
             // Init test data.
             actionData = new dfs.actions.basic.PullTokenAction(

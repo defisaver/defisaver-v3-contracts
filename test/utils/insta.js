@@ -9,7 +9,7 @@ const {
 } = require('./utils');
 const { topUp } = require('../../scripts/utils/fork');
 
-const addDefiSaverConnector = async (dfsConnectorAddress, version = 2, isFork = false) => {
+const addDefiSaverConnector = async (dfsConnectorAddress, isFork = false) => {
     const instaIndex = await hre.ethers.getContractAt(
         'IInstaIndex',
         addrs[network].INSTADAPP_INDEX,
@@ -28,63 +28,33 @@ const addDefiSaverConnector = async (dfsConnectorAddress, version = 2, isFork = 
         await stopImpersonatingAccount(zeroAddress);
     }
 
-    if (version === 2) {
-        const instaConnectorsV2Contract = await hre.ethers.getContractAt(
-            'IInstaConnectorsV2',
-            addrs[network].INSTADAPP_CONNECTORS_V2,
-            masterSigner,
-        );
+    const instaConnectorsV2Contract = await hre.ethers.getContractAt(
+        'IInstaConnectorsV2',
+        addrs[network].INSTADAPP_CONNECTORS_V2,
+        masterSigner,
+    );
 
-        const isConnectorAlreadyAdded = await instaConnectorsV2Contract.isConnectors([
-            'DefiSaverConnector',
-        ]);
-        if (isConnectorAlreadyAdded.isOk) {
-            return;
-        }
-
-        // Add connector
-        if (!isFork) {
-            await impersonateAccount(masterAddr);
-        }
-        await instaConnectorsV2Contract.addConnectors(
-            ['DefiSaverConnector'],
-            [dfsConnectorAddress],
-            { gasLimit: 800000 },
-        );
-        if (!isFork) {
-            await stopImpersonatingAccount(masterAddr);
-        }
-
-        // Check if connector is properly added
-        const response = await instaConnectorsV2Contract.isConnectors(['DefiSaverConnector']);
-        console.log('Connector added status:', response.isOk);
-    } else {
-        const instaConnectorsV1Contract = await hre.ethers.getContractAt(
-            'IInstaConnectorsV1',
-            addrs[network].INSTADAPP_CONNECTORS_V1,
-            masterSigner,
-        );
-
-        const isConnectorAlreadyAdded = await instaConnectorsV1Contract.isConnector([
-            dfsConnectorAddress,
-        ]);
-        if (isConnectorAlreadyAdded) {
-            return;
-        }
-
-        // Add connector
-        if (!isFork) {
-            await impersonateAccount(masterAddr);
-        }
-        await instaConnectorsV1Contract.enable(dfsConnectorAddress, { gasLimit: 800000 });
-        if (!isFork) {
-            await stopImpersonatingAccount(masterAddr);
-        }
-
-        // Check if connector is properly added
-        const response = await instaConnectorsV1Contract.isConnector([dfsConnectorAddress]);
-        console.log('Connector added status:', response);
+    const isConnectorAlreadyAdded = await instaConnectorsV2Contract.isConnectors([
+        'DefiSaverConnector',
+    ]);
+    if (isConnectorAlreadyAdded.isOk) {
+        return;
     }
+
+    // Add connector
+    if (!isFork) {
+        await impersonateAccount(masterAddr);
+    }
+    await instaConnectorsV2Contract.addConnectors(['DefiSaverConnector'], [dfsConnectorAddress], {
+        gasLimit: 800000,
+    });
+    if (!isFork) {
+        await stopImpersonatingAccount(masterAddr);
+    }
+
+    // Check if connector is properly added
+    const response = await instaConnectorsV2Contract.isConnectors(['DefiSaverConnector']);
+    console.log('Connector added status:', response.isOk);
 };
 
 module.exports = {

@@ -9,8 +9,8 @@ async function main() {
     await topUp(getOwnerAddr(), network);
 
     const dfsConnector = await redeploy('DefiSaverConnector', true);
-    await addDefiSaverConnector(dfsConnector.address, 1, true);
-    await addDefiSaverConnector(dfsConnector.address, 2, true);
+    await addDefiSaverConnector(dfsConnector.address, true);
+    await addDefiSaverConnector(dfsConnector.address, true);
 
     const recipeExecutor = await redeploy('RecipeExecutor', true);
     const flAction = await redeploy('FLAction', true);
