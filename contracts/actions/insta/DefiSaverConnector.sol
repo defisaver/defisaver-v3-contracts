@@ -9,6 +9,8 @@ import { IConnectorInterface } from "../../interfaces/protocols/insta/IConnector
 /// @title DefiSaverConnector
 /// @notice Forward all calls to the RecipeExecutor via delegatecall in context of DSA accounts
 contract DefiSaverConnector is AdminAuth, InstaConnectorHelper, IConnectorInterface {
+    string public constant name = "DefiSaverConnector";
+
     /// @notice Forward all calls to the RecipeExecutor
     fallback() external payable {
         address executor = getDfsRecipeExecutor();
@@ -17,11 +19,6 @@ contract DefiSaverConnector is AdminAuth, InstaConnectorHelper, IConnectorInterf
             let succeeded := delegatecall(sub(gas(), 5000), executor, 0, calldatasize(), 0, 0)
             if iszero(succeeded) { revert(0, 0) }
         }
-    }
-
-    /// @notice Return the name of the connector
-    function name() external pure override returns (string memory) {
-        return "DefiSaverConnector";
     }
 
     /// @notice Returns the ID of the connector
