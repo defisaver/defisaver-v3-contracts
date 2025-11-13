@@ -20,6 +20,7 @@ contract TestCore_DSProxyPermission is MockDSProxyPermission, BaseTest {
     SmartWallet wallet;
     address sender;
     address walletAddr;
+    bytes4 constant EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION

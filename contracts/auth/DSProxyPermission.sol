@@ -10,7 +10,7 @@ import { AuthHelper } from "./helpers/AuthHelper.sol";
 
 /// @title DSProxyPermission Proxy contract which works with DSProxy to give execute permission
 contract DSProxyPermission is AuthHelper {
-    bytes4 public constant EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
+    bytes4 private constant EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
 
     /// @notice Called in the context of DSProxy to authorize an address
     /// @param _contractAddr Address which will be authorized

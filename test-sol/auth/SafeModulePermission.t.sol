@@ -20,7 +20,8 @@ contract TestCore_SafeModulePermission is MockSafeModulePermission, BaseTest {
     address sender;
     address walletAddr;
 
-    address MODULE_ADDR = address(0xee);
+    address constant MODULE_ADDR = address(0xee);
+    address constant SENTINEL_MODULES = address(0x1);
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
