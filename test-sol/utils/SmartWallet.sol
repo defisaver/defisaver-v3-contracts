@@ -7,6 +7,11 @@ import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { IInstaIndex } from "../../contracts/interfaces/protocols/insta/IInstaIndex.sol";
+import {
+    IAccountImplementation
+} from "../../contracts/interfaces/protocols/summerfi/IAccountImplementation.sol";
+import { IAccountFactory } from "../../contracts/interfaces/protocols/summerfi/IAccountFactory.sol";
+
 import { BaseTest } from "./BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { DSAUtils } from "../../contracts/utils/DSAUtils.sol";
@@ -18,13 +23,14 @@ contract SmartWallet is BaseTest {
     bool public isSafe;
     bool public isDSA;
     bool public isDSProxy;
+    bool public isSummerfi;
     bool private safeInitialized;
 
     error SafeTxFailed();
     error UnsupportedWalletType();
 
     modifier ownerAsSender() {
-        vm.prank(owner);
+        vm.startPrank(owner);
         _;
         vm.stopPrank();
     }
@@ -38,6 +44,7 @@ contract SmartWallet is BaseTest {
         vm.label(owner, "owner");
 
         BaseTest.setUp();
+        // TODO -> update this to support other types too
         isSmartWalletSafe() == true ? createSafe() : createDSProxy();
         vm.label(walletAddr, "SmartWallet");
     }
@@ -47,6 +54,7 @@ contract SmartWallet is BaseTest {
         isSafe = false;
         isDSA = false;
         isDSProxy = true;
+        isSummerfi = false;
         return walletAddr;
     }
 
@@ -57,6 +65,14 @@ contract SmartWallet is BaseTest {
         isSafe = false;
         isDSA = true;
         isDSProxy = false;
+        isSummerfi = false;
+        return walletAddr;
+    }
+
+    function createSummerfiAcc() public ownerAsSender returns (address payable) {
+        // TODO -> whitelist recipe executor here?
+        walletAddr = payable(IAccountFactory(Addresses.SUMMERFI_ACCOUNT_FACTORY).createAccount());
+        vm.label(address(Addresses.SUMMERFI_GUARD), "AccountGuard");
         return walletAddr;
     }
 
@@ -83,8 +99,6 @@ contract SmartWallet is BaseTest {
                 .createProxyWithNonce(Addresses.SAFE_SINGLETON, setupData, saltNonce));
 
         isSafe = true;
-        isDSA = false;
-        isDSProxy = false;
         safeInitialized = true;
 
         return walletAddr;
@@ -112,13 +126,9 @@ contract SmartWallet is BaseTest {
         } else if (isDSProxy) {
             IDSProxy(walletAddr).execute{ value: _value }(_target, _calldata);
         } else if (isDSA) {
-            // Fix for [FAIL: vm.startPrank: cannot overwrite a prank until it is applied at least once]
-            consumePrank();
-            vm.startPrank(owner);
-
             DSAUtils.cast(walletAddr, Addresses.DFS_REGISTRY, owner, _calldata, _value);
-
-            vm.stopPrank();
+        } else if (isSummerfi) {
+            IAccountImplementation(walletAddr).execute{ value: _value }(_target, _calldata);
         } else {
             revert UnsupportedWalletType();
         }

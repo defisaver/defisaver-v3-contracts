@@ -12,10 +12,10 @@ import {
 import {
     IAccountFactory
 } from "../../../contracts/interfaces/protocols/summerfi/IAccountFactory.sol";
+import { IAccountGuard } from "../../../contracts/interfaces/protocols/summerfi/IAccountGuard.sol";
 import { IL2PoolV3 } from "../../../contracts/interfaces/protocols/aaveV3/IL2PoolV3.sol";
 import { IDebtToken } from "../../../contracts/interfaces/protocols/aaveV3/IDebtToken.sol";
 import { DataTypes } from "../../../contracts/interfaces/protocols/aaveV3/DataTypes.sol";
-import { IAccountGuard } from "../../../contracts/interfaces/protocols/summerfi/IAccountGuard.sol";
 
 import { RecipeExecutor } from "../../../contracts/core/RecipeExecutor.sol";
 import { StrategyModel } from "../../../contracts/core/strategy/StrategyModel.sol";
