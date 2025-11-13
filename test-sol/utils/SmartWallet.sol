@@ -7,9 +7,9 @@ import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { IInstaIndex } from "../../contracts/interfaces/protocols/insta/IInstaIndex.sol";
+import { IInstaAccountV2 } from "../../contracts/interfaces/protocols/insta/IInstaAccountV2.sol";
 import { BaseTest } from "./BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
-import { DSAUtils } from "../../contracts/utils/DSAUtils.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract SmartWallet is BaseTest {
@@ -114,7 +114,12 @@ contract SmartWallet is BaseTest {
             consumePrank();
             vm.startPrank(owner);
 
-            DSAUtils.cast(walletAddr, Addresses.DFS_REGISTRY, owner, _calldata, _value);
+            string[] memory connectors = new string[](1);
+            connectors[0] = "DEFI-SAVER-A";
+            bytes[] memory connectorsData = new bytes[](1);
+            connectorsData[0] = _calldata;
+
+            IInstaAccountV2(walletAddr).cast{ value: _value }(connectors, connectorsData, owner);
 
             vm.stopPrank();
         } else {

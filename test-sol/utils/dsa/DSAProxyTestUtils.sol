@@ -8,7 +8,6 @@ import {
 import { Addresses } from "../Addresses.sol";
 import { CheatCodes } from "../CheatCodes.sol";
 import { RegistryUtils } from "../RegistryUtils.sol";
-import { DSAUtils } from "../../../contracts/utils/DSAUtils.sol";
 
 contract DSAProxyTestUtils is CheatCodes, RegistryUtils {
     function _addDefiSaverConnector() internal {
@@ -22,7 +21,7 @@ contract DSAProxyTestUtils is CheatCodes, RegistryUtils {
         IInstaConnectorsV2 connector = IInstaConnectorsV2(Addresses.INSTADAPP_CONNECTORS_V2);
 
         string[] memory connectorNames = new string[](1);
-        connectorNames[0] = DSAUtils.DEFISAVER_CONNECTOR_NAME;
+        connectorNames[0] = "DEFI-SAVER-A";
 
         (bool alreadyAdded,) = connector.isConnectors(connectorNames);
         if (alreadyAdded) return;

@@ -6,7 +6,7 @@ import { IRecipeExecutor } from "../../../interfaces/core/IRecipeExecutor.sol";
 import { ISafe } from "../../../interfaces/protocols/safe/ISafe.sol";
 import { IDSProxy } from "../../../interfaces/DS/IDSProxy.sol";
 import { IDFSRegistry } from "../../../interfaces/core/IDFSRegistry.sol";
-import { DSAUtils } from "../../../utils/DSAUtils.sol";
+import { IInstaAccountV2 } from "../../../interfaces/protocols/insta/IInstaAccountV2.sol";
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
 import { FLFeeFaucet } from "../../../utils/fee/FLFeeFaucet.sol";
 import { StrategyModel } from "../../../core/strategy/StrategyModel.sol";
@@ -17,7 +17,7 @@ import { DFSIds } from "../../../utils/DFSIds.sol";
 contract FLHelper is MainnetFLAddresses, StrategyModel {
     uint16 internal constant AAVE_REFERRAL_CODE = 64;
     uint16 internal constant SPARK_REFERRAL_CODE = 64;
-
+    string internal constant DEFISAVER_CONNECTOR_ID = "DEFI-SAVER-A";
     FLFeeFaucet internal constant flFeeFaucet = FLFeeFaucet(DYDX_FL_FEE_FAUCET);
 
     // Revert if execution fails when using safe wallet
@@ -46,12 +46,16 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
         }
 
         if (_walletType == WalletType.DSAPROXY) {
-            DSAUtils.cast(
-                _wallet,
-                DFS_REGISTRY_ADDR,
-                address(this), // Only used for event logging, so here we will set it to the FL contract
-                data,
-                address(this).balance
+            string[] memory connectors = new string[](1);
+            connectors[0] = DEFISAVER_CONNECTOR_ID;
+
+            bytes[] memory connectorsData = new bytes[](1);
+            connectorsData[0] = data;
+
+            IInstaAccountV2(_wallet).cast{ value: address(this).balance }(
+                connectors,
+                connectorsData,
+                address(this) // Only used for event logging, so here we will set it to the FL contract
             );
 
             return;
