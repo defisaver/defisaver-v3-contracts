@@ -931,14 +931,15 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0x2ee96cf53ae5fbd5309284704f978d0ca66cb963",
+        "address": "0x4677c84699ab29637102609cD2868d0743a48DdF",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
+            "0x2ee96cf53ae5fbd5309284704f978d0ca66cb963",
             "0x5029336642814bC51a42bA80BF83a6322110035D",
             "0x5029336642814bC51a42bA80BF83a6322110035D",
             "0xe822d76c2632FC52f3eaa686bDA9Cea3212579D8",
