@@ -217,6 +217,7 @@ const getExplorerUrls = (hash) => {
 async function deployContract(contractNames, args) {
     const gasPriceSelected = args.gas;
     const network = hre.network.config.name;
+    const networkName = network === 'optimistic' ? 'optimism' : network;
 
     const contracts = Array.isArray(contractNames) ? contractNames : [contractNames];
 
@@ -288,18 +289,17 @@ async function deployContract(contractNames, args) {
             // Check for correct network addresses
             const helperRegex = /contract (.*)Addresses/g;
             const addressesUsed = contractString.match(helperRegex);
-            const networkFormatted = network === 'optimistic' ? 'optimism' : network;
 
             if (addressesUsed) {
                 const invalidAddresses = addressesUsed.filter(
                     (addressContract) =>
-                        !addressContract.toLowerCase().includes(networkFormatted.toLowerCase()) &&
+                        !addressContract.toLowerCase().includes(networkName.toLowerCase()) &&
                         !/\bUtilAddresses\b/.test(addressContract),
                 );
                 if (invalidAddresses.length > 0) {
                     console.log(`ERROR! Check if addresses are matching in ${contractName}!`);
                     console.log('Found:', invalidAddresses[0]);
-                    console.log('Expected network:', network);
+                    console.log('Expected network:', networkName);
                     process.exit(1);
                 }
             }
@@ -376,7 +376,7 @@ async function deployContract(contractNames, args) {
                         UPDATE_ADDRESSES_FILES
     ////////////////////////////////////////////////////////////// */
     console.log('\nUpdating addresses files...');
-    await updateContractsAddressesInJsonFiles(deployedAddresses, contracts, network);
+    await updateContractsAddressesInJsonFiles(deployedAddresses, contracts, networkName);
 
     return deployedAddresses;
 }
