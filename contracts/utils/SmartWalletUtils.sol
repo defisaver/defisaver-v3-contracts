@@ -14,6 +14,9 @@ import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title SmartWalletUtils - Helper contract with utility functions for smart wallets
 contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
+    bytes32 internal constant SUMMERFI_ACCOUNT_KECCAK256 =
+        0x15b0c1a13812f0fce8291b8e7786ece58e0daab08d489cdfe2899fdac4f66045;
+
     /// @notice Determine the type of wallet an address represents
     function _getWalletType(address _wallet) internal view returns (WalletType) {
         if (_isDSProxy(_wallet)) {
@@ -22,6 +25,10 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
 
         if (_isDSAProxy(_wallet)) {
             return WalletType.DSAPROXY;
+        }
+
+        if (_isSummerfiAccount(_wallet)) {
+            return WalletType.SUMMERFI;
         }
 
         // Otherwise, we assume we are in context of Safe
@@ -36,6 +43,11 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
     /// @notice Check if the wallet is a DSA Proxy Account
     function _isDSAProxy(address _wallet) internal view returns (bool) {
         return IInstaList(DSA_LIST_ADDR).accountID(_wallet) != 0;
+    }
+
+    /// @notice Check if the wallet is a Summerfi account
+    function _isSummerfiAccount(address _wallet) internal view returns (bool) {
+        return keccak256(_wallet.code) == SUMMERFI_ACCOUNT_KECCAK256;
     }
 
     /// @notice Fetch the owner of the smart wallet or the wallet itself

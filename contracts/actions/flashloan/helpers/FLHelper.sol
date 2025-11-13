@@ -6,6 +6,9 @@ import { IRecipeExecutor } from "../../../interfaces/core/IRecipeExecutor.sol";
 import { ISafe } from "../../../interfaces/protocols/safe/ISafe.sol";
 import { IDSProxy } from "../../../interfaces/DS/IDSProxy.sol";
 import { IDFSRegistry } from "../../../interfaces/core/IDFSRegistry.sol";
+import {
+    IAccountImplementation
+} from "../../../interfaces/protocols/summerfi/IAccountImplementation.sol";
 import { DSAUtils } from "../../../utils/DSAUtils.sol";
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
 import { FLFeeFaucet } from "../../../utils/fee/FLFeeFaucet.sol";
@@ -54,6 +57,11 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
                 address(this).balance
             );
 
+            return;
+        }
+
+        if (_walletType == WalletType.SUMMERFI) {
+            IAccountImplementation(_wallet).execute{ value: address(this).balance }(target, data);
             return;
         }
 

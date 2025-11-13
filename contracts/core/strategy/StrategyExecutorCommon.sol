@@ -11,7 +11,6 @@ import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "./StrategyModel.sol";
 import { BotAuth } from "./BotAuth.sol";
 import { CoreHelper } from "../helpers/CoreHelper.sol";
-import { WalletType } from "../../utils/DFSTypes.sol";
 import { DFSIds } from "../../utils/DFSIds.sol";
 
 /// @title StrategyExecutorCommon - Common contract used by StrategyExecutor and StrategyExecutorL2
