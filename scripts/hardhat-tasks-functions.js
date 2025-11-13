@@ -293,7 +293,8 @@ async function deployContract(contractNames, args) {
             if (addressesUsed) {
                 const invalidAddresses = addressesUsed.filter(
                     (addressContract) =>
-                        !addressContract.toLowerCase().includes(networkFormatted.toLowerCase()),
+                        !addressContract.toLowerCase().includes(networkFormatted.toLowerCase()) &&
+                        !/\bUtilAddresses\b/.test(addressContract),
                 );
                 if (invalidAddresses.length > 0) {
                     console.log(`ERROR! Check if addresses are matching in ${contractName}!`);
