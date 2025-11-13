@@ -4,5 +4,5 @@ pragma solidity =0.8.24;
 
 contract ArbitrumInstaConnectorUtils {
     string internal constant DEFISAVER_V2_CONNECTOR_NAME = "ConnectV2DefisaverArbitrum";
-    address internal constant DEFISAVER_REGISTRY_ADDR = 0xBF1CaC12DB60819Bfa71A328282ecbc1D40443aA;
+    address internal constant RECIPE_EXECUTOR_ADDR = 0x6927F7Dc79B4215F307e6c1C4d5883d134053BAB;
 }

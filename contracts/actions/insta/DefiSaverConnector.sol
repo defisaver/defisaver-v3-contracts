@@ -17,7 +17,7 @@ contract DefiSaverConnector is AdminAuth, InstaConnectorHelper {
     /// @notice Forward all calls to the RecipeExecutor
     /// @dev Returns encoded event data to follow other connectors convention
     fallback(bytes calldata) external payable returns (bytes memory) {
-        (bool success,) = getDfsRecipeExecutor().delegatecall(msg.data);
+        (bool success,) = RECIPE_EXECUTOR_ADDR.delegatecall(msg.data);
         if (!success) revert RecipeExecutionError();
 
         return abi.encode("LogConnectV2Defisaver()", bytes(""));
