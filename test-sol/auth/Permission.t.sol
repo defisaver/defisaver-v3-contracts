@@ -6,13 +6,18 @@ import { IInstaAccount } from "../../contracts/interfaces/protocols/insta/IInsta
 import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { IDSAuthority } from "../../contracts/interfaces/DS/IDSAuthority.sol";
 import { IDSAuth } from "../../contracts/interfaces/DS/IDSAuth.sol";
-import { AuthHelper } from "../../contracts/auth/helpers/AuthHelper.sol";
+import {
+    IAccountImplementation
+} from "../../contracts/interfaces/protocols/summerfi/IAccountImplementation.sol";
+import { IAccountGuard } from "../../contracts/interfaces/protocols/summerfi/IAccountGuard.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
+import { SummerfiUtils } from "../utils/summerfi/SummerfiUtils.sol";
 import { WalletType } from "../../contracts/utils/DFSTypes.sol";
+import { AuthHelper } from "../../contracts/auth/helpers/AuthHelper.sol";
 
-contract TestCore_Permission is AuthHelper, BaseTest {
+contract TestCore_Permission is AuthHelper, BaseTest, SummerfiUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -24,9 +29,11 @@ contract TestCore_Permission is AuthHelper, BaseTest {
     SmartWallet dsProxyWallet;
     SmartWallet safeWallet;
     SmartWallet dsaProxyWallet;
+    SmartWallet summerfiAcc;
     address dsProxyAddr;
     address safeAddr;
     address dsaProxyAddr;
+    address summerfiAccAddr;
 
     bytes4 constant EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
 
@@ -46,6 +53,9 @@ contract TestCore_Permission is AuthHelper, BaseTest {
 
         dsaProxyWallet = new SmartWallet(charlie);
         dsaProxyAddr = dsaProxyWallet.createDSAProxy();
+
+        summerfiAcc = new SmartWallet(jane);
+        summerfiAccAddr = summerfiAcc.createSummerfiAcc();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -87,6 +97,17 @@ contract TestCore_Permission is AuthHelper, BaseTest {
         _verifyDsaProxyPermission(addr, true);
         _removeDsaProxyPermission(addr);
         _verifyDsaProxyPermission(addr, false);
+    }
+
+    function test_giveAndRemove_SummerfiAcc_arbitraryPermission() public {
+        // Have to whitelist cut for summerfi acc to be able to call it
+        _whitelistAnyAddr(address(cut));
+        address addr = address(0x111);
+
+        _giveSummerfiAccPermission(addr);
+        _verifySummerfiAccPermission(addr, true);
+        _removeSummerfiAccPermission(addr);
+        _verifySummerfiAccPermission(addr, false);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -154,6 +175,28 @@ contract TestCore_Permission is AuthHelper, BaseTest {
         }
     }
 
+    function _giveSummerfiAccPermission(address _addr) internal {
+        bytes memory givePermCalldata =
+            abi.encodeCall(MockPermission.givePermissionTo, (WalletType.SUMMERFI, _addr));
+        summerfiAcc.execute(address(cut), givePermCalldata, 0);
+    }
+
+    function _removeSummerfiAccPermission(address _addr) internal {
+        bytes memory removePermCalldata =
+            abi.encodeCall(MockPermission.removePermissionFrom, (WalletType.SUMMERFI, _addr));
+        summerfiAcc.execute(address(cut), removePermCalldata, 0);
+    }
+
+    function _verifySummerfiAccPermission(address _addr, bool _enabled) internal view {
+        address guard = IAccountImplementation(summerfiAccAddr).guard();
+        bool canCall = IAccountGuard(guard).canCall(summerfiAccAddr, _addr);
+        if (_enabled) {
+            assertTrue(canCall);
+        } else {
+            assertFalse(canCall);
+        }
+    }
+
     function _getWalletByType(WalletType _walletType) internal view returns (SmartWallet wallet) {
         if (_walletType == WalletType.DSPROXY) {
             return dsProxyWallet;
@@ -161,6 +204,8 @@ contract TestCore_Permission is AuthHelper, BaseTest {
             return safeWallet;
         } else if (_walletType == WalletType.DSAPROXY) {
             return dsaProxyWallet;
+        } else if (_walletType == WalletType.SUMMERFI) {
+            return summerfiAcc;
         }
     }
 }

@@ -15,6 +15,16 @@ contract SummerfiUtils is RegistryUtils {
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
 
+    function _whitelistAnyAddr(address _addr) internal {
+        IAccountGuard accountGuard = IAccountGuard(Addresses.SUMMERFI_GUARD);
+        address guardOwner = accountGuard.owner();
+
+        cheats.prank(guardOwner);
+        accountGuard.setWhitelist(_addr, true);
+
+        assert(accountGuard.isWhitelisted(_addr));
+    }
+
     function _whitelistRecipeExecutor() internal {
         IAccountGuard accountGuard = IAccountGuard(Addresses.SUMMERFI_GUARD);
         address guardOwner = accountGuard.owner();
