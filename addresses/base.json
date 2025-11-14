@@ -45,25 +45,31 @@
     },
     {
         "name": "StrategyExecutorID",
-        "address": "0x0d099E38f6aF8778c5053349c350Aad906B1432F",
+        "address": "0x0e778A2e5c9A2Cc75C5b38d6347284B8836E65D6",
         "id": "0x0c1dc439",
         "path": "/StrategyExecutorID.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
-        "history": ["0x49658E0CF3883c338397C7257619B280dF581057"]
+        "history": [
+            "0x0d099E38f6aF8778c5053349c350Aad906B1432F",
+            "0x49658E0CF3883c338397C7257619B280dF581057"
+        ]
     },
     {
         "name": "StrategyExecutor",
-        "address": "0x0d099E38f6aF8778c5053349c350Aad906B1432F",
+        "address": "0x0e778A2e5c9A2Cc75C5b38d6347284B8836E65D6",
         "id": "0xdcb15eef",
         "path": "contracts/core/strategy/StrategyExecutor.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
-        "history": ["0x49658E0CF3883c338397C7257619B280dF581057"]
+        "history": [
+            "0x0d099E38f6aF8778c5053349c350Aad906B1432F",
+            "0x49658E0CF3883c338397C7257619B280dF581057"
+        ]
     },
     {
         "name": "DFSSell",
@@ -284,14 +290,17 @@
     },
     {
         "name": "FLAction",
-        "address": "0x5523E61fBEF59825831Ffbb1306aBc3Bb03BB3A4",
+        "address": "0xDA86B4c61A545a4b217746ba43C8157f0Ec612c7",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xAAbd4B0372240E319F9722c4Fd1e2FE0C8d422D2"]
+        "history": [
+            "0x5523E61fBEF59825831Ffbb1306aBc3Bb03BB3A4",
+            "0xAAbd4B0372240E319F9722c4Fd1e2FE0C8d422D2"
+        ]
     },
     {
         "name": "FLAaveV3WithFee",
@@ -1109,14 +1118,17 @@
     },
     {
         "name": "TxSaverExecutor",
-        "address": "0xa1c1e3de24f0efbb2f619b55dd31b16a224344d5",
+        "address": "0x1A3cA3D175A1583A227183e157454C8e26d2E531",
         "id": "0x91bfbd87",
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xe41DB81Eaa636E71A2f4E67D34236f341D5a1B7d"]
+        "history": [
+            "0xa1c1e3de24f0efbb2f619b55dd31b16a224344d5",
+            "0xe41DB81Eaa636E71A2f4E67D34236f341D5a1B7d"
+        ]
     },
     {
         "name": "BotAuthForTxSaver",

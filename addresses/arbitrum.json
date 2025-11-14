@@ -728,14 +728,15 @@
     },
     {
         "name": "FLAction",
-        "address": "0xab4AA2fcEA33205b44a556f8C48ceC3f21aFf0C3",
+        "address": "0x557f8E26358aa697A3b3838f21fA20Df3aB9afBD",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xab4AA2fcEA33205b44a556f8C48ceC3f21aFf0C3",
             "0x1561EAF39c98d45C55C7dC605E627672F4406819",
             "0xFbd213073FC4f597C840B1ee202678d210d765fb"
         ]
@@ -819,13 +820,16 @@
     },
     {
         "name": "StrategyExecutor",
-        "address": "0xa4F087267828C3Ca8ac18b6fE7f456aB20781AA6",
+        "address": "0x7EC50D40C78A05dD9e8A93A222e21B2D2B29420B",
         "id": "0x0c1dc439",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
-        "history": ["0x9652f91B10045Cd2a36ca8D87df4A800eD2AF05D"]
+        "history": [
+            "0xa4F087267828C3Ca8ac18b6fE7f456aB20781AA6",
+            "0x9652f91B10045Cd2a36ca8D87df4A800eD2AF05D"
+        ]
     },
     {
         "name": "AaveV3RatioTrigger",
@@ -1301,14 +1305,17 @@
     },
     {
         "name": "TxSaverExecutor",
-        "address": "0x2d7993e134b820359c55ca0b12b997f29a74556a",
+        "address": "0xa0f7DA725999199ce578cA77f3eedbA4069206a0",
         "id": "0x91bfbd87",
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x70cc5952c111275c30ef9aafc675e715eaf77a69"]
+        "history": [
+            "0x2d7993e134b820359c55ca0b12b997f29a74556a",
+            "0x70cc5952c111275c30ef9aafc675e715eaf77a69"
+        ]
     },
     {
         "name": "BotAuthForTxSaver",
