@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
+import { IAdminVault } from "../../contracts/interfaces/auth/IAdminVault.sol";
 import { DFSRegistry } from "../../contracts/core/DFSRegistry.sol";
 import { BotAuth } from "../../contracts/core/strategy/BotAuth.sol";
 import { CoreHelper } from "../../contracts/core/helpers/CoreHelper.sol";
-import { IAdminVault } from "../../contracts/interfaces/auth/IAdminVault.sol";
 import { CheatCodes } from "./CheatCodes.sol";
 
 contract RegistryUtils is CoreHelper, CheatCodes {

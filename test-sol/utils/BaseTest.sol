@@ -12,6 +12,7 @@ contract BaseTest is Config {
     address internal constant bob = address(0xbb);
     address internal constant alice = address(0xaa);
     address internal constant charlie = address(0xcc);
+    address internal constant jane = address(0x11);
 
     using SafeERC20 for IERC20;
 

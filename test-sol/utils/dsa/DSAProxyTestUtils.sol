@@ -9,11 +9,10 @@ import {
     IInstaConnectorsV1
 } from "../../../contracts/interfaces/protocols/insta/IInstaConnectorsV1.sol";
 import { Addresses } from "../Addresses.sol";
-import { CheatCodes } from "../CheatCodes.sol";
 import { RegistryUtils } from "../RegistryUtils.sol";
 import { DSAUtils } from "../../../contracts/utils/DSAUtils.sol";
 
-contract DSAProxyTestUtils is CheatCodes, RegistryUtils {
+contract DSAProxyTestUtils is RegistryUtils {
     function _addDefiSaverConnector() internal {
         address defiSaverConnector = address(new DefiSaverConnector());
         redeploy("DefiSaverConnector", defiSaverConnector);

@@ -15,7 +15,7 @@ import { IAccountFactory } from "../../contracts/interfaces/protocols/summerfi/I
 import { BaseTest } from "./BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { DSAUtils } from "../../contracts/utils/DSAUtils.sol";
-import { console2 } from "forge-std/console2.sol";
+import { console2 as console } from "forge-std/console2.sol";
 
 contract SmartWallet is BaseTest {
     address payable public owner;
@@ -73,6 +73,10 @@ contract SmartWallet is BaseTest {
         // TODO -> whitelist recipe executor here?
         walletAddr = payable(IAccountFactory(Addresses.SUMMERFI_ACCOUNT_FACTORY).createAccount());
         vm.label(address(Addresses.SUMMERFI_GUARD), "AccountGuard");
+        isSafe = false;
+        isDSA = false;
+        isDSProxy = false;
+        isSummerfi = true;
         return walletAddr;
     }
 
@@ -138,8 +142,8 @@ contract SmartWallet is BaseTest {
         uint256 startGas = gasleft();
         execute(_target, _calldata, _value);
         uint256 gasUsed = startGas - gasleft();
-        console2.log("--------- EXECUTING TX FROM WALLET ----------");
-        console2.log("GAS USED: ", gasUsed);
+        console.log("--------- EXECUTING TX FROM WALLET ----------");
+        console.log("GAS USED: ", gasUsed);
     }
 
     function ownerApprove(address _token, uint256 _amount) public ownerAsSender {

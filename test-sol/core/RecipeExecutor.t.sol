@@ -11,10 +11,11 @@ import { ActionsUtils } from "../utils/ActionsUtils.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { DSAProxyTestUtils } from "../utils/dsa/DSAProxyTestUtils.sol";
+import { SummerfiUtils } from "../utils/summerfi/SummerfiUtils.sol";
 
 /// @dev Recipe execution from strategy is already tested in StrategyExecutor tests
 /// @dev Here, we just test direct recipe execution with and without flash loan
-contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
+contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest, SummerfiUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -41,12 +42,15 @@ contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
         SmartWallet dsaProxyWallet = new SmartWallet(charlie);
         dsaProxyWallet.createDSAProxy();
 
-        wallets = new SmartWallet[](3);
+        SmartWallet summerfiSmartWallet = new SmartWallet(jane);
+        summerfiSmartWallet.createSummerfiAcc();
+
+        wallets = new SmartWallet[](4);
 
         wallets[0] = safeWallet;
         wallets[1] = dsProxyWallet;
         wallets[2] = dsaProxyWallet;
-
+        wallets[3] = summerfiSmartWallet;
         _addDefiSaverConnector();
 
         cut = new RecipeExecutor();
@@ -57,6 +61,8 @@ contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
 
         flAddress = address(new FLAction());
         redeploy("FLAction", flAddress);
+
+        _whitelistRecipeExecutor();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
