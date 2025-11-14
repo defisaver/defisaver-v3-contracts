@@ -1249,5 +1249,16 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "ConnectV2DefiSaverOptimism",
+        "address": "0x6C61F85a515a19aCC326c240a20a9276dd326878",
+        "id": "0x811fab0f",
+        "path": "contracts/actions/insta/connectors/ConnectV2DefiSaverOptimism.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
     }
 ]

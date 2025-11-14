@@ -1601,5 +1601,16 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "ConnectV2DefiSaverArbitrum",
+        "address": "0x1B2e29356b0302dB74530501318EA01Bfb35792a",
+        "id": "0xb8ab05e5",
+        "path": "contracts/actions/insta/connectors/ConnectV2DefiSaverArbitrum.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
     }
 ]

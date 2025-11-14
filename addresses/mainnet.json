@@ -4748,5 +4748,16 @@
         "changeTime": "0",
         "registryIds": [],
         "history": ["0x0b2621aE77952606A3b95d06E31b10132C51C860"]
+    },
+    {
+        "name": "ConnectV2DefiSaver",
+        "address": "0x80E31fE25A6C0087E0487E60da92fCe622757543",
+        "id": "0x1fc6d9e6",
+        "path": "contracts/actions/insta/connectors/ConnectV2DefiSaver.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
     }
 ]
