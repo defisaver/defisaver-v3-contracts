@@ -10,7 +10,7 @@ import { ActionBase } from "../ActionBase.sol";
 /// @notice This action only checks for current ratio, without comparing it to the start ratio.
 contract MorphoBlueTargetRatioCheck is ActionBase, MorphoBlueHelper {
     /// @notice 5% offset acceptable
-    uint256 internal constant RATIO_OFFSET = 50_000_000_000_000_000;
+    uint256 internal constant RATIO_OFFSET = 5e16;
 
     error BadAfterRatio(uint256 currentRatio, uint256 targetRatio);
 

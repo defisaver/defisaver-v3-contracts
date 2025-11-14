@@ -10,4 +10,5 @@ contract MainnetSkyAddresses {
     address internal constant LOCK_STAKE_SKY = 0xf9A9cfD3229E985B91F99Bc866d42938044FFa1C;
     address internal constant USDS_FARM = 0x38E4254bD82ED5Ee97CD1C4278FAae748d998865;
     address internal constant SPARK_FARM = 0x99cBC0e4E6427F6939536eD24d1275B95ff77404;
+    address internal constant SKY_FARM = 0xB44C2Fb4181D7Cb06bdFf34A46FdFe4a259B40Fc;
 }
