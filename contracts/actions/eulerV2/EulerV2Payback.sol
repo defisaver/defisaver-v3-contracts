@@ -80,7 +80,7 @@ contract EulerV2Payback is ActionBase, EulerV2Helper {
 
         if (maxPayback) {
             // Actual EVC function is named `call`, so it is safe to disable rule
-            // forge-lint: disable-next-line(unchecked-call)
+            // forge-lint: disable-next-item(unchecked-call)
             IEVC(EVC_ADDR)
                 .call(
                     _params.vault,
