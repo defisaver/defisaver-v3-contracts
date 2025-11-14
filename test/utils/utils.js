@@ -1566,7 +1566,7 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
         if (isDSAProxy) {
             await impersonateAccount(proxy.signer.address);
             receipt = await proxy['cast(string[],bytes[],address)'](
-                ['DefiSaverConnector'],
+                ['DEFI-SAVER-A'],
                 [callData],
                 nullAddress,
                 {

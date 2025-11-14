@@ -34,9 +34,7 @@ const addDefiSaverConnector = async (dfsConnectorAddress, isFork = false) => {
         masterSigner,
     );
 
-    const isConnectorAlreadyAdded = await instaConnectorsV2Contract.isConnectors([
-        'DefiSaverConnector',
-    ]);
+    const isConnectorAlreadyAdded = await instaConnectorsV2Contract.isConnectors(['DEFI-SAVER-A']);
     if (isConnectorAlreadyAdded.isOk) {
         return;
     }
@@ -45,7 +43,7 @@ const addDefiSaverConnector = async (dfsConnectorAddress, isFork = false) => {
     if (!isFork) {
         await impersonateAccount(masterAddr);
     }
-    await instaConnectorsV2Contract.addConnectors(['DefiSaverConnector'], [dfsConnectorAddress], {
+    await instaConnectorsV2Contract.addConnectors(['DEFI-SAVER-A'], [dfsConnectorAddress], {
         gasLimit: 800000,
     });
     if (!isFork) {
@@ -53,7 +51,7 @@ const addDefiSaverConnector = async (dfsConnectorAddress, isFork = false) => {
     }
 
     // Check if connector is properly added
-    const response = await instaConnectorsV2Contract.isConnectors(['DefiSaverConnector']);
+    const response = await instaConnectorsV2Contract.isConnectors(['DEFI-SAVER-A']);
     console.log('Connector added status:', response.isOk);
 };
 

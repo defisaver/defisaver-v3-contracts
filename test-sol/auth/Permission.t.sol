@@ -113,7 +113,7 @@ contract TestCore_Permission is AuthHelper, BaseTest {
     }
 
     /// @dev Mock DSA tests.
-    /// Tested through RecipeExecutor and DefiSaverConnector because we can't execute arbitrary calls to DSA Proxy Account
+    /// Tested through RecipeExecutor and ConnectV2DefiSaver because we can't execute arbitrary calls to DSA Proxy Account
     function _giveDsaProxyPermission(address _addr) internal {
         // Self-call to enable permission (simulate execution in the context of the DSA Proxy Account)
         vm.prank(dsaProxyAddr);

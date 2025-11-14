@@ -17,7 +17,7 @@ const { executeAction } = require('../../utils/actions');
 const { addDefiSaverConnector } = require('../../utils/insta');
 
 const dfsConnectorTest = async () => {
-    describe('Test DefiSaverConnector', function () {
+    describe('Test ConnectV2DefiSaver', function () {
         this.timeout(150000);
         let owner;
         let dsaAddress;
@@ -30,7 +30,7 @@ const dfsConnectorTest = async () => {
             owner = '0xF6Da9e9D73d7893223578D32a95d6d7de5522767';
             dsaAddress = '0x4C6Cd7b623e7E7741C20bdAF3452269277534eF8';
 
-            dfsConnector = await redeploy('DefiSaverConnector');
+            dfsConnector = await redeploy('ConnectV2DefiSaver');
             dsaSigner = hre.ethers.provider.getSigner(owner);
             dsaSigner.address = owner;
             dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress, dsaSigner);
@@ -96,7 +96,7 @@ const dfsConnectorTest = async () => {
     });
 };
 
-describe('DefiSaverConnector', function () {
+describe('ConnectV2DefiSaver', function () {
     this.timeout(80000);
     it('... forward calls to the RecipeExecutor via delegatecall in context of DSA accounts', async () => {
         await dfsConnectorTest();

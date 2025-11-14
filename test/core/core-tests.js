@@ -848,7 +848,11 @@ const recipeExecutorTest = async () => {
             await redeploy('RecipeExecutor');
 
             // Add connector for DSA Proxy Accounts.
-            const dfsConnector = await redeploy('DefiSaverConnector');
+            const connectV2DefisaverName =
+                network === 'mainnet'
+                    ? 'ConnectV2DefiSaver'
+                    : `ConnectV2DefiSaver${network.charAt(0).toUpperCase() + network.slice(1)}`;
+            const dfsConnector = await redeploy(connectV2DefisaverName);
             await addDefiSaverConnector(dfsConnector.address);
 
             strategyExecutor =

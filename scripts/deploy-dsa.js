@@ -8,7 +8,7 @@ async function main() {
     await topUp(senderAcc.address, network);
     await topUp(getOwnerAddr(), network);
 
-    const dfsConnector = await redeploy('DefiSaverConnector', true);
+    const dfsConnector = await redeploy('ConnectV2DefiSaver', true);
     await addDefiSaverConnector(dfsConnector.address, true);
     await addDefiSaverConnector(dfsConnector.address, true);
 
