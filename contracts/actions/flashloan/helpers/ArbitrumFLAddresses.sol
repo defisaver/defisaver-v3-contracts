@@ -35,7 +35,7 @@ contract ArbitrumFLAddresses {
     address internal constant CURVEUSD_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address internal constant UNI_V3_FACTORY = 0x1F98431c8aD98523631AE4a59f267346ea31F984;
-    address internal constant MORPHO_BLUE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant MORPHO_BLUE_ADDR = 0x6c247b1F6182318877311737BaC0844bAa518F5e;
 
     address internal constant RECIPE_EXECUTOR_ADDR = 0x4417bffFD5e3131069f62Fac07e40704EE234404;
 }

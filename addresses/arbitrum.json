@@ -727,14 +727,15 @@
     },
     {
         "name": "FLAction",
-        "address": "0xab4AA2fcEA33205b44a556f8C48ceC3f21aFf0C3",
+        "address": "0x9FD9884428615DF36c28B9ba206b67Ded81eB741",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xab4AA2fcEA33205b44a556f8C48ceC3f21aFf0C3",
             "0x1561EAF39c98d45C55C7dC605E627672F4406819",
             "0xFbd213073FC4f597C840B1ee202678d210d765fb"
         ]
@@ -1598,6 +1599,171 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueWithdraw",
+        "address": "0xd7132c78677E764b352F83D1ACbCd9564eC08569",
+        "id": "0x5e8a8984",
+        "path": "contracts/actions/morpho-blue/MorphoBlueWithdraw.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueWithdrawCollateral",
+        "address": "0x374553273E681C6cfA69006CEd70710d415a02D0",
+        "id": "0x053bcb63",
+        "path": "contracts/actions/morpho-blue/MorphoBlueWithdrawCollateral.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueBorrow",
+        "address": "0xAe3073ab93DAde55e8B9390E5f3A3071B1ec99Ec",
+        "id": "0xf82d8814",
+        "path": "contracts/actions/morpho-blue/MorphoBlueBorrow.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBluePayback",
+        "address": "0x0e5493737FC3466341E0372219ef72FA0B4DDBbB",
+        "id": "0xca8b1df9",
+        "path": "contracts/actions/morpho-blue/MorphoBluePayback.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueSupply",
+        "address": "0xeaF1c037716b447C178f3604BCFd10e650704525",
+        "id": "0x9200fb32",
+        "path": "contracts/actions/morpho-blue/MorphoBlueSupply.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueSupplyCollateral",
+        "address": "0x65A5900F2faab9cC495b92389844739DF08A290D",
+        "id": "0xc69d5942",
+        "path": "contracts/actions/morpho-blue/MorphoBlueSupplyCollateral.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueSetAuth",
+        "address": "0x7e1deb39317A7542Be231123733d94167FaC73D5",
+        "id": "0x3f1352f1",
+        "path": "contracts/actions/morpho-blue/MorphoBlueSetAuth.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueSetAuthWithSig",
+        "address": "0x14da4D942b2b855550b47567c333edB8443cF1A7",
+        "id": "0x382f0f62",
+        "path": "contracts/actions/morpho-blue/MorphoBlueSetAuthWithSig.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueClaim",
+        "address": "0x3ae0160e27778f7286182eAc774fD7ECd40539a7",
+        "id": "0x07f9b8e2",
+        "path": "contracts/actions/morpho-blue/MorphoBlueClaim.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueRatioTrigger",
+        "address": "0x539559aBa2F48dC9Fa2fB78B478a9768d7E07b8A",
+        "id": "0x98c39012",
+        "path": "contracts/triggers/MorphoBlueRatioTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueRatioCheck",
+        "address": "0x1377fD390ECdEB2C4471AaBbcf47a77425BE957e",
+        "id": "0xf913c3b7",
+        "path": "contracts/actions/checkers/MorphoBlueRatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueTargetRatioCheck",
+        "address": "0x83cc27951551188be7969e730A8e3AbB529Cc6c9",
+        "id": "0x49f12f40",
+        "path": "contracts/actions/checkers/MorphoBlueTargetRatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBluePriceTrigger",
+        "address": "0x9F0cE44F844ae786183604cf48D06828E788002b",
+        "id": "0x6730402c",
+        "path": "contracts/triggers/MorphoBluePriceTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueReallocateLiquidity",
+        "address": "0x79C0E0eFe0Df71B2d301f4e08cfB5Ca8814A8f4c",
+        "id": "0x75852bc7",
+        "path": "contracts/actions/morpho-blue/MorphoBlueReallocateLiquidity.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "MorphoBlueView",
+        "address": "0xa3b8b400a2eFF0314fa9605E778692bd4Bd9f880",
+        "id": "0x942aef0a",
+        "path": "contracts/views/MorphoBlueView.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     }
