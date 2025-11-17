@@ -554,43 +554,6 @@ const updateSparkAutomationStrategy = async (
     };
 };
 
-const subSparkCloseBundle = async (
-    proxy,
-    bundleId,
-    triggerBaseAsset,
-    triggerQuoteAsset,
-    targetPrice,
-    priceState,
-    _collAsset,
-    _collAssetId,
-    _debtAsset,
-    _debtAssetId,
-) => {
-    const triggerData = {
-        baseTokenAddress: triggerBaseAsset,
-        quoteTokenAddress: triggerQuoteAsset,
-        price: targetPrice,
-        ratioState:
-            priceState === 1
-                ? automationSdk.enums.RatioState.UNDER
-                : automationSdk.enums.RatioState.OVER,
-    };
-    const subData = {
-        collAsset: _collAsset,
-        collAssetId: _collAssetId,
-        debtAsset: _debtAsset,
-        debtAssetId: _debtAssetId,
-    };
-    const strategySub = automationSdk.strategySubService.sparkEncode.closeToAsset(
-        bundleId,
-        true,
-        triggerData,
-        subData,
-    );
-    const subId = await subToStrategy(proxy, strategySub);
-    return { subId, strategySub };
-};
-
 const subLiquityDsrPaybackStrategy = async ({ proxy, triggerRatio, targetRatio }) => {
     const strategySub = automationSdk.strategySubService.liquityEncode.dsrPayback(
         proxy.address,
@@ -1235,7 +1198,6 @@ module.exports = {
     subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
-    subSparkCloseBundle,
     subLiquityDsrPaybackStrategy,
     subLiquityDsrSupplyStrategy,
     subLiquityDebtInFrontRepayStrategy,
