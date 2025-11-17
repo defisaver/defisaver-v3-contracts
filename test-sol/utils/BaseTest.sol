@@ -104,11 +104,6 @@ contract BaseTest is Config {
         vm.startPrank(_sender);
     }
 
-    function consumePrank() internal view {
-        (bool success,) = address(0).staticcall("");
-        success; // silence unused variable warning
-    }
-
     function removeSelector(bytes memory _data) internal pure returns (bytes memory) {
         bytes memory result = new bytes(_data.length - 4);
         for (uint256 i = 4; i < _data.length; i++) {

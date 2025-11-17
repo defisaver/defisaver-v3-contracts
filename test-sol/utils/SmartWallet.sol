@@ -15,7 +15,7 @@ import { IInstaAccountV2 } from "../../contracts/interfaces/protocols/insta/IIns
 
 import { BaseTest } from "./BaseTest.sol";
 import { Addresses } from "../utils/Addresses.sol";
-import { console2 } from "forge-std/console2.sol";
+import { console2 as console } from "forge-std/console2.sol";
 
 contract SmartWallet is BaseTest {
     address payable public owner;
@@ -128,18 +128,12 @@ contract SmartWallet is BaseTest {
         } else if (isDSProxy) {
             IDSProxy(walletAddr).execute{ value: _value }(_target, _calldata);
         } else if (isDSA) {
-            // Fix for [FAIL: vm.startPrank: cannot overwrite a prank until it is applied at least once]
-            consumePrank();
-            vm.startPrank(owner);
-
             string[] memory connectors = new string[](1);
             connectors[0] = "DEFI-SAVER-A";
             bytes[] memory connectorsData = new bytes[](1);
             connectorsData[0] = _calldata;
 
             IInstaAccountV2(walletAddr).cast{ value: _value }(connectors, connectorsData, owner);
-
-            vm.stopPrank();
         } else if (isSummerfi) {
             IAccountImplementation(walletAddr).execute{ value: _value }(_target, _calldata);
         } else {
