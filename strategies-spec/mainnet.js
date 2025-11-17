@@ -6670,6 +6670,85 @@ const createAaveV3GenericFLCloseToDebtStrategy = () => {
     return aaveV3GenericFLCloseToDebtStrategy.encodeForDsProxyCall();
 };
 
+const createAaveV3FLCollateralSwitchStrategy = () => {
+    const aaveV3FLCollateralSwitchStrategy = new dfs.Strategy('AaveV3FLCollateralSwitchStrategy');
+
+    aaveV3FLCollateralSwitchStrategy.addSubSlot('&fromAsset', 'address');
+    aaveV3FLCollateralSwitchStrategy.addSubSlot('&fromAssetId', 'uint16');
+    aaveV3FLCollateralSwitchStrategy.addSubSlot('&toAsset', 'address');
+    aaveV3FLCollateralSwitchStrategy.addSubSlot('&toAssetId', 'uint16');
+    aaveV3FLCollateralSwitchStrategy.addSubSlot('&marketAddr', 'address');
+    aaveV3FLCollateralSwitchStrategy.addSubSlot('&amountToSwitch', 'uint256');
+    aaveV3FLCollateralSwitchStrategy.addSubSlot('&useOnBehalf', 'bool');
+
+    const trigger = new dfs.triggers.AaveV3QuotePriceTrigger(nullAddress, nullAddress, '0', '0');
+    aaveV3FLCollateralSwitchStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%fromAsset'], // Sent by backend.
+            ['%flAmount'], // Sent by backend.
+            // For maxUint256 amount use current fromAsset balance instead of '&amountToSwitch'.
+            // The maximum we can withdraw later is '&amountToSwitch', so this fl amount should be lowered for any fl fees so that:
+            // flAmount + flAmount * flFee = '&amountToSwitch'
+            // flAmount = '&amountToSwitch' / (1 + flFee)
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&fromAsset',
+            '&toAsset',
+            '%flAmount', // Sent by backend
+            '%exchangeWrapper', // Sent by backend.
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // Sent by backend.
+        '&toAsset',
+        '$2',
+    );
+    const supplyAction = new dfs.actions.aaveV3.AaveV3SupplyAction(
+        '%false', //  useDefaultMarket - Sent by backend.
+        '&marketAddr',
+        '$3',
+        '&proxy',
+        '&toAsset',
+        '&toAssetId',
+        '%true', // enableAsColl - Sent by backend
+        '&useOnBehalf',
+        '%address(0)', // onBehalf - Sent by backend
+    );
+    const withdrawAction = new dfs.actions.aaveV3.AaveV3WithdrawAction(
+        '%false', // useDefaultMarket - Sent by backend
+        '&marketAddr',
+        '&amountToSwitch',
+        '&proxy',
+        '&fromAssetId',
+    );
+    const returnFLAction = new dfs.actions.basic.SendTokenAction(
+        '&fromAsset',
+        '%flAddress', // Sent by backend.
+        '$1',
+    );
+    const returnAnyDust = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&fromAsset',
+        '&eoa',
+        '%max(uint)', // Sent by backend,
+    );
+
+    aaveV3FLCollateralSwitchStrategy.addAction(flAction);
+    aaveV3FLCollateralSwitchStrategy.addAction(sellAction);
+    aaveV3FLCollateralSwitchStrategy.addAction(feeTakingAction);
+    aaveV3FLCollateralSwitchStrategy.addAction(supplyAction);
+    aaveV3FLCollateralSwitchStrategy.addAction(withdrawAction);
+    aaveV3FLCollateralSwitchStrategy.addAction(returnFLAction);
+    aaveV3FLCollateralSwitchStrategy.addAction(returnAnyDust);
+
+    return aaveV3FLCollateralSwitchStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createRepayStrategy,
     createFLRepayStrategy,
@@ -6783,4 +6862,5 @@ module.exports = {
     createAaveV3GenericFLRepayOnPriceStrategy,
     createAaveV3GenericFLCloseToCollStrategy,
     createAaveV3GenericFLCloseToDebtStrategy,
+    createAaveV3FLCollateralSwitchStrategy,
 };

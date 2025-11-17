@@ -549,7 +549,7 @@ const setBalance = async (tokenAddr, userAddr, value) => {
         const tokenState = await tokenContract.callStatic.tokenState();
         tokenAddr = tokenState;
     } catch (error) {
-        console.log(error);
+        // ignore error
     }
     const slotInfo = await findBalancesSlot(tokenAddr);
     let index;

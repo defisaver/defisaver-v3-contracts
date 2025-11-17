@@ -533,8 +533,8 @@
         "name": "CBRebondStrategy",
         "id": 31,
         "isContinuous": true,
-        "triggerIds": ["CBRebondTrigger"],
-        "actionIds": ["CBChickenIn", "DFSSell", "GasFeeTaker", "CBCreate", "CBUpdateRebondSub"],
+        "triggerIds": [null],
+        "actionIds": [null, "DFSSell", "GasFeeTaker", null, null],
         "paramMapping": [
             ["&2", "&proxy"],
             ["&3", "&4", "$1", "&proxy", "&proxy"],
@@ -548,14 +548,7 @@
         "id": 32,
         "isContinuous": false,
         "triggerIds": ["LiquityRatioTrigger"],
-        "actionIds": [
-            "FetchBondId",
-            "CBChickenIn",
-            "DFSSell",
-            "GasFeeTaker",
-            "LiquityPayback",
-            "SendToken"
-        ],
+        "actionIds": [null, null, "DFSSell", "GasFeeTaker", "LiquityPayback", "SendToken"],
         "paramMapping": [
             ["&1", "&2"],
             ["$1", "&proxy"],
@@ -571,7 +564,7 @@
         "id": 33,
         "isContinuous": false,
         "triggerIds": ["LiquityRatioTrigger"],
-        "actionIds": ["FetchBondId", "CBChickenOut", "GasFeeTaker", "LiquityPayback", "SendToken"],
+        "actionIds": [null, null, "GasFeeTaker", "LiquityPayback", "SendToken"],
         "paramMapping": [
             ["&1", "&2"],
             ["$1", 0, "&proxy"],
@@ -817,14 +810,8 @@
         "name": "MorphoAaveV2RepayStrategy",
         "id": 47,
         "isContinuous": true,
-        "triggerIds": ["MorphoAaveV2RatioTrigger"],
-        "actionIds": [
-            "MorphoAaveV2Withdraw",
-            "DFSSell",
-            "GasFeeTaker",
-            "MorphoAaveV2Payback",
-            "MorphoAaveV2RatioCheck"
-        ],
+        "triggerIds": [null],
+        "actionIds": [null, "DFSSell", "GasFeeTaker", null, null],
         "paramMapping": [
             [0, 0, "&proxy"],
             [0, 0, "$1", "&proxy", "&proxy"],
@@ -838,15 +825,8 @@
         "name": "MorphoAaveV2FLRepayStrategy",
         "id": 48,
         "isContinuous": true,
-        "triggerIds": ["MorphoAaveV2RatioTrigger"],
-        "actionIds": [
-            "FLAction",
-            "DFSSell",
-            "GasFeeTaker",
-            "MorphoAaveV2Payback",
-            "MorphoAaveV2Withdraw",
-            "MorphoAaveV2RatioCheck"
-        ],
+        "triggerIds": [null],
+        "actionIds": ["FLAction", "DFSSell", "GasFeeTaker", null, null, null],
         "paramMapping": [
             [0, 0, 0, 0, 0, 0],
             [0, 0, 0, "&proxy", "&proxy"],
@@ -861,14 +841,8 @@
         "name": "MorphoAaveV2BoostStrategy",
         "id": 49,
         "isContinuous": true,
-        "triggerIds": ["MorphoAaveV2RatioTrigger"],
-        "actionIds": [
-            "MorphoAaveV2Borrow",
-            "DFSSell",
-            "GasFeeTaker",
-            "MorphoAaveV2Supply",
-            "MorphoAaveV2RatioCheck"
-        ],
+        "triggerIds": [null],
+        "actionIds": [null, "DFSSell", "GasFeeTaker", null, null],
         "paramMapping": [
             [0, 0, "&proxy"],
             [0, 0, "$1", "&proxy", "&proxy"],
@@ -882,15 +856,8 @@
         "name": "MorphoAaveV2FLBoostStrategy",
         "id": 50,
         "isContinuous": true,
-        "triggerIds": ["MorphoAaveV2RatioTrigger"],
-        "actionIds": [
-            "FLAction",
-            "DFSSell",
-            "GasFeeTaker",
-            "MorphoAaveV2Supply",
-            "MorphoAaveV2Borrow",
-            "MorphoAaveV2RatioCheck"
-        ],
+        "triggerIds": [null],
+        "actionIds": ["FLAction", "DFSSell", "GasFeeTaker", null, null, null],
         "paramMapping": [
             [0, 0, 0, 0, 0, 0],
             [0, 0, 0, "&proxy", "&proxy"],
@@ -2663,5 +2630,29 @@
             ["&1", "&3", "&eoa", "&eoa", 0, 0]
         ],
         "bundleId": 56
+    },
+    {
+        "name": "AaveV3FLCollateralSwitchStrategy",
+        "id": 135,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTaker",
+            "AaveV3Supply",
+            "AaveV3Withdraw",
+            "SendToken",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["$3", "&proxy", "&4", 0, 0, "&7", "&5", 0],
+            ["&2", 0, "&6", "&proxy", "&5"],
+            ["&1", 0, "$1"],
+            ["&1", "&eoa", 0]
+        ]
     }
 ]
