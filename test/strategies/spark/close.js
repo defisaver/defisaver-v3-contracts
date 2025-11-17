@@ -1,4 +1,4 @@
-// AaveV3 Close strategies
+// Spark Close strategies
 const hre = require('hardhat');
 const { expect } = require('chai');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -20,28 +20,25 @@ const {
     redeploy,
     sendEther,
     addBalancerFlLiquidity,
-    getCloseStrategyTypeName,
-    getCloseStrategyConfigs,
-} = require('../../../utils/utils');
+} = require('../../utils/utils');
 
-const { addBotCaller } = require('../../utils/utils-strategies');
-const { subAaveV3CloseGeneric } = require('../../utils/strategy-subs');
+const { addBotCaller } = require('../utils/utils-strategies');
+const { subSparkCloseGeneric } = require('../utils/strategy-subs');
 const {
-    callAaveV3GenericFLCloseToCollStrategy,
-    callAaveV3GenericFLCloseToDebtStrategy,
-} = require('../../utils/strategy-calls');
+    callSparkGenericFLCloseToCollStrategy,
+    callSparkGenericFLCloseToDebtStrategy,
+} = require('../utils/strategy-calls');
 const {
-    AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY,
-    openAaveV3ProxyPosition,
-    openAaveV3EOAPosition,
-    getAaveV3PositionRatio,
-    deployAaveV3CloseGenericBundle,
-    setupAaveV3EOAPermissions,
-    getAaveV3ReserveData,
-} = require('../../../utils/aave');
+    deploySparkCloseGenericBundle,
+    openSparkProxyPosition,
+    getSparkPositionRatio,
+    SPARK_AUTOMATION_TEST_PAIRS,
+    getSparkReserveDataFromPool,
+} = require('../../utils/spark');
+const { getCloseStrategyTypeName, getCloseStrategyConfigs } = require('../../utils/utils');
 
 const runCloseTests = () => {
-    describe('AaveV3 Close to debt Strategies take', () => {
+    describe('Spark Close To Debt Strategies Tests', () => {
         let snapshotId;
         let senderAcc;
         let proxy;
@@ -68,20 +65,9 @@ const runCloseTests = () => {
             flAddr = flContract.address;
 
             // Redeploys
-            await redeploy('AaveV3QuotePriceTrigger', isFork);
-            await redeploy('AaveV3QuotePriceRangeTrigger', isFork);
-            await redeploy('AaveV3Borrow', isFork);
-            await redeploy('AaveV3Payback', isFork);
-            await redeploy('AaveV3Supply', isFork);
-            await redeploy('AaveV3Withdraw', isFork);
-            await redeploy('AaveV3RatioCheck', isFork);
-            await redeploy('AaveV3OpenRatioCheck', isFork);
-            await redeploy('AaveV3View', isFork);
-            await redeploy('SubProxy', isFork);
-            await redeploy('SendTokenAndUnwrap', isFork);
-            await redeploy('SendTokensAndUnwrap', isFork);
+            await redeploy('SparkQuotePriceRangeTrigger', isFork);
 
-            bundleId = await deployAaveV3CloseGenericBundle();
+            bundleId = await deploySparkCloseGenericBundle();
         });
 
         beforeEach(async () => {
@@ -97,61 +83,38 @@ const runCloseTests = () => {
             debtAsset,
             collAmountInUSD,
             debtAmountInUSD,
-            isEOA,
             stopLossPrice,
             stopLossType,
             takeProfitPrice,
             takeProfitType,
             marketAddress,
         ) => {
-            const positionOwner = isEOA ? senderAcc.address : proxy.address;
+            const positionOwner = proxy.address;
 
-            // Open position
-            if (isEOA) {
-                await openAaveV3EOAPosition(
-                    senderAcc.address,
-                    proxy,
-                    collAsset.symbol,
-                    debtAsset.symbol,
-                    collAmountInUSD,
-                    debtAmountInUSD,
-                    marketAddress,
-                );
-
-                // EOA delegates to the actual Smart Wallet address that executes the strategy
-                await setupAaveV3EOAPermissions(
-                    senderAcc.address,
-                    proxy.address, // The actual Smart Wallet executing address
-                    collAsset.address,
-                    debtAsset.address,
-                    marketAddress,
-                );
-            } else {
-                await openAaveV3ProxyPosition(
-                    senderAcc.address,
-                    proxy,
-                    collAsset.symbol,
-                    debtAsset.symbol,
-                    collAmountInUSD,
-                    debtAmountInUSD,
-                    marketAddress,
-                );
-            }
+            await openSparkProxyPosition(
+                senderAcc.address,
+                proxy,
+                collAsset.symbol,
+                debtAsset.symbol,
+                collAmountInUSD,
+                debtAmountInUSD,
+                marketAddress,
+            );
 
             // Check ratioBefore
-            const ratioBefore = await getAaveV3PositionRatio(positionOwner, null, marketAddress);
+            const ratioBefore = await getSparkPositionRatio(positionOwner, null, marketAddress);
             console.log('ratioBefore', ratioBefore);
 
             // Get asset IDs
-            const collAssetId = (await getAaveV3ReserveData(collAsset.address, marketAddress)).id;
-            const debtAssetId = (await getAaveV3ReserveData(debtAsset.address, marketAddress)).id;
+            const collAssetId = (
+                await getSparkReserveDataFromPool(collAsset.address, marketAddress)
+            ).id;
+            const debtAssetId = (
+                await getSparkReserveDataFromPool(debtAsset.address, marketAddress)
+            ).id;
 
-            const user = isEOA ? senderAcc.address : proxy.address;
+            const user = proxy.address;
 
-            console.log('STOP LOSS PRICE', stopLossPrice);
-            console.log('STOP LOSS TYPE', stopLossType);
-            console.log('TAKE PROFIT PRICE', takeProfitPrice);
-            console.log('TAKE PROFIT TYPE', takeProfitType);
             // Determine close strategy type based on parameters
             const closeStrategyType = automationSdk.utils.getCloseStrategyType(
                 stopLossPrice,
@@ -161,7 +124,7 @@ const runCloseTests = () => {
             );
 
             // Create subscription based on whether it's EOA or proxy
-            const result = await subAaveV3CloseGeneric(
+            const result = await subSparkCloseGeneric(
                 proxy,
                 user,
                 collAsset.address,
@@ -178,9 +141,6 @@ const runCloseTests = () => {
             const repaySubId = result.subId;
             const strategySub = result.strategySub;
 
-            console.log('SUBBED !!!!');
-            // console.log(repaySubId, strategySub);
-
             // Determine if we're closing to debt or collateral based on strategy type
             const closeToDebt =
                 closeStrategyType === automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_DEBT ||
@@ -191,13 +151,6 @@ const runCloseTests = () => {
                     automationSdk.enums.CloseStrategyType
                         .TAKE_PROFIT_IN_DEBT_AND_STOP_LOSS_IN_COLLATERAL;
 
-            // Execute strategy (always with flash loan)
-            console.log(
-                'Executing FL Close strategy with type:',
-                closeStrategyType,
-                'closeToDebt:',
-                closeToDebt,
-            );
             await addBalancerFlLiquidity(debtAsset.address);
             await addBalancerFlLiquidity(collAsset.address);
 
@@ -214,7 +167,7 @@ const runCloseTests = () => {
                     .mul(hre.ethers.BigNumber.from(100))
                     .div(hre.ethers.BigNumber.from(99));
 
-                await callAaveV3GenericFLCloseToDebtStrategy(
+                await callSparkGenericFLCloseToDebtStrategy(
                     strategyExecutor,
                     0,
                     repaySubId,
@@ -236,7 +189,7 @@ const runCloseTests = () => {
                     mockWrapper,
                 );
 
-                await callAaveV3GenericFLCloseToCollStrategy(
+                await callSparkGenericFLCloseToCollStrategy(
                     strategyExecutor,
                     1,
                     repaySubId,
@@ -248,14 +201,14 @@ const runCloseTests = () => {
                 );
             }
 
-            const ratioAfter = await getAaveV3PositionRatio(positionOwner, null, marketAddress);
+            const ratioAfter = await getSparkPositionRatio(positionOwner, null, marketAddress);
             console.log('ratioAfter', ratioAfter);
             console.log('ratioBefore', ratioBefore);
             // ratio should be 0 at the end because position is closed
             expect(ratioAfter).to.be.eq(0);
         };
 
-        const testPairs = AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY[chainIds[network]] || [];
+        const testPairs = SPARK_AUTOMATION_TEST_PAIRS || [];
         const closeStrategyConfigs = getCloseStrategyConfigs(automationSdk);
 
         for (let i = 0; i < testPairs.length; ++i) {
@@ -269,9 +222,7 @@ const runCloseTests = () => {
                 chainIds[network],
             );
 
-            // Determine market name for test description
-            const marketName =
-                pair.marketAddr === addrs[network].AAVE_MARKET ? 'Core Market' : 'Prime Market';
+            const marketName = addrs[network].SPARK_MARKET;
 
             for (let j = 0; j < closeStrategyConfigs.length; ++j) {
                 const config = closeStrategyConfigs[j];
@@ -283,41 +234,17 @@ const runCloseTests = () => {
                 );
 
                 // SW Tests
-                it(`... should execute aaveV3 SW Close (${getCloseStrategyTypeName(
+                it(`... should execute Spark SW Close (${getCloseStrategyTypeName(
                     strategyTypeName,
                 )}) for ${pair.collSymbol} / ${
                     pair.debtSymbol
-                } pair on Aave V3 ${marketName}`, async () => {
-                    const isEOA = false;
+                } pair on Spark ${marketName}`, async () => {
                     console.log(`Testing SW Close strategy type: ${strategyTypeName}`);
                     await baseTest(
                         collAsset,
                         debtAsset,
                         pair.collAmountInUSD,
                         pair.debtAmountInUSD,
-                        isEOA,
-                        config.stopLossPrice,
-                        config.stopLossType,
-                        config.takeProfitPrice,
-                        config.takeProfitType,
-                        pair.marketAddr,
-                    );
-                });
-
-                // EOA Tests
-                it(`... should execute aaveV3 EOA Close (${getCloseStrategyTypeName(
-                    strategyTypeName,
-                )}) for ${pair.collSymbol} / ${
-                    pair.debtSymbol
-                } pair on Aave V3 ${marketName}`, async () => {
-                    const isEOA = true;
-                    console.log(`Testing EOA Close strategy type: ${strategyTypeName}`);
-                    await baseTest(
-                        collAsset,
-                        debtAsset,
-                        pair.collAmountInUSD,
-                        pair.debtAmountInUSD,
-                        isEOA,
                         config.stopLossPrice,
                         config.stopLossType,
                         config.takeProfitPrice,
@@ -329,6 +256,14 @@ const runCloseTests = () => {
         }
     });
 };
+
+describe('Spark close strategies test', function () {
+    this.timeout(80000);
+
+    it('... test Spark close strategies', async () => {
+        await runCloseTests();
+    }).timeout(50000);
+});
 
 module.exports = {
     runCloseTests,

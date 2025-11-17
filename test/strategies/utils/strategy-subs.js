@@ -1179,6 +1179,38 @@ const subCompV3CloseOnPriceBundle = async (
     return { subId, strategySub };
 };
 
+const subSparkCloseGeneric = async (
+    proxy,
+    user,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    stopLossPrice,
+    stopLossType,
+    takeProfitPrice,
+    takeProfitType,
+    bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.sparkEncode.closeOnPriceGeneric(
+        bundleId,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        user,
+        stopLossPrice,
+        stopLossType,
+        takeProfitPrice,
+        takeProfitType,
+    );
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdCloseToCollStrategy,
@@ -1220,4 +1252,5 @@ module.exports = {
     subCompV3BoostOnPriceBundle,
     subCompV3CloseOnPriceBundle,
     subAaveV3FLCollateralSwitchStrategy,
+    subSparkCloseGeneric,
 };
