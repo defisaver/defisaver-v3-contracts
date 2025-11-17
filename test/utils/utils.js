@@ -1,5 +1,3 @@
-// const { default: curve } = require('@curvefi/api');
-const curve = import('@curvefi/api');
 const fs = require('fs');
 const hre = require('hardhat');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
@@ -81,6 +79,8 @@ const addrs = {
         INSTADAPP_INDEX: '0x2971AdFa57b20E5a416aE5a708A8655A9c74f723',
         INSTADAPP_CONNECTORS_V2: '0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11',
         INSTADAPP_CONNECTORS_V1: '0xD6A602C01a023B98Ecfb29Df02FBA380d3B21E0c',
+        SUMMERFI_FACTORY: '0xF7B75183A2829843dB06266c114297dfbFaeE2b6',
+        SUMMERFI_GUARD: '0xCe91349d2A4577BBd0fC91Fe6019600e047f2847',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -119,6 +119,7 @@ const addrs = {
         INSTADAPP_INDEX: '0x6CE3e607C808b4f4C26B7F6aDAeB619e49CAbb25',
         INSTADAPP_CONNECTORS_V2: '0x127d8cD0E2b2E0366D522DeA53A787bfE9002C14',
         INSTADAPP_CONNECTORS_V1: '0x839c2D3aDe63DF5b0b8F3E57D5e145057Ab41556',
+        // TODO -> add summerfi factory and guard
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -163,6 +164,7 @@ const addrs = {
         INSTADAPP_INDEX: '0x1eE00C305C51Ff3bE60162456A9B533C07cD9288',
         INSTADAPP_CONNECTORS_V2: '0x67fCE99Dd6d8d659eea2a1ac1b8881c57eb6592B',
         INSTADAPP_CONNECTORS_V1: '0xE1594fd3603EDe6502A1cbC73489a26587Dc68BF',
+        // TODO -> add summerfi factory and guard
     },
     base: {
         PROXY_REGISTRY: '0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d',
@@ -201,6 +203,8 @@ const addrs = {
         INSTADAPP_INDEX: '0x6CE3e607C808b4f4C26B7F6aDAeB619e49CAbb25',
         INSTADAPP_CONNECTORS_V2: '0x127d8cD0E2b2E0366D522DeA53A787bfE9002C14',
         INSTADAPP_CONNECTORS_V1: '0x839c2D3aDe63DF5b0b8F3E57D5e145057Ab41556',
+        SUMMERFI_FACTORY: '0x881CD31218f45a75F8ad543A3e1Af087f3986Ae0',
+        SUMMERFI_GUARD: '0x83c8BFfD11913f0e94C1C0B615fC2Fdb1B17A27e',
     },
     linea: {
         REGISTRY_ADDR: '0x09fBeC68D216667C3262211D2E5609578951dCE0',
@@ -704,6 +708,42 @@ const createDsaProxy = async (acc, version = 2) => {
     return dsaProxy;
 };
 
+const createSummerfiAccount = async () => {
+    const summerfiFactory = await hre.ethers.getContractAt(
+        'IAccountFactory',
+        addrs[network].SUMMERFI_FACTORY,
+    );
+
+    const accountAddr = await summerfiFactory.callStatic['createAccount()']();
+    const tx = await summerfiFactory['createAccount()']();
+    await tx.wait();
+
+    const account = await hre.ethers.getContractAt('IAccountImplementation', accountAddr);
+
+    console.log(`Summerfi account created ${accountAddr}`);
+
+    return account;
+};
+
+const whitelistContractForSummerfi = async (contractAddr, whitelist = true) => {
+    const guardAddr = addrs[network].SUMMERFI_GUARD;
+    const accountGuard = await hre.ethers.getContractAt('IAccountGuard', guardAddr);
+    const guardOwner = await accountGuard.owner();
+
+    await sendEther((await hre.ethers.getSigners())[0], guardOwner, '1');
+    await impersonateAccount(guardOwner);
+
+    const signer = await hre.ethers.provider.getSigner(guardOwner);
+    const accountGuardWithSigner = accountGuard.connect(signer);
+
+    await accountGuardWithSigner.setWhitelist(contractAddr, whitelist);
+
+    const isWhitelisted = await accountGuard.isWhitelisted(contractAddr);
+    expect(isWhitelisted).to.be.equal(whitelist);
+
+    await stopImpersonatingAccount(guardOwner);
+};
+
 const getProxy = async (acc, isSafe = false) => {
     if (isSafe === true) {
         const safeAddr = await createSafe(acc);
@@ -1093,7 +1133,8 @@ const formatExchangeObj = (
 let _curveObj;
 const curveApiInit = async () => {
     if (!_curveObj) {
-        _curveObj = (await curve).default;
+        const curveModule = await import('@curvefi/api');
+        _curveObj = curveModule.default;
         await _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
         // Fetch factory pools
         await _curveObj.factory.fetchPools(true);
@@ -1544,6 +1585,15 @@ const isProxyDSAProxy = async (proxy) => {
     }
 };
 
+const isSummerfiAccount = async (proxy) => {
+    try {
+        const mockSmartWalletUtils = await deployContract('MockSmartWalletUtils');
+        return await mockSmartWalletUtils.isSummerfiAccount(proxy.address);
+    } catch (error) {
+        return false;
+    }
+};
+
 // executes tx through wallet depending the type
 const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => {
     let receipt;
@@ -1565,6 +1615,7 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
         );
     } else {
         const isDSAProxy = await isProxyDSAProxy(proxy);
+        const isSummerfi = await isSummerfiAccount(proxy);
 
         if (isDSAProxy) {
             const version = await proxy.version();
@@ -1595,6 +1646,11 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
             }
 
             await stopImpersonatingAccount(proxy.signer.address);
+        } else if (isSummerfi) {
+            receipt = await proxy.execute(targetAddr, callData, {
+                gasLimit: 10000000,
+                value: ethValue,
+            });
         } else {
             // Default to DSProxy execution
             receipt = await proxy['execute(address,bytes)'](targetAddr, callData, {
@@ -1607,9 +1663,10 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
     return receipt;
 };
 
-const WALLETS = ['DS_PROXY', 'SAFE', 'DSA_PROXY'];
+const WALLETS = ['DS_PROXY', 'SAFE', 'DSA_PROXY', 'SUMMERFI_ACC'];
 const isWalletNameDsProxy = (w) => w === 'DS_PROXY';
 const isWalletNameDsaProxy = (w) => w === 'DSA_PROXY';
+const isWalletNameSummerfiAcc = (w) => w === 'SUMMERFI_ACC';
 
 const generateIds = () => {
     const idsMap = {};
@@ -1747,8 +1804,12 @@ module.exports = {
     getAndSetMockExchangeWrapper,
     addBalancerFlLiquidity,
     isWalletNameDsaProxy,
+    isWalletNameSummerfiAcc,
     isProxyDSAProxy,
+    isSummerfiAccount,
     createDsaProxy,
+    createSummerfiAccount,
+    whitelistContractForSummerfi,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
