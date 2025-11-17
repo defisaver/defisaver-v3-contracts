@@ -855,8 +855,12 @@ const recipeExecutorTest = async () => {
             await redeploy('RecipeExecutor');
 
             // Add connector for DSA Proxy Accounts.
-            const dfsConnector = await redeploy('DefiSaverConnector');
-            await addDefiSaverConnector(dfsConnector.address, hre.config.dsaProxyVersion);
+            const connectV2DefisaverName =
+                network === 'mainnet'
+                    ? 'ConnectV2DefiSaver'
+                    : `ConnectV2DefiSaver${network.charAt(0).toUpperCase() + network.slice(1)}`;
+            const dfsConnector = await redeploy(connectV2DefisaverName);
+            await addDefiSaverConnector(dfsConnector.address);
 
             strategyExecutor =
                 network === 'mainnet'
@@ -873,13 +877,14 @@ const recipeExecutorTest = async () => {
             // Create smart wallets.
             dsProxy = await getProxy(senderAcc.address, false);
             safe = await getProxy(senderAcc.address, true);
-            dsaProxy = await createDsaProxy(senderAcc.address, hre.config.dsaProxyVersion);
+            dsaProxy = await createDsaProxy(senderAcc.address);
             summerfiAcc = await createSummerfiAccount();
 
             // Whitelist RecipeExecutor for Summerfi account
             const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
             await whitelistContractForSummerfi(recipeExecutorAddr);
 
+          
             // Init test data.
             actionData = new dfs.actions.basic.PullTokenAction(
                 addrs[network].WETH_ADDRESS,

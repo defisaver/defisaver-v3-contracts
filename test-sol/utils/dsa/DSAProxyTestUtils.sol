@@ -1,53 +1,36 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { DefiSaverConnector } from "../../../contracts/actions/insta/DefiSaverConnector.sol";
+import {
+    ConnectV2DefiSaver
+} from "../../../contracts/actions/insta/connectors/ConnectV2DefiSaver.sol";
 import {
     IInstaConnectorsV2
 } from "../../../contracts/interfaces/protocols/insta/IInstaConnectorsV2.sol";
-import {
-    IInstaConnectorsV1
-} from "../../../contracts/interfaces/protocols/insta/IInstaConnectorsV1.sol";
 import { Addresses } from "../Addresses.sol";
 import { RegistryUtils } from "../RegistryUtils.sol";
-import { DSAUtils } from "../../../contracts/utils/DSAUtils.sol";
 
 contract DSAProxyTestUtils is RegistryUtils {
     function _addDefiSaverConnector() internal {
-        address defiSaverConnector = address(new DefiSaverConnector());
-        redeploy("DefiSaverConnector", defiSaverConnector);
-        cheats.label(defiSaverConnector, "DefiSaverConnector");
+        address dfsConnector = address(new ConnectV2DefiSaver());
+        redeploy("ConnectV2DefiSaver", dfsConnector);
+        cheats.label(dfsConnector, "ConnectV2DefiSaver");
 
         address[] memory connectors = new address[](1);
-        connectors[0] = defiSaverConnector;
+        connectors[0] = dfsConnector;
 
-        // Add connector for V1 DSA Proxy accounts
-        {
-            IInstaConnectorsV1 connector = IInstaConnectorsV1(Addresses.INSTADAPP_CONNECTORS_V1);
+        IInstaConnectorsV2 instaConnectorsV2 = IInstaConnectorsV2(Addresses.INSTADAPP_CONNECTORS_V2);
 
-            if (connector.isConnector(connectors)) return;
+        string[] memory connectorNames = new string[](1);
+        connectorNames[0] = "DEFI-SAVER-A";
 
-            cheats.prank(Addresses.INSTADAPP_MASTER_ACCOUNT);
-            connector.enable(defiSaverConnector);
+        (bool alreadyAdded,) = instaConnectorsV2.isConnectors(connectorNames);
+        if (alreadyAdded) return;
 
-            assert(connector.isConnector(connectors));
-        }
+        cheats.prank(Addresses.INSTADAPP_MASTER_ACCOUNT);
+        instaConnectorsV2.addConnectors(connectorNames, connectors);
 
-        // Add connector for V2 DSA Proxy accounts
-        {
-            IInstaConnectorsV2 connector = IInstaConnectorsV2(Addresses.INSTADAPP_CONNECTORS_V2);
-
-            string[] memory connectorNames = new string[](1);
-            connectorNames[0] = DSAUtils.DEFISAVER_CONNECTOR_NAME;
-
-            (bool alreadyAdded,) = connector.isConnectors(connectorNames);
-            if (alreadyAdded) return;
-
-            cheats.prank(Addresses.INSTADAPP_MASTER_ACCOUNT);
-            connector.addConnectors(connectorNames, connectors);
-
-            (bool isOk,) = connector.isConnectors(connectorNames);
-            assert(isOk);
-        }
+        (bool isOk,) = instaConnectorsV2.isConnectors(connectorNames);
+        assert(isOk);
     }
 }

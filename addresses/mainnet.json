@@ -917,28 +917,30 @@
     },
     {
         "name": "StrategyExecutor",
-        "address": "0xFaa763790b26E7ea354373072baB02e680Eeb07F",
+        "address": "0x8278DA54b4A47c0f6F4a0a4b00B6f31678f30181",
         "id": "0xdcb15eef",
         "path": "contracts/core/strategy/StrategyExecutor.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
+            "0xFaa763790b26E7ea354373072baB02e680Eeb07F",
             "0x252025dF8680C275D0bA80D084e5967D8BD26caf",
             "0x6a1C1B8a27E7613a595Ffb7cCE225bdda7e04832"
         ]
     },
     {
         "name": "RecipeExecutor",
-        "address": "0x2ee96cf53ae5fbd5309284704f978d0ca66cb963",
+        "address": "0x4677c84699ab29637102609cD2868d0743a48DdF",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
+            "0x2ee96cf53ae5fbd5309284704f978d0ca66cb963",
             "0x5029336642814bC51a42bA80BF83a6322110035D",
             "0x5029336642814bC51a42bA80BF83a6322110035D",
             "0xe822d76c2632FC52f3eaa686bDA9Cea3212579D8",
@@ -2358,14 +2360,15 @@
     },
     {
         "name": "FLAction",
-        "address": "0x5f1dC84Ba060Ea3f7429c6A7bBEdd9243CF1209b",
+        "address": "0x7A0f3963c666d4549e5909a7162B560abF9f006D",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x5f1dC84Ba060Ea3f7429c6A7bBEdd9243CF1209b",
             "0xC2b92B6c69e5c3b6b29385C1a17FEe906e0CA910",
             "0x2bE65F12dCc55c8485030E306A1B01F47C437a8A",
             "0x72915D41982DfCAf30b871290618E59C45Edba7F",
@@ -3748,14 +3751,17 @@
     },
     {
         "name": "TxSaverExecutor",
-        "address": "0xac7745d524b780751cc8410224d73ebe7e7acca2",
+        "address": "0xDE0e1B36f54940050D4b1b421f8e3e44e40F64e0",
         "id": "0x91bfbd87",
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0x475f433407205557E8A7aeE7Be53155EB9681c92"]
+        "history": [
+            "0xac7745d524b780751cc8410224d73ebe7e7acca2",
+            "0x475f433407205557E8A7aeE7Be53155EB9681c92"
+        ]
     },
     {
         "name": "AaveV3OpenRatioCheck",
@@ -4739,13 +4745,39 @@
     },
     {
         "name": "SkyView",
-        "address": "0xCC3DA103AD79319A2fA68327bDFA27DB4489caDf",
+        "address": "0x3D05E4eEe0236BaD328C55B7a0F7596feA2AB612",
         "id": "0x6431452a",
         "path": "contracts/views/SkyView.sol",
-        "version": "1.0.1",
+        "version": "1.0.3",
         "inRegistry": false,
         "changeTime": "0",
         "registryIds": [],
-        "history": ["0x0b2621aE77952606A3b95d06E31b10132C51C860"]
+        "history": [
+            "0x7666Dc2D2dD1e62cF7f7Ef00a9d7514391172A62",
+            "0xCC3DA103AD79319A2fA68327bDFA27DB4489caDf",
+            "0x0b2621aE77952606A3b95d06E31b10132C51C860"
+        ]
+    },
+    {
+        "name": "SparkViewSmall",
+        "address": "0xC6917372b7a235F2DC64aDa6eBfD5de60A7be7E4",
+        "id": "0xd96fe862",
+        "path": "contracts/views/SparkViewSmall.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "ConnectV2DefiSaver",
+        "address": "0x80E31fE25A6C0087E0487E60da92fCe622757543",
+        "id": "0x1fc6d9e6",
+        "path": "contracts/actions/insta/connectors/ConnectV2DefiSaver.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
     }
 ]
