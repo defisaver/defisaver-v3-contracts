@@ -1242,5 +1242,29 @@
             ["&1", "&3", "&eoa", "&eoa", 0, 0]
         ],
         "bundleId": 27
+    },
+    {
+        "name": "AaveV3FLCollateralSwitchL2Strategy",
+        "id": 56,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Supply",
+            "AaveV3Withdraw",
+            "SendToken",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["$3", "&proxy", "&4", 0, 0, "&7", "&5", 0],
+            ["&2", 0, "&6", "&proxy", "&5"],
+            ["&1", 0, "$1"],
+            ["&1", "&eoa", 0]
+        ]
     }
 ]
