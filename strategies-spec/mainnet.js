@@ -6654,7 +6654,7 @@ const createAaveV3GenericFLCloseToDebtStrategy = () => {
 
     const sendTokenToEOAAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
         '&debtAsset',
-        '&eoa', // sent by backend
+        '&eoa',
         '%max(uint)',
     );
 
@@ -6747,6 +6747,195 @@ const createAaveV3FLCollateralSwitchStrategy = () => {
     aaveV3FLCollateralSwitchStrategy.addAction(returnAnyDust);
 
     return aaveV3FLCollateralSwitchStrategy.encodeForDsProxyCall();
+};
+
+const createSparkGenericFLCloseToCollStrategy = () => {
+    const sparkGenericFLCloseToCollStrategy = new dfs.Strategy('SparkGenericFLCloseToCollStrategy');
+
+    sparkGenericFLCloseToCollStrategy.addSubSlot('&collAsset', 'address');
+    sparkGenericFLCloseToCollStrategy.addSubSlot('&collAssetId', 'uint16');
+    sparkGenericFLCloseToCollStrategy.addSubSlot('&debtAsset', 'address');
+    sparkGenericFLCloseToCollStrategy.addSubSlot('&debtAssetId', 'uint16');
+    sparkGenericFLCloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
+    sparkGenericFLCloseToCollStrategy.addSubSlot('&marketAddr', 'address');
+    sparkGenericFLCloseToCollStrategy.addSubSlot('&user', 'address');
+
+    const trigger = new dfs.triggers.SparkQuotePriceRangeTrigger(
+        nullAddress,
+        nullAddress,
+        '0',
+        '0',
+    );
+    sparkGenericFLCloseToCollStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&debtAsset',
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const paybackAction = new dfs.actions.spark.SparkPaybackAction(
+        '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
+        '&marketAddr',
+        '%uint(max)', // max uint amount - Sent by backend.
+        '&proxy',
+        '%variableRate=2', // variable type of debt, hardcoded to 2 - Sent by backend.
+        '&debtAsset',
+        '&debtAssetId',
+        '%true', // useOnBehalf, hardcoded to true - Sent by backend.
+        '&user',
+    );
+    /// @dev This action won't have any effect for proxy positions, as aTokens will already be on proxy
+    /// However, it is generalized, so it can support EOA positions as well.
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '%aCollTokenAddr', // aToken for collateral - Sent by backend.
+        '&user',
+        '%uint(max)', // max uint amount - Sent by backend.
+    );
+    const withdrawAction = new dfs.actions.spark.SparkWithdrawAction(
+        '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
+        '&marketAddr',
+        '$4',
+        '&proxy',
+        '&collAssetId',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // sent by backend
+        '&collAsset',
+        '$5',
+    );
+    // return flashloan. This has to be separate action, because we don't want to unwrap weth
+    const sendTokenToFLAction = new dfs.actions.basic.SendTokenAction(
+        '&collAsset',
+        '%flAddress', // sent by backend
+        '$1',
+    );
+    // return:
+    // 1. Send all collAsset's left after the close and flRepayment to eoa
+    // 2. Send all debtAsset's left after the close and flRepayment to eoa
+    const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
+        ['&collAsset', '&debtAsset'],
+        ['&eoa', '&eoa'],
+        [
+            '%max(uint)', // sent by backend
+            '%max(uint)', // sent by backend
+        ],
+    );
+
+    sparkGenericFLCloseToCollStrategy.addAction(flAction);
+    sparkGenericFLCloseToCollStrategy.addAction(sellAction);
+    sparkGenericFLCloseToCollStrategy.addAction(paybackAction);
+    sparkGenericFLCloseToCollStrategy.addAction(pullTokenAction);
+    sparkGenericFLCloseToCollStrategy.addAction(withdrawAction);
+    sparkGenericFLCloseToCollStrategy.addAction(feeTakingAction);
+    sparkGenericFLCloseToCollStrategy.addAction(sendTokenToFLAction);
+    sparkGenericFLCloseToCollStrategy.addAction(sendTokensAction);
+
+    return sparkGenericFLCloseToCollStrategy.encodeForDsProxyCall();
+};
+
+const createSparkGenericFLCloseToDebtStrategy = () => {
+    const sparkGenericFLCloseToDebtStrategy = new dfs.Strategy('SparkGenericFLCloseToDebtStrategy');
+
+    sparkGenericFLCloseToDebtStrategy.addSubSlot('&collAsset', 'address');
+    sparkGenericFLCloseToDebtStrategy.addSubSlot('&collAssetId', 'uint16');
+    sparkGenericFLCloseToDebtStrategy.addSubSlot('&debtAsset', 'address');
+    sparkGenericFLCloseToDebtStrategy.addSubSlot('&debtAssetId', 'uint16');
+    sparkGenericFLCloseToDebtStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
+    sparkGenericFLCloseToDebtStrategy.addSubSlot('&marketAddr', 'address');
+    sparkGenericFLCloseToDebtStrategy.addSubSlot('&user', 'address');
+
+    const trigger = new dfs.triggers.SparkQuotePriceRangeTrigger(
+        nullAddress,
+        nullAddress,
+        '0',
+        '0',
+    );
+    sparkGenericFLCloseToDebtStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%debtAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+        ),
+    );
+
+    const paybackAction = new dfs.actions.spark.SparkPaybackAction(
+        '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
+        '&marketAddr',
+        '%uint(max)', // max uint amount - Sent by backend.
+        '&proxy',
+        '%variableRate=2', // variable type of debt, hardcoded to 2 - Sent by backend.
+        '&debtAsset',
+        '&debtAssetId',
+        '%true', // useOnBehalf, hardcoded to true - Sent by backend.
+        '&user',
+    );
+    /// @dev This action won't have any effect for proxy positions, as aTokens will already be on proxy
+    /// However, it is generalized, so it can support EOA positions as well.
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        '%aCollTokenAddr', // aToken for collateral - Sent by backend.
+        '&user',
+        '%uint(max)', // max uint amount - Sent by backend.
+    );
+    const withdrawAction = new dfs.actions.spark.SparkWithdrawAction(
+        '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
+        '&marketAddr',
+        '$3',
+        '&proxy',
+        '&collAssetId',
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collAsset',
+            '&debtAsset',
+            '$4',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // sent by backend
+        '&debtAsset',
+        '$5',
+    );
+
+    // return flashloan. This has to be separate action, because we don't want to unwrap weth
+    const sendTokenToFLAction = new dfs.actions.basic.SendTokenAction(
+        '&debtAsset',
+        '%flAddress', // sent by backend
+        '$1',
+    );
+
+    const sendTokenToEOAAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&debtAsset',
+        '&eoa',
+        '%max(uint)', // sent by backend
+    );
+
+    sparkGenericFLCloseToDebtStrategy.addAction(flAction);
+    sparkGenericFLCloseToDebtStrategy.addAction(paybackAction);
+    sparkGenericFLCloseToDebtStrategy.addAction(pullTokenAction);
+    sparkGenericFLCloseToDebtStrategy.addAction(withdrawAction);
+    sparkGenericFLCloseToDebtStrategy.addAction(sellAction);
+    sparkGenericFLCloseToDebtStrategy.addAction(feeTakingAction);
+    sparkGenericFLCloseToDebtStrategy.addAction(sendTokenToFLAction);
+    sparkGenericFLCloseToDebtStrategy.addAction(sendTokenToEOAAction);
+
+    return sparkGenericFLCloseToDebtStrategy.encodeForDsProxyCall();
 };
 
 module.exports = {
@@ -6863,4 +7052,6 @@ module.exports = {
     createAaveV3GenericFLCloseToCollStrategy,
     createAaveV3GenericFLCloseToDebtStrategy,
     createAaveV3FLCollateralSwitchStrategy,
+    createSparkGenericFLCloseToCollStrategy,
+    createSparkGenericFLCloseToDebtStrategy,
 };
