@@ -6814,7 +6814,7 @@ const createMorphoBlueFLCloseToCollStrategy = () => {
         '&oracle',
         '&irm',
         '&lltv',
-        '%uint(max)', // max uint amount - Sent by backend.
+        '%userCollateralAmount', // Read current user collateral amount - Sent by backend. Note: Does not support max uint amount. Collateral is IDLE, so no dust possible.
         '&user',
         '&proxy',
     );
@@ -6892,7 +6892,7 @@ const createMorphoBlueFLCloseToDebtStrategy = () => {
         '&oracle',
         '&irm',
         '&lltv',
-        '%uint(max)', // max uint amount - Sent by backend.
+        '%userCollateralAmount', // Read current user collateral amount - Sent by backend. Note: Does not support max uint amount. Collateral is IDLE, so no dust possible.
         '&user',
         '&proxy',
     );
