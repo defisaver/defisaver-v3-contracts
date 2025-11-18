@@ -3454,16 +3454,16 @@ const createAaveV3FLCollateralSwitchL2Strategy = () => {
     return aaveV3FLCollateralSwitchL2Strategy.encodeForDsProxyCall();
 };
 
-const createMorphoBlueCloseToCollL2Strategy = () => {
-    const morphoBlueCloseToCollL2Strategy = new dfs.Strategy('MorphoBlueCloseToCollL2Strategy');
+const createMorphoBlueFLCloseToCollL2Strategy = () => {
+    const morphoBlueFLCloseToCollL2Strategy = new dfs.Strategy('MorphoBlueFLCloseToCollL2Strategy');
 
-    morphoBlueCloseToCollL2Strategy.addSubSlot('&loanToken', 'address');
-    morphoBlueCloseToCollL2Strategy.addSubSlot('&collateralToken', 'address');
-    morphoBlueCloseToCollL2Strategy.addSubSlot('&oracle', 'address');
-    morphoBlueCloseToCollL2Strategy.addSubSlot('&irm', 'address');
-    morphoBlueCloseToCollL2Strategy.addSubSlot('&lltv', 'uint256');
-    morphoBlueCloseToCollL2Strategy.addSubSlot('&user', 'address');
-    morphoBlueCloseToCollL2Strategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
+    morphoBlueFLCloseToCollL2Strategy.addSubSlot('&loanToken', 'address');
+    morphoBlueFLCloseToCollL2Strategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueFLCloseToCollL2Strategy.addSubSlot('&oracle', 'address');
+    morphoBlueFLCloseToCollL2Strategy.addSubSlot('&irm', 'address');
+    morphoBlueFLCloseToCollL2Strategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueFLCloseToCollL2Strategy.addSubSlot('&user', 'address');
+    morphoBlueFLCloseToCollL2Strategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
 
     const trigger = new dfs.triggers.MorphoBluePriceRangeTrigger(
         'loanToken',
@@ -3472,7 +3472,7 @@ const createMorphoBlueCloseToCollL2Strategy = () => {
         'lowerPrice',
         'upperPrice',
     );
-    morphoBlueCloseToCollL2Strategy.addTrigger(trigger);
+    morphoBlueFLCloseToCollL2Strategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -3533,27 +3533,27 @@ const createMorphoBlueCloseToCollL2Strategy = () => {
             '%max(uint)', // sent by backend
         ],
     );
-    morphoBlueCloseToCollL2Strategy.addAction(flAction);
-    morphoBlueCloseToCollL2Strategy.addAction(sellAction);
-    morphoBlueCloseToCollL2Strategy.addAction(morphoPayback);
-    morphoBlueCloseToCollL2Strategy.addAction(morphoWithdrawCollateral);
-    morphoBlueCloseToCollL2Strategy.addAction(feeTakingAction);
-    morphoBlueCloseToCollL2Strategy.addAction(sendTokenToFlAction);
-    morphoBlueCloseToCollL2Strategy.addAction(sendTokensAction);
+    morphoBlueFLCloseToCollL2Strategy.addAction(flAction);
+    morphoBlueFLCloseToCollL2Strategy.addAction(sellAction);
+    morphoBlueFLCloseToCollL2Strategy.addAction(morphoPayback);
+    morphoBlueFLCloseToCollL2Strategy.addAction(morphoWithdrawCollateral);
+    morphoBlueFLCloseToCollL2Strategy.addAction(feeTakingAction);
+    morphoBlueFLCloseToCollL2Strategy.addAction(sendTokenToFlAction);
+    morphoBlueFLCloseToCollL2Strategy.addAction(sendTokensAction);
 
-    return morphoBlueCloseToCollL2Strategy.encodeForDsProxyCall();
+    return morphoBlueFLCloseToCollL2Strategy.encodeForDsProxyCall();
 };
 
-const createMorphoBlueCloseToDebtL2Strategy = () => {
-    const morphoBlueCloseToDebtL2Strategy = new dfs.Strategy('MorphoBlueCloseToDebtL2Strategy');
+const createMorphoBlueFLCloseToDebtL2Strategy = () => {
+    const morphoBlueFLCloseToDebtL2Strategy = new dfs.Strategy('MorphoBlueFLCloseToDebtL2Strategy');
 
-    morphoBlueCloseToDebtL2Strategy.addSubSlot('&loanToken', 'address');
-    morphoBlueCloseToDebtL2Strategy.addSubSlot('&collateralToken', 'address');
-    morphoBlueCloseToDebtL2Strategy.addSubSlot('&oracle', 'address');
-    morphoBlueCloseToDebtL2Strategy.addSubSlot('&irm', 'address');
-    morphoBlueCloseToDebtL2Strategy.addSubSlot('&lltv', 'uint256');
-    morphoBlueCloseToDebtL2Strategy.addSubSlot('&user', 'address');
-    morphoBlueCloseToDebtL2Strategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
+    morphoBlueFLCloseToDebtL2Strategy.addSubSlot('&loanToken', 'address');
+    morphoBlueFLCloseToDebtL2Strategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueFLCloseToDebtL2Strategy.addSubSlot('&oracle', 'address');
+    morphoBlueFLCloseToDebtL2Strategy.addSubSlot('&irm', 'address');
+    morphoBlueFLCloseToDebtL2Strategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueFLCloseToDebtL2Strategy.addSubSlot('&user', 'address');
+    morphoBlueFLCloseToDebtL2Strategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
 
     const trigger = new dfs.triggers.MorphoBluePriceRangeTrigger(
         'loanToken',
@@ -3562,7 +3562,7 @@ const createMorphoBlueCloseToDebtL2Strategy = () => {
         'lowerPrice',
         'upperPrice',
     );
-    morphoBlueCloseToDebtL2Strategy.addTrigger(trigger);
+    morphoBlueFLCloseToDebtL2Strategy.addTrigger(trigger);
 
     const flAction = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction(
@@ -3617,15 +3617,15 @@ const createMorphoBlueCloseToDebtL2Strategy = () => {
         '&eoa',
         '%max(uint)', // sent by backend
     );
-    morphoBlueCloseToDebtL2Strategy.addAction(flAction);
-    morphoBlueCloseToDebtL2Strategy.addAction(morphoPayback);
-    morphoBlueCloseToDebtL2Strategy.addAction(morphoWithdrawCollateral);
-    morphoBlueCloseToDebtL2Strategy.addAction(sellAction);
-    morphoBlueCloseToDebtL2Strategy.addAction(feeTakingAction);
-    morphoBlueCloseToDebtL2Strategy.addAction(sendTokenToFlAction);
-    morphoBlueCloseToDebtL2Strategy.addAction(sendTokenToEoaAction);
+    morphoBlueFLCloseToDebtL2Strategy.addAction(flAction);
+    morphoBlueFLCloseToDebtL2Strategy.addAction(morphoPayback);
+    morphoBlueFLCloseToDebtL2Strategy.addAction(morphoWithdrawCollateral);
+    morphoBlueFLCloseToDebtL2Strategy.addAction(sellAction);
+    morphoBlueFLCloseToDebtL2Strategy.addAction(feeTakingAction);
+    morphoBlueFLCloseToDebtL2Strategy.addAction(sendTokenToFlAction);
+    morphoBlueFLCloseToDebtL2Strategy.addAction(sendTokenToEoaAction);
 
-    return morphoBlueCloseToDebtL2Strategy.encodeForDsProxyCall();
+    return morphoBlueFLCloseToDebtL2Strategy.encodeForDsProxyCall();
 };
 
 module.exports = {
@@ -3682,6 +3682,6 @@ module.exports = {
     createAaveV3GenericFLCloseToCollL2Strategy,
     createAaveV3GenericFLCloseToDebtL2Strategy,
     createAaveV3FLCollateralSwitchL2Strategy,
-    createMorphoBlueCloseToCollL2Strategy,
-    createMorphoBlueCloseToDebtL2Strategy,
+    createMorphoBlueFLCloseToCollL2Strategy,
+    createMorphoBlueFLCloseToDebtL2Strategy,
 };
