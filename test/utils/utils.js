@@ -154,6 +154,7 @@ const addrs = {
         STRATEGY_EXECUTOR_ADDR: '0xa4F087267828C3Ca8ac18b6fE7f456aB20781AA6',
         REFILL_CALLER: '0xcbA094ae1B2B363886CC7f428206dB1b116834A2',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0xD6373b375665DE09533478E8859BeCF12427Bb5e',
+        MORPHO_BLUE_VIEW: '0xa3b8b400a2eFF0314fa9605E778692bd4Bd9f880',
     },
     base: {
         PROXY_REGISTRY: '0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d',
@@ -1675,6 +1676,17 @@ const getCloseStrategyConfigs = (automationSdk) => [
     },
 ];
 
+const isCloseToDebtType = (automationSdk, closeStrategyType) => {
+    return (
+        closeStrategyType === automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_DEBT ||
+        closeStrategyType === automationSdk.enums.CloseStrategyType.STOP_LOSS_IN_DEBT ||
+        closeStrategyType ===
+            automationSdk.enums.CloseStrategyType.TAKE_PROFIT_AND_STOP_LOSS_IN_DEBT ||
+        closeStrategyType ===
+            automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_DEBT_AND_STOP_LOSS_IN_COLLATERAL
+    );
+};
+
 module.exports = {
     addToExchangeAggregatorRegistry,
     getAddrFromRegistry,
@@ -1749,6 +1761,7 @@ module.exports = {
     addBalancerFlLiquidity,
     getCloseStrategyTypeName,
     getCloseStrategyConfigs,
+    isCloseToDebtType,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,

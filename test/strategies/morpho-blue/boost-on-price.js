@@ -39,7 +39,7 @@ const {
     callMorphoBlueBoostOnTargetPriceStrategy,
     callMorphoBlueFLBoostOnTargetPriceStrategy,
 } = require('../utils/strategy-calls');
-const { MORPHO_BLUE_ADDRESS } = require('../../utils/morpho-blue');
+const { MORPHO_BLUE_ADDRESS, formatMarketParams } = require('../../utils/morpho-blue');
 
 /* //////////////////////////////////////////////////////////////
                            CONSTANTS
@@ -128,13 +128,6 @@ const deployBoostOnPriceBundle = async (isFork) => {
     ]);
     return boostOnPriceBundleId;
 };
-const formatMarketParams = (marketParams) => [
-    marketParams.loanToken,
-    marketParams.collateralToken,
-    marketParams.oracle,
-    marketParams.irm,
-    marketParams.lltv,
-];
 const createPosition = async (marketParams, loanToken, collToken, senderAcc, proxy, user) => {
     // give auth for EOA automation
     if (user !== proxy.address) {

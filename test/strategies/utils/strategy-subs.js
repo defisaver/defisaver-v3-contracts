@@ -1211,6 +1211,37 @@ const subSparkCloseGeneric = async (
     return { subId, strategySub };
 };
 
+const subMorphoBlueClose = async (
+    proxy,
+    user,
+    loanToken,
+    collateralToken,
+    oracle,
+    irm,
+    lltv,
+    stopLossPrice,
+    stopLossType,
+    takeProfitPrice,
+    takeProfitType,
+    bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.morphoBlueEncode.closeOnPrice(
+        bundleId,
+        loanToken,
+        collateralToken,
+        oracle,
+        irm,
+        lltv,
+        user,
+        stopLossPrice,
+        stopLossType,
+        takeProfitPrice,
+        takeProfitType,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdCloseToCollStrategy,
@@ -1253,4 +1284,5 @@ module.exports = {
     subCompV3CloseOnPriceBundle,
     subAaveV3FLCollateralSwitchStrategy,
     subSparkCloseGeneric,
+    subMorphoBlueClose,
 };

@@ -7895,6 +7895,7 @@ const callMorphoBlueFLCloseToCollStrategy = async (
     collToken,
     flAmount,
     flAddress,
+    collAmount,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -7924,7 +7925,7 @@ const callMorphoBlueFLCloseToCollStrategy = async (
         placeHolderAddr,
         placeHolderAddr,
         0,
-        hre.ethers.constants.MaxUint256,
+        collAmount,
         placeHolderAddr,
         placeHolderAddr,
     );
@@ -7978,6 +7979,7 @@ const callMorphoBlueFLCloseToDebtStrategy = async (
     loanToken,
     flAmount,
     flAddress,
+    collAmount,
 ) => {
     const isL2 = network !== 'mainnet';
     const triggerCallData = [];
@@ -8002,7 +8004,7 @@ const callMorphoBlueFLCloseToDebtStrategy = async (
         placeHolderAddr,
         placeHolderAddr,
         0,
-        hre.ethers.constants.MaxUint256,
+        collAmount,
         placeHolderAddr,
         placeHolderAddr,
     );
