@@ -22,6 +22,7 @@ const {
     addBalancerFlLiquidity,
     getCloseStrategyTypeName,
     getCloseStrategyConfigs,
+    isCloseToDebtType,
 } = require('../../../utils/utils');
 
 const { addBotCaller } = require('../../utils/utils-strategies');
@@ -181,15 +182,7 @@ const runCloseTests = () => {
             console.log('SUBBED !!!!');
             // console.log(repaySubId, strategySub);
 
-            // Determine if we're closing to debt or collateral based on strategy type
-            const closeToDebt =
-                closeStrategyType === automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_DEBT ||
-                closeStrategyType === automationSdk.enums.CloseStrategyType.STOP_LOSS_IN_DEBT ||
-                closeStrategyType ===
-                    automationSdk.enums.CloseStrategyType.TAKE_PROFIT_AND_STOP_LOSS_IN_DEBT ||
-                closeStrategyType ===
-                    automationSdk.enums.CloseStrategyType
-                        .TAKE_PROFIT_IN_DEBT_AND_STOP_LOSS_IN_COLLATERAL;
+            const closeToDebt = isCloseToDebtType(automationSdk, closeStrategyType);
 
             // Execute strategy (always with flash loan)
             console.log(
