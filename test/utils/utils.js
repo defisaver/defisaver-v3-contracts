@@ -1675,6 +1675,17 @@ const getCloseStrategyConfigs = (automationSdk) => [
     },
 ];
 
+const isCloseToDebtType = (automationSdk, closeStrategyType) => {
+    return (
+        closeStrategyType === automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_DEBT ||
+        closeStrategyType === automationSdk.enums.CloseStrategyType.STOP_LOSS_IN_DEBT ||
+        closeStrategyType ===
+            automationSdk.enums.CloseStrategyType.TAKE_PROFIT_AND_STOP_LOSS_IN_DEBT ||
+        closeStrategyType ===
+            automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_DEBT_AND_STOP_LOSS_IN_COLLATERAL
+    );
+};
+
 module.exports = {
     addToExchangeAggregatorRegistry,
     getAddrFromRegistry,
@@ -1749,6 +1760,7 @@ module.exports = {
     addBalancerFlLiquidity,
     getCloseStrategyTypeName,
     getCloseStrategyConfigs,
+    isCloseToDebtType,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,

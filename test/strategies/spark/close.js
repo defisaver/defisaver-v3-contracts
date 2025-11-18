@@ -20,6 +20,7 @@ const {
     redeploy,
     sendEther,
     addBalancerFlLiquidity,
+    isCloseToDebtType,
 } = require('../../utils/utils');
 
 const { addBotCaller } = require('../utils/utils-strategies');
@@ -123,7 +124,6 @@ const runCloseTests = () => {
                 takeProfitType,
             );
 
-            // Create subscription based on whether it's EOA or proxy
             const result = await subSparkCloseGeneric(
                 proxy,
                 user,
@@ -138,23 +138,13 @@ const runCloseTests = () => {
                 takeProfitType,
                 bundleId,
             );
-            const repaySubId = result.subId;
+            const closeSubId = result.subId;
             const strategySub = result.strategySub;
-
-            // Determine if we're closing to debt or collateral based on strategy type
-            const closeToDebt =
-                closeStrategyType === automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_DEBT ||
-                closeStrategyType === automationSdk.enums.CloseStrategyType.STOP_LOSS_IN_DEBT ||
-                closeStrategyType ===
-                    automationSdk.enums.CloseStrategyType.TAKE_PROFIT_AND_STOP_LOSS_IN_DEBT ||
-                closeStrategyType ===
-                    automationSdk.enums.CloseStrategyType
-                        .TAKE_PROFIT_IN_DEBT_AND_STOP_LOSS_IN_COLLATERAL;
 
             await addBalancerFlLiquidity(debtAsset.address);
             await addBalancerFlLiquidity(collAsset.address);
 
-            if (closeToDebt) {
+            if (isCloseToDebtType(automationSdk, closeStrategyType)) {
                 // Close to debt: flash loan debt asset, sell collateral to repay
                 const sellAmount = await fetchAmountInUSDPrice(collAsset.symbol, collAmountInUSD);
                 const exchangeObject = await formatMockExchangeObjUsdFeed(
@@ -170,7 +160,7 @@ const runCloseTests = () => {
                 await callSparkGenericFLCloseToDebtStrategy(
                     strategyExecutor,
                     0,
-                    repaySubId,
+                    closeSubId,
                     strategySub,
                     exchangeObject,
                     flAmount,
@@ -192,7 +182,7 @@ const runCloseTests = () => {
                 await callSparkGenericFLCloseToCollStrategy(
                     strategyExecutor,
                     1,
-                    repaySubId,
+                    closeSubId,
                     strategySub,
                     exchangeObject,
                     flAmount,
