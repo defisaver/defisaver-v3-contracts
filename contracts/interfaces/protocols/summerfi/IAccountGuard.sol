@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.24;
+pragma solidity =0.8.24;
 
 interface IAccountGuard {
     function owners(address) external view returns (address);
