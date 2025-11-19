@@ -9,21 +9,24 @@ import { IAccountGuard } from "../interfaces/protocols/summerfi/IAccountGuard.so
 
 /// @title Contract to give execute permission to Summerfi accounts
 /// @dev Called from the context of the Summerfi account
-contract SummerfiAccountPermission {
+contract SFProxyPermission {
     /// @notice Gives permission to an address to call the Summerfi account
     /// @param _caller Address to give permission to
-    function _giveSummerfiAccountPermission(address _caller) internal {
-        // TODO -> Hardcode this addr?
+    function _giveSFProxyPermission(address _caller) internal {
         address guard = IAccountImplementation(address(this)).guard();
-        IAccountGuard(guard).permit(_caller, address(this), true);
+        if (!IAccountGuard(guard).canCall(address(this), _caller)) {
+            IAccountGuard(guard).permit(_caller, address(this), true);
+        }
     }
 
     /// @notice Removes permission from an address to call the Summerfi account
     /// @param _caller Address to remove permission from
-    function _removeSummerfiAccountPermission(address _caller) internal {
+    function _removeSFProxyPermission(address _caller) internal {
         // TODO -> Hardcode this addr?
         address guard = IAccountImplementation(address(this)).guard();
-        IAccountGuard(guard).permit(_caller, address(this), false);
+        if (IAccountGuard(guard).canCall(address(this), _caller)) {
+            IAccountGuard(guard).permit(_caller, address(this), false);
+        }
     }
 }
 

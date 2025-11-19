@@ -84,7 +84,7 @@ contract TestCore_SmartWalletUtils is BaseTest {
         assertTrue(cut.getWalletType(safeAddress) == WalletType.SAFE);
         assertTrue(cut.getWalletType(dsProxyAddress) == WalletType.DSPROXY);
         assertTrue(cut.getWalletType(dsaProxyAddress) == WalletType.DSAPROXY);
-        assertTrue(cut.getWalletType(summerfiAccAddress) == WalletType.SUMMERFI);
+        assertTrue(cut.getWalletType(summerfiAccAddress) == WalletType.SFPROXY);
     }
 
     function test_fetch_owner_or_wallet() public {

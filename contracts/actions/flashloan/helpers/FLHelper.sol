@@ -64,8 +64,9 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
             return;
         }
 
-        if (_walletType == WalletType.SUMMERFI) {
+        if (_walletType == WalletType.SFPROXY) {
             IAccountImplementation(_wallet).execute{ value: address(this).balance }(target, data);
+
             return;
         }
 

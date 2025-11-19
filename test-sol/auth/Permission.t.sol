@@ -177,13 +177,13 @@ contract TestCore_Permission is AuthHelper, BaseTest, SummerfiUtils {
 
     function _giveSummerfiAccPermission(address _addr) internal {
         bytes memory givePermCalldata =
-            abi.encodeCall(MockPermission.givePermissionTo, (WalletType.SUMMERFI, _addr));
+            abi.encodeCall(MockPermission.givePermissionTo, (WalletType.SFPROXY, _addr));
         summerfiAcc.execute(address(cut), givePermCalldata, 0);
     }
 
     function _removeSummerfiAccPermission(address _addr) internal {
         bytes memory removePermCalldata =
-            abi.encodeCall(MockPermission.removePermissionFrom, (WalletType.SUMMERFI, _addr));
+            abi.encodeCall(MockPermission.removePermissionFrom, (WalletType.SFPROXY, _addr));
         summerfiAcc.execute(address(cut), removePermCalldata, 0);
     }
 
@@ -204,7 +204,7 @@ contract TestCore_Permission is AuthHelper, BaseTest, SummerfiUtils {
             return safeWallet;
         } else if (_walletType == WalletType.DSAPROXY) {
             return dsaProxyWallet;
-        } else if (_walletType == WalletType.SUMMERFI) {
+        } else if (_walletType == WalletType.SFPROXY) {
             return summerfiAcc;
         }
     }

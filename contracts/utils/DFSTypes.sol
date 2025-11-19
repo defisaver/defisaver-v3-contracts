@@ -6,5 +6,5 @@ enum WalletType {
     DSPROXY,
     SAFE,
     DSAPROXY,
-    SUMMERFI
+    SFPROXY
 }
