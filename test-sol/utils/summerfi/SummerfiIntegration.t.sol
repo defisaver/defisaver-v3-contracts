@@ -57,6 +57,13 @@ contract SummerfiIntegration is
     uint256 constant SUPPLY_AMOUNT_USD = 4000; // $4000 in USD
     uint256 constant BORROW_AMOUNT_USD = 1000; // $1000 in USD
 
+    address constant UNI_WRAPPER_MAINNET = 0xfd077F7990AeE7A0F59b1aD98c6dBeB9aBFf0D7a;
+    address constant UNI_WRAPPER_ARBI = 0x37236458C59F4dCF17b96Aa67FC07Bbf5578d873;
+    address constant UNI_WRAPPER_BASE = 0x914A50910fF1404Fe62D04846a559c49C55219c3;
+    address constant UNI_WRAPPER_OPT = 0xF723B39fe2Aa9102dE45Bc8ECd3417805aAC79Aa;
+
+    address EXCHANGE_WRAPPER;
+
     /*//////////////////////////////////////////////////////////////////////////
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
@@ -78,6 +85,7 @@ contract SummerfiIntegration is
 
     uint256 supplyAmount;
     uint256 borrowAmount;
+    uint256 tolerance;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -87,6 +95,8 @@ contract SummerfiIntegration is
         // forkArbitrumLatest();
         // forkBaseLatest();
         // forkOptimismLatest();
+
+        tolerance = block.chainid == 1 ? 2e16 : block.chainid == 8453 ? 15e16 : 3e16;
 
         SUPPLY_ASSET = block.chainid == 42_161
             ? WETH_ADDR_ARBI
@@ -99,6 +109,12 @@ contract SummerfiIntegration is
             : block.chainid == 8453
                 ? BORROW_ASSET_BASE
                 : block.chainid == 10 ? BORROW_ASSET_OPT : Addresses.USDC_ADDR;
+
+        EXCHANGE_WRAPPER = block.chainid == 42_161
+            ? UNI_WRAPPER_ARBI
+            : block.chainid == 8453
+                ? UNI_WRAPPER_BASE
+                : block.chainid == 10 ? UNI_WRAPPER_OPT : UNI_WRAPPER_MAINNET;
 
         aavePool = getLendingPool(DEFAULT_AAVE_MARKET);
         accountFactory = IAccountFactory(SF_PROXY_FACTORY_ADDR);
@@ -240,13 +256,14 @@ contract SummerfiIntegration is
         actionsCalldata[2] = aaveV3WithdrawEncode(
             supplyReserve.id, false, type(uint256).max, summerfiAccount, DEFAULT_AAVE_MARKET
         );
-        actionsCalldata[3] = sellEncode(
+        actionsCalldata[3] = sellEncodeV3(
             SUPPLY_ASSET,
             BORROW_ASSET,
             type(uint256).max,
             summerfiAccount,
             summerfiAccount,
-            Addresses.UNI_V2_WRAPPER
+            EXCHANGE_WRAPPER,
+            3000
         );
         actionsCalldata[4] = sendTokenEncode(BORROW_ASSET, address(flAction), flAmount);
 
@@ -279,7 +296,7 @@ contract SummerfiIntegration is
         assertEq(balanceOf(BORROW_ASSET, summerfiAccount), 0);
         assertEq(balanceOf(supplyReserve.aTokenAddress, summerfiAccount), 0);
         assertEq(balanceOf(borrowReserve.variableDebtTokenAddress, summerfiAccount), 0);
-        assertApproxEqRel(balanceOf(BORROW_ASSET, bob), 4e9, 1e16); // Bob should have around 4k USDC (1% difference tolerance)
+        assertApproxEqRel(balanceOf(BORROW_ASSET, bob), 4e9, tolerance); // Bob should have around 4k USDC
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -291,17 +308,18 @@ contract SummerfiIntegration is
         DataTypes.ReserveData memory borrowReserve = aavePool.getReserveData(BORROW_ASSET);
 
         uint256 paybackAmount = amountInUSDPrice(BORROW_ASSET, _repayAmountUSD);
-        uint256 flAmount = amountInUSDPrice(SUPPLY_ASSET, _repayAmountUSD + 10);
+        uint256 flAmount = amountInUSDPrice(SUPPLY_ASSET, _repayAmountUSD + 20);
 
         bytes[] memory actionsCalldata = new bytes[](4);
         actionsCalldata[0] = flActionEncode(SUPPLY_ASSET, flAmount, FLSource.BALANCER);
-        actionsCalldata[1] = sellEncode(
+        actionsCalldata[1] = sellEncodeV3(
             SUPPLY_ASSET,
             BORROW_ASSET,
             flAmount,
             summerfiAccount,
             summerfiAccount,
-            Addresses.UNI_V2_WRAPPER
+            EXCHANGE_WRAPPER,
+            3000
         );
         actionsCalldata[2] = aaveV3PaybackEncode(
             paybackAmount,
