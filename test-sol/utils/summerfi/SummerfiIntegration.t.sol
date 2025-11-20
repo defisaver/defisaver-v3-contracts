@@ -47,10 +47,12 @@ contract SummerfiIntegration is
 
     address constant WETH_ADDR_BASE = 0x4200000000000000000000000000000000000006;
     address constant WETH_ADDR_ARBI = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
+    address constant WETH_ADDR_OPT = 0x4200000000000000000000000000000000000006;
     address SUPPLY_ASSET;
 
     address constant BORROW_ASSET_BASE = 0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA;
     address constant BORROW_ASSET_ARBI = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8;
+    address constant BORROW_ASSET_OPT = 0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85;
     address BORROW_ASSET;
     uint256 constant SUPPLY_AMOUNT_USD = 4000; // $4000 in USD
     uint256 constant BORROW_AMOUNT_USD = 1000; // $1000 in USD
@@ -84,14 +86,19 @@ contract SummerfiIntegration is
         forkMainnetLatest();
         // forkArbitrumLatest();
         // forkBaseLatest();
-
-        BORROW_ASSET = block.chainid == 42_161
-            ? BORROW_ASSET_ARBI
-            : block.chainid == 8453 ? BORROW_ASSET_BASE : Addresses.USDC_ADDR;
+        // forkOptimismLatest();
 
         SUPPLY_ASSET = block.chainid == 42_161
             ? WETH_ADDR_ARBI
-            : block.chainid == 8453 ? WETH_ADDR_BASE : Addresses.WETH_ADDR;
+            : block.chainid == 8453
+                ? WETH_ADDR_BASE
+                : block.chainid == 10 ? WETH_ADDR_OPT : Addresses.WETH_ADDR;
+
+        BORROW_ASSET = block.chainid == 42_161
+            ? BORROW_ASSET_ARBI
+            : block.chainid == 8453
+                ? BORROW_ASSET_BASE
+                : block.chainid == 10 ? BORROW_ASSET_OPT : Addresses.USDC_ADDR;
 
         aavePool = getLendingPool(DEFAULT_AAVE_MARKET);
         accountFactory = IAccountFactory(SF_PROXY_FACTORY_ADDR);
