@@ -29,24 +29,30 @@ import { FLAction } from "../../../contracts/actions/flashloan/FLAction.sol";
 import { SendToken } from "../../../contracts/actions/utils/SendToken.sol";
 import { DFSSell } from "../../../contracts/actions/exchange/DFSSell.sol";
 import { Addresses } from "../Addresses.sol";
-
-// import { console2 as console } from "forge-std/console2.sol";
+import {
+    SFProxyFactoryHelper
+} from "../../../contracts/utils/addresses/sfProxyFactory/SFProxyFactoryHelper.sol";
 
 contract SummerfiIntegration is
     BaseTest,
     ActionsUtils,
     RegistryUtils,
     AaveV3Helper,
-    AaveV3RatioHelper
+    AaveV3RatioHelper,
+    SFProxyFactoryHelper
 {
     /*//////////////////////////////////////////////////////////////////////////
                                     CONSTANTS
     //////////////////////////////////////////////////////////////////////////*/
-    address constant SUMMERFI_ACCOUNT_FACTORY = 0xF7B75183A2829843dB06266c114297dfbFaeE2b6;
-    address constant SUMMERFI_GUARD = 0xCe91349d2A4577BBd0fC91Fe6019600e047f2847;
-    address constant SUPPLY_ASSET = Addresses.WETH_ADDR;
+
+    address constant WETH_ADDR_BASE = 0x4200000000000000000000000000000000000006;
+    address constant WETH_ADDR_ARBI = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
+    address SUPPLY_ASSET;
+
+    address constant BORROW_ASSET_BASE = 0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA;
+    address constant BORROW_ASSET_ARBI = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8;
+    address BORROW_ASSET;
     uint256 constant SUPPLY_AMOUNT_USD = 4000; // $4000 in USD
-    address constant BORROW_ASSET = Addresses.USDC_ADDR;
     uint256 constant BORROW_AMOUNT_USD = 1000; // $1000 in USD
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -58,6 +64,7 @@ contract SummerfiIntegration is
 
     RecipeExecutor recipeExecutor;
     IAccountFactory accountFactory;
+    IAccountGuard accountGuard;
     AaveV3Supply aaveV3Supply;
     AaveV3Borrow aaveV3Borrow;
     AaveV3Payback aaveV3Payback;
@@ -75,9 +82,20 @@ contract SummerfiIntegration is
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
         forkMainnetLatest();
+        // forkArbitrumLatest();
+        // forkBaseLatest();
+
+        BORROW_ASSET = block.chainid == 42_161
+            ? BORROW_ASSET_ARBI
+            : block.chainid == 8453 ? BORROW_ASSET_BASE : Addresses.USDC_ADDR;
+
+        SUPPLY_ASSET = block.chainid == 42_161
+            ? WETH_ADDR_ARBI
+            : block.chainid == 8453 ? WETH_ADDR_BASE : Addresses.WETH_ADDR;
 
         aavePool = getLendingPool(DEFAULT_AAVE_MARKET);
-        accountFactory = IAccountFactory(SUMMERFI_ACCOUNT_FACTORY);
+        accountFactory = IAccountFactory(SF_PROXY_FACTORY_ADDR);
+        accountGuard = IAccountGuard(SF_PROXY_GUARD);
 
         recipeExecutor = new RecipeExecutor();
         aaveV3Supply = new AaveV3Supply();
@@ -173,7 +191,6 @@ contract SummerfiIntegration is
 
         assertEq(balanceOf(SUPPLY_ASSET, summerfiAccount), accountWethBefore);
 
-        IAccountGuard accountGuard = IAccountGuard(SUMMERFI_GUARD);
         assertFalse(accountGuard.canCall(summerfiAccount, address(flAction)));
     }
 
@@ -189,7 +206,6 @@ contract SummerfiIntegration is
         assertLt(debtAfter, debtBefore);
         assertApproxEqAbs(debtBefore - debtAfter, amountInUSDPrice(BORROW_ASSET, 500), 500e6 / 10);
 
-        IAccountGuard accountGuard = IAccountGuard(SUMMERFI_GUARD);
         assertFalse(accountGuard.canCall(summerfiAccount, address(flAction)));
     }
 
@@ -326,12 +342,11 @@ contract SummerfiIntegration is
 
         vm.label(summerfiAccount, "SummerfiAccount");
         vm.label(summerfiAccountOwner, "Owner");
-        vm.label(address(SUMMERFI_GUARD), "AccountGuard");
+        vm.label(address(accountGuard), "AccountGuard");
     }
 
     /// @dev Whitelist RecipeExecutor in the AccountGuard
     function whitelistRecipeExecutor() internal {
-        IAccountGuard accountGuard = IAccountGuard(SUMMERFI_GUARD);
         address guardOwner = accountGuard.owner();
 
         vm.prank(guardOwner);

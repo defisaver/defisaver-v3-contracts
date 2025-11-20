@@ -22,7 +22,6 @@ contract SFProxyPermission {
     /// @notice Removes permission from an address to call the Summerfi account
     /// @param _caller Address to remove permission from
     function _removeSFProxyPermission(address _caller) internal {
-        // TODO -> Hardcode this addr?
         address guard = IAccountImplementation(address(this)).guard();
         if (IAccountGuard(guard).canCall(address(this), _caller)) {
             IAccountGuard(guard).permit(_caller, address(this), false);

@@ -53,6 +53,24 @@ contract BaseTest is Config {
         vm.selectFork(mainnetFork);
     }
 
+    function forkOptimismLatest() internal {
+        string memory optimismRpc = vm.envString("OPTIMISM_NODE");
+        uint256 optimismFork = vm.createFork(optimismRpc);
+        vm.selectFork(optimismFork);
+    }
+
+    function forkBaseLatest() internal {
+        string memory baseRpc = vm.envString("BASE_NODE");
+        uint256 baseFork = vm.createFork(baseRpc);
+        vm.selectFork(baseFork);
+    }
+
+    function forkArbitrumLatest() internal {
+        string memory arbitrumRpc = vm.envString("ARBITRUM_NODE");
+        uint256 arbitrumFork = vm.createFork(arbitrumRpc);
+        vm.selectFork(arbitrumFork);
+    }
+
     function forkLocalAnvil() internal {
         string memory anvilRpc = "http://localhost:8545";
         uint256 anvilFork = vm.createFork(anvilRpc);
