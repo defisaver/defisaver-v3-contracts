@@ -216,6 +216,72 @@ contract SummerfiIntegration is
         assertFalse(accountGuard.canCall(summerfiAccount, address(flAction)));
     }
 
+    function testFlashLoanClosePosition() public {
+        _createAaveV3Position(summerfiAccount);
+
+        DataTypes.ReserveData memory supplyReserve = aavePool.getReserveData(SUPPLY_ASSET);
+        DataTypes.ReserveData memory borrowReserve = aavePool.getReserveData(BORROW_ASSET);
+
+        uint256 debtAmount = borrowAmount;
+        uint256 flAmount = debtAmount + 1000; // Add buffer for fees
+
+        bytes[] memory actionsCalldata = new bytes[](6);
+        actionsCalldata[0] = flActionEncode(BORROW_ASSET, flAmount, FLSource.BALANCER);
+        actionsCalldata[1] = aaveV3PaybackEncode(
+            type(uint256).max,
+            summerfiAccount,
+            2,
+            borrowReserve.id,
+            false,
+            true,
+            DEFAULT_AAVE_MARKET,
+            summerfiAccount
+        );
+        actionsCalldata[2] = aaveV3WithdrawEncode(
+            supplyReserve.id, false, type(uint256).max, summerfiAccount, DEFAULT_AAVE_MARKET
+        );
+        actionsCalldata[3] = sellEncode(
+            SUPPLY_ASSET,
+            BORROW_ASSET,
+            type(uint256).max,
+            summerfiAccount,
+            summerfiAccount,
+            Addresses.UNI_V2_WRAPPER
+        );
+        actionsCalldata[4] = sendTokenEncode(BORROW_ASSET, address(flAction), flAmount);
+
+        address[] memory tokens = new address[](1);
+        address[] memory receivers = new address[](1);
+        uint256[] memory amounts = new uint256[](1);
+        tokens[0] = BORROW_ASSET;
+        receivers[0] = bob;
+        amounts[0] = type(uint256).max;
+        actionsCalldata[5] = sendTokensAndUnwrapEncode(tokens, receivers, amounts);
+
+        bytes4[] memory actionIds = new bytes4[](6);
+        actionIds[0] = bytes4(keccak256("FLAction"));
+        actionIds[1] = bytes4(keccak256("AaveV3Payback"));
+        actionIds[2] = bytes4(keccak256("AaveV3Withdraw"));
+        actionIds[3] = bytes4(keccak256("DFSSell"));
+        actionIds[4] = bytes4(keccak256("SendToken"));
+        actionIds[5] = bytes4(keccak256("SendTokensAndUnwrap"));
+
+        StrategyModel.Recipe memory recipe = _createRecipe(actionsCalldata, actionIds);
+
+        vm.prank(summerfiAccountOwner);
+        IAccountImplementation(summerfiAccount)
+            .execute(
+                address(recipeExecutor),
+                abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
+            );
+
+        assertEq(balanceOf(SUPPLY_ASSET, summerfiAccount), 0);
+        assertEq(balanceOf(BORROW_ASSET, summerfiAccount), 0);
+        assertEq(balanceOf(supplyReserve.aTokenAddress, summerfiAccount), 0);
+        assertEq(balanceOf(borrowReserve.variableDebtTokenAddress, summerfiAccount), 0);
+        assertApproxEqRel(balanceOf(BORROW_ASSET, bob), 4e9, 1e16); // Bob should have around 4k USDC (1% difference tolerance)
+    }
+
     /*//////////////////////////////////////////////////////////////////////////
                                      HELPERS
     //////////////////////////////////////////////////////////////////////////*/
