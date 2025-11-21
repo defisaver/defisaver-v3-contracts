@@ -96,29 +96,7 @@ contract SummerfiIntegration is
         // forkBaseLatest();
         // forkOptimismLatest();
 
-        tolerance = block.chainid == 1 ? 2e16 : block.chainid == 8453 ? 15e16 : 3e16;
-
-        SUPPLY_ASSET = block.chainid == 42_161
-            ? WETH_ADDR_ARBI
-            : block.chainid == 8453
-                ? WETH_ADDR_BASE
-                : block.chainid == 10 ? WETH_ADDR_OPT : Addresses.WETH_ADDR;
-
-        BORROW_ASSET = block.chainid == 42_161
-            ? BORROW_ASSET_ARBI
-            : block.chainid == 8453
-                ? BORROW_ASSET_BASE
-                : block.chainid == 10 ? BORROW_ASSET_OPT : Addresses.USDC_ADDR;
-
-        EXCHANGE_WRAPPER = block.chainid == 42_161
-            ? UNI_WRAPPER_ARBI
-            : block.chainid == 8453
-                ? UNI_WRAPPER_BASE
-                : block.chainid == 10 ? UNI_WRAPPER_OPT : UNI_WRAPPER_MAINNET;
-
-        aavePool = getLendingPool(DEFAULT_AAVE_MARKET);
-        accountFactory = IAccountFactory(SF_PROXY_FACTORY_ADDR);
-        accountGuard = IAccountGuard(SF_PROXY_GUARD);
+        initValues();
 
         recipeExecutor = new RecipeExecutor();
         aaveV3Supply = new AaveV3Supply();
@@ -140,10 +118,6 @@ contract SummerfiIntegration is
         // Create SSW
         createSummerfiSmartWallet();
         whitelistRecipeExecutor();
-
-        // Convert USD amounts to token amounts
-        supplyAmount = amountInUSDPrice(SUPPLY_ASSET, SUPPLY_AMOUNT_USD);
-        borrowAmount = amountInUSDPrice(BORROW_ASSET, BORROW_AMOUNT_USD);
 
         give(SUPPLY_ASSET, bob, supplyAmount);
         approveAsSender(bob, SUPPLY_ASSET, summerfiAccount, supplyAmount);
@@ -444,5 +418,35 @@ contract SummerfiIntegration is
         accountGuard.setWhitelist(address(recipeExecutor), true);
 
         assert(accountGuard.isWhitelisted(address(recipeExecutor)));
+    }
+
+    function initValues() internal {
+        tolerance = block.chainid == 1 ? 2e16 : block.chainid == 8453 ? 15e16 : 3e16;
+
+        SUPPLY_ASSET = block.chainid == 42_161
+            ? WETH_ADDR_ARBI
+            : block.chainid == 8453
+                ? WETH_ADDR_BASE
+                : block.chainid == 10 ? WETH_ADDR_OPT : Addresses.WETH_ADDR;
+
+        BORROW_ASSET = block.chainid == 42_161
+            ? BORROW_ASSET_ARBI
+            : block.chainid == 8453
+                ? BORROW_ASSET_BASE
+                : block.chainid == 10 ? BORROW_ASSET_OPT : Addresses.USDC_ADDR;
+
+        EXCHANGE_WRAPPER = block.chainid == 42_161
+            ? UNI_WRAPPER_ARBI
+            : block.chainid == 8453
+                ? UNI_WRAPPER_BASE
+                : block.chainid == 10 ? UNI_WRAPPER_OPT : UNI_WRAPPER_MAINNET;
+
+        // Convert USD amounts to token amounts
+        supplyAmount = amountInUSDPrice(SUPPLY_ASSET, SUPPLY_AMOUNT_USD);
+        borrowAmount = amountInUSDPrice(BORROW_ASSET, BORROW_AMOUNT_USD);
+
+        aavePool = getLendingPool(DEFAULT_AAVE_MARKET);
+        accountFactory = IAccountFactory(SF_PROXY_FACTORY_ADDR);
+        accountGuard = IAccountGuard(SF_PROXY_GUARD);
     }
 }
