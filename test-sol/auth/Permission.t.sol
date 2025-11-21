@@ -13,11 +13,11 @@ import { IAccountGuard } from "../../contracts/interfaces/protocols/summerfi/IAc
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
-import { SummerfiUtils } from "../utils/summerfi/SummerfiUtils.sol";
+import { SFProxyUtils } from "../utils/summerfi/SFProxyUtils.sol";
 import { WalletType } from "../../contracts/utils/DFSTypes.sol";
 import { AuthHelper } from "../../contracts/auth/helpers/AuthHelper.sol";
 
-contract TestCore_Permission is AuthHelper, BaseTest, SummerfiUtils {
+contract TestCore_Permission is AuthHelper, BaseTest, SFProxyUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -29,11 +29,11 @@ contract TestCore_Permission is AuthHelper, BaseTest, SummerfiUtils {
     SmartWallet dsProxyWallet;
     SmartWallet safeWallet;
     SmartWallet dsaProxyWallet;
-    SmartWallet summerfiAcc;
+    SmartWallet sfProxy;
     address dsProxyAddr;
     address safeAddr;
     address dsaProxyAddr;
-    address summerfiAccAddr;
+    address sfProxyAddr;
 
     bytes4 constant EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
 
@@ -54,8 +54,8 @@ contract TestCore_Permission is AuthHelper, BaseTest, SummerfiUtils {
         dsaProxyWallet = new SmartWallet(charlie);
         dsaProxyAddr = dsaProxyWallet.createDSAProxy();
 
-        summerfiAcc = new SmartWallet(jane);
-        summerfiAccAddr = summerfiAcc.createSummerfiAcc();
+        sfProxy = new SmartWallet(jane);
+        sfProxyAddr = sfProxy.createSFProxy();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -99,15 +99,15 @@ contract TestCore_Permission is AuthHelper, BaseTest, SummerfiUtils {
         _verifyDsaProxyPermission(addr, false);
     }
 
-    function test_giveAndRemove_SummerfiAcc_arbitraryPermission() public {
+    function test_giveAndRemove_SFProxy_arbitraryPermission() public {
         // Have to whitelist cut for summerfi acc to be able to call it
         _whitelistAnyAddr(address(cut));
         address addr = address(0x111);
 
-        _giveSummerfiAccPermission(addr);
-        _verifySummerfiAccPermission(addr, true);
-        _removeSummerfiAccPermission(addr);
-        _verifySummerfiAccPermission(addr, false);
+        _giveSFProxyPermission(addr);
+        _verifySFProxyPermission(addr, true);
+        _removeSFProxyPermission(addr);
+        _verifySFProxyPermission(addr, false);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -175,21 +175,21 @@ contract TestCore_Permission is AuthHelper, BaseTest, SummerfiUtils {
         }
     }
 
-    function _giveSummerfiAccPermission(address _addr) internal {
+    function _giveSFProxyPermission(address _addr) internal {
         bytes memory givePermCalldata =
             abi.encodeCall(MockPermission.givePermissionTo, (WalletType.SFPROXY, _addr));
-        summerfiAcc.execute(address(cut), givePermCalldata, 0);
+        sfProxy.execute(address(cut), givePermCalldata, 0);
     }
 
-    function _removeSummerfiAccPermission(address _addr) internal {
+    function _removeSFProxyPermission(address _addr) internal {
         bytes memory removePermCalldata =
             abi.encodeCall(MockPermission.removePermissionFrom, (WalletType.SFPROXY, _addr));
-        summerfiAcc.execute(address(cut), removePermCalldata, 0);
+        sfProxy.execute(address(cut), removePermCalldata, 0);
     }
 
-    function _verifySummerfiAccPermission(address _addr, bool _enabled) internal view {
-        address guard = IAccountImplementation(summerfiAccAddr).guard();
-        bool canCall = IAccountGuard(guard).canCall(summerfiAccAddr, _addr);
+    function _verifySFProxyPermission(address _addr, bool _enabled) internal view {
+        address guard = IAccountImplementation(sfProxyAddr).guard();
+        bool canCall = IAccountGuard(guard).canCall(sfProxyAddr, _addr);
         if (_enabled) {
             assertTrue(canCall);
         } else {
@@ -205,7 +205,7 @@ contract TestCore_Permission is AuthHelper, BaseTest, SummerfiUtils {
         } else if (_walletType == WalletType.DSAPROXY) {
             return dsaProxyWallet;
         } else if (_walletType == WalletType.SFPROXY) {
-            return summerfiAcc;
+            return sfProxy;
         }
     }
 }

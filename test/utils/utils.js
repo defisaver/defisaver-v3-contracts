@@ -707,24 +707,24 @@ const createDsaProxy = async (acc) => {
     return dsaProxy;
 };
 
-const createSummerfiAccount = async () => {
-    const summerfiFactory = await hre.ethers.getContractAt(
+const createSFProxy = async () => {
+    const sfProxyFactory = await hre.ethers.getContractAt(
         'IAccountFactory',
         addrs[network].SUMMERFI_FACTORY,
     );
 
-    const accountAddr = await summerfiFactory.callStatic['createAccount()']();
-    const tx = await summerfiFactory['createAccount()']();
+    const accountAddr = await sfProxyFactory.callStatic['createAccount()']();
+    const tx = await sfProxyFactory['createAccount()']();
     await tx.wait();
 
     const account = await hre.ethers.getContractAt('IAccountImplementation', accountAddr);
 
-    console.log(`Summerfi account created ${accountAddr}`);
+    console.log(`Summerfi proxy created ${accountAddr}`);
 
     return account;
 };
 
-const whitelistContractForSummerfi = async (contractAddr, whitelist = true) => {
+const whitelistContractForSFProxy = async (contractAddr, whitelist = true) => {
     const guardAddr = addrs[network].SUMMERFI_GUARD;
     const accountGuard = await hre.ethers.getContractAt('IAccountGuard', guardAddr);
     const guardOwner = await accountGuard.owner();
@@ -1584,10 +1584,10 @@ const isProxyDSAProxy = async (proxy) => {
     }
 };
 
-const isSummerfiAccount = async (proxy) => {
+const isSFProxy = async (proxy) => {
     try {
         const mockSmartWalletUtils = await deployContract('MockSmartWalletUtils');
-        return await mockSmartWalletUtils.isSummerfiAccount(proxy.address);
+        return await mockSmartWalletUtils.isSFProxy(proxy.address);
     } catch (error) {
         return false;
     }
@@ -1614,7 +1614,7 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
         );
     } else {
         const isDSAProxy = await isProxyDSAProxy(proxy);
-        const isSummerfi = await isSummerfiAccount(proxy);
+        const isSFProxy = await isSFProxy(proxy);
 
         if (isDSAProxy) {
             await impersonateAccount(proxy.signer.address);
@@ -1628,7 +1628,7 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
                 },
             );
             await stopImpersonatingAccount(proxy.signer.address);
-        } else if (isSummerfi) {
+        } else if (isSFProxy) {
             receipt = await proxy.execute(targetAddr, callData, {
                 gasLimit: 10000000,
                 value: ethValue,
@@ -1645,10 +1645,10 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
     return receipt;
 };
 
-const WALLETS = ['DS_PROXY', 'SAFE', 'DSA_PROXY', 'SUMMERFI_ACC'];
+const WALLETS = ['DS_PROXY', 'SAFE', 'DSA_PROXY', 'SF_PROXY'];
 const isWalletNameDsProxy = (w) => w === 'DS_PROXY';
 const isWalletNameDsaProxy = (w) => w === 'DSA_PROXY';
-const isWalletNameSummerfiAcc = (w) => w === 'SUMMERFI_ACC';
+const isWalletNameSFProxy = (w) => w === 'SF_PROXY';
 
 const generateIds = () => {
     const idsMap = {};
@@ -1786,12 +1786,12 @@ module.exports = {
     getAndSetMockExchangeWrapper,
     addBalancerFlLiquidity,
     isWalletNameDsaProxy,
-    isWalletNameSummerfiAcc,
+    isWalletNameSFProxy,
     isProxyDSAProxy,
-    isSummerfiAccount,
+    isSFProxy,
     createDsaProxy,
-    createSummerfiAccount,
-    whitelistContractForSummerfi,
+    createSFProxy,
+    whitelistContractForSFProxy,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,

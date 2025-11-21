@@ -23,7 +23,7 @@ contract SmartWallet is BaseTest {
     bool public isSafe;
     bool public isDSA;
     bool public isDSProxy;
-    bool public isSummerfi;
+    bool public isSFProxy;
     bool private safeInitialized;
 
     error SafeTxFailed();
@@ -44,7 +44,6 @@ contract SmartWallet is BaseTest {
         vm.label(owner, "owner");
 
         BaseTest.setUp();
-        // TODO -> update this to support other types too
         isSmartWalletSafe() == true ? createSafe() : createDSProxy();
         vm.label(walletAddr, "SmartWallet");
     }
@@ -54,7 +53,7 @@ contract SmartWallet is BaseTest {
         isSafe = false;
         isDSA = false;
         isDSProxy = true;
-        isSummerfi = false;
+        isSFProxy = false;
         return walletAddr;
     }
 
@@ -63,18 +62,17 @@ contract SmartWallet is BaseTest {
         isSafe = false;
         isDSA = true;
         isDSProxy = false;
-        isSummerfi = false;
+        isSFProxy = false;
         return walletAddr;
     }
 
-    function createSummerfiAcc() public ownerAsSender returns (address payable) {
-        // TODO -> whitelist recipe executor here?
-        walletAddr = payable(IAccountFactory(Addresses.SUMMERFI_ACCOUNT_FACTORY).createAccount());
-        vm.label(address(Addresses.SUMMERFI_GUARD), "AccountGuard");
+    function createSFProxy() public ownerAsSender returns (address payable) {
+        walletAddr = payable(IAccountFactory(Addresses.SF_PROXY_FACTORY).createAccount());
+        vm.label(address(Addresses.SF_PROXY_GUARD), "AccountGuard");
         isSafe = false;
         isDSA = false;
         isDSProxy = false;
-        isSummerfi = true;
+        isSFProxy = true;
         return walletAddr;
     }
 
@@ -134,7 +132,7 @@ contract SmartWallet is BaseTest {
             connectorsData[0] = _calldata;
 
             IInstaAccountV2(walletAddr).cast{ value: _value }(connectors, connectorsData, owner);
-        } else if (isSummerfi) {
+        } else if (isSFProxy) {
             IAccountImplementation(walletAddr).execute{ value: _value }(_target, _calldata);
         } else {
             revert UnsupportedWalletType();

@@ -25,7 +25,7 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper, SFProx
             return WalletType.DSAPROXY;
         }
 
-        if (_isSummerfiAccount(_wallet)) {
+        if (_isSFProxy(_wallet)) {
             return WalletType.SFPROXY;
         }
 
@@ -44,7 +44,7 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper, SFProx
     }
 
     /// @notice Check if the wallet is a Summerfi account
-    function _isSummerfiAccount(address _wallet) internal view returns (bool) {
+    function _isSFProxy(address _wallet) internal view returns (bool) {
         return _wallet.codehash == SF_PROXY_CODEHASH;
     }
 

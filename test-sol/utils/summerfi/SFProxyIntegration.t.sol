@@ -33,7 +33,7 @@ import {
     SFProxyFactoryHelper
 } from "../../../contracts/utils/addresses/sfProxyFactory/SFProxyFactoryHelper.sol";
 
-contract SummerfiIntegration is
+contract SFProxyIntegration is
     BaseTest,
     ActionsUtils,
     RegistryUtils,
@@ -68,8 +68,8 @@ contract SummerfiIntegration is
                                     VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
 
-    address summerfiAccount;
-    address summerfiAccountOwner;
+    address sfProxy;
+    address sfProxyOwner;
 
     RecipeExecutor recipeExecutor;
     IAccountFactory accountFactory;
@@ -120,7 +120,7 @@ contract SummerfiIntegration is
         whitelistRecipeExecutor();
 
         give(SUPPLY_ASSET, bob, supplyAmount);
-        approveAsSender(bob, SUPPLY_ASSET, summerfiAccount, supplyAmount);
+        approveAsSender(bob, SUPPLY_ASSET, sfProxy, supplyAmount);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -134,9 +134,9 @@ contract SummerfiIntegration is
     }
 
     function testOpenPositionForSSW() public {
-        _createAaveV3Position(summerfiAccount);
+        _createAaveV3Position(sfProxy);
 
-        uint256 ratio = getSafetyRatio(DEFAULT_AAVE_MARKET, summerfiAccount);
+        uint256 ratio = getSafetyRatio(DEFAULT_AAVE_MARKET, sfProxy);
         assertGt(ratio, 1e18);
     }
 
@@ -160,8 +160,8 @@ contract SummerfiIntegration is
             abi.encodeWithSelector(AaveV3Supply.executeActionDirect.selector, actionCalldata);
 
         vm.expectRevert("account-guard/illegal-target");
-        vm.prank(summerfiAccountOwner);
-        IAccountImplementation(summerfiAccount).execute(address(aaveV3Supply), directCalldata);
+        vm.prank(sfProxyOwner);
+        IAccountImplementation(sfProxy).execute(address(aaveV3Supply), directCalldata);
     }
 
     function testRecipeWithFlashLoan() public {
@@ -177,37 +177,37 @@ contract SummerfiIntegration is
 
         StrategyModel.Recipe memory recipe = _createRecipe(actionsCalldata, actionIds);
 
-        uint256 accountWethBefore = balanceOf(SUPPLY_ASSET, summerfiAccount);
+        uint256 accountWethBefore = balanceOf(SUPPLY_ASSET, sfProxy);
 
-        vm.prank(summerfiAccountOwner);
-        IAccountImplementation(summerfiAccount)
+        vm.prank(sfProxyOwner);
+        IAccountImplementation(sfProxy)
             .execute(
                 address(recipeExecutor),
                 abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
             );
 
-        assertEq(balanceOf(SUPPLY_ASSET, summerfiAccount), accountWethBefore);
+        assertEq(balanceOf(SUPPLY_ASSET, sfProxy), accountWethBefore);
 
-        assertFalse(accountGuard.canCall(summerfiAccount, address(flAction)));
+        assertFalse(accountGuard.canCall(sfProxy, address(flAction)));
     }
 
     function testFlashLoanRepayPosition() public {
-        _createAaveV3Position(summerfiAccount);
+        _createAaveV3Position(sfProxy);
 
         DataTypes.ReserveData memory borrowReserve = aavePool.getReserveData(BORROW_ASSET);
-        uint256 debtBefore = balanceOf(borrowReserve.variableDebtTokenAddress, summerfiAccount);
+        uint256 debtBefore = balanceOf(borrowReserve.variableDebtTokenAddress, sfProxy);
 
         _repayAaveV3PositionWithFL(500);
 
-        uint256 debtAfter = balanceOf(borrowReserve.variableDebtTokenAddress, summerfiAccount);
+        uint256 debtAfter = balanceOf(borrowReserve.variableDebtTokenAddress, sfProxy);
         assertLt(debtAfter, debtBefore);
         assertApproxEqAbs(debtBefore - debtAfter, amountInUSDPrice(BORROW_ASSET, 500), 500e6 / 10);
 
-        assertFalse(accountGuard.canCall(summerfiAccount, address(flAction)));
+        assertFalse(accountGuard.canCall(sfProxy, address(flAction)));
     }
 
     function testFlashLoanClosePosition() public {
-        _createAaveV3Position(summerfiAccount);
+        _createAaveV3Position(sfProxy);
 
         DataTypes.ReserveData memory supplyReserve = aavePool.getReserveData(SUPPLY_ASSET);
         DataTypes.ReserveData memory borrowReserve = aavePool.getReserveData(BORROW_ASSET);
@@ -219,25 +219,19 @@ contract SummerfiIntegration is
         actionsCalldata[0] = flActionEncode(BORROW_ASSET, flAmount, FLSource.BALANCER);
         actionsCalldata[1] = aaveV3PaybackEncode(
             type(uint256).max,
-            summerfiAccount,
+            sfProxy,
             2,
             borrowReserve.id,
             false,
             true,
             DEFAULT_AAVE_MARKET,
-            summerfiAccount
+            sfProxy
         );
         actionsCalldata[2] = aaveV3WithdrawEncode(
-            supplyReserve.id, false, type(uint256).max, summerfiAccount, DEFAULT_AAVE_MARKET
+            supplyReserve.id, false, type(uint256).max, sfProxy, DEFAULT_AAVE_MARKET
         );
         actionsCalldata[3] = sellEncodeV3(
-            SUPPLY_ASSET,
-            BORROW_ASSET,
-            type(uint256).max,
-            summerfiAccount,
-            summerfiAccount,
-            EXCHANGE_WRAPPER,
-            3000
+            SUPPLY_ASSET, BORROW_ASSET, type(uint256).max, sfProxy, sfProxy, EXCHANGE_WRAPPER, 3000
         );
         actionsCalldata[4] = sendTokenEncode(BORROW_ASSET, address(flAction), flAmount);
 
@@ -259,18 +253,19 @@ contract SummerfiIntegration is
 
         StrategyModel.Recipe memory recipe = _createRecipe(actionsCalldata, actionIds);
 
-        vm.prank(summerfiAccountOwner);
-        IAccountImplementation(summerfiAccount)
+        vm.prank(sfProxyOwner);
+        IAccountImplementation(sfProxy)
             .execute(
                 address(recipeExecutor),
                 abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
             );
 
-        assertEq(balanceOf(SUPPLY_ASSET, summerfiAccount), 0);
-        assertEq(balanceOf(BORROW_ASSET, summerfiAccount), 0);
-        assertEq(balanceOf(supplyReserve.aTokenAddress, summerfiAccount), 0);
-        assertEq(balanceOf(borrowReserve.variableDebtTokenAddress, summerfiAccount), 0);
-        assertApproxEqRel(balanceOf(BORROW_ASSET, bob), 4e9, tolerance); // Bob should have around 4k USDC
+        assertEq(balanceOf(SUPPLY_ASSET, sfProxy), 0);
+        assertEq(balanceOf(BORROW_ASSET, sfProxy), 0);
+        assertEq(balanceOf(supplyReserve.aTokenAddress, sfProxy), 0);
+        assertEq(balanceOf(borrowReserve.variableDebtTokenAddress, sfProxy), 0);
+
+        assertEq(getRatio(DEFAULT_AAVE_MARKET, sfProxy), 0);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -287,23 +282,10 @@ contract SummerfiIntegration is
         bytes[] memory actionsCalldata = new bytes[](4);
         actionsCalldata[0] = flActionEncode(SUPPLY_ASSET, flAmount, FLSource.BALANCER);
         actionsCalldata[1] = sellEncodeV3(
-            SUPPLY_ASSET,
-            BORROW_ASSET,
-            flAmount,
-            summerfiAccount,
-            summerfiAccount,
-            EXCHANGE_WRAPPER,
-            3000
+            SUPPLY_ASSET, BORROW_ASSET, flAmount, sfProxy, sfProxy, EXCHANGE_WRAPPER, 3000
         );
         actionsCalldata[2] = aaveV3PaybackEncode(
-            paybackAmount,
-            summerfiAccount,
-            2,
-            borrowReserve.id,
-            false,
-            false,
-            DEFAULT_AAVE_MARKET,
-            summerfiAccount
+            paybackAmount, sfProxy, 2, borrowReserve.id, false, false, DEFAULT_AAVE_MARKET, sfProxy
         );
         actionsCalldata[3] = aaveV3WithdrawEncode(
             supplyReserve.id, false, flAmount, address(flAction), DEFAULT_AAVE_MARKET
@@ -329,8 +311,8 @@ contract SummerfiIntegration is
             paramMapping: paramMapping
         });
 
-        vm.prank(summerfiAccountOwner);
-        IAccountImplementation(summerfiAccount)
+        vm.prank(sfProxyOwner);
+        IAccountImplementation(sfProxy)
             .execute(
                 address(recipeExecutor),
                 abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
@@ -341,10 +323,10 @@ contract SummerfiIntegration is
         DataTypes.ReserveData memory supplyReserve = aavePool.getReserveData(SUPPLY_ASSET);
         DataTypes.ReserveData memory borrowReserve = aavePool.getReserveData(BORROW_ASSET);
 
-        if (_onBehalf != summerfiAccount) {
+        if (_onBehalf != sfProxy) {
             vm.prank(_onBehalf);
             IDebtToken(borrowReserve.variableDebtTokenAddress)
-                .approveDelegation(summerfiAccount, borrowAmount);
+                .approveDelegation(sfProxy, borrowAmount);
         }
 
         bytes[] memory actionsCalldata = new bytes[](2);
@@ -365,8 +347,8 @@ contract SummerfiIntegration is
         uint256 bobBorrowBefore = balanceOf(BORROW_ASSET, bob);
         uint256 aTokenBefore = balanceOf(supplyReserve.aTokenAddress, _onBehalf);
 
-        vm.prank(summerfiAccountOwner);
-        IAccountImplementation(summerfiAccount)
+        vm.prank(sfProxyOwner);
+        IAccountImplementation(sfProxy)
             .execute(
                 address(recipeExecutor),
                 abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
@@ -401,12 +383,12 @@ contract SummerfiIntegration is
     /// @dev Creates a brand new Summerfi smart account for testing using the factory
     function createSummerfiSmartWallet() internal {
         vm.prank(bob);
-        summerfiAccount = accountFactory.createAccount();
+        sfProxy = accountFactory.createAccount();
         // Bob is the owner of the newly created account
-        summerfiAccountOwner = IAccountImplementation(summerfiAccount).owner();
+        sfProxyOwner = IAccountImplementation(sfProxy).owner();
 
-        vm.label(summerfiAccount, "SummerfiAccount");
-        vm.label(summerfiAccountOwner, "Owner");
+        vm.label(sfProxy, "sfProxy");
+        vm.label(sfProxyOwner, "Owner");
         vm.label(address(accountGuard), "AccountGuard");
     }
 
@@ -421,8 +403,6 @@ contract SummerfiIntegration is
     }
 
     function initValues() internal {
-        tolerance = block.chainid == 1 ? 2e16 : block.chainid == 8453 ? 15e16 : 3e16;
-
         SUPPLY_ASSET = block.chainid == 42_161
             ? WETH_ADDR_ARBI
             : block.chainid == 8453

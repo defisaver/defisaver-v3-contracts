@@ -6,17 +6,9 @@ import { IAccountGuard } from "../../../contracts/interfaces/protocols/summerfi/
 import { RegistryUtils } from "../RegistryUtils.sol";
 import { Addresses } from "../Addresses.sol";
 
-contract SummerfiUtils is RegistryUtils {
-    /*//////////////////////////////////////////////////////////////////////////
-                                    CONSTANTS
-    //////////////////////////////////////////////////////////////////////////*/
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                    VARIABLES
-    //////////////////////////////////////////////////////////////////////////*/
-
+contract SFProxyUtils is RegistryUtils {
     function _whitelistAnyAddr(address _addr) internal {
-        IAccountGuard accountGuard = IAccountGuard(Addresses.SUMMERFI_GUARD);
+        IAccountGuard accountGuard = IAccountGuard(Addresses.SF_PROXY_GUARD);
         address guardOwner = accountGuard.owner();
 
         cheats.prank(guardOwner);
@@ -26,7 +18,7 @@ contract SummerfiUtils is RegistryUtils {
     }
 
     function _whitelistRecipeExecutor() internal {
-        IAccountGuard accountGuard = IAccountGuard(Addresses.SUMMERFI_GUARD);
+        IAccountGuard accountGuard = IAccountGuard(Addresses.SF_PROXY_GUARD);
         address guardOwner = accountGuard.owner();
 
         address recipeExecutor = getAddr("RecipeExecutor");

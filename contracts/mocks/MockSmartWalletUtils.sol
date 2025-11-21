@@ -14,8 +14,8 @@ contract MockSmartWalletUtils is SmartWalletUtils {
         return super._isDSAProxy(_proxy);
     }
 
-    function isSummerfiAccount(address _proxy) public view returns (bool) {
-        return super._isSummerfiAccount(_proxy);
+    function isSFProxy(address _proxy) public view returns (bool) {
+        return super._isSFProxy(_proxy);
     }
 
     function getWalletType(address _proxy) public view returns (WalletType) {
