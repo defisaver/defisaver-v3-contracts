@@ -98,6 +98,11 @@ import { GhoStake } from "../../contracts/actions/aaveV3/GhoStake.sol";
 import { SparkSupply } from "../../contracts/actions/spark/SparkSupply.sol";
 import { SparkBorrow } from "../../contracts/actions/spark/SparkBorrow.sol";
 import { SparkSetEMode } from "../../contracts/actions/spark/SparkSetEMode.sol";
+import { AaveV4Supply } from "../../contracts/actions/aaveV4/AaveV4Supply.sol";
+import { AaveV4Withdraw } from "../../contracts/actions/aaveV4/AaveV4Withdraw.sol";
+import { AaveV4Borrow } from "../../contracts/actions/aaveV4/AaveV4Borrow.sol";
+import { AaveV4Payback } from "../../contracts/actions/aaveV4/AaveV4Payback.sol";
+import { AaveV4CollateralSwitch } from "../../contracts/actions/aaveV4/AaveV4CollateralSwitch.sol";
 
 contract ActionsUtils {
     // @dev Change this value if we ever need to add more parameters to any action.
@@ -1322,6 +1327,88 @@ contract ActionsUtils {
         params = abi.encode(
             SparkSetEMode.Params({
                 categoryId: _categoryId, useDefaultMarket: _useDefaultMarket, market: _market
+            })
+        );
+    }
+
+    function aaveV4SupplyEncode(
+        address _spoke,
+        address _onBehalf,
+        address _from,
+        uint256 _reserveId,
+        uint256 _amount,
+        bool _useAsCollateral
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV4Supply.Params({
+                spoke: _spoke,
+                onBehalf: _onBehalf,
+                from: _from,
+                reserveId: _reserveId,
+                amount: _amount,
+                useAsCollateral: _useAsCollateral
+            })
+        );
+    }
+
+    function aaveV4WithdrawEncode(
+        address _spoke,
+        address _onBehalf,
+        address _to,
+        uint256 _reserveId,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV4Withdraw.Params({
+                spoke: _spoke, onBehalf: _onBehalf, to: _to, reserveId: _reserveId, amount: _amount
+            })
+        );
+    }
+
+    function aaveV4BorrowEncode(
+        address _spoke,
+        address _onBehalf,
+        address _to,
+        uint256 _reserveId,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV4Borrow.Params({
+                spoke: _spoke, onBehalf: _onBehalf, to: _to, reserveId: _reserveId, amount: _amount
+            })
+        );
+    }
+
+    function aaveV4PaybackEncode(
+        address _spoke,
+        address _onBehalf,
+        address _from,
+        uint256 _reserveId,
+        uint256 _amount
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV4Payback.Params({
+                spoke: _spoke,
+                onBehalf: _onBehalf,
+                from: _from,
+                reserveId: _reserveId,
+                amount: _amount
+            })
+        );
+    }
+
+    function aaveV4CollateralSwitchEncode(
+        address _spoke,
+        address _onBehalf,
+        uint256 _reserveId,
+        bool _useAsCollateral
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            AaveV4CollateralSwitch.Params({
+                spoke: _spoke,
+                onBehalf: _onBehalf,
+                reserveId: _reserveId,
+                useAsCollateral: _useAsCollateral
             })
         );
     }
