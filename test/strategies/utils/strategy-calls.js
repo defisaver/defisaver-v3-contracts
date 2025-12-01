@@ -2838,287 +2838,6 @@ const callSparkFLBoostStrategy = async (
     );
 };
 
-const sparkCloseActionsEncoded = {
-    flAction: ({ repayAmount, flAsset }) =>
-        new dfs.actions.flashloan.FLAction(
-            new dfs.actions.flashloan.BalancerFlashLoanAction([flAsset], [repayAmount], []),
-        ).encodeForRecipe()[0],
-
-    paybackAction: ({ repayAmount, rateMode = 2 }) =>
-        new dfs.actions.spark.SparkPaybackAction(
-            true,
-            nullAddress,
-            repayAmount,
-            placeHolderAddr,
-            rateMode,
-            placeHolderAddr,
-            '0',
-            false,
-            nullAddress,
-        ).encodeForRecipe()[0],
-
-    withdrawAction: ({ withdrawAmount }) =>
-        new dfs.actions.spark.SparkWithdrawAction(
-            true,
-            nullAddress,
-            withdrawAmount,
-            placeHolderAddr,
-            '0',
-        ).encodeForRecipe()[0],
-
-    sellAction: async ({ srcTokenInfo, destTokenInfo, swapAmount }) =>
-        new dfs.actions.basic.SellAction(
-            await formatMockExchangeObj(srcTokenInfo, destTokenInfo, swapAmount),
-            placeHolderAddr,
-            placeHolderAddr,
-        ).encodeForRecipe()[0],
-
-    feeTakingAction: ({ closeGasCost }) =>
-        new dfs.actions.basic.GasFeeAction(
-            closeGasCost,
-            placeHolderAddr,
-            '0',
-            '0',
-            closeGasCost,
-        ).encodeForRecipe()[0],
-
-    sendAction: () =>
-        new dfs.actions.basic.SendTokenAndUnwrapAction(
-            placeHolderAddr,
-            placeHolderAddr,
-            hre.ethers.constants.MaxUint256,
-        ).encodeForRecipe()[0],
-
-    sendRepayFL: ({ flAddr }) =>
-        new dfs.actions.basic.SendTokenAction(placeHolderAddr, flAddr, 0).encodeForRecipe()[0],
-};
-
-const callSparkCloseToDebtStrategy = async (
-    strategyExecutorByBot,
-    subId,
-    srcTokenInfo,
-    destTokenInfo,
-    partialAmounts = undefined,
-    sub,
-) => {
-    const actionsCallData = [];
-    const triggerCallData = [];
-
-    const closeGasCost = '1000000';
-
-    actionsCallData.push(
-        sparkCloseActionsEncoded.withdrawAction({
-            withdrawAmount: partialAmounts?.withdrawAmount || hre.ethers.constants.MaxUint256,
-        }),
-    );
-    actionsCallData.push(
-        await sparkCloseActionsEncoded.sellAction({
-            srcTokenInfo,
-            destTokenInfo,
-            swapAmount: hre.ethers.constants.MaxUint256,
-        }),
-    );
-    actionsCallData.push(sparkCloseActionsEncoded.feeTakingAction({ closeGasCost }));
-    actionsCallData.push(
-        sparkCloseActionsEncoded.paybackAction({
-            repayAmount: partialAmounts?.repayAmount || hre.ethers.constants.MaxUint256,
-        }),
-    );
-    actionsCallData.push(sparkCloseActionsEncoded.sendAction());
-
-    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
-
-    const receipt = await strategyExecutorByBot.executeStrategy(
-        subId,
-        0,
-        triggerCallData,
-        actionsCallData,
-        sub,
-        {
-            gasLimit: 8000000,
-        },
-    );
-
-    const gasUsed = await getGasUsed(receipt);
-
-    console.log(`GasUsed callSparkCloseToDebtStrategy: ${gasUsed}`);
-
-    return receipt;
-};
-
-const callSparkFLCloseToDebtStrategy = async (
-    strategyExecutorByBot,
-    subId,
-    repayAmount,
-    flAsset,
-    flAddr,
-    srcTokenInfo,
-    destTokenInfo,
-    withdrawAmount = undefined,
-    sub,
-) => {
-    const actionsCallData = [];
-    const triggerCallData = [];
-
-    const closeGasCost = '1000000';
-
-    actionsCallData.push(sparkCloseActionsEncoded.flAction({ flAsset, repayAmount }));
-    actionsCallData.push(
-        sparkCloseActionsEncoded.paybackAction({
-            repayAmount: withdrawAmount ? repayAmount : hre.ethers.constants.MaxUint256,
-        }),
-    );
-    actionsCallData.push(
-        sparkCloseActionsEncoded.withdrawAction({
-            withdrawAmount: withdrawAmount || hre.ethers.constants.MaxUint256,
-        }),
-    );
-    actionsCallData.push(
-        await sparkCloseActionsEncoded.sellAction({
-            srcTokenInfo,
-            destTokenInfo,
-            swapAmount: hre.ethers.constants.MaxUint256,
-        }),
-    );
-    actionsCallData.push(sparkCloseActionsEncoded.feeTakingAction({ closeGasCost }));
-    actionsCallData.push(sparkCloseActionsEncoded.sendRepayFL({ flAddr }));
-    actionsCallData.push(sparkCloseActionsEncoded.sendAction());
-
-    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
-
-    const receipt = await strategyExecutorByBot.executeStrategy(
-        subId,
-        1,
-        triggerCallData,
-        actionsCallData,
-        sub,
-        {
-            gasLimit: 8000000,
-        },
-    );
-
-    const gasUsed = await getGasUsed(receipt);
-
-    console.log(`GasUsed callSparkCloseToDebtStrategy: ${gasUsed}`);
-
-    return receipt;
-};
-
-const callSparkCloseToCollStrategy = async (
-    strategyExecutorByBot,
-    subId,
-    swapAmount,
-    srcTokenInfo,
-    destTokenInfo,
-    partialAmounts = undefined,
-    sub,
-) => {
-    const actionsCallData = [];
-    const triggerCallData = [];
-
-    const closeGasCost = '1000000';
-
-    actionsCallData.push(
-        sparkCloseActionsEncoded.withdrawAction({
-            withdrawAmount: partialAmounts?.withdrawAmount || hre.ethers.constants.MaxUint256,
-        }),
-    );
-    actionsCallData.push(sparkCloseActionsEncoded.feeTakingAction({ closeGasCost }));
-    actionsCallData.push(
-        await sparkCloseActionsEncoded.sellAction({
-            srcTokenInfo,
-            destTokenInfo,
-            swapAmount: partialAmounts ? hre.ethers.constants.MaxUint256 : swapAmount,
-        }),
-    );
-    actionsCallData.push(
-        sparkCloseActionsEncoded.paybackAction({
-            repayAmount: partialAmounts?.repayAmount || hre.ethers.constants.MaxUint256,
-        }),
-    );
-    actionsCallData.push(sparkCloseActionsEncoded.sendAction());
-    actionsCallData.push(sparkCloseActionsEncoded.sendAction());
-
-    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
-
-    const receipt = await strategyExecutorByBot.executeStrategy(
-        subId,
-        0,
-        triggerCallData,
-        actionsCallData,
-        sub,
-        {
-            gasLimit: 8000000,
-        },
-    );
-
-    const gasUsed = await getGasUsed(receipt);
-
-    console.log(`GasUsed callSparkCloseToCollStrategy: ${gasUsed}`);
-
-    return receipt;
-};
-
-const callSparkFLCloseToCollStrategy = async (
-    strategyExecutorByBot,
-    subId,
-    repayAmount,
-    flAsset,
-    flAddr,
-    swapAmount,
-    srcTokenInfo,
-    destTokenInfo,
-    withdrawAmount = undefined,
-    sub,
-) => {
-    const actionsCallData = [];
-    const triggerCallData = [];
-
-    const closeGasCost = '1000000';
-
-    actionsCallData.push(sparkCloseActionsEncoded.flAction({ repayAmount, flAsset }));
-    actionsCallData.push(
-        sparkCloseActionsEncoded.paybackAction({
-            repayAmount: withdrawAmount ? repayAmount : hre.ethers.constants.MaxUint256,
-        }),
-    );
-    actionsCallData.push(
-        sparkCloseActionsEncoded.withdrawAction({
-            withdrawAmount: withdrawAmount || hre.ethers.constants.MaxUint256,
-        }),
-    );
-    actionsCallData.push(sparkCloseActionsEncoded.feeTakingAction({ closeGasCost }));
-    actionsCallData.push(
-        await sparkCloseActionsEncoded.sellAction({
-            srcTokenInfo,
-            destTokenInfo,
-            swapAmount: withdrawAmount ? hre.ethers.constants.MaxUint256 : swapAmount,
-        }),
-    );
-    actionsCallData.push(sparkCloseActionsEncoded.sendRepayFL({ flAddr }));
-    actionsCallData.push(sparkCloseActionsEncoded.sendAction());
-    actionsCallData.push(sparkCloseActionsEncoded.sendAction());
-
-    triggerCallData.push(abiCoder.encode(['uint256'], ['0']));
-
-    const receipt = await strategyExecutorByBot.executeStrategy(
-        subId,
-        1,
-        triggerCallData,
-        actionsCallData,
-        sub,
-        {
-            gasLimit: 8000000,
-        },
-    );
-
-    const gasUsed = await getGasUsed(receipt);
-
-    console.log(`GasUsed callSparkCloseToCollStrategy: ${gasUsed}`);
-
-    return receipt;
-};
-
 const callLiquityDsrPaybackStrategy = async ({
     strategyExecutorByBot,
     subId,
@@ -7969,6 +7688,205 @@ const callAaveV3FLCollateralSwitchStrategy = async (
     );
 };
 
+const callSparkGenericFLCloseToDebtStrategy = async (
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    exchangeObject,
+    flAmount,
+    flAddr,
+    marketAddress,
+) => {
+    const isL2 = network !== 'mainnet';
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+    const collToken = exchangeObject[0];
+    const debtToken = exchangeObject[1];
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction([debtToken], [flAmount]),
+    );
+
+    const sparkPaybackAction = new dfs.actions.spark.SparkPaybackAction(
+        false,
+        placeHolderAddr,
+        MAX_UINT,
+        placeHolderAddr,
+        2,
+        placeHolderAddr,
+        0,
+        true,
+        placeHolderAddr,
+    );
+
+    // Get aToken address for collateral token (needed for PullTokenAction)
+    const aTokenAddr = (await getAaveV3ReserveData(collToken, marketAddress)).aTokenAddress;
+    console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collToken}`);
+
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        aTokenAddr,
+        placeHolderAddr,
+        MAX_UINT,
+    );
+    const sparkWithdrawAction = new dfs.actions.spark.SparkWithdrawAction(
+        false,
+        placeHolderAddr,
+        0,
+        placeHolderAddr,
+        0,
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, '0');
+
+    const sendTokenToFLAction = new dfs.actions.basic.SendTokenAction(placeHolderAddr, flAddr, 0);
+    const sendTokenToEOAAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        placeHolderAddr,
+        placeHolderAddr,
+        hre.ethers.constants.MaxUint256,
+    );
+
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(sparkPaybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
+    actionsCallData.push(sparkWithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendTokenToFLAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendTokenToEOAAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(
+        abiCoder.encode(
+            ['address', 'address', 'uint256', 'uint256'],
+            [placeHolderAddr, placeHolderAddr, 0, 0],
+        ),
+    );
+
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(
+        `GasUsed callSparkGenericFLCloseToDebtStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
+const callSparkGenericFLCloseToCollStrategy = async (
+    strategyExecutor,
+    strategyIndex,
+    subId,
+    strategySub,
+    exchangeObject,
+    flAmount,
+    flAddr,
+    marketAddress,
+) => {
+    const isL2 = network !== 'mainnet';
+    const triggerCallData = [];
+    const actionsCallData = [];
+    const gasCost = 1000000;
+    const collToken = exchangeObject[0];
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction([collToken], [flAmount]),
+    );
+
+    const sellAction = new dfs.actions.basic.SellAction(
+        exchangeObject,
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
+    const sparkPaybackAction = new dfs.actions.spark.SparkPaybackAction(
+        false,
+        placeHolderAddr,
+        MAX_UINT,
+        placeHolderAddr,
+        2,
+        placeHolderAddr,
+        0,
+        true,
+        placeHolderAddr,
+    );
+
+    // Get aToken address for collateral token (needed for PullTokenAction)
+    const aTokenAddr = (await getAaveV3ReserveData(collToken, marketAddress)).aTokenAddress;
+    console.log(`Using aToken address: ${aTokenAddr} for collateral token: ${collToken}`);
+
+    const pullTokenAction = new dfs.actions.basic.PullTokenAction(
+        aTokenAddr,
+        placeHolderAddr,
+        MAX_UINT,
+    );
+    const sparkWithdrawAction = new dfs.actions.spark.SparkWithdrawAction(
+        false,
+        placeHolderAddr,
+        0,
+        placeHolderAddr,
+        0,
+    );
+
+    const feeTakingAction = isL2
+        ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
+        : new dfs.actions.basic.GasFeeAction(gasCost, placeHolderAddr, '0');
+
+    const sendTokenToFLAction = new dfs.actions.basic.SendTokenAction(placeHolderAddr, flAddr, 0);
+
+    const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
+        [placeHolderAddr, placeHolderAddr],
+        [placeHolderAddr, placeHolderAddr],
+        [hre.ethers.constants.MaxUint256, hre.ethers.constants.MaxUint256],
+    );
+
+    actionsCallData.push(flAction.encodeForRecipe()[0]);
+    actionsCallData.push(sellAction.encodeForRecipe()[0]);
+    actionsCallData.push(sparkPaybackAction.encodeForRecipe()[0]);
+    actionsCallData.push(pullTokenAction.encodeForRecipe()[0]);
+    actionsCallData.push(sparkWithdrawAction.encodeForRecipe()[0]);
+    actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendTokenToFLAction.encodeForRecipe()[0]);
+    actionsCallData.push(sendTokensAction.encodeForRecipe()[0]);
+
+    triggerCallData.push(
+        abiCoder.encode(
+            ['address', 'address', 'uint256', 'uint256'],
+            [placeHolderAddr, placeHolderAddr, 0, 0],
+        ),
+    );
+
+    const { callData, receipt } = await executeStrategy(
+        isL2,
+        strategyExecutor,
+        subId,
+        strategyIndex,
+        triggerCallData,
+        actionsCallData,
+        strategySub,
+    );
+
+    const gasUsed = await getGasUsed(receipt);
+    const dollarPrice = calcGasToUSD(gasCost, 0, callData);
+    console.log(
+        `GasUsed callAaveV3GenericFLRepayStrategy: ${gasUsed}, price at ${AVG_GAS_PRICE} gwei $${dollarPrice}`,
+    );
+};
+
 module.exports = {
     callDcaStrategy,
     callMcdRepayStrategy,
@@ -8004,14 +7922,9 @@ module.exports = {
     callSparkFLRepayStrategy,
     callSparkBoostStrategy,
     callSparkFLBoostStrategy,
-    callSparkCloseToDebtStrategy,
-    callSparkFLCloseToDebtStrategy,
-    callSparkCloseToCollStrategy,
-    callSparkFLCloseToCollStrategy,
     callLiquityDsrPaybackStrategy,
     callLiquityDsrSupplyStrategy,
     callLiquityDebtInFrontRepayStrategy,
-    sparkCloseActionsEncoded,
     callAaveCloseToDebtWithMaximumGasPriceStrategy,
     callAaveCloseToDebtStrategy,
     callAaveFLCloseToDebtWithMaximumGasPriceStrategy,
@@ -8074,4 +7987,6 @@ module.exports = {
     callAaveV3BoostStrategy,
     callAaveV3FLBoostStrategy,
     callAaveV3FLCollateralSwitchStrategy,
+    callSparkGenericFLCloseToCollStrategy,
+    callSparkGenericFLCloseToDebtStrategy,
 };
