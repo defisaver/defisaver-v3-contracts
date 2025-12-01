@@ -1447,4 +1447,140 @@ describe('Test direct actions encoding for sdk and foundry', () => {
             expect(sdkEncoded).to.be.eq(foundryEncoded);
         });
     });
+
+    describe('AaveV4', () => {
+        let foundryContract;
+        const spoke = '0x0000000000000000000000000000000000000001';
+        const onBehalf = '0x0000000000000000000000000000000000000002';
+        const from = '0x0000000000000000000000000000000000000003';
+        const to = '0x0000000000000000000000000000000000000004';
+        const tokenAddress = '0x0000000000000000000000000000000000000005';
+        const reserveId = 1;
+        const amount = 10000;
+        const useAsCollateral = true;
+
+        before(async () => {
+            foundryContract = await getFoundryEncodingContract();
+        });
+
+        it('Test aaveV4SupplyEncode', async () => {
+            const AaveV4Supply = await hre.ethers.getContractFactory('AaveV4Supply');
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4SupplyAction(
+                spoke,
+                onBehalf,
+                from,
+                reserveId,
+                amount,
+                useAsCollateral,
+                tokenAddress,
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = AaveV4Supply.interface.encodeFunctionData(
+                'executeActionDirect',
+                [
+                    await foundryContract.aaveV4SupplyEncode(
+                        spoke,
+                        onBehalf,
+                        from,
+                        reserveId,
+                        amount,
+                        useAsCollateral,
+                    ),
+                ],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4WithdrawEncode', async () => {
+            const AaveV4Withdraw = await hre.ethers.getContractFactory('AaveV4Withdraw');
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4WithdrawAction(
+                spoke,
+                onBehalf,
+                to,
+                reserveId,
+                amount,
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = AaveV4Withdraw.interface.encodeFunctionData(
+                'executeActionDirect',
+                [
+                    await foundryContract.aaveV4WithdrawEncode(
+                        spoke,
+                        onBehalf,
+                        to,
+                        reserveId,
+                        amount,
+                    ),
+                ],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4BorrowEncode', async () => {
+            const AaveV4Borrow = await hre.ethers.getContractFactory('AaveV4Borrow');
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4BorrowAction(
+                spoke,
+                onBehalf,
+                to,
+                reserveId,
+                amount,
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = AaveV4Borrow.interface.encodeFunctionData(
+                'executeActionDirect',
+                [await foundryContract.aaveV4BorrowEncode(spoke, onBehalf, to, reserveId, amount)],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4PaybackEncode', async () => {
+            const AaveV4Payback = await hre.ethers.getContractFactory('AaveV4Payback');
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4PaybackAction(
+                spoke,
+                onBehalf,
+                from,
+                reserveId,
+                amount,
+                tokenAddress,
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = AaveV4Payback.interface.encodeFunctionData(
+                'executeActionDirect',
+                [
+                    await foundryContract.aaveV4PaybackEncode(
+                        spoke,
+                        onBehalf,
+                        from,
+                        reserveId,
+                        amount,
+                    ),
+                ],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+
+        it('Test aaveV4CollateralSwitchEncode', async () => {
+            const AaveV4CollateralSwitch =
+                await hre.ethers.getContractFactory('AaveV4CollateralSwitch');
+            const sdkEncoded = new sdk.actions.aaveV4.AaveV4CollateralSwitchAction(
+                spoke,
+                onBehalf,
+                reserveId,
+                useAsCollateral,
+            ).encodeForDsProxyCall()[1];
+
+            const foundryEncoded = AaveV4CollateralSwitch.interface.encodeFunctionData(
+                'executeActionDirect',
+                [
+                    await foundryContract.aaveV4CollateralSwitchEncode(
+                        spoke,
+                        onBehalf,
+                        reserveId,
+                        useAsCollateral,
+                    ),
+                ],
+            );
+            expect(sdkEncoded).to.be.eq(foundryEncoded);
+        });
+    });
 });
