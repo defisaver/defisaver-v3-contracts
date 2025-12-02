@@ -65,6 +65,37 @@ interface IHub {
         uint200 deficitRay;
     }
 
+    // TODO: Remove later (Part of current devnet deployment)
+    struct AssetDataOld {
+        uint120 liquidity;
+        uint120 realizedFees;
+        uint8 decimals;
+        //
+        uint120 deficit;
+        uint120 swept;
+        //
+        uint120 realizedPremium;
+        uint120 premiumOffset;
+        //
+        uint16 liquidityFee;
+        uint120 drawnShares;
+        uint120 premiumShares;
+        //
+        uint120 drawnIndex;
+        uint96 drawnRate;
+        uint40 lastUpdateTimestamp;
+        //
+        address underlying;
+        //
+        address irStrategy;
+        //
+        address reinvestmentController;
+        //
+        address feeReceiver;
+        //
+        uint120 addedShares;
+    }
+
     /// @notice Asset configuration. Subset of the `Asset` struct.
     struct AssetConfig {
         address feeReceiver;
@@ -317,7 +348,7 @@ interface IHub {
     /// @dev `drawnIndex`, `drawnRate` and `lastUpdateTimestamp` can be outdated due to passage of time.
     /// @param assetId The identifier of the asset.
     /// @return The asset struct.
-    function getAsset(uint256 assetId) external view returns (Asset memory);
+    function getAsset(uint256 assetId) external view returns (AssetDataOld memory); // TODO: Replace with Asset
 
     /// @notice Returns the asset configuration for the specified asset.
     /// @param assetId The identifier of the asset.

@@ -14,6 +14,7 @@ import { console2 } from "forge-std/console2.sol";
 contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper {
     uint256 internal constant RAY = 1e27;
 
+    address internal constant CORE_HUB = 0xaD905aD5EA5B98cD50AE40Cfe368344686a21366;
     address internal constant CORE_SPOKE = 0xBa97c5E52cd5BC3D7950Ae70779F8FfE92d40CdC;
     uint256 internal constant CORE_RESERVE_ID_WETH = 0;
     uint256 internal constant CORE_RESERVE_ID_WSTETH = 1;
