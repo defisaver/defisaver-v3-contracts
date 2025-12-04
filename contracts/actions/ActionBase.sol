@@ -3,14 +3,12 @@ pragma solidity =0.8.24;
 
 import { AdminAuth } from "../auth/AdminAuth.sol";
 import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
-import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { ActionsUtilHelper } from "./utils/helpers/ActionsUtilHelper.sol";
-import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
-import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
-abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
+abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
     event ActionEvent(string indexed logName, bytes data);
 
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
@@ -104,7 +102,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
             } else {
                 /// @dev The last two values are specially reserved for proxy addr and owner addr
                 if (_mapType == 254) return address(this); // wallet address
-                if (_mapType == 255) return fetchOwnersOrWallet(); // owner if 1/1 wallet or the wallet itself
+                if (_mapType == 255) return _fetchOwnerOrWallet(address(this)); // owner if 1/1 wallet or the wallet itself
 
                 _param = address(uint160(uint256(_subData[getSubIndex(_mapType)])));
             }
@@ -164,15 +162,5 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
             revert ReturnIndexValueError();
         }
         return (_type - SUB_MIN_INDEX_VALUE);
-    }
-
-    function fetchOwnersOrWallet() internal view returns (address) {
-        if (isDSProxy(address(this))) {
-            return IDSProxy(payable(address(this))).owner();
-        }
-
-        // if not DSProxy, we assume we are in context of Safe
-        address[] memory owners = ISafe(address(this)).getOwners();
-        return owners.length == 1 ? owners[0] : address(this);
     }
 }

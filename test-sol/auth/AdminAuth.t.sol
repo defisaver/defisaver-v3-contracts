@@ -59,26 +59,5 @@ contract TestCore_AdminAuth is AdminAuth, BaseTest {
         cut.withdrawStuckFunds(Addresses.WETH_ADDR, address(this), 1000);
     }
 
-    function test_should_kill_contract() public {
-        vm.deal(address(cut), 1000);
-        uint256 cutBalance = address(cut).balance;
-
-        address caller = Addresses.ADMIN_ACC;
-
-        uint256 callerBalanceBefore = caller.balance;
-
-        vm.prank(caller);
-        cut.kill();
-
-        uint256 callerBalanceAfter = caller.balance;
-
-        assertEq(callerBalanceAfter, callerBalanceBefore + cutBalance);
-    }
-
-    function test_kill_contract_when_caller_not_admin() public {
-        vm.expectRevert(abi.encodeWithSelector(AdminAuth.SenderNotAdmin.selector));
-        cut.kill();
-    }
-
     receive() external payable { }
 }

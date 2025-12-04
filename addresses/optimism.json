@@ -400,14 +400,15 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0x993a8c81142044e1cb0cf0c3d84bea235d842fb0",
+        "address": "0x30CEf36b14Dd71A347284204C48E134D04c24331",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x993a8c81142044e1cb0cf0c3d84bea235d842fb0",
             "0xA532771BD90dAf94b456A4acC9E9cbBdF1367572",
             "0x44FDe16DDCd7c02bE28de52CEc08997336051735",
             "0xe91ff198bA6DFA97A7B4Fa43e5a606c915B0471f",
@@ -655,14 +656,15 @@
     },
     {
         "name": "FLAction",
-        "address": "0x82d5eDeb005AfFbF381B5949C707a3305160F4A9",
+        "address": "0x13663f7f852dFa7ec6517B5F3B0caabDBd9bf049",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x82d5eDeb005AfFbF381B5949C707a3305160F4A9",
             "0xE668197A175E7A2143222a028470c6ABBBD183F6",
             "0x5fA356C700F0C8A6f445B8a36Eb6e108590919D4"
         ]
@@ -787,13 +789,14 @@
     },
     {
         "name": "StrategyExecutor",
-        "address": "0x2f54a62b18483f395779cCD81A598133aBb7775d",
+        "address": "0xf8BFE1adf836A11fF72cDFbe1Bc363D58b72Cc45",
         "id": "0x0c1dc439",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
         "history": [
+            "0x2f54a62b18483f395779cCD81A598133aBb7775d",
             "0xf9c0A56c4c2D40C13d9D377b5E1Cdfe3Cb0C9FF7",
             "0xF087652A441858c1FB5F47aFA5bb4AB45C05B273",
             "0xfeCB0c92c2233570332B3D7690141ffF4093c11E"
@@ -1127,14 +1130,17 @@
     },
     {
         "name": "TxSaverExecutor",
-        "address": "0xCD6051D332ec92Dcb25d5AE52D02e02f04ed0614",
+        "address": "0xC9F97fFb4FA98c87a14079B4ea6C07adF4FF1A46",
         "id": "0x91bfbd87",
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xd18daaf5601c021B8f6D51829B68B6984A3Abb6A"]
+        "history": [
+            "0xCD6051D332ec92Dcb25d5AE52D02e02f04ed0614",
+            "0xd18daaf5601c021B8f6D51829B68B6984A3Abb6A"
+        ]
     },
     {
         "name": "BotAuthForTxSaver",
@@ -1246,6 +1252,17 @@
         "version": "1.0.0",
         "inRegistry": true,
         "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "ConnectV2DefiSaverOptimism",
+        "address": "0x6C61F85a515a19aCC326c240a20a9276dd326878",
+        "id": "0x811fab0f",
+        "path": "contracts/actions/insta/connectors/ConnectV2DefiSaverOptimism.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
         "registryIds": [],
         "history": []
     }

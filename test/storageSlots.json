@@ -90,15 +90,5 @@
     "0x6A29A46E21C730DcA1d8b23d637c101cec605C5B": { "isVyper": false, "num": 0 },
     "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD": { "isVyper": false, "num": 2 },
     "0x2BBE31d63E6813E3AC858C04dae43FB2a72B0D11": { "isVyper": false, "num": 0 },
-    "0x845838DF265Dcd2c412A1Dc9e959c7d08537f8a2": { "isVyper": true, "num": 3 },
-    "0x9fC689CCaDa600B6DF723D9E47D84d76664a1F23": { "isVyper": true, "num": 3 },
-    "0x32512Bee3848bfcBb7bEAf647aa697a100f3b706": { "isVyper": false, "num": 0 },
-    "0xA1c3492b71938E144ad8bE4c2fB6810b01A43dD8": { "isVyper": false, "num": 0 },
-    "0xaf88d065e77c8cC2239327C5EDb3A432268e5831": { "isVyper": false, "num": 9 },
-    "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9": { "isVyper": false, "num": 51 },
-    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913": { "isVyper": false, "num": 9 },
-    "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA": { "isVyper": false, "num": 51 },
-    "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf": { "isVyper": false, "num": 9 },
-    "0x6Bb7a212910682DCFdbd5BCBb3e28FB4E8da10Ee": { "isVyper": false, "num": 4 },
-    "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58": { "isVyper": false, "num": 0 }
+    "0x6440f144b7e50d6a8439336510312d2f54beb01d": { "isVyper": false, "num": 1 }
 }

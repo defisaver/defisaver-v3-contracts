@@ -95,6 +95,10 @@ import {
     SkyStakingEngineSelectFarm
 } from "../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 import { GhoStake } from "../../contracts/actions/aaveV3/GhoStake.sol";
+import { CreateSub } from "../../contracts/actions/utils/CreateSub.sol";
+import { ToggleSub } from "../../contracts/actions/utils/ToggleSub.sol";
+import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
+import { HandleAuth } from "../../contracts/actions/utils/HandleAuth.sol";
 import { SparkSupply } from "../../contracts/actions/spark/SparkSupply.sol";
 import { SparkBorrow } from "../../contracts/actions/spark/SparkBorrow.sol";
 import { SparkSetEMode } from "../../contracts/actions/spark/SparkSetEMode.sol";
@@ -116,7 +120,9 @@ contract ActionsUtils {
         AAVEV3,
         UNIV3,
         SPARK,
-        MORPHO_BLUE
+        MORPHO_BLUE,
+        CURVEUSD,
+        BALANCER_V3
     }
 
     function executeActionCalldata(bytes memory _paramsCalldata, bool _isDirect)
@@ -1264,6 +1270,26 @@ contract ActionsUtils {
         returns (bytes memory params)
     {
         params = abi.encode(GhoStake.Params({ from: _from, to: _to, amount: _amount }));
+    }
+
+    function createSubEncode(StrategyModel.StrategySub memory _sub)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(CreateSub.Params({ sub: _sub }));
+    }
+
+    function toggleSubEncode(uint256 _subId, bool _active)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(ToggleSub.Params({ subId: _subId, active: _active }));
+    }
+
+    function handleAuthEncode(bool _enableAuth) public pure returns (bytes memory params) {
+        params = abi.encode(HandleAuth.Params({ enableAuth: _enableAuth }));
     }
 
     function sparkSupplyEncode(
