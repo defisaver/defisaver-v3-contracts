@@ -1786,5 +1786,16 @@
         "changeTime": "0",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "MorphoBluePriceRangeTrigger",
+        "address": "0xd58ba582D36bA71886D43D599FEa2530F0c8212A",
+        "id": "0x23825034",
+        "path": "contracts/triggers/MorphoBluePriceRangeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]

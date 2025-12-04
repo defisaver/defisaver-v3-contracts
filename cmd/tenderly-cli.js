@@ -102,7 +102,7 @@ const sync = async (idOrNameOrAddress, options) => {
             c.name === idOrNameOrAddress ||
             c.address === idOrNameOrAddress ||
             c.id === idOrNameOrAddress ||
-            c.history.includes(idOrNameOrAddress),
+            c?.history?.includes(idOrNameOrAddress),
     );
 
     if (!found) {
