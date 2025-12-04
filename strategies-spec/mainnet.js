@@ -6762,6 +6762,176 @@ const createSparkGenericFLCloseToDebtStrategy = () => {
     return sparkGenericFLCloseToDebtStrategy.encodeForDsProxyCall();
 };
 
+const createMorphoBlueFLCloseToCollStrategy = () => {
+    const morphoBlueFLCloseToCollStrategy = new dfs.Strategy('MorphoBlueFLCloseToCollStrategy');
+
+    morphoBlueFLCloseToCollStrategy.addSubSlot('&loanToken', 'address');
+    morphoBlueFLCloseToCollStrategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueFLCloseToCollStrategy.addSubSlot('&oracle', 'address');
+    morphoBlueFLCloseToCollStrategy.addSubSlot('&irm', 'address');
+    morphoBlueFLCloseToCollStrategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueFLCloseToCollStrategy.addSubSlot('&user', 'address');
+    morphoBlueFLCloseToCollStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
+
+    const trigger = new dfs.triggers.MorphoBluePriceRangeTrigger(
+        'loanToken',
+        'collateralToken',
+        'oracle',
+        'lowerPrice',
+        'upperPrice',
+    );
+    morphoBlueFLCloseToCollStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%collateralToken'], // sent by backend
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collateralToken',
+            '&loanToken',
+            '%flAmount', // sent by backend
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const morphoPayback = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%uint(max)', // max uint amount - Sent by backend.
+        '&proxy',
+        '&user',
+    );
+    const morphoWithdrawCollateral = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%userCollateralAmount', // Read current user collateral amount - Sent by backend. Note: Does not support max uint amount. Collateral is IDLE, so no dust possible.
+        '&user',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // sent by backend
+        '&collateralToken',
+        '$4',
+    );
+    const sendTokenToFlAction = new dfs.actions.basic.SendTokenAction(
+        '&collateralToken',
+        '%flAddress', // sent by backend
+        '$1',
+    );
+    // return:
+    // 1. Send all collateralToken's left after the close and flRepayment to eoa
+    // 2. Send all loanToken's left after the close and flRepayment to eoa
+    const sendTokensAction = new dfs.actions.basic.SendTokensAndUnwrapAction(
+        ['&collateralToken', '&loanToken'],
+        ['&eoa', '&eoa'],
+        [
+            '%max(uint)', // sent by backend
+            '%max(uint)', // sent by backend
+        ],
+    );
+    morphoBlueFLCloseToCollStrategy.addAction(flAction);
+    morphoBlueFLCloseToCollStrategy.addAction(sellAction);
+    morphoBlueFLCloseToCollStrategy.addAction(morphoPayback);
+    morphoBlueFLCloseToCollStrategy.addAction(morphoWithdrawCollateral);
+    morphoBlueFLCloseToCollStrategy.addAction(feeTakingAction);
+    morphoBlueFLCloseToCollStrategy.addAction(sendTokenToFlAction);
+    morphoBlueFLCloseToCollStrategy.addAction(sendTokensAction);
+
+    return morphoBlueFLCloseToCollStrategy.encodeForDsProxyCall();
+};
+
+const createMorphoBlueFLCloseToDebtStrategy = () => {
+    const morphoBlueFLCloseToDebtStrategy = new dfs.Strategy('MorphoBlueFLCloseToDebtStrategy');
+
+    morphoBlueFLCloseToDebtStrategy.addSubSlot('&loanToken', 'address');
+    morphoBlueFLCloseToDebtStrategy.addSubSlot('&collateralToken', 'address');
+    morphoBlueFLCloseToDebtStrategy.addSubSlot('&oracle', 'address');
+    morphoBlueFLCloseToDebtStrategy.addSubSlot('&irm', 'address');
+    morphoBlueFLCloseToDebtStrategy.addSubSlot('&lltv', 'uint256');
+    morphoBlueFLCloseToDebtStrategy.addSubSlot('&user', 'address');
+    morphoBlueFLCloseToDebtStrategy.addSubSlot('&automationSdk.enums.CloseStrategyType', 'uint8'); // only used by backend to determine which action to call
+
+    const trigger = new dfs.triggers.MorphoBluePriceRangeTrigger(
+        'loanToken',
+        'collateralToken',
+        'oracle',
+        'lowerPrice',
+        'upperPrice',
+    );
+    morphoBlueFLCloseToDebtStrategy.addTrigger(trigger);
+
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.BalancerFlashLoanAction(
+            ['%loanToken'], // sent by backend
+            ['%flAmount'], // sent by backend
+        ),
+    );
+    const morphoPayback = new dfs.actions.morphoblue.MorphoBluePaybackAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%uint(max)', // max uint amount - Sent by backend.
+        '&proxy',
+        '&user',
+    );
+    const morphoWithdrawCollateral = new dfs.actions.morphoblue.MorphoBlueWithdrawCollateralAction(
+        '&loanToken',
+        '&collateralToken',
+        '&oracle',
+        '&irm',
+        '&lltv',
+        '%userCollateralAmount', // Read current user collateral amount - Sent by backend. Note: Does not support max uint amount. Collateral is IDLE, so no dust possible.
+        '&user',
+        '&proxy',
+    );
+    const sellAction = new dfs.actions.basic.SellAction(
+        formatExchangeObj(
+            '&collateralToken',
+            '&loanToken',
+            '$3',
+            '%exchangeWrapper', // sent by backend
+        ),
+        '&proxy',
+        '&proxy',
+    );
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction(
+        '%gasStart', // sent by backend
+        '&loanToken',
+        '$4',
+    );
+    const sendTokenToFlAction = new dfs.actions.basic.SendTokenAction(
+        '&loanToken',
+        '%flAddress', // sent by backend
+        '$1',
+    );
+    const sendTokenToEoaAction = new dfs.actions.basic.SendTokenAndUnwrapAction(
+        '&loanToken',
+        '&eoa',
+        '%max(uint)', // sent by backend
+    );
+    morphoBlueFLCloseToDebtStrategy.addAction(flAction);
+    morphoBlueFLCloseToDebtStrategy.addAction(morphoPayback);
+    morphoBlueFLCloseToDebtStrategy.addAction(morphoWithdrawCollateral);
+    morphoBlueFLCloseToDebtStrategy.addAction(sellAction);
+    morphoBlueFLCloseToDebtStrategy.addAction(feeTakingAction);
+    morphoBlueFLCloseToDebtStrategy.addAction(sendTokenToFlAction);
+    morphoBlueFLCloseToDebtStrategy.addAction(sendTokenToEoaAction);
+
+    return morphoBlueFLCloseToDebtStrategy.encodeForDsProxyCall();
+};
+
 module.exports = {
     createRepayStrategy,
     createFLRepayStrategy,
@@ -6874,4 +7044,6 @@ module.exports = {
     createAaveV3FLCollateralSwitchStrategy,
     createSparkGenericFLCloseToCollStrategy,
     createSparkGenericFLCloseToDebtStrategy,
+    createMorphoBlueFLCloseToCollStrategy,
+    createMorphoBlueFLCloseToDebtStrategy,
 };
