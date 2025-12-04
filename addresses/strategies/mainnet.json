@@ -2654,5 +2654,59 @@
             ["&1", 0, "$1"],
             ["&1", "&eoa", 0]
         ]
+    },
+    {
+        "name": "SparkGenericFLCloseToDebtStrategy",
+        "id": 136,
+        "isContinuous": false,
+        "triggerIds": ["SparkQuotePriceRangeTrigger"],
+        "actionIds": [
+            "FLAction",
+            "SparkPayback",
+            "PullToken",
+            "SparkWithdraw",
+            "DFSSell",
+            "GasFeeTaker",
+            "SendToken",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            [0, "&proxy", 0, "&4", 0, 0, "&6", "&7"],
+            [0, "&7", 0],
+            ["&2", 0, "$3", "&proxy", "&6"],
+            ["&1", "&3", "$4", "&proxy", "&proxy"],
+            ["&3", "$5", 0],
+            ["&3", 0, "$1"],
+            ["&3", "&eoa", 0]
+        ],
+        "bundleId": 57
+    },
+    {
+        "name": "SparkGenericFLCloseToCollStrategy",
+        "id": 137,
+        "isContinuous": false,
+        "triggerIds": ["SparkQuotePriceRangeTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "SparkPayback",
+            "PullToken",
+            "SparkWithdraw",
+            "GasFeeTaker",
+            "SendToken",
+            "SendTokensAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            [0, "&proxy", 0, "&4", 0, 0, "&6", "&7"],
+            [0, "&7", 0],
+            ["&2", 0, "$4", "&proxy", "&6"],
+            ["&1", "$5", 0],
+            ["&1", 0, "$1"],
+            ["&1", "&3", "&eoa", "&eoa", 0, 0]
+        ],
+        "bundleId": 57
     }
 ]
