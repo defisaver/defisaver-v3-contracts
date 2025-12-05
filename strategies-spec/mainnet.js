@@ -7093,7 +7093,7 @@ const createAaveV4BoostStrategy = () => {
     return s.encodeForDsProxyCall();
 };
 const createAaveV4FLBoostStrategy = () => {
-    const s = new dfs.Strategy('s');
+    const s = new dfs.Strategy('AaveV4FLBoostStrategy');
 
     s.addSubSlot('&spoke', 'address');
     s.addSubSlot('&user', 'address');
