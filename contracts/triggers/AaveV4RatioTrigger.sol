@@ -2,15 +2,15 @@
 
 pragma solidity =0.8.24;
 
-import { ISpoke } from "../interfaces/protocols/aaveV4/ISpoke.sol";
 import { ITrigger } from "../interfaces/core/ITrigger.sol";
 import { TransientStorageCancun } from "../utils/transient/TransientStorageCancun.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 import { AdminAuth } from "../auth/AdminAuth.sol";
+import { AaveV4RatioHelper } from "../actions/aaveV4/helpers/AaveV4RatioHelper.sol";
 
 /// @title AaveV4RatioTrigger
 /// @notice Triggers when the user's ratio is over/under a subbed ratio.
-contract AaveV4RatioTrigger is ITrigger, AdminAuth, TriggerHelper {
+contract AaveV4RatioTrigger is ITrigger, AdminAuth, TriggerHelper, AaveV4RatioHelper {
     TransientStorageCancun public constant tempStorage =
         TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
@@ -33,13 +33,12 @@ contract AaveV4RatioTrigger is ITrigger, AdminAuth, TriggerHelper {
     function isTriggered(bytes memory, bytes memory _subData) external override returns (bool) {
         SubParams memory sub = parseSubInputs(_subData);
 
-        // Health factor represents safety ratio in aaveV4, scaled in WAD.
-        uint256 ratio = ISpoke(sub.spoke).getUserAccountData(sub.user).healthFactor;
+        uint256 ratio = getRatio(sub.spoke, sub.user);
 
         // HF will be max uint256 if user has no debt. In that case we don't want to trigger.
         if (ratio == type(uint256).max) return false;
 
-        tempStorage.setBytes32("AAVE_V4_RATIO", bytes32(ratio));
+        tempStorage.setBytes32(AAVE_V4_RATIO_KEY, bytes32(ratio));
 
         return RatioState(sub.state) == RatioState.OVER ? ratio > sub.ratio : ratio < sub.ratio;
     }

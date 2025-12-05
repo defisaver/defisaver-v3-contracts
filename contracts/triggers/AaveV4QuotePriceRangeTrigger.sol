@@ -9,31 +9,24 @@ import { AdminAuth } from "../auth/AdminAuth.sol";
 import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 
 /// @title AaveV4QuotePriceRangeTrigger
-/// @notice Verifies if current token price ratio for aaveV4 spoke is within a subbed price range.
+/// @notice Verifies if current token price ratio for aaveV4 spoke is outside of subbed price range.
 /// @notice It is possible to check only one side of the range by setting the other side price to 0.
 /// @dev The trigger expects the lowerPrice and upperPrice inputs to be scaled by PRICE_SCALE.
 contract AaveV4QuotePriceRangeTrigger is ITrigger, AdminAuth, TriggerHelper {
     /// @dev Expected subbed price scale.
     uint256 public constant PRICE_SCALE = 1e8;
 
-    enum PriceState {
-        OVER,
-        UNDER
-    }
-
     /// @param spoke Address of the spoke.
     /// @param baseTokenId Reserve id of the base token which is quoted.
     /// @param quoteTokenId Reserve id of the quote token.
     /// @param lowerPrice Lower price of the base token in terms of the quote token that represents the triggerable point.
     /// @param upperPrice Upper price of the base token in terms of the quote token that represents the triggerable point.
-    /// @param state Represents if we want the current price to be higher or lower than price param.
     struct SubParams {
         address spoke;
         uint256 baseTokenId;
         uint256 quoteTokenId;
         uint256 lowerPrice;
         uint256 upperPrice;
-        uint8 state;
     }
 
     /// @notice Function that determines whether to trigger based on current token price ratio for aaveV4 spoke.

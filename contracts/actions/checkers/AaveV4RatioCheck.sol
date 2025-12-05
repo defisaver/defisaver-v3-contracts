@@ -2,17 +2,18 @@
 
 pragma solidity =0.8.24;
 
-import { ISpoke } from "../../interfaces/protocols/aaveV4/ISpoke.sol";
 import { ActionBase } from "../ActionBase.sol";
-import { TransientStorage } from "../../utils/transient/TransientStorage.sol";
+import { TransientStorageCancun } from "../../utils/transient/TransientStorageCancun.sol";
+import { AaveV4RatioHelper } from "../aaveV4/helpers/AaveV4RatioHelper.sol";
 
 /// @title AaveV4RatioCheck
 /// @notice Checks the ratio of the Aave V4 position after strategy execution.
-contract AaveV4RatioCheck is ActionBase {
+contract AaveV4RatioCheck is ActionBase, AaveV4RatioHelper {
     /// @notice 5% offset acceptable
     uint256 internal constant RATIO_OFFSET = 5e16;
 
-    TransientStorage public constant tempStorage = TransientStorage(TRANSIENT_STORAGE_CANCUN);
+    TransientStorageCancun public constant tempStorage =
+        TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     error BadAfterRatio(uint256 startRatio, uint256 currRatio);
 
@@ -47,8 +48,8 @@ contract AaveV4RatioCheck is ActionBase {
         uint256 target =
             _parseParamUint(params.targetRatio, _paramMapping[1], _subData, _returnValues);
 
-        uint256 current = ISpoke(params.spoke).getUserAccountData(params.user).healthFactor;
-        uint256 start = uint256(tempStorage.getBytes32("AAVE_V4_RATIO"));
+        uint256 current = getRatio(params.spoke, params.user);
+        uint256 start = uint256(tempStorage.getBytes32(AAVE_V4_RATIO_KEY));
 
         if (state == RatioState.IN_REPAY) {
             // Repay: Ratio must increase but not overshoot 'target + offset' to avoid boost after.

@@ -71,7 +71,7 @@ contract TestAaveV4Payback is AaveV4TestBase {
 
             // Borrow debt
             if (!_executeAaveV4Borrow(
-                    testPair.spoke, testPair.debtReserveId, borrowAmount, sender, wallet
+                    testPair.spoke, testPair.debtReserveId, borrowAmountUsd, sender, wallet
                 )) {
                 console2.log("Failed to borrow assets. Check caps and reserve/spoke status.");
                 continue;
