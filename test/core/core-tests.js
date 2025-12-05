@@ -28,9 +28,12 @@ const {
     isWalletNameDsProxy,
     expectError,
     isWalletNameDsaProxy,
+    isWalletNameSFProxy,
     network,
     addrs,
     createDsaProxy,
+    createSFProxy,
+    whitelistContractForSFProxy,
 } = require('../utils/utils');
 
 const { deployContract } = require('../../scripts/utils/deployer');
@@ -813,6 +816,7 @@ const recipeExecutorTest = async () => {
         let dsProxy;
         let safe;
         let dsaProxy;
+        let sfProxy;
         let useDsProxy;
 
         const setupWallet = async (w) => {
@@ -822,6 +826,9 @@ const recipeExecutorTest = async () => {
             } else if (isWalletNameDsaProxy(w)) {
                 useDsProxy = false;
                 wallet = dsaProxy;
+            } else if (isWalletNameSFProxy(w)) {
+                useDsProxy = false;
+                wallet = sfProxy;
             } else {
                 useDsProxy = false;
                 wallet = safe;
@@ -871,6 +878,11 @@ const recipeExecutorTest = async () => {
             dsProxy = await getProxy(senderAcc.address, false);
             safe = await getProxy(senderAcc.address, true);
             dsaProxy = await createDsaProxy(senderAcc.address);
+            sfProxy = await createSFProxy();
+
+            // Whitelist RecipeExecutor for Summerfi account
+            const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');
+            await whitelistContractForSFProxy(recipeExecutorAddr);
 
             // Init test data.
             actionData = new dfs.actions.basic.PullTokenAction(
@@ -894,7 +906,7 @@ const recipeExecutorTest = async () => {
 
         for (let i = 0; i < WALLETS.length; i++) {
             it(`...should fail to execute recipe by strategy through ${WALLETS[i]} because the triggers check is not passing`, async () => {
-                if (isWalletNameDsaProxy(WALLETS[i])) return;
+                if (isWalletNameDsaProxy(WALLETS[i]) || isWalletNameSFProxy(WALLETS[i])) return;
                 setupWallet(WALLETS[i]);
                 const { strategySub, subId } = await addPlaceholderStrategy(wallet, maxGasPrice);
                 try {
@@ -927,7 +939,7 @@ const recipeExecutorTest = async () => {
             });
 
             it(`...should execute recipe by strategy through ${WALLETS[i]}`, async () => {
-                if (isWalletNameDsaProxy(WALLETS[i])) return;
+                if (isWalletNameDsaProxy(WALLETS[i]) || isWalletNameSFProxy(WALLETS[i])) return;
                 setupWallet(WALLETS[i]);
 
                 const { strategyId, subId } = await addPlaceholderStrategy(wallet, maxGasPrice);
@@ -1273,7 +1285,7 @@ const strategyStorageTest = async () => {
     });
 };
 
-// No tests for DSA proxy here because subscription is performed as part ot the CreateSub action inside RecipeExecutor.
+// No tests for DSA proxy or SummerFi Proxy here because subscription is performed as part ot the CreateSub action inside RecipeExecutor.
 const subProxyTest = async () => {
     describe('SubProxy', () => {
         let subProxy;
@@ -1345,7 +1357,7 @@ const subProxyTest = async () => {
 
         for (let i = 0; i < WALLETS.length; i++) {
             it('...should add a new subscription', async () => {
-                if (isWalletNameDsaProxy(WALLETS[i])) return;
+                if (isWalletNameDsaProxy(WALLETS[i]) || isWalletNameSFProxy(WALLETS[i])) return;
                 setupWallet(WALLETS[i]);
 
                 const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
@@ -1369,7 +1381,7 @@ const subProxyTest = async () => {
             });
 
             it('...should update the new subscription', async () => {
-                if (isWalletNameDsaProxy(WALLETS[i])) return;
+                if (isWalletNameDsaProxy(WALLETS[i]) || isWalletNameSFProxy(WALLETS[i])) return;
                 setupWallet(WALLETS[i]);
 
                 const numStrategies = +(await strategyStorage.getStrategyCount()) - 1;
@@ -1391,7 +1403,7 @@ const subProxyTest = async () => {
             });
 
             it('...should deactivate users sub', async () => {
-                if (isWalletNameDsaProxy(WALLETS[i])) return;
+                if (isWalletNameDsaProxy(WALLETS[i]) || isWalletNameSFProxy(WALLETS[i])) return;
                 setupWallet(WALLETS[i]);
 
                 const latestSub = +(await subStorage.getSubsCount()) - 1;
@@ -1407,7 +1419,7 @@ const subProxyTest = async () => {
             });
 
             it('...should activate users sub', async () => {
-                if (isWalletNameDsaProxy(WALLETS[i])) return;
+                if (isWalletNameDsaProxy(WALLETS[i]) || isWalletNameSFProxy(WALLETS[i])) return;
                 setupWallet(WALLETS[i]);
 
                 const latestSub = +(await subStorage.getSubsCount()) - 1;

@@ -232,6 +232,39 @@ contract ActionsUtils {
         return abi.encode(params);
     }
 
+    /// @notice sellEncode for Uniswap V3 wrapper
+    function sellEncodeV3(
+        address _srcAddr,
+        address _destAddr,
+        uint256 _srcAmount,
+        address _from,
+        address _to,
+        address _wrapper,
+        uint24 _fee
+    ) public view returns (bytes memory) {
+        DFSExchangeData.OffchainData memory offchain;
+
+        bytes memory wrapperData = abi.encodePacked(_srcAddr, _fee, _destAddr);
+
+        DFSExchangeData.ExchangeData memory sellParams = DFSExchangeData.ExchangeData({
+            srcAddr: _srcAddr,
+            destAddr: _destAddr,
+            srcAmount: _srcAmount,
+            destAmount: 0,
+            minPrice: 0,
+            dfsFeeDivider: 0,
+            user: msg.sender,
+            wrapper: _wrapper,
+            wrapperData: wrapperData,
+            offchainData: offchain
+        });
+
+        DFSSell.Params memory params =
+            DFSSell.Params({ exchangeData: sellParams, from: _from, to: _to });
+
+        return abi.encode(params);
+    }
+
     function gasFeeEncode(uint256 _gasUsed, address _feeToken) public pure returns (bytes memory) {
         GasFeeTaker.GasFeeTakerParams memory params = GasFeeTaker.GasFeeTakerParams({
             gasUsed: _gasUsed, feeToken: _feeToken, availableAmount: 0, dfsFeeDivider: 0

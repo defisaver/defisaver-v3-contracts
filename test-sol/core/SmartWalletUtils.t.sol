@@ -24,28 +24,48 @@ contract TestCore_SmartWalletUtils is BaseTest {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
-    function test_should_return_true_for_ds_proxy_wallet() public {
+    function test_should_create_DSProxy_wallet() public {
         SmartWallet wallet = new SmartWallet(bob);
         address dsProxyAddress = wallet.createDSProxy();
         assertTrue(cut.isDSProxy(dsProxyAddress));
         assertFalse(cut.isDSAProxy(dsProxyAddress));
+        assertFalse(cut.isSFProxy(dsProxyAddress));
     }
 
-    function test_should_return_false_for_safe_wallet() public {
+    function test_should_create_Safe_wallet() public {
         SmartWallet wallet = new SmartWallet(bob);
         address safeAddress = wallet.createSafe();
         assertFalse(cut.isDSProxy(safeAddress));
         assertFalse(cut.isDSAProxy(safeAddress));
+        assertFalse(cut.isSFProxy(safeAddress));
+    }
+
+    function test_should_create_DSA_wallet() public {
+        SmartWallet wallet = new SmartWallet(bob);
+        address dsaProxyWallet = wallet.createDSAProxy();
+        assertFalse(cut.isDSProxy(dsaProxyWallet));
+        assertTrue(cut.isDSAProxy(dsaProxyWallet));
+        assertFalse(cut.isSFProxy(dsaProxyWallet));
+    }
+
+    function test_should_create_Summerfi_wallet() public {
+        SmartWallet wallet = new SmartWallet(bob);
+        address sfProxyAddress = wallet.createSFProxy();
+        assertFalse(cut.isDSProxy(sfProxyAddress));
+        assertFalse(cut.isDSAProxy(sfProxyAddress));
+        assertTrue(cut.isSFProxy(sfProxyAddress));
     }
 
     function test_should_return_false_for_zero_address() public view {
         assertFalse(cut.isDSProxy(address(0)));
         assertFalse(cut.isDSAProxy(address(0)));
+        assertFalse(cut.isSFProxy(address(0)));
     }
 
     function test_should_return_false_for_eoa_address() public view {
         assertFalse(cut.isDSProxy(bob));
         assertFalse(cut.isDSAProxy(bob));
+        assertFalse(cut.isSFProxy(bob));
     }
 
     function test_should_return_correct_wallet_type() public {
@@ -58,9 +78,13 @@ contract TestCore_SmartWalletUtils is BaseTest {
         SmartWallet dsaProxyWallet = new SmartWallet(charlie);
         address dsaProxyAddress = dsaProxyWallet.createDSAProxy();
 
+        SmartWallet sfProxyWallet = new SmartWallet(jane);
+        address sfProxyAddress = sfProxyWallet.createSFProxy();
+
         assertTrue(cut.getWalletType(safeAddress) == WalletType.SAFE);
         assertTrue(cut.getWalletType(dsProxyAddress) == WalletType.DSPROXY);
         assertTrue(cut.getWalletType(dsaProxyAddress) == WalletType.DSAPROXY);
+        assertTrue(cut.getWalletType(sfProxyAddress) == WalletType.SFPROXY);
     }
 
     function test_fetch_owner_or_wallet() public {

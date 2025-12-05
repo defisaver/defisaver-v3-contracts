@@ -6,6 +6,9 @@ import { IRecipeExecutor } from "../../../interfaces/core/IRecipeExecutor.sol";
 import { ISafe } from "../../../interfaces/protocols/safe/ISafe.sol";
 import { IDSProxy } from "../../../interfaces/DS/IDSProxy.sol";
 import { IDFSRegistry } from "../../../interfaces/core/IDFSRegistry.sol";
+import {
+    IAccountImplementation
+} from "../../../interfaces/protocols/summerfi/IAccountImplementation.sol";
 import { IInstaAccountV2 } from "../../../interfaces/protocols/insta/IInstaAccountV2.sol";
 import { MainnetFLAddresses } from "./MainnetFLAddresses.sol";
 import { FLFeeFaucet } from "../../../utils/fee/FLFeeFaucet.sol";
@@ -57,6 +60,12 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
                 connectorsData,
                 address(this) // Only used for event logging, so here we will set it to the FL contract
             );
+
+            return;
+        }
+
+        if (_walletType == WalletType.SFPROXY) {
+            IAccountImplementation(_wallet).execute{ value: address(this).balance }(target, data);
 
             return;
         }

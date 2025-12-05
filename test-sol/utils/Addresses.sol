@@ -53,7 +53,12 @@ library Addresses {
     address public constant SAFE_SINGLETON = 0x41675C099F32341bf84BFc5382aF534df5C7461a;
     address public constant UNISWAP_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
     address public constant UNI_V2_WRAPPER = 0x6cb48F0525997c2C1594c89e0Ca74716C99E3d54;
+    address public constant UNI_V3_WRAPPER = 0xfd077F7990AeE7A0F59b1aD98c6dBeB9aBFf0D7a;
+    // InstaDapp
     address public constant INSTADAPP_INDEX = 0x2971AdFa57b20E5a416aE5a708A8655A9c74f723;
     address public constant INSTADAPP_CONNECTORS_V2 = 0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11;
     address public constant INSTADAPP_MASTER_ACCOUNT = 0x2386DC45AdDed673317eF068992F19421B481F4c;
+    // Summerfi
+    address public constant SF_PROXY_FACTORY = 0xF7B75183A2829843dB06266c114297dfbFaeE2b6;
+    address public constant SF_PROXY_GUARD = 0xCe91349d2A4577BBd0fC91Fe6019600e047f2847;
 }
