@@ -6,12 +6,13 @@ import { ISpoke } from "../../../contracts/interfaces/protocols/aaveV4/ISpoke.so
 import { IHub } from "../../../contracts/interfaces/protocols/aaveV4/IHub.sol";
 import { ExecuteActionsBase } from "../../utils/executeActions/ExecuteActionsBase.sol";
 import { AaveV4Helper } from "../../../contracts/actions/aaveV4/helpers/AaveV4Helper.sol";
+import { AaveV4RatioHelper } from "../../../contracts/actions/aavev4/helpers/AaveV4RatioHelper.sol";
 import { AaveV4Supply } from "../../../contracts/actions/aaveV4/AaveV4Supply.sol";
 import { AaveV4Borrow } from "../../../contracts/actions/aaveV4/AaveV4Borrow.sol";
 import { SmartWallet } from "test-sol/utils/SmartWallet.sol";
 import { console2 } from "forge-std/console2.sol";
 
-contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper {
+contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper, AaveV4RatioHelper {
     uint256 internal constant RAY = 1e27;
 
     address internal constant CORE_HUB = 0xaD905aD5EA5B98cD50AE40Cfe368344686a21366;
@@ -36,6 +37,30 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper {
             collReserveId: CORE_RESERVE_ID_USDC,
             debtReserveId: CORE_RESERVE_ID_WETH
         });
+    }
+
+    function _executeAaveV4Open(
+        AaveV4TestPair memory _testPair,
+        uint256 _supplyAmountInUSD,
+        uint256 _borrowAmountInUSD,
+        address _sender,
+        SmartWallet _wallet
+    ) internal returns (bool success) {
+        // Supply collateral
+        if (!_executeAaveV4Supply(_testPair, _supplyAmountInUSD, _sender, _wallet)) {
+            console2.log("Failed to supply assets. Check caps and reserve/spoke status.");
+            return false;
+        }
+
+        // Borrow debt
+        if (!_executeAaveV4Borrow(
+                _testPair.spoke, _testPair.debtReserveId, _borrowAmountInUSD, _sender, _wallet
+            )) {
+            console2.log("Failed to borrow assets. Check caps and reserve/spoke status.");
+            return false;
+        }
+
+        success = true;
     }
 
     function _executeAaveV4Supply(
@@ -69,20 +94,22 @@ contract AaveV4TestBase is ExecuteActionsBase, AaveV4Helper {
     function _executeAaveV4Borrow(
         address _spoke,
         uint256 _reserveId,
-        uint256 _borrowAmount,
+        uint256 _borrowAmountInUSD,
         address _to,
         SmartWallet _wallet
     ) internal returns (bool success) {
         ISpoke.Reserve memory reserve = ISpoke(_spoke).getReserve(_reserveId);
         address walletAddr = _wallet.walletAddr();
 
-        if (!_isValidBorrow(_spoke, _borrowAmount, reserve)) {
+        uint256 borrowAmount = amountInUSDPrice(reserve.underlying, _borrowAmountInUSD);
+
+        if (!_isValidBorrow(_spoke, borrowAmount, reserve)) {
             console2.log("Invalid borrow. Check caps and reserve/spoke status.");
             return false;
         }
 
         bytes memory executeActionCallData = executeActionCalldata(
-            aaveV4BorrowEncode(_spoke, walletAddr, _to, _reserveId, _borrowAmount), true
+            aaveV4BorrowEncode(_spoke, walletAddr, _to, _reserveId, borrowAmount), true
         );
 
         _wallet.execute(address(new AaveV4Borrow()), executeActionCallData, 0);

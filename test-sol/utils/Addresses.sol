@@ -52,4 +52,5 @@ library Addresses {
     address public constant UNISWAP_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
     address public constant BUNDLE_ADDR = 0x223c6aDE533851Df03219f6E3D8B763Bd47f84cf;
     address public constant STORAGE_ADDR = 0xF52551F95ec4A2B4299DcC42fbbc576718Dbf933;
+    address public constant TRANSIENT_STORAGE_CANCUN = 0x0304E27cccE28bAB4d78C6cb7AfD4cd01c87c1e4;
 }

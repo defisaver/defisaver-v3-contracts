@@ -103,6 +103,7 @@ import { AaveV4Withdraw } from "../../contracts/actions/aaveV4/AaveV4Withdraw.so
 import { AaveV4Borrow } from "../../contracts/actions/aaveV4/AaveV4Borrow.sol";
 import { AaveV4Payback } from "../../contracts/actions/aaveV4/AaveV4Payback.sol";
 import { AaveV4CollateralSwitch } from "../../contracts/actions/aaveV4/AaveV4CollateralSwitch.sol";
+import { AaveV4StoreRatio } from "../../contracts/actions/aaveV4/AaveV4StoreRatio.sol";
 
 contract ActionsUtils {
     // @dev Change this value if we ever need to add more parameters to any action.
@@ -1411,5 +1412,13 @@ contract ActionsUtils {
                 useAsCollateral: _useAsCollateral
             })
         );
+    }
+
+    function aaveV4StoreRatioEncode(address _spoke, address _user)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(AaveV4StoreRatio.Params({ spoke: _spoke, user: _user }));
     }
 }
