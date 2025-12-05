@@ -1086,81 +1086,6 @@ const getAaveV3ReserveData = async (tokenAddress, market = null) => {
     return reserveData;
 };
 
-// Helper function to get enum name from value
-const getCloseStrategyTypeName = (value) => {
-    const enumNames = [
-        'TAKE_PROFIT_IN_COLLATERAL',
-        'STOP_LOSS_IN_COLLATERAL',
-        'TAKE_PROFIT_IN_DEBT',
-        'STOP_LOSS_IN_DEBT',
-        'TAKE_PROFIT_AND_STOP_LOSS_IN_COLLATERAL',
-        'TAKE_PROFIT_IN_COLLATERAL_AND_STOP_LOSS_IN_DEBT',
-        'TAKE_PROFIT_AND_STOP_LOSS_IN_DEBT',
-        'TAKE_PROFIT_IN_DEBT_AND_STOP_LOSS_IN_COLLATERAL',
-    ];
-    return enumNames[value] || `UNKNOWN_${value}`;
-};
-
-// Close strategy configurations for testing
-const getAaveV3CloseStrategyConfigs = (automationSdk) => [
-    // Take Profit Only - In Collateral (very high quote price = always triggers)
-    {
-        stopLossPrice: 0,
-        stopLossType: null,
-        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
-        takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-    },
-    // Stop Loss Only - In Collateral (very low quote price = always triggers)
-    {
-        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
-        stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-        takeProfitPrice: 0,
-        takeProfitType: null,
-    },
-    // Take Profit Only - In Debt
-    {
-        stopLossPrice: 0,
-        stopLossType: null,
-        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
-        takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
-    },
-    // Stop Loss Only - In Debt
-    {
-        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
-        stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
-        takeProfitPrice: 0,
-        takeProfitType: null,
-    },
-    // Both - In Collateral
-    {
-        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
-        stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
-        takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-    },
-    // Take Profit In Collateral, Stop Loss In Debt
-    {
-        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
-        stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
-        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
-        takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-    },
-    // Both - In Debt
-    {
-        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
-        stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
-        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
-        takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
-    },
-    // Take Profit In Debt, Stop Loss In Collateral
-    {
-        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
-        stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
-        takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
-    },
-];
-
 const deployAaveV3FLCollateralSwitchStrategy = async () => {
     const isL2 = network !== 'mainnet';
     const isFork = isNetworkFork();
@@ -1197,8 +1122,6 @@ module.exports = {
     deployAaveV3CloseGenericBundle,
     setupAaveV3EOAPermissions,
     getAaveV3ReserveData,
-    getCloseStrategyTypeName,
-    getAaveV3CloseStrategyConfigs,
     deployAaveV3FLCollateralSwitchStrategy,
     AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST,
     AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY,
