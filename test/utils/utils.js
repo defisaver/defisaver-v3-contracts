@@ -164,6 +164,7 @@ const addrs = {
         INSTADAPP_CONNECTORS_V2: '0x67fCE99Dd6d8d659eea2a1ac1b8881c57eb6592B',
         SUMMERFI_FACTORY: '0xCcB155E5B2A3201d5e10EdAa6e9F908871d1722B',
         SUMMERFI_GUARD: '0x746a6f9Acb42bcB43C08C829A035DBa7Db9E7385',
+        MORPHO_BLUE_VIEW: '0xa3b8b400a2eFF0314fa9605E778692bd4Bd9f880',
     },
     base: {
         PROXY_REGISTRY: '0x425fA97285965E01Cc5F951B62A51F6CDEA5cc0d',
@@ -1713,6 +1714,92 @@ const addBalancerFlLiquidity = async (tokenAddr) => {
     await setBalance(tokenAddr, BALANCER_VAULT_ADDR, hre.ethers.utils.parseUnits('1000000000', 18));
 };
 
+// Helper function to get enum name from value
+const getCloseStrategyTypeName = (value) => {
+    const enumNames = [
+        'TAKE_PROFIT_IN_COLLATERAL',
+        'STOP_LOSS_IN_COLLATERAL',
+        'TAKE_PROFIT_IN_DEBT',
+        'STOP_LOSS_IN_DEBT',
+        'TAKE_PROFIT_AND_STOP_LOSS_IN_COLLATERAL',
+        'TAKE_PROFIT_IN_COLLATERAL_AND_STOP_LOSS_IN_DEBT',
+        'TAKE_PROFIT_AND_STOP_LOSS_IN_DEBT',
+        'TAKE_PROFIT_IN_DEBT_AND_STOP_LOSS_IN_COLLATERAL',
+    ];
+    return enumNames[value] || `UNKNOWN_${value}`;
+};
+
+// Close strategy configurations for testing
+const getCloseStrategyConfigs = (automationSdk) => [
+    // Take Profit Only - In Collateral (very high quote price = always triggers)
+    {
+        stopLossPrice: 0,
+        stopLossType: null,
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
+        takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
+    },
+    // Stop Loss Only - In Collateral (very low quote price = always triggers)
+    {
+        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
+        stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
+        takeProfitPrice: 0,
+        takeProfitType: null,
+    },
+    // Take Profit Only - In Debt
+    {
+        stopLossPrice: 0,
+        stopLossType: null,
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
+        takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
+    },
+    // Stop Loss Only - In Debt
+    {
+        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
+        stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
+        takeProfitPrice: 0,
+        takeProfitType: null,
+    },
+    // Both - In Collateral
+    {
+        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
+        stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
+        takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
+    },
+    // Take Profit In Collateral, Stop Loss In Debt
+    {
+        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
+        stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
+        takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
+    },
+    // Both - In Debt
+    {
+        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
+        stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
+        takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
+    },
+    // Take Profit In Debt, Stop Loss In Collateral
+    {
+        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
+        stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
+        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
+        takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
+    },
+];
+
+const isCloseToDebtType = (automationSdk, closeStrategyType) => {
+    return (
+        closeStrategyType === automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_DEBT ||
+        closeStrategyType === automationSdk.enums.CloseStrategyType.STOP_LOSS_IN_DEBT ||
+        closeStrategyType ===
+            automationSdk.enums.CloseStrategyType.TAKE_PROFIT_AND_STOP_LOSS_IN_DEBT ||
+        closeStrategyType ===
+            automationSdk.enums.CloseStrategyType.TAKE_PROFIT_IN_DEBT_AND_STOP_LOSS_IN_COLLATERAL
+    );
+};
+
 module.exports = {
     addToExchangeAggregatorRegistry,
     getAddrFromRegistry,
@@ -1792,6 +1879,9 @@ module.exports = {
     createDsaProxy,
     createSFProxy,
     whitelistContractForSFProxy,
+    getCloseStrategyTypeName,
+    getCloseStrategyConfigs,
+    isCloseToDebtType,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,

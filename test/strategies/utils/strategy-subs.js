@@ -554,43 +554,6 @@ const updateSparkAutomationStrategy = async (
     };
 };
 
-const subSparkCloseBundle = async (
-    proxy,
-    bundleId,
-    triggerBaseAsset,
-    triggerQuoteAsset,
-    targetPrice,
-    priceState,
-    _collAsset,
-    _collAssetId,
-    _debtAsset,
-    _debtAssetId,
-) => {
-    const triggerData = {
-        baseTokenAddress: triggerBaseAsset,
-        quoteTokenAddress: triggerQuoteAsset,
-        price: targetPrice,
-        ratioState:
-            priceState === 1
-                ? automationSdk.enums.RatioState.UNDER
-                : automationSdk.enums.RatioState.OVER,
-    };
-    const subData = {
-        collAsset: _collAsset,
-        collAssetId: _collAssetId,
-        debtAsset: _debtAsset,
-        debtAssetId: _debtAssetId,
-    };
-    const strategySub = automationSdk.strategySubService.sparkEncode.closeToAsset(
-        bundleId,
-        true,
-        triggerData,
-        subData,
-    );
-    const subId = await subToStrategy(proxy, strategySub);
-    return { subId, strategySub };
-};
-
 const subLiquityDsrPaybackStrategy = async ({ proxy, triggerRatio, targetRatio }) => {
     const strategySub = automationSdk.strategySubService.liquityEncode.dsrPayback(
         proxy.address,
@@ -845,6 +808,36 @@ const subAaveV3OpenOrder = async (
     );
     const subId = await subToStrategy(proxy, strategySub);
 
+    return { subId, strategySub };
+};
+const subAaveV3FLCollateralSwitchStrategy = async (
+    proxy,
+    strategyId,
+    fromAsset,
+    fromAssetId,
+    toAsset,
+    toAssetId,
+    marketAddr,
+    amountToSwitch,
+    baseTokenAddress,
+    quoteTokenAddress,
+    triggerPrice,
+    priceState,
+) => {
+    const strategySub = automationSdk.strategySubService.aaveV3Encode.collateralSwitch(
+        strategyId,
+        fromAsset,
+        fromAssetId,
+        toAsset,
+        toAssetId,
+        marketAddr,
+        amountToSwitch,
+        baseTokenAddress,
+        quoteTokenAddress,
+        triggerPrice,
+        priceState,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
     return { subId, strategySub };
 };
 const subLiquityV2RepayBundle = async (
@@ -1186,6 +1179,69 @@ const subCompV3CloseOnPriceBundle = async (
     return { subId, strategySub };
 };
 
+const subSparkCloseGeneric = async (
+    proxy,
+    user,
+    collAsset,
+    collAssetId,
+    debtAsset,
+    debtAssetId,
+    marketAddr,
+    stopLossPrice,
+    stopLossType,
+    takeProfitPrice,
+    takeProfitType,
+    bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.sparkEncode.closeOnPriceGeneric(
+        bundleId,
+        collAsset,
+        collAssetId,
+        debtAsset,
+        debtAssetId,
+        marketAddr,
+        user,
+        stopLossPrice,
+        stopLossType,
+        takeProfitPrice,
+        takeProfitType,
+    );
+
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
+const subMorphoBlueClose = async (
+    proxy,
+    user,
+    loanToken,
+    collateralToken,
+    oracle,
+    irm,
+    lltv,
+    stopLossPrice,
+    stopLossType,
+    takeProfitPrice,
+    takeProfitType,
+    bundleId,
+) => {
+    const strategySub = automationSdk.strategySubService.morphoBlueEncode.closeOnPrice(
+        bundleId,
+        loanToken,
+        collateralToken,
+        oracle,
+        irm,
+        lltv,
+        user,
+        stopLossPrice,
+        stopLossType,
+        takeProfitPrice,
+        takeProfitType,
+    );
+    const subId = await subToStrategy(proxy, strategySub);
+    return { subId, strategySub };
+};
+
 module.exports = {
     subDcaStrategy,
     subMcdCloseToCollStrategy,
@@ -1205,7 +1261,6 @@ module.exports = {
     subCompV2AutomationStrategy,
     subSparkAutomationStrategy,
     updateSparkAutomationStrategy,
-    subSparkCloseBundle,
     subLiquityDsrPaybackStrategy,
     subLiquityDsrSupplyStrategy,
     subLiquityDebtInFrontRepayStrategy,
@@ -1227,4 +1282,7 @@ module.exports = {
     subCompV3RepayOnPriceBundle,
     subCompV3BoostOnPriceBundle,
     subCompV3CloseOnPriceBundle,
+    subAaveV3FLCollateralSwitchStrategy,
+    subSparkCloseGeneric,
+    subMorphoBlueClose,
 };
