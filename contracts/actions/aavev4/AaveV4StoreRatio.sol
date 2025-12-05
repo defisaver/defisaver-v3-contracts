@@ -14,7 +14,7 @@ contract AaveV4StoreRatio is ActionBase, AaveV4RatioHelper {
         TransientStorageCancun(TRANSIENT_STORAGE_CANCUN);
 
     /// @param spoke Address of the spoke.
-    /// @param user Address of the user.
+    /// @param user Address of the user. Defaults to the proxy address if not provided.
     struct Params {
         address spoke;
         address user;
@@ -30,6 +30,7 @@ contract AaveV4StoreRatio is ActionBase, AaveV4RatioHelper {
         Params memory params = parseInputs(_callData);
         params.spoke = _parseParamAddr(params.spoke, _paramMapping[0], _subData, _returnValues);
         params.user = _parseParamAddr(params.user, _paramMapping[1], _subData, _returnValues);
+        params.user = params.user == address(0) ? address(this) : params.user;
 
         uint256 ratio = getRatio(params.spoke, params.user);
 

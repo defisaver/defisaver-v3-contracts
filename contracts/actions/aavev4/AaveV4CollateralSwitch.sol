@@ -61,6 +61,7 @@ contract AaveV4CollateralSwitch is ActionBase {
                             ACTION LOGIC
     //////////////////////////////////////////////////////////////*/
     function _collateralSwitch(Params memory _params) internal returns (bytes memory) {
+        _params.onBehalf = _params.onBehalf == address(0) ? address(this) : _params.onBehalf;
         ISpoke(_params.spoke)
             .setUsingAsCollateral(_params.reserveId, _params.useAsCollateral, _params.onBehalf);
 
