@@ -42,23 +42,25 @@ contract AaveV4RatioCheck is ActionBase, AaveV4RatioHelper {
     ) public payable virtual override returns (bytes32) {
         Params memory params = parseInputs(_callData);
 
-        RatioState state = RatioState(
+        params.ratioState = RatioState(
             _parseParamUint(uint8(params.ratioState), _paramMapping[0], _subData, _returnValues)
         );
-        uint256 target =
+        params.targetRatio =
             _parseParamUint(params.targetRatio, _paramMapping[1], _subData, _returnValues);
+        params.spoke = _parseParamAddr(params.spoke, _paramMapping[2], _subData, _returnValues);
+        params.user = _parseParamAddr(params.user, _paramMapping[3], _subData, _returnValues);
 
         uint256 current = getRatio(params.spoke, params.user);
         uint256 start = uint256(tempStorage.getBytes32(AAVE_V4_RATIO_KEY));
 
-        if (state == RatioState.IN_REPAY) {
+        if (params.ratioState == RatioState.IN_REPAY) {
             // Repay: Ratio must increase but not overshoot 'target + offset' to avoid boost after.
-            if (current <= start || current > target + RATIO_OFFSET) {
+            if (current <= start || current > params.targetRatio + RATIO_OFFSET) {
                 revert BadAfterRatio(start, current);
             }
         } else {
             // Boost: Ratio must decrease but not undershoot 'target - offset' to avoid repay after.
-            if (current >= start || current < target - RATIO_OFFSET) {
+            if (current >= start || current < params.targetRatio - RATIO_OFFSET) {
                 revert BadAfterRatio(start, current);
             }
         }
