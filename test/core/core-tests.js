@@ -878,7 +878,7 @@ const recipeExecutorTest = async () => {
             dsProxy = await getProxy(senderAcc.address, false);
             safe = await getProxy(senderAcc.address, true);
             dsaProxy = await createDsaProxy(senderAcc.address);
-            sfProxy = await createSFProxy();
+            sfProxy = await createSFProxy(senderAcc.address);
 
             // Whitelist RecipeExecutor for Summerfi account
             const recipeExecutorAddr = await getAddrFromRegistry('RecipeExecutor');

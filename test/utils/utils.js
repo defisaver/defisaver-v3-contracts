@@ -708,15 +708,17 @@ const createDsaProxy = async (acc) => {
     return dsaProxy;
 };
 
-const createSFProxy = async () => {
+const createSFProxy = async (acc) => {
     const sfProxyFactory = await hre.ethers.getContractAt(
         'IAccountFactory',
         addrs[network].SUMMERFI_FACTORY,
     );
 
-    const accountAddr = await sfProxyFactory.callStatic['createAccount()']();
-    const tx = await sfProxyFactory['createAccount()']();
-    await tx.wait();
+    let receipt = await sfProxyFactory['createAccount(address)'](acc);
+    receipt = await receipt.wait();
+
+    const abiCoder = new hre.ethers.utils.AbiCoder();
+    const [accountAddr] = abiCoder.decode(['address'], receipt.logs[0].topics[1]);
 
     const account = await hre.ethers.getContractAt('IAccountImplementation', accountAddr);
 
@@ -1615,7 +1617,7 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
         );
     } else {
         const isDSAProxy = await isProxyDSAProxy(proxy);
-        const isSFProxy = await isSFProxy(proxy);
+        const isSFProxyCheck = await isSFProxy(proxy);
 
         if (isDSAProxy) {
             await impersonateAccount(proxy.signer.address);
@@ -1629,7 +1631,7 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
                 },
             );
             await stopImpersonatingAccount(proxy.signer.address);
-        } else if (isSFProxy) {
+        } else if (isSFProxyCheck) {
             receipt = await proxy.execute(targetAddr, callData, {
                 gasLimit: 10000000,
                 value: ethValue,
