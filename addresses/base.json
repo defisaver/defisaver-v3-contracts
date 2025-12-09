@@ -165,14 +165,15 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0x7De85e67745a027D41Aba5Fe2D9b288e6467d710",
+        "address": "0xc91305DdE651c899EF8eE1D0C33E7dab1B5ABF0D",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x7De85e67745a027D41Aba5Fe2D9b288e6467d710",
             "0x7a87565b77dd65bbc153fe20e97743842f1a6e0c",
             "0xd0Ae279e330f98C399375f80968C8bf860202766",
             "0xdDFFd19564F9703800Da8a2FB9c2b4a7242bf01F"
@@ -290,14 +291,15 @@
     },
     {
         "name": "FLAction",
-        "address": "0xDA86B4c61A545a4b217746ba43C8157f0Ec612c7",
+        "address": "0x172A75C3cCaf3b35Bc1c604cbea1367Bf7fb968e",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xDA86B4c61A545a4b217746ba43C8157f0Ec612c7",
             "0x5523E61fBEF59825831Ffbb1306aBc3Bb03BB3A4",
             "0xAAbd4B0372240E319F9722c4Fd1e2FE0C8d422D2"
         ]
