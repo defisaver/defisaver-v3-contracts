@@ -52,12 +52,33 @@ contract TestSkyView is SkyExecuteActions {
     /*//////////////////////////////////////////////////////////////////////////
                                      TESTS
     //////////////////////////////////////////////////////////////////////////*/
+
+    function test_skyView_GetGeneralInfo() public view {
+        address[] memory farms = new address[](3);
+        farms[0] = USDS_FARM;
+        farms[1] = SPARK_FARM;
+        farms[2] = SKY_FARM;
+
+        SkyView.GeneralInfo memory info = cut.getGeneralInfo(farms);
+        assertGt(info.debtCeiling, 0);
+        assertGt(info.borrowRatePerSecond, 0);
+        assertEq(
+            info.totalSkyStaked,
+            info.totalSkyLockedInFarms[0] + info.totalSkyLockedInFarms[1]
+                + info.totalSkyLockedInFarms[2]
+        );
+    }
+
     function test_skyView_USDS_FARM() public {
         _baseTest(USDS_FARM);
     }
 
     function test_skyView_SPARK_FARM() public {
         _baseTest(SPARK_FARM);
+    }
+
+    function test_skyView_SKY_FARM() public {
+        _baseTest(SKY_FARM);
     }
 
     function test_skyView_NO_FARM() public {
@@ -88,9 +109,10 @@ contract TestSkyView is SkyExecuteActions {
         emit ILockstakeEngine.Lock(walletAddr, index, AMOUNT, SKY_REFERRAL_CODE);
         wallet.execute(address(stake), executeActionCallData, 0);
 
-        address[] memory farms = new address[](2);
+        address[] memory farms = new address[](3);
         farms[0] = USDS_FARM;
         farms[1] = SPARK_FARM;
+        farms[2] = SKY_FARM;
 
         SkyView.UrnInfo[] memory urnsInfo = cut.getUserInfo(walletAddr, farms);
 
@@ -109,6 +131,7 @@ contract TestSkyView is SkyExecuteActions {
         SkyView.UrnInfo[] memory urnsInfoAfterAYear = cut.getUserInfo(walletAddr, farms);
 
         for (uint256 i = 0; i < urnsInfoAfterAYear[index].amountsEarned.length; i++) {
+            if (_farm == USDS_FARM) continue; // USDS farm is currently not earning any rewards
             if (urnsInfoAfterAYear[index].amountsEarned[i].farm == _farm) {
                 assertGt(
                     urnsInfoAfterAYear[index].amountsEarned[i].amountEarned,

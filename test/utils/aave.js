@@ -28,6 +28,7 @@ const {
     createAaveV3GenericFLRepayOnPriceStrategy,
     createAaveV3GenericFLCloseToDebtStrategy,
     createAaveV3GenericFLCloseToCollStrategy,
+    createAaveV3FLCollateralSwitchStrategy,
 } = require('../../strategies-spec/mainnet');
 
 const {
@@ -41,6 +42,7 @@ const {
     createAaveV3GenericFLRepayOnPriceL2Strategy,
     createAaveV3GenericFLCloseToDebtL2Strategy,
     createAaveV3GenericFLCloseToCollL2Strategy,
+    createAaveV3FLCollateralSwitchL2Strategy,
 } = require('../../strategies-spec/l2');
 
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
@@ -522,6 +524,39 @@ const AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY = {
         },
     ],
 };
+
+const AAVE_V3_COLL_SWITCH_TEST_PAIRS = [
+    {
+        fromAsset: 'WETH',
+        toAsset: 'USDC',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 40_000,
+        debtAmountInUSD: 15_000,
+        amountToSwitchInUSD: 30_000,
+        priceState: 1, // UNDER
+        price: 100_000, // Trigger when 1 WETH < 100_000 USDC
+    },
+    {
+        fromAsset: 'USDC',
+        toAsset: 'WETH',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: hre.ethers.constants.MaxUint256,
+        priceState: 0, // OVER
+        price: 0.00001, // Trigger when 1 USDC > 0.00001 WETH <=> 1 WETH < 100_000 USDC
+    },
+    {
+        fromAsset: 'WETH',
+        toAsset: 'WBTC',
+        marketAddr: addrs[network].AAVE_MARKET,
+        collAmountInUSD: 50_000,
+        debtAmountInUSD: 25_000,
+        amountToSwitchInUSD: 40_000,
+        priceState: 1, // UNDER
+        price: 1, // Trigger when 1 WETH < 1 WBTC
+    },
+];
 
 const getAaveDataProvider = async () => {
     const dataProvider = await hre.ethers.getContractAt(
@@ -1051,80 +1086,20 @@ const getAaveV3ReserveData = async (tokenAddress, market = null) => {
     return reserveData;
 };
 
-// Helper function to get enum name from value
-const getCloseStrategyTypeName = (value) => {
-    const enumNames = [
-        'TAKE_PROFIT_IN_COLLATERAL',
-        'STOP_LOSS_IN_COLLATERAL',
-        'TAKE_PROFIT_IN_DEBT',
-        'STOP_LOSS_IN_DEBT',
-        'TAKE_PROFIT_AND_STOP_LOSS_IN_COLLATERAL',
-        'TAKE_PROFIT_IN_COLLATERAL_AND_STOP_LOSS_IN_DEBT',
-        'TAKE_PROFIT_AND_STOP_LOSS_IN_DEBT',
-        'TAKE_PROFIT_IN_DEBT_AND_STOP_LOSS_IN_COLLATERAL',
-    ];
-    return enumNames[value] || `UNKNOWN_${value}`;
+const deployAaveV3FLCollateralSwitchStrategy = async () => {
+    const isL2 = network !== 'mainnet';
+    const isFork = isNetworkFork();
+    await openStrategyAndBundleStorage(isFork);
+    const flCollateralSwitchStrategy = isL2
+        ? createAaveV3FLCollateralSwitchL2Strategy()
+        : createAaveV3FLCollateralSwitchStrategy();
+    const continuous = false;
+    const flCollateralSwitchStrategyId = await createStrategy(
+        ...flCollateralSwitchStrategy,
+        continuous,
+    );
+    return flCollateralSwitchStrategyId;
 };
-
-// Close strategy configurations for testing
-const getAaveV3CloseStrategyConfigs = (automationSdk) => [
-    // Take Profit Only - In Collateral (very high quote price = always triggers)
-    {
-        stopLossPrice: 0,
-        stopLossType: null,
-        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
-        takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-    },
-    // Stop Loss Only - In Collateral (very low quote price = always triggers)
-    {
-        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
-        stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-        takeProfitPrice: 0,
-        takeProfitType: null,
-    },
-    // Take Profit Only - In Debt
-    {
-        stopLossPrice: 0,
-        stopLossType: null,
-        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
-        takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
-    },
-    // Stop Loss Only - In Debt
-    {
-        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
-        stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
-        takeProfitPrice: 0,
-        takeProfitType: null,
-    },
-    // Both - In Collateral
-    {
-        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
-        stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
-        takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-    },
-    // Take Profit In Collateral, Stop Loss In Debt
-    {
-        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
-        stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
-        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
-        takeProfitType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-    },
-    // Both - In Debt
-    {
-        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
-        stopLossType: automationSdk.enums.CloseToAssetType.DEBT,
-        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
-        takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
-    },
-    // Take Profit In Debt, Stop Loss In Collateral
-    {
-        stopLossPrice: 999_999 * 1e8, // Maximum price - will always trigger
-        stopLossType: automationSdk.enums.CloseToAssetType.COLLATERAL,
-        takeProfitPrice: 0.00000001, // Minimal price - will always trigger
-        takeProfitType: automationSdk.enums.CloseToAssetType.DEBT,
-    },
-];
 
 module.exports = {
     getAaveDataProvider,
@@ -1147,6 +1122,7 @@ module.exports = {
     deployAaveV3CloseGenericBundle,
     setupAaveV3EOAPermissions,
     getAaveV3ReserveData,
+    deployAaveV3FLCollateralSwitchStrategy,
     AAVE_V3_AUTOMATION_TEST_PAIRS_BOOST,
     AAVE_V3_AUTOMATION_TEST_PAIRS_REPAY,
     aaveV2assetsDefaultMarket,
@@ -1157,6 +1133,5 @@ module.exports = {
     LUSD_ASSET_ID_IN_AAVE_V3_MARKET,
     WSETH_ASSET_ID_IN_AAVE_V3_MARKET,
     A_WETH_ADDRESS_V3,
-    getCloseStrategyTypeName,
-    getAaveV3CloseStrategyConfigs,
+    AAVE_V3_COLL_SWITCH_TEST_PAIRS,
 };

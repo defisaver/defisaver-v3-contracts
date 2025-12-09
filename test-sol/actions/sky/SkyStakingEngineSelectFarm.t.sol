@@ -63,6 +63,14 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         _baseTest(false, SPARK_FARM);
     }
 
+    function test_skyStakingEngineStake_Direct_SKY_FARM() public {
+        _baseTest(true, SKY_FARM);
+    }
+
+    function test_skyStakingEngineStake_SKY_FARM() public {
+        _baseTest(false, SKY_FARM);
+    }
+
     function test_skyStakingEngineStake_Direct_NO_FARM() public {
         _baseTest(true, address(0));
     }
@@ -89,6 +97,24 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         wallet.execute(address(cut), executeActionCallData, 0);
     }
 
+    function test_skyStakingEngineStake_Change_Farm_From_USDS_to_SKY() public {
+        give(SKY_ADDRESS, sender, AMOUNT);
+        approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
+
+        // stake and select USDS farm
+        executeSkyStakingEngineStake(
+            STAKING_ENGINE, 0, USDS_FARM, AMOUNT, sender, open, cut, stake, wallet
+        );
+
+        bytes memory executeActionCallData = executeActionCalldata(
+            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, SKY_FARM), true
+        );
+
+        vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
+        emit ILockstakeEngine.SelectFarm(walletAddr, 0, SKY_FARM, SKY_REFERRAL_CODE);
+        wallet.execute(address(cut), executeActionCallData, 0);
+    }
+
     function test_skyStakingEngineStake_Change_Farm_from_SPARK_to_USDS() public {
         give(SKY_ADDRESS, sender, AMOUNT);
         approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
@@ -96,6 +122,24 @@ contract TestSkyStakingEngineSelectFarm is SkyExecuteActions {
         // stake and select SPARK farm
         executeSkyStakingEngineStake(
             STAKING_ENGINE, 0, SPARK_FARM, AMOUNT, sender, open, cut, stake, wallet
+        );
+
+        bytes memory executeActionCallData = executeActionCalldata(
+            skyStakingEngineSelectFarmEncode(STAKING_ENGINE, 0, USDS_FARM), true
+        );
+
+        vm.expectEmit(true, true, true, true, address(STAKING_ENGINE));
+        emit ILockstakeEngine.SelectFarm(walletAddr, 0, USDS_FARM, SKY_REFERRAL_CODE);
+        wallet.execute(address(cut), executeActionCallData, 0);
+    }
+
+    function test_skyStakingEngineStake_Change_Farm_from_SKY_to_USDS() public {
+        give(SKY_ADDRESS, sender, AMOUNT);
+        approveAsSender(sender, SKY_ADDRESS, walletAddr, AMOUNT);
+
+        // stake and select SPARK farm
+        executeSkyStakingEngineStake(
+            STAKING_ENGINE, 0, SKY_FARM, AMOUNT, sender, open, cut, stake, wallet
         );
 
         bytes memory executeActionCallData = executeActionCalldata(

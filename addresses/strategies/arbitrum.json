@@ -922,5 +922,261 @@
             ["&1", "&3", "&eoa", "&eoa", 0, 0]
         ],
         "bundleId": 22
+    },
+    {
+        "name": "MorphoBlueRepayL2Strategy",
+        "id": 42,
+        "isContinuous": true,
+        "triggerIds": ["MorphoBlueRatioTrigger"],
+        "actionIds": [
+            "MorphoBlueWithdrawCollateral",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBluePayback",
+            "MorphoBlueRatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", "&2", "&3", "&4", "&5", 0, "&8", "&proxy"],
+            ["&2", "&1", "$1", "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&8"],
+            ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
+        ],
+        "bundleId": 26
+    },
+    {
+        "name": "MorphoBlueFLCollRepayL2Strategy",
+        "id": 43,
+        "isContinuous": true,
+        "triggerIds": ["MorphoBlueRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBluePayback",
+            "MorphoBlueWithdrawCollateral",
+            "MorphoBlueRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&2", "&1", 0, "&proxy", "&proxy"],
+            ["&1", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&8"],
+            ["&1", "&2", "&3", "&4", "&5", "$1", "&8", 0],
+            ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
+        ],
+        "bundleId": 26
+    },
+    {
+        "name": "MorphoBlueFLDebtRepayL2Strategy",
+        "id": 44,
+        "isContinuous": true,
+        "triggerIds": ["MorphoBlueRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "MorphoBluePayback",
+            "MorphoBlueWithdrawCollateral",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "SendTokens",
+            "MorphoBlueRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&proxy", "&8"],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&8", "&proxy"],
+            ["&2", "&1", "$3", "&proxy", "&proxy"],
+            ["&1", "$4", 0],
+            ["&1", "&1", 0, "&eoa", "$1", 0],
+            ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
+        ],
+        "bundleId": 26
+    },
+    {
+        "name": "MorphoBlueBoostL2Strategy",
+        "id": 45,
+        "isContinuous": true,
+        "triggerIds": ["MorphoBlueRatioTrigger"],
+        "actionIds": [
+            "MorphoBlueBorrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBlueSupplyCollateral",
+            "MorphoBlueRatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", "&2", "&3", "&4", "&5", 0, "&8", "&proxy"],
+            ["&1", "&2", "$1", "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&8"],
+            ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
+        ],
+        "bundleId": 27
+    },
+    {
+        "name": "MorphoBlueFLCollBoostL2Strategy",
+        "id": 46,
+        "isContinuous": true,
+        "triggerIds": ["MorphoBlueRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "MorphoBlueSupplyCollateral",
+            "MorphoBlueBorrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "SendTokens",
+            "MorphoBlueRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&proxy", "&8"],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&8", "&proxy"],
+            ["&1", "&2", "$3", "&proxy", "&proxy"],
+            ["&2", "$4", 0],
+            ["&2", "&2", 0, "&eoa", "$1", 0],
+            ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
+        ],
+        "bundleId": 27
+    },
+    {
+        "name": "MorphoBlueFLDebtBoostL2Strategy",
+        "id": 47,
+        "isContinuous": true,
+        "triggerIds": ["MorphoBlueRatioTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBlueSupplyCollateral",
+            "MorphoBlueBorrow",
+            "MorphoBlueRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&2", 0, "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&8"],
+            ["&1", "&2", "&3", "&4", "&5", "$1", "&8", 0],
+            ["&1", "&2", "&3", "&4", "&5", "&8", "&6", "&7"]
+        ],
+        "bundleId": 27
+    },
+    {
+        "name": "MorphoBlueBoostOnTargetPriceL2Strategy",
+        "id": 48,
+        "isContinuous": false,
+        "triggerIds": ["MorphoBluePriceTrigger"],
+        "actionIds": [
+            "MorphoBlueBorrow",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBlueSupplyCollateral",
+            "MorphoBlueTargetRatioCheck"
+        ],
+        "paramMapping": [
+            ["&1", "&2", "&3", "&4", "&5", 0, "&7", "&proxy"],
+            ["&1", "&2", "$1", "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&7"],
+            ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
+        ],
+        "bundleId": 25
+    },
+    {
+        "name": "MorphoBlueFLBoostOnTargetPriceL2Strategy",
+        "id": 49,
+        "isContinuous": false,
+        "triggerIds": ["MorphoBluePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "MorphoBlueSupplyCollateral",
+            "MorphoBlueBorrow",
+            "MorphoBlueTargetRatioCheck"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&2", 0, "&proxy", "&proxy"],
+            ["&2", "$2", 0],
+            ["&1", "&2", "&3", "&4", "&5", "$3", "&proxy", "&7"],
+            ["&1", "&2", "&3", "&4", "&5", "$1", "&7", 0],
+            ["&1", "&2", "&3", "&4", "&5", "&7", "&6"]
+        ],
+        "bundleId": 25
+    },
+    {
+        "name": "AaveV3FLCollateralSwitchL2Strategy",
+        "id": 50,
+        "isContinuous": false,
+        "triggerIds": ["AaveV3QuotePriceTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "AaveV3Supply",
+            "AaveV3Withdraw",
+            "SendToken",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&3", 0, "&proxy", "&proxy"],
+            ["&3", "$2", 0],
+            ["$3", "&proxy", "&4", 0, 0, "&7", "&5", 0],
+            ["&2", 0, "&6", "&proxy", "&5"],
+            ["&1", 0, "$1"],
+            ["&1", "&eoa", 0]
+        ]
+    },
+    {
+        "name": "MorphoBlueFLCloseToDebtL2Strategy",
+        "id": 51,
+        "isContinuous": false,
+        "triggerIds": ["MorphoBluePriceRangeTrigger"],
+        "actionIds": [
+            "FLAction",
+            "MorphoBluePayback",
+            "MorphoBlueWithdrawCollateral",
+            "DFSSell",
+            "GasFeeTakerL2",
+            "SendToken",
+            "SendTokenAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&proxy", "&6"],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&6", "&proxy"],
+            ["&2", "&1", "$3", "&proxy", "&proxy"],
+            ["&1", "$4", 0],
+            ["&1", 0, "$1"],
+            ["&1", "&eoa", 0]
+        ],
+        "bundleId": 28
+    },
+    {
+        "name": "MorphoBlueFLCloseToCollL2Strategy",
+        "id": 52,
+        "isContinuous": false,
+        "triggerIds": ["MorphoBluePriceRangeTrigger"],
+        "actionIds": [
+            "FLAction",
+            "DFSSell",
+            "MorphoBluePayback",
+            "MorphoBlueWithdrawCollateral",
+            "GasFeeTakerL2",
+            "SendToken",
+            "SendTokensAndUnwrap"
+        ],
+        "paramMapping": [
+            [],
+            ["&2", "&1", 0, "&proxy", "&proxy"],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&proxy", "&6"],
+            ["&1", "&2", "&3", "&4", "&5", 0, "&6", "&proxy"],
+            ["&2", "$4", 0],
+            ["&2", 0, "$1"],
+            ["&2", "&1", "&eoa", "&eoa", 0, 0]
+        ],
+        "bundleId": 28
     }
 ]
