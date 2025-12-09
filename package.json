@@ -46,7 +46,7 @@
     "decimal.js": "^10.3.1",
     "dotenv-safe": "^8.2.0",
     "envfile": "^6.17.0",
-    "eslint": "^7.24.0",
+    "eslint": "^9.0.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "ethereum-waffle": "^4.0.0",
