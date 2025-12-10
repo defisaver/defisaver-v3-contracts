@@ -7179,7 +7179,7 @@ const createAaveV4RepayOnPriceStrategy = () => {
         formatExchangeObj(
             '&collAsset',
             '&debtAsset',
-            '$1',
+            '$2',
             '%exchangeWrapper', // Sent by backend.
         ),
         '&proxy',
@@ -7188,14 +7188,14 @@ const createAaveV4RepayOnPriceStrategy = () => {
     const takeFee = new dfs.actions.basic.GasFeeAction(
         '%gasStart', // Sent by backend.
         '&debtAsset',
-        '$2',
+        '$3',
     );
     const payback = new dfs.actions.aaveV4.AaveV4PaybackAction(
         '&spoke',
         '&user',
         '&proxy',
         '&debtAssetId',
-        '$3',
+        '$4',
     );
     const check = new dfs.actions.checkers.AaveV4RatioCheckAction(
         '&ratioState',
@@ -7245,14 +7245,14 @@ const createAaveV4FLRepayOnPriceStrategy = () => {
     const takeFee = new dfs.actions.basic.GasFeeAction(
         '%gasStart', // Sent by backend.
         '&debtAsset',
-        '$2',
+        '$3',
     );
     const payback = new dfs.actions.aaveV4.AaveV4PaybackAction(
         '&spoke',
         '&user',
         '&proxy',
         '&debtAssetId',
-        '$3',
+        '$4',
     );
     const withdraw = new dfs.actions.aaveV4.AaveV4WithdrawAction(
         '&spoke',
@@ -7300,7 +7300,7 @@ const createAaveV4BoostOnPriceStrategy = () => {
         formatExchangeObj(
             '&debtAsset',
             '&collAsset',
-            '$1',
+            '$2',
             '%exchangeWrapper', // Sent by backend.
         ),
         '&proxy',
@@ -7309,14 +7309,14 @@ const createAaveV4BoostOnPriceStrategy = () => {
     const takeFee = new dfs.actions.basic.GasFeeAction(
         '%gasStart', // Sent by backend.
         '&collAsset',
-        '$2',
+        '$3',
     );
     const supply = new dfs.actions.aaveV4.AaveV4SupplyAction(
         '&spoke',
         '&user',
         '&proxy',
         '&collAssetId',
-        '$3',
+        '$4',
         '%true', // Sent by backend. Hardcode to true (useAsCollateral)
     );
     const check = new dfs.actions.checkers.AaveV4RatioCheckAction(
@@ -7367,14 +7367,14 @@ const createAaveV4FLBoostOnPriceStrategy = () => {
     const takeFee = new dfs.actions.basic.GasFeeAction(
         '%gasStart', // Sent by backend.
         '&collAsset',
-        '$2',
+        '$3',
     );
     const supply = new dfs.actions.aaveV4.AaveV4SupplyAction(
         '&spoke',
         '&user',
         '&proxy',
         '&collAssetId',
-        '$3',
+        '$4',
         '%true', // Sent by backend. Hardcode to true (useAsCollateral)
     );
     const borrow = new dfs.actions.aaveV4.AaveV4BorrowAction(
