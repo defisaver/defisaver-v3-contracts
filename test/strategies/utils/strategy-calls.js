@@ -8367,6 +8367,11 @@ const callAaveV4RepayOnPriceStrategy = async (
     const actionsCallData = [];
     const gasCost = 1000000;
 
+    const storeRatio = new dfs.actions.aaveV4.AaveV4StoreRatioAction(
+        placeHolderAddr,
+        placeHolderAddr,
+    );
+
     const withdraw = new dfs.actions.aaveV4.AaveV4WithdrawAction(
         placeHolderAddr,
         placeHolderAddr,
@@ -8393,6 +8398,7 @@ const callAaveV4RepayOnPriceStrategy = async (
         placeHolderAddr,
     );
 
+    actionsCallData.push(storeRatio.encodeForRecipe()[0]);
     actionsCallData.push(withdraw.encodeForRecipe()[0]);
     actionsCallData.push(sell.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
@@ -8440,6 +8446,10 @@ const callAaveV4FLRepayOnPriceStrategy = async (
     const fl = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction([collAsset], [flAmount]),
     );
+    const storeRatio = new dfs.actions.aaveV4.AaveV4StoreRatioAction(
+        placeHolderAddr,
+        placeHolderAddr,
+    );
     const sell = new dfs.actions.basic.SellAction(exchangeObject, placeHolderAddr, placeHolderAddr);
     const feeTakingAction = isL2
         ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
@@ -8467,6 +8477,7 @@ const callAaveV4FLRepayOnPriceStrategy = async (
     );
 
     actionsCallData.push(fl.encodeForRecipe()[0]);
+    actionsCallData.push(storeRatio.encodeForRecipe()[0]);
     actionsCallData.push(sell.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(payback.encodeForRecipe()[0]);
@@ -8509,6 +8520,10 @@ const callAaveV4BoostOnPriceStrategy = async (
     const actionsCallData = [];
     const gasCost = 1000000;
 
+    const storeRatio = new dfs.actions.aaveV4.AaveV4StoreRatioAction(
+        placeHolderAddr,
+        placeHolderAddr,
+    );
     const borrow = new dfs.actions.aaveV4.AaveV4BorrowAction(
         placeHolderAddr,
         placeHolderAddr,
@@ -8536,6 +8551,7 @@ const callAaveV4BoostOnPriceStrategy = async (
         placeHolderAddr,
     );
 
+    actionsCallData.push(storeRatio.encodeForRecipe()[0]);
     actionsCallData.push(borrow.encodeForRecipe()[0]);
     actionsCallData.push(sell.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
@@ -8583,6 +8599,10 @@ const callAaveV4FLBoostOnPriceStrategy = async (
     const fl = new dfs.actions.flashloan.FLAction(
         new dfs.actions.flashloan.BalancerFlashLoanAction([debtAsset], [flAmount]),
     );
+    const storeRatio = new dfs.actions.aaveV4.AaveV4StoreRatioAction(
+        placeHolderAddr,
+        placeHolderAddr,
+    );
     const sell = new dfs.actions.basic.SellAction(exchangeObject, placeHolderAddr, placeHolderAddr);
     const feeTakingAction = isL2
         ? new dfs.actions.basic.GasFeeActionL2(gasCost, placeHolderAddr, '0', '0', '10000000')
@@ -8611,6 +8631,7 @@ const callAaveV4FLBoostOnPriceStrategy = async (
     );
 
     actionsCallData.push(fl.encodeForRecipe()[0]);
+    actionsCallData.push(storeRatio.encodeForRecipe()[0]);
     actionsCallData.push(sell.encodeForRecipe()[0]);
     actionsCallData.push(feeTakingAction.encodeForRecipe()[0]);
     actionsCallData.push(supply.encodeForRecipe()[0]);
