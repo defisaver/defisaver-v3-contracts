@@ -7166,6 +7166,8 @@ const createAaveV4RepayOnPriceStrategy = () => {
     const trigger = new dfs.triggers.AaveV4QuotePriceTrigger('0', '0', '0', '0', '0');
     s.addTrigger(trigger);
 
+    const storeRatio = new dfs.actions.aaveV4.AaveV4StoreRatioAction('&spoke', '&user');
+
     const withdraw = new dfs.actions.aaveV4.AaveV4WithdrawAction(
         '&spoke',
         '&user',
@@ -7202,7 +7204,7 @@ const createAaveV4RepayOnPriceStrategy = () => {
         '&user',
     );
 
-    s.addActions([withdraw, sell, takeFee, payback, check]);
+    s.addActions([storeRatio, withdraw, sell, takeFee, payback, check]);
 
     return s.encodeForDsProxyCall();
 };
@@ -7227,6 +7229,9 @@ const createAaveV4FLRepayOnPriceStrategy = () => {
             ['%flAmount'], // Sent by backend.
         ),
     );
+
+    const storeRatio = new dfs.actions.aaveV4.AaveV4StoreRatioAction('&spoke', '&user');
+
     const sell = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '&collAsset',
@@ -7263,7 +7268,7 @@ const createAaveV4FLRepayOnPriceStrategy = () => {
         '&user',
     );
 
-    s.addActions([fl, sell, takeFee, payback, withdraw, check]);
+    s.addActions([fl, storeRatio, sell, takeFee, payback, withdraw, check]);
 
     return s.encodeForDsProxyCall();
 };
@@ -7281,6 +7286,8 @@ const createAaveV4BoostOnPriceStrategy = () => {
 
     const trigger = new dfs.triggers.AaveV4QuotePriceTrigger('0', '0', '0', '0', '0');
     s.addTrigger(trigger);
+
+    const storeRatio = new dfs.actions.aaveV4.AaveV4StoreRatioAction('&spoke', '&user');
 
     const borrow = new dfs.actions.aaveV4.AaveV4BorrowAction(
         '&spoke',
@@ -7319,7 +7326,7 @@ const createAaveV4BoostOnPriceStrategy = () => {
         '&user',
     );
 
-    s.addActions([borrow, sell, takeFee, supply, check]);
+    s.addActions([storeRatio, borrow, sell, takeFee, supply, check]);
 
     return s.encodeForDsProxyCall();
 };
@@ -7344,6 +7351,9 @@ const createAaveV4FLBoostOnPriceStrategy = () => {
             ['%flAmount'], // Sent by backend.
         ),
     );
+
+    const storeRatio = new dfs.actions.aaveV4.AaveV4StoreRatioAction('&spoke', '&user');
+
     const sell = new dfs.actions.basic.SellAction(
         formatExchangeObj(
             '&debtAsset',
@@ -7381,7 +7391,7 @@ const createAaveV4FLBoostOnPriceStrategy = () => {
         '&user',
     );
 
-    s.addActions([fl, sell, takeFee, supply, borrow, check]);
+    s.addActions([fl, storeRatio, sell, takeFee, supply, borrow, check]);
 
     return s.encodeForDsProxyCall();
 };
