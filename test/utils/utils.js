@@ -78,6 +78,7 @@ const addrs = {
         MORPHO_BLUE_VIEW: '0x10B621823D4f3E85fBDF759e252598e4e097C1fd',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0x814c8C7ceb1411B364c2940c4b9380e739e06686',
         COMP_V3_SUB_PROXY_ADDR: '0x2f62a2ec44ed48dd5f2d56b308558ac065e8b794',
+        AAVE_V4_CORE_SPOKE: '0xBa97c5E52cd5BC3D7950Ae70779F8FfE92d40CdC',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -597,6 +598,16 @@ const getTokenHelperContract = async () => {
 };
 const fetchAmountInUSDPrice = async (tokenSymbol, amountUSD) => {
     const { decimals, address } = getAssetInfo(tokenSymbol, chainIds[network]);
+    const tokenHelper = await getTokenHelperContract();
+
+    const tokenPriceInUSD = await tokenHelper.getPriceInUSD(address);
+    const tokenPriceInUSDFormatted = tokenPriceInUSD / 10 ** 8;
+
+    const numOfTokens = (amountUSD / tokenPriceInUSDFormatted).toFixed(decimals);
+
+    return hre.ethers.utils.parseUnits(numOfTokens, decimals);
+};
+const fetchAmountInUSDPriceByAddress = async (address, decimals, amountUSD) => {
     const tokenHelper = await getTokenHelperContract();
 
     const tokenPriceInUSD = await tokenHelper.getPriceInUSD(address);
@@ -1762,6 +1773,7 @@ module.exports = {
     getCloseStrategyTypeName,
     getCloseStrategyConfigs,
     isCloseToDebtType,
+    fetchAmountInUSDPriceByAddress,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
