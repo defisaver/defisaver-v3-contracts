@@ -30,6 +30,7 @@ const {
 
 const CORE_RESERVE_ID_USDC = 5;
 const CORE_RESERVE_ID_WETH = 0;
+const CORE_RESERVE_ID_USDT = 4;
 
 const AAVE_V4_AUTOMATION_TEST_PAIRS = [
     {
@@ -213,8 +214,15 @@ const getAaveV4AssetPrice = async (spoke, assetId) => {
     return price;
 };
 
+const getUserSuppliedAmount = async (spoke, user, reserveId) => {
+    const spokeContract = await hre.ethers.getContractAt('ISpoke', spoke);
+    const userSuppliedAmount = await spokeContract.getUserSuppliedAssets(reserveId, user);
+    return userSuppliedAmount;
+};
+
 module.exports = {
     AAVE_V4_AUTOMATION_TEST_PAIRS,
+    CORE_RESERVE_ID_USDT,
     deployAaveV4RepayBundle,
     deployAaveV4BoostBundle,
     deployAaveV4RepayOnPriceBundle,
@@ -227,4 +235,5 @@ module.exports = {
     getUserAccountData,
     getSafetyRatio,
     getAaveV4AssetPrice,
+    getUserSuppliedAmount,
 };
