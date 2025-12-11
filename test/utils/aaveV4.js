@@ -205,6 +205,14 @@ const getSafetyRatio = async (spoke, user) => {
     return userAccountData.healthFactor;
 };
 
+const getAaveV4AssetPrice = async (spoke, assetId) => {
+    const spokeContract = await hre.ethers.getContractAt('ISpoke', spoke);
+    const oracleAddr = await spokeContract.ORACLE();
+    const oracleContract = await hre.ethers.getContractAt('IAaveV4Oracle', oracleAddr);
+    const price = await oracleContract.getReservePrice(assetId);
+    return price;
+};
+
 module.exports = {
     AAVE_V4_AUTOMATION_TEST_PAIRS,
     deployAaveV4RepayBundle,
@@ -218,4 +226,5 @@ module.exports = {
     redeployAaveV4Contracts,
     getUserAccountData,
     getSafetyRatio,
+    getAaveV4AssetPrice,
 };

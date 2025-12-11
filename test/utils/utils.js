@@ -1019,6 +1019,52 @@ const formatMockExchangeObjUsdFeed = async (
     ];
 };
 
+/// @notice formats exchange object and sets mock wrapper balance.
+/// Rate is calculated based on existing prices.
+const formatMockExchangeObjUsingExistingPrices = async (
+    srcTokenInfo,
+    destTokenInfo,
+    srcAmount,
+    srcPrice,
+    destPrice,
+    wrapperContract,
+    amountUsedWhenSrcAmountIsPiped = 0,
+) => {
+    const srcTokenPriceInUsdBN = BigNumber.from(srcPrice);
+    const destTokenPriceInUsdBN = BigNumber.from(destPrice);
+    const ten = BigNumber.from(10);
+    const destScale = ten.pow(destTokenInfo.decimals);
+    const srcScale = ten.pow(srcTokenInfo.decimals);
+
+    const srcAmountIsPiped = srcAmount.toString()[0] === '$';
+
+    const destTokenAmountBN = (srcAmountIsPiped ? amountUsedWhenSrcAmountIsPiped : srcAmount)
+        .mul(srcTokenPriceInUsdBN)
+        .mul(destScale)
+        .div(destTokenPriceInUsdBN)
+        .div(srcScale)
+        .mul(2);
+
+    await setBalance(
+        destTokenInfo.addresses[chainIds[network]],
+        wrapperContract.address,
+        destTokenAmountBN,
+    );
+
+    return [
+        srcTokenInfo.addresses[chainIds[network]],
+        destTokenInfo.addresses[chainIds[network]],
+        srcAmount,
+        0,
+        0,
+        0,
+        nullAddress,
+        wrapperContract.address,
+        hre.ethers.utils.defaultAbiCoder.encode(['uint256'], [0]),
+        [nullAddress, nullAddress, nullAddress, 0, 0, hre.ethers.utils.toUtf8Bytes('')],
+    ];
+};
+
 const formatExchangeObj = (
     srcAddr,
     destAddr,
@@ -1774,6 +1820,7 @@ module.exports = {
     getCloseStrategyConfigs,
     isCloseToDebtType,
     fetchAmountInUSDPriceByAddress,
+    formatMockExchangeObjUsingExistingPrices,
     addrs,
     AVG_GAS_PRICE,
     standardAmounts,
