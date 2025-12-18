@@ -65,6 +65,67 @@ contract AaveV4View {
         UserReserveData[] reserves;
     }
 
+    /// @notice Same as regular UserReserveData, but with full reserve data
+    struct UserReserveDataFull {
+        uint256 reserveId; // The identifier of the reserve. Doesn't have to match the assetId in the Hub.
+        address underlying; // The address of the underlying asset.
+        uint256 price; // The price of the underlying asset, expressed in oracle decimals.
+        uint8 decimals; // The number of decimals of the underlying asset.
+        // --------------------------
+        bool isUsingAsCollateral; // True if the reserve is being used as collateral.
+        bool isBorrowing; // True if the reserve is being borrowed.
+        bool reservePaused; // True if the reserve is paused for given spoke.
+        bool reserveFrozen; // True if the reserve is frozen for given spoke.
+        bool borrowable; // True if the reserve is borrowable.
+        bool spokeActive; // True if the spoke is active for this reserve and hub.
+        bool spokePaused; // True if the spoke is paused for this reserve and hub.
+        // --------------------------
+        uint256 userSupplied; // The amount of user-supplied assets, expressed in asset units.
+        uint256 userDrawn; // The amount of user-drawn assets, expressed in asset units.
+        uint256 userPremium; // The amount of user-premium assets, expressed in asset units.
+        uint256 userTotalDebt; // The total amount of user-debt (drawn + premium), expressed in asset units.
+        // --------------------------
+        uint24 collateralRisk; // The risk associated with a collateral asset, expressed in BPS. (E.g 1500 = 15%). This is global for spoke and reserveId.
+        // --------------------------
+        // This uses user dynamic config key
+        uint16 userCollateralFactor; // The collateral factor of the user position, expressed in BPS. (E.g 8500 = 85%).
+        uint32 userMaxLiquidationBonus; // The maximum extra amount of collateral given to the liquidator as bonus, expressed in BPS. 10000 represents 0.00% bonus. E.g 10500 = 5% bonus.
+        uint16 userLiquidationFee; // The protocol fee charged on liquidations, taken from the collateral bonus given to the liquidator, expressed in BPS. (E.g 1000 = 10%)
+        // --------------------------
+        // This uses latest dynamic config key
+        uint16 latestCollateralFactor; // The collateral factor of the reserve, expressed in BPS. (E.g 8500 = 85%).
+        uint32 latestMaxLiquidationBonus; // The maximum extra amount of collateral given to the liquidator as bonus, expressed in BPS. 10000 represents 0.00% bonus. E.g 10500 = 5% bonus.
+        uint16 latestLiquidationFee; // The protocol fee charged on liquidations, taken from the collateral bonus given to the liquidator, expressed in BPS. (E.g 1000 = 10%)
+        // --------------------------
+        address hub; // The address of the associated Hub.
+        uint16 hubAssetId; // The identifier of the asset in the Hub.
+        uint256 hubLiquidity; // The liquidity available to be accessed, expressed in asset units.
+        uint96 drawnRate; // The rate at which drawn assets grows, expressed in RAY.
+        uint120 drawnIndex; // The drawn index which monotonically increases according to the drawn rate, expressed in RAY.
+        // --------------------------
+        uint256 spokeTotalSupplied; // The total amount of spoke-supplied assets, expressed in asset units.
+        uint256 spokeTotalDrawn; // The total amount of spoke-drawn assets, expressed in asset units.
+        uint256 spokeTotalPremium; // The total amount of spoke-premium assets, expressed in asset units.
+        uint256 spokeTotalDebt; // The total amount of spoke-debt (drawn + premium), expressed in asset units.
+        // --------------------------
+        uint256 spokeSupplyCap; // The supply cap of the spoke, expressed in asset units.
+        uint256 spokeBorrowCap; // The borrow cap of the spoke, expressed in asset units.
+        uint256 spokeDeficitRay; // The deficit reported by a spoke for a given asset, expressed in asset units and scaled by RAY.
+    }
+
+    /// @notice Same as regular LoanData, but with full reserves data
+    struct LoanDataWithFullReserves {
+        address user;
+        uint256 riskPremium;
+        uint256 avgCollateralFactor;
+        uint256 healthFactor;
+        uint256 totalCollateralInUsd;
+        uint256 totalDebtInUsd;
+        uint256 activeCollateralCount;
+        uint256 borrowedCount;
+        UserReserveDataFull[] reserves;
+    }
+
     /// @notice Minimal reserve data.
     /// @dev underlying The address of the underlying asset.
     /// @dev collateralFactor The collateral factor of the reserve, expressed in BPS. (E.g 8500 = 85%).
@@ -274,6 +335,33 @@ contract AaveV4View {
         }
     }
 
+    function getLoanDataFull(address _spoke, address _user)
+        public
+        view
+        returns (LoanDataWithFullReserves memory loanData)
+    {
+        ISpoke spoke = ISpoke(_spoke);
+
+        ISpoke.UserAccountData memory userAccountData = spoke.getUserAccountData(_user);
+        uint256 reserveCount = spoke.getReserveCount();
+
+        loanData = LoanDataWithFullReserves({
+            user: _user,
+            riskPremium: userAccountData.riskPremium,
+            avgCollateralFactor: userAccountData.avgCollateralFactor,
+            healthFactor: userAccountData.healthFactor,
+            totalCollateralInUsd: userAccountData.totalCollateralValue,
+            totalDebtInUsd: userAccountData.totalDebtValue,
+            activeCollateralCount: userAccountData.activeCollateralCount,
+            borrowedCount: userAccountData.borrowedCount,
+            reserves: new UserReserveDataFull[](reserveCount)
+        });
+
+        for (uint256 i = 0; i < reserveCount; ++i) {
+            loanData.reserves[i] = _getUserReserveDataFull(_spoke, _user, i);
+        }
+    }
+
     function getLoanDataForMultipleSpokes(address _user, address[] calldata _spokes)
         public
         view
@@ -445,17 +533,18 @@ contract AaveV4View {
             _reserveId, spoke.getUserPosition(_reserveId, _user).dynamicConfigKey
         );
 
-        // TODO: Uncomment
-        // (bool isUsingAsCollateral, bool isBorrowing) = spoke.getUserReserveStatus(i, _user)
-        bool isUsingAsCollateral = false;
-        bool isBorrowing = false;
-
         (uint256 drawn, uint256 premium) = spoke.getUserDebt(_reserveId, _user);
+
+        // TODO: Uncomment
+        // (bool isUsingAsCollateral, bool isBorrowing) = spoke.getUserReserveStatus(_reserveId, _user)
+        uint256 supplied = spoke.getUserSuppliedAssets(_reserveId, _user);
+        bool isUsingAsCollateral = supplied > 0;
+        bool isBorrowing = (drawn + premium) > 0;
 
         return UserReserveData({
             reserveId: _reserveId,
             underlying: spoke.getReserve(_reserveId).underlying,
-            supplied: spoke.getUserSuppliedAssets(_reserveId, _user),
+            supplied: supplied,
             drawn: drawn,
             premium: premium,
             totalDebt: drawn + premium,
@@ -465,6 +554,79 @@ contract AaveV4View {
             isUsingAsCollateral: isUsingAsCollateral,
             isBorrowing: isBorrowing
         });
+    }
+
+    function _getUserReserveDataFull(address _spoke, address _user, uint256 _reserveId)
+        internal
+        view
+        returns (UserReserveDataFull memory data)
+    {
+        ISpoke spoke = ISpoke(_spoke);
+        ISpoke.Reserve memory reserve = spoke.getReserve(_reserveId);
+
+        data.reserveId = _reserveId;
+        data.underlying = reserve.underlying;
+        data.price = getReservePrice(_spoke, _reserveId);
+        data.decimals = reserve.decimals;
+
+        data.reservePaused = reserve.paused;
+        data.reserveFrozen = reserve.frozen;
+        data.borrowable = reserve.borrowable;
+
+        data.userSupplied = spoke.getUserSuppliedAssets(_reserveId, _user);
+        (data.userDrawn, data.userPremium) = spoke.getUserDebt(_reserveId, _user);
+        data.userTotalDebt = data.userDrawn + data.userPremium;
+
+        // TODO: Uncomment
+        //(data.isUsingAsCollateral, data.isBorrowing) = spoke.getUserReserveStatus(_reserveId, _user);
+        data.isUsingAsCollateral = data.userSupplied > 0;
+        data.isBorrowing = data.userTotalDebt > 0;
+
+        data.collateralRisk = reserve.collateralRisk;
+
+        {
+            uint24 userKey = spoke.getUserPosition(_reserveId, _user).dynamicConfigKey;
+            ISpoke.DynamicReserveConfig memory userCfg =
+                spoke.getDynamicReserveConfig(_reserveId, userKey);
+            data.userCollateralFactor = userCfg.collateralFactor;
+            data.userMaxLiquidationBonus = userCfg.maxLiquidationBonus;
+            data.userLiquidationFee = userCfg.liquidationFee;
+        }
+
+        {
+            ISpoke.DynamicReserveConfig memory latestCfg =
+                spoke.getDynamicReserveConfig(_reserveId, reserve.dynamicConfigKey);
+            data.latestCollateralFactor = latestCfg.collateralFactor;
+            data.latestMaxLiquidationBonus = latestCfg.maxLiquidationBonus;
+            data.latestLiquidationFee = latestCfg.liquidationFee;
+        }
+
+        data.hub = reserve.hub;
+        data.hubAssetId = reserve.assetId;
+
+        IHub hub = IHub(reserve.hub);
+        data.hubLiquidity = hub.getAssetLiquidity(reserve.assetId);
+        data.drawnRate = uint96(hub.getAssetDrawnRate(reserve.assetId));
+        data.drawnIndex = uint120(hub.getAssetDrawnIndex(reserve.assetId));
+
+        data.spokeTotalSupplied = hub.getSpokeAddedAssets(reserve.assetId, _spoke);
+        (data.spokeTotalDrawn, data.spokeTotalPremium) = hub.getSpokeOwed(reserve.assetId, _spoke);
+        data.spokeTotalDebt = data.spokeTotalDrawn + data.spokeTotalPremium;
+
+        {
+            IHub.SpokeData memory hubSpokeData = hub.getSpoke(reserve.assetId, _spoke);
+            data.spokeActive = hubSpokeData.active;
+            data.spokePaused = hubSpokeData.paused;
+            data.spokeDeficitRay = hubSpokeData.deficitRay;
+
+            uint40 maxCap = hub.MAX_ALLOWED_SPOKE_CAP();
+            data.spokeSupplyCap = hubSpokeData.addCap != maxCap
+                ? uint256(hubSpokeData.addCap) * (10 ** reserve.decimals)
+                : type(uint256).max;
+            data.spokeBorrowCap = hubSpokeData.drawCap != maxCap
+                ? uint256(hubSpokeData.drawCap) * (10 ** reserve.decimals)
+                : type(uint256).max;
+        }
     }
 
     function _getSpokeData(address _spoke) internal view returns (SpokeData memory spokeData) {

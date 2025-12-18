@@ -94,6 +94,20 @@ contract TestAaveV4View is AaveV4TestBase {
         _logLoanData(loanData);
     }
 
+    function test_get_loan_data_full() public view {
+        AaveV4View.LoanDataWithFullReserves memory loanData =
+            cut.getLoanDataFull(CORE_SPOKE, TEST_USER);
+        console2.log("user:", loanData.user);
+        console2.log("healthFactor:", loanData.healthFactor);
+        console2.log("reserves:", loanData.reserves.length);
+        if (loanData.reserves.length > 0) {
+            console2.log("first reserve underlying:", loanData.reserves[0].underlying);
+            console2.log("first reserve userSupplied:", loanData.reserves[0].userSupplied);
+            console2.log("first reserve userTotalDebt:", loanData.reserves[0].userTotalDebt);
+            console2.log("first reserve price:", loanData.reserves[0].price);
+        }
+    }
+
     function test_get_loan_data_for_multiple_spokes() public view {
         address[] memory spokes = new address[](1);
         spokes[0] = CORE_SPOKE;
