@@ -403,10 +403,17 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     {
         emodesData = new DataTypes.EModeCategoryNew[](256);
         IPoolV3 lendingPool = getLendingPool(_market);
+        uint8 missCounter;
         for (uint8 i = 1; i < 255; i++) {
             DataTypes.EModeCategoryNew memory nextEmodeData = getEmodeData(lendingPool, i);
-            if (bytes(nextEmodeData.label).length == 0) break;
-            emodesData[i - 1] = nextEmodeData;
+            if (nextEmodeData.liquidationThreshold != 0) {
+                emodesData[i - 1] = nextEmodeData;
+                missCounter = 0;
+            } else {
+                ++missCounter;
+                // assumes there will never be a gap > 2 when setting eModes
+                if (missCounter > 2) break;
+            }
         }
     }
 
@@ -421,12 +428,18 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     {
         DataTypes.CollateralConfig memory config =
             _lendingPool.getEModeCategoryCollateralConfig(_id);
+        uint128 ltvzeroBitmap;
+        try _lendingPool.getEModeCategoryLtvzeroBitmap(_id) returns (uint128 _ltvzeroBitmap) {
+            ltvzeroBitmap = _ltvzeroBitmap;
+        } catch (bytes memory) { /*lowLevelData*/ }
+
         emodeData = DataTypes.EModeCategoryNew({
             ltv: config.ltv,
             liquidationThreshold: config.liquidationThreshold,
             liquidationBonus: config.liquidationBonus,
             collateralBitmap: _lendingPool.getEModeCategoryCollateralBitmap(_id),
             borrowableBitmap: _lendingPool.getEModeCategoryBorrowableBitmap(_id),
+            ltvzeroBitmap: ltvzeroBitmap,
             label: _lendingPool.getEModeCategoryLabel(_id)
         });
     }

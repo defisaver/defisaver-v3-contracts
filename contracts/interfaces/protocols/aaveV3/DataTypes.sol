@@ -100,8 +100,9 @@ library DataTypes {
         uint16 liquidationThreshold;
         uint16 liquidationBonus;
         uint128 collateralBitmap;
-        string label;
         uint128 borrowableBitmap;
+        uint128 ltvzeroBitmap; // if true, the asset will be treated as ltv0 and ltv0 rules apply. Added in aave v3.6
+        string label; // soft deprecated, will not be used after aave v3.6
     }
 
     enum InterestRateMode {
