@@ -428,9 +428,15 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
     {
         DataTypes.CollateralConfig memory config =
             _lendingPool.getEModeCategoryCollateralConfig(_id);
+
         uint128 ltvzeroBitmap;
         try _lendingPool.getEModeCategoryLtvzeroBitmap(_id) returns (uint128 _ltvzeroBitmap) {
             ltvzeroBitmap = _ltvzeroBitmap;
+        } catch (bytes memory) { /*lowLevelData*/ }
+
+        string memory label = "";
+        try _lendingPool.getEModeCategoryLabel(_id) returns (string memory _label) {
+            label = _label;
         } catch (bytes memory) { /*lowLevelData*/ }
 
         emodeData = DataTypes.EModeCategoryNew({
@@ -440,7 +446,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
             collateralBitmap: _lendingPool.getEModeCategoryCollateralBitmap(_id),
             borrowableBitmap: _lendingPool.getEModeCategoryBorrowableBitmap(_id),
             ltvzeroBitmap: ltvzeroBitmap,
-            label: _lendingPool.getEModeCategoryLabel(_id)
+            label: label
         });
     }
 
