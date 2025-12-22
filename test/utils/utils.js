@@ -1632,7 +1632,10 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
             );
             await stopImpersonatingAccount(proxy.signer.address);
         } else if (isSFProxyCheck) {
-            receipt = await proxy.execute(targetAddr, callData, {
+            const sfProxyRecipeExecutorProxyAddr = await getAddrFromRegistry(
+                'SFProxyRecipeExecutorProxy',
+            );
+            receipt = await proxy.execute(sfProxyRecipeExecutorProxyAddr, callData, {
                 gasLimit: 10000000,
                 value: ethValue,
             });
