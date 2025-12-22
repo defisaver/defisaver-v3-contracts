@@ -28,10 +28,14 @@ import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/Aav
 import { FLAction } from "../../../contracts/actions/flashloan/FLAction.sol";
 import { SendToken } from "../../../contracts/actions/utils/SendToken.sol";
 import { DFSSell } from "../../../contracts/actions/exchange/DFSSell.sol";
+import {
+    SFProxyRecipeExecutorProxy
+} from "../../../contracts/actions/summerfi/SFProxyRecipeExecutorProxy.sol";
 import { Addresses } from "../Addresses.sol";
 import {
     SFProxyFactoryHelper
 } from "../../../contracts/utils/addresses/sfProxyFactory/SFProxyFactoryHelper.sol";
+import { SFProxyUtils } from "./SFProxyUtils.sol";
 
 contract SFProxyIntegration is
     BaseTest,
@@ -39,7 +43,8 @@ contract SFProxyIntegration is
     RegistryUtils,
     AaveV3Helper,
     AaveV3RatioHelper,
-    SFProxyFactoryHelper
+    SFProxyFactoryHelper,
+    SFProxyUtils
 {
     /*//////////////////////////////////////////////////////////////////////////
                                     CONSTANTS
@@ -70,6 +75,7 @@ contract SFProxyIntegration is
 
     address sfProxy;
     address sfProxyOwner;
+    address sfProxyRecipeExecutorProxy;
 
     RecipeExecutor recipeExecutor;
     IAccountFactory accountFactory;
@@ -107,6 +113,8 @@ contract SFProxyIntegration is
         sendToken = new SendToken();
         dfsSell = new DFSSell();
         redeploy("RecipeExecutor", address(recipeExecutor));
+        redeploy("SFProxyRecipeExecutorProxy", address(new SFProxyRecipeExecutorProxy()));
+        sfProxyRecipeExecutorProxy = getAddr("SFProxyRecipeExecutorProxy");
         redeploy("AaveV3Supply", address(aaveV3Supply));
         redeploy("AaveV3Borrow", address(aaveV3Borrow));
         redeploy("AaveV3Payback", address(aaveV3Payback));
@@ -117,7 +125,7 @@ contract SFProxyIntegration is
 
         // Create SSW
         createSummerfiSmartWallet();
-        whitelistRecipeExecutor();
+        _whitelistSFProxyRecipeExecutorProxy();
 
         give(SUPPLY_ASSET, bob, supplyAmount);
         approveAsSender(bob, SUPPLY_ASSET, sfProxy, supplyAmount);
@@ -182,7 +190,7 @@ contract SFProxyIntegration is
         vm.prank(sfProxyOwner);
         IAccountImplementation(sfProxy)
             .execute(
-                address(recipeExecutor),
+                sfProxyRecipeExecutorProxy,
                 abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
             );
 
@@ -256,7 +264,7 @@ contract SFProxyIntegration is
         vm.prank(sfProxyOwner);
         IAccountImplementation(sfProxy)
             .execute(
-                address(recipeExecutor),
+                sfProxyRecipeExecutorProxy,
                 abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
             );
 
@@ -313,7 +321,7 @@ contract SFProxyIntegration is
         vm.prank(sfProxyOwner);
         IAccountImplementation(sfProxy)
             .execute(
-                address(recipeExecutor),
+                sfProxyRecipeExecutorProxy,
                 abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
             );
     }
@@ -349,7 +357,7 @@ contract SFProxyIntegration is
         vm.prank(sfProxyOwner);
         IAccountImplementation(sfProxy)
             .execute(
-                address(recipeExecutor),
+                sfProxyRecipeExecutorProxy,
                 abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
             );
 
@@ -389,16 +397,6 @@ contract SFProxyIntegration is
         vm.label(sfProxy, "sfProxy");
         vm.label(sfProxyOwner, "Owner");
         vm.label(address(accountGuard), "AccountGuard");
-    }
-
-    /// @dev Whitelist RecipeExecutor in the AccountGuard
-    function whitelistRecipeExecutor() internal {
-        address guardOwner = accountGuard.owner();
-
-        vm.prank(guardOwner);
-        accountGuard.setWhitelist(address(recipeExecutor), true);
-
-        assert(accountGuard.isWhitelisted(address(recipeExecutor)));
     }
 
     function initValues() internal {

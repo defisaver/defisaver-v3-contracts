@@ -14,10 +14,11 @@ import { IAccountFactory } from "../../contracts/interfaces/protocols/summerfi/I
 import { IInstaAccountV2 } from "../../contracts/interfaces/protocols/insta/IInstaAccountV2.sol";
 
 import { BaseTest } from "./BaseTest.sol";
+import { RegistryUtils } from "./RegistryUtils.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { console2 as console } from "forge-std/console2.sol";
 
-contract SmartWallet is BaseTest {
+contract SmartWallet is BaseTest, RegistryUtils {
     address payable public owner;
     address payable public walletAddr;
     bool public isSafe;
@@ -133,7 +134,10 @@ contract SmartWallet is BaseTest {
 
             IInstaAccountV2(walletAddr).cast{ value: _value }(connectors, connectorsData, owner);
         } else if (isSFProxy) {
-            IAccountImplementation(walletAddr).execute{ value: _value }(_target, _calldata);
+            address sfProxyRecipeExecutorProxy = getAddr("SFProxyRecipeExecutorProxy");
+            address target =
+                sfProxyRecipeExecutorProxy != address(0) ? sfProxyRecipeExecutorProxy : _target;
+            IAccountImplementation(walletAddr).execute{ value: _value }(target, _calldata);
         } else {
             revert UnsupportedWalletType();
         }
