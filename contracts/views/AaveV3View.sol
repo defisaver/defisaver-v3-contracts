@@ -404,7 +404,7 @@ contract AaveV3View is AaveV3Helper, AaveV3RatioHelper {
         emodesData = new DataTypes.EModeCategoryNew[](256);
         IPoolV3 lendingPool = getLendingPool(_market);
         uint8 missCounter;
-        for (uint8 i = 1; i < 255; i++) {
+        for (uint8 i = 1; i < 256; i++) {
             DataTypes.EModeCategoryNew memory nextEmodeData = getEmodeData(lendingPool, i);
             if (nextEmodeData.liquidationThreshold != 0) {
                 emodesData[i - 1] = nextEmodeData;
