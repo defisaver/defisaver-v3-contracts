@@ -1030,7 +1030,7 @@
         "path": "contracts/actions/compoundV3/CompV3Allow.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1041,7 +1041,7 @@
         "path": "contracts/actions/compoundV3/CompV3Borrow.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1052,7 +1052,7 @@
         "path": "contracts/actions/compoundV3/CompV3Claim.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1063,7 +1063,7 @@
         "path": "contracts/actions/compoundV3/CompV3Payback.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1074,7 +1074,7 @@
         "path": "contracts/actions/compoundV3/CompV3Supply.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1085,7 +1085,7 @@
         "path": "contracts/actions/compoundV3/CompV3Transfer.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1096,7 +1096,7 @@
         "path": "contracts/actions/compoundV3/CompV3Withdraw.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1132,7 +1132,7 @@
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": ["0xd18daaf5601c021B8f6D51829B68B6984A3Abb6A"]
     },
@@ -1223,7 +1223,7 @@
         "path": "contracts/triggers/AaveV3QuotePriceRangeTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
