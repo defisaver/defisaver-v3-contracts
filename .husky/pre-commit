@@ -17,8 +17,11 @@ fi
 # Format staged SOL files
 STAGED_SOL=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.sol$' || true)
 if [ -n "$STAGED_SOL" ]; then
-  echo "Formatting and Linting Solidity..."
-  forge fmt
-  forge lint
+  echo "Formatting staged Solidity files: $STAGED_SOL"
+  forge fmt $STAGED_SOL || exit 1
+  
+  echo "Linting all Solidity files..."
+  forge lint || exit 1
+  
   git add $STAGED_SOL
 fi

@@ -253,7 +253,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
         // sDAI/USDC
         testConfigs.push(
             TestConfig({
-                supplyToken: SDAI_ADDR,
+                supplyToken: Addresses.WETH_ADDR,
                 borrowToken: Addresses.USDT_ADDR,
                 supplyAmount: 80_000e18, // 30 sDAI
                 borrowAmount: 50_000e6, // 50k USDC
