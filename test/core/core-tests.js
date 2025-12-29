@@ -853,7 +853,7 @@ const recipeExecutorTest = async () => {
             await redeploy('UpdateSub');
             await redeploy('GasPriceTrigger');
             await redeploy('RecipeExecutor');
-            await redeploy('SFProxyRecipeExecutorProxy');
+            await redeploy('SFProxyEntryPoint');
 
             // Add connector for DSA Proxy Accounts.
             const connectV2DefisaverName =
@@ -881,10 +881,8 @@ const recipeExecutorTest = async () => {
             dsaProxy = await createDsaProxy(senderAcc.address);
             sfProxy = await createSFProxy(senderAcc.address);
 
-            // Whitelist SFProxyRecipeExecutorProxy for Summerfi account
-            const sfProxyRecipeExecutorProxyAddr = await getAddrFromRegistry(
-                'SFProxyRecipeExecutorProxy',
-            );
+            // Whitelist SFProxyEntryPoint for Summerfi account
+            const sfProxyRecipeExecutorProxyAddr = await getAddrFromRegistry('SFProxyEntryPoint');
             await whitelistContractForSFProxy(sfProxyRecipeExecutorProxyAddr);
 
             // Init test data.

@@ -7,7 +7,7 @@ import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { DFSIds } from "../../utils/DFSIds.sol";
 
 /// @title Proxy that delegatecalls to RecipeExecutor for SFProxy wallets
-contract SFProxyRecipeExecutorProxy is CoreHelper {
+contract SFProxyEntryPoint is CoreHelper {
     error RecipeExecutionError();
 
     /// @notice Forwards all calls to RecipeExecutor via delegatecall

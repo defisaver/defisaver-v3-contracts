@@ -28,9 +28,7 @@ import { AaveV3RatioHelper } from "../../../contracts/actions/aaveV3/helpers/Aav
 import { FLAction } from "../../../contracts/actions/flashloan/FLAction.sol";
 import { SendToken } from "../../../contracts/actions/utils/SendToken.sol";
 import { DFSSell } from "../../../contracts/actions/exchange/DFSSell.sol";
-import {
-    SFProxyRecipeExecutorProxy
-} from "../../../contracts/actions/summerfi/SFProxyRecipeExecutorProxy.sol";
+import { SFProxyEntryPoint } from "../../../contracts/actions/summerfi/SFProxyEntryPoint.sol";
 import { Addresses } from "../Addresses.sol";
 import {
     SFProxyFactoryHelper
@@ -113,8 +111,8 @@ contract SFProxyIntegration is
         sendToken = new SendToken();
         dfsSell = new DFSSell();
         redeploy("RecipeExecutor", address(recipeExecutor));
-        redeploy("SFProxyRecipeExecutorProxy", address(new SFProxyRecipeExecutorProxy()));
-        sfProxyRecipeExecutorProxy = getAddr("SFProxyRecipeExecutorProxy");
+        redeploy("SFProxyEntryPoint", address(new SFProxyEntryPoint()));
+        sfProxyRecipeExecutorProxy = getAddr("SFProxyEntryPoint");
         redeploy("AaveV3Supply", address(aaveV3Supply));
         redeploy("AaveV3Borrow", address(aaveV3Borrow));
         redeploy("AaveV3Payback", address(aaveV3Payback));
@@ -125,7 +123,7 @@ contract SFProxyIntegration is
 
         // Create SSW
         createSummerfiSmartWallet();
-        _whitelistSFProxyRecipeExecutorProxy();
+        _whitelistSFProxyEntryPoint();
 
         give(SUPPLY_ASSET, bob, supplyAmount);
         approveAsSender(bob, SUPPLY_ASSET, sfProxy, supplyAmount);
