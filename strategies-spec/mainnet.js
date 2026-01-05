@@ -6964,7 +6964,7 @@ const createSparkRepayOnPriceStrategy = () => {
         '&proxy',
     );
 
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction('%gasStart', '&collAsset', '$2');
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction('%gasStart', '&debtAsset', '$2');
 
     const paybackAction = new dfs.actions.spark.SparkPaybackAction(
         '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
@@ -6998,14 +6998,17 @@ const createSparkFLRepayOnPriceStrategy = () => {
     sparkFLRepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
     sparkFLRepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     sparkFLRepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    sparkFLRepayOnPriceStrategy.addSubSlot('&enableAsColl', 'bool');
 
     const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     sparkFLRepayOnPriceStrategy.addTrigger(trigger);
 
-    const flAction = new dfs.actions.flashloan.SparkFlashLoanAction(
-        ['%collAsset'], // sent by backend
-        ['%flAmount'], // sent by backend
+    const flAction = new dfs.actions.flashloan.FLAction(
+        new dfs.actions.flashloan.SparkFlashLoanAction(
+            ['%collAsset'], // sent by backend
+            ['%flAmount'], // sent by backend
+            nullAddress,
+            [],
+        ),
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -7019,7 +7022,7 @@ const createSparkFLRepayOnPriceStrategy = () => {
         '&proxy',
     );
 
-    const feeTakingAction = new dfs.actions.basic.GasFeeAction('%gasStart', '&collAsset', '$2');
+    const feeTakingAction = new dfs.actions.basic.GasFeeAction('%gasStart', '&debtAsset', '$2');
 
     const paybackAction = new dfs.actions.spark.SparkPaybackAction(
         '%false', // useDefaultMarket, hardcoded to false - Sent by backend.
@@ -7132,6 +7135,8 @@ const createSparkFLBoostOnPriceStrategy = () => {
         new dfs.actions.flashloan.SparkFlashLoanAction(
             ['%debtAsset'], // sent by backend
             ['%flAmount'], // sent by backend
+            nullAddress,
+            [],
         ),
     );
 
