@@ -7065,7 +7065,6 @@ const createSparkBoostOnPriceStrategy = () => {
     sparkBoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
     sparkBoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     sparkBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    sparkBoostOnPriceStrategy.addSubSlot('&enableAsColl', 'bool');
 
     const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     sparkBoostOnPriceStrategy.addTrigger(trigger);
@@ -7101,7 +7100,7 @@ const createSparkBoostOnPriceStrategy = () => {
         '&proxy',
         '&collAsset',
         '&collAssetId',
-        '&enableAsColl', // hardcoded always enable as coll
+        '%enableAsColl', // hardcoded always enable as coll
         '%true', // useOnBehalf, hardcoded to true - Sent by backend.
         '%onBehalfAddr', // set to empty because flag is true
     );
@@ -7126,7 +7125,6 @@ const createSparkFLBoostOnPriceStrategy = () => {
     sparkFLBoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
     sparkFLBoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     sparkFLBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
-    sparkFLBoostOnPriceStrategy.addSubSlot('&enableAsColl', 'bool');
 
     const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     sparkFLBoostOnPriceStrategy.addTrigger(trigger);
@@ -7160,7 +7158,7 @@ const createSparkFLBoostOnPriceStrategy = () => {
         '&proxy',
         '&collAsset',
         '&collAssetId',
-        '&enableAsColl', // hardcoded always enable as coll
+        '%enableAsColl', // hardcoded always enable as coll
         '%true', // useOnBehalf, hardcoded to true - Sent by backend.
         '%onBehalfAddr', // set to empty because flag is true
     );
