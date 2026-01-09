@@ -882,8 +882,8 @@ const recipeExecutorTest = async () => {
             sfProxy = await createSFProxy(senderAcc.address);
 
             // Whitelist SFProxyEntryPoint for Summerfi account
-            const sfProxyRecipeExecutorProxyAddr = await getAddrFromRegistry('SFProxyEntryPoint');
-            await whitelistContractForSFProxy(sfProxyRecipeExecutorProxyAddr);
+            const sfProxyEntryPointAddr = await getAddrFromRegistry('SFProxyEntryPoint');
+            await whitelistContractForSFProxy(sfProxyEntryPointAddr);
 
             // Init test data.
             actionData = new dfs.actions.basic.PullTokenAction(

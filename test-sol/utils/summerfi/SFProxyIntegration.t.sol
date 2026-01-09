@@ -73,7 +73,7 @@ contract SFProxyIntegration is
 
     address sfProxy;
     address sfProxyOwner;
-    address sfProxyRecipeExecutorProxy;
+    address sfProxyEntryPoint;
 
     RecipeExecutor recipeExecutor;
     IAccountFactory accountFactory;
@@ -112,7 +112,7 @@ contract SFProxyIntegration is
         dfsSell = new DFSSell();
         redeploy("RecipeExecutor", address(recipeExecutor));
         redeploy("SFProxyEntryPoint", address(new SFProxyEntryPoint()));
-        sfProxyRecipeExecutorProxy = getAddr("SFProxyEntryPoint");
+        sfProxyEntryPoint = getAddr("SFProxyEntryPoint");
         redeploy("AaveV3Supply", address(aaveV3Supply));
         redeploy("AaveV3Borrow", address(aaveV3Borrow));
         redeploy("AaveV3Payback", address(aaveV3Payback));
@@ -188,7 +188,7 @@ contract SFProxyIntegration is
         vm.prank(sfProxyOwner);
         IAccountImplementation(sfProxy)
             .execute(
-                sfProxyRecipeExecutorProxy,
+                sfProxyEntryPoint,
                 abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
             );
 
@@ -262,7 +262,7 @@ contract SFProxyIntegration is
         vm.prank(sfProxyOwner);
         IAccountImplementation(sfProxy)
             .execute(
-                sfProxyRecipeExecutorProxy,
+                sfProxyEntryPoint,
                 abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
             );
 
@@ -319,7 +319,7 @@ contract SFProxyIntegration is
         vm.prank(sfProxyOwner);
         IAccountImplementation(sfProxy)
             .execute(
-                sfProxyRecipeExecutorProxy,
+                sfProxyEntryPoint,
                 abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
             );
     }
@@ -355,7 +355,7 @@ contract SFProxyIntegration is
         vm.prank(sfProxyOwner);
         IAccountImplementation(sfProxy)
             .execute(
-                sfProxyRecipeExecutorProxy,
+                sfProxyEntryPoint,
                 abi.encodeWithSelector(RecipeExecutor.executeRecipe.selector, recipe)
             );
 

@@ -134,9 +134,9 @@ contract SmartWallet is BaseTest, RegistryUtils {
 
             IInstaAccountV2(walletAddr).cast{ value: _value }(connectors, connectorsData, owner);
         } else if (isSFProxy) {
-            address sfProxyRecipeExecutorProxy = getAddr("SFProxyEntryPoint");
-            address target =
-                sfProxyRecipeExecutorProxy != address(0) ? sfProxyRecipeExecutorProxy : _target;
+            address sfProxyEntryPoint = getAddr("SFProxyEntryPoint");
+            address target = sfProxyEntryPoint != address(0) ? sfProxyEntryPoint : _target;
+
             IAccountImplementation(walletAddr).execute{ value: _value }(target, _calldata);
         } else {
             revert UnsupportedWalletType();

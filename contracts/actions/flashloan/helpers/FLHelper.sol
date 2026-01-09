@@ -66,11 +66,11 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
 
         if (_walletType == WalletType.SFPROXY) {
             // SFProxy calls SFProxyEntryPoint that will delegate the call to RecipeExecutor
-            address sfProxyRecipeExecutorProxy =
+            address sfProxyEntryPoint =
                 IDFSRegistry(DFS_REGISTRY_ADDR).getAddr(DFSIds.SFPROXY_ENTRY_POINT);
 
             IAccountImplementation(_wallet).execute{ value: address(this).balance }(
-                sfProxyRecipeExecutorProxy, data
+                sfProxyEntryPoint, data
             );
 
             return;
