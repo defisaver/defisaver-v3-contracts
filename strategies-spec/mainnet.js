@@ -6974,11 +6974,14 @@ const createSparkRepayOnPriceStrategy = () => {
         '%rateMode', // variable type of debt, sent by backend
         '&debtAsset',
         '&debtAssetId',
-        '%true', // useOnBehalf, hardcoded to true - Sent by backend.
-        '%onBehalfAddr', // set to empty because flag is true
+        '%false', // useOnBehalf, set to false - Sent by backend.
+        '%onBehalfAddr', // set to empty because flag is false
     );
 
-    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck('&targetRatio');
+    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck(
+        '&targetRatio',
+        '&marketAddr',
+    );
 
     sparkRepayOnPriceStrategy.addAction(withdrawAction);
     sparkRepayOnPriceStrategy.addAction(sellAction);
@@ -7032,8 +7035,8 @@ const createSparkFLRepayOnPriceStrategy = () => {
         '%rateMode', // variable type of debt, sent by backend
         '&debtAsset',
         '&debtAssetId',
-        '%true', // useOnBehalf, hardcoded to true - Sent by backend.
-        '%onBehalfAddr', // set to empty because flag is true
+        '%false', // useOnBehalf, set to false - Sent by backend.
+        '%onBehalfAddr', // set to empty because flag is false
     );
 
     const withdrawAction = new dfs.actions.spark.SparkWithdrawAction(
@@ -7044,7 +7047,10 @@ const createSparkFLRepayOnPriceStrategy = () => {
         '&collAssetId',
     );
 
-    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck('&targetRatio');
+    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck(
+        '&targetRatio',
+        '&marketAddr',
+    );
 
     sparkFLRepayOnPriceStrategy.addAction(flAction);
     sparkFLRepayOnPriceStrategy.addAction(sellAction);
@@ -7076,8 +7082,8 @@ const createSparkBoostOnPriceStrategy = () => {
         '&proxy',
         '%rateMode',
         '&debtAssetId',
-        '%true', // useOnBehalf, hardcoded to true - Sent by backend.
-        '%onBehalfAddr', // set to empty because flag is true
+        '%false', // useOnBehalf, set to false - Sent by backend.
+        '%onBehalfAddr', // set to empty because flag is false
     );
 
     const sellAction = new dfs.actions.basic.SellAction(
@@ -7101,11 +7107,14 @@ const createSparkBoostOnPriceStrategy = () => {
         '&collAsset',
         '&collAssetId',
         '%enableAsColl', // hardcoded always enable as coll
-        '%true', // useOnBehalf, hardcoded to true - Sent by backend.
-        '%onBehalfAddr', // set to empty because flag is true
+        '%false', // useOnBehalf, set to false - Sent by backend.
+        '%onBehalfAddr', // set to empty because flag is false
     );
 
-    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck('&targetRatio');
+    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck(
+        '&targetRatio',
+        '&marketAddr',
+    );
 
     sparkBoostOnPriceStrategy.addAction(borrowAction);
     sparkBoostOnPriceStrategy.addAction(sellAction);
@@ -7159,8 +7168,8 @@ const createSparkFLBoostOnPriceStrategy = () => {
         '&collAsset',
         '&collAssetId',
         '%enableAsColl', // hardcoded always enable as coll
-        '%true', // useOnBehalf, hardcoded to true - Sent by backend.
-        '%onBehalfAddr', // set to empty because flag is true
+        '%false', // useOnBehalf, set to false - Sent by backend.
+        '%onBehalfAddr', // set to empty because flag is false
     );
 
     const borrowAction = new dfs.actions.spark.SparkBorrowAction(
@@ -7170,11 +7179,14 @@ const createSparkFLBoostOnPriceStrategy = () => {
         '%flAddress',
         '%rateMode',
         '&debtAssetId',
-        '%true', // useOnBehalf, hardcoded to true - Sent by backend.
-        '%onBehalfAddr', // set to empty because flag is true
+        '%false', // useOnBehalf, set to false - Sent by backend.
+        '%onBehalfAddr', // set to empty because flag is false
     );
 
-    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck('&targetRatio');
+    const checkerAction = new dfs.actions.checkers.SparkTargetRatioCheck(
+        '&targetRatio',
+        '&marketAddr',
+    );
 
     sparkFLBoostOnPriceStrategy.addAction(flAction);
     sparkFLBoostOnPriceStrategy.addAction(sellAction);

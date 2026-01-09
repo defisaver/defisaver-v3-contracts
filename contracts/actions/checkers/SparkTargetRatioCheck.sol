@@ -15,8 +15,10 @@ contract SparkTargetRatioCheck is ActionBase, SparkRatioHelper {
     error BadAfterRatio(uint256 currentRatio, uint256 targetRatio);
 
     /// @param targetRatio Target ratio.
+    /// @param market Market address.
     struct Params {
         uint256 targetRatio;
+        address market;
     }
 
     /// @inheritdoc ActionBase
@@ -31,7 +33,10 @@ contract SparkTargetRatioCheck is ActionBase, SparkRatioHelper {
         uint256 targetRatio =
             _parseParamUint(inputData.targetRatio, _paramMapping[0], _subData, _returnValues);
 
-        uint256 currRatio = getRatio(DEFAULT_SPARK_MARKET, address(this));
+        address market =
+            _parseParamAddr(inputData.market, _paramMapping[1], _subData, _returnValues);
+
+        uint256 currRatio = getRatio(market, address(this));
 
         /// @notice If `targetRatio` is 999% or more then skip `RATIO_OFFSET` check because it is very hard to be precise under 5%.
         if (targetRatio < RATIO_LIMIT) {
