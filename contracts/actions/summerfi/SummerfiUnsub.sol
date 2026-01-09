@@ -9,6 +9,7 @@ import { IAutomationBot } from "../../interfaces/protocols/summerfi/IAutomationB
 contract SummerfiUnsub is ActionBase {
     IAutomationBot constant SF_AUTOMATION_BOT =
         IAutomationBot(0x6E87a7A0A03E51A741075fDf4D1FCce39a4Df01b);
+    address constant SERVICE_REGISTRY = 0x9b4Ae7b164d195df9C4Da5d08Be88b2848b2EaDA;
 
     error SummerfiUnsub_DelegatecallFailed();
 
@@ -44,11 +45,9 @@ contract SummerfiUnsub is ActionBase {
 
     /// @dev Removes approval for each CDP via delegatecall to AutomationBot
     function _removeTriggers(Params memory params) internal {
-        address serviceRegistry = SF_AUTOMATION_BOT.serviceRegistry();
-
         for (uint256 i = 0; i < params.cdpIds.length; ++i) {
             bytes memory callData = abi.encodeWithSelector(
-                IAutomationBot.removeApproval.selector, serviceRegistry, params.cdpIds[i]
+                IAutomationBot.removeApproval.selector, SERVICE_REGISTRY, params.cdpIds[i]
             );
 
             (bool success, bytes memory returnData) =
