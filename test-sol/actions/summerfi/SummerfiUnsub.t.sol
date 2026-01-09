@@ -67,8 +67,4 @@ contract SummerfiUnsubTest is BaseTest, ActionsUtils {
         vm.expectRevert();
         dsProxyAcc.execute(address(cut), executeActionCallData);
     }
-
-    /*//////////////////////////////////////////////////////////////////////////
-                                     HELPERS
-    //////////////////////////////////////////////////////////////////////////*/
 }
