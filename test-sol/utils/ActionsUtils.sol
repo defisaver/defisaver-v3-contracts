@@ -102,6 +102,7 @@ import { HandleAuth } from "../../contracts/actions/utils/HandleAuth.sol";
 import { SparkSupply } from "../../contracts/actions/spark/SparkSupply.sol";
 import { SparkBorrow } from "../../contracts/actions/spark/SparkBorrow.sol";
 import { SparkSetEMode } from "../../contracts/actions/spark/SparkSetEMode.sol";
+import { SummerfiUnsub } from "../../contracts/actions/summerfi/SummerfiUnsub.sol";
 
 contract ActionsUtils {
     // @dev Change this value if we ever need to add more parameters to any action.
@@ -1384,4 +1385,13 @@ contract ActionsUtils {
             })
         );
     }
+
+    function SummerfiUnsubEncode(uint256[] memory _cdpIds)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(SummerfiUnsub.Params({ cdpIds: _cdpIds }));
+    }
 }
+

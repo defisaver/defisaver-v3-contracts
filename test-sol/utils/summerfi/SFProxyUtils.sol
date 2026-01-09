@@ -21,11 +21,11 @@ contract SFProxyUtils is RegistryUtils {
         IAccountGuard accountGuard = IAccountGuard(Addresses.SF_PROXY_GUARD);
         address guardOwner = accountGuard.owner();
 
-        address sfProxyRecipeExecutorProxy = getAddr("SFProxyEntryPoint");
+        address sfProxyEntryPoint = getAddr("SFProxyEntryPoint");
 
         cheats.prank(guardOwner);
-        accountGuard.setWhitelist(sfProxyRecipeExecutorProxy, true);
+        accountGuard.setWhitelist(sfProxyEntryPoint, true);
 
-        assert(accountGuard.isWhitelisted(sfProxyRecipeExecutorProxy));
+        assert(accountGuard.isWhitelisted(sfProxyEntryPoint));
     }
 }
