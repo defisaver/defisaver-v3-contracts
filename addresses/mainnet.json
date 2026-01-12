@@ -2361,14 +2361,15 @@
     },
     {
         "name": "FLAction",
-        "address": "0xAc83378E8B075F95640d581A42cba80452caEEa3",
+        "address": "0xE78C05c508405207ecc256781B9415e6De1c8336",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xAc83378E8B075F95640d581A42cba80452caEEa3",
             "0x7A0f3963c666d4549e5909a7162B560abF9f006D",
             "0x5f1dC84Ba060Ea3f7429c6A7bBEdd9243CF1209b",
             "0xC2b92B6c69e5c3b6b29385C1a17FEe906e0CA910",
@@ -4801,6 +4802,17 @@
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SFProxyEntryPoint",
+        "address": "0xAa15ca459659F35B1064EC546A44d962d54bA89e",
+        "id": "0x06f8038f",
+        "path": "contracts/actions/summerfi/SFProxyEntryPoint.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     }
