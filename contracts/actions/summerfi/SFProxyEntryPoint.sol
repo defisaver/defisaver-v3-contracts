@@ -5,9 +5,10 @@ pragma solidity =0.8.24;
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { DFSIds } from "../../utils/DFSIds.sol";
+import { AdminAuth } from "../../auth/AdminAuth.sol";
 
 /// @title Proxy that delegatecalls to RecipeExecutor for SFProxy wallets
-contract SFProxyEntryPoint is CoreHelper {
+contract SFProxyEntryPoint is CoreHelper, AdminAuth {
     error RecipeExecutionError();
 
     /// @notice Forwards all calls to RecipeExecutor via delegatecall
