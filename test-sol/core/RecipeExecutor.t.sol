@@ -6,6 +6,7 @@ import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
 import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
 import { FLAction } from "../../contracts/actions/flashloan/FLAction.sol";
+import { SFProxyEntryPoint } from "../../contracts/actions/summerfi/SFProxyEntryPoint.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
@@ -56,13 +57,14 @@ contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest, S
         cut = new RecipeExecutor();
 
         redeploy("RecipeExecutor", address(cut));
+        redeploy("SFProxyEntryPoint", address(new SFProxyEntryPoint()));
         redeploy("PullToken", address(new PullToken()));
         redeploy("SendToken", address(new SendToken()));
 
         flAddress = address(new FLAction());
         redeploy("FLAction", flAddress);
 
-        _whitelistRecipeExecutor();
+        _whitelistSFProxyEntryPoint();
     }
 
     /*//////////////////////////////////////////////////////////////////////////

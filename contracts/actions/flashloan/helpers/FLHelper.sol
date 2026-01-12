@@ -27,7 +27,7 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
     error SafeExecutionError();
 
     /// @notice Helper function to callback RecipeExecutor from FL contract
-    /// @param _wallet Address of the wallet from which to callback RecipeExecutor
+    /// @param _wallet Address of the wallet from which to callback RecipeExecutor/SFProxyEntryPoint
     /// @param _walletType Type of the wallet used
     /// @param _currRecipe Recipe to be executed
     /// @param _paybackAmount Payback flashloan amount including fees
@@ -65,7 +65,13 @@ contract FLHelper is MainnetFLAddresses, StrategyModel {
         }
 
         if (_walletType == WalletType.SFPROXY) {
-            IAccountImplementation(_wallet).execute{ value: address(this).balance }(target, data);
+            // SFProxy calls SFProxyEntryPoint that will delegate the call to RecipeExecutor
+            address sfProxyEntryPoint =
+                IDFSRegistry(DFS_REGISTRY_ADDR).getAddr(DFSIds.SFPROXY_ENTRY_POINT);
+
+            IAccountImplementation(_wallet).execute{ value: address(this).balance }(
+                sfProxyEntryPoint, data
+            );
 
             return;
         }

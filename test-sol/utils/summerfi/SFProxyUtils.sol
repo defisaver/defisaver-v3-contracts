@@ -17,15 +17,15 @@ contract SFProxyUtils is RegistryUtils {
         assert(accountGuard.isWhitelisted(_addr));
     }
 
-    function _whitelistRecipeExecutor() internal {
+    function _whitelistSFProxyEntryPoint() internal {
         IAccountGuard accountGuard = IAccountGuard(Addresses.SF_PROXY_GUARD);
         address guardOwner = accountGuard.owner();
 
-        address recipeExecutor = getAddr("RecipeExecutor");
+        address sfProxyEntryPoint = getAddr("SFProxyEntryPoint");
 
         cheats.prank(guardOwner);
-        accountGuard.setWhitelist(recipeExecutor, true);
+        accountGuard.setWhitelist(sfProxyEntryPoint, true);
 
-        assert(accountGuard.isWhitelisted(recipeExecutor));
+        assert(accountGuard.isWhitelisted(sfProxyEntryPoint));
     }
 }
