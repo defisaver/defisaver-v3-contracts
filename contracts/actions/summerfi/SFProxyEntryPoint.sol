@@ -11,11 +11,9 @@ contract SFProxyEntryPoint is CoreHelper {
     error RecipeExecutionError();
 
     /// @notice Forwards all calls to RecipeExecutor via delegatecall
-    fallback(bytes calldata data) external payable returns (bytes memory) {
-        (bool success,) = getRecipeExecutorAddress().delegatecall(data);
+    fallback() external payable {
+        (bool success,) = getRecipeExecutorAddress().delegatecall(msg.data);
         if (!success) revert RecipeExecutionError();
-
-        return "";
     }
 
     /// @notice Gets RecipeExecutor address from registry
