@@ -103,6 +103,7 @@ import { SparkSupply } from "../../contracts/actions/spark/SparkSupply.sol";
 import { SparkBorrow } from "../../contracts/actions/spark/SparkBorrow.sol";
 import { SparkSetEMode } from "../../contracts/actions/spark/SparkSetEMode.sol";
 import { SummerfiUnsub } from "../../contracts/actions/summerfi/SummerfiUnsub.sol";
+import { SummerfiUnsubV2 } from "../../contracts/actions/summerfi/SummerfiUnsubV2.sol";
 
 contract ActionsUtils {
     // @dev Change this value if we ever need to add more parameters to any action.
@@ -1392,6 +1393,20 @@ contract ActionsUtils {
         returns (bytes memory params)
     {
         params = abi.encode(SummerfiUnsub.Params({ cdpIds: _cdpIds }));
+    }
+
+    function SummerfiUnsubV2Encode(
+        uint256[][] memory _triggerIds,
+        bytes[][] memory _triggerData,
+        bool[] memory _removeAllowance
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SummerfiUnsubV2.Params({
+                triggerIds: _triggerIds,
+                triggerData: _triggerData,
+                removeAllowance: _removeAllowance
+            })
+        );
     }
 }
 
