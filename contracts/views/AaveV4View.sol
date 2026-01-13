@@ -19,6 +19,7 @@ contract AaveV4View {
      */
     /// @notice User reserve data.
     /// @dev reserveId The identifier of the reserve. Doesn't have to match the assetId in the Hub.
+    /// @dev assetId The identifier of the asset in the Hub.
     /// @dev underlying The address of the underlying asset.
     /// @dev supplied The amount of supplied assets, expressed in asset units.
     /// @dev drawn The amount of user-drawn assets, expressed in asset units.
@@ -31,6 +32,7 @@ contract AaveV4View {
     /// @dev isBorrowing True if the reserve is being borrowed.
     struct UserReserveData {
         uint256 reserveId;
+        uint16 assetId;
         address underlying;
         uint256 supplied;
         uint256 drawn;
@@ -529,6 +531,7 @@ contract AaveV4View {
         returns (UserReserveData memory)
     {
         ISpoke spoke = ISpoke(_spoke);
+        ISpoke.Reserve memory reserve = spoke.getReserve(_reserveId);
         ISpoke.DynamicReserveConfig memory config = spoke.getDynamicReserveConfig(
             _reserveId, spoke.getUserPosition(_reserveId, _user).dynamicConfigKey
         );
@@ -543,7 +546,8 @@ contract AaveV4View {
 
         return UserReserveData({
             reserveId: _reserveId,
-            underlying: spoke.getReserve(_reserveId).underlying,
+            assetId: reserve.assetId,
+            underlying: reserve.underlying,
             supplied: supplied,
             drawn: drawn,
             premium: premium,
