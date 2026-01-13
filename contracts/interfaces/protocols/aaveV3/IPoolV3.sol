@@ -313,6 +313,8 @@ interface IPoolV3 {
 
     /**
      * @notice Returns the label of an eMode category
+     * @dev This function is deprecated and will be removed in a future version.
+     * @custom:deprecated
      * @param id The id of the category
      * @return The label of the category
      */
@@ -341,6 +343,13 @@ interface IPoolV3 {
      * @return The borrowableBitmap of the category
      */
     function getEModeCategoryBorrowableBitmap(uint8 id) external view returns (uint128);
+
+    /**
+     * @notice Returns the ltvzero of an eMode category
+     * @param id The id of the category
+     * @return The ltvzeroBitmap of the category
+     */
+    function getEModeCategoryLtvzeroBitmap(uint8 id) external view returns (uint128);
 
     /**
      * @notice Returns the current deficit of a reserve.
