@@ -52,6 +52,7 @@ contract SummerfiUnsub is ActionBase {
 
             (bool success, bytes memory returnData) =
                 address(SF_AUTOMATION_BOT).delegatecall(callData);
+
             if (!success) {
                 if (returnData.length > 0) {
                     assembly {

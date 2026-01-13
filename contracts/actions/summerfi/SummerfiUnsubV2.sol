@@ -56,6 +56,7 @@ contract SummerfiUnsubV2 is ActionBase, SFHelper {
 
             (bool success, bytes memory returnData) =
                 address(SF_AUTOMATION_BOT_V2).delegatecall(callData);
+
             if (!success) {
                 if (returnData.length > 0) {
                     assembly {

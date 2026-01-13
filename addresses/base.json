@@ -1597,5 +1597,16 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "SummerfiUnsubV2",
+        "address": "0x60587B8Fe62Fc149d285a611822263206b4138da",
+        "id": "0xa7559614",
+        "path": "contracts/actions/summerfi/SummerfiUnsubV2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]

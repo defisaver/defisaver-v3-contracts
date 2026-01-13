@@ -4815,5 +4815,27 @@
         "changeTime": "86400",
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "SummerfiUnsub",
+        "address": "0x88bd1819362f395d37a59c58aecA4dee2a855f86",
+        "id": "0xbcc74767",
+        "path": "contracts/actions/summerfi/SummerfiUnsub.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SummerfiUnsubV2",
+        "address": "0x5E805eD9B7581a9f1398F75833f9663a459F5E30",
+        "id": "0xa7559614",
+        "path": "contracts/actions/summerfi/SummerfiUnsubV2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
+        "registryIds": [],
+        "history": []
     }
 ]
