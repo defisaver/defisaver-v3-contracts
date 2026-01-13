@@ -44,7 +44,7 @@ contract SummerfiUnsub is ActionBase {
         return uint8(ActionType.STANDARD_ACTION);
     }
 
-    /// @dev Removes approval for each CDP via delegatecall to AutomationBot
+    /// @dev Removes approvals and triggers corresponding to CDPs via delegatecall to AutomationBot
     function _removeTriggers(Params memory params) internal {
         for (uint256 i = 0; i < params.cdpIds.length; ++i) {
             bytes memory callData = abi.encodeWithSelector(
