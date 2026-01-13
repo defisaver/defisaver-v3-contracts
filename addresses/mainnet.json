@@ -3754,7 +3754,7 @@
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": ["0x475f433407205557E8A7aeE7Be53155EB9681c92"]
     },
@@ -4770,8 +4770,8 @@
         "id": "0x83a50237",
         "path": "contracts/triggers/SparkQuotePriceRangeTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4781,8 +4781,8 @@
         "id": "0x23825034",
         "path": "contracts/triggers/MorphoBluePriceRangeTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     }
