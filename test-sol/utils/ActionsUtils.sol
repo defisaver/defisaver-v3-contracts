@@ -1387,12 +1387,12 @@ contract ActionsUtils {
         );
     }
 
-    function SummerfiUnsubEncode(uint256[] memory _cdpIds)
+    function SummerfiUnsubEncode(uint256[] memory _cdpIds, uint256[] memory _triggerIds)
         public
         pure
         returns (bytes memory params)
     {
-        params = abi.encode(SummerfiUnsub.Params({ cdpIds: _cdpIds }));
+        params = abi.encode(SummerfiUnsub.Params({ cdpIds: _cdpIds, triggerIds: _triggerIds }));
     }
 
     function SummerfiUnsubV2Encode(

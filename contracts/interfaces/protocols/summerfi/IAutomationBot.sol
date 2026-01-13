@@ -2,6 +2,6 @@
 pragma solidity =0.8.24;
 
 interface IAutomationBot {
-    function removeApproval(address _serviceRegistry, uint256 cdpId) external;
+    function removeTrigger(uint256 cdpId, uint256 triggerId, bool removeAllowance) external;
 }
 
