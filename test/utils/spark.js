@@ -18,6 +18,8 @@ const {
     createSparkGenericFLCloseToCollStrategy,
     createSparkRepayOnPriceStrategy,
     createSparkFLRepayOnPriceStrategy,
+    createSparkBoostOnPriceStrategy,
+    createSparkFLBoostOnPriceStrategy,
 } = require('../../strategies-spec/mainnet');
 const { createStrategy, createBundle } = require('../strategies/utils/utils-strategies');
 const { getAssetInfo } = require('@defisaver/tokens');
@@ -138,6 +140,18 @@ const deploySparkRepayOnPriceBundle = async () => {
     const repayOnPriceStrategyId = await createStrategy(...repayOnPriceStrategy, continuous);
     const flRepayOnPriceStrategyId = await createStrategy(...flRepayOnPriceStrategy, continuous);
     const bundleId = await createBundle([repayOnPriceStrategyId, flRepayOnPriceStrategyId]);
+    return bundleId;
+};
+
+const deploySparkBoostOnPriceBundle = async () => {
+    const isFork = isNetworkFork();
+    await openStrategyAndBundleStorage(isFork);
+    const boostOnPriceStrategy = createSparkBoostOnPriceStrategy();
+    const flBoostOnPriceStrategy = createSparkFLBoostOnPriceStrategy();
+    const continuous = false;
+    const boostOnPriceStrategyId = await createStrategy(...boostOnPriceStrategy, continuous);
+    const flBoostOnPriceStrategyId = await createStrategy(...flBoostOnPriceStrategy, continuous);
+    const bundleId = await createBundle([boostOnPriceStrategyId, flBoostOnPriceStrategyId]);
     return bundleId;
 };
 
@@ -263,6 +277,59 @@ const SPARK_AUTOMATION_TEST_PAIRS = [
     },
 ];
 
+const SPARK_AUTOMATION_TEST_PAIRS_BOOST = [
+    {
+        collSymbol: 'WETH',
+        debtSymbol: 'DAI',
+        marketAddr: addrs[network].SPARK_MARKET,
+        triggerRatioBoost: 190,
+        targetRatioBoost: 180,
+        collAmountInUSD: 40_000,
+        debtAmountInUSD: 15_000,
+        boostAmountInUSD: 7_000,
+    },
+    {
+        collSymbol: 'WETH',
+        debtSymbol: 'USDC',
+        marketAddr: addrs[network].SPARK_MARKET,
+        triggerRatioBoost: 190,
+        targetRatioBoost: 180,
+        collAmountInUSD: 40_000,
+        debtAmountInUSD: 15_000,
+        boostAmountInUSD: 7_000,
+    },
+    {
+        collSymbol: 'WETH',
+        debtSymbol: 'USDT',
+        marketAddr: addrs[network].SPARK_MARKET,
+        triggerRatioBoost: 190,
+        targetRatioBoost: 180,
+        collAmountInUSD: 40_000,
+        debtAmountInUSD: 15_000,
+        boostAmountInUSD: 7_000,
+    },
+    {
+        collSymbol: 'TBTC',
+        debtSymbol: 'USDC',
+        marketAddr: addrs[network].SPARK_MARKET,
+        triggerRatioBoost: 190,
+        targetRatioBoost: 170,
+        collAmountInUSD: 40_000,
+        debtAmountInUSD: 15_000,
+        boostAmountInUSD: 4_000,
+    },
+    {
+        collSymbol: 'WETH',
+        debtSymbol: 'USDS',
+        marketAddr: addrs[network].SPARK_MARKET,
+        triggerRatioBoost: 190,
+        targetRatioBoost: 185,
+        collAmountInUSD: 40_000,
+        debtAmountInUSD: 15_000,
+        boostAmountInUSD: 6_000,
+    },
+];
+
 const SPARK_AUTOMATION_TEST_PAIRS_REPAY = [
     {
         collSymbol: 'WETH',
@@ -321,10 +388,12 @@ module.exports = {
     expectTwoSparkPositionsToBeEqual,
     deploySparkCloseGenericBundle,
     deploySparkRepayOnPriceBundle,
+    deploySparkBoostOnPriceBundle,
     openSparkProxyPosition,
     getSparkPositionRatio,
     getSparkReserveData,
     getSparkReserveDataFromPool,
     SPARK_AUTOMATION_TEST_PAIRS,
+    SPARK_AUTOMATION_TEST_PAIRS_BOOST,
     SPARK_AUTOMATION_TEST_PAIRS_REPAY,
 };
