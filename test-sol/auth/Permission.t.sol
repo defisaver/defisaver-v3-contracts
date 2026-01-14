@@ -178,13 +178,15 @@ contract TestCore_Permission is AuthHelper, BaseTest, SFProxyUtils {
     function _giveSFProxyPermission(address _addr) internal {
         bytes memory givePermCalldata =
             abi.encodeCall(MockPermission.givePermissionTo, (WalletType.SFPROXY, _addr));
-        sfProxy.execute(address(cut), givePermCalldata, 0);
+        vm.prank(IAccountImplementation(sfProxyAddr).owner());
+        IAccountImplementation(sfProxyAddr).execute{ value: 0 }(address(cut), givePermCalldata);
     }
 
     function _removeSFProxyPermission(address _addr) internal {
         bytes memory removePermCalldata =
             abi.encodeCall(MockPermission.removePermissionFrom, (WalletType.SFPROXY, _addr));
-        sfProxy.execute(address(cut), removePermCalldata, 0);
+        vm.prank(IAccountImplementation(sfProxyAddr).owner());
+        IAccountImplementation(sfProxyAddr).execute{ value: 0 }(address(cut), removePermCalldata);
     }
 
     function _verifySFProxyPermission(address _addr, bool _enabled) internal view {
