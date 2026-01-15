@@ -14,8 +14,6 @@ import { TriggerHelper } from "./helpers/TriggerHelper.sol";
 contract McdNextPriceRatio is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, TriggerHelper {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
-    error WrongNextPrice(uint256);
-
     enum RatioState {
         OVER,
         UNDER
@@ -33,6 +31,8 @@ contract McdNextPriceRatio is ITrigger, AdminAuth, McdRatioHelper, CoreHelper, T
     function isTriggered(bytes memory, bytes memory _subData) public view override returns (bool) {
         SubParams memory triggerSubData = parseSubInputs(_subData);
 
+        // Pass nextPrice = 0 to use the on-chain "next price" for this vault.
+        // The trigger will then calculate the ratio using that next price.
         uint256 checkedRatio = getRatio(triggerSubData.vaultId, 0);
 
         // if cdp has 0 ratio don't trigger it
