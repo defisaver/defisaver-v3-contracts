@@ -960,6 +960,17 @@
         ]
     },
     {
+        "name": "McdNextPriceRatioTrigger",
+        "address": "TBD",
+        "id": "0x65d88d3b",
+        "path": "contracts/triggers/McdNextPriceRatioTrigger.sol",
+        "version": "1.0.2",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "SDaiWrap",
         "address": "0xac7Ac294F29d818D26Bd9DF86d36904B1Ed346Ae",
         "id": "0xf7fc13f2",
