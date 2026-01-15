@@ -1,6 +1,14 @@
 const hre = require('hardhat');
 const { topUp } = require('./utils/fork');
 const { getOwnerAddr, redeploy, network } = require('../test/utils/utils');
+const {
+    deployAaveV4RepayBundle,
+    deployAaveV4BoostBundle,
+    deployAaveV4RepayOnPriceBundle,
+    deployAaveV4BoostOnPriceBundle,
+    deployAaveV4CloseBundle,
+    deployAaveV4FLCollateralSwitchStrategy,
+} = require('../test/utils/aaveV4');
 
 async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
@@ -30,6 +38,20 @@ async function main() {
     console.log('AaveV4RatioTrigger:', aaveV4RatioTrigger.address);
     console.log('AaveV4QuotePriceTrigger:', aaveV4QuotePriceTrigger.address);
     console.log('AaveV4QuotePriceRangeTrigger:', aaveV4QuotePriceRangeTrigger.address);
+
+    const repayBundle = await deployAaveV4RepayBundle();
+    const boostBundle = await deployAaveV4BoostBundle();
+    const repayOnPriceBundle = await deployAaveV4RepayOnPriceBundle();
+    const boostOnPriceBundle = await deployAaveV4BoostOnPriceBundle();
+    const closeBundle = await deployAaveV4CloseBundle();
+    const flCollateralSwitchStrategy = await deployAaveV4FLCollateralSwitchStrategy();
+
+    console.log('Repay Bundle:', repayBundle);
+    console.log('Boost Bundle:', boostBundle);
+    console.log('Repay On Price Bundle:', repayOnPriceBundle);
+    console.log('Boost On Price Bundle:', boostOnPriceBundle);
+    console.log('Close Bundle:', closeBundle);
+    console.log('FL Collateral Switch Strategy ID:', flCollateralSwitchStrategy);
 }
 
 main().catch((error) => {
