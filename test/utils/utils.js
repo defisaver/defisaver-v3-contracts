@@ -1,5 +1,3 @@
-// const { default: curve } = require('@curvefi/api');
-const curve = import('@curvefi/api');
 const fs = require('fs');
 const hre = require('hardhat');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
@@ -1064,10 +1062,17 @@ const formatExchangeObj = (
     ];
 };
 
+let _curveImportPromise;
+const getCurveModule = async () => {
+    if (!_curveImportPromise) _curveImportPromise = import('@curvefi/api');
+    return _curveImportPromise;
+};
+
 let _curveObj;
 const curveApiInit = async () => {
     if (!_curveObj) {
-        _curveObj = (await curve).default;
+        const curveModule = await getCurveModule();
+        _curveObj = curveModule.default ?? curveModule;
         await _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
         // Fetch factory pools
         await _curveObj.factory.fetchPools(true);
