@@ -49,7 +49,7 @@ contract TestSparkViewSmall is BaseTest, ActionsUtils, SparkHelper {
                                   SETUP FUNCTION
     //////////////////////////////////////////////////////////////////////////*/
     function setUp() public override {
-        forkMainnetLatest();
+        forkMainnet("SparkViewSmall");
 
         wallet = new SmartWallet(bob);
         sender = wallet.owner();

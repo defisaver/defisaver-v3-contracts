@@ -102,6 +102,8 @@ import { HandleAuth } from "../../contracts/actions/utils/HandleAuth.sol";
 import { SparkSupply } from "../../contracts/actions/spark/SparkSupply.sol";
 import { SparkBorrow } from "../../contracts/actions/spark/SparkBorrow.sol";
 import { SparkSetEMode } from "../../contracts/actions/spark/SparkSetEMode.sol";
+import { SummerfiUnsub } from "../../contracts/actions/summerfi/SummerfiUnsub.sol";
+import { SummerfiUnsubV2 } from "../../contracts/actions/summerfi/SummerfiUnsubV2.sol";
 
 contract ActionsUtils {
     // @dev Change this value if we ever need to add more parameters to any action.
@@ -212,6 +214,39 @@ contract ActionsUtils {
         path[0] = _srcAddr;
         path[1] = _destAddr;
         bytes memory wrapperData = abi.encode(path);
+
+        DFSExchangeData.ExchangeData memory sellParams = DFSExchangeData.ExchangeData({
+            srcAddr: _srcAddr,
+            destAddr: _destAddr,
+            srcAmount: _srcAmount,
+            destAmount: 0,
+            minPrice: 0,
+            dfsFeeDivider: 0,
+            user: msg.sender,
+            wrapper: _wrapper,
+            wrapperData: wrapperData,
+            offchainData: offchain
+        });
+
+        DFSSell.Params memory params =
+            DFSSell.Params({ exchangeData: sellParams, from: _from, to: _to });
+
+        return abi.encode(params);
+    }
+
+    /// @notice sellEncode for Uniswap V3 wrapper
+    function sellEncodeV3(
+        address _srcAddr,
+        address _destAddr,
+        uint256 _srcAmount,
+        address _from,
+        address _to,
+        address _wrapper,
+        uint24 _fee
+    ) public view returns (bytes memory) {
+        DFSExchangeData.OffchainData memory offchain;
+
+        bytes memory wrapperData = abi.encodePacked(_srcAddr, _fee, _destAddr);
 
         DFSExchangeData.ExchangeData memory sellParams = DFSExchangeData.ExchangeData({
             srcAddr: _srcAddr,
@@ -1351,4 +1386,27 @@ contract ActionsUtils {
             })
         );
     }
+
+    function SummerfiUnsubEncode(uint256[] memory _cdpIds, uint256[] memory _triggerIds)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(SummerfiUnsub.Params({ cdpIds: _cdpIds, triggerIds: _triggerIds }));
+    }
+
+    function SummerfiUnsubV2Encode(
+        uint256[][] memory _triggerIds,
+        bytes[][] memory _triggerData,
+        bool[] memory _removeAllowance
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SummerfiUnsubV2.Params({
+                triggerIds: _triggerIds,
+                triggerData: _triggerData,
+                removeAllowance: _removeAllowance
+            })
+        );
+    }
 }
+

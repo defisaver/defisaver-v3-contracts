@@ -6,15 +6,17 @@ import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
 import { PullToken } from "../../contracts/actions/utils/PullToken.sol";
 import { SendToken } from "../../contracts/actions/utils/SendToken.sol";
 import { FLAction } from "../../contracts/actions/flashloan/FLAction.sol";
+import { SFProxyEntryPoint } from "../../contracts/actions/summerfi/SFProxyEntryPoint.sol";
 import { BaseTest } from "../utils/BaseTest.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { Addresses } from "../utils/Addresses.sol";
 import { DSAProxyTestUtils } from "../utils/dsa/DSAProxyTestUtils.sol";
+import { SFProxyUtils } from "../utils/summerfi/SFProxyUtils.sol";
 
 /// @dev Recipe execution from strategy is already tested in StrategyExecutor tests
 /// @dev Here, we just test direct recipe execution with and without flash loan
-contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
+contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest, SFProxyUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -41,22 +43,28 @@ contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest {
         SmartWallet dsaProxyWallet = new SmartWallet(charlie);
         dsaProxyWallet.createDSAProxy();
 
-        wallets = new SmartWallet[](3);
+        SmartWallet sfProxyWallet = new SmartWallet(jane);
+        sfProxyWallet.createSFProxy();
+
+        wallets = new SmartWallet[](4);
 
         wallets[0] = safeWallet;
         wallets[1] = dsProxyWallet;
         wallets[2] = dsaProxyWallet;
-
+        wallets[3] = sfProxyWallet;
         _addDefiSaverConnector();
 
         cut = new RecipeExecutor();
 
         redeploy("RecipeExecutor", address(cut));
+        redeploy("SFProxyEntryPoint", address(new SFProxyEntryPoint()));
         redeploy("PullToken", address(new PullToken()));
         redeploy("SendToken", address(new SendToken()));
 
         flAddress = address(new FLAction());
         redeploy("FLAction", flAddress);
+
+        _whitelistSFProxyEntryPoint();
     }
 
     /*//////////////////////////////////////////////////////////////////////////

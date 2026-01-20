@@ -5,11 +5,17 @@ pragma solidity =0.8.24;
 import { SafeModulePermission } from "./SafeModulePermission.sol";
 import { DSProxyPermission } from "./DSProxyPermission.sol";
 import { DSAProxyPermission } from "./DSAProxyPermission.sol";
+import { SFProxyPermission } from "./SFProxyPermission.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title Permission contract to give execute permission on Smart Wallets
 /// @dev Called from the context of the wallet
-contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermission {
+contract Permission is
+    DSProxyPermission,
+    SafeModulePermission,
+    DSAProxyPermission,
+    SFProxyPermission
+{
     /// @notice Gives permission to Auth contract used by dfs automation
     function _givePermissionToAuthContract(bool _isDSProxyWallet) internal {
         _isDSProxyWallet
@@ -33,6 +39,8 @@ contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermissi
             _giveProxyPermission(_to);
         } else if (_walletType == WalletType.DSAPROXY) {
             _giveDSAProxyPermission(_to);
+        } else if (_walletType == WalletType.SFPROXY) {
+            _giveSFProxyPermission(_to);
         } else {
             _enableModule(_to);
         }
@@ -47,6 +55,8 @@ contract Permission is DSProxyPermission, SafeModulePermission, DSAProxyPermissi
             _removeProxyPermission(_from);
         } else if (_walletType == WalletType.DSAPROXY) {
             _removeDSAProxyPermission(_from);
+        } else if (_walletType == WalletType.SFPROXY) {
+            _removeSFProxyPermission(_from);
         } else {
             _disableModule(_from);
         }

@@ -400,14 +400,15 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0x30CEf36b14Dd71A347284204C48E134D04c24331",
+        "address": "0xEC891E6b5A93F5f29241De6B234a4e77A5456A1C",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x30CEf36b14Dd71A347284204C48E134D04c24331",
             "0x993a8c81142044e1cb0cf0c3d84bea235d842fb0",
             "0xA532771BD90dAf94b456A4acC9E9cbBdF1367572",
             "0x44FDe16DDCd7c02bE28de52CEc08997336051735",
@@ -656,14 +657,16 @@
     },
     {
         "name": "FLAction",
-        "address": "0x13663f7f852dFa7ec6517B5F3B0caabDBd9bf049",
+        "address": "0xB57b666dAB46229e2b80113b5187F6DCD91AB159",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.3",
+        "version": "1.0.5",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0xfF05C70C8d69258052228F28e571c3BFe54631c3",
+            "0x13663f7f852dFa7ec6517B5F3B0caabDBd9bf049",
             "0x82d5eDeb005AfFbF381B5949C707a3305160F4A9",
             "0xE668197A175E7A2143222a028470c6ABBBD183F6",
             "0x5fA356C700F0C8A6f445B8a36Eb6e108590919D4"
@@ -1263,6 +1266,28 @@
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SFProxyEntryPoint",
+        "address": "0x06299D4A07E8C6D7C1aEc14Ab2F46DF05Dd9588E",
+        "id": "0x06f8038f",
+        "path": "contracts/actions/summerfi/SFProxyEntryPoint.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SummerfiUnsubV2",
+        "address": "0xC24863ce3397316b743112AeBc2eBCF5507bFD42",
+        "id": "0xa7559614",
+        "path": "contracts/actions/summerfi/SummerfiUnsubV2.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     }

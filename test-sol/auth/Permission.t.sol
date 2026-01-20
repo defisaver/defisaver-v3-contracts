@@ -6,13 +6,18 @@ import { IInstaAccount } from "../../contracts/interfaces/protocols/insta/IInsta
 import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { IDSAuthority } from "../../contracts/interfaces/DS/IDSAuthority.sol";
 import { IDSAuth } from "../../contracts/interfaces/DS/IDSAuth.sol";
-import { AuthHelper } from "../../contracts/auth/helpers/AuthHelper.sol";
+import {
+    IAccountImplementation
+} from "../../contracts/interfaces/protocols/summerfi/IAccountImplementation.sol";
+import { IAccountGuard } from "../../contracts/interfaces/protocols/summerfi/IAccountGuard.sol";
 
 import { BaseTest } from "../utils/BaseTest.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
+import { SFProxyUtils } from "../utils/summerfi/SFProxyUtils.sol";
 import { WalletType } from "../../contracts/utils/DFSTypes.sol";
+import { AuthHelper } from "../../contracts/auth/helpers/AuthHelper.sol";
 
-contract TestCore_Permission is AuthHelper, BaseTest {
+contract TestCore_Permission is AuthHelper, BaseTest, SFProxyUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -24,9 +29,11 @@ contract TestCore_Permission is AuthHelper, BaseTest {
     SmartWallet dsProxyWallet;
     SmartWallet safeWallet;
     SmartWallet dsaProxyWallet;
+    SmartWallet sfProxy;
     address dsProxyAddr;
     address safeAddr;
     address dsaProxyAddr;
+    address sfProxyAddr;
 
     bytes4 constant EXECUTE_SELECTOR = bytes4(keccak256("execute(address,bytes)"));
 
@@ -46,6 +53,9 @@ contract TestCore_Permission is AuthHelper, BaseTest {
 
         dsaProxyWallet = new SmartWallet(charlie);
         dsaProxyAddr = dsaProxyWallet.createDSAProxy();
+
+        sfProxy = new SmartWallet(jane);
+        sfProxyAddr = sfProxy.createSFProxy();
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -87,6 +97,17 @@ contract TestCore_Permission is AuthHelper, BaseTest {
         _verifyDsaProxyPermission(addr, true);
         _removeDsaProxyPermission(addr);
         _verifyDsaProxyPermission(addr, false);
+    }
+
+    function test_giveAndRemove_SFProxy_arbitraryPermission() public {
+        // Have to whitelist cut for summerfi acc to be able to call it
+        _whitelistAnyAddr(address(cut));
+        address addr = address(0x111);
+
+        _giveSFProxyPermission(addr);
+        _verifySFProxyPermission(addr, true);
+        _removeSFProxyPermission(addr);
+        _verifySFProxyPermission(addr, false);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -154,6 +175,30 @@ contract TestCore_Permission is AuthHelper, BaseTest {
         }
     }
 
+    function _giveSFProxyPermission(address _addr) internal {
+        bytes memory givePermCalldata =
+            abi.encodeCall(MockPermission.givePermissionTo, (WalletType.SFPROXY, _addr));
+        vm.prank(IAccountImplementation(sfProxyAddr).owner());
+        IAccountImplementation(sfProxyAddr).execute{ value: 0 }(address(cut), givePermCalldata);
+    }
+
+    function _removeSFProxyPermission(address _addr) internal {
+        bytes memory removePermCalldata =
+            abi.encodeCall(MockPermission.removePermissionFrom, (WalletType.SFPROXY, _addr));
+        vm.prank(IAccountImplementation(sfProxyAddr).owner());
+        IAccountImplementation(sfProxyAddr).execute{ value: 0 }(address(cut), removePermCalldata);
+    }
+
+    function _verifySFProxyPermission(address _addr, bool _enabled) internal view {
+        address guard = IAccountImplementation(sfProxyAddr).guard();
+        bool canCall = IAccountGuard(guard).canCall(sfProxyAddr, _addr);
+        if (_enabled) {
+            assertTrue(canCall);
+        } else {
+            assertFalse(canCall);
+        }
+    }
+
     function _getWalletByType(WalletType _walletType) internal view returns (SmartWallet wallet) {
         if (_walletType == WalletType.DSPROXY) {
             return dsProxyWallet;
@@ -161,6 +206,8 @@ contract TestCore_Permission is AuthHelper, BaseTest {
             return safeWallet;
         } else if (_walletType == WalletType.DSAPROXY) {
             return dsaProxyWallet;
+        } else if (_walletType == WalletType.SFPROXY) {
+            return sfProxy;
         }
     }
 }

@@ -10,10 +10,11 @@ import { DSProxyFactoryHelper } from "../utils/addresses/dsProxyFactory/DSProxyF
 import {
     DSAProxyFactoryHelper
 } from "../utils/addresses/dsaProxyFactory/DSAProxyFactoryHelper.sol";
+import { SFProxyFactoryHelper } from "../utils/addresses/sfProxyFactory/SFProxyFactoryHelper.sol";
 import { WalletType } from "../utils/DFSTypes.sol";
 
 /// @title SmartWalletUtils - Helper contract with utility functions for smart wallets
-contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
+contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper, SFProxyFactoryHelper {
     /// @notice Determine the type of wallet an address represents
     function _getWalletType(address _wallet) internal view returns (WalletType) {
         if (_isDSProxy(_wallet)) {
@@ -22,6 +23,10 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
 
         if (_isDSAProxy(_wallet)) {
             return WalletType.DSAPROXY;
+        }
+
+        if (_isSFProxy(_wallet)) {
+            return WalletType.SFPROXY;
         }
 
         // Otherwise, we assume we are in context of Safe
@@ -38,8 +43,14 @@ contract SmartWalletUtils is DSProxyFactoryHelper, DSAProxyFactoryHelper {
         return IInstaList(DSA_LIST_ADDR).accountID(_wallet) != 0;
     }
 
+    /// @notice Check if the wallet is a Summerfi account
+    function _isSFProxy(address _wallet) internal view returns (bool) {
+        return _wallet.codehash == SF_PROXY_CODEHASH;
+    }
+
     /// @notice Fetch the owner of the smart wallet or the wallet itself
     /// @dev For 1/1 Safe it returns the owner, otherwise it returns the wallet itself
+    /// @dev Only supports Safe and DSProxy wallets because SFProxy and DSAProxy are not part of automation
     /// @param _wallet Address of the smart wallet
     /// @return Address of the owner or wallet
     function _fetchOwnerOrWallet(address _wallet) internal view returns (address) {

@@ -67,14 +67,14 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0xB8af168883D049FF9C811ab5B5DE179f3e7d6Fb7",
+        "address": "0xe1315EE74E2A3057c0ede9E0E2cf30b3ee3ad121",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xB8af168883D049FF9C811ab5B5DE179f3e7d6Fb7"]
     },
     {
         "name": "DFSSell",
@@ -89,14 +89,14 @@
     },
     {
         "name": "FLAction",
-        "address": "0xa67f6A6Af60dD626ce7bF3d4705ABe5D593D90Ec",
+        "address": "0x3D57875885e3cEe9E56Cb65D21789893B6e67815",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "inRegistry": true,
         "changeTime": 0,
         "registryIds": [],
-        "history": []
+        "history": ["0xa67f6A6Af60dD626ce7bF3d4705ABe5D593D90Ec"]
     },
     {
         "name": "ExchangeAggregatorRegistry",

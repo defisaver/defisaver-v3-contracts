@@ -7,24 +7,31 @@ import { IDSProxy } from "../../contracts/interfaces/DS/IDSProxy.sol";
 import { ISafeProxyFactory } from "../../contracts/interfaces/protocols/safe/ISafeProxyFactory.sol";
 import { ISafe } from "../../contracts/interfaces/protocols/safe/ISafe.sol";
 import { IInstaIndex } from "../../contracts/interfaces/protocols/insta/IInstaIndex.sol";
+import {
+    IAccountImplementation
+} from "../../contracts/interfaces/protocols/summerfi/IAccountImplementation.sol";
+import { IAccountFactory } from "../../contracts/interfaces/protocols/summerfi/IAccountFactory.sol";
 import { IInstaAccountV2 } from "../../contracts/interfaces/protocols/insta/IInstaAccountV2.sol";
-import { BaseTest } from "./BaseTest.sol";
-import { Addresses } from "../utils/Addresses.sol";
-import { console2 } from "forge-std/console2.sol";
 
-contract SmartWallet is BaseTest {
+import { BaseTest } from "./BaseTest.sol";
+import { RegistryUtils } from "./RegistryUtils.sol";
+import { Addresses } from "../utils/Addresses.sol";
+import { console2 as console } from "forge-std/console2.sol";
+
+contract SmartWallet is BaseTest, RegistryUtils {
     address payable public owner;
     address payable public walletAddr;
     bool public isSafe;
     bool public isDSA;
     bool public isDSProxy;
+    bool public isSFProxy;
     bool private safeInitialized;
 
     error SafeTxFailed();
     error UnsupportedWalletType();
 
     modifier ownerAsSender() {
-        vm.prank(owner);
+        vm.startPrank(owner);
         _;
         vm.stopPrank();
     }
@@ -47,6 +54,7 @@ contract SmartWallet is BaseTest {
         isSafe = false;
         isDSA = false;
         isDSProxy = true;
+        isSFProxy = false;
         return walletAddr;
     }
 
@@ -55,6 +63,17 @@ contract SmartWallet is BaseTest {
         isSafe = false;
         isDSA = true;
         isDSProxy = false;
+        isSFProxy = false;
+        return walletAddr;
+    }
+
+    function createSFProxy() public ownerAsSender returns (address payable) {
+        walletAddr = payable(IAccountFactory(Addresses.SF_PROXY_FACTORY).createAccount());
+        vm.label(address(Addresses.SF_PROXY_GUARD), "AccountGuard");
+        isSafe = false;
+        isDSA = false;
+        isDSProxy = false;
+        isSFProxy = true;
         return walletAddr;
     }
 
@@ -81,8 +100,6 @@ contract SmartWallet is BaseTest {
                 .createProxyWithNonce(Addresses.SAFE_SINGLETON, setupData, saltNonce));
 
         isSafe = true;
-        isDSA = false;
-        isDSProxy = false;
         safeInitialized = true;
 
         return walletAddr;
@@ -110,18 +127,17 @@ contract SmartWallet is BaseTest {
         } else if (isDSProxy) {
             IDSProxy(walletAddr).execute{ value: _value }(_target, _calldata);
         } else if (isDSA) {
-            // Fix for [FAIL: vm.startPrank: cannot overwrite a prank until it is applied at least once]
-            consumePrank();
-            vm.startPrank(owner);
-
             string[] memory connectors = new string[](1);
             connectors[0] = "DEFI-SAVER-A";
             bytes[] memory connectorsData = new bytes[](1);
             connectorsData[0] = _calldata;
 
             IInstaAccountV2(walletAddr).cast{ value: _value }(connectors, connectorsData, owner);
+        } else if (isSFProxy) {
+            address sfProxyEntryPoint = getAddr("SFProxyEntryPoint");
+            address target = sfProxyEntryPoint != address(0) ? sfProxyEntryPoint : _target;
 
-            vm.stopPrank();
+            IAccountImplementation(walletAddr).execute{ value: _value }(target, _calldata);
         } else {
             revert UnsupportedWalletType();
         }
@@ -131,8 +147,8 @@ contract SmartWallet is BaseTest {
         uint256 startGas = gasleft();
         execute(_target, _calldata, _value);
         uint256 gasUsed = startGas - gasleft();
-        console2.log("--------- EXECUTING TX FROM WALLET ----------");
-        console2.log("GAS USED: ", gasUsed);
+        console.log("--------- EXECUTING TX FROM WALLET ----------");
+        console.log("GAS USED: ", gasUsed);
     }
 
     function ownerApprove(address _token, uint256 _amount) public ownerAsSender {
