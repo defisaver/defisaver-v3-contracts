@@ -45,7 +45,6 @@ const {
     getSubHash,
 } = require('../strategies/utils/utils-strategies');
 const { executeSafeTx } = require('../utils/safe');
-const { addDefiSaverConnector } = require('../utils/insta');
 const { executeAction } = require('../utils/actions');
 
 const THREE_HOURS = 3 * 60 * 60;
@@ -854,14 +853,6 @@ const recipeExecutorTest = async () => {
             await redeploy('GasPriceTrigger');
             await redeploy('RecipeExecutor');
             await redeploy('SFProxyEntryPoint');
-
-            // Add connector for DSA Proxy Accounts.
-            const connectV2DefisaverName =
-                network === 'mainnet'
-                    ? 'ConnectV2DefiSaver'
-                    : `ConnectV2DefiSaver${network.charAt(0).toUpperCase() + network.slice(1)}`;
-            const dfsConnector = await redeploy(connectV2DefisaverName);
-            await addDefiSaverConnector(dfsConnector.address);
 
             strategyExecutor =
                 network === 'mainnet'

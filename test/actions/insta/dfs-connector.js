@@ -14,14 +14,12 @@ const {
     approve,
 } = require('../../utils/utils');
 const { executeAction } = require('../../utils/actions');
-const { addDefiSaverConnector } = require('../../utils/insta');
 
 const dfsConnectorTest = async () => {
     describe('Test ConnectV2DefiSaver', function () {
         this.timeout(150000);
         let owner;
         let dsaAddress;
-        let dfsConnector;
         let flContract;
         let dsaSigner;
         let dsaContract;
@@ -30,7 +28,6 @@ const dfsConnectorTest = async () => {
             owner = '0xF6Da9e9D73d7893223578D32a95d6d7de5522767';
             dsaAddress = '0x4C6Cd7b623e7E7741C20bdAF3452269277534eF8';
 
-            dfsConnector = await redeploy('ConnectV2DefiSaver');
             dsaSigner = hre.ethers.provider.getSigner(owner);
             dsaSigner.address = owner;
             dsaContract = await hre.ethers.getContractAt('IInstaAccountV2', dsaAddress, dsaSigner);
@@ -41,8 +38,6 @@ const dfsConnectorTest = async () => {
             await impersonateAccount(zeroAddress);
             await sendEther(zeroAcc, owner, '5');
             await stopImpersonatingAccount(zeroAddress);
-
-            await addDefiSaverConnector(dfsConnector.address);
 
             flContract = await redeploy('FLAction');
             await redeploy('RecipeExecutor');

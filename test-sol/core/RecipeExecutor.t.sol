@@ -11,12 +11,12 @@ import { BaseTest } from "../utils/BaseTest.sol";
 import { ActionsUtils } from "../utils/ActionsUtils.sol";
 import { SmartWallet } from "../utils/SmartWallet.sol";
 import { Addresses } from "../utils/Addresses.sol";
-import { DSAProxyTestUtils } from "../utils/dsa/DSAProxyTestUtils.sol";
 import { SFProxyUtils } from "../utils/summerfi/SFProxyUtils.sol";
+import { RegistryUtils } from "../utils/RegistryUtils.sol";
 
 /// @dev Recipe execution from strategy is already tested in StrategyExecutor tests
 /// @dev Here, we just test direct recipe execution with and without flash loan
-contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest, SFProxyUtils {
+contract TestCore_RecipeExecutor is ActionsUtils, RegistryUtils, BaseTest, SFProxyUtils {
     /*//////////////////////////////////////////////////////////////////////////
                                CONTRACT UNDER TEST
     //////////////////////////////////////////////////////////////////////////*/
@@ -52,7 +52,6 @@ contract TestCore_RecipeExecutor is ActionsUtils, DSAProxyTestUtils, BaseTest, S
         wallets[1] = dsProxyWallet;
         wallets[2] = dsaProxyWallet;
         wallets[3] = sfProxyWallet;
-        _addDefiSaverConnector();
 
         cut = new RecipeExecutor();
 
