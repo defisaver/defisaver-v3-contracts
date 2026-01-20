@@ -10,12 +10,12 @@ import {
     ITxSaverBytesTransientStorage
 } from "../interfaces/core/ITxSaverBytesTransientStorage.sol";
 import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
+import { DFSIds } from "../utils/DFSIds.sol";
 
 contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc {
     using SafeERC20 for IERC20;
     using TokenUtils for address;
 
-    bytes4 internal constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
     uint256 constant EOA_OR_WALLET_FEE_FLAG = 2; // see TxSaverBytesTransientStorage
 
     /// For TxSaver, total gas cost fee taken from user can't be higher than maxTxCost set by user
@@ -31,7 +31,7 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc {
         internal
         returns (address wrapperAddress, uint256 destAmount, bool hasFee, bool txSaverFeeTaken)
     {
-        address txSaverAddr = _registry.getAddr(TX_SAVER_EXECUTOR_ID);
+        address txSaverAddr = _registry.getAddr(DFSIds.TX_SAVER_EXECUTOR);
         ITxSaverBytesTransientStorage tStorage = ITxSaverBytesTransientStorage(txSaverAddr);
 
         // Check if TxSaverExecutor initiated transaction by setting right flag in transient storage
