@@ -420,4 +420,8 @@ interface IHub {
     /// @dev The value is not inclusive; using the maximum value indicates no threshold.
     /// @return The maximum risk premium threshold, expressed in BPS.
     function MAX_RISK_PREMIUM_THRESHOLD() external view returns (uint24);
+
+    function updateSpokeConfig(uint256 assetId, address spoke, SpokeConfig calldata config) external;
+
+    function authority() external view returns (address);
 }
