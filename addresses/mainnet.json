@@ -2144,14 +2144,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xB63565026194672f1db42473CB470B570bba78ce",
+        "address": "0xDABC9914Ce4279a351a26038Fa96BFa7a6D1aC6e",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.12",
+        "version": "1.0.13",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xB63565026194672f1db42473CB470B570bba78ce",
             "0xe5b2f8d31b47f09400d8afb599e0f239179de6b6",
             "0x5BAD7F432e22BcF1937C8361933c9C804179aEDf",
             "0x0CB0170F3413e54405F64d3C23BA3A1D8Bb96D99",
@@ -3759,7 +3760,7 @@
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
         "version": "1.0.2",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": [
             "0xac7745d524b780751cc8410224d73ebe7e7acca2",
@@ -4789,8 +4790,8 @@
         "id": "0x83a50237",
         "path": "contracts/triggers/SparkQuotePriceRangeTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -4800,8 +4801,8 @@
         "id": "0x23825034",
         "path": "contracts/triggers/MorphoBluePriceRangeTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },

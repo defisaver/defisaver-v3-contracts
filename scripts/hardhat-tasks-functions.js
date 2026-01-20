@@ -185,35 +185,6 @@ function sleep(ms) {
     });
 }
 
-const getExplorerUrls = (hash) => {
-    const network = hre.network.config.name;
-    const blockExplorer = hre.network.config.blockExplorer;
-    const networkPrefix = network === 'mainnet' || network === 'arbitrum' ? '' : `${network}.`;
-
-    if (network === 'base') {
-        return {
-            txUrl: `https://basescan.org/tx/${hash}`,
-            addressUrl: 'https://basescan.org/address/',
-        };
-    }
-    if (network === 'linea') {
-        return {
-            txUrl: `https://lineascan.build/tx/${hash}`,
-            addressUrl: 'https://lineascan.build/address/',
-        };
-    }
-    if (network === 'plasma') {
-        return {
-            txUrl: `https://${blockExplorer}.to/tx/${hash}`,
-            addressUrl: `https://${blockExplorer}.to/address/`,
-        };
-    }
-    return {
-        txUrl: `https://${networkPrefix}${blockExplorer}.io/tx/${hash}`,
-        addressUrl: `https://${networkPrefix}${blockExplorer}.io/address/`,
-    };
-};
-
 async function deployContract(contractNames, args) {
     const gasPriceSelected = args.gas;
     const network = hre.network.config.name;
@@ -353,7 +324,8 @@ async function deployContract(contractNames, args) {
         const deployerContract = Contract.connect(deployer);
         const contract = await deployerContract.deploy(currentOverrides);
 
-        const { txUrl, addressUrl } = getExplorerUrls(contract.deployTransaction.hash);
+        const txUrl = `https://${hre.network.config.blockExplorer}/tx/${contract.deployTransaction.hash}`;
+        const addressUrl = `https://${hre.network.config.blockExplorer}/address/`;
         console.log(`Transaction: ${txUrl}`);
 
         await contract.deployed();
@@ -409,6 +381,8 @@ async function verifyContract(contractAddress, contractName) {
         chainId = 8453;
     } else if (network === 'linea') {
         chainId = 59144;
+    } else if (network === 'plasma') {
+        chainId = 9745;
     }
 
     // V2 API parameters - chainid, module, action, and apikey go in URL
@@ -453,16 +427,10 @@ async function verifyContract(contractAddress, contractName) {
     const tx = await axios.post(url, params, config);
     console.log(`Verification submitted with GUID: ${tx.data.result}`);
 
-    const blockExplorer = hre.network.config.blockExplorer;
-    let demo = `https://${blockExplorer}.io/sourcecode-demo.html`;
-    if (!(network === 'mainnet' || network === 'arbitrum')) {
-        demo = `https://${network}.${blockExplorer}.io/sourcecode-demo.html`;
-    }
-    if (network === 'base') {
-        demo = 'https://basescan.org/sourcecode-demo.html';
-    }
+    const demoUrl = `https://${hre.network.config.blockExplorer}/sourcecode-demo.html`;
+
     console.log(
-        `Check how verification is going at ${demo} with API key ${apiKey} and receipt GUID ${tx.data.result}`,
+        `Check how verification is going at ${demoUrl} with API key ${apiKey} and receipt GUID ${tx.data.result}`,
     );
 }
 
