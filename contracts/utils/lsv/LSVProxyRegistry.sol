@@ -39,7 +39,7 @@ contract LSVProxyRegistry is AdminAuth, UtilAddresses, ActionsUtilHelper, DSProx
         uint256 _indexNumInOldOwnerProxiesArr
     ) public {
         // check if msg.sender is the owner of proxy in question
-        require(IDSProxy(payable(_proxyAddr)).owner() == msg.sender);
+        require(IDSProxy(_proxyAddr).owner() == msg.sender);
 
         // check if oldOwner really was the owner of proxy in question
         require(proxies[_oldOwner][_indexNumInOldOwnerProxiesArr] == _proxyAddr);
