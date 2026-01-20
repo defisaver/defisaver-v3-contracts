@@ -6941,6 +6941,7 @@ const createSparkRepayOnPriceStrategy = () => {
     sparkRepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
     sparkRepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     sparkRepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    sparkRepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
 
     const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     sparkRepayOnPriceStrategy.addTrigger(trigger);
@@ -6974,7 +6975,7 @@ const createSparkRepayOnPriceStrategy = () => {
         '%rateMode', // variable type of debt, sent by backend
         '&debtAsset',
         '&debtAssetId',
-        '%false', // useOnBehalf, set to false - Sent by backend.
+        '&useOnBehalf',
         '%onBehalfAddr', // set to empty because flag is false
     );
 
@@ -7001,6 +7002,7 @@ const createSparkFLRepayOnPriceStrategy = () => {
     sparkFLRepayOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
     sparkFLRepayOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     sparkFLRepayOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    sparkFLRepayOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
 
     const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     sparkFLRepayOnPriceStrategy.addTrigger(trigger);
@@ -7035,7 +7037,7 @@ const createSparkFLRepayOnPriceStrategy = () => {
         '%rateMode', // variable type of debt, sent by backend
         '&debtAsset',
         '&debtAssetId',
-        '%false', // useOnBehalf, set to false - Sent by backend.
+        '&useOnBehalf',
         '%onBehalfAddr', // set to empty because flag is false
     );
 
@@ -7071,6 +7073,7 @@ const createSparkBoostOnPriceStrategy = () => {
     sparkBoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
     sparkBoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     sparkBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    sparkBoostOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
 
     const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     sparkBoostOnPriceStrategy.addTrigger(trigger);
@@ -7082,7 +7085,7 @@ const createSparkBoostOnPriceStrategy = () => {
         '&proxy',
         '%rateMode',
         '&debtAssetId',
-        '%false', // useOnBehalf, set to false - Sent by backend.
+        '&useOnBehalf',
         '%onBehalfAddr', // set to empty because flag is false
     );
 
@@ -7090,7 +7093,7 @@ const createSparkBoostOnPriceStrategy = () => {
         formatExchangeObj(
             '&debtAsset',
             '&collAsset',
-            '%amount',
+            '$1',
             '%exchangeWrapper', // sent by backend
         ),
         '&proxy',
@@ -7134,6 +7137,7 @@ const createSparkFLBoostOnPriceStrategy = () => {
     sparkFLBoostOnPriceStrategy.addSubSlot('&debtAssetId', 'uint16');
     sparkFLBoostOnPriceStrategy.addSubSlot('&marketAddr', 'address');
     sparkFLBoostOnPriceStrategy.addSubSlot('&targetRatio', 'uint256');
+    sparkFLBoostOnPriceStrategy.addSubSlot('&useOnBehalf', 'bool');
 
     const trigger = new dfs.triggers.SparkQuotePriceTrigger(nullAddress, nullAddress, '0', '0');
     sparkFLBoostOnPriceStrategy.addTrigger(trigger);
@@ -7168,7 +7172,7 @@ const createSparkFLBoostOnPriceStrategy = () => {
         '&collAsset',
         '&collAssetId',
         '%enableAsColl', // hardcoded always enable as coll
-        '%false', // useOnBehalf, set to false - Sent by backend.
+        '&useOnBehalf',
         '%onBehalfAddr', // set to empty because flag is false
     );
 
@@ -7179,7 +7183,7 @@ const createSparkFLBoostOnPriceStrategy = () => {
         '%flAddress',
         '%rateMode',
         '&debtAssetId',
-        '%false', // useOnBehalf, set to false - Sent by backend.
+        '&useOnBehalf',
         '%onBehalfAddr', // set to empty because flag is false
     );
 
