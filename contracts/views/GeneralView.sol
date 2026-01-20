@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.24;
 
-import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
 import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
 
-contract GeneralView is CheckWalletType {
+contract GeneralView is SmartWalletUtils {
     enum WalletType {
         DSPROXY,
         SAFE
@@ -16,7 +16,7 @@ contract GeneralView is CheckWalletType {
         view
         returns (WalletType smartWalletType, address owner)
     {
-        if (isDSProxy(smartWalletAddress)) {
+        if (_isDSProxy(smartWalletAddress)) {
             return (WalletType.DSPROXY, IDSProxy(payable(smartWalletAddress)).owner());
         }
 

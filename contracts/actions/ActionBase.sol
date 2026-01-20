@@ -7,10 +7,10 @@ import { IDSProxy } from "../interfaces/DS/IDSProxy.sol";
 import { DefisaverLogger } from "../utils/DefisaverLogger.sol";
 import { ActionsUtilHelper } from "./utils/helpers/ActionsUtilHelper.sol";
 import { ISafe } from "../interfaces/protocols/safe/ISafe.sol";
-import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 
 /// @title Implements Action interface and common helpers for passing inputs
-abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
+abstract contract ActionBase is AdminAuth, ActionsUtilHelper, SmartWalletUtils {
     event ActionEvent(string indexed logName, bytes data);
 
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
@@ -167,7 +167,7 @@ abstract contract ActionBase is AdminAuth, ActionsUtilHelper, CheckWalletType {
     }
 
     function fetchOwnersOrWallet() internal view returns (address) {
-        if (isDSProxy(address(this))) {
+        if (_isDSProxy(address(this))) {
             return IDSProxy(payable(address(this))).owner();
         }
 

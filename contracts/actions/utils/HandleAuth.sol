@@ -37,7 +37,7 @@ contract HandleAuth is ActionBase, Permission {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function handleAuth(Params memory _inputData) internal {
-        bool isDSProxy = isDSProxy(address(this));
+        bool isDSProxy = _isDSProxy(address(this));
         address authContract = isDSProxy ? PROXY_AUTH_ADDRESS : MODULE_AUTH_ADDRESS;
 
         if (_inputData.enableAuth) {

@@ -4,7 +4,7 @@ pragma solidity =0.8.24;
 
 import { IAuth } from "../../interfaces/core/IAuth.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../strategy/StrategyModel.sol";
 import { BotAuth } from "../strategy/BotAuth.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
@@ -12,7 +12,7 @@ import { SubStorageL2 } from "./SubStorageL2.sol";
 import { CoreHelper } from "../helpers/CoreHelper.sol";
 
 /// @title Main entry point for executing automated strategies
-contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWalletType {
+contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, SmartWalletUtils {
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
 
     bytes4 constant EXECUTE_RECIPE_FROM_STRATEGY_SELECTOR = bytes4(
@@ -85,7 +85,7 @@ contract StrategyExecutorL2 is StrategyModel, AdminAuth, CoreHelper, CheckWallet
         StrategySub memory _sub,
         address _userWallet
     ) internal {
-        address authAddr = isDSProxy(_userWallet) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
+        address authAddr = _isDSProxy(_userWallet) ? PROXY_AUTH_ADDR : MODULE_AUTH_ADDR;
 
         IAuth(authAddr).callExecute{ value: msg.value }(
             _userWallet,

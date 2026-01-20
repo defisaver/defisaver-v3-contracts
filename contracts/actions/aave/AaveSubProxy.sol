@@ -5,12 +5,12 @@ pragma solidity =0.8.24;
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { Permission } from "../../auth/Permission.sol";
 import { SubStorage } from "../../core/strategy/SubStorage.sol";
-import { CheckWalletType } from "../../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../../utils/SmartWalletUtils.sol";
 import { StrategyModel } from "../../core/strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Contract that subscribes users to Aave V2 automation bundles
-contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, CheckWalletType {
+contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, SmartWalletUtils {
     uint64 public immutable REPAY_BUNDLE_ID;
     uint64 public immutable BOOST_BUNDLE_ID;
 
@@ -50,9 +50,8 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Check
     /// @dev If boostEnabled = false it will only create a repay bundle
     /// @dev User can't just sub a boost bundle without repay
     function subToAaveAutomation(AaveSubData calldata _subData) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
-
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
 
         SubStorage(SUB_STORAGE_ADDR).subscribeToStrategy(repaySub);
@@ -68,8 +67,8 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Check
     /// @dev Updating sub data will activate it as well
     /// @dev If we don't have a boost subId send as 0
     function updateSubData(uint32 _subId1, uint32 _subId2, AaveSubData calldata _subData) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
 
         // update repay as we must have a subId, it's ok if it's the same data
         StrategySub memory repaySub = formatRepaySub(_subData, address(this));
@@ -97,8 +96,9 @@ contract AaveSubProxy is StrategyModel, AdminAuth, CoreHelper, Permission, Check
 
     /// @notice Activates Repay sub and if exists a Boost sub
     function activateSub(uint32 _subId1, uint32 _subId2) public {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _givePermissionToAuthContract(_isDSProxy(address(this)));
+
         SubStorage(SUB_STORAGE_ADDR).activateSub(_subId1);
 
         if (_subId2 != 0) {

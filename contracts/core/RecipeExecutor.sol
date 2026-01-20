@@ -96,7 +96,7 @@ pragma solidity =0.8.24;
 import { IDFSRegistry } from "../interfaces/core/IDFSRegistry.sol";
 import { DSProxyPermission } from "../auth/DSProxyPermission.sol";
 import { SafeModulePermission } from "../auth/SafeModulePermission.sol";
-import { CheckWalletType } from "../utils/CheckWalletType.sol";
+import { SmartWalletUtils } from "../utils/SmartWalletUtils.sol";
 import { ActionBase } from "../actions/ActionBase.sol";
 import { StrategyModel } from "../core/strategy/StrategyModel.sol";
 import { StrategyStorage } from "../core/strategy/StrategyStorage.sol";
@@ -123,7 +123,7 @@ contract RecipeExecutor is
     AdminAuth,
     CoreHelper,
     TxSaverGasCostCalc,
-    CheckWalletType
+    SmartWalletUtils
 {
     bytes4 public constant TX_SAVER_EXECUTOR_ID = bytes4(keccak256("TxSaverExecutor"));
     IDFSRegistry public constant registry = IDFSRegistry(REGISTRY_ADDR);
@@ -360,9 +360,9 @@ contract RecipeExecutor is
         address _flActionAddr,
         bytes32[] memory _returnValues
     ) internal {
-        bool isDSProxy = isDSProxy(address(this));
+        bool _isDSProxy = _isDSProxy(address(this));
 
-        isDSProxy ? giveProxyPermission(_flActionAddr) : enableModule(_flActionAddr);
+        _isDSProxy ? giveProxyPermission(_flActionAddr) : enableModule(_flActionAddr);
 
         // encode data for FL
         bytes memory recipeData = abi.encode(_currRecipe, address(this));
@@ -380,7 +380,7 @@ contract RecipeExecutor is
                 _returnValues
             );
 
-        isDSProxy ? removeProxyPermission(_flActionAddr) : disableModule(_flActionAddr);
+        _isDSProxy ? removeProxyPermission(_flActionAddr) : disableModule(_flActionAddr);
     }
 
     /// @notice Checks if the specified address is of FL type action
