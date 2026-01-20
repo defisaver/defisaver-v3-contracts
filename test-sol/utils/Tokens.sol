@@ -6,6 +6,7 @@ import { StdStorage, stdStorage } from "forge-std/StdStorage.sol";
 import { IUniswapRouter } from "../../contracts/interfaces/exchange/IUniswapRouter.sol";
 import { IERC20 } from "../../contracts/interfaces/token/IERC20.sol";
 import { TokenPriceHelper } from "../../contracts/utils/token/TokenPriceHelper.sol";
+import { TokenPriceHelperL2 } from "../../contracts/utils/token/TokenPriceHelperL2.sol";
 import { TokenUtils } from "../../contracts/utils/token/TokenUtils.sol";
 
 import { Addresses } from "../utils/Addresses.sol";
@@ -97,11 +98,21 @@ contract Tokens is Test {
     }
 
     function amountInUSDPrice(address _tokenAddr, uint256 _amountUSD) internal returns (uint256) {
-        TokenPriceHelper t = new TokenPriceHelper();
+        TokenPriceHelper t;
+        TokenPriceHelperL2 tL2;
+        if (block.chainid == 1) {
+            t = new TokenPriceHelper();
+        } else {
+            tL2 = new TokenPriceHelperL2();
+        }
+
         uint256 USD_DECIMALS = 8;
 
         uint256 decimals = IERC20(_tokenAddr).decimals();
-        return (_amountUSD * 10 ** (decimals + USD_DECIMALS) / t.getPriceInUSD(_tokenAddr));
+        return (_amountUSD * 10 ** (decimals + USD_DECIMALS)
+                / (block.chainid == 1
+                        ? t.getPriceInUSD(_tokenAddr)
+                        : tL2.getPriceInUSD(_tokenAddr)));
     }
 
     function amountInUSDPriceMock(
