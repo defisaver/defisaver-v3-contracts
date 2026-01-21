@@ -4784,5 +4784,16 @@
         "changeTime": 0,
         "registryIds": [],
         "history": []
+    },
+    {
+        "name": "SparkTargetRatioCheck",
+        "address": "0x4E5044F622C0FcAb587106847F4889d3AB065c79",
+        "id": "0x66d60c1e",
+        "path": "contracts/actions/checkers/SparkTargetRatioCheck.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
     }
 ]
