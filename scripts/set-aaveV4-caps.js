@@ -16,7 +16,7 @@ async function main() {
     const mockArtifact = await hre.artifacts.readArtifact('MockAuthorityAaveV4');
     await hre.network.provider.send('hardhat_setCode', [authority, mockArtifact.deployedBytecode]);
 
-    const spokeConfig = ['1099511627774', '1099511627774', '16777214', true, true];
+    const spokeConfig = ['1099511627774', '1099511627774', '16777214', true, false];
 
     const reserveCount = await spoke.getReserveCount();
 
