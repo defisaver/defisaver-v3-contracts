@@ -343,14 +343,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xB67979842Ec9B462e18834Aee7426ef37938A5Dd",
+        "address": "0x31fa336650a4c06cAe65985707E9bA09A888bf13",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.12",
+        "version": "1.0.13",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xB67979842Ec9B462e18834Aee7426ef37938A5Dd",
             "0x5c278b10b839e5ec0a80bcfa8923bae11613c67d",
             "0xb099119B6B713614a589D078b4655DFdB75BCef6",
             "0xD313cdea0F3e759d8Aa0130F768895BDBd371b1d",
@@ -1030,7 +1031,7 @@
         "path": "contracts/actions/compoundV3/CompV3Allow.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1041,7 +1042,7 @@
         "path": "contracts/actions/compoundV3/CompV3Borrow.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1052,7 +1053,7 @@
         "path": "contracts/actions/compoundV3/CompV3Claim.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1063,7 +1064,7 @@
         "path": "contracts/actions/compoundV3/CompV3Payback.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1074,7 +1075,7 @@
         "path": "contracts/actions/compoundV3/CompV3Supply.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1085,7 +1086,7 @@
         "path": "contracts/actions/compoundV3/CompV3Transfer.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1096,7 +1097,7 @@
         "path": "contracts/actions/compoundV3/CompV3Withdraw.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1132,7 +1133,7 @@
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": ["0xd18daaf5601c021B8f6D51829B68B6984A3Abb6A"]
     },
@@ -1223,7 +1224,7 @@
         "path": "contracts/triggers/AaveV3QuotePriceRangeTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },

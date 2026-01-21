@@ -208,6 +208,8 @@ const registryDeploymentBlocks = {
     arbitrum: 12302244,
     base: 3654462,
     optimism: 8515878,
+    linea: 22860766,
+    plasma: 1942214,
 };
 
 const compareRegistryWithJson = async (options) => {
@@ -220,7 +222,19 @@ const compareRegistryWithJson = async (options) => {
 
     // fetch newContract events
     const filter = registry.filters.AddNewContract();
-    const events = await registry.queryFilter(filter, startingBlock);
+    let events = [];
+    const latestBlock = await registry.provider.getBlockNumber();
+    const batchSize = 50000;
+
+    if (latestBlock - startingBlock > batchSize) {
+        for (let i = startingBlock; i < latestBlock; i += batchSize) {
+            const end = Math.min(i + batchSize - 1, latestBlock);
+            const chunk = await registry.queryFilter(filter, i, end);
+            events = events.concat(chunk);
+        }
+    } else {
+        events = await registry.queryFilter(filter, startingBlock);
+    }
 
     // Get all registered contracts from on-chain events
     let registeredContracts = [];
@@ -356,7 +370,19 @@ const checkChangeTimeMismatches = async (options) => {
 
     // fetch newContract events
     const filter = registry.filters.AddNewContract();
-    const events = await registry.queryFilter(filter, startingBlock);
+    let events = [];
+    const latestBlock = await registry.provider.getBlockNumber();
+    const batchSize = 50000;
+
+    if (latestBlock - startingBlock > batchSize) {
+        for (let i = startingBlock; i < latestBlock; i += batchSize) {
+            const end = Math.min(i + batchSize - 1, latestBlock);
+            const chunk = await registry.queryFilter(filter, i, end);
+            events = events.concat(chunk);
+        }
+    } else {
+        events = await registry.queryFilter(filter, startingBlock);
+    }
 
     // Get all registered contracts from on-chain events
     let registeredContracts = [];

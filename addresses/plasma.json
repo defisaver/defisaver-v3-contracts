@@ -72,7 +72,7 @@
         "path": "contracts/core/RecipeExecutor.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "604800",
         "registryIds": [],
         "history": []
     },
@@ -83,7 +83,7 @@
         "path": "contracts/actions/exchange/DFSSell.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -94,7 +94,7 @@
         "path": "contracts/actions/flashloan/FLAction.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -166,14 +166,17 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x5B0B7E38C2a8e46CfAe13c360BC5927570BeEe94",
+        "address": "0x8C6eC1A4869e2B307Ee1667e1c18D5776b61CCe3",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
-        "history": ["0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C"]
+        "history": [
+            "0x5B0B7E38C2a8e46CfAe13c360BC5927570BeEe94",
+            "0xD8E67968d8a0df4beCf2D50daE1e34d4d80C701C"
+        ]
     },
     {
         "name": "AaveV3ViewSmall",
@@ -204,7 +207,7 @@
         "path": "contracts/actions/aaveV3/AaveV3ATokenPayback.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -215,7 +218,7 @@
         "path": "contracts/actions/aaveV3/AaveV3Borrow.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -226,7 +229,7 @@
         "path": "contracts/actions/aaveV3/AaveV3ClaimRewards.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -237,7 +240,7 @@
         "path": "contracts/actions/aaveV3/AaveV3CollateralSwitch.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -248,7 +251,7 @@
         "path": "contracts/actions/aaveV3/AaveV3DelegateCredit.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -258,7 +261,7 @@
         "id": "0x641f5b73",
         "path": "contracts/actions/aaveV3/AaveV3DelegateWithSig.sol",
         "version": "1.0.0",
-        "inRegistry": true,
+        "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": []
@@ -270,7 +273,7 @@
         "path": "contracts/actions/aaveV3/AaveV3Payback.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -281,7 +284,7 @@
         "path": "contracts/actions/aaveV3/AaveV3SetEMode.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -292,7 +295,7 @@
         "path": "contracts/actions/aaveV3/AaveV3Supply.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -303,7 +306,7 @@
         "path": "contracts/actions/aaveV3/AaveV3Withdraw.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -347,7 +350,7 @@
         "path": "contracts/actions/utils/PullToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -358,7 +361,7 @@
         "path": "contracts/actions/utils/RemoveTokenApproval.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -369,7 +372,7 @@
         "path": "contracts/actions/utils/SendToken.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -380,7 +383,7 @@
         "path": "contracts/actions/utils/SendTokenAndUnwrap.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -391,7 +394,7 @@
         "path": "contracts/actions/utils/SendTokens.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -402,7 +405,7 @@
         "path": "contracts/actions/utils/SubInputs.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -413,7 +416,7 @@
         "path": "contracts/actions/utils/SumInputs.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -424,7 +427,7 @@
         "path": "contracts/actions/utils/TokenBalance.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -457,7 +460,7 @@
         "path": "contracts/actions/utils/UnwrapETH.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -468,7 +471,7 @@
         "path": "contracts/actions/utils/WrapETH.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -479,7 +482,7 @@
         "path": "contracts/actions/utils/SendTokensAndUnwrap.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -512,7 +515,7 @@
         "path": "contracts/tx-saver/MockTxSaverExecutor.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },

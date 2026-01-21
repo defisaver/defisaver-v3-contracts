@@ -353,14 +353,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0xf9d70D3280794ffA1E1ffbFC8FAA600a2DFc1f52",
+        "address": "0x8B2Fc51EdeF42D5053683a1EE736C7038d424a2f",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.12",
+        "version": "1.0.13",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0xf9d70D3280794ffA1E1ffbFC8FAA600a2DFc1f52",
             "0xe73217aa2b278981ae91ecc03ea5684ca89a2f87",
             "0xBb0eBB7304290b90d78d1BEe3533E98C45BD6836",
             "0xE3A5551A10c12a1599302ba0b4cbb4E4Ed27eeDE",
@@ -1078,7 +1079,7 @@
         "id": "0x49b12183",
         "path": "contracts/actions/compoundV3/CompV3SubProxyL2.sol",
         "version": "1.0.3",
-        "inRegistry": true,
+        "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
@@ -1152,7 +1153,7 @@
         "path": "contracts/actions/llamalend/LlamaLendCreate.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1174,7 +1175,7 @@
         "path": "contracts/actions/llamalend/LlamaLendSelfLiquidate.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1185,7 +1186,7 @@
         "path": "contracts/actions/llamalend/LlamaLendPayback.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1196,7 +1197,7 @@
         "path": "contracts/actions/llamalend/LlamaLendWithdraw.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": ["0xd7a80e7a2296d75cd1eebc2f0de0cebd14fbe117"]
     },
@@ -1207,7 +1208,7 @@
         "path": "contracts/actions/llamalend/LlamaLendBorrow.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1218,7 +1219,7 @@
         "path": "contracts/actions/llamalend/LlamaLendSupply.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1229,7 +1230,7 @@
         "path": "contracts/actions/llamalend/advanced/LlamaLendBoost.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1240,7 +1241,7 @@
         "path": "contracts/actions/llamalend/advanced/LlamaLendRepay.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1251,7 +1252,7 @@
         "path": "contracts/actions/llamalend/LlamaLendGetDebt.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1262,7 +1263,7 @@
         "path": "contracts/actions/llamalend/advanced/LlamaLendLevCreate.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1273,7 +1274,7 @@
         "path": "contracts/actions/llamalend/advanced/LlamaLendSelfLiquidateWithColl.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": ["0x4faef2cd1680ea00f9398a0525c536b2466a887b"]
     },
@@ -1284,7 +1285,7 @@
         "path": "contracts/actions/llamalend/advanced/LlamaLendSwapper.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": ["0x9b4a6d3674b099317d0c5dfe2592ed222057c878"]
     },
@@ -1306,7 +1307,7 @@
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
         "history": ["0x70cc5952c111275c30ef9aafc675e715eaf77a69"]
     },
@@ -1444,7 +1445,7 @@
         "path": "contracts/actions/fluid/dex/FluidDexOpen",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1455,7 +1456,7 @@
         "path": "contracts/actions/fluid/dex/FluidDexSupply",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1466,7 +1467,7 @@
         "path": "contracts/actions/fluid/dex/FluidDexWithdraw",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1477,7 +1478,7 @@
         "path": "contracts/actions/fluid/dex/FluidDexBorrow",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1488,7 +1489,7 @@
         "path": "contracts/actions/fluid/dex/FluidDexPayback",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1686,7 +1687,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueSetAuthWithSig.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "86400",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1707,8 +1708,8 @@
         "id": "0x98c39012",
         "path": "contracts/triggers/MorphoBlueRatioTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1740,8 +1741,8 @@
         "id": "0x6730402c",
         "path": "contracts/triggers/MorphoBluePriceTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1773,8 +1774,8 @@
         "id": "0x23825034",
         "path": "contracts/triggers/MorphoBluePriceRangeTrigger.sol",
         "version": "1.0.0",
-        "inRegistry": false,
-        "changeTime": 0,
+        "inRegistry": true,
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     }
