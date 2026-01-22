@@ -5,23 +5,23 @@ pragma solidity =0.8.24;
 import { IAaveV4Oracle } from "../interfaces/protocols/aaveV4/IAaveV4Oracle.sol";
 
 contract MockAaveV4Oracle is IAaveV4Oracle {
-    IAaveV4Oracle public existingCoreSpokeOracle =
-        IAaveV4Oracle(0x1da2C38dF15077Fde873EaFFA29e88D50836814a);
-
     function SPOKE() external view returns (address) {
-        return existingCoreSpokeOracle.SPOKE();
+        return address(0xBa97c5E52cd5BC3D7950Ae70779F8FfE92d40CdC);
     }
 
     function DECIMALS() external view returns (uint8) {
-        return existingCoreSpokeOracle.DECIMALS();
+        return uint8(8);
     }
 
     function getReservePrice(uint256 reserveId) public view returns (uint256) {
-        if (reserveId == 0) {
-            uint256 harcodedEthPrice = 3360 * 1e8;
-            return harcodedEthPrice;
-        }
-        return existingCoreSpokeOracle.getReservePrice(reserveId);
+        if (reserveId == 0) return 3360 * 1e8; // ETH
+        if (reserveId == 1) return 4115 * 1e8; // wstETH
+        if (reserveId == 2) return 92_000 * 1e8; // WBTC
+        if (reserveId == 3) return 92_089 * 1e8; // cbBTC
+        if (reserveId == 4) return 150 * 1e8; // aave
+        if (reserveId == 5) return 1 * 1e8; // USDC
+        if (reserveId == 6) return 1 * 1e8; // USDT
+        if (reserveId == 7) return 1 * 1e8; // GHO
     }
 
     function getReservesPrices(uint256[] calldata reserveIds)
@@ -37,10 +37,11 @@ contract MockAaveV4Oracle is IAaveV4Oracle {
     }
 
     function getReserveSource(uint256 reserveId) external view returns (address) {
-        return existingCoreSpokeOracle.getReserveSource(reserveId);
+        return address(0);
     }
 
     function DESCRIPTION() external view returns (string memory) {
-        return existingCoreSpokeOracle.DESCRIPTION();
+        string memory description = "MockAaveV4Oracle";
+        return description;
     }
 }

@@ -6,8 +6,11 @@ async function main() {
     await hre.network.provider.send('hardhat_setCode', [coreOracle, mockArtifact.deployedBytecode]);
 
     const oracleContract = await hre.ethers.getContractAt('IAaveV4Oracle', coreOracle);
-    const ethPrice = await oracleContract.getReservePrice(0);
-    console.log('Eth price:', ethPrice);
+
+    for (let i = 0; i < 8; i++) {
+        const price = await oracleContract.getReservePrice(i);
+        console.log(`Reserve ${i} price:`, price);
+    }
 }
 
 main().catch((error) => {
