@@ -2,6 +2,7 @@
 
 pragma solidity =0.8.24;
 
+import { ISubStorageL2 } from "../../interfaces/core/ISubStorageL2.sol";
 import { AdminAuth } from "../../auth/AdminAuth.sol";
 import { IDFSRegistry } from "../../interfaces/core/IDFSRegistry.sol";
 import { BundleStorage } from "../strategy/BundleStorage.sol";
@@ -10,7 +11,7 @@ import { StrategyModel } from "../strategy/StrategyModel.sol";
 import { CoreHelper } from "../../core/helpers/CoreHelper.sol";
 
 /// @title Storage of users subscriptions to strategies/bundles
-contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
+contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper, ISubStorageL2 {
     error SenderNotSubOwnerError(address, uint256);
     error SubIdOutOfRange(uint256, bool);
 
@@ -74,6 +75,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     /// @param _sub Subscription struct of the user (is not stored on chain, only the hash)
     function subscribeToStrategy(StrategySub memory _sub)
         public
+        override
         isValidId(_sub.strategyOrBundleId, _sub.isBundle)
         returns (uint256)
     {
@@ -96,6 +98,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     /// @param _sub Subscription struct of the user (needs whole struct so we can hash it)
     function updateSubData(uint256 _subId, StrategySub calldata _sub)
         public
+        override
         onlySubOwner(_subId)
         isValidId(_sub.strategyOrBundleId, _sub.isBundle)
     {
@@ -113,7 +116,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     /// @notice Enables the subscription for execution if disabled
     /// @dev Must own the sub. to be able to enable it
     /// @param _subId Id of subscription to enable
-    function activateSub(uint256 _subId) public onlySubOwner(_subId) {
+    function activateSub(uint256 _subId) public override onlySubOwner(_subId) {
         StoredSubData storage sub = strategiesSubs[_subId];
 
         sub.isEnabled = true;
@@ -124,7 +127,7 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
     /// @notice Disables the subscription (will not be able to execute the strategy for the user)
     /// @dev Must own the sub. to be able to disable it
     /// @param _subId Id of subscription to disable
-    function deactivateSub(uint256 _subId) public onlySubOwner(_subId) {
+    function deactivateSub(uint256 _subId) public override onlySubOwner(_subId) {
         StoredSubData storage sub = strategiesSubs[_subId];
 
         sub.isEnabled = false;
@@ -134,15 +137,15 @@ contract SubStorageL2 is StrategyModel, AdminAuth, CoreHelper {
 
     ///////////////////// VIEW ONLY FUNCTIONS ////////////////////////////
 
-    function getSub(uint256 _subId) public view returns (StoredSubData memory) {
+    function getSub(uint256 _subId) public view override returns (StoredSubData memory) {
         return strategiesSubs[_subId];
     }
 
-    function getStrategySub(uint256 _subId) public view returns (StrategySub memory) {
+    function getStrategySub(uint256 _subId) public view override returns (StrategySub memory) {
         return storedStrategies[_subId];
     }
 
-    function getSubsCount() public view returns (uint256) {
+    function getSubsCount() public view override returns (uint256) {
         return strategiesSubs.length;
     }
 }

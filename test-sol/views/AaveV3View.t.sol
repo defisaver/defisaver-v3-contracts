@@ -311,27 +311,5 @@ contract TestAaveV3View is BaseTest, ActionsUtils, AaveV3Helper {
                 initialBalance: 1_000_000e6 // 1M USDT
             })
         );
-
-        // // GHO/WETH
-        // testConfigs.push(
-        //     TestConfig({
-        //         supplyToken: Addresses.GHO_TOKEN,
-        //         borrowToken: Addresses.WETH_ADDR,
-        //         supplyAmount: 7_500e18, // 7500 GHO
-        //         borrowAmount: 5e17, // 0.5 WETH
-        //         initialBalance: 1_000_000e18 // 1M GHO
-        //     })
-        // );
-
-        // DAI/WBTC
-        testConfigs.push(
-            TestConfig({
-                supplyToken: Addresses.DAI_ADDR,
-                borrowToken: Addresses.WBTC_ADDR,
-                supplyAmount: 300_000e18, // 300k DAI
-                borrowAmount: 1e8, // 1 WBTC
-                initialBalance: 500_000e18 // 500k DAI
-            })
-        );
     }
 }

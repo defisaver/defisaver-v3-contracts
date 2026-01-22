@@ -95,6 +95,10 @@ import {
     SkyStakingEngineSelectFarm
 } from "../../contracts/actions/sky/SkyStakingEngineSelectFarm.sol";
 import { GhoStake } from "../../contracts/actions/aaveV3/GhoStake.sol";
+import { CreateSub } from "../../contracts/actions/utils/CreateSub.sol";
+import { ToggleSub } from "../../contracts/actions/utils/ToggleSub.sol";
+import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
+import { HandleAuth } from "../../contracts/actions/utils/HandleAuth.sol";
 import { SparkSupply } from "../../contracts/actions/spark/SparkSupply.sol";
 import { SparkBorrow } from "../../contracts/actions/spark/SparkBorrow.sol";
 import { SparkSetEMode } from "../../contracts/actions/spark/SparkSetEMode.sol";
@@ -105,6 +109,8 @@ import { AaveV4Payback } from "../../contracts/actions/aaveV4/AaveV4Payback.sol"
 import { AaveV4CollateralSwitch } from "../../contracts/actions/aaveV4/AaveV4CollateralSwitch.sol";
 import { AaveV4StoreRatio } from "../../contracts/actions/aaveV4/AaveV4StoreRatio.sol";
 import { AaveV4RatioCheck } from "../../contracts/actions/checkers/AaveV4RatioCheck.sol";
+import { SummerfiUnsub } from "../../contracts/actions/summerfi/SummerfiUnsub.sol";
+import { SummerfiUnsubV2 } from "../../contracts/actions/summerfi/SummerfiUnsubV2.sol";
 
 contract ActionsUtils {
     // @dev Change this value if we ever need to add more parameters to any action.
@@ -123,7 +129,9 @@ contract ActionsUtils {
         AAVEV3,
         UNIV3,
         SPARK,
-        MORPHO_BLUE
+        MORPHO_BLUE,
+        CURVEUSD,
+        BALANCER_V3
     }
 
     function executeActionCalldata(bytes memory _paramsCalldata, bool _isDirect)
@@ -213,6 +221,39 @@ contract ActionsUtils {
         path[0] = _srcAddr;
         path[1] = _destAddr;
         bytes memory wrapperData = abi.encode(path);
+
+        DFSExchangeData.ExchangeData memory sellParams = DFSExchangeData.ExchangeData({
+            srcAddr: _srcAddr,
+            destAddr: _destAddr,
+            srcAmount: _srcAmount,
+            destAmount: 0,
+            minPrice: 0,
+            dfsFeeDivider: 0,
+            user: msg.sender,
+            wrapper: _wrapper,
+            wrapperData: wrapperData,
+            offchainData: offchain
+        });
+
+        DFSSell.Params memory params =
+            DFSSell.Params({ exchangeData: sellParams, from: _from, to: _to });
+
+        return abi.encode(params);
+    }
+
+    /// @notice sellEncode for Uniswap V3 wrapper
+    function sellEncodeV3(
+        address _srcAddr,
+        address _destAddr,
+        uint256 _srcAmount,
+        address _from,
+        address _to,
+        address _wrapper,
+        uint24 _fee
+    ) public view returns (bytes memory) {
+        DFSExchangeData.OffchainData memory offchain;
+
+        bytes memory wrapperData = abi.encodePacked(_srcAddr, _fee, _destAddr);
 
         DFSExchangeData.ExchangeData memory sellParams = DFSExchangeData.ExchangeData({
             srcAddr: _srcAddr,
@@ -1273,6 +1314,26 @@ contract ActionsUtils {
         params = abi.encode(GhoStake.Params({ from: _from, to: _to, amount: _amount }));
     }
 
+    function createSubEncode(StrategyModel.StrategySub memory _sub)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(CreateSub.Params({ sub: _sub }));
+    }
+
+    function toggleSubEncode(uint256 _subId, bool _active)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(ToggleSub.Params({ subId: _subId, active: _active }));
+    }
+
+    function handleAuthEncode(bool _enableAuth) public pure returns (bytes memory params) {
+        params = abi.encode(HandleAuth.Params({ enableAuth: _enableAuth }));
+    }
+
     function sparkSupplyEncode(
         uint256 _amount,
         address _from,
@@ -1438,4 +1499,27 @@ contract ActionsUtils {
             })
         );
     }
+
+    function SummerfiUnsubEncode(uint256[] memory _cdpIds, uint256[] memory _triggerIds)
+        public
+        pure
+        returns (bytes memory params)
+    {
+        params = abi.encode(SummerfiUnsub.Params({ cdpIds: _cdpIds, triggerIds: _triggerIds }));
+    }
+
+    function SummerfiUnsubV2Encode(
+        uint256[][] memory _triggerIds,
+        bytes[][] memory _triggerData,
+        bool[] memory _removeAllowance
+    ) public pure returns (bytes memory params) {
+        params = abi.encode(
+            SummerfiUnsubV2.Params({
+                triggerIds: _triggerIds,
+                triggerData: _triggerData,
+                removeAllowance: _removeAllowance
+            })
+        );
+    }
 }
+

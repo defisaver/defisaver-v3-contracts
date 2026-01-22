@@ -8,6 +8,7 @@ import { DFSExchangeData } from "../../../../exchangeV3/DFSExchangeData.sol";
 import { CurveUsdHelper } from "../../helpers/CurveUsdHelper.sol";
 import { CurveUsdSwapperTransient } from "./CurveUsdSwapperTransient.sol";
 import { ICrvUsdController } from "../../../../interfaces/protocols/curveusd/ICurveUsd.sol";
+import { DFSIds } from "../../../../utils/DFSIds.sol";
 
 /// @title Liquidates a curveusd position with a given percentage of collateral
 /// @notice This action uses internal swapper with transient storage to liquidate the position
@@ -74,7 +75,7 @@ contract CurveUsdSelfLiquidateWithCollTransient is ActionBase, CurveUsdHelper {
 
         if (!isControllerValid(_params.controllerAddress)) revert CurveUsdInvalidController();
 
-        address curveUsdTransientSwapper = registry.getAddr(CURVE_TRANSIENT_SWAPPER_ID);
+        address curveUsdTransientSwapper = registry.getAddr(DFSIds.CURVE_TRANSIENT_SWAPPER);
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
         info[1] = _params.sellAllCollateral ? 1 : 0;

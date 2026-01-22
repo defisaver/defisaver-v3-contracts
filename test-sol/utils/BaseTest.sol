@@ -11,6 +11,8 @@ contract BaseTest is Config {
     // EOA USERS
     address internal constant bob = address(0xbb);
     address internal constant alice = address(0xaa);
+    address internal constant charlie = address(0xcc);
+    address internal constant jane = address(0x11);
 
     using SafeERC20 for IERC20;
 
@@ -56,6 +58,24 @@ contract BaseTest is Config {
             "https://virtual.mainnet-aave.us-east.rpc.tenderly.co/dbaa58ab-597b-4bcd-ae6a-b8e50f716146";
         uint256 aaveV4DevNetFork = vm.createFork(aaveV4DevNetRpc);
         vm.selectFork(aaveV4DevNetFork);
+    }
+
+    function forkOptimismLatest() internal {
+        string memory optimismRpc = vm.envString("OPTIMISM_NODE");
+        uint256 optimismFork = vm.createFork(optimismRpc);
+        vm.selectFork(optimismFork);
+    }
+
+    function forkBaseLatest() internal {
+        string memory baseRpc = vm.envString("BASE_NODE");
+        uint256 baseFork = vm.createFork(baseRpc);
+        vm.selectFork(baseFork);
+    }
+
+    function forkArbitrumLatest() internal {
+        string memory arbitrumRpc = vm.envString("ARBITRUM_NODE");
+        uint256 arbitrumFork = vm.createFork(arbitrumRpc);
+        vm.selectFork(arbitrumFork);
     }
 
     function forkLocalAnvil() internal {

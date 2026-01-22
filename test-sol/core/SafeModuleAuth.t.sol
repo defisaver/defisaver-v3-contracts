@@ -2,7 +2,8 @@
 pragma solidity =0.8.24;
 
 import { SafeModuleAuth } from "../../contracts/core/strategy/SafeModuleAuth.sol";
-import { SafeModulePermission } from "../../contracts/auth/SafeModulePermission.sol";
+import { WalletAuth } from "../../contracts/core/strategy/WalletAuth.sol";
+import { MockSafeModulePermission } from "../../contracts/mocks/MockSafeModulePermission.sol";
 import { StrategyExecutor } from "../../contracts/core/strategy/StrategyExecutor.sol";
 import { RecipeExecutor } from "../../contracts/core/RecipeExecutor.sol";
 import { StrategyModel } from "../../contracts/core/strategy/StrategyModel.sol";
@@ -28,6 +29,7 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
 
     address strategyExecutorAddr;
     address safeModulePermissionAddr;
+    address recipeExecutorAddr;
 
     /*//////////////////////////////////////////////////////////////////////////
                                   SETUP FUNCTION
@@ -42,11 +44,12 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
         vm.etch(MODULE_AUTH_ADDR, address(newCut).code);
         cut = SafeModuleAuth(MODULE_AUTH_ADDR);
 
-        safeModulePermissionAddr = address(new SafeModulePermission());
+        safeModulePermissionAddr = address(new MockSafeModulePermission());
         strategyExecutorAddr = address(new StrategyExecutor());
         redeploy("StrategyExecutorID", strategyExecutorAddr);
 
-        vm.etch(RECIPE_EXECUTOR_ADDR, address(new RecipeExecutor()).code);
+        recipeExecutorAddr = address(new RecipeExecutor());
+        redeploy("RecipeExecutor", recipeExecutorAddr);
     }
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -55,10 +58,10 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
     function test_should_fail_to_call_execute_when_sender_is_not_executor() public {
         vm.expectRevert(
             abi.encodeWithSelector(
-                SafeModuleAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr
+                WalletAuth.SenderNotExecutorError.selector, address(this), strategyExecutorAddr
             )
         );
-        cut.callExecute(safeWalletAddr, RECIPE_EXECUTOR_ADDR, bytes("0x"));
+        cut.callExecute(safeWalletAddr, recipeExecutorAddr, bytes("0x"));
     }
 
     function test_should_fail_to_call_execute_when_paused() public {
@@ -67,19 +70,19 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
 
         prank(strategyExecutorAddr);
         vm.expectRevert(abi.encodeWithSelector(Pausable.ContractPaused.selector));
-        cut.callExecute(safeWalletAddr, RECIPE_EXECUTOR_ADDR, bytes("0x"));
+        cut.callExecute(safeWalletAddr, recipeExecutorAddr, bytes("0x"));
     }
 
     function test_should_fail_to_execute_safe_tx_when_no_auth_is_given() public {
         prank(strategyExecutorAddr);
         vm.expectRevert();
-        cut.callExecute(safeWalletAddr, RECIPE_EXECUTOR_ADDR, bytes("0x"));
+        cut.callExecute(safeWalletAddr, recipeExecutorAddr, bytes("0x"));
     }
 
     function test_should_execute_safe_tx() public {
         // first approve auth contract to call execute from safe
         bytes memory enableCalldata =
-            abi.encodeWithSelector(SafeModulePermission.enableModule.selector, address(cut));
+            abi.encodeWithSelector(MockSafeModulePermission.enableModule.selector, address(cut));
         wallet.execute(safeModulePermissionAddr, enableCalldata, 0);
 
         // create recipe
@@ -106,13 +109,13 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
 
         // execute safe tx
         prank(strategyExecutorAddr);
-        cut.callExecute(safeWalletAddr, RECIPE_EXECUTOR_ADDR, recipeExecutorCalldata);
+        cut.callExecute(safeWalletAddr, recipeExecutorAddr, recipeExecutorCalldata);
     }
 
     function test_should_revert_when_safe_tx_execution_fails() public {
         // first approve auth contract to call execute from safe
         bytes memory enableCalldata =
-            abi.encodeWithSelector(SafeModulePermission.enableModule.selector, address(cut));
+            abi.encodeWithSelector(MockSafeModulePermission.enableModule.selector, address(cut));
         wallet.execute(safeModulePermissionAddr, enableCalldata, 0);
 
         // create recipe
@@ -138,6 +141,6 @@ contract TestCore_SafeModuleAuth is RegistryUtils, ActionsUtils, BaseTest {
         /// @dev we expect revert because we are using recipe with flAction without returning funds
         prank(strategyExecutorAddr);
         vm.expectRevert(abi.encodeWithSelector(SafeModuleAuth.SafeExecutionError.selector));
-        cut.callExecute(safeWalletAddr, RECIPE_EXECUTOR_ADDR, recipeExecutorCalldata);
+        cut.callExecute(safeWalletAddr, recipeExecutorAddr, recipeExecutorCalldata);
     }
 }

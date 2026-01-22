@@ -6,6 +6,7 @@ import { ActionBase } from "../../ActionBase.sol";
 import { CurveUsdHelper } from "../helpers/CurveUsdHelper.sol";
 import { CurveUsdSwapper } from "./CurveUsdSwapper.sol";
 import { ICrvUsdController } from "../../../interfaces/protocols/curveusd/ICurveUsd.sol";
+import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title Liquidates a curveusd position with a given percentage of collateral
 /// @notice This action uses internal swapper to liquidate the position
@@ -77,7 +78,7 @@ contract CurveUsdSelfLiquidateWithColl is ActionBase, CurveUsdHelper {
     function _liquidate(Params memory _params) internal returns (uint256, bytes memory) {
         if (_params.swapAmount == 0) revert();
 
-        address curveUsdSwapper = registry.getAddr(CURVE_SWAPPER_ID);
+        address curveUsdSwapper = registry.getAddr(DFSIds.CURVE_SWAPPER);
 
         uint256[] memory swapData = _setupCurvePath(
             curveUsdSwapper,

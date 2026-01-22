@@ -127,7 +127,7 @@ module.exports = {
             accounts: [process.env.PRIV_KEY_MAINNET],
             name: 'mainnet',
             txType: 2,
-            blockExplorer: 'etherscan',
+            blockExplorer: 'etherscan.io',
             contractVerification: true,
         },
         optimism: {
@@ -136,7 +136,7 @@ module.exports = {
             chainId: 10,
             name: 'optimistic',
             txType: 2,
-            blockExplorer: 'etherscan',
+            blockExplorer: 'optimistic.etherscan.io',
             contractVerification: true,
         },
         base: {
@@ -145,7 +145,7 @@ module.exports = {
             chainId: 8453,
             name: 'base',
             txType: 2,
-            blockExplorer: 'etherscan',
+            blockExplorer: 'basescan.org',
             contractVerification: true,
         },
         arbitrum: {
@@ -154,7 +154,7 @@ module.exports = {
             chainId: 42161,
             name: 'arbitrum',
             txType: 0,
-            blockExplorer: 'arbiscan',
+            blockExplorer: 'arbiscan.io',
             contractVerification: true,
         },
         linea: {
@@ -163,7 +163,7 @@ module.exports = {
             chainId: 59144,
             name: 'linea',
             txType: 0,
-            blockExplorer: 'etherscan',
+            blockExplorer: 'lineascan.build',
             contractVerification: true,
         },
         plasma: {
@@ -172,8 +172,8 @@ module.exports = {
             chainId: 9745,
             name: 'plasma',
             txType: 2,
-            blockExplorer: 'plasmascan',
-            contractVerification: false,
+            blockExplorer: 'plasmascan.to',
+            contractVerification: true,
         },
     },
     solidity: {

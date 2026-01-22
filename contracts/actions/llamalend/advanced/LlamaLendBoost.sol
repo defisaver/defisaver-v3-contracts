@@ -8,6 +8,7 @@ import { DFSExchangeData } from "../../../exchangeV3/DFSExchangeData.sol";
 import {
     ILlamaLendController
 } from "../../../interfaces/protocols/llamalend/ILlamaLendController.sol";
+import { DFSIds } from "../../../utils/DFSIds.sol";
 
 /// @title LlamaLendBoost
 contract LlamaLendBoost is ActionBase, LlamaLendHelper {
@@ -62,7 +63,7 @@ contract LlamaLendBoost is ActionBase, LlamaLendHelper {
             revert InvalidLlamaLendController();
         }
 
-        address llamalendSwapper = registry.getAddr(LLAMALEND_SWAPPER_ID);
+        address llamalendSwapper = registry.getAddr(DFSIds.LLAMALEND_SWAPPER);
 
         uint256[] memory info = new uint256[](5);
         info[0] = _params.gasUsed;
