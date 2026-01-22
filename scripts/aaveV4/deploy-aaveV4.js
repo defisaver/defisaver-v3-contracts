@@ -1,6 +1,6 @@
 const hre = require('hardhat');
-const { topUp } = require('./utils/fork');
-const { getOwnerAddr, redeploy, network } = require('../test/utils/utils');
+const { topUp } = require('../utils/fork');
+const { getOwnerAddr, redeploy, network } = require('../../test/utils/utils');
 const {
     deployAaveV4RepayBundle,
     deployAaveV4BoostBundle,
@@ -8,7 +8,7 @@ const {
     deployAaveV4BoostOnPriceBundle,
     deployAaveV4CloseBundle,
     deployAaveV4FLCollateralSwitchStrategy,
-} = require('../test/utils/aaveV4');
+} = require('../../test/utils/aaveV4');
 
 async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];

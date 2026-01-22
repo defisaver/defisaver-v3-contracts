@@ -1,6 +1,6 @@
 const hre = require('hardhat');
-const { topUp } = require('./utils/fork');
-const { network } = require('../test/utils/utils');
+const { topUp } = require('../utils/fork');
+const { network } = require('../../test/utils/utils');
 
 async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
