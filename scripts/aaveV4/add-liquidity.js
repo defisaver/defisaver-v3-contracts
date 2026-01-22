@@ -1,6 +1,6 @@
 const hre = require('hardhat');
-const { topUp } = require('./utils/fork');
-const { network, approve, setBalance } = require('../test/utils/utils');
+const { topUp } = require('../utils/fork');
+const { network, approve, setBalance } = require('../../test/utils/utils');
 
 async function main() {
     const senderAcc = (await hre.ethers.getSigners())[0];
@@ -15,7 +15,7 @@ async function main() {
         const underlying = reserve.underlying;
         console.log('Underlying:', underlying);
         if (underlying === '0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf') {
-            continue;
+            continue; // topUp fails for cbBTC, skip for now
         }
         const amount = hre.ethers.utils.parseUnits('1000000', reserve.decimals);
         await setBalance(underlying, senderAcc.address, amount);
