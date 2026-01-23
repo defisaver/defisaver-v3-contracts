@@ -34,9 +34,10 @@ contract DFSExchangeWithTxSaver is DFSExchangeCore, TxSaverGasCostCalc {
         address txSaverAddr = _registry.getAddr(DFSIds.TX_SAVER_EXECUTOR);
         ITxSaverBytesTransientStorage tStorage = ITxSaverBytesTransientStorage(txSaverAddr);
 
-        // Check if TxSaverExecutor initiated transaction by setting right flag in transient storage
-        // we can't just check for msg.sender, as that wouldn't work for flashloan actions
-        uint256 feeType = tStorage.getFeeType();
+        // Check if TxSaverExecutor initiated transaction by setting right flag in transient storage.
+        // We can't just check for msg.sender, as that wouldn't work for flashloan actions.
+        // If no txSaverAddr is registered for this chain, default to regular sell.
+        uint256 feeType = (txSaverAddr != address(0)) ? tStorage.getFeeType() : 0;
 
         // if not initiated by TxSaverExecutor, perform regular sell
         if (feeType == 0) {
