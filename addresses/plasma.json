@@ -89,14 +89,17 @@
     },
     {
         "name": "FLAction",
-        "address": "0x3D57875885e3cEe9E56Cb65D21789893B6e67815",
+        "address": "0x40C9ce603923AACD0b7407Ff0EE844c9C067cEB7",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xa67f6A6Af60dD626ce7bF3d4705ABe5D593D90Ec"]
+        "history": [
+            "0x3D57875885e3cEe9E56Cb65D21789893B6e67815",
+            "0xa67f6A6Af60dD626ce7bF3d4705ABe5D593D90Ec"
+        ]
     },
     {
         "name": "ExchangeAggregatorRegistry",
