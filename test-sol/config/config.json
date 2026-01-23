@@ -2,6 +2,7 @@
     "isSmartWalletSafe": true,
     "blockNumber": 22238839,
     "AaveV3ATokenPayback": { "blockNumber": 21973355 },
+    "SparkViewSmall": { "blockNumber": 23764256 },
     "PendleTokenRedeem": { "blockNumber": 22875735 },
     "StrategyTriggerViewNoRevert": { "blockNumber": 22595730 },
     "LiquityV2Adjust": { "blockNumber": 22519730 },

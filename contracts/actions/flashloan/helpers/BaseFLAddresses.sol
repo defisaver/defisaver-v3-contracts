@@ -15,12 +15,13 @@ contract BaseFLAddresses {
         0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D;
 
     address internal constant VAULT_ADDR = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
+    address internal constant BALANCER_V3_VAULT_ADDR = 0xbA1333333333a1BA1108E8412f11850A5C319bA9;
 
     address internal constant UNI_V3_FACTORY = 0x33128a8fC17869897dcE68Ed026d694621f6FDfD;
 
     address internal constant MORPHO_BLUE_ADDR = 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb;
 
-    address internal constant RECIPE_EXECUTOR_ADDR = 0xd0Ae279e330f98C399375f80968C8bf860202766;
+    address internal constant DFS_REGISTRY_ADDR = 0x347FB634271F666353F23A3362f3935D96F97476;
 
     ////////// NOT USED
 
