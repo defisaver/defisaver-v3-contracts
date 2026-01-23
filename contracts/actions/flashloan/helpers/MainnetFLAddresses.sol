@@ -24,6 +24,7 @@ contract MainnetFLAddresses {
     address internal constant DAI_ADDR = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     address internal constant ST_ETH_ADDR = 0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84;
     address internal constant VAULT_ADDR = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
+    address internal constant BALANCER_V3_VAULT_ADDR = 0xbA1333333333a1BA1108E8412f11850A5C319bA9;
 
     address internal constant GHO_ADDR = 0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f;
     address internal constant GHO_FLASH_MINTER_ADDR = 0xb639D208Bcf0589D54FaC24E655C79EC529762B8;
@@ -34,5 +35,5 @@ contract MainnetFLAddresses {
     address internal constant CURVEUSD_FLASH_ADDR = 0xA7a4bb50AF91f90b6fEb3388E7f8286aF45b299B;
     address internal constant CURVEUSD_ADDR = 0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E;
 
-    address internal constant RECIPE_EXECUTOR_ADDR = 0x5029336642814bC51a42bA80BF83a6322110035D;
+    address internal constant DFS_REGISTRY_ADDR = 0x287778F121F134C66212FB16c9b53eC991D32f5b;
 }

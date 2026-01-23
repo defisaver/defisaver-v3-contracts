@@ -74,7 +74,7 @@ contract FLMaker is ActionBase, ReentrancyGuard, IERC3156FlashBorrower, IFlashLo
 
         uint256 paybackAmount = _amount + _fee;
 
-        _executeRecipe(wallet, _isDSProxy(wallet), currRecipe, paybackAmount);
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, paybackAmount);
 
         require(
             _token.getBalance(address(this)) == paybackAmount + balanceBefore,

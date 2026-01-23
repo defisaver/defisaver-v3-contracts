@@ -1,5 +1,3 @@
-// const { default: curve } = require('@curvefi/api');
-const curve = import('@curvefi/api');
 const fs = require('fs');
 const hre = require('hardhat');
 const { getAssetInfo, getAssetInfoByAddress } = require('@defisaver/tokens');
@@ -77,7 +75,11 @@ const addrs = {
         REFILL_CALLER: '0x33fDb79aFB4456B604f376A45A546e7ae700e880',
         MORPHO_BLUE_VIEW: '0x10B621823D4f3E85fBDF759e252598e4e097C1fd',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0x814c8C7ceb1411B364c2940c4b9380e739e06686',
-        COMP_V3_SUB_PROXY_ADDR: '0x2f62a2ec44ed48dd5f2d56b308558ac065e8b794',
+        BOLD_ADDR: '0x6440f144b7e50D6a8439336510312d2F54beB01D',
+        INSTADAPP_INDEX: '0x2971AdFa57b20E5a416aE5a708A8655A9c74f723',
+        INSTADAPP_CONNECTORS_V2: '0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11',
+        SUMMERFI_FACTORY: '0xF7B75183A2829843dB06266c114297dfbFaeE2b6',
+        SUMMERFI_GUARD: '0xCe91349d2A4577BBd0fC91Fe6019600e047f2847',
     },
     optimism: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -113,6 +115,10 @@ const addrs = {
         STRATEGY_EXECUTOR_ADDR: '0x2f54a62b18483f395779cCD81A598133aBb7775d',
         FEE_RECIPIENT_ADDR: '0x5b12C2B979CB3aB89DD4813837873bC4Dd1930D0',
         REFILL_CALLER: '0xaFdFC3814921d49AA412d6a22e3F44Cc555dDcC8',
+        INSTADAPP_INDEX: '0x6CE3e607C808b4f4C26B7F6aDAeB619e49CAbb25',
+        INSTADAPP_CONNECTORS_V2: '0x127d8cD0E2b2E0366D522DeA53A787bfE9002C14',
+        SUMMERFI_FACTORY: '0xaaf64927BaFe68E389DE3627AA6b52D81bdA2323',
+        SUMMERFI_GUARD: '0x916411367fC2f0dc828790eA03CF317eC74E24E4',
     },
     arbitrum: {
         PROXY_REGISTRY: '0x283Cc5C26e53D66ed2Ea252D986F094B37E6e895',
@@ -154,6 +160,10 @@ const addrs = {
         STRATEGY_EXECUTOR_ADDR: '0xa4F087267828C3Ca8ac18b6fE7f456aB20781AA6',
         REFILL_CALLER: '0xcbA094ae1B2B363886CC7f428206dB1b116834A2',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0xD6373b375665DE09533478E8859BeCF12427Bb5e',
+        INSTADAPP_INDEX: '0x1eE00C305C51Ff3bE60162456A9B533C07cD9288',
+        INSTADAPP_CONNECTORS_V2: '0x67fCE99Dd6d8d659eea2a1ac1b8881c57eb6592B',
+        SUMMERFI_FACTORY: '0xCcB155E5B2A3201d5e10EdAa6e9F908871d1722B',
+        SUMMERFI_GUARD: '0x746a6f9Acb42bcB43C08C829A035DBa7Db9E7385',
         MORPHO_BLUE_VIEW: '0xa3b8b400a2eFF0314fa9605E778692bd4Bd9f880',
     },
     base: {
@@ -190,6 +200,10 @@ const addrs = {
         REFILL_CALLER: '0xBefc466abe547B1785f382883833330a47C573f7',
         MORPHO_BLUE_VIEW: '0x53c0E962bd0AC53928ca04703238b2ec2894195B',
         FLUID_VAULT_T1_RESOLVER_ADDR: '0x79B3102173EB84E6BCa182C7440AfCa5A41aBcF8',
+        INSTADAPP_INDEX: '0x6CE3e607C808b4f4C26B7F6aDAeB619e49CAbb25',
+        INSTADAPP_CONNECTORS_V2: '0x127d8cD0E2b2E0366D522DeA53A787bfE9002C14',
+        SUMMERFI_FACTORY: '0x881CD31218f45a75F8ad543A3e1Af087f3986Ae0',
+        SUMMERFI_GUARD: '0x83c8BFfD11913f0e94C1C0B615fC2Fdb1B17A27e',
     },
     linea: {
         REGISTRY_ADDR: '0x09fBeC68D216667C3262211D2E5609578951dCE0',
@@ -280,7 +294,7 @@ const UNI_ADDR = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984';
 const LINK_ADDR = '0x514910771af9ca656af840dff83e8264ecf986ca';
 const WBTC_ADDR = '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599';
 const LUSD_ADDR = '0x5f98805A4E8be255a32880FDeC7F6728C6568bA0';
-const BOLD_ADDR = '0x6440f144b7e50d6a8439336510312d2f54beb01d';
+const BOLD_ADDR = '0x6440f144b7e50D6a8439336510312d2F54beB01D';
 
 const USDT_ADDR = '0xdac17f958d2ee523a2206206994597c13d831ec7';
 const BUSD_ADDR = '0x4fabb145d64652a948d72533023f6e7a623c7c53';
@@ -678,24 +692,62 @@ const getProxyWithSigner = async (signer, addr) => {
     return dsProxy;
 };
 
+const createDsaProxy = async (acc) => {
+    const version = 2;
+    const instaIndex = await hre.ethers.getContractAt(
+        'IInstaIndex',
+        addrs[network].INSTADAPP_INDEX,
+    );
+    let receipt = await instaIndex.build(acc, version, hre.ethers.constants.AddressZero);
+    receipt = await receipt.wait();
+
+    const abiCoder = new hre.ethers.utils.AbiCoder();
+    const [dsaProxyAddr] = abiCoder.decode(['address'], receipt.events.reverse()[0].topics[2]);
+    const contractName = 'IInstaAccountV2';
+    const dsaProxy = await hre.ethers.getContractAt(contractName, dsaProxyAddr);
+    return dsaProxy;
+};
+
+const createSFProxy = async (acc) => {
+    const sfProxyFactory = await hre.ethers.getContractAt(
+        'IAccountFactory',
+        addrs[network].SUMMERFI_FACTORY,
+    );
+
+    let receipt = await sfProxyFactory['createAccount(address)'](acc);
+    receipt = await receipt.wait();
+
+    const abiCoder = new hre.ethers.utils.AbiCoder();
+    const [accountAddr] = abiCoder.decode(['address'], receipt.logs[0].topics[1]);
+
+    const account = await hre.ethers.getContractAt('IAccountImplementation', accountAddr);
+
+    console.log(`Summerfi proxy created ${accountAddr}`);
+
+    return account;
+};
+
+const whitelistContractForSFProxy = async (contractAddr, whitelist = true) => {
+    const guardAddr = addrs[network].SUMMERFI_GUARD;
+    const accountGuard = await hre.ethers.getContractAt('IAccountGuard', guardAddr);
+    const guardOwner = await accountGuard.owner();
+
+    await sendEther((await hre.ethers.getSigners())[0], guardOwner, '1');
+    await impersonateAccount(guardOwner);
+
+    const signer = await hre.ethers.provider.getSigner(guardOwner);
+    const accountGuardWithSigner = accountGuard.connect(signer);
+
+    await accountGuardWithSigner.setWhitelist(contractAddr, whitelist);
+
+    const isWhitelisted = await accountGuard.isWhitelisted(contractAddr);
+    expect(isWhitelisted).to.be.equal(whitelist);
+
+    await stopImpersonatingAccount(guardOwner);
+};
+
 const getProxy = async (acc, isSafe = false) => {
-    if (isSafe === false) {
-        const proxyRegistry = await hre.ethers.getContractAt(
-            'IDSProxyRegistry',
-            addrs[network].PROXY_REGISTRY,
-        );
-        let proxyAddr = await proxyRegistry.proxies(acc);
-
-        if (proxyAddr === nullAddress) {
-            await proxyRegistry.build(acc);
-            proxyAddr = await proxyRegistry.proxies(acc);
-        }
-
-        const dsProxy = await hre.ethers.getContractAt('IDSProxy', proxyAddr);
-
-        return dsProxy;
-    } else {
-        // create safe
+    if (isSafe === true) {
         const safeAddr = await createSafe(acc);
         const safe = await hre.ethers.getContractAt('ISafe', safeAddr);
 
@@ -703,6 +755,22 @@ const getProxy = async (acc, isSafe = false) => {
 
         return safe;
     }
+
+    // Else create DS Proxy
+    const proxyRegistry = await hre.ethers.getContractAt(
+        'IDSProxyRegistry',
+        addrs[network].PROXY_REGISTRY,
+    );
+    let proxyAddr = await proxyRegistry.proxies(acc);
+
+    if (proxyAddr === nullAddress) {
+        await proxyRegistry.build(acc);
+        proxyAddr = await proxyRegistry.proxies(acc);
+    }
+
+    const dsProxy = await hre.ethers.getContractAt('IDSProxy', proxyAddr);
+
+    return dsProxy;
 };
 
 const sendEther = async (signer, toAddress, amount) => {
@@ -1067,7 +1135,8 @@ const formatExchangeObj = (
 let _curveObj;
 const curveApiInit = async () => {
     if (!_curveObj) {
-        _curveObj = (await curve).default;
+        const curveModule = await import('@curvefi/api');
+        _curveObj = curveModule.default;
         await _curveObj.init('JsonRpc', { url: process.env.ETHEREUM_NODE }, { chaindId: '1' });
         // Fetch factory pools
         await _curveObj.factory.fetchPools(true);
@@ -1509,14 +1578,35 @@ const filterEthersObject = (obj) => {
 
 const isProxySafe = (proxy) => proxy.functions.nonce !== undefined;
 
-// executes tx through safe or dsproxy depending the type
+const isProxyDSAProxy = async (proxy) => {
+    try {
+        const version = await proxy.version();
+        return version.eq(2);
+    } catch (error) {
+        return false;
+    }
+};
+
+const isSFProxy = async (proxy) => {
+    try {
+        const mockSmartWalletUtils = await deployContract('MockSmartWalletUtils');
+        return await mockSmartWalletUtils.isSFProxy(proxy.address);
+    } catch (error) {
+        return false;
+    }
+};
+
+// executes tx through wallet depending the type
 const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => {
     let receipt;
+
+    // If signer is not set, try setting it with _address
+    if (!proxy.signer.address) {
+        // eslint-disable-next-line no-underscore-dangle
+        proxy.signer.address = proxy.signer._address;
+    }
+
     if (isProxySafe(proxy)) {
-        // If signer is not set, try setting it with _address
-        if (!proxy.signer.address) {
-            proxy.signer.address = proxy.signer._address;
-        }
         receipt = await executeSafeTx(
             proxy.signer.address,
             proxy,
@@ -1526,17 +1616,43 @@ const executeTxFromProxy = async (proxy, targetAddr, callData, ethValue = 0) => 
             ethValue,
         );
     } else {
-        receipt = await proxy['execute(address,bytes)'](targetAddr, callData, {
-            gasLimit: 10000000,
-            value: ethValue,
-        });
+        const isDSAProxy = await isProxyDSAProxy(proxy);
+        const isSFProxyCheck = await isSFProxy(proxy);
+
+        if (isDSAProxy) {
+            await impersonateAccount(proxy.signer.address);
+            receipt = await proxy['cast(string[],bytes[],address)'](
+                ['DEFI-SAVER-A'],
+                [callData],
+                nullAddress,
+                {
+                    gasLimit: 10000000,
+                    value: ethValue,
+                },
+            );
+            await stopImpersonatingAccount(proxy.signer.address);
+        } else if (isSFProxyCheck) {
+            const sfProxyEntryPointAddr = await getAddrFromRegistry('SFProxyEntryPoint');
+            receipt = await proxy.execute(sfProxyEntryPointAddr, callData, {
+                gasLimit: 10000000,
+                value: ethValue,
+            });
+        } else {
+            // Default to DSProxy execution
+            receipt = await proxy['execute(address,bytes)'](targetAddr, callData, {
+                gasLimit: 10000000,
+                value: ethValue,
+            });
+        }
     }
 
     return receipt;
 };
 
-const WALLETS = ['DS_PROXY', 'SAFE'];
+const WALLETS = ['DS_PROXY', 'SAFE', 'DSA_PROXY', 'SF_PROXY'];
 const isWalletNameDsProxy = (w) => w === 'DS_PROXY';
+const isWalletNameDsaProxy = (w) => w === 'DSA_PROXY';
+const isWalletNameSFProxy = (w) => w === 'SF_PROXY';
 
 const generateIds = () => {
     const idsMap = {};
@@ -1759,6 +1875,13 @@ module.exports = {
     getStrategyExecutorContract,
     getAndSetMockExchangeWrapper,
     addBalancerFlLiquidity,
+    isWalletNameDsaProxy,
+    isWalletNameSFProxy,
+    isProxyDSAProxy,
+    isSFProxy,
+    createDsaProxy,
+    createSFProxy,
+    whitelistContractForSFProxy,
     getCloseStrategyTypeName,
     getCloseStrategyConfigs,
     isCloseToDebtType,

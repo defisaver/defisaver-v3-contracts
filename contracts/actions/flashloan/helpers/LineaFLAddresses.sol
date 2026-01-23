@@ -14,10 +14,10 @@ contract LineaFLAddresses {
     address internal constant AAVE_V3_LENDING_POOL_ADDRESS_PROVIDER =
         0x89502c3731F69DDC95B65753708A07F8Cd0373F4;
 
-    address internal constant RECIPE_EXECUTOR_ADDR = 0x50bCFC115283dF48Ab6382551B9B93b08E197747;
-
+    address internal constant DFS_REGISTRY_ADDR = 0x09fBeC68D216667C3262211D2E5609578951dCE0;
     ////////// NOT USED
     address internal constant VAULT_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant BALANCER_V3_VAULT_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant MORPHO_BLUE_ADDR = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address internal constant UNI_V3_FACTORY = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 

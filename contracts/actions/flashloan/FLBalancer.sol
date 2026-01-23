@@ -71,7 +71,7 @@ contract FLBalancer is ActionBase, ReentrancyGuard, IFlashLoanRecipient, IFlashL
             balancesBefore[i] = _tokens[i].getBalance(address(this));
         }
 
-        _executeRecipe(wallet, _isDSProxy(wallet), currRecipe, (_amounts[0] + _feeAmounts[0]));
+        _executeRecipe(wallet, _getWalletType(wallet), currRecipe, (_amounts[0] + _feeAmounts[0]));
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             uint256 paybackAmount = _amounts[i] + _feeAmounts[i];
