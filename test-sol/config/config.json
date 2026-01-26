@@ -21,6 +21,7 @@
     "LiquityV2Automation": { "blockNumber": 22539730 },
     "UmbrellaStake": { "blockNumber": 22644898 },
     "UmbrellaUnstake": { "blockNumber": 22644898 },
+    "SummerfiUnsubV2": { "blockNumber": 24246520 },
     "AaveV3": {
         "lightTesting": false,
         "lightPairs": [{ "supplyAsset": "WETH", "borrowAsset": "DAI" }],
