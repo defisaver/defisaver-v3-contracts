@@ -78,7 +78,7 @@ contract EulerV2PaybackWithShares is ActionBase, EulerV2Helper {
         // otherwise this will revert as authorization error on Euler side
         if (accountDebtAfter == 0) {
             // Actual EVC function is named `call`, so it is safe to disable rule
-            // forge-lint: disable-next-item(unchecked-call)
+            // forge-lint: disable-start(unchecked-call)
             IEVC(EVC_ADDR)
                 .call(
                     _params.vault,
@@ -86,6 +86,7 @@ contract EulerV2PaybackWithShares is ActionBase, EulerV2Helper {
                     0,
                     abi.encodeCall(IRiskManager.disableController, ())
                 );
+            // forge-lint: disable-end(unchecked-call)
         }
 
         return (_params.amount, abi.encode(_params));

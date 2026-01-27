@@ -45,25 +45,31 @@
     },
     {
         "name": "StrategyExecutorID",
-        "address": "0x0d099E38f6aF8778c5053349c350Aad906B1432F",
+        "address": "0x0e778A2e5c9A2Cc75C5b38d6347284B8836E65D6",
         "id": "0x0c1dc439",
         "path": "/StrategyExecutorID.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
-        "history": ["0x49658E0CF3883c338397C7257619B280dF581057"]
+        "history": [
+            "0x0d099E38f6aF8778c5053349c350Aad906B1432F",
+            "0x49658E0CF3883c338397C7257619B280dF581057"
+        ]
     },
     {
         "name": "StrategyExecutor",
-        "address": "0x0d099E38f6aF8778c5053349c350Aad906B1432F",
+        "address": "0x0e778A2e5c9A2Cc75C5b38d6347284B8836E65D6",
         "id": "0xdcb15eef",
         "path": "contracts/core/strategy/StrategyExecutor.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
         "changeTime": "604800",
         "registryIds": [],
-        "history": ["0x49658E0CF3883c338397C7257619B280dF581057"]
+        "history": [
+            "0x0d099E38f6aF8778c5053349c350Aad906B1432F",
+            "0x49658E0CF3883c338397C7257619B280dF581057"
+        ]
     },
     {
         "name": "DFSSell",
@@ -159,14 +165,16 @@
     },
     {
         "name": "RecipeExecutor",
-        "address": "0x7a87565b77dd65bbc153fe20e97743842f1a6e0c",
+        "address": "0xc91305DdE651c899EF8eE1D0C33E7dab1B5ABF0D",
         "id": "0x4c69ee1e",
         "path": "contracts/core/RecipeExecutor.sol",
-        "version": "1.0.2",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
         "history": [
+            "0x7De85e67745a027D41Aba5Fe2D9b288e6467d710",
+            "0x7a87565b77dd65bbc153fe20e97743842f1a6e0c",
             "0xd0Ae279e330f98C399375f80968C8bf860202766",
             "0xdDFFd19564F9703800Da8a2FB9c2b4a7242bf01F"
         ]
@@ -283,14 +291,19 @@
     },
     {
         "name": "FLAction",
-        "address": "0x5523E61fBEF59825831Ffbb1306aBc3Bb03BB3A4",
+        "address": "0x87Af4769e4134379125A262408e1f3EC60d2Ab52",
         "id": "0xbcab5e2a",
         "path": "contracts/actions/flashloan/FLAction.sol",
-        "version": "1.0.1",
+        "version": "1.0.4",
         "inRegistry": true,
         "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xAAbd4B0372240E319F9722c4Fd1e2FE0C8d422D2"]
+        "history": [
+            "0x172A75C3cCaf3b35Bc1c604cbea1367Bf7fb968e",
+            "0xDA86B4c61A545a4b217746ba43C8157f0Ec612c7",
+            "0x5523E61fBEF59825831Ffbb1306aBc3Bb03BB3A4",
+            "0xAAbd4B0372240E319F9722c4Fd1e2FE0C8d422D2"
+        ]
     },
     {
         "name": "FLAaveV3WithFee",
@@ -835,14 +848,15 @@
     },
     {
         "name": "AaveV3View",
-        "address": "0x723eE7B9D3Fc685Ebac5Ec87F4E5E20513DF975F",
+        "address": "0x2774c435bdD3992C2dF7F56715F4D0D9cfd764Ab",
         "id": "0x026c569e",
         "path": "contracts/views/AaveV3View.sol",
-        "version": "1.0.8",
+        "version": "1.0.9",
         "inRegistry": false,
         "changeTime": 0,
         "registryIds": [],
         "history": [
+            "0x723eE7B9D3Fc685Ebac5Ec87F4E5E20513DF975F",
             "0xfbd5be40ae3e86068066023f2631f1d9321f157e",
             "0x5269913CE50409910FC5bE03CD768D3630D518F3",
             "0xf140B2904beb743C2f17e0b5f766074212a7e243",
@@ -937,7 +951,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueWithdraw",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -948,7 +962,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueWithdrawCollateral",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -959,7 +973,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueBorrow",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -970,7 +984,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBluePayback",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -981,7 +995,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueSupply",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -992,7 +1006,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueSupplyCollateral",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1003,7 +1017,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueSetAuth",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1014,7 +1028,7 @@
         "path": "contracts/actions/morpho-blue/MorphoBlueSetAuthWithSig",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": 0,
         "registryIds": [],
         "history": []
     },
@@ -1058,7 +1072,7 @@
         "path": "contracts/actions/checkers/CompV3RatioCheck.sol",
         "version": "1.0.1",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": ["0xC1ff2500790150c4a1c77B9e702e9984A252b60c"]
     },
@@ -1069,7 +1083,7 @@
         "path": "contracts/triggers/MorphoBlueRatioTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1080,7 +1094,7 @@
         "path": "contracts/actions/checkers/MorphoBlueRatioCheck.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1108,14 +1122,17 @@
     },
     {
         "name": "TxSaverExecutor",
-        "address": "0xa1c1e3de24f0efbb2f619b55dd31b16a224344d5",
+        "address": "0x1A3cA3D175A1583A227183e157454C8e26d2E531",
         "id": "0x91bfbd87",
         "path": "contracts/tx-saver/TxSaverExecutor.sol",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "inRegistry": true,
-        "changeTime": 0,
+        "changeTime": "86400",
         "registryIds": [],
-        "history": ["0xe41DB81Eaa636E71A2f4E67D34236f341D5a1B7d"]
+        "history": [
+            "0xa1c1e3de24f0efbb2f619b55dd31b16a224344d5",
+            "0xe41DB81Eaa636E71A2f4E67D34236f341D5a1B7d"
+        ]
     },
     {
         "name": "BotAuthForTxSaver",
@@ -1523,7 +1540,7 @@
         "path": "contracts/actions/fluid/dex/FluidDexPayback.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1534,7 +1551,7 @@
         "path": "contracts/triggers/AaveV3QuotePriceRangeTrigger.sol",
         "version": "1.0.0",
         "inRegistry": true,
-        "changeTime": "0",
+        "changeTime": "86400",
         "registryIds": [],
         "history": []
     },
@@ -1550,10 +1567,43 @@
         "history": []
     },
     {
+        "name": "ConnectV2DefiSaverBase",
+        "address": "0xaef9e568eDdFdd170D72b6f67F4908F91887fFE4",
+        "id": "0x13ad6d4c",
+        "path": "contracts/actions/insta/connectors/ConnectV2DefiSaverBase.sol",
+        "version": "1.0.0",
+        "inRegistry": false,
+        "changeTime": "0",
+        "registryIds": [],
+        "history": []
+    },
+    {
         "name": "MorphoBluePriceRangeTrigger",
         "address": "0x688Fa13B6f7F8856BBEa46675Ed79A0F366f5E5b",
         "id": "0x23825034",
         "path": "contracts/triggers/MorphoBluePriceRangeTrigger.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SFProxyEntryPoint",
+        "address": "0xab6e5cde983fF98Cdb0F61f5F99cb58D40D0c837",
+        "id": "0x06f8038f",
+        "path": "contracts/actions/summerfi/SFProxyEntryPoint.sol",
+        "version": "1.0.0",
+        "inRegistry": true,
+        "changeTime": "86400",
+        "registryIds": [],
+        "history": []
+    },
+    {
+        "name": "SummerfiUnsubV2",
+        "address": "0x60587B8Fe62Fc149d285a611822263206b4138da",
+        "id": "0xa7559614",
+        "path": "contracts/actions/summerfi/SummerfiUnsubV2.sol",
         "version": "1.0.0",
         "inRegistry": false,
         "changeTime": 0,

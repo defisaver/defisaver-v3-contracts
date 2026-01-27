@@ -43,8 +43,8 @@ contract CBCreateRebondSub is ActionBase, CBHelper, Permission {
     //////////////////////////// ACTION LOGIC ////////////////////////////
 
     function createRebondSub(Params memory _params) internal returns (uint256 newSubId) {
-        /// @dev Give permission to dsproxy or safe to our auth contract to be able to execute the strategy
-        giveWalletPermission(isDSProxy(address(this)));
+        /// @dev Give wallet permission to our auth contract to be able to execute the strategy
+        _giveAuthContractPermission(_getWalletType(address(this)));
 
         // returns .length which is the next id we are subscribing
         newSubId = SubStorage(SUB_STORAGE_ADDR).getSubsCount();
