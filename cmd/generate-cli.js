@@ -7,6 +7,11 @@ const { readFileSync, writeFileSync, existsSync, statSync, mkdirSync, readdirSyn
 const { join, basename, relative, sep, dirname } = require('path');
 const { getNameId } = require('../test/utils/utils');
 
+// Escape special characters in a string so it can be safely used in a RegExp pattern
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /**
  __    __   _______  __      .______    _______ .______          _______.
 |  |  |  | |   ____||  |     |   _  \  |   ____||   _  \        /       |
@@ -815,8 +820,9 @@ const findSdkActionSignatureFromTemplateFile = (actionName) => {
         // Convert action name to camelCase for matching
         const camelCaseName = actionName[0].toLowerCase() + actionName.slice(1);
         // Look for the signature block
+        const safeCamelCaseName = escapeRegExp(camelCaseName);
         const regex = new RegExp(
-            `const ${camelCaseName}Action = new dfs\\.actions\\.[\\w.]+\\([\\s\\S]+?\\);`,
+            `const ${safeCamelCaseName}Action = new dfs\\.actions\\.[\\w.]+\\([\\s\\S]+?\\);`,
             'g',
         );
         const match = signatures.match(regex);
